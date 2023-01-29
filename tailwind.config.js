@@ -6,7 +6,11 @@ module.exports = {
     extend: {
       colors: {
         background: "#171717",
-        border: "#2C2C2C"
+        border: "#2C2C2C",
+        background_dark: "#0B0B0B",
+        hover_color: "#2B2B2B",
+        click_color: "#0B0B0B",
+        click_question: "171717"
 
       },
       fontFamily: {

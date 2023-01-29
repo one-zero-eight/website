@@ -1,6 +1,6 @@
 import { icons, titles } from "./data/SidebarData";
 import Logo from "./img/Logo";
-import Option from "./Option";
+import Option from "./UI/Option";
 
 
 function Sidebar() {
