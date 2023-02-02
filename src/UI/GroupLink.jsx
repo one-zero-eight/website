@@ -17,7 +17,7 @@ function GroupLink(props) {
                         "https://innohassle.campus.innopolis.university/cal/" +
                         props.data.file
                     )
-                    setLinkColor("text-click_color");
+                    setLinkColor("selected");
                 }
                 }
             >

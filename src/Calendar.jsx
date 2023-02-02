@@ -1,6 +1,6 @@
 import { groupsData } from "./data/CalendarData";
 import GroupLink from "./UI/GroupLink";
-import ImportPopover from "./UI/ImportPopover";
+import Instruction from "./UI/Instruction";
 import Droplist from "./UI/Droplist";
 import { useState } from "react";
 import Search from "./UI/Search";
@@ -10,16 +10,18 @@ function Calendar() {
     const [groups, setGroups] = useState(groupsData.groups);
 
 
-    return (
-        <main className="flex flex-col bg-background w-full text-white h-screen">
-            <div className="p-5">
 
-                <ImportPopover />
+    return (
+        <main className="flex flex-col bg-background w-screen text-white h-screen">
+            <div className="flex flex-col justify-center items-center p-5">
 
                 <div className="flex flex-row justify-center mt-3">
                     <h1 className="text-6xl font-bold">Schedule</h1>
                 </div>
-                <div className="flex flex-row justify-between mt-3">
+
+                <Instruction />
+
+                <div className="flex flex-col sm:flex-row w-full justify-between items-end mt-3">
 
                     <Search groups={groups} setGroups={setGroups} />
 
@@ -33,8 +35,6 @@ function Calendar() {
                     return <GroupLink data={group} />
                 })}
             </div>
-
-
 
         </main>
     );

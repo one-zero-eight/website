@@ -8,8 +8,6 @@ function SearchIcon(props) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
-      className="hover:cursor-pointer"
-      onClick={() => props.setSearchVisible(true)}
     >
       <path
         fillRule="evenodd"
