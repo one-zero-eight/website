@@ -6,7 +6,7 @@ function DropListCloseIcon(props) {
             height={18}
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="m-2"
+            className="mr-2"
             {...props}
         >
             <path

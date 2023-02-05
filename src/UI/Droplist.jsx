@@ -20,10 +20,10 @@ function Droplist(props) {
     }
 
     return (
-        <Popover className="relative">
+        <Popover className="relative text-lg sm:text-2xl  w-full sm:w-auto pl-2 sm:pl-0 ">
             <Popover.Button>
-                <div className="flex flex-row justify-center items-center  p-2">
-                    <h3 className="text-2xl mr-4"> {selected}</h3>
+                <div className="flex flex-row items-center">
+                    <h3 className="px-2 mr-4"> {selected}</h3>
 
                     <DropListIcon />
                 </div>
@@ -31,16 +31,19 @@ function Droplist(props) {
             </Popover.Button>
 
             <Popover.Panel className="absolute z-10">
-                <div className="flex flex-col justify-center items-end bg-background_dark rounded-xl pb-6">
-                    <DropListCloseIcon />
-                    <Popover.Button className="text-2xl py-1 px-4 hover:bg-section_g_end" value={"B22"} onClick={(e) => filter(e)}>BS Year 1</Popover.Button>
-                    <Popover.Button className="text-2xl py-1 px-4 hover:bg-section_g_end" value={"21"} onClick={(e) => filter(e)}>BS Year 2</Popover.Button>
-                    <Popover.Button className="text-2xl py-1 px-4 hover:bg-section_g_end" value={"B20"} onClick={(e) => filter(e)}>BS Year 3</Popover.Button>
-                    <Popover.Button className="text-2xl py-1 px-4 hover:bg-section_g_end" value={"B19"} onClick={(e) => filter(e)}>BS Year 4</Popover.Button>
-                    <Popover.Button className="text-2xl py-1 px-4 hover:bg-section_g_end" value={"M22"} onClick={(e) => filter(e)}>MS Year 1</Popover.Button>
-                </div>
+                <div className="flex flex-col justify-center items-center bg-background_dark rounded-xl pb-6">
+                    <div className="flex flex-row justify-center items-center">
+                        <h3 className="invisible px-2 mr-4"> {selected}</h3>
+                        <DropListCloseIcon />
+                    </div>
 
-                <img src="/solutions.jpg" alt="" />
+                    <Popover.Button className="sm:py-1 py-2 px-4 w-full hover:bg-section_g_end" value={""} onClick={(e) => filter(e)}>Course</Popover.Button>
+                    <Popover.Button className="sm:py-1 py-2 px-4 w-full hover:bg-section_g_end" value={"B22"} onClick={(e) => filter(e)}>BS Year 1</Popover.Button>
+                    <Popover.Button className="sm:py-1 py-2 px-4 w-full hover:bg-section_g_end" value={"21"} onClick={(e) => filter(e)}>BS Year 2</Popover.Button>
+                    <Popover.Button className="sm:py-1 py-2 px-4 w-full hover:bg-section_g_end" value={"B20"} onClick={(e) => filter(e)}>BS Year 3</Popover.Button>
+                    <Popover.Button className="sm:py-1 py-2 px-4 w-full hover:bg-section_g_end" value={"B19"} onClick={(e) => filter(e)}>BS Year 4</Popover.Button>
+                    <Popover.Button className="sm:py-1 py-2 px-4 w-full hover:bg-section_g_end" value={"M22"} onClick={(e) => filter(e)}>MS Year 1</Popover.Button>
+                </div>
             </Popover.Panel>
         </Popover>
     );
