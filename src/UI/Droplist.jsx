@@ -20,7 +20,7 @@ function Droplist(props) {
     }
 
     return (
-        <Popover className="relative text-lg sm:text-2xl  w-full sm:w-auto pl-2 sm:pl-0 ">
+        <Popover className="relative text-lg sm:text-2xl sm:w-auto pl-2 sm:pl-0 w-1/2 sm:w-auto">
             <Popover.Button>
                 <div className="flex flex-row items-center">
                     <h3 className="px-2 mr-4"> {selected}</h3>

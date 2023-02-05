@@ -8,7 +8,7 @@ function GroupLink(props) {
 
 
     return (
-        <div className="flex flex-row justify-between items-center text-lg sm:text-2xl font-semibold  border-8 border-border px-4 py-2 my-2 rounded-3xl">
+        <div className="flex flex-row justify-between items-center text-lg sm:text-2xl font-semibold  border-8 border-border px-4 py-2 my-2 rounded-3xl ">
             <h1 className="my-2">{props.data.name}</h1>
             <h1
                 className={`hover:text-hover_color hover:cursor-pointer ${props.copied === props.data.name ? "selected" : "text-white"}`}
