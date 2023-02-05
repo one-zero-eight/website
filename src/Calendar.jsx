@@ -32,7 +32,7 @@ function Calendar() {
 
                 <Instruction />
 
-                <div className="flex flex-row justify-between items-center sm:mt-10 mt-6 px-8 w-full">
+                <div className="flex flex-row justify-between items-center sm:mt-10 mt-6 sm:px-8 w-full">
 
                     <Search groups={groups} setGroups={setGroups} />
 
