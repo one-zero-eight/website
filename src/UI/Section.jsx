@@ -16,7 +16,7 @@ function Section(props) {
                         className={`flex grow font-semibold text-xl items-center w-min 
             ${props.sectionSelected === props.title
                                 ? "selected"
-                                : "text-inactive"
+                                : "text-inactive cursor-default"
                             } `}
                     >
                         {props.title}

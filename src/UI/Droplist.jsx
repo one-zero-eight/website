@@ -1,21 +1,19 @@
-import { groupsData } from "../data/CalendarData";
+
 import { Popover } from '@headlessui/react'
 import DropListIcon from "../img/DropListIcon";
 import DropListCloseIcon from "../img/CloseDropListIcon";
 import { useState } from "react";
+import { useDispatch } from 'react-redux';
+import { filterCalendar } from '../store/slices/calendarSlice';
 
-function Droplist(props) {
-
+function Droplist() {
 
     const [selected, setSelected] = useState("Course");
 
+    const dispatch = useDispatch();
+
     const filter = (e) => {
-
-        props.setGroups(groupsData.groups.filter((group) => {
-            return group.name.includes(e.target.value)
-        }));
-
-
+        dispatch(filterCalendar(e.target.value));
         setSelected(e.target.innerText);
     }
 
