@@ -2,7 +2,6 @@
 import GroupLink from "./UI/GroupLink";
 import Instruction from "./UI/Instruction";
 import Droplist from "./UI/Droplist";
-import { useEffect, useState } from "react";
 import Search from "./UI/Search";
 import useGetCalendar from "./hooks/useGetCalendar";
 import { useSelector } from "react-redux";

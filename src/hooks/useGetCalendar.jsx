@@ -8,7 +8,7 @@ function useGetCalendar() {
 
     const dispatch = useDispatch();
 
-    const url = "/cal/calendars.json"
+    const url = "/cal/academic.json"
 
     useEffect(() => {
         axios.get(url)
