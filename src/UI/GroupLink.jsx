@@ -19,10 +19,7 @@ function GroupLink(props) {
             : "text-white  hover:text-hover_color"
         }`}
         onClick={() => {
-          copy(
-            "https://innohassle.campus.innopolis.university/cal/" +
-              props.data.file
-          );
+          copy("https://innohassle.ru/schedule/" + props.data.file);
           dispatch(setCopied(props.data.name));
         }}
       >

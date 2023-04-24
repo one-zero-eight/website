@@ -6,7 +6,7 @@ import { setCalendar } from "../store/slices/calendarSlice";
 function useGetCalendar() {
   const dispatch = useDispatch();
 
-  const url = "/cal/academic.json";
+  const url = "/schedule/academic.json";
 
   useEffect(() => {
     axios.get(url).then((res) => dispatch(setCalendar(res.data.calendars)));
