@@ -1,5 +1,3 @@
-
-
 function FormsIcon(props) {
   return (
     <svg

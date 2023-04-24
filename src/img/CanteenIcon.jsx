@@ -1,4 +1,3 @@
-
 function CanteenIcon(props) {
   return (
     <svg

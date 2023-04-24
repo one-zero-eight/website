@@ -1,7 +1,7 @@
-
 function SearchIcon_bar(props) {
   return (
-    <svg className="ml-4"
+    <svg
+      className="ml-4"
       width={4}
       height={47}
       fill="none"

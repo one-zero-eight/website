@@ -1,5 +1,3 @@
-
-
 function LaundryIcon(props) {
   return (
     <svg
@@ -41,4 +39,4 @@ function LaundryIcon(props) {
   );
 }
 
-export default  LaundryIcon;
+export default LaundryIcon;

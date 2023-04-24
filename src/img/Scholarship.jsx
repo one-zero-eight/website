@@ -1,4 +1,3 @@
-
 function ScholarshipIcon(props) {
   return (
     <svg

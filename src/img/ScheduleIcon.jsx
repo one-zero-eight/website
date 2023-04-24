@@ -1,5 +1,3 @@
-
-
 function ScheduleIcon(props) {
   return (
     <svg

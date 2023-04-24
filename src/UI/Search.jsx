@@ -1,10 +1,8 @@
-
 import { useDispatch } from "react-redux";
 import SearchIcon from "../img/SearchIcon";
 import { filterCalendar } from "../store/slices/calendarSlice";
 
 function Search() {
-
   const dispatch = useDispatch();
 
   return (

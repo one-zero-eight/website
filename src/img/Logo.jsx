@@ -1,7 +1,4 @@
-
-
 function Logo(props) {
-    
   return (
     <svg
       width={118}
