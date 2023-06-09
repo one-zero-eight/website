@@ -7,7 +7,7 @@ import LaundryIcon from "./icons/LaundryIcon";
 import Logo from "./icons/Logo";
 import ScheduleIcon from "./icons/ScheduleIcon";
 import ScholarshipIcon from "./icons/ScholarshipIcon";
-import Section from "./Section";
+import SidebarSection from "./SidebarSection";
 
 type Item = {
   title: string;
@@ -34,7 +34,7 @@ function Sidebar() {
       <nav className="flex flex-col">
         {items.map((item, index) => {
           return (
-            <Section
+            <SidebarSection
               key={item.title}
               title={item.title}
               icon={item.icon}

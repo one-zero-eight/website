@@ -9,7 +9,7 @@ export type SectionProps = {
   selected: boolean;
 };
 
-function Section(props: SectionProps) {
+function SidebarSection(props: SectionProps) {
   const [isShowing, setIsShowing] = useState(false);
 
   const link = (
@@ -65,4 +65,4 @@ function Section(props: SectionProps) {
   );
 }
 
-export default Section;
+export default SidebarSection;
