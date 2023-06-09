@@ -24,7 +24,7 @@ export default function ScheduleDialog({
   const [timer, setTimer] = useState<any>();
   const copyButtonRef = useRef(null);
 
-  const calendarURL = `${API_URL}/schedule/${groupFile}.ics`;
+  const calendarURL = `${API_URL}/schedule/${groupFile}`;
 
   const copy = () => {
     _copy(calendarURL).then((ok) => {
