@@ -27,7 +27,7 @@ function Sidebar() {
   const [selection, setSelection] = useState("Schedule");
 
   return (
-    <aside className="hidden sm:flex bg-background flex-col items-center py-4 px-8 h-screen sticky top-0">
+    <aside className="hidden sm:flex bg-background flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
       <Link href="/" className="mb-8">
         <Logo className="h-16" />
       </Link>
