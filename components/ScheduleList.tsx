@@ -5,7 +5,6 @@ import { useState } from "react";
 import CategoriesDropdown from "./CategoriesDropdown";
 import FilterDropdown from "./FilterDropdown";
 import ScheduleElement from "./ScheduleElement";
-import Search from "./Search";
 
 export type ScheduleListProps = {
   categories: Categories;
@@ -38,7 +37,7 @@ export default function ScheduleList({
 
   return (
     <>
-      <div className="flex flex-row flex-wrap gap-4 mt-4">
+      <div className="flex flex-row flex-wrap gap-4 mt-4 justify-center">
         <CategoriesDropdown categories={categories} selected={category} />
         {schedule.filters.map((v) => (
           <FilterDropdown
@@ -51,13 +50,18 @@ export default function ScheduleList({
             }
           />
         ))}
-        <div className="grow"></div>
-        <Search value={search} setSearch={setSearch} />
+        <input
+          type="text"
+          className="form-control rounded-2xl bg-background_dark font-semibold text-lg sm:text-xl px-2 py-2 sm:py-3 w-5/6 border-2 max-w-[200px] lg:ml-auto"
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        ></input>
       </div>
 
       <hr className="border-b-1 w-full mt-4"></hr>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-y-2 gap-x-4 content-start place-items-center justify-items-stretch overflow-auto scrollbar-hide h-full w-full px-12 mt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-y-2 gap-x-4 content-start place-items-center justify-items-stretch overflow-auto scrollbar-hide h-full w-full px-0 md:px-12 mt-4">
         {calendars.map((element) => (
           <ScheduleElement
             name={element.name}
