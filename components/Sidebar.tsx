@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import React from "react";
 import CanteenIcon from "./icons/CanteenIcon";
 import FormsIcon from "./icons/FormsIcon";
 import LaundryIcon from "./icons/LaundryIcon";
@@ -24,7 +24,7 @@ const items: Item[] = [
 ];
 
 function Sidebar() {
-  const [selection, setSelection] = useState("Schedule");
+  const selection = "Schedule";
 
   return (
     <aside className="hidden sm:flex bg-background flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
@@ -32,7 +32,7 @@ function Sidebar() {
         <Logo className="h-16" />
       </Link>
       <nav className="flex flex-col">
-        {items.map((item, index) => {
+        {items.map((item) => {
           return (
             <SidebarSection
               key={item.title}

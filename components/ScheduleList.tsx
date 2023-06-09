@@ -79,7 +79,6 @@ export default function ScheduleList({
       </div>
 
       <ScheduleDialog
-        category={category}
         groupFile={selectedGroupFile}
         opened={selectedGroupFile !== ""}
         close={() => {

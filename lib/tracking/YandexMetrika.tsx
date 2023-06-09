@@ -42,6 +42,7 @@ export default function YandexMetrika() {
       </Script>
       <noscript id="yandex-metrika-pixel">
         <div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`https://mc.yandex.ru/watch/${ym_id}`}
             style={{ position: "absolute", left: "-9999px" }}

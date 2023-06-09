@@ -8,14 +8,12 @@ import React, { useRef, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
 export type ScheduleDialogProps = {
-  category: string;
   groupFile: string;
   opened: boolean;
   close?: () => void;
 };
 
 export default function ScheduleDialog({
-  category,
   groupFile,
   opened,
   close,
