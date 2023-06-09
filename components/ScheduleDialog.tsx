@@ -2,6 +2,7 @@
 import LinkIcon from "@/components/icons/LinkIcon";
 import QuestionIcon from "@/components/icons/QuestionIcon";
 import { API_URL } from "@/lib/schedule/api";
+import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import { Dialog } from "@headlessui/react";
 import React, { useRef, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
@@ -27,6 +28,7 @@ export default function ScheduleDialog({
   const calendarURL = `${API_URL}/schedule/${groupFile}`;
 
   const copy = () => {
+    ymEvent("button-copy", { scheduleFile: groupFile });
     _copy(calendarURL).then((ok) => {
       if (timer !== undefined) {
         clearTimeout(timer);
