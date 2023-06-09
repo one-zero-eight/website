@@ -1,6 +1,7 @@
 "use client";
 import LinkIcon from "@/components/icons/LinkIcon";
 import QuestionIcon from "@/components/icons/QuestionIcon";
+import { API_URL } from "@/lib/schedule/api";
 import { Dialog } from "@headlessui/react";
 import React, { useRef, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
@@ -23,11 +24,7 @@ export default function ScheduleDialog({
   const [timer, setTimer] = useState<any>();
   const copyButtonRef = useRef(null);
 
-  const origin =
-    typeof window !== "undefined" && window.location.origin
-      ? window.location.origin
-      : "";
-  const calendarURL = `${origin}/schedule/${category}/${group}.ics`;
+  const calendarURL = `${API_URL}/schedule/${category}/${group}.ics`;
 
   const copy = () => {
     _copy(calendarURL).then((ok) => {

@@ -1,3 +1,5 @@
+export const API_URL = process.env.API_URL;
+
 export type Categories = {
   categories: CategoryInfo[];
 };
@@ -10,14 +12,11 @@ export type CategoryInfo = {
 };
 
 export async function getCategories() {
-  const categories = (await fetch(
-    `${process.env.API_URL}/schedule/categories.json`,
-    {
-      next: {
-        revalidate: 60,
-      },
-    }
-  )
+  const categories = (await fetch(`${API_URL}/schedule/categories.json`, {
+    next: {
+      revalidate: 60,
+    },
+  })
     .then((res) => res.json())
     .catch(() => {})) as Categories;
   if (categories === undefined) {
@@ -63,14 +62,11 @@ export type ScheduleFilter = {
 };
 
 export async function getSchedule(category: string) {
-  const schedule = (await fetch(
-    `${process.env.API_URL}/schedule/${category}.json`,
-    {
-      next: {
-        revalidate: 60,
-      },
-    }
-  )
+  const schedule = (await fetch(`${API_URL}/schedule/${category}.json`, {
+    next: {
+      revalidate: 60,
+    },
+  })
     .then((res) => res.json())
     .catch(() => {})) as Schedule;
   if (schedule === undefined) {
