@@ -17,7 +17,7 @@ export default async function Page() {
           <Link
             key={v.slug}
             href={`/schedule/${v.slug}`}
-            className="flex flex-col justify-between items-center border-8 border-border px-4 py-2 my-2 rounded-3xl"
+            className="flex flex-col justify-between items-center border-8 border-border px-4 py-2 my-2 rounded-3xl text-center"
           >
             <p className="text-lg sm:text-2xl font-semibold">{v.title}</p>
             {v.shortDescription}
