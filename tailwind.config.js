@@ -1,5 +1,10 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
   theme: {
     extend: {
       colors: {
@@ -15,12 +20,10 @@ module.exports = {
         focus_color: "#9747FF",
       },
       fontFamily: {
-        primary1: ["Rubik", "sans-serif"],
+        primary: ["Rubik", "sans-serif"],
       },
     },
   },
-  plugins: [
-    require("tailwind-scrollbar-hide"),
-    require("tw-elements/dist/plugin"),
-  ],
+  darkMode: "class",
+  plugins: [],
 };

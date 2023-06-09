@@ -1,0 +1,13 @@
+# Ignore everything
+*
+
+# Allow specific files in the root
+!/.env*
+!/*.js
+!/*.json
+
+# Allow specific directories
+!/app
+!/components
+!/lib
+!/public

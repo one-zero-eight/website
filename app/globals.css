@@ -1,0 +1,11 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .selected {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-section_g_start to-section_g_end;
+  }
+}
