@@ -22,7 +22,7 @@ export default function ScheduleList({
     {}
   );
   const [search, setSearch] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState("");
+  const [selectedGroupFile, setSelectedGroupFile] = useState("");
 
   // Apply filters
   const calendars = schedule.calendars
@@ -65,17 +65,17 @@ export default function ScheduleList({
             key={element.file}
             calendar={element}
             schedule={schedule}
-            onClick={() => setSelectedGroup(element.name)}
+            onClick={() => setSelectedGroupFile(element.file)}
           />
         ))}
       </div>
 
       <ScheduleDialog
         category={category}
-        group={selectedGroup}
-        opened={selectedGroup !== ""}
+        groupFile={selectedGroupFile}
+        opened={selectedGroupFile !== ""}
         close={() => {
-          setSelectedGroup("");
+          setSelectedGroupFile("");
         }}
       />
     </>

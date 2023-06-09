@@ -8,14 +8,14 @@ import { useCopyToClipboard } from "usehooks-ts";
 
 export type ScheduleDialogProps = {
   category: string;
-  group: string;
+  groupFile: string;
   opened: boolean;
   close?: () => void;
 };
 
 export default function ScheduleDialog({
   category,
-  group,
+  groupFile,
   opened,
   close,
 }: ScheduleDialogProps) {
@@ -24,7 +24,7 @@ export default function ScheduleDialog({
   const [timer, setTimer] = useState<any>();
   const copyButtonRef = useRef(null);
 
-  const calendarURL = `${API_URL}/schedule/${category}/${group}.ics`;
+  const calendarURL = `${API_URL}/schedule/${groupFile}.ics`;
 
   const copy = () => {
     _copy(calendarURL).then((ok) => {

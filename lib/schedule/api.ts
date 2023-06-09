@@ -78,3 +78,5 @@ export async function getSchedule(category: string) {
   );
   return schedule;
 }
+
+export async function getCalendarURL(category: string, group: string) {}
