@@ -64,7 +64,7 @@ export default function ScheduleDialog({
           <ul className="list-decimal pl-4 text-white/75 my-4">
             <li>
               Copy the link.
-              <div className="flex flex-row flex-wrap gap-2 my-2">
+              <div className="flex flex-row gap-2">
                 <input
                   readOnly
                   value={calendarURL}
