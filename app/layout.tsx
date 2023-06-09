@@ -1,4 +1,6 @@
 import Sidebar from "@/components/Sidebar";
+import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
+import YandexMetrika from "@/lib/tracking/YandexMetrika";
 import { Metadata } from "next";
 import React from "react";
 import "./globals.css";
@@ -22,6 +24,9 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="bg-background_dark font-primary text-white">
         <noscript>You need to enable JavaScript to run this app.</noscript>
+        <YandexMetrika />
+        <GoogleAnalytics />
+
         <div className="flex flex-row">
           <Sidebar />
           <main className="w-full">{children}</main>

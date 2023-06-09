@@ -1,6 +1,7 @@
 "use client";
 import ScheduleDialog from "@/components/ScheduleDialog";
 import { Categories, Schedule } from "@/lib/schedule/api";
+import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import { useState } from "react";
 import CategoriesDropdown from "./CategoriesDropdown";
 import FilterDropdown from "./FilterDropdown";
@@ -69,7 +70,10 @@ export default function ScheduleList({
             key={element.file}
             calendar={element}
             schedule={schedule}
-            onClick={() => setSelectedGroupFile(element.file)}
+            onClick={() => {
+              ymEvent("button-import", { scheduleFile: element.file });
+              setSelectedGroupFile(element.file);
+            }}
           />
         ))}
       </div>
