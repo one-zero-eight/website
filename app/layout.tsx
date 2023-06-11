@@ -2,8 +2,15 @@ import Sidebar from "@/components/Sidebar";
 import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
 import YandexMetrika from "@/lib/tracking/YandexMetrika";
 import { Metadata } from "next";
+import { Rubik } from "next/font/google";
 import React from "react";
 import "./globals.css";
+
+const rubik = Rubik({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-rubik",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://innohassle.ru"),
@@ -21,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`dark ${rubik.variable}`}>
       <body className="bg-background_dark font-primary text-white">
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <YandexMetrika />

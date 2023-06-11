@@ -20,7 +20,7 @@ module.exports = {
         focus_color: "#9747FF",
       },
       fontFamily: {
-        primary: ["Rubik", "sans-serif"],
+        primary: ["var(--font-rubik)", "sans-serif"],
       },
     },
   },
