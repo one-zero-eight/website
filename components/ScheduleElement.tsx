@@ -15,25 +15,27 @@ function ScheduleElement({
   onClick,
 }: ScheduleElementProps) {
   return (
-    <div className="flex flex-row justify-between items-center text-lg sm:text-2xl font-semibold  border-8 border-border px-4 py-2 my-2 rounded-3xl min-w-fit">
+    <button
+      className="hover:bg-background flex flex-row justify-between items-center text-lg sm:text-2xl font-semibold  border-8 border-border px-4 py-2 my-2 rounded-3xl min-w-fit"
+      onClick={onClick}
+    >
       <div>
-        <p className="my-2 whitespace-nowrap">{calendar.name}</p>
+        <p className="my-2 whitespace-nowrap text-left">{calendar.name}</p>
         {schedule.filters.map((v) =>
           Object.hasOwn(calendar, v.alias) ? (
-            <p className="my-2 text-md text-inactive" key={v.alias}>
+            <p className="my-2 text-md text-inactive text-left" key={v.alias}>
               {calendar[v.alias]}
             </p>
           ) : undefined
         )}
       </div>
 
-      <button
-        className={`hover:cursor-pointer selected select-none whitespace-nowrap p-2 rounded-xl w-fit`}
-        onClick={onClick}
+      <div
+        className={`selected select-none whitespace-nowrap p-2 rounded-xl w-fit text-right`}
       >
         Import
-      </button>
-    </div>
+      </div>
+    </button>
   );
 }
 

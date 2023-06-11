@@ -53,7 +53,7 @@ export default function ScheduleList({
         ))}
         <input
           type="text"
-          className="form-control rounded-2xl bg-background_dark font-semibold text-lg sm:text-xl px-2 py-2 sm:py-3 w-5/6 border-2 max-w-[200px] lg:ml-auto"
+          className="hover:bg-background form-control rounded-xl bg-background_dark font-semibold text-lg sm:text-xl px-2 py-2 sm:py-3 w-5/6 border-2 max-w-[200px] lg:ml-auto"
           placeholder="Search..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}

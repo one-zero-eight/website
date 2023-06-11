@@ -23,9 +23,9 @@ function FilterDropdown({
     .title;
 
   return (
-    <Popover className="relative text-lg sm:text-2xl border-2 w-fit rounded-xl py-2">
-      <Popover.Button>
-        <div className="flex flex-row items-center">
+    <Popover className="relative text-lg sm:text-2xl pl-2 sm:pl-0 w-1/2 w-fit rounded-xl">
+      <Popover.Button className="rounded-xl">
+        <div className="flex flex-row items-center w-fit hover:bg-background py-2 border-2 rounded-xl">
           <div className="px-2 mr-4 whitespace-nowrap">
             {selected || filterTitle}
           </div>
