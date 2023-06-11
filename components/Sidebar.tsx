@@ -45,7 +45,7 @@ function Sidebar() {
         })}
       </nav>
       <div className="grow"></div>
-      <a href="https://t.me/one_zero_eight">one-zero-eight</a>
+      <a href="https://t.me/one_zero_eight">one-zero-eight 💜</a>
     </aside>
   );
 }
