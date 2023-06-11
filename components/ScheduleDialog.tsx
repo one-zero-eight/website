@@ -82,13 +82,13 @@ export default function ScheduleDialog({
             <li>
               Open your calendar settings to add a calendar by URL.
               <a
-                className="underline ml-4 text-sm sm:text-lg flex flex-row items-baseline gap-x-2 w-fit"
+                className="underline ml-4 flex flex-row items-baseline gap-x-2 w-fit"
                 href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
               >
                 <LinkIcon className="h-4 w-4" />
                 Google Calendar
               </a>
-              <a className="ml-4 text-sm sm:text-lg flex flex-row items-baseline gap-x-2 w-fit">
+              <a className="ml-4 flex flex-row items-baseline gap-x-2 w-fit">
                 <QuestionIcon className="h-4 w-4" />
                 Other applications: find in settings
               </a>

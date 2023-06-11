@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   applicationName: "InNoHassle",
   themeColor: "#000000",
   colorScheme: "dark",
-  alternates: { canonical: "https://innohassle.ru" },
+  alternates: { canonical: "/" },
 };
 
 export default function RootLayout({
@@ -29,7 +29,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`dark ${rubik.variable}`}>
-      <body className="bg-background_dark font-primary text-white">
+      <body className="bg-background_dark font-primary text-white text-lg">
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <YandexMetrika />
         <GoogleAnalytics />

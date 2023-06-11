@@ -20,12 +20,12 @@ function CategoriesDropdown({
   };
 
   return (
-    <Popover className="relative text-lg sm:text-2xl w-fit rounded-xl">
+    <Popover className="relative sm:text-2xl w-fit rounded-xl">
       <Popover.Button className="rounded-xl">
         <div className="flex flex-row items-center w-fit hover:bg-background p-2 border-2 rounded-xl">
-          <h3 className="mr-4 whitespace-nowrap">
+          <p className="mr-4 whitespace-nowrap">
             {(categoryInfo && categoryInfo.title) || ""}
-          </h3>
+          </p>
 
           <DropListIcon />
         </div>

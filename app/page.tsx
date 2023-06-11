@@ -33,18 +33,16 @@ export default async function Page() {
         You can import the URLs of .ics files into your favorite calendar app
         and receive schedule changes.
       </p>
-      <h2 className="text-2xl font-bold mt-8">Find your schedule</h2>
-      Firstly, choose a category.
-      <div className="flex gap-x-4 mt-8">
+      <h3 className="text-2xl font-bold mt-8">Find your schedule</h3>
+      <p className="text-white/75">Firstly, choose a category.</p>
+      <div className="flex flex-row flex-wrap sm:flex-nowrap gap-x-4 mt-8">
         {categories.categories.map((v) => (
           <Link
             key={v.slug}
             href={`/schedule/${v.slug}`}
-            className="hover:bg-background flex flex-col justify-between items-center border-8 border-border px-4 py-2 my-2 rounded-3xl text-center"
+            className="hover:bg-background flex flex-col justify-between items-center border-8 border-border px-4 py-2 my-2 rounded-3xl text-center w-full sm:w-fit"
           >
-            <p className="text-lg sm:text-2xl font-semibold selected">
-              {v.title}
-            </p>
+            <p className="sm:text-2xl font-semibold selected">{v.title}</p>
             {v.shortDescription}
           </Link>
         ))}

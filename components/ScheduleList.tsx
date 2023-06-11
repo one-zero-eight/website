@@ -53,7 +53,7 @@ export default function ScheduleList({
         ))}
         <input
           type="text"
-          className="form-control bg-background_dark hover:bg-background rounded-xl text-lg sm:text-2xl p-2 border-2 max-w-[200px] lg:ml-auto"
+          className="form-control bg-background_dark hover:bg-background rounded-xl sm:text-2xl p-2 border-2 max-w-[200px] lg:ml-auto"
           placeholder="Search..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -66,7 +66,6 @@ export default function ScheduleList({
         {calendars.map((element) => (
           <ScheduleElement
             name={element.name}
-            category={category}
             key={element.file}
             calendar={element}
             schedule={schedule}

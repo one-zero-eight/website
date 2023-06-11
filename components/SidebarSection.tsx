@@ -13,14 +13,17 @@ function SidebarSection(props: SectionProps) {
   const [isShowing, setIsShowing] = useState(false);
 
   const link = (
-    <Link href={props.path}>
+    <Link
+      href={props.path}
+      className={props.path === "#" ? "pointer-events-none" : ""}
+    >
       <div className="flex flex-row justify-center p-2">
         <props.icon
           className="place-self-start mr-4 w-8"
           fill={`${props.selected ? "#9A2EFF" : "#414141"}`}
         />
         <p
-          className={`flex grow font-semibold text-l items-center w-min 
+          className={`flex grow font-semibold text-lg items-center w-min 
               ${props.selected ? "selected" : "text-inactive"}`}
         >
           {props.title}
@@ -56,7 +59,7 @@ function SidebarSection(props: SectionProps) {
         leaveTo="transform scale-95 opacity-0"
       >
         <Popover.Panel>
-          <p className="flex justify-center items-center bg-background_dark text-white text-sm w-max px-8 py-2 rounded-md">
+          <p className="flex justify-center items-center bg-background_dark text-white text-sm w-max px-8 py-2 rounded-md pointer-events-none">
             Coming soon
           </p>
         </Popover.Panel>

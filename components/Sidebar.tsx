@@ -16,7 +16,7 @@ type Item = {
 };
 
 const items: Item[] = [
-  { title: "Schedule", path: "/schedule", icon: ScheduleIcon },
+  { title: "Schedule", path: "/", icon: ScheduleIcon },
   { title: "Laundry", path: "#", icon: LaundryIcon },
   { title: "Forms", path: "#", icon: FormsIcon },
   { title: "Canteen", path: "#", icon: CanteenIcon },
