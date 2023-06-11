@@ -20,10 +20,10 @@ function CategoriesDropdown({
   };
 
   return (
-    <Popover className="relative text-lg sm:text-2xl pl-2 sm:pl-0 w-1/2 w-fit rounded-xl">
+    <Popover className="relative text-lg sm:text-2xl w-fit rounded-xl">
       <Popover.Button className="rounded-xl">
-        <div className="flex flex-row items-center w-fit hover:bg-background py-2 border-2 rounded-xl">
-          <h3 className="px-2 mr-4">
+        <div className="flex flex-row items-center w-fit hover:bg-background p-2 border-2 rounded-xl">
+          <h3 className="mr-4 whitespace-nowrap">
             {(categoryInfo && categoryInfo.title) || ""}
           </h3>
 
@@ -32,10 +32,10 @@ function CategoriesDropdown({
       </Popover.Button>
 
       <Popover.Panel className="absolute z-10">
-        <div className="flex flex-col justify-center items-center bg-background_dark rounded-xl py-2 border-2">
+        <div className="flex flex-col justify-center items-center bg-background_dark rounded-xl border-2">
           {categories.categories.map((v) => (
             <Popover.Button
-              className="sm:py-1 py-2 px-4 w-full hover:bg-section_g_end"
+              className="py-2 px-4 w-full hover:bg-section_g_end whitespace-nowrap rounded-xl"
               value={v.slug}
               key={v.slug}
               onClick={(e) => setSelected((e.target as any).value as string)}
