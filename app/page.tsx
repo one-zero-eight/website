@@ -51,7 +51,7 @@ export default async function Page() {
       <p className="text-white/75">
         Our projects are open source!{" "}
         <a href="https://github.com/one-zero-eight" className="text-white">
-          @one-zero-eight
+          github/one-zero-eight
         </a>
       </p>
     </main>
