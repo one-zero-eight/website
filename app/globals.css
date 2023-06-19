@@ -2,8 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --color-background-dark: "#0B0B0B";
+  }
+}
+
 @layer components {
   .selected {
     @apply text-transparent bg-clip-text bg-gradient-to-r from-section_g_start to-section_g_end;
   }
 }
+
+@import "globals-calendar.css";

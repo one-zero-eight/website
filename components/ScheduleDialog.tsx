@@ -1,4 +1,5 @@
 "use client";
+import Calendar from "@/components/Calendar";
 import LinkIcon from "@/components/icons/LinkIcon";
 import QuestionIcon from "@/components/icons/QuestionIcon";
 import { API_URL } from "@/lib/schedule/api";
@@ -52,7 +53,7 @@ export default function ScheduleDialog({
       <div className="fixed inset-0 bg-black/75" aria-hidden="true" />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto max-w-lg rounded-xl bg-background p-8">
+        <Dialog.Panel className="mx-auto max-w-2xl max-h-[90dvh] rounded-xl bg-background p-8 overflow-y-scroll">
           <Dialog.Title className="text-xl font-bold">
             Import to your calendar
           </Dialog.Title>
@@ -100,6 +101,10 @@ export default function ScheduleDialog({
             Do not forget to import all calendars (for core courses and
             electives).
           </p>
+
+          <br />
+
+          <Calendar url={calendarURL} />
 
           <div className="flex flex-row w-full">
             <div className="grow"></div>
