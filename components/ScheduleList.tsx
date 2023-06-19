@@ -23,6 +23,7 @@ export default function ScheduleList({
   );
   const [search, setSearch] = useState("");
   const [selectedGroupFile, setSelectedGroupFile] = useState("");
+  const [dialogOpened, setDialogOpened] = useState(false);
 
   // Apply filters
   const calendars = schedule.calendars
@@ -72,6 +73,7 @@ export default function ScheduleList({
             onClick={() => {
               ymEvent("button-import", { scheduleFile: element.file });
               setSelectedGroupFile(element.file);
+              setDialogOpened(true);
             }}
           />
         ))}
@@ -79,10 +81,8 @@ export default function ScheduleList({
 
       <ScheduleDialog
         groupFile={selectedGroupFile}
-        opened={selectedGroupFile !== ""}
-        close={() => {
-          setSelectedGroupFile("");
-        }}
+        opened={dialogOpened}
+        close={() => setDialogOpened(false)}
       />
     </>
   );

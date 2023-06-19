@@ -6,6 +6,7 @@ import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import moment from "moment/moment";
+import { memo } from "react";
 import iCalendarPlugin from "./iCalendarPlugin";
 
 function Calendar({ url, ...props }: { url: string }) {
@@ -84,4 +85,4 @@ function Calendar({ url, ...props }: { url: string }) {
   );
 }
 
-export default Calendar;
+export default memo(Calendar);

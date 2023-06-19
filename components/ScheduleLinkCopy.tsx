@@ -31,7 +31,7 @@ export default function ScheduleLinkCopy({
 
   return (
     <div className="flex flex-row gap-2">
-      <input readOnly value={url} className="p-2 rounded-xl grow" />
+      <input readOnly value={url} className="p-2 rounded-xl grow min-w-0" />
       <button
         className="p-2 rounded-xl w-fit selected"
         ref={copyButtonRef}
