@@ -2,8 +2,10 @@
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
+import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import moment from "moment/moment";
 import iCalendarPlugin from "./iCalendarPlugin";
 
 function Calendar({ url, ...props }: { url: string }) {
@@ -13,6 +15,7 @@ function Calendar({ url, ...props }: { url: string }) {
         events={{ url: url, format: "ics" }} // Load events by url
         timeZone="Europe/Moscow" // Use the same timezone for everyone
         plugins={[
+          momentPlugin,
           dayGridPlugin,
           timeGridPlugin,
           listPlugin,
@@ -40,9 +43,19 @@ function Calendar({ url, ...props }: { url: string }) {
           center: "title",
           right: "listMonth,dayGridMonth,timeGridWeek",
         }}
+        titleFormat={(arg) => {
+          if (arg.date.year === new Date().getFullYear()) {
+            // Show only month if current year
+            return moment(arg.date).format("MMMM");
+          } else {
+            // Show month and year otherwise
+            return moment(arg.date).format("MMMM YYYY");
+          }
+        }}
         views={{
           timeGridWeek: {
-            titleFormat: () => "", // Do not show title in week view
+            // Show weekday and date in day header
+            dayHeaderFormat: "ddd D",
           },
         }}
         allDaySlot={false} // Do not display "all day" events
