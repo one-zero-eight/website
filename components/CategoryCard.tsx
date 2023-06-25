@@ -20,7 +20,7 @@ export default function CategoryCard(props: CategoryCardProps) {
         className="my-1"
         fill={`#9747FF`}
       />
-      <p className="sm:text-2xl py-1 font-semibold">{props.title}</p>
+      <p className="text-2xl py-1 font-semibold">{props.title}</p>
       <p className="text-white/75">{props.shortDescription}</p>
     </Link>
   )

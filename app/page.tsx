@@ -16,7 +16,7 @@ export default async function Page() {
         </a>{" "}
         for Innopolis students.
       </p>
-      <h2 className="text-4xl font-medium mt-8 text-center">Choose the category</h2>
+      <h2 className="text-3xl sm:text-3xl md:text-4xl font-medium mt-8 text-center">Choose the category</h2>
       <CategoryContainer/>
       <h3 className="text-2xl font-bold mt-8">Find your schedule</h3>
       <p className="text-white/75">Firstly, choose a category.</p>
