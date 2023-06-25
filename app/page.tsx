@@ -16,19 +16,10 @@ export default async function Page() {
         </a>{" "}
         for Innopolis students.
       </p>
-      <h2 className="text-3xl font-bold mt-8">Schedule</h2>
-      <p className="text-white/75">
-        We&apos;ve created parsers for these inconvenient spreadsheets with
-        schedule of classes.
-        <br />
-        The scripts generate .ics files for calendar apps.
-        <br />
-        You can import the URLs of .ics files into your favorite calendar app
-        and receive schedule changes.
-      </p>
+      <h2 className="text-4xl font-medium mt-8 text-center">Choose the category</h2>
+      <CategoryContainer/>
       <h3 className="text-2xl font-bold mt-8">Find your schedule</h3>
       <p className="text-white/75">Firstly, choose a category.</p>
-      <CategoryContainer/>
       <hr className="border-white/25 my-8 md:w-1/2 w-full" />
       <p className="text-white/75">
         Our projects are open source!{" "}
