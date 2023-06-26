@@ -4,7 +4,7 @@ import CloseIcon from "@/components/icons/CloseIcon";
 import LinkIcon from "@/components/icons/LinkIcon";
 import QuestionIcon from "@/components/icons/QuestionIcon";
 import ScheduleLinkCopy from "@/components/ScheduleLinkCopy";
-import { API_URL } from "@/lib/schedule/api";
+import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment, useRef } from "react";
 
@@ -19,7 +19,7 @@ export default function ScheduleDialog({
   opened,
   close,
 }: ScheduleDialogProps) {
-  const calendarURL = `${API_URL}/schedule/${groupFile}`;
+  const calendarURL = `${SCHEDULE_API_URL}/${groupFile}`;
   const copyButtonRef = useRef(null);
 
   return (

@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL;
+export const SCHEDULE_API_URL = process.env.NEXT_PUBLIC_SCHEDULE_API_URL!;
 
 export type Categories = {
   categories: CategoryInfo[];
@@ -12,7 +12,7 @@ export type CategoryInfo = {
 };
 
 export async function getCategories() {
-  const categories = (await fetch(`${API_URL}/schedule/categories.json`, {
+  const categories = (await fetch(`${SCHEDULE_API_URL}/categories.json`, {
     next: {
       revalidate: 60,
     },
@@ -62,7 +62,7 @@ export type ScheduleFilter = {
 };
 
 export async function getSchedule(category: string) {
-  const schedule = (await fetch(`${API_URL}/schedule/${category}.json`, {
+  const schedule = (await fetch(`${SCHEDULE_API_URL}/${category}.json`, {
     next: {
       revalidate: 60,
     },
