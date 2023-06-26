@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "orval": "orval --config ./orval.config.js"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.8",
@@ -17,14 +18,17 @@
     "@fullcalendar/react": "^6.1.8",
     "@fullcalendar/timegrid": "^6.1.8",
     "@headlessui/react": "^1.7.15",
+    "@tanstack/react-query": "^4.29.15",
     "@types/node": "20.2.5",
     "@types/react": "18.2.8",
     "@types/react-dom": "18.2.4",
     "autoprefixer": "10.4.14",
+    "axios": "^1.4.0",
     "eslint": "8.42.0",
     "eslint-config-next": "13.4.4",
     "ical.js": "^1.5.0",
     "next": "13.4.4",
+    "orval": "^6.16.0",
     "postcss": "8.4.24",
     "react": "18.2.0",
     "react-dom": "18.2.0",

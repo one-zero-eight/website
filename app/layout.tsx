@@ -1,3 +1,4 @@
+import Providers from "@/app/providers";
 import Sidebar from "@/components/Sidebar";
 import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
 import YandexMetrika from "@/lib/tracking/YandexMetrika";
@@ -30,16 +31,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${rubik.variable}`}>
       <body className="bg-background_dark font-primary text-white text-lg">
-        <noscript className="flex justify-center w-full p-8 bg-red-700">
-          You need to enable JavaScript to run this app.
-        </noscript>
-        <YandexMetrika />
-        <GoogleAnalytics />
+        <Providers>
+          <noscript className="flex justify-center w-full p-8 bg-red-700">
+            You need to enable JavaScript to run this app.
+          </noscript>
+          <YandexMetrika />
+          <GoogleAnalytics />
 
-        <div className="flex flex-row">
-          <Sidebar />
-          <main className="w-full">{children}</main>
-        </div>
+          <div className="flex flex-row">
+            <Sidebar />
+            <main className="w-full">{children}</main>
+          </div>
+        </Providers>
       </body>
     </html>
   );
