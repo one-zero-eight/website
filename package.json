@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "prettify": "prettier --write .",
     "orval": "orval --config ./orval.config.js"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
     "next": "13.4.4",
     "orval": "^6.16.0",
     "postcss": "8.4.24",
+    "prettier": "^2.8.8",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "tailwindcss": "3.3.2",
