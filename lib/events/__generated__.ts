@@ -5,16 +5,17 @@
  * API of Events project in InNoHassle Ecosystem.
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery, useMutation } from "@tanstack/react-query";
 import type {
-  UseQueryOptions,
-  UseMutationOptions,
-  QueryFunction,
   MutationFunction,
-  UseQueryResult,
+  QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseQueryOptions,
+  UseQueryResult,
 } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "./axios-instance";
+
 export type AuthGetTokenViaDevParams = {
   email?: string;
 };

@@ -1,4 +1,4 @@
-/** @type {{[key: string]: import('orval').Options}} */
+/** @type {{[key: string]: import("orval").Options}} */
 module.exports = {
   events: {
     input: {

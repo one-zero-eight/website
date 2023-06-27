@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+/** @type {import("tailwindcss").Config} */
 module.exports = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -20,8 +20,8 @@ module.exports = {
         focus_color: "#9747FF",
       },
       boxShadow: {
-        '5xl': '0 0 35px 0 rgba(151, 71, 255, 0.75)',
-        '5xl-m': '0 0 35px 0 rgba(151, 71, 255, 0.90)'
+        "5xl": "0 0 35px 0 rgba(151, 71, 255, 0.75)",
+        "5xl-m": "0 0 35px 0 rgba(151, 71, 255, 0.90)",
       },
       fontFamily: {
         primary: ["var(--font-rubik)", "sans-serif"],
