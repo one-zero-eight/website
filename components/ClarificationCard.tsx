@@ -10,7 +10,7 @@ export default function ClarificationCard(props: ClarificationProps) {
 
   return (
     <div
-      className="flex flex-col justify-between items-center text-center px-4 py-8 my-3 rounded-3xl bg-click_question basis-64 sm:w-fit"
+      className="flex flex-col justify-between items-center text-center px-4 py-8 my-3 rounded-3xl bg-click_question sm:w-64 lg:w-52 xl:w-72 2xl:w-60"
     >
       <div className="flex flex-row justify-between items-center">
       {props.icon.map((Icon, i) =>
