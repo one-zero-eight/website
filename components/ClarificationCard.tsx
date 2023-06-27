@@ -18,7 +18,7 @@ export default function ClarificationCard(props: ClarificationProps) {
       )
       }
       </div>
-      <p className="text-xl py-2 font-medium">{props.title}</p>
+      <p className="text-lg xl:text-xl py-2 font-medium">{props.title}</p>
       <p className="text-sm text-white/75">{props.shortDescription}</p>
     </div>
   )
