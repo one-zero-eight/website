@@ -9,7 +9,7 @@ import MagicExchangeIcon from "@/components/icons/MagicExchangeIcon";
 
 export default function ClarificationContainer() {
   return (
-    <div className="flex flex-row flex-wrap items-center justify-center sm:flex-nowrap w-full gap-x-10 mt-8">
+    <div className="flex flex-row flex-wrap items-center justify-center w-full gap-x-10 mt-8">
       <ClarificationCard
         icon={[TableChartIcon, DoubleArrowIcon, DataIcon]}
         title="Retrieval"

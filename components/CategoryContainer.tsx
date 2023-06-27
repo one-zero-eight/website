@@ -16,7 +16,7 @@ export default async function CategoryContainer() {
     "sport": SportIcon
   }
   return (
-    <div className="flex flex-row flex-wrap justify-center sm:flex-nowrap w-full gap-x-28 mt-8">
+    <div className="flex flex-row flex-wrap justify-center w-full gap-x-28 mt-8">
       {categories.categories.map((v) => (
         <CategoryCard
           icon={categoriesIcons[v.slug]}
