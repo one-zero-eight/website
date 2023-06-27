@@ -14,7 +14,7 @@ export default function CategoryCard(props: CategoryCardProps) {
     <Link
       key={props.slug}
       href={path}
-      className="hover:bg-background flex flex-col justify-between items-center border-4 border-border px-4 py-6 my-2 rounded-3xl text-center basis-80 sm:w-fit"
+      className="hover:bg-background flex flex-col justify-between items-center border-4 border-border px-4 py-6 my-2 rounded-3xl text-center sm:w-80 lg:w-64 xl:basis-80 sm:w-fit"
     >
       <props.icon
         className="my-1"
