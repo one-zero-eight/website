@@ -1,3 +1,5 @@
+"use client";
+
 export function getAuthToken() {
   return localStorage.getItem("token") || undefined;
 }

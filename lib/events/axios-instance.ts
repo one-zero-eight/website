@@ -1,3 +1,4 @@
+"use client";
 import { getAuthToken, unsetAuthToken } from "@/lib/auth";
 import { EVENTS_API_URL } from "@/lib/events";
 import Axios, { AxiosRequestConfig } from "axios";
