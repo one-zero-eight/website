@@ -5,7 +5,7 @@ import { useIsClient } from "usehooks-ts";
 
 function UserMenu() {
   const isClient = useIsClient();
-  const { data, isLoading, isError } = useUsersGetMe({ query: { retry: 1 } });
+  const { data, isLoading, isError } = useUsersGetMe();
   const { signIn, signOut } = useAuthMethods();
 
   // !isClient - SSR output and during hydration.
