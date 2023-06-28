@@ -115,7 +115,7 @@ export default function ScheduleDialog({
 
               <br />
 
-              <Calendar url={calendarURL} />
+              <Calendar urls={[calendarURL]} />
             </Dialog.Panel>
           </Transition.Child>
         </div>

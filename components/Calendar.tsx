@@ -9,11 +9,18 @@ import moment from "moment/moment";
 import { memo } from "react";
 import iCalendarPlugin from "./iCalendarPlugin";
 
-function Calendar({ url, ...props }: { url: string }) {
+function Calendar({
+  urls,
+  initialView = "listMonth",
+  ...props
+}: {
+  urls: string[];
+  initialView?: string;
+}) {
   return (
     <div {...props}>
       <FullCalendar
-        events={{ url: url, format: "ics" }} // Load events by url
+        eventSources={urls.map((url) => ({ url: url, format: "ics" }))} // Load events by url
         timeZone="Europe/Moscow" // Use the same timezone for everyone
         plugins={[
           momentPlugin,
@@ -23,7 +30,7 @@ function Calendar({ url, ...props }: { url: string }) {
           interactionPlugin,
           iCalendarPlugin,
         ]}
-        initialView="listMonth" // Default view
+        initialView={initialView} // Default view
         eventTimeFormat={{
           // Use 24-hour format
           hour: "2-digit",
