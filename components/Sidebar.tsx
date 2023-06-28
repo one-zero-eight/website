@@ -29,7 +29,7 @@ const items: Item[] = [
 function Sidebar() {
   const pathname = usePathname();
   const currentItem = items.find((v) => pathname.startsWith(v.path));
-  const selection = currentItem?.title || "Schedule";
+  const selection = currentItem?.title;
 
   return (
     <aside className="hidden sm:flex bg-background flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
