@@ -2,6 +2,7 @@
 import Calendar from "@/components/Calendar";
 import { useUsersGetMe, ViewUser } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
+import Link from "next/link";
 import React from "react";
 
 export default function Page() {
@@ -20,7 +21,45 @@ export default function Page() {
           <p className="text-lg text-gray-400">{data?.email}</p>
         </div>
       </div>
-      <h2 className="text-2xl font-bold">Your calendar</h2>
+      <div className="flex flex-row flex-wrap gap-8">
+        <div className="max-w-[50%]">
+          <h2 className="text-3xl font-bold mb-4">Schedule</h2>
+          {data?.groups_association === undefined ||
+          data.groups_association.length === 0 ? (
+            <p className="text-lg text-gray-400">Nothing here</p>
+          ) : (
+            <div className="flex flex-row flex-wrap gap-2">
+              {data.groups_association.map((v) => (
+                <div key={v.group.path} className="bg-gray-700 p-4 rounded-2xl">
+                  {v.group.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="max-w-[50%]">
+          <h2 className="text-3xl font-bold mb-4">Favorites</h2>
+          {data?.favorites_association === undefined ||
+          data.favorites_association.length === 0 ? (
+            <p className="text-lg text-gray-400">
+              Add favorite calendars using star button
+              <br />
+              <Link href="/schedule" className="underline underline-offset-4">
+                Explore schedules
+              </Link>
+            </p>
+          ) : (
+            <div className="flex flex-row flex-wrap gap-2">
+              {data.favorites_association.map((v) => (
+                <div key={v.group.path} className="bg-gray-700 p-4 rounded-2xl">
+                  {v.group.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      <h2 className="text-3xl font-bold my-4">Your calendar</h2>
       {!data ? (
         <>Loading...</>
       ) : (

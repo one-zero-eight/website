@@ -66,7 +66,6 @@ export default function ScheduleList({
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-y-2 gap-x-4 content-start place-items-center justify-items-stretch overflow-auto scrollbar-hide h-full w-full px-0 md:px-12 mt-4">
         {calendars.map((element) => (
           <ScheduleElement
-            name={element.name}
             key={element.file}
             calendar={element}
             schedule={schedule}

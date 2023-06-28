@@ -1,7 +1,6 @@
 import { Calendar, Schedule } from "@/lib/schedule/api";
 
 export type ScheduleElementProps = {
-  name: string;
   schedule: Schedule;
   calendar: Calendar;
   onClick: () => void;
