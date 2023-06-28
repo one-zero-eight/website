@@ -16,39 +16,44 @@ import type {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "./axios-instance";
 
-export type AuthGetTokenViaDevParams = {
+export type AuthGetDevTokenParams = {
   email?: string;
 };
 
-export type AuthLoginViaDevParams = {
-  email?: string;
+export type UsersHideGroupParams = {
+  group_id: number;
+  hide?: boolean;
+};
+
+export type UsersHideFavoriteParams = {
+  group_id: number;
+  hide?: boolean;
 };
 
 export type UsersDeleteFavoriteParams = {
-  favorite: string;
+  group_id: number;
 };
-
-export interface ViewGroup {
-  name: string;
-  type?: string;
-  hidden?: boolean;
-}
-
-export interface ViewFavorite {
-  name: string;
-  type?: string;
-  hidden?: boolean;
-}
 
 /**
  * Represents a user instance from the database excluding sensitive information.
  */
 export interface ViewUser {
+  id: number;
   email: string;
   name?: string;
   status?: string;
-  groups?: ViewGroup[];
-  favorites?: ViewFavorite[];
+  groups_association?: UserXGroupView[];
+  favorites_association?: UserXGroupView[];
+}
+
+/**
+ * Represents a group instance from the database excluding sensitive information.
+ */
+export interface ViewEventGroup {
+  id: number;
+  path: string;
+  name?: string;
+  type?: string;
 }
 
 export interface VersionInfo {
@@ -65,9 +70,13 @@ export interface ValidationError {
   type: string;
 }
 
-export interface Token {
-  access_token: string;
-  token_type: string;
+/**
+ * Represents a group instance from the database excluding sensitive information.
+ */
+export interface UserXGroupView {
+  user_id: number;
+  group: ViewEventGroup;
+  hidden: boolean;
 }
 
 export type SchemasSchemas = { [key: string]: any };
@@ -80,17 +89,20 @@ export interface Schemas {
 }
 
 export interface ListOfFavorites {
-  favorites: ViewFavorite[];
+  favorites: UserXGroupView[];
 }
 
 export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
-export interface CreateFavorite {
-  name: string;
+/**
+ * Represents a group instance to be created.
+ */
+export interface CreateEventGroup {
+  path: string;
+  name?: string;
   type?: string;
-  hidden?: boolean;
 }
 
 // eslint-disable-next-line
@@ -176,7 +188,7 @@ export const useUsersGetMe = <
  * @summary Add Favorite
  */
 export const usersAddFavorite = (
-  createFavorite: CreateFavorite,
+  createEventGroup: CreateEventGroup,
   options?: SecondParameter<typeof axiosInstance>
 ) => {
   return axiosInstance<ListOfFavorites>(
@@ -184,7 +196,7 @@ export const usersAddFavorite = (
       url: `/users/me/favorites`,
       method: "post",
       headers: { "Content-Type": "application/json" },
-      data: createFavorite,
+      data: createEventGroup,
     },
     options
   );
@@ -197,21 +209,21 @@ export const getUsersAddFavoriteMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof usersAddFavorite>>,
     TError,
-    { data: CreateFavorite },
+    { data: CreateEventGroup },
     TContext
   >;
   request?: SecondParameter<typeof axiosInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof usersAddFavorite>>,
   TError,
-  { data: CreateFavorite },
+  { data: CreateEventGroup },
   TContext
 > => {
   const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof usersAddFavorite>>,
-    { data: CreateFavorite }
+    { data: CreateEventGroup }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -224,7 +236,7 @@ export const getUsersAddFavoriteMutationOptions = <
 export type UsersAddFavoriteMutationResult = NonNullable<
   Awaited<ReturnType<typeof usersAddFavorite>>
 >;
-export type UsersAddFavoriteMutationBody = CreateFavorite;
+export type UsersAddFavoriteMutationBody = CreateEventGroup;
 export type UsersAddFavoriteMutationError = void | HTTPValidationError;
 
 /**
@@ -237,7 +249,7 @@ export const useUsersAddFavorite = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof usersAddFavorite>>,
     TError,
-    { data: CreateFavorite },
+    { data: CreateEventGroup },
     TContext
   >;
   request?: SecondParameter<typeof axiosInstance>;
@@ -319,6 +331,148 @@ export const useUsersDeleteFavorite = <
 };
 
 /**
+ * Hide favorite from current user
+ * @summary Hide Favorite
+ */
+export const usersHideFavorite = (
+  params: UsersHideFavoriteParams,
+  options?: SecondParameter<typeof axiosInstance>
+) => {
+  return axiosInstance<ListOfFavorites>(
+    { url: `/users/me/favorites/hide`, method: "post", params },
+    options
+  );
+};
+
+export const getUsersHideFavoriteMutationOptions = <
+  TError = void | HTTPValidationError,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof usersHideFavorite>>,
+    TError,
+    { params: UsersHideFavoriteParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof usersHideFavorite>>,
+  TError,
+  { params: UsersHideFavoriteParams },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof usersHideFavorite>>,
+    { params: UsersHideFavoriteParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return usersHideFavorite(params, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UsersHideFavoriteMutationResult = NonNullable<
+  Awaited<ReturnType<typeof usersHideFavorite>>
+>;
+
+export type UsersHideFavoriteMutationError = void | HTTPValidationError;
+
+/**
+ * @summary Hide Favorite
+ */
+export const useUsersHideFavorite = <
+  TError = void | HTTPValidationError,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof usersHideFavorite>>,
+    TError,
+    { params: UsersHideFavoriteParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}) => {
+  const mutationOptions = getUsersHideFavoriteMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+/**
+ * Hide group from current user
+ * @summary Hide Group
+ */
+export const usersHideGroup = (
+  params: UsersHideGroupParams,
+  options?: SecondParameter<typeof axiosInstance>
+) => {
+  return axiosInstance<ListOfFavorites>(
+    { url: `/users/me/groups/hide`, method: "post", params },
+    options
+  );
+};
+
+export const getUsersHideGroupMutationOptions = <
+  TError = void | HTTPValidationError,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof usersHideGroup>>,
+    TError,
+    { params: UsersHideGroupParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof usersHideGroup>>,
+  TError,
+  { params: UsersHideGroupParams },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof usersHideGroup>>,
+    { params: UsersHideGroupParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return usersHideGroup(params, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UsersHideGroupMutationResult = NonNullable<
+  Awaited<ReturnType<typeof usersHideGroup>>
+>;
+
+export type UsersHideGroupMutationError = void | HTTPValidationError;
+
+/**
+ * @summary Hide Group
+ */
+export const useUsersHideGroup = <
+  TError = void | HTTPValidationError,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof usersHideGroup>>,
+    TError,
+    { params: UsersHideGroupParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}) => {
+  const mutationOptions = getUsersHideGroupMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+/**
  * @summary Schemas
  */
 export const systemSchemas = (
@@ -390,300 +544,74 @@ export const useSystemSchemas = <
 };
 
 /**
- * @summary Login Via Innopolis
+ * @summary Get Dev Token
  */
-export const authLoginViaInnopolis = (
+export const authGetDevToken = (
+  params?: AuthGetDevTokenParams,
   options?: SecondParameter<typeof axiosInstance>,
   signal?: AbortSignal
 ) => {
-  return axiosInstance<unknown>(
-    { url: `/auth/innopolis/login`, method: "get", signal },
-    options
-  );
-};
-
-export const getAuthLoginViaInnopolisQueryKey = () =>
-  [`/auth/innopolis/login`] as const;
-
-export const getAuthLoginViaInnopolisQueryOptions = <
-  TData = Awaited<ReturnType<typeof authLoginViaInnopolis>>,
-  TError = unknown
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof authLoginViaInnopolis>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryOptions<
-  Awaited<ReturnType<typeof authLoginViaInnopolis>>,
-  TError,
-  TData
-> & { queryKey: QueryKey } => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey = queryOptions?.queryKey ?? getAuthLoginViaInnopolisQueryKey();
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof authLoginViaInnopolis>>
-  > = ({ signal }) => authLoginViaInnopolis(requestOptions, signal);
-
-  return { queryKey, queryFn, ...queryOptions };
-};
-
-export type AuthLoginViaInnopolisQueryResult = NonNullable<
-  Awaited<ReturnType<typeof authLoginViaInnopolis>>
->;
-export type AuthLoginViaInnopolisQueryError = unknown;
-
-/**
- * @summary Login Via Innopolis
- */
-export const useAuthLoginViaInnopolis = <
-  TData = Awaited<ReturnType<typeof authLoginViaInnopolis>>,
-  TError = unknown
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof authLoginViaInnopolis>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getAuthLoginViaInnopolisQueryOptions(options);
-
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-};
-
-/**
- * @summary Get Token Via Innopolis
- */
-export const authGetTokenViaInnopolis = (
-  options?: SecondParameter<typeof axiosInstance>,
-  signal?: AbortSignal
-) => {
-  return axiosInstance<Token>(
-    { url: `/auth/innopolis/token`, method: "get", signal },
-    options
-  );
-};
-
-export const getAuthGetTokenViaInnopolisQueryKey = () =>
-  [`/auth/innopolis/token`] as const;
-
-export const getAuthGetTokenViaInnopolisQueryOptions = <
-  TData = Awaited<ReturnType<typeof authGetTokenViaInnopolis>>,
-  TError = unknown
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof authGetTokenViaInnopolis>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryOptions<
-  Awaited<ReturnType<typeof authGetTokenViaInnopolis>>,
-  TError,
-  TData
-> & { queryKey: QueryKey } => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getAuthGetTokenViaInnopolisQueryKey();
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof authGetTokenViaInnopolis>>
-  > = ({ signal }) => authGetTokenViaInnopolis(requestOptions, signal);
-
-  return { queryKey, queryFn, ...queryOptions };
-};
-
-export type AuthGetTokenViaInnopolisQueryResult = NonNullable<
-  Awaited<ReturnType<typeof authGetTokenViaInnopolis>>
->;
-export type AuthGetTokenViaInnopolisQueryError = unknown;
-
-/**
- * @summary Get Token Via Innopolis
- */
-export const useAuthGetTokenViaInnopolis = <
-  TData = Awaited<ReturnType<typeof authGetTokenViaInnopolis>>,
-  TError = unknown
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof authGetTokenViaInnopolis>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getAuthGetTokenViaInnopolisQueryOptions(options);
-
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-};
-
-/**
- * @summary Login Via Dev
- */
-export const authLoginViaDev = (
-  params?: AuthLoginViaDevParams,
-  options?: SecondParameter<typeof axiosInstance>,
-  signal?: AbortSignal
-) => {
-  return axiosInstance<unknown>(
-    { url: `/auth/dev/login`, method: "get", params, signal },
-    options
-  );
-};
-
-export const getAuthLoginViaDevQueryKey = (params?: AuthLoginViaDevParams) =>
-  [`/auth/dev/login`, ...(params ? [params] : [])] as const;
-
-export const getAuthLoginViaDevQueryOptions = <
-  TData = Awaited<ReturnType<typeof authLoginViaDev>>,
-  TError = HTTPValidationError
->(
-  params?: AuthLoginViaDevParams,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof authLoginViaDev>>,
-      TError,
-      TData
-    >;
-    request?: SecondParameter<typeof axiosInstance>;
-  }
-): UseQueryOptions<
-  Awaited<ReturnType<typeof authLoginViaDev>>,
-  TError,
-  TData
-> & { queryKey: QueryKey } => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey = queryOptions?.queryKey ?? getAuthLoginViaDevQueryKey(params);
-
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof authLoginViaDev>>> = ({
-    signal,
-  }) => authLoginViaDev(params, requestOptions, signal);
-
-  return { queryKey, queryFn, ...queryOptions };
-};
-
-export type AuthLoginViaDevQueryResult = NonNullable<
-  Awaited<ReturnType<typeof authLoginViaDev>>
->;
-export type AuthLoginViaDevQueryError = HTTPValidationError;
-
-/**
- * @summary Login Via Dev
- */
-export const useAuthLoginViaDev = <
-  TData = Awaited<ReturnType<typeof authLoginViaDev>>,
-  TError = HTTPValidationError
->(
-  params?: AuthLoginViaDevParams,
-  options?: {
-    query?: UseQueryOptions<
-      Awaited<ReturnType<typeof authLoginViaDev>>,
-      TError,
-      TData
-    >;
-    request?: SecondParameter<typeof axiosInstance>;
-  }
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getAuthLoginViaDevQueryOptions(params, options);
-
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-};
-
-/**
- * @summary Get Token Via Dev
- */
-export const authGetTokenViaDev = (
-  params?: AuthGetTokenViaDevParams,
-  options?: SecondParameter<typeof axiosInstance>,
-  signal?: AbortSignal
-) => {
-  return axiosInstance<Token>(
+  return axiosInstance<string>(
     { url: `/auth/dev/token`, method: "get", params, signal },
     options
   );
 };
 
-export const getAuthGetTokenViaDevQueryKey = (
-  params?: AuthGetTokenViaDevParams
-) => [`/auth/dev/token`, ...(params ? [params] : [])] as const;
+export const getAuthGetDevTokenQueryKey = (params?: AuthGetDevTokenParams) =>
+  [`/auth/dev/token`, ...(params ? [params] : [])] as const;
 
-export const getAuthGetTokenViaDevQueryOptions = <
-  TData = Awaited<ReturnType<typeof authGetTokenViaDev>>,
+export const getAuthGetDevTokenQueryOptions = <
+  TData = Awaited<ReturnType<typeof authGetDevToken>>,
   TError = HTTPValidationError
 >(
-  params?: AuthGetTokenViaDevParams,
+  params?: AuthGetDevTokenParams,
   options?: {
     query?: UseQueryOptions<
-      Awaited<ReturnType<typeof authGetTokenViaDev>>,
+      Awaited<ReturnType<typeof authGetDevToken>>,
       TError,
       TData
     >;
     request?: SecondParameter<typeof axiosInstance>;
   }
 ): UseQueryOptions<
-  Awaited<ReturnType<typeof authGetTokenViaDev>>,
+  Awaited<ReturnType<typeof authGetDevToken>>,
   TError,
   TData
 > & { queryKey: QueryKey } => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getAuthGetTokenViaDevQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getAuthGetDevTokenQueryKey(params);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof authGetTokenViaDev>>
-  > = ({ signal }) => authGetTokenViaDev(params, requestOptions, signal);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof authGetDevToken>>> = ({
+    signal,
+  }) => authGetDevToken(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions };
 };
 
-export type AuthGetTokenViaDevQueryResult = NonNullable<
-  Awaited<ReturnType<typeof authGetTokenViaDev>>
+export type AuthGetDevTokenQueryResult = NonNullable<
+  Awaited<ReturnType<typeof authGetDevToken>>
 >;
-export type AuthGetTokenViaDevQueryError = HTTPValidationError;
+export type AuthGetDevTokenQueryError = HTTPValidationError;
 
 /**
- * @summary Get Token Via Dev
+ * @summary Get Dev Token
  */
-export const useAuthGetTokenViaDev = <
-  TData = Awaited<ReturnType<typeof authGetTokenViaDev>>,
+export const useAuthGetDevToken = <
+  TData = Awaited<ReturnType<typeof authGetDevToken>>,
   TError = HTTPValidationError
 >(
-  params?: AuthGetTokenViaDevParams,
+  params?: AuthGetDevTokenParams,
   options?: {
     query?: UseQueryOptions<
-      Awaited<ReturnType<typeof authGetTokenViaDev>>,
+      Awaited<ReturnType<typeof authGetDevToken>>,
       TError,
       TData
     >;
     request?: SecondParameter<typeof axiosInstance>;
   }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getAuthGetTokenViaDevQueryOptions(params, options);
+  const queryOptions = getAuthGetDevTokenQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
