@@ -14,7 +14,7 @@ function ScheduleElement({
 }: ScheduleElementProps) {
   return (
     <button
-      className="bg-background flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl w-80"
+      className="bg-background hover:bg-hover_color flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl w-80"
       onClick={onClick}
     >
       <div className="flex flex-col gap-0.5">
