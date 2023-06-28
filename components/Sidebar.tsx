@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React from "react";
 import CanteenIcon from "./icons/CanteenIcon";
 import FormsIcon from "./icons/FormsIcon";
@@ -17,6 +18,7 @@ type Item = {
 };
 
 const items: Item[] = [
+  { title: "Dashboard", path: "/dashboard", icon: ScheduleIcon },
   { title: "Schedule", path: "/", icon: ScheduleIcon },
   { title: "Laundry", path: "#", icon: LaundryIcon },
   { title: "Forms", path: "#", icon: FormsIcon },
@@ -25,7 +27,10 @@ const items: Item[] = [
 ];
 
 function Sidebar() {
-  const selection = "Schedule";
+  const pathname = usePathname();
+  const currentItem = items.find((v) => pathname.startsWith(v.path));
+  const selection = currentItem?.title || "Schedule";
+  console.log({ pathname, currentItem, selection });
 
   return (
     <aside className="hidden sm:flex bg-background flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
