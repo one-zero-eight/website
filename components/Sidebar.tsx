@@ -19,7 +19,7 @@ type Item = {
 
 const items: Item[] = [
   { title: "Dashboard", path: "/dashboard", icon: ScheduleIcon },
-  { title: "Schedule", path: "/", icon: ScheduleIcon },
+  { title: "Schedule", path: "/schedule", icon: ScheduleIcon },
   { title: "Laundry", path: "#", icon: LaundryIcon },
   { title: "Forms", path: "#", icon: FormsIcon },
   { title: "Canteen", path: "#", icon: CanteenIcon },
@@ -30,7 +30,6 @@ function Sidebar() {
   const pathname = usePathname();
   const currentItem = items.find((v) => pathname.startsWith(v.path));
   const selection = currentItem?.title || "Schedule";
-  console.log({ pathname, currentItem, selection });
 
   return (
     <aside className="hidden sm:flex bg-background flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
