@@ -1,5 +1,6 @@
 import { Calendar, Schedule } from "@/lib/schedule/api";
 import DownloadIcon from "@/components/icons/DownloadIcon";
+import FavoriteIcon from "@/components/icons/FavoriteIcon";
 
 export type ScheduleElementProps = {
   schedule: Schedule;
@@ -14,7 +15,7 @@ function ScheduleElement({
 }: ScheduleElementProps) {
   return (
     <button
-      className="bg-background hover:bg-hover_color flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl w-80"
+      className="bg-background hover:bg-hover_color flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl w-96"
       onClick={onClick}
     >
       <div className="flex flex-col gap-0.5">
@@ -32,10 +33,10 @@ function ScheduleElement({
           ) : undefined
         )}
       </div>
-
       <div
-        className={`selected select-none whitespace-nowrap mr-2 rounded-xl w-fit text-right`}
+        className={`flex flex-row selected select-none whitespace-nowrap rounded-xl w-fit text-right`}
       >
+        <FavoriteIcon isActive={false} />
         <DownloadIcon fill={`rgba(256, 256, 256, 0.75)`} />
         {/*Import*/}
       </div>
