@@ -4,6 +4,7 @@ import { useUsersGetMe, ViewUser } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 import Link from "next/link";
 import React from "react";
+import { GroupCard } from "@/components/GroupCard";
 
 export default function Page() {
   const { data } = useUsersGetMe();
@@ -30,9 +31,7 @@ export default function Page() {
           ) : (
             <div className="flex flex-row flex-wrap gap-2">
               {data.groups_association.map((v) => (
-                <div key={v.group.path} className="bg-gray-700 p-4 rounded-2xl">
-                  {v.group.name}
-                </div>
+                <GroupCard v={v} favorite={false} />
               ))}
             </div>
           )}
@@ -51,9 +50,7 @@ export default function Page() {
           ) : (
             <div className="flex flex-row flex-wrap gap-2">
               {data.favorites_association.map((v) => (
-                <div key={v.group.path} className="bg-gray-700 p-4 rounded-2xl">
-                  {v.group.name}
-                </div>
+                <GroupCard v={v} favorite={true} />
               ))}
             </div>
           )}
