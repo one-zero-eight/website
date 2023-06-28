@@ -11,7 +11,7 @@ module.exports = {
         background: "#171717",
         border: "#2C2C2C",
         background_dark: "#0B0B0B",
-        hover_color: "#2B2B2B",
+        hover_color: "#222222",
         click_color: "#0B0B0B",
         click_question: "#171717",
         section_g_start: "#9A2EFF",
