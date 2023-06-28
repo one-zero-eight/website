@@ -1,5 +1,4 @@
 "use client";
-import { getAuthToken, unsetAuthToken } from "@/lib/auth";
 import { EVENTS_API_URL } from "@/lib/events";
 import Axios, { AxiosRequestConfig } from "axios";
 
@@ -14,31 +13,12 @@ export const axiosInstance = <T>(
   options?: AxiosRequestConfig
 ): Promise<T> => {
   const source = Axios.CancelToken.source();
-
-  const token = getAuthToken();
-  const authHeaders: Record<string, string> = {};
-  if (token) {
-    authHeaders.Authorization = "Bearer " + token;
-  }
-
   const promise = AXIOS_INSTANCE<T>({
+    withCredentials: true,
     ...config,
     ...options,
-    headers: {
-      ...authHeaders,
-      ...config.headers,
-      ...options?.headers,
-    },
     cancelToken: source.token,
-  })
-    .then(({ data }) => data)
-    .catch((reason) => {
-      if (reason.response.status === 403 && token) {
-        console.warn("Authentication fail. Resetting token.");
-        unsetAuthToken();
-      }
-      return {} as T;
-    });
+  }).then(({ data }) => data);
 
   // @ts-ignore
   promise.cancel = () => {

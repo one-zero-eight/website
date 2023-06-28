@@ -1,13 +1,20 @@
 "use client";
+import { EVENTS_API_URL } from "@/lib/events";
+import { useRouter } from "next/navigation";
 
-export function getAuthToken() {
-  return localStorage.getItem("token") || undefined;
-}
+export function useAuthMethods() {
+  const router = useRouter();
 
-export function setAuthToken(token: string) {
-  localStorage.setItem("token", token);
-}
-
-export function unsetAuthToken() {
-  localStorage.removeItem("token");
+  return {
+    signIn: () => {
+      const url = new URL(`${EVENTS_API_URL}/auth/innopolis/login`);
+      url.searchParams.append("return_to", window.location.href);
+      router.push(url.toString());
+    },
+    signOut: () => {
+      const url = new URL(`${EVENTS_API_URL}/auth/logout`);
+      url.searchParams.append("return_to", window.location.href);
+      router.push(url.toString());
+    },
+  };
 }
