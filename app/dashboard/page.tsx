@@ -10,6 +10,16 @@ export default function Page() {
   return (
     <div className="p-4 sm:p-16 flex flex-col">
       <h1 className="text-4xl font-bold">Dashboard</h1>
+      <div className="my-12 flex flex-row gap-6">
+        <div className="w-24 h-24 bg-gray-600 rounded-full"></div>
+        <div className="flex flex-col justify-center">
+          <p className="text-2xl">
+            {data?.name}{" "}
+            <span className="text-sm text-gray-400">{data?.status}</span>
+          </p>
+          <p className="text-lg text-gray-400">{data?.email}</p>
+        </div>
+      </div>
       <h2 className="text-2xl font-bold">Your calendar</h2>
       {!data ? (
         <>Loading...</>
