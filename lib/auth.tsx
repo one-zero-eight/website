@@ -7,7 +7,9 @@ export function useAuthMethods() {
 
   return {
     signIn: () => {
-      const url = new URL(`${EVENTS_API_URL}/auth/innopolis/login`);
+      const url = new URL(
+        `${EVENTS_API_URL}/auth/${process.env.NEXT_PUBLIC_AUTH_PROVIDER}/login`
+      );
       url.searchParams.append("return_to", window.location.href);
       router.push(url.toString());
     },
