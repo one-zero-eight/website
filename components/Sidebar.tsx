@@ -10,6 +10,7 @@ import ScheduleIcon from "./icons/ScheduleIcon";
 import ScholarshipIcon from "./icons/ScholarshipIcon";
 import SidebarSection from "./SidebarSection";
 import UserMenu from "./UserMenu";
+import DashboardIcon from "@/components/icons/DashboardIcon";
 
 type Item = {
   title: string;
@@ -18,7 +19,7 @@ type Item = {
 };
 
 const items: Item[] = [
-  { title: "Dashboard", path: "/dashboard", icon: ScheduleIcon },
+  { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },
   { title: "Schedule", path: "/schedule", icon: ScheduleIcon },
   { title: "Laundry", path: "#", icon: LaundryIcon },
   { title: "Forms", path: "#", icon: FormsIcon },
