@@ -34,7 +34,7 @@ function ScheduleElement({
         )}
       </div>
       <div
-        className={`flex flex-row selected select-none whitespace-nowrap rounded-xl w-fit text-right`}
+        className={`flex flex-row items-center selected select-none whitespace-nowrap rounded-xl w-fit gap-x-1 text-right`}
       >
         <FavoriteIcon state={"non-active"} />
         <DownloadIcon fill={`rgba(256, 256, 256, 0.75)`} />
