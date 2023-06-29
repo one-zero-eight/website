@@ -1,31 +1,13 @@
 "use client";
 import Calendar from "@/components/Calendar";
+import { GroupCard } from "@/components/GroupCard";
 import { useUsersGetMe, ViewUser } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 import Link from "next/link";
 import React from "react";
-import { GroupCard } from "@/components/GroupCard";
 
-type Group = {
-  user_id: number;
-  group: {
-    id: number;
-    path: string;
-    name: string;
-    type: string;
-  };
-  hidden: boolean;
-};
-type UserMe = {
-  id: number;
-  email: string;
-  name: string;
-  status: string;
-  groups_associations: Group[];
-  favorites_associations: Group[];
-};
 export default function Page() {
-  const { data }: UserMe = useUsersGetMe();
+  const { data } = useUsersGetMe();
 
   return (
     <div className="p-4 sm:p-16 flex flex-col">
