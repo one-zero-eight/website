@@ -12,12 +12,16 @@ type DropdownButtonProps = {
 function DropdownButton(props: DropdownButtonProps) {
   return (
     <Popover.Button
-      className="rounded-xl w-full"
       key={props.key}
       value={props.key}
       onClick={props.func}
+      className="w-full rounded-3xl"
     >
-      <div className="flex flex-row items-center bg-background py-4 px-5 rounded-2xl">
+      <div
+        className={
+          "flex flex-row items-center bg-background py-4 px-5 rounded-3xl"
+        }
+      >
         <p className="mr-4 whitespace-nowrap">{props.title}</p>
         {props.default ? <DropListIcon /> : undefined}
       </div>
