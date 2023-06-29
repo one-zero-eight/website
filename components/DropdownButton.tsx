@@ -19,7 +19,7 @@ function DropdownButton(props: DropdownButtonProps) {
     >
       <div
         className={
-          "flex flex-row items-center bg-background py-4 px-5 rounded-3xl"
+          "flex flex-row items-center bg-background py-4 px-5 rounded-3xl text-secondary_hover"
         }
       >
         <p className="mr-4 whitespace-nowrap">{props.title}</p>
