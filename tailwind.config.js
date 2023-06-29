@@ -18,6 +18,8 @@ module.exports = {
         section_g_end: "#6E35A2",
         inactive: "#414141",
         focus_color: "#9747FF",
+        secondary: "rgba(255, 255, 255, 0.5)",
+        secondary_hover: "rgba(255, 255, 255, 0.75)",
       },
       boxShadow: {
         "5xl": "0 0 35px 0 rgba(151, 71, 255, 0.75)",
