@@ -20,6 +20,10 @@ export type AuthGetDevTokenParams = {
   email?: string;
 };
 
+export type EventGroupsFindEventGroupByPathParams = {
+  path: string;
+};
+
 export type UsersHideGroupParams = {
   group_id: number;
   hide?: boolean;
@@ -34,17 +38,11 @@ export type UsersDeleteFavoriteParams = {
   group_id: number;
 };
 
-/**
- * Represents a user instance from the database excluding sensitive information.
- */
-export interface ViewUser {
-  id: number;
-  email: string;
-  name?: string;
-  status?: string;
-  groups_association?: UserXGroupView[];
-  favorites_association?: UserXGroupView[];
-}
+export type UsersAddFavoriteParams = {
+  group_id: number;
+};
+
+export type ViewEventGroupSatellite = { [key: string]: any };
 
 /**
  * Represents a group instance from the database excluding sensitive information.
@@ -54,6 +52,7 @@ export interface ViewEventGroup {
   path: string;
   name?: string;
   type?: string;
+  satellite?: ViewEventGroupSatellite;
 }
 
 export interface VersionInfo {
@@ -79,6 +78,18 @@ export interface UserXGroupView {
   hidden: boolean;
 }
 
+/**
+ * Represents a user instance from the database excluding sensitive information.
+ */
+export interface ViewUser {
+  id: number;
+  email: string;
+  name?: string;
+  status?: string;
+  groups_association?: UserXGroupView[];
+  favorites_association?: UserXGroupView[];
+}
+
 export type SchemasSchemas = { [key: string]: any };
 
 /**
@@ -92,17 +103,15 @@ export interface ListOfFavorites {
   favorites: UserXGroupView[];
 }
 
-export interface HTTPValidationError {
-  detail?: ValidationError[];
+/**
+ * Represents a list of event groups.
+ */
+export interface ListEventGroupsResponse {
+  groups: ViewEventGroup[];
 }
 
-/**
- * Represents a group instance to be created.
- */
-export interface CreateEventGroup {
-  path: string;
-  name?: string;
-  type?: string;
+export interface HTTPValidationError {
+  detail?: ValidationError[];
 }
 
 // eslint-disable-next-line
@@ -188,16 +197,11 @@ export const useUsersGetMe = <
  * @summary Add Favorite
  */
 export const usersAddFavorite = (
-  createEventGroup: CreateEventGroup,
+  params: UsersAddFavoriteParams,
   options?: SecondParameter<typeof axiosInstance>
 ) => {
   return axiosInstance<ListOfFavorites>(
-    {
-      url: `/users/me/favorites`,
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      data: createEventGroup,
-    },
+    { url: `/users/me/favorites`, method: "post", params },
     options
   );
 };
@@ -209,25 +213,25 @@ export const getUsersAddFavoriteMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof usersAddFavorite>>,
     TError,
-    { data: CreateEventGroup },
+    { params: UsersAddFavoriteParams },
     TContext
   >;
   request?: SecondParameter<typeof axiosInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof usersAddFavorite>>,
   TError,
-  { data: CreateEventGroup },
+  { params: UsersAddFavoriteParams },
   TContext
 > => {
   const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof usersAddFavorite>>,
-    { data: CreateEventGroup }
+    { params: UsersAddFavoriteParams }
   > = (props) => {
-    const { data } = props ?? {};
+    const { params } = props ?? {};
 
-    return usersAddFavorite(data, requestOptions);
+    return usersAddFavorite(params, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -236,7 +240,7 @@ export const getUsersAddFavoriteMutationOptions = <
 export type UsersAddFavoriteMutationResult = NonNullable<
   Awaited<ReturnType<typeof usersAddFavorite>>
 >;
-export type UsersAddFavoriteMutationBody = CreateEventGroup;
+
 export type UsersAddFavoriteMutationError = void | HTTPValidationError;
 
 /**
@@ -249,7 +253,7 @@ export const useUsersAddFavorite = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof usersAddFavorite>>,
     TError,
-    { data: CreateEventGroup },
+    { params: UsersAddFavoriteParams },
     TContext
   >;
   request?: SecondParameter<typeof axiosInstance>;
@@ -470,6 +474,253 @@ export const useUsersHideGroup = <
   const mutationOptions = getUsersHideGroupMutationOptions(options);
 
   return useMutation(mutationOptions);
+};
+
+/**
+ * Get event group info by path
+ * @summary Find Event Group By Path
+ */
+export const eventGroupsFindEventGroupByPath = (
+  params: EventGroupsFindEventGroupByPathParams,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<ViewEventGroup>(
+    { url: `/event-groups/by-path`, method: "get", params, signal },
+    options
+  );
+};
+
+export const getEventGroupsFindEventGroupByPathQueryKey = (
+  params: EventGroupsFindEventGroupByPathParams
+) => [`/event-groups/by-path`, ...(params ? [params] : [])] as const;
+
+export const getEventGroupsFindEventGroupByPathQueryOptions = <
+  TData = Awaited<ReturnType<typeof eventGroupsFindEventGroupByPath>>,
+  TError = void | HTTPValidationError
+>(
+  params: EventGroupsFindEventGroupByPathParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof eventGroupsFindEventGroupByPath>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  }
+): UseQueryOptions<
+  Awaited<ReturnType<typeof eventGroupsFindEventGroupByPath>>,
+  TError,
+  TData
+> & { queryKey: QueryKey } => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getEventGroupsFindEventGroupByPathQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof eventGroupsFindEventGroupByPath>>
+  > = ({ signal }) =>
+    eventGroupsFindEventGroupByPath(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions };
+};
+
+export type EventGroupsFindEventGroupByPathQueryResult = NonNullable<
+  Awaited<ReturnType<typeof eventGroupsFindEventGroupByPath>>
+>;
+export type EventGroupsFindEventGroupByPathQueryError =
+  void | HTTPValidationError;
+
+/**
+ * @summary Find Event Group By Path
+ */
+export const useEventGroupsFindEventGroupByPath = <
+  TData = Awaited<ReturnType<typeof eventGroupsFindEventGroupByPath>>,
+  TError = void | HTTPValidationError
+>(
+  params: EventGroupsFindEventGroupByPathParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof eventGroupsFindEventGroupByPath>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getEventGroupsFindEventGroupByPathQueryOptions(
+    params,
+    options
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get event group info by id
+ * @summary Get Event Group
+ */
+export const eventGroupsGetEventGroup = (
+  eventGroupId: number,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<ViewEventGroup>(
+    { url: `/event-groups/${eventGroupId}`, method: "get", signal },
+    options
+  );
+};
+
+export const getEventGroupsGetEventGroupQueryKey = (eventGroupId: number) =>
+  [`/event-groups/${eventGroupId}`] as const;
+
+export const getEventGroupsGetEventGroupQueryOptions = <
+  TData = Awaited<ReturnType<typeof eventGroupsGetEventGroup>>,
+  TError = void | HTTPValidationError
+>(
+  eventGroupId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof eventGroupsGetEventGroup>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  }
+): UseQueryOptions<
+  Awaited<ReturnType<typeof eventGroupsGetEventGroup>>,
+  TError,
+  TData
+> & { queryKey: QueryKey } => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getEventGroupsGetEventGroupQueryKey(eventGroupId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof eventGroupsGetEventGroup>>
+  > = ({ signal }) =>
+    eventGroupsGetEventGroup(eventGroupId, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!eventGroupId, ...queryOptions };
+};
+
+export type EventGroupsGetEventGroupQueryResult = NonNullable<
+  Awaited<ReturnType<typeof eventGroupsGetEventGroup>>
+>;
+export type EventGroupsGetEventGroupQueryError = void | HTTPValidationError;
+
+/**
+ * @summary Get Event Group
+ */
+export const useEventGroupsGetEventGroup = <
+  TData = Awaited<ReturnType<typeof eventGroupsGetEventGroup>>,
+  TError = void | HTTPValidationError
+>(
+  eventGroupId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof eventGroupsGetEventGroup>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getEventGroupsGetEventGroupQueryOptions(
+    eventGroupId,
+    options
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get list of event groups
+ * @summary List Event Groups
+ */
+export const eventGroupsListEventGroups = (
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<ListEventGroupsResponse>(
+    { url: `/event-groups/`, method: "get", signal },
+    options
+  );
+};
+
+export const getEventGroupsListEventGroupsQueryKey = () =>
+  [`/event-groups/`] as const;
+
+export const getEventGroupsListEventGroupsQueryOptions = <
+  TData = Awaited<ReturnType<typeof eventGroupsListEventGroups>>,
+  TError = unknown
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof eventGroupsListEventGroups>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryOptions<
+  Awaited<ReturnType<typeof eventGroupsListEventGroups>>,
+  TError,
+  TData
+> & { queryKey: QueryKey } => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getEventGroupsListEventGroupsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof eventGroupsListEventGroups>>
+  > = ({ signal }) => eventGroupsListEventGroups(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions };
+};
+
+export type EventGroupsListEventGroupsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof eventGroupsListEventGroups>>
+>;
+export type EventGroupsListEventGroupsQueryError = unknown;
+
+/**
+ * @summary List Event Groups
+ */
+export const useEventGroupsListEventGroups = <
+  TData = Awaited<ReturnType<typeof eventGroupsListEventGroups>>,
+  TError = unknown
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof eventGroupsListEventGroups>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getEventGroupsListEventGroupsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
 };
 
 /**
