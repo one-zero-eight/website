@@ -36,7 +36,7 @@ function ScheduleElement({
       <div
         className={`flex flex-row selected select-none whitespace-nowrap rounded-xl w-fit text-right`}
       >
-        <FavoriteIcon isActive={false} />
+        <FavoriteIcon state={"non-active"} />
         <DownloadIcon fill={`rgba(256, 256, 256, 0.75)`} />
         {/*Import*/}
       </div>

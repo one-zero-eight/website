@@ -31,7 +31,7 @@ export default function Page() {
           ) : (
             <div className="flex flex-row flex-wrap gap-2">
               {data.groups_association.map((v) => (
-                <GroupCard v={v} favorite={false} />
+                <GroupCard v={v} favorite="non-active" />
               ))}
             </div>
           )}
@@ -50,7 +50,7 @@ export default function Page() {
           ) : (
             <div className="flex flex-row flex-wrap gap-2">
               {data.favorites_association.map((v) => (
-                <GroupCard v={v} favorite={true} />
+                <GroupCard v={v} favorite={"active"} />
               ))}
             </div>
           )}
