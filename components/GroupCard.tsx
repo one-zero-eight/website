@@ -1,4 +1,3 @@
-import React from "react";
 import DownloadIcon from "@/components/icons/DownloadIcon";
 import FavoriteIcon from "@/components/icons/FavoriteIcon";
 
@@ -12,9 +11,8 @@ export function GroupCard(props: any) {
       <div
         className={`flex flex-row selected select-none whitespace-nowrap mr-2 rounded-xl w-fit text-right`}
       >
-        <FavoriteIcon state={props.favorite} />
+        <FavoriteIcon active={props.favorite} />
         <DownloadIcon fill={`rgba(256, 256, 256, 0.75)`} />
-        {/*Import*/}
       </div>
     </div>
   );

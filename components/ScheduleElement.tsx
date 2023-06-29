@@ -1,6 +1,6 @@
-import { Calendar, Schedule } from "@/lib/schedule/api";
 import DownloadIcon from "@/components/icons/DownloadIcon";
 import FavoriteIcon from "@/components/icons/FavoriteIcon";
+import { Calendar, Schedule } from "@/lib/schedule/api";
 
 export type ScheduleElementProps = {
   schedule: Schedule;
@@ -36,9 +36,8 @@ function ScheduleElement({
       <div
         className={`flex flex-row items-center selected select-none whitespace-nowrap rounded-xl w-fit gap-x-1 text-right`}
       >
-        <FavoriteIcon state={"non-active"} />
+        <FavoriteIcon active={false} />
         <DownloadIcon fill={`rgba(256, 256, 256, 0.75)`} />
-        {/*Import*/}
       </div>
     </button>
   );
