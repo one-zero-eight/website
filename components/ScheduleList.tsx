@@ -63,7 +63,7 @@ export default function ScheduleList({
 
       <hr className="border-b-1 w-full mt-4"></hr>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-y-2 gap-x-4 content-start place-items-center justify-items-stretch overflow-auto scrollbar-hide h-full w-full px-0 md:px-12 mt-4">
+      <div className="flex flex-wrap justify-center gap-y-2 gap-x-10 content-start place-items-center justify-items-stretch overflow-auto scrollbar-hide h-full w-full px-0 md:px-12 mt-4">
         {calendars.map((element) => (
           <ScheduleElement
             key={element.file}
