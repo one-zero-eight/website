@@ -32,9 +32,9 @@ export default function Page() {
             <div className="flex flex-row flex-wrap gap-2">
               {data.groups_association.map((v) => (
                 <GroupCard
-                  name={v.group.name || ""}
                   key={v.group.path}
-                  favorite={false}
+                  name={v.group.name || ""}
+                  group_id={v.group.id}
                 />
               ))}
             </div>
@@ -55,9 +55,9 @@ export default function Page() {
             <div className="flex flex-row flex-wrap gap-2">
               {data.favorites_association.map((v) => (
                 <GroupCard
-                  name={v.group.name || ""}
                   key={v.group.path}
-                  favorite={true}
+                  name={v.group.name || ""}
+                  group_id={v.group.id}
                 />
               ))}
             </div>

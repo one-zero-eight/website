@@ -1,4 +1,5 @@
 import { GroupCard } from "@/components/GroupCard";
+import { useEventGroupsFindEventGroupByPath } from "@/lib/events";
 import { Calendar, Schedule } from "@/lib/schedule/api";
 
 export type ScheduleElementProps = {
@@ -12,13 +13,9 @@ function ScheduleElement({
   calendar,
   onClick,
 }: ScheduleElementProps) {
+  const { data } = useEventGroupsFindEventGroupByPath({ path: calendar.file });
   return (
-    <GroupCard
-      name={calendar.name}
-      favorite={false}
-      onFavoriteClick={() => {}}
-      onImportClick={onClick}
-    >
+    <GroupCard name={calendar.name} group_id={data?.id} onImportClick={onClick}>
       {schedule.filters.map((v) =>
         Object.hasOwn(calendar, v.alias) ? (
           <p
