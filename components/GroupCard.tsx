@@ -22,12 +22,12 @@ export function GroupCard({
         <p className="text-left text-xl font-medium w-56">{name}</p>
         {children}
       </div>
-      <div className="flex flex-row gap-2 select-none w-fit">
+      <div className="flex flex-row gap-2 place-items-center select-none w-fit">
         <div onClick={switchFavorite} className="cursor-pointer rounded-full">
           <FavoriteIcon active={isInFavorites} />
         </div>
         <div onClick={onImportClick} className="cursor-pointer rounded-full">
-          <DownloadIcon fill={`rgba(256, 256, 256, 0.75)`} />
+          <DownloadIcon />
         </div>
       </div>
     </div>
