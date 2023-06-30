@@ -6,13 +6,11 @@ function FavoriteIcon({ active, ...props }: FavoriteIconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      height={40}
+      height={36}
       viewBox="0 -960 960 960"
-      width={40}
+      width={36}
       className={
-        active
-          ? "fill-yellow-500 hover:fill-yellow-400"
-          : "fill-secondary hover:fill-secondary_hover"
+        active ? "fill-[#F0B132]" : "fill-secondary hover:fill-secondary_hover"
       }
       {...props}
     >
