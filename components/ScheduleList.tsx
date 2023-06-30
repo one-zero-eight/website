@@ -6,6 +6,7 @@ import { useState } from "react";
 import CategoriesDropdown from "./CategoriesDropdown";
 import FilterDropdown from "./FilterDropdown";
 import ScheduleElement from "./ScheduleElement";
+import SearchBar from "@/components/SearchBar";
 
 export type ScheduleListProps = {
   categories: Categories;
@@ -52,13 +53,12 @@ export default function ScheduleList({
             }
           />
         ))}
-        <input
-          type="text"
-          className="form-control bg-background_dark hover:bg-background rounded-xl sm:text-2xl p-2 border-2 max-w-[200px] lg:ml-auto"
-          placeholder="Search..."
+        <SearchBar
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-        ></input>
+          placeholder={"Find the group..."}
+          width={450}
+        />
       </div>
 
       <hr className="border-b-1 w-full mt-4 border-hover_color"></hr>
