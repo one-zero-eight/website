@@ -20,11 +20,23 @@ function SidebarSection(props: SectionProps) {
       <div className="flex flex-row justify-center p-2">
         <props.icon
           className="place-self-start mr-4 w-8"
-          fill={`${props.selected ? "#9A2EFF" : "#414141"}`}
+          fill={`${
+            props.selected
+              ? "#9A2EFF"
+              : props.path === "#"
+              ? "#2b2b2b"
+              : "#414141"
+          }`}
         />
         <p
           className={`flex grow font-semibold text-lg items-center w-min 
-              ${props.selected ? "selected" : "text-inactive"}`}
+              ${
+                props.selected
+                  ? "selected"
+                  : props.path === "#"
+                  ? "text-[#2b2b2b]"
+                  : "text-inactive"
+              }`}
         >
           {props.title}
         </p>
