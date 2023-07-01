@@ -57,9 +57,13 @@ export default async function Page({ params }: Props) {
   }
 
   return (
-    <div className="p-4 sm:p-16 flex flex-col">
-      <h1 className="text-4xl font-bold">Schedule</h1>
-      <p className="text-white/75">Now find your group.</p>
+    <div className="p-16 flex flex-col">
+      <h1 className="text-center xl:text-left text-3xl xl:text-4xl font-bold">
+        Schedule
+      </h1>
+      <p className="text-center xl:text-left text-white/75">
+        Now find your group.
+      </p>
       <ScheduleList
         categories={categories}
         category={params.category}
