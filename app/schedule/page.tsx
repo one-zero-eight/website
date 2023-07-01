@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <main className="p-12 sm:p-16">
+    <main className="p-16">
       <h1 className="text-3xl text-center lg:text-left xl:text-4xl font-bold">
         InNoHassle ecosystem
       </h1>

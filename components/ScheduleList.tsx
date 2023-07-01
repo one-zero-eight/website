@@ -40,7 +40,7 @@ export default function ScheduleList({
 
   return (
     <>
-      <div className="flex flex-row flex-wrap gap-4 mt-4 justify-center">
+      <div className="flex flex-row flex-wrap gap-4 mt-4 justify-center xl:justify-normal">
         <CategoriesDropdown categories={categories} selected={category} />
         {schedule.filters.map((v) => (
           <FilterDropdown
