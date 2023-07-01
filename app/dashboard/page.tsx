@@ -24,7 +24,7 @@ export default function Page() {
       </div>
       <div className="flex flex-row flex-wrap gap-8">
         <div className="max-w-[50%]">
-          <h2 className="text-3xl font-bold mb-4">Schedule</h2>
+          <h2 className="text-3xl font-medium mb-4">Schedule</h2>
           {data?.groups_association === undefined ||
           data.groups_association.length === 0 ? (
             <p className="text-lg text-gray-400">Nothing here</p>
@@ -41,7 +41,7 @@ export default function Page() {
           )}
         </div>
         <div className="max-w-[50%]">
-          <h2 className="text-3xl font-bold mb-4">Favorites</h2>
+          <h2 className="text-3xl font-medium mb-4">Favorites</h2>
           {data?.favorites_association === undefined ||
           data.favorites_association.length === 0 ? (
             <p className="text-lg text-gray-400">
@@ -64,7 +64,7 @@ export default function Page() {
           )}
         </div>
       </div>
-      <h2 className="text-3xl font-bold my-4">Your calendar</h2>
+      <h2 className="text-3xl font-medium my-4">Your calendar</h2>
       {!data ? (
         <>Loading...</>
       ) : (
