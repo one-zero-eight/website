@@ -57,7 +57,7 @@ export default async function Page({ params }: Props) {
   }
 
   return (
-    <div className="p-16 flex flex-col">
+    <div className="px-2 xl:px-16 py-16 flex flex-col">
       <h1 className="text-center xl:text-left text-3xl xl:text-4xl font-bold">
         Schedule
       </h1>
