@@ -10,10 +10,10 @@ export default function Page() {
   const { data } = useUsersGetMe();
 
   return (
-    <div className="p-4 sm:p-16 flex flex-col">
-      <h1 className="text-4xl font-bold">Dashboard</h1>
-      <div className="my-12 flex flex-row gap-6">
-        <div className="w-24 h-24 bg-gray-600 rounded-full"></div>
+    <div className="p-16 flex flex-col">
+      <h1 className="text-center sm:text-left text-4xl font-bold">Dashboard</h1>
+      <div className="justify-center sm:justify-normal my-12 flex flex-row gap-6">
+        <div className="shrink-0 w-24 h-24 bg-gray-600 rounded-full"></div>
         <div className="flex flex-col justify-center">
           <p className="text-2xl">
             {data?.name}{" "}
@@ -22,14 +22,16 @@ export default function Page() {
           <p className="text-lg text-gray-400">{data?.email}</p>
         </div>
       </div>
-      <div className="flex flex-row flex-wrap gap-8">
-        <div className="max-w-[50%]">
-          <h2 className="text-3xl font-medium mb-4">Schedule</h2>
+      <div className="flex flex-col xl:flex-row flex-wrap xl:justify-between">
+        <div className="min-w-[20%] lg:min-w-[30%] xl:max-w-[45%]">
+          <h2 className="text-center lg:text-left text-3xl font-medium mb-4">
+            Schedule
+          </h2>
           {data?.groups_association === undefined ||
           data.groups_association.length === 0 ? (
             <p className="text-lg text-gray-400">Nothing here</p>
           ) : (
-            <div className="flex flex-row flex-wrap gap-2">
+            <div className="justify-center lg:justify-normal flex flex-row flex-wrap gap-4 gap-y-2 mb-4">
               {data.groups_association.map((v) => (
                 <GroupCard
                   key={v.group.path}
@@ -40,8 +42,10 @@ export default function Page() {
             </div>
           )}
         </div>
-        <div className="max-w-[50%]">
-          <h2 className="text-3xl font-medium mb-4">Favorites</h2>
+        <div className="min-w-[20%] lg:min-w-[30%] xl:max-w-[50%]">
+          <h2 className="text-center lg:text-left text-3xl font-medium mb-4">
+            Favorites
+          </h2>
           {data?.favorites_association === undefined ||
           data.favorites_association.length === 0 ? (
             <p className="text-lg text-gray-400">
@@ -52,7 +56,7 @@ export default function Page() {
               </Link>
             </p>
           ) : (
-            <div className="flex flex-row flex-wrap gap-2">
+            <div className="justify-center lg:justify-normal flex flex-row flex-wrap gap-4 gap-y-2">
               {data.favorites_association.map((v) => (
                 <GroupCard
                   key={v.group.path}
