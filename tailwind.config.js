@@ -28,6 +28,14 @@ module.exports = {
       fontFamily: {
         primary: ["var(--font-rubik)", "sans-serif"],
       },
+      screens: {
+        "smw-mdh": { raw: "(min-width: 640px) and (min-height: 768px)" },
+        "sm-h": { raw: "(min-height: 640px)" },
+        "md-h": { raw: "(min-height: 768px)" },
+        "lg-h": { raw: "(min-height: 1024px)" },
+        "xl-h": { raw: "(min-height: 1280px)" },
+        "2xl-h": { raw: "(min-height: 1536px)" },
+      },
     },
   },
   darkMode: "class",
