@@ -19,7 +19,7 @@ export function GroupCard({
   return (
     <div className="bg-background hover:bg-hover_color flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl min-w-fit min-h-fit">
       <div className="flex flex-col gap-0.5">
-        <p className="text-left text-xl font-medium w-56">{name}</p>
+        <p className="text-left text-xl font-medium w-40">{name}</p>
         {children}
       </div>
       <div className="flex flex-row gap-2 place-items-center select-none w-fit">
