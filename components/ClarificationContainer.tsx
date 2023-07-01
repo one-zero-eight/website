@@ -9,7 +9,7 @@ import TableChartIcon from "@/components/icons/TableChartIcon";
 
 export default function ClarificationContainer() {
   return (
-    <div className="flex flex-col grow-0 lg:flex-row flex-wrap items-center justify-center w-full gap-y-10 md:gap-x-10 mt-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-7 grow-0 place-items-center w-full gap-y-10 mt-8">
       <ClarificationCard
         icon={[TableChartIcon, DoubleArrowIcon, DataIcon]}
         title="Retrieval"
