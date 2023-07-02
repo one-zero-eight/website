@@ -7,6 +7,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import ScheduleDialog from "@/components/ScheduleDialog";
 import { ymEvent } from "@/lib/tracking/YandexMetrika";
+import { Navbar } from "@/components/Navbar";
 
 export default function Page() {
   const { data } = useUsersGetMe();
@@ -14,8 +15,12 @@ export default function Page() {
   const [dialogOpened, setDialogOpened] = useState(false);
 
   return (
-    <div className="p-16 flex flex-col">
-      <h1 className="text-center sm:text-left text-4xl font-bold">Dashboard</h1>
+    <div className="p-16 py-12 flex flex-col">
+      <Navbar>
+        <h1 className="text-center sm:text-left text-4xl font-bold">
+          Dashboard
+        </h1>
+      </Navbar>
       <div className="justify-center sm:justify-normal my-12 flex flex-row gap-6">
         <div className="shrink-0 w-24 h-24 bg-gray-600 rounded-full"></div>
         <div className="flex flex-col justify-center">
