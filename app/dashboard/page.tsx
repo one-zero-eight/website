@@ -15,7 +15,7 @@ export default function Page() {
   const [dialogOpened, setDialogOpened] = useState(false);
 
   return (
-    <div className="p-16 py-12 flex flex-col">
+    <div className="p-16 flex flex-col">
       <Navbar>
         <h1 className="text-center sm:text-left text-4xl font-bold">
           Dashboard
