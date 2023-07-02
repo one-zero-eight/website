@@ -3,6 +3,7 @@ import { useAuthMethods } from "@/lib/auth";
 import { useUsersGetMe } from "@/lib/events";
 import { useIsClient } from "usehooks-ts";
 import React from "react";
+import { Popover, Transition } from "@headlessui/react";
 
 function UserMenu() {
   const isClient = useIsClient();
@@ -24,9 +25,36 @@ function UserMenu() {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center bg-background w-18p h-18p rounded-2xl ml-auto">
-      <div className="flex shrink-0 w-12 h-12 bg-gray-600 rounded-full border-border border-2" />
-    </div>
+    <Popover className="relative focus:outline-none">
+      <Popover.Button className="focus:outline-none">
+        <div className="flex flex-col justify-center items-center bg-background w-18p h-18p rounded-2xl ml-auto">
+          <div className="flex shrink-0 w-12 h-12 bg-gray-600 rounded-full border-border border-2" />
+        </div>
+      </Popover.Button>
+      <Transition
+        enter="transition duration-120 ease-out"
+        enterFrom="transform scale-95 opacity-0"
+        enterTo="transform scale-100 opacity-100"
+        leave="transition duration-125 ease-out"
+        leaveFrom="transform scale-100 opacity-100"
+        leaveTo="transform scale-95 opacity-0"
+      >
+        <Popover.Panel className="absolute right-0 top-[18p] bg-background z-10 opacity-[0.999] w-64 h-16 rounded-2xl">
+          <div className="flex top-1/2 justify-center ml-auto mr-auto left-0 right-0 w-64 h-16">
+            <Popover.Button>
+              {() => (
+                <button
+                  className="flex justify-center items-center text-center bg-border w-56 h-10 rounded-2xl"
+                  onClick={signOut}
+                >
+                  Sign out
+                </button>
+              )}
+            </Popover.Button>
+          </div>
+        </Popover.Panel>
+      </Transition>
+    </Popover>
   );
 }
 
