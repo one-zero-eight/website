@@ -38,9 +38,9 @@ export function useEventGroup(group_id?: number) {
   });
 
   let isInFavorites =
-    userData?.favorites_association?.findIndex(
+    (userData?.favorites_association?.findIndex(
       (v) => v.group.id === group_id
-    ) !== -1;
+    ) ?? -1) !== -1;
   // Use optimistic updates for mutations
   if (
     removeFavoriteIsLoading &&
