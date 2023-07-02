@@ -8,6 +8,7 @@ import {
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import React from "react";
+import { Navbar } from "@/components/Navbar";
 
 export type Props = {
   params: { category: string };
@@ -58,12 +59,20 @@ export default async function Page({ params }: Props) {
 
   return (
     <div className="px-2 xl:px-16 py-16 flex flex-col">
-      <h1 className="text-center xl:text-left text-3xl xl:text-4xl font-bold">
+      <h1 className="lg:hidden lg:invisible text-center xl:text-left text-3xl xl:text-4xl font-bold">
         Schedule
       </h1>
-      <p className="text-center xl:text-left text-white/75">
+      <p className="lg:hidden lg:invisible text-center xl:text-left text-white/75">
         Now find your group.
       </p>
+      <Navbar className="hidden invisible lg:flex lg:visible">
+        <h1 className="text-center xl:text-left text-3xl xl:text-4xl font-bold">
+          Schedule
+        </h1>
+        <p className="text-center xl:text-left text-white/75">
+          Now find your group.
+        </p>
+      </Navbar>
       <ScheduleList
         categories={categories}
         category={params.category}

@@ -16,7 +16,10 @@ export default function Page() {
 
   return (
     <div className="p-16 flex flex-col">
-      <Navbar>
+      <h1 className="lg:hidden lg:invisible text-center sm:text-left text-4xl font-bold">
+        Dashboard
+      </h1>
+      <Navbar className="hidden invisible lg:flex lg:visible">
         <h1 className="text-center sm:text-left text-4xl font-bold">
           Dashboard
         </h1>
