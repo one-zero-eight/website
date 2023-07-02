@@ -10,7 +10,17 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main className="p-16">
-      <Navbar>
+      <h1 className="lg:hidden lg:invisible text-3xl text-center lg:text-left xl:text-4xl font-bold">
+        InNoHassle ecosystem
+      </h1>
+      <p className="lg:hidden lg:invisible text-white/75 text-center text-base py-2 xl:text-lg lg:text-left">
+        Services developed by{" "}
+        <a href="https://t.me/one_zero_eight" className="text-white">
+          one-zero-eight community
+        </a>{" "}
+        for Innopolis students.
+      </p>
+      <Navbar className="hidden invisible lg:flex lg:visible">
         <h1 className="text-3xl text-center lg:text-left xl:text-4xl font-bold">
           InNoHassle ecosystem
         </h1>
