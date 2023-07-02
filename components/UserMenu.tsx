@@ -24,7 +24,7 @@ function UserMenu() {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center bg-background w-18p h-18p rounded-2xl">
+    <div className="flex flex-col justify-center items-center bg-background w-18p h-18p rounded-2xl ml-auto">
       <div className="flex shrink-0 w-12 h-12 bg-gray-600 rounded-full border-border border-2" />
     </div>
   );
