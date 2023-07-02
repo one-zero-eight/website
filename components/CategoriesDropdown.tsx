@@ -20,7 +20,7 @@ function CategoriesDropdown({
   };
 
   return (
-    <Popover className="relative text-xl w-max rounded-full focus:outline-none">
+    <Popover className="relative text-xl w-max z-10 opacity-[0.999] rounded-full focus:outline-none">
       <Popover.Button className="w-full rounded-full focus:outline-none">
         <div className="rounded-full flex flex-row items-center bg-background py-2 px-5 text-xl text-secondary_hover">
           <p className="mr-4 whitespace-nowrap">
@@ -39,7 +39,7 @@ function CategoriesDropdown({
         leaveFrom="transform scale-100 opacity-100"
         leaveTo="transform scale-95 opacity-0"
       >
-        <Popover.Panel className="absolute z-10 rounded-2xl drop-shadow-2xl bg-background focus:outline-none">
+        <Popover.Panel className="absolute rounded-2xl drop-shadow-2xl bg-background focus:outline-none">
           <div className="flex flex-col justify-center items-center divide-y divide-border">
             {categories.categories.map((v) => (
               <Popover.Button
@@ -54,7 +54,6 @@ function CategoriesDropdown({
           </div>
         </Popover.Panel>
       </Transition>
-      <Popover.Panel className="absolute z-10"></Popover.Panel>
     </Popover>
   );
 }
