@@ -9,7 +9,6 @@ import Logo from "./icons/Logo";
 import ScheduleIcon from "./icons/ScheduleIcon";
 import ScholarshipIcon from "./icons/ScholarshipIcon";
 import SidebarSection from "./SidebarSection";
-import UserMenu from "./UserMenu";
 import DashboardIcon from "@/components/icons/DashboardIcon";
 
 type Item = {
@@ -51,7 +50,6 @@ function Sidebar() {
         })}
       </nav>
       <div className="grow"></div>
-      <UserMenu />
       <br />
       <a href="https://t.me/one_zero_eight">one-zero-eight 💜</a>
     </aside>
