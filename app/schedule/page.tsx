@@ -1,6 +1,7 @@
 import CategoryContainer from "@/components/CategoryContainer";
 import ClarificationContainer from "@/components/ClarificationContainer";
 import { Metadata } from "next";
+import { Navbar } from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: "Schedule",
@@ -9,16 +10,18 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main className="p-16">
-      <h1 className="text-3xl text-center lg:text-left xl:text-4xl font-bold">
-        InNoHassle ecosystem
-      </h1>
-      <p className="text-white/75 text-center text-base py-2 xl:text-lg lg:text-left">
-        Services developed by{" "}
-        <a href="https://t.me/one_zero_eight" className="text-white">
-          one-zero-eight community
-        </a>{" "}
-        for Innopolis students.
-      </p>
+      <Navbar>
+        <h1 className="text-3xl text-center lg:text-left xl:text-4xl font-bold">
+          InNoHassle ecosystem
+        </h1>
+        <p className="text-white/75 text-center text-base py-2 xl:text-lg lg:text-left">
+          Services developed by{" "}
+          <a href="https://t.me/one_zero_eight" className="text-white">
+            one-zero-eight community
+          </a>{" "}
+          for Innopolis students.
+        </p>
+      </Navbar>
       <h2 className="text-3xl xl:text-4xl font-medium mt-8 text-center">
         Choose the category
       </h2>
