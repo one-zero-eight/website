@@ -36,6 +36,9 @@ module.exports = {
         "xl-h": { raw: "(min-height: 1280px)" },
         "2xl-h": { raw: "(min-height: 1536px)" },
       },
+      spacing: {
+        "18p": "4.5rem",
+      },
     },
   },
   darkMode: "class",
