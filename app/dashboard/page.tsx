@@ -4,10 +4,14 @@ import { GroupCard } from "@/components/GroupCard";
 import { useUsersGetMe, ViewUser } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import ScheduleDialog from "@/components/ScheduleDialog";
+import { ymEvent } from "@/lib/tracking/YandexMetrika";
 
 export default function Page() {
   const { data } = useUsersGetMe();
+  const [selectedGroupFile, setSelectedGroupFile] = useState("");
+  const [dialogOpened, setDialogOpened] = useState(false);
 
   return (
     <div className="p-16 flex flex-col">
@@ -37,6 +41,11 @@ export default function Page() {
                   key={v.group.path}
                   name={v.group.name || ""}
                   group_id={v.group.id}
+                  onImportClick={() => {
+                    ymEvent("button-import", { scheduleFile: v.group.path });
+                    setSelectedGroupFile(v.group.path || "");
+                    setDialogOpened(true);
+                  }}
                 />
               ))}
             </div>
@@ -62,6 +71,11 @@ export default function Page() {
                   key={v.group.path}
                   name={v.group.name || ""}
                   group_id={v.group.id}
+                  onImportClick={() => {
+                    ymEvent("button-import", { scheduleFile: v.group.path });
+                    setSelectedGroupFile(v.group.path || "");
+                    setDialogOpened(true);
+                  }}
                 />
               ))}
             </div>
@@ -74,6 +88,12 @@ export default function Page() {
       ) : (
         <Calendar urls={getCalendarsToShow(data)} initialView="dayGridMonth" />
       )}
+
+      <ScheduleDialog
+        groupFile={selectedGroupFile}
+        opened={dialogOpened}
+        close={() => setDialogOpened(false)}
+      />
     </div>
   );
 }
