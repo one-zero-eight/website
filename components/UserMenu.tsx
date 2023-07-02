@@ -12,7 +12,14 @@ function UserMenu() {
   // isError - Error getting the user. Assume not authenticated.
   // !data - Request sent but no data yet.
   if (!isClient || isError || !data) {
-    return <button onClick={signIn}>Sign in</button>;
+    return (
+      <button
+        className="w-32 h-12 bg-focus_color rounded-3xl font-semibold text-xl"
+        onClick={signIn}
+      >
+        Sign in
+      </button>
+    );
   }
 
   return (
