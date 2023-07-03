@@ -7,7 +7,6 @@ function CrossIcon(props: any) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
       className="mr-4 hover:cursor-pointer"
-      onClick={() => props.setSearchVisible(false)}
     >
       <path
         fillRule="evenodd"
