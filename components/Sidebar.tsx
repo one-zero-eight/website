@@ -78,7 +78,9 @@ function Sidebar() {
             </nav>
             <div className="flex grow"></div>
             <br />
-            <UserMenu />
+            <div className="mb-4">
+              <UserMenu isMobile={true} isSidebar={true} />
+            </div>
             <a className="flex" href="https://t.me/one_zero_eight">
               one-zero-eight 💜
             </a>
@@ -104,8 +106,8 @@ function Sidebar() {
         </nav>
         <div className="grow"></div>
         <br />
-        <div className="lg:hidden lg:invisible">
-          <UserMenu />
+        <div className="mb-4 lg:hidden lg:invisible">
+          <UserMenu isMobile={false} isSidebar={true} />
         </div>
         <a href="https://t.me/one_zero_eight">one-zero-eight 💜</a>
       </aside>
