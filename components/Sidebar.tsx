@@ -36,6 +36,13 @@ function Sidebar() {
   return (
     <>
       <div className="smw-mdh:hidden absolute flex flex-col">
+        <div
+          className={
+            isOpened
+              ? "block visible fixed inset-0 z-[2] bg-black/50"
+              : "hidden invisible"
+          }
+        />
         <aside
           className={
             "flex-col justify-center items-center z-[3] opacity-[0.999] py-8 px-8 h-[100dvh] top-0 " +
