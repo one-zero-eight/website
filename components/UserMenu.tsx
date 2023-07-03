@@ -6,7 +6,11 @@ import React from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { UserFace } from "@/components/icons/UserFace";
 
-function UserMenu() {
+type UserMenuProps = {
+  isMobile: boolean;
+  isSidebar: boolean;
+};
+function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   const isClient = useIsClient();
   const { data, isLoading, isError } = useUsersGetMe();
   const { signIn, signOut } = useAuthMethods();
@@ -47,7 +51,15 @@ function UserMenu() {
         leaveFrom="transform scale-100 opacity-100"
         leaveTo="transform scale-95 opacity-0"
       >
-        <Popover.Panel className="absolute right-0 top-[18p] bg-background z-10 opacity-[0.999] w-64 h-16 rounded-2xl border-border/50 border-2">
+        <Popover.Panel
+          className={
+            isMobile
+              ? "bg-background w-64 h-16 rounded-2xl border-border/50 border-2 absolute top-[18p] left-0 z-10 opacity-[0.999]"
+              : isSidebar
+              ? "bg-background w-64 h-16 rounded-2xl border-border/50 border-2 absolute bottom-0 left-20 z-10 opacity-[0.999]"
+              : "bg-background w-64 h-16 rounded-2xl border-border/50 border-2 absolute top-[18p] right-0 z-10 opacity-[0.999]"
+          }
+        >
           <div className="flex top-1/2 justify-center ml-auto mr-auto left-0 right-0 w-64 h-16">
             <Popover.Button>
               {() => (
