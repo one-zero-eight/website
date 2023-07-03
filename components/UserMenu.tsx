@@ -47,16 +47,16 @@ function UserMenu() {
         leaveFrom="transform scale-100 opacity-100"
         leaveTo="transform scale-95 opacity-0"
       >
-        <Popover.Panel className="absolute right-0 top-[18p] bg-background z-10 opacity-[0.999] w-64 h-16 rounded-2xl">
+        <Popover.Panel className="absolute right-0 top-[18p] bg-background z-10 opacity-[0.999] w-64 h-16 rounded-2xl border-border/50 border-2">
           <div className="flex top-1/2 justify-center ml-auto mr-auto left-0 right-0 w-64 h-16">
             <Popover.Button>
               {() => (
-                <button
+                <div
                   className="flex justify-center items-center text-center bg-border w-56 h-10 rounded-2xl"
                   onClick={signOut}
                 >
                   Sign out
-                </button>
+                </div>
               )}
             </Popover.Button>
           </div>
