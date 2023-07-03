@@ -11,6 +11,7 @@ import ScholarshipIcon from "./icons/ScholarshipIcon";
 import SidebarSection from "./SidebarSection";
 import DashboardIcon from "@/components/icons/DashboardIcon";
 import { MenuIcon } from "@/components/icons/MenuIcon";
+import UserMenu from "@/components/UserMenu";
 
 type Item = {
   title: string;
@@ -77,6 +78,7 @@ function Sidebar() {
             </nav>
             <div className="flex grow"></div>
             <br />
+            <UserMenu />
             <a className="flex" href="https://t.me/one_zero_eight">
               one-zero-eight 💜
             </a>
@@ -102,6 +104,9 @@ function Sidebar() {
         </nav>
         <div className="grow"></div>
         <br />
+        <div className="lg:hidden lg:invisible">
+          <UserMenu />
+        </div>
         <a href="https://t.me/one_zero_eight">one-zero-eight 💜</a>
       </aside>
     </>
