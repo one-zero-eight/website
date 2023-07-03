@@ -23,7 +23,7 @@ function FilterDropdown({
     .title;
 
   return (
-    <Popover className="relative text-xl z-[5] opacity-[0.999] w-max rounded-full focus:outline-none">
+    <Popover className="relative text-xl z-[1] opacity-[0.999] w-max rounded-full focus:outline-none">
       <Popover.Button className="w-full rounded-full focus:outline-none">
         <div className="rounded-full flex flex-row items-center bg-background py-2 px-5 text-xl text-secondary_hover">
           <p className="mr-4 whitespace-nowrap">{selected || filterTitle}</p>
