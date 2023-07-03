@@ -42,6 +42,7 @@ function Sidebar() {
               ? "block visible fixed inset-0 z-[2] bg-black/50"
               : "hidden invisible"
           }
+          onClick={() => setOpened(false)}
         />
         <aside
           className={
