@@ -44,15 +44,18 @@ function Sidebar() {
           }
           onClick={() => setOpened(false)}
         />
+        <button
+          className="pl-8 pt-8 flex visible z-[4] opacity-[0.999]"
+          onClick={() => setOpened(!isOpened)}
+        >
+          <MenuIcon width={36} height={36} color={"fill-white"} />
+        </button>
         <aside
           className={
             "flex-col fixed overflow-y-scroll justify-center items-center z-[3] opacity-[0.999] py-8 px-8 h-[100dvh] top-0 " +
-            (isOpened ? "bg-background" : "bg-none")
+            (isOpened ? "bg-background" : "hidden")
           }
         >
-          <button onClick={() => setOpened(!isOpened)}>
-            <MenuIcon width={36} height={36} color={"fill-white"} />
-          </button>
           <div
             className={
               isOpened
