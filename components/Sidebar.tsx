@@ -46,7 +46,7 @@ function Sidebar() {
         />
         <aside
           className={
-            "flex-col justify-center items-center z-[3] opacity-[0.999] py-8 px-8 h-[100dvh] top-0 " +
+            "flex-col fixed overflow-y-scroll justify-center items-center z-[3] opacity-[0.999] py-8 px-8 h-[100dvh] top-0 " +
             (isOpened ? "bg-background" : "bg-none")
           }
         >
