@@ -32,7 +32,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   return (
     <Popover className="relative focus:outline-none">
       <Popover.Button className="focus:outline-none">
-        <div className="flex flex-col justify-center items-center bg-background w-18p h-18p rounded-2xl ml-auto">
+        <div className="flex flex-col justify-center items-center bg-background w-64 lg:w-18p h-18p rounded-2xl ml-auto">
           <div className="flex shrink-0 w-12 h-12 bg-border rounded-full justify-center items-center">
             <UserFace
               className="flex"
@@ -56,7 +56,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
             isMobile
               ? "bg-background w-64 h-16 rounded-2xl border-border/50 border-2 absolute top-[18p] left-0 z-10 opacity-[0.999]"
               : isSidebar
-              ? "bg-background w-64 h-16 rounded-2xl border-border/50 border-2 absolute bottom-0 left-20 z-10 opacity-[0.999]"
+              ? "bg-background w-64 h-16 rounded-2xl border-border/50 border-2 absolute -top-32 z-10 opacity-[0.999]"
               : "bg-background w-64 h-16 rounded-2xl border-border/50 border-2 absolute top-[18p] right-0 z-10 opacity-[0.999]"
           }
         >
