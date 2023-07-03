@@ -32,7 +32,6 @@ function Sidebar() {
   const currentItem = items.find((v) => pathname.startsWith(v.path));
   const selection = currentItem?.title;
   const [isOpened, setOpened] = useState(false);
-  console.log(isOpened);
   return (
     <>
       <div className="smw-mdh:hidden absolute flex flex-col">
@@ -56,8 +55,8 @@ function Sidebar() {
           <div
             className={
               isOpened
-                ? "flex flex-col items-center opacity-100"
-                : "hidden opacity-0"
+                ? "flex flex-col items-center left-0 opacity-100"
+                : "flex relative left-[-500px] opacity-0"
             }
           >
             <Link href="/" className="flex mb-8">
@@ -65,7 +64,7 @@ function Sidebar() {
             </Link>
             <nav className="flex-col">
               {items.map((item) => (
-                <div key={item.path} onClick={() => setOpened(false)}>
+                <div key={"m-" + item.title} onClick={() => setOpened(false)}>
                   <SidebarSection
                     key={item.title}
                     title={item.title}
