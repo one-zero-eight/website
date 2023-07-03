@@ -4,6 +4,7 @@ import { useUsersGetMe } from "@/lib/events";
 import { useIsClient } from "usehooks-ts";
 import React from "react";
 import { Popover, Transition } from "@headlessui/react";
+import { UserFace } from "@/components/icons/UserFace";
 
 function UserMenu() {
   const isClient = useIsClient();
@@ -28,7 +29,14 @@ function UserMenu() {
     <Popover className="relative focus:outline-none">
       <Popover.Button className="focus:outline-none">
         <div className="flex flex-col justify-center items-center bg-background w-18p h-18p rounded-2xl ml-auto">
-          <div className="flex shrink-0 w-12 h-12 bg-gray-600 rounded-full border-border border-2" />
+          <div className="flex shrink-0 w-12 h-12 bg-border rounded-full justify-center items-center">
+            <UserFace
+              className="flex"
+              color="fill-secondary"
+              width={36}
+              height={36}
+            />
+          </div>
         </div>
       </Popover.Button>
       <Transition

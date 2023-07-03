@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import ScheduleDialog from "@/components/ScheduleDialog";
 import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import { Navbar } from "@/components/Navbar";
+import { UserFace } from "@/components/icons/UserFace";
 
 export default function Page() {
   const { data } = useUsersGetMe();
@@ -25,7 +26,14 @@ export default function Page() {
         </h1>
       </Navbar>
       <div className="justify-center sm:justify-normal my-12 flex flex-row gap-6">
-        <div className="shrink-0 w-24 h-24 bg-gray-600 rounded-full"></div>
+        <div className="flex shrink-0 w-24 h-24 bg-border rounded-full justify-center items-center">
+          <UserFace
+            className="flex"
+            color="fill-secondary"
+            width={56}
+            height={56}
+          />
+        </div>
         <div className="flex flex-col justify-center">
           <p className="text-2xl">
             {data?.name}{" "}
