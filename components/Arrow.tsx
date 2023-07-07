@@ -1,7 +1,10 @@
-function Arrow(props: any) {
+type ArrowProps = {
+  className?: string;
+};
+function Arrow({ className }: ArrowProps) {
   return (
     <svg
-      className={"rotate-90 lg:rotate-0 " + props.className}
+      className={"rotate-90 lg:rotate-0 " + className}
       width="102"
       height="38"
       viewBox="0 0 102 38"
