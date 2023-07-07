@@ -27,7 +27,7 @@ function CategoriesDropdown({
             {(categoryInfo && categoryInfo.title) || ""}
           </p>
 
-          <DropListIcon />
+          <DropListIcon className="fill-secondary hover:fill-secondary_hover" />
         </div>
       </Popover.Button>
 

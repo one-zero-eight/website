@@ -28,7 +28,7 @@ function FilterDropdown({
         <div className="rounded-full flex flex-row items-center bg-background py-2 px-5 text-xl text-secondary_hover">
           <p className="mr-4 whitespace-nowrap">{selected || filterTitle}</p>
 
-          <DropListIcon />
+          <DropListIcon className="fill-secondary hover:fill-secondary_hover" />
         </div>
       </Popover.Button>
 
