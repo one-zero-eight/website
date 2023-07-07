@@ -1,11 +1,10 @@
-function CrossIcon(props: any) {
+function CrossIcon() {
   return (
     <svg
       width={37}
       height={37}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      {...props}
       className="mr-4 hover:cursor-pointer"
     >
       <path
