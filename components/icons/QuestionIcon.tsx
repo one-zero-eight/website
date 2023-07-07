@@ -1,13 +1,15 @@
-function QuestionIcon(props: any) {
+import { IconProps } from "@/lib/types/IconProps";
+
+function QuestionIcon({ width, height, className, fill }: IconProps) {
   return (
     <svg
-      width={41}
-      height={41}
+      width={width || 41}
+      height={height || 41}
       viewBox="0 0 41 41"
       xmlns="http://www.w3.org/2000/svg"
-      fill="#ffffff"
+      fill={fill}
       fillOpacity={0.75}
-      {...props}
+      className={className}
     >
       <path
         fillRule="evenodd"
