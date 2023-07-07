@@ -1,4 +1,4 @@
-function DropListCloseIcon(props: any) {
+function DropListCloseIcon() {
   return (
     <svg
       width={30}
@@ -6,7 +6,6 @@ function DropListCloseIcon(props: any) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="mr-2"
-      {...props}
     >
       <path
         fillRule="evenodd"
