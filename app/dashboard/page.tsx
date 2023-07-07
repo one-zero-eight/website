@@ -9,8 +9,10 @@ import ScheduleDialog from "@/components/ScheduleDialog";
 import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import { Navbar } from "@/components/Navbar";
 import { UserFace } from "@/components/icons/UserFace";
+import useWindowDimensions from "@/hooks/useWindowsDimensions";
 
 export default function Page() {
+  const { width } = useWindowDimensions();
   const { data } = useUsersGetMe();
   const [selectedGroupFile, setSelectedGroupFile] = useState("");
   const [dialogOpened, setDialogOpened] = useState(false);
@@ -102,7 +104,18 @@ export default function Page() {
       {!data ? (
         <>Loading...</>
       ) : (
-        <Calendar urls={getCalendarsToShow(data)} initialView="dayGridMonth" />
+        <Calendar
+          urls={getCalendarsToShow(data)}
+          initialView={
+            width
+              ? width >= 1280
+                ? "dayGridMonth"
+                : width >= 1024
+                ? "timeGridWeek"
+                : "listMonth"
+              : "dayGridMonth"
+          }
+        />
       )}
 
       <ScheduleDialog
