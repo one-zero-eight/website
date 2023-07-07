@@ -48,12 +48,16 @@ function Sidebar() {
           className="pl-8 pt-8 flex visible z-[4] opacity-[0.999]"
           onClick={() => setOpened(!isOpened)}
         >
-          <MenuIcon width={36} height={36} fill={`#FFFFFF`} />
+          <MenuIcon
+            width={36}
+            height={36}
+            className="fill-base dark:fill-light_base"
+          />
         </button>
         <aside
           className={
             "flex-col fixed overflow-y-scroll justify-center items-center z-[3] opacity-[0.999] py-8 px-8 h-[100dvh] top-0 " +
-            (isOpened ? "bg-primary" : "hidden")
+            (isOpened ? "bg-light_primary dark:bg-primary" : "hidden")
           }
         >
           <div
@@ -64,7 +68,7 @@ function Sidebar() {
             }
           >
             <Link href="/" className="flex mb-8">
-              <Logo className="h-16" />
+              <Logo className="h-16 fill-base dark:fill-light_base" />
             </Link>
             <nav className="flex-col">
               {items.map((item) => (
@@ -90,9 +94,9 @@ function Sidebar() {
           </div>
         </aside>
       </div>
-      <aside className="smw-mdh:flex hidden bg-primary flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
+      <aside className="smw-mdh:flex hidden bg-light_primary dark:bg-primary flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
         <Link href="/" className="mb-8">
-          <Logo className="h-16" />
+          <Logo className="h-16 fill-base dark:fill-light_base" />
         </Link>
         <nav className="flex flex-col">
           {items.map((item) => {
@@ -112,7 +116,12 @@ function Sidebar() {
         <div className="mb-4 lg:hidden lg:invisible">
           <UserMenu isMobile={false} isSidebar={true} />
         </div>
-        <a href="https://t.me/one_zero_eight">one-zero-eight 💜</a>
+        <a
+          className="text-light_text dark:text-text"
+          href="https://t.me/one_zero_eight"
+        >
+          one-zero-eight 💜
+        </a>
       </aside>
     </>
   );

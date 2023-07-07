@@ -25,10 +25,10 @@ function FilterDropdown({
   return (
     <Popover className="relative text-xl z-[1] opacity-[0.999] w-max rounded-full focus:outline-none">
       <Popover.Button className="w-full rounded-full focus:outline-none">
-        <div className="rounded-full flex flex-row items-center bg-primary py-2 px-5 text-xl text-text_secondary">
+        <div className="rounded-full flex flex-row items-center bg-light_primary dark:bg-primary py-2 px-5 text-xl text-light_text_secondary dark:text-text_secondary">
           <p className="mr-4 whitespace-nowrap">{selected || filterTitle}</p>
 
-          <DropListIcon className="fill-icon hover:fill-icon_hover" />
+          <DropListIcon className="fill-light_icon hover:fill-light_icon_hover dark:fill-icon dark:hover:fill-icon_hover" />
         </div>
       </Popover.Button>
 
@@ -40,11 +40,11 @@ function FilterDropdown({
         leaveFrom="transform scale-100 opacity-100"
         leaveTo="transform scale-95 opacity-0"
       >
-        <Popover.Panel className="absolute z-10 rounded-2xl drop-shadow-2xl bg-primary focus:outline-none">
+        <Popover.Panel className="absolute z-10 rounded-2xl drop-shadow-2xl bg-light_primary dark:bg-primary focus:outline-none">
           <div className="flex flex-col justify-center items-center divide-y divide-border">
             {variants.map((v) => (
               <Popover.Button
-                className="w-full rounded-xl flex flex-row items-center bg-primary py-4 px-5 text-xl text-text_secondary focus:outline-none"
+                className="w-full rounded-xl flex flex-row items-center bg-light_primary dark:bg-primary py-4 px-5 text-xl text-light_text_secondary dark:text-text_secondary focus:outline-none"
                 value={v}
                 key={v}
                 onClick={(e) => setSelected((e.target as any).value)}

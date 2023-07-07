@@ -19,7 +19,7 @@ function ScheduleElement({
       {schedule.filters.map((v) =>
         Object.hasOwn(calendar, v.alias) ? (
           <p
-            className="text-xl text-inactive text-left font-medium"
+            className="text-xl text-light_inactive dark:text-inactive text-left font-medium"
             key={v.alias}
           >
             {calendar[v.alias]}

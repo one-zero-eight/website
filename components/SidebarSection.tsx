@@ -23,8 +23,8 @@ function SidebarSection(props: SectionProps) {
             props.selected
               ? "fill-focus_color"
               : props.path === "#"
-              ? "fill-disabled"
-              : "fill-inactive"
+              ? "fill-light_disabled dark:fill-disabled"
+              : "fill-light_inactive dark:fill-inactive"
           }`}
         />
         <p
@@ -33,8 +33,8 @@ function SidebarSection(props: SectionProps) {
                 props.selected
                   ? "selected"
                   : props.path === "#"
-                  ? "text-[#2b2b2b]"
-                  : "text-inactive"
+                  ? "text-light_disabled dark:text-disabled"
+                  : "text-light_inactive dark:text-inactive"
               }`}
         >
           {props.title}
