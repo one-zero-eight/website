@@ -29,12 +29,7 @@ export default function Page() {
       </Navbar>
       <div className="justify-center sm:justify-normal my-12 flex flex-row gap-6">
         <div className="flex shrink-0 w-24 h-24 bg-border rounded-full justify-center items-center">
-          <UserFace
-            className="flex"
-            color="fill-secondary"
-            width={56}
-            height={56}
-          />
+          <UserFace className="flex fill-secondary" width={56} height={56} />
         </div>
         <div className="flex flex-col justify-center">
           <p className="text-2xl">

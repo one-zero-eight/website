@@ -48,7 +48,7 @@ function Sidebar() {
           className="pl-8 pt-8 flex visible z-[4] opacity-[0.999]"
           onClick={() => setOpened(!isOpened)}
         >
-          <MenuIcon width={36} height={36} color={"fill-white"} />
+          <MenuIcon width={36} height={36} fill={`#FFFFFF`} />
         </button>
         <aside
           className={
