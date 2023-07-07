@@ -22,12 +22,12 @@ function CategoriesDropdown({
   return (
     <Popover className="relative text-xl w-max z-[1] opacity-[0.999] rounded-full focus:outline-none">
       <Popover.Button className="w-full rounded-full focus:outline-none">
-        <div className="rounded-full flex flex-row items-center bg-background py-2 px-5 text-xl text-secondary_hover">
+        <div className="rounded-full flex flex-row items-center bg-primary py-2 px-5 text-xl text-text_secondary">
           <p className="mr-4 whitespace-nowrap">
             {(categoryInfo && categoryInfo.title) || ""}
           </p>
 
-          <DropListIcon className="fill-secondary hover:fill-secondary_hover" />
+          <DropListIcon className="fill-icon hover:fill-icon_hover" />
         </div>
       </Popover.Button>
 
@@ -39,11 +39,11 @@ function CategoriesDropdown({
         leaveFrom="transform scale-100 opacity-100"
         leaveTo="transform scale-95 opacity-0"
       >
-        <Popover.Panel className="absolute rounded-2xl drop-shadow-2xl bg-background focus:outline-none">
+        <Popover.Panel className="absolute rounded-2xl drop-shadow-2xl bg-primary focus:outline-none">
           <div className="flex flex-col justify-center items-center divide-y divide-border">
             {categories.categories.map((v) => (
               <Popover.Button
-                className="w-full rounded-xl flex flex-row items-center bg-background py-4 px-5 text-xl text-secondary_hover focus:outline-none"
+                className="w-full rounded-xl flex flex-row items-center bg-primary py-4 px-5 text-xl text-text_secondary focus:outline-none"
                 value={v.slug}
                 key={v.slug}
                 onClick={(e) => setSelected((e.target as any).value as string)}

@@ -11,9 +11,7 @@ function FavoriteIcon({ active, width, height }: FavoriteIconProps) {
       height={width || 36}
       viewBox="0 -960 960 960"
       width={height || 36}
-      className={
-        active ? "fill-[#F0B132]" : "fill-secondary hover:fill-secondary_hover"
-      }
+      className={active ? "fill-[#F0B132]" : "fill-icon hover:fill-icon_hover"}
     >
       {active ? (
         <path d="m223.116-66.21 67.71-292.399L63.819-555.341l299.637-25.797L480-856.979l116.544 275.841 299.637 25.797-227.007 196.732 67.87 292.4L480-221.508 223.116-66.21Z" />

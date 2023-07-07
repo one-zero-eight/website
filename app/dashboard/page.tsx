@@ -30,14 +30,14 @@ export default function Page() {
       </Navbar>
       <div className="justify-center sm:justify-normal my-12 flex flex-row gap-6">
         <div className="flex shrink-0 w-24 h-24 bg-border rounded-full justify-center items-center">
-          <UserFace className="flex fill-secondary" width={56} height={56} />
+          <UserFace className="flex fill-icon" width={56} height={56} />
         </div>
         <div className="flex flex-col justify-center">
           <p className="text-2xl">
             {data?.name}{" "}
-            <span className="text-sm text-gray-400">{data?.status}</span>
+            <span className="text-sm text-text-secondary">{data?.status}</span>
           </p>
-          <p className="text-lg text-gray-400">{data?.email}</p>
+          <p className="text-lg text-text-secondary">{data?.email}</p>
         </div>
       </div>
       <div className="flex flex-col xl:flex-row flex-wrap xl:justify-between">
@@ -46,7 +46,7 @@ export default function Page() {
             Schedule
           </h2>
           {favorites.length === 0 ? (
-            <p className="text-lg text-gray-400">Nothing here</p>
+            <p className="text-lg text-text-secondary">Nothing here</p>
           ) : (
             <div className="justify-center lg:justify-normal flex flex-row flex-wrap gap-4 gap-y-2 mb-4">
               {favorites
@@ -72,7 +72,7 @@ export default function Page() {
             Favorites
           </h2>
           {favorites.length === 0 ? (
-            <p className="text-lg text-gray-400">
+            <p className="text-lg text-text-secondary">
               Add favorite calendars using star button
               <br />
               <Link href="/schedule" className="underline underline-offset-4">

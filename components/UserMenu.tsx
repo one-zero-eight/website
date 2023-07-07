@@ -32,9 +32,9 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   return (
     <Popover className="relative focus:outline-none">
       <Popover.Button className="focus:outline-none">
-        <div className="flex flex-col justify-center items-center bg-background w-64 lg:w-18p h-18p rounded-2xl ml-auto">
+        <div className="flex flex-col justify-center items-center bg-primary w-64 lg:w-18p h-18p rounded-2xl ml-auto">
           <div className="flex shrink-0 w-12 h-12 bg-border rounded-full justify-center items-center">
-            <UserFace className="flex fill-secondary" width={36} height={36} />
+            <UserFace className="flex fill-icon" width={36} height={36} />
           </div>
         </div>
       </Popover.Button>
@@ -49,10 +49,10 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
         <Popover.Panel
           className={
             isMobile
-              ? "bg-background w-64 h-16 rounded-2xl border-border/50 border-2 absolute top-[18p] left-0 z-10 opacity-[0.999]"
+              ? "bg-primary w-64 h-16 rounded-2xl border-border/50 border-2 absolute top-[18p] left-0 z-10 opacity-[0.999]"
               : isSidebar
-              ? "bg-background w-64 h-16 rounded-2xl border-border/50 border-2 absolute -top-32 z-10 opacity-[0.999]"
-              : "bg-background w-64 h-16 rounded-2xl border-border/50 border-2 absolute top-[18p] right-0 z-10 opacity-[0.999]"
+              ? "bg-primary w-64 h-16 rounded-2xl border-border/50 border-2 absolute -top-32 z-10 opacity-[0.999]"
+              : "bg-primary w-64 h-16 rounded-2xl border-border/50 border-2 absolute top-[18p] right-0 z-10 opacity-[0.999]"
           }
         >
           <div className="flex top-1/2 justify-center ml-auto mr-auto left-0 right-0 w-64 h-16">

@@ -19,7 +19,7 @@ export default function SearchBar({
       </span>
       <input
         type="text"
-        className={`form-control bg-background hover:bg-border active:bg-border rounded-full text-xl px-6 placeholder:text-white/50 text-white/75 focus:outline-none min-h-[56px] min-w-[${width}px]`}
+        className={`form-control bg-primary hover:bg-border active:bg-border rounded-full text-xl px-6 placeholder:text-text_transparent text-text_secondary focus:outline-none min-h-[56px] min-w-[${width}px]`}
         placeholder={placeholder}
         value={value}
         onChange={onChange}

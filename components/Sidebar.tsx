@@ -53,7 +53,7 @@ function Sidebar() {
         <aside
           className={
             "flex-col fixed overflow-y-scroll justify-center items-center z-[3] opacity-[0.999] py-8 px-8 h-[100dvh] top-0 " +
-            (isOpened ? "bg-background" : "hidden")
+            (isOpened ? "bg-primary" : "hidden")
           }
         >
           <div
@@ -90,7 +90,7 @@ function Sidebar() {
           </div>
         </aside>
       </div>
-      <aside className="smw-mdh:flex hidden bg-background flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
+      <aside className="smw-mdh:flex hidden bg-primary flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
         <Link href="/" className="mb-8">
           <Logo className="h-16" />
         </Link>

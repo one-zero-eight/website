@@ -61,7 +61,7 @@ export default function ScheduleList({
         />
       </div>
 
-      <hr className="border-b-1 w-full mt-4 border-hover_color"></hr>
+      <hr className="border-b-1 w-full mt-4 border-border"></hr>
 
       <div className="flex flex-wrap justify-center gap-y-2 gap-x-10 content-start place-items-center justify-items-stretch overflow-auto scrollbar-hide h-full w-full px-0 md:px-12 mt-4">
         {calendars.map((element) => (
