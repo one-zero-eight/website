@@ -49,7 +49,7 @@ function Calendar({
           // Buttons in header
           left: "prev,next",
           center: "title",
-          right: "listMonth,dayGridMonth,timeGridWeek",
+          right: "listMonth,timeGridWeek,dayGridMonth",
         }}
         titleFormat={(arg) => {
           if (arg.date.year === new Date().getFullYear()) {
