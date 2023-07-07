@@ -1,14 +1,14 @@
 "use client";
 import Calendar from "@/components/Calendar";
 import { GroupCard } from "@/components/GroupCard";
+import { UserFace } from "@/components/icons/UserFace";
+import { Navbar } from "@/components/Navbar";
+import ScheduleDialog from "@/components/ScheduleDialog";
 import { useUsersGetMe, ViewUser } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
+import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import Link from "next/link";
 import React, { useState } from "react";
-import ScheduleDialog from "@/components/ScheduleDialog";
-import { ymEvent } from "@/lib/tracking/YandexMetrika";
-import { Navbar } from "@/components/Navbar";
-import { UserFace } from "@/components/icons/UserFace";
 import { useWindowSize } from "usehooks-ts";
 
 export default function Page() {
@@ -130,14 +130,17 @@ export default function Page() {
 function getCalendarsToShow(data: ViewUser, includeHidden: boolean = false) {
   // Extract URLs of all calendars that user has.
   // Handle hidden calendars.
-  return ([] as string[]).concat(
-    data.groups_association?.flatMap((v) => {
-      if (v.hidden && !includeHidden) return [];
-      return [`${SCHEDULE_API_URL}/${v.group.path}`];
-    }) || [],
-    data.favorites_association?.flatMap((v) => {
-      if (v.hidden && !includeHidden) return [];
-      return [`${SCHEDULE_API_URL}/${v.group.path}`];
-    }) || []
-  );
+  // Return only unique items.
+  return ([] as string[])
+    .concat(
+      data.groups_association?.flatMap((v) => {
+        if (v.hidden && !includeHidden) return [];
+        return [`${SCHEDULE_API_URL}/${v.group.path}`];
+      }) || [],
+      data.favorites_association?.flatMap((v) => {
+        if (v.hidden && !includeHidden) return [];
+        return [`${SCHEDULE_API_URL}/${v.group.path}`];
+      }) || []
+    )
+    .filter((value, index, array) => array.indexOf(value) === index);
 }

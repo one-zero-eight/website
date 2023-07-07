@@ -6,7 +6,7 @@ import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import moment from "moment/moment";
-import { memo } from "react";
+import { useMemo } from "react";
 import iCalendarPlugin from "./iCalendarPlugin";
 
 function Calendar({
@@ -17,8 +17,8 @@ function Calendar({
   urls: string[];
   initialView?: string;
 }) {
-  return (
-    <div {...props}>
+  const calendar = useMemo(
+    () => (
       <FullCalendar
         eventSources={urls.map((url) => ({ url: url, format: "ics" }))} // Load events by url
         timeZone="Europe/Moscow" // Use the same timezone for everyone
@@ -88,8 +88,12 @@ function Calendar({
         scrollTimeReset={false} // Do not reset scroll on date switch
         noEventsContent={() => "No events this month"} // Custom message
       />
-    </div>
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [urls.join(";")]
   );
+
+  return <div {...props}>{calendar}</div>;
 }
 
-export default memo(Calendar);
+export default Calendar;
