@@ -9,10 +9,10 @@ import ScheduleDialog from "@/components/ScheduleDialog";
 import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import { Navbar } from "@/components/Navbar";
 import { UserFace } from "@/components/icons/UserFace";
-import useWindowDimensions from "@/hooks/useWindowsDimensions";
+import { useWindowSize } from "usehooks-ts";
 
 export default function Page() {
-  const { width } = useWindowDimensions();
+  const { width } = useWindowSize();
   const { data } = useUsersGetMe();
   const [selectedGroupFile, setSelectedGroupFile] = useState("");
   const [dialogOpened, setDialogOpened] = useState(false);
