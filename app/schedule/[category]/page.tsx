@@ -62,14 +62,14 @@ export default async function Page({ params }: Props) {
       <h1 className="lg:hidden lg:invisible text-center xl:text-left text-3xl xl:text-4xl font-bold">
         Schedule
       </h1>
-      <p className="lg:hidden lg:invisible text-center xl:text-left text-white/75">
+      <p className="lg:hidden lg:invisible text-center xl:text-left text-text_secondary">
         Now find your group.
       </p>
       <Navbar className="hidden invisible lg:flex lg:visible">
         <h1 className="text-center xl:text-left text-3xl xl:text-4xl font-bold">
           Schedule
         </h1>
-        <p className="text-center xl:text-left text-white/75">
+        <p className="text-center xl:text-left text-text_secondary">
           Now find your group.
         </p>
       </Navbar>

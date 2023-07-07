@@ -19,13 +19,12 @@ function SidebarSection(props: SectionProps) {
     >
       <div className="flex flex-row justify-center p-2">
         <props.icon
-          className="place-self-start mr-4"
-          fill={`${
+          className={`place-self-start mr-4 ${
             props.selected
-              ? "#9A2EFF"
+              ? "fill-focus_color"
               : props.path === "#"
-              ? "#2b2b2b"
-              : "#414141"
+              ? "fill-disabled"
+              : "fill-inactive"
           }`}
         />
         <p
@@ -71,7 +70,7 @@ function SidebarSection(props: SectionProps) {
         leaveTo="transform scale-95 opacity-0"
       >
         <Popover.Panel>
-          <p className="flex justify-center items-center bg-background_dark text-white text-sm w-max px-8 py-2 rounded-md pointer-events-none">
+          <p className="flex justify-center items-center bg-base text-text text-sm w-max px-8 py-2 rounded-md pointer-events-none">
             Coming soon
           </p>
         </Popover.Panel>

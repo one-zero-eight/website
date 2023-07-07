@@ -13,9 +13,9 @@ export default function Page() {
       <h1 className="lg:hidden lg:invisible text-3xl text-center lg:text-left xl:text-4xl font-bold">
         InNoHassle ecosystem
       </h1>
-      <p className="lg:hidden lg:invisible text-white/75 text-center text-base py-2 xl:text-lg lg:text-left">
+      <p className="lg:hidden lg:invisible text-text_secondary text-center text-base py-2 xl:text-lg lg:text-left">
         Services developed by{" "}
-        <a href="https://t.me/one_zero_eight" className="text-white">
+        <a href="https://t.me/one_zero_eight" className="text-text">
           one-zero-eight community
         </a>{" "}
         for Innopolis students.
@@ -24,9 +24,9 @@ export default function Page() {
         <h1 className="text-3xl text-center lg:text-left xl:text-4xl font-bold">
           InNoHassle ecosystem
         </h1>
-        <p className="text-white/75 text-center text-base py-2 xl:text-lg lg:text-left">
+        <p className="text-text_secondary text-center text-base py-2 xl:text-lg lg:text-left">
           Services developed by{" "}
-          <a href="https://t.me/one_zero_eight" className="text-white">
+          <a href="https://t.me/one_zero_eight" className="text-text">
             one-zero-eight community
           </a>{" "}
           for Innopolis students.
@@ -41,9 +41,9 @@ export default function Page() {
       </h3>
       <ClarificationContainer />
       <hr className="border-white/25 my-8 md:w-1/2 w-full" />
-      <p className="text-base lg:text-lg text-white/75">
+      <p className="text-base lg:text-lg text-text_secondary">
         Our projects are open source!{" "}
-        <a href="https://github.com/one-zero-eight" className="text-white">
+        <a href="https://github.com/one-zero-eight" className="text-text">
           github/one-zero-eight
         </a>
       </p>
