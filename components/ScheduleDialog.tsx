@@ -105,7 +105,7 @@ export default function ScheduleDialog({
                       Google Calendar
                     </a>
                     <a className="ml-4 flex flex-row items-baseline gap-x-2 w-fit">
-                      <QuestionIcon className="h-4 w-4" />
+                      <QuestionIcon className="h-4 w-4" fill={`#FFFFFF`} />
                       Other applications: find in settings
                     </a>
                   </li>

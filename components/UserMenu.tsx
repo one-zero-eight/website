@@ -34,12 +34,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
       <Popover.Button className="focus:outline-none">
         <div className="flex flex-col justify-center items-center bg-background w-64 lg:w-18p h-18p rounded-2xl ml-auto">
           <div className="flex shrink-0 w-12 h-12 bg-border rounded-full justify-center items-center">
-            <UserFace
-              className="flex"
-              color="fill-secondary"
-              width={36}
-              height={36}
-            />
+            <UserFace className="flex fill-secondary" width={36} height={36} />
           </div>
         </div>
       </Popover.Button>

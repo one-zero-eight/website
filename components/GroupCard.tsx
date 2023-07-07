@@ -27,7 +27,7 @@ export function GroupCard({
           <FavoriteIcon active={isInFavorites} />
         </div>
         <div onClick={onImportClick} className="cursor-pointer rounded-full">
-          <DownloadIcon />
+          <DownloadIcon className="fill-secondary hover:fill-secondary_hover" />
         </div>
       </div>
     </div>
