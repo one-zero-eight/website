@@ -1,13 +1,14 @@
-function DashboardIcon(props: any) {
+import { IconProps } from "@/lib/types/IconProps";
+
+function DashboardIcon({ width, height, className, fill }: IconProps) {
   return (
     <svg
-      width={40}
-      height={40}
-      fill="none"
+      width={width || 40}
+      height={height || 40}
+      fill={fill}
       viewBox="0 -960 960 960"
       xmlns="http://www.w3.org/2000/svg"
-      {...props}
-      className="mr-4 hover:cursor-pointer"
+      className={"mr-4 hover:cursor-pointer " + className}
     >
       <path
         fillRule="evenodd"
