@@ -19,7 +19,7 @@ function SidebarSection(props: SectionProps) {
     >
       <div className="flex flex-row justify-center p-2">
         <props.icon
-          className="place-self-start mr-4 w-8"
+          className="place-self-start mr-4"
           fill={`${
             props.selected
               ? "#9A2EFF"
