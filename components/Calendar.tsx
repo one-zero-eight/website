@@ -113,7 +113,11 @@ function Calendar({
     [urls.join(";")]
   );
 
-  return <div {...props}>{calendar}</div>;
+  return (
+    <div className="text-light_text dark:text-text" {...props}>
+      {calendar}
+    </div>
+  );
 }
 
 export default Calendar;
