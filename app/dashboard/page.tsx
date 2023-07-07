@@ -20,20 +20,20 @@ export default function Page() {
 
   return (
     <div className="p-16 flex flex-col">
-      <h1 className="lg:hidden lg:invisible text-center sm:text-left text-4xl font-bold">
+      <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-4xl font-bold">
         Dashboard
       </h1>
       <Navbar className="hidden invisible lg:flex lg:visible">
-        <h1 className="text-center sm:text-left text-4xl font-bold">
+        <h1 className="text-text-main text-center sm:text-left text-4xl font-bold">
           Dashboard
         </h1>
       </Navbar>
       <div className="justify-center sm:justify-normal my-12 flex flex-row gap-6">
         <div className="flex shrink-0 w-24 h-24 bg-border rounded-full justify-center items-center">
-          <UserFace className="flex fill-icon" width={56} height={56} />
+          <UserFace className="flex fill-icon-main" width={56} height={56} />
         </div>
         <div className="flex flex-col justify-center">
-          <p className="text-2xl">
+          <p className="text-text-main text-2xl">
             {data?.name}{" "}
             <span className="text-sm text-text-secondary">{data?.status}</span>
           </p>
@@ -42,7 +42,7 @@ export default function Page() {
       </div>
       <div className="flex flex-col xl:flex-row flex-wrap xl:justify-between">
         <div className="min-w-[20%] lg:min-w-[30%] xl:max-w-[45%]">
-          <h2 className="text-center lg:text-left text-3xl font-medium mb-4">
+          <h2 className="text-text-main text-center lg:text-left text-3xl font-medium mb-4">
             Schedule
           </h2>
           {favorites.length === 0 ? (
@@ -68,7 +68,7 @@ export default function Page() {
           )}
         </div>
         <div className="min-w-[20%] lg:min-w-[30%] xl:max-w-[50%]">
-          <h2 className="text-center lg:text-left text-3xl font-medium mb-4">
+          <h2 className="text-text-main text-center lg:text-left text-3xl font-medium mb-4">
             Favorites
           </h2>
           {favorites.length === 0 ? (
@@ -100,7 +100,7 @@ export default function Page() {
           )}
         </div>
       </div>
-      <h2 className="text-3xl font-medium my-4">Your calendar</h2>
+      <h2 className="text-text-main text-3xl font-medium my-4">Your calendar</h2>
       {!data ? (
         <>Loading...</>
       ) : (
