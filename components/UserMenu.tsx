@@ -3,6 +3,7 @@ import { UserFace } from "@/components/icons/UserFace";
 import { useAuthMethods } from "@/lib/auth";
 import { useUsersGetMe } from "@/lib/events";
 import { Popover, Transition } from "@headlessui/react";
+import Link from "next/link";
 import React from "react";
 import { useIsClient } from "usehooks-ts";
 
@@ -55,7 +56,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
         leaveTo="transform scale-95 opacity-0"
       >
         <Popover.Panel
-          className={`bg-primary-main w-64 h-16 rounded-2xl border-border/50 border-2 absolute z-10 opacity-[0.999] ${
+          className={`bg-primary-main p-4 rounded-2xl border-border/50 border-2 absolute z-10 opacity-[0.999] ${
             isMobile
               ? "top-[18p] left-0"
               : isSidebar
@@ -63,17 +64,21 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               : "top-[18p] right-0"
           }`}
         >
-          <div className="flex top-1/2 justify-center ml-auto mr-auto left-0 right-0 w-64 h-16">
-            <Popover.Button>
-              {() => (
-                <div
-                  className="flex justify-center items-center text-center text-text-main bg-border w-56 h-10 rounded-2xl"
-                  onClick={signOut}
-                >
-                  Sign out
-                </div>
-              )}
-            </Popover.Button>
+          <div className="justify-center sm:justify-normal flex flex-row gap-6">
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/dashboard"
+                className="text-text-main bg-border px-6 py-2 rounded-2xl w-full text-center whitespace-nowrap"
+              >
+                My dashboard
+              </Link>
+              <div
+                className="text-text-main bg-border px-6 py-2 rounded-2xl w-full text-center whitespace-nowrap cursor-pointer"
+                onClick={signOut}
+              >
+                Sign out
+              </div>
+            </div>
           </div>
         </Popover.Panel>
       </Transition>
