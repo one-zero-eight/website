@@ -1,4 +1,8 @@
 "use client";
+import DashboardIcon from "@/components/icons/DashboardIcon";
+import { MenuIcon } from "@/components/icons/MenuIcon";
+import UserMenu from "@/components/UserMenu";
+import { useUsersGetMe } from "@/lib/events";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
@@ -9,9 +13,6 @@ import Logo from "./icons/Logo";
 import ScheduleIcon from "./icons/ScheduleIcon";
 import ScholarshipIcon from "./icons/ScholarshipIcon";
 import SidebarSection from "./SidebarSection";
-import DashboardIcon from "@/components/icons/DashboardIcon";
-import { MenuIcon } from "@/components/icons/MenuIcon";
-import UserMenu from "@/components/UserMenu";
 
 type Item = {
   title: string;
@@ -29,10 +30,12 @@ const items: Item[] = [
 ];
 
 function Sidebar() {
+  const { data: user } = useUsersGetMe();
   const pathname = usePathname();
   const currentItem = items.find((v) => pathname.startsWith(v.path));
   const selection = currentItem?.title;
   const [isOpened, setOpened] = useState(false);
+
   return (
     <>
       <div className="smw-mdh:hidden absolute flex flex-col">
@@ -63,7 +66,10 @@ function Sidebar() {
                 : "flex relative left-[-500px] opacity-0"
             }
           >
-            <Link href="/" className="flex mb-8">
+            <Link
+              href={user ? "/dashboard" : "/schedule"}
+              className="flex mb-8"
+            >
               <Logo className="h-16 fill-text-main" />
             </Link>
             <nav className="flex-col">
@@ -91,7 +97,7 @@ function Sidebar() {
         </aside>
       </div>
       <aside className="smw-mdh:flex hidden bg-primary-main flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
-        <Link href="/" className="mb-8">
+        <Link href={user ? "/dashboard" : "/schedule"} className="mb-8">
           <Logo className="h-16 fill-text-main" />
         </Link>
         <nav className="flex flex-col">
