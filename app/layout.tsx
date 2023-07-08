@@ -29,7 +29,7 @@ export default function RootLayout({
 }) {
   return (
     <ThemedHtml lang="en" className={`${rubik.variable}`}>
-      <body className="">
+      <body className="bg-base font-primary text-text-main text-lg">
         <Providers>
           <noscript className="flex justify-center w-full p-8 bg-red-700">
             You need to enable JavaScript to run this app.
