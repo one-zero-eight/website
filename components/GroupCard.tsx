@@ -58,7 +58,7 @@ export function GroupCard({
             />
           </div>
         )}
-        <div onClick={switchFavorite}>
+        <div onClick={switchFavorite} className="cursor-pointer rounded-full">
           {isPredefined ? (
             <PredefinedIcon />
           ) : (
