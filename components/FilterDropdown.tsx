@@ -35,6 +35,13 @@ function FilterDropdown({
       >
         <Popover.Panel className="absolute z-10 rounded-2xl drop-shadow-2xl bg-primary-main focus:outline-none">
           <div className="flex flex-col justify-center items-center divide-y divide-border">
+            <Popover.Button
+              className="w-full rounded-xl flex flex-row items-center bg-primary-main py-4 px-5 text-xl text-text-secondary/75 focus:outline-none"
+              value={""}
+              onClick={(e) => setSelected((e.target as any).value)}
+            >
+              All
+            </Popover.Button>
             {typeFilter.values.map((v) => (
               <Popover.Button
                 className="w-full rounded-xl flex flex-row items-center bg-primary-main py-4 px-5 text-xl text-text-secondary/75 focus:outline-none"
