@@ -1,4 +1,5 @@
 "use client";
+import { EventApi } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
@@ -21,6 +22,18 @@ function Calendar({
     () => (
       <FullCalendar
         eventSources={urls.map((url) => ({ url: url, format: "ics" }))} // Load events by url
+        eventsSet={(events) => {
+          // Remove duplicates.
+          const unique: Record<string, EventApi> = {};
+          for (const event of events) {
+            const uniqueId = event.title + event.startStr + event.endStr;
+            if (!(uniqueId in unique)) {
+              unique[uniqueId] = event;
+            } else {
+              event.remove();
+            }
+          }
+        }}
         timeZone="Europe/Moscow" // Use the same timezone for everyone
         plugins={[
           momentPlugin,
