@@ -3,8 +3,9 @@ import FavoriteIcon from "@/components/icons/FavoriteIcon";
 import { useEventGroup } from "@/lib/event-group";
 import { ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { HideIcon } from "@/components/icons/HideIcon";
+import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 
 export type GroupCardProps = {
   group: ViewEventGroup;
@@ -17,8 +18,14 @@ export function GroupCard({
   onImportClick,
   canHide = false,
 }: GroupCardProps) {
-  const { switchFavorite, isInFavorites, isHidden, switchHideFavorite } =
-    useEventGroup(group.id);
+  const [isShowing, setIsShowing] = useState(false);
+  const {
+    switchFavorite,
+    isInFavorites,
+    isHidden,
+    isPredefined,
+    switchHideFavorite,
+  } = useEventGroup(group.id);
   const satelliteToDisplay = group.type
     ? viewConfig.types[group.type].showAdditionalInfo
     : [];
@@ -51,8 +58,12 @@ export function GroupCard({
             />
           </div>
         )}
-        <div onClick={switchFavorite} className="cursor-pointer rounded-full">
-          <FavoriteIcon active={isInFavorites} />
+        <div onClick={switchFavorite}>
+          {isPredefined ? (
+            <PredefinedIcon />
+          ) : (
+            <FavoriteIcon active={isInFavorites} />
+          )}
         </div>
         <div onClick={onImportClick} className="cursor-pointer rounded-full">
           <DownloadIcon className="fill-icon-main/50 hover:fill-icon-hover/75" />
