@@ -27,6 +27,7 @@
   --fc-button-hover-border-color: #111;
   --fc-button-active-bg-color: #3b2452;
   --fc-button-active-border-color: #111;
+  --fc-button-text-color: #fff;
 }
 
 .fc .fc-timegrid-slot-minor {
