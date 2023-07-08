@@ -66,10 +66,7 @@ export default function ScheduleList({ category }: ScheduleListProps) {
         {groups?.map((group) => (
           <GroupCard
             key={group.path}
-            name={group.name || ""}
-            group_id={group.id}
-            satellite={group.satellite}
-            displaySatellite={typeInfo?.showAdditionalInfo}
+            group={group}
             onImportClick={() => {
               ymEvent("button-import", { scheduleFile: group.path });
               setSelectedGroupFile(group.path);

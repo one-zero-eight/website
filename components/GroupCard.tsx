@@ -1,39 +1,41 @@
 import DownloadIcon from "@/components/icons/DownloadIcon";
 import FavoriteIcon from "@/components/icons/FavoriteIcon";
 import { useEventGroup } from "@/lib/event-group";
-import { ViewEventGroupSatellite } from "@/lib/events";
+import { ViewEventGroup } from "@/lib/events";
+import { viewConfig } from "@/lib/events-view-config";
+import { Fragment } from "react";
 
 export type GroupCardProps = {
-  name: string;
-  group_id?: number;
+  group: ViewEventGroup;
   onImportClick?: () => void;
   canHide?: boolean;
-  satellite?: ViewEventGroupSatellite;
-  displaySatellite?: string[];
 };
 
 export function GroupCard({
-  name,
-  group_id,
+  group,
   onImportClick,
   canHide = false,
-  satellite,
-  displaySatellite,
 }: GroupCardProps) {
   const { switchFavorite, isInFavorites, isHidden, switchHideFavorite } =
-    useEventGroup(group_id);
+    useEventGroup(group.id);
+  const satelliteToDisplay = group.type
+    ? viewConfig.types[group.type].showAdditionalInfo
+    : [];
   return (
     <div className="bg-primary-main hover:bg-primary-hover flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl min-w-fit min-h-fit">
       <div className="flex flex-col gap-0.5">
         <p className="text-text-main text-left text-xl font-medium w-40">
-          {name}
+          {group.name}
         </p>
-        {satellite &&
-          displaySatellite &&
-          displaySatellite.map((v) => (
-            <p className="text-xl text-inactive text-left font-medium" key={v}>
-              {satellite[v]}
-            </p>
+        {group.satellite &&
+          satelliteToDisplay.map((v) => (
+            <Fragment key={v}>
+              {group.satellite && (
+                <p className="text-xl text-inactive text-left font-medium">
+                  {group.satellite[v]}
+                </p>
+              )}
+            </Fragment>
           ))}
       </div>
       <div className="flex flex-row gap-2 place-items-center select-none w-fit">
