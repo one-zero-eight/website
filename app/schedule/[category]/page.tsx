@@ -59,17 +59,17 @@ export default async function Page({ params }: Props) {
 
   return (
     <div className="px-2 xl:px-16 py-16 flex flex-col">
-      <h1 className="text-light_text dark:text-text lg:hidden lg:invisible text-center xl:text-left text-3xl xl:text-4xl font-bold">
+      <h1 className="text-text-main lg:hidden lg:invisible text-center xl:text-left text-3xl xl:text-4xl font-bold">
         Schedule
       </h1>
-      <p className="lg:hidden lg:invisible text-center xl:text-left text-light_text_secondary dark:text-text_secondary">
+      <p className="lg:hidden lg:invisible text-center xl:text-left text-text-secondary/75">
         Now find your group.
       </p>
       <Navbar className="hidden invisible lg:flex lg:visible">
-        <h1 className="text-light_text dark:text-text text-center xl:text-left text-3xl xl:text-4xl font-bold">
+        <h1 className="text-text-main text-center xl:text-left text-3xl xl:text-4xl font-bold">
           Schedule
         </h1>
-        <p className="text-center xl:text-left text-light_text_secondary dark:text-text_secondary">
+        <p className="text-center xl:text-left text-text-secondary/75">
           Now find your group.
         </p>
       </Navbar>

@@ -114,7 +114,7 @@ function Calendar({
   );
 
   return (
-    <div className="text-light_text dark:text-text" {...props}>
+    <div className="text-text-main" {...props}>
       {calendar}
     </div>
   );

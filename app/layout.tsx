@@ -30,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`dark ${rubik.variable}`}>
-      <body className="bg-light_base dark:bg-base font-primary text-text text-lg">
+      <body className="bg-base font-primary text-text-main text-lg">
         <Providers>
           <noscript className="flex justify-center w-full p-8 bg-red-700">
             You need to enable JavaScript to run this app.

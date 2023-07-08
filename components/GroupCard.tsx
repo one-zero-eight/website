@@ -20,9 +20,9 @@ export function GroupCard({
   const { switchFavorite, isInFavorites, isHidden, switchHideFavorite } =
     useEventGroup(group_id);
   return (
-    <div className="bg-light_primary dark:bg-primary dark:hover:bg-primary_hover flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl min-w-fit min-h-fit">
+    <div className="bg-primary-main hover:bg-primary-hover flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl min-w-fit min-h-fit">
       <div className="flex flex-col gap-0.5">
-        <p className="text-light_text dark:text-text text-left text-xl font-medium w-40">
+        <p className="text-text-main text-left text-xl font-medium w-40">
           {name}
         </p>
         {children}
@@ -40,7 +40,7 @@ export function GroupCard({
           <FavoriteIcon active={isInFavorites} />
         </div>
         <div onClick={onImportClick} className="cursor-pointer rounded-full">
-          <DownloadIcon className="fill-light_icon hover:fill-light_icon_hover dark:fill-icon dark:hover:fill-icon_hover" />
+          <DownloadIcon className="fill-icon-main/50 hover:fill-icon-hover/75" />
         </div>
       </div>
     </div>

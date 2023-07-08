@@ -12,9 +12,7 @@ function FavoriteIcon({ active, width, height }: FavoriteIconProps) {
       viewBox="0 -960 960 960"
       width={height || 36}
       className={
-        active
-          ? "fill-[#F0B132]"
-          : "fill-light_icon hover:fill-light_icon_hover dark:fill-icon dark:hover:fill-icon_hover"
+        active ? "fill-[#F0B132]" : "fill-icon-main/50 hover:fill-icon-hover/75"
       }
     >
       {active ? (

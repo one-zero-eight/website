@@ -23,8 +23,8 @@ function SidebarSection(props: SectionProps) {
             props.selected
               ? "fill-focus_color"
               : props.path === "#"
-              ? "fill-light_disabled dark:fill-disabled"
-              : "fill-light_inactive dark:fill-inactive"
+              ? "fill-disabled"
+              : "fill-inactive"
           }`}
         />
         <p
@@ -33,8 +33,8 @@ function SidebarSection(props: SectionProps) {
                 props.selected
                   ? "selected"
                   : props.path === "#"
-                  ? "text-light_disabled dark:text-disabled"
-                  : "text-light_inactive dark:text-inactive"
+                  ? "text-disabled"
+                  : "text-inactive"
               }`}
         >
           {props.title}
@@ -70,7 +70,7 @@ function SidebarSection(props: SectionProps) {
         leaveTo="transform scale-95 opacity-0"
       >
         <Popover.Panel>
-          <p className="flex justify-center items-center bg-base text-text text-sm w-max px-8 py-2 rounded-md pointer-events-none">
+          <p className="flex justify-center items-center bg-text-main text-base dark:bg-base dark:text-text-main text-sm w-max px-8 py-2 rounded-md pointer-events-none">
             Coming soon
           </p>
         </Popover.Panel>
