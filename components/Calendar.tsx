@@ -104,6 +104,7 @@ function Calendar({
         //   info.jsEvent.preventDefault();
         //   console.log(info);
         // }}
+        slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
         scrollTimeReset={false} // Do not reset scroll on date switch
         noEventsContent={() => "No events this month"} // Custom message
