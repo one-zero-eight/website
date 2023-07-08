@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --color-base: 255 255 255; /* #FFFFFF */
     --color-primary: 242 243 245; /* #F2F3F5 */
     --color-primary-hover: 223 225 229; /* #DFE1E5 */
@@ -24,6 +25,7 @@
     --color-focus: 151 71 255; /* #9747FF */
   }
   :root[class~="dark"] {
+    color-scheme: dark;
     --color-base: 11 11 11; /* #0B0B0B */
     --color-primary: 23 23 23; /* #171717 */
     --color-primary-hover: 34 34 34; /* #222222 */

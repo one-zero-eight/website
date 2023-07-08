@@ -1,4 +1,5 @@
 import Providers from "@/app/providers";
+import ThemedHtml from "@/app/theme";
 import Sidebar from "@/components/Sidebar";
 import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
 import YandexMetrika from "@/lib/tracking/YandexMetrika";
@@ -18,8 +19,6 @@ export const metadata: Metadata = {
   title: { default: "InNoHassle", template: "%s — InNoHassle" },
   description: "InNoHassle ecosystem by one-zero-eight",
   applicationName: "InNoHassle",
-  themeColor: "#000000",
-  colorScheme: "dark",
   alternates: { canonical: "/" },
 };
 
@@ -29,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`dark ${rubik.variable}`}>
-      <body className="bg-base font-primary text-text-main text-lg">
+    <ThemedHtml lang="en" className={`${rubik.variable}`}>
+      <body className="">
         <Providers>
           <noscript className="flex justify-center w-full p-8 bg-red-700">
             You need to enable JavaScript to run this app.
@@ -44,6 +43,6 @@ export default function RootLayout({
           </div>
         </Providers>
       </body>
-    </html>
+    </ThemedHtml>
   );
 }

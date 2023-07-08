@@ -1,3 +1,4 @@
+import SwitchThemeButton from "@/components/SwitchThemeButton";
 import UserMenu from "@/components/UserMenu";
 
 type NavbarProps = {
@@ -14,6 +15,7 @@ export function Navbar({ children, className }: NavbarProps) {
     >
       <div className="mr-auto">{children}</div>
       <UserMenu isMobile={false} isSidebar={false} />
+      <SwitchThemeButton />
     </nav>
   );
 }
