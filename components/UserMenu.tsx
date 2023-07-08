@@ -21,7 +21,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   if (!isClient || isError || !data) {
     return (
       <button
-        className="w-32 h-12 bg-focus_color rounded-3xl font-semibold text-xl"
+        className="w-32 h-12 bg-focus_color text-white rounded-3xl font-semibold text-xl"
         onClick={signIn}
       >
         Sign in
