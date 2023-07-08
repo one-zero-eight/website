@@ -5,6 +5,7 @@ import { UserFace } from "@/components/icons/UserFace";
 import { Navbar } from "@/components/Navbar";
 import ScheduleDialog from "@/components/ScheduleDialog";
 import { UserXGroupViewApp, useUsersGetMe } from "@/lib/events";
+import { viewConfig } from "@/lib/events-view-config";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import Link from "next/link";
@@ -58,6 +59,12 @@ export default function Page() {
                     key={v.group.path}
                     name={v.group.name || ""}
                     group_id={v.group.id}
+                    satellite={v.group.satellite}
+                    displaySatellite={
+                      v.group.type
+                        ? viewConfig.types[v.group.type].showAdditionalInfo
+                        : undefined
+                    }
                     canHide={true}
                     onImportClick={() => {
                       ymEvent("button-import", { scheduleFile: v.group.path });
@@ -90,6 +97,12 @@ export default function Page() {
                     key={v.group.path}
                     name={v.group.name || ""}
                     group_id={v.group.id}
+                    satellite={v.group.satellite}
+                    displaySatellite={
+                      v.group.type
+                        ? viewConfig.types[v.group.type].showAdditionalInfo
+                        : undefined
+                    }
                     canHide={true}
                     onImportClick={() => {
                       ymEvent("button-import", { scheduleFile: v.group.path });
@@ -102,7 +115,9 @@ export default function Page() {
           )}
         </div>
       </div>
-      <h2 className="text-text-main text-3xl font-medium my-4">Your calendar</h2>
+      <h2 className="text-text-main text-3xl font-medium my-4">
+        Your calendar
+      </h2>
       {!data ? (
         <>Loading...</>
       ) : (

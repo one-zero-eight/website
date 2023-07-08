@@ -68,6 +68,8 @@ export default function ScheduleList({ category }: ScheduleListProps) {
             key={group.path}
             name={group.name || ""}
             group_id={group.id}
+            satellite={group.satellite}
+            displaySatellite={typeInfo?.showAdditionalInfo}
             onImportClick={() => {
               ymEvent("button-import", { scheduleFile: group.path });
               setSelectedGroupFile(group.path);

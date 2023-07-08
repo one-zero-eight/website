@@ -1,13 +1,15 @@
 import DownloadIcon from "@/components/icons/DownloadIcon";
 import FavoriteIcon from "@/components/icons/FavoriteIcon";
 import { useEventGroup } from "@/lib/event-group";
+import { ViewEventGroupSatellite } from "@/lib/events";
 
 export type GroupCardProps = {
   name: string;
   group_id?: number;
   onImportClick?: () => void;
   canHide?: boolean;
-  children?: React.ReactNode;
+  satellite?: ViewEventGroupSatellite;
+  displaySatellite?: string[];
 };
 
 export function GroupCard({
@@ -15,7 +17,8 @@ export function GroupCard({
   group_id,
   onImportClick,
   canHide = false,
-  children,
+  satellite,
+  displaySatellite,
 }: GroupCardProps) {
   const { switchFavorite, isInFavorites, isHidden, switchHideFavorite } =
     useEventGroup(group_id);
@@ -25,7 +28,13 @@ export function GroupCard({
         <p className="text-text-main text-left text-xl font-medium w-40">
           {name}
         </p>
-        {children}
+        {satellite &&
+          displaySatellite &&
+          displaySatellite.map((v) => (
+            <p className="text-xl text-inactive text-left font-medium" key={v}>
+              {satellite[v]}
+            </p>
+          ))}
       </div>
       <div className="flex flex-row gap-2 place-items-center select-none w-fit">
         {canHide && (
