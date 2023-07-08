@@ -4,6 +4,7 @@ import { useEventGroup } from "@/lib/event-group";
 import { ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
 import { Fragment } from "react";
+import { HideIcon } from "@/components/icons/HideIcon";
 
 export type GroupCardProps = {
   group: ViewEventGroup;
@@ -38,13 +39,16 @@ export function GroupCard({
             </Fragment>
           ))}
       </div>
-      <div className="flex flex-row gap-2 place-items-center select-none w-fit">
+      <div className="flex flex-row gap-3 place-items-center select-none w-fit">
         {canHide && (
           <div
             onClick={switchHideFavorite}
             className="cursor-pointer rounded-full"
           >
-            <FavoriteIcon active={isHidden} />
+            <HideIcon
+              active={isHidden}
+              className="mt-1 fill-icon-main/50 hover:fill-icon-hover/75"
+            />
           </div>
         )}
         <div onClick={switchFavorite} className="cursor-pointer rounded-full">
