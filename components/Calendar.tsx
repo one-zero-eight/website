@@ -24,12 +24,19 @@ function Calendar({
         eventSources={urls.map((url) => ({ url: url, format: "ics" }))} // Load events by url
         eventsSet={(events) => {
           // Remove duplicates.
+          // Accumulate 'extendedProps.calendarURLs' to use it later.
           const unique: Record<string, EventApi> = {};
           for (const event of events) {
             const uniqueId = event.title + event.startStr + event.endStr;
             if (!(uniqueId in unique)) {
               unique[uniqueId] = event;
             } else {
+              unique[uniqueId].setExtendedProp(
+                "calendarURLs",
+                (
+                  unique[uniqueId].extendedProps.calendarURLs as string[]
+                ).concat(event.extendedProps.calendarURLs as string[])
+              );
               event.remove();
             }
           }

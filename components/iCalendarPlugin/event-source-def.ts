@@ -58,7 +58,7 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
 
     internalState.iCalExpanderPromise.then((iCalExpander) => {
       successCallback({
-        rawEvents: expandICalEvents(iCalExpander, arg.range),
+        rawEvents: expandICalEvents(iCalExpander, arg.range, meta),
         response: internalState.response,
       });
     }, errorCallback);
@@ -67,7 +67,8 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
 
 function expandICalEvents(
   iCalExpander: IcalExpander,
-  range: DateRange
+  range: DateRange,
+  meta: ICalFeedMeta
 ): EventInput[] {
   // expand the range. because our `range` is timeZone-agnostic UTC
   // or maybe because ical.js always produces dates in local time? i forget
@@ -83,7 +84,7 @@ function expandICalEvents(
   // single events
   for (let iCalEvent of iCalRes.events) {
     expanded.push({
-      ...buildNonDateProps(iCalEvent),
+      ...buildNonDateProps(iCalEvent, meta),
       start: iCalEvent.startDate.toString(),
       end:
         specifiesEnd(iCalEvent) && iCalEvent.endDate
@@ -96,7 +97,7 @@ function expandICalEvents(
   for (let iCalOccurence of iCalRes.occurrences) {
     let iCalEvent = iCalOccurence.item;
     expanded.push({
-      ...buildNonDateProps(iCalEvent),
+      ...buildNonDateProps(iCalEvent, meta),
       start: iCalOccurence.startDate.toString(),
       end:
         specifiesEnd(iCalEvent) && iCalOccurence.endDate
@@ -108,8 +109,12 @@ function expandICalEvents(
   return expanded;
 }
 
-function buildNonDateProps(iCalEvent: ICAL.Event): EventInput {
+function buildNonDateProps(
+  iCalEvent: ICAL.Event,
+  meta: ICalFeedMeta
+): EventInput {
   return {
+    id: iCalEvent.uid,
     title: iCalEvent.summary,
     url: extractEventUrl(iCalEvent),
     color: iCalEvent.color,
@@ -117,6 +122,7 @@ function buildNonDateProps(iCalEvent: ICAL.Event): EventInput {
       location: iCalEvent.location,
       organizer: iCalEvent.organizer,
       description: iCalEvent.description,
+      calendarURLs: [meta.url],
     },
   };
 }
