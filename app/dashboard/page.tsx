@@ -56,6 +56,7 @@ export default function Page() {
                     key={v.group.path}
                     name={v.group.name || ""}
                     group_id={v.group.id}
+                    canHide={true}
                     onImportClick={() => {
                       ymEvent("button-import", { scheduleFile: v.group.path });
                       setSelectedGroupFile(v.group.path || "");
@@ -87,6 +88,7 @@ export default function Page() {
                     key={v.group.path}
                     name={v.group.name || ""}
                     group_id={v.group.id}
+                    canHide={true}
                     onImportClick={() => {
                       ymEvent("button-import", { scheduleFile: v.group.path });
                       setSelectedGroupFile(v.group.path || "");
