@@ -1,7 +1,8 @@
 "use client";
-import { UserFace } from "@/components/icons/UserFace";
 import React from "react";
 import { useDarkMode, useIsClient } from "usehooks-ts";
+import { DarkModeIcon } from "@/components/icons/DarkModeIcon";
+import { LightModeIcon } from "@/components/icons/LightModeIcon";
 
 export default function SwitchThemeButton() {
   const isClient = useIsClient();
@@ -12,9 +13,13 @@ export default function SwitchThemeButton() {
       onClick={toggle}
     >
       {isClient && !isDarkMode ? (
-        <UserFace className="flex fill-yellow-600" width={36} height={36} />
+        <LightModeIcon className="flex fill-[#F0B132]" width={36} height={36} />
       ) : (
-        <UserFace className="flex fill-violet-500" width={36} height={36} />
+        <DarkModeIcon
+          className="flex fill-focus_color"
+          width={36}
+          height={36}
+        />
       )}
     </button>
   );
