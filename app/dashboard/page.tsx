@@ -47,7 +47,7 @@ export default function Page() {
           <h2 className="text-text-main text-center lg:text-left text-3xl font-medium mb-4">
             Schedule
           </h2>
-          {favorites.length === 0 ? (
+          {favorites.filter((v) => v.predefined === true).length === 0 ? (
             <p className="text-lg text-text-secondary/75">Nothing here</p>
           ) : (
             <div className="justify-center lg:justify-normal flex flex-row flex-wrap gap-4 gap-y-2 mb-4">
@@ -72,7 +72,7 @@ export default function Page() {
           <h2 className="text-text-main text-center lg:text-left text-3xl font-medium mb-4">
             Favorites
           </h2>
-          {favorites.length === 0 ? (
+          {favorites.filter((v) => v.predefined === false).length === 0 ? (
             <p className="text-lg text-text-secondary/75">
               Add favorite calendars using star button
               <br />
