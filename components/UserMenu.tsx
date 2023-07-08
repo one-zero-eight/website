@@ -1,6 +1,6 @@
 "use client";
 import { UserFace } from "@/components/icons/UserFace";
-import { useAuthMethods } from "@/lib/auth";
+import { useAuthPaths } from "@/lib/auth";
 import { useUsersGetMe } from "@/lib/events";
 import { Popover, Transition } from "@headlessui/react";
 import Link from "next/link";
@@ -14,7 +14,7 @@ type UserMenuProps = {
 function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   const isClient = useIsClient();
   const { data, isLoading, isError } = useUsersGetMe();
-  const { signIn, signOut } = useAuthMethods();
+  const { signIn, signOut } = useAuthPaths();
 
   // !isClient - SSR output and during hydration.
   if (!isClient) {
@@ -25,12 +25,12 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   // !data - Request sent but no data yet.
   if (isError || !data) {
     return (
-      <button
-        className="w-32 h-12 bg-focus_color text-white rounded-3xl font-semibold text-xl"
-        onClick={signIn}
+      <Link
+        href={signIn}
+        className="flex justify-center items-center w-32 h-12 bg-focus_color text-white rounded-3xl font-semibold text-xl"
       >
         Sign in
-      </button>
+      </Link>
     );
   }
 
@@ -83,12 +83,12 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               >
                 My dashboard
               </Link>
-              <div
+              <Link
+                href={signOut}
                 className="text-text-main bg-border px-6 py-2 rounded-2xl w-full text-center whitespace-nowrap cursor-pointer"
-                onClick={signOut}
               >
                 Sign out
-              </div>
+              </Link>
             </div>
           </div>
         </Popover.Panel>

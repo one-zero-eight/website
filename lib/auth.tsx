@@ -1,22 +1,21 @@
 "use client";
 import { EVENTS_API_URL } from "@/lib/events";
-import { useRouter } from "next/navigation";
+import { useIsClient } from "usehooks-ts";
 
-export function useAuthMethods() {
-  const router = useRouter();
+export function useAuthPaths() {
+  const isClient = useIsClient();
+  const currentURL = isClient ? window.location.href : "/";
+
+  const loginEndpoint = `${EVENTS_API_URL}/auth/${process.env.NEXT_PUBLIC_AUTH_PROVIDER}/login`;
+  const signInURL = new URL(loginEndpoint);
+  signInURL.searchParams.append("return_to", currentURL);
+
+  const logoutEndpoint = `${EVENTS_API_URL}/auth/logout`;
+  const signOutURL = new URL(logoutEndpoint);
+  signOutURL.searchParams.append("return_to", currentURL);
 
   return {
-    signIn: () => {
-      const url = new URL(
-        `${EVENTS_API_URL}/auth/${process.env.NEXT_PUBLIC_AUTH_PROVIDER}/login`
-      );
-      url.searchParams.append("return_to", window.location.href);
-      router.push(url.toString());
-    },
-    signOut: () => {
-      const url = new URL(`${EVENTS_API_URL}/auth/logout`);
-      url.searchParams.append("return_to", window.location.href);
-      router.push(url.toString());
-    },
+    signIn: signInURL.toString(),
+    signOut: signOutURL.toString(),
   };
 }
