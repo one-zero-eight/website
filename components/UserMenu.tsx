@@ -65,7 +65,18 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
           }`}
         >
           <div className="justify-center sm:justify-normal flex flex-row gap-6">
+            <div className="flex bg-border shrink-0 w-20 h-20 rounded-full justify-center items-center">
+              <UserFace
+                className="flex fill-icon-main/50"
+                width={48}
+                height={48}
+              />
+            </div>
             <div className="flex flex-col gap-2">
+              <div className="flex flex-col justify-center h-20">
+                <p className="text-text-main text-xl">{data?.name} </p>
+                <p className="text-sm text-text-secondary/75">{data?.email}</p>
+              </div>
               <Link
                 href="/dashboard"
                 className="text-text-main bg-border px-6 py-2 rounded-2xl w-full text-center whitespace-nowrap"
