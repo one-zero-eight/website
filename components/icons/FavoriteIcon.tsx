@@ -8,9 +8,9 @@ function FavoriteIcon({ active, width, height }: FavoriteIconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      height={width || 36}
+      height={width || 40}
       viewBox="0 -960 960 960"
-      width={height || 36}
+      width={height || 40}
       className={
         active ? "fill-[#F0B132]" : "fill-icon-main/50 hover:fill-icon-hover/75"
       }
