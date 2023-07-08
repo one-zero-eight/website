@@ -1,10 +1,10 @@
 "use client";
+import { UserFace } from "@/components/icons/UserFace";
 import { useAuthMethods } from "@/lib/auth";
 import { useUsersGetMe } from "@/lib/events";
-import { useIsClient } from "usehooks-ts";
-import React from "react";
 import { Popover, Transition } from "@headlessui/react";
-import { UserFace } from "@/components/icons/UserFace";
+import React from "react";
+import { useIsClient } from "usehooks-ts";
 
 type UserMenuProps = {
   isMobile: boolean;
@@ -16,9 +16,13 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   const { signIn, signOut } = useAuthMethods();
 
   // !isClient - SSR output and during hydration.
+  if (!isClient) {
+    return <></>;
+  }
+
   // isError - Error getting the user. Assume not authenticated.
   // !data - Request sent but no data yet.
-  if (!isClient || isError || !data) {
+  if (isError || !data) {
     return (
       <button
         className="w-32 h-12 bg-focus_color text-white rounded-3xl font-semibold text-xl"
