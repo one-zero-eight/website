@@ -34,7 +34,7 @@ export default function ScheduleLinkCopy({
       <input
         readOnly
         value={url}
-        className="p-2 rounded-xl grow min-w-0 bg-light_secondary dark:bg-secondary"
+        className="p-2 rounded-xl grow min-w-0 bg-secondary-main"
       />
       <button
         className="p-2 rounded-xl w-fit selected"
