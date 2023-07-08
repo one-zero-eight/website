@@ -37,10 +37,11 @@ export function useEventGroup(group_id?: number) {
     },
   });
 
-  let isInFavorites =
-    (userData?.favorites_association?.findIndex(
-      (v) => v.group.id === group_id
-    ) ?? -1) !== -1;
+  const userFavoriteGroup = userData?.favorites?.find(
+    (v) => v.group.id === group_id
+  );
+  const isPredefined = userFavoriteGroup?.predefined ?? false;
+  let isInFavorites = !!userFavoriteGroup;
   // Use optimistic updates for mutations
   if (
     removeFavoriteIsLoading &&
@@ -56,12 +57,12 @@ export function useEventGroup(group_id?: number) {
   }
 
   const addToFavorites = async () => {
-    if (group_id === undefined) return;
+    if (group_id === undefined || isPredefined) return;
     await addFavoriteMutate({ params: { group_id: group_id } });
   };
 
   const removeFromFavorites = async () => {
-    if (group_id === undefined) return;
+    if (group_id === undefined || isPredefined) return;
     await removeFavoriteMutate({ params: { group_id: group_id } });
   };
 
@@ -76,6 +77,7 @@ export function useEventGroup(group_id?: number) {
   return {
     group_id,
     isInFavorites,
+    isPredefined,
     addToFavorites,
     removeFromFavorites,
     switchFavorite,
