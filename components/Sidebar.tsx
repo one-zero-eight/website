@@ -74,9 +74,8 @@ function Sidebar() {
             </Link>
             <nav className="flex-col">
               {items.map((item) => (
-                <div key={"m-" + item.title} onClick={() => setOpened(false)}>
+                <div key={item.title} onClick={() => setOpened(false)}>
                   <SidebarSection
-                    key={item.title}
                     title={item.title}
                     icon={item.icon}
                     selected={selection === item.title}
@@ -101,17 +100,15 @@ function Sidebar() {
           <Logo className="h-16 fill-text-main" />
         </Link>
         <nav className="flex flex-col">
-          {items.map((item) => {
-            return (
-              <SidebarSection
-                key={item.title}
-                title={item.title}
-                icon={item.icon}
-                selected={selection === item.title}
-                path={item.path}
-              />
-            );
-          })}
+          {items.map((item) => (
+            <SidebarSection
+              key={item.title}
+              title={item.title}
+              icon={item.icon}
+              selected={selection === item.title}
+              path={item.path}
+            />
+          ))}
         </nav>
         <div className="grow"></div>
         <br />
