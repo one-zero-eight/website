@@ -24,11 +24,6 @@ export type EventGroupsFindEventGroupByPathParams = {
   path: string;
 };
 
-export type UsersHideGroupParams = {
-  group_id: number;
-  hide?: boolean;
-};
-
 export type UsersHideFavoriteParams = {
   group_id: number;
   hide?: boolean;
@@ -41,6 +36,14 @@ export type UsersDeleteFavoriteParams = {
 export type UsersAddFavoriteParams = {
   group_id: number;
 };
+
+export interface ViewUserApp {
+  id: number;
+  email: string;
+  name?: string;
+  status?: string;
+  favorites?: UserXGroupViewApp[];
+}
 
 export type ViewEventGroupSatellite = { [key: string]: any };
 
@@ -72,35 +75,11 @@ export interface ValidationError {
 /**
  * Represents a group instance from the database excluding sensitive information.
  */
-export interface UserXGroupView {
+export interface UserXGroupViewApp {
   user_id: number;
   group: ViewEventGroup;
   hidden: boolean;
-}
-
-/**
- * Represents a user instance from the database excluding sensitive information.
- */
-export interface ViewUser {
-  id: number;
-  email: string;
-  name?: string;
-  status?: string;
-  groups_association?: UserXGroupView[];
-  favorites_association?: UserXGroupView[];
-}
-
-export type SchemasSchemas = { [key: string]: any };
-
-/**
- * Represents a dictionary of all schemas.
- */
-export interface Schemas {
-  schemas: SchemasSchemas;
-}
-
-export interface ListOfFavorites {
-  favorites: UserXGroupView[];
+  predefined?: boolean;
 }
 
 /**
@@ -130,7 +109,7 @@ export const usersGetMe = (
   options?: SecondParameter<typeof axiosInstance>,
   signal?: AbortSignal
 ) => {
-  return axiosInstance<ViewUser>(
+  return axiosInstance<ViewUserApp>(
     { url: `/users/me`, method: "get", signal },
     options
   );
@@ -200,7 +179,7 @@ export const usersAddFavorite = (
   params: UsersAddFavoriteParams,
   options?: SecondParameter<typeof axiosInstance>
 ) => {
-  return axiosInstance<ListOfFavorites>(
+  return axiosInstance<ViewUserApp>(
     { url: `/users/me/favorites`, method: "post", params },
     options
   );
@@ -271,7 +250,7 @@ export const usersDeleteFavorite = (
   params: UsersDeleteFavoriteParams,
   options?: SecondParameter<typeof axiosInstance>
 ) => {
-  return axiosInstance<ListOfFavorites>(
+  return axiosInstance<ViewUserApp>(
     { url: `/users/me/favorites`, method: "delete", params },
     options
   );
@@ -342,7 +321,7 @@ export const usersHideFavorite = (
   params: UsersHideFavoriteParams,
   options?: SecondParameter<typeof axiosInstance>
 ) => {
-  return axiosInstance<ListOfFavorites>(
+  return axiosInstance<ViewUserApp>(
     { url: `/users/me/favorites/hide`, method: "post", params },
     options
   );
@@ -401,77 +380,6 @@ export const useUsersHideFavorite = <
   request?: SecondParameter<typeof axiosInstance>;
 }) => {
   const mutationOptions = getUsersHideFavoriteMutationOptions(options);
-
-  return useMutation(mutationOptions);
-};
-
-/**
- * Hide group from current user
- * @summary Hide Group
- */
-export const usersHideGroup = (
-  params: UsersHideGroupParams,
-  options?: SecondParameter<typeof axiosInstance>
-) => {
-  return axiosInstance<ListOfFavorites>(
-    { url: `/users/me/groups/hide`, method: "post", params },
-    options
-  );
-};
-
-export const getUsersHideGroupMutationOptions = <
-  TError = void | HTTPValidationError,
-  TContext = unknown
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof usersHideGroup>>,
-    TError,
-    { params: UsersHideGroupParams },
-    TContext
-  >;
-  request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof usersHideGroup>>,
-  TError,
-  { params: UsersHideGroupParams },
-  TContext
-> => {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof usersHideGroup>>,
-    { params: UsersHideGroupParams }
-  > = (props) => {
-    const { params } = props ?? {};
-
-    return usersHideGroup(params, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type UsersHideGroupMutationResult = NonNullable<
-  Awaited<ReturnType<typeof usersHideGroup>>
->;
-
-export type UsersHideGroupMutationError = void | HTTPValidationError;
-
-/**
- * @summary Hide Group
- */
-export const useUsersHideGroup = <
-  TError = void | HTTPValidationError,
-  TContext = unknown
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof usersHideGroup>>,
-    TError,
-    { params: UsersHideGroupParams },
-    TContext
-  >;
-  request?: SecondParameter<typeof axiosInstance>;
-}) => {
-  const mutationOptions = getUsersHideGroupMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
@@ -650,7 +558,7 @@ export const useEventGroupsGetEventGroup = <
 };
 
 /**
- * Get list of event groups
+ * Get a list of all event groups
  * @summary List Event Groups
  */
 export const eventGroupsListEventGroups = (
@@ -713,77 +621,6 @@ export const useEventGroupsListEventGroups = <
   request?: SecondParameter<typeof axiosInstance>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const queryOptions = getEventGroupsListEventGroupsQueryOptions(options);
-
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-};
-
-/**
- * @summary Schemas
- */
-export const systemSchemas = (
-  options?: SecondParameter<typeof axiosInstance>,
-  signal?: AbortSignal
-) => {
-  return axiosInstance<Schemas>(
-    { url: `/schemas`, method: "get", signal },
-    options
-  );
-};
-
-export const getSystemSchemasQueryKey = () => [`/schemas`] as const;
-
-export const getSystemSchemasQueryOptions = <
-  TData = Awaited<ReturnType<typeof systemSchemas>>,
-  TError = unknown
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof systemSchemas>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryOptions<
-  Awaited<ReturnType<typeof systemSchemas>>,
-  TError,
-  TData
-> & { queryKey: QueryKey } => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey = queryOptions?.queryKey ?? getSystemSchemasQueryKey();
-
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof systemSchemas>>> = ({
-    signal,
-  }) => systemSchemas(requestOptions, signal);
-
-  return { queryKey, queryFn, ...queryOptions };
-};
-
-export type SystemSchemasQueryResult = NonNullable<
-  Awaited<ReturnType<typeof systemSchemas>>
->;
-export type SystemSchemasQueryError = unknown;
-
-/**
- * @summary Schemas
- */
-export const useSystemSchemas = <
-  TData = Awaited<ReturnType<typeof systemSchemas>>,
-  TError = unknown
->(options?: {
-  query?: UseQueryOptions<
-    Awaited<ReturnType<typeof systemSchemas>>,
-    TError,
-    TData
-  >;
-  request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getSystemSchemasQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -863,6 +700,78 @@ export const useAuthGetDevToken = <
   }
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const queryOptions = getAuthGetDevTokenQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * @summary Get Dev Parser Token
+ */
+export const authGetDevParserToken = (
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<string>(
+    { url: `/auth/dev/parser-token`, method: "get", signal },
+    options
+  );
+};
+
+export const getAuthGetDevParserTokenQueryKey = () =>
+  [`/auth/dev/parser-token`] as const;
+
+export const getAuthGetDevParserTokenQueryOptions = <
+  TData = Awaited<ReturnType<typeof authGetDevParserToken>>,
+  TError = unknown
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof authGetDevParserToken>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryOptions<
+  Awaited<ReturnType<typeof authGetDevParserToken>>,
+  TError,
+  TData
+> & { queryKey: QueryKey } => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAuthGetDevParserTokenQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof authGetDevParserToken>>
+  > = ({ signal }) => authGetDevParserToken(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions };
+};
+
+export type AuthGetDevParserTokenQueryResult = NonNullable<
+  Awaited<ReturnType<typeof authGetDevParserToken>>
+>;
+export type AuthGetDevParserTokenQueryError = unknown;
+
+/**
+ * @summary Get Dev Parser Token
+ */
+export const useAuthGetDevParserToken = <
+  TData = Awaited<ReturnType<typeof authGetDevParserToken>>,
+  TError = unknown
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof authGetDevParserToken>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getAuthGetDevParserTokenQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
