@@ -27,7 +27,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
     return (
       <Link
         href={signIn}
-        className="flex justify-center items-center w-32 h-12 bg-focus_color text-white rounded-3xl font-semibold text-xl"
+        className="mt-3 flex justify-center items-center w-32 h-12 bg-focus_color text-white rounded-3xl font-semibold text-xl"
       >
         Sign in
       </Link>
