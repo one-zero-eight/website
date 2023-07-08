@@ -1,30 +1,18 @@
 "use client";
-import { Categories, getCategoryInfoByCategories } from "@/lib/schedule/api";
-import { useRouter } from "next/navigation";
-import { Popover, Transition } from "@headlessui/react";
-import React from "react";
 import DropListIcon from "@/components/icons/DropListIcon";
+import { getTypeInfoBySlug, viewConfig } from "@/lib/events-view-config";
+import { Popover, Transition } from "@headlessui/react";
+import Link from "next/link";
+import React from "react";
 
-function CategoriesDropdown({
-  categories,
-  selected,
-}: {
-  categories: Categories;
-  selected: string;
-}) {
-  const router = useRouter();
-  const categoryInfo = getCategoryInfoByCategories(selected, categories);
-
-  const setSelected = (v: string) => {
-    router.push(`/schedule/${v}`);
-  };
-
+function CategoriesDropdown({ category }: { category: string }) {
+  const typeInfo = getTypeInfoBySlug(category);
   return (
     <Popover className="relative text-xl w-max z-[1] opacity-[0.999] rounded-full focus:outline-none">
       <Popover.Button className="w-full rounded-full focus:outline-none">
         <div className="rounded-full flex flex-row items-center bg-primary-main py-2 px-5 text-xl text-text-secondary/75">
           <p className="mr-4 whitespace-nowrap">
-            {(categoryInfo && categoryInfo.title) || ""}
+            {(typeInfo && typeInfo.title) || ""}
           </p>
 
           <DropListIcon className="fill-icon-main/50 hover:fill-icon-hover/75" />
@@ -41,15 +29,14 @@ function CategoriesDropdown({
       >
         <Popover.Panel className="absolute rounded-2xl drop-shadow-2xl bg-primary-main focus:outline-none">
           <div className="flex flex-col justify-center items-center divide-y divide-border">
-            {categories.categories.map((v) => (
-              <Popover.Button
-                className="w-full rounded-xl flex flex-row items-center bg-primary-main py-4 px-5 text-xl text-text-secondary/75 focus:outline-none"
-                value={v.slug}
+            {Object.values(viewConfig.types).map((v) => (
+              <Link
+                href={`/schedule/${v.slug}`}
                 key={v.slug}
-                onClick={(e) => setSelected((e.target as any).value as string)}
+                className="w-full rounded-xl flex flex-row items-center bg-primary-main py-4 px-5 text-xl text-text-secondary/75 focus:outline-none"
               >
                 {v.title}
-              </Popover.Button>
+              </Link>
             ))}
           </div>
         </Popover.Panel>
