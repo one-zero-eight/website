@@ -19,7 +19,7 @@ export default function Page() {
   const favorites = data?.favorites || [];
 
   return (
-    <div className="p-16 items-center lg:[align-items:normal] flex flex-col">
+    <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
       <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
         Dashboard
       </h1>
