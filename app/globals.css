@@ -13,6 +13,7 @@
     --color-secondary: 227 229 232; /* #E3E5E8 */
     --color-secondary-hover: 210 212 216; /* #D2D4D8 */
     --color-border: 211 211 211; /* #D3D3D3 */
+    --color-border-hover: 182 182 182;
     --color-disabled: 192 192 192; /* #C0C0C0 */
     --color-inactive: 138 138 138; /* #8A8A8A */
     --color-icon: 0 0 0; /* #00000080 */
@@ -32,6 +33,7 @@
     --color-secondary: 34 34 34; /* #222222 */
     --color-secondary-hover: 40 40 40; /* #282828 */
     --color-border: 44 44 44; /* #2C2C2C */
+    --color-border-hover: 60 60 60;
     --color-disabled: 43 43 43; /* #2B2B2B */
     --color-inactive: 65 65 65; /* #414141 */
     --color-icon: 255 255 255; /* #FFFFFF7F */

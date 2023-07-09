@@ -17,7 +17,10 @@ module.exports = {
           main: "rgba(var(--color-secondary) / <alpha-value>)",
           hover: "rgba(var(--color-secondary-hover) / <alpha-value>)",
         },
-        border: "rgba(var(--color-border) / <alpha-value>)",
+        border: {
+          DEFAULT: "rgba(var(--color-border) / <alpha-value>)",
+          hover: "rgba(var(--color-border-hover) / <alpha-value>)",
+        },
         disabled: "rgba(var(--color-disabled) / <alpha-value>)",
         inactive: "rgba(var(--color-inactive) / <alpha-value>)",
         icon: {
