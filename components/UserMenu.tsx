@@ -6,6 +6,8 @@ import { Popover, Transition } from "@headlessui/react";
 import Link from "next/link";
 import React from "react";
 import { useIsClient } from "usehooks-ts";
+import { ExitIcon } from "@/components/icons/ExitIcon";
+import { AccountIcon } from "@/components/icons/AccountIcon";
 
 type UserMenuProps = {
   isMobile: boolean;
@@ -79,14 +81,24 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               </div>
               <Link
                 href="/dashboard"
-                className="text-text-main bg-border px-6 py-2 rounded-2xl w-full text-center whitespace-nowrap"
+                className="flex flex-row justify-center items-center gap-2 text-text-main/75 bg-border hover:bg-border-hover px-6 py-2 rounded-2xl w-full text-center whitespace-nowrap"
               >
+                <AccountIcon
+                  width={26}
+                  height={26}
+                  className={"flex fill-text-main/75"}
+                />
                 My dashboard
               </Link>
               <Link
                 href={signOut}
-                className="text-text-main bg-border px-6 py-2 rounded-2xl w-full text-center whitespace-nowrap cursor-pointer"
+                className="flex flex-row justify-center items-center gap-2 text-text-main/75 bg-secondary-main hover:bg-secondary-hover px-6 py-2 rounded-2xl w-full text-center whitespace-nowrap cursor-pointer"
               >
+                <ExitIcon
+                  width={26}
+                  height={26}
+                  className={"flex fill-text-main/75"}
+                />
                 Sign out
               </Link>
             </div>
