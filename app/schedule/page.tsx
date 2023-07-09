@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <main className="p-16">
+    <main className="p-16 items-center lg:[align-items:normal]">
       <h1 className="lg:hidden lg:invisible text-3xl text-center lg:text-left xl:text-4xl font-bold">
         InNoHassle ecosystem
       </h1>
