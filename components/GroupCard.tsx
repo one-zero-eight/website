@@ -6,6 +6,7 @@ import { viewConfig } from "@/lib/events-view-config";
 import { Fragment, useState } from "react";
 import { HideIcon } from "@/components/icons/HideIcon";
 import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
+import { useWindowSize } from "usehooks-ts";
 
 export type GroupCardProps = {
   group: ViewEventGroup;
@@ -18,6 +19,7 @@ export function GroupCard({
   onImportClick,
   canHide = false,
 }: GroupCardProps) {
+  const { width } = useWindowSize();
   const [isShowing, setIsShowing] = useState(false);
   const {
     switchFavorite,
@@ -32,14 +34,14 @@ export function GroupCard({
   return (
     <div className="bg-primary-main hover:bg-primary-hover flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl min-w-fit min-h-fit">
       <div className="flex flex-col gap-0.5">
-        <p className="text-text-main text-left text-xl font-medium w-40">
+        <p className="text-text-main text-left text-lg sm:text-xl font-medium w-40">
           {group.name}
         </p>
         {group.satellite &&
           satelliteToDisplay.map((v) => (
             <Fragment key={v}>
               {group.satellite && (
-                <p className="text-xl text-inactive text-left font-medium">
+                <p className="text-lg sm:text-xl text-inactive text-left font-medium">
                   {group.satellite[v]}
                 </p>
               )}
@@ -54,19 +56,32 @@ export function GroupCard({
           >
             <HideIcon
               active={isHidden}
+              width={width >= 640 ? 40 : 36}
+              height={width >= 640 ? 40 : 36}
               className="mt-1 fill-icon-main/50 hover:fill-icon-hover/75"
             />
           </div>
         )}
         <div onClick={switchFavorite} className="cursor-pointer rounded-full">
           {isPredefined ? (
-            <PredefinedIcon />
+            <PredefinedIcon
+              width={width >= 640 ? 40 : 36}
+              height={width >= 640 ? 40 : 36}
+            />
           ) : (
-            <FavoriteIcon active={isInFavorites} />
+            <FavoriteIcon
+              active={isInFavorites}
+              width={width >= 640 ? 40 : 36}
+              height={width >= 640 ? 40 : 36}
+            />
           )}
         </div>
         <div onClick={onImportClick} className="cursor-pointer rounded-full">
-          <DownloadIcon className="fill-icon-main/50 hover:fill-icon-hover/75" />
+          <DownloadIcon
+            className="fill-icon-main/50 hover:fill-icon-hover/75"
+            width={width >= 640 ? 48 : 40}
+            height={width >= 640 ? 48 : 40}
+          />
         </div>
       </div>
     </div>

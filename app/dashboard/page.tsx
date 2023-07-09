@@ -19,8 +19,8 @@ export default function Page() {
   const favorites = data?.favorites || [];
 
   return (
-    <div className="p-16 flex flex-col">
-      <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-4xl font-bold">
+    <div className="p-16 items-center lg:[align-items:normal] flex flex-col">
+      <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
         Dashboard
       </h1>
       <Navbar className="hidden invisible lg:flex lg:visible">
@@ -29,17 +29,23 @@ export default function Page() {
         </h1>
       </Navbar>
       <div className="justify-center sm:justify-normal my-12 flex flex-row gap-6">
-        <div className="flex bg-border shrink-0 w-24 h-24 rounded-full justify-center items-center">
-          <UserFace className="flex fill-icon-main/50" width={56} height={56} />
+        <div className="flex bg-border shrink-0 w-20 sm:w-24 h-20 sm:h-24 rounded-full justify-center items-center">
+          <UserFace
+            className="flex fill-icon-main/50"
+            width={width >= 640 ? 56 : 48}
+            height={width >= 640 ? 56 : 48}
+          />
         </div>
         <div className="flex flex-col justify-center">
-          <p className="text-text-main text-2xl">
+          <p className="text-text-main text-xl sm:text-2xl">
             {data?.name}{" "}
             <span className="text-sm text-text-secondary/75">
               {data?.status}
             </span>
           </p>
-          <p className="text-lg text-text-secondary/75">{data?.email}</p>
+          <p className="text-base sm:text-lg text-text-secondary/75">
+            {data?.email}
+          </p>
         </div>
       </div>
       <div className="flex flex-col xl:flex-row flex-wrap xl:justify-between">
