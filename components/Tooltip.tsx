@@ -10,6 +10,10 @@ export default function Tooltip({
 }) {
   const [show, setShow] = useState(false);
 
+  if (tip === undefined) {
+    return <>{children}</>;
+  }
+
   return (
     <Popover className="relative appearance-none">
       <div
