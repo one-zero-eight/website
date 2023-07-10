@@ -8,7 +8,7 @@ import React from "react";
 function CategoriesDropdown({ category }: { category: string }) {
   const typeInfo = getTypeInfoBySlug(category);
   return (
-    <Popover className="relative text-xl w-max z-[1] opacity-[0.999] rounded-full focus:outline-none">
+    <Popover className="relative text-xl w-max z-[2] opacity-[0.999] rounded-full focus:outline-none">
       <Popover.Button className="w-full rounded-full focus:outline-none">
         <div className="rounded-full flex flex-row items-center bg-primary-main py-2 px-5 text-xl text-text-secondary/75">
           <p className="mr-4 whitespace-nowrap">
