@@ -35,7 +35,11 @@ function SidebarSection(props: SectionProps) {
   );
 
   if (props.path === "#") {
-    return <Tooltip content="Coming soon">{element}</Tooltip>;
+    return (
+      <Tooltip content="Coming soon">
+        <div tabIndex={0}>{element}</div>
+      </Tooltip>
+    );
   }
 
   return <Link href={props.path}>{element}</Link>;
