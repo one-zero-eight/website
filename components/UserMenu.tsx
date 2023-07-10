@@ -1,4 +1,6 @@
 "use client";
+import { AccountIcon } from "@/components/icons/AccountIcon";
+import { ExitIcon } from "@/components/icons/ExitIcon";
 import { UserFace } from "@/components/icons/UserFace";
 import { useAuthPaths } from "@/lib/auth";
 import { useUsersGetMe } from "@/lib/events";
@@ -6,8 +8,6 @@ import { Popover, Transition } from "@headlessui/react";
 import Link from "next/link";
 import React from "react";
 import { useIsClient } from "usehooks-ts";
-import { ExitIcon } from "@/components/icons/ExitIcon";
-import { AccountIcon } from "@/components/icons/AccountIcon";
 
 type UserMenuProps = {
   isMobile: boolean;
@@ -38,8 +38,8 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
 
   return (
     <Popover className="relative focus:outline-none">
-      <Popover.Button className="focus:outline-none">
-        <div className="flex flex-col justify-center items-center bg-primary-main w-64 lg:w-18p h-18p rounded-2xl ml-auto">
+      <Popover.Button className="rounded-2xl hover:bg-primary-hover">
+        <div className="flex flex-col justify-center items-center bg-primary-main w-64 lg:w-18p h-18p rounded-2xl ml-auto hover:bg-primary-hover">
           <div className="flex shrink-0 w-12 h-12 bg-border rounded-full justify-center items-center">
             <UserFace
               className="flex fill-icon-main/50"
