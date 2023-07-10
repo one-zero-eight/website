@@ -9,38 +9,36 @@ export type SectionProps = {
 };
 
 function SidebarSection(props: SectionProps) {
-  return (
-    <Tooltip tip={props.path === "#" ? "Coming soon" : undefined}>
-      <Link
-        href={props.path}
-        className={props.path === "#" ? "pointer-events-none" : ""}
+  const element = (
+    <div className="flex flex-row justify-center p-2 select-none">
+      <props.icon
+        className={`place-self-start mr-4 ${
+          props.selected
+            ? "fill-focus_color"
+            : props.path === "#"
+            ? "fill-disabled"
+            : "fill-inactive"
+        }`}
+      />
+      <p
+        className={`flex grow font-semibold text-lg items-center w-min ${
+          props.selected
+            ? "selected"
+            : props.path === "#"
+            ? "text-disabled"
+            : "text-inactive"
+        }`}
       >
-        <div className="flex flex-row justify-center p-2">
-          <props.icon
-            className={`place-self-start mr-4 ${
-              props.selected
-                ? "fill-focus_color"
-                : props.path === "#"
-                ? "fill-disabled"
-                : "fill-inactive"
-            }`}
-          />
-          <p
-            className={`flex grow font-semibold text-lg items-center w-min 
-              ${
-                props.selected
-                  ? "selected"
-                  : props.path === "#"
-                  ? "text-disabled"
-                  : "text-inactive"
-              }`}
-          >
-            {props.title}
-          </p>
-        </div>
-      </Link>
-    </Tooltip>
+        {props.title}
+      </p>
+    </div>
   );
+
+  if (props.path === "#") {
+    return <Tooltip tip="Coming soon">{element}</Tooltip>;
+  }
+
+  return <Link href={props.path}>{element}</Link>;
 }
 
 export default SidebarSection;
