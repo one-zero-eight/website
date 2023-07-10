@@ -15,7 +15,7 @@ type UserMenuProps = {
 };
 function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   const isClient = useIsClient();
-  const { data, isLoading, isError } = useUsersGetMe();
+  const { data, isError } = useUsersGetMe();
   const { signIn, signOut } = useAuthPaths();
 
   // !isClient - SSR output and during hydration.

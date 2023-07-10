@@ -6,7 +6,7 @@ import Tooltip from "@/components/Tooltip";
 import { useEventGroup } from "@/lib/event-group";
 import { ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { useWindowSize } from "usehooks-ts";
 
 export type GroupCardProps = {
@@ -21,7 +21,6 @@ export function GroupCard({
   canHide = false,
 }: GroupCardProps) {
   const { width } = useWindowSize();
-  const [isShowing, setIsShowing] = useState(false);
   const {
     switchFavorite,
     isInFavorites,
