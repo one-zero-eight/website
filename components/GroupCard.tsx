@@ -49,14 +49,14 @@ export function GroupCard({
             </Fragment>
           ))}
       </div>
-      <div className="flex flex-row gap-3 place-items-center select-none w-fit">
+      <div className="flex flex-row place-items-center select-none w-fit">
         {canHide && (
           <Tooltip
             content={isHidden ? "Hidden from calendar" : "Hide from calendar"}
           >
-            <div
+            <button
               onClick={switchHideFavorite}
-              className="cursor-pointer rounded-full"
+              className="rounded-full p-2 hover:bg-primary-hover focus:bg-primary-hover"
             >
               <HideIcon
                 active={isHidden}
@@ -64,38 +64,48 @@ export function GroupCard({
                 height={width >= 640 ? 40 : 36}
                 className="mt-1 fill-icon-main/50 hover:fill-icon-hover/75"
               />
-            </div>
+            </button>
           </Tooltip>
         )}
-        <div onClick={switchFavorite} className="cursor-pointer rounded-full">
-          {isPredefined ? (
-            <Tooltip content={"Your group from official lists"}>
+        <Tooltip
+          content={
+            isPredefined
+              ? "Your group from official lists"
+              : isInFavorites
+              ? "In favorites"
+              : "Add to favorites"
+          }
+        >
+          <button
+            onClick={switchFavorite}
+            className="rounded-full p-2 hover:bg-primary-hover focus:bg-primary-hover"
+          >
+            {isPredefined ? (
               <PredefinedIcon
                 width={width >= 640 ? 40 : 36}
                 height={width >= 640 ? 40 : 36}
               />
-            </Tooltip>
-          ) : (
-            <Tooltip
-              content={isInFavorites ? "In favorites" : "Add to favorites"}
-            >
+            ) : (
               <FavoriteIcon
                 active={isInFavorites}
                 width={width >= 640 ? 40 : 36}
                 height={width >= 640 ? 40 : 36}
               />
-            </Tooltip>
-          )}
-        </div>
-        <div onClick={onImportClick} className="cursor-pointer rounded-full">
-          <Tooltip content={"Import to your calendar"}>
+            )}
+          </button>
+        </Tooltip>
+        <Tooltip content={"Import to your calendar"}>
+          <button
+            onClick={onImportClick}
+            className="rounded-full p-2 hover:bg-primary-hover focus:bg-primary-hover"
+          >
             <DownloadIcon
               className="fill-icon-main/50 hover:fill-icon-hover/75"
               width={width >= 640 ? 48 : 40}
               height={width >= 640 ? 48 : 40}
             />
-          </Tooltip>
-        </div>
+          </button>
+        </Tooltip>
       </div>
     </div>
   );
