@@ -51,7 +51,9 @@ export function GroupCard({
       </div>
       <div className="flex flex-row gap-3 place-items-center select-none w-fit">
         {canHide && (
-          <Tooltip tip={isHidden ? "Show in calendar" : "Hide from calendar"}>
+          <Tooltip
+            tip={isHidden ? "Hidden from calendar" : "Hide from calendar"}
+          >
             <div
               onClick={switchHideFavorite}
               className="cursor-pointer rounded-full"
@@ -67,16 +69,14 @@ export function GroupCard({
         )}
         <div onClick={switchFavorite} className="cursor-pointer rounded-full">
           {isPredefined ? (
-            <Tooltip tip={"We know something about you 👀"}>
+            <Tooltip tip={"Your group from official lists"}>
               <PredefinedIcon
                 width={width >= 640 ? 40 : 36}
                 height={width >= 640 ? 40 : 36}
               />
             </Tooltip>
           ) : (
-            <Tooltip
-              tip={isInFavorites ? "Remove from favorites" : "Add to favorites"}
-            >
+            <Tooltip tip={isInFavorites ? "In favorites" : "Add to favorites"}>
               <FavoriteIcon
                 active={isInFavorites}
                 width={width >= 640 ? 40 : 36}
