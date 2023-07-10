@@ -8,6 +8,7 @@ export type TypeInfo = {
   title: string;
   shortDescription: string;
   filters: TypeFilter[];
+  grouping?: string;
   showAdditionalInfo: string[];
 };
 
@@ -37,6 +38,7 @@ export const viewConfig: ViewConfig = {
           ],
         },
       ],
+      grouping: "course",
       showAdditionalInfo: ["course"],
     },
     elective: {
@@ -51,6 +53,7 @@ export const viewConfig: ViewConfig = {
           values: ["BS Tech", "MS Tech", "BS/MS Hum"],
         },
       ],
+      grouping: "elective_type",
       showAdditionalInfo: ["elective_type"],
     },
   },
