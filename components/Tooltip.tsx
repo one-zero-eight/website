@@ -4,6 +4,7 @@ import {
   FloatingPortal,
   offset,
   shift,
+  useClick,
   useDismiss,
   useFloating,
   useFocus,
@@ -42,6 +43,7 @@ export default function Tooltip({
   // Event listeners to change the open state
   const hover = useHover(context, { move: false });
   const focus = useFocus(context);
+  const click = useClick(context, { toggle: false });
   const dismiss = useDismiss(context);
   // Role props for screen readers
   const role = useRole(context, { role: "tooltip" });
@@ -50,6 +52,7 @@ export default function Tooltip({
   const { getReferenceProps, getFloatingProps } = useInteractions([
     hover,
     focus,
+    click,
     dismiss,
     role,
   ]);
@@ -70,7 +73,7 @@ export default function Tooltip({
             ref={refs.setFloating}
             style={{ ...floatingStyles, ...transitionStyles }}
             {...getFloatingProps()}
-            className="bg-primary-main text-text-main text-sm px-8 py-2 rounded-md pointer-events-none drop-shadow-md"
+            className="z-10 bg-primary-main text-text-main text-sm px-8 py-2 rounded-md pointer-events-none drop-shadow-md"
           >
             {tip}
           </div>
