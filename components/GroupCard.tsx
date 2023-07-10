@@ -33,7 +33,10 @@ export function GroupCard({
     ? viewConfig.types[group.type].showAdditionalInfo
     : [];
   return (
-    <div className="bg-primary-main hover:bg-primary-hover flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl min-w-fit min-h-fit">
+    <div
+      className="cursor-pointer bg-primary-main hover:bg-primary-hover flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl min-w-fit min-h-fit"
+      onClick={onImportClick}
+    >
       <div className="flex flex-col gap-0.5">
         <p className="text-text-main text-left text-lg sm:text-xl font-medium w-40">
           {group.name}
@@ -55,8 +58,11 @@ export function GroupCard({
             content={isHidden ? "Hidden from calendar" : "Hide from calendar"}
           >
             <button
-              onClick={switchHideFavorite}
-              className="rounded-full p-2 hover:bg-primary-hover focus:bg-primary-hover"
+              onClick={(e) => {
+                e.stopPropagation();
+                switchHideFavorite && switchHideFavorite();
+              }}
+              className="rounded-full p-2 hover:bg-secondary-hover"
             >
               <HideIcon
                 active={isHidden}
@@ -77,8 +83,11 @@ export function GroupCard({
           }
         >
           <button
-            onClick={switchFavorite}
-            className="rounded-full p-2 hover:bg-primary-hover focus:bg-primary-hover"
+            onClick={(e) => {
+              e.stopPropagation();
+              switchFavorite && switchFavorite();
+            }}
+            className="rounded-full p-2 hover:bg-secondary-hover"
           >
             {isPredefined ? (
               <PredefinedIcon
@@ -96,8 +105,11 @@ export function GroupCard({
         </Tooltip>
         <Tooltip content={"Import to your calendar"}>
           <button
-            onClick={onImportClick}
-            className="rounded-full p-2 hover:bg-primary-hover focus:bg-primary-hover"
+            onClick={(e) => {
+              e.stopPropagation();
+              onImportClick && onImportClick();
+            }}
+            className="rounded-full p-2 hover:bg-secondary-hover"
           >
             <DownloadIcon
               className="fill-icon-main/50 hover:fill-icon-hover/75"
