@@ -74,7 +74,12 @@ function Sidebar() {
             </Link>
             <nav className="flex-col">
               {items.map((item) => (
-                <div key={item.title} onClick={() => setOpened(false)}>
+                <div
+                  key={item.title}
+                  onClick={() =>
+                    item.path !== "#" ? setOpened(false) : undefined
+                  }
+                >
                   <SidebarSection
                     title={item.title}
                     icon={item.icon}
