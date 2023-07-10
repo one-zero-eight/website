@@ -1,11 +1,12 @@
 import DownloadIcon from "@/components/icons/DownloadIcon";
 import FavoriteIcon from "@/components/icons/FavoriteIcon";
+import { HideIcon } from "@/components/icons/HideIcon";
+import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
+import Tooltip from "@/components/Tooltip";
 import { useEventGroup } from "@/lib/event-group";
 import { ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
 import { Fragment, useState } from "react";
-import { HideIcon } from "@/components/icons/HideIcon";
-import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 import { useWindowSize } from "usehooks-ts";
 
 export type GroupCardProps = {
@@ -50,38 +51,48 @@ export function GroupCard({
       </div>
       <div className="flex flex-row gap-3 place-items-center select-none w-fit">
         {canHide && (
-          <div
-            onClick={switchHideFavorite}
-            className="cursor-pointer rounded-full"
-          >
-            <HideIcon
-              active={isHidden}
-              width={width >= 640 ? 40 : 36}
-              height={width >= 640 ? 40 : 36}
-              className="mt-1 fill-icon-main/50 hover:fill-icon-hover/75"
-            />
-          </div>
+          <Tooltip tip={isHidden ? "Show in calendar" : "Hide from calendar"}>
+            <div
+              onClick={switchHideFavorite}
+              className="cursor-pointer rounded-full"
+            >
+              <HideIcon
+                active={isHidden}
+                width={width >= 640 ? 40 : 36}
+                height={width >= 640 ? 40 : 36}
+                className="mt-1 fill-icon-main/50 hover:fill-icon-hover/75"
+              />
+            </div>
+          </Tooltip>
         )}
         <div onClick={switchFavorite} className="cursor-pointer rounded-full">
           {isPredefined ? (
-            <PredefinedIcon
-              width={width >= 640 ? 40 : 36}
-              height={width >= 640 ? 40 : 36}
-            />
+            <Tooltip tip={"We know something about you 👀"}>
+              <PredefinedIcon
+                width={width >= 640 ? 40 : 36}
+                height={width >= 640 ? 40 : 36}
+              />
+            </Tooltip>
           ) : (
-            <FavoriteIcon
-              active={isInFavorites}
-              width={width >= 640 ? 40 : 36}
-              height={width >= 640 ? 40 : 36}
-            />
+            <Tooltip
+              tip={isInFavorites ? "Remove from favorites" : "Add to favorites"}
+            >
+              <FavoriteIcon
+                active={isInFavorites}
+                width={width >= 640 ? 40 : 36}
+                height={width >= 640 ? 40 : 36}
+              />
+            </Tooltip>
           )}
         </div>
         <div onClick={onImportClick} className="cursor-pointer rounded-full">
-          <DownloadIcon
-            className="fill-icon-main/50 hover:fill-icon-hover/75"
-            width={width >= 640 ? 48 : 40}
-            height={width >= 640 ? 48 : 40}
-          />
+          <Tooltip tip={"Import to your calendar"}>
+            <DownloadIcon
+              className="fill-icon-main/50 hover:fill-icon-hover/75"
+              width={width >= 640 ? 48 : 40}
+              height={width >= 640 ? 48 : 40}
+            />
+          </Tooltip>
         </div>
       </div>
     </div>
