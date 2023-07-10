@@ -52,7 +52,7 @@ export function GroupCard({
       <div className="flex flex-row gap-3 place-items-center select-none w-fit">
         {canHide && (
           <Tooltip
-            tip={isHidden ? "Hidden from calendar" : "Hide from calendar"}
+            content={isHidden ? "Hidden from calendar" : "Hide from calendar"}
           >
             <div
               onClick={switchHideFavorite}
@@ -69,14 +69,16 @@ export function GroupCard({
         )}
         <div onClick={switchFavorite} className="cursor-pointer rounded-full">
           {isPredefined ? (
-            <Tooltip tip={"Your group from official lists"}>
+            <Tooltip content={"Your group from official lists"}>
               <PredefinedIcon
                 width={width >= 640 ? 40 : 36}
                 height={width >= 640 ? 40 : 36}
               />
             </Tooltip>
           ) : (
-            <Tooltip tip={isInFavorites ? "In favorites" : "Add to favorites"}>
+            <Tooltip
+              content={isInFavorites ? "In favorites" : "Add to favorites"}
+            >
               <FavoriteIcon
                 active={isInFavorites}
                 width={width >= 640 ? 40 : 36}
@@ -86,7 +88,7 @@ export function GroupCard({
           )}
         </div>
         <div onClick={onImportClick} className="cursor-pointer rounded-full">
-          <Tooltip tip={"Import to your calendar"}>
+          <Tooltip content={"Import to your calendar"}>
             <DownloadIcon
               className="fill-icon-main/50 hover:fill-icon-hover/75"
               width={width >= 640 ? 48 : 40}

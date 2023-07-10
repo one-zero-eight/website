@@ -17,10 +17,10 @@ import React, { useState } from "react";
 
 export default function Tooltip({
   children,
-  tip,
+  content,
 }: {
   children: React.ReactNode;
-  tip: React.ReactNode;
+  content: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -57,7 +57,7 @@ export default function Tooltip({
     role,
   ]);
 
-  if (tip === undefined) {
+  if (content === undefined) {
     return <>{children}</>;
   }
 
@@ -75,7 +75,7 @@ export default function Tooltip({
             {...getFloatingProps()}
             className="z-10 bg-primary-main text-text-main text-sm px-8 py-2 rounded-md pointer-events-none drop-shadow-md"
           >
-            {tip}
+            {content}
           </div>
         )}
       </FloatingPortal>
