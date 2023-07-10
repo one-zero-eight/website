@@ -68,7 +68,7 @@ export function GroupCard({
                 active={isHidden}
                 width={width >= 640 ? 40 : 36}
                 height={width >= 640 ? 40 : 36}
-                className="mt-1 fill-icon-main/50 hover:fill-icon-hover/75"
+                className="fill-icon-main/50 hover:fill-icon-hover/75"
               />
             </button>
           </Tooltip>

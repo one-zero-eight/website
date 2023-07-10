@@ -17,7 +17,7 @@ export function HideIcon({
     <svg
       xmlns="http://www.w3.org/2000/svg"
       height={height || 40}
-      viewBox="0 -960 960 960"
+      viewBox="0 -990 960 960"
       width={width || 40}
       className={className}
       fill={fill}
