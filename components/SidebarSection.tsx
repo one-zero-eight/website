@@ -1,6 +1,5 @@
-import { Popover, Transition } from "@headlessui/react";
+import Tooltip from "@/components/Tooltip";
 import Link from "next/link";
-import { useState } from "react";
 
 export type SectionProps = {
   icon: (props: { className?: string; fill?: string }) => React.JSX.Element;
@@ -10,8 +9,6 @@ export type SectionProps = {
 };
 
 function SidebarSection(props: SectionProps) {
-  const [isShowing, setIsShowing] = useState(false);
-
   const link = (
     <Link
       href={props.path}
@@ -46,37 +43,7 @@ function SidebarSection(props: SectionProps) {
     return link;
   }
 
-  return (
-    <Popover className="relative appearance-none">
-      <div
-        onFocus={() => setIsShowing(true)}
-        onBlur={() => setIsShowing(false)}
-        onMouseEnter={() => setIsShowing(true)}
-        onMouseLeave={() => setIsShowing(false)}
-      >
-        {link}
-      </div>
-
-      <Transition
-        className="absolute z-10"
-        show={isShowing && !props.selected}
-        onMouseEnter={() => setIsShowing(false)}
-        onMouseLeave={() => setIsShowing(false)}
-        enter="transition duration-150 ease-out "
-        enterFrom="transform scale-95 opacity-0 "
-        enterTo="transform scale-100 opacity-100"
-        leave="transition duration-75 ease-out"
-        leaveFrom="transform scale-100 opacity-100"
-        leaveTo="transform scale-95 opacity-0"
-      >
-        <Popover.Panel>
-          <p className="flex justify-center items-center bg-text-main text-base dark:bg-base dark:text-text-main text-sm w-max px-8 py-2 rounded-md pointer-events-none">
-            Coming soon
-          </p>
-        </Popover.Panel>
-      </Transition>
-    </Popover>
-  );
+  return <Tooltip tip={"Coming soon"}>{link}</Tooltip>;
 }
 
 export default SidebarSection;
