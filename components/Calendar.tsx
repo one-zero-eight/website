@@ -1,5 +1,5 @@
 "use client";
-import { EventApi } from "@fullcalendar/core";
+import { EventApi, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
@@ -81,9 +81,16 @@ function Calendar({
           }
         }}
         views={{
+          listMonth: {
+            eventContent: renderEventListMonth,
+          },
           timeGridWeek: {
             // Show weekday and date in day header
             dayHeaderFormat: "ddd D",
+            eventContent: renderEventTimeGridWeek,
+          },
+          dayGridMonth: {
+            eventContent: renderEventDayGridMonth,
           },
         }}
         allDaySlot={false} // Do not display "all day" events
@@ -117,6 +124,46 @@ function Calendar({
   return (
     <div className="text-text-main" {...props}>
       {calendar}
+    </div>
+  );
+}
+
+function renderEventListMonth({ event }: EventContentArg) {
+  return (
+    <div className="text-left">
+      {event.title}{" "}
+      <span className="text-inactive">{event.extendedProps.location}</span>
+    </div>
+  );
+}
+
+function renderEventTimeGridWeek({ event }: EventContentArg) {
+  return (
+    <div className="text-left">
+      <span className="line-clamp-2">{event.title}</span>
+      <span className="text-xs">{event.extendedProps.location}</span>
+    </div>
+  );
+}
+
+function renderEventDayGridMonth({
+  event,
+  borderColor,
+  backgroundColor,
+  timeText,
+}: EventContentArg) {
+  return (
+    <div className="max-w-full">
+      <div className="flex flex-row items-center">
+        <div
+          className="fc-daygrid-event-dot"
+          style={{ borderColor: borderColor || backgroundColor }}
+        />
+        {timeText && <div className="fc-event-time">{timeText}</div>}
+        <div className="fc-event-title line-clamp-2 max-w-full">
+          {event.title || <>&nbsp;</>}
+        </div>
+      </div>
     </div>
   );
 }
