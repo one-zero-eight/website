@@ -33,7 +33,7 @@ export async function generateStaticParams() {
 
 export default async function Page({ params }: Props) {
   return (
-    <div className="p-2 pt-16 items-center lg:[align-items:normal] flex flex-col">
+    <div className="p-16 items-center lg:[align-items:normal] flex flex-col">
       <h1 className="text-text-main lg:hidden lg:invisible text-center xl:text-left text-3xl xl:text-4xl font-bold">
         Schedule
       </h1>
@@ -41,7 +41,7 @@ export default async function Page({ params }: Props) {
         Now find your group.
       </p>
       <Navbar className="hidden invisible lg:flex lg:visible">
-        <h1 className="text-text-main text-center xl:text-left text-3xl xl:text-4xl font-bold">
+        <h1 className="text-text-main text-center lg:text-left text-3xl lg:text-4xl font-bold">
           Schedule
         </h1>
         <p className="text-center xl:text-left text-text-secondary/75">
