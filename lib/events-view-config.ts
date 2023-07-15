@@ -60,7 +60,7 @@ export const viewConfig: ViewConfig = {
       id: "sports",
       slug: "sports",
       title: "Sports",
-      shortDescription: "Schedule of sport classes in Sum23",
+      shortDescription: "Schedule of sport classes in Sum23.",
       filters: [],
       grouping: undefined,
       showAdditionalInfo: [],
