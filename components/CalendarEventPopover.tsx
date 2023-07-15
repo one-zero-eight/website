@@ -6,7 +6,6 @@ import {
   FloatingPortal,
   offset,
   shift,
-  useClick,
   useDismiss,
   useFloating,
   useInteractions,
@@ -53,13 +52,12 @@ export default function CalendarEventPopover({
   });
 
   // Event listeners to change the open state
-  const click = useClick(context, { toggle: false });
   const dismiss = useDismiss(context, { outsidePressEvent: "click" });
   // Role props for screen readers
   const role = useRole(context);
 
   // Merge all the interactions into prop getters
-  const { getFloatingProps } = useInteractions([click, dismiss, role]);
+  const { getFloatingProps } = useInteractions([dismiss, role]);
 
   return (
     <>
