@@ -156,7 +156,9 @@ function renderEventTimeGridWeek({ event }: EventContentArg) {
   return (
     <div className="text-left">
       <span className="line-clamp-2">{event.title}</span>
-      <span className="text-xs">{event.extendedProps.location}</span>
+      <span className="text-xs line-clamp-2">
+        {event.extendedProps.location}
+      </span>
     </div>
   );
 }
