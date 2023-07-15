@@ -4,13 +4,13 @@ import { GroupCard } from "@/components/GroupCard";
 import { UserFace } from "@/components/icons/UserFace";
 import { Navbar } from "@/components/Navbar";
 import ScheduleDialog from "@/components/ScheduleDialog";
+import { useAuthPaths } from "@/lib/auth";
 import { UserXGroupViewApp, useUsersGetMe } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import Link from "next/link";
 import React, { useState } from "react";
 import { useIsClient, useWindowSize } from "usehooks-ts";
-import { useAuthPaths } from "@/lib/auth";
 
 export default function Page() {
   const { width } = useWindowSize();
@@ -176,8 +176,8 @@ export default function Page() {
 
       <ScheduleDialog
         groupFile={selectedGroupFile}
-        opened={dialogOpened}
-        close={() => setDialogOpened(false)}
+        isOpen={dialogOpened}
+        setIsOpen={setDialogOpened}
       />
     </div>
   );

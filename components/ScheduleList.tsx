@@ -2,13 +2,13 @@
 import { GroupCard } from "@/components/GroupCard";
 import ScheduleDialog from "@/components/ScheduleDialog";
 import SearchBar from "@/components/SearchBar";
+import SignInPopup from "@/components/SignInPopup";
 import { useEventGroupsListEventGroups } from "@/lib/events";
 import { getTypeInfoBySlug } from "@/lib/events-view-config";
 import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import React, { useState } from "react";
 import CategoriesDropdown from "./CategoriesDropdown";
 import FilterDropdown from "./FilterDropdown";
-import SignInPopup from "@/components/SignInPopup";
 
 export type ScheduleListProps = {
   category: string;
@@ -116,8 +116,8 @@ export default function ScheduleList({ category }: ScheduleListProps) {
 
       <ScheduleDialog
         groupFile={selectedGroupFile}
-        opened={dialogOpened}
-        close={() => setDialogOpened(false)}
+        isOpen={dialogOpened}
+        setIsOpen={setDialogOpened}
       />
 
       <SignInPopup
