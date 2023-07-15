@@ -1,4 +1,5 @@
 "use client";
+import CalendarEventPopover from "@/components/CalendarEventPopover";
 import { EventApi, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -7,7 +8,7 @@ import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import moment from "moment/moment";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import iCalendarPlugin from "./iCalendarPlugin";
 
 function Calendar({
@@ -18,6 +19,10 @@ function Calendar({
   urls: string[];
   initialView?: string;
 }) {
+  const [popoverOpened, setPopoverOpened] = useState(false);
+  const [popoverEvent, setPopoverEvent] = useState<EventApi>();
+  const [eventElement, setEventElement] = useState<HTMLElement>();
+
   const calendar = useMemo(
     () => (
       <FullCalendar
@@ -107,10 +112,12 @@ function Calendar({
         stickyHeaderDates={false}
         eventInteractive={true} // Make event tabbable
         eventClassNames="cursor-pointer text-sm" // Show that events are clickable
-        // eventClick={(info) => {
-        //   info.jsEvent.preventDefault();
-        //   console.log(info);
-        // }}
+        eventClick={(info) => {
+          info.jsEvent.preventDefault();
+          setEventElement(info.el);
+          setPopoverEvent(info.event);
+          setPopoverOpened(true);
+        }}
         slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
         scrollTimeReset={false} // Do not reset scroll on date switch
@@ -124,6 +131,14 @@ function Calendar({
   return (
     <div className="text-text-main" {...props}>
       {calendar}
+      {popoverEvent && eventElement && (
+        <CalendarEventPopover
+          event={popoverEvent}
+          isOpen={popoverOpened}
+          setIsOpen={setPopoverOpened}
+          eventElement={eventElement}
+        />
+      )}
     </div>
   );
 }
