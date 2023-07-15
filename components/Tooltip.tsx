@@ -67,8 +67,8 @@ export default function Tooltip({
         {children}
       </div>
 
-      <FloatingPortal>
-        {isMounted && (
+      {isMounted && (
+        <FloatingPortal id="tooltip">
           <div
             ref={refs.setFloating}
             style={{ ...floatingStyles, ...transitionStyles }}
@@ -77,8 +77,8 @@ export default function Tooltip({
           >
             {content}
           </div>
-        )}
-      </FloatingPortal>
+        </FloatingPortal>
+      )}
     </>
   );
 }
