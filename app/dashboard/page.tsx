@@ -63,98 +63,102 @@ export default function Page() {
   }
 
   return (
-    <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
-      <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
-        Dashboard
-      </h1>
-      <Navbar className="hidden invisible lg:flex lg:visible">
-        <h1 className="text-text-main text-center sm:text-left text-4xl font-bold">
+    <>
+      <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
+        <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
           Dashboard
         </h1>
-      </Navbar>
-      <div className="justify-center sm:justify-normal my-12 flex flex-row gap-6">
-        <div className="flex bg-border shrink-0 w-20 sm:w-24 h-20 sm:h-24 rounded-full justify-center items-center">
-          <UserFace
-            className="flex fill-icon-main/50"
-            width={width >= 640 ? 56 : 48}
-            height={width >= 640 ? 56 : 48}
-          />
-        </div>
-        <div className="flex flex-col justify-center">
-          <p className="text-text-main text-xl sm:text-2xl">{data?.name}</p>
-          <p className="text-base sm:text-lg text-text-secondary/75">
-            {data?.email}
-          </p>
-        </div>
-      </div>
-      <div className="flex flex-col xl:flex-row flex-wrap xl:justify-between">
-        <div className="min-w-[20%] lg:min-w-[30%] xl:max-w-[45%]">
-          <h2 className="text-text-main text-center lg:text-left text-3xl font-medium mb-4">
-            Schedule
-          </h2>
-          {favorites.filter((v) => v.predefined === true).length === 0 ? (
-            <p className="text-lg text-text-secondary/75">Nothing here</p>
-          ) : (
-            <div className="justify-center lg:justify-normal flex flex-row flex-wrap gap-4 gap-y-2 mb-4">
-              {favorites
-                .filter((v) => v.predefined === true)
-                .map((v) => (
-                  <GroupCard
-                    key={v.group.path}
-                    group={v.group}
-                    canHide={true}
-                  />
-                ))}
-            </div>
-          )}
-        </div>
-        <div className="min-w-[20%] lg:min-w-[30%] xl:max-w-[50%]">
-          <h2 className="text-text-main text-center lg:text-left text-3xl font-medium mb-4">
-            Favorites
-          </h2>
-          {favorites.filter((v) => v.predefined === false).length === 0 ? (
-            <p className="text-lg text-text-secondary/75">
-              Add favorite calendars using star button
-              <br />
-              <Link href="/schedule" className="underline underline-offset-4">
-                Explore schedules
-              </Link>
+        <Navbar className="hidden invisible lg:flex lg:visible">
+          <h1 className="text-text-main text-center sm:text-left text-4xl font-bold">
+            Dashboard
+          </h1>
+        </Navbar>
+        <div className="justify-center sm:justify-normal my-12 flex flex-row gap-6">
+          <div className="flex bg-border shrink-0 w-20 sm:w-24 h-20 sm:h-24 rounded-full justify-center items-center">
+            <UserFace
+              className="flex fill-icon-main/50"
+              width={width >= 640 ? 56 : 48}
+              height={width >= 640 ? 56 : 48}
+            />
+          </div>
+          <div className="flex flex-col justify-center">
+            <p className="text-text-main text-xl sm:text-2xl">{data?.name}</p>
+            <p className="text-base sm:text-lg text-text-secondary/75">
+              {data?.email}
             </p>
-          ) : (
-            <div className="justify-center lg:justify-normal flex flex-row flex-wrap gap-4 gap-y-2">
-              {favorites
-                .filter((v) => v.predefined === false)
-                .map((v) => (
-                  <GroupCard
-                    key={v.group.path}
-                    group={v.group}
-                    canHide={true}
-                  />
-                ))}
-            </div>
-          )}
+          </div>
         </div>
+        <div className="flex flex-col xl:flex-row flex-wrap xl:justify-between">
+          <div className="min-w-[20%] lg:min-w-[30%] xl:max-w-[45%]">
+            <h2 className="text-text-main text-center lg:text-left text-3xl font-medium mb-4">
+              Schedule
+            </h2>
+            {favorites.filter((v) => v.predefined === true).length === 0 ? (
+              <p className="text-lg text-text-secondary/75">Nothing here</p>
+            ) : (
+              <div className="justify-center lg:justify-normal flex flex-row flex-wrap gap-4 gap-y-2 mb-4">
+                {favorites
+                  .filter((v) => v.predefined === true)
+                  .map((v) => (
+                    <GroupCard
+                      key={v.group.path}
+                      group={v.group}
+                      canHide={true}
+                    />
+                  ))}
+              </div>
+            )}
+          </div>
+          <div className="min-w-[20%] lg:min-w-[30%] xl:max-w-[50%]">
+            <h2 className="text-text-main text-center lg:text-left text-3xl font-medium mb-4">
+              Favorites
+            </h2>
+            {favorites.filter((v) => v.predefined === false).length === 0 ? (
+              <p className="text-lg text-text-secondary/75">
+                Add favorite calendars using star button
+                <br />
+                <Link href="/schedule" className="underline underline-offset-4">
+                  Explore schedules
+                </Link>
+              </p>
+            ) : (
+              <div className="justify-center lg:justify-normal flex flex-row flex-wrap gap-4 gap-y-2">
+                {favorites
+                  .filter((v) => v.predefined === false)
+                  .map((v) => (
+                    <GroupCard
+                      key={v.group.path}
+                      group={v.group}
+                      canHide={true}
+                    />
+                  ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <h2 className="text-text-main text-3xl font-medium my-4">
+          Your calendar
+        </h2>
       </div>
-      <h2 className="text-text-main text-3xl font-medium my-4">
-        Your calendar
-      </h2>
-      {!data ? (
-        <>Loading...</>
-      ) : (
-        <Calendar
-          urls={getCalendarsToShow(favorites)}
-          initialView={
-            width
-              ? width >= 1280
-                ? "dayGridMonth"
-                : width >= 1024
-                ? "timeGridWeek"
-                : "listMonth"
-              : "dayGridMonth"
-          }
-        />
-      )}
-    </div>
+      <div className="px-2">
+        {!data ? (
+          <>Loading...</>
+        ) : (
+          <Calendar
+            urls={getCalendarsToShow(favorites)}
+            initialView={
+              width
+                ? width >= 1280
+                  ? "dayGridMonth"
+                  : width >= 1024
+                  ? "timeGridWeek"
+                  : "listMonth"
+                : "dayGridMonth"
+            }
+          />
+        )}
+      </div>
+    </>
   );
 }
 
