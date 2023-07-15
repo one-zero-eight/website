@@ -4,19 +4,21 @@ import { HideIcon } from "@/components/icons/HideIcon";
 import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 import Tooltip from "@/components/Tooltip";
 import { useEventGroup } from "@/lib/event-group";
-import { ViewEventGroup } from "@/lib/events";
+import { useUsersGetMe, ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
 import { Fragment } from "react";
-import { useWindowSize } from "usehooks-ts";
+import { useIsClient, useWindowSize } from "usehooks-ts";
 
 export type GroupCardProps = {
   group: ViewEventGroup;
+  askToSignIn?: () => void;
   onImportClick?: () => void;
   canHide?: boolean;
 };
 
 export function GroupCard({
   group,
+  askToSignIn,
   onImportClick,
   canHide = false,
 }: GroupCardProps) {
@@ -31,6 +33,7 @@ export function GroupCard({
   const satelliteToDisplay = group.type
     ? viewConfig.types[group.type].showAdditionalInfo
     : [];
+  const { data, isError } = useUsersGetMe();
   return (
     <div
       className="cursor-pointer bg-primary-main hover:bg-primary-hover flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl min-w-fit min-h-fit"
@@ -84,7 +87,11 @@ export function GroupCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              switchFavorite && switchFavorite();
+              if (isError || !data) {
+                askToSignIn && askToSignIn();
+              } else {
+                switchFavorite && switchFavorite();
+              }
             }}
             className="rounded-full p-2 hover:bg-secondary-hover"
           >

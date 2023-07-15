@@ -8,6 +8,7 @@ import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import React, { useState } from "react";
 import CategoriesDropdown from "./CategoriesDropdown";
 import FilterDropdown from "./FilterDropdown";
+import SignInPopup from "@/components/SignInPopup";
 
 export type ScheduleListProps = {
   category: string;
@@ -23,6 +24,7 @@ export default function ScheduleList({ category }: ScheduleListProps) {
   const [search, setSearch] = useState("");
   const [selectedGroupFile, setSelectedGroupFile] = useState("");
   const [dialogOpened, setDialogOpened] = useState(false);
+  const [signInOpened, setSignInOpened] = useState(false);
 
   // Apply filters
   const groups = data?.groups
@@ -98,6 +100,9 @@ export default function ScheduleList({ category }: ScheduleListProps) {
               <GroupCard
                 key={group.path}
                 group={group}
+                askToSignIn={() => {
+                  setSignInOpened(true);
+                }}
                 onImportClick={() => {
                   ymEvent("button-import", { scheduleFile: group.path });
                   setSelectedGroupFile(group.path);
@@ -113,6 +118,15 @@ export default function ScheduleList({ category }: ScheduleListProps) {
         groupFile={selectedGroupFile}
         opened={dialogOpened}
         close={() => setDialogOpened(false)}
+      />
+
+      <SignInPopup
+        header={"Sign in to get access"}
+        description={
+          "Save your favorite schedule in the dashboard with your Innopolis account."
+        }
+        opened={signInOpened}
+        close={() => setSignInOpened(false)}
       />
     </>
   );

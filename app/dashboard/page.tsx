@@ -9,14 +9,62 @@ import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import Link from "next/link";
 import React, { useState } from "react";
-import { useWindowSize } from "usehooks-ts";
+import { useIsClient, useWindowSize } from "usehooks-ts";
+import { useAuthPaths } from "@/lib/auth";
 
 export default function Page() {
   const { width } = useWindowSize();
+  const isClient = useIsClient();
   const { data } = useUsersGetMe();
   const [selectedGroupFile, setSelectedGroupFile] = useState("");
   const [dialogOpened, setDialogOpened] = useState(false);
   const favorites = data?.favorites || [];
+  const { signIn } = useAuthPaths();
+
+  if (!isClient)
+    return (
+      <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
+        <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
+          Dashboard
+        </h1>
+        <Navbar className="hidden invisible lg:flex lg:visible">
+          <h1 className="text-text-main text-center sm:text-left text-4xl font-bold">
+            Dashboard
+          </h1>
+        </Navbar>
+      </div>
+    );
+  if (isClient && !data) {
+    return (
+      <>
+        <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
+          <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
+            Dashboard
+          </h1>
+          <Navbar className="hidden invisible lg:flex lg:visible">
+            <h1 className="text-text-main text-center sm:text-left text-4xl font-bold">
+              Dashboard
+            </h1>
+          </Navbar>
+        </div>
+        <div className="flex flex-col text-left gap-y-6 mx-16">
+          <h1 className="flex text-text-main text-2xl sm:text-3xl font-bold">
+            Sign in to get access
+          </h1>
+          <p className="text-text-secondary/75">
+            View your academic groups and save favorite schedule with your
+            Innopolis account.
+          </p>
+          <Link
+            href={signIn}
+            className="mt-3 flex justify-center items-center w-32 h-12 bg-focus_color text-white rounded-3xl font-semibold text-xl"
+          >
+            Sign in
+          </Link>
+        </div>
+      </>
+    );
+  }
 
   return (
     <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
