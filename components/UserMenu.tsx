@@ -93,7 +93,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
       </button>
 
       {isMounted && (
-        <FloatingPortal id="userMenu">
+        <FloatingPortal>
           <FloatingFocusManager context={context} modal={false}>
             <div
               ref={refs.setFloating}

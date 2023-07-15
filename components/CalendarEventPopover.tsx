@@ -64,7 +64,7 @@ export default function CalendarEventPopover({
   return (
     <>
       {isMounted && (
-        <FloatingPortal id="calendarPopover">
+        <FloatingPortal>
           <FloatingFocusManager
             context={context}
             modal={false}
