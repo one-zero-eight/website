@@ -9,7 +9,6 @@ import {
   FloatingFocusManager,
   FloatingOverlay,
   FloatingPortal,
-  useClick,
   useDismiss,
   useFloating,
   useInteractions,
@@ -32,7 +31,7 @@ export default function ScheduleDialog({
   const calendarURL = `${SCHEDULE_API_URL}/${groupFile}`;
   const copyButtonRef = useRef(null);
 
-  const { context, refs, floatingStyles } = useFloating({
+  const { context, refs } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
   });
@@ -41,17 +40,16 @@ export default function ScheduleDialog({
   const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
 
   // Event listeners to change the open state
-  const click = useClick(context);
   const dismiss = useDismiss(context, { outsidePressEvent: "mousedown" });
   // Role props for screen readers
   const role = useRole(context);
 
-  const { getFloatingProps } = useInteractions([click, dismiss, role]);
+  const { getFloatingProps } = useInteractions([dismiss, role]);
 
   return (
     <>
       {isMounted && (
-        <FloatingPortal id="scheduleDialog">
+        <FloatingPortal>
           <FloatingOverlay
             className="z-10 bg-black/75 place-items-center grid"
             lockScroll
@@ -66,7 +64,7 @@ export default function ScheduleDialog({
                 {...getFloatingProps()}
                 className="flex p-4"
               >
-                <div className="max-w-2xl h-fit my-auto rounded-xl bg-primary-main overflow-hidden">
+                <div className="max-w-2xl h-fit rounded-xl bg-primary-main overflow-hidden">
                   <div className="text-xl font-bold">
                     <div className="flex flex-row w-full">
                       <div className="text-text-main grow items-center pl-4 sm:pl-8 pt-6">
