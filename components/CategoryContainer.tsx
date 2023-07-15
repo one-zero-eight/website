@@ -12,7 +12,7 @@ const categoriesIcons: {
 } = {
   "core-courses": CoreCoursesIcon,
   electives: ElectivesIcon,
-  sport: SportIcon,
+  sports: SportIcon,
 };
 
 export default async function CategoryContainer() {
