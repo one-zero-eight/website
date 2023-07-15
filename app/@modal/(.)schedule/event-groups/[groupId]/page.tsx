@@ -4,6 +4,7 @@ import CloseIcon from "@/components/icons/CloseIcon";
 import LinkIcon from "@/components/icons/LinkIcon";
 import QuestionIcon from "@/components/icons/QuestionIcon";
 import ScheduleLinkCopy from "@/components/ScheduleLinkCopy";
+import { useEventGroupsGetEventGroup } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 import {
   FloatingFocusManager,
@@ -15,25 +16,23 @@ import {
   useRole,
   useTransitionStyles,
 } from "@floating-ui/react";
+import { useRouter } from "next/navigation";
 import React, { useRef } from "react";
 
-export type ScheduleDialogProps = {
-  groupFile: string;
-  isOpen: boolean;
-  setIsOpen: (open: boolean, event?: Event) => void;
+export type Props = {
+  params: { groupId: string };
 };
 
-export default function ScheduleDialog({
-  groupFile,
-  isOpen,
-  setIsOpen,
-}: ScheduleDialogProps) {
-  const calendarURL = `${SCHEDULE_API_URL}/${groupFile}`;
+export default function Page({ params }: Props) {
+  const router = useRouter();
+  const groupId = Number(params.groupId);
+  const { data } = useEventGroupsGetEventGroup(groupId);
+
   const copyButtonRef = useRef(null);
 
   const { context, refs } = useFloating({
-    open: isOpen,
-    onOpenChange: setIsOpen,
+    open: true,
+    onOpenChange: () => router.back(),
   });
 
   // Transition effect
@@ -45,6 +44,9 @@ export default function ScheduleDialog({
   const role = useRole(context);
 
   const { getFloatingProps } = useInteractions([dismiss, role]);
+
+  const calendarURL =
+    data !== undefined ? `${SCHEDULE_API_URL}/${data.path}` : undefined;
 
   return (
     <>
@@ -72,7 +74,7 @@ export default function ScheduleDialog({
                       </div>
                       <button
                         className="rounded-xl w-fit p-4"
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => router.back()}
                       >
                         <CloseIcon className="fill-icon-main/50 hover:fill-icon_hover w-10" />
                       </button>
@@ -88,7 +90,7 @@ export default function ScheduleDialog({
                       <li>
                         Copy the link.
                         <ScheduleLinkCopy
-                          url={calendarURL}
+                          url={calendarURL || ""}
                           copyButtonRef={copyButtonRef}
                         />
                       </li>
@@ -112,7 +114,7 @@ export default function ScheduleDialog({
 
                   <br />
 
-                  <Calendar urls={[calendarURL]} />
+                  <Calendar urls={calendarURL ? [calendarURL] : []} />
                 </div>
               </div>
             </FloatingFocusManager>

@@ -1,11 +1,9 @@
 "use client";
 import { GroupCard } from "@/components/GroupCard";
-import ScheduleDialog from "@/components/ScheduleDialog";
 import SearchBar from "@/components/SearchBar";
 import SignInPopup from "@/components/SignInPopup";
 import { useEventGroupsListEventGroups } from "@/lib/events";
 import { getTypeInfoBySlug } from "@/lib/events-view-config";
-import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import React, { useState } from "react";
 import CategoriesDropdown from "./CategoriesDropdown";
 import FilterDropdown from "./FilterDropdown";
@@ -22,8 +20,6 @@ export default function ScheduleList({ category }: ScheduleListProps) {
     {}
   );
   const [search, setSearch] = useState("");
-  const [selectedGroupFile, setSelectedGroupFile] = useState("");
-  const [dialogOpened, setDialogOpened] = useState(false);
   const [signInOpened, setSignInOpened] = useState(false);
 
   // Apply filters
@@ -103,22 +99,11 @@ export default function ScheduleList({ category }: ScheduleListProps) {
                 askToSignIn={() => {
                   setSignInOpened(true);
                 }}
-                onImportClick={() => {
-                  ymEvent("button-import", { scheduleFile: group.path });
-                  setSelectedGroupFile(group.path);
-                  setDialogOpened(true);
-                }}
               />
             </React.Fragment>
           );
         })}
       </div>
-
-      <ScheduleDialog
-        groupFile={selectedGroupFile}
-        isOpen={dialogOpened}
-        setIsOpen={setDialogOpened}
-      />
 
       <SignInPopup
         header={"Sign in to get access"}

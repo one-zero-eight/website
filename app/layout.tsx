@@ -24,8 +24,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   return (
     <ThemedHtml lang="en" className={`${rubik.variable}`}>
@@ -41,6 +43,7 @@ export default function RootLayout({
             <Sidebar />
             <main className="w-full">{children}</main>
           </div>
+          {modal}
         </Providers>
       </body>
     </ThemedHtml>

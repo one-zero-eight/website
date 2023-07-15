@@ -6,22 +6,23 @@ import Tooltip from "@/components/Tooltip";
 import { useEventGroup } from "@/lib/event-group";
 import { useUsersGetMe, ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Fragment } from "react";
-import { useIsClient, useWindowSize } from "usehooks-ts";
+import { useWindowSize } from "usehooks-ts";
 
 export type GroupCardProps = {
   group: ViewEventGroup;
   askToSignIn?: () => void;
-  onImportClick?: () => void;
   canHide?: boolean;
 };
 
 export function GroupCard({
   group,
   askToSignIn,
-  onImportClick,
   canHide = false,
 }: GroupCardProps) {
+  const router = useRouter();
   const { width } = useWindowSize();
   const {
     switchFavorite,
@@ -34,10 +35,13 @@ export function GroupCard({
     ? viewConfig.types[group.type].showAdditionalInfo
     : [];
   const { data, isError } = useUsersGetMe();
+
+  const eventGroupURL = `/schedule/event-groups/${group.id}`;
+
   return (
     <div
       className="cursor-pointer bg-primary-main hover:bg-primary-hover flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl min-w-fit min-h-fit"
-      onClick={onImportClick}
+      onClick={() => router.push(eventGroupURL)}
     >
       <div className="flex flex-col gap-0.5">
         <p className="text-text-main text-left text-lg sm:text-xl font-medium w-40">
@@ -110,19 +114,16 @@ export function GroupCard({
           </button>
         </Tooltip>
         <Tooltip content={"Import to your calendar"}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onImportClick && onImportClick();
-            }}
-            className="rounded-full p-2 hover:bg-secondary-hover"
+          <Link
+            href={eventGroupURL}
+            className="block rounded-full p-2 hover:bg-secondary-hover"
           >
             <DownloadIcon
               className="fill-icon-main/50 hover:fill-icon-hover/75"
               width={width >= 640 ? 48 : 40}
               height={width >= 640 ? 48 : 40}
             />
-          </button>
+          </Link>
         </Tooltip>
       </div>
     </div>

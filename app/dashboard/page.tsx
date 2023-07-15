@@ -3,21 +3,17 @@ import Calendar from "@/components/Calendar";
 import { GroupCard } from "@/components/GroupCard";
 import { UserFace } from "@/components/icons/UserFace";
 import { Navbar } from "@/components/Navbar";
-import ScheduleDialog from "@/components/ScheduleDialog";
 import { useAuthPaths } from "@/lib/auth";
 import { UserXGroupViewApp, useUsersGetMe } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
-import { ymEvent } from "@/lib/tracking/YandexMetrika";
 import Link from "next/link";
-import React, { useState } from "react";
+import React from "react";
 import { useIsClient, useWindowSize } from "usehooks-ts";
 
 export default function Page() {
   const { width } = useWindowSize();
   const isClient = useIsClient();
   const { data } = useUsersGetMe();
-  const [selectedGroupFile, setSelectedGroupFile] = useState("");
-  const [dialogOpened, setDialogOpened] = useState(false);
   const favorites = data?.favorites || [];
   const { signIn } = useAuthPaths();
 
@@ -107,11 +103,6 @@ export default function Page() {
                     key={v.group.path}
                     group={v.group}
                     canHide={true}
-                    onImportClick={() => {
-                      ymEvent("button-import", { scheduleFile: v.group.path });
-                      setSelectedGroupFile(v.group.path || "");
-                      setDialogOpened(true);
-                    }}
                   />
                 ))}
             </div>
@@ -138,11 +129,6 @@ export default function Page() {
                     key={v.group.path}
                     group={v.group}
                     canHide={true}
-                    onImportClick={() => {
-                      ymEvent("button-import", { scheduleFile: v.group.path });
-                      setSelectedGroupFile(v.group.path || "");
-                      setDialogOpened(true);
-                    }}
                   />
                 ))}
             </div>
@@ -168,12 +154,6 @@ export default function Page() {
           }
         />
       )}
-
-      <ScheduleDialog
-        groupFile={selectedGroupFile}
-        isOpen={dialogOpened}
-        setIsOpen={setDialogOpened}
-      />
     </div>
   );
 }
