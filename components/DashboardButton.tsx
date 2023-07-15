@@ -18,14 +18,14 @@ export function DashboardButton() {
         {width < 1024 ? (
           <Link
             href={signIn}
-            className="mt-6 flex justify-center items-center w-32 h-12 bg-focus_color text-white rounded-3xl font-semibold text-xl"
+            className="mt-6 flex justify-center text-text-main items-center w-32 h-12 bg-focus_color rounded-3xl font-semibold text-xl"
           >
             Sign in
           </Link>
         ) : (
           <Link
             href={signIn}
-            className="mt-6 flex justify-center items-center w-32 h-12 bg-base border-focus_color border-2 text-white rounded-3xl font-semibold text-xl"
+            className="mt-6 flex justify-center text-text-main items-center w-32 h-12 bg-base border-focus_color border-2 rounded-3xl font-semibold text-xl"
           >
             Sign in
           </Link>
@@ -36,7 +36,7 @@ export function DashboardButton() {
   return (
     <Link
       href={"/dashboard"}
-      className="mt-6 flex text-center justify-center items-center w-52 h-14 bg-base border-border border-2 text-white rounded-3xl font-medium text-xl"
+      className="mt-6 flex text-center justify-center text-text-main items-center w-52 h-14 bg-base border-border border-2 rounded-3xl font-medium text-xl"
     >
       <DashboardIcon width={36} height={36} className="fill-icon-main" />
       Dashboard
