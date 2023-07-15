@@ -68,7 +68,6 @@ export default function CalendarEventPopover({
           <FloatingFocusManager
             context={context}
             modal={false}
-            // order={["reference", "content"]}
             initialFocus={-1}
           >
             <div
