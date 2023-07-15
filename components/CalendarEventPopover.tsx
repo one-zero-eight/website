@@ -15,6 +15,8 @@ import {
 import { EventApi } from "@fullcalendar/core";
 import moment from "moment";
 import React from "react";
+import { LocationIcon } from "@/components/icons/LocationIcon";
+import { CalendarEventIcon } from "@/components/icons/CalendarEventIcon";
 
 export type ScheduleDialogProps = {
   event: EventApi;
@@ -72,14 +74,26 @@ export default function CalendarEventPopover({
               ref={refs.setFloating}
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
-              className="z-10 bg-primary-main text-text-main text-sm p-4 rounded-md drop-shadow-md max-w-md"
+              className="flex flex-col gap-2 z-10 bg-primary-main text-text-main text-sm p-4 rounded-2xl drop-shadow-md max-w-md"
             >
-              <div className="text-xl text-bold">{event.title}</div>
-              <div>
-                {moment(event.startStr).format("dddd, D MMMM, HH:mm")}&ndash;
+              <div className="flex px-8 text-xl text-bold">{event.title}</div>
+              <div className="flex flex-row items-center gap-2">
+                <CalendarEventIcon
+                  width={24}
+                  height={24}
+                  className="flex fill-icon-main"
+                />
+                {moment(event.startStr).format("dddd, D MMMM; HH:mm—")}
                 {moment(event.endStr).format("HH:mm")}
               </div>
-              <div>{event.extendedProps.location}</div>
+              <div className="flex flex-row items-center gap-2">
+                <LocationIcon
+                  width={24}
+                  height={24}
+                  className="flex fill-icon-main"
+                />
+                <p className="flex">{event.extendedProps.location}</p>
+              </div>
             </div>
           </FloatingFocusManager>
         </FloatingPortal>
