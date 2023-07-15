@@ -125,8 +125,8 @@ export default function ScheduleList({ category }: ScheduleListProps) {
         description={
           "Save your favorite schedule in the dashboard with your Innopolis account."
         }
-        opened={signInOpened}
-        close={() => setSignInOpened(false)}
+        isOpen={signInOpened}
+        setIsOpen={setSignInOpened}
       />
     </>
   );
