@@ -17,7 +17,7 @@ const categoriesIcons: {
 
 export default async function CategoryContainer() {
   return (
-    <div className="flex flex-row flex-wrap justify-center w-full gap-y-12 lg:gap-x-20 xl:gap-x-28 mt-8">
+    <div className="flex flex-row flex-wrap justify-center w-full gap-y-12 sm:gap-x-18p lg:gap-x-20 xl:gap-x-28 mt-8">
       {Object.entries(viewConfig.types).map(([k, v]) => (
         <CategoryCard
           key={v.slug}
