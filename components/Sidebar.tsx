@@ -1,17 +1,14 @@
 "use client";
 import DashboardIcon from "@/components/icons/DashboardIcon";
 import { MenuIcon } from "@/components/icons/MenuIcon";
+import ScholarshipIcon from "@/components/icons/ScholarshipIcon";
 import UserMenu from "@/components/UserMenu";
 import { useUsersGetMe } from "@/lib/events";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
-import CanteenIcon from "./icons/CanteenIcon";
-import FormsIcon from "./icons/FormsIcon";
-import LaundryIcon from "./icons/LaundryIcon";
 import Logo from "./icons/Logo";
 import ScheduleIcon from "./icons/ScheduleIcon";
-import ScholarshipIcon from "./icons/ScholarshipIcon";
 import SidebarSection from "./SidebarSection";
 
 type Item = {
@@ -23,9 +20,9 @@ type Item = {
 const items: Item[] = [
   { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },
   { title: "Schedule", path: "/schedule", icon: ScheduleIcon },
-  { title: "Laundry", path: "#", icon: LaundryIcon },
-  { title: "Forms", path: "#", icon: FormsIcon },
-  { title: "Canteen", path: "#", icon: CanteenIcon },
+  // { title: "Laundry", path: "#", icon: LaundryIcon },
+  // { title: "Forms", path: "#", icon: FormsIcon },
+  // { title: "Canteen", path: "#", icon: CanteenIcon },
   { title: "Scholarship", path: "#", icon: ScholarshipIcon },
 ];
 
