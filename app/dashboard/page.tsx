@@ -85,12 +85,7 @@ export default function Page() {
           />
         </div>
         <div className="flex flex-col justify-center">
-          <p className="text-text-main text-xl sm:text-2xl">
-            {data?.name}{" "}
-            <span className="text-sm text-text-secondary/75">
-              {data?.status}
-            </span>
-          </p>
+          <p className="text-text-main text-xl sm:text-2xl">{data?.name}</p>
           <p className="text-base sm:text-lg text-text-secondary/75">
             {data?.email}
           </p>
