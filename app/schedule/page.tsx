@@ -2,11 +2,12 @@ import CategoryContainer from "@/components/CategoryContainer";
 import ClarificationContainer from "@/components/ClarificationContainer";
 import { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
+import React from "react";
+import { DashboardButton } from "@/components/DashboardButton";
 
 export const metadata: Metadata = {
   title: "Schedule",
 };
-
 export default function Page() {
   return (
     <main className="p-16 items-center lg:[align-items:normal]">
@@ -35,6 +36,9 @@ export default function Page() {
       <h2 className="text-text text-3xl xl:text-4xl font-medium mt-8 text-center">
         Choose the category
       </h2>
+      <div className="flex justify-center">
+        <DashboardButton />
+      </div>
       <CategoryContainer />
       <h3 className="text-text text-3xl font-medium text-center lg:text-left mt-8">
         How it works?
