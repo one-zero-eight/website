@@ -47,8 +47,8 @@ export default function CalendarEventPopover({
   const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
     common: {
       transitionProperty: "all",
-      transitionDuration: "150ms",
     },
+    duration: 200,
   });
 
   // Event listeners to change the open state
