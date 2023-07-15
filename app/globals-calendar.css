@@ -46,3 +46,8 @@
   /* Force word wrapping */
   word-spacing: 3000px;
 }
+
+/* No Events label */
+.fc-list-empty-cushion {
+  @apply h-[50dvh];
+}
