@@ -1,4 +1,3 @@
-import { Navbar } from "@/components/Navbar";
 import React, { useState } from "react";
 import { useUsersGetMe, ViewEventGroup } from "@/lib/events";
 import { useWindowSize } from "usehooks-ts";
@@ -9,13 +8,14 @@ import { useEventGroup } from "@/lib/event-group";
 import SignInPopup from "@/components/SignInPopup";
 import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 import FavoriteIcon from "@/components/icons/FavoriteIcon";
-import Calendar from "@/components/Calendar";
-import { SCHEDULE_API_URL } from "@/lib/schedule/api";
+import { useRouter } from "next/navigation";
 
 type EventGroupPageProps = {
   groupData: ViewEventGroup;
+  isPopup: boolean;
 };
-export function EventGroupPage({ groupData }: EventGroupPageProps) {
+export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
+  const router = useRouter();
   const { width } = useWindowSize();
   const [signInOpened, setSignInOpened] = useState(false);
   const { data, isError } = useUsersGetMe();
@@ -28,20 +28,18 @@ export function EventGroupPage({ groupData }: EventGroupPageProps) {
     sports: "Sports",
     none: "Not found",
   };
-  console.log(data);
   const type = groupData.type || "none";
   return (
     <>
-      <div className="p-16 bg-secondary-main w-full h-64 items-center lg:[align-items:normal] flex flex-col">
-        <Navbar />
-      </div>
-      <div className="p-16 w-full items-center lg:[align-items:normal] flex flex-col">
+      <div className="p-16 items-center lg:[align-items:normal] flex flex-col">
         <div className="flex flex-col">
           <div className="flex flex-row justify-between">
-            <h1 className="text-text-main text-center lg:text-left text-3xl lg:text-4xl font-bold">
-              {groupData.name}
-            </h1>
-            <div className="flex flex-row gap-4">
+            <div className="flex flex-row w-full">
+              <h1 className="text-text-main text-center lg:text-left text-3xl lg:text-4xl font-bold">
+                {groupData.name}
+              </h1>
+            </div>
+            <div className="flex flex-row mt-8 gap-4">
               <Tooltip content={"Import to your calendar"}>
                 <Link
                   href={`/schedule/event-groups/${groupData.id}/import`}
@@ -114,20 +112,6 @@ export function EventGroupPage({ groupData }: EventGroupPageProps) {
         <h2 className="flex text-text-main text-center xl:text-left text-3xl font-medium">
           Calendar
         </h2>
-      </div>
-      <div className="px-2">
-        <Calendar
-          urls={groupData.path ? [`${SCHEDULE_API_URL}/${groupData.path}`] : []}
-          initialView={
-            width
-              ? width >= 1280
-                ? "dayGridMonth"
-                : width >= 1024
-                ? "timeGridWeek"
-                : "listMonth"
-              : "dayGridMonth"
-          }
-        />
       </div>
     </>
   );
