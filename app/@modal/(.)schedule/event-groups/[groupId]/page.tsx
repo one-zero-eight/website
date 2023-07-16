@@ -65,6 +65,10 @@ export default function Page({ params }: Props) {
     sports: "Sports",
     none: "Not found",
   };
+  const refreshPage = () => {
+    router.push(window.location.href);
+    router.back();
+  };
   return (
     <>
       {isMounted && (
@@ -89,11 +93,11 @@ export default function Page({ params }: Props) {
                       className="rounded-2xl p-4 fill-icon-main/50 hover:fill-icon-hover/75"
                       onClick={() => router.back()}
                     >
-                      <CloseIcon className="fill-icon-main/50 hover:fill-icon_hover w-10" />
+                      <CloseIcon width={40} height={40} />
                     </button>
                     <button
                       className="rounded-2xl fill-icon-main/50 hover:fill-icon-hover/75"
-                      onClick={() => router.refresh()}
+                      onClick={() => window.location.reload()}
                     >
                       <ExpandIcon className="flex" width={36} height={36} />
                     </button>
