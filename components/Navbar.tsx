@@ -2,7 +2,7 @@ import SwitchThemeButton from "@/components/SwitchThemeButton";
 import UserMenu from "@/components/UserMenu";
 
 type NavbarProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
 };
 export function Navbar({ children, className }: NavbarProps) {
