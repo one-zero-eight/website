@@ -34,13 +34,16 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
     <>
       <div className="p-16 items-center lg:[align-items:normal] flex flex-col">
         <div className="flex flex-col">
-          <div className="flex flex-row justify-between">
-            <div className="flex flex-row w-full">
+          <div className="flex flex-col lg:flex-row justify-between">
+            <div className="flex flex-col lg:flex-row w-full">
               <h1 className="text-text-main text-center lg:text-left text-3xl lg:text-4xl font-bold">
                 {groupData.name}
               </h1>
+              <p className="text-center lg:hidden lg:invisible xl:text-left text-text-secondary/75">
+                {groupData.satellite?.description || ""}
+              </p>
             </div>
-            <div className="flex flex-row mt-8 gap-4">
+            <div className="flex flex-col justify-center items-center lg:[align-items:normal] lg:justify-normal lg:flex-row mt-8 gap-4">
               <Tooltip content={"Import to your calendar"}>
                 <Link
                   href={`/schedule/event-groups/${groupData.id}/import`}
@@ -90,11 +93,11 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
               </Tooltip>
             </div>
           </div>
-          <p className="text-center xl:text-left text-text-secondary/75">
+          <p className="hidden invisible lg:block lg:visible text-center xl:text-left text-text-secondary/75">
             {groupData.satellite?.description || ""}
           </p>
         </div>
-        <div className="flex flex-col my-8 gap-y-4">
+        <div className="flex flex-col justify-center items-center my-8 gap-y-4">
           <h2 className="flex text-text-main text-center xl:text-left text-3xl font-medium">
             Tags
           </h2>
