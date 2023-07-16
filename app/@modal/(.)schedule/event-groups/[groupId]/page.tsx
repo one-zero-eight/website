@@ -84,7 +84,7 @@ export default function Page({ params }: Props) {
                 className="flex p-4"
               >
                 <div className="max-w-2xl h-fit rounded-xl bg-primary-main overflow-hidden">
-                  <div className="bg-secondary-main w-256 h-64">
+                  <div className="bg-secondary-main w-screen lg:w-256 h-64">
                     <button
                       className="rounded-2xl p-4 fill-icon-main/50 hover:fill-icon-hover/75"
                       onClick={() => router.back()}
@@ -98,11 +98,15 @@ export default function Page({ params }: Props) {
                       <ExpandIcon className="flex" width={36} height={36} />
                     </button>
                   </div>
-                  <div className="flex flex-row w-full shrink-0">
-                    <h1 className="text-text-main grow items-center pl-4 sm:pl-8 pt-6 font-bold text-2xl xl:text-3xl">
+                  <div className="flex flex-col lg:flex-row justify-center items-center w-screen shrink-0">
+                    <h1 className="text-text-main lg:grow text-center lg:text-left pl-4 sm:pl-8 pt-6 font-bold text-2xl xl:text-3xl">
                       {data.name}
                     </h1>
-                    <div className="flex flex-row mt-8 mr-4 gap-4 w-fit">
+                    <p className="lg:hidden lg:invisible pl-8 text-center lg:text-left w-4/6 text-text-secondary/75">
+                      {data.satellite?.description ||
+                        "Hello world, this is a long description about my life and this elective."}
+                    </p>
+                    <div className="flex flex-col lg:flex-row justify-center items-center mt-8 mr-4 gap-4 w-fit">
                       <Tooltip content={"Import to your calendar"}>
                         <Link
                           href={`/schedule/event-groups/${data.id}/import`}
@@ -152,11 +156,10 @@ export default function Page({ params }: Props) {
                       </Tooltip>
                     </div>
                   </div>
-                  <p className="pl-8 text-left w-4/6 xl:text-left text-text-secondary/75">
-                    {data.satellite?.description ||
-                      "Hello world, this is a long description about my life and this elective."}
+                  <p className="hidden invisible lg:block lg:visible pl-8 text-center lg:text-left w-4/6 text-text-secondary/75">
+                    {data.satellite?.description || ""}
                   </p>
-                  <div className="pl-8 flex flex-col my-8 gap-y-4">
+                  <div className="pl-8 flex flex-col justify-center items-center lg:[align-items:normal] lg:justify-normal my-8 gap-y-4">
                     <h2 className="flex text-text-main grow text-center xl:text-left text-3xl font-medium">
                       Tags
                     </h2>
@@ -164,7 +167,7 @@ export default function Page({ params }: Props) {
                       <p className="text-text-main">{tagsInfo[type]}</p>
                     </div>
                   </div>
-                  <h2 className="pl-8 flex text-text-main text-center xl:text-left text-3xl font-medium">
+                  <h2 className="pl-8 flex justify-center items-center lg:[align-items:normal] text-text-main text-center xl:text-left text-3xl font-medium">
                     Calendar
                   </h2>
                   <br />
