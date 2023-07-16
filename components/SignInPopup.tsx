@@ -67,12 +67,12 @@ export default function SignInPopup({
                         {header}
                       </div>
                       <button
-                        className="rounded-xl w-fit p-4"
+                        className="rounded-2xl w-fit p-4 fill-icon-main/50 hover:fill-icon-hover/75"
                         onClick={() => {
-                          close && close();
+                          setIsOpen && setIsOpen(false);
                         }}
                       >
-                        <CloseIcon className="fill-icon-main/50 hover:fill-icon_hover w-10" />
+                        <CloseIcon className="w-10" />
                       </button>
                     </div>
                   </div>
