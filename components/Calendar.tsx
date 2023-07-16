@@ -114,9 +114,15 @@ function Calendar({
         eventClassNames="cursor-pointer text-sm" // Show that events are clickable
         eventClick={(info) => {
           info.jsEvent.preventDefault();
-          setEventElement(info.el);
+          // We should check prev value via argument because 'eventElement' may be outdated in current closure
+          setEventElement((prevElement) => {
+            setPopoverOpened((prevOpened) => {
+              if (!prevOpened) return true;
+              return prevElement !== info.el;
+            });
+            return info.el;
+          });
           setPopoverEvent(info.event);
-          setPopoverOpened(true);
         }}
         slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
