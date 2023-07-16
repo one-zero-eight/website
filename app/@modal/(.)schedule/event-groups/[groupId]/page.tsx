@@ -1,9 +1,4 @@
 "use client";
-import Calendar from "@/components/Calendar";
-import CloseIcon from "@/components/icons/CloseIcon";
-import LinkIcon from "@/components/icons/LinkIcon";
-import QuestionIcon from "@/components/icons/QuestionIcon";
-import ScheduleLinkCopy from "@/components/ScheduleLinkCopy";
 import { useEventGroupsGetEventGroup } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 import {
@@ -18,6 +13,10 @@ import {
 } from "@floating-ui/react";
 import { useRouter } from "next/navigation";
 import React, { useRef } from "react";
+import { EventGroupPage } from "@/components/EventGroupPage";
+import Calendar from "@/components/Calendar";
+import { useWindowSize } from "usehooks-ts";
+import CloseIcon from "@/components/icons/CloseIcon";
 
 export type Props = {
   params: { groupId: string };
@@ -48,6 +47,8 @@ export default function Page({ params }: Props) {
   const calendarURL =
     data !== undefined ? `${SCHEDULE_API_URL}/${data.path}` : undefined;
 
+  const { width } = useWindowSize();
+  if (!data) return <>Loading...</>;
   return (
     <>
       {isMounted && (
@@ -64,57 +65,34 @@ export default function Page({ params }: Props) {
                 ref={refs.setFloating}
                 style={transitionStyles}
                 {...getFloatingProps()}
-                className="flex p-4"
+                className="flex-row my-32 mx-64 w-max max-w-3xl"
               >
-                <div className="max-w-2xl h-fit rounded-xl bg-primary-main overflow-hidden">
-                  <div className="text-xl font-bold">
-                    <div className="flex flex-row w-full">
-                      <div className="text-text-main grow items-center pl-4 sm:pl-8 pt-6">
-                        Import to your calendar
-                      </div>
-                      <button
-                        className="rounded-xl w-fit p-4"
-                        onClick={() => router.back()}
-                      >
-                        <CloseIcon className="fill-icon-main/50 hover:fill-icon_hover w-10" />
-                      </button>
+                <div className="flex flex-row shrink-0 w-full">
+                  <div className="rounded-2xl h-fit overflow-hidden bg-primary-main p-2">
+                    <button
+                      className="rounded-xl p-4"
+                      onClick={() => router.back()}
+                    >
+                      <CloseIcon className="fill-icon-main/50 hover:fill-icon_hover w-10" />
+                    </button>
+                    <EventGroupPage groupData={data} isPopup={true} />
+                    <div className="px-2">
+                      <Calendar
+                        urls={
+                          data.path ? [`${SCHEDULE_API_URL}/${data.path}`] : []
+                        }
+                        initialView={
+                          width
+                            ? width >= 1280
+                              ? "dayGridMonth"
+                              : width >= 1024
+                              ? "timeGridWeek"
+                              : "listMonth"
+                            : "dayGridMonth"
+                        }
+                      />
                     </div>
                   </div>
-                  <div className="px-4 sm:px-8">
-                    <div className="text-text-secondary/75">
-                      You can add the schedule to your favorite calendar
-                      application and it will be updated on schedule changes.
-                    </div>
-
-                    <ul className="list-decimal pl-4 text-text-secondary/75 my-4">
-                      <li>
-                        Copy the link.
-                        <ScheduleLinkCopy
-                          url={calendarURL || ""}
-                          copyButtonRef={copyButtonRef}
-                        />
-                      </li>
-                      <li>
-                        Open your calendar settings to add a calendar by URL.
-                        <a
-                          className="underline ml-4 flex flex-row items-baseline gap-x-2 w-fit"
-                          href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
-                        >
-                          <LinkIcon className="h-4 w-4 fill-icon-main/50 hover:fill-icon-hover/75" />
-                          Google Calendar
-                        </a>
-                        <a className="ml-4 flex flex-row items-baseline gap-x-2 w-fit">
-                          <QuestionIcon className="h-4 w-4 fill-icon-main/50 hover:fill-icon-hover/75" />
-                          Other applications: find in settings
-                        </a>
-                      </li>
-                      <li>Paste the link and click Add.</li>
-                    </ul>
-                  </div>
-
-                  <br />
-
-                  <Calendar urls={calendarURL ? [calendarURL] : []} />
                 </div>
               </div>
             </FloatingFocusManager>
