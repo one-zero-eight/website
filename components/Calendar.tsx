@@ -88,24 +88,21 @@ function Calendar({
         views={{
           listMonth: {
             eventContent: renderEventListMonth,
-            navLinks: false,
           },
           timeGridWeek: {
             // Show weekday and date in day header
             dayHeaderFormat: "ddd D",
             eventContent: renderEventTimeGridWeek,
-            navLinks: false,
           },
           dayGridMonth: {
             eventContent: renderEventDayGridMonth,
-            navLinks: false,
           },
         }}
         allDaySlot={false} // Do not display "all day" events
         // displayEventEnd={true} // Display end time
         nowIndicator={true} // Display current time as line
         firstDay={1} // From Monday
-        navLinks={true} // Dates are clickable
+        navLinks={false} // Dates are clickable
         weekNumbers={true} // Display numbers of weeks
         weekNumberFormat={{ week: "long" }} // Show "Week 1", not "W1"
         weekNumberClassNames="text-sm" // Small text size
