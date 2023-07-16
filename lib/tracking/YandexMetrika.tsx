@@ -1,13 +1,20 @@
+import { useUsersGetMe } from "@/lib/events";
 import Script from "next/script";
+import { useEffect } from "react";
 
 declare global {
   interface Window {
-    ym: (
+    ym: ((
       id: number,
       method: "reachGoal",
       target: string,
       params?: object
-    ) => void;
+    ) => void) &
+      ((
+        id: number,
+        method: "userParams",
+        data: { [key: string | "UserID"]: any }
+      ) => void);
   }
 }
 
@@ -50,13 +57,38 @@ export default function YandexMetrika() {
           />
         </div>
       </noscript>
+      <YandexMetrikaUserInfoTracker />
     </>
   );
+}
+
+function YandexMetrikaUserInfoTracker() {
+  const { data } = useUsersGetMe();
+
+  // Send user info to Yandex Metrika
+  useEffect(() => {
+    if (data) {
+      ymUserParams({
+        UserID: data.id,
+        email: data.email,
+        name: data.name,
+      });
+    }
+  }, [data]);
+
+  return <></>;
 }
 
 // https://yandex.ru/support/metrica/general/goal-js-event.html
 export function ymEvent(target: string, params?: object) {
   if (window !== undefined && window.ym !== undefined && ym_id !== undefined) {
     window.ym(ym_id, "reachGoal", target, params);
+  }
+}
+
+// https://yandex.ru/support/metrica/data/user-params_data.html
+export function ymUserParams(data: Record<string, any>) {
+  if (window !== undefined && window.ym !== undefined && ym_id !== undefined) {
+    window.ym(ym_id, "userParams", data);
   }
 }
