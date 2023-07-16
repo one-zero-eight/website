@@ -20,10 +20,10 @@ export default function Page() {
   if (!isClient)
     return (
       <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
-        <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
+        <h1 className="text-text-main lgw-smh:hidden lgw-smh:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
           Dashboard
         </h1>
-        <Navbar className="hidden invisible lg:flex lg:visible">
+        <Navbar>
           <h1 className="text-text-main text-center sm:text-left text-4xl font-bold">
             Dashboard
           </h1>
@@ -34,10 +34,10 @@ export default function Page() {
     return (
       <>
         <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
-          <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
+          <h1 className="text-text-main lgw-smh:hidden lgw-smh:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
             Dashboard
           </h1>
-          <Navbar className="hidden invisible lg:flex lg:visible">
+          <Navbar>
             <h1 className="text-text-main text-center sm:text-left text-4xl font-bold">
               Dashboard
             </h1>
@@ -65,10 +65,10 @@ export default function Page() {
   return (
     <>
       <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
-        <h1 className="text-text-main lg:hidden lg:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
+        <h1 className="text-text-main lgw-smh:hidden lgw-smh:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
           Dashboard
         </h1>
-        <Navbar className="hidden invisible lg:flex lg:visible">
+        <Navbar>
           <h1 className="text-text-main text-center sm:text-left text-4xl font-bold">
             Dashboard
           </h1>

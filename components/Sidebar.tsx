@@ -35,7 +35,7 @@ function Sidebar() {
 
   return (
     <>
-      <div className="smw-mdh:hidden absolute flex flex-col">
+      <div className="lgw-smh:hidden absolute flex flex-col">
         <div
           className={
             isOpened
@@ -97,7 +97,7 @@ function Sidebar() {
           </div>
         </aside>
       </div>
-      <aside className="smw-mdh:flex hidden bg-primary-main flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
+      <aside className="lgw-smh:flex hidden bg-primary-main flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
         <Link href={user ? "/dashboard" : "/schedule"} className="mb-8">
           <Logo className="h-16 fill-text-main" />
         </Link>
@@ -114,7 +114,7 @@ function Sidebar() {
         </nav>
         <div className="grow"></div>
         <br />
-        <div className="mb-4 lg:hidden lg:invisible">
+        <div className="mb-4 lgw-smh:hidden lgw-smh:invisible">
           <UserMenu isMobile={false} isSidebar={true} />
         </div>
         <a className="text-text-main" href="https://t.me/one_zero_eight">

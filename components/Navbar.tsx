@@ -9,7 +9,7 @@ export function Navbar({ children, className }: NavbarProps) {
   return (
     <nav
       className={
-        "hidden lg:flex justify-between z-[2] opacity-[0.999] pb-0 items-start " +
+        "hidden invisible lgw-smh:flex lgw-smh:visible justify-between z-[2] opacity-[0.999] pb-0 items-start " +
         className
       }
     >
