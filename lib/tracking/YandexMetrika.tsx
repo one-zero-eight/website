@@ -1,6 +1,4 @@
-import { useUsersGetMe } from "@/lib/events";
 import Script from "next/script";
-import { useEffect } from "react";
 
 declare global {
   interface Window {
@@ -57,26 +55,8 @@ export default function YandexMetrika() {
           />
         </div>
       </noscript>
-      <YandexMetrikaUserInfoTracker />
     </>
   );
-}
-
-function YandexMetrikaUserInfoTracker() {
-  const { data } = useUsersGetMe();
-
-  // Send user info to Yandex Metrika
-  useEffect(() => {
-    if (data) {
-      ymUserParams({
-        UserID: data.id,
-        email: data.email,
-        name: data.name,
-      });
-    }
-  }, [data]);
-
-  return <></>;
 }
 
 // https://yandex.ru/support/metrica/general/goal-js-event.html

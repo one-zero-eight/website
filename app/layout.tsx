@@ -2,6 +2,7 @@ import Providers from "@/app/providers";
 import ThemedHtml from "@/app/theme";
 import Sidebar from "@/components/Sidebar";
 import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
+import UserInfoTracker from "@/lib/tracking/UserInfoTracker";
 import YandexMetrika from "@/lib/tracking/YandexMetrika";
 import { Metadata } from "next";
 import { Rubik } from "next/font/google";
@@ -38,6 +39,7 @@ export default function RootLayout({
           </noscript>
           <YandexMetrika />
           <GoogleAnalytics />
+          <UserInfoTracker />
 
           <div className="flex flex-row">
             <Sidebar />
