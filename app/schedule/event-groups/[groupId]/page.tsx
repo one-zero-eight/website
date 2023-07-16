@@ -15,5 +15,5 @@ export default function Page({ params }: Props) {
     return <>Loading...</>;
   }
 
-  return <EventGroupPage data={data} />;
+  return <EventGroupPage groupData={data} />;
 }
