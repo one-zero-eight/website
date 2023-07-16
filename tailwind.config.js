@@ -7,6 +7,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      width: {
+        256: "64rem",
+      },
       colors: {
         base: "rgba(var(--color-base) / <alpha-value>)",
         primary: {
