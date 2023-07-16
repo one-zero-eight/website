@@ -35,6 +35,7 @@ export function DashboardButton() {
   }
   return (
     <Link
+      id="schedule-dashboard-button"
       href={"/dashboard"}
       className="mt-6 flex text-center justify-center text-text-main items-center w-52 h-14 bg-base border-border border-2 rounded-3xl font-medium text-xl"
     >
