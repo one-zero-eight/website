@@ -65,10 +65,6 @@ export default function Page({ params }: Props) {
     sports: "Sports",
     none: "Not found",
   };
-  const refreshPage = () => {
-    router.push(window.location.href);
-    router.back();
-  };
   return (
     <>
       {isMounted && (
