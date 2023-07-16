@@ -18,7 +18,7 @@ export function DashboardButton() {
         {width < 1024 ? (
           <Link
             href={signIn}
-            className="mt-6 flex justify-center text-text-main items-center w-32 h-12 bg-focus_color rounded-3xl font-semibold text-xl"
+            className="mt-6 flex justify-center text-white items-center w-32 h-12 bg-focus_color rounded-3xl font-semibold text-xl"
           >
             Sign in
           </Link>
