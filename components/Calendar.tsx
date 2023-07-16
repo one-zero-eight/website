@@ -170,17 +170,19 @@ function renderEventDayGridMonth({
   timeText,
 }: EventContentArg) {
   return (
-    <div className="max-w-full">
-      <div className="flex flex-row items-center">
-        <div
-          className="fc-daygrid-event-dot"
-          style={{ borderColor: borderColor || backgroundColor }}
-        />
-        {timeText && <div className="fc-event-time">{timeText}</div>}
-        <div className="fc-event-title line-clamp-2 max-w-full">
-          {event.title || <>&nbsp;</>}
-        </div>
+    <div className="w-full flex flex-row items-center overflow-hidden">
+      <div
+        className="fc-daygrid-event-dot"
+        style={{ borderColor: borderColor || backgroundColor }}
+      />
+      <div className="fc-event-title max-w-full w-full text-xs">
+        {event.title || <>&nbsp;</>}
       </div>
+      {timeText && (
+        <div className="text-xs text-inactive text-right w-fit ml-1 hidden lg:block">
+          {timeText}
+        </div>
+      )}
     </div>
   );
 }
