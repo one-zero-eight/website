@@ -88,14 +88,17 @@ function Calendar({
         views={{
           listMonth: {
             eventContent: renderEventListMonth,
+            navLinks: false,
           },
           timeGridWeek: {
             // Show weekday and date in day header
             dayHeaderFormat: "ddd D",
             eventContent: renderEventTimeGridWeek,
+            navLinks: false,
           },
           dayGridMonth: {
             eventContent: renderEventDayGridMonth,
+            navLinks: false,
           },
         }}
         allDaySlot={false} // Do not display "all day" events
