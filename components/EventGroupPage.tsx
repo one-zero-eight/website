@@ -10,6 +10,7 @@ import SignInPopup from "@/components/SignInPopup";
 import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 import FavoriteIcon from "@/components/icons/FavoriteIcon";
 import Calendar from "@/components/Calendar";
+import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 
 type EventGroupPageProps = {
   groupData: ViewEventGroup;
@@ -115,7 +116,18 @@ export function EventGroupPage({ groupData }: EventGroupPageProps) {
         </h2>
       </div>
       <div className="px-2">
-        <Calendar urls={groupData.path ? [groupData.path] : []} />
+        <Calendar
+          urls={groupData.path ? [`${SCHEDULE_API_URL}/${groupData.path}`] : []}
+          initialView={
+            width
+              ? width >= 1280
+                ? "dayGridMonth"
+                : width >= 1024
+                ? "timeGridWeek"
+                : "listMonth"
+              : "dayGridMonth"
+          }
+        />
       </div>
     </>
   );
