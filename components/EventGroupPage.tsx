@@ -9,6 +9,7 @@ import SignInPopup from "@/components/SignInPopup";
 import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 import FavoriteIcon from "@/components/icons/FavoriteIcon";
 import { useRouter } from "next/navigation";
+import CloseIcon from "@/components/icons/CloseIcon";
 
 type EventGroupPageProps = {
   groupData: ViewEventGroup;
@@ -29,7 +30,7 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
     none: "Not found",
   };
   const type = groupData.type || "none";
-  return (
+  return !isPopup ? (
     <>
       <div className="p-16 items-center lg:[align-items:normal] flex flex-col">
         <div className="flex flex-col">
@@ -109,6 +110,29 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
           isOpen={signInOpened}
           setIsOpen={setSignInOpened}
         />
+        <h2 className="flex text-text-main text-center xl:text-left text-3xl font-medium">
+          Calendar
+        </h2>
+      </div>
+    </>
+  ) : (
+    <>
+      <div className="max-w-2xl h-fit rounded-xl bg-primary-main overflow-hidden">
+        <div className="text-xl font-bold">
+          <div className="flex flex-row w-full">
+            <div className="text-text-main grow items-center pl-4 sm:pl-8 pt-6">
+              {groupData.name}
+            </div>
+            <button className="rounded-xl" onClick={() => router.back()}>
+              <CloseIcon className="fill-icon-main/50 hover:fill-icon_hover w-10" />
+            </button>
+          </div>
+        </div>
+        <div className="px-4 sm:px-8">
+          <div className="text-text-secondary/75">
+            {groupData.satellite?.description || ""}
+          </div>
+        </div>
         <h2 className="flex text-text-main text-center xl:text-left text-3xl font-medium">
           Calendar
         </h2>
