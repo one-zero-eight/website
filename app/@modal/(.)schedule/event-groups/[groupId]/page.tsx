@@ -78,10 +78,10 @@ export default function Page({ params }: Props) {
                 {...getFloatingProps()}
                 className="flex p-4"
               >
-                <div className="max-w-2xl h-fit rounded-xl bg-primary-main overflow-hidden">
+                <div className="max-w-3xl h-fit rounded-xl bg-primary-main overflow-hidden">
                   <div
                     style={{ backgroundImage: "url(/background-pattern.svg)" }}
-                    className="bg-repeat bg-secondary-main w-5/6 lg:w-256 h-64"
+                    className="bg-repeat bg-secondary-main w-full lg:w-256 h-64"
                   >
                     <button
                       className="rounded-2xl p-4 fill-icon-main/50 hover:fill-icon-hover/75"
@@ -97,10 +97,10 @@ export default function Page({ params }: Props) {
                     </button>
                   </div>
                   <div className="flex flex-col lg:flex-row justify-center items-center shrink-0">
-                    <h1 className="text-text-main lg:grow text-center lg:text-left sm:pl-8 pt-6 font-bold text-2xl xl:text-3xl">
+                    <h1 className="text-text-main lg:grow text-center lg:text-left lg:pl-8 pt-6 font-bold text-2xl xl:text-3xl">
                       {data.name}
                     </h1>
-                    <p className="lg:hidden lg:invisible sm:pl-8 text-center lg:text-left w-4/6 text-text-secondary/75">
+                    <p className="lg:hidden lg:invisible lg:pl-8 text-center lg:text-left w-4/6 text-text-secondary/75">
                       {data.satellite?.description ||
                         "Hello world, this is a long description about my life and this elective."}
                     </p>
@@ -157,7 +157,7 @@ export default function Page({ params }: Props) {
                   <p className="hidden invisible lg:block lg:visible pl-8 text-center lg:text-left w-4/6 text-text-secondary/75">
                     {data.satellite?.description || ""}
                   </p>
-                  <div className="sm:pl-8 flex flex-col justify-center items-center lg:[align-items:normal] lg:justify-normal my-8 gap-y-4">
+                  <div className="lg:pl-8 flex flex-col justify-center items-center lg:[align-items:normal] lg:justify-normal my-8 gap-y-4">
                     <h2 className="flex text-text-main grow text-center xl:text-left text-3xl font-medium">
                       Tags
                     </h2>
@@ -165,7 +165,7 @@ export default function Page({ params }: Props) {
                       <p className="text-text-main">{tagsInfo[type]}</p>
                     </div>
                   </div>
-                  <h2 className="sm:pl-8 flex justify-center items-center lg:justify-normal lg:[align-items:normal] text-text-main text-center xl:text-left text-3xl font-medium">
+                  <h2 className="lg:pl-8 flex justify-center items-center lg:justify-normal lg:[align-items:normal] text-text-main text-center xl:text-left text-3xl font-medium">
                     Calendar
                   </h2>
                   <br />
