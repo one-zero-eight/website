@@ -97,7 +97,7 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
             {groupData.satellite?.description || ""}
           </p>
         </div>
-        <div className="flex flex-col justify-center items-center my-8 gap-y-4">
+        <div className="flex flex-col justify-center lg:justify-normal lg:[align-items:normal] items-center my-8 gap-y-4">
           <h2 className="flex text-text-main text-center xl:text-left text-3xl font-medium">
             Tags
           </h2>
