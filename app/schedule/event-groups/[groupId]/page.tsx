@@ -20,7 +20,10 @@ export default function Page({ params }: Props) {
   }
   return (
     <>
-      <div className="p-16 bg-secondary-main w-full h-64 items-center lg:[align-items:normal] flex flex-col">
+      <div
+        style={{ backgroundImage: "url(/background-pattern.svg)" }}
+        className="p-16 bg-repeat bg-primary-main w-full h-64 items-center lg:[align-items:normal] flex flex-col"
+      >
         <Navbar />
       </div>
       <EventGroupPage groupData={data} isPopup={false} />

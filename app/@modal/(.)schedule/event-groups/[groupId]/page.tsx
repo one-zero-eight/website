@@ -84,7 +84,10 @@ export default function Page({ params }: Props) {
                 className="flex p-4"
               >
                 <div className="max-w-2xl h-fit rounded-xl bg-primary-main overflow-hidden">
-                  <div className="bg-secondary-main w-screen lg:w-256 h-64">
+                  <div
+                    style={{ backgroundImage: "url(/background-pattern.svg)" }}
+                    className="bg-repeat bg-secondary-main w-screen lg:w-256 h-64"
+                  >
                     <button
                       className="rounded-2xl p-4 fill-icon-main/50 hover:fill-icon-hover/75"
                       onClick={() => router.back()}
