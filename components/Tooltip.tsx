@@ -68,7 +68,7 @@ export default function Tooltip({
       </div>
 
       {isMounted && (
-        <FloatingPortal id="tooltip">
+        <FloatingPortal>
           <div
             ref={refs.setFloating}
             style={{ ...floatingStyles, ...transitionStyles }}
