@@ -1,4 +1,12 @@
 "use client";
+import Calendar from "@/components/Calendar";
+import CloseIcon from "@/components/icons/CloseIcon";
+import DownloadIcon from "@/components/icons/DownloadIcon";
+import { ExpandIcon } from "@/components/icons/ExpandIcon";
+import FavoriteIcon from "@/components/icons/FavoriteIcon";
+import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
+import Tooltip from "@/components/Tooltip";
+import { useEventGroup } from "@/lib/event-group";
 import { useEventGroupsGetEventGroup } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
 import {
@@ -11,18 +19,10 @@ import {
   useRole,
   useTransitionStyles,
 } from "@floating-ui/react";
-import { useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
-import { useWindowSize } from "usehooks-ts";
-import { useEventGroup } from "@/lib/event-group";
-import CloseIcon from "@/components/icons/CloseIcon";
-import { ExpandIcon } from "@/components/icons/ExpandIcon";
-import FavoriteIcon from "@/components/icons/FavoriteIcon";
-import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
-import Tooltip from "@/components/Tooltip";
-import DownloadIcon from "@/components/icons/DownloadIcon";
 import Link from "next/link";
-import Calendar from "@/components/Calendar";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useWindowSize } from "usehooks-ts";
 
 export type Props = {
   params: { groupId: string };
@@ -32,8 +32,6 @@ export default function Page({ params }: Props) {
   const router = useRouter();
   const groupId = Number(params.groupId);
   const { data } = useEventGroupsGetEventGroup(groupId);
-
-  const copyButtonRef = useRef(null);
 
   const { context, refs } = useFloating({
     open: true,
@@ -73,10 +71,7 @@ export default function Page({ params }: Props) {
             className="z-10 bg-black/75 place-items-center grid"
             lockScroll
           >
-            <FloatingFocusManager
-              context={context}
-              initialFocus={copyButtonRef}
-            >
+            <FloatingFocusManager context={context}>
               <div
                 ref={refs.setFloating}
                 style={transitionStyles}
