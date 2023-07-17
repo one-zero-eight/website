@@ -96,7 +96,7 @@ export default function Page({ params }: Props) {
                       <ExpandIcon className="flex" width={36} height={36} />
                     </button>
                   </div>
-                  <div className="flex flex-col lg:flex-row justify-center items-center w-screen shrink-0">
+                  <div className="flex flex-col lg:flex-row justify-center items-center shrink-0">
                     <h1 className="text-text-main lg:grow text-center lg:text-left pl-4 sm:pl-8 pt-6 font-bold text-2xl xl:text-3xl">
                       {data.name}
                     </h1>
