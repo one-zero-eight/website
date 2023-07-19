@@ -45,6 +45,7 @@ module.exports = {
       },
       fontFamily: {
         primary: ["var(--font-rubik)", "sans-serif"],
+        handwritten: ["var(--font-fuzzy-bubbles)", "sans-serif"],
       },
       screens: {
         "lgw-smh": { raw: "(min-width: 1024px) and (min-height: 600px)" },

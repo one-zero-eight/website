@@ -5,7 +5,7 @@ import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
 import UserInfoTracker from "@/lib/tracking/UserInfoTracker";
 import YandexMetrika from "@/lib/tracking/YandexMetrika";
 import { Metadata } from "next";
-import { Rubik } from "next/font/google";
+import { Fuzzy_Bubbles, Rubik } from "next/font/google";
 import React from "react";
 import "./globals.css";
 
@@ -13,6 +13,14 @@ const rubik = Rubik({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-rubik",
+});
+
+// Font for Scholarship
+const fuzzyBubbles = Fuzzy_Bubbles({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-fuzzy-bubbles",
+  weight: "700",
 });
 
 export const metadata: Metadata = {
@@ -31,7 +39,10 @@ export default function RootLayout({
   modal: React.ReactNode;
 }) {
   return (
-    <ThemedHtml lang="en" className={`${rubik.variable}`}>
+    <ThemedHtml
+      lang="en"
+      className={`${rubik.variable} ${fuzzyBubbles.variable}`}
+    >
       <body className="bg-base font-primary text-text-main text-lg">
         <Providers>
           <noscript className="flex justify-center w-full p-8 bg-red-700">
