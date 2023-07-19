@@ -20,10 +20,10 @@ type Item = {
 const items: Item[] = [
   { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },
   { title: "Schedule", path: "/schedule", icon: ScheduleIcon },
+  { title: "Scholarship", path: "/scholarship", icon: ScholarshipIcon },
   // { title: "Laundry", path: "#", icon: LaundryIcon },
   // { title: "Forms", path: "#", icon: FormsIcon },
   // { title: "Canteen", path: "#", icon: CanteenIcon },
-  { title: "Scholarship", path: "#", icon: ScholarshipIcon },
 ];
 
 function Sidebar() {
