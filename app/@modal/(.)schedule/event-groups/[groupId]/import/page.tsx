@@ -99,6 +99,7 @@ export default function Page({ params }: Props) {
                         <a
                           className="underline ml-4 flex flex-row items-baseline gap-x-2 w-fit"
                           href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
+                          target="_blank"
                         >
                           <LinkIcon className="h-4 w-4 fill-icon-main/50 hover:fill-icon-hover/75" />
                           Google Calendar
