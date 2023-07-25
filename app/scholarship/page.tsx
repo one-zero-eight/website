@@ -1,3 +1,8 @@
+import { ScholarshipBmax } from "@/components/icons/ScholarshipBmax";
+import { ScholarshipBmin } from "@/components/icons/ScholarshipBmin";
+import { ScholarshipFormula } from "@/components/icons/ScholarshipFormula";
+import { ScholarshipGPA } from "@/components/icons/ScholarshipGPA";
+import { ScholarshipS } from "@/components/icons/ScholarshipS";
 import { Navbar } from "@/components/Navbar";
 import ScholarshipCalculator from "@/components/ScholarshipCalculator";
 import React from "react";
@@ -21,7 +26,62 @@ export default function Page() {
           scholarship.
         </p>
       </Navbar>
-      <ScholarshipCalculator />
+
+      <div className="flex flex-col items-center">
+        <div className="max-w-2xl w-full my-12">
+          <ScholarshipCalculator />
+        </div>
+
+        <div className="max-w-2xl">
+          <h2 className="text-3xl text-center">Information</h2>
+
+          <h3 className="text-2xl mt-4">Academic scholarships:</h3>
+          <p>
+            For the first semester &mdash; scholarship from the admissions
+            department
+          </p>
+          <p>For the next semesters &mdash; using the following formula:</p>
+          <ScholarshipFormula className="fill-text-main my-4 w-full" />
+
+          <p>
+            <ScholarshipS className="inline fill-text-main -mt-1" /> &mdash;
+            scholarship amount
+          </p>
+          <p>
+            <ScholarshipBmin className="inline fill-text-main -mt-1" /> &mdash;
+            minimum scholarship amount (3,000₽)
+          </p>
+          <p>
+            <ScholarshipBmax className="inline fill-text-main -mt-1" /> &mdash;
+            maximum scholarship amount (20,000₽)
+          </p>
+          <p>
+            <ScholarshipGPA className="inline fill-text-main" /> &mdash;
+            student&apos;s average grade for the last semester
+          </p>
+
+          <h3 className="text-2xl mt-4">Increased scholarship:</h3>
+          <p>
+            + <i>10,000₽</i> &mdash; if you achieve all <b>A</b> and <b>P</b>{" "}
+            grades in all subjects for two consecutive semesters.
+          </p>
+          <p>
+            + <i>6,000₽</i> &mdash; if you win a competition for an increased
+            scholarship (link).
+          </p>
+
+          <h3 className="text-2xl mt-4">Financial support:</h3>
+          <p>
+            <i>reimbursement</i> &mdash; if you participate in events, you can
+            apply for travel and accommodation cost reimbursement
+          </p>
+          <p>
+            <i>support</i> &mdash; if you require financial assistance due to
+            personal or unexpected reasons, you can submit a financial support
+            application to 319
+          </p>
+        </div>
+      </div>
     </main>
   );
 }
