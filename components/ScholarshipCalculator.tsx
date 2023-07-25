@@ -12,8 +12,8 @@ import {
   MARK_COLORS,
   MARK_MAPPING,
 } from "@/lib/scholarship";
-import { Fragment, useEffect, useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
+import { createRef, Fragment, useEffect, useState } from "react";
+import { useLocalStorage, useWindowSize } from "usehooks-ts";
 
 export default function ScholarshipCalculator() {
   const [_, setStorageMarks] = useLocalStorage<Mark[]>("scholarship-marks", []);
@@ -22,6 +22,8 @@ export default function ScholarshipCalculator() {
   const [errorGPA, setErrorGPA] = useState(false);
   const [displayScholarship, setDisplayScholarship] = useState("");
   const [errorScholarship, setErrorScholarship] = useState(false);
+  const marksTextAreaRef = createRef<HTMLTextAreaElement>();
+  const { width: windowWidth } = useWindowSize();
 
   useEffect(() => {
     const marks = window.localStorage.getItem("scholarship-marks");
@@ -79,6 +81,18 @@ export default function ScholarshipCalculator() {
     setErrorScholarship(false);
   };
 
+  // Update text area height when marks change
+  useEffect(() => {
+    updateTextAreaHeight(marksTextAreaRef.current);
+  }, [marksTextAreaRef.current, marks, windowWidth]);
+
+  const updateTextAreaHeight = (target?: HTMLTextAreaElement | null) => {
+    if (target) {
+      target.style.height = "auto";
+      target.style.height = `${target.scrollHeight}px`;
+    }
+  };
+
   const onGPAChange = (v: string) => {
     setDisplayGPA(v);
     const gpa = Math.round(Number(v) * 100) / 100;
@@ -129,18 +143,19 @@ export default function ScholarshipCalculator() {
         Enter your grades or GPA
       </div>
       <div className="relative">
-        <input
+        <textarea
+          ref={marksTextAreaRef}
           value={marks.join("")}
           onChange={(e) => onMarksChange(e.target.value)}
-          type="text"
           autoComplete="off"
           spellCheck={false}
-          className="text-transparent caret-section_g_start inset-0 w-full p-2 font-handwritten rounded-2xl bg-transparent outline-none border-2 border-section_g_start"
-          style={{ letterSpacing: "1em" }}
+          className="resize-none text-transparent caret-section_g_start inset-0 w-full p-2 font-handwritten rounded-2xl bg-transparent outline-none border-2 border-section_g_start overflow-hidden"
+          style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
+          rows={1}
         />
         <div
-          className="absolute w-full max-w-full inset-0 pointer-events-none p-2 font-handwritten border-2 border-transparent"
-          style={{ letterSpacing: "1em" }}
+          className="absolute flex flex-wrap w-full max-w-full inset-0 pointer-events-none p-2 font-handwritten border-2 border-transparent"
+          style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
         >
           {marks.map((v, i) => (
             <Fragment key={i}>
