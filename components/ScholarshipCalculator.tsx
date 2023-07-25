@@ -176,6 +176,7 @@ export default function ScholarshipCalculator() {
           {marks.map((v, i) => (
             <Fragment key={i}>
               <span style={{ color: MARK_COLORS[v] }}>{v}</span>
+              <span className="w-0 -ml-3 mr-3 text-[#414141]">|</span>
             </Fragment>
           ))}
         </div>
