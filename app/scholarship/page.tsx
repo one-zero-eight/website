@@ -14,7 +14,7 @@ export default function Page() {
         Scholarship calculator
       </h1>
       <p className="lgw-smh:hidden lgw-smh:invisible text-text-secondary/75 text-center text-base py-2 xl:text-lg lg:text-left">
-        Calculate your scholarship easily. Type your marks, GPA or expected
+        Calculate your scholarship easily. Just type your marks, GPA or expected
         scholarship.
       </p>
       <Navbar>
@@ -22,8 +22,8 @@ export default function Page() {
           Scholarship calculator
         </h1>
         <p className="text-text-secondary/75 text-center text-base py-2 xl:text-lg lg:text-left">
-          Calculate your scholarship easily. Type your marks, GPA or expected
-          scholarship.
+          Calculate your scholarship easily. Just type your marks, GPA or
+          expected scholarship.
         </p>
       </Navbar>
 
@@ -38,7 +38,7 @@ export default function Page() {
           <h3 className="text-2xl mt-4">Academic scholarships:</h3>
           <p>
             For the first semester &mdash; scholarship from the admissions
-            department
+            department.
           </p>
           <p>For the next semesters &mdash; using the following formula:</p>
           <ScholarshipFormula className="fill-text-main my-4 w-full" />
@@ -62,23 +62,65 @@ export default function Page() {
 
           <h3 className="text-2xl mt-4">Increased scholarship:</h3>
           <p>
-            + <i>10,000₽</i> &mdash; if you achieve all <b>A</b> and <b>P</b>{" "}
-            grades in all subjects for two consecutive semesters.
+            + <i>10,000₽</i> &mdash; if you get all A grades in all subjects for
+            two consecutive semesters.
           </p>
           <p>
-            + <i>6,000₽</i> &mdash; if you win a competition for an increased
-            scholarship (link).
+            + <i>6,000₽</i> &mdash; if you win a competition for a{" "}
+            <a
+              href="https://my.university.innopolis.ru/profile/student-achievements"
+              target="_blank"
+              className="italic underline"
+            >
+              higher scholarship
+            </a>
+            .
           </p>
 
           <h3 className="text-2xl mt-4">Financial support:</h3>
           <p>
             <i>reimbursement</i> &mdash; if you participate in events, you can
-            apply for travel and accommodation cost reimbursement
+            apply for travel and accommodation cost reimbursement.
           </p>
           <p>
             <i>support</i> &mdash; if you require financial assistance due to
             personal or unexpected reasons, you can submit a financial support
-            application to 319
+            application to 319.
+          </p>
+
+          <h3 className="text-2xl mt-4">Official sources:</h3>
+          <p>
+            See more information about scholarships in{" "}
+            <a
+              href="http://campuslife.innopolis.ru/handbook2023#scholarship"
+              target="_blank"
+              className="italic underline"
+            >
+              Student&apos;s Handbook
+            </a>
+            .
+          </p>
+          <p>
+            See your scholarship for the current semester on the{" "}
+            <a
+              href="https://my.university.innopolis.ru/profile/personal-form/index?tab=scholarship"
+              target="_blank"
+              className="italic underline"
+            >
+              My University
+            </a>{" "}
+            portal.
+          </p>
+          <p>
+            See your marks on the{" "}
+            <a
+              href="https://my.university.innopolis.ru/profile/personal-form/index?tab=validations"
+              target="_blank"
+              className="italic underline"
+            >
+              My University
+            </a>{" "}
+            portal.
           </p>
         </div>
       </div>
