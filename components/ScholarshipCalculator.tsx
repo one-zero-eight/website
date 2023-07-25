@@ -81,15 +81,32 @@ export default function ScholarshipCalculator() {
     setErrorScholarship(false);
   };
 
-  // Update text area height when marks change
+  // Update text area properties when marks change
   useEffect(() => {
+    updateTextAreaContent(marksTextAreaRef.current, marks);
     updateTextAreaHeight(marksTextAreaRef.current);
   }, [marksTextAreaRef.current, marks, windowWidth]);
 
+  // Update text area height after marks change
   const updateTextAreaHeight = (target?: HTMLTextAreaElement | null) => {
     if (target) {
       target.style.height = "auto";
       target.style.height = `${target.scrollHeight}px`;
+    }
+  };
+
+  // Update text area content when marks change
+  // Keeping caret position
+  const updateTextAreaContent = (
+    target?: HTMLTextAreaElement | null,
+    marks?: Mark[]
+  ) => {
+    if (target && marks) {
+      const selectionStart = target.selectionStart;
+      const selectionEnd = target.selectionEnd;
+      target.value = marks.join("");
+      target.selectionStart = selectionStart;
+      target.selectionEnd = selectionEnd;
     }
   };
 
@@ -145,7 +162,6 @@ export default function ScholarshipCalculator() {
       <div className="relative">
         <textarea
           ref={marksTextAreaRef}
-          value={marks.join("")}
           onChange={(e) => onMarksChange(e.target.value)}
           autoComplete="off"
           spellCheck={false}
