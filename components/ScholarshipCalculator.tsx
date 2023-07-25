@@ -125,7 +125,7 @@ export default function ScholarshipCalculator() {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-text text-3xl xl:text-4xl font-medium mt-8 text-center">
+      <div className="text-text text-3xl xl:text-4xl font-medium mt-8 mb-4 text-center">
         Enter your grades or GPA
       </div>
       <div className="relative">
