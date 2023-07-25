@@ -3,12 +3,12 @@ export type Mark = "A" | "B" | "C" | "D" | "P" | "F";
 
 // Colors for every mark
 export const MARK_COLORS: Record<Mark, string> = {
-  A: "#00ff00",
-  B: "#00ffff",
-  C: "#ffff00",
-  D: "#ff0000",
-  P: "#00ff00",
-  F: "#ff0000",
+  A: "#069C56",
+  B: "#FF980E",
+  C: "#FF681E",
+  D: "#D3212C",
+  P: "#069C56",
+  F: "#D3212C",
 };
 
 // Values for every mark
