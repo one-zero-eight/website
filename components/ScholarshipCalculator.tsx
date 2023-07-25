@@ -180,7 +180,7 @@ export default function ScholarshipCalculator() {
           ))}
         </div>
       </div>
-      <div className="flex flex-row justify-between items-center">
+      <div className="flex flex-row flex-wrap justify-between items-center">
         <div className="text-text text-xl font-medium">Your GPA:</div>
         <input
           value={displayGPA}
@@ -191,7 +191,7 @@ export default function ScholarshipCalculator() {
           max={5}
           autoComplete="off"
           spellCheck={false}
-          className={`no-spin w-32 text-center font-handwritten rounded-2xl bg-transparent p-2 outline-none border-2 ${
+          className={`w-32 text-center font-handwritten rounded-2xl bg-transparent p-2 outline-none border-2 ${
             !errorGPA ? "border-section_g_start" : "border-red-500"
           }`}
           style={{
@@ -199,7 +199,7 @@ export default function ScholarshipCalculator() {
           }}
         />
       </div>
-      <div className="flex flex-row justify-between items-center">
+      <div className="flex flex-row flex-wrap justify-between items-center">
         <div className="text-text text-xl font-medium">Scholarship:</div>
         <input
           value={displayScholarship}
@@ -210,7 +210,7 @@ export default function ScholarshipCalculator() {
           min={FORMULA_B_MIN}
           autoComplete="off"
           spellCheck={false}
-          className={`no-spin w-32 text-center font-handwritten rounded-2xl bg-transparent p-2 outline-none border-2 ${
+          className={`rubles-input w-32 text-center font-handwritten rounded-2xl bg-transparent p-2 outline-none border-2 ${
             !errorScholarship ? "border-section_g_start" : "border-red-500"
           }`}
           style={{
