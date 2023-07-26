@@ -39,9 +39,8 @@ export function calculateColorGPA(gpa: number): string {
 export function calculateGPA(marks: Mark[]): number {
   // Sum all marks
   const total = marks.reduce((total, v) => total + MARK_VALUES[v], 0);
-  const average = total / marks.length;
-  // Round down to hundreds
-  return Math.floor(average * 100) / 100;
+  // Calculate average and round down to hundreds
+  return Math.floor((total * 100) / marks.length) / 100;
 }
 
 /**
