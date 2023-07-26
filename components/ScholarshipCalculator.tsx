@@ -182,6 +182,15 @@ export default function ScholarshipCalculator() {
             </Fragment>
           ))}
         </div>
+        {marks.length !== 0 && (
+          <button
+            onClick={() => onMarksChange("")}
+            className="absolute -right-1 -top-1 rounded-full bg-base h-7 w-7 text-lg p-2 align-middle text-section_g_start"
+            style={{ lineHeight: 0 }}
+          >
+            X
+          </button>
+        )}
       </div>
       <div className="flex flex-row flex-wrap justify-between items-center">
         <div className="text-text text-xl font-medium">Your GPA:</div>
