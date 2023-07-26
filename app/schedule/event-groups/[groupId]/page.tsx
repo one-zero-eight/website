@@ -1,10 +1,10 @@
 "use client";
-import { useEventGroupsGetEventGroup } from "@/lib/events";
-import React from "react";
+import Calendar from "@/components/Calendar";
 import { EventGroupPage } from "@/components/EventGroupPage";
 import { Navbar } from "@/components/Navbar";
+import { useEventGroupsGetEventGroup } from "@/lib/events";
 import { SCHEDULE_API_URL } from "@/lib/schedule/api";
-import Calendar from "@/components/Calendar";
+import React from "react";
 import { useWindowSize } from "usehooks-ts";
 
 export type Props = {
@@ -22,7 +22,7 @@ export default function Page({ params }: Props) {
     <>
       <div
         style={{ backgroundImage: "url(/background-pattern.svg)" }}
-        className="p-16 bg-repeat bg-primary-main w-full h-64 items-center lg:[align-items:normal] flex flex-col"
+        className="px-4 lg:px-12 py-16 bg-repeat bg-primary-main w-full h-64 items-center lg:[align-items:normal] flex flex-col"
       >
         <Navbar />
       </div>

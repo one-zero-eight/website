@@ -69,13 +69,13 @@ export default function ScheduleList({ category }: ScheduleListProps) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={"Find the group..."}
-          width={450}
+          width={300}
         />
       </div>
 
       <hr className="border-b-1 w-full mt-4 border-border"></hr>
 
-      <div className="flex flex-wrap justify-left gap-y-2 gap-x-10 content-start place-items-center justify-items-stretch overflow-auto scrollbar-hide h-full w-full px-0 md:px-12 mt-4">
+      <div className="flex flex-wrap justify-left gap-y-2 gap-x-10 content-start justify-center lg:justify-normal place-items-center justify-items-stretch overflow-auto scrollbar-hide h-full w-full px-0 lg:px-4 mt-4">
         {groups?.map((group) => {
           let groupTitle = undefined;
           if (
@@ -84,7 +84,7 @@ export default function ScheduleList({ category }: ScheduleListProps) {
             group.satellite[typeInfo.grouping] !== lastGroup
           ) {
             groupTitle = (
-              <div className="text-3xl font-bold w-full mt-8 mb-4 ml-4">
+              <div className="text-3xl font-bold w-full mt-8 mb-4 ml-4 text-center lg:text-left">
                 {group.satellite[typeInfo.grouping]}
               </div>
             );

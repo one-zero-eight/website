@@ -33,7 +33,7 @@ export async function generateStaticParams() {
 
 export default async function Page({ params }: Props) {
   return (
-    <div className="p-16 items-center lg:[align-items:normal] flex flex-col">
+    <div className="px-4 lg:px-12 py-16 items-center lg:[align-items:normal] flex flex-col">
       <h1 className="text-text-main lgw-smh:hidden lgw-smh:invisible text-center xl:text-left text-3xl xl:text-4xl font-bold">
         Schedule
       </h1>

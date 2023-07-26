@@ -19,7 +19,7 @@ export default function Page() {
 
   if (!isClient)
     return (
-      <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
+      <div className="px-4 lg:px-12 py-16 items-center lg:[align-items:normal] flex flex-col">
         <h1 className="text-text-main lgw-smh:hidden lgw-smh:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
           Dashboard
         </h1>
@@ -33,7 +33,7 @@ export default function Page() {
   if (isClient && !data) {
     return (
       <>
-        <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
+        <div className="px-4 lg:px-12 py-16 items-center lg:[align-items:normal] flex flex-col">
           <h1 className="text-text-main lgw-smh:hidden lgw-smh:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
             Dashboard
           </h1>
@@ -64,7 +64,7 @@ export default function Page() {
 
   return (
     <>
-      <div className="px-10 lg:px-16 p-16 items-center lg:[align-items:normal] flex flex-col">
+      <div className="px-4 lg:px-12 py-16 items-center lg:[align-items:normal] flex flex-col">
         <h1 className="text-text-main lgw-smh:hidden lgw-smh:invisible text-center sm:text-left text-3xl sm:text-4xl font-bold">
           Dashboard
         </h1>
@@ -73,7 +73,7 @@ export default function Page() {
             Dashboard
           </h1>
         </Navbar>
-        <div className="justify-center sm:justify-normal my-12 flex flex-row gap-6">
+        <div className="justify-center sm:justify-normal my-12 flex flex-row gap-4 sm:gap-6">
           <div className="flex bg-border shrink-0 w-20 sm:w-24 h-20 sm:h-24 rounded-full justify-center items-center">
             <UserFace
               className="flex fill-icon-main/50"

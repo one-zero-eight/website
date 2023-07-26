@@ -40,12 +40,12 @@ export function GroupCard({
 
   return (
     <div
-      className="cursor-pointer bg-primary-main hover:bg-primary-hover flex flex-row justify-between items-center sm:text-2xl px-7 py-5 my-2 rounded-3xl min-w-fit min-h-fit"
+      className="cursor-pointer bg-primary-main hover:bg-primary-hover flex flex-row justify-between items-center sm:text-2xl pl-7 pr-5 py-5 my-2 rounded-3xl min-w-fit min-h-fit"
       onClick={() => router.push(eventGroupPageURL)}
       onMouseEnter={() => router.prefetch(eventGroupPageURL)}
     >
-      <div className="flex flex-col gap-0.5">
-        <p className="text-text-main text-left text-lg sm:text-xl font-medium w-40">
+      <div className="flex flex-col gap-0.5 w-32 sm:w-40">
+        <p className="text-text-main text-left text-lg sm:text-xl font-medium">
           {group.name}
         </p>
         {group.satellite &&

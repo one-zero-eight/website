@@ -9,7 +9,7 @@ import React from "react";
 
 export default function Page() {
   return (
-    <main className="p-16 items-center lg:[align-items:normal]">
+    <main className="px-4 lg:px-12 py-16 items-center lg:[align-items:normal]">
       <h1 className="lgw-smh:hidden lgw-smh:invisible text-3xl text-center lg:text-left xl:text-4xl font-bold">
         Scholarship calculator
       </h1>
