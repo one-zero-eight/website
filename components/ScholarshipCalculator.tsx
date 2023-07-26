@@ -113,6 +113,7 @@ export default function ScholarshipCalculator() {
   };
 
   const onGPAChange = (v: string) => {
+    v = v.substring(0, 5);
     setDisplayGPA(v);
     const gpa = Math.round(Number(v) * 100) / 100;
     if (!isNaN(gpa) && gpa >= 2 && gpa <= 5) {
@@ -133,6 +134,7 @@ export default function ScholarshipCalculator() {
   };
 
   const onScholarshipChange = (v: string) => {
+    v = v.substring(0, 5);
     setDisplayScholarship(v);
     const scholarship = Number(v);
     if (
@@ -170,6 +172,7 @@ export default function ScholarshipCalculator() {
           className="resize-none text-transparent caret-section_g_start inset-0 w-full p-3 font-handwritten rounded-2xl bg-transparent outline-none border-2 border-section_g_start overflow-hidden"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
           rows={1}
+          maxLength={50}
         />
         <div
           className="absolute flex flex-wrap w-full max-w-full inset-0 pointer-events-none p-3 font-handwritten border-2 border-transparent"
