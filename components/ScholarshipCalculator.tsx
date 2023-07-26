@@ -105,8 +105,10 @@ export default function ScholarshipCalculator() {
       const selectionStart = target.selectionStart;
       const selectionEnd = target.selectionEnd;
       target.value = marks.join("");
-      target.selectionStart = selectionStart;
-      target.selectionEnd = selectionEnd;
+      if (document.activeElement === target) {
+        target.selectionStart = selectionStart;
+        target.selectionEnd = selectionEnd;
+      }
     }
   };
 
