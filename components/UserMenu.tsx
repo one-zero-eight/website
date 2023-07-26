@@ -81,7 +81,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
         {...getReferenceProps()}
         className="rounded-2xl hover:bg-primary-hover"
       >
-        <div className="flex flex-col justify-center items-center bg-primary-main w-64 lg:w-18p h-18p rounded-2xl ml-auto hover:bg-primary-hover">
+        <div className="flex flex-col justify-center items-center bg-primary-main w-18p h-18p rounded-2xl ml-auto hover:bg-primary-hover">
           <div className="flex shrink-0 w-12 h-12 bg-border rounded-full justify-center items-center">
             <UserFace
               className="flex fill-icon-main/50"

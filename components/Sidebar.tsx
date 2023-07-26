@@ -5,6 +5,7 @@ import FormsIcon from "@/components/icons/FormsIcon";
 import LaundryIcon from "@/components/icons/LaundryIcon";
 import { MenuIcon } from "@/components/icons/MenuIcon";
 import ScholarshipIcon from "@/components/icons/ScholarshipIcon";
+import SwitchThemeButton from "@/components/SwitchThemeButton";
 import UserMenu from "@/components/UserMenu";
 import { useUsersGetMe } from "@/lib/events";
 import Link from "next/link";
@@ -55,15 +56,15 @@ function Sidebar() {
         </button>
         <aside
           className={
-            "flex-col fixed overflow-y-scroll justify-center items-center z-[3] opacity-[0.999] py-8 px-8 h-[100dvh] top-0 " +
+            "flex-col fixed overflow-y-auto justify-center items-center z-[3] opacity-[0.999] py-8 px-8 h-[100dvh] top-0 " +
             (isOpened ? "bg-primary-main" : "hidden")
           }
         >
           <div
             className={
               isOpened
-                ? "flex flex-col items-center left-0 opacity-100"
-                : "flex relative left-[-500px] opacity-0"
+                ? "flex flex-col items-center left-0 opacity-100 h-full"
+                : "flex relative left-[-500px] opacity-0 h-full"
             }
           >
             <Link
@@ -91,7 +92,8 @@ function Sidebar() {
             </nav>
             <div className="flex grow"></div>
             <br />
-            <div className="mb-4">
+            <div className="mb-4 flex flex-row w-full justify-center">
+              <SwitchThemeButton />
               <UserMenu isMobile={true} isSidebar={true} />
             </div>
             <a className="flex" href="https://t.me/one_zero_eight">
