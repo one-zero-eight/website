@@ -167,12 +167,12 @@ export default function ScholarshipCalculator() {
           onChange={(e) => onMarksChange(e.target.value)}
           autoComplete="off"
           spellCheck={false}
-          className="resize-none text-transparent caret-section_g_start inset-0 w-full p-2 font-handwritten rounded-2xl bg-transparent outline-none border-2 border-section_g_start overflow-hidden"
+          className="resize-none text-transparent caret-section_g_start inset-0 w-full p-3 font-handwritten rounded-2xl bg-transparent outline-none border-2 border-section_g_start overflow-hidden"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
           rows={1}
         />
         <div
-          className="absolute flex flex-wrap w-full max-w-full inset-0 pointer-events-none p-2 font-handwritten border-2 border-transparent"
+          className="absolute flex flex-wrap w-full max-w-full inset-0 pointer-events-none p-3 font-handwritten border-2 border-transparent"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
         >
           {marks.map((v, i) => (
