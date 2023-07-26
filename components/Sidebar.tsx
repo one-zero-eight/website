@@ -49,7 +49,7 @@ function Sidebar() {
           onClick={() => setOpened(false)}
         />
         <button
-          className="fixed ml-8 mt-8 flex visible z-[4] opacity-[0.999]"
+          className="ml-8 mt-8 flex visible z-[4] opacity-[0.999]"
           onClick={() => setOpened(!isOpened)}
         >
           <MenuIcon width={36} height={36} className="fill-text-main" />
