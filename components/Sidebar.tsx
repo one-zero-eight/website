@@ -1,5 +1,8 @@
 "use client";
+import CanteenIcon from "@/components/icons/CanteenIcon";
 import DashboardIcon from "@/components/icons/DashboardIcon";
+import FormsIcon from "@/components/icons/FormsIcon";
+import LaundryIcon from "@/components/icons/LaundryIcon";
 import { MenuIcon } from "@/components/icons/MenuIcon";
 import ScholarshipIcon from "@/components/icons/ScholarshipIcon";
 import UserMenu from "@/components/UserMenu";
@@ -21,9 +24,9 @@ const items: Item[] = [
   { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },
   { title: "Schedule", path: "/schedule", icon: ScheduleIcon },
   { title: "Scholarship", path: "/scholarship", icon: ScholarshipIcon },
-  // { title: "Laundry", path: "#", icon: LaundryIcon },
-  // { title: "Forms", path: "#", icon: FormsIcon },
-  // { title: "Canteen", path: "#", icon: CanteenIcon },
+  { title: "Laundry", path: "#", icon: LaundryIcon },
+  { title: "Forms", path: "#", icon: FormsIcon },
+  { title: "Canteen", path: "#", icon: CanteenIcon },
 ];
 
 function Sidebar() {
