@@ -81,9 +81,10 @@ export function calculateMarksFromGPA(gpa: number): Mark[] {
 
   const percent = Math.round((gpa - MARK_VALUES[markBottom]) * 100); // From 0 to 100
 
-  // Calculate for 20 marks
-  const top = Math.ceil(percent / 5);
-  const bottom = 20 - top;
+  // Calculate for static number of marks
+  const marks_count = 10;
+  const top = Math.ceil(percent / (100 / marks_count));
+  const bottom = marks_count - top;
 
   // Fill marks array
   const marks: Mark[] = [];
