@@ -73,8 +73,16 @@ export default function Page() {
               className="italic underline"
             >
               higher scholarship
+            </a>{" "}
+            (+<i>12,000₽</i> for{" "}
+            <a
+              href="https://innopolis.university/upload/iblock/0f7/d9batvrsu87higzhdr3ulkuzfmtakzzl/Об_утверждении_размеров_государственных_стипендий.pdf"
+              target="_blank"
+              className="italic underline"
+            >
+              state-funded students
             </a>
-            .
+            ).
           </p>
 
           <h3 className="text-2xl mt-4">Financial support:</h3>
