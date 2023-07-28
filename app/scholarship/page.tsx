@@ -130,6 +130,17 @@ export default function Page() {
             </a>{" "}
             portal.
           </p>
+          <p>
+            See the official documents about scholarship on the{" "}
+            <a
+              href="https://innopolis.university/sveden/grants"
+              target="_blank"
+              className="italic underline"
+            >
+              Innopolis University
+            </a>{" "}
+            website.
+          </p>
         </div>
       </div>
     </main>
