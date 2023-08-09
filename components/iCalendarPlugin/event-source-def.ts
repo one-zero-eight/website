@@ -51,7 +51,7 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
                 skipInvalidDates: true,
               });
             });
-          }
+          },
         ),
       };
     }
@@ -68,7 +68,7 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
 function expandICalEvents(
   iCalExpander: IcalExpander,
   range: DateRange,
-  meta: ICalFeedMeta
+  meta: ICalFeedMeta,
 ): EventInput[] {
   // expand the range. because our `range` is timeZone-agnostic UTC
   // or maybe because ical.js always produces dates in local time? i forget
@@ -111,7 +111,7 @@ function expandICalEvents(
 
 function buildNonDateProps(
   iCalEvent: ICAL.Event,
-  meta: ICalFeedMeta
+  meta: ICalFeedMeta,
 ): EventInput {
   return {
     id: iCalEvent.uid,

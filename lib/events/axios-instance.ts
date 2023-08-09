@@ -10,7 +10,7 @@ export const AXIOS_INSTANCE = Axios.create({ baseURL: EVENTS_API_URL });
  */
 export const axiosInstance = <T>(
   config: AxiosRequestConfig,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<T> => {
   const source = Axios.CancelToken.source();
   const promise = AXIOS_INSTANCE<T>({

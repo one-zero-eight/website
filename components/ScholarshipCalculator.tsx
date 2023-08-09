@@ -69,7 +69,7 @@ export default function ScholarshipCalculator() {
     const newScholarship = calculateScholarship(
       newGPA,
       FORMULA_B_MIN,
-      FORMULA_B_MAX
+      FORMULA_B_MAX,
     );
 
     // Update state
@@ -99,7 +99,7 @@ export default function ScholarshipCalculator() {
   // Keeping caret position
   const updateTextAreaContent = (
     target?: HTMLTextAreaElement | null,
-    marks?: Mark[]
+    marks?: Mark[],
   ) => {
     if (target && marks) {
       const selectionStart = target.selectionStart;
@@ -121,7 +121,7 @@ export default function ScholarshipCalculator() {
       const newScholarship = calculateScholarship(
         gpa,
         FORMULA_B_MIN,
-        FORMULA_B_MAX
+        FORMULA_B_MAX,
       );
       setMarks(newMarks);
       setStorageMarks(newMarks);
@@ -145,7 +145,7 @@ export default function ScholarshipCalculator() {
       const newGPA = calculateGPAFromScholarship(
         scholarship,
         FORMULA_B_MIN,
-        FORMULA_B_MAX
+        FORMULA_B_MAX,
       );
       const newMarks = calculateMarksFromGPA(newGPA);
       setMarks(newMarks);

@@ -21,7 +21,7 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
   const [signInOpened, setSignInOpened] = useState(false);
   const { data, isError } = useUsersGetMe();
   const { switchFavorite, isInFavorites, isPredefined } = useEventGroup(
-    groupData.id
+    groupData.id,
   );
   const tagsInfo: { [key: string]: string } = {
     "core course": "Core Courses",

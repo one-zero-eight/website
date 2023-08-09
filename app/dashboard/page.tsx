@@ -164,7 +164,7 @@ export default function Page() {
 
 function getCalendarsToShow(
   favorites: UserXGroupViewApp[],
-  includeHidden: boolean = false
+  includeHidden: boolean = false,
 ) {
   // Check if there are any groups
   if (favorites.length === 0) {

@@ -17,7 +17,7 @@ export default function ScheduleList({ category }: ScheduleListProps) {
   const { data } = useEventGroupsListEventGroups();
 
   const [filters, setFilters] = useState<{ [key: string]: string | undefined }>(
-    {}
+    {},
   );
   const [search, setSearch] = useState("");
   const [signInOpened, setSignInOpened] = useState(false);
@@ -29,11 +29,11 @@ export default function ScheduleList({ category }: ScheduleListProps) {
       Object.entries(filters).every(
         ([filterAlias, filterValue]) =>
           filterValue === undefined ||
-          (v.satellite && v.satellite[filterAlias] === filterValue)
-      )
+          (v.satellite && v.satellite[filterAlias] === filterValue),
+      ),
     )
-    .filter((v) =>
-      v.name?.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+    .filter(
+      (v) => v.name?.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
     )
     .sort((a, b) => {
       if (

@@ -49,7 +49,7 @@ export function calculateGPA(marks: Mark[]): number {
 export function calculateScholarship(
   GPA: number,
   Bmin: number,
-  Bmax: number
+  Bmax: number,
 ): number {
   // Formula for scholarship
   const S = Bmin + (Bmax - Bmin) * Math.pow((GPA - 2) / 3, 2.5);
@@ -63,7 +63,7 @@ export function calculateScholarship(
 export function calculateGPAFromScholarship(
   scholarship: number,
   Bmin: number,
-  Bmax: number
+  Bmax: number,
 ): number {
   // Reverse the formula for scholarship
   const gpa = Math.pow((scholarship - Bmin) / (Bmax - Bmin), 1 / 2.5) * 3 + 2;

@@ -22,7 +22,7 @@ export function useEventGroup(group_id?: number) {
   const hide = useUsersHideFavorite({ mutation: { onSettled } });
 
   const userFavoriteGroup = userData?.favorites?.find(
-    (v) => v.group.id === group_id
+    (v) => v.group.id === group_id,
   );
   const isPredefined = userFavoriteGroup?.predefined ?? false;
   let isInFavorites = !!userFavoriteGroup;

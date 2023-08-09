@@ -40,7 +40,7 @@ function Calendar({
                 "calendarURLs",
                 (
                   unique[uniqueId].extendedProps.calendarURLs as string[]
-                ).concat(event.extendedProps.calendarURLs as string[])
+                ).concat(event.extendedProps.calendarURLs as string[]),
               );
               event.remove();
             }
@@ -131,7 +131,7 @@ function Calendar({
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [urls.join(";")]
+    [urls.join(";")],
   );
 
   return (

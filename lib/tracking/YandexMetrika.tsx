@@ -6,12 +6,12 @@ declare global {
       id: number,
       method: "reachGoal",
       target: string,
-      params?: object
+      params?: object,
     ) => void) &
       ((
         id: number,
         method: "userParams",
-        data: { [key: string | "UserID"]: any }
+        data: { [key: string | "UserID"]: any },
       ) => void);
   }
 }

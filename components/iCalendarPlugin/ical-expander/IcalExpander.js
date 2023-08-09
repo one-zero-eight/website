@@ -97,7 +97,7 @@ export class IcalExpander {
                 (ex) =>
                   ex.uid === event.uid &&
                   ex.recurrenceId.toJSDate().getTime() ===
-                    occurrence.startDate.toJSDate().getTime()
+                    occurrence.startDate.toJSDate().getTime(),
               );
 
               // We have passed the max date, stop
