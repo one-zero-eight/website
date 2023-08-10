@@ -42,6 +42,7 @@ export default function ScholarshipCalculator() {
     } catch (e) {
       // Accept any error
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onMarksChange = (v: string) => {
@@ -85,6 +86,7 @@ export default function ScholarshipCalculator() {
   useEffect(() => {
     updateTextAreaContent(marksTextAreaRef.current, marks);
     updateTextAreaHeight(marksTextAreaRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marksTextAreaRef.current, marks, windowWidth]);
 
   // Update text area height after marks change
