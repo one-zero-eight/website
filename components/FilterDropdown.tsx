@@ -1,6 +1,6 @@
 "use client";
 import DropListIcon from "@/components/icons/DropListIcon";
-import { TypeFilter } from "@/lib/events-view-config";
+import { getTagInfo, getTagInfoByType } from "@/lib/events/tags";
 import { Popover, Transition } from "@headlessui/react";
 import React from "react";
 
@@ -9,16 +9,20 @@ function FilterDropdown({
   selected,
   setSelected,
 }: {
-  typeFilter: TypeFilter;
+  typeFilter: string;
   selected: string;
   setSelected: (v: string) => void;
 }) {
+  const typeInfo = getTagInfo(typeFilter);
+  const optionsInfos = getTagInfoByType(typeFilter);
+  const selectedTagInfo = getTagInfo(selected);
+
   return (
     <Popover className="relative text-xl z-[1] opacity-[0.999] w-max rounded-full focus:outline-none">
       <Popover.Button className="w-full rounded-full focus:outline-none">
         <div className="rounded-full flex flex-row items-center bg-primary-main py-2 px-5 text-xl text-text-secondary/75">
           <p className="mr-4 whitespace-nowrap">
-            {selected || typeFilter.title}
+            {selectedTagInfo?.name || "Filter"}
           </p>
 
           <DropListIcon className="fill-icon-main/50 hover:fill-icon-hover/75" />
@@ -42,14 +46,14 @@ function FilterDropdown({
             >
               All
             </Popover.Button>
-            {typeFilter.values.map((v) => (
+            {optionsInfos.map((v) => (
               <Popover.Button
                 className="w-full rounded-xl flex flex-row items-center bg-primary-main py-4 px-5 text-xl text-text-secondary/75 focus:outline-none"
-                value={v}
-                key={v}
+                value={v.alias}
+                key={v.alias}
                 onClick={(e) => setSelected((e.target as any).value)}
               >
-                {v}
+                {v.name}
               </Popover.Button>
             ))}
           </div>

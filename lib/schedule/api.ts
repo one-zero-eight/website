@@ -1,1 +1,0 @@
-export const SCHEDULE_API_URL = process.env.NEXT_PUBLIC_SCHEDULE_API_URL!;

@@ -4,6 +4,7 @@ import {
   useUsersDeleteFavorite,
   useUsersGetMe,
   useUsersHideFavorite,
+  ViewEventGroup,
 } from "@/lib/events";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -21,8 +22,8 @@ export function useEventGroup(group_id?: number) {
   const remove = useUsersDeleteFavorite({ mutation: { onSettled } });
   const hide = useUsersHideFavorite({ mutation: { onSettled } });
 
-  const userFavoriteGroup = userData?.favorites?.find(
-    (v) => v.group.id === group_id,
+  const userFavoriteGroup = userData?.favorites_association?.find(
+    (v) => v.event_group.id === group_id,
   );
   const isPredefined = userFavoriteGroup?.predefined ?? false;
   let isInFavorites = !!userFavoriteGroup;
@@ -86,4 +87,20 @@ export function useEventGroup(group_id?: number) {
     unhideFavorite,
     switchHideFavorite,
   };
+}
+
+export function getFirstTagByType(
+  event_group: ViewEventGroup,
+  tag_type: string,
+) {
+  if (event_group.tags === undefined) return undefined;
+  return event_group.tags.find((v) => v.type === tag_type);
+}
+
+export function getAllTagsByType(
+  event_group: ViewEventGroup,
+  tag_type: string,
+) {
+  if (event_group.tags === undefined) return [];
+  return event_group.tags.filter((v) => v.type === tag_type);
 }

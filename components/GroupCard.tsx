@@ -3,7 +3,11 @@ import FavoriteIcon from "@/components/icons/FavoriteIcon";
 import { HideIcon } from "@/components/icons/HideIcon";
 import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 import Tooltip from "@/components/Tooltip";
-import { useEventGroup } from "@/lib/event-group";
+import {
+  getAllTagsByType,
+  getFirstTagByType,
+  useEventGroup,
+} from "@/lib/event-group";
 import { useUsersGetMe, ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
 import Link from "next/link";
@@ -31,9 +35,11 @@ export function GroupCard({
     isPredefined,
     switchHideFavorite,
   } = useEventGroup(group.id);
-  const satelliteToDisplay = group.type
-    ? viewConfig.types[group.type].showAdditionalInfo
-    : [];
+  const category = getFirstTagByType(group, "category");
+  const tagsToDisplay =
+    category && category.alias in viewConfig.categories
+      ? viewConfig.categories[category.alias].showTagTypes
+      : [];
   const { data, isError } = useUsersGetMe();
   const eventGroupPageURL = `/schedule/event-groups/${group.id}`;
   const eventGroupURL = `/schedule/event-groups/${group.id}/import`;
@@ -48,16 +54,23 @@ export function GroupCard({
         <p className="text-text-main text-left text-lg sm:text-xl font-medium">
           {group.name}
         </p>
-        {group.satellite &&
-          satelliteToDisplay.map((v) => (
-            <Fragment key={v}>
-              {group.satellite && (
-                <p className="text-lg sm:text-xl text-inactive text-left font-medium">
-                  {group.satellite[v]}
-                </p>
-              )}
-            </Fragment>
-          ))}
+        {tagsToDisplay.length > 0 &&
+          tagsToDisplay.map((v) => {
+            const tags = getAllTagsByType(group, v);
+            if (tags.length === 0) return null;
+            return (
+              <Fragment key={v}>
+                {tags.map((tag) => (
+                  <p
+                    key={tag.id}
+                    className="text-lg sm:text-xl text-inactive text-left font-medium"
+                  >
+                    {tag.name}
+                  </p>
+                ))}
+              </Fragment>
+            );
+          })}
       </div>
       <div className="flex flex-row place-items-center select-none w-fit">
         {canHide && (

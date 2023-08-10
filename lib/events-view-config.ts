@@ -1,73 +1,45 @@
 export type ViewConfig = {
-  types: Record<string, TypeInfo>;
+  categories: Record<string, CategoryInfo>;
 };
 
-export type TypeInfo = {
-  id: string;
-  slug: string;
-  title: string;
-  shortDescription: string;
-  filters: TypeFilter[];
-  grouping?: string;
-  showAdditionalInfo: string[];
-};
-
-export type TypeFilter = {
+export type CategoryInfo = {
   alias: string;
   title: string;
-  values: string[];
+  shortDescription: string;
+  filtersTagTypes: string[];
+  groupingTagType?: string;
+  showTagTypes: string[];
 };
 
 export const viewConfig: ViewConfig = {
-  types: {
-    "core course": {
-      id: "core course",
-      slug: "core-courses",
+  categories: {
+    "core-courses": {
+      alias: "core-courses",
       title: "Core Courses",
       shortDescription: "Academic schedule for core courses in Sum23.",
-      filters: [
-        {
-          alias: "course",
-          title: "Course",
-          values: [
-            "BS - Year 1",
-            "BS - Year 2",
-            "BS - Year 3",
-            "BS - Year 4",
-            "MS - Year 1",
-          ],
-        },
-      ],
-      grouping: "course",
-      showAdditionalInfo: ["course"],
+      filtersTagTypes: ["core-courses"],
+      groupingTagType: "core-courses",
+      showTagTypes: ["core-courses"],
     },
-    elective: {
-      id: "elective",
-      slug: "electives",
+    electives: {
+      alias: "electives",
       title: "Electives",
       shortDescription: "Academic schedule for electives in Sum23.",
-      filters: [
-        {
-          alias: "elective_type",
-          title: "Elective type",
-          values: ["BS Tech", "MS Tech", "BS/MS Hum"],
-        },
-      ],
-      grouping: "elective_type",
-      showAdditionalInfo: ["elective_type"],
+      filtersTagTypes: ["electives"],
+      groupingTagType: "electives",
+      showTagTypes: ["electives"],
     },
     sports: {
-      id: "sports",
-      slug: "sports",
+      alias: "sports",
       title: "Sports",
       shortDescription: "Schedule of sport classes in Sum23.",
-      filters: [],
-      grouping: undefined,
-      showAdditionalInfo: [],
+      filtersTagTypes: [],
+      groupingTagType: undefined,
+      showTagTypes: [],
     },
   },
 };
 
-export function getTypeInfoBySlug(slug: string) {
-  return Object.values(viewConfig.types).find((v) => v.slug === slug);
+export function getCategoryInfoBySlug(slug: string) {
+  return Object.values(viewConfig.categories).find((v) => v.alias === slug);
 }

@@ -1,18 +1,18 @@
 "use client";
 import DropListIcon from "@/components/icons/DropListIcon";
-import { getTypeInfoBySlug, viewConfig } from "@/lib/events-view-config";
+import { getCategoryInfoBySlug, viewConfig } from "@/lib/events-view-config";
 import { Popover, Transition } from "@headlessui/react";
 import Link from "next/link";
 import React from "react";
 
 function CategoriesDropdown({ category }: { category: string }) {
-  const typeInfo = getTypeInfoBySlug(category);
+  const categoryInfo = getCategoryInfoBySlug(category);
   return (
     <Popover className="relative text-xl w-max z-[2] opacity-[0.999] rounded-full focus:outline-none">
       <Popover.Button className="w-full rounded-full focus:outline-none">
         <div className="rounded-full flex flex-row items-center bg-primary-main py-2 px-5 text-xl text-text-secondary/75">
           <p className="mr-4 whitespace-nowrap">
-            {(typeInfo && typeInfo.title) || ""}
+            {(categoryInfo && categoryInfo.title) || ""}
           </p>
 
           <DropListIcon className="fill-icon-main/50 hover:fill-icon-hover/75" />
@@ -29,10 +29,10 @@ function CategoriesDropdown({ category }: { category: string }) {
       >
         <Popover.Panel className="absolute rounded-2xl drop-shadow-2xl bg-primary-main focus:outline-none">
           <div className="flex flex-col justify-center items-center divide-y divide-border">
-            {Object.values(viewConfig.types).map((v) => (
+            {Object.values(viewConfig.categories).map((v) => (
               <Link
-                href={`/schedule/${v.slug}`}
-                key={v.slug}
+                href={`/schedule/${v.alias}`}
+                key={v.alias}
                 className="w-full rounded-xl flex flex-row items-center bg-primary-main py-4 px-5 text-xl text-text-secondary/75 focus:outline-none"
               >
                 {v.title}

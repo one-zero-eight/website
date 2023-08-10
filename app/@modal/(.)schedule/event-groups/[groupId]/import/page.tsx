@@ -4,8 +4,7 @@ import CloseIcon from "@/components/icons/CloseIcon";
 import LinkIcon from "@/components/icons/LinkIcon";
 import QuestionIcon from "@/components/icons/QuestionIcon";
 import ScheduleLinkCopy from "@/components/ScheduleLinkCopy";
-import { useEventGroupsGetEventGroup } from "@/lib/events";
-import { SCHEDULE_API_URL } from "@/lib/schedule/api";
+import { getICSLink, useEventGroupsGetEventGroup } from "@/lib/events";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -45,8 +44,7 @@ export default function Page({ params }: Props) {
 
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
-  const calendarURL =
-    data !== undefined ? `${SCHEDULE_API_URL}/${data.path}` : undefined;
+  const calendarURL = data !== undefined ? getICSLink(data.alias) : undefined;
 
   return (
     <>

@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import ScheduleList from "@/components/ScheduleList";
-import { getTypeInfoBySlug, viewConfig } from "@/lib/events-view-config";
+import { getCategoryInfoBySlug, viewConfig } from "@/lib/events-view-config";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import React from "react";
@@ -13,21 +13,21 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
-  const typeInfo = getTypeInfoBySlug(params.category);
+  const categoryInfo = getCategoryInfoBySlug(params.category);
 
-  if (typeInfo === undefined) {
+  if (categoryInfo === undefined) {
     notFound();
   }
 
   return {
-    title: typeInfo.title + " " + ((await parent).title?.absolute || ""),
+    title: categoryInfo.title + " " + ((await parent).title?.absolute || ""),
     alternates: { canonical: `/schedule/${params.category}` },
   };
 }
 
 export async function generateStaticParams() {
-  return Object.values(viewConfig.types).map((typeInfo) => ({
-    category: typeInfo.slug,
+  return Object.values(viewConfig.categories).map((typeInfo) => ({
+    category: typeInfo.alias,
   }));
 }
 

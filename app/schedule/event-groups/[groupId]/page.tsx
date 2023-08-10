@@ -2,8 +2,7 @@
 import Calendar from "@/components/Calendar";
 import { EventGroupPage } from "@/components/EventGroupPage";
 import { Navbar } from "@/components/Navbar";
-import { useEventGroupsGetEventGroup } from "@/lib/events";
-import { SCHEDULE_API_URL } from "@/lib/schedule/api";
+import { getICSLink, useEventGroupsGetEventGroup } from "@/lib/events";
 import React from "react";
 import { useWindowSize } from "usehooks-ts";
 
@@ -29,7 +28,7 @@ export default function Page({ params }: Props) {
       <EventGroupPage groupData={data} isPopup={false} />
       <div className="px-2">
         <Calendar
-          urls={data.path ? [`${SCHEDULE_API_URL}/${data.path}`] : []}
+          urls={[getICSLink(data.alias)]}
           initialView={
             width
               ? width >= 1280

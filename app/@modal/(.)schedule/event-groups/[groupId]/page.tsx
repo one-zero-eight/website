@@ -7,8 +7,7 @@ import FavoriteIcon from "@/components/icons/FavoriteIcon";
 import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 import Tooltip from "@/components/Tooltip";
 import { useEventGroup } from "@/lib/event-group";
-import { useEventGroupsGetEventGroup } from "@/lib/events";
-import { SCHEDULE_API_URL } from "@/lib/schedule/api";
+import { getICSLink, useEventGroupsGetEventGroup } from "@/lib/events";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -48,21 +47,11 @@ export default function Page({ params }: Props) {
 
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
-  const calendarURL =
-    data !== undefined ? `${SCHEDULE_API_URL}/${data.path}` : undefined;
-
   const { width } = useWindowSize();
   const [signInOpened, setSignInOpened] = useState(false);
   const { switchFavorite, isInFavorites, isPredefined } =
     useEventGroup(groupId);
   if (!data) return <>Loading...</>;
-  const type = data.type || "none";
-  const tagsInfo: { [key: string]: string } = {
-    "core course": "Core Courses",
-    elective: "Electives",
-    sports: "Sports",
-    none: "Not found",
-  };
   return (
     <>
       {isMounted && (
@@ -101,7 +90,7 @@ export default function Page({ params }: Props) {
                       {data.name}
                     </h1>
                     <p className="lg:hidden lg:invisible lg:pl-8 text-center lg:text-left w-4/6 text-text-secondary/75">
-                      {data.satellite?.description ||
+                      {data.description ||
                         "Hello world, this is a long description about my life and this elective."}
                     </p>
                     <div className="flex flex-row justify-center items-center mt-8 mr-4 gap-4 w-fit">
@@ -155,23 +144,28 @@ export default function Page({ params }: Props) {
                     </div>
                   </div>
                   <p className="hidden invisible lg:block lg:visible pl-8 text-center lg:text-left w-4/6 text-text-secondary/75">
-                    {data.satellite?.description || ""}
+                    {data.description || ""}
                   </p>
                   <div className="lg:pl-8 flex flex-col justify-center items-center lg:[align-items:normal] lg:justify-normal my-8 gap-y-4">
                     <h2 className="flex text-text-main grow text-center xl:text-left text-3xl font-medium">
                       Tags
                     </h2>
-                    <div className="flex rounded-3xl bg-secondary-main w-fit py-2 px-4">
-                      <p className="text-text-main">{tagsInfo[type]}</p>
+                    <div className="flex gap-2">
+                      {data.tags?.map((tag) => (
+                        <div
+                          key={tag.id}
+                          className="flex rounded-3xl bg-secondary-main w-fit py-2 px-4"
+                        >
+                          <p className="text-text-main">{tag.name}</p>
+                        </div>
+                      ))}
                     </div>
                   </div>
                   <h2 className="lg:pl-8 flex justify-center items-center lg:justify-normal lg:[align-items:normal] text-text-main text-center xl:text-left text-3xl font-medium">
                     Calendar
                   </h2>
                   <br />
-                  <Calendar
-                    urls={data.path ? [`${SCHEDULE_API_URL}/${data.path}`] : []}
-                  />
+                  <Calendar urls={[getICSLink(data.alias)]} />
                 </div>
               </div>
             </FloatingFocusManager>

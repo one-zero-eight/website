@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import { useUsersGetMe, ViewEventGroup } from "@/lib/events";
-import { useWindowSize } from "usehooks-ts";
-import Tooltip from "@/components/Tooltip";
-import Link from "next/link";
-import DownloadIcon from "@/components/icons/DownloadIcon";
-import { useEventGroup } from "@/lib/event-group";
-import SignInPopup from "@/components/SignInPopup";
-import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
-import FavoriteIcon from "@/components/icons/FavoriteIcon";
-import { useRouter } from "next/navigation";
 import CloseIcon from "@/components/icons/CloseIcon";
+import DownloadIcon from "@/components/icons/DownloadIcon";
+import FavoriteIcon from "@/components/icons/FavoriteIcon";
+import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
+import SignInPopup from "@/components/SignInPopup";
+import Tooltip from "@/components/Tooltip";
+import { useEventGroup } from "@/lib/event-group";
+import { useUsersGetMe, ViewEventGroup } from "@/lib/events";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useWindowSize } from "usehooks-ts";
 
 type EventGroupPageProps = {
   groupData: ViewEventGroup;
@@ -23,13 +23,6 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
   const { switchFavorite, isInFavorites, isPredefined } = useEventGroup(
     groupData.id,
   );
-  const tagsInfo: { [key: string]: string } = {
-    "core course": "Core Courses",
-    elective: "Electives",
-    sports: "Sports",
-    none: "Not found",
-  };
-  const type = groupData.type || "none";
   return !isPopup ? (
     <>
       <div className="p-16 items-center lg:[align-items:normal] flex flex-col">
@@ -39,8 +32,8 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
               <h1 className="text-text-main text-center lg:text-left text-3xl lg:text-4xl font-bold">
                 {groupData.name}
               </h1>
-              <p className="text-center lg:hidden lg:invisible xl:text-left text-text-secondary/75">
-                {groupData.satellite?.description || ""}
+              <p className="text-center lg:hidden lg:invisible lg:text-left text-text-secondary/75">
+                {groupData.description || ""}
               </p>
             </div>
             <div className="flex flex-row justify-center items-center lg:[align-items:normal] lg:justify-normal lg:flex-row mt-8 gap-4">
@@ -94,15 +87,22 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
             </div>
           </div>
           <p className="hidden invisible lg:block lg:visible text-center xl:text-left text-text-secondary/75">
-            {groupData.satellite?.description || ""}
+            {groupData.description || ""}
           </p>
         </div>
         <div className="flex flex-col justify-center lg:justify-normal lg:[align-items:normal] items-center my-8 gap-y-4">
           <h2 className="flex text-text-main text-center xl:text-left text-3xl font-medium">
             Tags
           </h2>
-          <div className="flex rounded-3xl bg-secondary-main w-fit py-2 px-4">
-            <p className="text-text-main">{tagsInfo[type]}</p>
+          <div className="flex gap-2">
+            {groupData.tags?.map((tag) => (
+              <div
+                key={tag.id}
+                className="flex rounded-3xl bg-secondary-main w-fit py-2 px-4"
+              >
+                <p className="text-text-main">{tag.name}</p>
+              </div>
+            ))}
           </div>
         </div>
         <SignInPopup
@@ -133,7 +133,7 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
         </div>
         <div className="px-4 sm:px-8">
           <div className="text-text-secondary/75">
-            {groupData.satellite?.description || ""}
+            {groupData.description || ""}
           </div>
         </div>
         <h2 className="flex text-text-main text-center xl:text-left text-3xl font-medium">

@@ -4,8 +4,11 @@ import { GroupCard } from "@/components/GroupCard";
 import { UserFace } from "@/components/icons/UserFace";
 import { Navbar } from "@/components/Navbar";
 import { useAuthPaths } from "@/lib/auth";
-import { UserXGroupViewApp, useUsersGetMe } from "@/lib/events";
-import { SCHEDULE_API_URL } from "@/lib/schedule/api";
+import {
+  getICSLink,
+  UserXFavoriteGroupView,
+  useUsersGetMe,
+} from "@/lib/events";
 import Link from "next/link";
 import React from "react";
 import { useIsClient, useWindowSize } from "usehooks-ts";
@@ -14,7 +17,7 @@ export default function Page() {
   const { width } = useWindowSize();
   const isClient = useIsClient();
   const { data } = useUsersGetMe();
-  const favorites = data?.favorites || [];
+  const favorites = data?.favorites_association || [];
   const { signIn } = useAuthPaths();
 
   if (!isClient)
@@ -101,8 +104,8 @@ export default function Page() {
                   .filter((v) => v.predefined === true)
                   .map((v) => (
                     <GroupCard
-                      key={v.group.path}
-                      group={v.group}
+                      key={v.event_group.path}
+                      group={v.event_group}
                       canHide={true}
                     />
                   ))}
@@ -127,8 +130,8 @@ export default function Page() {
                   .filter((v) => v.predefined === false)
                   .map((v) => (
                     <GroupCard
-                      key={v.group.path}
-                      group={v.group}
+                      key={v.event_group.path}
+                      group={v.event_group}
                       canHide={true}
                     />
                   ))}
@@ -163,7 +166,7 @@ export default function Page() {
 }
 
 function getCalendarsToShow(
-  favorites: UserXGroupViewApp[],
+  favorites: UserXFavoriteGroupView[],
   includeHidden: boolean = false,
 ) {
   // Check if there are any groups
@@ -174,7 +177,7 @@ function getCalendarsToShow(
   // Remove hidden calendars
   const toShow = favorites.flatMap((v) => {
     if (v.hidden && !includeHidden) return [];
-    return [`${SCHEDULE_API_URL}/${v.group.path}`];
+    return [getICSLink(v.event_group.alias)];
   });
 
   // Return unique items
