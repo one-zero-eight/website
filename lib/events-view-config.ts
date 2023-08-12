@@ -9,10 +9,20 @@ export type CategoryInfo = {
   filtersTagTypes: string[];
   groupingTagType?: string;
   showTagTypes: string[];
+  outdated: boolean;
 };
 
 export const viewConfig: ViewConfig = {
   categories: {
+    bootcamp2023: {
+      alias: "bootcamp2023",
+      title: "Bootcamp",
+      shortDescription: "Schedule of bootcamp activities in August, 2023.",
+      filtersTagTypes: ["bootcamp2023"],
+      groupingTagType: "bootcamp2023",
+      showTagTypes: ["bootcamp2023"],
+      outdated: false,
+    },
     "core-courses": {
       alias: "core-courses",
       title: "Core Courses",
@@ -20,6 +30,7 @@ export const viewConfig: ViewConfig = {
       filtersTagTypes: ["core-courses"],
       groupingTagType: "core-courses",
       showTagTypes: ["core-courses"],
+      outdated: true,
     },
     electives: {
       alias: "electives",
@@ -28,6 +39,7 @@ export const viewConfig: ViewConfig = {
       filtersTagTypes: ["electives"],
       groupingTagType: "electives",
       showTagTypes: ["electives"],
+      outdated: true,
     },
     sports: {
       alias: "sports",
@@ -36,6 +48,7 @@ export const viewConfig: ViewConfig = {
       filtersTagTypes: [],
       groupingTagType: undefined,
       showTagTypes: [],
+      outdated: true,
     },
   },
 };
