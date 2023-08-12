@@ -43,6 +43,10 @@ export function GroupCard({
   const { data, isError } = useUsersGetMe();
   const eventGroupPageURL = `/schedule/event-groups/${group.id}`;
   const eventGroupURL = `/schedule/event-groups/${group.id}/import`;
+  const outdated =
+    category &&
+    category.alias in viewConfig.categories &&
+    viewConfig.categories[category.alias].outdated;
 
   return (
     <div
@@ -71,6 +75,11 @@ export function GroupCard({
               </Fragment>
             );
           })}
+        {outdated && (
+          <p className="blur-0 text-red-500 text-sm border border-dashed border-red-500 w-fit py-1 px-2 mt-1 rounded-full">
+            Outdated
+          </p>
+        )}
       </div>
       <div className="flex flex-row place-items-center select-none w-fit">
         {canHide && (
