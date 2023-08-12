@@ -1,4 +1,6 @@
 "use client";
+import { CalendarEventIcon } from "@/components/icons/CalendarEventIcon";
+import { LocationIcon } from "@/components/icons/LocationIcon";
 import {
   autoUpdate,
   flip,
@@ -15,8 +17,6 @@ import {
 import { EventApi } from "@fullcalendar/core";
 import moment from "moment";
 import React from "react";
-import { LocationIcon } from "@/components/icons/LocationIcon";
-import { CalendarEventIcon } from "@/components/icons/CalendarEventIcon";
 
 export type ScheduleDialogProps = {
   event: EventApi;
@@ -77,6 +77,11 @@ export default function CalendarEventPopover({
               className="flex flex-col gap-2 z-10 bg-primary-main text-text-main text-sm p-4 rounded-2xl drop-shadow-md max-w-md"
             >
               <div className="flex px-8 text-xl text-bold">{event.title}</div>
+              <div className="flex flex-row items-center gap-2 pl-8">
+                <p className="flex whitespace-pre-wrap">
+                  {event.extendedProps.description}
+                </p>
+              </div>
               <div className="flex flex-row items-center gap-2">
                 <CalendarEventIcon
                   width={24}
