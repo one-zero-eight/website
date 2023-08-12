@@ -36,13 +36,12 @@ function Calendar({
             if (!(uniqueId in unique)) {
               unique[uniqueId] = event;
             } else {
-              unique[uniqueId].setExtendedProp(
-                "calendarURLs",
-                (
-                  unique[uniqueId].extendedProps.calendarURLs as string[]
-                ).concat(event.extendedProps.calendarURLs as string[]),
-              );
-              event.remove();
+              const calendarURLs = (
+                unique[uniqueId].extendedProps.calendarURLs as string[]
+              ).concat(event.extendedProps.calendarURLs as string[]);
+              unique[uniqueId].remove();
+              unique[uniqueId] = event;
+              unique[uniqueId].setExtendedProp("calendarURLs", calendarURLs);
             }
           }
         }}
