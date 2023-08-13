@@ -123,7 +123,12 @@ function Sidebar() {
           <UserMenu isMobile={false} isSidebar={true} />
         </div>
         <a className="text-text-main" href="https://t.me/one_zero_eight">
-          one-zero-eight 💜
+          See you at
+          <br />
+          <span className="underline-offset-2 underline">
+            one-zero-eight
+          </span>{" "}
+          💜
         </a>
       </aside>
     </>
