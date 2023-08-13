@@ -32,7 +32,7 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
               <h1 className="text-text-main text-center lg:text-left text-3xl lg:text-4xl font-bold">
                 {groupData.name}
               </h1>
-              <p className="text-center lg:hidden lg:invisible lg:text-left text-text-secondary/75">
+              <p className="text-center lg:hidden lg:invisible lg:text-left text-text-secondary/75 whitespace-pre-wrap">
                 {groupData.description || ""}
               </p>
             </div>
@@ -86,7 +86,7 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
               </Tooltip>
             </div>
           </div>
-          <p className="hidden invisible lg:block lg:visible text-center xl:text-left text-text-secondary/75">
+          <p className="hidden invisible lg:block lg:visible text-center xl:text-left text-text-secondary/75 whitespace-pre-wrap">
             {groupData.description || ""}
           </p>
         </div>
@@ -132,7 +132,7 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
           </div>
         </div>
         <div className="px-4 sm:px-8">
-          <div className="text-text-secondary/75">
+          <div className="text-text-secondary/75 whitespace-pre-wrap">
             {groupData.description || ""}
           </div>
         </div>

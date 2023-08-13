@@ -89,7 +89,7 @@ export default function Page({ params }: Props) {
                     <h1 className="text-text-main lg:grow text-center lg:text-left lg:pl-8 pt-6 font-bold text-2xl xl:text-3xl">
                       {data.name}
                     </h1>
-                    <p className="lg:hidden lg:invisible lg:pl-8 text-center lg:text-left w-4/6 text-text-secondary/75">
+                    <p className="lg:hidden lg:invisible lg:pl-8 text-center lg:text-left w-4/6 text-text-secondary/75 whitespace-pre-wrap">
                       {data.description ||
                         "Hello world, this is a long description about my life and this elective."}
                     </p>
@@ -143,7 +143,7 @@ export default function Page({ params }: Props) {
                       </Tooltip>
                     </div>
                   </div>
-                  <p className="hidden invisible lg:block lg:visible pl-8 text-center lg:text-left w-4/6 text-text-secondary/75">
+                  <p className="hidden invisible lg:block lg:visible pl-8 text-center lg:text-left w-4/6 text-text-secondary/75 whitespace-pre-wrap">
                     {data.description || ""}
                   </p>
                   <div className="lg:pl-8 flex flex-col justify-center items-center lg:[align-items:normal] lg:justify-normal my-8 gap-y-4">
