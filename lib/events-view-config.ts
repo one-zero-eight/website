@@ -23,6 +23,15 @@ export const viewConfig: ViewConfig = {
       showTagTypes: ["bootcamp2023"],
       outdated: false,
     },
+    "bootcamp2023-workshops": {
+      alias: "bootcamp2023-workshops",
+      title: "Workshops",
+      shortDescription: "Workshops on bootcamp in August, 2023.",
+      filtersTagTypes: ["bootcamp2023-workshops"],
+      groupingTagType: "bootcamp2023-workshops",
+      showTagTypes: ["bootcamp2023-workshops"],
+      outdated: false,
+    },
     "core-courses": {
       alias: "core-courses",
       title: "Core Courses",

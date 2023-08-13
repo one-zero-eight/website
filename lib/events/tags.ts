@@ -60,6 +60,56 @@ export const tags: TagInfo[] = [
     name: "BS/MS Hum",
     type: "electives",
   },
+  {
+    alias: "sum23",
+    name: "Sum23 semester",
+    type: "semester",
+  },
+  {
+    alias: "bootcamp2023",
+    name: "Bootcamp 2023",
+    type: "category",
+  },
+  {
+    alias: "academic",
+    name: "Academic schedule for Bootcamp 2023",
+    type: "bootcamp2023",
+  },
+  {
+    alias: "buddy",
+    name: "Meetings with buddies on Bootcamp 2023",
+    type: "bootcamp2023",
+  },
+  {
+    alias: "bootcamp2023-workshops",
+    type: "category",
+    name: "Workshops on Bootcamp 2023",
+  },
+  {
+    alias: "bootcamp2023-workshops-14",
+    type: "bootcamp2023-workshops",
+    name: "Monday",
+  },
+  {
+    alias: "bootcamp2023-workshops-15",
+    type: "bootcamp2023-workshops",
+    name: "Tuesday",
+  },
+  {
+    alias: "bootcamp2023-workshops-16",
+    type: "bootcamp2023-workshops",
+    name: "Wednesday",
+  },
+  {
+    alias: "bootcamp2023-workshops-17",
+    type: "bootcamp2023-workshops",
+    name: "Thursday",
+  },
+  {
+    alias: "bootcamp2023-workshops-18",
+    type: "bootcamp2023-workshops",
+    name: "Friday",
+  },
 ];
 
 export function getTagInfo(alias: string): TagInfo | undefined {

@@ -15,6 +15,7 @@ const categoriesIcons: {
   electives: ElectivesIcon,
   sports: SportIcon,
   bootcamp2023: BootcampIcon,
+  "bootcamp2023-workshops": BootcampIcon,
 };
 
 export default async function CategoryContainer() {
