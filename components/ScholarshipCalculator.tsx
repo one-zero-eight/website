@@ -237,6 +237,10 @@ export default function ScholarshipCalculator() {
           }}
         />
       </div>
+      <div className="flex flex-row flex-wrap justify-between items-center self-center text-center text-red-500 w-2/3 border border-red-500 border-dashed rounded-xl p-4 mt-2">
+        Note: this calculator is valid only for B22-B19 courses. Formula for B23
+        will be added before next semester.
+      </div>
     </div>
   );
 }
