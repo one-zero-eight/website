@@ -29,7 +29,10 @@ export const viewConfig: ViewConfig = {
       shortDescription: "Workshops on bootcamp in August, 2023.",
       filtersTagTypes: ["bootcamp2023-workshops"],
       groupingTagType: "bootcamp2023-workshops",
-      showTagTypes: ["bootcamp2023-workshops"],
+      showTagTypes: [
+        "bootcamp2023-workshops",
+        "bootcamp2023-workshops-timeslot",
+      ],
       outdated: false,
     },
     "core-courses": {
