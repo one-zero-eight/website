@@ -41,6 +41,19 @@ export type UsersAddFavoriteParams = {
   group_id: number;
 };
 
+export interface ViewWorkshop {
+  id: number;
+  alias: string;
+  name: string;
+  date: string;
+  speaker?: string;
+  capacity?: number;
+  comment?: string;
+  location?: string;
+  timeslots?: Timeslot[];
+  checkin_count?: number;
+}
+
 /**
  * Represents a user instance from the database excluding sensitive information.
  */
@@ -52,15 +65,6 @@ export interface ViewUser {
 }
 
 export type ViewTagSatellite = { [key: string]: any };
-
-export interface ViewTag {
-  id: number;
-  alias: string;
-  type?: string;
-  name?: string;
-  satellite?: ViewTagSatellite;
-  ownerships?: Ownership[];
-}
 
 /**
  * Represents a group instance from the database excluding sensitive information.
@@ -109,6 +113,13 @@ export interface UpdateEventGroup {
   path?: string;
 }
 
+export interface Timeslot {
+  workshop_id: number;
+  sequence: number;
+  start: string;
+  end: string;
+}
+
 /**
  * An enumeration.
  */
@@ -128,11 +139,32 @@ export interface Ownership {
   role_alias: OwnershipEnum;
 }
 
+export interface ViewTag {
+  id: number;
+  alias: string;
+  type?: string;
+  name?: string;
+  satellite?: ViewTagSatellite;
+  ownerships?: Ownership[];
+}
+
+export interface ListWorkshopsResponse {
+  workshops: ViewWorkshop[];
+}
+
+export interface ListTagsResponse {
+  tags: ViewTag[];
+}
+
 /**
  * Represents a list of event groups.
  */
 export interface ListEventGroupsResponse {
   groups: ViewEventGroup[];
+}
+
+export interface ListCheckInResponse {
+  check_ins: CheckIn[];
 }
 
 export interface HTTPValidationError {
@@ -147,6 +179,13 @@ export interface CreateEventGroup {
   name: string;
   path?: string;
   description?: string;
+}
+
+export interface CheckIn {
+  workshop_id: number;
+  user_id: number;
+  timeslot_sequence: number;
+  dtstamp: string;
 }
 
 export interface BodyEventGroupsSetEventGroupIcs {
@@ -221,6 +260,87 @@ export const useUsersGetMe = <
   request?: SecondParameter<typeof axiosInstance>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const queryOptions = getUsersGetMeQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get schedule in ICS format for the user
+ * @summary Get My Schedule
+ */
+export const usersGetMySchedule = (
+  userId: number,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<unknown | Blob>(
+    { url: `/users/ics/${userId}`, method: "get", signal },
+    options,
+  );
+};
+
+export const getUsersGetMyScheduleQueryKey = (userId: number) =>
+  [`/users/ics/${userId}`] as const;
+
+export const getUsersGetMyScheduleQueryOptions = <
+  TData = Awaited<ReturnType<typeof usersGetMySchedule>>,
+  TError = void | HTTPValidationError,
+>(
+  userId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof usersGetMySchedule>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryOptions<
+  Awaited<ReturnType<typeof usersGetMySchedule>>,
+  TError,
+  TData
+> & { queryKey: QueryKey } => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getUsersGetMyScheduleQueryKey(userId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof usersGetMySchedule>>
+  > = ({ signal }) => usersGetMySchedule(userId, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!userId, ...queryOptions };
+};
+
+export type UsersGetMyScheduleQueryResult = NonNullable<
+  Awaited<ReturnType<typeof usersGetMySchedule>>
+>;
+export type UsersGetMyScheduleQueryError = void | HTTPValidationError;
+
+/**
+ * @summary Get My Schedule
+ */
+export const useUsersGetMySchedule = <
+  TData = Awaited<ReturnType<typeof usersGetMySchedule>>,
+  TError = void | HTTPValidationError,
+>(
+  userId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof usersGetMySchedule>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getUsersGetMyScheduleQueryOptions(userId, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -537,7 +657,7 @@ export const eventGroupsCreateEventGroup = (
 };
 
 export const getEventGroupsCreateEventGroupMutationOptions = <
-  TError = HTTPValidationError,
+  TError = void | HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -571,13 +691,14 @@ export type EventGroupsCreateEventGroupMutationResult = NonNullable<
   Awaited<ReturnType<typeof eventGroupsCreateEventGroup>>
 >;
 export type EventGroupsCreateEventGroupMutationBody = CreateEventGroup;
-export type EventGroupsCreateEventGroupMutationError = HTTPValidationError;
+export type EventGroupsCreateEventGroupMutationError =
+  void | HTTPValidationError;
 
 /**
  * @summary Create Event Group
  */
 export const useEventGroupsCreateEventGroup = <
-  TError = HTTPValidationError,
+  TError = void | HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -699,7 +820,7 @@ export const eventGroupsUpdateEventGroup = (
 };
 
 export const getEventGroupsUpdateEventGroupMutationOptions = <
-  TError = HTTPValidationError,
+  TError = void | HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -733,13 +854,14 @@ export type EventGroupsUpdateEventGroupMutationResult = NonNullable<
   Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>
 >;
 export type EventGroupsUpdateEventGroupMutationBody = UpdateEventGroup;
-export type EventGroupsUpdateEventGroupMutationError = HTTPValidationError;
+export type EventGroupsUpdateEventGroupMutationError =
+  void | HTTPValidationError;
 
 /**
  * @summary Update Event Group
  */
 export const useEventGroupsUpdateEventGroup = <
-  TError = HTTPValidationError,
+  TError = void | HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -937,24 +1059,29 @@ export const useEventGroupsFindEventGroupByAlias = <
  * @summary Get Event Group Ics
  */
 export const eventGroupsGetEventGroupIcs = (
-  eventGroupId: string,
+  eventGroupId: number,
   options?: SecondParameter<typeof axiosInstance>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<unknown>(
-    { url: `/event-groups/${eventGroupId}/ics`, method: "get", signal },
+  return axiosInstance<Blob>(
+    {
+      url: `/event-groups/${eventGroupId}/ics`,
+      method: "get",
+      responseType: "blob",
+      signal,
+    },
     options,
   );
 };
 
-export const getEventGroupsGetEventGroupIcsQueryKey = (eventGroupId: string) =>
+export const getEventGroupsGetEventGroupIcsQueryKey = (eventGroupId: number) =>
   [`/event-groups/${eventGroupId}/ics`] as const;
 
 export const getEventGroupsGetEventGroupIcsQueryOptions = <
   TData = Awaited<ReturnType<typeof eventGroupsGetEventGroupIcs>>,
   TError = void | HTTPValidationError,
 >(
-  eventGroupId: string,
+  eventGroupId: number,
   options?: {
     query?: UseQueryOptions<
       Awaited<ReturnType<typeof eventGroupsGetEventGroupIcs>>,
@@ -994,7 +1121,7 @@ export const useEventGroupsGetEventGroupIcs = <
   TData = Awaited<ReturnType<typeof eventGroupsGetEventGroupIcs>>,
   TError = void | HTTPValidationError,
 >(
-  eventGroupId: string,
+  eventGroupId: number,
   options?: {
     query?: UseQueryOptions<
       Awaited<ReturnType<typeof eventGroupsGetEventGroupIcs>>,
@@ -1030,7 +1157,7 @@ export const eventGroupsSetEventGroupIcs = (
   const formData = new FormData();
   formData.append("ics_file", bodyEventGroupsSetEventGroupIcs.ics_file);
 
-  return axiosInstance<unknown | void>(
+  return axiosInstance<unknown>(
     {
       url: `/event-groups/${eventGroupId}/ics`,
       method: "put",
@@ -1042,7 +1169,7 @@ export const eventGroupsSetEventGroupIcs = (
 };
 
 export const getEventGroupsSetEventGroupIcsMutationOptions = <
-  TError = HTTPValidationError,
+  TError = void | HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1077,13 +1204,14 @@ export type EventGroupsSetEventGroupIcsMutationResult = NonNullable<
 >;
 export type EventGroupsSetEventGroupIcsMutationBody =
   BodyEventGroupsSetEventGroupIcs;
-export type EventGroupsSetEventGroupIcsMutationError = HTTPValidationError;
+export type EventGroupsSetEventGroupIcsMutationError =
+  void | HTTPValidationError;
 
 /**
  * @summary Set Event Group Ics
  */
 export const useEventGroupsSetEventGroupIcs = <
-  TError = HTTPValidationError,
+  TError = void | HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1109,8 +1237,13 @@ export const eventGroupsGetEventGroupIcsByAlias = (
   options?: SecondParameter<typeof axiosInstance>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<unknown>(
-    { url: `/event-groups/ics/${eventGroupAlias}.ics`, method: "get", signal },
+  return axiosInstance<Blob>(
+    {
+      url: `/event-groups/ics/${eventGroupAlias}.ics`,
+      method: "get",
+      responseType: "blob",
+      signal,
+    },
     options,
   );
 };
@@ -1337,6 +1470,377 @@ export const useAuthGetDevParserToken = <
   query.queryKey = queryOptions.queryKey;
 
   return query;
+};
+
+/**
+ * Get a list of all tags
+ * @summary List Tags
+ */
+export const tagsListTags = (
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<ListTagsResponse>(
+    { url: `/tags/`, method: "get", signal },
+    options,
+  );
+};
+
+export const getTagsListTagsQueryKey = () => [`/tags/`] as const;
+
+export const getTagsListTagsQueryOptions = <
+  TData = Awaited<ReturnType<typeof tagsListTags>>,
+  TError = unknown,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof tagsListTags>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryOptions<Awaited<ReturnType<typeof tagsListTags>>, TError, TData> & {
+  queryKey: QueryKey;
+} => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getTagsListTagsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof tagsListTags>>> = ({
+    signal,
+  }) => tagsListTags(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions };
+};
+
+export type TagsListTagsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof tagsListTags>>
+>;
+export type TagsListTagsQueryError = unknown;
+
+/**
+ * @summary List Tags
+ */
+export const useTagsListTags = <
+  TData = Awaited<ReturnType<typeof tagsListTags>>,
+  TError = unknown,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof tagsListTags>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getTagsListTagsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * List all workshops
+ * @summary List Workshops
+ */
+export const workshopsListWorkshops = (
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<ListWorkshopsResponse>(
+    { url: `/workshops/`, method: "get", signal },
+    options,
+  );
+};
+
+export const getWorkshopsListWorkshopsQueryKey = () => [`/workshops/`] as const;
+
+export const getWorkshopsListWorkshopsQueryOptions = <
+  TData = Awaited<ReturnType<typeof workshopsListWorkshops>>,
+  TError = unknown,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof workshopsListWorkshops>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryOptions<
+  Awaited<ReturnType<typeof workshopsListWorkshops>>,
+  TError,
+  TData
+> & { queryKey: QueryKey } => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getWorkshopsListWorkshopsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof workshopsListWorkshops>>
+  > = ({ signal }) => workshopsListWorkshops(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions };
+};
+
+export type WorkshopsListWorkshopsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof workshopsListWorkshops>>
+>;
+export type WorkshopsListWorkshopsQueryError = unknown;
+
+/**
+ * @summary List Workshops
+ */
+export const useWorkshopsListWorkshops = <
+  TData = Awaited<ReturnType<typeof workshopsListWorkshops>>,
+  TError = unknown,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof workshopsListWorkshops>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getWorkshopsListWorkshopsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * List all checkins for current user
+ * @summary List Workshops User Check In
+ */
+export const workshopsListWorkshopsUserCheckIn = (
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<ListCheckInResponse>(
+    { url: `/workshops/user-check-in/`, method: "get", signal },
+    options,
+  );
+};
+
+export const getWorkshopsListWorkshopsUserCheckInQueryKey = () =>
+  [`/workshops/user-check-in/`] as const;
+
+export const getWorkshopsListWorkshopsUserCheckInQueryOptions = <
+  TData = Awaited<ReturnType<typeof workshopsListWorkshopsUserCheckIn>>,
+  TError = unknown,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof workshopsListWorkshopsUserCheckIn>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryOptions<
+  Awaited<ReturnType<typeof workshopsListWorkshopsUserCheckIn>>,
+  TError,
+  TData
+> & { queryKey: QueryKey } => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getWorkshopsListWorkshopsUserCheckInQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof workshopsListWorkshopsUserCheckIn>>
+  > = ({ signal }) => workshopsListWorkshopsUserCheckIn(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions };
+};
+
+export type WorkshopsListWorkshopsUserCheckInQueryResult = NonNullable<
+  Awaited<ReturnType<typeof workshopsListWorkshopsUserCheckIn>>
+>;
+export type WorkshopsListWorkshopsUserCheckInQueryError = unknown;
+
+/**
+ * @summary List Workshops User Check In
+ */
+export const useWorkshopsListWorkshopsUserCheckIn = <
+  TData = Awaited<ReturnType<typeof workshopsListWorkshopsUserCheckIn>>,
+  TError = unknown,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof workshopsListWorkshopsUserCheckIn>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions =
+    getWorkshopsListWorkshopsUserCheckInQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get workshop info
+ * @summary Get Workshop
+ */
+export const workshopsGetWorkshop = (
+  workshopId: number,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<ViewWorkshop>(
+    { url: `/workshops/${workshopId}`, method: "get", signal },
+    options,
+  );
+};
+
+export const getWorkshopsGetWorkshopQueryKey = (workshopId: number) =>
+  [`/workshops/${workshopId}`] as const;
+
+export const getWorkshopsGetWorkshopQueryOptions = <
+  TData = Awaited<ReturnType<typeof workshopsGetWorkshop>>,
+  TError = HTTPValidationError,
+>(
+  workshopId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof workshopsGetWorkshop>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryOptions<
+  Awaited<ReturnType<typeof workshopsGetWorkshop>>,
+  TError,
+  TData
+> & { queryKey: QueryKey } => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getWorkshopsGetWorkshopQueryKey(workshopId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof workshopsGetWorkshop>>
+  > = ({ signal }) => workshopsGetWorkshop(workshopId, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!workshopId, ...queryOptions };
+};
+
+export type WorkshopsGetWorkshopQueryResult = NonNullable<
+  Awaited<ReturnType<typeof workshopsGetWorkshop>>
+>;
+export type WorkshopsGetWorkshopQueryError = HTTPValidationError;
+
+/**
+ * @summary Get Workshop
+ */
+export const useWorkshopsGetWorkshop = <
+  TData = Awaited<ReturnType<typeof workshopsGetWorkshop>>,
+  TError = HTTPValidationError,
+>(
+  workshopId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof workshopsGetWorkshop>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getWorkshopsGetWorkshopQueryOptions(workshopId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Check-in or Check-out from workshop
+ * @summary Check In
+ */
+export const workshopsCheckIn = (
+  workshopId: number,
+  checkIn: boolean,
+  options?: SecondParameter<typeof axiosInstance>,
+) => {
+  return axiosInstance<unknown>(
+    { url: `/workshops/${workshopId}/?check_in=${checkIn}`, method: "put" },
+    options,
+  );
+};
+
+export const getWorkshopsCheckInMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof workshopsCheckIn>>,
+    TError,
+    { workshopId: number; checkIn: boolean },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof workshopsCheckIn>>,
+  TError,
+  { workshopId: number; checkIn: boolean },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof workshopsCheckIn>>,
+    { workshopId: number; checkIn: boolean }
+  > = (props) => {
+    const { workshopId, checkIn } = props ?? {};
+
+    return workshopsCheckIn(workshopId, checkIn, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type WorkshopsCheckInMutationResult = NonNullable<
+  Awaited<ReturnType<typeof workshopsCheckIn>>
+>;
+
+export type WorkshopsCheckInMutationError = HTTPValidationError;
+
+/**
+ * @summary Check In
+ */
+export const useWorkshopsCheckIn = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof workshopsCheckIn>>,
+    TError,
+    { workshopId: number; checkIn: boolean },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}) => {
+  const mutationOptions = getWorkshopsCheckInMutationOptions(options);
+
+  return useMutation(mutationOptions);
 };
 
 /**
