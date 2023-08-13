@@ -1,6 +1,6 @@
 "use client";
 import DropListIcon from "@/components/icons/DropListIcon";
-import { getTagInfo, getTagInfoByType } from "@/lib/events/tags";
+import { useTagsListTags } from "@/lib/events";
 import { Popover, Transition } from "@headlessui/react";
 import React from "react";
 
@@ -13,9 +13,12 @@ function FilterDropdown({
   selected: string;
   setSelected: (v: string) => void;
 }) {
-  const typeInfo = getTagInfo(typeFilter);
-  const optionsInfos = getTagInfoByType(typeFilter);
-  const selectedTagInfo = getTagInfo(selected);
+  const { data } = useTagsListTags();
+
+  if (data === undefined) return null;
+
+  const optionsInfos = data.tags.filter((tag) => tag.type === typeFilter);
+  const selectedTagInfo = data.tags.find((tag) => tag.alias === selected);
 
   return (
     <Popover className="relative text-xl z-[1] opacity-[0.999] w-max rounded-full focus:outline-none">
