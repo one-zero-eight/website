@@ -2,12 +2,8 @@ import CategoryContainer from "@/components/CategoryContainer";
 import ClarificationContainer from "@/components/ClarificationContainer";
 import { DashboardButton } from "@/components/DashboardButton";
 import { Navbar } from "@/components/Navbar";
-import { Metadata } from "next";
 import React from "react";
 
-export const metadata: Metadata = {
-  title: "Schedule",
-};
 export default function Page() {
   return (
     <main className="px-4 lg:px-12 py-16 items-center lg:[align-items:normal]">
