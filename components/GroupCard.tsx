@@ -53,7 +53,6 @@ export function GroupCard({
     category.alias in viewConfig.categories &&
     viewConfig.categories[category.alias].outdated;
   const recommended = recommendedGroups.includes(group.alias);
-  if (recommended) console.log(group.alias, recommendedGroups, recommended);
 
   return (
     <div
