@@ -21,6 +21,11 @@ export type GroupCardProps = {
   canHide?: boolean;
 };
 
+export const recommendedGroups = [
+  "bootcamp2023-08-14-introduction-to-one-zero-eight-a-place-of-opportunity",
+  "bootcamp2023-08-15-even-programmers-can-be-creative",
+];
+
 export function GroupCard({
   group,
   askToSignIn,
@@ -47,6 +52,8 @@ export function GroupCard({
     category &&
     category.alias in viewConfig.categories &&
     viewConfig.categories[category.alias].outdated;
+  const recommended = recommendedGroups.includes(group.alias);
+  if (recommended) console.log(group.alias, recommendedGroups, recommended);
 
   return (
     <div
@@ -79,6 +86,13 @@ export function GroupCard({
           <p className="blur-0 text-red-500 text-sm border border-dashed border-red-500 w-fit py-1 px-2 mt-1 rounded-full">
             Outdated
           </p>
+        )}
+        {recommended && (
+          <Tooltip content="Workshop by one-zero-eight community">
+            <p className="blur-0 text-section_g_start text-sm border border-section_g_start w-fit py-1 px-2 mt-1 rounded-full">
+              Recommended
+            </p>
+          </Tooltip>
         )}
       </div>
       <div className="flex flex-row place-items-center select-none w-fit">
