@@ -69,9 +69,9 @@ function Sidebar() {
           >
             <Link
               href={user ? "/dashboard" : "/schedule"}
-              className="flex mb-8"
+              className="flex mb-4"
             >
-              <Logo className="h-16 fill-text-main" />
+              <Logo className="fill-text-main" />
             </Link>
             <nav className="flex-col">
               {items.map((item) => (
@@ -103,8 +103,8 @@ function Sidebar() {
         </aside>
       </div>
       <aside className="lgw-smh:flex hidden bg-primary-main flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
-        <Link href={user ? "/dashboard" : "/schedule"} className="mb-8">
-          <Logo className="h-16 fill-text-main" />
+        <Link href={user ? "/dashboard" : "/schedule"} className="mb-4">
+          <Logo className="fill-text-main" />
         </Link>
         <nav className="flex flex-col">
           {items.map((item) => (
