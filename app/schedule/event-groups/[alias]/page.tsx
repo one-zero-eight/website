@@ -4,20 +4,19 @@ import { EventGroupPage } from "@/components/EventGroupPage";
 import { Navbar } from "@/components/Navbar";
 import {
   getICSLink,
-  useEventGroupsGetEventGroup,
+  useEventGroupsFindEventGroupByAlias,
   useUsersGetMe,
 } from "@/lib/events";
 import React from "react";
 import { useWindowSize } from "usehooks-ts";
 
 export type Props = {
-  params: { groupId: string };
+  params: { alias: string };
 };
 
-export default function Page({ params }: Props) {
-  const groupId = Number(params.groupId);
+export default function Page({ params: { alias } }: Props) {
   const { data: user } = useUsersGetMe();
-  const { data: group } = useEventGroupsGetEventGroup(groupId);
+  const { data: group } = useEventGroupsFindEventGroupByAlias({ alias });
   const { width } = useWindowSize();
   if (!group) {
     return <>Loading...</>;

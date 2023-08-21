@@ -9,7 +9,7 @@ import Tooltip from "@/components/Tooltip";
 import { useEventGroup } from "@/lib/event-group";
 import {
   getICSLink,
-  useEventGroupsGetEventGroup,
+  useEventGroupsFindEventGroupByAlias,
   useUsersGetMe,
 } from "@/lib/events";
 import {
@@ -28,14 +28,13 @@ import React, { useState } from "react";
 import { useWindowSize } from "usehooks-ts";
 
 export type Props = {
-  params: { groupId: string };
+  params: { alias: string };
 };
 
-export default function Page({ params }: Props) {
+export default function Page({ params: { alias } }: Props) {
   const router = useRouter();
-  const groupId = Number(params.groupId);
   const { data: user } = useUsersGetMe();
-  const { data: group } = useEventGroupsGetEventGroup(groupId);
+  const { data: group } = useEventGroupsFindEventGroupByAlias({ alias });
 
   const { context, refs } = useFloating({
     open: true,
@@ -54,8 +53,9 @@ export default function Page({ params }: Props) {
 
   const { width } = useWindowSize();
   const [signInOpened, setSignInOpened] = useState(false);
-  const { switchFavorite, isInFavorites, isPredefined } =
-    useEventGroup(groupId);
+  const { switchFavorite, isInFavorites, isPredefined } = useEventGroup(
+    group?.id,
+  );
   if (!group) return <>Loading...</>;
   return (
     <>
@@ -101,7 +101,7 @@ export default function Page({ params }: Props) {
                     <div className="flex flex-row justify-center items-center mt-8 mr-4 gap-4 w-fit">
                       <Tooltip content={"Import to your calendar"}>
                         <Link
-                          href={`/schedule/event-groups/${group.id}/import`}
+                          href={`/schedule/event-groups/${group.alias}/import`}
                           className="flex flex-row gap-2 justify-center items-center text-center text-text-main p-2 font-medium w-40 h-14 rounded-full border-focus_color bg-primary-main hover:bg-primary-hover border-2 text-xl"
                         >
                           <DownloadIcon

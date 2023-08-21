@@ -46,8 +46,8 @@ export function GroupCard({
       ? viewConfig.categories[category.alias].showTagTypes
       : [];
   const { data, isError } = useUsersGetMe();
-  const eventGroupPageURL = `/schedule/event-groups/${group.id}`;
-  const eventGroupURL = `/schedule/event-groups/${group.id}/import`;
+  const eventGroupPageURL = `/schedule/event-groups/${group.alias}`;
+  const eventGroupURL = `/schedule/event-groups/${group.alias}/import`;
   const outdated =
     category &&
     category.alias in viewConfig.categories &&

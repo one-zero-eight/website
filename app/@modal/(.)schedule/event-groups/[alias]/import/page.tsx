@@ -6,7 +6,7 @@ import QuestionIcon from "@/components/icons/QuestionIcon";
 import ScheduleLinkCopy from "@/components/ScheduleLinkCopy";
 import {
   getICSLink,
-  useEventGroupsGetEventGroup,
+  useEventGroupsFindEventGroupByAlias,
   useUsersGetMe,
 } from "@/lib/events";
 import {
@@ -23,14 +23,13 @@ import { useRouter } from "next/navigation";
 import React, { useRef } from "react";
 
 export type Props = {
-  params: { groupId: string };
+  params: { alias: string };
 };
 
-export default function Page({ params }: Props) {
+export default function Page({ params: { alias } }: Props) {
   const router = useRouter();
-  const groupId = Number(params.groupId);
   const { data: user } = useUsersGetMe();
-  const { data: group } = useEventGroupsGetEventGroup(groupId);
+  const { data: group } = useEventGroupsFindEventGroupByAlias({ alias });
 
   const copyButtonRef = useRef(null);
 

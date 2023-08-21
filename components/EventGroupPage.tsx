@@ -39,7 +39,7 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
             <div className="flex flex-row justify-center items-center lg:[align-items:normal] lg:justify-normal lg:flex-row mt-8 gap-4">
               <Tooltip content={"Import to your calendar"}>
                 <Link
-                  href={`/schedule/event-groups/${groupData.id}/import`}
+                  href={`/schedule/event-groups/${groupData.alias}/import`}
                   className="flex flex-row gap-2 justify-center items-center text-center text-text-main p-2 font-medium w-40 h-14 rounded-full border-focus_color bg-primary-main hover:bg-primary-hover border-2 text-xl"
                 >
                   <DownloadIcon
