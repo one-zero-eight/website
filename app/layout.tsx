@@ -26,7 +26,7 @@ const fuzzyBubbles = Fuzzy_Bubbles({
 export const metadata: Metadata = {
   metadataBase: new URL("https://innohassle.ru"),
   title: { default: "InNoHassle", template: "%s — InNoHassle" },
-  description: "InNoHassle ecosystem by one-zero-eight",
+  description: "InNoHassle ecosystem by one-zero-eight.",
   applicationName: "InNoHassle",
   alternates: { canonical: "/" },
 };

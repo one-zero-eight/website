@@ -10,10 +10,10 @@ export type Props = {
 };
 
 export async function generateMetadata(
-  { params }: Props,
+  { params: { category } }: Props,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
-  const categoryInfo = getCategoryInfoBySlug(params.category);
+  const categoryInfo = getCategoryInfoBySlug(category);
 
   if (categoryInfo === undefined) {
     notFound();
@@ -21,7 +21,10 @@ export async function generateMetadata(
 
   return {
     title: categoryInfo.title + " " + ((await parent).title?.absolute || ""),
-    alternates: { canonical: `/schedule/${params.category}` },
+    description:
+      categoryInfo.shortDescription +
+      " Find your group in this category and see the calendar with all classes.",
+    alternates: { canonical: `/schedule/${category}` },
   };
 }
 
