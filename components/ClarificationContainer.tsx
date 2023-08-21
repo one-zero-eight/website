@@ -9,7 +9,7 @@ import TableChartIcon from "@/components/icons/TableChartIcon";
 
 export default function ClarificationContainer() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-7 grow-0 place-items-center w-full gap-y-10 mt-8">
+    <div className="mt-8 grid w-full grow-0 grid-cols-1 place-items-center gap-y-10 lg:grid-cols-3 2xl:grid-cols-7">
       <ClarificationCard
         icon={[TableChartIcon, DoubleArrowIcon, DataIcon]}
         title="Retrieval"
@@ -21,7 +21,7 @@ export default function ClarificationContainer() {
         title="Processing"
         shortDescription={`The scripts generate .ics files for calendar apps`}
       />
-      <Arrow className="lg:hidden lg:invisible 2xl:flex 2xl:visible" />
+      <Arrow className="lg:invisible lg:hidden 2xl:visible 2xl:flex" />
       <ClarificationCard
         icon={[CalendarAddIcon]}
         title="Import"

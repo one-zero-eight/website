@@ -67,7 +67,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
     return (
       <Link
         href={signIn}
-        className="mt-3 flex justify-center items-center w-32 h-12 bg-focus_color text-white rounded-3xl font-semibold text-xl"
+        className="mt-3 flex h-12 w-32 items-center justify-center rounded-3xl bg-focus_color text-xl font-semibold text-white"
       >
         Sign in
       </Link>
@@ -81,8 +81,8 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
         {...getReferenceProps()}
         className="rounded-2xl hover:bg-primary-hover"
       >
-        <div className="flex flex-col justify-center items-center bg-primary-main w-18p h-18p rounded-2xl ml-auto hover:bg-primary-hover">
-          <div className="flex shrink-0 w-12 h-12 bg-border rounded-full justify-center items-center">
+        <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-primary-main hover:bg-primary-hover">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-border">
             <UserFace
               className="flex fill-icon-main/50"
               width={36}
@@ -99,16 +99,16 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               ref={refs.setFloating}
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
-              className={`w-fit bg-primary-main p-4 rounded-2xl border-border/50 border-2 absolute z-10 opacity-[0.999] ${
+              className={`absolute z-10 w-fit rounded-2xl border-2 border-border/50 bg-primary-main p-4 opacity-[0.999] ${
                 isMobile
-                  ? "top-[18p] left-0"
+                  ? "left-0 top-[18p]"
                   : isSidebar
                   ? "-top-32"
-                  : "top-[18p] right-0"
+                  : "right-0 top-[18p]"
               }`}
             >
-              <div className="justify-center sm:justify-normal flex flex-row gap-6">
-                <div className="flex bg-border shrink-0 w-20 h-20 rounded-full justify-center items-center">
+              <div className="flex flex-row justify-center gap-6 sm:justify-normal">
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-border">
                   <UserFace
                     className="flex fill-icon-main/50"
                     width={48}
@@ -116,15 +116,15 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <div className="flex flex-col justify-center h-20">
-                    <p className="text-text-main text-xl">{data?.name} </p>
+                  <div className="flex h-20 flex-col justify-center">
+                    <p className="text-xl text-text-main">{data?.name} </p>
                     <p className="text-sm text-text-secondary/75">
                       {data?.email}
                     </p>
                   </div>
                   <Link
                     href="/dashboard"
-                    className="flex flex-row justify-center items-center gap-2 text-text-main/75 bg-border hover:bg-border-hover px-6 py-2 rounded-2xl w-full text-center whitespace-nowrap"
+                    className="flex w-full flex-row items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-border px-6 py-2 text-center text-text-main/75 hover:bg-border-hover"
                   >
                     <AccountIcon
                       width={26}
@@ -135,7 +135,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                   </Link>
                   <Link
                     href={signOut}
-                    className="flex flex-row justify-center items-center gap-2 text-text-main/75 bg-secondary-main hover:bg-secondary-hover px-6 py-2 rounded-2xl w-full text-center whitespace-nowrap cursor-pointer"
+                    className="flex w-full cursor-pointer flex-row items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-secondary-main px-6 py-2 text-center text-text-main/75 hover:bg-secondary-hover"
                   >
                     <ExitIcon
                       width={26}

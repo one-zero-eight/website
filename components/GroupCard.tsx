@@ -56,12 +56,12 @@ export function GroupCard({
 
   return (
     <div
-      className="cursor-pointer bg-primary-main hover:bg-primary-hover flex flex-row justify-between items-center sm:text-2xl pl-7 pr-5 py-5 my-2 rounded-3xl min-w-fit min-h-fit"
+      className="my-2 flex min-h-fit min-w-fit cursor-pointer flex-row items-center justify-between rounded-3xl bg-primary-main py-5 pl-7 pr-5 hover:bg-primary-hover sm:text-2xl"
       onClick={() => router.push(eventGroupPageURL)}
       onMouseEnter={() => router.prefetch(eventGroupPageURL)}
     >
-      <div className="flex flex-col gap-0.5 w-32 sm:w-40">
-        <p className="text-text-main text-left text-lg sm:text-xl font-medium">
+      <div className="flex w-32 flex-col gap-0.5 sm:w-40">
+        <p className="text-left text-lg font-medium text-text-main sm:text-xl">
           {group.name}
         </p>
         {tagsToDisplay.length > 0 &&
@@ -73,7 +73,7 @@ export function GroupCard({
                 {tags.map((tag) => (
                   <p
                     key={tag.id}
-                    className="text-lg sm:text-xl text-inactive text-left font-medium"
+                    className="text-left text-lg font-medium text-inactive sm:text-xl"
                   >
                     {tag.name}
                   </p>
@@ -82,19 +82,19 @@ export function GroupCard({
             );
           })}
         {outdated && (
-          <p className="blur-0 text-red-500 text-sm border border-dashed border-red-500 w-fit py-1 px-2 mt-1 rounded-full">
+          <p className="mt-1 w-fit rounded-full border border-dashed border-red-500 px-2 py-1 text-sm text-red-500 blur-0">
             Outdated
           </p>
         )}
         {recommended && (
           <Tooltip content="Workshop by one-zero-eight community">
-            <p className="blur-0 text-section_g_start text-sm border border-section_g_start w-fit py-1 px-2 mt-1 rounded-full">
+            <p className="mt-1 w-fit rounded-full border border-section_g_start px-2 py-1 text-sm text-section_g_start blur-0">
               Recommended
             </p>
           </Tooltip>
         )}
       </div>
-      <div className="flex flex-row place-items-center select-none w-fit">
+      <div className="flex w-fit select-none flex-row place-items-center">
         {canHide && (
           <Tooltip
             content={isHidden ? "Hidden from calendar" : "Hide from calendar"}

@@ -63,7 +63,7 @@ export default function ScheduleList({ category }: ScheduleListProps) {
 
   return (
     <>
-      <div className="flex flex-row flex-wrap gap-4 mt-4 justify-center xl:justify-normal">
+      <div className="mt-4 flex flex-row flex-wrap justify-center gap-4 xl:justify-normal">
         <CategoriesDropdown category={category} />
         {categoryInfo?.filtersTagTypes.map((v) => (
           <FilterDropdown
@@ -83,9 +83,9 @@ export default function ScheduleList({ category }: ScheduleListProps) {
         />
       </div>
 
-      <hr className="border-b-1 w-full mt-4 border-border"></hr>
+      <hr className="border-b-1 mt-4 w-full border-border"></hr>
 
-      <div className="flex flex-wrap justify-left gap-y-2 gap-x-10 content-start justify-center lg:justify-normal place-items-center justify-items-stretch overflow-auto scrollbar-hide h-full w-full px-0 lg:px-4 mt-4">
+      <div className="justify-left scrollbar-hide mt-4 flex h-full w-full flex-wrap place-items-center content-start justify-center justify-items-stretch gap-x-10 gap-y-2 overflow-auto px-0 lg:justify-normal lg:px-4">
         {groups?.map((group) => {
           let groupTitle = undefined;
           const tagName = categoryInfo?.groupingTagType
@@ -97,7 +97,7 @@ export default function ScheduleList({ category }: ScheduleListProps) {
             tagName !== lastGroup
           ) {
             groupTitle = (
-              <div className="text-3xl font-bold w-full mt-8 mb-4 ml-4 text-center lg:text-left">
+              <div className="mb-4 ml-4 mt-8 w-full text-center text-3xl font-bold lg:text-left">
                 {tagName}
               </div>
             );

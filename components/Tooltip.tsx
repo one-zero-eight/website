@@ -73,7 +73,7 @@ export default function Tooltip({
             ref={refs.setFloating}
             style={{ ...floatingStyles, ...transitionStyles }}
             {...getFloatingProps()}
-            className="z-10 bg-primary-main text-text-main text-sm px-8 py-2 rounded-md pointer-events-none drop-shadow-md"
+            className="pointer-events-none z-10 rounded-md bg-primary-main px-8 py-2 text-sm text-text-main drop-shadow-md"
           >
             {content}
           </div>

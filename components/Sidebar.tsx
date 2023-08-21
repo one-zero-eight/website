@@ -39,37 +39,37 @@ function Sidebar() {
 
   return (
     <>
-      <div className="lgw-smh:hidden absolute flex flex-col">
+      <div className="absolute flex flex-col lgw-smh:hidden">
         <div
           className={
             isOpened
-              ? "block visible fixed inset-0 z-[2] bg-black/50"
-              : "hidden invisible"
+              ? "visible fixed inset-0 z-[2] block bg-black/50"
+              : "invisible hidden"
           }
           onClick={() => setOpened(false)}
         />
         <button
-          className="ml-8 mt-8 flex visible z-[4] opacity-[0.999]"
+          className="visible z-[4] ml-8 mt-8 flex opacity-[0.999]"
           onClick={() => setOpened(!isOpened)}
         >
           <MenuIcon width={36} height={36} className="fill-text-main" />
         </button>
         <aside
           className={
-            "flex-col fixed overflow-y-auto justify-center items-center z-[3] opacity-[0.999] py-8 px-8 h-[100dvh] top-0 " +
+            "fixed top-0 z-[3] h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8 opacity-[0.999] " +
             (isOpened ? "bg-primary-main" : "hidden")
           }
         >
           <div
             className={
               isOpened
-                ? "flex flex-col items-center left-0 opacity-100 h-full"
-                : "flex relative left-[-500px] opacity-0 h-full"
+                ? "left-0 flex h-full flex-col items-center opacity-100"
+                : "relative left-[-500px] flex h-full opacity-0"
             }
           >
             <Link
               href={user ? "/dashboard" : "/schedule"}
-              className="flex mb-4"
+              className="mb-4 flex"
             >
               <Logo className="fill-text-main" />
             </Link>
@@ -92,7 +92,7 @@ function Sidebar() {
             </nav>
             <div className="flex grow"></div>
             <br />
-            <div className="mb-4 flex flex-row w-full justify-center">
+            <div className="mb-4 flex w-full flex-row justify-center">
               <SwitchThemeButton />
               <UserMenu isMobile={true} isSidebar={true} />
             </div>
@@ -102,7 +102,7 @@ function Sidebar() {
           </div>
         </aside>
       </div>
-      <aside className="lgw-smh:flex hidden bg-primary-main flex-col items-center py-4 px-8 h-[100dvh] sticky top-0">
+      <aside className="sticky top-0 hidden h-[100dvh] flex-col items-center bg-primary-main px-8 py-4 lgw-smh:flex">
         <Link href={user ? "/dashboard" : "/schedule"} className="mb-4">
           <Logo className="fill-text-main" />
         </Link>
@@ -119,13 +119,13 @@ function Sidebar() {
         </nav>
         <div className="grow"></div>
         <br />
-        <div className="mb-4 lgw-smh:hidden lgw-smh:invisible">
+        <div className="mb-4 lgw-smh:invisible lgw-smh:hidden">
           <UserMenu isMobile={false} isSidebar={true} />
         </div>
         <a className="text-text-main" href="https://t.me/one_zero_eight">
           See you at
           <br />
-          <span className="underline-offset-2 underline">
+          <span className="underline underline-offset-2">
             one-zero-eight
           </span>{" "}
           💜

@@ -43,9 +43,9 @@ export default function RootLayout({
       lang="en"
       className={`${rubik.variable} ${fuzzyBubbles.variable}`}
     >
-      <body className="bg-base font-primary text-text-main text-lg">
+      <body className="bg-base font-primary text-lg text-text-main">
         <Providers>
-          <noscript className="flex justify-center w-full p-8 bg-red-700">
+          <noscript className="flex w-full justify-center bg-red-700 p-8">
             You need to enable JavaScript to run this app.
           </noscript>
           <YandexMetrika />

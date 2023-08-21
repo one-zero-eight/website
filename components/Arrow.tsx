@@ -4,7 +4,7 @@ type ArrowProps = {
 function Arrow({ className }: ArrowProps) {
   return (
     <svg
-      className={"fill-border rotate-90 lg:rotate-0 " + className}
+      className={"rotate-90 fill-border lg:rotate-0 " + className}
       width="102"
       height="38"
       viewBox="0 0 102 38"

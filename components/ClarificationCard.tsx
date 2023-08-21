@@ -8,13 +8,13 @@ export type ClarificationProps = {
 
 export default function ClarificationCard(props: ClarificationProps) {
   return (
-    <div className="flex flex-col justify-between items-center text-center px-4 py-8 my-3 rounded-3xl bg-primary-main w-max-125">
-      <div className="flex flex-row justify-between items-center">
+    <div className="w-max-125 my-3 flex flex-col items-center justify-between rounded-3xl bg-primary-main px-4 py-8 text-center">
+      <div className="flex flex-row items-center justify-between">
         {props.icon.map((Icon, i) => (
           <Icon key={i} fill={`#9747FF`} />
         ))}
       </div>
-      <p className="text-lg xl:text-xl py-2 font-medium text-text">
+      <p className="text-text py-2 text-lg font-medium xl:text-xl">
         {props.title}
       </p>
       <p className="text-sm text-text-secondary/75">{props.shortDescription}</p>

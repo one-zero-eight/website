@@ -162,7 +162,7 @@ export default function ScholarshipCalculator() {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-text text-3xl xl:text-4xl font-medium mt-8 mb-4 text-center">
+      <div className="text-text mb-4 mt-8 text-center text-3xl font-medium xl:text-4xl">
         Enter your grades or GPA
       </div>
       <div className="relative">
@@ -171,33 +171,33 @@ export default function ScholarshipCalculator() {
           onChange={(e) => onMarksChange(e.target.value)}
           autoComplete="off"
           spellCheck={false}
-          className="resize-none text-transparent caret-section_g_start inset-0 w-full p-3 font-handwritten rounded-2xl bg-transparent outline-none border-2 border-section_g_start overflow-hidden"
+          className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-section_g_start bg-transparent p-3 font-handwritten text-transparent caret-section_g_start outline-none"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
           rows={1}
           maxLength={50}
         />
         <div
-          className="absolute flex flex-wrap w-full max-w-full inset-0 pointer-events-none p-3 font-handwritten border-2 border-transparent"
+          className="pointer-events-none absolute inset-0 flex w-full max-w-full flex-wrap border-2 border-transparent p-3 font-handwritten"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
         >
           {marks.map((v, i) => (
             <Fragment key={i}>
               <span style={{ color: MARK_COLORS[v] }}>{v}</span>
-              <span className="w-0 -ml-3 mr-3 text-[#414141]">|</span>
+              <span className="-ml-3 mr-3 w-0 text-[#414141]">|</span>
             </Fragment>
           ))}
         </div>
         {marks.length !== 0 && (
           <button
             onClick={() => onMarksChange("")}
-            className="absolute -right-1 -top-1 rounded-full bg-base h-7 w-7 text-lg p-2 align-middle text-section_g_start"
+            className="absolute -right-1 -top-1 h-7 w-7 rounded-full bg-base p-2 align-middle text-lg text-section_g_start"
             style={{ lineHeight: 0 }}
           >
             X
           </button>
         )}
       </div>
-      <div className="flex flex-row flex-wrap justify-between items-center">
+      <div className="flex flex-row flex-wrap items-center justify-between">
         <div className="text-text text-xl font-medium">Your GPA:</div>
         <input
           value={displayGPA}
@@ -208,7 +208,7 @@ export default function ScholarshipCalculator() {
           max={5}
           autoComplete="off"
           spellCheck={false}
-          className={`w-32 text-center font-handwritten rounded-2xl bg-transparent p-2 outline-none border-2 ${
+          className={`w-32 rounded-2xl border-2 bg-transparent p-2 text-center font-handwritten outline-none ${
             !errorGPA ? "border-section_g_start" : "border-red-500"
           }`}
           style={{
@@ -216,7 +216,7 @@ export default function ScholarshipCalculator() {
           }}
         />
       </div>
-      <div className="flex flex-row flex-wrap justify-between items-center">
+      <div className="flex flex-row flex-wrap items-center justify-between">
         <div className="text-text text-xl font-medium">Scholarship:</div>
         <input
           value={displayScholarship}
@@ -227,7 +227,7 @@ export default function ScholarshipCalculator() {
           min={FORMULA_B_MIN}
           autoComplete="off"
           spellCheck={false}
-          className={`rubles-input w-32 text-center font-handwritten rounded-2xl bg-transparent p-2 outline-none border-2 ${
+          className={`rubles-input w-32 rounded-2xl border-2 bg-transparent p-2 text-center font-handwritten outline-none ${
             !errorScholarship ? "border-section_g_start" : "border-red-500"
           }`}
           style={{
@@ -237,7 +237,7 @@ export default function ScholarshipCalculator() {
           }}
         />
       </div>
-      <div className="flex flex-row flex-wrap justify-between items-center self-center text-center text-red-500 w-2/3 border border-red-500 border-dashed rounded-xl p-4 mt-2">
+      <div className="mt-2 flex w-2/3 flex-row flex-wrap items-center justify-between self-center rounded-xl border border-dashed border-red-500 p-4 text-center text-red-500">
         Note: this calculator is valid only for B22-B19 courses. Formula for B23
         will be added before next semester.
       </div>

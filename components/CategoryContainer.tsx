@@ -20,7 +20,7 @@ const categoriesIcons: {
 
 export default async function CategoryContainer() {
   return (
-    <div className="flex flex-row flex-wrap justify-center w-full gap-y-12 sm:gap-x-18p lg:gap-x-20 xl:gap-x-28 mt-8">
+    <div className="mt-8 flex w-full flex-row flex-wrap justify-center gap-y-12 sm:gap-x-18p lg:gap-x-20 xl:gap-x-28">
       {Object.entries(viewConfig.categories)
         .filter(([_, v]) => !v.outdated)
         .map(([k, v]) => (
@@ -33,7 +33,7 @@ export default async function CategoryContainer() {
             outdated={v.outdated}
           />
         ))}
-      <div className="w-full h-0"></div>
+      <div className="h-0 w-full"></div>
       {Object.entries(viewConfig.categories)
         .filter(([_, v]) => v.outdated)
         .map(([k, v]) => (

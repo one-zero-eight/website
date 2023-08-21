@@ -19,7 +19,7 @@ export default function SearchBar({
       </span>
       <input
         type="text"
-        className="form-control bg-primary-main hover:bg-border active:bg-border rounded-full text-xl px-6 placeholder:text-text-transparent/50 text-text-secondary/75 focus:outline-none min-h-[56px]"
+        className="form-control min-h-[56px] rounded-full bg-primary-main px-6 text-xl text-text-secondary/75 placeholder:text-text-transparent/50 hover:bg-border focus:outline-none active:bg-border"
         style={{ width: width }}
         placeholder={placeholder}
         value={value}

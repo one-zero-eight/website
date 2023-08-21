@@ -56,7 +56,7 @@ export default function Page({ params: { alias } }: Props) {
       {isMounted && (
         <FloatingPortal>
           <FloatingOverlay
-            className="z-10 bg-black/75 place-items-center grid"
+            className="z-10 grid place-items-center bg-black/75"
             lockScroll
           >
             <FloatingFocusManager
@@ -69,17 +69,17 @@ export default function Page({ params: { alias } }: Props) {
                 {...getFloatingProps()}
                 className="flex p-4"
               >
-                <div className="max-w-2xl h-fit rounded-xl bg-primary-main overflow-hidden">
+                <div className="h-fit max-w-2xl overflow-hidden rounded-xl bg-primary-main">
                   <div className="text-xl font-bold">
-                    <div className="flex flex-row w-full">
-                      <div className="text-text-main grow items-center pl-4 sm:pl-8 pt-6">
+                    <div className="flex w-full flex-row">
+                      <div className="grow items-center pl-4 pt-6 text-text-main sm:pl-8">
                         Import to your calendar
                       </div>
                       <button
-                        className="rounded-xl w-fit p-4"
+                        className="w-fit rounded-xl p-4"
                         onClick={() => router.back()}
                       >
-                        <CloseIcon className="fill-icon-main/50 hover:fill-icon_hover w-10" />
+                        <CloseIcon className="hover:fill-icon_hover w-10 fill-icon-main/50" />
                       </button>
                     </div>
                   </div>
@@ -89,7 +89,7 @@ export default function Page({ params: { alias } }: Props) {
                       application and it will be updated on schedule changes.
                     </div>
 
-                    <ul className="list-decimal pl-4 text-text-secondary/75 my-4">
+                    <ul className="my-4 list-decimal pl-4 text-text-secondary/75">
                       <li>
                         Copy the link.
                         <ScheduleLinkCopy
@@ -100,14 +100,14 @@ export default function Page({ params: { alias } }: Props) {
                       <li>
                         Open your calendar settings to add a calendar by URL.
                         <a
-                          className="underline ml-4 flex flex-row items-baseline gap-x-2 w-fit"
+                          className="ml-4 flex w-fit flex-row items-baseline gap-x-2 underline"
                           href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
                           target="_blank"
                         >
                           <LinkIcon className="h-4 w-4 fill-icon-main/50 hover:fill-icon-hover/75" />
                           Google Calendar
                         </a>
-                        <a className="ml-4 flex flex-row items-baseline gap-x-2 w-fit">
+                        <a className="ml-4 flex w-fit flex-row items-baseline gap-x-2">
                           <QuestionIcon className="h-4 w-4 fill-icon-main/50 hover:fill-icon-hover/75" />
                           Other applications: find in settings
                         </a>

@@ -25,7 +25,7 @@ export default function Page({ params: { alias } }: Props) {
     <>
       <div
         style={{ backgroundImage: "url(/background-pattern.svg)" }}
-        className="px-4 lg:px-12 py-16 bg-repeat bg-primary-main w-full h-64 items-center lg:[align-items:normal] flex flex-col"
+        className="flex h-64 w-full flex-col items-center bg-primary-main bg-repeat px-4 py-16 lg:px-12 lg:[align-items:normal]"
       >
         <Navbar />
       </div>

@@ -50,7 +50,7 @@ export default function SignInPopup({
       {isMounted && (
         <FloatingPortal>
           <FloatingOverlay
-            className="z-10 bg-black/75 place-items-center grid"
+            className="z-10 grid place-items-center bg-black/75"
             lockScroll
           >
             <FloatingFocusManager context={context} initialFocus={signInRef}>
@@ -60,14 +60,14 @@ export default function SignInPopup({
                 {...getFloatingProps()}
                 className="flex p-4"
               >
-                <div className="max-w-2xl h-fit rounded-xl bg-primary-main overflow-hidden">
+                <div className="h-fit max-w-2xl overflow-hidden rounded-xl bg-primary-main">
                   <div className="text-xl font-bold">
-                    <div className="flex flex-row w-full">
-                      <div className="text-text-main grow items-center pl-4 sm:pl-8 pt-6">
+                    <div className="flex w-full flex-row">
+                      <div className="grow items-center pl-4 pt-6 text-text-main sm:pl-8">
                         {header}
                       </div>
                       <button
-                        className="rounded-2xl w-fit p-4 fill-icon-main/50 hover:fill-icon-hover/75"
+                        className="w-fit rounded-2xl fill-icon-main/50 p-4 hover:fill-icon-hover/75"
                         onClick={() => {
                           setIsOpen && setIsOpen(false);
                         }}
@@ -81,7 +81,7 @@ export default function SignInPopup({
                     <Link
                       ref={signInRef}
                       href={signIn}
-                      className="my-8 flex justify-center items-center w-32 h-12 bg-focus_color text-white rounded-3xl font-semibold text-xl"
+                      className="my-8 flex h-12 w-32 items-center justify-center rounded-3xl bg-focus_color text-xl font-semibold text-white"
                     >
                       Sign in
                     </Link>

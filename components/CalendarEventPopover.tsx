@@ -74,9 +74,9 @@ export default function CalendarEventPopover({
               ref={refs.setFloating}
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
-              className="flex flex-col gap-2 z-10 bg-primary-main text-text-main text-sm p-4 rounded-2xl drop-shadow-md max-w-md"
+              className="z-10 flex max-w-md flex-col gap-2 rounded-2xl bg-primary-main p-4 text-sm text-text-main drop-shadow-md"
             >
-              <div className="flex px-8 text-xl text-bold">{event.title}</div>
+              <div className="text-bold flex px-8 text-xl">{event.title}</div>
               <div className="flex flex-row items-center gap-2 pl-8">
                 <p className="flex whitespace-pre-wrap">
                   {event.extendedProps.description}

@@ -25,22 +25,22 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
   );
   return !isPopup ? (
     <>
-      <div className="p-16 items-center lg:[align-items:normal] flex flex-col">
+      <div className="flex flex-col items-center p-16 lg:[align-items:normal]">
         <div className="flex flex-col">
-          <div className="flex flex-col lg:flex-row justify-between">
-            <div className="flex flex-col lg:flex-row w-full">
-              <h1 className="text-text-main text-center lg:text-left text-3xl lg:text-4xl font-bold">
+          <div className="flex flex-col justify-between lg:flex-row">
+            <div className="flex w-full flex-col lg:flex-row">
+              <h1 className="text-center text-3xl font-bold text-text-main lg:text-left lg:text-4xl">
                 {groupData.name}
               </h1>
-              <p className="text-center lg:hidden lg:invisible lg:text-left text-text-secondary/75 whitespace-pre-wrap">
+              <p className="whitespace-pre-wrap text-center text-text-secondary/75 lg:invisible lg:hidden lg:text-left">
                 {groupData.description || ""}
               </p>
             </div>
-            <div className="flex flex-row justify-center items-center lg:[align-items:normal] lg:justify-normal lg:flex-row mt-8 gap-4">
+            <div className="mt-8 flex flex-row items-center justify-center gap-4 lg:flex-row lg:justify-normal lg:[align-items:normal]">
               <Tooltip content={"Import to your calendar"}>
                 <Link
                   href={`/schedule/event-groups/${groupData.alias}/import`}
-                  className="flex flex-row gap-2 justify-center items-center text-center text-text-main p-2 font-medium w-40 h-14 rounded-full border-focus_color bg-primary-main hover:bg-primary-hover border-2 text-xl"
+                  className="flex h-14 w-40 flex-row items-center justify-center gap-2 rounded-full border-2 border-focus_color bg-primary-main p-2 text-center text-xl font-medium text-text-main hover:bg-primary-hover"
                 >
                   <DownloadIcon
                     className="flex fill-icon-main"
@@ -86,19 +86,19 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
               </Tooltip>
             </div>
           </div>
-          <p className="hidden invisible lg:block lg:visible text-center xl:text-left text-text-secondary/75 whitespace-pre-wrap">
+          <p className="invisible hidden whitespace-pre-wrap text-center text-text-secondary/75 lg:visible lg:block xl:text-left">
             {groupData.description || ""}
           </p>
         </div>
-        <div className="flex flex-col justify-center lg:justify-normal lg:[align-items:normal] items-center my-8 gap-y-4">
-          <h2 className="flex text-text-main text-center xl:text-left text-3xl font-medium">
+        <div className="my-8 flex flex-col items-center justify-center gap-y-4 lg:justify-normal lg:[align-items:normal]">
+          <h2 className="flex text-center text-3xl font-medium text-text-main xl:text-left">
             Tags
           </h2>
           <div className="flex gap-2">
             {groupData.tags?.map((tag) => (
               <div
                 key={tag.id}
-                className="flex rounded-3xl bg-secondary-main w-fit py-2 px-4"
+                className="flex w-fit rounded-3xl bg-secondary-main px-4 py-2"
               >
                 <p className="text-text-main">{tag.name}</p>
               </div>
@@ -113,30 +113,30 @@ export function EventGroupPage({ groupData, isPopup }: EventGroupPageProps) {
           isOpen={signInOpened}
           setIsOpen={setSignInOpened}
         />
-        <h2 className="flex text-text-main text-center xl:text-left text-3xl font-medium">
+        <h2 className="flex text-center text-3xl font-medium text-text-main xl:text-left">
           Calendar
         </h2>
       </div>
     </>
   ) : (
     <>
-      <div className="max-w-2xl h-fit rounded-xl bg-primary-main overflow-hidden">
+      <div className="h-fit max-w-2xl overflow-hidden rounded-xl bg-primary-main">
         <div className="text-xl font-bold">
-          <div className="flex flex-row w-full">
-            <div className="text-text-main grow items-center pl-4 sm:pl-8 pt-6">
+          <div className="flex w-full flex-row">
+            <div className="grow items-center pl-4 pt-6 text-text-main sm:pl-8">
               {groupData.name}
             </div>
             <button className="rounded-xl" onClick={() => router.back()}>
-              <CloseIcon className="fill-icon-main/50 hover:fill-icon_hover w-10" />
+              <CloseIcon className="hover:fill-icon_hover w-10 fill-icon-main/50" />
             </button>
           </div>
         </div>
         <div className="px-4 sm:px-8">
-          <div className="text-text-secondary/75 whitespace-pre-wrap">
+          <div className="whitespace-pre-wrap text-text-secondary/75">
             {groupData.description || ""}
           </div>
         </div>
-        <h2 className="flex text-text-main text-center xl:text-left text-3xl font-medium">
+        <h2 className="flex text-center text-3xl font-medium text-text-main xl:text-left">
           Calendar
         </h2>
       </div>

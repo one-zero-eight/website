@@ -9,50 +9,50 @@ import React from "react";
 
 export default function Page() {
   return (
-    <main className="px-4 lg:px-12 py-16 items-center lg:[align-items:normal]">
-      <h1 className="lgw-smh:hidden lgw-smh:invisible text-3xl text-center lg:text-left xl:text-4xl font-bold">
+    <main className="items-center px-4 py-16 lg:px-12 lg:[align-items:normal]">
+      <h1 className="text-center text-3xl font-bold lg:text-left xl:text-4xl lgw-smh:invisible lgw-smh:hidden">
         Scholarship calculator
       </h1>
-      <p className="lgw-smh:hidden lgw-smh:invisible text-text-secondary/75 text-center text-base py-2 xl:text-lg lg:text-left">
+      <p className="py-2 text-center text-base text-text-secondary/75 lg:text-left xl:text-lg lgw-smh:invisible lgw-smh:hidden">
         Calculate your scholarship easily. Just type your marks, GPA or expected
         scholarship.
       </p>
       <Navbar>
-        <h1 className="text-text-main text-3xl text-center lg:text-left xl:text-4xl font-bold">
+        <h1 className="text-center text-3xl font-bold text-text-main lg:text-left xl:text-4xl">
           Scholarship calculator
         </h1>
-        <p className="text-text-secondary/75 text-center text-base py-2 xl:text-lg lg:text-left">
+        <p className="py-2 text-center text-base text-text-secondary/75 lg:text-left xl:text-lg">
           Calculate your scholarship easily. Just type your marks, GPA or
           expected scholarship.
         </p>
       </Navbar>
 
       <div className="flex flex-col items-center">
-        <div className="max-w-2xl w-full my-12">
+        <div className="my-12 w-full max-w-2xl">
           <ScholarshipCalculator />
         </div>
 
         <div className="max-w-2xl">
-          <h2 className="text-3xl text-center">Information</h2>
+          <h2 className="text-center text-3xl">Information</h2>
 
-          <h3 className="text-2xl mt-4">Academic scholarships:</h3>
+          <h3 className="mt-4 text-2xl">Academic scholarships:</h3>
           <p>
             For the first semester &mdash; scholarship from the admissions
             department.
           </p>
           <p>For the next semesters &mdash; using the following formula:</p>
-          <ScholarshipFormula className="fill-text-main my-4 w-full" />
+          <ScholarshipFormula className="my-4 w-full fill-text-main" />
 
           <p>
-            <ScholarshipS className="inline fill-text-main -mt-1" /> &mdash;
+            <ScholarshipS className="-mt-1 inline fill-text-main" /> &mdash;
             scholarship amount
           </p>
           <p>
-            <ScholarshipBmin className="inline fill-text-main -mt-1" /> &mdash;
+            <ScholarshipBmin className="-mt-1 inline fill-text-main" /> &mdash;
             minimum scholarship amount (3,000₽)
           </p>
           <p>
-            <ScholarshipBmax className="inline fill-text-main -mt-1" /> &mdash;
+            <ScholarshipBmax className="-mt-1 inline fill-text-main" /> &mdash;
             maximum scholarship amount (20,000₽)
           </p>
           <p>
@@ -60,7 +60,7 @@ export default function Page() {
             student&apos;s average grade for the last semester
           </p>
 
-          <h3 className="text-2xl mt-4">Increased scholarship:</h3>
+          <h3 className="mt-4 text-2xl">Increased scholarship:</h3>
           <p>
             + <i>10,000₽</i> &mdash; if you get all A grades in all subjects for
             two consecutive semesters.
@@ -85,7 +85,7 @@ export default function Page() {
             ).
           </p>
 
-          <h3 className="text-2xl mt-4">Financial support:</h3>
+          <h3 className="mt-4 text-2xl">Financial support:</h3>
           <p>
             <i>reimbursement</i> &mdash; if you participate in events, you can
             apply for travel and accommodation cost reimbursement.
@@ -96,7 +96,7 @@ export default function Page() {
             application to 319.
           </p>
 
-          <h3 className="text-2xl mt-4">Official sources:</h3>
+          <h3 className="mt-4 text-2xl">Official sources:</h3>
           <p>
             See more information about scholarships in{" "}
             <a

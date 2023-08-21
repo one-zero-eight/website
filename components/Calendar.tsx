@@ -161,7 +161,7 @@ function renderEventTimeGridWeek({ event }: EventContentArg) {
   return (
     <div className="text-left">
       <span className="line-clamp-2">{event.title}</span>
-      <span className="text-xs line-clamp-2">
+      <span className="line-clamp-2 text-xs">
         {event.extendedProps.location}
       </span>
     </div>
@@ -175,16 +175,16 @@ function renderEventDayGridMonth({
   timeText,
 }: EventContentArg) {
   return (
-    <div className="w-full flex flex-row items-center overflow-hidden">
+    <div className="flex w-full flex-row items-center overflow-hidden">
       <div
         className="fc-daygrid-event-dot"
         style={{ borderColor: borderColor || backgroundColor }}
       />
-      <div className="fc-event-title max-w-full w-full text-xs">
+      <div className="fc-event-title w-full max-w-full text-xs">
         {event.title || <>&nbsp;</>}
       </div>
       {timeText && (
-        <div className="text-xs text-inactive text-right w-fit ml-1 hidden lg:block">
+        <div className="ml-1 hidden w-fit text-right text-xs text-inactive lg:block">
           {timeText}
         </div>
       )}

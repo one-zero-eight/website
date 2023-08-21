@@ -36,18 +36,18 @@ export async function generateStaticParams() {
 
 export default async function Page({ params }: Props) {
   return (
-    <div className="px-4 lg:px-12 py-16 items-center lg:[align-items:normal] flex flex-col">
-      <h1 className="text-text-main lgw-smh:hidden lgw-smh:invisible text-center xl:text-left text-3xl xl:text-4xl font-bold">
+    <div className="flex flex-col items-center px-4 py-16 lg:px-12 lg:[align-items:normal]">
+      <h1 className="text-center text-3xl font-bold text-text-main xl:text-left xl:text-4xl lgw-smh:invisible lgw-smh:hidden">
         Schedule
       </h1>
-      <p className="lgw-smh:hidden lgw-smh:invisible text-center xl:text-left text-text-secondary/75">
+      <p className="text-center text-text-secondary/75 xl:text-left lgw-smh:invisible lgw-smh:hidden">
         Now find your group.
       </p>
       <Navbar>
-        <h1 className="text-text-main text-center lg:text-left text-3xl lg:text-4xl font-bold">
+        <h1 className="text-center text-3xl font-bold text-text-main lg:text-left lg:text-4xl">
           Schedule
         </h1>
-        <p className="text-center xl:text-left text-text-secondary/75">
+        <p className="text-center text-text-secondary/75 xl:text-left">
           Now find your group.
         </p>
       </Navbar>

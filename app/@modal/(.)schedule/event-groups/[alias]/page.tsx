@@ -62,7 +62,7 @@ export default function Page({ params: { alias } }: Props) {
       {isMounted && (
         <FloatingPortal>
           <FloatingOverlay
-            className="z-10 bg-black/75 place-items-center grid"
+            className="z-10 grid place-items-center bg-black/75"
             lockScroll
           >
             <FloatingFocusManager context={context}>
@@ -72,13 +72,13 @@ export default function Page({ params: { alias } }: Props) {
                 {...getFloatingProps()}
                 className="flex p-4"
               >
-                <div className="max-w-3xl h-fit rounded-xl bg-primary-main overflow-hidden">
+                <div className="h-fit max-w-3xl overflow-hidden rounded-xl bg-primary-main">
                   <div
                     style={{ backgroundImage: "url(/background-pattern.svg)" }}
-                    className="bg-repeat bg-secondary-main w-full lg:w-256 h-64"
+                    className="h-64 w-full bg-secondary-main bg-repeat lg:w-256"
                   >
                     <button
-                      className="rounded-2xl p-4 fill-icon-main/50 hover:fill-icon-hover/75"
+                      className="rounded-2xl fill-icon-main/50 p-4 hover:fill-icon-hover/75"
                       onClick={() => router.back()}
                     >
                       <CloseIcon width={40} height={40} />
@@ -90,19 +90,19 @@ export default function Page({ params: { alias } }: Props) {
                       <ExpandIcon className="flex" width={36} height={36} />
                     </button>
                   </div>
-                  <div className="flex flex-col lg:flex-row justify-center items-center shrink-0">
-                    <h1 className="text-text-main lg:grow text-center lg:text-left lg:pl-8 pt-6 font-bold text-2xl xl:text-3xl">
+                  <div className="flex shrink-0 flex-col items-center justify-center lg:flex-row">
+                    <h1 className="pt-6 text-center text-2xl font-bold text-text-main lg:grow lg:pl-8 lg:text-left xl:text-3xl">
                       {group.name}
                     </h1>
-                    <p className="lg:hidden lg:invisible lg:pl-8 text-center lg:text-left w-4/6 text-text-secondary/75 whitespace-pre-wrap">
+                    <p className="w-4/6 whitespace-pre-wrap text-center text-text-secondary/75 lg:invisible lg:hidden lg:pl-8 lg:text-left">
                       {group.description ||
                         "Hello world, this is a long description about my life and this elective."}
                     </p>
-                    <div className="flex flex-row justify-center items-center mt-8 mr-4 gap-4 w-fit">
+                    <div className="mr-4 mt-8 flex w-fit flex-row items-center justify-center gap-4">
                       <Tooltip content={"Import to your calendar"}>
                         <Link
                           href={`/schedule/event-groups/${group.alias}/import`}
-                          className="flex flex-row gap-2 justify-center items-center text-center text-text-main p-2 font-medium w-40 h-14 rounded-full border-focus_color bg-primary-main hover:bg-primary-hover border-2 text-xl"
+                          className="flex h-14 w-40 flex-row items-center justify-center gap-2 rounded-full border-2 border-focus_color bg-primary-main p-2 text-center text-xl font-medium text-text-main hover:bg-primary-hover"
                         >
                           <DownloadIcon
                             className="flex fill-icon-main"
@@ -148,25 +148,25 @@ export default function Page({ params: { alias } }: Props) {
                       </Tooltip>
                     </div>
                   </div>
-                  <p className="hidden invisible lg:block lg:visible pl-8 text-center lg:text-left w-4/6 text-text-secondary/75 whitespace-pre-wrap">
+                  <p className="invisible hidden w-4/6 whitespace-pre-wrap pl-8 text-center text-text-secondary/75 lg:visible lg:block lg:text-left">
                     {group.description || ""}
                   </p>
-                  <div className="lg:pl-8 flex flex-col justify-center items-center lg:[align-items:normal] lg:justify-normal my-8 gap-y-4">
-                    <h2 className="flex text-text-main grow text-center xl:text-left text-3xl font-medium">
+                  <div className="my-8 flex flex-col items-center justify-center gap-y-4 lg:justify-normal lg:pl-8 lg:[align-items:normal]">
+                    <h2 className="flex grow text-center text-3xl font-medium text-text-main xl:text-left">
                       Tags
                     </h2>
                     <div className="flex gap-2">
                       {group.tags?.map((tag) => (
                         <div
                           key={tag.id}
-                          className="flex rounded-3xl bg-secondary-main w-fit py-2 px-4"
+                          className="flex w-fit rounded-3xl bg-secondary-main px-4 py-2"
                         >
                           <p className="text-text-main">{tag.name}</p>
                         </div>
                       ))}
                     </div>
                   </div>
-                  <h2 className="lg:pl-8 flex justify-center items-center lg:justify-normal lg:[align-items:normal] text-text-main text-center xl:text-left text-3xl font-medium">
+                  <h2 className="flex items-center justify-center text-center text-3xl font-medium text-text-main lg:justify-normal lg:pl-8 lg:[align-items:normal] xl:text-left">
                     Calendar
                   </h2>
                   <br />

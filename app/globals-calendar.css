@@ -35,7 +35,7 @@
 }
 
 .fc .fc-timegrid-slot-label {
-  @apply border-t-0 relative text-xs text-white/50 pr-1 align-top top-[-0.5rem];
+  @apply relative top-[-0.5rem] border-t-0 pr-1 align-top text-xs text-white/50;
 }
 
 .fc-header-toolbar.fc-toolbar {

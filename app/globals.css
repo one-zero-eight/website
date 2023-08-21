@@ -49,7 +49,7 @@
 
 @layer components {
   .selected {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-section_g_start to-section_g_end;
+    @apply bg-gradient-to-r from-section_g_start to-section_g_end bg-clip-text text-transparent;
   }
 }
 

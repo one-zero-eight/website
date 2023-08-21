@@ -10,9 +10,9 @@ export type SectionProps = {
 
 function SidebarSection(props: SectionProps) {
   const element = (
-    <div className="flex flex-row justify-center p-2 select-none">
+    <div className="flex select-none flex-row justify-center p-2">
       <props.icon
-        className={`place-self-start mr-4 ${
+        className={`mr-4 place-self-start ${
           props.selected
             ? "fill-focus_color"
             : props.path === "#"
@@ -21,7 +21,7 @@ function SidebarSection(props: SectionProps) {
         }`}
       />
       <p
-        className={`flex grow font-semibold text-lg items-center w-min ${
+        className={`flex w-min grow items-center text-lg font-semibold ${
           props.selected
             ? "selected"
             : props.path === "#"
