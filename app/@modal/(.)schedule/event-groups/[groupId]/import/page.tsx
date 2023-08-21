@@ -4,7 +4,11 @@ import CloseIcon from "@/components/icons/CloseIcon";
 import LinkIcon from "@/components/icons/LinkIcon";
 import QuestionIcon from "@/components/icons/QuestionIcon";
 import ScheduleLinkCopy from "@/components/ScheduleLinkCopy";
-import { getICSLink, useEventGroupsGetEventGroup } from "@/lib/events";
+import {
+  getICSLink,
+  useEventGroupsGetEventGroup,
+  useUsersGetMe,
+} from "@/lib/events";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -25,7 +29,8 @@ export type Props = {
 export default function Page({ params }: Props) {
   const router = useRouter();
   const groupId = Number(params.groupId);
-  const { data } = useEventGroupsGetEventGroup(groupId);
+  const { data: user } = useUsersGetMe();
+  const { data: group } = useEventGroupsGetEventGroup(groupId);
 
   const copyButtonRef = useRef(null);
 
@@ -44,7 +49,8 @@ export default function Page({ params }: Props) {
 
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
-  const calendarURL = data !== undefined ? getICSLink(data.alias) : undefined;
+  const calendarURL =
+    group !== undefined ? getICSLink(group.alias, user?.id, "url") : undefined;
 
   return (
     <>

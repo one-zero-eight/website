@@ -16,8 +16,8 @@ import { useIsClient, useWindowSize } from "usehooks-ts";
 export default function Page() {
   const { width } = useWindowSize();
   const isClient = useIsClient();
-  const { data } = useUsersGetMe();
-  const favorites = data?.favorites_association || [];
+  const { data: user } = useUsersGetMe();
+  const favorites = user?.favorites_association || [];
   const { signIn } = useAuthPaths();
 
   if (!isClient)
@@ -33,7 +33,7 @@ export default function Page() {
         </Navbar>
       </div>
     );
-  if (isClient && !data) {
+  if (isClient && !user) {
     return (
       <>
         <div className="px-4 lg:px-12 py-16 items-center lg:[align-items:normal] flex flex-col">
@@ -85,9 +85,9 @@ export default function Page() {
             />
           </div>
           <div className="flex flex-col justify-center">
-            <p className="text-text-main text-xl sm:text-2xl">{data?.name}</p>
+            <p className="text-text-main text-xl sm:text-2xl">{user?.name}</p>
             <p className="text-base sm:text-lg text-text-secondary/75">
-              {data?.email}
+              {user?.email}
             </p>
           </div>
         </div>
@@ -144,11 +144,11 @@ export default function Page() {
         </h2>
       </div>
       <div className="px-2">
-        {!data ? (
+        {!user ? (
           <>Loading...</>
         ) : (
           <Calendar
-            urls={getCalendarsToShow(favorites)}
+            urls={getCalendarsToShow(favorites, false, user.id)}
             initialView={
               width
                 ? width >= 1280
@@ -168,6 +168,7 @@ export default function Page() {
 function getCalendarsToShow(
   favorites: UserXFavoriteGroupView[],
   includeHidden: boolean = false,
+  userId: number | undefined,
 ) {
   // Check if there are any groups
   if (favorites.length === 0) {
@@ -177,7 +178,7 @@ function getCalendarsToShow(
   // Remove hidden calendars
   const toShow = favorites.flatMap((v) => {
     if (v.hidden && !includeHidden) return [];
-    return [getICSLink(v.event_group.alias)];
+    return [getICSLink(v.event_group.alias, userId)];
   });
 
   // Return unique items

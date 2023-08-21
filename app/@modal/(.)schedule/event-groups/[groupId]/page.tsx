@@ -7,7 +7,11 @@ import FavoriteIcon from "@/components/icons/FavoriteIcon";
 import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 import Tooltip from "@/components/Tooltip";
 import { useEventGroup } from "@/lib/event-group";
-import { getICSLink, useEventGroupsGetEventGroup } from "@/lib/events";
+import {
+  getICSLink,
+  useEventGroupsGetEventGroup,
+  useUsersGetMe,
+} from "@/lib/events";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -30,7 +34,8 @@ export type Props = {
 export default function Page({ params }: Props) {
   const router = useRouter();
   const groupId = Number(params.groupId);
-  const { data } = useEventGroupsGetEventGroup(groupId);
+  const { data: user } = useUsersGetMe();
+  const { data: group } = useEventGroupsGetEventGroup(groupId);
 
   const { context, refs } = useFloating({
     open: true,
@@ -51,7 +56,7 @@ export default function Page({ params }: Props) {
   const [signInOpened, setSignInOpened] = useState(false);
   const { switchFavorite, isInFavorites, isPredefined } =
     useEventGroup(groupId);
-  if (!data) return <>Loading...</>;
+  if (!group) return <>Loading...</>;
   return (
     <>
       {isMounted && (
@@ -87,16 +92,16 @@ export default function Page({ params }: Props) {
                   </div>
                   <div className="flex flex-col lg:flex-row justify-center items-center shrink-0">
                     <h1 className="text-text-main lg:grow text-center lg:text-left lg:pl-8 pt-6 font-bold text-2xl xl:text-3xl">
-                      {data.name}
+                      {group.name}
                     </h1>
                     <p className="lg:hidden lg:invisible lg:pl-8 text-center lg:text-left w-4/6 text-text-secondary/75 whitespace-pre-wrap">
-                      {data.description ||
+                      {group.description ||
                         "Hello world, this is a long description about my life and this elective."}
                     </p>
                     <div className="flex flex-row justify-center items-center mt-8 mr-4 gap-4 w-fit">
                       <Tooltip content={"Import to your calendar"}>
                         <Link
-                          href={`/schedule/event-groups/${data.id}/import`}
+                          href={`/schedule/event-groups/${group.id}/import`}
                           className="flex flex-row gap-2 justify-center items-center text-center text-text-main p-2 font-medium w-40 h-14 rounded-full border-focus_color bg-primary-main hover:bg-primary-hover border-2 text-xl"
                         >
                           <DownloadIcon
@@ -119,7 +124,7 @@ export default function Page({ params }: Props) {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!data) {
+                            if (!group) {
                               setSignInOpened(true);
                             } else {
                               switchFavorite && switchFavorite();
@@ -144,14 +149,14 @@ export default function Page({ params }: Props) {
                     </div>
                   </div>
                   <p className="hidden invisible lg:block lg:visible pl-8 text-center lg:text-left w-4/6 text-text-secondary/75 whitespace-pre-wrap">
-                    {data.description || ""}
+                    {group.description || ""}
                   </p>
                   <div className="lg:pl-8 flex flex-col justify-center items-center lg:[align-items:normal] lg:justify-normal my-8 gap-y-4">
                     <h2 className="flex text-text-main grow text-center xl:text-left text-3xl font-medium">
                       Tags
                     </h2>
                     <div className="flex gap-2">
-                      {data.tags?.map((tag) => (
+                      {group.tags?.map((tag) => (
                         <div
                           key={tag.id}
                           className="flex rounded-3xl bg-secondary-main w-fit py-2 px-4"
@@ -165,7 +170,7 @@ export default function Page({ params }: Props) {
                     Calendar
                   </h2>
                   <br />
-                  <Calendar urls={[getICSLink(data.alias)]} />
+                  <Calendar urls={[getICSLink(group.alias, user?.id)]} />
                 </div>
               </div>
             </FloatingFocusManager>
