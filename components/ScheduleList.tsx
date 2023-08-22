@@ -1,5 +1,5 @@
 "use client";
-import { GroupCard, recommendedGroups } from "@/components/GroupCard";
+import { GroupCard } from "@/components/GroupCard";
 import SearchBar from "@/components/SearchBar";
 import SignInPopup from "@/components/SignInPopup";
 import { getFirstTagByType } from "@/lib/event-group";
@@ -46,16 +46,6 @@ export default function ScheduleList({ category }: ScheduleListProps) {
       if (aTag === undefined && bTag === undefined) return 0;
       if (aTag === undefined) return -1;
       if (bTag === undefined) return 1;
-      if (
-        aTag.alias.localeCompare(bTag.alias) === 0 &&
-        recommendedGroups.includes(a.alias)
-      )
-        return -1;
-      if (
-        aTag.alias.localeCompare(bTag.alias) === 0 &&
-        recommendedGroups.includes(b.alias)
-      )
-        return 1;
       return aTag.alias.localeCompare(bTag.alias);
     });
 

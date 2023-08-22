@@ -21,11 +21,6 @@ export type GroupCardProps = {
   canHide?: boolean;
 };
 
-export const recommendedGroups = [
-  "bootcamp2023-08-14-introduction-to-one-zero-eight-a-place-of-opportunity",
-  "bootcamp2023-08-15-even-programmers-can-be-creative",
-];
-
 export function GroupCard({
   group,
   askToSignIn,
@@ -45,14 +40,13 @@ export function GroupCard({
     category && category.alias in viewConfig.categories
       ? viewConfig.categories[category.alias].showTagTypes
       : [];
-  const { data, isError } = useUsersGetMe();
+  const { data: user, isError } = useUsersGetMe();
   const eventGroupPageURL = `/schedule/event-groups/${group.alias}`;
   const eventGroupURL = `/schedule/event-groups/${group.alias}/import`;
   const outdated =
     category &&
     category.alias in viewConfig.categories &&
     viewConfig.categories[category.alias].outdated;
-  const recommended = recommendedGroups.includes(group.alias);
 
   return (
     <div
@@ -85,13 +79,6 @@ export function GroupCard({
           <p className="mt-1 w-fit rounded-full border border-dashed border-red-500 px-2 py-1 text-sm text-red-500 blur-0">
             Outdated
           </p>
-        )}
-        {recommended && (
-          <Tooltip content="Workshop by one-zero-eight community">
-            <p className="mt-1 w-fit rounded-full border border-section_g_start px-2 py-1 text-sm text-section_g_start blur-0">
-              Recommended
-            </p>
-          </Tooltip>
         )}
       </div>
       <div className="flex w-fit select-none flex-row place-items-center">
@@ -127,7 +114,7 @@ export function GroupCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              if (isError || !data) {
+              if (isError || !user) {
                 askToSignIn && askToSignIn();
               } else {
                 switchFavorite && switchFavorite();
