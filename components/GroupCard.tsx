@@ -1,4 +1,3 @@
-import DownloadIcon from "@/components/icons/DownloadIcon";
 import FavoriteIcon from "@/components/icons/FavoriteIcon";
 import { HideIcon } from "@/components/icons/HideIcon";
 import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
@@ -10,7 +9,6 @@ import {
 } from "@/lib/event-group";
 import { useUsersGetMe, ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fragment } from "react";
 import { useWindowSize } from "usehooks-ts";
@@ -42,7 +40,6 @@ export function GroupCard({
       : [];
   const { data: user, isError } = useUsersGetMe();
   const eventGroupPageURL = `/schedule/event-groups/${group.alias}`;
-  const eventGroupURL = `/schedule/event-groups/${group.alias}/import`;
   const outdated =
     category &&
     category.alias in viewConfig.categories &&
@@ -54,7 +51,7 @@ export function GroupCard({
       onClick={() => router.push(eventGroupPageURL)}
       onMouseEnter={() => router.prefetch(eventGroupPageURL)}
     >
-      <div className="flex w-32 flex-col gap-0.5 sm:w-40">
+      <div className="flex w-32 flex-col gap-0.5 sm:w-60">
         <p className="text-left text-lg font-medium text-text-main sm:text-xl">
           {group.name}
         </p>
@@ -135,18 +132,6 @@ export function GroupCard({
               />
             )}
           </button>
-        </Tooltip>
-        <Tooltip content={"Import to your calendar"}>
-          <Link
-            href={eventGroupURL}
-            className="block rounded-full p-2 hover:bg-secondary-hover"
-          >
-            <DownloadIcon
-              className="fill-icon-main/50 hover:fill-icon-hover/75"
-              width={width >= 640 ? 48 : 40}
-              height={width >= 640 ? 48 : 40}
-            />
-          </Link>
         </Tooltip>
       </div>
     </div>
