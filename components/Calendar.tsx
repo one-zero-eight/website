@@ -71,9 +71,14 @@ function Calendar({
         }}
         headerToolbar={{
           // Buttons in header
-          left: "prev,next",
-          center: "title",
-          right: "listMonth,timeGridWeek,dayGridMonth",
+          left: "prev title next",
+          center: undefined,
+          right: "listMonth timeGridWeek dayGridMonth",
+        }}
+        buttonText={{
+          listMonth: "List",
+          timeGridWeek: "Week",
+          dayGridMonth: "Month",
         }}
         titleFormat={(arg) => {
           if (arg.date.year === new Date().getFullYear()) {
