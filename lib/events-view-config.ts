@@ -38,7 +38,7 @@ export const viewConfig: ViewConfig = {
       shortDescription: "Schedule of sport classes in F23.",
       filtersTagTypes: [],
       groupingTagType: undefined,
-      showTagTypes: [],
+      showTagTypes: ["category"],
       outdated: false,
     },
     // bootcamp2023: {
