@@ -77,13 +77,6 @@ export default function CalendarEventPopover({
               className="z-10 flex max-w-md flex-col gap-2 rounded-2xl bg-primary-main p-4 text-sm text-text-main drop-shadow-md"
             >
               <div className="text-bold flex px-8 text-xl">{event.title}</div>
-              {event.extendedProps.description && (
-                <div className="flex flex-row items-center gap-2 pl-8">
-                  <p className="flex whitespace-pre-wrap">
-                    {event.extendedProps.description}
-                  </p>
-                </div>
-              )}
               <div className="flex flex-row items-center gap-2">
                 <CalendarEventIcon
                   width={24}
@@ -101,6 +94,13 @@ export default function CalendarEventPopover({
                     className="flex fill-icon-main"
                   />
                   <p className="flex">{event.extendedProps.location}</p>
+                </div>
+              )}
+              {event.extendedProps.description && (
+                <div className="flex flex-row items-center gap-2 pl-8">
+                  <p className="flex whitespace-pre-wrap">
+                    {event.extendedProps.description}
+                  </p>
                 </div>
               )}
             </div>
