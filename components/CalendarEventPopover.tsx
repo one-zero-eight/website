@@ -1,6 +1,7 @@
 "use client";
 import { CalendarEventIcon } from "@/components/icons/CalendarEventIcon";
 import { LocationIcon } from "@/components/icons/LocationIcon";
+import { NotesIcon } from "@/components/icons/NotesIcon";
 import {
   autoUpdate,
   flip,
@@ -97,7 +98,12 @@ export default function CalendarEventPopover({
                 </div>
               )}
               {event.extendedProps.description && (
-                <div className="flex flex-row items-center gap-2 pl-8">
+                <div className="flex flex-row gap-2">
+                  <NotesIcon
+                    width={24}
+                    height={24}
+                    className="flex fill-icon-main"
+                  />
                   <p className="flex whitespace-pre-wrap">
                     {event.extendedProps.description}
                   </p>
