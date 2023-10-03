@@ -111,6 +111,7 @@ export default function Page() {
                   : "listMonth"
                 : "dayGridMonth"
             }
+            viewId="page"
           />
         )}
       </div>

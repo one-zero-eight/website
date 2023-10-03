@@ -112,7 +112,10 @@ export default function Page({ params: { alias } }: Props) {
                       <li>Paste the link and click Add.</li>
                     </ul>
                     <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8">
-                      <Calendar urls={calendarURL ? [calendarURL] : []} />
+                      <Calendar
+                        urls={calendarURL ? [calendarURL] : []}
+                        viewId="popup"
+                      />
                     </div>
                   </div>
                 </div>

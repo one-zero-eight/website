@@ -67,6 +67,7 @@ export default function Page({ params: { alias } }: Props) {
                     : "listMonth"
                   : "dayGridMonth"
               }
+              viewId="page"
             />
           </div>
         </div>

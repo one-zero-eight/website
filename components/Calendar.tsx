@@ -8,20 +8,33 @@ import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import moment from "moment/moment";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "usehooks-ts";
 import iCalendarPlugin from "./iCalendarPlugin";
 
 function Calendar({
   urls,
   initialView = "listMonth",
+  viewId = "",
   ...props
 }: {
   urls: string[];
   initialView?: string;
+  viewId?: string;
 }) {
   const [popoverOpened, setPopoverOpened] = useState(false);
   const [popoverEvent, setPopoverEvent] = useState<EventApi>();
   const [eventElement, setEventElement] = useState<HTMLElement>();
+
+  const [storedCalendarView, setStoredCalendarView] = useLocalStorage(
+    `calendar-view-${viewId}`,
+    initialView,
+  );
+  const [calendarView, setCalendarView] = useState(storedCalendarView);
+
+  useEffect(() => {
+    setStoredCalendarView(calendarView);
+  }, [calendarView, setStoredCalendarView]);
 
   const calendar = useMemo(
     () => (
@@ -54,7 +67,7 @@ function Calendar({
           interactionPlugin,
           iCalendarPlugin,
         ]}
-        initialView={initialView} // Default view
+        initialView={calendarView} // Default view
         eventTimeFormat={{
           // Use 24-hour format
           hour: "2-digit",
@@ -132,6 +145,7 @@ function Calendar({
         scrollTime="07:30:00" // Scroll to 7:30am on launch
         scrollTimeReset={false} // Do not reset scroll on date switch
         noEventsContent={() => "No events this month"} // Custom message
+        viewDidMount={({ view }) => setCalendarView(view.type)}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps

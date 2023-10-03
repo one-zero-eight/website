@@ -111,7 +111,10 @@ export default function Page({ params: { alias } }: Props) {
                         <ExportButton alias={group.alias} />
                       </div>
                       <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8">
-                        <Calendar urls={[getICSLink(group.alias, user?.id)]} />
+                        <Calendar
+                          urls={[getICSLink(group.alias, user?.id)]}
+                          viewId="popup"
+                        />
                       </div>
                     </div>
                   )}
