@@ -77,7 +77,17 @@ export default function CalendarEventPopover({
               {...getFloatingProps()}
               className="z-10 flex max-w-md flex-col gap-2 rounded-2xl bg-primary-main p-4 text-sm text-text-main drop-shadow-md"
             >
-              <div className="text-bold flex px-8 text-xl">{event.title}</div>
+              <div className="flex flex-row gap-2">
+                <div className="w-6 p-1">
+                  <div
+                    className="h-4 w-4 rounded-full"
+                    style={{ backgroundColor: event.backgroundColor }}
+                  ></div>
+                </div>
+                <div className="text-bold flex whitespace-pre-wrap text-xl [overflow-wrap:anywhere]">
+                  {event.title}
+                </div>
+              </div>
               <div className="flex flex-row gap-2">
                 <CalendarEventIcon
                   width={24}
