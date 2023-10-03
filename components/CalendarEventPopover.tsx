@@ -104,7 +104,7 @@ export default function CalendarEventPopover({
                     height={24}
                     className="flex fill-icon-main"
                   />
-                  <p className="flex whitespace-pre-wrap">
+                  <p className="flex whitespace-pre-wrap [overflow-wrap:anywhere]">
                     {event.extendedProps.description}
                   </p>
                 </div>
