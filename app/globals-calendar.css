@@ -25,14 +25,14 @@
   }
 
   .fc-header-toolbar.fc-toolbar {
-    @apply flex-wrap gap-y-2 mb-4;
+    @apply mb-4 flex-wrap gap-y-2;
 
     .fc-toolbar-chunk {
-      @apply gap-1 flex justify-center items-center;
+      @apply flex items-center justify-center gap-1;
     }
 
     .fc-button {
-      @apply text-lg m-0 rounded-xl border-0 outline-0;
+      @apply m-0 rounded-xl border-0 text-lg outline-0;
 
       &:focus-visible {
         @apply border-0 outline-0;
@@ -40,11 +40,11 @@
     }
 
     .fc-toolbar-title {
-      @apply m-0 text-lg inline min-w-[100px] text-center;
+      @apply m-0 inline min-w-[100px] text-center text-lg;
     }
 
     .fc-toolbar-chunk:has(.fc-toolbar-title) {
-      @apply rounded-xl border-0 outline-0 bg-primary-main;
+      @apply rounded-xl border-0 bg-primary-main outline-0;
     }
   }
 
