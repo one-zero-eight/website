@@ -78,23 +78,27 @@ export default function CalendarEventPopover({
               className="z-10 flex max-w-md flex-col gap-2 rounded-2xl bg-primary-main p-4 text-sm text-text-main drop-shadow-md"
             >
               <div className="text-bold flex px-8 text-xl">{event.title}</div>
-              <div className="flex flex-row items-center gap-2">
+              <div className="flex flex-row gap-2">
                 <CalendarEventIcon
                   width={24}
                   height={24}
-                  className="flex fill-icon-main"
+                  className="flex min-w-fit fill-icon-main"
                 />
-                {moment(event.startStr).format("dddd, D MMMM; HH:mm—")}
-                {moment(event.endStr).format("HH:mm")}
+                <p className="flex whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                  {moment(event.startStr).format("dddd, D MMMM; HH:mm—")}
+                  {moment(event.endStr).format("HH:mm")}
+                </p>
               </div>
               {event.extendedProps.location && (
-                <div className="flex flex-row items-center gap-2">
+                <div className="flex flex-row gap-2">
                   <LocationIcon
                     width={24}
                     height={24}
-                    className="flex fill-icon-main"
+                    className="flex min-w-fit fill-icon-main"
                   />
-                  <p className="flex">{event.extendedProps.location}</p>
+                  <p className="flex whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                    {event.extendedProps.location}
+                  </p>
                 </div>
               )}
               {event.extendedProps.description && (
@@ -102,9 +106,9 @@ export default function CalendarEventPopover({
                   <NotesIcon
                     width={24}
                     height={24}
-                    className="flex fill-icon-main"
+                    className="flex min-w-fit fill-icon-main"
                   />
-                  <p className="flex whitespace-pre-wrap [overflow-wrap:anywhere]">
+                  <p className="flex whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
                     {event.extendedProps.description}
                   </p>
                 </div>
