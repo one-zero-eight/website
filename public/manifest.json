@@ -1,0 +1,17 @@
+{
+  "name": "InNoHassle",
+  "short_name": "InNoHassle",
+  "description": "InNoHassle ecosystem: schedule, scholarship calculator, and more.",
+  "start_url": "/?from=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0b0b",
+  "theme_color": "#9747ff",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -11,6 +11,7 @@
     "orval": "orval --config ./orval.config.js"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^9.7.1",
     "@floating-ui/react": "^0.26.0",
     "@fullcalendar/core": "^6.1.9",
     "@fullcalendar/daygrid": "^6.1.9",

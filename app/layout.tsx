@@ -29,6 +29,8 @@ export const metadata: Metadata = {
   description: "InNoHassle ecosystem by one-zero-eight.",
   applicationName: "InNoHassle",
   alternates: { canonical: "/" },
+  manifest: "/manifest.json",
+  themeColor: "#9747ff",
 };
 
 export default function RootLayout({

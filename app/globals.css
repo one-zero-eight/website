@@ -7,6 +7,7 @@
 @layer base {
   :root {
     color-scheme: light;
+    accent-color: var(--color-focus);
     --color-base: 255 255 255; /* #FFFFFF */
     --color-primary: 242 243 245; /* #F2F3F5 */
     --color-primary-hover: 223 225 229; /* #DFE1E5 */
