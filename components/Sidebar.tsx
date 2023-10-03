@@ -11,6 +11,7 @@ import { useUsersGetMe } from "@/lib/events";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
+import { useMediaQuery } from "usehooks-ts";
 import Logo from "./icons/Logo";
 import ScheduleIcon from "./icons/ScheduleIcon";
 import SidebarSection from "./SidebarSection";
@@ -30,15 +31,24 @@ const items: Item[] = [
   { title: "Canteen", path: "#", icon: CanteenIcon },
 ];
 
-function Sidebar() {
+export const SidebarContext = React.createContext<{
+  isOpened: boolean;
+  setOpened: (opened: boolean) => void;
+  isMobile: boolean;
+}>({ isOpened: false, setOpened: () => {}, isMobile: false });
+
+function Sidebar({ children }: React.PropsWithChildren) {
   const { data: user } = useUsersGetMe();
   const pathname = usePathname();
   const currentItem = items.find((v) => pathname.startsWith(v.path));
   const selection = currentItem?.title;
+  const isMobile = !useMediaQuery(
+    "(min-width: 1024px) and (min-height: 600px)",
+  );
   const [isOpened, setOpened] = useState(false);
 
   return (
-    <>
+    <SidebarContext.Provider value={{ isOpened, setOpened, isMobile }}>
       <div className="absolute flex flex-col lgw-smh:hidden">
         <div
           className={
@@ -48,15 +58,9 @@ function Sidebar() {
           }
           onClick={() => setOpened(false)}
         />
-        <button
-          className="visible z-[4] ml-8 mt-8 flex opacity-[0.999]"
-          onClick={() => setOpened(!isOpened)}
-        >
-          <MenuIcon width={36} height={36} className="fill-text-main" />
-        </button>
         <aside
           className={
-            "fixed top-0 z-[3] h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8 opacity-[0.999] " +
+            "fixed top-0 z-10 h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8 " +
             (isOpened ? "bg-primary-main" : "hidden")
           }
         >
@@ -69,6 +73,7 @@ function Sidebar() {
           >
             <Link
               href={user ? "/dashboard" : "/schedule"}
+              onClick={() => setOpened(false)}
               className="mb-4 flex"
             >
               <Logo className="fill-text-main" />
@@ -86,24 +91,32 @@ function Sidebar() {
                     icon={item.icon}
                     selected={selection === item.title}
                     path={item.path}
+                    onClick={() => setOpened(false)}
                   />
                 </div>
               ))}
             </nav>
             <div className="flex grow"></div>
             <br />
-            <div className="mb-4 flex w-full flex-row justify-center">
+            <div className="mb-2 flex w-full flex-row items-center justify-center gap-4">
               <SwitchThemeButton />
               <UserMenu isMobile={true} isSidebar={true} />
             </div>
-            <a className="flex" href="https://t.me/one_zero_eight">
+            <a
+              className="w-full text-center"
+              href="https://t.me/one_zero_eight"
+            >
               one-zero-eight 💜
             </a>
           </div>
         </aside>
       </div>
       <aside className="sticky top-0 hidden h-[100dvh] flex-col items-center bg-primary-main px-8 py-4 lgw-smh:flex">
-        <Link href={user ? "/dashboard" : "/schedule"} className="mb-4">
+        <Link
+          href={user ? "/dashboard" : "/schedule"}
+          onClick={() => setOpened(false)}
+          className="mb-4"
+        >
           <Logo className="fill-text-main" />
         </Link>
         <nav className="flex flex-col">
@@ -114,6 +127,7 @@ function Sidebar() {
               icon={item.icon}
               selected={selection === item.title}
               path={item.path}
+              onClick={() => setOpened(false)}
             />
           ))}
         </nav>
@@ -122,7 +136,7 @@ function Sidebar() {
         <div className="mb-4 lgw-smh:invisible lgw-smh:hidden">
           <UserMenu isMobile={false} isSidebar={true} />
         </div>
-        <a className="text-text-main" href="https://t.me/one_zero_eight">
+        <a href="https://t.me/one_zero_eight">
           See you at
           <br />
           <span className="underline underline-offset-2">
@@ -131,7 +145,18 @@ function Sidebar() {
           💜
         </a>
       </aside>
-    </>
+      {children}
+    </SidebarContext.Provider>
+  );
+}
+
+export function SidebarMenuButton({ className }: { className?: string }) {
+  const { isOpened, setOpened } = React.useContext(SidebarContext);
+
+  return (
+    <button className={className} onClick={() => setOpened(!isOpened)}>
+      <MenuIcon width={36} height={36} className="fill-text-main" />
+    </button>
   );
 }
 

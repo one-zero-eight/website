@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/Navbar";
+import { NavbarTemplate } from "@/components/Navbar";
 import ScheduleList from "@/components/ScheduleList";
 import { getCategoryInfoBySlug, viewConfig } from "@/lib/events-view-config";
 import { Metadata, ResolvingMetadata } from "next";
@@ -34,24 +34,18 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function Page({ params }: Props) {
+export default async function Page({ params: { category } }: Props) {
+  const categoryInfo = getCategoryInfoBySlug(category);
+
   return (
-    <div className="flex flex-col items-center px-4 py-16 lg:px-12 lg:[align-items:normal]">
-      <h1 className="text-center text-3xl font-bold text-text-main xl:text-left xl:text-4xl lgw-smh:invisible lgw-smh:hidden">
-        Schedule
-      </h1>
-      <p className="text-center text-text-secondary/75 xl:text-left lgw-smh:invisible lgw-smh:hidden">
-        Now find your group.
-      </p>
-      <Navbar>
-        <h1 className="text-center text-3xl font-bold text-text-main lg:text-left lg:text-4xl">
-          Schedule
-        </h1>
-        <p className="text-center text-text-secondary/75 xl:text-left">
-          Now find your group.
-        </p>
-      </Navbar>
-      <ScheduleList category={params.category} />
+    <div className="flex flex-col p-4 lg:p-12">
+      <NavbarTemplate
+        title={`Schedule${
+          categoryInfo?.title ? " — " + categoryInfo.title : ""
+        }`}
+        description={categoryInfo?.shortDescription}
+      />
+      <ScheduleList category={category} />
     </div>
   );
 }

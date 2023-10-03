@@ -69,27 +69,24 @@ export default function Page({ params: { alias } }: Props) {
                 {...getFloatingProps()}
                 className="flex p-4"
               >
-                <div className="h-fit max-w-2xl overflow-hidden rounded-xl bg-primary-main">
-                  <div className="text-xl font-bold">
+                <div className="h-fit max-w-2xl overflow-hidden rounded-2xl bg-primary-main">
+                  <div className="flex flex-col p-4 lg:p-8">
                     <div className="flex w-full flex-row">
-                      <div className="grow items-center pl-4 pt-6 text-text-main sm:pl-8">
-                        Import to your calendar
+                      <div className="grow items-center text-3xl font-semibold">
+                        Export to your calendar
                       </div>
                       <button
-                        className="w-fit rounded-xl p-4"
+                        className="-mr-4 -mt-4 rounded-2xl fill-icon-main/50 p-4 hover:bg-primary-hover/50 hover:fill-icon-hover/75 lg:-mr-8 lg:-mt-8"
                         onClick={() => router.back()}
                       >
-                        <CloseIcon className="hover:fill-icon_hover w-10 fill-icon-main/50" />
+                        <CloseIcon width={40} height={40} />
                       </button>
                     </div>
-                  </div>
-                  <div className="px-4 sm:px-8">
                     <div className="text-text-secondary/75">
                       You can add the schedule to your favorite calendar
                       application and it will be updated on schedule changes.
                     </div>
-
-                    <ul className="my-4 list-decimal pl-4 text-text-secondary/75">
+                    <ul className="my-4 list-decimal pl-5 text-text-secondary/75">
                       <li>
                         Copy the link.
                         <ScheduleLinkCopy
@@ -114,11 +111,10 @@ export default function Page({ params: { alias } }: Props) {
                       </li>
                       <li>Paste the link and click Add.</li>
                     </ul>
+                    <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8">
+                      <Calendar urls={calendarURL ? [calendarURL] : []} />
+                    </div>
                   </div>
-
-                  <br />
-
-                  <Calendar urls={calendarURL ? [calendarURL] : []} />
                 </div>
               </div>
             </FloatingFocusManager>

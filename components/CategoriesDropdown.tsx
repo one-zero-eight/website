@@ -8,9 +8,9 @@ import React from "react";
 function CategoriesDropdown({ category }: { category: string }) {
   const categoryInfo = getCategoryInfoBySlug(category);
   return (
-    <Popover className="relative z-[2] w-max rounded-full text-xl opacity-[0.999] focus:outline-none">
-      <Popover.Button className="w-full rounded-full focus:outline-none">
-        <div className="flex flex-row items-center rounded-full bg-primary-main px-5 py-2 text-xl text-text-secondary/75">
+    <Popover className="relative z-[2] w-max rounded-2xl opacity-[0.999] focus:outline-none">
+      <Popover.Button className="w-full rounded-2xl focus:outline-none">
+        <div className="flex flex-row items-center rounded-2xl bg-primary-main p-4 py-2 text-xl text-text-secondary/75">
           <p className="mr-4 whitespace-nowrap">
             {(categoryInfo && categoryInfo.title) || ""}
           </p>
@@ -33,7 +33,7 @@ function CategoriesDropdown({ category }: { category: string }) {
               <Link
                 href={`/schedule/${v.alias}`}
                 key={v.alias}
-                className="flex w-full flex-row items-center rounded-xl bg-primary-main px-5 py-4 text-xl text-text-secondary/75 focus:outline-none"
+                className="flex w-full flex-row items-center rounded-2xl bg-primary-main px-5 py-4 text-xl text-text-secondary/75 focus:outline-none"
               >
                 {v.title}
               </Link>

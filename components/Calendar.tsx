@@ -139,7 +139,7 @@ function Calendar({
   );
 
   return (
-    <div className="text-text-main" {...props}>
+    <div {...props}>
       {calendar}
       {popoverEvent && eventElement && (
         <CalendarEventPopover

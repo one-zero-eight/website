@@ -162,7 +162,7 @@ export default function ScholarshipCalculator() {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-text mb-4 mt-8 text-center text-3xl font-medium xl:text-4xl">
+      <div className="mb-4 text-center text-3xl font-medium">
         Enter your grades or GPA
       </div>
       <div className="relative">
@@ -190,7 +190,7 @@ export default function ScholarshipCalculator() {
         {marks.length !== 0 && (
           <button
             onClick={() => onMarksChange("")}
-            className="absolute -right-1 -top-1 h-7 w-7 rounded-full bg-base p-2 align-middle text-lg text-section_g_start"
+            className="absolute -right-1 -top-1 h-7 w-7 rounded-2xl bg-base p-2 align-middle text-lg text-section_g_start"
             style={{ lineHeight: 0 }}
           >
             X
@@ -198,7 +198,7 @@ export default function ScholarshipCalculator() {
         )}
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
-        <div className="text-text text-xl font-medium">Your GPA:</div>
+        <div className="text-xl font-medium">Your GPA:</div>
         <input
           value={displayGPA}
           onChange={(e) => onGPAChange(e.target.value)}
@@ -217,7 +217,7 @@ export default function ScholarshipCalculator() {
         />
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
-        <div className="text-text text-xl font-medium">Scholarship:</div>
+        <div className="text-xl font-medium">Scholarship:</div>
         <input
           value={displayScholarship}
           onChange={(e) => onScholarshipChange(e.target.value)}
@@ -237,7 +237,7 @@ export default function ScholarshipCalculator() {
           }}
         />
       </div>
-      <div className="mt-2 flex w-2/3 flex-row flex-wrap items-center justify-between self-center rounded-xl border border-dashed border-red-500 p-4 text-center text-red-500">
+      <div className="mt-2 flex w-2/3 flex-row flex-wrap items-center justify-between self-center rounded-2xl border border-dashed border-red-500 p-4 text-center text-red-500">
         Note: this calculator is valid only for B22-B20 courses. Formula for B23
         will be added before next semester.
       </div>

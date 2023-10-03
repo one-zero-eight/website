@@ -16,26 +16,22 @@ export default function CategoryCard({
   shortDescription,
   outdated,
 }: CategoryCardProps) {
-  const path = `/schedule/${slug}`;
-
   return (
     <Link
       key={slug}
-      href={path}
-      className={`my-2 flex basis-80 flex-col items-center justify-between rounded-3xl border-4 border-border px-4 py-6 text-center text-text-main shadow-5xl transition ease-in-out hover:bg-primary-main hover:shadow-5xl-m ${
+      href={`/schedule/${slug}`}
+      className={`my-2 flex basis-80 flex-col items-center justify-between rounded-2xl px-4 py-6 text-center shadow-5xl transition ease-in-out hover:bg-primary-hover hover:bg-primary-main hover:shadow-5xl-m ${
         outdated ? "border-dashed shadow-none" : ""
       }`}
     >
       <Icon className="my-1" width={48} height={48} fill={`#9747FF`} />
-      <p className="py-1 text-xl font-semibold xl:text-2xl">{title}</p>
+      <p className="my-1 text-2xl font-semibold">{title}</p>
       {outdated && (
-        <p className="w-fit rounded-full border border-dashed border-red-500 px-2 py-1 text-sm text-red-500 blur-0">
+        <p className="w-fit rounded-xl border border-dashed border-red-500 px-2 py-1 text-sm text-red-500 blur-0">
           Outdated
         </p>
       )}
-      <p className="text-base text-text-secondary/75 xl:text-lg">
-        {shortDescription}
-      </p>
+      <p className="text-lg text-text-secondary/75">{shortDescription}</p>
     </Link>
   );
 }

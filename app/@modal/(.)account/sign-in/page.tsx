@@ -1,6 +1,6 @@
 "use client";
 import CloseIcon from "@/components/icons/CloseIcon";
-import { useAuthPaths } from "@/lib/auth";
+import SignInButton from "@/components/SignInButton";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -11,28 +11,18 @@ import {
   useRole,
   useTransitionStyles,
 } from "@floating-ui/react";
-import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useRef } from "react";
 
-type PopupProps = {
-  header: string;
-  description: string;
-  isOpen: boolean;
-  setIsOpen: (open: boolean, event?: Event) => void;
-};
+export default function Page() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-export default function SignInPopup({
-  header,
-  description,
-  isOpen,
-  setIsOpen,
-}: PopupProps) {
-  const { signIn } = useAuthPaths();
   const signInRef = useRef(null);
 
-  const { context, refs, floatingStyles } = useFloating({
-    open: isOpen,
-    onOpenChange: setIsOpen,
+  const { context, refs } = useFloating({
+    open: true,
+    onOpenChange: () => router.back(),
   });
 
   // Transition effect
@@ -60,31 +50,24 @@ export default function SignInPopup({
                 {...getFloatingProps()}
                 className="flex p-4"
               >
-                <div className="h-fit max-w-2xl overflow-hidden rounded-xl bg-primary-main">
-                  <div className="text-xl font-bold">
+                <div className="h-fit max-w-2xl overflow-hidden rounded-2xl bg-primary-main">
+                  <div className="flex flex-col p-4 lg:p-8">
                     <div className="flex w-full flex-row">
-                      <div className="grow items-center pl-4 pt-6 text-text-main sm:pl-8">
-                        {header}
+                      <div className="grow items-center text-3xl font-semibold">
+                        {searchParams.get("header") || "Sign in to get access"}
                       </div>
                       <button
-                        className="w-fit rounded-2xl fill-icon-main/50 p-4 hover:fill-icon-hover/75"
-                        onClick={() => {
-                          setIsOpen && setIsOpen(false);
-                        }}
+                        className="-mr-4 -mt-4 rounded-2xl fill-icon-main/50 p-4 hover:bg-primary-hover/50 hover:fill-icon-hover/75 lg:-mr-8 lg:-mt-8"
+                        onClick={() => router.back()}
                       >
-                        <CloseIcon className="w-10" />
+                        <CloseIcon width={40} height={40} />
                       </button>
                     </div>
-                  </div>
-                  <div className="px-4 sm:px-8">
-                    <div className="text-text-secondary/75">{description}</div>
-                    <Link
-                      ref={signInRef}
-                      href={signIn}
-                      className="my-8 flex h-12 w-32 items-center justify-center rounded-3xl bg-focus_color text-xl font-semibold text-white"
-                    >
-                      Sign in
-                    </Link>
+                    <div className="mb-4 text-text-secondary/75">
+                      {searchParams.get("header") ||
+                        "Use your Innopolis account to use all features of this service."}
+                    </div>
+                    <SignInButton ref={signInRef} />
                   </div>
                 </div>
               </div>

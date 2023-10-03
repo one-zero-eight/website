@@ -9,7 +9,7 @@ export default function SwitchThemeButton() {
   const { isDarkMode, toggle } = useDarkMode();
   return (
     <button
-      className="ml-4 flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-primary-main hover:bg-primary-hover"
+      className="flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-primary-main hover:bg-primary-hover"
       onClick={toggle}
     >
       {isClient && !isDarkMode ? (

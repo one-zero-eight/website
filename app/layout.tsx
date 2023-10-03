@@ -53,8 +53,9 @@ export default function RootLayout({
           <UserInfoTracker />
 
           <div className="flex flex-row">
-            <Sidebar />
-            <main className="w-full">{children}</main>
+            <Sidebar>
+              <main className="w-full">{children}</main>
+            </Sidebar>
           </div>
           {modal}
         </Providers>

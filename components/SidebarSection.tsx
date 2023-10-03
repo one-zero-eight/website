@@ -6,6 +6,7 @@ export type SectionProps = {
   path: string;
   title: string;
   selected: boolean;
+  onClick: () => void;
 };
 
 function SidebarSection(props: SectionProps) {
@@ -42,7 +43,11 @@ function SidebarSection(props: SectionProps) {
     );
   }
 
-  return <Link href={props.path}>{element}</Link>;
+  return (
+    <Link href={props.path} onClick={props.onClick}>
+      {element}
+    </Link>
+  );
 }
 
 export default SidebarSection;

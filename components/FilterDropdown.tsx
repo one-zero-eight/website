@@ -17,13 +17,15 @@ function FilterDropdown({
 
   if (data === undefined) return null;
 
-  const optionsInfos = data.tags.filter((tag) => tag.type === typeFilter);
+  const optionsInfos = data.tags
+    .filter((tag) => tag.type === typeFilter)
+    .sort((a, b) => (a.name && b.name ? a.name.localeCompare(b.name) : 0));
   const selectedTagInfo = data.tags.find((tag) => tag.alias === selected);
 
   return (
-    <Popover className="relative z-[1] w-max rounded-full text-xl opacity-[0.999] focus:outline-none">
-      <Popover.Button className="w-full rounded-full focus:outline-none">
-        <div className="flex flex-row items-center rounded-full bg-primary-main px-5 py-2 text-xl text-text-secondary/75">
+    <Popover className="relative z-[1] w-max rounded-2xl opacity-[0.999] focus:outline-none">
+      <Popover.Button className="w-full rounded-2xl focus:outline-none">
+        <div className="flex flex-row items-center rounded-2xl bg-primary-main px-4 py-2 text-xl text-text-secondary/75">
           <p className="mr-4 whitespace-nowrap">
             {selectedTagInfo?.name || "Filter"}
           </p>
@@ -43,7 +45,7 @@ function FilterDropdown({
         <Popover.Panel className="absolute z-10 rounded-2xl bg-primary-main drop-shadow-2xl focus:outline-none">
           <div className="flex flex-col items-center justify-center divide-y divide-border">
             <Popover.Button
-              className="flex w-full flex-row items-center rounded-xl bg-primary-main px-5 py-4 text-xl text-text-secondary/75 focus:outline-none"
+              className="flex w-full flex-row items-center rounded-2xl bg-primary-main px-5 py-4 text-xl text-text-secondary/75 focus:outline-none"
               value={""}
               onClick={(e) => setSelected((e.target as any).value)}
             >
@@ -51,7 +53,7 @@ function FilterDropdown({
             </Popover.Button>
             {optionsInfos.map((v) => (
               <Popover.Button
-                className="flex w-full flex-row items-center rounded-xl bg-primary-main px-5 py-4 text-xl text-text-secondary/75 focus:outline-none"
+                className="flex w-full flex-row items-center whitespace-nowrap rounded-2xl bg-primary-main px-5 py-4 text-xl text-text-secondary/75 focus:outline-none"
                 value={v.alias}
                 key={v.alias}
                 onClick={(e) => setSelected((e.target as any).value)}

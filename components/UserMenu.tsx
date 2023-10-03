@@ -2,6 +2,8 @@
 import { AccountIcon } from "@/components/icons/AccountIcon";
 import { ExitIcon } from "@/components/icons/ExitIcon";
 import { UserFace } from "@/components/icons/UserFace";
+import { SidebarContext } from "@/components/Sidebar";
+import { SignInButtonIcon } from "@/components/SignInButton";
 import { useAuthPaths } from "@/lib/auth";
 import { useUsersGetMe } from "@/lib/events";
 import {
@@ -19,7 +21,7 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useIsClient } from "usehooks-ts";
 
 type UserMenuProps = {
@@ -29,8 +31,9 @@ type UserMenuProps = {
 function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   const isClient = useIsClient();
   const { data, isError } = useUsersGetMe();
-  const { signIn, signOut } = useAuthPaths();
+  const { signOut } = useAuthPaths();
   const [isOpen, setIsOpen] = useState(false);
+  const { setOpened: setSidebarOpened } = useContext(SidebarContext);
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
@@ -57,20 +60,16 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   ]);
 
   // !isClient - SSR output and during hydration.
-  if (!isClient) {
-    return <></>;
-  }
-
   // isError - Error getting the user. Assume not authenticated.
   // !data - Request sent but no data yet.
-  if (isError || !data) {
+  if (!isClient || isError || !data) {
     return (
-      <Link
-        href={signIn}
-        className="mt-3 flex h-12 w-32 items-center justify-center rounded-3xl bg-focus_color text-xl font-semibold text-white"
-      >
-        Sign in
-      </Link>
+      <SignInButtonIcon
+        onClick={() => {
+          setIsOpen(false);
+          setSidebarOpened(false);
+        }}
+      />
     );
   }
 
@@ -82,7 +81,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
         className="rounded-2xl hover:bg-primary-hover"
       >
         <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-primary-main hover:bg-primary-hover">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-border">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full">
             <UserFace
               className="flex fill-icon-main/50"
               width={36}
@@ -99,7 +98,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               ref={refs.setFloating}
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
-              className={`absolute z-10 w-fit rounded-2xl border-2 border-border/50 bg-primary-main p-4 opacity-[0.999] ${
+              className={`absolute z-10 w-fit rounded-2xl border-2 border-border/50 bg-primary-main p-4 ${
                 isMobile
                   ? "left-0 top-[18p]"
                   : isSidebar
@@ -124,6 +123,10 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                   </div>
                   <Link
                     href="/dashboard"
+                    onClick={() => {
+                      setIsOpen(false);
+                      setSidebarOpened(false);
+                    }}
                     className="flex w-full flex-row items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-border px-6 py-2 text-center text-text-main/75 hover:bg-border-hover"
                   >
                     <AccountIcon
@@ -135,6 +138,10 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                   </Link>
                   <Link
                     href={signOut}
+                    onClick={() => {
+                      setIsOpen(false);
+                      setSidebarOpened(false);
+                    }}
                     className="flex w-full cursor-pointer flex-row items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-secondary-main px-6 py-2 text-center text-text-main/75 hover:bg-secondary-hover"
                   >
                     <ExitIcon

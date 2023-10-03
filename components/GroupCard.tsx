@@ -1,13 +1,12 @@
-import FavoriteIcon from "@/components/icons/FavoriteIcon";
+import FavoriteButton from "@/components/FavoriteButton";
 import { HideIcon } from "@/components/icons/HideIcon";
-import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 import Tooltip from "@/components/Tooltip";
 import {
   getAllTagsByType,
   getFirstTagByType,
   useEventGroup,
 } from "@/lib/event-group";
-import { useUsersGetMe, ViewEventGroup } from "@/lib/events";
+import { ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
 import { useRouter } from "next/navigation";
 import { Fragment } from "react";
@@ -15,30 +14,18 @@ import { useWindowSize } from "usehooks-ts";
 
 export type GroupCardProps = {
   group: ViewEventGroup;
-  askToSignIn?: () => void;
   canHide?: boolean;
 };
 
-export function GroupCard({
-  group,
-  askToSignIn,
-  canHide = false,
-}: GroupCardProps) {
+export function GroupCard({ group, canHide = false }: GroupCardProps) {
   const router = useRouter();
   const { width } = useWindowSize();
-  const {
-    switchFavorite,
-    isInFavorites,
-    isHidden,
-    isPredefined,
-    switchHideFavorite,
-  } = useEventGroup(group.id);
+  const { isHidden, switchHideFavorite } = useEventGroup(group.id);
   const category = getFirstTagByType(group, "category");
   const tagsToDisplay =
     category && category.alias in viewConfig.categories
       ? viewConfig.categories[category.alias].showTagTypes
       : [];
-  const { data: user, isError } = useUsersGetMe();
   const eventGroupPageURL = `/schedule/event-groups/${group.alias}`;
   const outdated =
     category &&
@@ -47,14 +34,12 @@ export function GroupCard({
 
   return (
     <div
-      className="my-2 flex min-h-fit min-w-fit cursor-pointer flex-row items-center justify-between rounded-3xl bg-primary-main py-5 pl-7 pr-5 hover:bg-primary-hover sm:text-2xl"
+      className="flex min-h-fit min-w-fit max-w-full cursor-pointer flex-row items-center justify-between rounded-2xl bg-primary-main p-4 hover:bg-primary-hover"
       onClick={() => router.push(eventGroupPageURL)}
       onMouseEnter={() => router.prefetch(eventGroupPageURL)}
     >
-      <div className="flex w-32 flex-col gap-0.5 sm:w-60">
-        <p className="text-left text-lg font-medium text-text-main sm:text-xl">
-          {group.name}
-        </p>
+      <div className="flex flex-col gap-0.5">
+        <p className="text-xl font-medium">{group.name}</p>
         {tagsToDisplay.length > 0 &&
           tagsToDisplay.map((v) => {
             const tags = getAllTagsByType(group, v);
@@ -62,10 +47,7 @@ export function GroupCard({
             return (
               <Fragment key={v}>
                 {tags.map((tag) => (
-                  <p
-                    key={tag.id}
-                    className="text-left text-lg font-medium text-inactive sm:text-xl"
-                  >
+                  <p key={tag.id} className="text-inactive">
                     {tag.name}
                   </p>
                 ))}
@@ -73,7 +55,7 @@ export function GroupCard({
             );
           })}
         {outdated && (
-          <p className="mt-1 w-fit rounded-full border border-dashed border-red-500 px-2 py-1 text-sm text-red-500 blur-0">
+          <p className="mt-1 w-fit rounded-xl border border-dashed border-red-500 px-2 py-1 text-sm text-red-500 blur-0">
             Outdated
           </p>
         )}
@@ -88,7 +70,7 @@ export function GroupCard({
                 e.stopPropagation();
                 switchHideFavorite && switchHideFavorite();
               }}
-              className="rounded-full p-2 hover:bg-secondary-hover"
+              className="rounded-2xl p-2 hover:bg-secondary-hover"
             >
               <HideIcon
                 active={isHidden}
@@ -99,40 +81,9 @@ export function GroupCard({
             </button>
           </Tooltip>
         )}
-        <Tooltip
-          content={
-            isPredefined
-              ? "Your group from official lists"
-              : isInFavorites
-              ? "In favorites"
-              : "Add to favorites"
-          }
-        >
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isError || !user) {
-                askToSignIn && askToSignIn();
-              } else {
-                switchFavorite && switchFavorite();
-              }
-            }}
-            className="rounded-full p-2 hover:bg-secondary-hover"
-          >
-            {isPredefined ? (
-              <PredefinedIcon
-                width={width >= 640 ? 40 : 36}
-                height={width >= 640 ? 40 : 36}
-              />
-            ) : (
-              <FavoriteIcon
-                active={isInFavorites}
-                width={width >= 640 ? 40 : 36}
-                height={width >= 640 ? 40 : 36}
-              />
-            )}
-          </button>
-        </Tooltip>
+        <div className="-mr-2">
+          <FavoriteButton groupId={group.id} />
+        </div>
       </div>
     </div>
   );
