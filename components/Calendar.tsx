@@ -115,7 +115,7 @@ function Calendar({
             eventContent: renderEventDayGridMonth,
           },
         }}
-        allDaySlot={false} // Do not display "all day" events
+        allDayText="" // Remove text in all day row
         // displayEventEnd={true} // Display end time
         nowIndicator={true} // Display current time as line
         firstDay={1} // From Monday

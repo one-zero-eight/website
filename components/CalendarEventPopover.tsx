@@ -95,8 +95,10 @@ export default function CalendarEventPopover({
                   className="flex min-w-fit fill-icon-main"
                 />
                 <p className="flex whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
-                  {moment(event.startStr).format("dddd, D MMMM; HH:mm—")}
-                  {moment(event.endStr).format("HH:mm")}
+                  {!event.allDay
+                    ? moment(event.startStr).format("dddd, D MMMM; HH:mm—") +
+                      moment(event.endStr).format("HH:mm")
+                    : moment(event.startStr).format("dddd, D MMMM")}
                 </p>
               </div>
               {event.extendedProps.location && (

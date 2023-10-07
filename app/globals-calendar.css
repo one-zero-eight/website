@@ -73,4 +73,16 @@
   .fc-list-day-side-text {
     @apply font-medium;
   }
+
+  .fc-daygrid-day-events {
+    @apply !min-h-0 !m-0;
+  }
+
+  .fc-timegrid-divider {
+    @apply hidden;
+  }
+
+  .fc-timeGridWeek-view .fc-daygrid-body{
+    @apply bg-[var(--fc-neutral-bg-color)];
+  }
 }
