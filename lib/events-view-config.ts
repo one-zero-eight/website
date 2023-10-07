@@ -41,6 +41,15 @@ export const viewConfig: ViewConfig = {
       showTagTypes: ["category"],
       outdated: false,
     },
+    cleaning: {
+      alias: "cleaning",
+      title: "Cleaning",
+      shortDescription: "Schedule of cleaning and linen change in dormitories.",
+      filtersTagTypes: [],
+      groupingTagType: "cleaning",
+      showTagTypes: ["cleaning"],
+      outdated: false,
+    },
     // bootcamp2023: {
     //   alias: "bootcamp2023",
     //   title: "Bootcamp",

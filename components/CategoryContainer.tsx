@@ -1,5 +1,6 @@
 import CategoryCard from "@/components/CategoryCard";
 import { BootcampIcon } from "@/components/icons/BootcampIcon";
+import CleaningIcon from "@/components/icons/CleaningIcon";
 import CoreCoursesIcon from "@/components/icons/CoreCoursesIcon";
 import ElectivesIcon from "@/components/icons/ElectivesIcon";
 import SportIcon from "@/components/icons/SportIcon";
@@ -14,6 +15,7 @@ const categoriesIcons: {
   "core-courses": CoreCoursesIcon,
   electives: ElectivesIcon,
   sports: SportIcon,
+  cleaning: CleaningIcon,
   bootcamp2023: BootcampIcon,
   "bootcamp2023-workshops": BootcampIcon,
 };
