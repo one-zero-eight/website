@@ -8,6 +8,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   cacheStartUrl: true,
   dynamicStartUrl: true,
   dynamicStartUrlRedirect: "/dashboard",
+  extendDefaultRuntimeCaching: true,
   workboxOptions: {
     runtimeCaching: [
       {
