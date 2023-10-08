@@ -122,7 +122,7 @@ function Calendar({
         navLinks={false} // Dates are clickable
         weekNumbers={true} // Display numbers of weeks
         weekNumberFormat={{ week: "long" }} // Show "Week 1", not "W1"
-        weekNumberClassNames="text-sm" // Small text size
+        weekNumberClassNames="text-sm week-cell" // Small text size
         // weekNumberCalculation={calculateWeek} // Display academic week numbers
         // height="100dvh" // Full height
         contentHeight="auto" // Do not add scrollbar

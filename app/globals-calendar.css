@@ -48,7 +48,7 @@
     }
   }
 
-  .fc-col-header-cell-cushion {
+  .fc-col-header-cell-cushion, .week-cell {
     /* Force word wrapping */
     word-spacing: 3000px;
   }
