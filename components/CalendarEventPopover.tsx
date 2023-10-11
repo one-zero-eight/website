@@ -89,12 +89,14 @@ export default function CalendarEventPopover({
                 </div>
               </div>
               <div className="flex flex-row gap-2">
-                <CalendarEventIcon
-                  width={24}
-                  height={24}
-                  className="flex min-w-fit fill-icon-main"
-                />
-                <p className="flex whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                <div className="w-6">
+                  <CalendarEventIcon
+                    width={24}
+                    height={24}
+                    className="fill-icon-main"
+                  />
+                </div>
+                <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
                   {!event.allDay
                     ? moment(event.startStr).format("dddd, D MMMM; HH:mm—") +
                       moment(event.endStr).format("HH:mm")
@@ -103,24 +105,28 @@ export default function CalendarEventPopover({
               </div>
               {event.extendedProps.location && (
                 <div className="flex flex-row gap-2">
-                  <LocationIcon
-                    width={24}
-                    height={24}
-                    className="flex min-w-fit fill-icon-main"
-                  />
-                  <p className="flex whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                  <div className="w-6">
+                    <LocationIcon
+                      width={24}
+                      height={24}
+                      className="fill-icon-main"
+                    />
+                  </div>
+                  <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
                     {event.extendedProps.location}
                   </p>
                 </div>
               )}
               {event.extendedProps.description && (
                 <div className="flex flex-row gap-2">
-                  <NotesIcon
-                    width={24}
-                    height={24}
-                    className="flex min-w-fit fill-icon-main"
-                  />
-                  <p className="flex whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                  <div className="w-6">
+                    <NotesIcon
+                      width={24}
+                      height={24}
+                      className="fill-icon-main"
+                    />
+                  </div>
+                  <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
                     {event.extendedProps.description}
                   </p>
                 </div>
