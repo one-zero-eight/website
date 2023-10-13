@@ -1,14 +1,10 @@
-import FavoriteIcon from "@/components/icons/FavoriteIcon";
-import { PredefinedIcon } from "@/components/icons/PredefinedIcon";
 import Tooltip from "@/components/Tooltip";
 import { useEventGroup } from "@/lib/event-group";
 import { useUsersGetMe } from "@/lib/events";
 import { useRouter } from "next/navigation";
-import { useWindowSize } from "usehooks-ts";
 
 export default function FavoriteButton({ groupId }: { groupId: number }) {
   const router = useRouter();
-  const { width } = useWindowSize();
   const { switchFavorite, isInFavorites, isPredefined } =
     useEventGroup(groupId);
   const { data: user, isError } = useUsersGetMe();
@@ -32,21 +28,14 @@ export default function FavoriteButton({ groupId }: { groupId: number }) {
             switchFavorite && switchFavorite();
           }
         }}
-        className={`rounded-2xl p-2 hover:bg-secondary-hover hover:fill-icon-hover/75 ${
-          isInFavorites ? "fill-[#F0B132]" : "fill-icon-main/5"
-        }`}
+        className="h-fit rounded-2xl p-2 text-4xl text-icon-main/50 hover:bg-secondary-hover hover:text-icon-hover/75"
       >
         {isPredefined ? (
-          <PredefinedIcon
-            width={width >= 640 ? 40 : 36}
-            height={width >= 640 ? 40 : 36}
-          />
+          <span className="icon-[material-symbols--stars-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
+        ) : isInFavorites ? (
+          <span className="icon-[material-symbols--star] text-[#F0B132]" />
         ) : (
-          <FavoriteIcon
-            active={isInFavorites}
-            width={width >= 640 ? 40 : 36}
-            height={width >= 640 ? 40 : 36}
-          />
+          <span className="icon-[material-symbols--star-outline]" />
         )}
       </button>
     </Tooltip>

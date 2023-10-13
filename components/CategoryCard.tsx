@@ -1,8 +1,7 @@
-import { IconProps } from "@/lib/types/IconProps";
 import Link from "next/link";
 
 export type CategoryCardProps = {
-  icon: (props: IconProps) => React.JSX.Element;
+  icon: React.ReactNode;
   slug: string;
   title: string;
   shortDescription: string;
@@ -11,7 +10,7 @@ export type CategoryCardProps = {
 
 export default function CategoryCard({
   slug,
-  icon: Icon,
+  icon,
   title,
   shortDescription,
   outdated,
@@ -20,12 +19,12 @@ export default function CategoryCard({
     <Link
       key={slug}
       href={`/schedule/${slug}`}
-      className={`my-2 flex basis-80 flex-col items-center justify-between rounded-2xl px-4 py-6 text-center shadow-5xl transition ease-in-out hover:bg-primary-hover hover:bg-primary-main hover:shadow-5xl-m ${
+      className={`my-2 flex basis-80 flex-col items-center justify-between gap-2 rounded-2xl px-4 py-6 text-center text-[#9747FF] shadow-5xl transition ease-in-out hover:bg-primary-main hover:shadow-5xl-m ${
         outdated ? "border-dashed shadow-none" : ""
       }`}
     >
-      <Icon className="my-1" width={48} height={48} fill={`#9747FF`} />
-      <p className="my-1 text-2xl font-semibold">{title}</p>
+      {icon}
+      <p className="text-2xl font-semibold text-text-main">{title}</p>
       {outdated && (
         <p className="w-fit rounded-xl border border-dashed border-red-500 px-2 py-1 text-sm text-red-500 blur-0">
           Outdated

@@ -1,4 +1,3 @@
-import { LoginIcon } from "@/components/icons/LoginIcon";
 import { useAuthPaths } from "@/lib/auth";
 import Link from "next/link";
 
@@ -16,7 +15,7 @@ export default function SignInButton(props: SignInButtonProps) {
         props.className ?? ""
       }`}
     >
-      <LoginIcon width={36} height={36} className="-ml-2 fill-icon-main" />
+      <span className="icon-[material-symbols--login] -ml-2 text-4xl text-icon-main" />
       Sign in
     </Link>
   );
@@ -34,11 +33,7 @@ export function SignInButtonIcon(props: SignInButtonProps) {
         props.className ?? ""
       }`}
     >
-      <LoginIcon
-        className="-ml-1 flex fill-icon-main/50"
-        width={36}
-        height={36}
-      />
+      <span className="icon-[material-symbols--login] -ml-1 text-4xl text-icon-main/50" />
     </Link>
   );
 }

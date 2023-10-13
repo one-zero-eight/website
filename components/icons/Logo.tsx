@@ -1,4 +1,4 @@
-import { IconProps } from "@/lib/types/IconProps";
+import { IconProps } from "@/components/icons/IconProps";
 
 function Logo(props: IconProps) {
   return (

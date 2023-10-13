@@ -1,5 +1,4 @@
 import FavoriteButton from "@/components/FavoriteButton";
-import { HideIcon } from "@/components/icons/HideIcon";
 import Tooltip from "@/components/Tooltip";
 import {
   getAllTagsByType,
@@ -60,7 +59,7 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
           </p>
         )}
       </div>
-      <div className="flex w-fit select-none flex-row place-items-center">
+      <div className="flex select-none flex-row place-items-center">
         {canHide && (
           <Tooltip
             content={isHidden ? "Hidden from calendar" : "Hide from calendar"}
@@ -70,14 +69,13 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
                 e.stopPropagation();
                 switchHideFavorite && switchHideFavorite();
               }}
-              className="rounded-2xl p-2 hover:bg-secondary-hover"
+              className="rounded-2xl p-2 text-4xl hover:bg-secondary-hover"
             >
-              <HideIcon
-                active={isHidden}
-                width={width >= 640 ? 40 : 36}
-                height={width >= 640 ? 40 : 36}
-                className="fill-icon-main/50 hover:fill-icon-hover/75"
-              />
+              {isHidden ? (
+                <span className="icon-[material-symbols--visibility-off-outline] my-1 text-icon-main/50" />
+              ) : (
+                <span className="icon-[material-symbols--visibility-outline] my-1 text-icon-main/50" />
+              )}
             </button>
           </Tooltip>
         )}

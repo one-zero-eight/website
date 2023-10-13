@@ -1,8 +1,5 @@
 "use client";
 import Calendar from "@/components/Calendar";
-import CloseIcon from "@/components/icons/CloseIcon";
-import LinkIcon from "@/components/icons/LinkIcon";
-import QuestionIcon from "@/components/icons/QuestionIcon";
 import ScheduleLinkCopy from "@/components/ScheduleLinkCopy";
 import {
   getICSLink,
@@ -76,10 +73,10 @@ export default function Page({ params: { alias } }: Props) {
                         Export to your calendar
                       </div>
                       <button
-                        className="-mr-4 -mt-4 rounded-2xl fill-icon-main/50 p-4 hover:bg-primary-hover/50 hover:fill-icon-hover/75 lg:-mr-8 lg:-mt-8"
+                        className="-mr-4 -mt-4 rounded-2xl p-4 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75 lg:-mr-8 lg:-mt-8"
                         onClick={() => router.back()}
                       >
-                        <CloseIcon width={40} height={40} />
+                        <span className="icon-[material-symbols--close] text-4xl" />
                       </button>
                     </div>
                     <div className="text-text-secondary/75">
@@ -97,15 +94,15 @@ export default function Page({ params: { alias } }: Props) {
                       <li>
                         Open your calendar settings to add a calendar by URL.
                         <a
-                          className="ml-4 flex w-fit flex-row items-baseline gap-x-2 underline"
+                          className="ml-4 flex w-fit flex-row items-center gap-x-2 underline"
                           href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
                           target="_blank"
                         >
-                          <LinkIcon className="h-4 w-4 fill-icon-main/50 hover:fill-icon-hover/75" />
+                          <span className="icon-[material-symbols--link] text-icon-main/50" />
                           Google Calendar
                         </a>
-                        <a className="ml-4 flex w-fit flex-row items-baseline gap-x-2">
-                          <QuestionIcon className="h-4 w-4 fill-icon-main/50 hover:fill-icon-hover/75" />
+                        <a className="ml-4 flex w-fit flex-row items-center gap-x-2">
+                          <span className="icon-[material-symbols--help-outline] text-icon-main/50" />
                           Other applications: find in settings
                         </a>
                       </li>

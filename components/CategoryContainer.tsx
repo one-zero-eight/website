@@ -1,23 +1,19 @@
 import CategoryCard from "@/components/CategoryCard";
-import { BootcampIcon } from "@/components/icons/BootcampIcon";
-import CleaningIcon from "@/components/icons/CleaningIcon";
-import CoreCoursesIcon from "@/components/icons/CoreCoursesIcon";
-import ElectivesIcon from "@/components/icons/ElectivesIcon";
-import SportIcon from "@/components/icons/SportIcon";
 import { viewConfig } from "@/lib/events-view-config";
 
 const categoriesIcons: {
-  [key: string]: (props: {
-    className?: string;
-    fill?: string;
-  }) => React.JSX.Element;
+  [key: string]: React.ReactNode;
 } = {
-  "core-courses": CoreCoursesIcon,
-  electives: ElectivesIcon,
-  sports: SportIcon,
-  cleaning: CleaningIcon,
-  bootcamp2023: BootcampIcon,
-  "bootcamp2023-workshops": BootcampIcon,
+  "core-courses": (
+    <span className="icon-[material-symbols--hub-outline] text-5xl" />
+  ),
+  electives: (
+    <span className="icon-[material-symbols--widgets-outline] text-5xl" />
+  ),
+  sports: <span className="icon-[material-symbols--sports-soccer] text-5xl" />,
+  cleaning: <span className="icon-[material-symbols--mop-outline] text-5xl" />,
+  bootcamp2023: null,
+  "bootcamp2023-workshops": null,
 };
 
 export default async function CategoryContainer() {

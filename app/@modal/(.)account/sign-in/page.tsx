@@ -1,5 +1,4 @@
 "use client";
-import CloseIcon from "@/components/icons/CloseIcon";
 import SignInButton from "@/components/SignInButton";
 import {
   FloatingFocusManager,
@@ -57,10 +56,10 @@ export default function Page() {
                         {searchParams.get("header") || "Sign in to get access"}
                       </div>
                       <button
-                        className="-mr-4 -mt-4 rounded-2xl fill-icon-main/50 p-4 hover:bg-primary-hover/50 hover:fill-icon-hover/75 lg:-mr-8 lg:-mt-8"
+                        className="-mr-4 -mt-4 rounded-2xl p-4 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75 lg:-mr-8 lg:-mt-8"
                         onClick={() => router.back()}
                       >
-                        <CloseIcon width={40} height={40} />
+                        <span className="icon-[material-symbols--close] text-4xl" />
                       </button>
                     </div>
                     <div className="mb-4 text-text-secondary/75">

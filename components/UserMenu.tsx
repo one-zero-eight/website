@@ -1,7 +1,4 @@
 "use client";
-import { AccountIcon } from "@/components/icons/AccountIcon";
-import { ExitIcon } from "@/components/icons/ExitIcon";
-import { UserFace } from "@/components/icons/UserFace";
 import { SidebarContext } from "@/components/Sidebar";
 import { SignInButtonIcon } from "@/components/SignInButton";
 import { useAuthPaths } from "@/lib/auth";
@@ -81,12 +78,8 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
         className="rounded-2xl hover:bg-primary-hover"
       >
         <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-primary-main hover:bg-primary-hover">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full">
-            <UserFace
-              className="flex fill-icon-main/50"
-              width={36}
-              height={36}
-            />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
+            <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-4xl" />
           </div>
         </div>
       </button>
@@ -107,12 +100,8 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               }`}
             >
               <div className="flex flex-row justify-center gap-6 sm:justify-normal">
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-border">
-                  <UserFace
-                    className="flex fill-icon-main/50"
-                    width={48}
-                    height={48}
-                  />
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-border text-icon-main/50">
+                  <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-5xl" />
                 </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex h-20 flex-col justify-center">
@@ -129,11 +118,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                     }}
                     className="flex w-full flex-row items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-border px-6 py-2 text-center text-text-main/75 hover:bg-border-hover"
                   >
-                    <AccountIcon
-                      width={26}
-                      height={26}
-                      className={"flex fill-text-main/75"}
-                    />
+                    <span className="icon-[material-symbols--account-circle] text-2xl" />
                     My dashboard
                   </Link>
                   <Link
@@ -144,11 +129,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                     }}
                     className="flex w-full cursor-pointer flex-row items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-secondary-main px-6 py-2 text-center text-text-main/75 hover:bg-secondary-hover"
                   >
-                    <ExitIcon
-                      width={26}
-                      height={26}
-                      className={"flex fill-text-main/75"}
-                    />
+                    <span className="icon-[material-symbols--logout] text-2xl" />
                     Sign out
                   </Link>
                 </div>

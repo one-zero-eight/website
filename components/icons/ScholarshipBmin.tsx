@@ -1,4 +1,4 @@
-import { IconProps } from "@/lib/types/IconProps";
+import { IconProps } from "@/components/icons/IconProps";
 
 // B_{min}
 // https://latex2image.joeraut.com

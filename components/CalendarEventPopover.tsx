@@ -1,7 +1,4 @@
 "use client";
-import { CalendarEventIcon } from "@/components/icons/CalendarEventIcon";
-import { LocationIcon } from "@/components/icons/LocationIcon";
-import { NotesIcon } from "@/components/icons/NotesIcon";
 import {
   autoUpdate,
   flip,
@@ -90,11 +87,7 @@ export default function CalendarEventPopover({
               </div>
               <div className="flex flex-row gap-2">
                 <div className="w-6">
-                  <CalendarEventIcon
-                    width={24}
-                    height={24}
-                    className="fill-icon-main"
-                  />
+                  <span className="icon-[material-symbols--today-outline] text-2xl" />
                 </div>
                 <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
                   {!event.allDay
@@ -106,11 +99,7 @@ export default function CalendarEventPopover({
               {event.extendedProps.location && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
-                    <LocationIcon
-                      width={24}
-                      height={24}
-                      className="fill-icon-main"
-                    />
+                    <span className="icon-[material-symbols--location-on-outline] text-2xl" />
                   </div>
                   <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
                     {event.extendedProps.location}
@@ -120,11 +109,7 @@ export default function CalendarEventPopover({
               {event.extendedProps.description && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
-                    <NotesIcon
-                      width={24}
-                      height={24}
-                      className="fill-icon-main"
-                    />
+                    <span className="icon-[material-symbols--notes] text-2xl" />
                   </div>
                   <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
                     {event.extendedProps.description}

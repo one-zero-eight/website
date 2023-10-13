@@ -1,10 +1,4 @@
 "use client";
-import CanteenIcon from "@/components/icons/CanteenIcon";
-import DashboardIcon from "@/components/icons/DashboardIcon";
-import FormsIcon from "@/components/icons/FormsIcon";
-import LaundryIcon from "@/components/icons/LaundryIcon";
-import { MenuIcon } from "@/components/icons/MenuIcon";
-import ScholarshipIcon from "@/components/icons/ScholarshipIcon";
 import SwitchThemeButton from "@/components/SwitchThemeButton";
 import UserMenu from "@/components/UserMenu";
 import { useUsersGetMe } from "@/lib/events";
@@ -13,22 +7,57 @@ import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import Logo from "./icons/Logo";
-import ScheduleIcon from "./icons/ScheduleIcon";
 import SidebarSection from "./SidebarSection";
 
 type Item = {
   title: string;
   path: string;
-  icon: (props: { className?: string; fill?: string }) => React.JSX.Element;
+  icon: React.ReactNode;
 };
 
 const items: Item[] = [
-  { title: "Dashboard", path: "/dashboard", icon: DashboardIcon },
-  { title: "Schedule", path: "/schedule", icon: ScheduleIcon },
-  { title: "Scholarship", path: "/scholarship", icon: ScholarshipIcon },
-  { title: "Laundry", path: "#", icon: LaundryIcon },
-  { title: "Forms", path: "#", icon: FormsIcon },
-  { title: "Canteen", path: "#", icon: CanteenIcon },
+  {
+    title: "Dashboard",
+    path: "/dashboard",
+    icon: (
+      <span className="icon-[material-symbols--space-dashboard-outline] text-4xl" />
+    ),
+  },
+  {
+    title: "Schedule",
+    path: "/schedule",
+    icon: (
+      <span className="icon-[material-symbols--calendar-month-outline-rounded] text-4xl" />
+    ),
+  },
+  {
+    title: "Scholarship",
+    path: "/scholarship",
+    icon: (
+      <span className="icon-[material-symbols--credit-card-outline] text-4xl" />
+    ),
+  },
+  {
+    title: "Laundry",
+    path: "#",
+    icon: (
+      <span className="icon-[material-symbols--local-laundry-service-outline] text-4xl" />
+    ),
+  },
+  {
+    title: "Forms",
+    path: "#",
+    icon: (
+      <span className="icon-[material-symbols--list-alt-outline-rounded] text-4xl" />
+    ),
+  },
+  {
+    title: "Canteen",
+    path: "#",
+    icon: (
+      <span className="icon-[material-symbols--lunch-dining-outline] text-4xl" />
+    ),
+  },
 ];
 
 export const SidebarContext = React.createContext<{
@@ -155,7 +184,7 @@ export function SidebarMenuButton({ className }: { className?: string }) {
 
   return (
     <button className={className} onClick={() => setOpened(!isOpened)}>
-      <MenuIcon width={36} height={36} className="fill-text-main" />
+      <span className="icon-[material-symbols--menu] text-4xl" />
     </button>
   );
 }

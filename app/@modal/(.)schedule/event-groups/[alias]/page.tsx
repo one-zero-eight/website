@@ -2,8 +2,6 @@
 import Calendar from "@/components/Calendar";
 import ExportButton from "@/components/ExportButton";
 import FavoriteButton from "@/components/FavoriteButton";
-import CloseIcon from "@/components/icons/CloseIcon";
-import { ExpandIcon } from "@/components/icons/ExpandIcon";
 import {
   getICSLink,
   useEventGroupsFindEventGroupByAlias,
@@ -67,16 +65,16 @@ export default function Page({ params: { alias } }: Props) {
                     className="flex h-64 w-full items-start justify-end bg-secondary-main bg-repeat"
                   >
                     <button
-                      className="rounded-2xl fill-icon-main/50 p-[18px] hover:bg-primary-hover/50 hover:fill-icon-hover/75"
+                      className="rounded-2xl p-4 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
                       onClick={() => window.location.reload()}
                     >
-                      <ExpandIcon className="flex" width={36} height={36} />
+                      <span className="icon-[material-symbols--open-in-full] text-4xl" />
                     </button>
                     <button
-                      className="rounded-2xl fill-icon-main/50 p-4 hover:bg-primary-hover/50 hover:fill-icon-hover/75"
+                      className="rounded-2xl p-4 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
                       onClick={() => router.back()}
                     >
-                      <CloseIcon width={40} height={40} />
+                      <span className="icon-[material-symbols--close] text-4xl" />
                     </button>
                   </div>
                   {group && (

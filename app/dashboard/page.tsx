@@ -1,7 +1,6 @@
 "use client";
 import Calendar from "@/components/Calendar";
 import { GroupCard } from "@/components/GroupCard";
-import { UserFace } from "@/components/icons/UserFace";
 import SignInButton from "@/components/SignInButton";
 import {
   getICSLink,
@@ -9,6 +8,7 @@ import {
   useUsersGetMe,
 } from "@/lib/events";
 import Link from "next/link";
+import React from "react";
 import { useIsClient, useWindowSize } from "usehooks-ts";
 
 export default function Page() {
@@ -37,12 +37,8 @@ export default function Page() {
   return (
     <>
       <div className="my-4 flex max-w-full flex-row gap-4 sm:gap-6">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-border sm:h-24 sm:w-24">
-          <UserFace
-            className="fill-icon-main/50"
-            width={width >= 640 ? 56 : 48}
-            height={width >= 640 ? 56 : 48}
-          />
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-border text-icon-main/50 sm:h-24 sm:w-24">
+          <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-5xl lg:text-6xl" />
         </div>
         <div className="flex flex-col justify-center overflow-x-hidden">
           <p className="break-words text-2xl">{user?.name}</p>

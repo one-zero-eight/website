@@ -1,4 +1,4 @@
-import { IconProps } from "@/lib/types/IconProps";
+import { IconProps } from "@/components/icons/IconProps";
 
 // S = B_{min} + (B_{max} - B_{min}) \cdot (\frac{GPA - 2}{3})^{2.5}
 // https://latex2image.joeraut.com

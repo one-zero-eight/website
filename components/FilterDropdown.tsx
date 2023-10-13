@@ -1,5 +1,4 @@
 "use client";
-import DropListIcon from "@/components/icons/DropListIcon";
 import { useTagsListTags } from "@/lib/events";
 import { Popover, Transition } from "@headlessui/react";
 import React from "react";
@@ -25,12 +24,12 @@ function FilterDropdown({
   return (
     <Popover className="relative z-[1] w-max rounded-2xl opacity-[0.999] focus:outline-none">
       <Popover.Button className="w-full rounded-2xl focus:outline-none">
-        <div className="flex flex-row items-center rounded-2xl bg-primary-main px-4 py-2 text-xl text-text-secondary/75">
-          <p className="mr-4 whitespace-nowrap">
+        <div className="flex flex-row items-center gap-2 rounded-2xl bg-primary-main p-4 py-2.5 text-xl text-text-secondary/75 hover:text-icon-hover/75">
+          <p className="whitespace-nowrap">
             {selectedTagInfo?.name || "Filter"}
           </p>
 
-          <DropListIcon className="fill-icon-main/50 hover:fill-icon-hover/75" />
+          <span className="icon-[material-symbols--expand-more] text-4xl" />
         </div>
       </Popover.Button>
 

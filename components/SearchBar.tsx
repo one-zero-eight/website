@@ -1,5 +1,3 @@
-import SearchIcon from "@/components/icons/SearchIcon";
-
 type SearchBarProps = {
   width: number;
   placeholder: string;
@@ -15,7 +13,7 @@ export default function SearchBar({
   return (
     <div className="relative">
       <span className="absolute inset-y-0 right-0 flex items-center pr-4">
-        <SearchIcon className="fill-text-transparent/50" />
+        <span className="icon-[material-symbols--search] text-3xl text-text-transparent/50" />
       </span>
       <input
         type="text"

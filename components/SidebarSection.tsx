@@ -2,7 +2,7 @@ import Tooltip from "@/components/Tooltip";
 import Link from "next/link";
 
 export type SectionProps = {
-  icon: (props: { className?: string; fill?: string }) => React.JSX.Element;
+  icon: React.ReactNode;
   path: string;
   title: string;
   selected: boolean;
@@ -11,16 +11,16 @@ export type SectionProps = {
 
 function SidebarSection(props: SectionProps) {
   const element = (
-    <div className="flex select-none flex-row justify-center p-2">
-      <props.icon
-        className={`mr-4 place-self-start ${
-          props.selected
-            ? "fill-focus_color"
-            : props.path === "#"
-            ? "fill-disabled"
-            : "fill-inactive"
-        }`}
-      />
+    <div
+      className={`flex select-none flex-row justify-center gap-4 p-2 ${
+        props.selected
+          ? "text-focus_color "
+          : props.path === "#"
+          ? "text-disabled"
+          : "text-inactive"
+      }`}
+    >
+      {props.icon}
       <p
         className={`flex w-min grow items-center text-lg font-semibold ${
           props.selected
