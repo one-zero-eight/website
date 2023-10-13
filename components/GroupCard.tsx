@@ -9,7 +9,6 @@ import { ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
 import { useRouter } from "next/navigation";
 import { Fragment } from "react";
-import { useWindowSize } from "usehooks-ts";
 
 export type GroupCardProps = {
   group: ViewEventGroup;
@@ -18,7 +17,6 @@ export type GroupCardProps = {
 
 export function GroupCard({ group, canHide = false }: GroupCardProps) {
   const router = useRouter();
-  const { width } = useWindowSize();
   const { isHidden, switchHideFavorite } = useEventGroup(group.id);
   const category = getFirstTagByType(group, "category");
   const tagsToDisplay =
