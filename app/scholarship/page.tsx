@@ -26,7 +26,7 @@ export default function Page() {
           department.
         </p>
         <p>For the next semesters &mdash; using the following formula:</p>
-        <ScholarshipFormula className="my-4 w-full fill-text-main" />
+        <ScholarshipFormula className="my-4 w-full fill-text-main stroke-none" />
 
         <p>
           <ScholarshipS className="-mt-1 inline fill-text-main" /> &mdash;
@@ -38,7 +38,7 @@ export default function Page() {
         </p>
         <p>
           <ScholarshipBmax className="-mt-1 inline fill-text-main" /> &mdash;
-          maximum scholarship amount (20,000₽)
+          maximum scholarship amount (10,000₽ for B23, and 20,000₽ for others)
         </p>
         <p>
           <ScholarshipGPA className="inline fill-text-main" /> &mdash;

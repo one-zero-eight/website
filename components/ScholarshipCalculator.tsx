@@ -6,7 +6,8 @@ import {
   calculateGPAFromScholarship,
   calculateMarksFromGPA,
   calculateScholarship,
-  FORMULA_B_MAX,
+  FORMULA_B_MAX_B22,
+  FORMULA_B_MAX_B23,
   FORMULA_B_MIN,
   Mark,
   MARK_COLORS,
@@ -17,15 +18,23 @@ import { useLocalStorage, useWindowSize } from "usehooks-ts";
 
 export default function ScholarshipCalculator() {
   const [_, setStorageMarks] = useLocalStorage<Mark[]>("scholarship-marks", []);
+  const [__, setStorageIsB23] = useLocalStorage<boolean>(
+    "scholarship-isB23",
+    true,
+  );
   const [marks, setMarks] = useState<Mark[]>([]);
   const [displayGPA, setDisplayGPA] = useState("");
   const [errorGPA, setErrorGPA] = useState(false);
   const [displayScholarship, setDisplayScholarship] = useState("");
   const [errorScholarship, setErrorScholarship] = useState(false);
+  const [isB23, setIsB23] = useState(true);
   const marksTextAreaRef = createRef<HTMLTextAreaElement>();
   const { width: windowWidth } = useWindowSize();
 
   useEffect(() => {
+    const isB23 = window.localStorage.getItem("scholarship-isB23") !== "false";
+    setIsB23(isB23);
+
     const marks = window.localStorage.getItem("scholarship-marks");
     if (!marks) return;
     try {
@@ -37,7 +46,7 @@ export default function ScholarshipCalculator() {
             newMarks.push(MARK_MAPPING[m]);
           }
         }
-        onMarksChange(newMarks.join(""));
+        onMarksChange(newMarks.join(""), isB23);
       }
     } catch (e) {
       // Accept any error
@@ -45,7 +54,10 @@ export default function ScholarshipCalculator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onMarksChange = (v: string) => {
+  const onMarksChange = (v: string, isB23: boolean) => {
+    setIsB23(isB23);
+    setStorageIsB23(isB23);
+
     const newMarks: Mark[] = [];
     for (let c of v) {
       // Convert characters to marks if there is mapping found
@@ -70,7 +82,7 @@ export default function ScholarshipCalculator() {
     const newScholarship = calculateScholarship(
       newGPA,
       FORMULA_B_MIN,
-      FORMULA_B_MAX,
+      isB23 ? FORMULA_B_MAX_B23 : FORMULA_B_MAX_B22,
     );
 
     // Update state
@@ -114,7 +126,10 @@ export default function ScholarshipCalculator() {
     }
   };
 
-  const onGPAChange = (v: string) => {
+  const onGPAChange = (v: string, isB23: boolean) => {
+    setIsB23(isB23);
+    setStorageIsB23(isB23);
+
     v = v.substring(0, 5);
     setDisplayGPA(v);
     const gpa = Math.round(Number(v) * 100) / 100;
@@ -123,7 +138,7 @@ export default function ScholarshipCalculator() {
       const newScholarship = calculateScholarship(
         gpa,
         FORMULA_B_MIN,
-        FORMULA_B_MAX,
+        isB23 ? FORMULA_B_MAX_B23 : FORMULA_B_MAX_B22,
       );
       setMarks(newMarks);
       setStorageMarks(newMarks);
@@ -135,19 +150,22 @@ export default function ScholarshipCalculator() {
     }
   };
 
-  const onScholarshipChange = (v: string) => {
+  const onScholarshipChange = (v: string, isB23: boolean) => {
+    setIsB23(isB23);
+    setStorageIsB23(isB23);
+
     v = v.substring(0, 5);
     setDisplayScholarship(v);
     const scholarship = Number(v);
     if (
       !isNaN(scholarship) &&
       scholarship >= FORMULA_B_MIN &&
-      scholarship <= FORMULA_B_MAX
+      scholarship <= (isB23 ? FORMULA_B_MAX_B23 : FORMULA_B_MAX_B22)
     ) {
       const newGPA = calculateGPAFromScholarship(
         scholarship,
         FORMULA_B_MIN,
-        FORMULA_B_MAX,
+        isB23 ? FORMULA_B_MAX_B23 : FORMULA_B_MAX_B22,
       );
       const newMarks = calculateMarksFromGPA(newGPA);
       setMarks(newMarks);
@@ -168,7 +186,7 @@ export default function ScholarshipCalculator() {
       <div className="relative">
         <textarea
           ref={marksTextAreaRef}
-          onChange={(e) => onMarksChange(e.target.value)}
+          onChange={(e) => onMarksChange(e.target.value, isB23)}
           autoComplete="off"
           spellCheck={false}
           className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-section_g_start bg-transparent p-3 font-handwritten text-transparent caret-section_g_start outline-none"
@@ -189,7 +207,7 @@ export default function ScholarshipCalculator() {
         </div>
         {marks.length !== 0 && (
           <button
-            onClick={() => onMarksChange("")}
+            onClick={() => onMarksChange("", isB23)}
             className="absolute -right-1 -top-1 h-7 w-7 rounded-2xl bg-base p-2 align-middle text-lg text-section_g_start"
             style={{ lineHeight: 0 }}
           >
@@ -198,10 +216,35 @@ export default function ScholarshipCalculator() {
         )}
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
+        <div className="text-xl font-medium">Course:</div>
+        <div className="flex w-32 flex-row overflow-clip rounded-2xl border-2 border-section_g_start">
+          <button
+            onClick={() => onMarksChange(marks.join(""), true)}
+            className={`w-full rounded-l-2xl p-2 text-center font-handwritten transition-colors hover:bg-section_g_start/20 ${
+              isB23
+                ? "bg-section_g_start/10 text-section_g_start"
+                : "bg-transparent text-gray-500"
+            }`}
+          >
+            B23
+          </button>
+          <button
+            onClick={() => onMarksChange(marks.join(""), false)}
+            className={`w-full rounded-r-2xl p-2 text-center font-handwritten transition-colors hover:bg-section_g_start/20 ${
+              !isB23
+                ? "bg-section_g_start/10 text-section_g_start"
+                : "bg-transparent text-gray-500"
+            }`}
+          >
+            B22+
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-row flex-wrap items-center justify-between">
         <div className="text-xl font-medium">Your GPA:</div>
         <input
           value={displayGPA}
-          onChange={(e) => onGPAChange(e.target.value)}
+          onChange={(e) => onGPAChange(e.target.value, isB23)}
           type="number"
           step={0.01}
           min={2}
@@ -220,10 +263,10 @@ export default function ScholarshipCalculator() {
         <div className="text-xl font-medium">Scholarship:</div>
         <input
           value={displayScholarship}
-          onChange={(e) => onScholarshipChange(e.target.value)}
+          onChange={(e) => onScholarshipChange(e.target.value, isB23)}
           type="number"
           step={100}
-          max={FORMULA_B_MAX}
+          max={isB23 ? FORMULA_B_MAX_B23 : FORMULA_B_MAX_B22}
           min={FORMULA_B_MIN}
           autoComplete="off"
           spellCheck={false}
@@ -236,10 +279,6 @@ export default function ScholarshipCalculator() {
               : "red",
           }}
         />
-      </div>
-      <div className="mt-2 flex w-2/3 flex-row flex-wrap items-center justify-between self-center rounded-2xl border border-dashed border-red-500 p-4 text-center text-red-500">
-        Note: this calculator is valid only for B22-B20 courses. Formula for B23
-        will be added before next semester.
       </div>
     </div>
   );
