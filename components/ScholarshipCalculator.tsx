@@ -189,7 +189,7 @@ export default function ScholarshipCalculator() {
           onChange={(e) => onMarksChange(e.target.value, isB23)}
           autoComplete="off"
           spellCheck={false}
-          className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-section_g_start bg-transparent p-3 font-handwritten text-transparent caret-section_g_start outline-none"
+          className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-section_g_start bg-base p-3 font-handwritten text-transparent caret-section_g_start outline-none"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
           rows={1}
           maxLength={50}
@@ -217,7 +217,7 @@ export default function ScholarshipCalculator() {
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
         <div className="text-xl font-medium">Course:</div>
-        <div className="flex w-32 flex-row overflow-clip rounded-2xl border-2 border-section_g_start">
+        <div className="flex w-32 flex-row overflow-clip rounded-2xl border-2 border-section_g_start bg-base">
           <button
             onClick={() => onMarksChange(marks.join(""), true)}
             className={`w-full rounded-l-2xl p-2 text-center font-handwritten transition-colors hover:bg-section_g_start/20 ${
@@ -251,7 +251,7 @@ export default function ScholarshipCalculator() {
           max={5}
           autoComplete="off"
           spellCheck={false}
-          className={`w-32 rounded-2xl border-2 bg-transparent p-2 text-center font-handwritten outline-none ${
+          className={`w-32 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none ${
             !errorGPA ? "border-section_g_start" : "border-red-500"
           }`}
           style={{
@@ -270,7 +270,7 @@ export default function ScholarshipCalculator() {
           min={FORMULA_B_MIN}
           autoComplete="off"
           spellCheck={false}
-          className={`rubles-input w-32 rounded-2xl border-2 bg-transparent p-2 text-center font-handwritten outline-none ${
+          className={`rubles-input w-32 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none ${
             !errorScholarship ? "border-section_g_start" : "border-red-500"
           }`}
           style={{
