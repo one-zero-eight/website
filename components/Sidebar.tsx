@@ -44,28 +44,28 @@ const externalItems: Item[] = [
     title: "Sports",
     path: "https://sport.innopolis.university",
     icon: (
-      <span className="icon-[material-symbols--open-in-new-rounded] text-4xl" />
+      <span className="icon-[material-symbols--exercise-outline] text-4xl" />
     ),
   },
   {
     title: "Moodle",
     path: "https://moodle.innopolis.university",
     icon: (
-      <span className="icon-[material-symbols--open-in-new-rounded] text-4xl" />
+      <span className="icon-[material-symbols--school-outline-rounded] text-4xl" />
     ),
   },
   {
     title: "Baam",
     path: "https://baam.duckdns.org/s",
     icon: (
-      <span className="icon-[material-symbols--open-in-new-rounded] text-4xl" />
+      <span className="icon-[material-symbols--qr-code-rounded] text-4xl" />
     ),
   },
   {
     title: "My University",
     path: "https://my.university.innopolis.ru",
     icon: (
-      <span className="icon-[material-symbols--open-in-new-rounded] text-4xl" />
+      <span className="icon-[material-symbols--account-circle-outline] text-4xl" />
     ),
   },
 ];
@@ -148,6 +148,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
                     selected={false}
                     path={item.path}
                     onClick={() => setOpened(false)}
+                    external={true}
                   />
                 </div>
               ))}
@@ -198,6 +199,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 selected={false}
                 path={item.path}
                 onClick={() => setOpened(false)}
+                external={true}
               />
             </div>
           ))}

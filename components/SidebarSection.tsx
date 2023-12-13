@@ -7,6 +7,7 @@ export type SectionProps = {
   title: string;
   selected: boolean;
   onClick: () => void;
+  external?: boolean;
 };
 
 function SidebarSection(props: SectionProps) {
@@ -31,6 +32,9 @@ function SidebarSection(props: SectionProps) {
         }`}
       >
         {props.title}
+        {props.external && (
+          <span className="icon-[material-symbols--open-in-new-rounded] ml-1" />
+        )}
       </p>
     </div>
   );
