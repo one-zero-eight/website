@@ -12,7 +12,7 @@ export type SectionProps = {
 function SidebarSection(props: SectionProps) {
   const element = (
     <div
-      className={`flex select-none flex-row justify-center gap-4 p-2 ${
+      className={`flex select-none flex-row justify-center gap-4 rounded-2xl p-2 hover:bg-gray-500/10 ${
         props.selected
           ? "text-focus_color "
           : props.path === "#"
@@ -22,7 +22,7 @@ function SidebarSection(props: SectionProps) {
     >
       {props.icon}
       <p
-        className={`flex w-min grow items-center text-lg font-semibold ${
+        className={`flex w-min grow items-center whitespace-nowrap text-lg font-semibold ${
           props.selected
             ? "selected"
             : props.path === "#"
@@ -44,7 +44,12 @@ function SidebarSection(props: SectionProps) {
   }
 
   return (
-    <Link href={props.path} onClick={props.onClick}>
+    <Link
+      href={props.path}
+      onClick={props.onClick}
+      target={props.path.startsWith("/") ? undefined : "_blank"}
+      rel={props.path.startsWith("/") ? undefined : "noopener noreferrer"}
+    >
       {element}
     </Link>
   );

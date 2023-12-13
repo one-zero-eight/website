@@ -37,25 +37,35 @@ const items: Item[] = [
       <span className="icon-[material-symbols--credit-card-outline] text-4xl" />
     ),
   },
+];
+
+const externalItems: Item[] = [
   {
-    title: "Laundry",
-    path: "#",
+    title: "Sports",
+    path: "https://sport.innopolis.university",
     icon: (
-      <span className="icon-[material-symbols--local-laundry-service-outline] text-4xl" />
+      <span className="icon-[material-symbols--open-in-new-rounded] text-4xl" />
     ),
   },
   {
-    title: "Forms",
-    path: "#",
+    title: "Moodle",
+    path: "https://moodle.innopolis.university",
     icon: (
-      <span className="icon-[material-symbols--list-alt-outline-rounded] text-4xl" />
+      <span className="icon-[material-symbols--open-in-new-rounded] text-4xl" />
     ),
   },
   {
-    title: "Canteen",
-    path: "#",
+    title: "Baam",
+    path: "https://baam.duckdns.org/s",
     icon: (
-      <span className="icon-[material-symbols--lunch-dining-outline] text-4xl" />
+      <span className="icon-[material-symbols--open-in-new-rounded] text-4xl" />
+    ),
+  },
+  {
+    title: "My University",
+    path: "https://my.university.innopolis.ru",
+    icon: (
+      <span className="icon-[material-symbols--open-in-new-rounded] text-4xl" />
     ),
   },
 ];
@@ -124,6 +134,23 @@ function Sidebar({ children }: React.PropsWithChildren) {
                   />
                 </div>
               ))}
+              <div className="mx-2.5 my-1 h-0.5 rounded-full bg-gray-500/20" />
+              {externalItems.map((item) => (
+                <div
+                  key={item.title}
+                  onClick={() =>
+                    item.path !== "#" ? setOpened(false) : undefined
+                  }
+                >
+                  <SidebarSection
+                    title={item.title}
+                    icon={item.icon}
+                    selected={false}
+                    path={item.path}
+                    onClick={() => setOpened(false)}
+                  />
+                </div>
+              ))}
             </nav>
             <div className="flex grow"></div>
             <br />
@@ -158,6 +185,21 @@ function Sidebar({ children }: React.PropsWithChildren) {
               path={item.path}
               onClick={() => setOpened(false)}
             />
+          ))}
+          <div className="mx-2.5 my-1 h-0.5 rounded-full bg-gray-500/20" />
+          {externalItems.map((item) => (
+            <div
+              key={item.title}
+              onClick={() => (item.path !== "#" ? setOpened(false) : undefined)}
+            >
+              <SidebarSection
+                title={item.title}
+                icon={item.icon}
+                selected={false}
+                path={item.path}
+                onClick={() => setOpened(false)}
+              />
+            </div>
           ))}
         </nav>
         <div className="grow"></div>
