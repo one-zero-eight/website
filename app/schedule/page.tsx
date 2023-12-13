@@ -11,8 +11,15 @@ export default function Page() {
         description={
           <>
             Services developed by{" "}
-            <a href="https://t.me/one_zero_eight">one-zero-eight community</a>{" "}
-            for Innopolis students.
+            <a
+              href="https://t.me/one_zero_eight"
+              className="selected"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              one-zero-eight
+            </a>{" "}
+            community for Innopolis students.
           </>
         }
       />
