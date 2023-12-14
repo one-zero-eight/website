@@ -29,49 +29,49 @@ export function useEventGroup(group_id?: number) {
   let isInFavorites = !!userFavoriteGroup;
   let isHidden = userFavoriteGroup?.hidden ?? false;
   // Use optimistic updates for mutations
-  if (remove.isLoading && remove.variables?.params.group_id === group_id) {
+  if (remove.isPending && remove.variables?.params.group_id === group_id) {
     isInFavorites = false;
   }
-  if (add.isLoading && add.variables?.params.group_id === group_id) {
+  if (add.isPending && add.variables?.params.group_id === group_id) {
     isInFavorites = true;
   }
-  if (hide.isLoading && hide.variables?.params.group_id === group_id) {
+  if (hide.isPending && hide.variables?.params.group_id === group_id) {
     isHidden = hide.variables?.params.hide ?? isHidden;
   }
 
-  const addToFavorites = async () => {
+  const addToFavorites = () => {
     if (group_id === undefined || isPredefined) return;
-    await add.mutate({ params: { group_id: group_id } });
+    add.mutate({ params: { group_id: group_id } });
   };
 
-  const removeFromFavorites = async () => {
+  const removeFromFavorites = () => {
     if (group_id === undefined || isPredefined) return;
-    await remove.mutate({ params: { group_id: group_id } });
+    remove.mutate({ params: { group_id: group_id } });
   };
 
-  const switchFavorite = async () => {
+  const switchFavorite = () => {
     if (!isInFavorites) {
-      await addToFavorites();
+      addToFavorites();
     } else {
-      await removeFromFavorites();
+      removeFromFavorites();
     }
   };
 
-  const hideFavorite = async () => {
+  const hideFavorite = () => {
     if (group_id === undefined) return;
-    await hide.mutate({ params: { group_id: group_id, hide: true } });
+    hide.mutate({ params: { group_id: group_id, hide: true } });
   };
 
-  const unhideFavorite = async () => {
+  const unhideFavorite = () => {
     if (group_id === undefined) return;
-    await hide.mutate({ params: { group_id: group_id, hide: false } });
+    hide.mutate({ params: { group_id: group_id, hide: false } });
   };
 
-  const switchHideFavorite = async () => {
+  const switchHideFavorite = () => {
     if (!isHidden) {
-      await hideFavorite();
+      hideFavorite();
     } else {
-      await unhideFavorite();
+      unhideFavorite();
     }
   };
 

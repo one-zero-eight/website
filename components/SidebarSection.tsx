@@ -19,8 +19,8 @@ function SidebarSection(props: SectionProps) {
         props.selected
           ? "text-focus_color"
           : props.path === "#"
-          ? "text-disabled"
-          : "text-inactive",
+            ? "text-disabled"
+            : "text-inactive",
       )}
     >
       {props.icon}
@@ -30,8 +30,8 @@ function SidebarSection(props: SectionProps) {
           props.selected
             ? "selected"
             : props.path === "#"
-            ? "text-disabled"
-            : "text-inactive",
+              ? "text-disabled"
+              : "text-inactive",
         )}
       >
         {props.title}

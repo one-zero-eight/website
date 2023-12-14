@@ -5,7 +5,7 @@ import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
 import UserInfoTracker from "@/lib/tracking/UserInfoTracker";
 import YandexMetrika from "@/lib/tracking/YandexMetrika";
 import clsx from "clsx";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { Fuzzy_Bubbles, Rubik } from "next/font/google";
 import React from "react";
 import "./globals.css";
@@ -31,6 +31,9 @@ export const metadata: Metadata = {
   applicationName: "InNoHassle",
   alternates: { canonical: "/" },
   manifest: "/manifest.json",
+};
+
+export const viewport: Viewport = {
   themeColor: "#9747ff",
 };
 

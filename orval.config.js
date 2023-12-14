@@ -2,7 +2,7 @@
 module.exports = {
   events: {
     input: {
-      target: "http://localhost:8000/openapi.json",
+      target: "https://api.innohassle.ru/events/v0/openapi.json",
       // validation: true,
     },
     output: {

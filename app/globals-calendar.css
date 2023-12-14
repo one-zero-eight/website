@@ -48,7 +48,8 @@
     }
   }
 
-  .fc-col-header-cell-cushion, .week-cell {
+  .fc-col-header-cell-cushion,
+  .week-cell {
     /* Force word wrapping */
     word-spacing: 3000px;
   }
@@ -75,14 +76,14 @@
   }
 
   .fc-daygrid-day-events {
-    @apply !min-h-0 !m-0;
+    @apply !m-0 !min-h-0;
   }
 
   .fc-timegrid-divider {
     @apply hidden;
   }
 
-  .fc-timeGridWeek-view .fc-daygrid-body{
+  .fc-timeGridWeek-view .fc-daygrid-body {
     @apply bg-[var(--fc-neutral-bg-color)];
   }
 }

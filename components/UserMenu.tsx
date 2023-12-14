@@ -97,8 +97,8 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                 isMobile
                   ? "left-0 top-[18p]"
                   : isSidebar
-                  ? "-top-32"
-                  : "right-0 top-[18p]",
+                    ? "-top-32"
+                    : "right-0 top-[18p]",
               )}
             >
               <div className="flex flex-row justify-center gap-6 sm:justify-normal">

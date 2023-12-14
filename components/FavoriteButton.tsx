@@ -15,8 +15,8 @@ export default function FavoriteButton({ groupId }: { groupId: number }) {
         isPredefined
           ? "Your group from official lists"
           : isInFavorites
-          ? "In favorites"
-          : "Add to favorites"
+            ? "In favorites"
+            : "Add to favorites"
       }
     >
       <button

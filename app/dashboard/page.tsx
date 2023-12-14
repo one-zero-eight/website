@@ -103,8 +103,8 @@ export default function Page() {
                 ? width >= 1280
                   ? "dayGridMonth"
                   : width >= 1024
-                  ? "timeGridWeek"
-                  : "listMonth"
+                    ? "timeGridWeek"
+                    : "listMonth"
                 : "dayGridMonth"
             }
             viewId="page"
