@@ -1,6 +1,7 @@
 import { SidebarMenuButton } from "@/components/Sidebar";
 import SwitchThemeButton from "@/components/SwitchThemeButton";
 import UserMenu from "@/components/UserMenu";
+import clsx from "clsx";
 
 export function Navbar({
   children,
@@ -9,9 +10,7 @@ export function Navbar({
   className?: string;
 }>) {
   return (
-    <nav
-      className={`flex w-full items-start justify-between ${className ?? ""}`}
-    >
+    <nav className={clsx("flex w-full items-start justify-between", className)}>
       <SidebarMenuButton className="-ml-4 -mt-4 p-4 lgw-smh:hidden" />
       <div className="min-h-full flex-grow">{children}</div>
       <div className="hidden items-center gap-4 lgw-smh:flex">

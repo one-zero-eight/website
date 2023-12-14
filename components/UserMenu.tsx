@@ -17,6 +17,7 @@ import {
   useRole,
   useTransitionStyles,
 } from "@floating-ui/react";
+import clsx from "clsx";
 import Link from "next/link";
 import React, { useContext, useState } from "react";
 import { useIsClient } from "usehooks-ts";
@@ -91,13 +92,14 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               ref={refs.setFloating}
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
-              className={`absolute z-10 w-fit rounded-2xl border-2 border-border/50 bg-primary-main p-4 ${
+              className={clsx(
+                "absolute z-10 w-fit rounded-2xl border-2 border-border/50 bg-primary-main p-4",
                 isMobile
                   ? "left-0 top-[18p]"
                   : isSidebar
                   ? "-top-32"
-                  : "right-0 top-[18p]"
-              }`}
+                  : "right-0 top-[18p]",
+              )}
             >
               <div className="flex flex-row justify-center gap-6 sm:justify-normal">
                 <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-border text-icon-main/50">

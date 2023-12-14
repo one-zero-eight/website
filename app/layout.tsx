@@ -4,6 +4,7 @@ import Sidebar from "@/components/Sidebar";
 import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
 import UserInfoTracker from "@/lib/tracking/UserInfoTracker";
 import YandexMetrika from "@/lib/tracking/YandexMetrika";
+import clsx from "clsx";
 import { Metadata } from "next";
 import { Fuzzy_Bubbles, Rubik } from "next/font/google";
 import React from "react";
@@ -43,7 +44,7 @@ export default function RootLayout({
   return (
     <ThemedHtml
       lang="en"
-      className={`${rubik.variable} ${fuzzyBubbles.variable}`}
+      className={clsx(rubik.variable, fuzzyBubbles.variable)}
     >
       <body className="bg-base font-primary text-lg text-text-main">
         <Providers>

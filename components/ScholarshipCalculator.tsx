@@ -13,6 +13,7 @@ import {
   MARK_COLORS,
   MARK_MAPPING,
 } from "@/lib/scholarship";
+import clsx from "clsx";
 import { createRef, Fragment, useEffect, useState } from "react";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
 
@@ -220,21 +221,23 @@ export default function ScholarshipCalculator() {
         <div className="flex w-32 flex-row overflow-clip rounded-2xl border-2 border-section_g_start bg-base">
           <button
             onClick={() => onMarksChange(marks.join(""), true)}
-            className={`w-full rounded-l-2xl p-2 text-center font-handwritten transition-colors hover:bg-section_g_start/20 ${
+            className={clsx(
+              "w-full rounded-l-2xl p-2 text-center font-handwritten transition-colors hover:bg-section_g_start/20",
               isB23
                 ? "bg-section_g_start/10 text-section_g_start"
-                : "bg-transparent text-gray-500"
-            }`}
+                : "bg-transparent text-gray-500",
+            )}
           >
             B23
           </button>
           <button
             onClick={() => onMarksChange(marks.join(""), false)}
-            className={`w-full rounded-r-2xl p-2 text-center font-handwritten transition-colors hover:bg-section_g_start/20 ${
+            className={clsx(
+              "w-full rounded-r-2xl p-2 text-center font-handwritten transition-colors hover:bg-section_g_start/20",
               !isB23
                 ? "bg-section_g_start/10 text-section_g_start"
-                : "bg-transparent text-gray-500"
-            }`}
+                : "bg-transparent text-gray-500",
+            )}
           >
             B22+
           </button>
@@ -251,9 +254,10 @@ export default function ScholarshipCalculator() {
           max={5}
           autoComplete="off"
           spellCheck={false}
-          className={`w-32 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none ${
-            !errorGPA ? "border-section_g_start" : "border-red-500"
-          }`}
+          className={clsx(
+            "w-32 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
+            !errorGPA ? "border-section_g_start" : "border-red-500",
+          )}
           style={{
             color: !errorGPA ? calculateColorGPA(Number(displayGPA)) : "red",
           }}
@@ -270,9 +274,10 @@ export default function ScholarshipCalculator() {
           min={FORMULA_B_MIN}
           autoComplete="off"
           spellCheck={false}
-          className={`rubles-input w-32 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none ${
-            !errorScholarship ? "border-section_g_start" : "border-red-500"
-          }`}
+          className={clsx(
+            "rubles-input w-32 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
+            !errorScholarship ? "border-section_g_start" : "border-red-500",
+          )}
           style={{
             color: !errorScholarship
               ? calculateColorGPA(Number(displayGPA))

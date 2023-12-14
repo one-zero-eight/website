@@ -2,6 +2,7 @@
 import SwitchThemeButton from "@/components/SwitchThemeButton";
 import UserMenu from "@/components/UserMenu";
 import { useUsersGetMe } from "@/lib/events";
+import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
@@ -90,25 +91,25 @@ function Sidebar({ children }: React.PropsWithChildren) {
     <SidebarContext.Provider value={{ isOpened, setOpened, isMobile }}>
       <div className="absolute flex flex-col lgw-smh:hidden">
         <div
-          className={
+          className={clsx(
             isOpened
               ? "visible fixed inset-0 z-[2] block bg-black/50"
-              : "invisible hidden"
-          }
+              : "invisible hidden",
+          )}
           onClick={() => setOpened(false)}
         />
         <aside
-          className={
-            "fixed top-0 z-10 h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8 " +
-            (isOpened ? "bg-primary-main" : "hidden")
-          }
+          className={clsx(
+            "fixed top-0 z-10 h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8",
+            isOpened ? "bg-primary-main" : "hidden",
+          )}
         >
           <div
-            className={
+            className={clsx(
               isOpened
                 ? "left-0 flex h-full flex-col items-center opacity-100"
-                : "relative left-[-500px] flex h-full opacity-0"
-            }
+                : "relative left-[-500px] flex h-full opacity-0",
+            )}
           >
             <Link
               href={user ? "/dashboard" : "/schedule"}
