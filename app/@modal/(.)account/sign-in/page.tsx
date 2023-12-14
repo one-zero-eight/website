@@ -64,7 +64,7 @@ export default function Page() {
                     </div>
                     <div className="mb-4 text-text-secondary/75">
                       {searchParams.get("header") ||
-                        "Use your Innopolis account to use all features of this service."}
+                        "Use your Innopolis account to access all features of this service."}
                     </div>
                     <SignInButton ref={signInRef} />
                   </div>
