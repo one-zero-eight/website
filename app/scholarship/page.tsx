@@ -17,7 +17,7 @@ export default function Page() {
         <ScholarshipCalculator />
       </div>
 
-      <div className="flex max-w-2xl flex-col self-center">
+      <div className="mt-4 flex max-w-2xl flex-col self-center">
         <h2 className="text-center text-3xl">Information</h2>
 
         <h3 className="mt-4 text-2xl">Academic scholarships:</h3>
