@@ -63,6 +63,13 @@ const externalItems: Item[] = [
     ),
   },
   {
+    title: "Innopoints",
+    path: "https://ipts.innopolis.university/",
+    icon: (
+      <span className="icon-[material-symbols--loyalty-outline-rounded] text-4xl" />
+    ),
+  },
+  {
     title: "My University",
     path: "https://my.university.innopolis.ru",
     icon: (
