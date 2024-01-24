@@ -1,0 +1,33 @@
+name: Deploy to production server
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to production server
+    runs-on: self-hosted
+    environment:
+      name: production
+      url: https://innohassle.ru
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          script_stop: true # Stop script on error
+          script: |
+            cd ${{ secrets.REPOSITORY_ROOT }}
+            git reset --hard
+            git checkout ${{ github.ref_name }}
+            git pull
+            docker compose build
+            docker compose pull
+            docker compose up -d
