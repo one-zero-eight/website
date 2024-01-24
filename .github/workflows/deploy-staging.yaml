@@ -24,6 +24,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
           script_stop: true # Stop script on error
           script: |
             cd ${{ secrets.REPOSITORY_ROOT }}
