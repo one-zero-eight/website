@@ -28,6 +28,6 @@ jobs:
             git reset --hard
             git checkout ${{ github.ref_name }}
             git pull
-            docker compose build
+            docker compose build --pull
             docker compose pull
             docker compose up -d
