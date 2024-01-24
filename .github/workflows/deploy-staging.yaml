@@ -2,7 +2,7 @@ name: Deploy to staging server
 
 concurrency:
   group: staging
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   push:
