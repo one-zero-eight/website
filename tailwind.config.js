@@ -10,7 +10,11 @@ module.exports = {
   theme: {
     extend: {
       width: {
+        52: '3.25rem',
         256: "64rem",
+      },
+      height: {
+        52: '3.25rem',
       },
       colors: {
         base: "rgba(var(--color-base) / <alpha-value>)",

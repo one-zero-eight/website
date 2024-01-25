@@ -67,19 +67,17 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
                 e.stopPropagation();
                 switchHideFavorite && switchHideFavorite();
               }}
-              className="rounded-2xl p-2 text-4xl hover:bg-secondary-hover"
+              className="w-52 h-52 p-2 rounded-2xl text-4xl hover:bg-secondary-hover"
             >
               {isHidden ? (
-                <span className="icon-[material-symbols--visibility-off-outline] my-1 text-icon-main/50" />
+                <span className="icon-[material-symbols--visibility-off-outline] text-icon-main/50" />
               ) : (
-                <span className="icon-[material-symbols--visibility-outline] my-1 text-icon-main/50" />
+                <span className="icon-[material-symbols--visibility-outline] text-icon-main/50" />
               )}
             </button>
           </Tooltip>
         )}
-        <div className="-mr-2">
           <FavoriteButton groupId={group.id} />
-        </div>
       </div>
     </div>
   );
