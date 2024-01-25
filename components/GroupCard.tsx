@@ -1,5 +1,5 @@
 import FavoriteButton from "@/components/FavoriteButton";
-import Tooltip from "@/components/Tooltip";
+import HideButton from "@/components/HideButton";
 import {
   getAllTagsByType,
   getFirstTagByType,
@@ -17,7 +17,6 @@ export type GroupCardProps = {
 
 export function GroupCard({ group, canHide = false }: GroupCardProps) {
   const router = useRouter();
-  const { isHidden, switchHideFavorite } = useEventGroup(group.id);
   const category = getFirstTagByType(group, "category");
   const tagsToDisplay =
     category && category.alias in viewConfig.categories
@@ -59,23 +58,7 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
       </div>
       <div className="flex select-none flex-row place-items-center">
         {canHide && (
-          <Tooltip
-            content={isHidden ? "Hidden from calendar" : "Hide from calendar"}
-          >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                switchHideFavorite && switchHideFavorite();
-              }}
-              className="w-52 h-52 p-2 rounded-2xl text-4xl hover:bg-secondary-hover"
-            >
-              {isHidden ? (
-                <span className="icon-[material-symbols--visibility-off-outline] text-icon-main/50" />
-              ) : (
-                <span className="icon-[material-symbols--visibility-outline] text-icon-main/50" />
-              )}
-            </button>
-          </Tooltip>
+          <HideButton groupId={group.id} />
         )}
           <FavoriteButton groupId={group.id} />
       </div>
