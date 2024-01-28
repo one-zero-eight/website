@@ -1,9 +1,8 @@
-import FavoriteButton from "@/components/FavoriteButton";
-import HideButton from "@/components/HideButton";
+import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
+import HideButton from "@/components/schedule/group-card/HideButton";
 import {
   getAllTagsByType,
   getFirstTagByType,
-  useEventGroup,
 } from "@/lib/event-group";
 import { ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";

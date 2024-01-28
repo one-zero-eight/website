@@ -1,4 +1,4 @@
-import Tooltip from "@/components/Tooltip";
+import Tooltip from "@/components/common/Tooltip";
 import { useEventGroup } from "@/lib/event-group";
 import { useUsersGetMe } from "@/lib/events";
 import { useRouter } from "next/navigation";

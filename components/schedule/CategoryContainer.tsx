@@ -1,4 +1,4 @@
-import CategoryCard from "@/components/CategoryCard";
+import CategoryCard from "@/components/schedule/CategoryCard";
 import { viewConfig } from "@/lib/events-view-config";
 
 const categoriesIcons: {

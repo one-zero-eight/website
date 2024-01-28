@@ -1,5 +1,5 @@
 "use client";
-import SignInButton from "@/components/SignInButton";
+import SignInButton from "@/components/common/SignInButton";
 import {
   FloatingFocusManager,
   FloatingOverlay,

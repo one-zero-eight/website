@@ -1,6 +1,6 @@
 import Providers from "@/app/providers";
 import ThemedHtml from "@/app/theme";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/layout/Sidebar";
 import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
 import UserInfoTracker from "@/lib/tracking/UserInfoTracker";
 import YandexMetrika from "@/lib/tracking/YandexMetrika";

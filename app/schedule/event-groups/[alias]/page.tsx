@@ -1,8 +1,8 @@
 "use client";
-import Calendar from "@/components/Calendar";
-import ExportButton from "@/components/ExportButton";
-import FavoriteButton from "@/components/FavoriteButton";
-import { NavbarTemplate } from "@/components/Navbar";
+import Calendar from "@/components/common/calendar/Calendar";
+import ExportButton from "@/components/schedule/ExportButton";
+import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
+import { NavbarTemplate } from "@/components/layout/Navbar";
 import {
   getICSLink,
   useEventGroupsFindEventGroupByAlias,

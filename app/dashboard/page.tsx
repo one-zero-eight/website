@@ -1,7 +1,7 @@
 "use client";
-import Calendar from "@/components/Calendar";
-import { GroupCard } from "@/components/GroupCard";
-import SignInButton from "@/components/SignInButton";
+import Calendar from "@/components/common/calendar/Calendar";
+import { GroupCard } from "@/components/schedule/group-card/GroupCard";
+import SignInButton from "@/components/common/SignInButton";
 import {
   getICSLink,
   UserXFavoriteGroupView,

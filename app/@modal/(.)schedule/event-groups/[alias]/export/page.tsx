@@ -1,6 +1,6 @@
 "use client";
-import Calendar from "@/components/Calendar";
-import ScheduleLinkCopy from "@/components/ScheduleLinkCopy";
+import Calendar from "@/components/common/calendar/Calendar";
+import ScheduleLinkCopy from "@/components/schedule/ScheduleLinkCopy";
 import {
   getICSLink,
   useEventGroupsFindEventGroupByAlias,

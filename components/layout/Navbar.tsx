@@ -1,6 +1,6 @@
-import { SidebarMenuButton } from "@/components/Sidebar";
-import SwitchThemeButton from "@/components/SwitchThemeButton";
-import UserMenu from "@/components/UserMenu";
+import { SidebarMenuButton } from "@/components/layout/Sidebar";
+import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
+import UserMenu from "@/components/layout/UserMenu";
 import clsx from "clsx";
 
 export function Navbar({

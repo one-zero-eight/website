@@ -1,4 +1,4 @@
-import Tooltip from "@/components/Tooltip";
+import Tooltip from "@/components/common/Tooltip";
 import clsx from "clsx";
 import Link from "next/link";
 

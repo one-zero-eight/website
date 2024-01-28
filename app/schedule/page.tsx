@@ -1,7 +1,7 @@
-import CategoryContainer from "@/components/CategoryContainer";
-import ClarificationContainer from "@/components/ClarificationContainer";
-import { DashboardButton } from "@/components/DashboardButton";
-import { NavbarTemplate } from "@/components/Navbar";
+import CategoryContainer from "@/components/schedule/CategoryContainer";
+import ClarificationContainer from "@/components/schedule/ClarificationContainer";
+import { DashboardButton } from "@/components/schedule/DashboardButton";
+import { NavbarTemplate } from "@/components/layout/Navbar";
 
 export default function Page() {
   return (

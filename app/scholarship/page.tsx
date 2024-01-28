@@ -3,8 +3,8 @@ import { ScholarshipBmin } from "@/components/icons/ScholarshipBmin";
 import { ScholarshipFormula } from "@/components/icons/ScholarshipFormula";
 import { ScholarshipGPA } from "@/components/icons/ScholarshipGPA";
 import { ScholarshipS } from "@/components/icons/ScholarshipS";
-import { NavbarTemplate } from "@/components/Navbar";
-import ScholarshipCalculator from "@/components/ScholarshipCalculator";
+import { NavbarTemplate } from "@/components/layout/Navbar";
+import ScholarshipCalculator from "@/components/scholarship/ScholarshipCalculator";
 
 export default function Page() {
   return (

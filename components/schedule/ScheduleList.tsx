@@ -1,6 +1,6 @@
 "use client";
-import { GroupCard } from "@/components/GroupCard";
-import SearchBar from "@/components/SearchBar";
+import { GroupCard } from "@/components/schedule/group-card/GroupCard";
+import SearchBar from "@/components/schedule/SearchBar";
 import { getFirstTagByType } from "@/lib/event-group";
 import { useEventGroupsListEventGroups, ViewEventGroup } from "@/lib/events";
 import { getCategoryInfoBySlug } from "@/lib/events-view-config";

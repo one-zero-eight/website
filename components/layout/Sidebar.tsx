@@ -1,13 +1,13 @@
 "use client";
-import SwitchThemeButton from "@/components/SwitchThemeButton";
-import UserMenu from "@/components/UserMenu";
+import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
+import UserMenu from "@/components/layout/UserMenu";
 import { useUsersGetMe } from "@/lib/events";
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
-import Logo from "./icons/Logo";
+import Logo from "../icons/Logo";
 import SidebarSection from "./SidebarSection";
 
 type Item = {

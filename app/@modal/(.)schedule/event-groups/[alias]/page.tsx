@@ -1,7 +1,7 @@
 "use client";
-import Calendar from "@/components/Calendar";
-import ExportButton from "@/components/ExportButton";
-import FavoriteButton from "@/components/FavoriteButton";
+import Calendar from "@/components/common/calendar/Calendar";
+import ExportButton from "@/components/schedule/ExportButton";
+import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
 import {
   getICSLink,
   useEventGroupsFindEventGroupByAlias,

@@ -1,6 +1,6 @@
 "use client";
-import { SidebarContext } from "@/components/Sidebar";
-import { SignInButtonIcon } from "@/components/SignInButton";
+import { SidebarContext } from "@/components/layout/Sidebar";
+import { SignInButtonIcon } from "@/components/common/SignInButton";
 import { useAuthPaths } from "@/lib/auth";
 import { useUsersGetMe } from "@/lib/events";
 import {

@@ -1,4 +1,4 @@
-import ClarificationCard from "@/components/ClarificationCard";
+import ClarificationCard from "@/components/schedule/ClarificationCard";
 import Arrow from "@/components/icons/Arrow";
 
 export default function ClarificationContainer() {

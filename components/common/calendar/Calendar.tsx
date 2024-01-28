@@ -1,5 +1,5 @@
 "use client";
-import CalendarEventPopover from "@/components/CalendarEventPopover";
+import CalendarEventPopover from "@/components/common/calendar/CalendarEventPopover";
 import { EventApi, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";

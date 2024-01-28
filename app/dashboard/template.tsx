@@ -1,4 +1,4 @@
-import { NavbarTemplate } from "@/components/Navbar";
+import { NavbarTemplate } from "@/components/layout/Navbar";
 
 export default function Template({ children }: React.PropsWithChildren) {
   return (

@@ -1,5 +1,5 @@
 "use client";
-import SignInButton from "@/components/SignInButton";
+import SignInButton from "@/components/common/SignInButton";
 import { useUsersGetMe } from "@/lib/events";
 import Link from "next/link";
 
