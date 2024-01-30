@@ -60,6 +60,7 @@ module.exports = {
         "lg-h": { raw: "(min-height: 1024px)" },
         "xl-h": { raw: "(min-height: 1280px)" },
         "2xl-h": { raw: "(min-height: 1536px)" },
+        "4xl": { raw: "(min-width: 2048px)"},
       },
       spacing: {
         "18p": "4.5rem",
