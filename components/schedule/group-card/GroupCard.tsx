@@ -29,7 +29,7 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
 
   return (
     <div
-      className="flex min-h-fit min-w-fit max-w-full cursor-pointer flex-row items-center justify-between rounded-2xl bg-primary-main p-4 hover:bg-primary-hover"
+      className="flex min-h-fit min-w-fit max-w-full basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl bg-primary-main p-4 hover:bg-primary-hover"
       onClick={() => router.push(eventGroupPageURL)}
       onMouseEnter={() => router.prefetch(eventGroupPageURL)}
     >
