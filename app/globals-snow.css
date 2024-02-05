@@ -13,7 +13,7 @@
   }
 }
 
-body {
+.snow body {
   animation: snow 180s linear infinite;
   background-image: url("/snow-1.svg"), url("/snow-2.svg"), url("/snow-3.svg");
   background-size:

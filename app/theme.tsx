@@ -13,11 +13,17 @@ export default function ThemedHtml({
 } & React.HTMLProps<HTMLHtmlElement>) {
   const isClient = useIsClient();
   const { isDarkMode } = useDarkMode();
+  const isSafari =
+    isClient && /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
   return (
     <html
       {...htmlProps}
-      className={clsx(className, (!isClient || isDarkMode) && "dark")}
+      className={clsx(
+        className,
+        (!isClient || isDarkMode) && "dark",
+        !isSafari && "snow",
+      )}
     >
       {children}
     </html>

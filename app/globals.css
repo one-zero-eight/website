@@ -1,4 +1,5 @@
 @import "globals-calendar.css";
+@import "globals-snow.css";
 
 @tailwind base;
 @tailwind components;
