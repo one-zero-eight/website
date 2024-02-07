@@ -53,7 +53,7 @@ export default function Page() {
           {favorites.filter((v) => v.predefined === true).length === 0 ? (
             <p className="mb-4 text-lg text-text-secondary/75">Nothing here.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 4xl:grid-cols-3 gap-4 justify-stretch">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 4xl:grid-cols-3 gap-4 justify-stretch">
               {favorites
                 .filter((v) => v.predefined === true)
                 .map((v) => (
@@ -84,7 +84,7 @@ export default function Page() {
               </Link>
             </p>
           ) : (
-            <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 4xl:grid-cols-3 gap-4 justify-stretch">
+            <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 4xl:grid-cols-3 gap-4 justify-stretch">
               {favorites
                 .filter((v) => v.predefined === false)
                 .map((v) => (
