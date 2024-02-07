@@ -47,13 +47,13 @@ export default function Page() {
           </p>
         </div>
       </div>
-      <div className="flex flex-col 2xl:flex-row justify-between gap-24 xl:gap-8">
+      <div className="flex flex-col 2xl:flex-row justify-between gap-4 2xl:gap-8">
         <div className="flex flex-col w-full 2xl:w-1/2">
           <h2 className="my-4 text-3xl font-medium">Schedule</h2>
           {favorites.filter((v) => v.predefined === true).length === 0 ? (
             <p className="mb-4 text-lg text-text-secondary/75">Nothing here.</p>
           ) : (
-            <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 4xl:grid-cols-3 gap-4 justify-stretch">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 4xl:grid-cols-3 gap-4 justify-stretch">
               {favorites
                 .filter((v) => v.predefined === true)
                 .map((v) => (
