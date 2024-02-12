@@ -57,7 +57,6 @@ export default function Page() {
               {favorites
                 .filter((v) => v.predefined === true)
                 .map((v) => (
-                    <>
                   <GroupCard
                     key={v.event_group.path}
                     group={v.event_group}
