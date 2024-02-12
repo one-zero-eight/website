@@ -63,12 +63,6 @@ export default function Page() {
                     group={v.event_group}
                     canHide={true}
                   />
-                  <GroupCard
-                  key={v.event_group.path}
-                group={v.event_group}
-                canHide={true}
-            />
-                    </>
                 ))}
             </div>
           )}
