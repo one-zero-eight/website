@@ -1,5 +1,6 @@
 import {
   getUsersGetMeQueryKey,
+  useIcsGetMusicRoomCurrentUserSchedule,
   useUsersAddFavorite,
   useUsersDeleteFavorite,
   useUsersGetMe,
@@ -103,4 +104,12 @@ export function getAllTagsByType(
 ) {
   if (event_group.tags === undefined) return [];
   return event_group.tags.filter((v) => v.type === tag_type);
+}
+
+export function useMyMusicRoom() {
+  const musicRoomSchedule = useIcsGetMusicRoomCurrentUserSchedule();
+
+  return {
+    musicRoomSchedule,
+  };
 }

@@ -1,8 +1,13 @@
 "use client";
 import Calendar from "@/components/common/calendar/Calendar";
-import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 import SignInButton from "@/components/common/SignInButton";
+import ExportButton from "@/components/schedule/ExportButton";
+import { GroupCard } from "@/components/schedule/group-card/GroupCard";
+import LinkIconButton from "@/components/schedule/group-card/LinkIconButton";
+import { PersonalCard } from "@/components/schedule/group-card/PersonalCard";
+import { useMyMusicRoom } from "@/lib/event-group";
 import {
+  EVENTS_API_URL,
   getICSLink,
   UserXFavoriteGroupView,
   useUsersGetMe,
@@ -16,6 +21,7 @@ export default function Page() {
   const isClient = useIsClient();
   const { data: user } = useUsersGetMe();
   const favorites = user?.favorites_association || [];
+  const { musicRoomSchedule } = useMyMusicRoom();
 
   if (!isClient) {
     return <></>;
@@ -47,13 +53,13 @@ export default function Page() {
           </p>
         </div>
       </div>
-      <div className="flex flex-col 2xl:flex-row justify-between gap-4 2xl:gap-8">
-        <div className="flex flex-col w-full 2xl:w-1/2">
+      <div className="flex flex-col justify-between gap-4 2xl:flex-row 2xl:gap-8">
+        <div className="flex w-full flex-col 2xl:w-1/2">
           <h2 className="my-4 text-3xl font-medium">Schedule</h2>
           {favorites.filter((v) => v.predefined === true).length === 0 ? (
             <p className="mb-4 text-lg text-text-secondary/75">Nothing here.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 4xl:grid-cols-3 gap-4 justify-stretch">
+            <div className="grid grid-cols-1 justify-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 4xl:grid-cols-3">
               {favorites
                 .filter((v) => v.predefined === true)
                 .map((v) => (
@@ -63,10 +69,26 @@ export default function Page() {
                     canHide={true}
                   />
                 ))}
+              {musicRoomSchedule.isSuccess && (
+                <PersonalCard
+                  name="Music room"
+                  description="Your room bookings"
+                  pageUrl="/music-room"
+                  buttons={
+                    <LinkIconButton
+                      href="https://t.me/InnoMusicRoomBot"
+                      icon={
+                        <span className="icon-[mdi--robot-excited-outline] text-[#78DBE2]" />
+                      }
+                      tooltip="Open Telegram bot"
+                    />
+                  }
+                />
+              )}
             </div>
           )}
         </div>
-        <div className="flex flex-col w-full 2xl:w-1/2">
+        <div className="flex w-full flex-col 2xl:w-1/2">
           <h2 className="my-4 text-3xl font-medium">Favorites</h2>
           {favorites.filter((v) => v.predefined === false).length === 0 ? (
             <p className="mb-4 text-lg text-text-secondary/75">
@@ -77,7 +99,7 @@ export default function Page() {
               </Link>
             </p>
           ) : (
-            <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 4xl:grid-cols-3 gap-4 justify-stretch">
+            <div className="mb-4 grid grid-cols-1 justify-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-2 4xl:grid-cols-3">
               {favorites
                 .filter((v) => v.predefined === false)
                 .map((v) => (
@@ -130,6 +152,9 @@ function getCalendarsToShow(
     if (v.hidden && !includeHidden) return [];
     return [getICSLink(v.event_group.alias, userId)];
   });
+
+  // Add personal calendars
+  toShow.push(`${EVENTS_API_URL}/users/me/music-room.ics`);
 
   // Return unique items
   return toShow.filter((value, index, array) => array.indexOf(value) === index);
