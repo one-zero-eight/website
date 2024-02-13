@@ -104,25 +104,21 @@ function Sidebar({ children }: React.PropsWithChildren) {
       <div className="absolute flex flex-col lgw-smh:hidden">
         <div
           className={clsx(
-            isOpened
-              ? "visible fixed inset-0 z-[2] block bg-black/50"
-              : "invisible hidden",
+            "fixed inset-0 transition-colors",
+            isOpened ? "visible z-[2] block bg-black/50" : "z-[-1] bg-black/0",
           )}
           onClick={() => setOpened(false)}
         />
         <aside
           className={clsx(
-            "fixed top-0 z-10 h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8",
-            isOpened ? "bg-primary-main" : "hidden",
+            "bg-pink fixed top-0 z-10 h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8",
+            "transition-transform",
+            isOpened
+              ? "translate-x-0 transform bg-primary-main"
+              : "  -translate-x-full transform bg-primary-main",
           )}
         >
-          <div
-            className={clsx(
-              isOpened
-                ? "left-0 flex h-full flex-col items-center opacity-100"
-                : "relative left-[-500px] flex h-full opacity-0",
-            )}
-          >
+          <div className="left-0 flex h-full flex-col items-center opacity-100">
             <Link
               href={user ? "/dashboard" : "/schedule"}
               onClick={() => setOpened(false)}
