@@ -38,6 +38,11 @@ const items: Item[] = [
       <span className="icon-[material-symbols--credit-card-outline] text-4xl" />
     ),
   },
+  {
+    title: "Music room",
+    path: "/music-room",
+    icon: <span className="icon-[material-symbols--piano] text-4xl" />,
+  },
 ];
 
 const externalItems: Item[] = [
