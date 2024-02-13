@@ -178,7 +178,7 @@ function renderEventListMonth({ event }: EventContentArg) {
 
 function renderEventTimeGridWeek({ event }: EventContentArg) {
   return (
-    <div className="text-left">
+    <div className="h-full overflow-clip text-left">
       <span className="line-clamp-2">{event.title}</span>
       <span className="line-clamp-2 text-xs">
         {event.extendedProps.location}
