@@ -20,7 +20,6 @@ Useful links:
 
  * OpenAPI spec version: 0.1.0
  */
-import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   MutationFunction,
   QueryFunction,
@@ -29,10 +28,20 @@ import type {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "./axios-instance";
+
 export type IcsGetEventGroupIcsByAliasParams = {
   user_id: number;
   export_type: string;
+};
+
+export type IcsGetMusicRoomUserScheduleParams = {
+  access_key: string;
+};
+
+export type IcsGetUserScheduleParams = {
+  access_key: string;
 };
 
 export type EventGroupsFindEventGroupByAliasParams = {
@@ -41,6 +50,19 @@ export type EventGroupsFindEventGroupByAliasParams = {
 
 export type EventGroupsFindEventGroupByPathParams = {
   path: string;
+};
+
+export type UsersDeleteUserScheduleKeyParams = {
+  access_key: string;
+  resource_path: string;
+};
+
+export type UsersGenerateUserScheduleKeyParams = {
+  resource_path: string;
+};
+
+export type UsersHideMusicRoomParams = {
+  hide?: boolean;
 };
 
 export type UsersHideFavoriteParams = {
@@ -56,6 +78,22 @@ export type UsersAddFavoriteParams = {
   group_id: number;
 };
 
+/**
+ * Represents a user schedule key.
+ */
+export interface ViewUserScheduleKey {
+  access_key: string;
+  resource_path: string;
+  user_id: number;
+}
+
+export interface _GetScheduleAccessKeyResponse {
+  access_key: ViewUserScheduleKey;
+  new: boolean;
+}
+
+export type ViewUserName = string | null;
+
 export type ViewUserLinkedCalendars = { [key: string]: LinkedCalendarView };
 
 /**
@@ -66,18 +104,33 @@ export interface ViewUser {
   favorites_association?: UserXFavoriteGroupView[];
   id: number;
   linked_calendars?: ViewUserLinkedCalendars;
-  name?: string;
+  moodle_hidden: boolean;
+  music_room_hidden: boolean;
+  name?: ViewUserName;
+  sports_hidden: boolean;
 }
 
-export type ViewTagSatellite = { [key: string]: any };
+export type ViewTagType = string | null;
+
+export type ViewTagSatelliteAnyOf = { [key: string]: any };
+
+export type ViewTagSatellite = ViewTagSatelliteAnyOf | null;
+
+export type ViewTagName = string | null;
 
 export interface ViewTag {
   alias: string;
   id: number;
-  name?: string;
+  name?: ViewTagName;
   satellite?: ViewTagSatellite;
-  type?: string;
+  type?: ViewTagType;
 }
+
+export type ViewEventGroupPath = string | null;
+
+export type ViewEventGroupName = string | null;
+
+export type ViewEventGroupDescription = string | null;
 
 /**
  * Represents a group instance from the database excluding sensitive information.
@@ -85,10 +138,10 @@ export interface ViewTag {
 export interface ViewEventGroup {
   alias: string;
   created_at: string;
-  description?: string;
+  description?: ViewEventGroupDescription;
   id: number;
-  name?: string;
-  path?: string;
+  name?: ViewEventGroupName;
+  path?: ViewEventGroupPath;
   tags?: ViewTag[];
   updated_at: string;
 }
@@ -111,14 +164,22 @@ export interface UserXFavoriteGroupView {
   user_id: number;
 }
 
+export type UpdateEventGroupPath = string | null;
+
+export type UpdateEventGroupName = string | null;
+
+export type UpdateEventGroupDescription = string | null;
+
+export type UpdateEventGroupAlias = string | null;
+
 /**
  * Represents a group instance to be updated.
  */
 export interface UpdateEventGroup {
-  alias?: string;
-  description?: string;
-  name?: string;
-  path?: string;
+  alias?: UpdateEventGroupAlias;
+  description?: UpdateEventGroupDescription;
+  name?: UpdateEventGroupName;
+  path?: UpdateEventGroupPath;
 }
 
 export interface ListTagsResponse {
@@ -128,33 +189,52 @@ export interface ListTagsResponse {
 /**
  * Represents a list of event groups.
  */
-export interface ListEventGroupsResponse {
+export interface ListEventGroupsResponseOutput {
   groups: ViewEventGroup[];
 }
+
+/**
+ * Represents a list of event groups.
+ */
+export interface ListEventGroupsResponseInput {
+  groups: ViewEventGroup[];
+}
+
+export type LinkedCalendarViewName = string | null;
+
+export type LinkedCalendarViewDescription = string | null;
+
+export type LinkedCalendarViewColor = string | null;
 
 /**
  * Represents a linked calendar instance from the database excluding sensitive information.
  */
 export interface LinkedCalendarView {
   alias: string;
-  color?: string;
-  description?: string;
+  color?: LinkedCalendarViewColor;
+  description?: LinkedCalendarViewDescription;
   id: number;
   is_active?: boolean;
-  name?: string;
+  name?: LinkedCalendarViewName;
   url: string;
   user_id: number;
 }
+
+export type LinkedCalendarCreateName = string | null;
+
+export type LinkedCalendarCreateDescription = string | null;
+
+export type LinkedCalendarCreateColor = string | null;
 
 /**
  * Represents a linked calendar instance to be created.
  */
 export interface LinkedCalendarCreate {
   alias: string;
-  color?: string;
-  description?: string;
+  color?: LinkedCalendarCreateColor;
+  description?: LinkedCalendarCreateDescription;
   is_active?: boolean;
-  name?: string;
+  name?: LinkedCalendarCreateName;
   url: string;
 }
 
@@ -162,14 +242,18 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
+export type CreateEventGroupPath = string | null;
+
+export type CreateEventGroupDescription = string | null;
+
 /**
  * Represents a group instance to be created.
  */
 export interface CreateEventGroup {
   alias: string;
-  description?: string;
+  description?: CreateEventGroupDescription;
   name: string;
-  path?: string;
+  path?: CreateEventGroupPath;
 }
 
 export interface BodyEventGroupsSetEventGroupIcs {
@@ -468,6 +552,90 @@ export const useUsersHideFavorite = <
 };
 
 /**
+ * Hide music room, sports or moodle from current user
+ * @summary Hide Music Room
+ */
+export const usersHideMusicRoom = (
+  target: "music-room" | "sports" | "moodle",
+  params?: UsersHideMusicRoomParams,
+  options?: SecondParameter<typeof axiosInstance>,
+) => {
+  return axiosInstance<ViewUser>(
+    { url: `/users/me/${target}/hide`, method: "POST", params },
+    options,
+  );
+};
+
+export const getUsersHideMusicRoomMutationOptions = <
+  TError = void | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof usersHideMusicRoom>>,
+    TError,
+    {
+      target: "music-room" | "sports" | "moodle";
+      params?: UsersHideMusicRoomParams;
+    },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof usersHideMusicRoom>>,
+  TError,
+  {
+    target: "music-room" | "sports" | "moodle";
+    params?: UsersHideMusicRoomParams;
+  },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof usersHideMusicRoom>>,
+    {
+      target: "music-room" | "sports" | "moodle";
+      params?: UsersHideMusicRoomParams;
+    }
+  > = (props) => {
+    const { target, params } = props ?? {};
+
+    return usersHideMusicRoom(target, params, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UsersHideMusicRoomMutationResult = NonNullable<
+  Awaited<ReturnType<typeof usersHideMusicRoom>>
+>;
+
+export type UsersHideMusicRoomMutationError = void | HTTPValidationError;
+
+/**
+ * @summary Hide Music Room
+ */
+export const useUsersHideMusicRoom = <
+  TError = void | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof usersHideMusicRoom>>,
+    TError,
+    {
+      target: "music-room" | "sports" | "moodle";
+      params?: UsersHideMusicRoomParams;
+    },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}) => {
+  const mutationOptions = getUsersHideMusicRoomMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+/**
  * Add linked calendar to current user
  * @summary Link Calendar
  */
@@ -544,6 +712,252 @@ export const useUsersLinkCalendar = <
 };
 
 /**
+ * Generate an access key for the user schedule
+ * @summary Generate User Schedule Key
+ */
+export const usersGenerateUserScheduleKey = (
+  params: UsersGenerateUserScheduleKeyParams,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<_GetScheduleAccessKeyResponse>(
+    { url: `/users/me/get-schedule-access-key`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getUsersGenerateUserScheduleKeyQueryKey = (
+  params: UsersGenerateUserScheduleKeyParams,
+) => {
+  return [
+    `/users/me/get-schedule-access-key`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getUsersGenerateUserScheduleKeyQueryOptions = <
+  TData = Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
+  TError = void | HTTPValidationError,
+>(
+  params: UsersGenerateUserScheduleKeyParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getUsersGenerateUserScheduleKeyQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>
+  > = ({ signal }) =>
+    usersGenerateUserScheduleKey(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type UsersGenerateUserScheduleKeyQueryResult = NonNullable<
+  Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>
+>;
+export type UsersGenerateUserScheduleKeyQueryError = void | HTTPValidationError;
+
+/**
+ * @summary Generate User Schedule Key
+ */
+export const useUsersGenerateUserScheduleKey = <
+  TData = Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
+  TError = void | HTTPValidationError,
+>(
+  params: UsersGenerateUserScheduleKeyParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getUsersGenerateUserScheduleKeyQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get all access keys for the user schedule
+ * @summary Get User Schedule Keys
+ */
+export const usersGetUserScheduleKeys = (
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<ViewUserScheduleKey[]>(
+    { url: `/users/me/schedule-access-keys`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getUsersGetUserScheduleKeysQueryKey = () => {
+  return [`/users/me/schedule-access-keys`] as const;
+};
+
+export const getUsersGetUserScheduleKeysQueryOptions = <
+  TData = Awaited<ReturnType<typeof usersGetUserScheduleKeys>>,
+  TError = void,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof usersGetUserScheduleKeys>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getUsersGetUserScheduleKeysQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof usersGetUserScheduleKeys>>
+  > = ({ signal }) => usersGetUserScheduleKeys(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof usersGetUserScheduleKeys>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type UsersGetUserScheduleKeysQueryResult = NonNullable<
+  Awaited<ReturnType<typeof usersGetUserScheduleKeys>>
+>;
+export type UsersGetUserScheduleKeysQueryError = void;
+
+/**
+ * @summary Get User Schedule Keys
+ */
+export const useUsersGetUserScheduleKeys = <
+  TData = Awaited<ReturnType<typeof usersGetUserScheduleKeys>>,
+  TError = void,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof usersGetUserScheduleKeys>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getUsersGetUserScheduleKeysQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Delete an access key for the user schedule
+ * @summary Delete User Schedule Key
+ */
+export const usersDeleteUserScheduleKey = (
+  params: UsersDeleteUserScheduleKeyParams,
+  options?: SecondParameter<typeof axiosInstance>,
+) => {
+  return axiosInstance<unknown>(
+    { url: `/users/me/schedule-access-key`, method: "DELETE", params },
+    options,
+  );
+};
+
+export const getUsersDeleteUserScheduleKeyMutationOptions = <
+  TError = void | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof usersDeleteUserScheduleKey>>,
+    TError,
+    { params: UsersDeleteUserScheduleKeyParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof usersDeleteUserScheduleKey>>,
+  TError,
+  { params: UsersDeleteUserScheduleKeyParams },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof usersDeleteUserScheduleKey>>,
+    { params: UsersDeleteUserScheduleKeyParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return usersDeleteUserScheduleKey(params, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UsersDeleteUserScheduleKeyMutationResult = NonNullable<
+  Awaited<ReturnType<typeof usersDeleteUserScheduleKey>>
+>;
+
+export type UsersDeleteUserScheduleKeyMutationError =
+  void | HTTPValidationError;
+
+/**
+ * @summary Delete User Schedule Key
+ */
+export const useUsersDeleteUserScheduleKey = <
+  TError = void | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof usersDeleteUserScheduleKey>>,
+    TError,
+    { params: UsersDeleteUserScheduleKeyParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}) => {
+  const mutationOptions = getUsersDeleteUserScheduleKeyMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+/**
  * Get a list of all event groups
  * @summary List Event Groups
  */
@@ -551,7 +965,7 @@ export const eventGroupsListEventGroups = (
   options?: SecondParameter<typeof axiosInstance>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<ListEventGroupsResponse>(
+  return axiosInstance<ListEventGroupsResponseInput>(
     { url: `/event-groups/`, method: "GET", signal },
     options,
   );
@@ -700,6 +1114,84 @@ export const useEventGroupsCreateEventGroup = <
 };
 
 /**
+ * @summary Update Event Group
+ */
+export const eventGroupsUpdateEventGroup = (
+  eventGroupId: number,
+  updateEventGroup: UpdateEventGroup,
+  options?: SecondParameter<typeof axiosInstance>,
+) => {
+  return axiosInstance<ViewEventGroup>(
+    {
+      url: `/event-groups/${eventGroupId}`,
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      data: updateEventGroup,
+    },
+    options,
+  );
+};
+
+export const getEventGroupsUpdateEventGroupMutationOptions = <
+  TError = void | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>,
+    TError,
+    { eventGroupId: number; data: UpdateEventGroup },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>,
+  TError,
+  { eventGroupId: number; data: UpdateEventGroup },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>,
+    { eventGroupId: number; data: UpdateEventGroup }
+  > = (props) => {
+    const { eventGroupId, data } = props ?? {};
+
+    return eventGroupsUpdateEventGroup(eventGroupId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type EventGroupsUpdateEventGroupMutationResult = NonNullable<
+  Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>
+>;
+export type EventGroupsUpdateEventGroupMutationBody = UpdateEventGroup;
+export type EventGroupsUpdateEventGroupMutationError =
+  void | HTTPValidationError;
+
+/**
+ * @summary Update Event Group
+ */
+export const useEventGroupsUpdateEventGroup = <
+  TError = void | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>,
+    TError,
+    { eventGroupId: number; data: UpdateEventGroup },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}) => {
+  const mutationOptions =
+    getEventGroupsUpdateEventGroupMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+/**
  * Get event group info by id
  * @summary Get Event Group
  */
@@ -792,84 +1284,6 @@ export const useEventGroupsGetEventGroup = <
   query.queryKey = queryOptions.queryKey;
 
   return query;
-};
-
-/**
- * @summary Update Event Group
- */
-export const eventGroupsUpdateEventGroup = (
-  eventGroupId: number,
-  updateEventGroup: UpdateEventGroup,
-  options?: SecondParameter<typeof axiosInstance>,
-) => {
-  return axiosInstance<ViewEventGroup>(
-    {
-      url: `/event-groups/${eventGroupId}`,
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      data: updateEventGroup,
-    },
-    options,
-  );
-};
-
-export const getEventGroupsUpdateEventGroupMutationOptions = <
-  TError = void | HTTPValidationError,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>,
-    TError,
-    { eventGroupId: number; data: UpdateEventGroup },
-    TContext
-  >;
-  request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>,
-  TError,
-  { eventGroupId: number; data: UpdateEventGroup },
-  TContext
-> => {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>,
-    { eventGroupId: number; data: UpdateEventGroup }
-  > = (props) => {
-    const { eventGroupId, data } = props ?? {};
-
-    return eventGroupsUpdateEventGroup(eventGroupId, data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type EventGroupsUpdateEventGroupMutationResult = NonNullable<
-  Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>
->;
-export type EventGroupsUpdateEventGroupMutationBody = UpdateEventGroup;
-export type EventGroupsUpdateEventGroupMutationError =
-  void | HTTPValidationError;
-
-/**
- * @summary Update Event Group
- */
-export const useEventGroupsUpdateEventGroup = <
-  TError = void | HTTPValidationError,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>,
-    TError,
-    { eventGroupId: number; data: UpdateEventGroup },
-    TContext
-  >;
-  request?: SecondParameter<typeof axiosInstance>;
-}) => {
-  const mutationOptions =
-    getEventGroupsUpdateEventGroupMutationOptions(options);
-
-  return useMutation(mutationOptions);
 };
 
 /**
@@ -1213,104 +1627,74 @@ export const useTagsListTags = <
 };
 
 /**
- * Get event group .ics file by id
- * @summary Get Event Group Ics By Alias
+ * Get schedule in ICS format for the current user
+ * @summary Get Current User Schedule
  */
-export const icsGetEventGroupIcsByAlias = (
-  eventGroupAlias: string,
-  params: IcsGetEventGroupIcsByAliasParams,
+export const icsGetCurrentUserSchedule = (
   options?: SecondParameter<typeof axiosInstance>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<Blob>(
-    {
-      url: `/${eventGroupAlias}.ics`,
-      method: "GET",
-      params,
-      responseType: "blob",
-      signal,
-    },
+  return axiosInstance<unknown | Blob>(
+    { url: `/users/me/all.ics`, method: "GET", signal },
     options,
   );
 };
 
-export const getIcsGetEventGroupIcsByAliasQueryKey = (
-  eventGroupAlias: string,
-  params: IcsGetEventGroupIcsByAliasParams,
-) => {
-  return [`/${eventGroupAlias}.ics`, ...(params ? [params] : [])] as const;
+export const getIcsGetCurrentUserScheduleQueryKey = () => {
+  return [`/users/me/all.ics`] as const;
 };
 
-export const getIcsGetEventGroupIcsByAliasQueryOptions = <
-  TData = Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
-  TError = void | HTTPValidationError,
->(
-  eventGroupAlias: string,
-  params: IcsGetEventGroupIcsByAliasParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof axiosInstance>;
-  },
-) => {
+export const getIcsGetCurrentUserScheduleQueryOptions = <
+  TData = Awaited<ReturnType<typeof icsGetCurrentUserSchedule>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof icsGetCurrentUserSchedule>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ??
-    getIcsGetEventGroupIcsByAliasQueryKey(eventGroupAlias, params);
+    queryOptions?.queryKey ?? getIcsGetCurrentUserScheduleQueryKey();
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>
-  > = ({ signal }) =>
-    icsGetEventGroupIcsByAlias(eventGroupAlias, params, requestOptions, signal);
+    Awaited<ReturnType<typeof icsGetCurrentUserSchedule>>
+  > = ({ signal }) => icsGetCurrentUserSchedule(requestOptions, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!eventGroupAlias,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof icsGetCurrentUserSchedule>>,
     TError,
     TData
   > & { queryKey: QueryKey };
 };
 
-export type IcsGetEventGroupIcsByAliasQueryResult = NonNullable<
-  Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>
+export type IcsGetCurrentUserScheduleQueryResult = NonNullable<
+  Awaited<ReturnType<typeof icsGetCurrentUserSchedule>>
 >;
-export type IcsGetEventGroupIcsByAliasQueryError = void | HTTPValidationError;
+export type IcsGetCurrentUserScheduleQueryError = unknown;
 
 /**
- * @summary Get Event Group Ics By Alias
+ * @summary Get Current User Schedule
  */
-export const useIcsGetEventGroupIcsByAlias = <
-  TData = Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
-  TError = void | HTTPValidationError,
->(
-  eventGroupAlias: string,
-  params: IcsGetEventGroupIcsByAliasParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof axiosInstance>;
-  },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getIcsGetEventGroupIcsByAliasQueryOptions(
-    eventGroupAlias,
-    params,
-    options,
-  );
+export const useIcsGetCurrentUserSchedule = <
+  TData = Awaited<ReturnType<typeof icsGetCurrentUserSchedule>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof icsGetCurrentUserSchedule>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getIcsGetCurrentUserScheduleQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -1322,22 +1706,26 @@ export const useIcsGetEventGroupIcsByAlias = <
 };
 
 /**
- * Get schedule in ICS format for the user
+ * Get schedule in ICS format for the user; requires access key for `/users/{user_id}/all.ics` resource
  * @summary Get User Schedule
  */
 export const icsGetUserSchedule = (
   userId: number,
+  params: IcsGetUserScheduleParams,
   options?: SecondParameter<typeof axiosInstance>,
   signal?: AbortSignal,
 ) => {
   return axiosInstance<unknown | Blob>(
-    { url: `/users/${userId}.ics`, method: "GET", signal },
+    { url: `/users/${userId}/all.ics`, method: "GET", params, signal },
     options,
   );
 };
 
-export const getIcsGetUserScheduleQueryKey = (userId: number) => {
-  return [`/users/${userId}.ics`] as const;
+export const getIcsGetUserScheduleQueryKey = (
+  userId: number,
+  params: IcsGetUserScheduleParams,
+) => {
+  return [`/users/${userId}/all.ics`, ...(params ? [params] : [])] as const;
 };
 
 export const getIcsGetUserScheduleQueryOptions = <
@@ -1345,6 +1733,7 @@ export const getIcsGetUserScheduleQueryOptions = <
   TError = void | HTTPValidationError,
 >(
   userId: number,
+  params: IcsGetUserScheduleParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1359,11 +1748,12 @@ export const getIcsGetUserScheduleQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getIcsGetUserScheduleQueryKey(userId);
+    queryOptions?.queryKey ?? getIcsGetUserScheduleQueryKey(userId, params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof icsGetUserSchedule>>
-  > = ({ signal }) => icsGetUserSchedule(userId, requestOptions, signal);
+  > = ({ signal }) =>
+    icsGetUserSchedule(userId, params, requestOptions, signal);
 
   return {
     queryKey,
@@ -1390,6 +1780,7 @@ export const useIcsGetUserSchedule = <
   TError = void | HTTPValidationError,
 >(
   userId: number,
+  params: IcsGetUserScheduleParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1401,7 +1792,92 @@ export const useIcsGetUserSchedule = <
     request?: SecondParameter<typeof axiosInstance>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getIcsGetUserScheduleQueryOptions(userId, options);
+  const queryOptions = getIcsGetUserScheduleQueryOptions(
+    userId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get schedule in ICS format for the current user
+ * @summary Get Music Room Current User Schedule
+ */
+export const icsGetMusicRoomCurrentUserSchedule = (
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<unknown | Blob>(
+    { url: `/users/me/music-room.ics`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getIcsGetMusicRoomCurrentUserScheduleQueryKey = () => {
+  return [`/users/me/music-room.ics`] as const;
+};
+
+export const getIcsGetMusicRoomCurrentUserScheduleQueryOptions = <
+  TData = Awaited<ReturnType<typeof icsGetMusicRoomCurrentUserSchedule>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof icsGetMusicRoomCurrentUserSchedule>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getIcsGetMusicRoomCurrentUserScheduleQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof icsGetMusicRoomCurrentUserSchedule>>
+  > = ({ signal }) =>
+    icsGetMusicRoomCurrentUserSchedule(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof icsGetMusicRoomCurrentUserSchedule>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type IcsGetMusicRoomCurrentUserScheduleQueryResult = NonNullable<
+  Awaited<ReturnType<typeof icsGetMusicRoomCurrentUserSchedule>>
+>;
+export type IcsGetMusicRoomCurrentUserScheduleQueryError = unknown;
+
+/**
+ * @summary Get Music Room Current User Schedule
+ */
+export const useIcsGetMusicRoomCurrentUserSchedule = <
+  TData = Awaited<ReturnType<typeof icsGetMusicRoomCurrentUserSchedule>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof icsGetMusicRoomCurrentUserSchedule>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions =
+    getIcsGetMusicRoomCurrentUserScheduleQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -1507,6 +1983,300 @@ export const useIcsGetUserLinkedSchedule = <
   const queryOptions = getIcsGetUserLinkedScheduleQueryOptions(
     userId,
     linkedAlias,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get schedule in ICS format for the user; requires access key for `/users/{user_id}/music-room.ics` resource
+ * @summary Get Music Room User Schedule
+ */
+export const icsGetMusicRoomUserSchedule = (
+  userId: number,
+  params: IcsGetMusicRoomUserScheduleParams,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<unknown | Blob>(
+    { url: `/users/${userId}/music-room.ics`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getIcsGetMusicRoomUserScheduleQueryKey = (
+  userId: number,
+  params: IcsGetMusicRoomUserScheduleParams,
+) => {
+  return [
+    `/users/${userId}/music-room.ics`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getIcsGetMusicRoomUserScheduleQueryOptions = <
+  TData = Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
+  TError = void | HTTPValidationError,
+>(
+  userId: number,
+  params: IcsGetMusicRoomUserScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getIcsGetMusicRoomUserScheduleQueryKey(userId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>
+  > = ({ signal }) =>
+    icsGetMusicRoomUserSchedule(userId, params, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!userId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type IcsGetMusicRoomUserScheduleQueryResult = NonNullable<
+  Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>
+>;
+export type IcsGetMusicRoomUserScheduleQueryError = void | HTTPValidationError;
+
+/**
+ * @summary Get Music Room User Schedule
+ */
+export const useIcsGetMusicRoomUserSchedule = <
+  TData = Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
+  TError = void | HTTPValidationError,
+>(
+  userId: number,
+  params: IcsGetMusicRoomUserScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getIcsGetMusicRoomUserScheduleQueryOptions(
+    userId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get schedule in ICS format for the music room
+ * @summary Get Music Room Schedule
+ */
+export const icsGetMusicRoomSchedule = (
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<Blob>(
+    { url: `/music-room.ics`, method: "GET", responseType: "blob", signal },
+    options,
+  );
+};
+
+export const getIcsGetMusicRoomScheduleQueryKey = () => {
+  return [`/music-room.ics`] as const;
+};
+
+export const getIcsGetMusicRoomScheduleQueryOptions = <
+  TData = Awaited<ReturnType<typeof icsGetMusicRoomSchedule>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof icsGetMusicRoomSchedule>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getIcsGetMusicRoomScheduleQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof icsGetMusicRoomSchedule>>
+  > = ({ signal }) => icsGetMusicRoomSchedule(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof icsGetMusicRoomSchedule>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type IcsGetMusicRoomScheduleQueryResult = NonNullable<
+  Awaited<ReturnType<typeof icsGetMusicRoomSchedule>>
+>;
+export type IcsGetMusicRoomScheduleQueryError = unknown;
+
+/**
+ * @summary Get Music Room Schedule
+ */
+export const useIcsGetMusicRoomSchedule = <
+  TData = Awaited<ReturnType<typeof icsGetMusicRoomSchedule>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof icsGetMusicRoomSchedule>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getIcsGetMusicRoomScheduleQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get event group .ics file by id
+ * @summary Get Event Group Ics By Alias
+ */
+export const icsGetEventGroupIcsByAlias = (
+  eventGroupAlias: string,
+  params: IcsGetEventGroupIcsByAliasParams,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<Blob>(
+    {
+      url: `/${eventGroupAlias}.ics`,
+      method: "GET",
+      params,
+      responseType: "blob",
+      signal,
+    },
+    options,
+  );
+};
+
+export const getIcsGetEventGroupIcsByAliasQueryKey = (
+  eventGroupAlias: string,
+  params: IcsGetEventGroupIcsByAliasParams,
+) => {
+  return [`/${eventGroupAlias}.ics`, ...(params ? [params] : [])] as const;
+};
+
+export const getIcsGetEventGroupIcsByAliasQueryOptions = <
+  TData = Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
+  TError = void | HTTPValidationError,
+>(
+  eventGroupAlias: string,
+  params: IcsGetEventGroupIcsByAliasParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getIcsGetEventGroupIcsByAliasQueryKey(eventGroupAlias, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>
+  > = ({ signal }) =>
+    icsGetEventGroupIcsByAlias(eventGroupAlias, params, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!eventGroupAlias,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type IcsGetEventGroupIcsByAliasQueryResult = NonNullable<
+  Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>
+>;
+export type IcsGetEventGroupIcsByAliasQueryError = void | HTTPValidationError;
+
+/**
+ * @summary Get Event Group Ics By Alias
+ */
+export const useIcsGetEventGroupIcsByAlias = <
+  TData = Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
+  TError = void | HTTPValidationError,
+>(
+  eventGroupAlias: string,
+  params: IcsGetEventGroupIcsByAliasParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = getIcsGetEventGroupIcsByAliasQueryOptions(
+    eventGroupAlias,
+    params,
     options,
   );
 
