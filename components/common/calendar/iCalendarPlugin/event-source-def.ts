@@ -42,17 +42,18 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
     if (!internalState || arg.isRefetch) {
       internalState = meta.internalState = {
         response: null,
-        iCalExpanderPromise: fetch(meta.url, { method: "GET" }).then(
-          (response) => {
-            return response.text().then((icsText) => {
-              internalState.response = response;
-              return new IcalExpander({
-                ics: icsText,
-                skipInvalidDates: true,
-              });
+        iCalExpanderPromise: fetch(meta.url, {
+          method: "GET",
+          credentials: "include",
+        }).then((response) => {
+          return response.text().then((icsText) => {
+            internalState.response = response;
+            return new IcalExpander({
+              ics: icsText,
+              skipInvalidDates: true,
             });
-          },
-        ),
+          });
+        }),
       };
     }
 
