@@ -49,7 +49,7 @@ export default function Page() {
           <button
             onClick={() => {
               const encodedURL =
-                "Imh0dHBzOi8vdC5tZS9qb2luY2hhdC9Eamh5WmtCTi1GbVpTdHhUQjQwcXdRIg==";
+                "aHR0cHM6Ly90Lm1lL2pvaW5jaGF0L0RqaHlaa0JOLUZtWlN0eFRCNDBxd1E=";
               const url = atob(encodedURL);
               window.open(url, "_blank");
             }}
