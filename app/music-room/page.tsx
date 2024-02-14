@@ -46,9 +46,14 @@ export default function Page() {
               </p>
             </div>
           </a>
-          <a
-            href="https://t.me/InnoMusicRoomBot"
-            className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
+          <button
+            onClick={() => {
+              const encodedURL =
+                "Imh0dHBzOi8vdC5tZS9qb2luY2hhdC9Eamh5WmtCTi1GbVpTdHhUQjQwcXdRIg==";
+              const url = atob(encodedURL);
+              window.open(url, "_blank");
+            }}
+            className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 text-left hover:bg-secondary-main"
           >
             <div className="w-12">
               <span className="icon-[ic--baseline-telegram] text-5xl text-[#9747FF]" />
@@ -62,7 +67,7 @@ export default function Page() {
                 ask questions.
               </p>
             </div>
-          </a>
+          </button>
         </div>
         <div className="flex w-full flex-row items-center justify-center rounded-2xl bg-primary-main p-4">
           <iframe
