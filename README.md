@@ -2,65 +2,75 @@
 
 > https://innohassle.ru
 
-Currently, it provides only Schedule service
-that lets Innopolis University students to find their group schedule and import into the calendar app.
+Сервисы экосистемы InNoHassle для студентов Университета Иннополис на одном сайте.
 
-Technology stack:
+1. Schedule - Расписания
+   - Просматривайте расписания всех академических групп, элективов, спортивных секций, клининга
+   - Экспортируйте обновляемые расписания в приложение календаря на своих девайсах
+   - Добавляйте нужные группы в избранное, чтобы увидеть их в личном кабинете
+   - Скрывайте и отображайте группы в личном кабинете
+   - Выбирайте формат отображения расписания - на день, на неделю или на месяц
+2. Music room - Музыкальная комната
+   - Просматривайте все брони музыкальной комнаты на отдельной странице
+   - Просматривайте собственные бронирования в личном кабинете
+3. Scholarship - Стипендия
+   - Посчитайте свою стипендию, исходя из ожидаемых оценок или GPA
+   - Рассчитайте, какие необходимы оценки для получения нужной стипендии
+   - Узнайте подробную информацию о видах стипендии в Университете
+4. Dashboard - Личный кабинет
+   - Войдите с помощью студенческого аккаунта
+   - Просматривайте на одной странице все релевантные учебные группы
+5. Офлайн доступ
+   - Зайдите на сайт один раз и имейте доступ к расписаниям даже с плохим интернетом
+6. Стилизация сайта
+   - Выбирайте между темной и светлой стороной Силы
 
-- Node.js
-- TypeScript
-- React, Next.js
-- Tailwind CSS
+## Технологии
 
-The website uses API from https://github.com/one-zero-eight/InNoHassle-Parsers.
-The schedule parser output should be available on `$NEXT_PUBLIC_API_URL/schedule`.
-You can serve parser output via Nginx or any serving program.
+- Node.js, TypeScript
+- React, Next.js (App router)
+- Стили: TailwindCSS
+- Запросы данных: Axios, TanStack Query
 
-## Deployment
+## Разработка
 
-Use Docker with Docker Compose plugin to run website on a server.
-It will build Next.js website and run Next.js server on port 3000.
+### Начало работы
 
-Firstly, configure environment variables.
-Just copy contents of `.env.example` to `.env.local`.
-Then you can configure `.env.local` for your deployment.
+- Установить Node.js 18+, npm
+- Установить зависимости: `npm install`
+- Скопировать файл переменных окружения: `cp .env.example .env.local`
+- При необходимости изменить переменные окружения в файле `.env.local`
+  - Не изменяйте ID трекеров, чтобы они не включались при разработке
+- Настроить автоформатирование через Prettier, а также ESLint в своей IDE
 
-```bash
-cp .env.example .env.local
-```
+При изменении типов в API запустите `npm run orval`, чтобы сгенерировать клиентские типы и функции.
 
-Install Docker with Docker Compose and run it.
+### Development сервер
 
-Note: API server must be running (check URL in `.env.local` file)
-as Next.js will fetch all resources at build time.
+- Запустить сервер разработки: `npm run dev`
+- Открыть в браузере: http://localhost:3000
+  - Страница будет обновляться при изменении кода.
 
-```bash
-docker compose build
-docker compose up -d
-```
+Чтобы использовать API прод сервера, нужно в браузере изменить у cookie `token` параметр SameSite (установить `None`).
+Тогда браузер сможет использовать верный токен для обращения с локального сайта в API.
 
-Now open http://localhost:3000 in the browser to view the website.
+### Production сервер
 
-You can configure Nginx to add SSL certificates and host multiple websites
-by proxying requests from your domain to `http://127.0.0.1:3000`.
+- Собрать приложение: `npm run build`
+- Запустить сервер: `npm run start`
+- Открыть в браузере: http://localhost:3000
 
-## Development
+### Развертывание на сервере
 
-Firstly, configure environment variables.
-Just copy contents of `.env.example` to `.env.local`.
-Then you can configure `.env.local`.
-Do not configure trackers IDs not to include them during development.
+Мы используем Docker с плагином Docker Compose для запуска вебсайта на серверах.
 
-```bash
-cp .env.example .env.local
-```
+- Скопировать файл переменных окружения: `cp .env.example .env.local`
+- Изменить переменные окружения в файле `.env.local`
+- Установить Docker с Docker Compose
+- Собрать образ Docker: `docker compose build`
+  - Note: API server must be running (check URL in `.env.local` file)
+    as Next.js will fetch all resources at build time.
+- Запустить контейнер: `docker compose up -d`
+- Открыть в браузере: http://localhost:3000
 
-Use npm to install dependencies and run development server.
-
-```bash
-npm install
-npm run dev
-```
-
-Now open http://localhost:3000 in the browser to view the website.
-The page will be reloaded when you make changes in files.
+Вы можете настроить Nginx reverse proxy, чтобы добавить SSL сертификаты для https.
