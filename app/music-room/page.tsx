@@ -6,12 +6,12 @@ import React from "react";
 
 export default function Page() {
   return (
-    <main className="flex flex-col p-4 lg:p-12">
+    <div className="@container/content flex flex-col p-4 @lg/main:p-12">
       <NavbarTemplate
         title="Music room"
         description="Book the Music room in Sports center freely."
       />
-      <div className="my-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="my-4 grid grid-cols-1 gap-4 @lg/content:grid-cols-2">
         <div className="flex flex-col gap-4">
           <a
             href="https://t.me/InnoMusicRoomBot"
@@ -90,7 +90,7 @@ export default function Page() {
         </div>
       </div>
       <h2 className="my-4 text-3xl font-medium">Booking calendar</h2>
-      <div className="lg:-mx-8">
+      <div className="@lg/content:-mx-8">
         <Calendar
           urls={[
             `${EVENTS_API_URL}/music-room.ics`,
@@ -103,6 +103,6 @@ export default function Page() {
           viewId="music-room"
         />
       </div>
-    </main>
+    </div>
   );
 }
