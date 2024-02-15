@@ -67,7 +67,7 @@ export default function RootLayout({
           <>
             <div className="flex flex-row">
               <Sidebar>
-                <main className="w-full">{children}</main>
+                <main className="@container/main w-full">{children}</main>
               </Sidebar>
             </div>
             {modal}
