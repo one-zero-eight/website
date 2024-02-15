@@ -24,12 +24,12 @@ export default function Page({ params: { alias } }: Props) {
     <>
       <div
         style={{ backgroundImage: "url(/background-pattern.svg)" }}
-        className="h-64 bg-primary-main bg-repeat p-4 lg:p-12"
+        className="h-64 bg-primary-main bg-repeat p-4 @lg/main:p-12"
       >
         <NavbarTemplate title="" description="" />
       </div>
       {group && (
-        <div className="flex flex-col p-4 lg:p-12">
+        <div className="flex flex-col p-4 @lg/main:p-12">
           <div className="mb-4 flex items-start justify-between gap-4">
             <div className="min-h-full flex-grow">
               <h1 className="text-3xl font-semibold">{group.name}</h1>
@@ -55,7 +55,7 @@ export default function Page({ params: { alias } }: Props) {
             <h2 className="flex grow text-3xl font-medium">Calendar</h2>
             <ExportButton alias={group.alias} />
           </div>
-          <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8">
+          <div className="-mx-4 -mb-4 @lg/main:-mx-8 @lg/main:-mb-8">
             <Calendar
               urls={[getICSLink(group.alias, user?.id)]}
               initialView={
