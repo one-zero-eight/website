@@ -5,7 +5,7 @@ import { NavbarTemplate } from "@/components/layout/Navbar";
 
 export default function Page() {
   return (
-    <main className="flex flex-col p-4 @lg/main:p-12">
+    <div className="flex flex-col p-4 @container/content @lg/main:p-12">
       <NavbarTemplate
         title="InNoHassle ecosystem"
         description={
@@ -32,11 +32,11 @@ export default function Page() {
       <CategoryContainer />
       <h3 className="my-4 text-center text-3xl font-medium">How it works?</h3>
       <ClarificationContainer />
-      <hr className="my-4 w-full border-border @md/main:w-1/2" />
+      <hr className="my-4 w-full border-border @md/content:w-1/2" />
       <p className="text-lg text-text-secondary/75">
         Our projects are open source!{" "}
         <a href="https://github.com/one-zero-eight">github/one-zero-eight</a>
       </p>
-    </main>
+    </div>
   );
 }
