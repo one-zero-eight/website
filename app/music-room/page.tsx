@@ -6,12 +6,12 @@ import React from "react";
 
 export default function Page() {
   return (
-    <div className="@container/content flex flex-col p-4 @lg/main:p-12">
+    <div className="@container/content flex flex-col p-4 @2xl/main:p-12">
       <NavbarTemplate
         title="Music room"
         description="Book the Music room in Sports center freely."
       />
-      <div className="my-4 grid grid-cols-1 gap-4 @lg/content:grid-cols-2">
+      <div className="my-4 grid grid-cols-1 gap-4 @xl/content:grid-cols-2">
         <div className="flex flex-col gap-4">
           <a
             href="https://t.me/InnoMusicRoomBot"
@@ -90,7 +90,8 @@ export default function Page() {
         </div>
       </div>
       <h2 className="my-4 text-3xl font-medium">Booking calendar</h2>
-      <div className="@lg/content:-mx-8">
+        { /* TODO: Determine what to do with the margin of calendar */ }
+      <div className="lg:-mx-8">
         <Calendar
           urls={[
             `${EVENTS_API_URL}/music-room.ics`,
