@@ -24,16 +24,16 @@ export default function Page({ params: { alias } }: Props) {
     <>
       <div
         style={{ backgroundImage: "url(/background-pattern.svg)" }}
-        className="@container/navbar h-64 bg-primary-main bg-repeat p-4 @lg/main:p-12"
+        className="@container/navbar h-64 bg-primary-main bg-repeat p-4 @2xl/main:p-12"
       >
         <NavbarTemplate title="" description="" />
       </div>
       {group && (
-        <div className="@container/content flex flex-col p-4 @lg/main:p-12">
+        <div className="@container/content flex flex-col p-4 @2xl/main:p-12">
           <div className="mb-4 flex items-start justify-between gap-4">
-            <div className="min-h-full flex-grow">
+            <div className="flex flex-col gap-2 min-h-full flex-grow">
               <h1 className="text-3xl font-semibold">{group.name}</h1>
-              <p className="mt-2 whitespace-pre-wrap text-base text-text-secondary/75">
+              <p className="whitespace-pre-wrap text-base text-text-secondary/75">
                 {group.description ||
                   "Hello world, this is a long description about my life and this elective."}
               </p>
@@ -55,7 +55,7 @@ export default function Page({ params: { alias } }: Props) {
             <h2 className="flex grow text-3xl font-medium">Calendar</h2>
             <ExportButton alias={group.alias} />
           </div>
-          <div className="-mx-4 -mb-4 @lg/content:-mx-8 @lg/content:-mb-8">
+          <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8"> {/* TODO: Calendar margin is not good? */}
             <Calendar
               urls={[getICSLink(group.alias, user?.id)]}
               initialView={
