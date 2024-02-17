@@ -53,7 +53,7 @@ export default function Page({ params: { alias } }: Props) {
       {isMounted && (
         <FloatingPortal>
           <FloatingOverlay
-            className="z-10 grid place-items-center bg-black/75"
+            className="@container/export z-10 grid place-items-center bg-black/75"
             lockScroll
           >
             <FloatingFocusManager
@@ -67,13 +67,13 @@ export default function Page({ params: { alias } }: Props) {
                 className="flex p-4"
               >
                 <div className="h-fit max-w-2xl overflow-hidden rounded-2xl bg-primary-main">
-                  <div className="flex flex-col p-4 lg:p-8">
-                    <div className="flex w-full flex-row">
+                  <div className="flex flex-col p-4 @lg/export:p-8">
+                    <div className="flex w-full flex-row mb-2">
                       <div className="grow items-center text-3xl font-semibold">
                         Export to your calendar
                       </div>
                       <button
-                        className="-mr-4 -mt-4 rounded-2xl p-4 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75 lg:-mr-8 lg:-mt-8"
+                        className="-mt-2 -mr-2 w-52 h-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75 @lg/export:-mt-6 @lg/export:-mr-6"
                         onClick={() => router.back()}
                       >
                         <span className="icon-[material-symbols--close] text-4xl" />
@@ -108,6 +108,7 @@ export default function Page({ params: { alias } }: Props) {
                       </li>
                       <li>Paste the link and click Add.</li>
                     </ul>
+                    { /* TODO: Determine what to do with calendar margin */ }
                     <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8">
                       <Calendar
                         urls={calendarURL ? [calendarURL] : []}
