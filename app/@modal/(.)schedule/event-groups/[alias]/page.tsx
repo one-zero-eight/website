@@ -49,7 +49,7 @@ export default function Page({ params: { alias } }: Props) {
       {isMounted && (
         <FloatingPortal>
           <FloatingOverlay
-            className="z-10 grid place-items-center bg-black/75"
+            className="@container/event z-10 grid place-items-center bg-black/75"
             lockScroll
           >
             <FloatingFocusManager context={context}>
@@ -59,26 +59,29 @@ export default function Page({ params: { alias } }: Props) {
                 {...getFloatingProps()}
                 className="flex p-4"
               >
-                <div className="h-fit max-w-3xl overflow-hidden rounded-2xl bg-primary-main lg:w-[768px]">
+                { /* TODO: Replace lg with appropriate breakpoint from queries */ }
+                <div className="h-fit max-w-3xl overflow-hidden rounded-2xl bg-primary-main @lg/event:w-[768px]">
                   <div
                     style={{ backgroundImage: "url(/background-pattern.svg)" }}
                     className="flex h-64 w-full items-start justify-end bg-secondary-main bg-repeat"
                   >
-                    <button
-                      className="rounded-2xl p-4 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
-                      onClick={() => window.location.reload()}
-                    >
-                      <span className="icon-[material-symbols--open-in-full] text-4xl" />
-                    </button>
-                    <button
-                      className="rounded-2xl p-4 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
-                      onClick={() => router.back()}
-                    >
+                    <div className="flex flex-row gap-4 mr-2">
+                      <button
+                        className="mt-2 w-52 h-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
+                        onClick={() => window.location.reload()}
+                      >
+                        <span className="icon-[material-symbols--open-in-full] text-4xl" />
+                      </button>
+                      <button
+                        className="mt-2 w-52 h-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
+                        onClick={() => router.back()}
+                      >
                       <span className="icon-[material-symbols--close] text-4xl" />
                     </button>
+                    </div>
                   </div>
                   {group && (
-                    <div className="flex flex-col p-4 lg:p-8">
+                    <div className="flex flex-col p-4 @lg/event:p-8">
                       <div className="mb-4 flex items-start justify-between gap-4">
                         <div className="min-h-full flex-grow">
                           <h1 className="text-3xl font-semibold">
@@ -108,6 +111,7 @@ export default function Page({ params: { alias } }: Props) {
                         </h2>
                         <ExportButton alias={group.alias} />
                       </div>
+                      { /* TODO: Determine what to do with calendar margin */ }
                       <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8">
                         <Calendar
                           urls={[getICSLink(group.alias, user?.id)]}
