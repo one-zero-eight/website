@@ -29,9 +29,11 @@ function Calendar({
   initialView?: string;
   viewId?: string;
 }) {
-  const [popoverOpened, setPopoverOpened] = useState(false);
-  const [popoverEvent, setPopoverEvent] = useState<EventApi>();
-  const [eventElement, setEventElement] = useState<HTMLElement>();
+  const [popoverInfo, setPopoverInfo] = useState({
+    opened: false,
+    event: undefined as EventApi | undefined,
+    eventElement: undefined as HTMLElement | undefined,
+  });
 
   const [storedCalendarView, setStoredCalendarView] = useLocalStorage(
     `calendar-view-${viewId}`,
@@ -151,14 +153,13 @@ function Calendar({
         eventClick={(info) => {
           info.jsEvent.preventDefault();
           // We should check prev value via argument because 'eventElement' may be outdated in current closure
-          setEventElement((prevElement) => {
-            setPopoverOpened((prevOpened) => {
-              if (!prevOpened) return true;
-              return prevElement !== info.el;
-            });
-            return info.el;
+          setPopoverInfo((prev) => {
+            return {
+              opened: !prev.opened || prev.eventElement !== info.el,
+              event: info.event,
+              eventElement: info.el,
+            };
           });
-          setPopoverEvent(info.event);
         }}
         slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
@@ -174,12 +175,14 @@ function Calendar({
   return (
     <div {...props}>
       {calendar}
-      {popoverEvent && eventElement && (
+      {popoverInfo.event && popoverInfo.eventElement && (
         <CalendarEventPopover
-          event={popoverEvent}
-          isOpen={popoverOpened}
-          setIsOpen={setPopoverOpened}
-          eventElement={eventElement}
+          event={popoverInfo.event}
+          isOpen={popoverInfo.opened}
+          setIsOpen={() =>
+            setPopoverInfo((prev) => ({ ...prev, opened: !prev.opened }))
+          }
+          eventElement={popoverInfo.eventElement}
         />
       )}
     </div>
