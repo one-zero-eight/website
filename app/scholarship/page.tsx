@@ -8,7 +8,7 @@ import ScholarshipCalculator from "@/components/scholarship/ScholarshipCalculato
 
 export default function Page() {
   return (
-    <main className="flex flex-col p-4 lg:p-12">
+    <div className="@container/content flex flex-col p-4 @2xl/main:p-12">
       <NavbarTemplate
         title="Scholarship calculator"
         description="Calculate your scholarship easily. Just type your marks, GPA or expected scholarship."
@@ -127,6 +127,6 @@ export default function Page() {
           website.
         </p>
       </div>
-    </main>
+    </div>
   );
 }
