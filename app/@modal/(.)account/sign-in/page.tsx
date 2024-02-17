@@ -39,7 +39,7 @@ export default function Page() {
       {isMounted && (
         <FloatingPortal>
           <FloatingOverlay
-            className="z-10 grid place-items-center bg-black/75"
+            className="@container/sign-in z-10 grid place-items-center bg-black/75"
             lockScroll
           >
             <FloatingFocusManager context={context} initialFocus={signInRef}>
@@ -50,13 +50,13 @@ export default function Page() {
                 className="flex p-4"
               >
                 <div className="h-fit max-w-2xl overflow-hidden rounded-2xl bg-primary-main">
-                  <div className="flex flex-col p-4 lg:p-8">
-                    <div className="flex w-full flex-row">
+                  <div className="flex flex-col p-4 @lg/sign-in:p-8">
+                    <div className="flex w-full flex-row mb-2">
                       <div className="grow items-center text-3xl font-semibold">
                         {searchParams.get("header") || "Sign in to get access"}
                       </div>
                       <button
-                        className="-mr-4 -mt-4 rounded-2xl p-4 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75 lg:-mr-8 lg:-mt-8"
+                        className="-mt-2 -mr-2 w-52 h-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75 @lg/sign-in:-mt-6 @lg/sign-in:-mr-6"
                         onClick={() => router.back()}
                       >
                         <span className="icon-[material-symbols--close] text-4xl" />
