@@ -13,6 +13,7 @@ interface ICalFeedMeta {
   url: string;
   format: "ics"; // for EventSourceApi
   internalState?: InternalState; // HACK. TODO: use classes in future
+  color: string; // Default color for events from this feed
 }
 
 interface InternalState {
@@ -26,6 +27,7 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
       return {
         url: refined.url,
         format: "ics",
+        color: refined.color,
       };
     }
     return null;
@@ -118,7 +120,7 @@ function buildNonDateProps(
     id: iCalEvent.uid,
     title: iCalEvent.summary,
     url: extractEventUrl(iCalEvent),
-    color: iCalEvent.color,
+    color: iCalEvent.color || meta.color,
     extendedProps: {
       location: iCalEvent.location,
       organizer: iCalEvent.organizer,

@@ -92,7 +92,13 @@ export default function Page() {
       <h2 className="my-4 text-3xl font-medium">Booking calendar</h2>
       <div className="lg:-mx-8">
         <Calendar
-          urls={[`${EVENTS_API_URL}/music-room.ics`]}
+          urls={[
+            `${EVENTS_API_URL}/music-room.ics`,
+            {
+              url: `${EVENTS_API_URL}/users/me/music-room.ics`,
+              color: "seagreen",
+            },
+          ]}
           initialView="timeGridWeek"
           viewId="music-room"
         />
