@@ -57,8 +57,8 @@ export default function ScheduleList({ category }: ScheduleListProps) {
 
   return (
     <>
-      <div className="mt-4 flex flex-row flex-wrap justify-center gap-4 md:justify-between">
-        <div className="flex flex-row flex-wrap justify-center gap-4 md:justify-normal">
+      <div className="mt-4 flex flex-row flex-wrap justify-center gap-4 @2xl/content:justify-between">
+        <div className="flex flex-row flex-wrap justify-center gap-4 @2xl/content:justify-normal">
           <CategoriesDropdown category={category} />
           {categoryInfo?.filtersTagTypes.map((v) => (
             <FilterDropdown
@@ -94,7 +94,7 @@ export default function ScheduleList({ category }: ScheduleListProps) {
               </div>
             </div>
 
-            <div className="mb-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="mb-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
               {groups[tagName].map((group) => (
                 <GroupCard key={group.path} group={group} />
               ))}
