@@ -59,7 +59,6 @@ export default function Page({ params: { alias } }: Props) {
                 {...getFloatingProps()}
                 className="flex p-4"
               >
-                { /* TODO: Replace lg with appropriate breakpoint from queries */ }
                 <div className="h-fit max-w-3xl overflow-hidden rounded-2xl bg-primary-main @lg/event:w-[768px]">
                   <div
                     style={{ backgroundImage: "url(/background-pattern.svg)" }}
