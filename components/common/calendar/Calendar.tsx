@@ -226,7 +226,7 @@ function renderEventDayGridMonth({
         {event.title || <>&nbsp;</>}
       </div>
       {timeText && (
-        <div className="ml-1 hidden w-fit text-right text-xs text-inactive lg:block">
+        <div className="ml-1 hidden w-fit text-right text-xs text-inactive @5xl/main:block">
           {timeText}
         </div>
       )}
