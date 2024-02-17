@@ -3,7 +3,7 @@ import Arrow from "@/components/icons/Arrow";
 
 export default function ClarificationContainer() {
   return (
-    <div className="my-4 grid w-full grid-cols-1 place-items-center gap-y-10 lg:grid-cols-3 2xl:grid-cols-7">
+    <div className="@container/clarify my-4 grid w-full grid-cols-1 place-items-center gap-y-10 @2xl/content:grid-cols-3 @5xl/content:grid-cols-7">
       <ClarificationCard
         icon={
           <>
@@ -21,7 +21,7 @@ export default function ClarificationContainer() {
         title="Processing"
         shortDescription={`The scripts generate .ics files for calendar apps`}
       />
-      <Arrow className="lg:invisible lg:hidden 2xl:visible 2xl:flex" />
+      <Arrow className="@2xl/clarify:invisible @2xl/clarify:hidden @5xl/clarify:visible @5xl/clarify:flex" />
       <ClarificationCard
         icon={
           <span className="icon-[material-symbols--calendar-add-on-outline] text-5xl" />
