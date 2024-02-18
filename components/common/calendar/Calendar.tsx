@@ -65,8 +65,9 @@ function Calendar({
           // Accumulate 'extendedProps.calendarURLs' to use it later.
           const unique: Record<string, EventApi> = {};
           for (const event of events) {
+            // Using 'id' instead of 'title' is a fix for Music romm
             const uniqueId =
-              event.id || event.title + event.startStr + event.endStr;
+              (event.id || event.title) + event.startStr + event.endStr;
             if (!(uniqueId in unique)) {
               unique[uniqueId] = event;
             } else {
