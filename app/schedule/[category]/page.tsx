@@ -38,7 +38,7 @@ export default async function Page({ params: { category } }: Props) {
   const categoryInfo = getCategoryInfoBySlug(category);
 
   return (
-    <div className="@container/content flex flex-col p-4 @lg/main:p-12">
+    <div className="flex flex-col p-4 @container/content @lg/main:p-12">
       <NavbarTemplate
         title={`Schedule${
           categoryInfo?.title ? " — " + categoryInfo.title : ""

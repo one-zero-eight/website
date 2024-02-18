@@ -71,6 +71,6 @@ module.exports = {
   plugins: [
     // Iconify plugin
     addDynamicIconSelectors(),
-    require('@tailwindcss/container-queries'),
+    require("@tailwindcss/container-queries"),
   ],
 };
