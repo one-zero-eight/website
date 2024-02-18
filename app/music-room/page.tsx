@@ -90,8 +90,7 @@ export default function Page() {
         </div>
       </div>
       <h2 className="my-4 text-3xl font-medium">Booking calendar</h2>
-      {/* TODO: Determine what to do with the margin of calendar */}
-      <div className="lg:-mx-8">
+      <div className="@lg/content:-mx-8">
         <Calendar
           urls={[
             `${EVENTS_API_URL}/music-room.ics`,

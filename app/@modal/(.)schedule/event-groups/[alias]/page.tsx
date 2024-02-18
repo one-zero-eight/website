@@ -110,8 +110,7 @@ export default function Page({ params: { alias } }: Props) {
                         </h2>
                         <ExportButton alias={group.alias} />
                       </div>
-                      {/* TODO: Determine what to do with calendar margin */}
-                      <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8">
+                      <div className="-mx-4 -mb-4 @lg/event:-mx-8 @lg/event:-mb-8">
                         <Calendar
                           urls={[getICSLink(group.alias, user?.id)]}
                           viewId="popup"
