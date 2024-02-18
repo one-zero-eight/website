@@ -6,7 +6,7 @@ import React from "react";
 
 export default function Page() {
   return (
-    <div className="@container/content flex flex-col p-4 @2xl/main:p-12">
+    <div className="flex flex-col p-4 @container/content @2xl/main:p-12">
       <NavbarTemplate
         title="Music room"
         description="Book the Music room in Sports center freely."
@@ -90,7 +90,7 @@ export default function Page() {
         </div>
       </div>
       <h2 className="my-4 text-3xl font-medium">Booking calendar</h2>
-        { /* TODO: Determine what to do with the margin of calendar */ }
+      {/* TODO: Determine what to do with the margin of calendar */}
       <div className="lg:-mx-8">
         <Calendar
           urls={[

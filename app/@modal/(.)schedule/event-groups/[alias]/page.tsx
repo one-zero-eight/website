@@ -49,7 +49,7 @@ export default function Page({ params: { alias } }: Props) {
       {isMounted && (
         <FloatingPortal>
           <FloatingOverlay
-            className="@container/event z-10 grid place-items-center bg-black/75"
+            className="z-10 grid place-items-center bg-black/75 @container/event"
             lockScroll
           >
             <FloatingFocusManager context={context}>
@@ -64,19 +64,19 @@ export default function Page({ params: { alias } }: Props) {
                     style={{ backgroundImage: "url(/background-pattern.svg)" }}
                     className="flex h-64 w-full items-start justify-end bg-secondary-main bg-repeat"
                   >
-                    <div className="flex flex-row gap-4 mr-2">
+                    <div className="mr-2 flex flex-row gap-4">
                       <button
-                        className="mt-2 w-52 h-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
+                        className="mt-2 h-52 w-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
                         onClick={() => window.location.reload()}
                       >
                         <span className="icon-[material-symbols--open-in-full] text-4xl" />
                       </button>
                       <button
-                        className="mt-2 w-52 h-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
+                        className="mt-2 h-52 w-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
                         onClick={() => router.back()}
                       >
-                      <span className="icon-[material-symbols--close] text-4xl" />
-                    </button>
+                        <span className="icon-[material-symbols--close] text-4xl" />
+                      </button>
                     </div>
                   </div>
                   {group && (
@@ -110,7 +110,7 @@ export default function Page({ params: { alias } }: Props) {
                         </h2>
                         <ExportButton alias={group.alias} />
                       </div>
-                      { /* TODO: Determine what to do with calendar margin */ }
+                      {/* TODO: Determine what to do with calendar margin */}
                       <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8">
                         <Calendar
                           urls={[getICSLink(group.alias, user?.id)]}

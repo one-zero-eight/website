@@ -1,7 +1,6 @@
 "use client";
 import Calendar from "@/components/common/calendar/Calendar";
 import SignInButton from "@/components/common/SignInButton";
-import ExportButton from "@/components/schedule/ExportButton";
 import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton";
 import { PersonalCard } from "@/components/schedule/group-card/PersonalCard";
@@ -42,7 +41,7 @@ export default function Page() {
 
   return (
     <>
-      <div className="@container/account my-4 flex max-w-full flex-row gap-4">
+      <div className="my-4 flex max-w-full flex-row gap-4 @container/account">
         <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-border text-icon-main/50 @xl/account:h-24 @xl/account:w-24">
           <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-5xl @xl/account:text-6xl" />
         </div>
@@ -53,8 +52,8 @@ export default function Page() {
           </p>
         </div>
       </div>
-      <div className="@container/sections flex flex-col justify-between gap-4 @6xl/content:flex-row @6xl/content:gap-8">
-        <div className="@container/schedule flex w-full flex-col @6xl/content:w-1/2">
+      <div className="flex flex-col justify-between gap-4 @container/sections @6xl/content:flex-row @6xl/content:gap-8">
+        <div className="flex w-full flex-col @container/schedule @6xl/content:w-1/2">
           <h2 className="my-4 text-3xl font-medium">Schedule</h2>
           {favorites.filter((v) => v.predefined === true).length === 0 ? (
             <p className="mb-4 text-lg text-text-secondary/75">Nothing here.</p>
@@ -88,7 +87,7 @@ export default function Page() {
             </div>
           )}
         </div>
-        <div className="@container/favorites flex w-full flex-col @6xl/content:w-1/2">
+        <div className="flex w-full flex-col @container/favorites @6xl/content:w-1/2">
           <h2 className="my-4 text-3xl font-medium">Favorites</h2>
           {favorites.filter((v) => v.predefined === false).length === 0 ? (
             <p className="mb-4 text-lg text-text-secondary/75">
@@ -114,7 +113,9 @@ export default function Page() {
         </div>
       </div>
       <h2 className="my-4 text-3xl font-medium">Your calendar</h2>
-      <div className="lg:-mx-8"> {/* TODO: -mx-8 makes calendars margin not equal on PC. is it good or not? */}
+      <div className="">
+        {" "}
+        {/* TODO: -mx-8 makes calendars margin not equal on PC. is it good or not? */}
         {!user ? (
           <>Loading...</>
         ) : (
