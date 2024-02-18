@@ -55,9 +55,7 @@ export default function Page({ params: { alias } }: Props) {
             <h2 className="flex grow text-3xl font-medium">Calendar</h2>
             <ExportButton alias={group.alias} />
           </div>
-          <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8">
-            {" "}
-            {/* TODO: Calendar margin is not good? */}
+          <div className="-mx-4 -mb-4 @lg/content:-mx-8 @lg/content:-mb-8">
             <Calendar
               urls={[getICSLink(group.alias, user?.id)]}
               initialView={

@@ -108,8 +108,7 @@ export default function Page({ params: { alias } }: Props) {
                       </li>
                       <li>Paste the link and click Add.</li>
                     </ul>
-                    {/* TODO: Determine what to do with calendar margin */}
-                    <div className="-mx-4 -mb-4 lg:-mx-8 lg:-mb-8">
+                    <div className="-mx-4 -mb-4 @lg/export:-mx-8 @lg/export:-mb-8">
                       <Calendar
                         urls={calendarURL ? [calendarURL] : []}
                         viewId="popup"
