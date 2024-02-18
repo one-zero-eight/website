@@ -113,7 +113,7 @@ export default function Page() {
         </div>
       </div>
       <h2 className="my-4 text-3xl font-medium">Your calendar</h2>
-      <div className="-mx-4 -mb-4 @lg/content:-mx-8 @lg/content:-mb-8">
+      <div className="@lg/content:-mx-8 @lg/content:-mb-8">
         {!user ? (
           <>Loading...</>
         ) : (
