@@ -1,6 +1,7 @@
-import Providers from "@/app/providers";
+import CustomQueryClientProvider from "@/app/_query_provider";
 import ThemedHtml from "@/app/theme";
 import Sidebar from "@/components/layout/Sidebar";
+import ComposeChildren from "@/components/utils/ComposeChildren";
 import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
 import UserInfoTracker from "@/lib/tracking/UserInfoTracker";
 import YandexMetrika from "@/lib/tracking/YandexMetrika";
@@ -40,31 +41,38 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
   modal,
-}: {
-  children: React.ReactNode;
-  modal: React.ReactNode;
-}) {
+}: React.PropsWithChildren<{ modal: React.ReactNode }>) {
   return (
     <ThemedHtml
       lang="en"
       className={clsx(rubik.variable, fuzzyBubbles.variable)}
     >
+      <head>
+        {/* Trackers */}
+        <YandexMetrika />
+        <GoogleAnalytics />
+      </head>
+
       <body className="bg-base font-primary text-lg text-text-main">
-        <Providers>
-          <noscript className="flex w-full justify-center bg-red-700 p-8">
-            You need to enable JavaScript to run this app.
-          </noscript>
-          <YandexMetrika />
-          <GoogleAnalytics />
+        <noscript className="flex w-full justify-center bg-red-700 p-8">
+          You need to enable JavaScript to run this app.
+        </noscript>
+
+        <ComposeChildren>
+          {/* Providers */}
+          <CustomQueryClientProvider />
           <UserInfoTracker />
 
-          <div className="flex flex-row">
-            <Sidebar>
-              <main className="w-full">{children}</main>
-            </Sidebar>
-          </div>
-          {modal}
-        </Providers>
+          {/* Content */}
+          <>
+            <div className="flex flex-row">
+              <Sidebar>
+                <main className="w-full">{children}</main>
+              </Sidebar>
+            </div>
+            {modal}
+          </>
+        </ComposeChildren>
       </body>
     </ThemedHtml>
   );

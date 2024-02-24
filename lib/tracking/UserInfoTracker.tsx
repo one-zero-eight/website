@@ -3,7 +3,7 @@ import { useUsersGetMe } from "@/lib/events";
 import { ymUserParams } from "@/lib/tracking/YandexMetrika";
 import { useEffect } from "react";
 
-export default function UserInfoTracker() {
+export default function UserInfoTracker({ children }: React.PropsWithChildren) {
   const { data } = useUsersGetMe();
 
   // Send user info to Yandex Metrika
@@ -17,5 +17,5 @@ export default function UserInfoTracker() {
     }
   }, [data]);
 
-  return <></>;
+  return <>{children}</>;
 }
