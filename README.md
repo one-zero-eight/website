@@ -22,16 +22,16 @@ The website uses the API of services [InNoHassle-Events](https://github.com/one-
 
 ### Services
 
-1. 🗓️ Schedule
+- 🗓️ Schedule
    - 🔍 Check all academic groups, electives, sports sections, cleaning schedules
    - 📲 Export schedules to your favorite calendar app on your devices
    - 🌟 Add groups to favorites to see them in your personal account
    - 🙈 Hide and show groups in your personal account
    - 🔄 Choose the format of the schedule - for a day, for a week, or for a month
-2. 🎵 Music room
+- 🎵 Music room
    - 📅 See all bookings of the music room on a separate page
    - 🧐 View your own bookings in your personal account
-3. 💰 Scholarship
+- 💰 Scholarship
    - 📊 Calculate your scholarship based on expected grades or GPA
    - 📈 Calculate what grades are needed to get the desired scholarship
    - ℹ️ Get detailed information about the types of scholarships at the University
