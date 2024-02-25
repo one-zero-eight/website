@@ -1,4 +1,4 @@
-# Website | InNoHassle ecosystem 
+# Website | InNoHassle ecosystem
 
 > https://innohassle.ru
 
@@ -55,42 +55,41 @@ The website uses the API of services [InNoHassle-Events](https://github.com/one-
 
 ### Getting started
 
-- Install Node.js 18+, npm
-- Install dependencies: `npm install`
-- Set up pre-commit hooks (for formatting and linting): `npm prepare`
-- Copy environment variables file: `cp .env.example .env.local`
-- Edit variables in `.env.local` if you want to use a different API server
-  - Do not change the ID of the trackers so that they are not enabled in development
-- Set up your IDE to autoformat code with Prettier and use ESLint
+1. Install Node.js 18+, npm
+2. Install dependencies: `npm install`
+3. Set up pre-commit hooks (for formatting and linting): `npm run prepare`
+4. Copy environment variables file: `cp .env.example .env.local`
+5. Edit variables in `.env.local` if you want to use a different API server
+   > Do not change the ID of the trackers so that they are not enabled in development
+6. Set up your IDE to autoformat code with Prettier and use ESLint
 
 When the API types change, run `npm run orval` to generate new client types and functions.
 
 ### Development server
 
-- Start development server: `npm run dev`
-- Open in the browser: http://localhost:3000
-  - The page will be reloaded when you edit the code
+1. Start development server: `npm run dev`
+2. Open in the browser: http://localhost:3000
+   > The page will be reloaded when you edit the code
 
 In order to use the API of the production server, you need to change the SameSite parameter of the `token` cookie in the browser (set `None`).
 Then the browser will be able to use the correct token to access the API from the local site.
 
 ### Production server
 
-- Build the application: `npm run build`
-- Run the production-like server: `npm run start`
-- Open in the browser: http://localhost:3000
+1. Build the application: `npm run build`
+2. Run the production-like server: `npm run start`
+3. Open in the browser: http://localhost:3000
 
 ### Production deployment
 
 We use Docker with Docker Compose plugin to run the website on servers.
 
-- Copy the file with environment variables: `cp .env.example .env.local`
-- Change environment variables in the `.env.local` file
-- Install Docker with Docker Compose
-- Build a Docker image: `docker compose build --pull`
-  - Note: API server must be running (check URL in `.env.local` file)
-    as Next.js will fetch all resources at build time.
-- Run the container: `docker compose up --detach`
-- Open in the browser: http://localhost:3000
+1. Copy the file with environment variables: `cp .env.example .env.local`
+2. Change environment variables in the `.env.local` file
+3. Install Docker with Docker Compose
+4. Build a Docker image: `docker compose build --pull`
+   > API server must be running (check URL in `.env.local` file) as Next.js will fetch all resources at build time
+5. Run the container: `docker compose up --detach`
+6. Open in the browser: http://localhost:3000
 
 You can set up a Nginx reverse proxy to add SSL certificates for https.
