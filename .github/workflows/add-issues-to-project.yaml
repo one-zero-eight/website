@@ -16,13 +16,8 @@ jobs:
     name: Add issue to project
     if: github.repository_owner == 'one-zero-eight' # Do not run in forks
     runs-on: ubuntu-latest
-    permissions: # Permissions granted to the 'GITHUB_TOKEN'
-      contents: read
-      issues: write
-      pull-requests: write
-      repository-projects: write
     steps:
       - uses: actions/add-to-project@v0.5.0
         with:
           project-url: https://github.com/orgs/one-zero-eight/projects/4
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.ACTIONS_PAT_PROJECTS }}
