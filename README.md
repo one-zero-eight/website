@@ -44,7 +44,7 @@ The website uses the API of services [InNoHassle-Events](https://github.com/one-
 ### Technologies
 
 - [Node.js 18+](https://nodejs.org) & [TypeScript](https://www.typescriptlang.org/)
-- [React](https://react.dev/) & [Next.js](https://nextjs.org/) (App router)add deployment section
+- [React](https://react.dev/) & [Next.js](https://nextjs.org/) (App router)
 - Styling: [TailwindCSS](https://tailwindcss.com/), [Iconify](https://iconify.design/)
 - Formatting and linting: [Husky](https://typicode.github.io/husky/), [lint-staged](https://github.com/lint-staged/lint-staged), [Prettier](https://prettier.io/), [ESLint](https://eslint.org/)
 - Data fetching: [Axios](https://axios-http.com/), [TanStack Query](https://tanstack.com/query/latest), [Orval](https://orval.dev/)
@@ -99,4 +99,3 @@ You can set up a Nginx reverse proxy to add SSL certificates for https.
 We are open to contributions of any kind.
 You can help us with code, bugs, design, documentation, media, new ideas, etc.
 If you are interested in contributing, please read our [contribution guide](https://github.com/one-zero-eight/.github/blob/main/CONTRIBUTING.md).
-
