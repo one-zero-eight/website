@@ -1,4 +1,4 @@
-# InNoHassle Website
+# Website | InNoHassle ecosystem 
 
 > https://innohassle.ru
 
