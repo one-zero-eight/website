@@ -51,6 +51,7 @@ The website uses the API of services [InNoHassle-Events](https://github.com/one-
 
 - Install Node.js 18+, npm
 - Install dependencies: `npm install`
+- Set up pre-commit hooks (for formatting and linting): `npm prepare`
 - Copy environment variables file: `cp .env.example .env.local`
 - Edit variables in `.env.local` if you want to use a different API server
   - Do not change the ID of the trackers so that they are not enabled in development
