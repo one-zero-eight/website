@@ -1,6 +1,6 @@
 # InNoHassle Website
 
-> https://innohassle.ru [![Website](https://img.shields.io/website?url=https%3A%2F%2Finnohassle.ru)](https://innohassle.ru)
+> https://innohassle.ru
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg) ](https://opensource.org/licenses/MIT)
 
