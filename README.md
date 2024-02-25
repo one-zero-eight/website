@@ -65,7 +65,7 @@ The website uses the API of services [InNoHassle-Events](https://github.com/one-
 
 When the API types change, run `npm run orval` to generate new client types and functions.
 
-### Development server
+### Run for development
 
 1. Start development server: `npm run dev`
 2. Open in the browser: http://localhost:3000
@@ -74,13 +74,13 @@ When the API types change, run `npm run orval` to generate new client types and 
 In order to use the API of the production server, you need to change the SameSite parameter of the `token` cookie in the browser (set `None`).
 Then the browser will be able to use the correct token to access the API from the local site.
 
-### Production server
+### Run for production
 
 1. Build the application: `npm run build`
 2. Run the production-like server: `npm run start`
 3. Open in the browser: http://localhost:3000
 
-### Production deployment
+### Deployment
 
 We use Docker with Docker Compose plugin to run the website on servers.
 
