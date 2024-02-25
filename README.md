@@ -1,87 +1,89 @@
 # InNoHassle Website
 
-> https://innohassle.ru
+> https://innohassle.ru [![Website](https://img.shields.io/website?url=https%3A%2F%2Finnohassle.ru)](https://innohassle.ru)
+
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg) ](https://opensource.org/licenses/MIT)
 
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=one-zero-eight_InNoHassle-Website&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=one-zero-eight_InNoHassle-Website)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=one-zero-eight_InNoHassle-Website&metric=bugs)](https://sonarcloud.io/summary/new_code?id=one-zero-eight_InNoHassle-Website)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=one-zero-eight_InNoHassle-Website&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=one-zero-eight_InNoHassle-Website)
 
-## Описание
+## Project description
 
-В экосистеме InNoHassle множество сервисов для студентов Университета Иннополис.
-К некоторым из них можно получить доступ с помощью вебсайта InNoHassle.
+There are several services in the InNoHassle ecosystem for Innopolis University students.
+You can access some of them through the InNoHassle website.
 
-Сайт работает с API сервисов [InNoHassle-Events](https://github.com/one-zero-eight/InNoHassle-Events), [InNoHassle-MusicRoom](https://github.com/one-zero-eight/InNoHassle-MusicRoom).
+The website uses the API of services [InNoHassle-Events](https://github.com/one-zero-eight/InNoHassle-Events), [InNoHassle-MusicRoom](https://github.com/one-zero-eight/InNoHassle-MusicRoom).
 
-### Сервисы
+### Services
 
-1. Schedule - Расписания
-   - Просматривайте расписания всех академических групп, элективов, спортивных секций, клининга
-   - Экспортируйте обновляемые расписания в приложение календаря на своих девайсах
-   - Добавляйте нужные группы в избранное, чтобы увидеть их в личном кабинете
-   - Скрывайте и отображайте группы в личном кабинете
-   - Выбирайте формат отображения расписания - на день, на неделю или на месяц
-2. Music room - Музыкальная комната
-   - Просматривайте все брони музыкальной комнаты на отдельной странице
-   - Просматривайте собственные бронирования в личном кабинете
-3. Scholarship - Стипендия
-   - Посчитайте свою стипендию, исходя из ожидаемых оценок или GPA
-   - Рассчитайте, какие необходимы оценки для получения нужной стипендии
-   - Узнайте подробную информацию о видах стипендии в Университете
+1. Schedule
+   - Check all academic groups, electives, sports sections, cleaning schedules
+   - Export schedules to your favorite calendar app on your devices
+   - Add groups to favorites to see them in your personal account
+   - Hide and show groups in your personal account
+   - Choose the format of the schedule - for a day, for a week, or for a month
+2. Music room
+   - See all bookings of the music room on a separate page
+   - View your own bookings in your personal account
+3. Scholarship
+   - Calculate your scholarship based on expected grades or GPA
+   - Calculate what grades are needed to get the desired scholarship
+   - Get detailed information about the types of scholarships at the University
 
-### Возможности
+### More features
 
-- Вход в личный кабинет с помощью студенческого аккаунта
-- Все релевантные учебные группы на одной странице в личном кабинете
-- Офлайн доступ к сайту при плохом соединении
-- Темная и светлая тема интерфейса
+- Sign in to your personal account using your student email
+- All relevant academic groups are on your personal dashboard
+- Offline access to the website in case of a bad internet connection
+- Dark and light theme of the interface
 
-### Технологии
+### Technologies
 
 - Node.js, TypeScript
 - React, Next.js (App router)
-- Стили: TailwindCSS
-- Запросы данных: Axios, TanStack Query
+- Styling: TailwindCSS
+- Data fetching: Axios, TanStack Query
 
-## Разработка
+## Development
 
-### Начало работы
+### Getting started
 
-- Установить Node.js 18+, npm
-- Установить зависимости: `npm install`
-- Скопировать файл переменных окружения: `cp .env.example .env.local`
-- При необходимости изменить переменные окружения в файле `.env.local`
-  - Не изменяйте ID трекеров, чтобы они не включались при разработке
-- Настроить автоформатирование через Prettier, а также ESLint в своей IDE
+- Install Node.js 18+, npm
+- Install dependencies: `npm install`
+- Copy environment variables file: `cp .env.example .env.local`
+- Edit variables in `.env.local` if you want to use a different API server
+  - Do not change the ID of the trackers so that they are not enabled in development
+- Set up your IDE to autoformat code with Prettier and use ESLint
 
-При изменении типов в API запустите `npm run orval`, чтобы сгенерировать клиентские типы и функции.
+When the API types change, run `npm run orval` to generate new client types and functions.
 
-### Development сервер
+### Development server
 
-- Запустить сервер разработки: `npm run dev`
-- Открыть в браузере: http://localhost:3000
-  - Страница будет обновляться при изменении кода.
+- Start development server: `npm run dev`
+- Open in the browser: http://localhost:3000
+  - The page will be reloaded when you edit the code
 
-Чтобы использовать API прод сервера, нужно в браузере изменить у cookie `token` параметр SameSite (установить `None`).
-Тогда браузер сможет использовать верный токен для обращения с локального сайта в API.
+In order to use the API of the production server, you need to change the SameSite parameter of the `token` cookie in the browser (set `None`).
+Then the browser will be able to use the correct token to access the API from the local site.
 
-### Production сервер
+### Production server
 
-- Собрать приложение: `npm run build`
-- Запустить сервер: `npm run start`
-- Открыть в браузере: http://localhost:3000
+- Build the application: `npm run build`
+- Run the production-like server: `npm run start`
+- Open in the browser: http://localhost:3000
 
-### Развертывание на сервере
+### Production deployment
 
-Мы используем Docker с плагином Docker Compose для запуска вебсайта на серверах.
+We use Docker with Docker Compose plugin to run the website on servers.
 
-- Скопировать файл переменных окружения: `cp .env.example .env.local`
-- Изменить переменные окружения в файле `.env.local`
-- Установить Docker с Docker Compose
-- Собрать образ Docker: `docker compose build`
+- Copy the file with environment variables: `cp .env.example .env.local`
+- Change environment variables in the `.env.local` file
+- Install Docker with Docker Compose
+- Build a Docker image: `docker compose build --pull`
   - Note: API server must be running (check URL in `.env.local` file)
     as Next.js will fetch all resources at build time.
-- Запустить контейнер: `docker compose up -d`
-- Открыть в браузере: http://localhost:3000
+- Run the container: `docker compose up --detach`
+- Open in the browser: http://localhost:3000
 
-Вы можете настроить Nginx reverse proxy, чтобы добавить SSL сертификаты для https.
+You can set up a Nginx reverse proxy to add SSL certificates for https.
