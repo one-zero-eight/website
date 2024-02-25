@@ -10,11 +10,11 @@ module.exports = {
   theme: {
     extend: {
       width: {
-        52: '3.25rem',
+        52: "3.25rem",
         256: "64rem",
       },
       height: {
-        52: '3.25rem',
+        52: "3.25rem",
       },
       colors: {
         base: "rgba(var(--color-base) / <alpha-value>)",
@@ -60,7 +60,7 @@ module.exports = {
         "lg-h": { raw: "(min-height: 1024px)" },
         "xl-h": { raw: "(min-height: 1280px)" },
         "2xl-h": { raw: "(min-height: 1536px)" },
-        "4xl": { raw: "(min-width: 2048px)"},
+        "4xl": { raw: "(min-width: 2048px)" },
       },
       spacing: {
         "18p": "4.5rem",

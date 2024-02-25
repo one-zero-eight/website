@@ -1,6 +1,6 @@
 name: 🐞 Bug report
 description: Report an issue with innohassle.ru
-labels: ['bug']
+labels: ["bug"]
 body:
   - type: markdown
     attributes:

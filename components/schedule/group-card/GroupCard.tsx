@@ -1,9 +1,6 @@
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
 import HideButton from "@/components/schedule/group-card/HideButton";
-import {
-  getAllTagsByType,
-  getFirstTagByType,
-} from "@/lib/event-group";
+import { getAllTagsByType, getFirstTagByType } from "@/lib/event-group";
 import { ViewEventGroup } from "@/lib/events";
 import { viewConfig } from "@/lib/events-view-config";
 import { useRouter } from "next/navigation";
@@ -56,10 +53,8 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
         )}
       </div>
       <div className="flex select-none flex-row place-items-center">
-        {canHide && (
-          <HideButton groupId={group.id} />
-        )}
-          <FavoriteButton groupId={group.id} />
+        {canHide && <HideButton groupId={group.id} />}
+        <FavoriteButton groupId={group.id} />
       </div>
     </div>
   );
