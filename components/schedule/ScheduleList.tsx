@@ -37,8 +37,8 @@ export default function ScheduleList({ category }: ScheduleListProps) {
         ),
       )
       // Filter by search
-      .filter(
-        (v) => v.name?.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
+      .filter((v) =>
+        v.name?.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
       )
       // Group by tag
       .reduce(
