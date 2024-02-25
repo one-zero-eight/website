@@ -1,0 +1,11 @@
+# Run all services:
+# docker compose up --build --detach
+
+version: "3"
+
+services:
+  web:
+    build: . # See Dockerfile for more details
+    restart: always
+    ports:
+      - "3000:3000"
