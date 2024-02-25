@@ -20,6 +20,7 @@ body:
     attributes:
       label: Suggested solution
       description: We could provide following implementation...
+      placeholder: Your thoughts on the solution
     validations:
       required: true
   - type: textarea
