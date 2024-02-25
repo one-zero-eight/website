@@ -8,7 +8,12 @@
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=one-zero-eight_InNoHassle-Website&metric=bugs)](https://sonarcloud.io/summary/new_code?id=one-zero-eight_InNoHassle-Website)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=one-zero-eight_InNoHassle-Website&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=one-zero-eight_InNoHassle-Website)
 
-## Project description
+## Table of contents
+
+Did you know that GitHub supports table of
+contents [by default](https://github.blog/changelog/2021-04-13-table-of-contents-support-in-markdown-files/) 🤔
+
+## About
 
 There are several services in the InNoHassle ecosystem for Innopolis University students.
 You can access some of them through the InNoHassle website.
@@ -17,33 +22,36 @@ The website uses the API of services [InNoHassle-Events](https://github.com/one-
 
 ### Services
 
-1. Schedule
-   - Check all academic groups, electives, sports sections, cleaning schedules
-   - Export schedules to your favorite calendar app on your devices
-   - Add groups to favorites to see them in your personal account
-   - Hide and show groups in your personal account
-   - Choose the format of the schedule - for a day, for a week, or for a month
-2. Music room
-   - See all bookings of the music room on a separate page
-   - View your own bookings in your personal account
-3. Scholarship
-   - Calculate your scholarship based on expected grades or GPA
-   - Calculate what grades are needed to get the desired scholarship
-   - Get detailed information about the types of scholarships at the University
+1. 🗓️ Schedule
+   - 🔍 Check all academic groups, electives, sports sections, cleaning schedules
+   - 📲 Export schedules to your favorite calendar app on your devices
+   - 🌟 Add groups to favorites to see them in your personal account
+   - 🙈 Hide and show groups in your personal account
+   - 🔄 Choose the format of the schedule - for a day, for a week, or for a month
+2. 🎵 Music room
+   - 📅 See all bookings of the music room on a separate page
+   - 🧐 View your own bookings in your personal account
+3. 💰 Scholarship
+   - 📊 Calculate your scholarship based on expected grades or GPA
+   - 📈 Calculate what grades are needed to get the desired scholarship
+   - ℹ️ Get detailed information about the types of scholarships at the University
 
 ### More features
 
-- Sign in to your personal account using your student email
-- All relevant academic groups are on your personal dashboard
-- Offline access to the website in case of a bad internet connection
-- Dark and light theme of the interface
+- 🔑 Sign in to your personal account using your student email
+- 📚 All relevant academic groups are on your personal dashboard
+- 📴 Offline access to the website in case of a bad internet connection
+- 🌙 Dark and 🌞 light theme of the interface
 
 ### Technologies
 
-- Node.js, TypeScript
-- React, Next.js (App router)
-- Styling: TailwindCSS
-- Data fetching: Axios, TanStack Query
+- [Node.js 18+](https://nodejs.org) & [TypeScript](https://www.typescriptlang.org/)
+- [React](https://react.dev/) & [Next.js](https://nextjs.org/) (App router)
+- Styling: [TailwindCSS](https://tailwindcss.com/), [Iconify](https://iconify.design/)
+- Formatting and linting: [Husky](https://typicode.github.io/husky/), [lint-staged](https://github.com/lint-staged/lint-staged), [Prettier](https://prettier.io/), [ESLint](https://eslint.org/)
+- Data fetching: [Axios](https://axios-http.com/), [TanStack Query](https://tanstack.com/query/latest), [Orval](https://orval.dev/)
+- Deployment: [Docker](https://www.docker.com/), [Docker Compose](https://docs.docker.com/compose/), [GitHub Actions](https://github.com/features/actions)
+- Calendar: [FullCalendar](https://fullcalendar.io/), [ical.js](https://github.com/kewisch/ical.js)
 
 ## Development
 
