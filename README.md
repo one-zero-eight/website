@@ -1,3 +1,9 @@
+<p align="center" style="background-color: white">
+  <a href="https://innohassle.ru">
+    <img alt="InNoHassle" height="300px" src="https://raw.githubusercontent.com/one-zero-eight/InNoHassle-Design/212a5c06590c4d469a0a894481c09915a4b1735f/logo/ing-white-outline-transparent.svg">
+  </a>
+</p>
+
 # Website | InNoHassle ecosystem
 
 > https://innohassle.ru
