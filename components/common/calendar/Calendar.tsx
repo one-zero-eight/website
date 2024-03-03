@@ -108,10 +108,11 @@ function Calendar({
           // Buttons in header
           left: "prev title next",
           center: undefined,
-          right: "listMonth timeGridWeek dayGridMonth",
+          right: "timeGrid3 timeGridWeek dayGridMonth listMonth",
         }}
         buttonText={{
           listMonth: "List",
+          timeGrid3: "3 days",
           timeGridWeek: "Week",
           dayGridMonth: "Month",
         }}
@@ -129,6 +130,27 @@ function Calendar({
             eventContent: renderEventListMonth,
           },
           timeGridWeek: {
+            eventContent: renderEventTimeGridWeek,
+            weekNumbers: false,
+            // Show weekday and date in day header
+            dayHeaderContent: (arg) => {
+              if (!arg.isToday) {
+                return moment(arg.date).format("ddd D");
+              }
+              // If today, show date in red circle
+              return (
+                <>
+                  {moment(arg.date).format("ddd")}{" "}
+                  <div className="inline-flex w-fit items-center justify-center rounded-md bg-red-500 px-1 text-white">
+                    {moment(arg.date).format("D")}
+                  </div>
+                </>
+              );
+            },
+          },
+          timeGrid3: {
+            type: "timeGrid",
+            dayCount: 3,
             eventContent: renderEventTimeGridWeek,
             weekNumbers: false,
             // Show weekday and date in day header
