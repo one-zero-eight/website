@@ -129,9 +129,23 @@ function Calendar({
             eventContent: renderEventListMonth,
           },
           timeGridWeek: {
-            // Show weekday and date in day header
-            dayHeaderFormat: "ddd D",
             eventContent: renderEventTimeGridWeek,
+            weekNumbers: false,
+            // Show weekday and date in day header
+            dayHeaderContent: (arg) => {
+              if (!arg.isToday) {
+                return moment(arg.date).format("ddd D");
+              }
+              // If today, show date in red circle
+              return (
+                <>
+                  {moment(arg.date).format("ddd")}{" "}
+                  <div className="inline-flex w-fit items-center justify-center rounded-md bg-red-500 px-1 text-white">
+                    {moment(arg.date).format("D")}
+                  </div>
+                </>
+              );
+            },
           },
           dayGridMonth: {
             eventContent: renderEventDayGridMonth,
@@ -140,6 +154,29 @@ function Calendar({
         allDayText="" // Remove text in all day row
         // displayEventEnd={true} // Display end time
         nowIndicator={true} // Display current time as line
+        nowIndicatorContent={(arg) => {
+          if (
+            arg.date.getUTCHours() === 0 &&
+            arg.date.getUTCMinutes() === 0 &&
+            arg.date.getUTCSeconds() === 0
+          )
+            return null; // It's a line, not a label
+          // Fix timezone
+          const text = moment(Number(arg.date) - 3 * 60 * 60 * 1000).format(
+            "HH:mm",
+          );
+          const isNearTimeLabel =
+            arg.date.getUTCMinutes() < 15 || arg.date.getUTCMinutes() > 45;
+          if (!isNearTimeLabel) {
+            return <div>{text}</div>;
+          } else {
+            return (
+              <div className="-mt-6 flex h-12 translate-y-2 items-center justify-end bg-base">
+                {text}
+              </div>
+            );
+          }
+        }}
         firstDay={1} // From Monday
         navLinks={false} // Dates are clickable
         weekNumbers={true} // Display numbers of weeks
@@ -150,7 +187,7 @@ function Calendar({
         contentHeight="auto" // Do not add scrollbar
         stickyHeaderDates={false}
         eventInteractive={true} // Make event tabbable
-        eventClassNames="cursor-pointer text-sm" // Show that events are clickable
+        eventClassNames="cursor-pointer text-sm rounded-md !bg-transparent border-0 overflow-clip"
         eventClick={(info) => {
           info.jsEvent.preventDefault();
           // We should check prev value via argument because 'eventElement' may be outdated in current closure
@@ -199,10 +236,47 @@ function renderEventListMonth({ event }: EventContentArg) {
   );
 }
 
-function renderEventTimeGridWeek({ event }: EventContentArg) {
+function renderEventTimeGridWeek({
+  event,
+  borderColor,
+  backgroundColor,
+  timeText,
+}: EventContentArg) {
+  const border =
+    borderColor !== "undefined"
+      ? borderColor
+      : backgroundColor !== "undefined"
+        ? backgroundColor
+        : "#9A2EFF";
+  const background =
+    backgroundColor !== "undefined"
+      ? backgroundColor
+      : borderColor !== "undefined"
+        ? borderColor
+        : "#9A2EFF";
   return (
-    <div className="h-full overflow-clip text-left">
-      <span className="line-clamp-2">{event.title}</span>
+    <div
+      className="h-full border-l-4 p-1 text-left"
+      style={{
+        borderLeftColor: border,
+        backgroundColor: `color-mix(in srgb, ${background} 40%, transparent)`,
+        color: `color-mix(in srgb, ${background} 75%, rgb(var(--color-text)))`,
+      }}
+    >
+      <span
+        className="line-clamp-2 text-sm font-medium"
+        style={{
+          color: `color-mix(in srgb, ${background} 60%, rgb(var(--color-text)))`,
+        }}
+      >
+        {event.title}
+      </span>
+      {timeText && (
+        <span className="line-clamp-2 text-xs text-opacity-50">
+          {" "}
+          {timeText}
+        </span>
+      )}
       <span className="line-clamp-2 text-xs">
         {event.extendedProps.location}
       </span>
@@ -222,7 +296,7 @@ function renderEventDayGridMonth({
         className="fc-daygrid-event-dot"
         style={{ borderColor: borderColor || backgroundColor }}
       />
-      <div className="fc-event-title w-full max-w-full text-xs">
+      <div className="fc-event-title w-full max-w-full text-xs text-text-main">
         {event.title || <>&nbsp;</>}
       </div>
       {timeText && (
