@@ -1,5 +1,4 @@
 "use client";
-import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 import SearchBar from "@/components/schedule/SearchBar";
 import { getFirstTagByType } from "@/lib/event-group";
 import { useEventGroupsListEventGroups, ViewEventGroup } from "@/lib/events";
@@ -7,6 +6,8 @@ import { getCategoryInfoBySlug } from "@/lib/events-view-config";
 import React, { useState } from "react";
 import CategoriesDropdown from "./CategoriesDropdown";
 import FilterDropdown from "./FilterDropdown";
+import { GroupCardTagSkeleton } from "@/components/schedule/skeletons/GroupCardTagSkeleton";
+import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 
 export type ScheduleListProps = {
   category: string;
@@ -82,25 +83,31 @@ export default function ScheduleList({ category }: ScheduleListProps) {
       </div>
 
       <hr className="border-b-1 mt-4 w-full border-border" />
-
-      {Object.keys(groups)
-        .sort()
-        .map((tagName) => (
-          <React.Fragment key={tagName}>
-            <div className="my-4 flex w-full flex-wrap justify-between">
-              <div className="text-3xl font-medium">{tagName}</div>
-              <div className="flex items-center text-inactive">
-                {groups[tagName].length} groups
+      {Object.keys(groups).length > 0 ? (
+        Object.keys(groups)
+          .sort()
+          .map((tagName) => (
+            <React.Fragment key={tagName}>
+              <div className="my-4 flex w-full flex-wrap justify-between">
+                <div className="text-3xl font-medium">{tagName}</div>
+                <div className="flex items-center text-inactive">
+                  {groups[tagName].length} groups
+                </div>
               </div>
-            </div>
 
-            <div className="mb-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
-              {groups[tagName].map((group) => (
-                <GroupCard key={group.path} group={group} />
-              ))}
-            </div>
-          </React.Fragment>
-        ))}
+              <div className="mb-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
+                {groups[tagName].map((group) => (
+                  <GroupCard key={group.path} group={group} />
+                ))}
+              </div>
+            </React.Fragment>
+          ))
+      ) : (
+        <React.Fragment>
+          <GroupCardTagSkeleton />
+          <GroupCardTagSkeleton />
+        </React.Fragment>
+      )}
     </>
   );
 }
