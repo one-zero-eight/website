@@ -42,10 +42,7 @@ export default function Page({ params: { alias } }: Props) {
   // Role props for screen readers
   const role = useRole(context);
 
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    dismiss,
-    role,
-  ]);
+  const { getFloatingProps } = useInteractions([dismiss, role]);
 
   return (
     <>

@@ -1,8 +1,8 @@
 import { GroupCardSkeleton } from "@/components/schedule/skeletons/GroupCardSkeleton";
-import React, { useState } from "react";
+import React from "react";
 
 export function GroupCardTagSkeleton() {
-  const [els] = useState(Array(12).fill(crypto.randomUUID()));
+  const els = Array(12).fill(crypto.randomUUID());
   return (
     <React.Fragment key={`loading-gctag-${crypto.randomUUID()}`}>
       <div className="my-4 flex w-full flex-wrap justify-between">
