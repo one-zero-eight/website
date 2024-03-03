@@ -64,10 +64,11 @@ export default function Page({ params: { alias } }: Props) {
                 ref={refs.setFloating}
                 style={transitionStyles}
                 {...getFloatingProps()}
-                className="flex p-4"
+                className="flex h-fit w-full flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-1/2"
               >
-                <div className="h-fit max-w-2xl overflow-hidden rounded-2xl bg-primary-main">
-                  <div className="flex flex-col p-4 @lg/export:p-8">
+                <div className="overflow-hidden rounded-2xl bg-primary-main">
+                  <div className="flex flex-col p-4 @2xl/export:p-8">
+                    {/* Heading and description */}
                     <div className="mb-2 flex w-full flex-row">
                       <div className="grow items-center text-3xl font-semibold">
                         Export to your calendar
@@ -83,6 +84,7 @@ export default function Page({ params: { alias } }: Props) {
                       You can add the schedule to your favorite calendar
                       application and it will be updated on schedule changes.
                     </div>
+                    {/* Export steps */}
                     <ul className="my-4 list-decimal pl-5 text-text-secondary/75">
                       <li>
                         Copy the link.
@@ -108,7 +110,8 @@ export default function Page({ params: { alias } }: Props) {
                       </li>
                       <li>Paste the link and click Add.</li>
                     </ul>
-                    <div className="-mx-4 -mb-4 @lg/export:-mx-8 @lg/export:-mb-8">
+                    {/* Calendar itself */}
+                    <div className="-mx-4 -mb-4 @2xl/export:-mx-8 @2xl/export:-mb-8">
                       <Calendar
                         urls={calendarURL ? [calendarURL] : []}
                         viewId="popup"
