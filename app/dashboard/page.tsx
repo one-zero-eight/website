@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import React from "react";
 import { useIsClient, useWindowSize } from "usehooks-ts";
+import { useState } from "react";
 
 export default function Page() {
   const { width } = useWindowSize();
@@ -21,6 +22,7 @@ export default function Page() {
   const { data: user } = useUsersGetMe();
   const favorites = user?.favorites_association || [];
   const { musicRoomSchedule } = useMyMusicRoom();
+  const [isAvailable, setIsAvailable] = useState(true);
 
   if (!isClient) {
     return <></>;
@@ -53,9 +55,10 @@ export default function Page() {
         </div>
       </div>
       <div className="flex flex-col justify-between gap-4 @container/sections @6xl/content:flex-row @6xl/content:gap-8">
-        <div className="flex w-full flex-col @container/schedule @6xl/content:w-1/2">
-          <h2 className="my-4 text-3xl font-medium">Schedule</h2>
-          {favorites.filter((v) => v.predefined === true).length === 0 ? (
+        <details className="flex w-full flex-col @container/schedule @6xl/content:w-1/2">
+          <summary className="my-4 text-3xl font-medium">Schedule</summary>
+          {!isAvailable ? null : 
+            favorites.filter((v) => v.predefined === true).length === 0 ? (
             <p className="mb-4 text-lg text-text-secondary/75">Nothing here.</p>
           ) : (
             <div className="grid grid-cols-1 justify-stretch gap-4 @lg/schedule:grid-cols-2 @4xl/schedule:grid-cols-3">
@@ -86,10 +89,11 @@ export default function Page() {
               )}
             </div>
           )}
-        </div>
-        <div className="flex w-full flex-col @container/favorites @6xl/content:w-1/2">
-          <h2 className="my-4 text-3xl font-medium">Favorites</h2>
-          {favorites.filter((v) => v.predefined === false).length === 0 ? (
+        </details>
+        <details className="flex w-full flex-col @container/favorites @6xl/content:w-1/2">
+          <summary className="my-4 text-3xl font-medium">Favorites</summary>
+          {!isAvailable ? null : 
+            favorites.filter((v) => v.predefined === false).length === 0 ? (
             <p className="mb-4 text-lg text-text-secondary/75">
               Add favorite calendars using star button.
               <br />
@@ -110,7 +114,7 @@ export default function Page() {
                 ))}
             </div>
           )}
-        </div>
+        </details>
       </div>
       <h2 className="my-4 text-3xl font-medium">Your calendar</h2>
       <div className="@lg/content:-mx-8 @lg/content:-mb-8">
