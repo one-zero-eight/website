@@ -106,11 +106,12 @@ function Calendar({
         }}
         headerToolbar={{
           // Buttons in header
-          left: "prev title next",
+          left: "prev,title,next today",
           center: undefined,
           right: "timeGrid3 timeGridWeek dayGridMonth listMonth",
         }}
         buttonText={{
+          today: "Today",
           listMonth: "List",
           timeGrid3: "3 days",
           timeGridWeek: "Week",

@@ -39,8 +39,8 @@
       @apply m-0 inline min-w-[100px] text-center text-lg;
     }
 
-    .fc-toolbar-chunk:has(.fc-toolbar-title) {
-      @apply rounded-xl border-0 bg-primary-main outline-0;
+    .fc-toolbar-chunk div:has(.fc-toolbar-title) {
+      @apply flex items-center justify-center gap-1 rounded-xl border-0 bg-primary-main outline-0;
     }
   }
 
