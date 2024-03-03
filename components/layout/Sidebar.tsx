@@ -1,14 +1,14 @@
 "use client";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
-import UserMenu from "@/components/layout/UserMenu";
 import { useUsersGetMe } from "@/lib/events";
-import clsx from "clsx";
+import UserMenu from "@/components/layout/UserMenu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
-import { useMediaQuery } from "usehooks-ts";
+import React, { useEffect, useState } from "react";
+import { useWindowSize } from "usehooks-ts";
 import Logo from "../icons/Logo";
-import SidebarSection from "./SidebarSection";
+import SidebarSection from "@/components/layout/SidebarSection";
+import clsx from "clsx";
 
 type Item = {
   title: string;
@@ -94,31 +94,40 @@ function Sidebar({ children }: React.PropsWithChildren) {
   const pathname = usePathname();
   const currentItem = items.find((v) => pathname.startsWith(v.path));
   const selection = currentItem?.title;
-  const isMobile = !useMediaQuery(
-    "(min-width: 1024px) and (min-height: 600px)",
-  );
+  const { width, height } = useWindowSize();
+  const [isMobile, setMobile] = useState(false);
   const [isOpened, setOpened] = useState(false);
+
+  useEffect(() => {
+    if (width >= 1024 && height >= 600) {
+      setMobile(false);
+      setOpened(true);
+    } else {
+      setMobile(true);
+      setOpened(false);
+    }
+  }, [width, height]);
 
   return (
     <SidebarContext.Provider value={{ isOpened, setOpened, isMobile }}>
-      <div className="absolute flex flex-col lgw-smh:hidden">
-        <div
-          className={clsx(
-            "fixed inset-0 transition-colors",
-            isOpened ? "visible z-[2] block bg-black/50" : "z-[-1] bg-black/0",
-          )}
-          onClick={() => setOpened(false)}
-        />
+      {isMobile && isOpened ? (
+          <div
+              className={clsx(
+                  "fixed inset-0 transition-colors",
+                  isOpened ? "visible z-[2] block bg-black/50" : "z-[-1] bg-black/0",
+              )}
+              onClick={() => setOpened(false)}
+          />
+      ) : (
+          <></>
+      )}
         <aside
           className={clsx(
-            "fixed top-0 z-10 h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8",
-            "transition-transform",
-            isOpened
-              ? "translate-x-0 transform bg-sidebar"
-              : "  -translate-x-full transform bg-sidebar",
+            "flex h-[100dvh] flex-col items-center bg-sidebar px-8 transition-transform",
+              isMobile ? "fixed z-10 overflow-y-auto py-8" : "sticky py-4",
+              isOpened ? "translate-x-0 transform" : "-translate-x-full transform",
           )}
         >
-          <div className="left-0 flex h-full flex-col items-center opacity-100">
             <Link
               href={user ? "/dashboard" : "/schedule"}
               onClick={() => setOpened(false)}
@@ -174,59 +183,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
             >
               one-zero-eight 💜
             </a>
-          </div>
         </aside>
-      </div>
-      <aside className="sticky top-0 hidden h-[100dvh] flex-col items-center bg-sidebar px-8 py-4 lgw-smh:flex">
-        <Link
-          href={user ? "/dashboard" : "/schedule"}
-          onClick={() => setOpened(false)}
-          className="mb-4"
-        >
-          <Logo className="fill-text-main" />
-        </Link>
-        <nav className="flex flex-col">
-          {items.map((item) => (
-            <SidebarSection
-              key={item.title}
-              title={item.title}
-              icon={item.icon}
-              selected={selection === item.title}
-              path={item.path}
-              onClick={() => setOpened(false)}
-            />
-          ))}
-          <div className="mx-2.5 my-1 h-0.5 rounded-full bg-gray-500/20" />
-          {externalItems.map((item) => (
-            <div
-              key={item.title}
-              onClick={() => (item.path !== "#" ? setOpened(false) : undefined)}
-            >
-              <SidebarSection
-                title={item.title}
-                icon={item.icon}
-                selected={false}
-                path={item.path}
-                onClick={() => setOpened(false)}
-                external={true}
-              />
-            </div>
-          ))}
-        </nav>
-        <div className="grow"></div>
-        <br />
-        <div className="mb-4 lgw-smh:invisible lgw-smh:hidden">
-          <UserMenu isMobile={false} isSidebar={true} />
-        </div>
-        <a href="https://t.me/one_zero_eight">
-          See you at
-          <br />
-          <span className="underline underline-offset-2">
-            one-zero-eight
-          </span>{" "}
-          💜
-        </a>
-      </aside>
       {children}
     </SidebarContext.Provider>
   );
