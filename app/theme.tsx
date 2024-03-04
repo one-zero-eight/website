@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { useDarkMode, useIsClient } from "usehooks-ts";
+import { useIsClient, useTernaryDarkMode } from "usehooks-ts";
 
 export default function ThemedHtml({
   children,
@@ -12,7 +12,11 @@ export default function ThemedHtml({
   className?: string;
 } & React.HTMLProps<HTMLHtmlElement>) {
   const isClient = useIsClient();
-  const { isDarkMode } = useDarkMode();
+  const { isDarkMode } = useTernaryDarkMode({
+    defaultValue: "dark",
+    initializeWithValue: true,
+    localStorageKey: "theme",
+  });
   const isSafari =
     isClient && /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
