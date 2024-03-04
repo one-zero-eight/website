@@ -12,7 +12,7 @@
     "prepare": "husky",
     "orval": "orval --config ./orval.config.js",
     "release": "bumpp package.json",
-    "taze": "taze minor -wIr"
+    "update-deps": "taze minor -wIr"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.5",
@@ -25,16 +25,16 @@
     "@fullcalendar/react": "^6.1.11",
     "@fullcalendar/timegrid": "^6.1.11",
     "@headlessui/react": "^1.7.18",
-    "@iconify/json": "^2.2.186",
+    "@iconify/json": "^2.2.189",
     "@iconify/tailwind": "^0.1.4",
-    "@tanstack/react-query": "^5.24.1",
     "@tailwindcss/container-queries": "^0.1.1",
+    "@tanstack/react-query": "^5.24.8",
     "@types/node": "20.10.4",
     "@types/react": "18.2.45",
     "@types/react-dom": "18.2.17",
     "autoprefixer": "10.4.16",
     "axios": "^1.6.7",
-    "bumpp": "^9.3.0",
+    "bumpp": "^9.3.1",
     "clsx": "^2.1.0",
     "eslint": "8.55.0",
     "eslint-config-next": "14.0.4",
