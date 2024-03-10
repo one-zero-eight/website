@@ -18,6 +18,7 @@ module.exports = {
       },
       colors: {
         base: "rgba(var(--color-base) / <alpha-value>)",
+        sidebar: "rgba(var(--color-sidebar) / <alpha-value>)",
         primary: {
           main: "rgba(var(--color-primary) / <alpha-value>)",
           hover: "rgba(var(--color-primary-hover) / <alpha-value>)",

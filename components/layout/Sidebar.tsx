@@ -114,8 +114,8 @@ function Sidebar({ children }: React.PropsWithChildren) {
             "bg-pink fixed top-0 z-10 h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8",
             "transition-transform",
             isOpened
-              ? "translate-x-0 transform bg-primary-main"
-              : "  -translate-x-full transform bg-primary-main",
+              ? "translate-x-0 transform bg-sidebar"
+              : "  -translate-x-full transform bg-sidebar",
           )}
         >
           <div className="left-0 flex h-full flex-col items-center opacity-100">
@@ -177,7 +177,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
           </div>
         </aside>
       </div>
-      <aside className="sticky top-0 hidden h-[100dvh] flex-col items-center bg-primary-main px-8 py-4 lgw-smh:flex">
+      <aside className="sticky top-0 hidden h-[100dvh] flex-col items-center bg-sidebar px-8 py-4 lgw-smh:flex">
         <Link
           href={user ? "/dashboard" : "/schedule"}
           onClick={() => setOpened(false)}

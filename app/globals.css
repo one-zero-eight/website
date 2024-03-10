@@ -12,6 +12,7 @@
     --color-base: 255 255 255; /* #FFFFFF */
     --color-primary: 242 243 245; /* #F2F3F5 */
     --color-primary-hover: 223 225 229; /* #DFE1E5 */
+    --color-sidebar: 242 243 245; /* #F2F3F5 */
     --color-secondary: 227 229 232; /* #E3E5E8 */
     --color-secondary-hover: 210 212 216; /* #D2D4D8 */
     --color-border: 211 211 211; /* #D3D3D3 */
@@ -30,22 +31,23 @@
   :root[class~="dark"] {
     color-scheme: dark;
     --color-base: 11 11 11; /* #0B0B0B */
-    --color-primary: 23 23 23; /* #171717 */
-    --color-primary-hover: 34 34 34; /* #222222 */
+    --color-primary: 38 38 38; /* #262626 */
+    --color-primary-hover: 28 28 28; /* #1C1C1C */
+    --color-sidebar: 27 27 27; /* #1B1B1B */
     --color-secondary: 34 34 34; /* #222222 */
-    --color-secondary-hover: 40 40 40; /* #282828 */
+    --color-secondary-hover: 55 55 55; /* #373737 */
     --color-border: 44 44 44; /* #2C2C2C */
     --color-border-hover: 60 60 60;
     --color-disabled: 43 43 43; /* #2B2B2B */
-    --color-inactive: 65 65 65; /* #414141 */
+    --color-inactive: 105 105 105; /* #696969 */
     --color-icon: 255 255 255; /* #FFFFFF7F */
     --color-icon-hover: 255 255 255; /* #FFFFFFBF */
     --color-text: 255 255 255; /* #FFFFFF */
     --color-text-secondary: 255 255 255; /* #FFFFFFBF */
     --color-text-transparent: 255 255 255; /* #FFFFFF7F */
-    --color-section-g-start: 154 46 255; /* #9A2EFF */
-    --color-section-g-end: 110 53 162; /* #6E35A2 */
-    --color-focus: 151 71 255; /* #9747FF */
+    --color-section-g-start: 190 97 255; /* #BE61FF */
+    --color-section-g-end: 209 35 162; /* #D1233E */
+    --color-focus: 166 97 255; /* #A661FF */
   }
 }
 
