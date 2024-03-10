@@ -1,13 +1,13 @@
 "use client";
+import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 import SearchBar from "@/components/schedule/SearchBar";
+import { GroupCardTagSkeleton } from "@/components/schedule/skeletons/GroupCardTagSkeleton";
 import { getFirstTagByType } from "@/lib/event-group";
 import { useEventGroupsListEventGroups, ViewEventGroup } from "@/lib/events";
 import { getCategoryInfoBySlug } from "@/lib/events-view-config";
 import React, { useState } from "react";
 import CategoriesDropdown from "./CategoriesDropdown";
 import FilterDropdown from "./FilterDropdown";
-import { GroupCardTagSkeleton } from "@/components/schedule/skeletons/GroupCardTagSkeleton";
-import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 
 export type ScheduleListProps = {
   category: string;
@@ -29,32 +29,35 @@ export default function ScheduleList({ category }: ScheduleListProps) {
     .concat(Object.values(filters).filter((v) => v !== undefined) as string[]);
 
   // Apply filters and group elements
-  const groups =
-    data?.groups
-      // Filter by tags
-      .filter((v) =>
-        tagsFilter.every(
-          (tag) => v.tags?.findIndex((t) => t.alias === tag) !== -1,
-        ),
-      )
-      // Filter by search
-      .filter((v) =>
-        v.name?.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-      )
-      // Group by tag
-      .reduce(
-        (acc, v) => {
-          let tag = "";
-          if (categoryInfo?.groupingTagType !== undefined) {
-            tag =
-              getFirstTagByType(v, categoryInfo?.groupingTagType)?.name || "";
-          }
-          if (acc[tag] === undefined) acc[tag] = [];
-          acc[tag].push(v);
-          return acc;
-        },
-        {} as { [key: string]: ViewEventGroup[] },
-      ) || {};
+  const groups = !data
+    ? {}
+    : data.groups
+        // Filter by tags
+        .filter((v) =>
+          tagsFilter.every(
+            (tag) => v.tags?.findIndex((t) => t.alias === tag) !== -1,
+          ),
+        )
+        // Filter by search
+        .filter((v) =>
+          v.name?.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
+        )
+        // Sort by alias
+        .sort((a, b) => a.alias.localeCompare(b.alias))
+        // Group by tag
+        .reduce(
+          (acc, v) => {
+            let tag = "";
+            if (categoryInfo?.groupingTagType !== undefined) {
+              tag =
+                getFirstTagByType(v, categoryInfo?.groupingTagType)?.name || "";
+            }
+            if (acc[tag] === undefined) acc[tag] = [];
+            acc[tag].push(v);
+            return acc;
+          },
+          {} as { [key: string]: ViewEventGroup[] },
+        );
 
   return (
     <>
