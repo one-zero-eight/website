@@ -19,6 +19,7 @@ module.exports = {
       colors: {
         base: "rgba(var(--color-base) / <alpha-value>)",
         sidebar: "rgba(var(--color-sidebar) / <alpha-value>)",
+        popup: "rgba(var(--color-popup) / <alpha-value>)",
         primary: {
           main: "rgba(var(--color-primary) / <alpha-value>)",
           hover: "rgba(var(--color-primary-hover) / <alpha-value>)",
@@ -44,7 +45,7 @@ module.exports = {
         },
         section_g_start: "rgba(var(--color-section-g-start) / <alpha-value>)",
         section_g_end: "rgba(var(--color-section-g-end) / <alpha-value>)",
-        focus_color: "rgba(var(--color-focus) / <alpha-value>)",
+        focus: "rgba(var(--color-focus) / <alpha-value>)",
       },
       boxShadow: {
         "5xl": "0 0 35px 0 rgba(151, 71, 255, 0.75)",
