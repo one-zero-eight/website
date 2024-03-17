@@ -25,15 +25,15 @@
     "@fullcalendar/react": "^6.1.11",
     "@fullcalendar/timegrid": "^6.1.11",
     "@headlessui/react": "^1.7.18",
-    "@iconify/json": "^2.2.190",
+    "@iconify/json": "^2.2.192",
     "@iconify/tailwind": "^0.1.4",
     "@tailwindcss/container-queries": "^0.1.1",
-    "@tanstack/react-query": "^5.25.0",
+    "@tanstack/react-query": "^5.28.4",
     "@types/node": "20.10.4",
     "@types/react": "18.2.45",
     "@types/react-dom": "18.2.17",
     "autoprefixer": "10.4.16",
-    "axios": "^1.6.7",
+    "axios": "^1.6.8",
     "bumpp": "^9.4.0",
     "clsx": "^2.1.0",
     "eslint": "8.55.0",
@@ -51,7 +51,7 @@
     "tailwindcss": "3.3.6",
     "taze": "^0.13.3",
     "typescript": "5.3.3",
-    "usehooks-ts": "^2.16.0"
+    "usehooks-ts": "^3.0.1"
   },
   "lint-staged": {
     "{app,components,lib,public}/**/*.{js,ts,jsx,tsx}": [
