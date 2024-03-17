@@ -111,7 +111,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
         />
         <aside
           className={clsx(
-            "bg-pink fixed top-0 z-10 h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8",
+            "fixed top-0 z-10 h-[100dvh] flex-col items-center justify-center overflow-y-auto px-8 py-8",
             "transition-transform",
             isOpened
               ? "translate-x-0 transform bg-sidebar"
