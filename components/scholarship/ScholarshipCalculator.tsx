@@ -190,7 +190,7 @@ export default function ScholarshipCalculator() {
           onChange={(e) => onMarksChange(e.target.value, isB23)}
           autoComplete="off"
           spellCheck={false}
-          className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-section_g_start bg-base p-3 font-handwritten text-transparent caret-section_g_start outline-none"
+          className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-focus bg-base p-3 font-handwritten text-transparent caret-focus outline-none"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
           rows={1}
           maxLength={50}
@@ -209,7 +209,7 @@ export default function ScholarshipCalculator() {
         {marks.length !== 0 && (
           <button
             onClick={() => onMarksChange("", isB23)}
-            className="absolute -right-1 -top-1 h-7 w-7 rounded-2xl bg-base p-2 align-middle text-lg text-section_g_start"
+            className="absolute -right-1 -top-1 h-7 w-7 rounded-2xl bg-base p-2 align-middle text-lg text-focus"
             style={{ lineHeight: 0 }}
           >
             X
@@ -218,14 +218,12 @@ export default function ScholarshipCalculator() {
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
         <div className="text-xl font-medium">Course:</div>
-        <div className="flex w-32 flex-row overflow-clip rounded-2xl border-2 border-section_g_start bg-base">
+        <div className="flex w-32 flex-row overflow-clip rounded-2xl border-2 border-focus bg-base">
           <button
             onClick={() => onMarksChange(marks.join(""), true)}
             className={clsx(
-              "w-full rounded-l-2xl p-2 text-center font-handwritten transition-colors hover:bg-section_g_start/20",
-              isB23
-                ? "bg-section_g_start/10 text-section_g_start"
-                : "bg-transparent text-gray-500",
+              "w-full rounded-l-2xl p-2 text-center font-handwritten transition-colors hover:bg-focus/20",
+              isB23 ? "bg-focus/10 text-focus" : "bg-transparent text-gray-500",
             )}
           >
             B23
@@ -233,9 +231,9 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), false)}
             className={clsx(
-              "w-full rounded-r-2xl p-2 text-center font-handwritten transition-colors hover:bg-section_g_start/20",
+              "w-full rounded-r-2xl p-2 text-center font-handwritten transition-colors hover:bg-focus/20",
               !isB23
-                ? "bg-section_g_start/10 text-section_g_start"
+                ? "bg-focus/10 text-focus"
                 : "bg-transparent text-gray-500",
             )}
           >
@@ -256,7 +254,7 @@ export default function ScholarshipCalculator() {
           spellCheck={false}
           className={clsx(
             "w-32 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
-            !errorGPA ? "border-section_g_start" : "border-red-500",
+            !errorGPA ? "border-focus" : "border-red-500",
           )}
           style={{
             color: !errorGPA ? calculateColorGPA(Number(displayGPA)) : "red",
@@ -276,7 +274,7 @@ export default function ScholarshipCalculator() {
           spellCheck={false}
           className={clsx(
             "rubles-input w-32 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
-            !errorScholarship ? "border-section_g_start" : "border-red-500",
+            !errorScholarship ? "border-focus" : "border-red-500",
           )}
           style={{
             color: !errorScholarship

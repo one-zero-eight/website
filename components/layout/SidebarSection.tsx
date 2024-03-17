@@ -17,7 +17,7 @@ function SidebarSection(props: SectionProps) {
       className={clsx(
         "flex select-none flex-row justify-center gap-4 rounded-2xl p-2 hover:bg-gray-500/10",
         props.selected
-          ? "text-focus_color"
+          ? "text-focus"
           : props.path === "#"
             ? "text-disabled"
             : "text-inactive",

@@ -13,7 +13,7 @@ export default function SignInButton(props: SignInButtonProps) {
       rel="nofollow noindex"
       {...props}
       className={clsx(
-        "flex h-14 w-fit items-center justify-center gap-4 rounded-2xl border-2 border-focus_color bg-base px-6 py-2 text-xl font-medium hover:bg-primary-hover",
+        "flex h-14 w-fit items-center justify-center gap-4 rounded-2xl border-2 border-focus bg-base px-6 py-2 text-xl font-medium hover:bg-primary-hover",
         props.className,
       )}
     >

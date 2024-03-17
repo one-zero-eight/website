@@ -17,7 +17,7 @@ export default function SwitchThemeButton() {
       }
     >
       <span className="icon-[material-symbols--light-mode-outline] flex text-4xl text-[#F0B132] dark:hidden" />
-      <span className="icon-[material-symbols--dark-mode-outline] hidden text-4xl text-focus_color dark:flex" />
+      <span className="icon-[material-symbols--dark-mode-outline] hidden text-4xl text-focus dark:flex" />
     </button>
   );
 }
