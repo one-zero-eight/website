@@ -59,7 +59,7 @@ export default function Page({ params: { alias } }: Props) {
                 {...getFloatingProps()}
                 className="flex h-fit w-full flex-col p-4 @2xl/event:w-3/4 @5xl/event:w-1/2"
               >
-                <div className="overflow-hidden rounded-2xl bg-primary-main">
+                <div className="overflow-hidden rounded-2xl bg-popup">
                   {/* EventGroup banner */}
                   <div
                     style={{

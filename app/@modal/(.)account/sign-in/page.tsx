@@ -49,7 +49,7 @@ export default function Page() {
                 {...getFloatingProps()}
                 className="flex p-4"
               >
-                <div className="h-fit max-w-2xl overflow-hidden rounded-2xl bg-primary-main">
+                <div className="h-fit max-w-2xl overflow-hidden rounded-2xl bg-popup">
                   <div className="flex flex-col p-4 @lg/sign-in:p-8">
                     <div className="mb-2 flex w-full flex-row">
                       <div className="grow items-center text-3xl font-semibold">

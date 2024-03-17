@@ -93,7 +93,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
               className={clsx(
-                "absolute z-10 w-fit rounded-2xl border-2 border-border/50 bg-primary-main p-4",
+                "absolute z-10 w-fit rounded-2xl border-2 border-border/50 bg-popup p-4",
                 isMobile
                   ? "left-0 top-[18p]"
                   : isSidebar
@@ -129,7 +129,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                       setIsOpen(false);
                       setSidebarOpened(false);
                     }}
-                    className="flex w-full cursor-pointer flex-row items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-secondary-main px-6 py-2 text-center text-text-main/75 hover:bg-secondary-hover"
+                    className="flex w-full cursor-pointer flex-row items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-border px-6 py-2 text-center text-text-main/75 hover:bg-border-hover"
                   >
                     <span className="icon-[material-symbols--logout] text-2xl" />
                     Sign out

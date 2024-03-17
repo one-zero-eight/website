@@ -66,7 +66,7 @@ export default function Page({ params: { alias } }: Props) {
                 {...getFloatingProps()}
                 className="flex h-fit w-full flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-1/2"
               >
-                <div className="overflow-hidden rounded-2xl bg-primary-main">
+                <div className="overflow-hidden rounded-2xl bg-popup">
                   <div className="flex flex-col p-4 @2xl/export:p-8">
                     {/* Heading and description */}
                     <div className="mb-2 flex w-full flex-row">
