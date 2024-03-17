@@ -25,7 +25,7 @@
     --color-text-secondary: 0 0 0; /* #000000BF */
     --color-text-transparent: 0 0 0; /* #00000080 */
     --color-section-g-start: 154 46 255; /* #9A2EFF */
-    --color-section-g-end: 110 53 162; /* #6E35A2 */
+    --color-section-g-end: 209 35 162; /* #D1233E */
     --color-focus: 151 71 255; /* #9747FF */
   }
   :root[class~="dark"] {
@@ -45,9 +45,9 @@
     --color-text: 255 255 255; /* #FFFFFF */
     --color-text-secondary: 255 255 255; /* #FFFFFFBF */
     --color-text-transparent: 255 255 255; /* #FFFFFF7F */
-    --color-section-g-start: 190 97 255; /* #BE61FF */
+    --color-section-g-start: 154 46 255; /* #9A2EFF */
     --color-section-g-end: 209 35 162; /* #D1233E */
-    --color-focus: 166 97 255; /* #A661FF */
+    --color-focus: 151 71 255; /* #9747FF */
   }
 }
 
