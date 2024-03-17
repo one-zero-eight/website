@@ -10,9 +10,10 @@
     color-scheme: light;
     accent-color: var(--color-focus);
     --color-base: 255 255 255; /* #FFFFFF */
-    --color-primary: 242 243 245; /* #F2F3F5 */
+    --color-primary: 235 237 239; /* #EBEDEF */
     --color-primary-hover: 223 225 229; /* #DFE1E5 */
     --color-sidebar: 242 243 245; /* #F2F3F5 */
+    --color-popup: 242 243 245; /* #F2F3F5 */
     --color-secondary: 227 229 232; /* #E3E5E8 */
     --color-secondary-hover: 210 212 216; /* #D2D4D8 */
     --color-border: 211 211 211; /* #D3D3D3 */
@@ -34,6 +35,7 @@
     --color-primary: 38 38 38; /* #262626 */
     --color-primary-hover: 28 28 28; /* #1C1C1C */
     --color-sidebar: 27 27 27; /* #1B1B1B */
+    --color-popup: 27 27 27; /* #1B1B1B */
     --color-secondary: 34 34 34; /* #222222 */
     --color-secondary-hover: 55 55 55; /* #373737 */
     --color-border: 44 44 44; /* #2C2C2C */
