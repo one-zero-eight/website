@@ -4,8 +4,7 @@ import { useUsersGetMe } from "@/lib/events";
 import UserMenu from "@/components/layout/UserMenu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { useMediaQuery } from "usehooks-ts";
+import React, { useState } from "react";
 import Logo from "../icons/Logo";
 import SidebarSection from "@/components/layout/SidebarSection";
 import clsx from "clsx";
@@ -86,29 +85,17 @@ const externalItems: Item[] = [
 export const SidebarContext = React.createContext<{
   isOpened: boolean;
   setOpened: (opened: boolean) => void;
-  isMobile: boolean;
-}>({ isOpened: false, setOpened: () => {}, isMobile: false });
+}>({ isOpened: false, setOpened: () => {} });
 
 function Sidebar({ children }: React.PropsWithChildren) {
   const { data: user } = useUsersGetMe();
   const pathname = usePathname();
   const currentItem = items.find((v) => pathname.startsWith(v.path));
   const selection = currentItem?.title;
-  const isMobile = !useMediaQuery(
-    "(min-width: 1024px) and (min-height: 600px)",
-  );
   const [isOpened, setOpened] = useState(false);
 
-  useEffect(() => {
-    if (!isMobile) {
-      setOpened(true);
-    } else {
-      setOpened(false);
-    }
-  }, [isMobile]);
-
   return (
-    <SidebarContext.Provider value={{ isOpened, setOpened, isMobile }}>
+    <SidebarContext.Provider value={{ isOpened, setOpened }}>
       <div
         className={clsx(
           "fixed inset-0 flex transition-colors lgw-smh:hidden",
@@ -125,7 +112,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
         <div className="flex flex-col items-center justify-center px-8 py-8 lgw-smh:h-full lgw-smh:py-4">
           <Link
             href={user ? "/dashboard" : "/schedule"}
-            onClick={() => setOpened(!isMobile)}
+            onClick={() => setOpened(false)}
             className="mb-4 flex"
           >
             <Logo className="fill-text-main" />
@@ -139,7 +126,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 selected={selection === item.title}
                 path={item.path}
                 onClick={() =>
-                  item.path !== "#" ? setOpened(!isMobile) : undefined
+                  item.path !== "#" ? setOpened(false) : undefined
                 }
               />
             ))}
@@ -152,7 +139,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 selected={false}
                 path={item.path}
                 onClick={() =>
-                  item.path !== "#" ? setOpened(!isMobile) : undefined
+                  item.path !== "#" ? setOpened(false) : undefined
                 }
                 external={true}
               />
@@ -168,12 +155,10 @@ function Sidebar({ children }: React.PropsWithChildren) {
             className="text-center lgw-smh:text-left"
             href="https://t.me/one_zero_eight"
           >
-            {!isMobile ? (
-              <>
-                See you at
-                <br />
-              </>
-            ) : null}
+            <span className="hidden lgw-smh:inline">
+              See you at
+              <br />
+            </span>
             <span className="underline underline-offset-2">
               one-zero-eight
             </span>{" "}
