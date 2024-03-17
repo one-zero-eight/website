@@ -5,7 +5,7 @@ import UserMenu from "@/components/layout/UserMenu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { useWindowSize } from "usehooks-ts";
+import { useMediaQuery } from "usehooks-ts";
 import Logo from "../icons/Logo";
 import SidebarSection from "@/components/layout/SidebarSection";
 import clsx from "clsx";
@@ -94,96 +94,93 @@ function Sidebar({ children }: React.PropsWithChildren) {
   const pathname = usePathname();
   const currentItem = items.find((v) => pathname.startsWith(v.path));
   const selection = currentItem?.title;
-  const { width, height } = useWindowSize();
-  const [isMobile, setMobile] = useState(false);
+  const isMobile = !useMediaQuery(
+    "(min-width: 1024px) and (min-height: 600px)",
+  );
   const [isOpened, setOpened] = useState(false);
 
   useEffect(() => {
-    if (width >= 1024 && height >= 600) {
-      setMobile(false);
+    if (!isMobile) {
       setOpened(true);
     } else {
-      setMobile(true);
       setOpened(false);
     }
-  }, [width, height]);
+  }, [isMobile]);
 
   return (
     <SidebarContext.Provider value={{ isOpened, setOpened, isMobile }}>
-      {isMobile && isOpened ? (
-          <div
-              className={clsx(
-                  "fixed inset-0 transition-colors",
-                  isOpened ? "visible z-[2] block bg-black/50" : "z-[-1] bg-black/0",
-              )}
-              onClick={() => setOpened(false)}
-          />
-      ) : (
-          <></>
-      )}
-        <aside
-          className={clsx(
-            "flex h-[100dvh] flex-col items-center bg-sidebar px-8 transition-transform",
-              isMobile ? "fixed z-10 overflow-y-auto py-8" : "sticky py-4",
-              isOpened ? "translate-x-0 transform" : "-translate-x-full transform",
-          )}
-        >
-            <Link
-              href={user ? "/dashboard" : "/schedule"}
-              onClick={() => setOpened(false)}
-              className="mb-4 flex"
-            >
-              <Logo className="fill-text-main" />
-            </Link>
-            <nav className="flex-col">
-              {items.map((item) => (
-                <div
-                  key={item.title}
-                  onClick={() =>
-                    item.path !== "#" ? setOpened(false) : undefined
-                  }
-                >
-                  <SidebarSection
-                    title={item.title}
-                    icon={item.icon}
-                    selected={selection === item.title}
-                    path={item.path}
-                    onClick={() => setOpened(false)}
-                  />
-                </div>
-              ))}
-              <div className="mx-2.5 my-1 h-0.5 rounded-full bg-gray-500/20" />
-              {externalItems.map((item) => (
-                <div
-                  key={item.title}
-                  onClick={() =>
-                    item.path !== "#" ? setOpened(false) : undefined
-                  }
-                >
-                  <SidebarSection
-                    title={item.title}
-                    icon={item.icon}
-                    selected={false}
-                    path={item.path}
-                    onClick={() => setOpened(false)}
-                    external={true}
-                  />
-                </div>
-              ))}
-            </nav>
-            <div className="flex grow"></div>
-            <br />
-            <div className="mb-2 flex w-full flex-row items-center justify-center gap-4">
-              <SwitchThemeButton />
-              <UserMenu isMobile={true} isSidebar={true} />
-            </div>
-            <a
-              className="w-full text-center"
-              href="https://t.me/one_zero_eight"
-            >
-              one-zero-eight 💜
-            </a>
-        </aside>
+      <div
+        className={clsx(
+          "fixed inset-0 flex transition-colors lgw-smh:hidden",
+          isOpened ? "visible z-[2] block bg-black/50" : "z-[-1] bg-black/0",
+        )}
+        onClick={() => setOpened(false)}
+      />
+      <aside
+        className={clsx(
+          "fixed top-0 z-10 h-[100dvh] overflow-y-auto bg-sidebar transition-transform lgw-smh:sticky lgw-smh:translate-x-0 lgw-smh:overflow-visible lgw-smh:transition-none",
+          isOpened ? "translate-x-0 transform" : "-translate-x-full transform",
+        )}
+      >
+        <div className="flex flex-col items-center justify-center px-8 py-8 lgw-smh:h-full lgw-smh:py-4">
+          <Link
+            href={user ? "/dashboard" : "/schedule"}
+            onClick={() => setOpened(!isMobile)}
+            className="mb-4 flex"
+          >
+            <Logo className="fill-text-main" />
+          </Link>
+          <nav className="flex-col">
+            {items.map((item) => (
+              <SidebarSection
+                key={item.title}
+                title={item.title}
+                icon={item.icon}
+                selected={selection === item.title}
+                path={item.path}
+                onClick={() =>
+                  item.path !== "#" ? setOpened(!isMobile) : undefined
+                }
+              />
+            ))}
+            <div className="mx-2.5 my-1 h-0.5 rounded-full bg-gray-500/20" />
+            {externalItems.map((item) => (
+              <SidebarSection
+                key={item.title}
+                title={item.title}
+                icon={item.icon}
+                selected={false}
+                path={item.path}
+                onClick={() =>
+                  item.path !== "#" ? setOpened(!isMobile) : undefined
+                }
+                external={true}
+              />
+            ))}
+          </nav>
+          <div className="flex grow"></div>
+          <br />
+          <div className="mb-4 flex w-full flex-row items-center justify-center gap-4 lgw-smh:hidden">
+            <SwitchThemeButton />
+            <UserMenu isMobile={true} isSidebar={true} />
+          </div>
+          <a
+            className="text-center lgw-smh:text-left"
+            href="https://t.me/one_zero_eight"
+          >
+            {!isMobile ? (
+              <>
+                See you at
+                <br />
+              </>
+            ) : null}
+            <span className="underline underline-offset-2">
+              one-zero-eight
+            </span>{" "}
+            💜
+          </a>
+        </div>
+      </aside>
       {children}
     </SidebarContext.Provider>
   );
