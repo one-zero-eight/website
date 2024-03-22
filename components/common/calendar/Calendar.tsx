@@ -226,7 +226,7 @@ function Calendar({
         scrollTime="07:30:00" // Scroll to 7:30am on launch
         scrollTimeReset={false} // Do not reset scroll on date switch
         noEventsContent={() => "No events this month"} // Custom message
-        viewDidMount={({ view }) => setCalendarView(view.type)}
+        datesSet={({ view }) => setCalendarView(view.type)}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
