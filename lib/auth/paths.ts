@@ -1,7 +1,7 @@
 "use client";
 import { useIsClient } from "usehooks-ts";
 
-export function useAuthPaths() {
+export function useAuthPaths(signInRedirect?: string) {
   const isClient = useIsClient();
   const currentURL = isClient ? window.location.href : "/";
 
@@ -9,7 +9,7 @@ export function useAuthPaths() {
   const signInURL = new URL(loginEndpoint);
   signInURL.searchParams.append(
     "redirect_uri",
-    isClient ? `${window.location.origin}/dashboard` : "/",
+    signInRedirect ?? (isClient ? `${window.location.origin}/dashboard` : "/"),
   );
 
   const logoutEndpoint = `${process.env.NEXT_PUBLIC_ACCOUNTS_API_URL}/logout`;
