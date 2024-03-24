@@ -1,4 +1,4 @@
-import { useAuthPaths } from "@/lib/auth";
+import { useAuthPaths } from "@/lib/auth/paths";
 import clsx from "clsx";
 import Link from "next/link";
 

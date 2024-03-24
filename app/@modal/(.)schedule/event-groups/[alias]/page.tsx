@@ -1,9 +1,8 @@
 "use client";
-import {
-  getICSLink,
-  useEventGroupsFindEventGroupByAlias,
-  useUsersGetMe,
-} from "@/lib/events";
+import Calendar from "@/components/common/calendar/Calendar";
+import ExportButton from "@/components/schedule/ExportButton";
+import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
+import { events, getICSLink } from "@/lib/events";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -16,9 +15,6 @@ import {
 } from "@floating-ui/react";
 import { useRouter } from "next/navigation";
 import React from "react";
-import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
-import ExportButton from "@/components/schedule/ExportButton";
-import Calendar from "@/components/common/calendar/Calendar";
 
 export type Props = {
   params: { alias: string };
@@ -26,8 +22,8 @@ export type Props = {
 
 export default function Page({ params: { alias } }: Props) {
   const router = useRouter();
-  const { data: user } = useUsersGetMe();
-  const { data: group } = useEventGroupsFindEventGroupByAlias({ alias });
+  const { data: eventsUser } = events.useUsersGetMe();
+  const { data: group } = events.useEventGroupsFindEventGroupByAlias({ alias });
 
   const { context, refs } = useFloating({
     open: true,
@@ -134,7 +130,7 @@ export default function Page({ params: { alias } }: Props) {
                     <div className="-mx-4 -mb-4 rounded-b-2xl @2xl/event:-mx-8 @2xl/event:-mb-8">
                       {group ? (
                         <Calendar
-                          urls={[getICSLink(group.alias, user?.id)]}
+                          urls={[getICSLink(group.alias, eventsUser?.id)]}
                           viewId="popup"
                         />
                       ) : (

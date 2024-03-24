@@ -2,6 +2,7 @@ import CustomQueryClientProvider from "@/app/_query_provider";
 import ThemedHtml from "@/app/theme";
 import Sidebar from "@/components/layout/Sidebar";
 import ComposeChildren from "@/components/utils/ComposeChildren";
+import { AuthManager } from "@/lib/auth/AuthManager";
 import GoogleAnalytics from "@/lib/tracking/GoogleAnalytics";
 import UserInfoTracker from "@/lib/tracking/UserInfoTracker";
 import YandexMetrika from "@/lib/tracking/YandexMetrika";
@@ -61,6 +62,7 @@ export default function RootLayout({
         <ComposeChildren>
           {/* Providers */}
           <CustomQueryClientProvider />
+          <AuthManager />
           <UserInfoTracker />
 
           {/* Content */}

@@ -9,3 +9,11 @@ export function getICSLink(
     userId || 0
   }&export_type=${exportType}`;
 }
+
+export function getMusicRoomLink() {
+  return `${EVENTS_API_URL}/music-room.ics`;
+}
+
+export function getMyMusicRoomLink() {
+  return `${EVENTS_API_URL}/users/me/music-room.ics`;
+}

@@ -1,6 +1,9 @@
 import { NavbarTemplate } from "@/components/layout/Navbar";
 import ScheduleList from "@/components/schedule/ScheduleList";
-import { getCategoryInfoBySlug, viewConfig } from "@/lib/events-view-config";
+import {
+  getCategoryInfoBySlug,
+  viewConfig,
+} from "@/lib/events/events-view-config";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import React from "react";

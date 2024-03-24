@@ -1,13 +1,13 @@
 import Tooltip from "@/components/common/Tooltip";
-import { useEventGroup } from "@/lib/event-group";
-import { useUsersGetMe } from "@/lib/events";
+import { useMe } from "@/lib/auth/user";
+import { useEventGroup } from "@/lib/events/event-group";
 import { useRouter } from "next/navigation";
 
 export default function FavoriteButton({ groupId }: { groupId: number }) {
   const router = useRouter();
   const { switchFavorite, isInFavorites, isPredefined } =
     useEventGroup(groupId);
-  const { data: user, isError } = useUsersGetMe();
+  const { me } = useMe();
 
   return (
     <Tooltip
@@ -22,7 +22,7 @@ export default function FavoriteButton({ groupId }: { groupId: number }) {
       <button
         onClick={(e) => {
           e.stopPropagation();
-          if (isError || !user) {
+          if (!me) {
             router.push("/account/sign-in");
           } else {
             switchFavorite && switchFavorite();

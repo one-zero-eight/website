@@ -29,7 +29,8 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { axiosInstance } from "./axios-instance";
+import { axiosQuery } from "./axios";
+import { queryOptionsMutator } from "./query";
 
 export type IcsGetEventGroupIcsByAliasParams = {
   user_id: number;
@@ -75,7 +76,7 @@ export type UsersGenerateUserScheduleKeyParams = {
   resource_path: string;
 };
 
-export type UsersHideMusicRoomParams = {
+export type UsersHideTargetParams = {
   hide?: boolean;
 };
 
@@ -110,13 +111,17 @@ export type ViewUserName = string | null;
 
 export type ViewUserLinkedCalendars = { [key: string]: LinkedCalendarView };
 
+export type ViewUserInnohassleId = string | null;
+
 /**
  * Represents a user instance from the database excluding sensitive information.
  */
 export interface ViewUser {
   email: string;
-  favorites_association?: UserXFavoriteGroupView[];
+  favorite_event_groups?: number[];
+  hidden_event_groups?: number[];
   id: number;
+  innohassle_id?: ViewUserInnohassleId;
   linked_calendars?: ViewUserLinkedCalendars;
   moodle_hidden: boolean;
   music_room_hidden: boolean;
@@ -168,14 +173,8 @@ export interface ValidationError {
   type: string;
 }
 
-/**
- * Represents a group instance from the database excluding sensitive information.
- */
-export interface UserXFavoriteGroupView {
-  event_group: ViewEventGroup;
-  hidden: boolean;
-  predefined?: boolean;
-  user_id: number;
+export interface UserPredefinedGroupsResponse {
+  event_groups: number[];
 }
 
 export type UpdateEventGroupPath = string | null;
@@ -281,10 +280,10 @@ type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
  * @summary Get Me
  */
 export const usersGetMe = (
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<ViewUser>(
+  return axiosQuery<ViewUser>(
     { url: `/users/me`, method: "GET", signal },
     options,
   );
@@ -294,14 +293,14 @@ export const getUsersGetMeQueryKey = () => {
   return [`/users/me`] as const;
 };
 
-export const getUsersGetMeQueryOptions = <
+export const useUsersGetMeQueryOptions = <
   TData = Awaited<ReturnType<typeof usersGetMe>>,
   TError = void,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof usersGetMe>>, TError, TData>
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -311,7 +310,13 @@ export const getUsersGetMeQueryOptions = <
     signal,
   }) => usersGetMe(requestOptions, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof usersGetMe>>,
     TError,
     TData
@@ -333,9 +338,93 @@ export const useUsersGetMe = <
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof usersGetMe>>, TError, TData>
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getUsersGetMeQueryOptions(options);
+  const queryOptions = useUsersGetMeQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get predefined event groups for user
+ * @summary Get Predefined
+ */
+export const usersGetPredefined = (
+  options?: SecondParameter<typeof axiosQuery>,
+  signal?: AbortSignal,
+) => {
+  return axiosQuery<UserPredefinedGroupsResponse>(
+    { url: `/users/me/predefined`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getUsersGetPredefinedQueryKey = () => {
+  return [`/users/me/predefined`] as const;
+};
+
+export const useUsersGetPredefinedQueryOptions = <
+  TData = Awaited<ReturnType<typeof usersGetPredefined>>,
+  TError = void,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof usersGetPredefined>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getUsersGetPredefinedQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof usersGetPredefined>>
+  > = ({ signal }) => usersGetPredefined(requestOptions, signal);
+
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
+    Awaited<ReturnType<typeof usersGetPredefined>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type UsersGetPredefinedQueryResult = NonNullable<
+  Awaited<ReturnType<typeof usersGetPredefined>>
+>;
+export type UsersGetPredefinedQueryError = void;
+
+/**
+ * @summary Get Predefined
+ */
+export const useUsersGetPredefined = <
+  TData = Awaited<ReturnType<typeof usersGetPredefined>>,
+  TError = void,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof usersGetPredefined>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useUsersGetPredefinedQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -352,9 +441,9 @@ export const useUsersGetMe = <
  */
 export const usersAddFavorite = (
   params: UsersAddFavoriteParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
 ) => {
-  return axiosInstance<ViewUser>(
+  return axiosQuery<ViewUser>(
     { url: `/users/me/favorites`, method: "POST", params },
     options,
   );
@@ -370,7 +459,7 @@ export const getUsersAddFavoriteMutationOptions = <
     { params: UsersAddFavoriteParams },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof usersAddFavorite>>,
   TError,
@@ -410,7 +499,7 @@ export const useUsersAddFavorite = <
     { params: UsersAddFavoriteParams },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const mutationOptions = getUsersAddFavoriteMutationOptions(options);
 
@@ -423,9 +512,9 @@ export const useUsersAddFavorite = <
  */
 export const usersDeleteFavorite = (
   params: UsersDeleteFavoriteParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
 ) => {
-  return axiosInstance<ViewUser>(
+  return axiosQuery<ViewUser>(
     { url: `/users/me/favorites`, method: "DELETE", params },
     options,
   );
@@ -441,7 +530,7 @@ export const getUsersDeleteFavoriteMutationOptions = <
     { params: UsersDeleteFavoriteParams },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof usersDeleteFavorite>>,
   TError,
@@ -481,7 +570,7 @@ export const useUsersDeleteFavorite = <
     { params: UsersDeleteFavoriteParams },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const mutationOptions = getUsersDeleteFavoriteMutationOptions(options);
 
@@ -494,9 +583,9 @@ export const useUsersDeleteFavorite = <
  */
 export const usersHideFavorite = (
   params: UsersHideFavoriteParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
 ) => {
-  return axiosInstance<ViewUser>(
+  return axiosQuery<ViewUser>(
     { url: `/users/me/favorites/hide`, method: "POST", params },
     options,
   );
@@ -512,7 +601,7 @@ export const getUsersHideFavoriteMutationOptions = <
     { params: UsersHideFavoriteParams },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof usersHideFavorite>>,
   TError,
@@ -552,7 +641,7 @@ export const useUsersHideFavorite = <
     { params: UsersHideFavoriteParams },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const mutationOptions = getUsersHideFavoriteMutationOptions(options);
 
@@ -561,84 +650,84 @@ export const useUsersHideFavorite = <
 
 /**
  * Hide music room, sports or moodle from current user
- * @summary Hide Music Room
+ * @summary Hide Target
  */
-export const usersHideMusicRoom = (
+export const usersHideTarget = (
   target: "music-room" | "sports" | "moodle",
-  params?: UsersHideMusicRoomParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  params?: UsersHideTargetParams,
+  options?: SecondParameter<typeof axiosQuery>,
 ) => {
-  return axiosInstance<ViewUser>(
+  return axiosQuery<ViewUser>(
     { url: `/users/me/${target}/hide`, method: "POST", params },
     options,
   );
 };
 
-export const getUsersHideMusicRoomMutationOptions = <
+export const getUsersHideTargetMutationOptions = <
   TError = void | HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof usersHideMusicRoom>>,
+    Awaited<ReturnType<typeof usersHideTarget>>,
     TError,
     {
       target: "music-room" | "sports" | "moodle";
-      params?: UsersHideMusicRoomParams;
+      params?: UsersHideTargetParams;
     },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof usersHideMusicRoom>>,
+  Awaited<ReturnType<typeof usersHideTarget>>,
   TError,
   {
     target: "music-room" | "sports" | "moodle";
-    params?: UsersHideMusicRoomParams;
+    params?: UsersHideTargetParams;
   },
   TContext
 > => {
   const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof usersHideMusicRoom>>,
+    Awaited<ReturnType<typeof usersHideTarget>>,
     {
       target: "music-room" | "sports" | "moodle";
-      params?: UsersHideMusicRoomParams;
+      params?: UsersHideTargetParams;
     }
   > = (props) => {
     const { target, params } = props ?? {};
 
-    return usersHideMusicRoom(target, params, requestOptions);
+    return usersHideTarget(target, params, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type UsersHideMusicRoomMutationResult = NonNullable<
-  Awaited<ReturnType<typeof usersHideMusicRoom>>
+export type UsersHideTargetMutationResult = NonNullable<
+  Awaited<ReturnType<typeof usersHideTarget>>
 >;
 
-export type UsersHideMusicRoomMutationError = void | HTTPValidationError;
+export type UsersHideTargetMutationError = void | HTTPValidationError;
 
 /**
- * @summary Hide Music Room
+ * @summary Hide Target
  */
-export const useUsersHideMusicRoom = <
+export const useUsersHideTarget = <
   TError = void | HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof usersHideMusicRoom>>,
+    Awaited<ReturnType<typeof usersHideTarget>>,
     TError,
     {
       target: "music-room" | "sports" | "moodle";
-      params?: UsersHideMusicRoomParams;
+      params?: UsersHideTargetParams;
     },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
-  const mutationOptions = getUsersHideMusicRoomMutationOptions(options);
+  const mutationOptions = getUsersHideTargetMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
@@ -649,9 +738,9 @@ export const useUsersHideMusicRoom = <
  */
 export const usersLinkCalendar = (
   linkedCalendarCreate: LinkedCalendarCreate,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
 ) => {
-  return axiosInstance<LinkedCalendarView>(
+  return axiosQuery<LinkedCalendarView>(
     {
       url: `/users/me/linked`,
       method: "POST",
@@ -672,7 +761,7 @@ export const getUsersLinkCalendarMutationOptions = <
     { data: LinkedCalendarCreate },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof usersLinkCalendar>>,
   TError,
@@ -712,7 +801,7 @@ export const useUsersLinkCalendar = <
     { data: LinkedCalendarCreate },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const mutationOptions = getUsersLinkCalendarMutationOptions(options);
 
@@ -725,10 +814,10 @@ export const useUsersLinkCalendar = <
  */
 export const usersGenerateUserScheduleKey = (
   params: UsersGenerateUserScheduleKeyParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<_GetScheduleAccessKeyResponse>(
+  return axiosQuery<_GetScheduleAccessKeyResponse>(
     { url: `/users/me/get-schedule-access-key`, method: "GET", params, signal },
     options,
   );
@@ -743,7 +832,7 @@ export const getUsersGenerateUserScheduleKeyQueryKey = (
   ] as const;
 };
 
-export const getUsersGenerateUserScheduleKeyQueryOptions = <
+export const useUsersGenerateUserScheduleKeyQueryOptions = <
   TData = Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
   TError = void | HTTPValidationError,
 >(
@@ -756,7 +845,7 @@ export const getUsersGenerateUserScheduleKeyQueryOptions = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -769,7 +858,13 @@ export const getUsersGenerateUserScheduleKeyQueryOptions = <
   > = ({ signal }) =>
     usersGenerateUserScheduleKey(params, requestOptions, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
     TError,
     TData
@@ -797,10 +892,10 @@ export const useUsersGenerateUserScheduleKey = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getUsersGenerateUserScheduleKeyQueryOptions(
+  const queryOptions = useUsersGenerateUserScheduleKeyQueryOptions(
     params,
     options,
   );
@@ -819,10 +914,10 @@ export const useUsersGenerateUserScheduleKey = <
  * @summary Get User Schedule Keys
  */
 export const usersGetUserScheduleKeys = (
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<ViewUserScheduleKey[]>(
+  return axiosQuery<ViewUserScheduleKey[]>(
     { url: `/users/me/schedule-access-keys`, method: "GET", signal },
     options,
   );
@@ -832,7 +927,7 @@ export const getUsersGetUserScheduleKeysQueryKey = () => {
   return [`/users/me/schedule-access-keys`] as const;
 };
 
-export const getUsersGetUserScheduleKeysQueryOptions = <
+export const useUsersGetUserScheduleKeysQueryOptions = <
   TData = Awaited<ReturnType<typeof usersGetUserScheduleKeys>>,
   TError = void,
 >(options?: {
@@ -843,7 +938,7 @@ export const getUsersGetUserScheduleKeysQueryOptions = <
       TData
     >
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -854,7 +949,13 @@ export const getUsersGetUserScheduleKeysQueryOptions = <
     Awaited<ReturnType<typeof usersGetUserScheduleKeys>>
   > = ({ signal }) => usersGetUserScheduleKeys(requestOptions, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof usersGetUserScheduleKeys>>,
     TError,
     TData
@@ -880,9 +981,9 @@ export const useUsersGetUserScheduleKeys = <
       TData
     >
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getUsersGetUserScheduleKeysQueryOptions(options);
+  const queryOptions = useUsersGetUserScheduleKeysQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -899,9 +1000,9 @@ export const useUsersGetUserScheduleKeys = <
  */
 export const usersDeleteUserScheduleKey = (
   params: UsersDeleteUserScheduleKeyParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
 ) => {
-  return axiosInstance<UsersDeleteUserScheduleKey200>(
+  return axiosQuery<UsersDeleteUserScheduleKey200>(
     { url: `/users/me/schedule-access-key`, method: "DELETE", params },
     options,
   );
@@ -917,7 +1018,7 @@ export const getUsersDeleteUserScheduleKeyMutationOptions = <
     { params: UsersDeleteUserScheduleKeyParams },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof usersDeleteUserScheduleKey>>,
   TError,
@@ -958,7 +1059,7 @@ export const useUsersDeleteUserScheduleKey = <
     { params: UsersDeleteUserScheduleKeyParams },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const mutationOptions = getUsersDeleteUserScheduleKeyMutationOptions(options);
 
@@ -970,10 +1071,10 @@ export const useUsersDeleteUserScheduleKey = <
  * @summary List Event Groups
  */
 export const eventGroupsListEventGroups = (
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<ListEventGroupsResponseInput>(
+  return axiosQuery<ListEventGroupsResponseInput>(
     { url: `/event-groups/`, method: "GET", signal },
     options,
   );
@@ -983,7 +1084,7 @@ export const getEventGroupsListEventGroupsQueryKey = () => {
   return [`/event-groups/`] as const;
 };
 
-export const getEventGroupsListEventGroupsQueryOptions = <
+export const useEventGroupsListEventGroupsQueryOptions = <
   TData = Awaited<ReturnType<typeof eventGroupsListEventGroups>>,
   TError = unknown,
 >(options?: {
@@ -994,7 +1095,7 @@ export const getEventGroupsListEventGroupsQueryOptions = <
       TData
     >
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -1005,7 +1106,13 @@ export const getEventGroupsListEventGroupsQueryOptions = <
     Awaited<ReturnType<typeof eventGroupsListEventGroups>>
   > = ({ signal }) => eventGroupsListEventGroups(requestOptions, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof eventGroupsListEventGroups>>,
     TError,
     TData
@@ -1031,9 +1138,9 @@ export const useEventGroupsListEventGroups = <
       TData
     >
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getEventGroupsListEventGroupsQueryOptions(options);
+  const queryOptions = useEventGroupsListEventGroupsQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -1049,9 +1156,9 @@ export const useEventGroupsListEventGroups = <
  */
 export const eventGroupsCreateEventGroup = (
   createEventGroup: CreateEventGroup,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
 ) => {
-  return axiosInstance<ViewEventGroup>(
+  return axiosQuery<ViewEventGroup>(
     {
       url: `/event-groups/`,
       method: "POST",
@@ -1072,7 +1179,7 @@ export const getEventGroupsCreateEventGroupMutationOptions = <
     { data: CreateEventGroup },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof eventGroupsCreateEventGroup>>,
   TError,
@@ -1113,7 +1220,7 @@ export const useEventGroupsCreateEventGroup = <
     { data: CreateEventGroup },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const mutationOptions =
     getEventGroupsCreateEventGroupMutationOptions(options);
@@ -1127,9 +1234,9 @@ export const useEventGroupsCreateEventGroup = <
 export const eventGroupsUpdateEventGroup = (
   eventGroupId: number,
   updateEventGroup: UpdateEventGroup,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
 ) => {
-  return axiosInstance<ViewEventGroup>(
+  return axiosQuery<ViewEventGroup>(
     {
       url: `/event-groups/${eventGroupId}`,
       method: "PUT",
@@ -1150,7 +1257,7 @@ export const getEventGroupsUpdateEventGroupMutationOptions = <
     { eventGroupId: number; data: UpdateEventGroup },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof eventGroupsUpdateEventGroup>>,
   TError,
@@ -1191,7 +1298,7 @@ export const useEventGroupsUpdateEventGroup = <
     { eventGroupId: number; data: UpdateEventGroup },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const mutationOptions =
     getEventGroupsUpdateEventGroupMutationOptions(options);
@@ -1205,10 +1312,10 @@ export const useEventGroupsUpdateEventGroup = <
  */
 export const eventGroupsGetEventGroup = (
   eventGroupId: number,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<ViewEventGroup>(
+  return axiosQuery<ViewEventGroup>(
     { url: `/event-groups/${eventGroupId}`, method: "GET", signal },
     options,
   );
@@ -1218,7 +1325,7 @@ export const getEventGroupsGetEventGroupQueryKey = (eventGroupId: number) => {
   return [`/event-groups/${eventGroupId}`] as const;
 };
 
-export const getEventGroupsGetEventGroupQueryOptions = <
+export const useEventGroupsGetEventGroupQueryOptions = <
   TData = Awaited<ReturnType<typeof eventGroupsGetEventGroup>>,
   TError = void | HTTPValidationError,
 >(
@@ -1231,7 +1338,7 @@ export const getEventGroupsGetEventGroupQueryOptions = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -1244,12 +1351,13 @@ export const getEventGroupsGetEventGroupQueryOptions = <
   > = ({ signal }) =>
     eventGroupsGetEventGroup(eventGroupId, requestOptions, signal);
 
-  return {
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
     queryKey,
     queryFn,
-    enabled: !!eventGroupId,
-    ...queryOptions,
-  } as UseQueryOptions<
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof eventGroupsGetEventGroup>>,
     TError,
     TData
@@ -1277,10 +1385,10 @@ export const useEventGroupsGetEventGroup = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getEventGroupsGetEventGroupQueryOptions(
+  const queryOptions = useEventGroupsGetEventGroupQueryOptions(
     eventGroupId,
     options,
   );
@@ -1300,10 +1408,10 @@ export const useEventGroupsGetEventGroup = <
  */
 export const eventGroupsFindEventGroupByPath = (
   params: EventGroupsFindEventGroupByPathParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<ViewEventGroup>(
+  return axiosQuery<ViewEventGroup>(
     { url: `/event-groups/by-path`, method: "GET", params, signal },
     options,
   );
@@ -1315,7 +1423,7 @@ export const getEventGroupsFindEventGroupByPathQueryKey = (
   return [`/event-groups/by-path`, ...(params ? [params] : [])] as const;
 };
 
-export const getEventGroupsFindEventGroupByPathQueryOptions = <
+export const useEventGroupsFindEventGroupByPathQueryOptions = <
   TData = Awaited<ReturnType<typeof eventGroupsFindEventGroupByPath>>,
   TError = void | HTTPValidationError,
 >(
@@ -1328,7 +1436,7 @@ export const getEventGroupsFindEventGroupByPathQueryOptions = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -1342,7 +1450,13 @@ export const getEventGroupsFindEventGroupByPathQueryOptions = <
   > = ({ signal }) =>
     eventGroupsFindEventGroupByPath(params, requestOptions, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof eventGroupsFindEventGroupByPath>>,
     TError,
     TData
@@ -1371,10 +1485,10 @@ export const useEventGroupsFindEventGroupByPath = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getEventGroupsFindEventGroupByPathQueryOptions(
+  const queryOptions = useEventGroupsFindEventGroupByPathQueryOptions(
     params,
     options,
   );
@@ -1394,10 +1508,10 @@ export const useEventGroupsFindEventGroupByPath = <
  */
 export const eventGroupsFindEventGroupByAlias = (
   params: EventGroupsFindEventGroupByAliasParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<ViewEventGroup>(
+  return axiosQuery<ViewEventGroup>(
     { url: `/event-groups/by-alias`, method: "GET", params, signal },
     options,
   );
@@ -1409,7 +1523,7 @@ export const getEventGroupsFindEventGroupByAliasQueryKey = (
   return [`/event-groups/by-alias`, ...(params ? [params] : [])] as const;
 };
 
-export const getEventGroupsFindEventGroupByAliasQueryOptions = <
+export const useEventGroupsFindEventGroupByAliasQueryOptions = <
   TData = Awaited<ReturnType<typeof eventGroupsFindEventGroupByAlias>>,
   TError = void | HTTPValidationError,
 >(
@@ -1422,7 +1536,7 @@ export const getEventGroupsFindEventGroupByAliasQueryOptions = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -1436,7 +1550,13 @@ export const getEventGroupsFindEventGroupByAliasQueryOptions = <
   > = ({ signal }) =>
     eventGroupsFindEventGroupByAlias(params, requestOptions, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof eventGroupsFindEventGroupByAlias>>,
     TError,
     TData
@@ -1465,10 +1585,10 @@ export const useEventGroupsFindEventGroupByAlias = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getEventGroupsFindEventGroupByAliasQueryOptions(
+  const queryOptions = useEventGroupsFindEventGroupByAliasQueryOptions(
     params,
     options,
   );
@@ -1489,12 +1609,12 @@ export const useEventGroupsFindEventGroupByAlias = <
 export const eventGroupsSetEventGroupIcs = (
   eventGroupId: number,
   bodyEventGroupsSetEventGroupIcs: BodyEventGroupsSetEventGroupIcs,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
 ) => {
   const formData = new FormData();
   formData.append("ics_file", bodyEventGroupsSetEventGroupIcs.ics_file);
 
-  return axiosInstance<void | EventGroupsSetEventGroupIcs201>(
+  return axiosQuery<void | EventGroupsSetEventGroupIcs201>(
     {
       url: `/event-groups/${eventGroupId}/schedule.ics`,
       method: "PUT",
@@ -1515,7 +1635,7 @@ export const getEventGroupsSetEventGroupIcsMutationOptions = <
     { eventGroupId: number; data: BodyEventGroupsSetEventGroupIcs },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof eventGroupsSetEventGroupIcs>>,
   TError,
@@ -1556,7 +1676,7 @@ export const useEventGroupsSetEventGroupIcs = <
     { eventGroupId: number; data: BodyEventGroupsSetEventGroupIcs },
     TContext
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const mutationOptions =
     getEventGroupsSetEventGroupIcsMutationOptions(options);
@@ -1569,10 +1689,10 @@ export const useEventGroupsSetEventGroupIcs = <
  * @summary List Tags
  */
 export const tagsListTags = (
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<ListTagsResponse>(
+  return axiosQuery<ListTagsResponse>(
     { url: `/tags/`, method: "GET", signal },
     options,
   );
@@ -1582,14 +1702,14 @@ export const getTagsListTagsQueryKey = () => {
   return [`/tags/`] as const;
 };
 
-export const getTagsListTagsQueryOptions = <
+export const useTagsListTagsQueryOptions = <
   TData = Awaited<ReturnType<typeof tagsListTags>>,
   TError = unknown,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof tagsListTags>>, TError, TData>
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -1599,7 +1719,13 @@ export const getTagsListTagsQueryOptions = <
     signal,
   }) => tagsListTags(requestOptions, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof tagsListTags>>,
     TError,
     TData
@@ -1621,9 +1747,9 @@ export const useTagsListTags = <
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof tagsListTags>>, TError, TData>
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getTagsListTagsQueryOptions(options);
+  const queryOptions = useTagsListTagsQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -1639,10 +1765,10 @@ export const useTagsListTags = <
  * @summary Get Current User Schedule
  */
 export const icsGetCurrentUserSchedule = (
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<IcsGetCurrentUserSchedule200One | Blob>(
+  return axiosQuery<IcsGetCurrentUserSchedule200One | Blob>(
     { url: `/users/me/all.ics`, method: "GET", signal },
     options,
   );
@@ -1652,7 +1778,7 @@ export const getIcsGetCurrentUserScheduleQueryKey = () => {
   return [`/users/me/all.ics`] as const;
 };
 
-export const getIcsGetCurrentUserScheduleQueryOptions = <
+export const useIcsGetCurrentUserScheduleQueryOptions = <
   TData = Awaited<ReturnType<typeof icsGetCurrentUserSchedule>>,
   TError = unknown,
 >(options?: {
@@ -1663,7 +1789,7 @@ export const getIcsGetCurrentUserScheduleQueryOptions = <
       TData
     >
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -1674,7 +1800,13 @@ export const getIcsGetCurrentUserScheduleQueryOptions = <
     Awaited<ReturnType<typeof icsGetCurrentUserSchedule>>
   > = ({ signal }) => icsGetCurrentUserSchedule(requestOptions, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof icsGetCurrentUserSchedule>>,
     TError,
     TData
@@ -1700,9 +1832,9 @@ export const useIcsGetCurrentUserSchedule = <
       TData
     >
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getIcsGetCurrentUserScheduleQueryOptions(options);
+  const queryOptions = useIcsGetCurrentUserScheduleQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -1720,10 +1852,10 @@ export const useIcsGetCurrentUserSchedule = <
 export const icsGetUserSchedule = (
   userId: number,
   params: IcsGetUserScheduleParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<IcsGetUserSchedule200One | Blob>(
+  return axiosQuery<IcsGetUserSchedule200One | Blob>(
     { url: `/users/${userId}/all.ics`, method: "GET", params, signal },
     options,
   );
@@ -1736,7 +1868,7 @@ export const getIcsGetUserScheduleQueryKey = (
   return [`/users/${userId}/all.ics`, ...(params ? [params] : [])] as const;
 };
 
-export const getIcsGetUserScheduleQueryOptions = <
+export const useIcsGetUserScheduleQueryOptions = <
   TData = Awaited<ReturnType<typeof icsGetUserSchedule>>,
   TError = void | HTTPValidationError,
 >(
@@ -1750,7 +1882,7 @@ export const getIcsGetUserScheduleQueryOptions = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -1763,12 +1895,13 @@ export const getIcsGetUserScheduleQueryOptions = <
   > = ({ signal }) =>
     icsGetUserSchedule(userId, params, requestOptions, signal);
 
-  return {
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
     queryKey,
     queryFn,
-    enabled: !!userId,
-    ...queryOptions,
-  } as UseQueryOptions<
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof icsGetUserSchedule>>,
     TError,
     TData
@@ -1797,10 +1930,10 @@ export const useIcsGetUserSchedule = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getIcsGetUserScheduleQueryOptions(
+  const queryOptions = useIcsGetUserScheduleQueryOptions(
     userId,
     params,
     options,
@@ -1820,10 +1953,10 @@ export const useIcsGetUserSchedule = <
  * @summary Get Music Room Current User Schedule
  */
 export const icsGetMusicRoomCurrentUserSchedule = (
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<IcsGetMusicRoomCurrentUserSchedule200One | Blob>(
+  return axiosQuery<IcsGetMusicRoomCurrentUserSchedule200One | Blob>(
     { url: `/users/me/music-room.ics`, method: "GET", signal },
     options,
   );
@@ -1833,7 +1966,7 @@ export const getIcsGetMusicRoomCurrentUserScheduleQueryKey = () => {
   return [`/users/me/music-room.ics`] as const;
 };
 
-export const getIcsGetMusicRoomCurrentUserScheduleQueryOptions = <
+export const useIcsGetMusicRoomCurrentUserScheduleQueryOptions = <
   TData = Awaited<ReturnType<typeof icsGetMusicRoomCurrentUserSchedule>>,
   TError = unknown,
 >(options?: {
@@ -1844,7 +1977,7 @@ export const getIcsGetMusicRoomCurrentUserScheduleQueryOptions = <
       TData
     >
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -1856,7 +1989,13 @@ export const getIcsGetMusicRoomCurrentUserScheduleQueryOptions = <
   > = ({ signal }) =>
     icsGetMusicRoomCurrentUserSchedule(requestOptions, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof icsGetMusicRoomCurrentUserSchedule>>,
     TError,
     TData
@@ -1882,10 +2021,10 @@ export const useIcsGetMusicRoomCurrentUserSchedule = <
       TData
     >
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const queryOptions =
-    getIcsGetMusicRoomCurrentUserScheduleQueryOptions(options);
+    useIcsGetMusicRoomCurrentUserScheduleQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -1903,10 +2042,10 @@ export const useIcsGetMusicRoomCurrentUserSchedule = <
 export const icsGetUserLinkedSchedule = (
   userId: number,
   linkedAlias: string,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<IcsGetUserLinkedSchedule200One | Blob>(
+  return axiosQuery<IcsGetUserLinkedSchedule200One | Blob>(
     {
       url: `/users/${userId}/linked/${linkedAlias}.ics`,
       method: "GET",
@@ -1923,7 +2062,7 @@ export const getIcsGetUserLinkedScheduleQueryKey = (
   return [`/users/${userId}/linked/${linkedAlias}.ics`] as const;
 };
 
-export const getIcsGetUserLinkedScheduleQueryOptions = <
+export const useIcsGetUserLinkedScheduleQueryOptions = <
   TData = Awaited<ReturnType<typeof icsGetUserLinkedSchedule>>,
   TError = void | HTTPValidationError,
 >(
@@ -1937,7 +2076,7 @@ export const getIcsGetUserLinkedScheduleQueryOptions = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -1951,12 +2090,13 @@ export const getIcsGetUserLinkedScheduleQueryOptions = <
   > = ({ signal }) =>
     icsGetUserLinkedSchedule(userId, linkedAlias, requestOptions, signal);
 
-  return {
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
     queryKey,
     queryFn,
-    enabled: !!(userId && linkedAlias),
-    ...queryOptions,
-  } as UseQueryOptions<
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof icsGetUserLinkedSchedule>>,
     TError,
     TData
@@ -1985,10 +2125,10 @@ export const useIcsGetUserLinkedSchedule = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getIcsGetUserLinkedScheduleQueryOptions(
+  const queryOptions = useIcsGetUserLinkedScheduleQueryOptions(
     userId,
     linkedAlias,
     options,
@@ -2010,10 +2150,10 @@ export const useIcsGetUserLinkedSchedule = <
 export const icsGetMusicRoomUserSchedule = (
   userId: number,
   params: IcsGetMusicRoomUserScheduleParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<IcsGetMusicRoomUserSchedule200One | Blob>(
+  return axiosQuery<IcsGetMusicRoomUserSchedule200One | Blob>(
     { url: `/users/${userId}/music-room.ics`, method: "GET", params, signal },
     options,
   );
@@ -2029,7 +2169,7 @@ export const getIcsGetMusicRoomUserScheduleQueryKey = (
   ] as const;
 };
 
-export const getIcsGetMusicRoomUserScheduleQueryOptions = <
+export const useIcsGetMusicRoomUserScheduleQueryOptions = <
   TData = Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
   TError = void | HTTPValidationError,
 >(
@@ -2043,7 +2183,7 @@ export const getIcsGetMusicRoomUserScheduleQueryOptions = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -2057,12 +2197,13 @@ export const getIcsGetMusicRoomUserScheduleQueryOptions = <
   > = ({ signal }) =>
     icsGetMusicRoomUserSchedule(userId, params, requestOptions, signal);
 
-  return {
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
     queryKey,
     queryFn,
-    enabled: !!userId,
-    ...queryOptions,
-  } as UseQueryOptions<
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
     TError,
     TData
@@ -2091,10 +2232,10 @@ export const useIcsGetMusicRoomUserSchedule = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getIcsGetMusicRoomUserScheduleQueryOptions(
+  const queryOptions = useIcsGetMusicRoomUserScheduleQueryOptions(
     userId,
     params,
     options,
@@ -2114,10 +2255,10 @@ export const useIcsGetMusicRoomUserSchedule = <
  * @summary Get Music Room Schedule
  */
 export const icsGetMusicRoomSchedule = (
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<Blob>(
+  return axiosQuery<Blob>(
     { url: `/music-room.ics`, method: "GET", responseType: "blob", signal },
     options,
   );
@@ -2127,7 +2268,7 @@ export const getIcsGetMusicRoomScheduleQueryKey = () => {
   return [`/music-room.ics`] as const;
 };
 
-export const getIcsGetMusicRoomScheduleQueryOptions = <
+export const useIcsGetMusicRoomScheduleQueryOptions = <
   TData = Awaited<ReturnType<typeof icsGetMusicRoomSchedule>>,
   TError = unknown,
 >(options?: {
@@ -2138,7 +2279,7 @@ export const getIcsGetMusicRoomScheduleQueryOptions = <
       TData
     >
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -2149,7 +2290,13 @@ export const getIcsGetMusicRoomScheduleQueryOptions = <
     Awaited<ReturnType<typeof icsGetMusicRoomSchedule>>
   > = ({ signal }) => icsGetMusicRoomSchedule(requestOptions, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof icsGetMusicRoomSchedule>>,
     TError,
     TData
@@ -2175,9 +2322,9 @@ export const useIcsGetMusicRoomSchedule = <
       TData
     >
   >;
-  request?: SecondParameter<typeof axiosInstance>;
+  request?: SecondParameter<typeof axiosQuery>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getIcsGetMusicRoomScheduleQueryOptions(options);
+  const queryOptions = useIcsGetMusicRoomScheduleQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -2195,10 +2342,10 @@ export const useIcsGetMusicRoomSchedule = <
 export const icsGetEventGroupIcsByAlias = (
   eventGroupAlias: string,
   params: IcsGetEventGroupIcsByAliasParams,
-  options?: SecondParameter<typeof axiosInstance>,
+  options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
-  return axiosInstance<Blob>(
+  return axiosQuery<Blob>(
     {
       url: `/${eventGroupAlias}.ics`,
       method: "GET",
@@ -2217,7 +2364,7 @@ export const getIcsGetEventGroupIcsByAliasQueryKey = (
   return [`/${eventGroupAlias}.ics`, ...(params ? [params] : [])] as const;
 };
 
-export const getIcsGetEventGroupIcsByAliasQueryOptions = <
+export const useIcsGetEventGroupIcsByAliasQueryOptions = <
   TData = Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
   TError = void | HTTPValidationError,
 >(
@@ -2231,7 +2378,7 @@ export const getIcsGetEventGroupIcsByAliasQueryOptions = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -2245,12 +2392,13 @@ export const getIcsGetEventGroupIcsByAliasQueryOptions = <
   > = ({ signal }) =>
     icsGetEventGroupIcsByAlias(eventGroupAlias, params, requestOptions, signal);
 
-  return {
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
     queryKey,
     queryFn,
-    enabled: !!eventGroupAlias,
-    ...queryOptions,
-  } as UseQueryOptions<
+  });
+
+  return customOptions as UseQueryOptions<
     Awaited<ReturnType<typeof icsGetEventGroupIcsByAlias>>,
     TError,
     TData
@@ -2279,10 +2427,10 @@ export const useIcsGetEventGroupIcsByAlias = <
         TData
       >
     >;
-    request?: SecondParameter<typeof axiosInstance>;
+    request?: SecondParameter<typeof axiosQuery>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = getIcsGetEventGroupIcsByAliasQueryOptions(
+  const queryOptions = useIcsGetEventGroupIcsByAliasQueryOptions(
     eventGroupAlias,
     params,
     options,

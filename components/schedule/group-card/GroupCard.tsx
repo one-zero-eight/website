@@ -1,13 +1,13 @@
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
 import HideButton from "@/components/schedule/group-card/HideButton";
-import { getAllTagsByType, getFirstTagByType } from "@/lib/event-group";
-import { ViewEventGroup } from "@/lib/events";
-import { viewConfig } from "@/lib/events-view-config";
+import { events } from "@/lib/events";
+import { getAllTagsByType, getFirstTagByType } from "@/lib/events/event-group";
+import { viewConfig } from "@/lib/events/events-view-config";
 import { useRouter } from "next/navigation";
 import { Fragment } from "react";
 
 export type GroupCardProps = {
-  group: ViewEventGroup;
+  group: events.ViewEventGroup;
   canHide?: boolean;
 };
 

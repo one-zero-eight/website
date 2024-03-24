@@ -1,12 +1,12 @@
 "use client";
 import SignInButton from "@/components/common/SignInButton";
-import { useUsersGetMe } from "@/lib/events";
+import { useMe } from "@/lib/auth/user";
 import Link from "next/link";
 
 export function DashboardButton() {
-  const { data, isError } = useUsersGetMe();
+  const { me } = useMe();
 
-  if (isError || !data) {
+  if (!me) {
     return <SignInButton />;
   }
 

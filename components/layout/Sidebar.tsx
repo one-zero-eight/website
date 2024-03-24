@@ -1,13 +1,13 @@
 "use client";
+import SidebarSection from "@/components/layout/SidebarSection";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
-import { useUsersGetMe } from "@/lib/events";
 import UserMenu from "@/components/layout/UserMenu";
+import { useMe } from "@/lib/auth/user";
+import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import Logo from "../icons/Logo";
-import SidebarSection from "@/components/layout/SidebarSection";
-import clsx from "clsx";
 
 type Item = {
   title: string;
@@ -88,7 +88,7 @@ export const SidebarContext = React.createContext<{
 }>({ isOpened: false, setOpened: () => {} });
 
 function Sidebar({ children }: React.PropsWithChildren) {
-  const { data: user } = useUsersGetMe();
+  const { me } = useMe();
   const pathname = usePathname();
   const currentItem = items.find((v) => pathname.startsWith(v.path));
   const selection = currentItem?.title;
@@ -111,7 +111,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
       >
         <div className="flex flex-col items-center justify-center px-8 py-8 lgw-smh:h-full lgw-smh:py-4">
           <Link
-            href={user ? "/dashboard" : "/schedule"}
+            href={me ? "/dashboard" : "/schedule"}
             onClick={() => setOpened(false)}
             className="mb-4 flex"
           >

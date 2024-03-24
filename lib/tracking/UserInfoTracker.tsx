@@ -1,21 +1,21 @@
 "use client";
-import { useUsersGetMe } from "@/lib/events";
+import { useMe } from "@/lib/auth/user";
 import { ymUserParams } from "@/lib/tracking/YandexMetrika";
 import { useEffect } from "react";
 
 export default function UserInfoTracker({ children }: React.PropsWithChildren) {
-  const { data } = useUsersGetMe();
+  const { me } = useMe();
 
   // Send user info to Yandex Metrika
   useEffect(() => {
-    if (data) {
+    if (me) {
       ymUserParams({
-        UserID: data.id,
-        email: data.email,
-        name: data.name,
+        UserID: me.id,
+        email: me.innopolis_sso?.email,
+        name: me.innopolis_sso?.name,
       });
     }
-  }, [data]);
+  }, [me]);
 
   return <>{children}</>;
 }

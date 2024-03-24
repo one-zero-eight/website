@@ -1,8 +1,7 @@
 "use client";
 import Calendar from "@/components/common/calendar/Calendar";
 import { NavbarTemplate } from "@/components/layout/Navbar";
-import { EVENTS_API_URL } from "@/lib/events";
-import React from "react";
+import { getMusicRoomLink, getMyMusicRoomLink } from "@/lib/events";
 
 export default function Page() {
   return (
@@ -93,9 +92,9 @@ export default function Page() {
       <div className="@2xl/content:-mx-8">
         <Calendar
           urls={[
-            `${EVENTS_API_URL}/music-room.ics`,
+            getMusicRoomLink(),
             {
-              url: `${EVENTS_API_URL}/users/me/music-room.ics`,
+              url: getMyMusicRoomLink(),
               color: "seagreen",
             },
           ]}

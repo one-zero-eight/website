@@ -1,3 +1,2 @@
-"use client";
-export * from "./api";
-export * from "./__generated__";
+export * from "./links";
+export * as events from "./api/__generated__";

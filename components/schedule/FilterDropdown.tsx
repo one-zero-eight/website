@@ -1,5 +1,5 @@
 "use client";
-import { useTagsListTags } from "@/lib/events";
+import { events } from "@/lib/events";
 import { Popover, Transition } from "@headlessui/react";
 import React from "react";
 
@@ -12,7 +12,7 @@ function FilterDropdown({
   selected: string;
   setSelected: (v: string) => void;
 }) {
-  const { data } = useTagsListTags();
+  const { data } = events.useTagsListTags();
 
   if (data === undefined) return null;
 

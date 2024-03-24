@@ -1,34 +1,29 @@
 "use client";
 import Calendar from "@/components/common/calendar/Calendar";
 import SignInButton from "@/components/common/SignInButton";
-import { GroupCard } from "@/components/schedule/group-card/GroupCard";
+import { GroupCardById } from "@/components/schedule/group-card/GroupCardById";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton";
 import { PersonalCard } from "@/components/schedule/group-card/PersonalCard";
-import { useMyMusicRoom } from "@/lib/event-group";
-import {
-  EVENTS_API_URL,
-  getICSLink,
-  UserXFavoriteGroupView,
-  useUsersGetMe,
-} from "@/lib/events";
+import { useMe } from "@/lib/auth/user";
+import { events, getICSLink, getMyMusicRoomLink } from "@/lib/events";
+import { useMyMusicRoom } from "@/lib/events/event-group";
 import Link from "next/link";
-import React from "react";
 import { useIsClient, useWindowSize } from "usehooks-ts";
-import { useState } from "react";
 
 export default function Page() {
   const { width } = useWindowSize();
   const isClient = useIsClient();
-  const { data: user } = useUsersGetMe();
-  const favorites = user?.favorites_association || [];
+  const { me } = useMe();
+  const { data: eventsUser } = events.useUsersGetMe();
+  const { data: eventGroups } = events.useEventGroupsListEventGroups();
+  const { data: predefined } = events.useUsersGetPredefined();
   const { musicRoomSchedule } = useMyMusicRoom();
-  const [isAvailable, setIsAvailable] = useState(true);
 
   if (!isClient) {
     return <></>;
   }
 
-  if (isClient && !user) {
+  if (!me) {
     return (
       <>
         <h2 className="my-4 text-3xl font-medium">Sign in to get access</h2>
@@ -48,29 +43,23 @@ export default function Page() {
           <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-5xl @xl/account:text-6xl" />
         </div>
         <div className="flex flex-col justify-center overflow-x-hidden">
-          <p className="break-words text-2xl">{user?.name}</p>
+          <p className="break-words text-2xl">{me.innopolis_sso?.name}</p>
           <p className="overflow-ellipsis text-text-secondary/75">
-            {user?.email}
+            {me.innopolis_sso?.email}
           </p>
         </div>
       </div>
       <div className="flex flex-col justify-between gap-4 @container/sections @6xl/content:flex-row @6xl/content:gap-8">
         <details className="flex w-full flex-col @container/schedule @6xl/content:w-1/2">
           <summary className="my-4 text-3xl font-medium">Schedule</summary>
-          {!isAvailable ? null : favorites.filter((v) => v.predefined === true)
-              .length === 0 ? (
+          {predefined?.event_groups === undefined ||
+          predefined.event_groups.length === 0 ? (
             <p className="mb-4 text-lg text-text-secondary/75">Nothing here.</p>
           ) : (
             <div className="grid grid-cols-1 justify-stretch gap-4 @lg/schedule:grid-cols-2 @4xl/schedule:grid-cols-3">
-              {favorites
-                .filter((v) => v.predefined === true)
-                .map((v) => (
-                  <GroupCard
-                    key={v.event_group.path}
-                    group={v.event_group}
-                    canHide={true}
-                  />
-                ))}
+              {predefined.event_groups.map((v) => (
+                <GroupCardById key={v} groupId={v} canHide={true} />
+              ))}
               {musicRoomSchedule.isSuccess && (
                 <PersonalCard
                   name="Music room"
@@ -92,8 +81,8 @@ export default function Page() {
         </details>
         <details className="flex w-full flex-col @container/favorites @6xl/content:w-1/2">
           <summary className="my-4 text-3xl font-medium">Favorites</summary>
-          {!isAvailable ? null : favorites.filter((v) => v.predefined === false)
-              .length === 0 ? (
+          {eventsUser?.favorite_event_groups === undefined ||
+          eventsUser.favorite_event_groups.length === 0 ? (
             <p className="mb-4 text-lg text-text-secondary/75">
               Add favorite calendars using star button.
               <br />
@@ -103,26 +92,30 @@ export default function Page() {
             </p>
           ) : (
             <div className="mb-4 grid grid-cols-1 justify-stretch gap-4 @lg/favorites:grid-cols-2 @4xl/favorites:grid-cols-3">
-              {favorites
-                .filter((v) => v.predefined === false)
-                .map((v) => (
-                  <GroupCard
-                    key={v.event_group.path}
-                    group={v.event_group}
-                    canHide={true}
-                  />
-                ))}
+              {eventsUser.favorite_event_groups.map((v) => (
+                <GroupCardById key={v} groupId={v} canHide={true} />
+              ))}
             </div>
           )}
         </details>
       </div>
       <h2 className="my-4 text-3xl font-medium">Your calendar</h2>
       <div className="@lg/content:-mx-8 @lg/content:-mb-8">
-        {!user ? (
+        {eventsUser?.favorite_event_groups === undefined ||
+        eventsUser?.hidden_event_groups === undefined ||
+        predefined?.event_groups === undefined ||
+        eventGroups === undefined ? (
           <>Loading...</>
         ) : (
           <Calendar
-            urls={getCalendarsToShow(favorites, false, user.id)}
+            urls={getCalendarsToShow(
+              eventsUser.favorite_event_groups,
+              eventsUser.hidden_event_groups,
+              predefined.event_groups,
+              eventGroups,
+              false,
+              eventsUser.id,
+            )}
             initialView={
               width
                 ? width >= 1280
@@ -141,23 +134,23 @@ export default function Page() {
 }
 
 function getCalendarsToShow(
-  favorites: UserXFavoriteGroupView[],
+  favorites: number[],
+  hidden: number[],
+  predefined: number[],
+  eventGroups: events.ListEventGroupsResponseOutput,
   includeHidden: boolean = false,
   userId: number | undefined,
 ) {
-  // Check if there are any groups
-  if (favorites.length === 0) {
-    return [];
-  }
-
   // Remove hidden calendars
-  const toShow = favorites.flatMap((v) => {
-    if (v.hidden && !includeHidden) return [];
-    return [getICSLink(v.event_group.alias, userId)];
+  const toShow = favorites.concat(predefined).flatMap((v) => {
+    if (!includeHidden && hidden.includes(v)) return [];
+    const group = eventGroups.groups.find((group) => group.id === v);
+    if (!group) return [];
+    return [getICSLink(group.alias, userId)];
   });
 
   // Add personal calendars
-  toShow.push(`${EVENTS_API_URL}/users/me/music-room.ics`);
+  toShow.push(getMyMusicRoomLink());
 
   // Return unique items
   return toShow.filter((value, index, array) => array.indexOf(value) === index);

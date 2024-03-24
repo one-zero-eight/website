@@ -1,34 +1,27 @@
-import {
-  getUsersGetMeQueryKey,
-  useIcsGetMusicRoomCurrentUserSchedule,
-  useUsersAddFavorite,
-  useUsersDeleteFavorite,
-  useUsersGetMe,
-  useUsersHideFavorite,
-  ViewEventGroup,
-} from "@/lib/events";
+import { events } from "@/lib/events/index";
 import { useQueryClient } from "@tanstack/react-query";
 
-export function useEventGroup(group_id?: number) {
+export function useEventGroup(group_id: number) {
   const queryClient = useQueryClient();
-  const { data: userData } = useUsersGetMe();
+  const { data: predefined } = events.useUsersGetPredefined();
+  const { data: eventsUser } = events.useUsersGetMe();
 
-  const onSettled = async () => {
-    return await queryClient.invalidateQueries({
-      queryKey: getUsersGetMeQueryKey(),
-    });
+  const onSettled = () => {
+    return Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ["events", ...events.getUsersGetMeQueryKey()],
+      }),
+    ]);
   };
 
-  const add = useUsersAddFavorite({ mutation: { onSettled } });
-  const remove = useUsersDeleteFavorite({ mutation: { onSettled } });
-  const hide = useUsersHideFavorite({ mutation: { onSettled } });
+  const add = events.useUsersAddFavorite({ mutation: { onSettled } });
+  const remove = events.useUsersDeleteFavorite({ mutation: { onSettled } });
+  const hide = events.useUsersHideFavorite({ mutation: { onSettled } });
 
-  const userFavoriteGroup = userData?.favorites_association?.find(
-    (v) => v.event_group.id === group_id,
-  );
-  const isPredefined = userFavoriteGroup?.predefined ?? false;
-  let isInFavorites = !!userFavoriteGroup;
-  let isHidden = userFavoriteGroup?.hidden ?? false;
+  const isFavorite = eventsUser?.favorite_event_groups?.includes(group_id);
+  const isPredefined = predefined?.event_groups?.includes(group_id) ?? false;
+  let isInFavorites = !!isFavorite;
+  let isHidden = eventsUser?.hidden_event_groups?.includes(group_id) ?? false;
   // Use optimistic updates for mutations
   if (remove.isPending && remove.variables?.params.group_id === group_id) {
     isInFavorites = false;
@@ -91,7 +84,7 @@ export function useEventGroup(group_id?: number) {
 }
 
 export function getFirstTagByType(
-  event_group: ViewEventGroup,
+  event_group: events.ViewEventGroup,
   tag_type: string,
 ) {
   if (event_group.tags === undefined) return undefined;
@@ -99,7 +92,7 @@ export function getFirstTagByType(
 }
 
 export function getAllTagsByType(
-  event_group: ViewEventGroup,
+  event_group: events.ViewEventGroup,
   tag_type: string,
 ) {
   if (event_group.tags === undefined) return [];
@@ -107,7 +100,7 @@ export function getAllTagsByType(
 }
 
 export function useMyMusicRoom() {
-  const musicRoomSchedule = useIcsGetMusicRoomCurrentUserSchedule();
+  const musicRoomSchedule = events.useIcsGetMusicRoomCurrentUserSchedule();
 
   return {
     musicRoomSchedule,

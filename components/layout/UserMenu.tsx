@@ -1,8 +1,8 @@
 "use client";
-import { SidebarContext } from "@/components/layout/Sidebar";
 import { SignInButtonIcon } from "@/components/common/SignInButton";
-import { useAuthPaths } from "@/lib/auth";
-import { useUsersGetMe } from "@/lib/events";
+import { SidebarContext } from "@/components/layout/Sidebar";
+import { useAuthPaths } from "@/lib/auth/paths";
+import { useMe } from "@/lib/auth/user";
 import {
   autoUpdate,
   flip,
@@ -28,7 +28,7 @@ type UserMenuProps = {
 };
 function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   const isClient = useIsClient();
-  const { data, isError } = useUsersGetMe();
+  const { me } = useMe();
   const { signOut } = useAuthPaths();
   const [isOpen, setIsOpen] = useState(false);
   const { setOpened: setSidebarOpened } = useContext(SidebarContext);
@@ -60,7 +60,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   // !isClient - SSR output and during hydration.
   // isError - Error getting the user. Assume not authenticated.
   // !data - Request sent but no data yet.
-  if (!isClient || isError || !data) {
+  if (!isClient || !me) {
     return (
       <SignInButtonIcon
         onClick={() => {
@@ -107,9 +107,11 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                 </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex h-20 flex-col justify-center">
-                    <p className="text-xl text-text-main">{data?.name} </p>
+                    <p className="text-xl text-text-main">
+                      {me?.innopolis_sso?.name}{" "}
+                    </p>
                     <p className="text-sm text-text-secondary/75">
-                      {data?.email}
+                      {me?.innopolis_sso?.email}
                     </p>
                   </div>
                   <Link

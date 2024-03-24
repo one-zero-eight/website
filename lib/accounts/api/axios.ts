@@ -1,14 +1,10 @@
-"use client";
-import { EVENTS_API_URL } from "@/lib/events";
 import Axios, { AxiosRequestConfig } from "axios";
 
-export const AXIOS_INSTANCE = Axios.create({ baseURL: EVENTS_API_URL });
+export const AXIOS_INSTANCE = Axios.create({
+  baseURL: process.env.NEXT_PUBLIC_ACCOUNTS_API_URL,
+});
 
-/**
- * Custom Axios instance creating.
- * Adds Authorization header and handles auth errors.
- */
-export const axiosInstance = <T>(
+export const axiosQuery = <T>(
   config: AxiosRequestConfig,
   options?: AxiosRequestConfig,
 ): Promise<T> => {

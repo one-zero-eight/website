@@ -1,5 +1,8 @@
 "use client";
-import { getCategoryInfoBySlug, viewConfig } from "@/lib/events-view-config";
+import {
+  getCategoryInfoBySlug,
+  viewConfig,
+} from "@/lib/events/events-view-config";
 import { Popover, Transition } from "@headlessui/react";
 import Link from "next/link";
 import React from "react";

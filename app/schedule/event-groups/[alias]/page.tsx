@@ -1,13 +1,9 @@
 "use client";
 import Calendar from "@/components/common/calendar/Calendar";
+import { NavbarTemplate } from "@/components/layout/Navbar";
 import ExportButton from "@/components/schedule/ExportButton";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
-import { NavbarTemplate } from "@/components/layout/Navbar";
-import {
-  getICSLink,
-  useEventGroupsFindEventGroupByAlias,
-  useUsersGetMe,
-} from "@/lib/events";
+import { events, getICSLink } from "@/lib/events";
 import React from "react";
 import { useWindowSize } from "usehooks-ts";
 
@@ -16,8 +12,8 @@ export type Props = {
 };
 
 export default function Page({ params: { alias } }: Props) {
-  const { data: user } = useUsersGetMe();
-  const { data: group } = useEventGroupsFindEventGroupByAlias({ alias });
+  const { data: eventsUser } = events.useUsersGetMe();
+  const { data: group } = events.useEventGroupsFindEventGroupByAlias({ alias });
   const { width } = useWindowSize();
 
   return (
@@ -57,7 +53,7 @@ export default function Page({ params: { alias } }: Props) {
           </div>
           <div className="-mx-4 -mb-4 @lg/content:-mx-8 @lg/content:-mb-8">
             <Calendar
-              urls={[getICSLink(group.alias, user?.id)]}
+              urls={[getICSLink(group.alias, eventsUser?.id)]}
               initialView={
                 width
                   ? width >= 1280

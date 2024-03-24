@@ -46,7 +46,15 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
         response: null,
         iCalExpanderPromise: fetch(meta.url, {
           method: "GET",
-          credentials: "include",
+          headers:
+            localStorage.getItem("accessToken") &&
+            localStorage.getItem("accessToken").length > 5
+              ? {
+                  Authorization:
+                    "Bearer " +
+                    localStorage.getItem("accessToken")?.slice(1, -1),
+                }
+              : undefined,
         }).then((response) => {
           return response.text().then((icsText) => {
             internalState.response = response;

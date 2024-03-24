@@ -1,11 +1,7 @@
 "use client";
 import Calendar from "@/components/common/calendar/Calendar";
 import ScheduleLinkCopy from "@/components/schedule/ScheduleLinkCopy";
-import {
-  getICSLink,
-  useEventGroupsFindEventGroupByAlias,
-  useUsersGetMe,
-} from "@/lib/events";
+import { events, getICSLink } from "@/lib/events";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -25,8 +21,8 @@ export type Props = {
 
 export default function Page({ params: { alias } }: Props) {
   const router = useRouter();
-  const { data: user } = useUsersGetMe();
-  const { data: group } = useEventGroupsFindEventGroupByAlias({ alias });
+  const { data: eventsUser } = events.useUsersGetMe();
+  const { data: group } = events.useEventGroupsFindEventGroupByAlias({ alias });
 
   const copyButtonRef = useRef(null);
 
@@ -46,7 +42,9 @@ export default function Page({ params: { alias } }: Props) {
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
   const calendarURL =
-    group !== undefined ? getICSLink(group.alias, user?.id, "url") : undefined;
+    group !== undefined
+      ? getICSLink(group.alias, eventsUser?.id, "url")
+      : undefined;
 
   return (
     <>
