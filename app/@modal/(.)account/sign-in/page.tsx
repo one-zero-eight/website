@@ -17,7 +17,7 @@ export default function Page() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const signInRef = useRef(null);
+  const signInRef = useRef<HTMLButtonElement>(null);
 
   const { context, refs } = useFloating({
     open: true,
