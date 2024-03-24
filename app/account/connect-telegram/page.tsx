@@ -36,7 +36,7 @@ export default function Page() {
           to access InNoHassle services.
         </p>
         <div className="flex items-center justify-center">
-          <SignInButton />
+          <SignInButton signInRedirect="/account/connect-telegram" />
         </div>
       </>
     );
