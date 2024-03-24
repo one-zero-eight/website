@@ -34,6 +34,17 @@ export type LogoutParams = {
   redirect_uri: string;
 };
 
+export type TokensGenerateUsersServiceTokenParams = {
+  /**
+   * Some string that will be in `sub` field of JWT token. Actually, is may be anything.
+   */
+  sub: string;
+  /**
+   * Generate token only for current user - other users will be marked as not existing in the system
+   */
+  only_for_me?: boolean;
+};
+
 export type TokensGenerateTokenParams = {
   sub: string;
   /**
@@ -882,6 +893,90 @@ export const useTokensGetJwks = <
 };
 
 /**
+ * Generate access token for current user with user id in `uid` field
+ * @summary Generate My Token
+ */
+export const tokensGenerateMyToken = (
+  options?: SecondParameter<typeof axiosQuery>,
+  signal?: AbortSignal,
+) => {
+  return axiosQuery<TokenData>(
+    { url: `/tokens/generate-my-token`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getTokensGenerateMyTokenQueryKey = () => {
+  return [`/tokens/generate-my-token`] as const;
+};
+
+export const useTokensGenerateMyTokenQueryOptions = <
+  TData = Awaited<ReturnType<typeof tokensGenerateMyToken>>,
+  TError = void,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof tokensGenerateMyToken>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getTokensGenerateMyTokenQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof tokensGenerateMyToken>>
+  > = ({ signal }) => tokensGenerateMyToken(requestOptions, signal);
+
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
+    Awaited<ReturnType<typeof tokensGenerateMyToken>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type TokensGenerateMyTokenQueryResult = NonNullable<
+  Awaited<ReturnType<typeof tokensGenerateMyToken>>
+>;
+export type TokensGenerateMyTokenQueryError = void;
+
+/**
+ * @summary Generate My Token
+ */
+export const useTokensGenerateMyToken = <
+  TData = Awaited<ReturnType<typeof tokensGenerateMyToken>>,
+  TError = void,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof tokensGenerateMyToken>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useTokensGenerateMyTokenQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
  * Generate access token with some sub in `sub` field
  * @summary Generate Token
  */
@@ -979,43 +1074,60 @@ export const useTokensGenerateToken = <
 };
 
 /**
- * Generate access token for current user with user id in `uid` field
- * @summary Generate My Token
+ * Generate access token for access users-related endpoints (/users/*).
+ * @summary Generate Users Service Token
  */
-export const tokensGenerateMyToken = (
+export const tokensGenerateUsersServiceToken = (
+  params: TokensGenerateUsersServiceTokenParams,
   options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
   return axiosQuery<TokenData>(
-    { url: `/tokens/generate-my-token`, method: "GET", signal },
+    {
+      url: `/tokens/generate-users-scope-service-token`,
+      method: "GET",
+      params,
+      signal,
+    },
     options,
   );
 };
 
-export const getTokensGenerateMyTokenQueryKey = () => {
-  return [`/tokens/generate-my-token`] as const;
+export const getTokensGenerateUsersServiceTokenQueryKey = (
+  params: TokensGenerateUsersServiceTokenParams,
+) => {
+  return [
+    `/tokens/generate-users-scope-service-token`,
+    ...(params ? [params] : []),
+  ] as const;
 };
 
-export const useTokensGenerateMyTokenQueryOptions = <
-  TData = Awaited<ReturnType<typeof tokensGenerateMyToken>>,
-  TError = void,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof tokensGenerateMyToken>>,
-      TError,
-      TData
-    >
-  >;
-  request?: SecondParameter<typeof axiosQuery>;
-}) => {
+export const useTokensGenerateUsersServiceTokenQueryOptions = <
+  TData = Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>,
+  TError = void | HTTPValidationError,
+>(
+  params: TokensGenerateUsersServiceTokenParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosQuery>;
+  },
+) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getTokensGenerateMyTokenQueryKey();
+  const queryKey =
+    queryOptions?.queryKey ??
+    getTokensGenerateUsersServiceTokenQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof tokensGenerateMyToken>>
-  > = ({ signal }) => tokensGenerateMyToken(requestOptions, signal);
+    Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>
+  > = ({ signal }) =>
+    tokensGenerateUsersServiceToken(params, requestOptions, signal);
 
   const customOptions = queryOptionsMutator({
     ...queryOptions,
@@ -1024,34 +1136,41 @@ export const useTokensGenerateMyTokenQueryOptions = <
   });
 
   return customOptions as UseQueryOptions<
-    Awaited<ReturnType<typeof tokensGenerateMyToken>>,
+    Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>,
     TError,
     TData
   > & { queryKey: QueryKey };
 };
 
-export type TokensGenerateMyTokenQueryResult = NonNullable<
-  Awaited<ReturnType<typeof tokensGenerateMyToken>>
+export type TokensGenerateUsersServiceTokenQueryResult = NonNullable<
+  Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>
 >;
-export type TokensGenerateMyTokenQueryError = void;
+export type TokensGenerateUsersServiceTokenQueryError =
+  void | HTTPValidationError;
 
 /**
- * @summary Generate My Token
+ * @summary Generate Users Service Token
  */
-export const useTokensGenerateMyToken = <
-  TData = Awaited<ReturnType<typeof tokensGenerateMyToken>>,
-  TError = void,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof tokensGenerateMyToken>>,
-      TError,
-      TData
-    >
-  >;
-  request?: SecondParameter<typeof axiosQuery>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = useTokensGenerateMyTokenQueryOptions(options);
+export const useTokensGenerateUsersServiceToken = <
+  TData = Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>,
+  TError = void | HTTPValidationError,
+>(
+  params: TokensGenerateUsersServiceTokenParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosQuery>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useTokensGenerateUsersServiceTokenQueryOptions(
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

@@ -10,7 +10,7 @@
     "prettify": "prettier --write .",
     "lint-staged": "lint-staged",
     "prepare": "husky",
-    "orval": "orval --config ./orval.config.js",
+    "generate-api": "orval --config ./orval.config.js",
     "release": "bumpp package.json",
     "update-deps": "taze minor -wIr"
   },
