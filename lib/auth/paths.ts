@@ -5,6 +5,14 @@ import { useIsClient } from "usehooks-ts";
 export function useAuthPaths(signInRedirect?: string) {
   const isClient = useIsClient();
   const pathname = usePathname();
+
+  if (!isClient) {
+    return {
+      signIn: "/",
+      signOut: "/",
+    };
+  }
+
   const origin = isClient ? window.location.origin : "";
 
   const loginEndpoint = `${process.env.NEXT_PUBLIC_ACCOUNTS_API_URL}/providers/${process.env.NEXT_PUBLIC_AUTH_PROVIDER}/login`;
