@@ -1,4 +1,4 @@
-import { getMyAccessToken } from "@/lib/auth/access";
+import { getMyAccessToken, invalidateMyAccessToken } from "@/lib/auth/access";
 import Axios, { AxiosRequestConfig } from "axios";
 
 export const AXIOS_INSTANCE = Axios.create({
@@ -18,7 +18,7 @@ AXIOS_INSTANCE.interceptors.response.use(
   async (error) => {
     const { response } = error;
     if (response.status === 401) {
-      // invalidateMyAccessToken();
+      invalidateMyAccessToken();
       return Promise.reject(error);
     }
   },
