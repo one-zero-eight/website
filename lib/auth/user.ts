@@ -1,5 +1,6 @@
 import { accounts } from "@/lib/accounts";
 import { invalidateMyAccessToken } from "@/lib/auth/access";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useIsClient, useLocalStorage } from "usehooks-ts";
 
@@ -9,16 +10,20 @@ export function useMe() {
     null,
   );
   const isClient = useIsClient();
+  const queryClient = useQueryClient();
   const { data: me, isPending } = accounts.useUsersGetMe();
 
   useEffect(() => {
     if (me || !isPending) {
       setStoredMe(me ?? null);
       if (!me) {
-        invalidateMyAccessToken();
+        const invalidated = invalidateMyAccessToken();
+        if (invalidated) {
+          queryClient.clear();
+        }
       }
     }
-  }, [me, isPending, setStoredMe]);
+  }, [me, isPending, setStoredMe, queryClient]);
 
   return { me: !isClient ? undefined : me || storedMe || undefined };
 }
