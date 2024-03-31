@@ -17,17 +17,11 @@ export default function ThemedHtml({
     initializeWithValue: true,
     localStorageKey: "theme",
   });
-  const isSafari =
-    isClient && /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
   return (
     <html
       {...htmlProps}
-      className={clsx(
-        className,
-        (!isClient || isDarkMode) && "dark",
-        !isSafari && "snow",
-      )}
+      className={clsx(className, (!isClient || isDarkMode) && "dark")}
     >
       <head>
         <script

@@ -31,11 +31,11 @@ export default function FavoriteButton({ groupId }: { groupId: number }) {
         className="-mr-2 h-52 w-52 rounded-2xl p-2 text-4xl text-icon-main/50 hover:bg-secondary-hover hover:text-icon-hover/75"
       >
         {isPredefined ? (
-          <span className="icon-[material-symbols--stars-outline] text-[#78DBE2]" />
+          <span className="icon-[material-symbols--stars-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
         ) : isInFavorites ? (
-          <span className="icon-[material-symbols--ac-unit-rounded] text-[#78DBE2]" />
+          <span className="icon-[material-symbols--star] text-[#F0B132]" />
         ) : (
-          <span className="icon-[material-symbols--ac-unit-rounded]" />
+          <span className="icon-[material-symbols--star-outline]" />
         )}
       </button>
     </Tooltip>
