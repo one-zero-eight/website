@@ -75,6 +75,9 @@ export default function Page() {
         >
           Continue
         </button>
+
+        {/* Support LoginUrl */}
+        <TelegramLogin showButton={false} />
       </div>
     </>
   );

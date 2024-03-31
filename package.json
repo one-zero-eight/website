@@ -51,7 +51,8 @@
     "tailwindcss": "3.3.6",
     "taze": "^0.13.3",
     "typescript": "5.3.3",
-    "usehooks-ts": "^3.0.2"
+    "usehooks-ts": "^3.0.2",
+    "zod": "^3.22.4"
   },
   "lint-staged": {
     "{app,components,lib,public}/**/*.{js,ts,jsx,tsx}": [

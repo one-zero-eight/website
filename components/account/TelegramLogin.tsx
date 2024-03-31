@@ -5,8 +5,11 @@ import TelegramLoginButton, {
 } from "@/components/account/TelegramLoginButton";
 import { accounts } from "@/lib/accounts";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
-export default function TelegramLogin() {
+export default function TelegramLogin({ showButton = true }) {
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { mutate: connectTelegram } = accounts.useProvidersTelegramConnect({
     mutation: {
@@ -18,9 +21,24 @@ export default function TelegramLogin() {
     },
   });
 
+  useEffect(() => {
+    if (searchParams.has("id")) {
+      const telegramUser = TelegramUser.safeParse(
+        Object.fromEntries(searchParams.entries()),
+      );
+      if (telegramUser.success) {
+        connectTelegram({ data: telegramUser.data });
+      }
+    }
+  }, [searchParams, connectTelegram]);
+
   const onAuth = (user: TelegramUser) => {
     connectTelegram({ data: user });
   };
+
+  if (!showButton) {
+    return null;
+  }
 
   return (
     <TelegramLoginButton

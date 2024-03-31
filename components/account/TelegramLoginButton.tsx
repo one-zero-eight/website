@@ -1,14 +1,16 @@
 import { useEffect, useRef } from "react";
+import { z } from "zod";
 
-export type TelegramUser = {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  photo_url: string;
-  auth_date: number;
-  hash: string;
-};
+export const TelegramUser = z.object({
+  id: z.coerce.number(),
+  first_name: z.string(),
+  last_name: z.string().optional(),
+  username: z.string().optional(),
+  photo_url: z.string(),
+  auth_date: z.coerce.number(),
+  hash: z.string(),
+});
+export type TelegramUser = z.infer<typeof TelegramUser>;
 
 export type TelegramLoginButtonProps = {
   botName: string;
