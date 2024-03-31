@@ -69,7 +69,7 @@ export default function Page() {
                     <LinkIconButton
                       href="https://t.me/InnoMusicRoomBot"
                       icon={
-                        <span className="icon-[mdi--robot-excited-outline] text-[#78DBE2]" />
+                        <span className="icon-[mdi--robot-excited-outline] text-[#F0B132]" />
                       }
                       tooltip="Open Telegram bot"
                     />
