@@ -3,7 +3,6 @@ import TelegramLogin from "@/components/account/TelegramLogin";
 import SignInButton from "@/components/common/SignInButton";
 import { useMe } from "@/lib/auth/user";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 import { useIsClient } from "usehooks-ts";
 
 export default function Page() {
@@ -13,16 +12,6 @@ export default function Page() {
   const { me } = useMe();
 
   const bot = searchParams.get("bot");
-
-  useEffect(() => {
-    if (me?.telegram) {
-      if (bot) {
-        router.push(`https://t.me/${bot}`);
-      } else {
-        router.push("/dashboard");
-      }
-    }
-  }, [bot, me?.telegram, router]);
 
   if (!isClient || !me) {
     return (
