@@ -3,6 +3,7 @@ import TelegramLogin from "@/components/account/TelegramLogin";
 import SignInButton from "@/components/common/SignInButton";
 import { useMe } from "@/lib/auth/user";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { useIsClient } from "usehooks-ts";
 
 export default function Page() {
@@ -77,7 +78,9 @@ export default function Page() {
         </button>
 
         {/* Support LoginUrl */}
-        <TelegramLogin showButton={false} />
+        <Suspense>
+          <TelegramLogin showButton={false} />
+        </Suspense>
       </div>
     </>
   );
