@@ -11,12 +11,15 @@ export function useAuthPaths(signInRedirect?: string) {
   const signInURL = new URL(loginEndpoint);
   signInURL.searchParams.append(
     "redirect_uri",
-    origin + (signInRedirect || "/dashboard"),
+    new URL(signInRedirect || "/dashboard", origin).toString(),
   );
 
   const logoutEndpoint = `${process.env.NEXT_PUBLIC_ACCOUNTS_API_URL}/logout`;
   const signOutURL = new URL(logoutEndpoint);
-  signOutURL.searchParams.append("redirect_uri", origin + pathname);
+  signOutURL.searchParams.append(
+    "redirect_uri",
+    new URL(pathname, origin).toString(),
+  );
 
   return {
     signIn: signInURL.toString(),
