@@ -36,13 +36,21 @@ export type IcsGetEventGroupIcsByAliasParams = {
   export_type: string;
 };
 
+export type IcsGetUserLinkedSchedule200One = {};
+
+export type IcsGetSportUserSchedule200One = {};
+
+export type IcsGetSportUserScheduleParams = {
+  access_key: string;
+};
+
+export type IcsGetSportCurrentUserSchedule200One = {};
+
 export type IcsGetMusicRoomUserSchedule200One = {};
 
 export type IcsGetMusicRoomUserScheduleParams = {
   access_key: string;
 };
-
-export type IcsGetUserLinkedSchedule200One = {};
 
 export type IcsGetMusicRoomCurrentUserSchedule200One = {};
 
@@ -814,98 +822,70 @@ export const useUsersLinkCalendar = <
 export const usersGenerateUserScheduleKey = (
   params: UsersGenerateUserScheduleKeyParams,
   options?: SecondParameter<typeof axiosQuery>,
-  signal?: AbortSignal,
 ) => {
   return axiosQuery<_GetScheduleAccessKeyResponse>(
-    { url: `/users/me/get-schedule-access-key`, method: "GET", params, signal },
+    { url: `/users/me/get-schedule-access-key`, method: "POST", params },
     options,
   );
 };
 
-export const getUsersGenerateUserScheduleKeyQueryKey = (
-  params: UsersGenerateUserScheduleKeyParams,
-) => {
-  return [
-    `/users/me/get-schedule-access-key`,
-    ...(params ? [params] : []),
-  ] as const;
-};
-
-export const useUsersGenerateUserScheduleKeyQueryOptions = <
-  TData = Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
+export const getUsersGenerateUserScheduleKeyMutationOptions = <
   TError = void | HTTPValidationError,
->(
-  params: UsersGenerateUserScheduleKeyParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof axiosQuery>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getUsersGenerateUserScheduleKeyQueryKey(params);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>
-  > = ({ signal }) =>
-    usersGenerateUserScheduleKey(params, requestOptions, signal);
-
-  const customOptions = queryOptionsMutator({
-    ...queryOptions,
-    queryKey,
-    queryFn,
-  });
-
-  return customOptions as UseQueryOptions<
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
     TError,
-    TData
-  > & { queryKey: QueryKey };
+    { params: UsersGenerateUserScheduleKeyParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
+  TError,
+  { params: UsersGenerateUserScheduleKeyParams },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
+    { params: UsersGenerateUserScheduleKeyParams }
+  > = (props) => {
+    const { params } = props ?? {};
+
+    return usersGenerateUserScheduleKey(params, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
-export type UsersGenerateUserScheduleKeyQueryResult = NonNullable<
+export type UsersGenerateUserScheduleKeyMutationResult = NonNullable<
   Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>
 >;
-export type UsersGenerateUserScheduleKeyQueryError = void | HTTPValidationError;
+
+export type UsersGenerateUserScheduleKeyMutationError =
+  void | HTTPValidationError;
 
 /**
  * @summary Generate User Schedule Key
  */
 export const useUsersGenerateUserScheduleKey = <
-  TData = Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
   TError = void | HTTPValidationError,
->(
-  params: UsersGenerateUserScheduleKeyParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof axiosQuery>;
-  },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = useUsersGenerateUserScheduleKeyQueryOptions(
-    params,
-    options,
-  );
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof usersGenerateUserScheduleKey>>,
+    TError,
+    { params: UsersGenerateUserScheduleKeyParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}) => {
+  const mutationOptions =
+    getUsersGenerateUserScheduleKeyMutationOptions(options);
 
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
+  return useMutation(mutationOptions);
 };
 
 /**
@@ -2035,6 +2015,302 @@ export const useIcsGetMusicRoomCurrentUserSchedule = <
 };
 
 /**
+ * Get schedule in ICS format for the user; requires access key for `/users/{user_id}/music-room.ics` resource
+ * @summary Get Music Room User Schedule
+ */
+export const icsGetMusicRoomUserSchedule = (
+  userId: number,
+  params: IcsGetMusicRoomUserScheduleParams,
+  options?: SecondParameter<typeof axiosQuery>,
+  signal?: AbortSignal,
+) => {
+  return axiosQuery<IcsGetMusicRoomUserSchedule200One | Blob>(
+    { url: `/users/${userId}/music-room.ics`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getIcsGetMusicRoomUserScheduleQueryKey = (
+  userId: number,
+  params: IcsGetMusicRoomUserScheduleParams,
+) => {
+  return [
+    `/users/${userId}/music-room.ics`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const useIcsGetMusicRoomUserScheduleQueryOptions = <
+  TData = Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
+  TError = void | HTTPValidationError,
+>(
+  userId: number,
+  params: IcsGetMusicRoomUserScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosQuery>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getIcsGetMusicRoomUserScheduleQueryKey(userId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>
+  > = ({ signal }) =>
+    icsGetMusicRoomUserSchedule(userId, params, requestOptions, signal);
+
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
+    Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type IcsGetMusicRoomUserScheduleQueryResult = NonNullable<
+  Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>
+>;
+export type IcsGetMusicRoomUserScheduleQueryError = void | HTTPValidationError;
+
+/**
+ * @summary Get Music Room User Schedule
+ */
+export const useIcsGetMusicRoomUserSchedule = <
+  TData = Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
+  TError = void | HTTPValidationError,
+>(
+  userId: number,
+  params: IcsGetMusicRoomUserScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosQuery>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useIcsGetMusicRoomUserScheduleQueryOptions(
+    userId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get schedule in ICS format for the current user
+ * @summary Get Sport Current User Schedule
+ */
+export const icsGetSportCurrentUserSchedule = (
+  options?: SecondParameter<typeof axiosQuery>,
+  signal?: AbortSignal,
+) => {
+  return axiosQuery<IcsGetSportCurrentUserSchedule200One | Blob>(
+    { url: `/users/me/sport.ics`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getIcsGetSportCurrentUserScheduleQueryKey = () => {
+  return [`/users/me/sport.ics`] as const;
+};
+
+export const useIcsGetSportCurrentUserScheduleQueryOptions = <
+  TData = Awaited<ReturnType<typeof icsGetSportCurrentUserSchedule>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof icsGetSportCurrentUserSchedule>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getIcsGetSportCurrentUserScheduleQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof icsGetSportCurrentUserSchedule>>
+  > = ({ signal }) => icsGetSportCurrentUserSchedule(requestOptions, signal);
+
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
+    Awaited<ReturnType<typeof icsGetSportCurrentUserSchedule>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type IcsGetSportCurrentUserScheduleQueryResult = NonNullable<
+  Awaited<ReturnType<typeof icsGetSportCurrentUserSchedule>>
+>;
+export type IcsGetSportCurrentUserScheduleQueryError = unknown;
+
+/**
+ * @summary Get Sport Current User Schedule
+ */
+export const useIcsGetSportCurrentUserSchedule = <
+  TData = Awaited<ReturnType<typeof icsGetSportCurrentUserSchedule>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof icsGetSportCurrentUserSchedule>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useIcsGetSportCurrentUserScheduleQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Get schedule in ICS format for the user; requires access key for `/users/{user_id}/sport.ics` resource
+ * @summary Get Sport User Schedule
+ */
+export const icsGetSportUserSchedule = (
+  userId: number,
+  params: IcsGetSportUserScheduleParams,
+  options?: SecondParameter<typeof axiosQuery>,
+  signal?: AbortSignal,
+) => {
+  return axiosQuery<IcsGetSportUserSchedule200One | Blob>(
+    { url: `/users/${userId}/sport.ics`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getIcsGetSportUserScheduleQueryKey = (
+  userId: number,
+  params: IcsGetSportUserScheduleParams,
+) => {
+  return [`/users/${userId}/sport.ics`, ...(params ? [params] : [])] as const;
+};
+
+export const useIcsGetSportUserScheduleQueryOptions = <
+  TData = Awaited<ReturnType<typeof icsGetSportUserSchedule>>,
+  TError = void | HTTPValidationError,
+>(
+  userId: number,
+  params: IcsGetSportUserScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof icsGetSportUserSchedule>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosQuery>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getIcsGetSportUserScheduleQueryKey(userId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof icsGetSportUserSchedule>>
+  > = ({ signal }) =>
+    icsGetSportUserSchedule(userId, params, requestOptions, signal);
+
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
+    Awaited<ReturnType<typeof icsGetSportUserSchedule>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type IcsGetSportUserScheduleQueryResult = NonNullable<
+  Awaited<ReturnType<typeof icsGetSportUserSchedule>>
+>;
+export type IcsGetSportUserScheduleQueryError = void | HTTPValidationError;
+
+/**
+ * @summary Get Sport User Schedule
+ */
+export const useIcsGetSportUserSchedule = <
+  TData = Awaited<ReturnType<typeof icsGetSportUserSchedule>>,
+  TError = void | HTTPValidationError,
+>(
+  userId: number,
+  params: IcsGetSportUserScheduleParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof icsGetSportUserSchedule>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosQuery>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useIcsGetSportUserScheduleQueryOptions(
+    userId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
  * Get schedule in ICS format for the user
  * @summary Get User Linked Schedule
  */
@@ -2130,113 +2406,6 @@ export const useIcsGetUserLinkedSchedule = <
   const queryOptions = useIcsGetUserLinkedScheduleQueryOptions(
     userId,
     linkedAlias,
-    options,
-  );
-
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-  };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-};
-
-/**
- * Get schedule in ICS format for the user; requires access key for `/users/{user_id}/music-room.ics` resource
- * @summary Get Music Room User Schedule
- */
-export const icsGetMusicRoomUserSchedule = (
-  userId: number,
-  params: IcsGetMusicRoomUserScheduleParams,
-  options?: SecondParameter<typeof axiosQuery>,
-  signal?: AbortSignal,
-) => {
-  return axiosQuery<IcsGetMusicRoomUserSchedule200One | Blob>(
-    { url: `/users/${userId}/music-room.ics`, method: "GET", params, signal },
-    options,
-  );
-};
-
-export const getIcsGetMusicRoomUserScheduleQueryKey = (
-  userId: number,
-  params: IcsGetMusicRoomUserScheduleParams,
-) => {
-  return [
-    `/users/${userId}/music-room.ics`,
-    ...(params ? [params] : []),
-  ] as const;
-};
-
-export const useIcsGetMusicRoomUserScheduleQueryOptions = <
-  TData = Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
-  TError = void | HTTPValidationError,
->(
-  userId: number,
-  params: IcsGetMusicRoomUserScheduleParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof axiosQuery>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ??
-    getIcsGetMusicRoomUserScheduleQueryKey(userId, params);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>
-  > = ({ signal }) =>
-    icsGetMusicRoomUserSchedule(userId, params, requestOptions, signal);
-
-  const customOptions = queryOptionsMutator({
-    ...queryOptions,
-    queryKey,
-    queryFn,
-  });
-
-  return customOptions as UseQueryOptions<
-    Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
-    TError,
-    TData
-  > & { queryKey: QueryKey };
-};
-
-export type IcsGetMusicRoomUserScheduleQueryResult = NonNullable<
-  Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>
->;
-export type IcsGetMusicRoomUserScheduleQueryError = void | HTTPValidationError;
-
-/**
- * @summary Get Music Room User Schedule
- */
-export const useIcsGetMusicRoomUserSchedule = <
-  TData = Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
-  TError = void | HTTPValidationError,
->(
-  userId: number,
-  params: IcsGetMusicRoomUserScheduleParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof icsGetMusicRoomUserSchedule>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof axiosQuery>;
-  },
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = useIcsGetMusicRoomUserScheduleQueryOptions(
-    userId,
-    params,
     options,
   );
 

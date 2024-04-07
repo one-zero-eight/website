@@ -34,11 +34,21 @@ export type LogoutParams = {
   redirect_uri: string;
 };
 
-export type TokensGenerateUsersServiceTokenParams = {
+export type TokensGenerateSportTokenParams = {
+  telegram_id?: number | null;
+  innohassle_id?: string | null;
+  email?: string | null;
+};
+
+export type TokensGenerateServiceTokenParams = {
   /**
-   * Some string that will be in `sub` field of JWT token. Actually, is may be anything.
+   * Some string that will be in `sub` field of JWT token. Actually, it may be anything.
    */
   sub: string;
+  /**
+   * List of scopes that will be in `scope` field of JWT token. Default is ['users']
+   */
+  scopes?: AvailableScopes[];
   /**
    * Generate token only for current user - other users will be marked as not existing in the system
    */
@@ -88,17 +98,12 @@ export type UserTelegram = TelegramWidgetData | null;
 
 export type UserInnopolisSso = UserInfoFromSSO | null;
 
-/**
- * MongoDB document ObjectID
- */
-export type UserId = string | null;
-
 export interface User {
   /** MongoDB document ObjectID */
-  id?: UserId;
-  innohassle_admin?: boolean;
-  innopolis_sso?: UserInnopolisSso;
-  telegram?: UserTelegram;
+  id: string;
+  innohassle_admin: boolean;
+  innopolis_sso: UserInnopolisSso;
+  telegram: UserTelegram;
 }
 
 export interface TokenData {
@@ -128,6 +133,15 @@ export interface TelegramLoginResponse {
 export interface HTTPValidationError {
   detail?: ValidationError[];
 }
+
+export type AvailableScopes =
+  (typeof AvailableScopes)[keyof typeof AvailableScopes];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const AvailableScopes = {
+  users: "users",
+  sport: "sport",
+} as const;
 
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
 
@@ -1075,42 +1089,37 @@ export const useTokensGenerateToken = <
 
 /**
  * Generate access token for access users-related endpoints (/users/*).
- * @summary Generate Users Service Token
+ * @summary Generate Service Token
  */
-export const tokensGenerateUsersServiceToken = (
-  params: TokensGenerateUsersServiceTokenParams,
+export const tokensGenerateServiceToken = (
+  params: TokensGenerateServiceTokenParams,
   options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
   return axiosQuery<TokenData>(
-    {
-      url: `/tokens/generate-users-scope-service-token`,
-      method: "GET",
-      params,
-      signal,
-    },
+    { url: `/tokens/generate-service-token`, method: "GET", params, signal },
     options,
   );
 };
 
-export const getTokensGenerateUsersServiceTokenQueryKey = (
-  params: TokensGenerateUsersServiceTokenParams,
+export const getTokensGenerateServiceTokenQueryKey = (
+  params: TokensGenerateServiceTokenParams,
 ) => {
   return [
-    `/tokens/generate-users-scope-service-token`,
+    `/tokens/generate-service-token`,
     ...(params ? [params] : []),
   ] as const;
 };
 
-export const useTokensGenerateUsersServiceTokenQueryOptions = <
-  TData = Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>,
+export const useTokensGenerateServiceTokenQueryOptions = <
+  TData = Awaited<ReturnType<typeof tokensGenerateServiceToken>>,
   TError = void | HTTPValidationError,
 >(
-  params: TokensGenerateUsersServiceTokenParams,
+  params: TokensGenerateServiceTokenParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>,
+        Awaited<ReturnType<typeof tokensGenerateServiceToken>>,
         TError,
         TData
       >
@@ -1121,13 +1130,12 @@ export const useTokensGenerateUsersServiceTokenQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ??
-    getTokensGenerateUsersServiceTokenQueryKey(params);
+    queryOptions?.queryKey ?? getTokensGenerateServiceTokenQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>
+    Awaited<ReturnType<typeof tokensGenerateServiceToken>>
   > = ({ signal }) =>
-    tokensGenerateUsersServiceToken(params, requestOptions, signal);
+    tokensGenerateServiceToken(params, requestOptions, signal);
 
   const customOptions = queryOptionsMutator({
     ...queryOptions,
@@ -1136,30 +1144,29 @@ export const useTokensGenerateUsersServiceTokenQueryOptions = <
   });
 
   return customOptions as UseQueryOptions<
-    Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>,
+    Awaited<ReturnType<typeof tokensGenerateServiceToken>>,
     TError,
     TData
   > & { queryKey: QueryKey };
 };
 
-export type TokensGenerateUsersServiceTokenQueryResult = NonNullable<
-  Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>
+export type TokensGenerateServiceTokenQueryResult = NonNullable<
+  Awaited<ReturnType<typeof tokensGenerateServiceToken>>
 >;
-export type TokensGenerateUsersServiceTokenQueryError =
-  void | HTTPValidationError;
+export type TokensGenerateServiceTokenQueryError = void | HTTPValidationError;
 
 /**
- * @summary Generate Users Service Token
+ * @summary Generate Service Token
  */
-export const useTokensGenerateUsersServiceToken = <
-  TData = Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>,
+export const useTokensGenerateServiceToken = <
+  TData = Awaited<ReturnType<typeof tokensGenerateServiceToken>>,
   TError = void | HTTPValidationError,
 >(
-  params: TokensGenerateUsersServiceTokenParams,
+  params: TokensGenerateServiceTokenParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof tokensGenerateUsersServiceToken>>,
+        Awaited<ReturnType<typeof tokensGenerateServiceToken>>,
         TError,
         TData
       >
@@ -1167,10 +1174,104 @@ export const useTokensGenerateUsersServiceToken = <
     request?: SecondParameter<typeof axiosQuery>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = useTokensGenerateUsersServiceTokenQueryOptions(
+  const queryOptions = useTokensGenerateServiceTokenQueryOptions(
     params,
     options,
   );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Generate access token for access https://sport.innopolis.university/api/swagger/
+ * @summary Generate Sport Token
+ */
+export const tokensGenerateSportToken = (
+  params?: TokensGenerateSportTokenParams,
+  options?: SecondParameter<typeof axiosQuery>,
+  signal?: AbortSignal,
+) => {
+  return axiosQuery<TokenData>(
+    { url: `/tokens/generate-sport-token`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getTokensGenerateSportTokenQueryKey = (
+  params?: TokensGenerateSportTokenParams,
+) => {
+  return [`/tokens/generate-sport-token`, ...(params ? [params] : [])] as const;
+};
+
+export const useTokensGenerateSportTokenQueryOptions = <
+  TData = Awaited<ReturnType<typeof tokensGenerateSportToken>>,
+  TError = void | HTTPValidationError,
+>(
+  params?: TokensGenerateSportTokenParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof tokensGenerateSportToken>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosQuery>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getTokensGenerateSportTokenQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof tokensGenerateSportToken>>
+  > = ({ signal }) => tokensGenerateSportToken(params, requestOptions, signal);
+
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
+    Awaited<ReturnType<typeof tokensGenerateSportToken>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type TokensGenerateSportTokenQueryResult = NonNullable<
+  Awaited<ReturnType<typeof tokensGenerateSportToken>>
+>;
+export type TokensGenerateSportTokenQueryError = void | HTTPValidationError;
+
+/**
+ * @summary Generate Sport Token
+ */
+export const useTokensGenerateSportToken = <
+  TData = Awaited<ReturnType<typeof tokensGenerateSportToken>>,
+  TError = void | HTTPValidationError,
+>(
+  params?: TokensGenerateSportTokenParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof tokensGenerateSportToken>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosQuery>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useTokensGenerateSportTokenQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

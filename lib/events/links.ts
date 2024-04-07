@@ -21,3 +21,7 @@ export function getMyMusicRoomLink() {
 export function getMySportLink() {
   return `${EVENTS_API_URL}/users/me/sport.ics`;
 }
+
+export function getPersonalLink(resourcePath: string, accessKey: string) {
+  return `${EVENTS_API_URL}${resourcePath}?access_key=${accessKey}`;
+}

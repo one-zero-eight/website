@@ -1,6 +1,7 @@
 "use client";
 import Calendar from "@/components/common/calendar/Calendar";
 import { NavbarTemplate } from "@/components/layout/Navbar";
+import ExportButton from "@/components/schedule/ExportButton";
 import { getMySportLink } from "@/lib/events";
 import React from "react";
 
@@ -53,7 +54,13 @@ export default function Page() {
           </a>
         </div>
       </div>
-      <h2 className="my-4 text-3xl font-medium">Sport calendar</h2>
+      <div className="my-4 flex flex-row flex-wrap items-center">
+        <h2 className="flex grow text-3xl font-medium">Sport calendar</h2>
+        <ExportButton
+          tooltip="Export your personal calendar"
+          href="/sport/export"
+        />
+      </div>
       <div className="@2xl/content:-mx-8">
         <Calendar
           urls={[

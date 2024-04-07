@@ -1,6 +1,7 @@
 "use client";
 import Calendar from "@/components/common/calendar/Calendar";
 import { NavbarTemplate } from "@/components/layout/Navbar";
+import ExportButton from "@/components/schedule/ExportButton";
 import { getMusicRoomLink, getMyMusicRoomLink } from "@/lib/events";
 
 export default function Page() {
@@ -88,7 +89,13 @@ export default function Page() {
           ></iframe>
         </div>
       </div>
-      <h2 className="my-4 text-3xl font-medium">Booking calendar</h2>
+      <div className="my-4 flex flex-row flex-wrap items-center">
+        <h2 className="flex grow text-3xl font-medium">Booking calendar</h2>
+        <ExportButton
+          tooltip="Export your personal calendar"
+          href="/music-room/export"
+        />
+      </div>
       <div className="@2xl/content:-mx-8">
         <Calendar
           urls={[
