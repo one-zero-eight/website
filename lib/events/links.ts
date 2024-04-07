@@ -17,3 +17,7 @@ export function getMusicRoomLink() {
 export function getMyMusicRoomLink() {
   return `${EVENTS_API_URL}/users/me/music-room.ics`;
 }
+
+export function getMySportLink() {
+  return `${EVENTS_API_URL}/users/me/sport.ics`;
+}

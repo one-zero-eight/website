@@ -1,13 +1,19 @@
 "use client";
-import Calendar from "@/components/common/calendar/Calendar";
+import Calendar, { URLType } from "@/components/common/calendar/Calendar";
 import SignInButton from "@/components/common/SignInButton";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton";
 import { PersonalCard } from "@/components/schedule/group-card/PersonalCard";
 import { useMe } from "@/lib/auth/user";
-import { events, getICSLink, getMyMusicRoomLink } from "@/lib/events";
+import {
+  events,
+  getICSLink,
+  getMyMusicRoomLink,
+  getMySportLink,
+} from "@/lib/events";
 import { useMyMusicRoom } from "@/lib/events/event-group";
 import Link from "next/link";
+import React from "react";
 import { useIsClient, useWindowSize } from "usehooks-ts";
 
 export default function Page() {
@@ -60,6 +66,27 @@ export default function Page() {
               {predefined.event_groups.map((v) => (
                 <GroupCardById key={v} groupId={v} canHide={true} />
               ))}
+              <PersonalCard
+                name={
+                  <div className="flex items-center">
+                    Sport
+                    <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
+                      NEW
+                    </span>
+                  </div>
+                }
+                description="Your sport schedule"
+                pageUrl="/sport"
+                buttons={
+                  <LinkIconButton
+                    href="https://t.me/IUSportBot"
+                    icon={
+                      <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
+                    }
+                    tooltip="Open Telegram bot"
+                  />
+                }
+              />
               {musicRoomSchedule.isSuccess && (
                 <PersonalCard
                   name="Music room"
@@ -69,7 +96,7 @@ export default function Page() {
                     <LinkIconButton
                       href="https://t.me/InnoMusicRoomBot"
                       icon={
-                        <span className="icon-[mdi--robot-excited-outline] text-[#F0B132]" />
+                        <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
                       }
                       tooltip="Open Telegram bot"
                     />
@@ -142,7 +169,7 @@ function getCalendarsToShow(
   userId: number | undefined,
 ) {
   // Remove hidden calendars
-  const toShow = favorites.concat(predefined).flatMap((v) => {
+  const toShow: URLType[] = favorites.concat(predefined).flatMap((v) => {
     if (!includeHidden && hidden.includes(v)) return [];
     const group = eventGroups.groups.find((group) => group.id === v);
     if (!group) return [];
@@ -150,7 +177,14 @@ function getCalendarsToShow(
   });
 
   // Add personal calendars
-  toShow.push(getMyMusicRoomLink());
+  toShow.push({
+    url: getMyMusicRoomLink(),
+    color: "seagreen",
+  });
+  toShow.push({
+    url: getMySportLink(),
+    color: "seagreen",
+  });
 
   // Return unique items
   return toShow.filter((value, index, array) => array.indexOf(value) === index);

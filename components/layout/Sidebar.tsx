@@ -11,6 +11,7 @@ import Logo from "../icons/Logo";
 
 type Item = {
   title: string;
+  badge?: React.ReactNode;
   path: string;
   icon: React.ReactNode;
 };
@@ -42,16 +43,21 @@ const items: Item[] = [
     path: "/music-room",
     icon: <span className="icon-[material-symbols--piano] text-4xl" />,
   },
-];
-
-const externalItems: Item[] = [
   {
-    title: "Sports",
-    path: "https://sport.innopolis.university",
+    title: "Sport",
+    path: "/sport",
+    badge: (
+      <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
+        NEW
+      </span>
+    ),
     icon: (
       <span className="icon-[material-symbols--exercise-outline] text-4xl" />
     ),
   },
+];
+
+const externalItems: Item[] = [
   {
     title: "Moodle",
     path: "https://moodle.innopolis.university",
@@ -122,6 +128,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
               <SidebarSection
                 key={item.title}
                 title={item.title}
+                badge={item.badge}
                 icon={item.icon}
                 selected={selection === item.title}
                 path={item.path}
@@ -135,6 +142,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
               <SidebarSection
                 key={item.title}
                 title={item.title}
+                badge={item.badge}
                 icon={item.icon}
                 selected={false}
                 path={item.path}

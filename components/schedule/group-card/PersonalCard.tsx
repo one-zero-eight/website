@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 
 export type PersonalCardProps = {
-  name: string;
+  name: React.ReactNode;
   description: React.ReactNode;
   buttons?: React.ReactNode;
   pageUrl?: string;

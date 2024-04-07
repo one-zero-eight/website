@@ -6,6 +6,7 @@ export type SectionProps = {
   icon: React.ReactNode;
   path: string;
   title: string;
+  badge?: React.ReactNode;
   selected: boolean;
   onClick: () => void;
   external?: boolean;
@@ -15,7 +16,7 @@ function SidebarSection(props: SectionProps) {
   const element = (
     <div
       className={clsx(
-        "flex select-none flex-row justify-center gap-4 rounded-2xl p-2 hover:bg-gray-500/10",
+        "flex select-none flex-row justify-center rounded-2xl p-2 hover:bg-gray-500/10",
         props.selected
           ? "text-focus"
           : props.path === "#"
@@ -26,7 +27,8 @@ function SidebarSection(props: SectionProps) {
       {props.icon}
       <p
         className={clsx(
-          "flex w-min grow items-center whitespace-nowrap text-lg font-semibold",
+          "ml-4",
+          "flex w-fit items-center whitespace-nowrap text-lg font-semibold",
           props.selected
             ? "selected"
             : props.path === "#"
@@ -35,10 +37,13 @@ function SidebarSection(props: SectionProps) {
         )}
       >
         {props.title}
+      </p>
+      <div className="flex w-min grow items-center">
         {props.external && (
           <span className="icon-[material-symbols--open-in-new-rounded] ml-1" />
         )}
-      </p>
+        {props.badge}
+      </div>
     </div>
   );
 
