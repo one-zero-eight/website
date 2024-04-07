@@ -80,6 +80,7 @@ function Calendar({
             }
           }
         }}
+        progressiveEventRendering={true}
         timeZone="Europe/Moscow" // Use the same timezone for everyone
         plugins={[
           momentPlugin,
