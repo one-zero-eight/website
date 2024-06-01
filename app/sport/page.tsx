@@ -22,7 +22,7 @@ export default function Page() {
               <span className="icon-[mdi--robot-excited-outline] text-5xl text-[#9747FF]" />
             </div>
             <div className="flex flex-col gap-2">
-              <p className="flex items-center text-2xl font-semibold text-text-main underline-offset-4 group-hover:underline">
+              <p className="flex items-center text-2xl font-semibold text-text-main">
                 Telegram bot
                 <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
                   NEW
@@ -43,7 +43,7 @@ export default function Page() {
               <span className="icon-[material-symbols--quick-reference-outline-rounded] text-5xl text-[#9747FF]" />
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-2xl font-semibold text-text-main underline-offset-4 group-hover:underline">
+              <p className="text-2xl font-semibold text-text-main">
                 Official website
               </p>
               <p className="text-lg text-text-secondary/75">

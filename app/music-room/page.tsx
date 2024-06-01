@@ -21,7 +21,7 @@ export default function Page() {
               <span className="icon-[mdi--robot-excited-outline] text-5xl text-[#9747FF]" />
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-2xl font-semibold text-text-main underline-offset-4 group-hover:underline">
+              <p className="text-2xl font-semibold text-text-main">
                 Telegram bot
               </p>
               <p className="text-lg text-text-secondary/75">
@@ -37,7 +37,7 @@ export default function Page() {
               <span className="icon-[material-symbols--quick-reference-outline-rounded] text-5xl text-[#9747FF]" />
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-2xl font-semibold text-text-main underline-offset-4 group-hover:underline">
+              <p className="text-2xl font-semibold text-text-main">
                 Instructions
               </p>
               <p className="text-lg text-text-secondary/75">
@@ -59,7 +59,7 @@ export default function Page() {
               <span className="icon-[ic--baseline-telegram] text-5xl text-[#9747FF]" />
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-2xl font-semibold text-text-main underline-offset-4 group-hover:underline">
+              <p className="text-2xl font-semibold text-text-main">
                 Telegram chat
               </p>
               <p className="text-lg text-text-secondary/75">
