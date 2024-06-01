@@ -193,14 +193,14 @@ export interface ListTagsResponse {
  * Represents a list of event groups.
  */
 export interface ListEventGroupsResponseOutput {
-  groups: ViewEventGroup[];
+  event_groups: ViewEventGroup[];
 }
 
 /**
  * Represents a list of event groups.
  */
 export interface ListEventGroupsResponseInput {
-  groups: ViewEventGroup[];
+  event_groups: ViewEventGroup[];
 }
 
 export type LinkedCalendarViewName = string | null;
@@ -245,22 +245,41 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
+export type CreateTagType = string | null;
+
+export type CreateTagSatellite = string | null;
+
+export type CreateTagName = string | null;
+
+export interface CreateTag {
+  alias: string;
+  name?: CreateTagName;
+  satellite?: CreateTagSatellite;
+  type?: CreateTagType;
+}
+
 export type CreateEventGroupPath = string | null;
 
 export type CreateEventGroupDescription = string | null;
 
-/**
- * Represents a group instance to be created.
- */
 export interface CreateEventGroup {
   alias: string;
   description?: CreateEventGroupDescription;
   name: string;
   path?: CreateEventGroupPath;
+  tags?: CreateTag[];
+}
+
+export interface BodyTagsBatchCreateTags {
+  tags: CreateTag[];
 }
 
 export interface BodyEventGroupsSetEventGroupIcs {
   ics_file: Blob;
+}
+
+export interface BodyEventGroupsBatchCreateEventGroups {
+  event_groups: CreateEventGroup[];
 }
 
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
@@ -1234,6 +1253,89 @@ export const useEventGroupsCreateEventGroup = <
 };
 
 /**
+ * @summary Batch Create Event Groups
+ */
+export const eventGroupsBatchCreateEventGroups = (
+  bodyEventGroupsBatchCreateEventGroups: BodyEventGroupsBatchCreateEventGroups,
+  options?: SecondParameter<typeof axiosQuery>,
+) => {
+  return axiosQuery<ListEventGroupsResponseInput>(
+    {
+      url: `/event-groups/batch-create-or-read`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: bodyEventGroupsBatchCreateEventGroups,
+    },
+    options,
+  );
+};
+
+export const getEventGroupsBatchCreateEventGroupsMutationOptions = <
+  TError = void | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof eventGroupsBatchCreateEventGroups>>,
+    TError,
+    { data: BodyEventGroupsBatchCreateEventGroups },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof eventGroupsBatchCreateEventGroups>>,
+  TError,
+  { data: BodyEventGroupsBatchCreateEventGroups },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof eventGroupsBatchCreateEventGroups>>,
+    { data: BodyEventGroupsBatchCreateEventGroups }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return eventGroupsBatchCreateEventGroups(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type EventGroupsBatchCreateEventGroupsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof eventGroupsBatchCreateEventGroups>>
+>;
+export type EventGroupsBatchCreateEventGroupsMutationBody =
+  BodyEventGroupsBatchCreateEventGroups;
+export type EventGroupsBatchCreateEventGroupsMutationError =
+  void | HTTPValidationError;
+
+/**
+ * @summary Batch Create Event Groups
+ */
+export const useEventGroupsBatchCreateEventGroups = <
+  TError = void | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof eventGroupsBatchCreateEventGroups>>,
+    TError,
+    { data: BodyEventGroupsBatchCreateEventGroups },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof eventGroupsBatchCreateEventGroups>>,
+  TError,
+  { data: BodyEventGroupsBatchCreateEventGroups },
+  TContext
+> => {
+  const mutationOptions =
+    getEventGroupsBatchCreateEventGroupsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+/**
  * @summary Update Event Group
  */
 export const eventGroupsUpdateEventGroup = (
@@ -1774,6 +1876,87 @@ export const useTagsListTags = <
   query.queryKey = queryOptions.queryKey;
 
   return query;
+};
+
+/**
+ * Create tags in batch
+ * @summary Batch Create Tags
+ */
+export const tagsBatchCreateTags = (
+  bodyTagsBatchCreateTags: BodyTagsBatchCreateTags,
+  options?: SecondParameter<typeof axiosQuery>,
+) => {
+  return axiosQuery<ListTagsResponse>(
+    {
+      url: `/tags/batch-create-or-read`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: bodyTagsBatchCreateTags,
+    },
+    options,
+  );
+};
+
+export const getTagsBatchCreateTagsMutationOptions = <
+  TError = void | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof tagsBatchCreateTags>>,
+    TError,
+    { data: BodyTagsBatchCreateTags },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof tagsBatchCreateTags>>,
+  TError,
+  { data: BodyTagsBatchCreateTags },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof tagsBatchCreateTags>>,
+    { data: BodyTagsBatchCreateTags }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return tagsBatchCreateTags(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TagsBatchCreateTagsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof tagsBatchCreateTags>>
+>;
+export type TagsBatchCreateTagsMutationBody = BodyTagsBatchCreateTags;
+export type TagsBatchCreateTagsMutationError = void | HTTPValidationError;
+
+/**
+ * @summary Batch Create Tags
+ */
+export const useTagsBatchCreateTags = <
+  TError = void | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof tagsBatchCreateTags>>,
+    TError,
+    { data: BodyTagsBatchCreateTags },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof tagsBatchCreateTags>>,
+  TError,
+  { data: BodyTagsBatchCreateTags },
+  TContext
+> => {
+  const mutationOptions = getTagsBatchCreateTagsMutationOptions(options);
+
+  return useMutation(mutationOptions);
 };
 
 /**
@@ -2640,6 +2823,82 @@ export const useIcsGetEventGroupIcsByAlias = <
     params,
     options,
   );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * Endpoint that serves Prometheus metrics.
+ * @summary Metrics
+ */
+export const metrics = (
+  options?: SecondParameter<typeof axiosQuery>,
+  signal?: AbortSignal,
+) => {
+  return axiosQuery<unknown>(
+    { url: `/metrics`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getMetricsQueryKey = () => {
+  return [`/metrics`] as const;
+};
+
+export const useMetricsQueryOptions = <
+  TData = Awaited<ReturnType<typeof metrics>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof metrics>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getMetricsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof metrics>>> = ({
+    signal,
+  }) => metrics(requestOptions, signal);
+
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
+    Awaited<ReturnType<typeof metrics>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type MetricsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof metrics>>
+>;
+export type MetricsQueryError = unknown;
+
+/**
+ * @summary Metrics
+ */
+export const useMetrics = <
+  TData = Awaited<ReturnType<typeof metrics>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof metrics>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useMetricsQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

@@ -171,7 +171,7 @@ function getCalendarsToShow(
   // Remove hidden calendars
   const toShow: URLType[] = favorites.concat(predefined).flatMap((v) => {
     if (!includeHidden && hidden.includes(v)) return [];
-    const group = eventGroups.groups.find((group) => group.id === v);
+    const group = eventGroups.event_groups.find((group) => group.id === v);
     if (!group) return [];
     return [getICSLink(group.alias, userId)];
   });

@@ -9,7 +9,9 @@ export type GroupCardProps = {
 export function GroupCardById({ groupId, canHide = false }: GroupCardProps) {
   const { data: eventGroups } = events.useEventGroupsListEventGroups();
   if (groupId === undefined) return null;
-  const group = eventGroups?.groups?.find((group) => group.id === groupId);
+  const group = eventGroups?.event_groups?.find(
+    (group) => group.id === groupId,
+  );
   if (!group) return null;
   return <GroupCard group={group} canHide={canHide} />;
 }

@@ -31,7 +31,7 @@ export default function ScheduleList({ category }: ScheduleListProps) {
   // Apply filters and group elements
   const groups = !data
     ? {}
-    : data.groups
+    : data.event_groups
         // Filter by tags
         .filter((v) =>
           tagsFilter.every(
