@@ -1,35 +1,12 @@
-import { useCallback, useState } from "react";
 import React from "react";
-import { pdfjs, Document, Page } from "react-pdf";
+import PdfPreview from "./pdfpreview";
 
-import type { PDFDocumentProxy } from "pdfjs-dist";
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url,
-).toString();
-
-const options = {
-  cMapUrl: "/cmaps/",
-  standardFontDataUrl: "/standard_fonts/",
-};
-
-const maxWidth = 600;
-const maxHeight = 300;
-
-export default function SearchResult() {
-  const file =
-    "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf";
-  const [numPages, setNumPages] = useState<number>();
-  const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
-  const [containerWidth, setContainerWidth] = useState<number>();
-
-  function onDocumentLoadSuccess({
-    numPages: nextNumPages,
-  }: PDFDocumentProxy): void {
-    setNumPages(nextNumPages);
-  }
-
+const SearchResult: React.FC<{
+  file: string;
+  clipX: number;
+  clipY: number;
+  description: string;
+}> = ({ file, clipX, clipY, description }) => {
   return (
     <div className="m-4 grid grid-cols-10 gap-4 @xl/content:grid-cols-2">
       <div className="col-span-4 flex flex-col gap-4">
@@ -50,23 +27,15 @@ export default function SearchResult() {
           </div>
         </a>
       </div>
-      <div className="col-span-6 flex flex-row items-center justify-center rounded-2xl bg-primary-main p-4">
-        <Document
-          file={file}
-          onLoadSuccess={onDocumentLoadSuccess}
-          options={options}
-        >
-          {Array.from(new Array(numPages), (el, index) => (
-            <Page
-              key={`page_${index + 1}`}
-              pageNumber={index + 1}
-              width={
-                containerWidth ? Math.min(containerWidth, maxWidth) : maxWidth
-              }
-            />
-          ))}
-        </Document>
-      </div>
+
+      <PdfPreview
+        file={file}
+        clipX={clipX}
+        clipY={clipY}
+        description={description}
+      ></PdfPreview>
     </div>
   );
-}
+};
+
+export default SearchResult;
