@@ -1,4 +1,5 @@
 "use client";
+import SearchResult from "@/components/search/SearchResult";
 import SearchField from "@/components/search/searchfield";
 
 const styles = {
@@ -13,7 +14,10 @@ const styles = {
 export default function Page() {
   return (
     <div className="search-page" style={styles.searchPage}>
-      <SearchField />
+      <div className="my-4 grid grid-cols-1 gap-4 @xl/content:grid-cols-2">
+        <SearchField />
+        <SearchResult />
+      </div>
     </div>
   );
 }
