@@ -1,3 +1,4 @@
+"use client";
 import SearchField from "@/components/search/searchfield";
 
 const styles = {
