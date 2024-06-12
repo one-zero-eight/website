@@ -44,7 +44,7 @@ const PdfPreview: React.FC<{
         const canvas = canvasRef.current;
         const context = canvas!.getContext("2d");
 
-        canvas!.width = previewWidth;
+        canvas!.width = viewport.width; // Заменить на previewWidth если нужно уменьшить размер
         canvas!.height = previewHeight;
 
         const renderContext = {
@@ -62,7 +62,7 @@ const PdfPreview: React.FC<{
 
   return (
     <div
-      className="pdf-preview-elem col-span-4 rounded-2xl bg-primary-main"
+      className="pdf-preview-elem col-span-7 rounded-2xl bg-primary-main" // col-span-4, если используете previewWidth
       style={{
         display: "flex",
         alignItems: "center",

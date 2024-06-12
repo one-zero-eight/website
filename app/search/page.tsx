@@ -13,8 +13,8 @@ const styles = {
 
 const preview_props: PdfPreviewProps = {
   file: "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
-  clipX: 100,
-  clipY: 100,
+  clipX: 0,
+  clipY: 300,
   description: "Oi oi oi ue ni agariya kanke ne",
 };
 
