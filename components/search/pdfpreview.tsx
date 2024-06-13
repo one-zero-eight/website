@@ -1,12 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { pdfjs, Document, Page } from "react-pdf";
 import type { PDFDocumentProxy } from "pdfjs-dist";
+import "react-pdf/dist/esm/Page/TextLayer.css";
+
+function highlightPattern(text: string, pattern: string) {
+  return text.replace(pattern, (value: any) => `<mark>${value}</mark>`);
+}
 
 export declare type PdfPreviewProps = {
   file: string;
-  clipX: number;
-  clipY: number;
-  description: string;
+  searchText: string;
 };
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -19,50 +22,34 @@ const options = {
   standardFontDataUrl: "/standard_fonts/",
 };
 
-const previewWidth = 300; // Ширина предпросмотра
-const previewHeight = 150; // Высота предпросмотра
-
 const PdfPreview: React.FC<{
   file: string;
-  clipX: number;
-  clipY: number;
-  description: string;
-}> = ({ file, clipX, clipY, description }) => {
+  searchText: string;
+}> = ({ file, searchText }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null);
+  const [numPages, setNumPages] = useState(0);
+  const [allPageNumbers, setAllPageNumbers] = React.useState<number[]>();
+  const PAGE_MAX_HEIGHT = 200;
 
-  const onDocumentLoadSuccess = (pdf: PDFDocumentProxy): void => {
+  function onDocumentLoadSuccess(pdf: PDFDocumentProxy) {
     setPdfDocument(pdf);
-  };
-
-  useEffect(() => {
-    if (pdfDocument) {
-      const renderPage = async () => {
-        const page = await pdfDocument.getPage(1);
-        const viewport = page.getViewport({ scale: 1 });
-        const canvas = canvasRef.current;
-        const context = canvas!.getContext("2d");
-
-        canvas!.width = viewport.width; // Заменить на previewWidth если нужно уменьшить размер
-        canvas!.height = previewHeight;
-
-        const renderContext = {
-          canvasContext: context!,
-          viewport,
-          transform: [1, 0, 0, 1, -clipX, -clipY], // Обрезаем нужную часть
-        };
-
-        await page.render(renderContext).promise;
-      };
-
-      renderPage();
+    const allPageNumbers: number[] = [];
+    for (let p = 1; p < pdf.numPages + 1; p++) {
+      allPageNumbers.push(p);
     }
-  }, [pdfDocument]);
+    setAllPageNumbers(allPageNumbers);
+  }
+
+  const textRenderer = useCallback(
+    (textItem: { str: any }) => highlightPattern(textItem.str, searchText),
+    [searchText],
+  );
 
   return (
     <div
-      className="pdf-preview-elem col-span-7 rounded-2xl bg-primary-main" // col-span-4, если используете previewWidth
+      className="pdf-preview-elem col-span-6 rounded-2xl bg-primary-main" // col-span-4, если используете previewWidth
       style={{
         display: "flex",
         alignItems: "center",
@@ -72,25 +59,28 @@ const PdfPreview: React.FC<{
       }}
     >
       <Document
+        className="rounded-2xl"
         file={file}
         onLoadSuccess={onDocumentLoadSuccess}
-        options={options}
       >
-        <canvas ref={canvasRef} className="rounded-2xl" />
+        <div
+          style={{
+            maxHeight: `${PAGE_MAX_HEIGHT}px`,
+            overflowY: "scroll",
+            overflowX: "hidden",
+          }}
+        >
+          {allPageNumbers
+            ? allPageNumbers.map((pn) => (
+                <Page
+                  key={`page-${pn}`}
+                  pageNumber={pn}
+                  customTextRenderer={textRenderer}
+                />
+              ))
+            : undefined}
+        </div>
       </Document>
-      <div
-        className="pdf-preview-info text-lg text-text-secondary/75"
-        style={{
-          width: `${previewWidth}px`,
-          height: "30px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: "10px",
-        }}
-      >
-        <p>{description}</p>
-      </div>
     </div>
   );
 };

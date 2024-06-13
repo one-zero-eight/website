@@ -13,9 +13,7 @@ const styles = {
 
 const preview_props: PdfPreviewProps = {
   file: "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
-  clipX: 0,
-  clipY: 300,
-  description: "Oi oi oi ue ni agariya kanke ne",
+  searchText: "PDF",
 };
 
 export default function Page() {
@@ -25,9 +23,7 @@ export default function Page() {
         <SearchField />
         <SearchResult
           file={preview_props.file}
-          clipX={preview_props.clipX}
-          clipY={preview_props.clipY}
-          description={preview_props.description}
+          searchText={preview_props.searchText}
         />
       </div>
     </div>
