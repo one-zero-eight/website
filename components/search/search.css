@@ -34,3 +34,9 @@
   flex-direction: column;
   align-items: center;
 }
+
+@media (max-width: 1431px) {
+  .pdf-preview-elem {
+    overflow-x: scroll;
+  }
+}
