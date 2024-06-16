@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import { pdfjs, Document, Page } from "react-pdf";
 import type { PDFDocumentProxy } from "pdfjs-dist";
+import React, { useCallback, useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
 function highlightPattern(text: string, pattern: string) {
@@ -77,11 +77,11 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ file, searchText }) => {
       </Document>
       <div className="navigation">
         <button onClick={goToPrevPage} disabled={currentPage <= 1}>
-          &lt;{"      "}
+          &lt;
         </button>
         <span>{`${currentPage}/${numPages}`}</span>
         <button onClick={goToNextPage} disabled={currentPage >= numPages}>
-          {"      "}&gt;
+          &gt;
         </button>
       </div>
     </div>

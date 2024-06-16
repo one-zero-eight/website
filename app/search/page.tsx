@@ -1,9 +1,9 @@
 "use client";
-import SearchResult from "@/components/search/SearchResult";
-import SearchField from "@/components/search/searchfield";
 import { PdfPreviewProps } from "@/components/search/pdfpreview";
-import { useState } from "react";
+import SearchField from "@/components/search/searchfield";
+import SearchResult from "@/components/search/SearchResult";
 import { responseData } from "@/hooks/sendSearchRequest";
+import { useState } from "react";
 
 const styles = {
   searchPage: {
@@ -37,7 +37,7 @@ export default function Page() {
             <SearchResult
               file={searchResult.file}
               searchText={searchResult.searchText}
-            />{" "}
+            />
           </div>
         )}
 
