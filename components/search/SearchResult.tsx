@@ -1,5 +1,10 @@
+import dynamic from "next/dynamic";
 import React from "react";
-import PdfPreview from "./pdfpreview";
+
+export const PdfPreview = dynamic(
+  () => import("./pdfpreview").then((x) => x.default),
+  { ssr: false },
+);
 
 const SearchResult: React.FC<{
   file: string;
