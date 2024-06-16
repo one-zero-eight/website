@@ -3,11 +3,7 @@ import SearchResult from "@/components/search/SearchResult";
 import SearchField from "@/components/search/searchfield";
 import { PdfPreviewProps } from "@/components/search/pdfpreview";
 import { useState } from "react";
-import {
-  findPdfFile,
-  requestData,
-  responseData,
-} from "@/hooks/sendSearchRequest";
+import { responseData } from "@/hooks/sendSearchRequest";
 
 const styles = {
   searchPage: {
@@ -33,7 +29,7 @@ export default function Page() {
           searchResult={searchResult}
           setSearchResult={setSearchResult}
         />
-        {searchResult && (
+        {searchResult && searchResult.file && (
           <div className="search-result">
             <p className="search-result-title text-2xl font-semibold text-text-main">
               Results for: {searchResult.searchText}
@@ -42,6 +38,14 @@ export default function Page() {
               file={searchResult.file}
               searchText={searchResult.searchText}
             />{" "}
+          </div>
+        )}
+
+        {searchResult && !searchResult.file && (
+          <div className="search-result">
+            <p className="search-result-title text-2xl font-semibold text-text-main">
+              No matched results for: {searchResult.searchText}
+            </p>
           </div>
         )}
       </div>

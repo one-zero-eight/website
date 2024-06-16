@@ -3,13 +3,15 @@ export type requestData = {
 };
 
 export type responseData = {
-  file: string;
+  file: string | null;
   searchText: string;
 };
 
 const url: string = "https://get_pdfs.com/";
 
-export async function sendSearchRequest(data: requestData): Promise<responseData[]> {
+export async function sendSearchRequest(
+  data: requestData,
+): Promise<responseData[]> {
   try {
     const response = await fetch(
       `${url}${encodeURIComponent(data.searchText)}`,
@@ -32,7 +34,7 @@ export async function sendSearchRequest(data: requestData): Promise<responseData
   }
 }
 
-export async function findPdfFile(data: requestData): Promise<responseData | null> {
+export async function findPdfFile(data: requestData): Promise<responseData> {
   const available_pdfs: responseData[] = [
     {
       file: "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
@@ -50,5 +52,5 @@ export async function findPdfFile(data: requestData): Promise<responseData | nul
     }
   }
 
-  return null;
+  return { file: null, searchText: data.searchText };
 }
