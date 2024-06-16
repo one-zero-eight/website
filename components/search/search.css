@@ -35,8 +35,41 @@
   align-items: center;
 }
 
+.navigation {
+  display: flex;
+  flex-direction: row;
+  gap: 50px;
+}
+
 @media (max-width: 1431px) {
-  .pdf-preview-elem {
+  /* .pdf-preview-elem {
+    overflow-x: scroll;
+  } */
+
+  .pdf-preview-elem2 {
+    max-width: 600px;
+    overflow-x: scroll;
+  }
+}
+
+@media (max-width: 1375px) {
+  /* .pdf-preview-elem {
+    overflow-x: scroll;
+  } */
+
+  .pdf-preview-elem2 {
+    max-width: 500px;
+    overflow-x: scroll;
+  }
+}
+
+@media (max-width: 1200px) {
+  /* .pdf-preview-elem {
+    overflow-x: scroll;
+  } */
+
+  .pdf-preview-elem2 {
+    max-width: 400px;
     overflow-x: scroll;
   }
 }

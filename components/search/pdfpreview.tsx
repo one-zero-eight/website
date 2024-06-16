@@ -22,24 +22,16 @@ const options = {
   standardFontDataUrl: "/standard_fonts/",
 };
 
-const PdfPreview: React.FC<{
-  file: string;
-  searchText: string;
-}> = ({ file, searchText }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
+const PdfPreview: React.FC<PdfPreviewProps> = ({ file, searchText }) => {
   const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState(0);
-  const [allPageNumbers, setAllPageNumbers] = React.useState<number[]>();
+  const [currentPage, setCurrentPage] = useState(1);
   const PAGE_MAX_HEIGHT = 200;
 
   function onDocumentLoadSuccess(pdf: PDFDocumentProxy) {
     setPdfDocument(pdf);
-    const allPageNumbers: number[] = [];
-    for (let p = 1; p < pdf.numPages + 1; p++) {
-      allPageNumbers.push(p);
-    }
-    setAllPageNumbers(allPageNumbers);
+    setNumPages(pdf.numPages);
+    setCurrentPage(1); // Устанавливаем текущую страницу на первую при загрузке документа
   }
 
   const textRenderer = useCallback(
@@ -47,9 +39,19 @@ const PdfPreview: React.FC<{
     [searchText],
   );
 
+  const goToPrevPage = () => {
+    setCurrentPage((prevPage) => (prevPage > 1 ? prevPage - 1 : prevPage));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage((prevPage) =>
+      prevPage < numPages ? prevPage + 1 : prevPage,
+    );
+  };
+
   return (
     <div
-      className="pdf-preview-elem col-span-6 rounded-2xl bg-primary-main" // col-span-4, если используете previewWidth
+      className="pdf-preview-elem col-span-6 rounded-2xl bg-primary-main"
       style={{
         display: "flex",
         alignItems: "center",
@@ -67,22 +69,23 @@ const PdfPreview: React.FC<{
           style={{
             maxHeight: `${PAGE_MAX_HEIGHT}px`,
             overflowY: "scroll",
-            overflowX: "hidden",
           }}
+          className="pdf-preview-elem2"
         >
-          {allPageNumbers
-            ? allPageNumbers.map((pn) => (
-                <Page
-                  key={`page-${pn}`}
-                  pageNumber={pn}
-                  customTextRenderer={textRenderer}
-                />
-              ))
-            : undefined}
+          <Page pageNumber={currentPage} customTextRenderer={textRenderer} />
         </div>
       </Document>
+      <div className="navigation">
+        <button onClick={goToPrevPage} disabled={currentPage <= 1}>
+          &lt;{"      "}
+        </button>
+        <span>{`${currentPage}/${numPages}`}</span>
+        <button onClick={goToNextPage} disabled={currentPage >= numPages}>
+          {"      "}&gt;
+        </button>
+      </div>
     </div>
   );
 };
 
-export default PdfPreview;
+export default PdfPreview; // example.pdf
