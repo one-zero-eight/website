@@ -1,7 +1,15 @@
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import "./search.css";
+import {
+  findPdfFile,
+  requestData,
+  responseData,
+} from "@/hooks/sendSearchRequest";
 
-export default function SearchField() {
+const SearchField: React.FC<{
+  searchResult: responseData | null;
+  setSearchResult: Dispatch<SetStateAction<responseData | null>>;
+}> = ({ searchResult, setSearchResult }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -11,8 +19,12 @@ export default function SearchField() {
     }
   };
 
-  const sendRequest = () => {
-    alert(`Отправляем запрос: ${searchQuery}`);
+  const sendRequest = async () => {
+    const data: requestData = {
+      searchText: searchQuery,
+    };
+    const result = await findPdfFile(data);
+    setSearchResult(result);
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,4 +50,6 @@ export default function SearchField() {
       />
     </div>
   );
-}
+};
+
+export default SearchField;
