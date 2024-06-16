@@ -26,7 +26,7 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ file, searchText }) => {
   const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_MAX_HEIGHT = 200;
+  const PAGE_MAX_HEIGHT = 400;
 
   function onDocumentLoadSuccess(pdf: PDFDocumentProxy) {
     setPdfDocument(pdf);
