@@ -25,6 +25,16 @@ const items: Item[] = [
     ),
   },
   {
+    title: "Search",
+    path: "/search",
+    badge: (
+      <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
+        NEW
+      </span>
+    ),
+    icon: <span className="icon-[material-symbols--search] text-4xl" />,
+  },
+  {
     title: "Schedule",
     path: "/schedule",
     icon: (
@@ -46,24 +56,9 @@ const items: Item[] = [
   {
     title: "Sport",
     path: "/sport",
-    badge: (
-      <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
-        NEW
-      </span>
-    ),
     icon: (
       <span className="icon-[material-symbols--exercise-outline] text-4xl" />
     ),
-  },
-  {
-    title: "Search",
-    path: "/search",
-    badge: (
-      <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
-        NEW
-      </span>
-    ),
-    icon: <span className="icon-[material-symbols--search] text-4xl" />,
   },
 ];
 
