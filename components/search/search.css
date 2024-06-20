@@ -41,6 +41,18 @@
   gap: 50px;
 }
 
+.sources {
+  font-size: 1em;
+  margin-top: auto;
+}
+
+.moodle-response {
+  display: flex;
+  flex-direction: row;
+
+  gap: 5px;
+}
+
 @media (max-width: 1431px) {
   /* .pdf-preview-elem {
     overflow-x: scroll;

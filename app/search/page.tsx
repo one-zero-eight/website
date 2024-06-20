@@ -2,7 +2,7 @@
 import { PdfPreviewProps } from "@/components/search/pdfpreview";
 import SearchField from "@/components/search/searchfield";
 import SearchResult from "@/components/search/SearchResult";
-import { responseData } from "@/hooks/sendSearchRequest";
+import { ResponseData } from "@/hooks/sendSearchRequest";
 import { useState } from "react";
 
 const styles = {
@@ -14,13 +14,8 @@ const styles = {
   },
 };
 
-const preview_props: PdfPreviewProps = {
-  file: "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
-  searchText: "PDF",
-};
-
 export default function Page() {
-  const [searchResult, setSearchResult] = useState<responseData | null>(null);
+  const [searchResult, setSearchResult] = useState<ResponseData | null>(null);
 
   return (
     <div className="search-page" style={styles.searchPage}>
@@ -29,22 +24,19 @@ export default function Page() {
           searchResult={searchResult}
           setSearchResult={setSearchResult}
         />
-        {searchResult && searchResult.file && (
+        {searchResult && searchResult.responses && (
           <div className="search-result">
             <p className="search-result-title text-2xl font-semibold text-text-main">
-              Results for: {searchResult.searchText}
+              Results for: {searchResult.search_text}
             </p>
-            <SearchResult
-              file={searchResult.file}
-              searchText={searchResult.searchText}
-            />
+            <SearchResult response_data={searchResult} />
           </div>
         )}
 
-        {searchResult && !searchResult.file && (
+        {searchResult && !searchResult.responses && (
           <div className="search-result">
             <p className="search-result-title text-2xl font-semibold text-text-main">
-              No matched results for: {searchResult.searchText}
+              No matched results for: {searchResult.search_text}
             </p>
           </div>
         )}

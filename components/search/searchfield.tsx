@@ -1,14 +1,14 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
 import "./search.css";
 import {
-  findPdfFile,
+  sendSearchRequest,
   requestData,
-  responseData,
+  ResponseData,
 } from "@/hooks/sendSearchRequest";
 
 const SearchField: React.FC<{
-  searchResult: responseData | null;
-  setSearchResult: Dispatch<SetStateAction<responseData | null>>;
+  searchResult: ResponseData | null;
+  setSearchResult: Dispatch<SetStateAction<ResponseData | null>>;
 }> = ({ searchResult, setSearchResult }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -23,7 +23,7 @@ const SearchField: React.FC<{
     const data: requestData = {
       searchText: searchQuery,
     };
-    const result = await findPdfFile(data);
+    const result = await sendSearchRequest(data);
     setSearchResult(result);
   };
 
