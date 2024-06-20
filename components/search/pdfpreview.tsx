@@ -51,7 +51,7 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ file, searchText }) => {
 
   return (
     <div
-      className="pdf-preview-elem col-span-6 rounded-2xl bg-primary-main"
+      className="pdf-preview-elem col-span-6"
       style={{
         display: "flex",
         alignItems: "center",
@@ -60,6 +60,21 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ file, searchText }) => {
         padding: "10px",
       }}
     >
+      <div
+        className="file-title"
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          width: "100%",
+          padding: "10px",
+
+          fontSize: "1.5rem",
+          fontWeight: "bold",
+          marginBottom: "1rem",
+        }}
+      >
+        <p>File Title</p>
+      </div>
       <Document
         className="rounded-2xl"
         file={file}
@@ -70,12 +85,18 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ file, searchText }) => {
             maxHeight: `${PAGE_MAX_HEIGHT}px`,
             overflowY: "scroll",
           }}
-          className="pdf-preview-elem2"
+          className="pdf-preview-elem2 custom-preview-scrollbar"
         >
           <Page pageNumber={currentPage} customTextRenderer={textRenderer} />
         </div>
       </Document>
-      <div className="navigation">
+      <div
+        className="navigation"
+        style={{
+          marginTop: "1.5rem",
+          marginBottom: "0.5rem",
+        }}
+      >
         <button onClick={goToPrevPage} disabled={currentPage <= 1}>
           &lt;
         </button>
