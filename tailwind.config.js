@@ -71,8 +71,8 @@ module.exports = {
   },
   darkMode: "class",
   plugins: [
-    // Iconify plugin
     addDynamicIconSelectors(),
     require("@tailwindcss/container-queries"),
+    require("@tailwindcss/typography"),
   ],
 };

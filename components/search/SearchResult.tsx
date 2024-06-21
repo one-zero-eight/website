@@ -1,10 +1,10 @@
-import dynamic from "next/dynamic";
-import React, { useState } from "react";
 import {
   MoodleSource,
   ResponseData,
   TelegramSource,
 } from "@/hooks/sendSearchRequest";
+import dynamic from "next/dynamic";
+import React, { useState } from "react";
 import Markdown from "react-markdown";
 import SearchSource from "./SearchSource";
 
@@ -28,8 +28,9 @@ const SearchResult: React.FC<{
           className="m-4 grid auto-rows-max grid-cols-10 gap-4 rounded-2xl bg-primary-main @xl/content:grid-cols-2"
         >
           <div className="group col-span-4 flex flex-col gap-2 rounded-2xl px-4 py-6">
-            <p className="mb-4 text-2xl font-bold">Answer Title</p>
-            <Markdown>{response.markdown_text}</Markdown>
+            <Markdown className="prose dark:prose-invert">
+              {response.markdown_text}
+            </Markdown>
             {response.sources.length != 0 && (
               <div className="sources">
                 <p style={{ fontWeight: "bold" }}>Sources:</p>
