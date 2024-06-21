@@ -9,6 +9,7 @@ function highlightPattern(text: string, pattern: string) {
 
 export declare type PdfPreviewProps = {
   file: string;
+  fileTitle: string;
   searchText: string;
 };
 
@@ -22,7 +23,11 @@ const options = {
   standardFontDataUrl: "/standard_fonts/",
 };
 
-const PdfPreview: React.FC<PdfPreviewProps> = ({ file, searchText }) => {
+const PdfPreview: React.FC<PdfPreviewProps> = ({
+  file,
+  fileTitle,
+  searchText,
+}) => {
   const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,20 +65,8 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({ file, searchText }) => {
         padding: "10px",
       }}
     >
-      <div
-        className="file-title"
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          width: "100%",
-          padding: "10px",
-
-          fontSize: "1.5rem",
-          fontWeight: "bold",
-          marginBottom: "1rem",
-        }}
-      >
-        <p>File Title</p>
+      <div className="file-title mb-4 flex w-full items-start p-3 text-2xl font-bold">
+        <p>{fileTitle}</p>
       </div>
       <Document
         className="rounded-2xl"

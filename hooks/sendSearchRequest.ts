@@ -95,12 +95,29 @@ const example: ResponseData = {
           module_id: 82752,
           module_name: "Week 01 - 01 August 2022",
           data_id: 82752,
-          display_name: "Lecture 2 Slides Файл",
+          display_name: "Lecture 2 Slides",
           resource_type: "pdf",
           resource_download_url:
             "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
           resource_preview_url:
             "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
+          preview_location: {
+            page_index: 1,
+          },
+        },
+        {
+          type: "moodle",
+          course_id: 1114,
+          course_name: "[Sum24] Practicum Project",
+          module_id: 82752,
+          module_name: "Week 01 - 01 June 2024",
+          data_id: 82752,
+          display_name: "Lecture 1 Slides",
+          resource_type: "pdf",
+          resource_download_url:
+            "https://pdfobject.com/pdf/sample.pdf",
+          resource_preview_url:
+            "https://pdfobject.com/pdf/sample.pdf",
           preview_location: {
             page_index: 1,
           },
@@ -119,30 +136,30 @@ const example: ResponseData = {
       markdown_text:
         "# Computer Architecture 2. Week 2\n\n### Content of the Class:\n\n- The role of performance characteristics and their relation to computer speed\n- The measurement of performance characteristics\n- Decision-making based on various performance metrics\n- Programs to determine comprehensive performance indexes",
       sources: [
-        {
-          type: "moodle",
-          course_id: 1114,
-          course_name: "[F22] Fundamentals of Computer Architecture",
-          module_id: 82752,
-          module_name: "Week 01 - 01 August 2022",
-          data_id: 82752,
-          display_name: "Lecture 2 Slides Файл",
-          resource_type: "pdf",
-          resource_download_url:
-            "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
-          resource_preview_url:
-            "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
-          preview_location: {
-            page_index: 1,
-          },
-        },
-        {
-          type: "telegram",
-          chat_username: "one_zero_eight",
-          chat_title: "one-zero-eight – 108",
-          message_id: 63,
-          link: "https://t.me/one_zero_eight/63",
-        },
+        // {
+        //   type: "moodle",
+        //   course_id: 1114,
+        //   course_name: "[F22] Fundamentals of Computer Architecture",
+        //   module_id: 82752,
+        //   module_name: "Week 01 - 01 August 2022",
+        //   data_id: 82752,
+        //   display_name: "Lecture 2 Slides Файл",
+        //   resource_type: "pdf",
+        //   resource_download_url:
+        //     "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
+        //   resource_preview_url:
+        //     "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
+        //   preview_location: {
+        //     page_index: 1,
+        //   },
+        // },
+        // {
+        //   type: "telegram",
+        //   chat_username: "one_zero_eight",
+        //   chat_title: "one-zero-eight – 108",
+        //   message_id: 63,
+        //   link: "https://t.me/one_zero_eight/63",
+        // },
       ],
     },
   ],
