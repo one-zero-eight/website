@@ -56,7 +56,7 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({
 
   return (
     <div
-      className="pdf-preview-elem col-span-6"
+      className="col-span-6 w-fit"
       style={{
         display: "flex",
         alignItems: "center",
@@ -65,20 +65,28 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({
         padding: "10px",
       }}
     >
-      <div className="file-title mb-4 flex w-full items-start p-3 text-2xl font-bold">
+      <div className="file-title mb-4 flex w-full items-start py-2 text-2xl font-bold">
         <p>{fileTitle}</p>
       </div>
       <Document
-        className="rounded-2xl"
+        className="max-w-full rounded-2xl"
         file={file}
         onLoadSuccess={onDocumentLoadSuccess}
+        loading={
+          <div
+            className="flex animate-pulse bg-primary-hover"
+            style={{
+              height: `${PAGE_MAX_HEIGHT}px`,
+            }}
+          />
+        }
       >
         <div
           style={{
             maxHeight: `${PAGE_MAX_HEIGHT}px`,
             overflowY: "scroll",
           }}
-          className="pdf-preview-elem2 custom-preview-scrollbar"
+          className="custom-preview-scrollbar max-w-full"
         >
           <Page pageNumber={currentPage} customTextRenderer={textRenderer} />
         </div>

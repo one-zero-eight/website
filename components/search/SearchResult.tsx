@@ -25,9 +25,9 @@ const SearchResult: React.FC<{
       {response_data.responses?.map((response, index_response) => (
         <div
           key={index_response}
-          className="m-4 grid auto-rows-max grid-cols-10 gap-4 rounded-2xl bg-primary-main @xl/content:grid-cols-2"
+          className="m-4 flex w-full flex-col gap-4 rounded-2xl bg-primary-main lg:flex-row"
         >
-          <div className="group col-span-4 flex flex-col gap-2 rounded-2xl px-4 py-6">
+          <div className="group flex grow flex-col gap-2 rounded-2xl px-4 py-6">
             <Markdown className="prose dark:prose-invert">
               {response.markdown_text}
             </Markdown>
@@ -80,7 +80,7 @@ const SearchResult: React.FC<{
           ) : (
             response.sources.length != 0 &&
             response.sources[selectedSource].type === "telegram" && (
-              <div className="col-span-6 flex w-full flex-col items-center justify-center gap-4">
+              <div className="flex w-full flex-col items-center justify-center gap-4">
                 <p>No preview available</p>
                 <a
                   href={
