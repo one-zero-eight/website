@@ -1,34 +1,18 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { useState } from "react";
 import "./search.css";
-import {
-  sendSearchRequest,
-  requestData,
-  ResponseData,
-} from "@/hooks/sendSearchRequest";
 
-const SearchField: React.FC<{
-  searchResult: ResponseData | null;
-  setSearchResult: Dispatch<SetStateAction<ResponseData | null>>;
-}> = ({ searchResult, setSearchResult }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+export default function SearchField({
+  runSearch,
+}: {
+  runSearch: (query: string) => void;
+}) {
+  const [text, setText] = useState("");
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      sendRequest();
+      runSearch(text);
     }
-  };
-
-  const sendRequest = async () => {
-    const data: requestData = {
-      searchText: searchQuery,
-    };
-    const result = await sendSearchRequest(data);
-    setSearchResult(result);
-  };
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
   };
 
   return (
@@ -45,11 +29,9 @@ const SearchField: React.FC<{
         className="search-textarea hide-scrollbar inset-0 w-full resize-none rounded-2xl border-2 border-focus bg-base p-3 caret-focus outline-none"
         maxLength={200}
         onKeyDown={handleKeyDown}
-        onChange={handleChange}
-        value={searchQuery}
+        onChange={(e) => setText(e.target.value)}
+        value={text}
       />
     </div>
   );
-};
-
-export default SearchField;
+}

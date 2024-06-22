@@ -18,16 +18,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-const options = {
-  cMapUrl: "/cmaps/",
-  standardFontDataUrl: "/standard_fonts/",
-};
-
-const PdfPreview: React.FC<PdfPreviewProps> = ({
+export default function PdfPreview({
   file,
   fileTitle,
   searchText,
-}) => {
+}: PdfPreviewProps) {
   const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -108,6 +103,4 @@ const PdfPreview: React.FC<PdfPreviewProps> = ({
       </div>
     </div>
   );
-};
-
-export default PdfPreview; // example.pdf
+}

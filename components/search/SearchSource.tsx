@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, useCallback, useState } from "react";
+import React, { MouseEventHandler } from "react";
 
 export declare type SearchSourceProps = {
   isSelected: boolean;
@@ -7,7 +7,7 @@ export declare type SearchSourceProps = {
   link: string;
 };
 
-function SearchSource({
+export default function SearchSource({
   isSelected,
   source,
   onSelect,
@@ -18,8 +18,7 @@ function SearchSource({
     : "bg-primary-main hover:bg-secondary-main";
   const searchClassName =
     "grid grid-flow-col items-center justify-between p-4 " + bgColor;
-  console.log(isSelected);
-  console.log(searchClassName);
+
   return (
     <div className={searchClassName} onClick={onSelect}>
       <p className="pr-1">{source}</p>
@@ -42,5 +41,3 @@ function SearchSource({
     </div>
   );
 }
-
-export default SearchSource;
