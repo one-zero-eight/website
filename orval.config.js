@@ -48,4 +48,29 @@ module.exports = {
       },
     },
   },
+  search: {
+    input: {
+      // target: "https://api.innohassle.ru/search/staging-v0/openapi.json",
+      target: "http://localhost:8004/openapi.json",
+      // validation: true,
+    },
+    output: {
+      mode: "single",
+      target: "./lib/search/api/__generated__.ts",
+      client: "react-query",
+      prettier: true,
+      override: {
+        mutator: {
+          path: "./lib/search/api/axios.ts",
+          name: "axiosQuery",
+        },
+        query: {
+          queryOptions: {
+            path: "./lib/search/api/query.ts",
+            name: "queryOptionsMutator",
+          },
+        },
+      },
+    },
+  },
 };
