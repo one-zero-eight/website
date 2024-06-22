@@ -2,7 +2,7 @@ import { getMyAccessToken, invalidateMyAccessToken } from "@/lib/auth/access";
 import Axios, { AxiosRequestConfig } from "axios";
 
 export const AXIOS_INSTANCE = Axios.create({
-  baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
+  baseURL: process.env.NEXT_PUBLIC_SEARCH_API_URL,
 });
 
 AXIOS_INSTANCE.interceptors.request.use(async (request) => {
