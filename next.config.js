@@ -33,6 +33,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
 const nextConfig = {
   poweredByHeader: false,
   output: "standalone",
+  swcMinify: false, // Hack for pdfjs
 };
 
 module.exports = withPWA(nextConfig);
