@@ -37,6 +37,7 @@
     "axios": "^1.7.2",
     "bumpp": "^9.4.1",
     "clsx": "^2.1.1",
+    "daisyui": "^4.12.8",
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.3",
     "husky": "^9.0.11",

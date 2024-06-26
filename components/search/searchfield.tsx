@@ -16,18 +16,12 @@ export default function SearchField({
   };
 
   return (
-    <div className="search-field">
-      <label
-        htmlFor="searchInput"
-        className="mb-4 text-center text-3xl font-medium"
-      >
-        Find anything
-      </label>
+    <div className="flex gap-2">
       <input
         autoComplete="off"
         spellCheck={false}
-        className="search-textarea hide-scrollbar inset-0 w-full resize-none rounded-2xl border-2 border-focus bg-base p-3 caret-focus outline-none"
-        maxLength={200}
+        className="inset-0 h-fit w-full resize-none rounded-2xl border-2 border-focus bg-base p-3 caret-focus outline-none"
+        placeholder={"Search anything"}
         onKeyDown={handleKeyDown}
         onChange={(e) => setText(e.target.value)}
         value={text}

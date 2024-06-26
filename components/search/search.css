@@ -1,21 +1,3 @@
-.search-field {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: "white";
-}
-
-.search-textarea {
-  line-height: 1.5em;
-  min-width: 600px;
-  max-width: 600px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-}
-
 .hide-scrollbar {
   scrollbar-width: none;
   /* Firefox */

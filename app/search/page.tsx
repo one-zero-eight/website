@@ -26,7 +26,7 @@ export default function Page() {
         title="Search"
         description="Find anything at Innopolis University"
       />
-      <div className="my-4 grid grid-cols-1 gap-4">
+      <div className="flex flex-col gap-4">
         <SearchField runSearch={runSearch} />
         {searchResult && (
           <div className="search-result w-full">
