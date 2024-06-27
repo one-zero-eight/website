@@ -51,7 +51,7 @@ module.exports = {
   search: {
     input: {
       // target: "https://api.innohassle.ru/search/staging-v0/openapi.json",
-      target: "http://localhost:8004/openapi.json",
+      target: "https://api.innohassle.ru/search/staging-v0/openapi.json",
       // validation: true,
     },
     output: {
