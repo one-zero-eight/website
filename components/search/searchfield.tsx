@@ -37,7 +37,7 @@ export default function SearchField({
         value={text}
       />
       <button
-        className={`btn btn-square btn-xs h-auto w-[110px] rounded-2xl text-base ${
+        className={`btn btn-square btn-xs h-auto w-[110px] rounded-2xl text-base shadow-search-btn ${
           clickedButton === "Search"
             ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
             : "btn-ghost text-black"
@@ -47,7 +47,7 @@ export default function SearchField({
         Search
       </button>
       <button
-        className={`btn btn-square btn-xs h-auto w-[110px] rounded-2xl text-base ${
+        className={`btn btn-square btn-xs h-auto w-[110px] rounded-2xl text-base shadow-search-btn ${
           clickedButton === "Ask"
             ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
             : "btn-ghost text-black"

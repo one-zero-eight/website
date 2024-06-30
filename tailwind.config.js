@@ -48,11 +48,12 @@ module.exports = {
         section_g_start: "rgba(var(--color-section-g-start) / <alpha-value>)",
         section_g_end: "rgba(var(--color-section-g-end) / <alpha-value>)",
         focus: "rgba(var(--color-focus) / <alpha-value>)",
-        breadcrumbs: "#93bd58"
+        breadcrumbs: "#93bd58",
       },
       boxShadow: {
         "5xl": "0 0 35px 0 rgba(151, 71, 255, 0.75)",
         "5xl-m": "0 0 35px 0 rgba(151, 71, 255, 0.90)",
+        "search-btn": "0px 0px 4px 0px #00000040",
       },
       fontFamily: {
         primary: ["var(--font-rubik)", "sans-serif"],
