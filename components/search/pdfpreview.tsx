@@ -98,11 +98,18 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           </div>
         </Document>
       )}
-      {!error && (
+      {error && (
         <div className="mb-2 mt-6 flex flex-row gap-12">
-          <div className="flex flex-row items-center rounded-2xl bg-primary-tgresult p-4">
-            <a href={(source as MoodleSource).resource_download_url}>
-              <span>Download</span>
+          <div className="flex flex-row items-center justify-center rounded-2xl bg-primary-tgresult p-4">
+            <a
+              className="flex flex-row items-center justify-center gap-4"
+              href={(source as MoodleSource).resource_download_url}
+            >
+              <span
+                className="icon-[material-symbols--download]"
+                style={{ width: "1.3rem", height: "1.3rem" }}
+              ></span>
+              Download
             </a>
           </div>
 
@@ -116,15 +123,29 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
             </button>
           </div>
 
-          <div className="flex flex-row items-center rounded-2xl bg-primary-tgresult p-4">
-            <a href={(source as MoodleSource).resource_preview_url}>
-              <span>To source</span>
+          <div className="flex flex-row items-center justify-center rounded-2xl bg-primary-tgresult p-4">
+            <a
+              className="flex flex-row items-center justify-center gap-4"
+              href={(source as MoodleSource).resource_preview_url}
+            >
+              <span
+                className="icon-[material-symbols--open-in-new]"
+                style={{ width: "1.3rem", height: "1.3rem" }}
+              ></span>
+              To source
             </a>
           </div>
 
-          <div className="flex flex-row items-center rounded-2xl bg-primary-tgresult p-4">
-            <a href="">
-              <span>New tab</span>
+          <div className="flex flex-row items-center justify-center rounded-2xl bg-primary-tgresult p-4">
+            <a
+              className="flex flex-row items-center justify-center gap-4"
+              href=""
+            >
+              <span
+                className="icon-[material-symbols--open-in-new]"
+                style={{ width: "1.3rem", height: "1.3rem" }}
+              ></span>
+              New tab
             </a>
           </div>
         </div>

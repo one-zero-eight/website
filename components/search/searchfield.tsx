@@ -37,23 +37,31 @@ export default function SearchField({
         value={text}
       />
       <button
-        className={`btn btn-square btn-xs h-auto w-[110px] rounded-2xl text-base shadow-search-btn ${
+        className={`btn btn-square btn-xs flex h-auto w-[110px] items-center justify-center rounded-2xl text-base shadow-search-btn ${
           clickedButton === "Search"
             ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
             : "btn-ghost text-black"
         }`}
         onClick={() => handleButtonClick("Search")}
       >
+        <span
+          className="icon-[material-symbols--search-rounded]"
+          style={{ width: "1.3rem", height: "1.3rem" }}
+        ></span>
         Search
       </button>
       <button
-        className={`btn btn-square btn-xs h-auto w-[110px] rounded-2xl text-base shadow-search-btn ${
+        className={`btn btn-square btn-xs flex h-auto w-[110px] items-center justify-center rounded-2xl text-base shadow-search-btn ${
           clickedButton === "Ask"
             ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
             : "btn-ghost text-black"
         }`}
         onClick={() => handleButtonClick("Ask")}
       >
+        <span
+          className="icon-[material-symbols--question-mark-rounded]"
+          style={{ width: "1.3rem;", height: "1.3rem" }}
+        ></span>
         Ask
       </button>
     </div>
