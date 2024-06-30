@@ -44,7 +44,7 @@ export default function SearchResult({
   return (
     <div
       onClick={() => handleDivClick()}
-      className={`m-4 flex h-[150px] w-full flex-col gap-4 rounded-2xl lg:flex-row ${isClicked ? "border-2 border-focus" : ""} ${source.type === "moodle" ? "bg-primary-mdlresult" : "bg-primary-tgresult"}`}
+      className={`m-4 flex h-[150px] w-full flex-col gap-4 rounded-2xl border border-default lg:flex-row ${isClicked ? "border-2 border-focus" : ""} ${source.type === "moodle" ? "bg-primary-mdlresult" : "bg-primary-tgresult"}`}
     >
       <div className="group flex grow flex-col gap-2 rounded-2xl px-4 py-6">
         <div>

@@ -14,7 +14,7 @@ export default function SearchResultPage({
     useState<SearchResponseSource | null>(searchResult.responses[0]?.source);
 
   return (
-    <div className="flex w-[100%] flex-row">
+    <div className="flex w-[100%] flex-row gap-8">
       <div className="flex w-[50%] flex-col">
         {searchResult.responses.map((response, i) => (
           <SearchResult
@@ -29,11 +29,7 @@ export default function SearchResultPage({
       {previewSource &&
       previewSource.type === "moodle" &&
       previewSource.resource_preview_url !== null ? (
-        <PdfPreview
-          file={previewSource.resource_preview_url}
-          fileTitle={previewSource.display_name}
-          searchText=""
-        />
+        <PdfPreview source={previewSource} searchText="" />
       ) : (
         previewSource &&
         previewSource.type === "telegram" && (

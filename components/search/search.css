@@ -10,12 +10,6 @@
   /* Chrome, Safari и Opera */
 }
 
-.navigation {
-  display: flex;
-  flex-direction: row;
-  gap: 50px;
-}
-
 .sources {
   font-size: 1em;
   margin-top: auto;

@@ -49,6 +49,7 @@ module.exports = {
         section_g_end: "rgba(var(--color-section-g-end) / <alpha-value>)",
         focus: "rgba(var(--color-focus) / <alpha-value>)",
         breadcrumbs: "#93bd58",
+        default: "#9CA3AF",
       },
       boxShadow: {
         "5xl": "0 0 35px 0 rgba(151, 71, 255, 0.75)",
