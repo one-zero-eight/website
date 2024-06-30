@@ -1,6 +1,6 @@
 import { search } from "@/lib/search";
 import dynamic from "next/dynamic";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import SearchSource from "./SearchSource";
 import {
@@ -16,43 +16,61 @@ export const PdfPreview = dynamic(
 
 export default function SearchResult({
   response,
+  selectedSource,
+  setPreviewSource,
 }: {
   response: search.SearchResponse;
+  selectedSource: search.SearchResponseSource | null;
+  setPreviewSource: React.Dispatch<
+    React.SetStateAction<search.SearchResponseSource | null>
+  >;
 }) {
   const [selectedSourceIndex, setSelectedSourceIndex] = useState(0);
+  const [isClicked, setIsClicked] = useState(false);
   const source = response.source;
 
+  useEffect(() => {
+    if (selectedSource != source) {
+      setIsClicked(false);
+    }
+  }, [selectedSource]);
+
+  function handleDivClick() {
+    console.log("Clicked");
+    setPreviewSource(source);
+    setIsClicked(true);
+  }
+
   return (
-    <div className="m-4 flex w-full flex-col gap-4 rounded-2xl bg-primary-main lg:flex-row">
+    <div
+      onClick={() => handleDivClick()}
+      className={`m-4 flex h-[150px] w-full flex-col gap-4 rounded-2xl lg:flex-row ${isClicked ? "border-2 border-focus" : ""} ${source.type === "moodle" ? "bg-primary-mdlresult" : "bg-primary-tgresult"}`}
+    >
       <div className="group flex grow flex-col gap-2 rounded-2xl px-4 py-6">
         <div>
-          {source.type === "moodle"
-            ? (source as MoodleSource).filename
-            : source.type === "telegram"
-              ? (source as TelegramSource).display_name
-              : ""}
+          {source.type === "moodle" ? (
+            <>
+              <p className="text-[30px]">
+                {(source as MoodleSource).display_name}
+              </p>
+              <p className="text-[18px] text-breadcrumbs">
+                {(source as MoodleSource).breadcrumbs.join(" > ")}
+              </p>
+            </>
+          ) : source.type === "telegram" ? (
+            <>
+              <p className="text-[30px]">
+                {(source as TelegramSource).display_name}
+              </p>
+              <p className="text-[18px] text-breadcrumbs">
+                {(source as TelegramSource).breadcrumbs.join(" > ")}
+              </p>
+            </>
+          ) : (
+            ""
+          )}
         </div>
       </div>
-
-      {source.type === "moodle" && source.resource_preview_url !== null ? (
-        <PdfPreview
-          file={source.resource_preview_url}
-          fileTitle={source.display_name}
-          searchText=""
-        />
-      ) : (
-        source.type === "telegram" && (
-          <div className="flex w-full flex-col items-center justify-center gap-4">
-            <p>No preview available</p>
-            <a
-              href={source.link}
-              className="bg-primary-hover/75 p-4 hover:bg-primary-hover"
-            >
-              Go to the source
-            </a>
-          </div>
-        )
-      )}
     </div>
   );
 }

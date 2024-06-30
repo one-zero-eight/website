@@ -27,11 +27,20 @@ export default function PdfPreview({
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_MAX_HEIGHT = 400;
+  const [error, setError] = useState<string | null>(null);
 
   function onDocumentLoadSuccess(pdf: PDFDocumentProxy) {
     setPdfDocument(pdf);
     setNumPages(pdf.numPages);
     setCurrentPage(1); // Устанавливаем текущую страницу на первую при загрузке документа
+  }
+
+  function onDocumentLoadError(error: any) {
+    if (error.name === "MissingPDFException") {
+      setError("PDF file is missing");
+    } else {
+      setError("Error while loading PDF file");
+    }
   }
 
   const textRenderer = useCallback(
@@ -50,57 +59,55 @@ export default function PdfPreview({
   };
 
   return (
-    <div
-      className="col-span-6 w-fit"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        padding: "10px",
-      }}
-    >
-      <div className="file-title mb-4 flex w-full items-start py-2 text-2xl font-bold">
+    <div className="col-span-6 flex h-[849px] w-[50%] flex-col items-center justify-center p-[10px]">
+      <div className="mb-4 flex w-full items-start justify-center py-2 text-2xl font-bold">
         <p>{fileTitle}</p>
       </div>
-      <Document
-        className="max-w-full rounded-2xl"
-        file={file}
-        onLoadSuccess={onDocumentLoadSuccess}
-        loading={
-          <div
-            className="flex animate-pulse bg-primary-hover"
-            style={{
-              height: `${PAGE_MAX_HEIGHT}px`,
-            }}
-          />
-        }
-      >
-        <div
-          style={{
-            maxHeight: `${PAGE_MAX_HEIGHT}px`,
-            overflowY: "scroll",
-          }}
-          className="custom-preview-scrollbar max-w-full"
+      {error ? (
+        <div className="text-2xl font-bold text-red-500">{error}</div>
+      ) : (
+        <Document
+          className="max-w-full rounded-2xl"
+          file={file}
+          onLoadSuccess={onDocumentLoadSuccess}
+          onLoadError={onDocumentLoadError}
+          loading={
+            <div
+              className="flex animate-pulse bg-primary-hover"
+              style={{
+                height: `${PAGE_MAX_HEIGHT}px`,
+              }}
+            />
+          }
         >
-          <Page pageNumber={currentPage} customTextRenderer={textRenderer} />
+          <div
+            style={{
+              maxHeight: `${PAGE_MAX_HEIGHT}px`,
+              overflowY: "scroll",
+            }}
+            className="custom-preview-scrollbar max-w-full"
+          >
+            <Page pageNumber={currentPage} customTextRenderer={textRenderer} />
+          </div>
+        </Document>
+      )}
+      {!error && (
+        <div
+          className="navigation"
+          style={{
+            marginTop: "1.5rem",
+            marginBottom: "0.5rem",
+          }}
+        >
+          <button onClick={goToPrevPage} disabled={currentPage <= 1}>
+            &lt;
+          </button>
+          <span>{`${currentPage}/${numPages}`}</span>
+          <button onClick={goToNextPage} disabled={currentPage >= numPages}>
+            &gt;
+          </button>
         </div>
-      </Document>
-      <div
-        className="navigation"
-        style={{
-          marginTop: "1.5rem",
-          marginBottom: "0.5rem",
-        }}
-      >
-        <button onClick={goToPrevPage} disabled={currentPage <= 1}>
-          &lt;
-        </button>
-        <span>{`${currentPage}/${numPages}`}</span>
-        <button onClick={goToNextPage} disabled={currentPage >= numPages}>
-          &gt;
-        </button>
-      </div>
+      )}
     </div>
   );
 }

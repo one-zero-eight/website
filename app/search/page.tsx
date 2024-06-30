@@ -2,6 +2,7 @@
 import { NavbarTemplate } from "@/components/layout/Navbar";
 import SearchField from "@/components/search/searchfield";
 import SearchResult from "@/components/search/SearchResult";
+import SearchResultPage from "@/components/search/searchResultPage";
 import { search } from "@/lib/search";
 import React from "react";
 
@@ -29,19 +30,17 @@ export default function Page() {
       <div className="flex flex-col gap-4">
         <SearchField runSearch={runSearch} />
         {searchResult && (
-          <div className="search-result w-full">
-            <p className="search-result-title text-2xl font-semibold text-text-main">
+          <div className="mt-4 flex w-full flex-col items-center">
+            <p className="text-2xl font-semibold text-text-main">
               Results for: {searchResult.searched_for}
             </p>
-            {searchResult.responses.map((response, i) => (
-              <SearchResult key={i} response={response} />
-            ))}
+            <SearchResultPage searchResult={searchResult}></SearchResultPage>
           </div>
         )}
 
         {searchResult && !searchResult.responses && (
-          <div className="search-result w-full">
-            <p className="search-result-title text-2xl font-semibold text-text-main">
+          <div className="mt-4 flex w-full flex-col items-center">
+            <p className="text-2xl font-semibold text-text-main">
               No matched results for: {searchResult.searched_for}
             </p>
           </div>

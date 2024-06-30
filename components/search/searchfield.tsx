@@ -7,6 +7,7 @@ export default function SearchField({
   runSearch: (query: string) => void;
 }) {
   const [text, setText] = useState("");
+  const [clickedButton, setClickedButton] = useState<string>("Search");
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
@@ -15,8 +16,17 @@ export default function SearchField({
     }
   };
 
+  const handleButtonClick = (buttonType: string) => {
+    setClickedButton(buttonType);
+    if (buttonType === "Search") {
+      setClickedButton("Search");
+    } else if (buttonType === "Ask") {
+      setClickedButton("Ask");
+    }
+  };
+
   return (
-    <div className="flex gap-2">
+    <div className="mt-4 flex gap-2">
       <input
         autoComplete="off"
         spellCheck={false}
@@ -26,6 +36,26 @@ export default function SearchField({
         onChange={(e) => setText(e.target.value)}
         value={text}
       />
+      <button
+        className={`btn btn-square btn-xs h-auto w-[110px] rounded-2xl text-base ${
+          clickedButton === "Search"
+            ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
+            : "btn-ghost text-black"
+        }`}
+        onClick={() => handleButtonClick("Search")}
+      >
+        Search
+      </button>
+      <button
+        className={`btn btn-square btn-xs h-auto w-[110px] rounded-2xl text-base ${
+          clickedButton === "Ask"
+            ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
+            : "btn-ghost text-black"
+        }`}
+        onClick={() => handleButtonClick("Ask")}
+      >
+        Ask
+      </button>
     </div>
   );
 }

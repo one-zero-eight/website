@@ -23,6 +23,8 @@ module.exports = {
         primary: {
           main: "rgba(var(--color-primary) / <alpha-value>)",
           hover: "rgba(var(--color-primary-hover) / <alpha-value>)",
+          tgresult: "#F3F4F6",
+          mdlresult: "#FFFFFF",
         },
         secondary: {
           main: "rgba(var(--color-secondary) / <alpha-value>)",
@@ -46,6 +48,7 @@ module.exports = {
         section_g_start: "rgba(var(--color-section-g-start) / <alpha-value>)",
         section_g_end: "rgba(var(--color-section-g-end) / <alpha-value>)",
         focus: "rgba(var(--color-focus) / <alpha-value>)",
+        breadcrumbs: "#93bd58"
       },
       boxShadow: {
         "5xl": "0 0 35px 0 rgba(151, 71, 255, 0.75)",

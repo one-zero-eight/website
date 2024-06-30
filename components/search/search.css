@@ -10,13 +10,6 @@
   /* Chrome, Safari и Opera */
 }
 
-.search-result {
-  display: flex;
-  margin-top: 5%;
-  flex-direction: column;
-  align-items: center;
-}
-
 .navigation {
   display: flex;
   flex-direction: row;
