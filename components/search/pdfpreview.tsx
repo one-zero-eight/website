@@ -98,7 +98,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           </div>
         </Document>
       )}
-      {true && (
+      {!error && (
         <div className="mb-2 mt-6 flex flex-row gap-12">
           <div className="flex flex-row items-center rounded-2xl bg-primary-tgresult p-4">
             <a href={(source as MoodleSource).resource_download_url}>
