@@ -28,23 +28,24 @@ export default function Page() {
         description="Find anything at Innopolis University"
       />
       <div className="flex flex-col gap-4">
-        <SearchField runSearch={runSearch} />
-        {searchResult && (
-          <div className="mt-4 flex w-full flex-col items-center">
-            <p className="text-2xl font-semibold text-text-main">
-              Results for: {searchResult.searched_for}
-            </p>
-            <SearchResultPage searchResult={searchResult}></SearchResultPage>
-          </div>
-        )}
-
-        {searchResult && !searchResult.responses && (
-          <div className="mt-4 flex w-full flex-col items-center">
-            <p className="text-2xl font-semibold text-text-main">
-              No matched results for: {searchResult.searched_for}
-            </p>
-          </div>
-        )}
+        <div className="flex flex-row gap-12">
+          <SearchField runSearch={runSearch} />
+        </div>
+        {searchResult &&
+          (searchResult.responses.length > 0 ? (
+            <div className="flex w-full flex-col items-center">
+              <p className="p-4 text-2xl font-semibold text-text-main">
+                Results for: {searchResult.searched_for}
+              </p>
+              <SearchResultPage searchResult={searchResult}></SearchResultPage>
+            </div>
+          ) : (
+            <div className="flex w-full flex-col items-center">
+              <p className="p-4 text-2xl font-semibold text-text-main">
+                No matched results for: {searchResult.searched_for}
+              </p>
+            </div>
+          ))}
       </div>
     </div>
   );

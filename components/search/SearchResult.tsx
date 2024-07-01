@@ -8,6 +8,7 @@ import {
   MoodleSourceType,
   TelegramSource,
 } from "@/lib/search/api/__generated__";
+import clsx from "clsx";
 
 export const PdfPreview = dynamic(
   () => import("./pdfpreview").then((x) => x.default),
@@ -26,51 +27,45 @@ export default function SearchResult({
   >;
 }) {
   const [selectedSourceIndex, setSelectedSourceIndex] = useState(0);
-  const [isClicked, setIsClicked] = useState(false);
+  const [isClicked, setIsClicked] = useState(
+    selectedSource === response.source,
+  );
   const source = response.source;
 
   useEffect(() => {
     if (selectedSource != source) {
       setIsClicked(false);
     }
-  }, [selectedSource]);
+  }, [selectedSource, source]);
 
   function handleDivClick() {
     console.log("Clicked");
     setPreviewSource(source);
     setIsClicked(true);
   }
-
   return (
     <div
       onClick={() => handleDivClick()}
-      className={`m-4 flex h-[150px] w-full flex-col gap-4 rounded-2xl border border-default lg:flex-row ${isClicked ? "border-2 border-focus" : ""} ${source.type === "moodle" ? "bg-primary-mdlresult" : "bg-primary-tgresult"}`}
+      className={clsx(
+        "flex flex-col rounded-lg !border bg-primary-main p-4 hover:bg-primary-hover",
+        isClicked
+          ? "border-[#9747FF] drop-shadow-[0_0_4px_#9747FF]"
+          : "border-gray-400",
+      )}
     >
-      <div className="group flex grow flex-col gap-2 rounded-2xl px-4 py-6">
-        <div>
-          {source.type === "moodle" ? (
-            <>
-              <p className="text-[30px]">
-                {(source as MoodleSource).display_name}
-              </p>
-              <p className="text-[18px] text-breadcrumbs">
-                {(source as MoodleSource).breadcrumbs.join(" > ")}
-              </p>
-            </>
-          ) : source.type === "telegram" ? (
-            <>
-              <p className="text-[30px]">
-                {(source as TelegramSource).display_name}
-              </p>
-              <p className="text-[18px] text-breadcrumbs">
-                {(source as TelegramSource).breadcrumbs.join(" > ")}
-              </p>
-            </>
-          ) : (
-            ""
-          )}
-        </div>
-      </div>
+      {source.type === "moodle" ? (
+        <span className="icon-[material-symbols--school-outline] text-3xl text-[#F27F22]" />
+      ) : (
+        source.type === "telegram" && (
+          <span className="icon-[uil--telegram-alt] text-3xl text-[#27A7E7]" />
+        )
+      )}
+      <p className="text-xs font-semibold text-base-content dark:text-white md:text-2xl">
+        {source.display_name}
+      </p>
+      <p className="invisible h-0 text-xs text-breadcrumbs md:visible md:h-auto">
+        {source.breadcrumbs.join(" > ")}
+      </p>
     </div>
   );
 }

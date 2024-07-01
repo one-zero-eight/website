@@ -6,6 +6,7 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 import React, { useCallback, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/TextLayer.css";
+import PdfPreviewBottomButton from "./PdfPreviewBottomButton";
 
 function highlightPattern(text: string, pattern: string) {
   return text.replace(pattern, (value: any) => `<mark>${value}</mark>`);
@@ -63,15 +64,17 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
   };
 
   return (
-    <div className="col-span-6 m-4 flex h-[849px] w-[50%] flex-col items-center justify-center rounded-2xl border border-default p-4">
-      <div className="mb-4 flex w-full flex-col items-start justify-center py-2 text-2xl font-bold">
-        <p>{(source as MoodleSource).display_name}</p>
-        <p className="text-[18px] font-normal text-breadcrumbs">
-          {(source as MoodleSource).breadcrumbs.join(" > ")}
-        </p>
-      </div>
+    <div className="flex flex-col justify-start gap-2 rounded-lg border border-default bg-primary-main p-4 md:basis-1/2">
+      <p className="text-2xl font-semibold text-base-content dark:text-white">
+        {(source as MoodleSource).display_name}
+      </p>
+      <p className="text-xs font-normal text-breadcrumbs">
+        {(source as MoodleSource).breadcrumbs.join(" > ")}
+      </p>
       {error ? (
-        <div className="text-2xl font-bold text-red-500">{error}</div>
+        <div className="flex h-[400px] items-center justify-center text-lg font-semibold text-red-500">
+          {error}
+        </div>
       ) : (
         <Document
           className="max-w-full rounded-2xl"
@@ -99,55 +102,45 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
         </Document>
       )}
       {error && (
-        <div className="mb-2 mt-6 flex flex-row gap-12">
-          <div className="flex flex-row items-center justify-center rounded-2xl bg-primary-tgresult p-4">
-            <a
-              className="flex flex-row items-center justify-center gap-4"
-              href={(source as MoodleSource).resource_download_url}
-            >
-              <span
-                className="icon-[material-symbols--download]"
-                style={{ width: "1.3rem", height: "1.3rem" }}
-              ></span>
-              Download
-            </a>
-          </div>
+        <div className="mb-4 mt-2 flex flex-row justify-center gap-4">
+          <PdfPreviewBottomButton
+            icon={<span className="icon-[material-symbols--download]"></span>}
+            text="Download"
+            href={(source as MoodleSource).resource_download_url}
+          />
 
-          <div className="flex flex-row items-center gap-12 rounded-2xl bg-primary-tgresult p-4">
-            <button onClick={goToPrevPage} disabled={currentPage <= 1}>
+          <div className="flex flex-row items-center rounded-lg bg-base-100 dark:bg-primary-hover">
+            <button
+              className="px-4"
+              onClick={goToPrevPage}
+              disabled={currentPage <= 1}
+            >
               &lt;
             </button>
-            <span>{`${currentPage}/${numPages}`}</span>
-            <button onClick={goToNextPage} disabled={currentPage >= numPages}>
+            <span className="px-4 text-sm md:text-xs">{`${currentPage}/${numPages}`}</span>
+            <button
+              className="px-4"
+              onClick={goToNextPage}
+              disabled={currentPage >= numPages}
+            >
               &gt;
             </button>
           </div>
 
-          <div className="flex flex-row items-center justify-center rounded-2xl bg-primary-tgresult p-4">
-            <a
-              className="flex flex-row items-center justify-center gap-4"
-              href={(source as MoodleSource).resource_preview_url}
-            >
-              <span
-                className="icon-[material-symbols--open-in-new]"
-                style={{ width: "1.3rem", height: "1.3rem" }}
-              ></span>
-              To source
-            </a>
-          </div>
-
-          <div className="flex flex-row items-center justify-center rounded-2xl bg-primary-tgresult p-4">
-            <a
-              className="flex flex-row items-center justify-center gap-4"
-              href=""
-            >
-              <span
-                className="icon-[material-symbols--open-in-new]"
-                style={{ width: "1.3rem", height: "1.3rem" }}
-              ></span>
-              New tab
-            </a>
-          </div>
+          <PdfPreviewBottomButton
+            icon={
+              <span className="icon-[material-symbols--open-in-new]"></span>
+            }
+            text="To source"
+            href={(source as MoodleSource).resource_preview_url}
+          />
+          <PdfPreviewBottomButton
+            icon={
+              <span className="icon-[material-symbols--open-in-new]"></span>
+            }
+            text="New tab"
+            href={undefined}
+          />
         </div>
       )}
     </div>

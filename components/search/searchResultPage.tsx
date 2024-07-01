@@ -14,8 +14,8 @@ export default function SearchResultPage({
     useState<SearchResponseSource | null>(searchResult.responses[0]?.source);
 
   return (
-    <div className="flex w-[100%] flex-row gap-8">
-      <div className="flex w-[50%] flex-col">
+    <div className="flex w-full flex-col gap-4 md:flex-row md:items-start md:gap-12">
+      <div className="flex flex-row justify-stretch gap-4 md:basis-1/2 md:flex-col">
         {searchResult.responses.map((response, i) => (
           <SearchResult
             key={i}
@@ -33,7 +33,7 @@ export default function SearchResultPage({
       ) : (
         previewSource &&
         previewSource.type === "telegram" && (
-          <div className="flex h-[849px] w-[50%] w-full flex-col items-center justify-center gap-4">
+          <div className="flex h-[849px] basis-1/2 flex-col items-center justify-center gap-4">
             <p>No preview available</p>
             <a
               href={previewSource.link}

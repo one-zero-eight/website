@@ -26,18 +26,18 @@ export default function SearchField({
   };
 
   return (
-    <div className="mt-4 flex gap-2">
+    <div className="mt-4 flex flex-row gap-2 md:basis-1/2">
       <input
         autoComplete="off"
         spellCheck={false}
-        className="inset-0 h-fit w-full resize-none rounded-2xl border-2 border-focus bg-base p-3 caret-focus outline-none"
+        className="inset-0 h-10 w-full resize-none rounded-lg border-2 border-focus bg-base p-3 text-base text-base-content caret-focus outline-none dark:text-white"
         placeholder={"Search anything"}
         onKeyDown={handleKeyDown}
         onChange={(e) => setText(e.target.value)}
         value={text}
       />
       <button
-        className={`btn btn-square btn-xs flex h-auto w-[110px] items-center justify-center rounded-2xl text-base shadow-search-btn ${
+        className={`shadow-[0px-0px-4px-#00000040]; flex h-10 items-center justify-center rounded-lg px-3 text-xs font-normal text-white shadow-search-btn ${
           clickedButton === "Search"
             ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
             : "btn-ghost text-black"
@@ -51,18 +51,15 @@ export default function SearchField({
         Search
       </button>
       <button
-        className={`btn btn-square btn-xs flex h-auto w-[110px] items-center justify-center rounded-2xl text-base shadow-search-btn ${
+        className={`flex h-10 flex-row items-center justify-center gap-2 rounded-lg px-3 text-xs font-normal text-base-content shadow-search-btn shadow-[0px-0px-4px-#00000040] dark:text-white ${
           clickedButton === "Ask"
             ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
-            : "btn-ghost text-black"
+            : "bg-primary-main"
         }`}
-        onClick={() => handleButtonClick("Ask")}
+        // onClick={() => handleButtonClick("Ask")}
       >
-        <span
-          className="icon-[material-symbols--question-mark-rounded]"
-          style={{ width: "1.3rem;", height: "1.3rem" }}
-        ></span>
-        Ask
+        <span className="icon-[material-symbols--question-mark-rounded]"></span>
+        <p>Ask</p>
       </button>
     </div>
   );
