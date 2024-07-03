@@ -3,10 +3,13 @@ import { NavbarTemplate } from "@/components/layout/Navbar";
 import SearchField from "@/components/search/searchfield";
 import SearchResultPage from "@/components/search/searchResultPage";
 import { search } from "@/lib/search";
-import React from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Page() {
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q") ?? "";
+
   const { data: searchResult } = search.useSearchSearchByMeta(
     { query: searchQuery },
     {
@@ -17,7 +20,9 @@ export default function Page() {
   );
 
   const runSearch = (query: string) => {
-    setSearchQuery(query.trim());
+    const url = new URL(window.location.href);
+    url.searchParams.set("q", query.trim());
+    router.push(url.toString());
   };
 
   return (
