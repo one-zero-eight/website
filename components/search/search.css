@@ -1,33 +1,3 @@
-.hide-scrollbar {
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* Internet Explorer 10+ */
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-  /* Chrome, Safari и Opera */
-}
-
-.sources {
-  font-size: 1em;
-  margin-top: auto;
-}
-
-.moodle-response {
-  display: flex;
-  flex-direction: row;
-
-  gap: 5px;
-}
-
-.custom-preview-scrollbar {
-  background-color: #fdfdfd;
-  border-radius: 6px;
-  box-shadow: 0 4px 28px rgba(123, 151, 158, 0.25);
-}
-
 .custom-preview-scrollbar::-webkit-scrollbar {
   width: 15px;
 }

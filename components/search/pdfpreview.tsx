@@ -25,7 +25,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
   const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState(0);
-  const PAGE_MAX_HEIGHT = 400;
+  const PAGE_MIN_HEIGHT = 400;
   const [error, setError] = useState<string | null>(null);
 
   let pageIndex: number = 1;
@@ -64,7 +64,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
   };
 
   return (
-    <div className="flex flex-col justify-start gap-2 rounded-lg border border-default bg-primary-main p-4 md:basis-1/2">
+    <div className="flex h-fit max-h-full flex-col gap-2 rounded-lg border border-default bg-primary-main p-4">
       <p className="text-2xl font-semibold text-base-content dark:text-white">
         {(source as MoodleSource).display_name}
       </p>
@@ -72,7 +72,6 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
         {(source as MoodleSource).breadcrumbs.join(" > ")}
       </p>
       <Document
-        className="max-w-full rounded-2xl"
         file={(source as MoodleSource).resource_preview_url}
         onLoadSuccess={onDocumentLoadSuccess}
         onLoadError={onDocumentLoadError}
@@ -80,7 +79,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           <div
             className="skeleton flex"
             style={{
-              height: `${PAGE_MAX_HEIGHT}px`,
+              height: `${PAGE_MIN_HEIGHT}px`,
             }}
           />
         }
@@ -88,24 +87,26 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           <div
             className="skeleton flex items-center justify-center text-lg font-semibold text-red-500"
             style={{
-              height: `${PAGE_MAX_HEIGHT}px`,
+              height: `${PAGE_MIN_HEIGHT}px`,
             }}
           >
             {error}
           </div>
         }
       >
-        <div
-          style={{
-            maxHeight: `${PAGE_MAX_HEIGHT}px`,
-            overflowY: "scroll",
-          }}
-          className="custom-preview-scrollbar max-w-full"
-        >
-          <Page pageNumber={currentPage} customTextRenderer={textRenderer} />
+        <div className="flex items-center justify-center">
+          <div className="custom-preview-scrollbar overflow-auto rounded-2xl shadow-lg">
+            <Page
+              pageNumber={currentPage}
+              customTextRenderer={textRenderer}
+              renderTextLayer={true}
+              renderAnnotationLayer={false}
+              renderForms={false}
+            />
+          </div>
         </div>
       </Document>
-      <div className="mb-4 mt-2 flex flex-row justify-center gap-4">
+      <div className="mb-4 mt-2 flex flex-row flex-wrap justify-center gap-4">
         <PdfPreviewBottomButton
           icon={<span className="icon-[material-symbols--download]"></span>}
           text="Download"
