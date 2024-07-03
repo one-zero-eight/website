@@ -19,6 +19,8 @@ import type {
 } from "@tanstack/react-query";
 import { axiosQuery } from "./axios";
 import { queryOptionsMutator } from "./query";
+export type MoodleGetMoodleFiles200Item = { [key: string]: any };
+
 export type MoodlePreviewMoodleParams = {
   course_id: number;
   module_id: number;
@@ -224,7 +226,7 @@ export interface HTTPValidationError {
 }
 
 export interface BodyMoodleUploadContent {
-  data: InContentsInput;
+  data: string;
   files: Blob[];
 }
 
@@ -406,6 +408,89 @@ export const useMoodlePreviewMoodle = <
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const queryOptions = useMoodlePreviewMoodleQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * @summary Get Moodle Files
+ */
+export const moodleGetMoodleFiles = (
+  options?: SecondParameter<typeof axiosQuery>,
+  signal?: AbortSignal,
+) => {
+  return axiosQuery<MoodleGetMoodleFiles200Item[]>(
+    { url: `/moodle/files`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getMoodleGetMoodleFilesQueryKey = () => {
+  return [`/moodle/files`] as const;
+};
+
+export const useMoodleGetMoodleFilesQueryOptions = <
+  TData = Awaited<ReturnType<typeof moodleGetMoodleFiles>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof moodleGetMoodleFiles>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getMoodleGetMoodleFilesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof moodleGetMoodleFiles>>
+  > = ({ signal }) => moodleGetMoodleFiles(requestOptions, signal);
+
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
+    Awaited<ReturnType<typeof moodleGetMoodleFiles>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type MoodleGetMoodleFilesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof moodleGetMoodleFiles>>
+>;
+export type MoodleGetMoodleFilesQueryError = unknown;
+
+/**
+ * @summary Get Moodle Files
+ */
+export const useMoodleGetMoodleFiles = <
+  TData = Awaited<ReturnType<typeof moodleGetMoodleFiles>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof moodleGetMoodleFiles>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useMoodleGetMoodleFilesQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
