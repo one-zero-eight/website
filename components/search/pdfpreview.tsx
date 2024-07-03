@@ -101,48 +101,42 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           </div>
         </Document>
       )}
-      {error && (
-        <div className="mb-4 mt-2 flex flex-row justify-center gap-4">
-          <PdfPreviewBottomButton
-            icon={<span className="icon-[material-symbols--download]"></span>}
-            text="Download"
-            href={(source as MoodleSource).resource_download_url}
-          />
+      <div className="mb-4 mt-2 flex flex-row justify-center gap-4">
+        <PdfPreviewBottomButton
+          icon={<span className="icon-[material-symbols--download]"></span>}
+          text="Download"
+          href={(source as MoodleSource).resource_download_url}
+        />
 
-          <div className="flex flex-row items-center rounded-lg bg-base-100 dark:bg-primary-hover">
-            <button
-              className="px-4"
-              onClick={goToPrevPage}
-              disabled={currentPage <= 1}
-            >
-              &lt;
-            </button>
-            <span className="px-4 text-sm md:text-xs">{`${currentPage}/${numPages}`}</span>
-            <button
-              className="px-4"
-              onClick={goToNextPage}
-              disabled={currentPage >= numPages}
-            >
-              &gt;
-            </button>
-          </div>
-
-          <PdfPreviewBottomButton
-            icon={
-              <span className="icon-[material-symbols--open-in-new]"></span>
-            }
-            text="To source"
-            href={(source as MoodleSource).resource_preview_url}
-          />
-          <PdfPreviewBottomButton
-            icon={
-              <span className="icon-[material-symbols--open-in-new]"></span>
-            }
-            text="New tab"
-            href={undefined}
-          />
+        <div className="flex flex-row items-center rounded-lg bg-base-100 dark:bg-primary-hover">
+          <button
+            className="px-4"
+            onClick={goToPrevPage}
+            disabled={currentPage <= 1}
+          >
+            &lt;
+          </button>
+          <span className="px-4 text-sm md:text-xs">{`${currentPage}/${numPages}`}</span>
+          <button
+            className="px-4"
+            onClick={goToNextPage}
+            disabled={currentPage >= numPages}
+          >
+            &gt;
+          </button>
         </div>
-      )}
+
+        <PdfPreviewBottomButton
+          icon={<span className="icon-[material-symbols--open-in-new]"></span>}
+          text="To source"
+          href={(source as MoodleSource).resource_preview_url}
+        />
+        <PdfPreviewBottomButton
+          icon={<span className="icon-[material-symbols--open-in-new]"></span>}
+          text="New tab"
+          href={undefined}
+        />
+      </div>
     </div>
   );
 }
