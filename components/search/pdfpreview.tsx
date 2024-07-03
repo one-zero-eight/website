@@ -78,7 +78,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
       ) : (
         <Document
           className="max-w-full rounded-2xl"
-          file={(source as MoodleSource).link}
+          file={(source as MoodleSource).resource_preview_url}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={onDocumentLoadError}
           loading={
