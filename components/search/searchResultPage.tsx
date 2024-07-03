@@ -1,9 +1,13 @@
 import { search } from "@/lib/search";
+import { SearchResponseSource } from "@/lib/search/api/__generated__";
 import dynamic from "next/dynamic";
 import React, { useState } from "react";
 import SearchResult from "./SearchResult";
-import { SearchResponseSource } from "@/lib/search/api/__generated__";
-import PdfPreview from "./pdfpreview";
+
+export const PdfPreview = dynamic(
+  () => import("./pdfpreview").then((x) => x.default),
+  { ssr: false },
+);
 
 export default function SearchResultPage({
   searchResult,

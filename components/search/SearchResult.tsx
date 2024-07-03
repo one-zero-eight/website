@@ -1,19 +1,6 @@
 import { search } from "@/lib/search";
-import dynamic from "next/dynamic";
-import React, { useEffect, useState } from "react";
-import Markdown from "react-markdown";
-import SearchSource from "./SearchSource";
-import {
-  MoodleSource,
-  MoodleSourceType,
-  TelegramSource,
-} from "@/lib/search/api/__generated__";
 import clsx from "clsx";
-
-export const PdfPreview = dynamic(
-  () => import("./pdfpreview").then((x) => x.default),
-  { ssr: false },
-);
+import React, { useEffect, useState } from "react";
 
 export default function SearchResult({
   response,
