@@ -71,36 +71,40 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
       <p className="text-xs font-normal text-breadcrumbs">
         {(source as MoodleSource).breadcrumbs.join(" > ")}
       </p>
-      {error ? (
-        <div className="flex h-[400px] items-center justify-center text-lg font-semibold text-red-500">
-          {error}
-        </div>
-      ) : (
-        <Document
-          className="max-w-full rounded-2xl"
-          file={(source as MoodleSource).resource_preview_url}
-          onLoadSuccess={onDocumentLoadSuccess}
-          onLoadError={onDocumentLoadError}
-          loading={
-            <div
-              className="flex animate-pulse bg-primary-hover"
-              style={{
-                height: `${PAGE_MAX_HEIGHT}px`,
-              }}
-            />
-          }
-        >
+      <Document
+        className="max-w-full rounded-2xl"
+        file={(source as MoodleSource).resource_preview_url}
+        onLoadSuccess={onDocumentLoadSuccess}
+        onLoadError={onDocumentLoadError}
+        loading={
           <div
+            className="skeleton flex"
             style={{
-              maxHeight: `${PAGE_MAX_HEIGHT}px`,
-              overflowY: "scroll",
+              height: `${PAGE_MAX_HEIGHT}px`,
             }}
-            className="custom-preview-scrollbar max-w-full"
+          />
+        }
+        error={
+          <div
+            className="skeleton flex items-center justify-center text-lg font-semibold text-red-500"
+            style={{
+              height: `${PAGE_MAX_HEIGHT}px`,
+            }}
           >
-            <Page pageNumber={currentPage} customTextRenderer={textRenderer} />
+            {error}
           </div>
-        </Document>
-      )}
+        }
+      >
+        <div
+          style={{
+            maxHeight: `${PAGE_MAX_HEIGHT}px`,
+            overflowY: "scroll",
+          }}
+          className="custom-preview-scrollbar max-w-full"
+        >
+          <Page pageNumber={currentPage} customTextRenderer={textRenderer} />
+        </div>
+      </Document>
       <div className="mb-4 mt-2 flex flex-row justify-center gap-4">
         <PdfPreviewBottomButton
           icon={<span className="icon-[material-symbols--download]"></span>}
