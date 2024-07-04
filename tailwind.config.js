@@ -74,7 +74,10 @@ module.exports = {
       },
     },
   },
-  darkMode: "class",
+  daisyui: {
+    themes: ["light", "dark"],
+  },
+  darkMode: ["class", '[data-theme="dark"]'],
   plugins: [
     addDynamicIconSelectors(),
     require("@tailwindcss/container-queries"),

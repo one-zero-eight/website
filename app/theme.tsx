@@ -22,12 +22,13 @@ export default function ThemedHtml({
     <html
       {...htmlProps}
       className={clsx(className, (!isClient || isDarkMode) && "dark")}
+      data-theme={!isClient || isDarkMode ? "dark" : "light"}
     >
       <head>
         <script
           // Hack to set dark mode quickly, before hydration finishes
           dangerouslySetInnerHTML={{
-            __html: `(function(){if (localStorage.getItem("theme") === '"light"' || (localStorage.getItem("theme") === null && !window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.remove("dark")})()`,
+            __html: `(function(){if (localStorage.getItem("theme") === '"light"' || (localStorage.getItem("theme") === null && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {document.documentElement.classList.remove("dark"); document.documentElement.setAttribute("data-theme", "light");}})()`,
           }}
         />
       </head>
