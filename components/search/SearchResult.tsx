@@ -1,6 +1,7 @@
 import { search } from "@/lib/search";
+import { MoodleSource } from "@/lib/search/api/__generated__";
 import clsx from "clsx";
-import React from "react";
+import React, { MouseEventHandler } from "react";
 
 export default function SearchResult({
   response,
@@ -20,11 +21,15 @@ export default function SearchResult({
     setPreviewSource(response.source);
   }
 
+  const handlePropagation = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.stopPropagation();
+  };
+
   return (
     <div
       onClick={() => handleDivClick()}
       className={clsx(
-        "flex cursor-pointer flex-col rounded-lg !border bg-primary-main p-4 hover:bg-primary-hover",
+        "flex cursor-pointer flex-col rounded-lg !border bg-sidebar p-4 hover:bg-primary-hover",
         isSelected
           ? "border-[#9747FF] drop-shadow-[0_0_4px_#9747FF]"
           : "border-gray-400",
@@ -40,9 +45,15 @@ export default function SearchResult({
       <p className="text-xs font-semibold text-base-content dark:text-white md:text-2xl">
         {response.source.display_name}
       </p>
-      <p className="invisible h-0 text-xs text-breadcrumbs md:visible md:h-auto">
-        {response.source.breadcrumbs.join(" > ")}
-      </p>
+
+      <a
+        href={(response.source as MoodleSource).link}
+        onClickCapture={handlePropagation}
+      >
+        <p className="invisible h-0 truncate text-xs text-breadcrumbs hover:underline md:visible md:h-auto">
+          {response.source.breadcrumbs.join(" > ")}
+        </p>
+      </a>
     </div>
   );
 }

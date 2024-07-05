@@ -64,11 +64,11 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
   };
 
   return (
-    <div className="flex h-fit max-h-full flex-col gap-2 rounded-lg border border-default bg-primary-main p-4">
+    <div className="flex h-fit max-h-full flex-col gap-2 rounded-lg border border-default bg-sidebar p-4">
       <p className="text-2xl font-semibold text-base-content dark:text-white">
         {(source as MoodleSource).display_name}
       </p>
-      <p className="text-xs font-normal text-breadcrumbs">
+      <p className="truncate pb-3 text-xs font-normal text-breadcrumbs">
         {(source as MoodleSource).breadcrumbs.join(" > ")}
       </p>
       <Document
@@ -134,7 +134,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
         <PdfPreviewBottomButton
           icon={<span className="icon-[material-symbols--open-in-new]"></span>}
           text="To source"
-          href={(source as MoodleSource).resource_preview_url}
+          href={(source as MoodleSource).link}
         />
         <PdfPreviewBottomButton
           icon={<span className="icon-[material-symbols--open-in-new]"></span>}
