@@ -10,7 +10,7 @@ export default function Page() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q") ?? "";
 
-  const { data: searchResult } = search.useSearchSearchByMeta(
+  const { data: searchResult } = search.useSearchSearchByQuery(
     { query: searchQuery },
     {
       query: {

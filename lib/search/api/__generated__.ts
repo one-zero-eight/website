@@ -27,7 +27,12 @@ export type MoodlePreviewMoodleParams = {
   filename: string;
 };
 
-export type SearchSearchByMetaParams = {
+export type SearchAddUserFeedbackParams = {
+  response_index: number;
+  feedback: string;
+};
+
+export type SearchSearchByQueryParams = {
   query: string;
   limit?: number;
 };
@@ -67,6 +72,8 @@ export interface TelegramSource {
 export interface SearchResponses {
   /** Responses to the search query. */
   responses: SearchResponse[];
+  /** Assigned search query index */
+  search_query_id: string;
   /** Text that was searched for. */
   searched_for: string;
 }
@@ -233,34 +240,34 @@ export interface BodyMoodleUploadContent {
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
 
 /**
- * @summary Search By Meta
+ * @summary Search By Query
  */
-export const searchSearchByMeta = (
-  params: SearchSearchByMetaParams,
+export const searchSearchByQuery = (
+  params: SearchSearchByQueryParams,
   options?: SecondParameter<typeof axiosQuery>,
   signal?: AbortSignal,
 ) => {
   return axiosQuery<SearchResponses>(
-    { url: `/search/by-meta`, method: "GET", params, signal },
+    { url: `/search/search`, method: "GET", params, signal },
     options,
   );
 };
 
-export const getSearchSearchByMetaQueryKey = (
-  params: SearchSearchByMetaParams,
+export const getSearchSearchByQueryQueryKey = (
+  params: SearchSearchByQueryParams,
 ) => {
-  return [`/search/by-meta`, ...(params ? [params] : [])] as const;
+  return [`/search/search`, ...(params ? [params] : [])] as const;
 };
 
-export const useSearchSearchByMetaQueryOptions = <
-  TData = Awaited<ReturnType<typeof searchSearchByMeta>>,
+export const useSearchSearchByQueryQueryOptions = <
+  TData = Awaited<ReturnType<typeof searchSearchByQuery>>,
   TError = HTTPValidationError,
 >(
-  params: SearchSearchByMetaParams,
+  params: SearchSearchByQueryParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof searchSearchByMeta>>,
+        Awaited<ReturnType<typeof searchSearchByQuery>>,
         TError,
         TData
       >
@@ -271,11 +278,11 @@ export const useSearchSearchByMetaQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getSearchSearchByMetaQueryKey(params);
+    queryOptions?.queryKey ?? getSearchSearchByQueryQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof searchSearchByMeta>>
-  > = ({ signal }) => searchSearchByMeta(params, requestOptions, signal);
+    Awaited<ReturnType<typeof searchSearchByQuery>>
+  > = ({ signal }) => searchSearchByQuery(params, requestOptions, signal);
 
   const customOptions = queryOptionsMutator({
     ...queryOptions,
@@ -284,29 +291,29 @@ export const useSearchSearchByMetaQueryOptions = <
   });
 
   return customOptions as UseQueryOptions<
-    Awaited<ReturnType<typeof searchSearchByMeta>>,
+    Awaited<ReturnType<typeof searchSearchByQuery>>,
     TError,
     TData
   > & { queryKey: QueryKey };
 };
 
-export type SearchSearchByMetaQueryResult = NonNullable<
-  Awaited<ReturnType<typeof searchSearchByMeta>>
+export type SearchSearchByQueryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof searchSearchByQuery>>
 >;
-export type SearchSearchByMetaQueryError = HTTPValidationError;
+export type SearchSearchByQueryQueryError = HTTPValidationError;
 
 /**
- * @summary Search By Meta
+ * @summary Search By Query
  */
-export const useSearchSearchByMeta = <
-  TData = Awaited<ReturnType<typeof searchSearchByMeta>>,
+export const useSearchSearchByQuery = <
+  TData = Awaited<ReturnType<typeof searchSearchByQuery>>,
   TError = HTTPValidationError,
 >(
-  params: SearchSearchByMetaParams,
+  params: SearchSearchByQueryParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof searchSearchByMeta>>,
+        Awaited<ReturnType<typeof searchSearchByQuery>>,
         TError,
         TData
       >
@@ -314,7 +321,7 @@ export const useSearchSearchByMeta = <
     request?: SecondParameter<typeof axiosQuery>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-  const queryOptions = useSearchSearchByMetaQueryOptions(params, options);
+  const queryOptions = useSearchSearchByQueryQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
@@ -323,6 +330,82 @@ export const useSearchSearchByMeta = <
   query.queryKey = queryOptions.queryKey;
 
   return query;
+};
+
+/**
+ * @summary Add User Feedback
+ */
+export const searchAddUserFeedback = (
+  searchQueryId: string,
+  params: SearchAddUserFeedbackParams,
+  options?: SecondParameter<typeof axiosQuery>,
+) => {
+  return axiosQuery<unknown>(
+    { url: `/search/search/${searchQueryId}/feedback`, method: "POST", params },
+    options,
+  );
+};
+
+export const getSearchAddUserFeedbackMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof searchAddUserFeedback>>,
+    TError,
+    { searchQueryId: string; params: SearchAddUserFeedbackParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof searchAddUserFeedback>>,
+  TError,
+  { searchQueryId: string; params: SearchAddUserFeedbackParams },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof searchAddUserFeedback>>,
+    { searchQueryId: string; params: SearchAddUserFeedbackParams }
+  > = (props) => {
+    const { searchQueryId, params } = props ?? {};
+
+    return searchAddUserFeedback(searchQueryId, params, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SearchAddUserFeedbackMutationResult = NonNullable<
+  Awaited<ReturnType<typeof searchAddUserFeedback>>
+>;
+
+export type SearchAddUserFeedbackMutationError = HTTPValidationError;
+
+/**
+ * @summary Add User Feedback
+ */
+export const useSearchAddUserFeedback = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof searchAddUserFeedback>>,
+    TError,
+    { searchQueryId: string; params: SearchAddUserFeedbackParams },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof searchAddUserFeedback>>,
+  TError,
+  { searchQueryId: string; params: SearchAddUserFeedbackParams },
+  TContext
+> => {
+  const mutationOptions = getSearchAddUserFeedbackMutationOptions(options);
+
+  return useMutation(mutationOptions);
 };
 
 /**
