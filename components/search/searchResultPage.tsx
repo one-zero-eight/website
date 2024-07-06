@@ -18,7 +18,7 @@ export default function SearchResultPage({
     useState<SearchResponseSource | null>(searchResult.responses[0]?.source);
 
   return (
-    <div className="grid w-full grow grid-cols-1 gap-4 md:grid-cols-2">
+    <div className="grid w-full grow grid-cols-1 gap-6 md:grid-cols-2">
       <div className="flex flex-row justify-stretch gap-4 md:flex-col">
         {searchResult.responses.map((response, i) => (
           <SearchResult

@@ -37,7 +37,7 @@ export default function SearchField({
         value={text}
       />
       <button
-        className={`shadow-[0px-0px-4px-#00000040]; flex h-10 items-center justify-center rounded-lg px-3 text-xs font-normal text-white shadow-search-btn ${
+        className={`shadow-[0px-0px-4px-#00000040]; font-inter mr-3 flex h-10 w-[93px] items-center justify-center gap-2 rounded-lg px-2 py-1 text-base font-normal leading-6 text-white shadow-search-btn ${
           clickedButton === "Search"
             ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
             : "btn-ghost text-black"
@@ -46,11 +46,11 @@ export default function SearchField({
       >
         <span
           className="icon-[material-symbols--search-rounded]"
-          style={{ width: "1.3rem", height: "1.3rem" }}
+          style={{ width: "1.5rem", height: "1.5rem" }}
         ></span>
         Search
       </button>
-      <button
+      {/* <button
         className={`flex h-10 flex-row items-center justify-center gap-2 rounded-lg px-3 text-xs font-normal text-base-content shadow-search-btn shadow-[0px-0px-4px-#00000040] dark:text-white ${
           clickedButton === "Ask"
             ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
@@ -60,7 +60,7 @@ export default function SearchField({
       >
         <span className="icon-[material-symbols--question-mark-rounded]"></span>
         <p>Ask</p>
-      </button>
+      </button> */}
     </div>
   );
 }
