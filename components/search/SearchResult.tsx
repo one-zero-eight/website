@@ -1,5 +1,8 @@
 import { search } from "@/lib/search";
-import { MoodleSource } from "@/lib/search/api/__generated__";
+import {
+  MoodleSource,
+  SearchResponseSource,
+} from "@/lib/search/api/__generated__";
 import clsx from "clsx";
 import React, { MouseEventHandler } from "react";
 
@@ -10,9 +13,7 @@ export default function SearchResult({
 }: {
   response: search.SearchResponse;
   selectedSource: search.SearchResponseSource | null;
-  setPreviewSource: React.Dispatch<
-    React.SetStateAction<search.SearchResponseSource | null>
-  >;
+  setPreviewSource: (source: SearchResponseSource) => void;
 }) {
   const isSelected = selectedSource === response.source;
 
@@ -45,13 +46,12 @@ export default function SearchResult({
       <p className="text-xs font-semibold text-base-content dark:text-white md:text-2xl">
         {response.source.display_name}
       </p>
-
       <a
         href={(response.source as MoodleSource).link}
         onClickCapture={handlePropagation}
-        className="w-fit max-w-full"
+        className=""
       >
-        <p className="invisible h-0 truncate text-xs text-breadcrumbs hover:underline md:visible md:h-auto">
+        <p className="max-w-full truncate text-xs text-breadcrumbs hover:underline">
           {response.source.breadcrumbs.join(" > ")}
         </p>
       </a>

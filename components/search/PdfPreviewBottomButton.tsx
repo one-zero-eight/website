@@ -11,13 +11,11 @@ export default function PdfPreviewBottomButton({
 }) {
   return (
     <a
-      className="flex flex-row items-center justify-center rounded-lg bg-base-100 px-4 py-2 dark:bg-primary-hover md:py-[14px]"
+      className="flex flex-wrap items-center justify-center rounded-lg bg-base-100 px-4 py-2 dark:bg-primary-hover md:py-[14px]"
       href={href}
     >
       {icon}
-      <p className="invisible w-0 text-nowrap pl-0 text-sm sm:visible sm:w-auto sm:pl-2 md:text-xs">
-        {text}
-      </p>
+      <p className="text-nowrap pl-2 text-sm md:text-xs">{text}</p>
     </a>
   );
 }

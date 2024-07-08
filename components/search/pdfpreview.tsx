@@ -3,10 +3,11 @@ import {
   SearchResponseSource,
 } from "@/lib/search/api/__generated__";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import React, { useCallback, useState } from "react";
+import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import PdfPreviewBottomButton from "./PdfPreviewBottomButton";
+import clsx from "clsx";
 
 function highlightPattern(text: string, pattern: string) {
   return text.replace(pattern, (value: any) => `<mark>${value}</mark>`);
@@ -15,6 +16,8 @@ function highlightPattern(text: string, pattern: string) {
 export declare type PdfPreviewProps = {
   source: SearchResponseSource | null;
   searchText: string;
+  isOpened: boolean;
+  onClose: () => void;
 };
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -22,7 +25,12 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
+export default function PdfPreview({
+  source,
+  searchText,
+  isOpened,
+  onClose,
+}: PdfPreviewProps) {
   const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState(0);
   const PAGE_MIN_HEIGHT = 400;
@@ -64,10 +72,23 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
   };
 
   return (
-    <div className="flex h-fit max-h-full flex-col gap-2 rounded-lg border border-default bg-sidebar p-4">
-      <p className="text-2xl font-semibold text-base-content dark:text-white">
-        {(source as MoodleSource).display_name}
-      </p>
+    <div
+      className={clsx(
+        "flex h-fit max-h-full min-w-0 flex-col gap-2 rounded-lg border border-default bg-sidebar p-4 md:basis-1/2",
+        isOpened
+          ? "fixed inset-8 top-8 z-10 md:visible md:static"
+          : "invisible w-0",
+      )}
+    >
+      <div className="flex flex-row items-center justify-between">
+        <p className="text-2xl font-semibold text-base-content dark:text-white">
+          {(source as MoodleSource).display_name}
+        </p>
+        <span
+          className="icon-[material-symbols--close] text-2xl md:invisible"
+          onClick={onClose}
+        />
+      </div>
       <a href={(source as MoodleSource).link} className="w-fit max-w-full">
         <p className="truncate pb-3 text-xs font-normal text-breadcrumbs hover:underline">
           {(source as MoodleSource).breadcrumbs.join(" > ")}
@@ -108,41 +129,50 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           </div>
         </div>
       </Document>
-      <div className="mb-4 mt-2 flex flex-row flex-wrap justify-center gap-4">
-        <PdfPreviewBottomButton
-          icon={<span className="icon-[material-symbols--download]"></span>}
-          text="Download"
-          href={(source as MoodleSource).resource_download_url}
-        />
+      <div className="mb-4 mt-2 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
+        <div className="flex flex-row items-stretch gap-4">
+          <PdfPreviewBottomButton
+            icon={<span className="icon-[material-symbols--download]"></span>}
+            text="Download"
+            href={(source as MoodleSource).resource_download_url}
+          />
 
-        <div className="flex flex-row items-center rounded-lg bg-base-100 dark:bg-primary-hover">
-          <button
-            className="px-4"
-            onClick={goToPrevPage}
-            disabled={currentPage <= 1}
-          >
-            &lt;
-          </button>
-          <span className="px-4 text-sm md:text-xs">{`${currentPage}/${numPages}`}</span>
-          <button
-            className="px-4"
-            onClick={goToNextPage}
-            disabled={currentPage >= numPages}
-          >
-            &gt;
-          </button>
+          <div className="flex flex-row items-center rounded-lg bg-base-100 dark:bg-primary-hover">
+            <button
+              className="px-4"
+              onClick={goToPrevPage}
+              disabled={currentPage <= 1}
+            >
+              &lt;
+            </button>
+            <div className="max-w-4"></div>
+            <span className="text-sm md:text-xs">{`${currentPage}/${numPages}`}</span>
+            <div className="max-w-4"></div>
+            <button
+              className="px-4"
+              onClick={goToNextPage}
+              disabled={currentPage >= numPages}
+            >
+              &gt;
+            </button>
+          </div>
         </div>
-
-        <PdfPreviewBottomButton
-          icon={<span className="icon-[material-symbols--open-in-new]"></span>}
-          text="To source"
-          href={(source as MoodleSource).link}
-        />
-        <PdfPreviewBottomButton
-          icon={<span className="icon-[material-symbols--open-in-new]"></span>}
-          text="New tab"
-          href={undefined}
-        />
+        <div className="flex flex-row items-stretch gap-4">
+          <PdfPreviewBottomButton
+            icon={
+              <span className="icon-[material-symbols--open-in-new]"></span>
+            }
+            text="To source"
+            href={(source as MoodleSource).link}
+          />
+          <PdfPreviewBottomButton
+            icon={
+              <span className="icon-[material-symbols--open-in-new]"></span>
+            }
+            text="New tab"
+            href={undefined}
+          />
+        </div>
       </div>
     </div>
   );
