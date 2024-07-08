@@ -68,7 +68,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
       <p className="text-2xl font-semibold text-base-content dark:text-white">
         {(source as MoodleSource).display_name}
       </p>
-      <a href={(source as MoodleSource).link} className="w-fit">
+      <a href={(source as MoodleSource).link} className="w-fit max-w-full">
         <p className="truncate pb-3 text-xs font-normal text-breadcrumbs hover:underline">
           {(source as MoodleSource).breadcrumbs.join(" > ")}
         </p>
