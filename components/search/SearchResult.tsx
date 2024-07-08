@@ -49,6 +49,7 @@ export default function SearchResult({
       <a
         href={(response.source as MoodleSource).link}
         onClickCapture={handlePropagation}
+        className="w-fit"
       >
         <p className="invisible h-0 truncate text-xs text-breadcrumbs hover:underline md:visible md:h-auto">
           {response.source.breadcrumbs.join(" > ")}

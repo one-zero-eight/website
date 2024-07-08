@@ -68,9 +68,11 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
       <p className="text-2xl font-semibold text-base-content dark:text-white">
         {(source as MoodleSource).display_name}
       </p>
-      <p className="truncate pb-3 text-xs font-normal text-breadcrumbs">
-        {(source as MoodleSource).breadcrumbs.join(" > ")}
-      </p>
+      <a href={(source as MoodleSource).link} className="w-fit">
+        <p className="truncate pb-3 text-xs font-normal text-breadcrumbs hover:underline">
+          {(source as MoodleSource).breadcrumbs.join(" > ")}
+        </p>
+      </a>
       <Document
         file={(source as MoodleSource).resource_preview_url}
         onLoadSuccess={onDocumentLoadSuccess}
