@@ -4,7 +4,7 @@ import {
   SearchResponseSource,
 } from "@/lib/search/api/__generated__";
 import clsx from "clsx";
-import React, { MouseEventHandler } from "react";
+import React from "react";
 
 export default function SearchResult({
   response,
@@ -49,11 +49,9 @@ export default function SearchResult({
       <a
         href={(response.source as MoodleSource).link}
         onClickCapture={handlePropagation}
-        className=""
+        className="w-fit max-w-full truncate text-xs text-breadcrumbs hover:underline"
       >
-        <p className="max-w-full truncate text-xs text-breadcrumbs hover:underline">
-          {response.source.breadcrumbs.join(" > ")}
-        </p>
+        {response.source.breadcrumbs.join(" > ")}
       </a>
     </div>
   );
