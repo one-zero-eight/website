@@ -37,17 +37,14 @@ export default function SearchField({
         value={text}
       />
       <button
-        className={`shadow-[0px-0px-4px-#00000040]; font-inter mr-3 flex h-10 w-[93px] items-center justify-center gap-2 rounded-lg px-2 py-1 text-base font-normal leading-6 text-white shadow-search-btn ${
+        className={`mr-3 flex h-10 w-[93px] items-center justify-center gap-2 rounded-lg px-2 py-1 text-base font-normal leading-6 text-white shadow-[0px-0px-4px-#00000040] ${
           clickedButton === "Search"
             ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
             : "btn-ghost text-black"
         }`}
         onClick={() => handleButtonClick("Search")}
       >
-        <span
-          className="icon-[material-symbols--search-rounded]"
-          style={{ width: "1.5rem", height: "1.5rem" }}
-        ></span>
+        <span className="icon-[material-symbols--search-rounded] h-4 w-4" />
         Search
       </button>
       {/* <button
