@@ -2,12 +2,12 @@ import {
   MoodleSource,
   SearchResponseSource,
 } from "@/lib/search/api/__generated__";
+import clsx from "clsx";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import PdfPreviewBottomButton from "./PdfPreviewBottomButton";
-import clsx from "clsx";
 
 function highlightPattern(text: string, pattern: string) {
   return text.replace(pattern, (value: any) => `<mark>${value}</mark>`);
@@ -135,6 +135,7 @@ export default function PdfPreview({
             icon={<span className="icon-[material-symbols--download]"></span>}
             text="Download"
             href={(source as MoodleSource).resource_download_url}
+            download
           />
 
           <div className="flex flex-row items-center rounded-lg bg-base-100 dark:bg-primary-hover">
@@ -170,7 +171,8 @@ export default function PdfPreview({
               <span className="icon-[material-symbols--open-in-new]"></span>
             }
             text="New tab"
-            href={undefined}
+            href={(source as MoodleSource).resource_download_url}
+            target="_blank"
           />
         </div>
       </div>
