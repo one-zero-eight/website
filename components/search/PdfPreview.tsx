@@ -1,4 +1,5 @@
 import { search } from "@/lib/search";
+import { usePreviewFile } from "@/lib/search/use-preview-file";
 import { useElementWidth } from "@/lib/ui/use-element-size";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { useCallback, useRef, useState } from "react";
@@ -26,6 +27,8 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const { data: file } = usePreviewFile(source.resource_preview_url);
+
   const divRef = useRef<HTMLDivElement>(null);
   const divWidth = useElementWidth(divRef);
 
@@ -41,6 +44,8 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
   function onDocumentLoadError(error: any) {
     if (error.name === "MissingPDFException") {
       setError("PDF file is missing");
+    } else if (error.name === "InvalidPDFException") {
+      setError("Not a valid PDF file");
     } else {
       setError("Error while loading PDF file");
     }
@@ -65,9 +70,10 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
     <>
       <Document
         inputRef={divRef}
-        file={source.resource_preview_url}
+        file={file}
         onLoadSuccess={onDocumentLoadSuccess}
         onLoadError={onDocumentLoadError}
+        noData={<div className="skeleton flex h-[400px]" />}
         loading={<div className="skeleton flex h-[400px]" />}
         error={
           <div className="skeleton flex h-[400px] items-center justify-center text-lg font-semibold text-red-500">
@@ -78,7 +84,9 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
         <div className="flex items-center justify-center">
           <div className="custom-preview-scrollbar overflow-hidden rounded-2xl shadow-lg">
             <Page
+              noData={<div className="skeleton flex h-[400px]" />}
               loading={<div className="skeleton flex h-[400px]" />}
+              error={<div className="skeleton flex h-[400px]" />}
               width={divWidth}
               pageNumber={currentPage}
               customTextRenderer={textRenderer}
