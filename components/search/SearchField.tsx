@@ -1,63 +1,40 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./search.css";
 
 export default function SearchField({
   runSearch,
+  currentQuery,
 }: {
   runSearch: (query: string) => void;
+  currentQuery: string;
 }) {
-  const [text, setText] = useState("");
-  const [clickedButton, setClickedButton] = useState<string>("Search");
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      runSearch(text);
-    }
-  };
-
-  const handleButtonClick = (buttonType: string) => {
-    setClickedButton(buttonType);
-    if (buttonType === "Search") {
-      setClickedButton("Search");
-    } else if (buttonType === "Ask") {
-      setClickedButton("Ask");
-    }
-  };
-
+  const [text, setText] = useState(currentQuery);
   return (
-    <div className="mt-4 flex flex-row gap-2 md:basis-1/2">
-      <input
-        autoComplete="off"
-        spellCheck={false}
-        className="inset-0 h-10 w-full resize-none rounded-lg border-2 border-focus bg-base p-3 text-base text-base-content caret-focus outline-none dark:text-white"
-        placeholder={"Search anything"}
-        onKeyDown={handleKeyDown}
-        onChange={(e) => setText(e.target.value)}
-        value={text}
-      />
-      <button
-        className={`mr-3 flex h-10 w-[93px] items-center justify-center gap-2 rounded-lg px-2 py-1 text-base font-normal leading-6 text-white shadow-[0px-0px-4px-#00000040] ${
-          clickedButton === "Search"
-            ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
-            : "btn-ghost text-black"
-        }`}
-        onClick={() => handleButtonClick("Search")}
-      >
-        <span className="icon-[material-symbols--search-rounded] h-4 w-4" />
-        Search
-      </button>
-      {/* <button
-        className={`flex h-10 flex-row items-center justify-center gap-2 rounded-lg px-3 text-xs font-normal text-base-content shadow-search-btn shadow-[0px-0px-4px-#00000040] dark:text-white ${
-          clickedButton === "Ask"
-            ? "btn-primary bg-[#9747FF] hover:bg-[#6600CC]"
-            : "bg-primary-main"
-        }`}
-        // onClick={() => handleButtonClick("Ask")}
-      >
-        <span className="icon-[material-symbols--question-mark-rounded]"></span>
-        <p>Ask</p>
-      </button> */}
-    </div>
+    <form
+      className="flex"
+      onSubmit={(e) => {
+        e.preventDefault();
+        runSearch(text);
+      }}
+    >
+      <div className="flex flex-row gap-2 md:basis-1/2">
+        <input
+          autoComplete="off"
+          spellCheck={false}
+          className="inset-0 h-10 w-full resize-none rounded-lg border-2 border-focus bg-base p-3 text-base text-base-content caret-focus outline-none dark:text-white"
+          placeholder="Search anything"
+          onChange={(e) => setText(e.target.value)}
+          value={text}
+          autoFocus={true}
+        />
+        <button
+          type="submit"
+          className="btn-primary mr-3 flex h-10 w-[93px] items-center justify-center gap-2 rounded-lg bg-[#9747FF] px-2 py-1 text-base font-normal leading-6 text-white shadow-[0px-0px-4px-#00000040] hover:bg-[#6600CC]"
+        >
+          <span className="icon-[material-symbols--search-rounded] h-4 w-4" />
+          Search
+        </button>
+      </div>
+    </form>
   );
 }
