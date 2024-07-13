@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import React, { useState } from "react";
 import SearchResult from "./SearchResult";
 import clsx from "clsx";
+import TelegramPreview from "./telegramPreview";
 
 export const PdfPreview = dynamic(
   () => import("./pdfpreview").then((x) => x.default),
@@ -67,15 +68,12 @@ export default function SearchResultPage({
       ) : (
         previewSource &&
         previewSource.type === "telegram" && (
-          <div className="invisible flex h-[849px] basis-1/2 flex-col items-center justify-center gap-4 md:visible">
-            <p>No preview available</p>
-            <a
-              href={previewSource.link}
-              className="bg-primary-hover/75 p-4 hover:bg-primary-hover"
-            >
-              Go to the source
-            </a>
-          </div>
+          <TelegramPreview
+            source={previewSource}
+            searchText=""
+            isOpened={isPreviewOpened}
+            onClose={onClosePreview}
+          ></TelegramPreview>
         )
       )}
     </div>
