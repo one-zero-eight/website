@@ -1,6 +1,7 @@
 import { search } from "@/lib/search";
+import { useElementWidth } from "@/lib/ui/use-element-size";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import PreviewBottomButton from "./PreviewBottomButton";
 
@@ -24,6 +25,9 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
   const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const divRef = useRef<HTMLDivElement>(null);
+  const divWidth = useElementWidth(divRef);
 
   const numPages = pdfDocument?.numPages ?? 0;
 
@@ -60,6 +64,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
   return (
     <>
       <Document
+        inputRef={divRef}
         file={source.resource_preview_url}
         onLoadSuccess={onDocumentLoadSuccess}
         onLoadError={onDocumentLoadError}
@@ -71,8 +76,10 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
         }
       >
         <div className="flex items-center justify-center">
-          <div className="custom-preview-scrollbar overflow-auto rounded-2xl shadow-lg">
+          <div className="custom-preview-scrollbar overflow-hidden rounded-2xl shadow-lg">
             <Page
+              loading={<div className="skeleton flex h-[400px]" />}
+              width={divWidth}
               pageNumber={currentPage}
               customTextRenderer={textRenderer}
               renderTextLayer={true}
