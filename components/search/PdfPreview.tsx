@@ -84,25 +84,33 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           </div>
         }
       >
-        <div className="flex items-center justify-center">
-          <div className="custom-preview-scrollbar overflow-hidden rounded-2xl shadow-lg">
-            <Page
-              noData={
-                <div className="skeleton flex" style={{ height: divHeight }} />
-              }
-              loading={
-                <div className="skeleton flex" style={{ height: divHeight }} />
-              }
-              error={<div className="skeleton flex h-[400px]" />}
-              width={divWidth}
-              pageNumber={currentPage}
-              customTextRenderer={textRenderer}
-              renderTextLayer={true}
-              renderAnnotationLayer={true}
-              renderForms={false}
-            />
+        {pdfDocument !== null && (
+          <div className="flex items-center justify-center">
+            <div className="custom-preview-scrollbar overflow-hidden rounded-2xl shadow-lg">
+              <Page
+                noData={
+                  <div
+                    className="skeleton flex"
+                    style={{ height: divHeight }}
+                  />
+                }
+                loading={
+                  <div
+                    className="skeleton flex"
+                    style={{ height: divHeight }}
+                  />
+                }
+                error={<div className="skeleton flex h-[400px]" />}
+                width={divWidth}
+                pageNumber={currentPage}
+                customTextRenderer={textRenderer}
+                renderTextLayer={true}
+                renderAnnotationLayer={true}
+                renderForms={false}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </Document>
       <div className="mb-4 mt-2 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
         <div className="flex flex-row items-stretch gap-4">
