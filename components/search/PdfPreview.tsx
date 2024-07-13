@@ -1,3 +1,4 @@
+"use client";
 import { search } from "@/lib/search";
 import { usePreviewFile } from "@/lib/search/use-preview-file";
 import { useElementHeight, useElementWidth } from "@/lib/ui/use-element-size";
@@ -6,7 +7,8 @@ import { useCallback, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import PreviewBottomButton from "./PreviewBottomButton";
 
-import "react-pdf/dist/esm/Page/TextLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+import "react-pdf/dist/Page/AnnotationLayer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
@@ -96,7 +98,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
               pageNumber={currentPage}
               customTextRenderer={textRenderer}
               renderTextLayer={true}
-              renderAnnotationLayer={false}
+              renderAnnotationLayer={true}
               renderForms={false}
             />
           </div>
