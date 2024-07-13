@@ -15,7 +15,7 @@ export default function Page() {
   const [previewSource, setPreviewSource] =
     useState<search.SearchResponseSource>();
 
-  const { data: searchResult, refetch } = search.useSearchSearchByQuery(
+  const { data: searchResult } = search.useSearchSearchByQuery(
     { query: searchQuery },
     {
       query: {

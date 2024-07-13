@@ -29,18 +29,19 @@ export default function TelegramPreview({ source }: TelegramPreviewProps) {
     }
 
     // Append the script to the container
-    if (ref.current !== null) {
-      ref.current.innerHTML = ""; // Clear any previous script
-      ref.current.appendChild(script);
+    const container = ref.current;
+    if (container !== null) {
+      container.innerHTML = ""; // Clear any previous script
+      container.appendChild(script);
     }
 
     // Cleanup script when component unmounts or source changes
     return () => {
-      if (ref.current !== null) {
-        ref.current.innerHTML = "";
+      if (container !== null) {
+        container.innerHTML = "";
       }
     };
-  }, [isDarkMode]);
+  }, [isDarkMode, source.link]);
 
   return (
     <div
