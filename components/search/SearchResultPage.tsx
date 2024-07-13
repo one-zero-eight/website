@@ -1,13 +1,13 @@
 import { search } from "@/lib/search";
 import { SearchResponseSource } from "@/lib/search/api/__generated__";
+import clsx from "clsx";
 import dynamic from "next/dynamic";
 import React, { useState } from "react";
 import SearchResult from "./SearchResult";
-import clsx from "clsx";
-import TelegramPreview from "./telegramPreview";
+import TelegramPreview from "./TelegramPreview";
 
 export const PdfPreview = dynamic(
-  () => import("./pdfpreview").then((x) => x.default),
+  () => import("./PdfPreview").then((x) => x.default),
   { ssr: false },
 );
 

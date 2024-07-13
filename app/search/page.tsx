@@ -1,7 +1,7 @@
 "use client";
 import { NavbarTemplate } from "@/components/layout/Navbar";
-import SearchField from "@/components/search/searchfield";
-import SearchResultPage from "@/components/search/searchResultPage";
+import SearchField from "@/components/search/SearchField";
+import SearchResultPage from "@/components/search/SearchResultPage";
 import { search } from "@/lib/search";
 import { useRouter, useSearchParams } from "next/navigation";
 
