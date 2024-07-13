@@ -38,5 +38,9 @@ export function usePreviewFile(url: string | undefined) {
       return promise;
     },
     enabled: !!url,
+    // Do not refetch when the URL does not change
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 }

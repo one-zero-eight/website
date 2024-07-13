@@ -1,6 +1,6 @@
 import { search } from "@/lib/search";
 import { usePreviewFile } from "@/lib/search/use-preview-file";
-import { useElementWidth } from "@/lib/ui/use-element-size";
+import { useElementHeight, useElementWidth } from "@/lib/ui/use-element-size";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { useCallback, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -31,6 +31,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
 
   const divRef = useRef<HTMLDivElement>(null);
   const divWidth = useElementWidth(divRef);
+  const divHeight = useElementHeight(divRef);
 
   const numPages = pdfDocument?.numPages ?? 0;
 
@@ -84,8 +85,12 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
         <div className="flex items-center justify-center">
           <div className="custom-preview-scrollbar overflow-hidden rounded-2xl shadow-lg">
             <Page
-              noData={<div className="skeleton flex h-[400px]" />}
-              loading={<div className="skeleton flex h-[400px]" />}
+              noData={
+                <div className="skeleton flex" style={{ height: divHeight }} />
+              }
+              loading={
+                <div className="skeleton flex" style={{ height: divHeight }} />
+              }
               error={<div className="skeleton flex h-[400px]" />}
               width={divWidth}
               pageNumber={currentPage}
