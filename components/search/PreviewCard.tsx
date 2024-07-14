@@ -2,6 +2,7 @@ import TelegramPreview from "@/components/search/TelegramPreview";
 import { search } from "@/lib/search";
 import clsx from "clsx";
 import dynamic from "next/dynamic";
+import { ErrorBoundary } from "react-error-boundary";
 
 export const PdfPreview = dynamic(
   () => import("./PdfPreview").then((x) => x.default),
@@ -36,11 +37,13 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
         </p>
       </a>
 
-      {source.type === "moodle" ? (
-        <PdfPreview source={source} searchText="" />
-      ) : source.type === "telegram" ? (
-        <TelegramPreview source={source} />
-      ) : null}
+      <ErrorBoundary fallback={<div>Some error occurred</div>}>
+        {source.type === "moodle" ? (
+          <PdfPreview source={source} searchText="" />
+        ) : source.type === "telegram" ? (
+          <TelegramPreview source={source} />
+        ) : null}
+      </ErrorBoundary>
     </div>
   );
 }
