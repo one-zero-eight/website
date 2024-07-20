@@ -21,7 +21,11 @@ export default function SearchResult({
           : "border-gray-400",
       )}
     >
-      {response.source.type === "moodle" ? (
+      {response.source.type === "moodle-file" ? (
+        <span className="icon-[material-symbols--school-outline] text-3xl text-[#F27F22]" />
+      ) : response.source.type === "moodle-url" ? (
+        <span className="icon-[material-symbols--school-outline] text-3xl text-[#F27F22]" />
+      ) : response.source.type === "moodle-unknown" ? (
         <span className="icon-[material-symbols--school-outline] text-3xl text-[#F27F22]" />
       ) : response.source.type === "telegram" ? (
         <span className="icon-[uil--telegram-alt] text-3xl text-[#27A7E7]" />

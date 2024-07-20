@@ -27,14 +27,24 @@ export type MoodlePreviewMoodleParams = {
   filename: string;
 };
 
+export type SearchAddUserFeedbackFeedback =
+  (typeof SearchAddUserFeedbackFeedback)[keyof typeof SearchAddUserFeedbackFeedback];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SearchAddUserFeedbackFeedback = {
+  like: "like",
+  dislike: "dislike",
+} as const;
+
 export type SearchAddUserFeedbackParams = {
   response_index: number;
-  feedback: string;
+  feedback: SearchAddUserFeedbackFeedback;
 };
 
 export type SearchSearchByQueryParams = {
   query: string;
   limit?: number;
+  use_ai?: boolean;
 };
 
 export type ValidationErrorLocItem = string | number;
@@ -69,88 +79,157 @@ export interface TelegramSource {
   type: TelegramSourceType;
 }
 
+export type SearchTaskStatus =
+  (typeof SearchTaskStatus)[keyof typeof SearchTaskStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SearchTaskStatus = {
+  pending: "pending",
+  completed: "completed",
+  failed: "failed",
+} as const;
+
+export interface SearchTask {
+  query: string;
+  status: SearchTaskStatus;
+  task_id: string;
+}
+
+export type SearchResultStatus =
+  (typeof SearchResultStatus)[keyof typeof SearchResultStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SearchResultStatus = {
+  completed: "completed",
+  failed: "failed",
+} as const;
+
+export interface SearchResult {
+  result?: MoodleFileResult[];
+  status: SearchResultStatus;
+  task_id: string;
+}
+
+/**
+ * Assigned search query index
+ */
+export type SearchResponsesSearchQueryId = string | null;
+
 export interface SearchResponses {
   /** Responses to the search query. */
   responses: SearchResponse[];
   /** Assigned search query index */
-  search_query_id: string;
+  search_query_id: SearchResponsesSearchQueryId;
   /** Text that was searched for. */
   searched_for: string;
 }
 
 /**
- * Score of the search response. Optional.
+ * Relevant source for the search.
  */
-export type SearchResponseScore = number | null;
+export type SearchResponseSource =
+  | MoodleFileSource
+  | MoodleUrlSource
+  | MoodleUnknownSource
+  | TelegramSource;
+
+/**
+ * Score of the search response. Multiple scores if was an aggregation of multiple chunks. Optional.
+ */
+export type SearchResponseScore = number | number[] | null;
+
+export interface SearchResponse {
+  /** Score of the search response. Multiple scores if was an aggregation of multiple chunks. Optional. */
+  score: SearchResponseScore;
+  /** Relevant source for the search. */
+  source: SearchResponseSource;
+}
 
 export interface PdfLocation {
   /** Page index in the PDF file. Starts from 1. */
   page_index: number;
 }
 
-export type MoodleSourceType =
-  (typeof MoodleSourceType)[keyof typeof MoodleSourceType];
+export type MoodleUrlSourceType =
+  (typeof MoodleUrlSourceType)[keyof typeof MoodleUrlSourceType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const MoodleSourceType = {
-  moodle: "moodle",
+export const MoodleUrlSourceType = {
+  "moodle-url": "moodle-url",
 } as const;
 
-export type MoodleSourcePreviewLocation = PdfLocation | null;
-
-/**
- * Filename of the resource.
- */
-export type MoodleSourceFilename = string | null;
-
-export interface MoodleSource {
+export interface MoodleUrlSource {
   /** Breadcrumbs to the resource. */
   breadcrumbs: string[];
-  /** Course ID in the Moodle system. */
-  course_id: number;
-  /** Course name in the Moodle system. */
-  course_name: string;
   /** Display name of the resource. */
   display_name: string;
-  /** Filename of the resource. */
-  filename: MoodleSourceFilename;
   /** Anchor URL to the resource on Moodle. */
   link: string;
-  /** Module ID in the Moodle system (resources). */
-  module_id: number;
-  /** Module name in the Moodle system. */
-  module_name: string;
-  preview_location: MoodleSourcePreviewLocation;
-  /** URL to download the resource. */
-  resource_download_url: string;
-  /** URL to get the preview of the resource. */
-  resource_preview_url: string;
-  /** Type of the resource. */
-  resource_type: string;
-  type: MoodleSourceType;
+  type: MoodleUrlSourceType;
+  /** URL of the resource */
+  url: string;
 }
+
+export type MoodleUnknownSourceType =
+  (typeof MoodleUnknownSourceType)[keyof typeof MoodleUnknownSourceType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const MoodleUnknownSourceType = {
+  "moodle-unknown": "moodle-unknown",
+} as const;
+
+export interface MoodleUnknownSource {
+  /** Breadcrumbs to the resource. */
+  breadcrumbs: string[];
+  /** Display name of the resource. */
+  display_name: string;
+  /** Anchor URL to the resource on Moodle. */
+  link: string;
+  type: MoodleUnknownSourceType;
+}
+
+export type MoodleFileSourceType =
+  (typeof MoodleFileSourceType)[keyof typeof MoodleFileSourceType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const MoodleFileSourceType = {
+  "moodle-file": "moodle-file",
+} as const;
 
 /**
- * Relevant source for the search.
+ * URL to get the preview of the resource.
  */
-export type SearchResponseSource = MoodleSource | TelegramSource;
+export type MoodleFileSourceResourcePreviewUrl = string | null;
 
-export interface SearchResponse {
-  /** Score of the search response. Optional. */
-  score: SearchResponseScore;
-  /** Relevant source for the search. */
-  source: SearchResponseSource;
+/**
+ * URL to download the resource.
+ */
+export type MoodleFileSourceResourceDownloadUrl = string | null;
+
+export type MoodleFileSourcePreviewLocation = PdfLocation | null;
+
+export interface MoodleFileSource {
+  /** Breadcrumbs to the resource. */
+  breadcrumbs: string[];
+  /** Display name of the resource. */
+  display_name: string;
+  /** Anchor URL to the resource on Moodle. */
+  link: string;
+  preview_location: MoodleFileSourcePreviewLocation;
+  /** URL to download the resource. */
+  resource_download_url: MoodleFileSourceResourceDownloadUrl;
+  /** URL to get the preview of the resource. */
+  resource_preview_url: MoodleFileSourceResourcePreviewUrl;
+  type: MoodleFileSourceType;
 }
 
-export interface MoodleEntry {
-  contents: MoodleContentSchemaOutput[];
-  course_fullname: string;
+export type MoodleFileResultScore = number[] | number | null;
+
+export interface MoodleFileResult {
   course_id: number;
-  /** MongoDB document ObjectID */
-  id: string;
+  filename: string;
   module_id: number;
-  module_modname: string;
-  module_name: string;
+  score?: MoodleFileResultScore;
 }
 
 export interface MoodleCourse {
@@ -172,6 +251,20 @@ export interface MoodleContentSchemaOutput {
   timecreated: MoodleContentSchemaOutputTimecreated;
   timemodified: MoodleContentSchemaOutputTimemodified;
   type: string;
+  uploaded: boolean;
+}
+
+export interface MoodleEntry {
+  contents: MoodleContentSchemaOutput[];
+  course_fullname: string;
+  course_id: number;
+  /** MongoDB document ObjectID */
+  id: string;
+  module_id: number;
+  module_modname: string;
+  module_name: string;
+  section_id: number;
+  section_summary: string;
 }
 
 export type MoodleContentSchemaInputTimemodified = number | null;
@@ -183,6 +276,20 @@ export interface MoodleContentSchemaInput {
   timecreated?: MoodleContentSchemaInputTimecreated;
   timemodified?: MoodleContentSchemaInputTimemodified;
   type: string;
+  uploaded?: boolean;
+}
+
+export type MessageSchemaText = string | null;
+
+export type MessageSchemaCaption = string | null;
+
+export interface MessageSchema {
+  caption: MessageSchemaCaption;
+  chat: Chat;
+  date: string;
+  id: number;
+  sender_chat: Chat;
+  text: MessageSchemaText;
 }
 
 export interface InModule {
@@ -216,14 +323,14 @@ export interface InCourses {
   courses: InCourse[];
 }
 
-export interface InContentsOutput {
-  contents: MoodleContentSchemaOutput[];
+export interface InContents {
+  contents: MoodleContentSchemaInput[];
   course_id: number;
   module_id: number;
 }
 
-export interface InContentsInput {
-  contents: MoodleContentSchemaInput[];
+export interface InContent {
+  content: MoodleContentSchemaInput;
   course_id: number;
   module_id: number;
 }
@@ -232,9 +339,37 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
-export interface BodyMoodleUploadContent {
-  data: string;
-  files: Blob[];
+export interface FlattenInContentsWithPresignedUrl {
+  content: MoodleContentSchemaOutput;
+  course_id: number;
+  module_id: number;
+  presigned_url: string;
+}
+
+export interface Detail {
+  detail: string;
+}
+
+export type DBMessageSchemaText = string | null;
+
+export type DBMessageSchemaCaption = string | null;
+
+export interface DBMessageSchema {
+  caption: DBMessageSchemaCaption;
+  chat_id: number;
+  chat_title: string;
+  chat_username: string;
+  date: string;
+  link: string;
+  message_id: number;
+  text: DBMessageSchemaText;
+}
+
+export interface Chat {
+  id: number;
+  title: string;
+  type: string;
+  username: string;
 }
 
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
@@ -261,7 +396,7 @@ export const getSearchSearchByQueryQueryKey = (
 
 export const useSearchSearchByQueryQueryOptions = <
   TData = Awaited<ReturnType<typeof searchSearchByQuery>>,
-  TError = HTTPValidationError,
+  TError = void | HTTPValidationError,
 >(
   params: SearchSearchByQueryParams,
   options?: {
@@ -300,14 +435,14 @@ export const useSearchSearchByQueryQueryOptions = <
 export type SearchSearchByQueryQueryResult = NonNullable<
   Awaited<ReturnType<typeof searchSearchByQuery>>
 >;
-export type SearchSearchByQueryQueryError = HTTPValidationError;
+export type SearchSearchByQueryQueryError = void | HTTPValidationError;
 
 /**
  * @summary Search By Query
  */
 export const useSearchSearchByQuery = <
   TData = Awaited<ReturnType<typeof searchSearchByQuery>>,
-  TError = HTTPValidationError,
+  TError = void | HTTPValidationError,
 >(
   params: SearchSearchByQueryParams,
   options?: {
@@ -404,6 +539,88 @@ export const useSearchAddUserFeedback = <
   TContext
 > => {
   const mutationOptions = getSearchAddUserFeedbackMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+/**
+ * Determining whether to save the message or overwrite it
+ * @summary Save Or Update Message
+ */
+export const telegramSaveOrUpdateMessage = (
+  messageSchema: MessageSchema,
+  options?: SecondParameter<typeof axiosQuery>,
+) => {
+  return axiosQuery<DBMessageSchema>(
+    {
+      url: `/telegram/messages`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: messageSchema,
+    },
+    options,
+  );
+};
+
+export const getTelegramSaveOrUpdateMessageMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof telegramSaveOrUpdateMessage>>,
+    TError,
+    { data: MessageSchema },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof telegramSaveOrUpdateMessage>>,
+  TError,
+  { data: MessageSchema },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof telegramSaveOrUpdateMessage>>,
+    { data: MessageSchema }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return telegramSaveOrUpdateMessage(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TelegramSaveOrUpdateMessageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof telegramSaveOrUpdateMessage>>
+>;
+export type TelegramSaveOrUpdateMessageMutationBody = MessageSchema;
+export type TelegramSaveOrUpdateMessageMutationError = HTTPValidationError;
+
+/**
+ * @summary Save Or Update Message
+ */
+export const useTelegramSaveOrUpdateMessage = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof telegramSaveOrUpdateMessage>>,
+    TError,
+    { data: MessageSchema },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof telegramSaveOrUpdateMessage>>,
+  TError,
+  { data: MessageSchema },
+  TContext
+> => {
+  const mutationOptions =
+    getTelegramSaveOrUpdateMessageMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
@@ -585,86 +802,6 @@ export const useMoodleGetMoodleFiles = <
 };
 
 /**
- * @summary Batch Upsert Courses
- */
-export const moodleBatchUpsertCourses = (
-  inCourses: InCourses,
-  options?: SecondParameter<typeof axiosQuery>,
-) => {
-  return axiosQuery<unknown>(
-    {
-      url: `/moodle/batch-courses`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      data: inCourses,
-    },
-    options,
-  );
-};
-
-export const getMoodleBatchUpsertCoursesMutationOptions = <
-  TError = HTTPValidationError,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof moodleBatchUpsertCourses>>,
-    TError,
-    { data: InCourses },
-    TContext
-  >;
-  request?: SecondParameter<typeof axiosQuery>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof moodleBatchUpsertCourses>>,
-  TError,
-  { data: InCourses },
-  TContext
-> => {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof moodleBatchUpsertCourses>>,
-    { data: InCourses }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return moodleBatchUpsertCourses(data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type MoodleBatchUpsertCoursesMutationResult = NonNullable<
-  Awaited<ReturnType<typeof moodleBatchUpsertCourses>>
->;
-export type MoodleBatchUpsertCoursesMutationBody = InCourses;
-export type MoodleBatchUpsertCoursesMutationError = HTTPValidationError;
-
-/**
- * @summary Batch Upsert Courses
- */
-export const useMoodleBatchUpsertCourses = <
-  TError = HTTPValidationError,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof moodleBatchUpsertCourses>>,
-    TError,
-    { data: InCourses },
-    TContext
-  >;
-  request?: SecondParameter<typeof axiosQuery>;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof moodleBatchUpsertCourses>>,
-  TError,
-  { data: InCourses },
-  TContext
-> => {
-  const mutationOptions = getMoodleBatchUpsertCoursesMutationOptions(options);
-
-  return useMutation(mutationOptions);
-};
-
-/**
  * @summary Courses
  */
 export const moodleCourses = (
@@ -740,81 +877,81 @@ export const useMoodleCourses = <
 };
 
 /**
- * @summary Course Content
+ * @summary Batch Upsert Courses
  */
-export const moodleCourseContent = (
-  inSections: InSections,
+export const moodleBatchUpsertCourses = (
+  inCourses: InCourses,
   options?: SecondParameter<typeof axiosQuery>,
 ) => {
   return axiosQuery<unknown>(
     {
-      url: `/moodle/set-course-content`,
+      url: `/moodle/batch-courses`,
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      data: inSections,
+      data: inCourses,
     },
     options,
   );
 };
 
-export const getMoodleCourseContentMutationOptions = <
+export const getMoodleBatchUpsertCoursesMutationOptions = <
   TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof moodleCourseContent>>,
+    Awaited<ReturnType<typeof moodleBatchUpsertCourses>>,
     TError,
-    { data: InSections },
+    { data: InCourses },
     TContext
   >;
   request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof moodleCourseContent>>,
+  Awaited<ReturnType<typeof moodleBatchUpsertCourses>>,
   TError,
-  { data: InSections },
+  { data: InCourses },
   TContext
 > => {
   const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof moodleCourseContent>>,
-    { data: InSections }
+    Awaited<ReturnType<typeof moodleBatchUpsertCourses>>,
+    { data: InCourses }
   > = (props) => {
     const { data } = props ?? {};
 
-    return moodleCourseContent(data, requestOptions);
+    return moodleBatchUpsertCourses(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type MoodleCourseContentMutationResult = NonNullable<
-  Awaited<ReturnType<typeof moodleCourseContent>>
+export type MoodleBatchUpsertCoursesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof moodleBatchUpsertCourses>>
 >;
-export type MoodleCourseContentMutationBody = InSections;
-export type MoodleCourseContentMutationError = HTTPValidationError;
+export type MoodleBatchUpsertCoursesMutationBody = InCourses;
+export type MoodleBatchUpsertCoursesMutationError = HTTPValidationError;
 
 /**
- * @summary Course Content
+ * @summary Batch Upsert Courses
  */
-export const useMoodleCourseContent = <
+export const useMoodleBatchUpsertCourses = <
   TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof moodleCourseContent>>,
+    Awaited<ReturnType<typeof moodleBatchUpsertCourses>>,
     TError,
-    { data: InSections },
+    { data: InCourses },
     TContext
   >;
   request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof moodleCourseContent>>,
+  Awaited<ReturnType<typeof moodleBatchUpsertCourses>>,
   TError,
-  { data: InSections },
+  { data: InCourses },
   TContext
 > => {
-  const mutationOptions = getMoodleCourseContentMutationOptions(options);
+  const mutationOptions = getMoodleBatchUpsertCoursesMutationOptions(options);
 
   return useMutation(mutationOptions);
 };
@@ -903,18 +1040,98 @@ export const useMoodleCoursesContent = <
 };
 
 /**
+ * @summary Course Content
+ */
+export const moodleCourseContent = (
+  inSections: InSections[],
+  options?: SecondParameter<typeof axiosQuery>,
+) => {
+  return axiosQuery<unknown>(
+    {
+      url: `/moodle/set-course-content`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: inSections,
+    },
+    options,
+  );
+};
+
+export const getMoodleCourseContentMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof moodleCourseContent>>,
+    TError,
+    { data: InSections[] },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof moodleCourseContent>>,
+  TError,
+  { data: InSections[] },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof moodleCourseContent>>,
+    { data: InSections[] }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return moodleCourseContent(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MoodleCourseContentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof moodleCourseContent>>
+>;
+export type MoodleCourseContentMutationBody = InSections[];
+export type MoodleCourseContentMutationError = HTTPValidationError;
+
+/**
+ * @summary Course Content
+ */
+export const useMoodleCourseContent = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof moodleCourseContent>>,
+    TError,
+    { data: InSections[] },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof moodleCourseContent>>,
+  TError,
+  { data: InSections[] },
+  TContext
+> => {
+  const mutationOptions = getMoodleCourseContentMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+/**
  * @summary Need To Upload Contents
  */
 export const moodleNeedToUploadContents = (
-  inContentsInput: InContentsInput[],
+  inContents: InContents[],
   options?: SecondParameter<typeof axiosQuery>,
 ) => {
-  return axiosQuery<InContentsOutput[]>(
+  return axiosQuery<FlattenInContentsWithPresignedUrl[]>(
     {
       url: `/moodle/need-to-upload-contents`,
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      data: inContentsInput,
+      data: inContents,
     },
     options,
   );
@@ -927,21 +1144,21 @@ export const getMoodleNeedToUploadContentsMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof moodleNeedToUploadContents>>,
     TError,
-    { data: InContentsInput[] },
+    { data: InContents[] },
     TContext
   >;
   request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof moodleNeedToUploadContents>>,
   TError,
-  { data: InContentsInput[] },
+  { data: InContents[] },
   TContext
 > => {
   const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof moodleNeedToUploadContents>>,
-    { data: InContentsInput[] }
+    { data: InContents[] }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -954,7 +1171,7 @@ export const getMoodleNeedToUploadContentsMutationOptions = <
 export type MoodleNeedToUploadContentsMutationResult = NonNullable<
   Awaited<ReturnType<typeof moodleNeedToUploadContents>>
 >;
-export type MoodleNeedToUploadContentsMutationBody = InContentsInput[];
+export type MoodleNeedToUploadContentsMutationBody = InContents[];
 export type MoodleNeedToUploadContentsMutationError = HTTPValidationError;
 
 /**
@@ -967,14 +1184,14 @@ export const useMoodleNeedToUploadContents = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof moodleNeedToUploadContents>>,
     TError,
-    { data: InContentsInput[] },
+    { data: InContents[] },
     TContext
   >;
   request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof moodleNeedToUploadContents>>,
   TError,
-  { data: InContentsInput[] },
+  { data: InContents[] },
   TContext
 > => {
   const mutationOptions = getMoodleNeedToUploadContentsMutationOptions(options);
@@ -983,87 +1200,331 @@ export const useMoodleNeedToUploadContents = <
 };
 
 /**
- * @summary Upload Content
+ * @summary Content Uploaded
  */
-export const moodleUploadContent = (
-  bodyMoodleUploadContent: BodyMoodleUploadContent,
+export const moodleContentUploaded = (
+  inContent: InContent,
   options?: SecondParameter<typeof axiosQuery>,
 ) => {
-  const formData = new FormData();
-  bodyMoodleUploadContent.files.forEach((value) =>
-    formData.append("files", value),
-  );
-  formData.append("data", bodyMoodleUploadContent.data);
-
   return axiosQuery<unknown>(
     {
-      url: `/moodle/upload-contents`,
+      url: `/moodle/content-uploaded`,
       method: "POST",
-      headers: { "Content-Type": "multipart/form-data" },
-      data: formData,
+      headers: { "Content-Type": "application/json" },
+      data: inContent,
     },
     options,
   );
 };
 
-export const getMoodleUploadContentMutationOptions = <
+export const getMoodleContentUploadedMutationOptions = <
   TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof moodleUploadContent>>,
+    Awaited<ReturnType<typeof moodleContentUploaded>>,
     TError,
-    { data: BodyMoodleUploadContent },
+    { data: InContent },
     TContext
   >;
   request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof moodleUploadContent>>,
+  Awaited<ReturnType<typeof moodleContentUploaded>>,
   TError,
-  { data: BodyMoodleUploadContent },
+  { data: InContent },
   TContext
 > => {
   const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof moodleUploadContent>>,
-    { data: BodyMoodleUploadContent }
+    Awaited<ReturnType<typeof moodleContentUploaded>>,
+    { data: InContent }
   > = (props) => {
     const { data } = props ?? {};
 
-    return moodleUploadContent(data, requestOptions);
+    return moodleContentUploaded(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type MoodleUploadContentMutationResult = NonNullable<
-  Awaited<ReturnType<typeof moodleUploadContent>>
+export type MoodleContentUploadedMutationResult = NonNullable<
+  Awaited<ReturnType<typeof moodleContentUploaded>>
 >;
-export type MoodleUploadContentMutationBody = BodyMoodleUploadContent;
-export type MoodleUploadContentMutationError = HTTPValidationError;
+export type MoodleContentUploadedMutationBody = InContent;
+export type MoodleContentUploadedMutationError = HTTPValidationError;
 
 /**
- * @summary Upload Content
+ * @summary Content Uploaded
  */
-export const useMoodleUploadContent = <
+export const useMoodleContentUploaded = <
   TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof moodleUploadContent>>,
+    Awaited<ReturnType<typeof moodleContentUploaded>>,
     TError,
-    { data: BodyMoodleUploadContent },
+    { data: InContent },
     TContext
   >;
   request?: SecondParameter<typeof axiosQuery>;
 }): UseMutationResult<
-  Awaited<ReturnType<typeof moodleUploadContent>>,
+  Awaited<ReturnType<typeof moodleContentUploaded>>,
   TError,
-  { data: BodyMoodleUploadContent },
+  { data: InContent },
   TContext
 > => {
-  const mutationOptions = getMoodleUploadContentMutationOptions(options);
+  const mutationOptions = getMoodleContentUploadedMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+/**
+ * @summary Get Corpora
+ */
+export const computeGetCorpora = (
+  options?: SecondParameter<typeof axiosQuery>,
+  signal?: AbortSignal,
+) => {
+  return axiosQuery<unknown>(
+    { url: `/compute/corpora`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getComputeGetCorporaQueryKey = () => {
+  return [`/compute/corpora`] as const;
+};
+
+export const useComputeGetCorporaQueryOptions = <
+  TData = Awaited<ReturnType<typeof computeGetCorpora>>,
+  TError = Detail,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof computeGetCorpora>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getComputeGetCorporaQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof computeGetCorpora>>
+  > = ({ signal }) => computeGetCorpora(requestOptions, signal);
+
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
+    Awaited<ReturnType<typeof computeGetCorpora>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ComputeGetCorporaQueryResult = NonNullable<
+  Awaited<ReturnType<typeof computeGetCorpora>>
+>;
+export type ComputeGetCorporaQueryError = Detail;
+
+/**
+ * @summary Get Corpora
+ */
+export const useComputeGetCorpora = <
+  TData = Awaited<ReturnType<typeof computeGetCorpora>>,
+  TError = Detail,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof computeGetCorpora>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useComputeGetCorporaQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * @summary Get Pending Search Queries
+ */
+export const computeGetPendingSearchQueries = (
+  options?: SecondParameter<typeof axiosQuery>,
+  signal?: AbortSignal,
+) => {
+  return axiosQuery<SearchTask[]>(
+    { url: `/compute/pending-searchs`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getComputeGetPendingSearchQueriesQueryKey = () => {
+  return [`/compute/pending-searchs`] as const;
+};
+
+export const useComputeGetPendingSearchQueriesQueryOptions = <
+  TData = Awaited<ReturnType<typeof computeGetPendingSearchQueries>>,
+  TError = Detail,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof computeGetPendingSearchQueries>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getComputeGetPendingSearchQueriesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof computeGetPendingSearchQueries>>
+  > = ({ signal }) => computeGetPendingSearchQueries(requestOptions, signal);
+
+  const customOptions = queryOptionsMutator({
+    ...queryOptions,
+    queryKey,
+    queryFn,
+  });
+
+  return customOptions as UseQueryOptions<
+    Awaited<ReturnType<typeof computeGetPendingSearchQueries>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ComputeGetPendingSearchQueriesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof computeGetPendingSearchQueries>>
+>;
+export type ComputeGetPendingSearchQueriesQueryError = Detail;
+
+/**
+ * @summary Get Pending Search Queries
+ */
+export const useComputeGetPendingSearchQueries = <
+  TData = Awaited<ReturnType<typeof computeGetPendingSearchQueries>>,
+  TError = Detail,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof computeGetPendingSearchQueries>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+  const queryOptions = useComputeGetPendingSearchQueriesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+};
+
+/**
+ * @summary Post Completed Search Queries
+ */
+export const computePostCompletedSearchQueries = (
+  searchResult: SearchResult[],
+  options?: SecondParameter<typeof axiosQuery>,
+) => {
+  return axiosQuery<unknown>(
+    {
+      url: `/compute/completed-searchs`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: searchResult,
+    },
+    options,
+  );
+};
+
+export const getComputePostCompletedSearchQueriesMutationOptions = <
+  TError = Detail | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof computePostCompletedSearchQueries>>,
+    TError,
+    { data: SearchResult[] },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof computePostCompletedSearchQueries>>,
+  TError,
+  { data: SearchResult[] },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof computePostCompletedSearchQueries>>,
+    { data: SearchResult[] }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return computePostCompletedSearchQueries(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ComputePostCompletedSearchQueriesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof computePostCompletedSearchQueries>>
+>;
+export type ComputePostCompletedSearchQueriesMutationBody = SearchResult[];
+export type ComputePostCompletedSearchQueriesMutationError =
+  | Detail
+  | HTTPValidationError;
+
+/**
+ * @summary Post Completed Search Queries
+ */
+export const useComputePostCompletedSearchQueries = <
+  TError = Detail | HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof computePostCompletedSearchQueries>>,
+    TError,
+    { data: SearchResult[] },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosQuery>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof computePostCompletedSearchQueries>>,
+  TError,
+  { data: SearchResult[] },
+  TContext
+> => {
+  const mutationOptions =
+    getComputePostCompletedSearchQueriesMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

@@ -38,7 +38,7 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
       </a>
 
       <ErrorBoundary fallback={<div>Some error occurred</div>}>
-        {source.type === "moodle" ? (
+        {source.type === "moodle-file" ? (
           <PdfPreview source={source} searchText="" />
         ) : source.type === "telegram" ? (
           <TelegramPreview source={source} />
