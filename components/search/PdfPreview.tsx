@@ -20,7 +20,7 @@ function highlightPattern(text: string, pattern: string) {
 }
 
 export declare type PdfPreviewProps = {
-  source: search.MoodleSource;
+  source: search.MoodleFileSource;
   searchText: string;
 };
 
@@ -29,7 +29,9 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: file } = usePreviewFile(source.resource_preview_url);
+  const { data: file } = usePreviewFile(
+    source.resource_preview_url ?? undefined,
+  );
 
   const divRef = useRef<HTMLDivElement>(null);
   const divWidth = useElementWidth(divRef);
@@ -117,7 +119,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           <PreviewBottomButton
             icon={<span className="icon-[material-symbols--download]"></span>}
             text="Download"
-            href={source.resource_download_url}
+            href={source.resource_download_url ?? undefined}
             target="_blank"
             download
           />
@@ -152,7 +154,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           <PreviewBottomButton
             icon={<span className="icon-[material-symbols--open-in-new]" />}
             text="New tab"
-            href={source.resource_download_url}
+            href={source.resource_download_url ?? undefined}
             target="_blank"
           />
         </div>
