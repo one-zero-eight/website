@@ -50,7 +50,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
     if (error.name === "MissingPDFException") {
       setError("PDF file is missing");
     } else if (error.name === "InvalidPDFException") {
-      setError("Not a valid PDF file");
+      setError("Preview available for PDF only");
     } else {
       setError("Error while loading PDF file");
     }
@@ -78,10 +78,14 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
         file={file}
         onLoadSuccess={onDocumentLoadSuccess}
         onLoadError={onDocumentLoadError}
-        noData={<div className="skeleton flex h-[400px]" />}
+        noData={
+          <div className="flex h-[400px] items-center justify-center text-sm dark:text-[#eeff41]">
+            File has not yet been uploaded
+          </div>
+        }
         loading={<div className="skeleton flex h-[400px]" />}
         error={
-          <div className="skeleton flex h-[400px] items-center justify-center text-lg font-semibold text-red-500">
+          <div className="flex h-[400px] items-center justify-center text-sm dark:text-[#eeff41]">
             {error}
           </div>
         }
@@ -114,51 +118,55 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           </div>
         )}
       </Document>
-      <div className="mb-4 mt-2 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
-        <div className="flex flex-row items-stretch gap-4">
-          <PreviewBottomButton
-            icon={<span className="icon-[material-symbols--download]"></span>}
-            text="Download"
-            href={source.resource_download_url ?? undefined}
-            target="_blank"
-            download
-          />
+      {file !== undefined && (
+        <div className="mb-4 mt-2 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
+          <div className="flex flex-row items-stretch gap-4">
+            <PreviewBottomButton
+              icon={<span className="icon-[material-symbols--download]"></span>}
+              text="Download"
+              href={source.resource_download_url ?? undefined}
+              target="_blank"
+              download
+            />
 
-          <div className="flex flex-row items-center rounded-lg bg-base-100 dark:bg-primary-hover">
-            <button
-              className="px-4"
-              onClick={goToPrevPage}
-              disabled={currentPage <= 1}
-            >
-              &lt;
-            </button>
-            <div className="max-w-4"></div>
-            <span className="text-sm md:text-xs">{`${currentPage}/${numPages}`}</span>
-            <div className="max-w-4"></div>
-            <button
-              className="px-4"
-              onClick={goToNextPage}
-              disabled={currentPage >= numPages}
-            >
-              &gt;
-            </button>
+            {error === null && (
+              <div className="flex flex-row items-center rounded-lg bg-base-100 dark:bg-primary-hover">
+                <button
+                  className="px-4"
+                  onClick={goToPrevPage}
+                  disabled={currentPage <= 1}
+                >
+                  &lt;
+                </button>
+                <div className="max-w-4"></div>
+                <span className="text-sm md:text-xs">{`${currentPage}/${numPages}`}</span>
+                <div className="max-w-4"></div>
+                <button
+                  className="px-4"
+                  onClick={goToNextPage}
+                  disabled={currentPage >= numPages}
+                >
+                  &gt;
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-row items-stretch gap-4">
+            <PreviewBottomButton
+              icon={<span className="icon-[material-symbols--open-in-new]" />}
+              text="To source"
+              href={source.link}
+              target="_blank"
+            />
+            <PreviewBottomButton
+              icon={<span className="icon-[material-symbols--open-in-new]" />}
+              text="New tab"
+              href={source.resource_download_url ?? undefined}
+              target="_blank"
+            />
           </div>
         </div>
-        <div className="flex flex-row items-stretch gap-4">
-          <PreviewBottomButton
-            icon={<span className="icon-[material-symbols--open-in-new]" />}
-            text="To source"
-            href={source.link}
-            target="_blank"
-          />
-          <PreviewBottomButton
-            icon={<span className="icon-[material-symbols--open-in-new]" />}
-            text="New tab"
-            href={source.resource_download_url ?? undefined}
-            target="_blank"
-          />
-        </div>
-      </div>
+      )}
     </>
   );
 }

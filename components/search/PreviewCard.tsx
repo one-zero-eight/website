@@ -3,6 +3,8 @@ import { search } from "@/lib/search";
 import clsx from "clsx";
 import dynamic from "next/dynamic";
 import { ErrorBoundary } from "react-error-boundary";
+import MoodleUrlPreview from "./MoodleUrlPreview";
+import MoodleUnknownPreview from "./MoodleUnknownPreview";
 
 export const PdfPreview = dynamic(
   () => import("./PdfPreview").then((x) => x.default),
@@ -42,6 +44,10 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
           <PdfPreview source={source} searchText="" />
         ) : source.type === "telegram" ? (
           <TelegramPreview source={source} />
+        ) : source.type === "moodle-url" ? (
+          <MoodleUrlPreview source={source} />
+        ) : source.type === "moodle-unknown" ? (
+          <MoodleUnknownPreview source={source} />
         ) : null}
       </ErrorBoundary>
     </div>
