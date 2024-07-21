@@ -118,8 +118,9 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
           </div>
         )}
       </Document>
-      {file !== undefined && (
-        <div className="mb-4 mt-2 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
+
+      <div className="mb-4 mt-2 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
+        {file !== undefined && (
           <div className="flex flex-row items-stretch gap-4">
             <PreviewBottomButton
               icon={<span className="icon-[material-symbols--download]"></span>}
@@ -151,22 +152,24 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
               </div>
             )}
           </div>
-          <div className="flex flex-row items-stretch gap-4">
-            <PreviewBottomButton
-              icon={<span className="icon-[material-symbols--open-in-new]" />}
-              text="To source"
-              href={source.link}
-              target="_blank"
-            />
+        )}
+        <div className="flex flex-row items-stretch gap-4">
+          <PreviewBottomButton
+            icon={<span className="icon-[material-symbols--open-in-new]" />}
+            text="To source"
+            href={source.link}
+            target="_blank"
+          />
+          {file !== undefined && (
             <PreviewBottomButton
               icon={<span className="icon-[material-symbols--open-in-new]" />}
               text="New tab"
               href={source.resource_download_url ?? undefined}
               target="_blank"
             />
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </>
   );
 }
