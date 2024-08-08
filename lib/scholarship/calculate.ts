@@ -1,9 +1,5 @@
 import { Mark, MARK_COLORS, MARK_VALUES } from "@/lib/scholarship/consts";
 
-export const FORMULA_B_MIN = 3000;
-export const FORMULA_B_MAX_B22 = 20000;
-export const FORMULA_B_MAX_B23 = 10000;
-
 /**
  * Get hex color between two mark colors.
  */

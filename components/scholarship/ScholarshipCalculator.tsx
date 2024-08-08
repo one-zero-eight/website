@@ -6,8 +6,8 @@ import {
   calculateGPAFromScholarship,
   calculateMarksFromGPA,
   calculateScholarship,
-  FORMULA_B_MAX_B22,
-  FORMULA_B_MAX_B23,
+  Courses,
+  FORMULA_B_MAX_MAPPING,
   FORMULA_B_MIN,
   Mark,
   MARK_COLORS,
@@ -19,22 +19,28 @@ import { useLocalStorage, useWindowSize } from "usehooks-ts";
 
 export default function ScholarshipCalculator() {
   const [_, setStorageMarks] = useLocalStorage<Mark[]>("scholarship-marks", []);
-  const [__, setStorageIsB23] = useLocalStorage<boolean>(
-    "scholarship-isB23",
-    true,
+  const [__, setStorageCourse] = useLocalStorage<Courses>(
+    "scholarship-course",
+    "B24",
   );
   const [marks, setMarks] = useState<Mark[]>([]);
   const [displayGPA, setDisplayGPA] = useState("");
   const [errorGPA, setErrorGPA] = useState(false);
   const [displayScholarship, setDisplayScholarship] = useState("");
   const [errorScholarship, setErrorScholarship] = useState(false);
-  const [isB23, setIsB23] = useState(true);
+  const [course, setCourse] = useState<Courses>("B24");
   const marksTextAreaRef = createRef<HTMLTextAreaElement>();
   const { width: windowWidth } = useWindowSize();
 
   useEffect(() => {
-    const isB23 = window.localStorage.getItem("scholarship-isB23") !== "false";
-    setIsB23(isB23);
+    const courseStored = window.localStorage.getItem("scholarship-course");
+    const course =
+      courseStored === '"B22"'
+        ? "B22"
+        : courseStored === '"B23"'
+          ? "B23"
+          : "B24";
+    setCourse(course);
 
     const marks = window.localStorage.getItem("scholarship-marks");
     if (!marks) return;
@@ -47,7 +53,7 @@ export default function ScholarshipCalculator() {
             newMarks.push(MARK_MAPPING[m]);
           }
         }
-        onMarksChange(newMarks.join(""), isB23);
+        onMarksChange(newMarks.join(""), course);
       }
     } catch (e) {
       // Accept any error
@@ -55,9 +61,9 @@ export default function ScholarshipCalculator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onMarksChange = (v: string, isB23: boolean) => {
-    setIsB23(isB23);
-    setStorageIsB23(isB23);
+  const onMarksChange = (v: string, course: Courses) => {
+    setCourse(course);
+    setStorageCourse(course);
 
     const newMarks: Mark[] = [];
     for (let c of v) {
@@ -83,7 +89,7 @@ export default function ScholarshipCalculator() {
     const newScholarship = calculateScholarship(
       newGPA,
       FORMULA_B_MIN,
-      isB23 ? FORMULA_B_MAX_B23 : FORMULA_B_MAX_B22,
+      FORMULA_B_MAX_MAPPING[course],
     );
 
     // Update state
@@ -127,9 +133,9 @@ export default function ScholarshipCalculator() {
     }
   };
 
-  const onGPAChange = (v: string, isB23: boolean) => {
-    setIsB23(isB23);
-    setStorageIsB23(isB23);
+  const onGPAChange = (v: string, course: Courses) => {
+    setCourse(course);
+    setStorageCourse(course);
 
     v = v.substring(0, 5);
     setDisplayGPA(v);
@@ -139,7 +145,7 @@ export default function ScholarshipCalculator() {
       const newScholarship = calculateScholarship(
         gpa,
         FORMULA_B_MIN,
-        isB23 ? FORMULA_B_MAX_B23 : FORMULA_B_MAX_B22,
+        FORMULA_B_MAX_MAPPING[course],
       );
       setMarks(newMarks);
       setStorageMarks(newMarks);
@@ -151,9 +157,9 @@ export default function ScholarshipCalculator() {
     }
   };
 
-  const onScholarshipChange = (v: string, isB23: boolean) => {
-    setIsB23(isB23);
-    setStorageIsB23(isB23);
+  const onScholarshipChange = (v: string, course: Courses) => {
+    setCourse(course);
+    setStorageCourse(course);
 
     v = v.substring(0, 5);
     setDisplayScholarship(v);
@@ -161,12 +167,12 @@ export default function ScholarshipCalculator() {
     if (
       !isNaN(scholarship) &&
       scholarship >= FORMULA_B_MIN &&
-      scholarship <= (isB23 ? FORMULA_B_MAX_B23 : FORMULA_B_MAX_B22)
+      scholarship <= FORMULA_B_MAX_MAPPING[course]
     ) {
       const newGPA = calculateGPAFromScholarship(
         scholarship,
         FORMULA_B_MIN,
-        isB23 ? FORMULA_B_MAX_B23 : FORMULA_B_MAX_B22,
+        FORMULA_B_MAX_MAPPING[course],
       );
       const newMarks = calculateMarksFromGPA(newGPA);
       setMarks(newMarks);
@@ -187,7 +193,7 @@ export default function ScholarshipCalculator() {
       <div className="relative">
         <textarea
           ref={marksTextAreaRef}
-          onChange={(e) => onMarksChange(e.target.value, isB23)}
+          onChange={(e) => onMarksChange(e.target.value, course)}
           autoComplete="off"
           spellCheck={false}
           className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-focus bg-base p-3 font-handwritten text-transparent caret-focus outline-none"
@@ -208,7 +214,7 @@ export default function ScholarshipCalculator() {
         </div>
         {marks.length !== 0 && (
           <button
-            onClick={() => onMarksChange("", isB23)}
+            onClick={() => onMarksChange("", course)}
             className="absolute -right-1 -top-1 h-7 w-7 rounded-2xl bg-base p-2 align-middle text-lg text-focus"
             style={{ lineHeight: 0 }}
           >
@@ -218,26 +224,39 @@ export default function ScholarshipCalculator() {
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
         <div className="text-xl font-medium">Course:</div>
-        <div className="flex w-32 flex-row overflow-clip rounded-2xl border-2 border-focus bg-base">
+        <div className="flex w-48 flex-row overflow-clip rounded-2xl border-2 border-focus bg-base">
           <button
-            onClick={() => onMarksChange(marks.join(""), true)}
+            onClick={() => onMarksChange(marks.join(""), "B24")}
             className={clsx(
               "w-full rounded-l-2xl p-2 text-center font-handwritten transition-colors hover:bg-focus/20",
-              isB23 ? "bg-focus/10 text-focus" : "bg-transparent text-gray-500",
+              course === "B24"
+                ? "bg-focus/10 text-focus"
+                : "bg-transparent text-gray-500",
+            )}
+          >
+            B24
+          </button>
+          <button
+            onClick={() => onMarksChange(marks.join(""), "B23")}
+            className={clsx(
+              "w-full p-2 text-center font-handwritten transition-colors hover:bg-focus/20",
+              course === "B23"
+                ? "bg-focus/10 text-focus"
+                : "bg-transparent text-gray-500",
             )}
           >
             B23
           </button>
           <button
-            onClick={() => onMarksChange(marks.join(""), false)}
+            onClick={() => onMarksChange(marks.join(""), "B22")}
             className={clsx(
               "w-full rounded-r-2xl p-2 text-center font-handwritten transition-colors hover:bg-focus/20",
-              !isB23
+              course === "B22"
                 ? "bg-focus/10 text-focus"
                 : "bg-transparent text-gray-500",
             )}
           >
-            B22+
+            B22
           </button>
         </div>
       </div>
@@ -245,7 +264,7 @@ export default function ScholarshipCalculator() {
         <div className="text-xl font-medium">Your GPA:</div>
         <input
           value={displayGPA}
-          onChange={(e) => onGPAChange(e.target.value, isB23)}
+          onChange={(e) => onGPAChange(e.target.value, course)}
           type="number"
           step={0.01}
           min={2}
@@ -253,7 +272,7 @@ export default function ScholarshipCalculator() {
           autoComplete="off"
           spellCheck={false}
           className={clsx(
-            "w-32 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
+            "w-48 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
             !errorGPA ? "border-focus" : "border-red-500",
           )}
           style={{
@@ -265,15 +284,15 @@ export default function ScholarshipCalculator() {
         <div className="text-xl font-medium">Scholarship:</div>
         <input
           value={displayScholarship}
-          onChange={(e) => onScholarshipChange(e.target.value, isB23)}
+          onChange={(e) => onScholarshipChange(e.target.value, course)}
           type="number"
           step={100}
-          max={isB23 ? FORMULA_B_MAX_B23 : FORMULA_B_MAX_B22}
+          max={FORMULA_B_MAX_MAPPING[course]}
           min={FORMULA_B_MIN}
           autoComplete="off"
           spellCheck={false}
           className={clsx(
-            "rubles-input w-32 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
+            "rubles-input w-48 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
             !errorScholarship ? "border-focus" : "border-red-500",
           )}
           style={{

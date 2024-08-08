@@ -38,7 +38,8 @@ export default function Page() {
         </p>
         <p>
           <ScholarshipBmax className="-mt-1 inline fill-text-main" /> &mdash;
-          maximum scholarship amount (10,000₽ for B23, and 20,000₽ for others)
+          maximum scholarship amount (10,000₽ for B24 &amp; B23; 20,000₽ for
+          B22)
         </p>
         <p>
           <ScholarshipGPA className="inline fill-text-main" /> &mdash;

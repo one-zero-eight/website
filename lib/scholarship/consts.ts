@@ -1,3 +1,13 @@
+// Courses
+export type Courses = "B24" | "B23" | "B22";
+
+export const FORMULA_B_MIN = 3000;
+export const FORMULA_B_MAX_MAPPING: Record<Courses, number> = {
+  B24: 10000,
+  B23: 10000,
+  B22: 20000,
+};
+
 // Typed marks
 export type Mark = "A" | "B" | "C" | "D" | "P" | "F";
 
