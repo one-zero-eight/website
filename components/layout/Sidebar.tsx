@@ -51,6 +51,18 @@ const items: Item[] = [
     ),
   },
   {
+    title: "Rooms",
+    path: "/rooms",
+    badge: (
+      <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
+        NEW
+      </span>
+    ),
+    icon: (
+      <span className="icon-[material-symbols--nest-multi-room-outline-rounded] text-4xl" />
+    ),
+  },
+  {
     title: "Music room",
     path: "/music-room",
     icon: <span className="icon-[material-symbols--piano] text-4xl" />,
