@@ -31,7 +31,7 @@ export default async function CategoryContainer() {
             outdated={v.outdated}
           />
         ))}
-      {/*<div className="h-0 w-full"></div>*/}
+      <div className="h-0 w-full" />
       {Object.entries(viewConfig.categories)
         .filter(([_, v]) => v.outdated)
         .map(([_, v]) => (

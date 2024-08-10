@@ -14,31 +14,25 @@ export type CategoryInfo = {
 
 export const viewConfig: ViewConfig = {
   categories: {
-    "core-courses": {
-      alias: "core-courses",
-      title: "Core Courses",
-      shortDescription: "Academic schedule for core courses in S24.",
-      filtersTagTypes: ["core-courses"],
-      groupingTagType: "core-courses",
-      showTagTypes: ["core-courses"],
+    bootcamp2024: {
+      alias: "bootcamp2024",
+      title: "Bootcamp",
+      shortDescription: "Schedule of bootcamp activities in August, 2024.",
+      filtersTagTypes: ["bootcamp2024"],
+      groupingTagType: "bootcamp2024",
+      showTagTypes: ["bootcamp2024", "bootcamp2024-workshops-timeslot"],
       outdated: false,
     },
-    electives: {
-      alias: "electives",
-      title: "Electives",
-      shortDescription: "Academic schedule for electives in S24.",
-      filtersTagTypes: ["electives"],
-      groupingTagType: "electives",
-      showTagTypes: ["electives"],
-      outdated: false,
-    },
-    sports: {
-      alias: "sports",
-      title: "Sports",
-      shortDescription: "Schedule of sport classes in S24.",
-      filtersTagTypes: [],
-      groupingTagType: undefined,
-      showTagTypes: ["category"],
+    "bootcamp2024-workshops": {
+      alias: "bootcamp2024-workshops",
+      title: "Workshops",
+      shortDescription: "Workshops on bootcamp in August, 2024.",
+      filtersTagTypes: ["bootcamp2024-workshops"],
+      groupingTagType: "bootcamp2024-workshops",
+      showTagTypes: [
+        "bootcamp2024-workshops",
+        "bootcamp2024-workshops-timeslot",
+      ],
       outdated: false,
     },
     cleaning: {
@@ -50,27 +44,33 @@ export const viewConfig: ViewConfig = {
       showTagTypes: ["cleaning"],
       outdated: false,
     },
-    // bootcamp2023: {
-    //   alias: "bootcamp2023",
-    //   title: "Bootcamp",
-    //   shortDescription: "Schedule of bootcamp activities in August, 2023.",
-    //   filtersTagTypes: ["bootcamp2023"],
-    //   groupingTagType: "bootcamp2023",
-    //   showTagTypes: ["bootcamp2023", "bootcamp2023-workshops-timeslot"],
-    //   outdated: true,
-    // },
-    // "bootcamp2023-workshops": {
-    //   alias: "bootcamp2023-workshops",
-    //   title: "Workshops",
-    //   shortDescription: "Workshops on bootcamp in August, 2023.",
-    //   filtersTagTypes: ["bootcamp2023-workshops"],
-    //   groupingTagType: "bootcamp2023-workshops",
-    //   showTagTypes: [
-    //     "bootcamp2023-workshops",
-    //     "bootcamp2023-workshops-timeslot",
-    //   ],
-    //   outdated: true,
-    // },
+    "core-courses": {
+      alias: "core-courses",
+      title: "Core Courses",
+      shortDescription: "Academic schedule for core courses in Sum24.",
+      filtersTagTypes: ["core-courses"],
+      groupingTagType: "core-courses",
+      showTagTypes: ["core-courses"],
+      outdated: true,
+    },
+    electives: {
+      alias: "electives",
+      title: "Electives",
+      shortDescription: "Academic schedule for electives in Sum24.",
+      filtersTagTypes: ["electives"],
+      groupingTagType: "electives",
+      showTagTypes: ["electives"],
+      outdated: true,
+    },
+    sports: {
+      alias: "sports",
+      title: "Sports",
+      shortDescription: "Schedule of sport classes in Sum24.",
+      filtersTagTypes: [],
+      groupingTagType: undefined,
+      showTagTypes: ["category"],
+      outdated: true,
+    },
   },
 };
 
