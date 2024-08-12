@@ -241,9 +241,7 @@ function Calendar({
         <CalendarEventPopover
           event={popoverInfo.event}
           isOpen={popoverInfo.opened}
-          setIsOpen={() =>
-            setPopoverInfo((prev) => ({ ...prev, opened: !prev.opened }))
-          }
+          setIsOpen={() => setPopoverInfo((prev) => ({ ...prev }))}
           eventElement={popoverInfo.eventElement}
         />
       )}
