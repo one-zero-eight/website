@@ -14,7 +14,7 @@ import {
 } from "@floating-ui/react";
 import { EventApi } from "@fullcalendar/core";
 import moment from "moment";
-import React from "react";
+import React, { useEffect } from "react";
 
 export type ScheduleDialogProps = {
   event: EventApi;
@@ -42,6 +42,9 @@ export default function CalendarEventPopover({
       reference: eventElement,
     },
   });
+  useEffect(() => {
+    refs.setPositionReference(eventElement);
+  }, [eventElement, refs]);
 
   // Transition effect
   const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
