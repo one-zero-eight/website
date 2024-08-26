@@ -55,6 +55,23 @@ export default function Page() {
           </p>
         </div>
       </div>
+      <a
+        href="https://t.me/one_zero_eight"
+        className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
+      >
+        <div className="w-12">
+          <span className="icon-[ic--baseline-telegram] text-5xl text-[#9747FF]" />
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className="text-2xl font-semibold text-text-main">
+            Telegram channel
+          </p>
+          <p className="text-lg text-text-secondary/75">
+            Join <span className="text-[#9747FF]">one-zero-eight</span> channel
+            in Telegram for all important information about InNoHassle.
+          </p>
+        </div>
+      </a>
       <div className="flex flex-col justify-between gap-4 @container/sections @6xl/content:flex-row @6xl/content:gap-8">
         <details className="flex w-full flex-col @container/schedule @6xl/content:w-1/2">
           <summary className="my-4 text-3xl font-medium">Schedule</summary>
