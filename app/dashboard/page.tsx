@@ -8,6 +8,7 @@ import { useMe } from "@/lib/auth/user";
 import {
   events,
   getICSLink,
+  getMyMoodleLink,
   getMyMusicRoomLink,
   getMySportLink,
 } from "@/lib/events";
@@ -75,28 +76,32 @@ export default function Page() {
       <div className="flex flex-col justify-between gap-4 @container/sections @6xl/content:flex-row @6xl/content:gap-8">
         <details className="flex w-full flex-col @container/schedule @6xl/content:w-1/2">
           <summary className="my-4 text-3xl font-medium">Schedule</summary>
-          {predefined?.event_groups === undefined ||
-          predefined.event_groups.length === 0 ? (
-            <p className="mb-4 text-lg text-text-secondary/75">Nothing here.</p>
-          ) : (
-            <div className="grid grid-cols-1 justify-stretch gap-4 @lg/schedule:grid-cols-2 @4xl/schedule:grid-cols-3">
-              {predefined.event_groups.map((v) => (
-                <GroupCardById key={v} groupId={v} canHide={true} />
-              ))}
+          <div className="grid grid-cols-1 justify-stretch gap-4 @lg/schedule:grid-cols-2 @4xl/schedule:grid-cols-3">
+            {predefined?.event_groups.map((v) => (
+              <GroupCardById key={v} groupId={v} canHide={true} />
+            ))}
+            <PersonalCard
+              name="Sport"
+              description="Your sport schedule"
+              pageUrl="/sport"
+              buttons={
+                <LinkIconButton
+                  href="https://t.me/IUSportBot"
+                  icon={
+                    <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
+                  }
+                  tooltip="Open Telegram bot"
+                />
+              }
+            />
+            {musicRoomSchedule.isSuccess && (
               <PersonalCard
-                name={
-                  <div className="flex items-center">
-                    Sport
-                    <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
-                      NEW
-                    </span>
-                  </div>
-                }
-                description="Your sport schedule"
-                pageUrl="/sport"
+                name="Music room"
+                description="Your room bookings"
+                pageUrl="/music-room"
                 buttons={
                   <LinkIconButton
-                    href="https://t.me/IUSportBot"
+                    href="https://t.me/InnoMusicRoomBot"
                     icon={
                       <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
                     }
@@ -104,24 +109,28 @@ export default function Page() {
                   />
                 }
               />
-              {musicRoomSchedule.isSuccess && (
-                <PersonalCard
-                  name="Music room"
-                  description="Your room bookings"
-                  pageUrl="/music-room"
-                  buttons={
-                    <LinkIconButton
-                      href="https://t.me/InnoMusicRoomBot"
-                      icon={
-                        <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
-                      }
-                      tooltip="Open Telegram bot"
-                    />
+            )}
+            <PersonalCard
+              name={
+                <span className="flex items-center">
+                  Moodle
+                  <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
+                    NEW
+                  </span>
+                </span>
+              }
+              description="Your Moodle deadlines"
+              buttons={
+                <LinkIconButton
+                  href="/extension"
+                  icon={
+                    <span className="icon-[material-symbols--extension-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
                   }
+                  tooltip="Install the browser extension to sync Moodle calendar"
                 />
-              )}
-            </div>
-          )}
+              }
+            />
+          </div>
         </details>
         <details className="flex w-full flex-col @container/favorites @6xl/content:w-1/2">
           <summary className="my-4 text-3xl font-medium">Favorites</summary>
@@ -200,6 +209,10 @@ function getCalendarsToShow(
   });
   toShow.push({
     url: getMySportLink(),
+    color: "seagreen",
+  });
+  toShow.push({
+    url: getMyMoodleLink(),
     color: "seagreen",
   });
 

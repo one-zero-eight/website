@@ -22,6 +22,10 @@ export function getMySportLink() {
   return `${EVENTS_API_URL}/users/me/sport.ics`;
 }
 
+export function getMyMoodleLink() {
+  return `${EVENTS_API_URL}/users/me/moodle.ics`;
+}
+
 export function getPersonalLink(resourcePath: string, accessKey: string) {
   return `${EVENTS_API_URL}${resourcePath}?access_key=${accessKey}`;
 }
