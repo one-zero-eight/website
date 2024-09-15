@@ -6,7 +6,7 @@ import {
   EventSourceDef,
 } from "@fullcalendar/core/internal";
 // @ts-ignore
-import * as ICAL from "ical.js";
+import ICAL from "ical.js";
 import { IcalExpander } from "./ical-expander/IcalExpander";
 
 interface ICalFeedMeta {
