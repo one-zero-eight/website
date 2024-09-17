@@ -142,11 +142,11 @@ function Sidebar({ children }: React.PropsWithChildren) {
       />
       <aside
         className={clsx(
-          "fixed top-0 z-10 h-[100dvh] overflow-auto bg-sidebar transition-transform lgw-smh:sticky lgw-smh:translate-x-0 lgw-smh:overflow-auto lgw-smh:transition-none",
+          "fixed top-0 z-10 h-[100dvh] shrink-0 overflow-y-auto bg-sidebar px-8 py-8 transition-transform lgw-smh:sticky lgw-smh:translate-x-0 lgw-smh:py-4 lgw-smh:transition-none",
           isOpened ? "translate-x-0 transform" : "-translate-x-full transform",
         )}
       >
-        <div className="flex h-full flex-col items-center justify-start px-8 py-8 lgw-smh:h-auto lgw-smh:py-4">
+        <div className="flex min-h-full flex-col items-center justify-start">
           <Link
             href={me ? "/dashboard" : "/schedule"}
             onClick={() => setOpened(false)}
