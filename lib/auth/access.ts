@@ -1,3 +1,4 @@
+import { queryClient } from "@/app/_query_provider";
 import { useLocalStorage } from "usehooks-ts";
 
 const TOKEN_KEY = "accessToken";
@@ -15,6 +16,8 @@ export function invalidateMyAccessToken() {
   localStorage.removeItem(TOKEN_KEY);
   // Notify usehooks-ts about the change
   window.dispatchEvent(new StorageEvent("local-storage", { key: TOKEN_KEY }));
+  // Clear the query cache
+  queryClient.clear();
   return true;
 }
 
