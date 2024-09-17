@@ -8,7 +8,7 @@ import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import moment from "moment/moment";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import iCalendarPlugin from "./iCalendarPlugin";
 
@@ -34,6 +34,18 @@ function Calendar({
     event: undefined as EventApi | undefined,
     eventElement: undefined as HTMLElement | undefined,
   });
+
+  const setIsOpenCallback = useCallback(
+    (opened: boolean) =>
+      setPopoverInfo((prev) => {
+        if (opened) {
+          return { ...prev, opened };
+        } else {
+          return { opened, event: undefined, eventElement: undefined };
+        }
+      }),
+    [setPopoverInfo],
+  );
 
   const [storedCalendarView, setStoredCalendarView] = useLocalStorage(
     `calendar-view-${viewId}`,
@@ -214,14 +226,13 @@ function Calendar({
         eventClassNames="cursor-pointer text-sm rounded-md !bg-transparent border-0 overflow-clip"
         eventClick={(info) => {
           info.jsEvent.preventDefault();
+          info.jsEvent.stopPropagation();
           // We should check prev value via argument because 'eventElement' may be outdated in current closure
-          setPopoverInfo((prev) => {
-            return {
-              opened: !prev.opened || prev.eventElement !== info.el,
-              event: info.event,
-              eventElement: info.el,
-            };
-          });
+          setPopoverInfo((prev) => ({
+            event: info.event,
+            eventElement: info.el,
+            opened: !(prev.opened && prev.eventElement === info.el),
+          }));
         }}
         slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
@@ -241,7 +252,7 @@ function Calendar({
         <CalendarEventPopover
           event={popoverInfo.event}
           isOpen={popoverInfo.opened}
-          setIsOpen={() => setPopoverInfo((prev) => ({ ...prev }))}
+          setIsOpen={setIsOpenCallback}
           eventElement={popoverInfo.eventElement}
         />
       )}

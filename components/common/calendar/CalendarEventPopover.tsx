@@ -1,4 +1,3 @@
-"use client";
 import {
   autoUpdate,
   flip,
@@ -55,7 +54,13 @@ export default function CalendarEventPopover({
   });
 
   // Event listeners to change the open state
-  const dismiss = useDismiss(context, { outsidePressEvent: "click" });
+  const dismiss = useDismiss(context, {
+    outsidePressEvent: "click",
+    referencePress: true,
+    capture: {
+      outsidePress: false,
+    },
+  });
   // Role props for screen readers
   const role = useRole(context);
 
