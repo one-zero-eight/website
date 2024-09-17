@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+    @apply bg-base;
     color-scheme: light;
     accent-color: var(--color-focus);
     --color-base: 255 255 255; /* #FFFFFF */

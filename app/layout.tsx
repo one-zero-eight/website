@@ -54,7 +54,7 @@ export default function RootLayout({
         <GoogleAnalytics />
       </head>
 
-      <body className="bg-base font-primary text-lg text-text-main">
+      <body className="font-primary text-lg text-text-main">
         <noscript className="flex w-full justify-center bg-red-700 p-8">
           You need to enable JavaScript to run this app.
         </noscript>
