@@ -82,6 +82,5 @@ module.exports = {
     addDynamicIconSelectors(),
     require("@tailwindcss/container-queries"),
     require("@tailwindcss/typography"),
-    require("daisyui"),
   ],
 };
