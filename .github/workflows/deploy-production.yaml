@@ -18,17 +18,15 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          command_timeout: 30m
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           fingerprint: ${{ secrets.SSH_FINGERPRINT }}
           script_stop: true # Stop script on error
+          command_timeout: 30m
           script: |
             cd ${{ secrets.REPOSITORY_ROOT }}
             git reset --hard
             git checkout ${{ github.ref_name }}
             git pull
-            docker compose build --pull
-            docker compose pull
-            docker compose up -d
+            docker compose up --build --pull always --force-recreate --detach
