@@ -30,7 +30,7 @@ export default function SearchResult({
       ) : response.source.type === "telegram" ? (
         <span className="icon-[uil--telegram-alt] text-3xl text-[#27A7E7]" />
       ) : null}
-      <p className="text-xs font-semibold text-base-content dark:text-white md:text-2xl">
+      <p className="text-base-content text-xs font-semibold dark:text-white md:text-2xl">
         {response.source.display_name}
       </p>
       <a

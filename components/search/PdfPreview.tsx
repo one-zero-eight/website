@@ -131,7 +131,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
             />
 
             {error === null && (
-              <div className="flex flex-row items-center rounded-lg bg-base-100 dark:bg-primary-hover">
+              <div className="bg-base-100 flex flex-row items-center rounded-lg dark:bg-primary-hover">
                 <button
                   className="px-4"
                   onClick={goToPrevPage}

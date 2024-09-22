@@ -25,7 +25,7 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
       )}
     >
       <div className="flex flex-row items-center justify-between">
-        <p className="text-2xl font-semibold text-base-content dark:text-white">
+        <p className="text-base-content text-2xl font-semibold dark:text-white">
           {source.display_name}
         </p>
         <span
