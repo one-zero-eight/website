@@ -1,5 +1,6 @@
 "use client";
 import CalendarEventPopover from "@/components/common/calendar/CalendarEventPopover";
+import { events } from "@/lib/events";
 import { EventApi, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -17,6 +18,9 @@ export type URLType =
   | {
       url: string;
       color?: string;
+      sourceLink?: string;
+      updatedAt?: string;
+      eventGroup?: events.ViewEventGroup;
     };
 
 function Calendar({
@@ -70,6 +74,11 @@ function Calendar({
                 url: url.url,
                 format: "ics",
                 color: url.color,
+                extraParams: {
+                  sourceLink: url.sourceLink,
+                  updatedAt: url.updatedAt,
+                  eventGroup: url.eventGroup,
+                },
               },
         )} // Load events by url
         eventsSet={(events) => {

@@ -14,6 +14,9 @@ interface ICalFeedMeta {
   format: "ics"; // for EventSourceApi
   internalState?: InternalState; // HACK. TODO: use classes in future
   color: string; // Default color for events from this feed
+  sourceLink?: string;
+  updatedAt?: string;
+  eventGroup?: any;
 }
 
 interface InternalState {
@@ -28,6 +31,9 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
         url: refined.url,
         format: "ics",
         color: refined.color,
+        sourceLink: refined.extraParams?.sourceLink,
+        updatedAt: refined.extraParams?.updatedAt,
+        eventGroup: refined.extraParams?.eventGroup,
       };
     }
     return null;
@@ -95,7 +101,7 @@ function expandICalEvents(
   // single events
   for (let iCalEvent of iCalRes.events) {
     expanded.push({
-      ...buildNonDateProps(iCalEvent, meta),
+      ...buildNonDateProps(iCalEvent, meta, iCalExpander),
       start: iCalEvent.startDate.toString(),
       end:
         specifiesEnd(iCalEvent) && iCalEvent.endDate
@@ -108,7 +114,7 @@ function expandICalEvents(
   for (let iCalOccurence of iCalRes.occurrences) {
     let iCalEvent = iCalOccurence.item;
     expanded.push({
-      ...buildNonDateProps(iCalEvent, meta),
+      ...buildNonDateProps(iCalEvent, meta, iCalExpander),
       start: iCalOccurence.startDate.toString(),
       end:
         specifiesEnd(iCalEvent) && iCalOccurence.endDate
@@ -123,6 +129,7 @@ function expandICalEvents(
 function buildNonDateProps(
   iCalEvent: ICAL.Event,
   meta: ICalFeedMeta,
+  iCalExpander: IcalExpander,
 ): EventInput {
   return {
     id: iCalEvent.uid,
@@ -134,6 +141,11 @@ function buildNonDateProps(
       organizer: iCalEvent.organizer,
       description: iCalEvent.description,
       calendarURLs: [meta.url],
+      sourceLink:
+        iCalExpander.component.getFirstProperty("x-wr-link")?.getFirstValue() ||
+        meta.sourceLink,
+      updatedAt: meta.eventGroup?.updated_at || meta.updatedAt,
+      eventGroup: meta.eventGroup,
     },
   };
 }

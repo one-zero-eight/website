@@ -99,10 +99,16 @@ export default function Page() {
       <div className="@2xl/content:-mx-8">
         <Calendar
           urls={[
-            getMusicRoomLink(),
+            {
+              url: getMusicRoomLink(),
+              sourceLink: "https://t.me/InnoMusicRoomBot",
+              updatedAt: new Date().toISOString(),
+            },
             {
               url: getMyMusicRoomLink(),
               color: "seagreen",
+              sourceLink: "https://t.me/InnoMusicRoomBot",
+              updatedAt: new Date().toISOString(),
             },
           ]}
           initialView="timeGridWeek"

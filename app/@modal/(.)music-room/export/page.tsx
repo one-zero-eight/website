@@ -130,6 +130,8 @@ export default function Page() {
                           {
                             url: getMyMusicRoomLink(),
                             color: "seagreen",
+                            sourceLink: "https://t.me/InnoMusicRoomBot",
+                            updatedAt: new Date().toISOString(),
                           },
                         ]}
                         viewId="popup"

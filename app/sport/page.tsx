@@ -67,6 +67,8 @@ export default function Page() {
             {
               url: getMySportLink(),
               color: "seagreen",
+              sourceLink: "https://sport.innopolis.university",
+              updatedAt: new Date().toISOString(),
             },
           ]}
           initialView="timeGridWeek"

@@ -130,7 +130,12 @@ export default function Page({ params: { alias } }: Props) {
                     <div className="-mx-4 -mb-4 rounded-b-2xl @2xl/event:-mx-8 @2xl/event:-mb-8">
                       {group ? (
                         <Calendar
-                          urls={[getICSLink(group.alias, eventsUser?.id)]}
+                          urls={[
+                            {
+                              url: getICSLink(group.alias, eventsUser?.id),
+                              eventGroup: group,
+                            },
+                          ]}
                           viewId="popup"
                         />
                       ) : (

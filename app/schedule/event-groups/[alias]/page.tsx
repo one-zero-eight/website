@@ -53,7 +53,12 @@ export default function Page({ params: { alias } }: Props) {
           </div>
           <div className="-mx-4 -mb-4 @lg/content:-mx-8 @lg/content:-mb-8">
             <Calendar
-              urls={[getICSLink(group.alias, eventsUser?.id)]}
+              urls={[
+                {
+                  url: getICSLink(group.alias, eventsUser?.id),
+                  eventGroup: group,
+                },
+              ]}
               initialView={
                 width
                   ? width >= 1280

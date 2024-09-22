@@ -104,7 +104,7 @@ export default function CalendarEventPopover({
                     : moment(event.startStr).format("dddd, D MMMM")}
                 </p>
               </div>
-              {event.extendedProps.location && (
+              {event.extendedProps?.location && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
                     <span className="icon-[material-symbols--location-on-outline] text-2xl" />
@@ -114,7 +114,7 @@ export default function CalendarEventPopover({
                   </p>
                 </div>
               )}
-              {event.extendedProps.description && (
+              {event.extendedProps?.description && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
                     <span className="icon-[material-symbols--notes] text-2xl" />
@@ -122,6 +122,31 @@ export default function CalendarEventPopover({
                   <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
                     {event.extendedProps.description}
                   </p>
+                </div>
+              )}
+              {event.extendedProps?.updatedAt && (
+                <div className="flex flex-row gap-2">
+                  <div className="w-6">
+                    <span className="icon-[material-symbols--update] text-2xl" />
+                  </div>
+                  <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                    Calendar updated at:{" "}
+                    {moment(event.extendedProps.updatedAt).format("DD.MM HH:m")}
+                  </p>
+                </div>
+              )}
+              {event.extendedProps?.sourceLink && (
+                <div className="flex flex-row gap-2">
+                  <div className="w-6">
+                    <span className="icon-[material-symbols--link] text-2xl" />
+                  </div>
+                  <a
+                    href={event.extendedProps.sourceLink}
+                    target="_blank"
+                    className="flex w-full whitespace-pre-wrap py-1 underline underline-offset-2 [overflow-wrap:anywhere]"
+                  >
+                    Go to source
+                  </a>
                 </div>
               )}
             </div>

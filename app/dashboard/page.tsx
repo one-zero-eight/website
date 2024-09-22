@@ -193,27 +193,34 @@ function getCalendarsToShow(
   eventGroups: events.ListEventGroupsResponseOutput,
   includeHidden: boolean = false,
   userId: number | undefined,
-) {
+): URLType[] {
   // Remove hidden calendars
   const toShow: URLType[] = favorites.concat(predefined).flatMap((v) => {
     if (!includeHidden && hidden.includes(v)) return [];
     const group = eventGroups.event_groups.find((group) => group.id === v);
     if (!group) return [];
-    return [getICSLink(group.alias, userId)];
+    return [{ url: getICSLink(group.alias, userId), eventGroup: group }];
   });
 
   // Add personal calendars
   toShow.push({
     url: getMyMusicRoomLink(),
     color: "seagreen",
+    sourceLink: "https://t.me/InnoMusicRoomBot",
+    updatedAt: new Date().toISOString(),
   });
   toShow.push({
     url: getMySportLink(),
     color: "seagreen",
+    sourceLink: "https://sport.innopolis.university",
+    updatedAt: new Date().toISOString(),
   });
   toShow.push({
     url: getMyMoodleLink(),
     color: "seagreen",
+    sourceLink:
+      "https://moodle.innopolis.university/calendar/view.php?view=month",
+    updatedAt: new Date().toISOString(),
   });
 
   // Return unique items

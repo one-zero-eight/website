@@ -111,7 +111,11 @@ export default function Page({ params: { alias } }: Props) {
                     {/* Calendar itself */}
                     <div className="-mx-4 -mb-4 @2xl/export:-mx-8 @2xl/export:-mb-8">
                       <Calendar
-                        urls={calendarURL ? [calendarURL] : []}
+                        urls={
+                          calendarURL
+                            ? [{ url: calendarURL, eventGroup: group }]
+                            : []
+                        }
                         viewId="popup"
                       />
                     </div>
