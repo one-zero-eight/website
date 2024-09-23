@@ -151,10 +151,21 @@ function Calendar({
         views={{
           listMonth: {
             eventContent: renderEventListMonth,
+            listDayFormat: (arg) => {
+              if (arg.date.year === new Date().getFullYear()) {
+                // Show month, day, weekday
+                return moment(arg.date).format("MMMM D, dddd");
+              } else {
+                // Add year if not current year
+                return moment(arg.date).format("YYYY, MMMM D");
+              }
+            },
+            listDaySideFormat: (arg) =>
+              `Week ${calculateWeek(moment(arg.date).toDate())}`,
           },
           timeGridWeek: {
             eventContent: renderEventTimeGridWeek,
-            weekNumbers: false,
+            weekNumbers: true,
             // Show weekday and date in day header
             dayHeaderContent: (arg) => {
               if (!arg.isToday) {
@@ -175,7 +186,7 @@ function Calendar({
             type: "timeGrid",
             dayCount: 3,
             eventContent: renderEventTimeGridWeek,
-            weekNumbers: false,
+            weekNumbers: true,
             // Show weekday and date in day header
             dayHeaderContent: (arg) => {
               if (!arg.isToday) {
@@ -227,7 +238,7 @@ function Calendar({
         weekNumbers={true} // Display numbers of weeks
         weekNumberFormat={{ week: "long" }} // Show "Week 1", not "W1"
         weekNumberClassNames="text-sm week-cell" // Small text size
-        // weekNumberCalculation={calculateWeek} // Display academic week numbers
+        weekNumberCalculation={calculateWeek} // Display academic week numbers
         // height="100dvh" // Full height
         contentHeight="auto" // Do not add scrollbar
         stickyHeaderDates={false}
@@ -348,6 +359,20 @@ function renderEventDayGridMonth({
       )}
     </div>
   );
+}
+
+function calculateWeek(date: Date) {
+  // Calculate academic week number
+  const semesterStart = new Date("2024-08-26").getTime(); // Monday, first day of first week
+  const semesterEnd = new Date("2024-12-30").getTime(); // Monday, the day after the last week
+
+  const time = date.getTime();
+  if (time < semesterStart || time >= semesterEnd) {
+    return Infinity; // Out of semester
+  }
+
+  const weekLength = 7 * 24 * 60 * 60 * 1000; // 7 days
+  return Math.floor((time - semesterStart) / weekLength) + 1;
 }
 
 export default Calendar;
