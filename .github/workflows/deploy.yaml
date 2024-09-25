@@ -1,0 +1,113 @@
+name: Build static files and deploy
+
+on:
+  # Allow manual trigger of the workflow
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy to
+        type: environment
+        required: true
+  # Verify build on any push; deploy only on main branch
+  push:
+  # Verify build in pull requests
+  pull_request:
+
+jobs:
+  build:
+    name: Build static files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure environment variables
+        run: echo "${{ secrets.ENV_VARIABLES }}" > .env.local
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build
+        run: pnpm run build
+
+      - name: List files
+        run: |
+          # Save the list of files as a GitHub Actions step summary
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          ls -lAhR ./dist 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: static-files
+          path: dist/
+          if-no-files-found: error
+
+  deploy-staging:
+    if: github.repository_owner == 'one-zero-eight' && ((github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+    name: Deploy to staging server
+    needs: build
+    runs-on: self-hosted
+    environment:
+      name: staging
+      url: https://pre.innohassle.ru
+    concurrency:
+      group: staging
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: static-files
+          path: dist
+
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          source: "./dist/*"
+          target: ${{ secrets.SSH_TARGET_DIR }}
+          strip_components: 1
+          overwrite: true
+          rm: true
+
+  deploy-production:
+    if: github.repository_owner == 'one-zero-eight' && (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    name: Deploy to production server
+    needs: build
+    runs-on: self-hosted
+    environment:
+      name: production
+      url: https://innohassle.ru
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: static-files
+          path: dist
+
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          source: "./dist/*"
+          target: ${{ secrets.SSH_TARGET_DIR }}
+          strip_components: 1
+          overwrite: true
+          rm: true
