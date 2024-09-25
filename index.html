@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Optimizations -->
+    <link rel="preconnect" href="https://api.innohassle.ru" />
+
+    <!-- Initial title and description -->
+    <title>InNoHassle</title>
+    <meta
+      name="description"
+      content="InNoHassle ecosystem by one-zero-eight."
+    />
+    <link rel="icon" href="/icon.png" type="image/png" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+
+    <!-- App configuration -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#9747ff" />
+
+    <!-- Theme changer script -->
+    <script type="text/javascript">
+      <!-- Run before loading any resources -->
+      document.documentElement.classList.toggle(
+        "dark",
+        localStorage.getItem("theme") === '"dark"' ||
+          (localStorage.getItem("theme") === null &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches),
+      );
+    </script>
+
+    <!-- The app entrypoint -->
+    <script type="module" src="/src/app/entry-client.tsx"></script>
+  </head>
+
+  <body>
+    <!-- Notice in case of disabled JavaScript -->
+    <noscript class="flex w-full justify-center bg-red-700 p-8">
+      You need to enable JavaScript to run this app.
+    </noscript>
+
+    <!-- Main app container -->
+    <div id="app" class="font-primary text-lg text-text-main">
+      <!-- Show loading state. App will replace this after rendering -->
+      <div class="flex h-screen w-full items-center justify-center">
+        Loading...
+      </div>
+    </div>
+  </body>
+</html>

@@ -2,13 +2,13 @@
 
 # dependencies
 /node_modules
-/.pnp
-.pnp.js
-/package-lock.json
+/pnpm-lock.yaml
 
-# testing
+# output
+/dist
+/build
 /coverage
 
-# next.js
-/.next/
-/out/
+# editors
+/.idea
+/.vscode
