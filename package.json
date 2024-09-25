@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prettify": "prettier --write .",
+    "prettier:check": "prettier --ignore-unknown --check .",
     "lint-staged": "lint-staged",
     "prepare": "husky",
     "generate-api": "orval --config ./orval.config.ts",
