@@ -1,7 +1,7 @@
 import TelegramPreview from "@/components/search/TelegramPreview";
 import { search } from "@/lib/search";
 import clsx from "clsx";
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import MoodleUnknownPreview from "./MoodleUnknownPreview";
 import MoodleUrlPreview from "./MoodleUrlPreview";
@@ -38,7 +38,9 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
 
       <ErrorBoundary fallback={<div>Some error occurred</div>}>
         {source.type === "moodle-file" ? (
-          <PdfPreview source={source} searchText="" />
+          <Suspense>
+            <PdfPreview source={source} searchText="" />
+          </Suspense>
         ) : source.type === "telegram" ? (
           <TelegramPreview source={source} />
         ) : source.type === "moodle-url" ? (

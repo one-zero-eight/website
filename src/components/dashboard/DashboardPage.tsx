@@ -1,5 +1,5 @@
 import { Calendar } from "@/components/calendar/Calendar.tsx";
-import { URLType } from "@/components/calendar/CalendarInner.tsx";
+import { URLType } from "@/components/calendar/CalendarViewer.tsx";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton.tsx";
@@ -148,33 +148,32 @@ export function DashboardPage() {
       </div>
       <h2 className="my-4 text-3xl font-medium">Your calendar</h2>
       <div className="@lg/content:-mx-8 @lg/content:-mb-8">
-        {eventsUser?.favorite_event_groups === undefined ||
-        eventsUser?.hidden_event_groups === undefined ||
-        predefined?.event_groups === undefined ||
-        eventGroups === undefined ? (
-          <>Loading...</>
-        ) : (
-          <Calendar
-            urls={getCalendarsToShow(
-              eventsUser.favorite_event_groups,
-              eventsUser.hidden_event_groups,
-              predefined.event_groups,
-              eventGroups,
-              false,
-              eventsUser.id,
-            )}
-            initialView={
-              width
-                ? width >= 1280
-                  ? "dayGridMonth"
-                  : width >= 1024
-                    ? "timeGridWeek"
-                    : "listMonth"
-                : "dayGridMonth"
-            }
-            viewId="page"
-          />
-        )}
+        <Calendar
+          urls={
+            eventsUser?.favorite_event_groups === undefined ||
+            eventsUser?.hidden_event_groups === undefined ||
+            predefined === undefined ||
+            eventGroups === undefined
+              ? []
+              : getCalendarsToShow(
+                  eventsUser.favorite_event_groups,
+                  eventsUser.hidden_event_groups,
+                  predefined.event_groups,
+                  eventGroups,
+                  eventsUser.id,
+                )
+          }
+          initialView={
+            width
+              ? width >= 1280
+                ? "dayGridMonth"
+                : width >= 1024
+                  ? "timeGridWeek"
+                  : "listMonth"
+              : "dayGridMonth"
+          }
+          viewId="page"
+        />
       </div>
     </>
   );
@@ -185,12 +184,11 @@ function getCalendarsToShow(
   hidden: number[],
   predefined: number[],
   eventGroups: events.ListEventGroupsResponseOutput,
-  includeHidden: boolean = false,
   userId: number | undefined,
 ): URLType[] {
   // Remove hidden calendars
   const toShow: URLType[] = favorites.concat(predefined).flatMap((v) => {
-    if (!includeHidden && hidden.includes(v)) return [];
+    if (hidden.includes(v)) return [];
     const group = eventGroups.event_groups.find((group) => group.id === v);
     if (!group) return [];
     return [{ url: getICSLink(group.alias, userId), eventGroup: group }];
