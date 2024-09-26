@@ -89,7 +89,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
       >
         {pdfDocument !== null && (
           <div className="flex items-center justify-center">
-            <div className="custom-preview-scrollbar overflow-hidden rounded-2xl shadow-lg">
+            <div className="overflow-hidden rounded-2xl shadow-lg">
               <Page
                 noData={
                   <div

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "./search.css";
 
 export default function SearchField({
   runSearch,

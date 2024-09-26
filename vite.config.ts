@@ -1,6 +1,7 @@
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { ViteMinifyPlugin } from "vite-plugin-minify";
 import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { version } from "./package.json";
@@ -32,6 +33,9 @@ export default defineConfig({
       },
       manifest: false, // Manifest is already in public/manifest.json
     }),
+
+    // Minify the index.html
+    ViteMinifyPlugin({}),
   ],
 
   define: {
