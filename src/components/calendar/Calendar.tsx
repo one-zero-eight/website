@@ -1,3 +1,11 @@
-import { lazy } from "react";
+import { ComponentProps, lazy, Suspense } from "react";
 
-export const Calendar = lazy(() => import("./CalendarInner.tsx"));
+export const CalendarViewer = lazy(() => import("./CalendarViewer.tsx"));
+
+export function Calendar(props: ComponentProps<typeof CalendarViewer>) {
+  return (
+    <Suspense>
+      <CalendarViewer {...props} />
+    </Suspense>
+  );
+}

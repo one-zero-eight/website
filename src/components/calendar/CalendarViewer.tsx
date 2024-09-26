@@ -23,7 +23,7 @@ export type URLType =
       eventGroup?: events.ViewEventGroup;
     };
 
-export default function CalendarInner({
+export default function CalendarViewer({
   urls,
   initialView = "listMonth",
   viewId = "",
