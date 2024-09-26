@@ -43,10 +43,5 @@ export default function TelegramPreview({ source }: TelegramPreviewProps) {
     };
   }, [isDarkMode, source.link]);
 
-  return (
-    <div
-      ref={ref}
-      className="custom-preview-scrollbar overflow-auto rounded-lg shadow-lg"
-    />
-  );
+  return <div ref={ref} className="overflow-auto rounded-lg shadow-lg" />;
 }

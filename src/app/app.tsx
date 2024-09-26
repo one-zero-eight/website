@@ -1,5 +1,3 @@
-import "./styles.css";
-
 import { queryClient } from "@/app/query-client.ts";
 import { AuthManager } from "@/lib/auth/AuthManager.tsx";
 import { useMe } from "@/lib/auth/user.ts";

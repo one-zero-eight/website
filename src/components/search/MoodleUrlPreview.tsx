@@ -8,7 +8,7 @@ export declare type MoodleUrlPreviewProps = {
 export default function MoodleUrlPreview({ source }: MoodleUrlPreviewProps) {
   return (
     <>
-      <div className="custom-preview-scrollbar flex h-[400px] w-full items-center justify-center overflow-hidden rounded-2xl shadow-lg">
+      <div className="flex h-[400px] w-full items-center justify-center overflow-hidden rounded-2xl shadow-lg">
         <a
           href={source.url}
           className="flex flex-row items-center justify-center gap-2 hover:text-secondary-hover"
