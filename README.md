@@ -22,7 +22,7 @@ contents [by default](https://github.blog/changelog/2021-04-13-table-of-contents
 There are several services in the InNoHassle ecosystem for Innopolis University students.
 You can access some of them through the InNoHassle website.
 
-The website uses the API of services [InNoHassle-Events](https://github.com/one-zero-eight/InNoHassle-Events), [InNoHassle-MusicRoom](https://github.com/one-zero-eight/InNoHassle-MusicRoom).
+The website uses the API of InNoHassle services: [Events](https://github.com/one-zero-eight/events), [Music Room](https://github.com/one-zero-eight/music-room), [Search](https://github.com/one-zero-eight/search).
 
 ### Services
 
@@ -49,31 +49,30 @@ The website uses the API of services [InNoHassle-Events](https://github.com/one-
 
 ### Technologies
 
-- [Node.js 18+](https://nodejs.org) & [TypeScript](https://www.typescriptlang.org/)
-- [React](https://react.dev/) & [Next.js](https://nextjs.org/) (App router)
+- [Node.js 20+](https://nodejs.org) & [TypeScript](https://www.typescriptlang.org/)
+- [React](https://react.dev/) & [Vite](https://vitejs.dev/) & [TanStack Router](https://tanstack.com/router/latest/docs/framework/react/overview)
 - Styling: [TailwindCSS](https://tailwindcss.com/), [Iconify](https://iconify.design/)
 - Formatting and linting: [Husky](https://typicode.github.io/husky/), [lint-staged](https://github.com/lint-staged/lint-staged), [Prettier](https://prettier.io/), [ESLint](https://eslint.org/)
 - Data fetching: [Axios](https://axios-http.com/), [TanStack Query](https://tanstack.com/query/latest), [Orval](https://orval.dev/)
-- Deployment: [Docker](https://www.docker.com/), [Docker Compose](https://docs.docker.com/compose/), [GitHub Actions](https://github.com/features/actions)
 - Calendar: [FullCalendar](https://fullcalendar.io/), [ical.js](https://github.com/kewisch/ical.js)
 
 ## Development
 
 ### Getting started
 
-1. Install Node.js 18+, npm
-2. Install dependencies: `npm install`
-3. Set up pre-commit hooks (for formatting and linting): `npm run prepare`
+1. Install Node.js 20+, pnpm
+2. Install dependencies: `pnpm install`
+3. Set up pre-commit hooks (for formatting and linting): `pnpm run prepare`
 4. Copy environment variables file: `cp .env.example .env.local`
 5. Edit variables in `.env.local` if you want to use a different API server
    > Do not change the ID of the trackers so that they are not enabled in development
 6. Set up your IDE to autoformat code with Prettier and use ESLint
 
-When the API types change, run `npm run orval` to generate new client types and functions.
+When the API types change, run `pnpm run orval` to generate new client types and functions.
 
 ### Run for development
 
-1. Start development server: `npm run dev`
+1. Start development server: `pnpm run dev`
 2. Open in the browser: http://localhost:3000
    > The page will be reloaded when you edit the code
 
@@ -82,23 +81,9 @@ Then the browser will be able to use the correct token to access the API from th
 
 ### Run for production
 
-1. Build the application: `npm run build`
-2. Run the production-like server: `npm run start`
+1. Build the application: `pnpm run build`
+2. Run the production-like server: `pnpm run preview`
 3. Open in the browser: http://localhost:3000
-
-### Deployment
-
-We use Docker with Docker Compose plugin to run the website on servers.
-
-1. Copy the file with environment variables: `cp .env.example .env.local`
-2. Change environment variables in the `.env.local` file
-3. Install Docker with Docker Compose
-4. Build a Docker image: `docker compose build --pull`
-   > API server must be running (check URL in `.env.local` file) as Next.js will fetch all resources at build time
-5. Run the container: `docker compose up --detach`
-6. Open in the browser: http://localhost:3000
-
-You can set up a Nginx reverse proxy to add SSL certificates for https.
 
 ## Contributing
 
