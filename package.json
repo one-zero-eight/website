@@ -87,10 +87,10 @@
     "zod": "^3.23.8"
   },
   "lint-staged": {
-    "{app,components,lib,public}/**/*.{js,ts,jsx,tsx}": [
+    "{app,components,lib,public}/**/*.{js,ts,jsx,tsx,mdx}": [
       "eslint --fix",
       "prettier --write --ignore-unknown"
     ],
-    "**/*.+(json|css|md|ya?ml)": "prettier --write --ignore-unknown"
+    "**/*.+(json|css|md|ya?ml|mdx)": "prettier --write --ignore-unknown"
   }
 }
