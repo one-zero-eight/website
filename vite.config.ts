@@ -1,5 +1,7 @@
+import mdx from "@mdx-js/rollup";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import viteReact from "@vitejs/plugin-react";
+import remarkGfm from "remark-gfm";
 import { defineConfig } from "vite";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
 import { VitePWA } from "vite-plugin-pwa";
@@ -19,6 +21,11 @@ export default defineConfig({
 
     // React support
     viteReact(),
+
+    // MDX support
+    mdx({
+      remarkPlugins: [remarkGfm],
+    }),
 
     // Resolve paths from tsconfig.json
     tsconfigPaths(),

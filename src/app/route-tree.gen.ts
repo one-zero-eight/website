@@ -17,13 +17,14 @@ import { Route as WithmenuSportImport } from "./routes/_with_menu/sport";
 import { Route as WithmenuSearchImport } from "./routes/_with_menu/search";
 import { Route as WithmenuScholarshipImport } from "./routes/_with_menu/scholarship";
 import { Route as WithmenuRoomsImport } from "./routes/_with_menu/rooms";
-import { Route as WithmenuMusicRoomImport } from "./routes/_with_menu/music-room";
 import { Route as WithmenuExtensionImport } from "./routes/_with_menu/extension";
 import { Route as WithmenuDashboardImport } from "./routes/_with_menu/dashboard";
 import { Route as WithmenuAccountRouteImport } from "./routes/_with_menu/account/route";
 import { Route as WithmenuScheduleIndexImport } from "./routes/_with_menu/schedule/index";
+import { Route as WithmenuMusicRoomIndexImport } from "./routes/_with_menu/music-room.index";
 import { Route as WithmenuAccountIndexImport } from "./routes/_with_menu/account/index";
 import { Route as WithmenuScheduleCategoryImport } from "./routes/_with_menu/schedule/$category";
+import { Route as WithmenuMusicRoomInstructionsImport } from "./routes/_with_menu/music-room.instructions";
 import { Route as WithmenuAccountConnectTelegramImport } from "./routes/_with_menu/account/connect-telegram";
 import { Route as WithmenuScheduleEventGroupsAliasImport } from "./routes/_with_menu/schedule/event-groups.$alias";
 
@@ -59,11 +60,6 @@ const WithmenuRoomsRoute = WithmenuRoomsImport.update({
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
-const WithmenuMusicRoomRoute = WithmenuMusicRoomImport.update({
-  path: "/music-room",
-  getParentRoute: () => WithmenuRouteRoute,
-} as any);
-
 const WithmenuExtensionRoute = WithmenuExtensionImport.update({
   path: "/extension",
   getParentRoute: () => WithmenuRouteRoute,
@@ -84,6 +80,11 @@ const WithmenuScheduleIndexRoute = WithmenuScheduleIndexImport.update({
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
+const WithmenuMusicRoomIndexRoute = WithmenuMusicRoomIndexImport.update({
+  path: "/music-room/",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
+
 const WithmenuAccountIndexRoute = WithmenuAccountIndexImport.update({
   path: "/",
   getParentRoute: () => WithmenuAccountRouteRoute,
@@ -93,6 +94,12 @@ const WithmenuScheduleCategoryRoute = WithmenuScheduleCategoryImport.update({
   path: "/schedule/$category",
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
+
+const WithmenuMusicRoomInstructionsRoute =
+  WithmenuMusicRoomInstructionsImport.update({
+    path: "/music-room/instructions",
+    getParentRoute: () => WithmenuRouteRoute,
+  } as any);
 
 const WithmenuAccountConnectTelegramRoute =
   WithmenuAccountConnectTelegramImport.update({
@@ -145,13 +152,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof WithmenuExtensionImport;
       parentRoute: typeof WithmenuRouteImport;
     };
-    "/_with_menu/music-room": {
-      id: "/_with_menu/music-room";
-      path: "/music-room";
-      fullPath: "/music-room";
-      preLoaderRoute: typeof WithmenuMusicRoomImport;
-      parentRoute: typeof WithmenuRouteImport;
-    };
     "/_with_menu/rooms": {
       id: "/_with_menu/rooms";
       path: "/rooms";
@@ -187,6 +187,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof WithmenuAccountConnectTelegramImport;
       parentRoute: typeof WithmenuAccountRouteImport;
     };
+    "/_with_menu/music-room/instructions": {
+      id: "/_with_menu/music-room/instructions";
+      path: "/music-room/instructions";
+      fullPath: "/music-room/instructions";
+      preLoaderRoute: typeof WithmenuMusicRoomInstructionsImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
     "/_with_menu/schedule/$category": {
       id: "/_with_menu/schedule/$category";
       path: "/schedule/$category";
@@ -200,6 +207,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/account/";
       preLoaderRoute: typeof WithmenuAccountIndexImport;
       parentRoute: typeof WithmenuAccountRouteImport;
+    };
+    "/_with_menu/music-room/": {
+      id: "/_with_menu/music-room/";
+      path: "/music-room";
+      fullPath: "/music-room";
+      preLoaderRoute: typeof WithmenuMusicRoomIndexImport;
+      parentRoute: typeof WithmenuRouteImport;
     };
     "/_with_menu/schedule/": {
       id: "/_with_menu/schedule/";
@@ -237,12 +251,13 @@ interface WithmenuRouteRouteChildren {
   WithmenuAccountRouteRoute: typeof WithmenuAccountRouteRouteWithChildren;
   WithmenuDashboardRoute: typeof WithmenuDashboardRoute;
   WithmenuExtensionRoute: typeof WithmenuExtensionRoute;
-  WithmenuMusicRoomRoute: typeof WithmenuMusicRoomRoute;
   WithmenuRoomsRoute: typeof WithmenuRoomsRoute;
   WithmenuScholarshipRoute: typeof WithmenuScholarshipRoute;
   WithmenuSearchRoute: typeof WithmenuSearchRoute;
   WithmenuSportRoute: typeof WithmenuSportRoute;
+  WithmenuMusicRoomInstructionsRoute: typeof WithmenuMusicRoomInstructionsRoute;
   WithmenuScheduleCategoryRoute: typeof WithmenuScheduleCategoryRoute;
+  WithmenuMusicRoomIndexRoute: typeof WithmenuMusicRoomIndexRoute;
   WithmenuScheduleIndexRoute: typeof WithmenuScheduleIndexRoute;
   WithmenuScheduleEventGroupsAliasRoute: typeof WithmenuScheduleEventGroupsAliasRoute;
 }
@@ -251,12 +266,13 @@ const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuAccountRouteRoute: WithmenuAccountRouteRouteWithChildren,
   WithmenuDashboardRoute: WithmenuDashboardRoute,
   WithmenuExtensionRoute: WithmenuExtensionRoute,
-  WithmenuMusicRoomRoute: WithmenuMusicRoomRoute,
   WithmenuRoomsRoute: WithmenuRoomsRoute,
   WithmenuScholarshipRoute: WithmenuScholarshipRoute,
   WithmenuSearchRoute: WithmenuSearchRoute,
   WithmenuSportRoute: WithmenuSportRoute,
+  WithmenuMusicRoomInstructionsRoute: WithmenuMusicRoomInstructionsRoute,
   WithmenuScheduleCategoryRoute: WithmenuScheduleCategoryRoute,
+  WithmenuMusicRoomIndexRoute: WithmenuMusicRoomIndexRoute,
   WithmenuScheduleIndexRoute: WithmenuScheduleIndexRoute,
   WithmenuScheduleEventGroupsAliasRoute: WithmenuScheduleEventGroupsAliasRoute,
 };
@@ -271,14 +287,15 @@ export interface FileRoutesByFullPath {
   "/account": typeof WithmenuAccountRouteRouteWithChildren;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/extension": typeof WithmenuExtensionRoute;
-  "/music-room": typeof WithmenuMusicRoomRoute;
   "/rooms": typeof WithmenuRoomsRoute;
   "/scholarship": typeof WithmenuScholarshipRoute;
   "/search": typeof WithmenuSearchRoute;
   "/sport": typeof WithmenuSportRoute;
   "/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
+  "/music-room/instructions": typeof WithmenuMusicRoomInstructionsRoute;
   "/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/account/": typeof WithmenuAccountIndexRoute;
+  "/music-room": typeof WithmenuMusicRoomIndexRoute;
   "/schedule": typeof WithmenuScheduleIndexRoute;
   "/schedule/event-groups/$alias": typeof WithmenuScheduleEventGroupsAliasRoute;
 }
@@ -288,14 +305,15 @@ export interface FileRoutesByTo {
   "": typeof WithmenuRouteRouteWithChildren;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/extension": typeof WithmenuExtensionRoute;
-  "/music-room": typeof WithmenuMusicRoomRoute;
   "/rooms": typeof WithmenuRoomsRoute;
   "/scholarship": typeof WithmenuScholarshipRoute;
   "/search": typeof WithmenuSearchRoute;
   "/sport": typeof WithmenuSportRoute;
   "/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
+  "/music-room/instructions": typeof WithmenuMusicRoomInstructionsRoute;
   "/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/account": typeof WithmenuAccountIndexRoute;
+  "/music-room": typeof WithmenuMusicRoomIndexRoute;
   "/schedule": typeof WithmenuScheduleIndexRoute;
   "/schedule/event-groups/$alias": typeof WithmenuScheduleEventGroupsAliasRoute;
 }
@@ -307,14 +325,15 @@ export interface FileRoutesById {
   "/_with_menu/account": typeof WithmenuAccountRouteRouteWithChildren;
   "/_with_menu/dashboard": typeof WithmenuDashboardRoute;
   "/_with_menu/extension": typeof WithmenuExtensionRoute;
-  "/_with_menu/music-room": typeof WithmenuMusicRoomRoute;
   "/_with_menu/rooms": typeof WithmenuRoomsRoute;
   "/_with_menu/scholarship": typeof WithmenuScholarshipRoute;
   "/_with_menu/search": typeof WithmenuSearchRoute;
   "/_with_menu/sport": typeof WithmenuSportRoute;
   "/_with_menu/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
+  "/_with_menu/music-room/instructions": typeof WithmenuMusicRoomInstructionsRoute;
   "/_with_menu/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/_with_menu/account/": typeof WithmenuAccountIndexRoute;
+  "/_with_menu/music-room/": typeof WithmenuMusicRoomIndexRoute;
   "/_with_menu/schedule/": typeof WithmenuScheduleIndexRoute;
   "/_with_menu/schedule/event-groups/$alias": typeof WithmenuScheduleEventGroupsAliasRoute;
 }
@@ -327,14 +346,15 @@ export interface FileRouteTypes {
     | "/account"
     | "/dashboard"
     | "/extension"
-    | "/music-room"
     | "/rooms"
     | "/scholarship"
     | "/search"
     | "/sport"
     | "/account/connect-telegram"
+    | "/music-room/instructions"
     | "/schedule/$category"
     | "/account/"
+    | "/music-room"
     | "/schedule"
     | "/schedule/event-groups/$alias";
   fileRoutesByTo: FileRoutesByTo;
@@ -343,14 +363,15 @@ export interface FileRouteTypes {
     | ""
     | "/dashboard"
     | "/extension"
-    | "/music-room"
     | "/rooms"
     | "/scholarship"
     | "/search"
     | "/sport"
     | "/account/connect-telegram"
+    | "/music-room/instructions"
     | "/schedule/$category"
     | "/account"
+    | "/music-room"
     | "/schedule"
     | "/schedule/event-groups/$alias";
   id:
@@ -360,14 +381,15 @@ export interface FileRouteTypes {
     | "/_with_menu/account"
     | "/_with_menu/dashboard"
     | "/_with_menu/extension"
-    | "/_with_menu/music-room"
     | "/_with_menu/rooms"
     | "/_with_menu/scholarship"
     | "/_with_menu/search"
     | "/_with_menu/sport"
     | "/_with_menu/account/connect-telegram"
+    | "/_with_menu/music-room/instructions"
     | "/_with_menu/schedule/$category"
     | "/_with_menu/account/"
+    | "/_with_menu/music-room/"
     | "/_with_menu/schedule/"
     | "/_with_menu/schedule/event-groups/$alias";
   fileRoutesById: FileRoutesById;
@@ -408,12 +430,13 @@ export const routeTree = rootRoute
         "/_with_menu/account",
         "/_with_menu/dashboard",
         "/_with_menu/extension",
-        "/_with_menu/music-room",
         "/_with_menu/rooms",
         "/_with_menu/scholarship",
         "/_with_menu/search",
         "/_with_menu/sport",
+        "/_with_menu/music-room/instructions",
         "/_with_menu/schedule/$category",
+        "/_with_menu/music-room/",
         "/_with_menu/schedule/",
         "/_with_menu/schedule/event-groups/$alias"
       ]
@@ -432,10 +455,6 @@ export const routeTree = rootRoute
     },
     "/_with_menu/extension": {
       "filePath": "_with_menu/extension.tsx",
-      "parent": "/_with_menu"
-    },
-    "/_with_menu/music-room": {
-      "filePath": "_with_menu/music-room.tsx",
       "parent": "/_with_menu"
     },
     "/_with_menu/rooms": {
@@ -458,6 +477,10 @@ export const routeTree = rootRoute
       "filePath": "_with_menu/account/connect-telegram.tsx",
       "parent": "/_with_menu/account"
     },
+    "/_with_menu/music-room/instructions": {
+      "filePath": "_with_menu/music-room.instructions.tsx",
+      "parent": "/_with_menu"
+    },
     "/_with_menu/schedule/$category": {
       "filePath": "_with_menu/schedule/$category.tsx",
       "parent": "/_with_menu"
@@ -465,6 +488,10 @@ export const routeTree = rootRoute
     "/_with_menu/account/": {
       "filePath": "_with_menu/account/index.tsx",
       "parent": "/_with_menu/account"
+    },
+    "/_with_menu/music-room/": {
+      "filePath": "_with_menu/music-room.index.tsx",
+      "parent": "/_with_menu"
     },
     "/_with_menu/schedule/": {
       "filePath": "_with_menu/schedule/index.tsx",

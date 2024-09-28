@@ -68,6 +68,14 @@ const config: Config = {
       spacing: {
         "18p": "4.5rem",
       },
+      typography: {
+        quoteless: {
+          css: {
+            "blockquote p:first-of-type::before": { content: "none" },
+            "blockquote p:first-of-type::after": { content: "none" },
+          },
+        },
+      },
     },
   },
   darkMode: ["class"],

@@ -2,6 +2,7 @@ import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { MusicRoomExportModal } from "@/components/calendar/MusicRoomExportModal.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
 import { getMusicRoomLink, getMyMusicRoomLink } from "@/lib/events";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 export function MusicRoomPage() {
@@ -26,8 +27,8 @@ export function MusicRoomPage() {
               </p>
             </div>
           </a>
-          <a
-            href="https://bit.ly/inno-music-room"
+          <Link
+            to="/music-room/instructions"
             className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
           >
             <div className="w-12">
@@ -42,7 +43,7 @@ export function MusicRoomPage() {
                 visitor should accept these conditions.
               </p>
             </div>
-          </a>
+          </Link>
           <button
             onClick={() => {
               const encodedURL =
