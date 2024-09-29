@@ -91,7 +91,7 @@ export function BookModal({
             ref={refs.setFloating}
             style={transitionStyles}
             {...getFloatingProps()}
-            className="flex h-fit w-full flex-col p-4 @2xl/modal:w-3/4 @5xl/modal:w-1/2"
+            className="flex h-fit w-full max-w-lg flex-col p-4"
           >
             <div className="overflow-hidden rounded-2xl bg-popup">
               <div className="flex flex-col p-4 @2xl/modal:p-8">
