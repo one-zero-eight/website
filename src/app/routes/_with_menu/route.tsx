@@ -5,7 +5,7 @@ export const Route = createFileRoute("/_with_menu")({
   component: () => (
     <div className="flex flex-row">
       <Sidebar>
-        <main className="w-full @container/main">
+        <main className="min-h-[100dvh] w-full @container/main">
           <Outlet />
         </main>
       </Sidebar>

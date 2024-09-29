@@ -1,7 +1,7 @@
 import mdx from "@mdx-js/rollup";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
-import viteReact from "@vitejs/plugin-react";
 import remarkGfm from "remark-gfm";
+import veauryVitePlugins from "veaury/vite/index.js";
 import { defineConfig } from "vite";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
 import { VitePWA } from "vite-plugin-pwa";
@@ -19,8 +19,16 @@ export default defineConfig({
       semicolons: true,
     }),
 
-    // React support
-    viteReact(),
+    // Support for React and Vue in one project
+    veauryVitePlugins({
+      type: "react",
+      // Configuration of @vitejs/plugin-react
+      // reactOptions: {...},
+      // Configuration of @vitejs/plugin-vue
+      // vueOptions: {...},
+      // Configuration of @vitejs/plugin-vue-jsx
+      // vueJsxOptions: {...}
+    }),
 
     // MDX support
     mdx({

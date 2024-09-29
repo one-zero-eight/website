@@ -1,0 +1,33 @@
+/* GENERATED */
+
+@mixin shadow-1 {
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 24%), 0px 1px 3px 0px rgba(0, 0, 0, 12%);
+}
+
+@mixin shadow-2 {
+  box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 15%), 0px 2px 4px 0px rgba(0, 0, 0, 12%);
+}
+
+@mixin shadow-3 {
+  box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 15%), 0px 3px 6px 0px rgba(0, 0, 0, 10%);
+}
+
+@mixin shadow-4 {
+  box-shadow: 0px 15px 25px 0px rgba(0, 0, 0, 15%), 0px 5px 10px 0px rgba(0, 0, 0, 5%);
+}
+
+@mixin shadow-5 {
+  box-shadow: 0px 20px 40px 0px rgba(0, 0, 0, 20%);
+}
+
+@mixin shadow-inset-1 {
+  box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 25%);
+}
+
+@mixin shadow-inset-2 {
+  box-shadow: inset 0px 2px 4px 1px rgba(0, 0, 0, 20%);
+}
+
+@mixin shadow-inset-3 {
+  box-shadow: inset 0px 4px 8px 0px rgba(0, 0, 0, 25%);
+}

@@ -40,6 +40,18 @@ const items: Item[] = [
       <span className="icon-[material-symbols--calendar-month-outline-rounded] text-4xl" />
     ),
   },
+  ...((import.meta.env.VITE_DISABLE_BOOKING && []) || [
+    {
+      title: "Room booking",
+      path: "/room-booking",
+      icon: <span className="icon-[ph--door-open] text-4xl" />,
+      badge: (
+        <span className="ml-2 rounded-full bg-rose-700 px-2 py-1 text-xs font-semibold text-white">
+          BETA
+        </span>
+      ),
+    },
+  ]),
   {
     title: "Scholarship",
     path: "/scholarship",
@@ -48,7 +60,7 @@ const items: Item[] = [
     ),
   },
   {
-    title: "Rooms",
+    title: "Dorms",
     path: "/rooms",
     badge: (
       <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
