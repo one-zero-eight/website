@@ -12,3 +12,6 @@
 # editors
 /.idea
 /.vscode
+
+*.scss
+src/lib/room-booking/index.d.ts
