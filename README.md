@@ -68,7 +68,7 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
    > Do not change the ID of the trackers so that they are not enabled in development
 6. Set up your IDE to autoformat code with Prettier and use ESLint
 
-When the API types change, run `pnpm run orval` to generate new client types and functions.
+When the API types change, run `pnpm run generate-api` to generate new client types and functions.
 
 ### Run for development
 
@@ -76,8 +76,14 @@ When the API types change, run `pnpm run orval` to generate new client types and
 2. Open in the browser: http://localhost:3000
    > The page will be reloaded when you edit the code
 
-In order to use the API of the production server, you need to change the SameSite parameter of the `token` cookie in the browser (set `None`).
-Then the browser will be able to use the correct token to access the API from the local site.
+To access API from local server, you have to set up a https proxy from 'local.innohassle.ru':
+
+1. Install Docker and Docker Compose
+2. Run `docker-compose up -d` in the root of the project
+3. Add `127.0.0.1 local.innohassle.ru` to your /etc/hosts file
+4. Access the website from the local server using the URL `https://local.innohassle.ru`
+5. This will redirect all requests to `http://localhost:3000`, so don't stop your development server
+6. To stop the proxy, run `docker-compose down`
 
 ### Run for production
 
