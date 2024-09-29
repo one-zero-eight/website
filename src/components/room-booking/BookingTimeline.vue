@@ -603,7 +603,6 @@ $time-block-width: 50px;
 
   &-scroller {
     position: relative;
-    max-height: 100%;
     overflow: auto;
     overscroll-behavior: contain;
     scrollbar-width: none;

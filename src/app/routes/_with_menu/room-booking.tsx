@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/room-booking")({
   component: () => (
-    <div className="flex h-full flex-col p-4 @container/content @2xl/main:p-12">
+    <div className="flex h-[100dvh] flex-col p-4 @container/content @2xl/main:p-12">
       <Helmet>
         <title>Room booking</title>
         <meta
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_with_menu/room-booking")({
         title="Room booking"
         description="Book auditoriums and meeting rooms in Innopolis University."
       />
-      <div className="mt-4 flex-grow">
+      <div className="mt-4 flex-grow overflow-hidden">
         <RoomBookingPage />
       </div>
     </div>
