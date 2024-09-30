@@ -1,6 +1,6 @@
 import { BookModal } from "@/components/room-booking/BookModal.tsx";
 import { components } from "@/lib/room-booking";
-import { lazy, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/BookingTimeline.tsx"),
@@ -17,13 +17,15 @@ export function RoomBookingPage() {
   const [modalOpen, setModalOpen] = useState(false);
   return (
     <>
-      <BookingTimeline
-        className="flex max-h-full"
-        onBooking={(data: BookingData) => {
-          setBookingModalData(data);
-          setModalOpen(true);
-        }}
-      />
+      <Suspense>
+        <BookingTimeline
+          className="flex max-h-full"
+          onBooking={(data: BookingData) => {
+            setBookingModalData(data);
+            setModalOpen(true);
+          }}
+        />
+      </Suspense>
       <BookModal
         data={bookingModalData}
         open={modalOpen}
