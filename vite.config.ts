@@ -1,6 +1,7 @@
 import mdx from "@mdx-js/rollup";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import remarkGfm from "remark-gfm";
+// @ts-expect-error The plugin is not typed
 import veauryVitePlugins from "veaury/vite/index.js";
 import { defineConfig } from "vite";
 import { ViteMinifyPlugin } from "vite-plugin-minify";

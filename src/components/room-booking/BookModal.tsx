@@ -50,13 +50,14 @@ export function BookModal({
 
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
-  const titleInputRef = useRef(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState("");
 
   const submitBooking = useCallback(() => {
+    if (!data) return;
     if (!title) {
-      titleInputRef.current.focus();
+      titleInputRef.current?.focus();
       return;
     }
 

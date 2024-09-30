@@ -19,7 +19,7 @@ export function RoomBookingPage() {
     <>
       <BookingTimeline
         className="flex max-h-full"
-        onBooking={(data) => {
+        onBooking={(data: BookingData) => {
           setBookingModalData(data);
           setModalOpen(true);
         }}
