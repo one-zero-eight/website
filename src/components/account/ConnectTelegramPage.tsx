@@ -99,8 +99,7 @@ export function ConnectTelegramPage() {
             const searchParams = new URLSearchParams(searchStr);
             const bot = searchParams.get("bot");
             if (bot) {
-              const encodedBot = encodeURIComponent(bot);
-              window.location.replace(`https://t.me/${encodedBot}`);
+              window.location.replace(`https://t.me/${bot}`);
             } else {
               navigate({ to: "/dashboard" });
             }
