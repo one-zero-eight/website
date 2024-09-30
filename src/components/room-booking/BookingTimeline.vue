@@ -1,10 +1,9 @@
 <script setup lang="ts">
+import type { MaybeRef } from "vue";
 import type { components, paths } from "@/lib/room-booking";
 import { useEventListener, useNow } from "@vueuse/core";
 import createClient from "openapi-fetch";
-import type { MaybeRef } from "vue";
 import { computed, onMounted, ref, shallowRef, toRaw, unref } from "vue";
-import { svgToDataUrl } from "./svg";
 
 const props = defineProps<{
   onBooking: (data: { from: Date; to: Date; room: Room }) => void;
@@ -154,15 +153,6 @@ const timelineDates = computed(() => {
   }
   return dates;
 });
-
-const RULERS_BG = svgToDataUrl(
-  `<svg width="${PIXELS_PER_MINUTE * 60}" height="1000">` +
-    `<rect x="0" y="0" height="100%" width="1" fill="#fff" opacity="0.2"/>` +
-    `<rect x="${PIXELS_PER_MINUTE * 15}" y="0" height="100%" width="1" fill="#fff" opacity="0.025"/>` +
-    `<rect x="${PIXELS_PER_MINUTE * 30}" y="0" height="100%" width="1" fill="#fff" opacity="0.075"/>` +
-    `<rect x="${PIXELS_PER_MINUTE * 45}" y="0" height="100%" width="1" fill="#fff" opacity="0.025"/>` +
-    `</svg>`,
-);
 
 interface BookingData {
   id: string;
@@ -436,7 +426,6 @@ function scrollToNow(behavior: "instant" | "smooth" = "smooth") {
       '--header-height': HEADER_HEIGHT_PX,
       '--row-height': ROW_HEIGHT_PX,
       '--ppm': PIXELS_PER_MINUTE,
-      '--rulers-bg': RULERS_BG,
       cursor: pendingBookingData ? 'crosshair' : undefined,
     }"
   >
@@ -457,6 +446,42 @@ function scrollToNow(behavior: "instant" | "smooth" = "smooth") {
             }}
           </span>
         </div>
+        <svg :class="$style['rulers-svg']" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern
+              id="Rulers"
+              x="0"
+              y="0"
+              :width="PIXELS_PER_MINUTE * 60"
+              height="100%"
+              patternUnits="userSpaceOnUse"
+            >
+              <rect x="0" y="0" height="100%" width="1" />
+              <rect
+                :x="PIXELS_PER_MINUTE * 15"
+                y="0"
+                height="100%"
+                width="1"
+                opacity="0.4"
+              />
+              <rect
+                :x="PIXELS_PER_MINUTE * 30"
+                y="0"
+                height="100%"
+                width="1"
+                opacity="0.7"
+              />
+              <rect
+                :x="PIXELS_PER_MINUTE * 45"
+                y="0"
+                height="100%"
+                width="1"
+                opacity="0.4"
+              />
+            </pattern>
+          </defs>
+          <rect fill="url(#Rulers)" width="100%" height="100%" />
+        </svg>
         <div
           v-if="pendingBookingData"
           :class="$style['timeline-booking-new']"
@@ -559,16 +584,52 @@ $time-block-width: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: colors.$gray-700;
+  color: var(--c-text-muted-2);
   user-select: none;
+}
+
+.timeline {
+  --c-bg-items: #{colors.$gray-50};
+  --c-bg-sheet: #{colors.$gray-100};
+  --c-borders: #{colors.$gray-200};
+  --c-text: #{colors.$gray-900};
+  --c-text-muted: #{colors.$gray-500};
+  --c-text-muted-2: #{colors.$gray-300};
+  --c-textbox-bg-red: #{colors.$red-400};
+  --c-textbox-text-red: #{colors.$red-900};
+  --c-textbox-borders-red: #{colors.$red-600};
+  --c-textbox-bg-purple: #{colors.$purple-400};
+  --c-textbox-text-purple: #{colors.$purple-900};
+  --c-textbox-borders-purple: #{colors.$purple-600};
+  --c-ruler-now: #{colors.$red-600};
+}
+
+:global(.dark) {
+  .timeline {
+    --c-bg-items: #{colors.$gray-950};
+    --c-bg-sheet: #{colors.$gray-900};
+    --c-borders: #{colors.$gray-800};
+    --c-text: #{colors.$gray-200};
+    --c-text-muted: #{colors.$gray-500};
+    --c-text-muted-2: #{colors.$gray-700};
+    --c-textbox-bg-red: #{colors.$red-900};
+    --c-textbox-text-red: #{colors.$red-500};
+    --c-textbox-borders-red: #{colors.$red-700};
+    --c-textbox-bg-purple: #{colors.$purple-900};
+    --c-textbox-text-purple: #{colors.$purple-500};
+    --c-textbox-borders-purple: #{colors.$purple-700};
+    --c-ruler-now: #{colors.$red-800};
+  }
 }
 
 .timeline {
   position: relative;
   overflow: hidden;
-  background: colors.$gray-900;
-  border: 1px solid colors.$gray-800;
+  background: var(--c-bg-sheet);
+  border: 1px solid var(--c-borders);
   border-radius: borders.$radius-md;
+  display: flex;
+  max-height: 100%;
 
   &-corner {
     @include text-md;
@@ -581,10 +642,10 @@ $time-block-width: 50px;
     display: flex;
     align-items: center;
     padding-left: 12px;
-    background: colors.$gray-950;
-    color: colors.$gray-200;
+    background: var(--c-bg-items);
+    color: var(--c-text);
 
-    border-color: colors.$gray-800;
+    border-color: var(--c-borders);
     border-style: solid;
     border-bottom-width: 1px;
     border-right-width: 1px;
@@ -625,7 +686,7 @@ $time-block-width: 50px;
     position: absolute;
     height: 100%;
     width: 1px;
-    background: colors.$red-800;
+    background: var(--c-ruler-now);
     left: calc(var(--sidebar-width) + var(--now-x));
     top: 0;
   }
@@ -640,10 +701,10 @@ $time-block-width: 50px;
     width: fit-content;
     height: var(--header-height);
     margin-left: var(--sidebar-width);
-    border-bottom: 1px solid colors.$gray-800;
+    border-bottom: 1px solid var(--c-borders);
 
-    background: colors.$gray-950;
-    color: colors.$gray-500;
+    background: var(--c-bg-items);
+    color: var(--c-text-muted);
 
     &-item {
       display: flex;
@@ -693,10 +754,10 @@ $time-block-width: 50px;
       display: flex;
       align-items: center;
       padding: 0 12px;
-      background: colors.$gray-950;
-      color: colors.$gray-500;
+      background: var(--c-bg-items);
+      color: var(--c-text-muted);
 
-      border-color: colors.$gray-800;
+      border-color: var(--c-borders);
       border-style: solid;
       border-right-width: 1px;
     }
@@ -716,9 +777,9 @@ $time-block-width: 50px;
     & > div {
       padding: 0;
       justify-content: center;
-      border: 1px solid colors.$purple-700;
-      background: colors.$purple-900;
-      color: colors.$purple-500;
+      border: 1px solid var(--c-textbox-borders-purple);
+      background: var(--c-textbox-bg-purple);
+      color: var(--c-textbox-text-purple);
     }
   }
 
@@ -730,9 +791,12 @@ $time-block-width: 50px;
     width: var(--width);
 
     & > div {
-      background: colors.$gray-950;
-      color: colors.$gray-200;
-      border: 1px solid colors.$gray-800;
+      background: var(--c-bg-items);
+      color: var(--c-text);
+
+      :global(.dark) & {
+        border: 1px solid var(--c-borders);
+      }
 
       & > span {
         position: sticky;
@@ -741,6 +805,19 @@ $time-block-width: 50px;
         text-overflow: ellipsis;
       }
     }
+  }
+}
+
+.rulers-svg {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: var(--sidebar-width);
+  width: 100%;
+  height: 100%;
+
+  & pattern rect {
+    fill: var(--c-borders);
   }
 }
 
@@ -782,9 +859,9 @@ $time-block-width: 50px;
   right: 0;
   left: var(--sidebar-width);
   transform: translateY(var(--header-height));
-  background: colors.$red-900;
-  color: colors.$red-500;
-  border: 1px solid colors.$red-700;
+  background: var(--c-textbox-bg-red);
+  color: var(--c-textbox-text-red);
+  border: 1px solid var(--c-textbox-borders-red);
   border-radius: borders.$radius-xs;
   cursor: pointer;
 }
