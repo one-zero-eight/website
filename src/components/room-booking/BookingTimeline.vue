@@ -403,11 +403,10 @@ function scrollTo(d: Date, behavior: "instant" | "smooth" = "smooth") {
 
   if (!el) return;
 
-  const { width } = el.getBoundingClientRect();
-
   scrollerEl.value?.scrollTo({
     behavior,
-    left: msToPx(msBetween(timelineStart, d)) - (width - SIDEBAR_WIDTH) / 2,
+    // Padding 60px from the sidebar
+    left: msToPx(msBetween(timelineStart, d)) - 60,
   });
 }
 
