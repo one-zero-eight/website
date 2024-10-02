@@ -1,3 +1,5 @@
+import { Helmet } from "react-helmet-async";
+
 declare global {
   interface Window {
     ym: ((
@@ -26,7 +28,7 @@ export function YandexMetrika() {
   }
 
   return (
-    <>
+    <Helmet>
       <script id="yandex-metrika" defer>
         {`
           (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -44,15 +46,9 @@ export function YandexMetrika() {
         `}
       </script>
       <noscript id="yandex-metrika-pixel">
-        <div>
-          <img
-            src={`https://mc.yandex.ru/watch/${ym_id}`}
-            style={{ position: "absolute", left: "-9999px" }}
-            alt=""
-          />
-        </div>
+        {`<div><img src="https://mc.yandex.ru/watch/${ym_id}" style="position:absolute; left:-9999px;" alt="" /></div>`}
       </noscript>
-    </>
+    </Helmet>
   );
 }
 

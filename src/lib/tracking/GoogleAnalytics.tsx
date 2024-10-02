@@ -1,3 +1,5 @@
+import { Helmet } from "react-helmet-async";
+
 export const ga_id =
   import.meta.env.VITE_TRACKER_GA !== undefined &&
   import.meta.env.VITE_TRACKER_GA !== "G-XXXXXXXXXX"
@@ -10,7 +12,7 @@ export function GoogleAnalytics() {
   }
 
   return (
-    <>
+    <Helmet>
       <script
         src={`https://www.googletagmanager.com/gtag/js?id=${ga_id}`}
         defer
@@ -24,6 +26,6 @@ export function GoogleAnalytics() {
           gtag('config', '${ga_id}');
         `}
       </script>
-    </>
+    </Helmet>
   );
 }
