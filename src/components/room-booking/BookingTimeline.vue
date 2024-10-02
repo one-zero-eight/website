@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { MaybeRef } from "vue";
 import type { components, paths } from "@/lib/room-booking";
 import { useEventListener, useNow } from "@vueuse/core";
 import createClient from "openapi-fetch";
+import type { MaybeRef } from "vue";
 import { computed, onMounted, ref, shallowRef, toRaw, unref } from "vue";
 
 const props = defineProps<{
@@ -165,33 +165,31 @@ interface BookingData {
 
 const bookingsDataByRoomId = computed(() => {
   const start = timelineStart.value;
+  const sortedActualBookings = actualBookings.value
+    .slice()
+    // We assume that if booking A starts before any booking B, A also ends
+    // before B start.
+    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+
   const bookingsData = new Map<string, BookingData[]>();
   const totalLengths = new Map<string, number>();
-  for (const { id, title, roomId, startsAt, endsAt } of actualBookings.value) {
-    const roomLength = totalLengths.get(roomId) ?? 0;
-    if (!bookingsData.has(roomId)) bookingsData.set(roomId, []);
 
-    const roomData = bookingsData.get(roomId)!;
+  for (const { id, title, roomId, startsAt, endsAt } of sortedActualBookings) {
+    const roomLength = totalLengths.get(roomId) ?? 0;
+
     const length = msToPx(msBetween(startsAt, endsAt));
-    roomData.push({
+    const booking = {
       id,
       title,
       length: px(length),
       offsetX: px(msToPx(msBetween(start, startsAt)) - roomLength),
       startsAt,
       endsAt,
-    });
+    };
     totalLengths.set(roomId, roomLength + length);
+    if (!bookingsData.has(roomId)) bookingsData.set(roomId, [booking]);
+    else bookingsData.get(roomId)!.push(booking);
   }
-
-  // Need to sort arrays, because later the binary search will be used on them.
-  bookingsData.forEach((bookings) =>
-    bookings.sort(
-      // We assume that if booking A starts before any booking B, A also ends
-      // before B start.
-      (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
-    ),
-  );
 
   return bookingsData;
 });
