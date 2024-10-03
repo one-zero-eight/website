@@ -1,16 +1,19 @@
+import { $events } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { EventGroupExportModal } from "@/components/calendar/EventGroupExportModal.tsx";
 import { NavbarTemplate } from "@/components/layout/Navbar.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton.tsx";
-import { events, getICSLink } from "@/lib/events";
+import { getICSLink } from "@/lib/events/links.ts";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useWindowSize } from "usehooks-ts";
 
 export function EventGroupPage({ alias }: { alias: string }) {
-  const { data: eventsUser } = events.useUsersGetMe();
-  const { data: group } = events.useEventGroupsFindEventGroupByAlias({ alias });
+  const { data: eventsUser } = $events.useQuery("get", "/users/me");
+  const { data: group } = $events.useQuery("get", "/event-groups/by-alias", {
+    params: { query: { alias } },
+  });
   const { width } = useWindowSize();
   const [exportModalOpen, setExportModalOpen] = useState(false);
 

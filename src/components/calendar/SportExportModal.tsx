@@ -1,6 +1,7 @@
+import { $events } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import ScheduleLinkCopy from "@/components/schedule/ScheduleLinkCopy.tsx";
-import { events, getMySportLink, getPersonalLink } from "@/lib/events";
+import { getMySportLink, getPersonalLink } from "@/lib/events/links.ts";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -20,7 +21,7 @@ export function SportExportModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data: eventsUser } = events.useUsersGetMe();
+  const { data: eventsUser } = $events.useQuery("get", "/users/me");
 
   const { context, refs } = useFloating({ open, onOpenChange });
 
@@ -38,7 +39,7 @@ export function SportExportModal({
     mutate: generateScheduleKey,
     isPending,
     data: scheduleKey,
-  } = events.useUsersGenerateUserScheduleKey();
+  } = $events.useMutation("post", "/users/me/get-schedule-access-key");
 
   useEffect(() => {
     if (eventsUser === undefined) return;
@@ -47,7 +48,9 @@ export function SportExportModal({
     if (!open) return;
     generateScheduleKey({
       params: {
-        resource_path: `/users/${eventsUser?.id}/sport.ics`,
+        query: {
+          resource_path: `/users/${eventsUser?.id}/sport.ics`,
+        },
       },
     });
   });

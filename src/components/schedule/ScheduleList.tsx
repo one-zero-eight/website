@@ -1,7 +1,7 @@
+import { $events, eventsTypes } from "@/api/events";
 import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 import SearchBar from "@/components/schedule/SearchBar";
 import { GroupCardTagSkeleton } from "@/components/schedule/skeletons/GroupCardTagSkeleton";
-import { events } from "@/lib/events";
 import { getFirstTagByType } from "@/lib/events/event-group";
 import { getCategoryInfoBySlug } from "@/lib/events/events-view-config";
 import React, { useState } from "react";
@@ -14,7 +14,7 @@ export type ScheduleListProps = {
 
 export default function ScheduleList({ category }: ScheduleListProps) {
   const categoryInfo = getCategoryInfoBySlug(category);
-  const { data } = events.useEventGroupsListEventGroups();
+  const { data } = $events.useQuery("get", "/event-groups/");
 
   const [filters, setFilters] = useState<{ [key: string]: string | undefined }>(
     {},
@@ -55,7 +55,7 @@ export default function ScheduleList({ category }: ScheduleListProps) {
             acc[tag].push(v);
             return acc;
           },
-          {} as { [key: string]: events.ViewEventGroup[] },
+          {} as { [key: string]: eventsTypes.SchemaViewEventGroup[] },
         );
 
   return (

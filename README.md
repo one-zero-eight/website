@@ -51,9 +51,10 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 
 - [Node.js 20+](https://nodejs.org) & [TypeScript](https://www.typescriptlang.org/)
 - [React](https://react.dev/) & [Vite](https://vitejs.dev/) & [TanStack Router](https://tanstack.com/router/latest/docs/framework/react/overview)
+- [Vue](https://vuejs.org/) & [Veaury](https://github.com/gloriasoft/veaury)
 - Styling: [TailwindCSS](https://tailwindcss.com/), [Iconify](https://iconify.design/)
 - Formatting and linting: [Husky](https://typicode.github.io/husky/), [lint-staged](https://github.com/lint-staged/lint-staged), [Prettier](https://prettier.io/), [ESLint](https://eslint.org/)
-- Data fetching: [Axios](https://axios-http.com/), [TanStack Query](https://tanstack.com/query/latest), [Orval](https://orval.dev/)
+- Data fetching: [OpenAPI Typescript](https://openapi-ts.dev/), [TanStack Query](https://tanstack.com/query/latest)
 - Calendar: [FullCalendar](https://fullcalendar.io/), [ical.js](https://github.com/kewisch/ical.js)
 
 ## Development
@@ -68,7 +69,7 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
    > Do not change the ID of the trackers so that they are not enabled in development
 6. Set up your IDE to autoformat code with Prettier and use ESLint
 
-When the API types change, run `pnpm run generate-api` to generate new client types and functions.
+When the API types change, run `pnpm run gen:api` to generate new client types and functions.
 
 ### Run for development
 

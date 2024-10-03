@@ -1,9 +1,9 @@
-import { search } from "@/lib/search";
+import { searchTypes } from "@/api/search";
 import { useEffect, useRef } from "react";
 import { useTernaryDarkMode } from "usehooks-ts";
 
 export declare type TelegramPreviewProps = {
-  source: search.TelegramSource;
+  source: searchTypes.SchemaTelegramSource;
 };
 
 export default function TelegramPreview({ source }: TelegramPreviewProps) {

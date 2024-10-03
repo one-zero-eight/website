@@ -1,6 +1,6 @@
+import { useMe } from "@/api/accounts/user.ts";
 import { SignInModal } from "@/components/account/SignInModal.tsx";
 import Tooltip from "@/components/common/Tooltip";
-import { useMe } from "@/lib/auth/user";
 import { useEventGroup } from "@/lib/events/event-group";
 import { useState } from "react";
 

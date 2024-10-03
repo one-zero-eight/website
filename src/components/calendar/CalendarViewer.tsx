@@ -1,5 +1,5 @@
+import { eventsTypes } from "@/api/events";
 import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
-import { events } from "@/lib/events";
 import { EventApi, EventContentArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -20,7 +20,7 @@ export type URLType =
       color?: string;
       sourceLink?: string;
       updatedAt?: string;
-      eventGroup?: events.ViewEventGroup;
+      eventGroup?: eventsTypes.SchemaViewEventGroup;
     };
 
 export default function CalendarViewer({

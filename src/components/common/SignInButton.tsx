@@ -1,4 +1,4 @@
-import { getSignInUrl } from "@/lib/auth/paths";
+import { getSignInUrl } from "@/api/accounts/paths.ts";
 import clsx from "clsx";
 import { forwardRef } from "react";
 

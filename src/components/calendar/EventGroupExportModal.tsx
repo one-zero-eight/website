@@ -1,6 +1,7 @@
+import { $events } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import ScheduleLinkCopy from "@/components/schedule/ScheduleLinkCopy.tsx";
-import { events, getICSLink } from "@/lib/events";
+import { getICSLink } from "@/lib/events/links.ts";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -22,8 +23,10 @@ export function EventGroupExportModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data: eventsUser } = events.useUsersGetMe();
-  const { data: group } = events.useEventGroupsFindEventGroupByAlias({ alias });
+  const { data: eventsUser } = $events.useQuery("get", "/users/me");
+  const { data: group } = $events.useQuery("get", "/event-groups/by-alias", {
+    params: { query: { alias } },
+  });
 
   const { context, refs } = useFloating({ open, onOpenChange });
 

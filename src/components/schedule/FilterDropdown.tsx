@@ -1,6 +1,5 @@
-import { events } from "@/lib/events";
+import { $events } from "@/api/events";
 import { Popover, Transition } from "@headlessui/react";
-import React from "react";
 
 function FilterDropdown({
   typeFilter,
@@ -11,7 +10,7 @@ function FilterDropdown({
   selected: string;
   setSelected: (v: string) => void;
 }) {
-  const { data } = events.useTagsListTags();
+  const { data } = $events.useQuery("get", "/tags/");
 
   if (data === undefined) return null;
 

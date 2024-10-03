@@ -1,9 +1,9 @@
+import { $accounts } from "@/api/accounts";
+import { useMe } from "@/api/accounts/user.ts";
 import TelegramLoginButton, {
   TelegramUser,
 } from "@/components/account/TelegramLoginButton.tsx";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
-import { accounts } from "@/lib/accounts";
-import { useMe } from "@/lib/auth/user.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -16,15 +16,17 @@ export function ConnectTelegramPage() {
     select: ({ searchStr }) => ({ searchStr }),
   });
 
-  const { mutate: connectTelegram } = accounts.useProvidersTelegramConnect({
-    mutation: {
+  const { mutate: connectTelegram } = $accounts.useMutation(
+    "post",
+    "/providers/telegram/connect",
+    {
       onSuccess: () => {
         return queryClient.invalidateQueries({
-          queryKey: ["accounts", ...accounts.getUsersGetMeQueryKey()],
+          queryKey: $accounts.queryOptions("get", "/users/me").queryKey,
         });
       },
     },
-  });
+  );
 
   useEffect(() => {
     // Support LoginUrl
@@ -34,7 +36,7 @@ export function ConnectTelegramPage() {
         Object.fromEntries(searchParams.entries()),
       );
       if (telegramUser.success) {
-        connectTelegram({ data: telegramUser.data });
+        connectTelegram({ body: telegramUser.data });
       }
     }
   }, [searchStr, connectTelegram]);
@@ -72,7 +74,7 @@ export function ConnectTelegramPage() {
         <div className="flex items-center justify-center">
           <TelegramLoginButton
             botName={import.meta.env.VITE_BOT_NAME!}
-            onAuth={(data) => connectTelegram({ data })}
+            onAuth={(data) => connectTelegram({ body: data })}
             className="flex h-10 w-full items-center justify-center"
           />
         </div>

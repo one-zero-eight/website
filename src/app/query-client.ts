@@ -1,5 +1,4 @@
 import { QueryClient } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -7,7 +6,7 @@ export const queryClient = new QueryClient({
       networkMode: "offlineFirst",
 
       retry: (failureCount, error) => {
-        if (isAxiosError(error) && error.response?.status === 401) {
+        if (error.message === "Unauthorized") {
           return false; // Do not retry on auth error
         }
 

@@ -1,5 +1,5 @@
-import { search } from "@/lib/search";
-import { usePreviewFile } from "@/lib/search/use-preview-file";
+import { searchTypes } from "@/api/search";
+import { usePreviewFile } from "@/api/search/use-preview-file.ts";
 import { useElementHeight, useElementWidth } from "@/lib/ui/use-element-size";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import workerSrc from "pdfjs-dist/build/pdf.worker?worker&url";
@@ -17,7 +17,7 @@ function highlightPattern(text: string, pattern: string) {
 }
 
 export declare type PdfPreviewProps = {
-  source: search.MoodleFileSource;
+  source: searchTypes.SchemaMoodleFileSource;
   searchText: string;
 };
 
@@ -72,7 +72,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
     <>
       <Document
         inputRef={divRef}
-        file={file}
+        file={file?.data}
         onLoadSuccess={onDocumentLoadSuccess}
         onLoadError={onDocumentLoadError}
         noData={

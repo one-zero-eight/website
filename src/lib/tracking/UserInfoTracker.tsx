@@ -1,4 +1,4 @@
-import { useMe } from "@/lib/auth/user";
+import { useMe } from "@/api/accounts/user.ts";
 import { ymUserParams } from "@/lib/tracking/YandexMetrika";
 import { useEffect } from "react";
 

@@ -1,7 +1,7 @@
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { SportExportModal } from "@/components/calendar/SportExportModal.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
-import { getMySportLink } from "@/lib/events";
+import { getMySportLink } from "@/lib/events/links.ts";
 import { useState } from "react";
 
 export function SportPage() {

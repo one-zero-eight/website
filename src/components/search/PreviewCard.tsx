@@ -1,5 +1,5 @@
+import { searchTypes } from "@/api/search";
 import TelegramPreview from "@/components/search/TelegramPreview";
-import { search } from "@/lib/search";
 import clsx from "clsx";
 import { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -9,7 +9,7 @@ import MoodleUrlPreview from "./MoodleUrlPreview";
 const PdfPreview = lazy(() => import("./PdfPreview"));
 
 export declare type PreviewCardProps = {
-  source: search.SearchResponseSource;
+  source: searchTypes.SchemaSearchResponse["source"];
   onClose: () => void;
 };
 

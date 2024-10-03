@@ -1,7 +1,7 @@
+import { getSignOutUrl } from "@/api/accounts/paths.ts";
+import { useMe } from "@/api/accounts/user.ts";
 import { SignInButtonIcon } from "@/components/common/SignInButton";
 import { SidebarContext } from "@/components/layout/Sidebar";
-import { getSignOutUrl } from "@/lib/auth/paths";
-import { useMe } from "@/lib/auth/user";
 import {
   autoUpdate,
   flip,

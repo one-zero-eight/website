@@ -1,5 +1,5 @@
+import { useMe } from "@/api/accounts/user.ts";
 import { SignInButton } from "@/components/common/SignInButton";
-import { useMe } from "@/lib/auth/user";
 import { Link } from "@tanstack/react-router";
 
 export function DashboardButton() {

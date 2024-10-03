@@ -1,5 +1,5 @@
+import { roomBookingTypes } from "@/api/room-booking";
 import { BookModal } from "@/components/room-booking/BookModal.tsx";
-import { components } from "@/lib/room-booking";
 import { lazy, Suspense, useState } from "react";
 
 const BookingTimeline = lazy(
@@ -9,7 +9,7 @@ const BookingTimeline = lazy(
 export type BookingData = {
   from: Date;
   to: Date;
-  room: components["schemas"]["Room"];
+  room: roomBookingTypes.SchemaRoom;
 };
 
 export function RoomBookingPage() {

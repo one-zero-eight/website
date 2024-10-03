@@ -1,7 +1,7 @@
+import { $search, searchTypes } from "@/api/search";
 import PreviewCard from "@/components/search/PreviewCard.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
-import { search } from "@/lib/search";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -9,18 +9,20 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const navigate = useNavigate();
 
   const [previewSource, setPreviewSource] =
-    useState<search.SearchResponseSource>();
+    useState<searchTypes.SchemaSearchResponse["source"]>();
 
-  const { data: searchResult } = search.useSearchSearchByQuery(
-    { query: searchQuery },
+  const { data: searchResult } = $search.useQuery(
+    "get",
+    "/search/search",
     {
-      query: {
-        enabled: searchQuery.length > 0,
-        // Disable refetch
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-      },
+      params: { query: { query: searchQuery } },
+    },
+    {
+      enabled: searchQuery.length > 0,
+      // Disable refetch
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
     },
   );
 

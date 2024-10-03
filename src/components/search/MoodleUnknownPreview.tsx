@@ -1,8 +1,8 @@
-import { search } from "@/lib/search";
+import { searchTypes } from "@/api/search";
 import PreviewBottomButton from "./PreviewBottomButton";
 
 export declare type MoodleUnknownPreviewProps = {
-  source: search.MoodleUnknownSource;
+  source: searchTypes.SchemaMoodleUnknownSource;
 };
 
 export default function MoodleUnknownPreview({

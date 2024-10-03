@@ -1,6 +1,6 @@
+import { useMe } from "@/api/accounts/user.ts";
+import { AuthManager } from "@/api/helpers/AuthManager.tsx";
 import { queryClient } from "@/app/query-client.ts";
-import { AuthManager } from "@/lib/auth/AuthManager.tsx";
-import { useMe } from "@/lib/auth/user.ts";
 import { GoogleAnalytics } from "@/lib/tracking/GoogleAnalytics.tsx";
 import { UserInfoTracker } from "@/lib/tracking/UserInfoTracker.tsx";
 import { YandexMetrika } from "@/lib/tracking/YandexMetrika.tsx";

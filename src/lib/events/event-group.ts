@@ -1,46 +1,55 @@
-import { events } from "@/lib/events/index";
+import { $events, eventsTypes } from "@/api/events";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function useEventGroup(group_id: number) {
   const queryClient = useQueryClient();
-  const { data: predefined } = events.useUsersGetPredefined();
-  const { data: eventsUser } = events.useUsersGetMe();
+  const { data: eventsUser } = $events.useQuery("get", "/users/me");
+  const { data: predefined } = $events.useQuery("get", "/users/me/predefined");
 
   const onSettled = () => {
     return Promise.all([
       queryClient.invalidateQueries({
-        queryKey: ["events", ...events.getUsersGetMeQueryKey()],
+        queryKey: $events.queryOptions("get", "/users/me").queryKey,
       }),
     ]);
   };
 
-  const add = events.useUsersAddFavorite({ mutation: { onSettled } });
-  const remove = events.useUsersDeleteFavorite({ mutation: { onSettled } });
-  const hide = events.useUsersHideFavorite({ mutation: { onSettled } });
+  const add = $events.useMutation("post", "/users/me/favorites", {
+    onSettled,
+  });
+  const remove = $events.useMutation("delete", "/users/me/favorites", {
+    onSettled,
+  });
+  const hide = $events.useMutation("post", "/users/me/favorites/hide", {
+    onSettled,
+  });
 
   const isFavorite = eventsUser?.favorite_event_groups?.includes(group_id);
   const isPredefined = predefined?.event_groups?.includes(group_id) ?? false;
   let isInFavorites = !!isFavorite;
   let isHidden = eventsUser?.hidden_event_groups?.includes(group_id) ?? false;
   // Use optimistic updates for mutations
-  if (remove.isPending && remove.variables?.params.group_id === group_id) {
+  if (
+    remove.isPending &&
+    remove.variables?.params.query.group_id === group_id
+  ) {
     isInFavorites = false;
   }
-  if (add.isPending && add.variables?.params.group_id === group_id) {
+  if (add.isPending && add.variables?.params.query.group_id === group_id) {
     isInFavorites = true;
   }
-  if (hide.isPending && hide.variables?.params.group_id === group_id) {
-    isHidden = hide.variables?.params.hide ?? isHidden;
+  if (hide.isPending && hide.variables?.params.query.group_id === group_id) {
+    isHidden = hide.variables?.params.query.hide ?? isHidden;
   }
 
   const addToFavorites = () => {
     if (group_id === undefined || isPredefined) return;
-    add.mutate({ params: { group_id: group_id } });
+    add.mutate({ params: { query: { group_id } } });
   };
 
   const removeFromFavorites = () => {
     if (group_id === undefined || isPredefined) return;
-    remove.mutate({ params: { group_id: group_id } });
+    remove.mutate({ params: { query: { group_id } } });
   };
 
   const switchFavorite = () => {
@@ -53,12 +62,12 @@ export function useEventGroup(group_id: number) {
 
   const hideFavorite = () => {
     if (group_id === undefined) return;
-    hide.mutate({ params: { group_id: group_id, hide: true } });
+    hide.mutate({ params: { query: { group_id, hide: true } } });
   };
 
   const unhideFavorite = () => {
     if (group_id === undefined) return;
-    hide.mutate({ params: { group_id: group_id, hide: false } });
+    hide.mutate({ params: { query: { group_id, hide: false } } });
   };
 
   const switchHideFavorite = () => {
@@ -84,7 +93,7 @@ export function useEventGroup(group_id: number) {
 }
 
 export function getFirstTagByType(
-  event_group: events.ViewEventGroup,
+  event_group: eventsTypes.SchemaViewEventGroup,
   tag_type: string,
 ) {
   if (event_group.tags === undefined) return undefined;
@@ -92,7 +101,7 @@ export function getFirstTagByType(
 }
 
 export function getAllTagsByType(
-  event_group: events.ViewEventGroup,
+  event_group: eventsTypes.SchemaViewEventGroup,
   tag_type: string,
 ) {
   if (event_group.tags === undefined) return [];
@@ -100,9 +109,7 @@ export function getAllTagsByType(
 }
 
 export function useMyMusicRoom() {
-  const musicRoomSchedule = events.useIcsGetMusicRoomCurrentUserSchedule();
-
-  return {
-    musicRoomSchedule,
-  };
+  return $events.useQuery("get", "/users/me/music-room.ics", {
+    parseAs: "text",
+  });
 }

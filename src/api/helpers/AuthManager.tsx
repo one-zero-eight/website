@@ -1,5 +1,8 @@
-import { accounts } from "@/lib/accounts";
-import { invalidateMyAccessToken, useMyAccessToken } from "@/lib/auth/access";
+import { $accounts, accountsTypes } from "@/api/accounts";
+import {
+  invalidateMyAccessToken,
+  useMyAccessToken,
+} from "@/api/helpers/access-token.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { PropsWithChildren, useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
@@ -7,11 +10,17 @@ import { useLocalStorage } from "usehooks-ts";
 export function AuthManager({ children }: PropsWithChildren) {
   const [token, setToken] = useMyAccessToken();
   const queryClient = useQueryClient();
-  const { refetch: refetchMyToken } = accounts.useTokensGenerateMyToken({
-    query: { enabled: false },
-  });
-  const { data: me, isPending } = accounts.useUsersGetMe();
-  const [_, setStoredMe] = useLocalStorage<accounts.User | null>("user", null);
+  const { refetch: refetchMyToken } = $accounts.useQuery(
+    "get",
+    "/tokens/generate-my-token",
+    {},
+    { enabled: false },
+  );
+  const { data: me, isPending } = $accounts.useQuery("get", "/users/me");
+  const [_, setStoredMe] = useLocalStorage<accountsTypes.SchemaUser | null>(
+    "user",
+    null,
+  );
 
   useEffect(() => {
     if (me || !isPending) {
@@ -20,7 +29,7 @@ export function AuthManager({ children }: PropsWithChildren) {
         invalidateMyAccessToken();
       }
     }
-  }, [me, isPending, setStoredMe, queryClient]);
+  }, [me, isPending, setStoredMe]);
 
   useEffect(() => {
     // If the user doesn't have personal access token for services, we should fetch it
@@ -28,10 +37,11 @@ export function AuthManager({ children }: PropsWithChildren) {
       refetchMyToken().then((result) => {
         if (result.isSuccess) {
           setToken(result.data.access_token);
+          queryClient.clear();
         }
       });
     }
-  }, [me, token, setToken, refetchMyToken]);
+  }, [me, token, setToken, refetchMyToken, queryClient]);
 
   return <>{children}</>;
 }

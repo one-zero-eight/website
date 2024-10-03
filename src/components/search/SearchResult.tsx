@@ -1,4 +1,4 @@
-import { search } from "@/lib/search";
+import { searchTypes } from "@/api/search";
 import clsx from "clsx";
 
 export default function SearchResult({
@@ -6,7 +6,7 @@ export default function SearchResult({
   isSelected,
   select,
 }: {
-  response: search.SearchResponse;
+  response: searchTypes.SchemaSearchResponse;
   isSelected: boolean;
   select: () => void;
 }) {

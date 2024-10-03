@@ -1,28 +1,28 @@
+import { useMe } from "@/api/accounts/user.ts";
+import { $events, eventsTypes } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { URLType } from "@/components/calendar/CalendarViewer.tsx";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton.tsx";
 import { PersonalCard } from "@/components/schedule/group-card/PersonalCard.tsx";
-import { useMe } from "@/lib/auth/user.ts";
+import { useMyMusicRoom } from "@/lib/events/event-group.ts";
 import {
-  events,
   getICSLink,
   getMyMoodleLink,
   getMyMusicRoomLink,
   getMySportLink,
-} from "@/lib/events";
-import { useMyMusicRoom } from "@/lib/events/event-group.ts";
+} from "@/lib/events/links.ts";
 import { Link } from "@tanstack/react-router";
 import { useWindowSize } from "usehooks-ts";
 
 export function DashboardPage() {
   const { width } = useWindowSize();
   const { me } = useMe();
-  const { data: eventsUser } = events.useUsersGetMe();
-  const { data: eventGroups } = events.useEventGroupsListEventGroups();
-  const { data: predefined } = events.useUsersGetPredefined();
-  const { musicRoomSchedule } = useMyMusicRoom();
+  const { data: eventsUser } = $events.useQuery("get", "/users/me");
+  const { data: eventGroups } = $events.useQuery("get", "/event-groups/");
+  const { data: predefined } = $events.useQuery("get", "/users/me/predefined");
+  const { isSuccess: musicRoomIsSuccess } = useMyMusicRoom();
 
   if (!me) {
     return (
@@ -88,7 +88,7 @@ export function DashboardPage() {
                 />
               }
             />
-            {musicRoomSchedule.isSuccess && (
+            {musicRoomIsSuccess && (
               <PersonalCard
                 name="Music room"
                 description="Your room bookings"
@@ -183,7 +183,7 @@ function getCalendarsToShow(
   favorites: number[],
   hidden: number[],
   predefined: number[],
-  eventGroups: events.ListEventGroupsResponseOutput,
+  eventGroups: eventsTypes.SchemaListEventGroupsResponseOutput,
   userId: number | undefined,
 ): URLType[] {
   // Remove hidden calendars

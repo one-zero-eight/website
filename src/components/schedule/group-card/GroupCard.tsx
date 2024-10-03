@@ -1,13 +1,13 @@
+import { eventsTypes } from "@/api/events";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
 import HideButton from "@/components/schedule/group-card/HideButton";
-import { events } from "@/lib/events";
 import { getAllTagsByType, getFirstTagByType } from "@/lib/events/event-group";
 import { viewConfig } from "@/lib/events/events-view-config";
 import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 
 export type GroupCardProps = {
-  group: events.ViewEventGroup;
+  group: eventsTypes.SchemaViewEventGroup;
   canHide?: boolean;
 };
 

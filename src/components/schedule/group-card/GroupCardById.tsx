@@ -1,5 +1,5 @@
+import { $events } from "@/api/events";
 import { GroupCard } from "@/components/schedule/group-card/GroupCard";
-import { events } from "@/lib/events";
 
 export type GroupCardProps = {
   groupId?: number;
@@ -7,7 +7,7 @@ export type GroupCardProps = {
 };
 
 export function GroupCardById({ groupId, canHide = false }: GroupCardProps) {
-  const { data: eventGroups } = events.useEventGroupsListEventGroups();
+  const { data: eventGroups } = $events.useQuery("get", "/event-groups/");
   if (groupId === undefined) return null;
   const group = eventGroups?.event_groups?.find(
     (group) => group.id === groupId,

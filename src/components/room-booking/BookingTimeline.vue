@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import type { components, paths } from "@/lib/room-booking";
+import { roomBookingFetch, roomBookingTypes } from "@/api/room-booking";
 import { useEventListener, useNow } from "@vueuse/core";
-import createClient from "openapi-fetch";
 import type { MaybeRef } from "vue";
 import { computed, onMounted, ref, shallowRef, toRaw, unref } from "vue";
 
 const props = defineProps<{
-  onBooking: (data: { from: Date; to: Date; room: Room }) => void;
+  onBooking: (data: {
+    from: Date;
+    to: Date;
+    room: roomBookingTypes.SchemaRoom;
+  }) => void;
 }>();
 
 onMounted(() => {
@@ -24,8 +27,6 @@ const T = {
   Hour: 1000 * 60 * 60,
   Day: 1000 * 60 * 60 * 24,
 };
-
-type Room = components["schemas"]["Room"];
 
 interface Booking {
   id: string;
@@ -98,12 +99,9 @@ const SIDEBAR_WIDTH_PX = px(SIDEBAR_WIDTH);
 const HEADER_HEIGHT_PX = px(HEADER_HEIGHT);
 const ROW_HEIGHT_PX = px(ROW_HEIGHT);
 
-const client = createClient<paths>({
-  baseUrl: import.meta.env.VITE_BOOKING_API_URL,
-});
-const actualRooms = shallowRef<Room[]>([]);
+const actualRooms = shallowRef<roomBookingTypes.SchemaRoom[]>([]);
 const actualBookings = shallowRef<Booking[]>([]);
-client.GET("/rooms/").then(({ data, error }) => {
+roomBookingFetch.GET("/rooms/").then(({ data, error }) => {
   if (error) {
     console.error(error);
     return;
@@ -111,7 +109,7 @@ client.GET("/rooms/").then(({ data, error }) => {
 
   actualRooms.value = data;
 });
-client
+roomBookingFetch
   .GET("/bookings/", {
     params: {
       query: { start: today.toISOString(), end: endDate.toISOString() },
@@ -229,7 +227,7 @@ const overlayEl = ref<HTMLElement | null>(null);
 
 interface PendingBooking {
   roomIdx: number;
-  room: Room;
+  room: roomBookingTypes.SchemaRoom;
   pressedAt?: Date;
   hoveredAt: Date;
 }
