@@ -1,4 +1,4 @@
-import { getSignInUrl } from "@/api/accounts/paths.ts";
+import { navigateToSignIn } from "@/api/accounts/sign-in.ts";
 import clsx from "clsx";
 import { forwardRef } from "react";
 
@@ -21,7 +21,7 @@ export const SignInButton = forwardRef(function SignInButton_(
         className,
       )}
       onClick={(e) => {
-        window.location.assign(getSignInUrl(signInRedirect));
+        navigateToSignIn(signInRedirect);
         onClick?.(e);
       }}
     >
@@ -44,7 +44,7 @@ export const SignInButtonIcon = forwardRef(function SignInButtonIcon(
         className,
       )}
       onClick={(e) => {
-        window.location.assign(getSignInUrl(signInRedirect));
+        navigateToSignIn(signInRedirect);
         onClick?.(e);
       }}
     >

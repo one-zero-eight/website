@@ -1,4 +1,5 @@
 import { $accounts, accountsTypes } from "@/api/accounts";
+import { navigateToSignIn, shouldAutoSignIn } from "@/api/accounts/sign-in.ts";
 import {
   invalidateMyAccessToken,
   useMyAccessToken,
@@ -27,6 +28,9 @@ export function AuthManager({ children }: PropsWithChildren) {
       setStoredMe(me ?? null);
       if (!me) {
         invalidateMyAccessToken();
+        if (shouldAutoSignIn()) {
+          navigateToSignIn(window.location.href, "none");
+        }
       }
     }
   }, [me, isPending, setStoredMe]);

@@ -1,4 +1,4 @@
-import { getSignOutUrl } from "@/api/accounts/paths.ts";
+import { navigateToSignOut } from "@/api/accounts/sign-in.ts";
 import { useMe } from "@/api/accounts/user.ts";
 import { SignInButtonIcon } from "@/components/common/SignInButton";
 import { SidebarContext } from "@/components/layout/Sidebar";
@@ -120,7 +120,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                   </Link>
                   <button
                     onClick={() => {
-                      window.location.assign(getSignOutUrl());
+                      navigateToSignOut();
                       setIsOpen(false);
                       setSidebarOpened(false);
                     }}
