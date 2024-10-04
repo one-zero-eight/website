@@ -94,7 +94,7 @@ export function MusicRoomPage() {
           onClick={() => setExportModalOpen(true)}
         />
       </div>
-      <div className="@2xl/content:-mx-8">
+      <div className="-mx-4 -mb-4 @2xl/main:-mx-12 @2xl/main:-mb-12">
         <Calendar
           urls={[
             {

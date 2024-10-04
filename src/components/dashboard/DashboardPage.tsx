@@ -155,7 +155,7 @@ export function DashboardPage() {
         </details>
       </div>
       <h2 className="my-4 text-3xl font-medium">Your calendar</h2>
-      <div className="@lg/content:-mx-8 @lg/content:-mb-8">
+      <div className="-mx-4 -mb-4 @2xl/main:-mx-12 @2xl/main:-mb-12">
         <Calendar
           urls={
             eventsUser?.favorite_event_groups === undefined ||

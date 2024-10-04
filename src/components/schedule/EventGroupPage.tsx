@@ -58,7 +58,7 @@ export function EventGroupPage({ alias }: { alias: string }) {
             <h2 className="flex grow text-3xl font-medium">Calendar</h2>
             <ExportButton onClick={() => setExportModalOpen(true)} />
           </div>
-          <div className="-mx-4 -mb-4 @lg/content:-mx-8 @lg/content:-mb-8">
+          <div className="-mx-4 -mb-4 @2xl/main:-mx-12 @2xl/main:-mb-12">
             <Calendar
               urls={[
                 {
