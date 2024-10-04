@@ -8,7 +8,7 @@ import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import moment from "moment/moment";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import iCalendarPlugin from "./iCalendarPlugin";
 import "./styles-calendar.css";
@@ -61,26 +61,12 @@ export default function CalendarViewer({
     setStoredCalendarView(calendarView);
   }, [calendarView, setStoredCalendarView]);
 
-  const calendar = useMemo(
+  const calendarRef = useRef<FullCalendar>(null);
+
+  const calendarComponent = useMemo(
     () => (
       <FullCalendar
-        eventSources={urls.map((url) =>
-          typeof url === "string"
-            ? {
-                url: url,
-                format: "ics",
-              }
-            : {
-                url: url.url,
-                format: "ics",
-                color: url.color,
-                extraParams: {
-                  sourceLink: url.sourceLink,
-                  updatedAt: url.updatedAt,
-                  eventGroup: url.eventGroup,
-                },
-              },
-        )} // Load events by url
+        ref={calendarRef}
         eventsSet={(events) => {
           // Remove duplicates.
           // Accumulate 'extendedProps.calendarURLs' to use it later.
@@ -262,12 +248,61 @@ export default function CalendarViewer({
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [urls.join(";")],
+    [],
   );
+
+  useEffect(() => {
+    const calendarApi = calendarRef.current?.getApi();
+    if (!calendarApi) return;
+
+    // Run in the next tick
+    setTimeout(() => {
+      const eventSourcesPrev = calendarApi.getEventSources();
+      const eventSourcesToGet = urls.map((url) =>
+        typeof url === "string"
+          ? {
+              url: url,
+              format: "ics",
+            }
+          : {
+              url: url.url,
+              format: "ics",
+              color: url.color,
+              extraParams: {
+                sourceLink: url.sourceLink,
+                updatedAt: url.updatedAt,
+                eventGroup: url.eventGroup,
+              },
+            },
+      );
+
+      // Remove old sources that are not in the list
+      for (const eventSource of eventSourcesPrev) {
+        // Check if the source is in the list of sources to get
+        const found = eventSourcesToGet.find(
+          (source) => source.url === eventSource.url,
+        );
+        if (!found) {
+          eventSource.remove();
+        }
+      }
+
+      // Add new sources
+      for (const eventSource of eventSourcesToGet) {
+        // Check if the source is already in the calendar
+        const found = eventSourcesPrev.find(
+          (source) => source.url === eventSource.url,
+        );
+        if (!found) {
+          calendarApi.addEventSource(eventSource);
+        }
+      }
+    });
+  }, [urls]);
 
   return (
     <div {...props}>
-      {calendar}
+      {calendarComponent}
       {popoverInfo.event && popoverInfo.eventElement && (
         <CalendarEventPopover
           event={popoverInfo.event}
