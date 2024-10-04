@@ -14,11 +14,6 @@ export function ScheduleMainPage() {
       <CategoryContainer />
       <h3 className="my-4 text-center text-3xl font-medium">How it works?</h3>
       <ClarificationContainer />
-      <hr className="my-4 w-full border-border @3xl/content:w-1/2" />
-      <p className="text-lg text-text-secondary/75">
-        Our projects are open source!{" "}
-        <a href="https://github.com/one-zero-eight">github/one-zero-eight</a>
-      </p>
     </>
   );
 }

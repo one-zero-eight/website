@@ -69,9 +69,9 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
       <button
         ref={refs.setReference}
         {...getReferenceProps()}
-        className="rounded-2xl hover:bg-primary-hover"
+        className="rounded-2xl"
       >
-        <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-primary-main hover:bg-primary-hover">
+        <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-secondary-main hover:bg-secondary-hover">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
             <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-4xl" />
           </div>

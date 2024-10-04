@@ -1,3 +1,4 @@
+import Tooltip from "@/components/common/Tooltip.tsx";
 import SidebarSection from "@/components/layout/SidebarSection";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
@@ -190,23 +191,63 @@ function Sidebar({ children }: React.PropsWithChildren) {
           </nav>
           <div className="flex grow"></div>
           <br />
-          <div className="mb-4 flex w-full flex-row items-center justify-center gap-4 lgw-smh:hidden">
+          <a
+            href="https://t.me/one_zero_eight"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="my-4 text-center"
+          >
+            <span className="underline underline-offset-2">one-zero-eight</span>{" "}
+            💜
+          </a>
+          <div className="flex flex-row gap-2">
+            <Tooltip content="GitHub">
+              <a
+                href="https://github.com/one-zero-eight"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-2xl"
+              >
+                <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-secondary-main hover:bg-secondary-hover">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
+                    <span className="icon-[mdi--github] text-4xl" />
+                  </div>
+                </div>
+              </a>
+            </Tooltip>
+            <Tooltip content="Telegram">
+              <a
+                href="https://t.me/one_zero_eight"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-2xl"
+              >
+                <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-secondary-main hover:bg-secondary-hover">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
+                    <span className="icon-[uil--telegram-alt] text-4xl" />
+                  </div>
+                </div>
+              </a>
+            </Tooltip>
+            <Tooltip content="YouTube">
+              <a
+                href="https://www.youtube.com/@one-zero-eight"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-2xl"
+              >
+                <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-secondary-main hover:bg-secondary-hover">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
+                    <span className="icon-[hugeicons--youtube] text-4xl" />
+                  </div>
+                </div>
+              </a>
+            </Tooltip>
+          </div>
+          <div className="mt-4 flex w-full flex-row items-center justify-center gap-4 lgw-smh:hidden">
             <SwitchThemeButton />
             <UserMenu isMobile={true} isSidebar={true} />
           </div>
-          <a
-            className="text-center lgw-smh:text-left"
-            href="https://t.me/one_zero_eight"
-          >
-            <span className="hidden lgw-smh:inline">
-              See you at
-              <br />
-            </span>
-            <span className="underline underline-offset-2">
-              one-zero-eight
-            </span>{" "}
-            💜
-          </a>
         </div>
       </aside>
       {children}

@@ -9,7 +9,7 @@ export default function SwitchThemeButton() {
 
   return (
     <button
-      className="flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-primary-main hover:bg-primary-hover"
+      className="flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-secondary-main hover:bg-secondary-hover"
       onClick={() =>
         setTernaryDarkMode((prev) => (prev === "dark" ? "light" : "dark"))
       }
