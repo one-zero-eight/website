@@ -5,8 +5,7 @@ import { useEventGroup } from "@/lib/events/event-group";
 import { useState } from "react";
 
 export default function FavoriteButton({ groupId }: { groupId: number }) {
-  const { switchFavorite, isInFavorites, isPredefined } =
-    useEventGroup(groupId);
+  const { switchFavorite, isFavorite, isPredefined } = useEventGroup(groupId);
   const { me } = useMe();
   const [signInModalOpen, setSignInModalOpen] = useState(false);
 
@@ -16,7 +15,7 @@ export default function FavoriteButton({ groupId }: { groupId: number }) {
         content={
           isPredefined
             ? "Your group from official lists"
-            : isInFavorites
+            : isFavorite
               ? "In favorites"
               : "Add to favorites"
         }
@@ -35,7 +34,7 @@ export default function FavoriteButton({ groupId }: { groupId: number }) {
         >
           {isPredefined ? (
             <span className="icon-[material-symbols--stars-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
-          ) : isInFavorites ? (
+          ) : isFavorite ? (
             <span className="icon-[material-symbols--star] text-[#F0B132]" />
           ) : (
             <span className="icon-[material-symbols--star-outline]" />
