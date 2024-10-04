@@ -27,7 +27,6 @@ export default function CalendarViewer({
   urls,
   initialView = "listMonth",
   viewId = "",
-  ...props
 }: {
   urls: URLType[];
   initialView?: string;
@@ -38,6 +37,7 @@ export default function CalendarViewer({
     event: undefined as EventApi | undefined,
     eventElement: undefined as HTMLElement | undefined,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const setIsOpenCallback = useCallback(
     (opened: boolean) =>
@@ -245,6 +245,7 @@ export default function CalendarViewer({
         scrollTimeReset={false} // Do not reset scroll on date switch
         noEventsContent={() => "No events this month"} // Custom message
         datesSet={({ view }) => setCalendarView(view.type)}
+        loading={setIsLoading}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -301,7 +302,7 @@ export default function CalendarViewer({
   }, [urls]);
 
   return (
-    <div {...props}>
+    <div className={isLoading ? "calendar-loading" : undefined}>
       {calendarComponent}
       {popoverInfo.event && popoverInfo.eventElement && (
         <CalendarEventPopover

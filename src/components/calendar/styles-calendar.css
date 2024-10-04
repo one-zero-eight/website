@@ -124,3 +124,21 @@
     @apply shadow-none;
   }
 }
+
+.calendar-loading .fc-view-harness::before {
+  /* Loading state */
+  @apply absolute left-0 right-0 top-0 h-[2px] bg-white;
+  content: "";
+  animation: loading 1.5s infinite linear;
+}
+
+@keyframes loading {
+  0% {
+    left: -20%;
+    right: 100%;
+  }
+  100% {
+    left: 100%;
+    right: -20%;
+  }
+}
