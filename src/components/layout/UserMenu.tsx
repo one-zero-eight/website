@@ -95,8 +95,16 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               )}
             >
               <div className="flex flex-row justify-center gap-6 sm:justify-normal">
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-border text-icon-main/50">
-                  <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-5xl" />
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full bg-border text-icon-main/50">
+                  {me.telegram?.photo_url ? (
+                    <img
+                      src={me.telegram.photo_url}
+                      alt="Your avatar"
+                      className="rounded-full border-2 border-icon-main/50"
+                    />
+                  ) : (
+                    <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-5xl" />
+                  )}
                 </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex h-20 flex-col justify-center">
