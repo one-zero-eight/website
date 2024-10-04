@@ -1,6 +1,10 @@
 import { eventsTypes } from "@/api/events";
 import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
-import { EventApi, EventContentArg } from "@fullcalendar/core";
+import {
+  DayHeaderContentArg,
+  EventApi,
+  EventContentArg,
+} from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
@@ -151,43 +155,15 @@ export default function CalendarViewer({
           },
           timeGridWeek: {
             eventContent: renderEventTimeGridWeek,
+            dayHeaderContent: renderDayHeader,
             weekNumbers: true,
-            // Show weekday and date in day header
-            dayHeaderContent: (arg) => {
-              if (!arg.isToday) {
-                return moment(arg.date).format("ddd D");
-              }
-              // If today, show date in red circle
-              return (
-                <>
-                  {moment(arg.date).format("ddd")}{" "}
-                  <div className="inline-flex w-fit items-center justify-center rounded-md bg-red-500 px-1 text-white">
-                    {moment(arg.date).format("D")}
-                  </div>
-                </>
-              );
-            },
           },
           timeGrid3: {
             type: "timeGrid",
             dayCount: 3,
             eventContent: renderEventTimeGridWeek,
+            dayHeaderContent: renderDayHeader,
             weekNumbers: true,
-            // Show weekday and date in day header
-            dayHeaderContent: (arg) => {
-              if (!arg.isToday) {
-                return moment(arg.date).format("ddd D");
-              }
-              // If today, show date in red circle
-              return (
-                <>
-                  {moment(arg.date).format("ddd")}{" "}
-                  <div className="inline-flex w-fit items-center justify-center rounded-md bg-red-500 px-1 text-white">
-                    {moment(arg.date).format("D")}
-                  </div>
-                </>
-              );
-            },
           },
           dayGridMonth: {
             eventContent: renderEventDayGridMonth,
@@ -394,6 +370,19 @@ function renderEventDayGridMonth({
         </div>
       )}
     </div>
+  );
+}
+
+function renderDayHeader({ date }: DayHeaderContentArg) {
+  // Show weekday and day number in the day header
+  // The day number is highlighted with a red background if it is today
+  return (
+    <>
+      {moment(date).format("ddd")}{" "}
+      <div className="inline-flex w-fit items-center justify-center rounded-md [.fc-day-today_&]:bg-red-500 [.fc-day-today_&]:px-1 [.fc-day-today_&]:text-white">
+        {moment(date).format("D")}
+      </div>
+    </>
   );
 }
 
