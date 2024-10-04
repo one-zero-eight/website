@@ -91,6 +91,11 @@
     @apply min-h-full align-bottom font-light text-gray-600 dark:text-gray-500;
   }
 
+  .fc-list-day.fc-day-today .fc-list-day-text::after {
+    content: "today";
+    @apply ml-2 inline-flex h-7 w-fit items-center justify-center rounded-md bg-red-500 px-1 font-medium text-white;
+  }
+
   .fc-daygrid-day-events {
     @apply !m-0 !min-h-0;
   }
