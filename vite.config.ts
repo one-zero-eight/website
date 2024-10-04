@@ -2,7 +2,7 @@ import mdx from "@mdx-js/rollup";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import remarkGfm from "remark-gfm";
 // @ts-expect-error The plugin is not typed
-import veauryVitePlugins from "veaury/vite/index.js";
+import veauryVitePlugins from "veaury/vite/esm/index.mjs";
 import { defineConfig } from "vite";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
 import { VitePWA } from "vite-plugin-pwa";
@@ -53,6 +53,14 @@ export default defineConfig({
     // Minify the index.html
     ViteMinifyPlugin({}),
   ],
+
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: "modern-compiler",
+      },
+    },
+  },
 
   define: {
     // Inject the app version variable
