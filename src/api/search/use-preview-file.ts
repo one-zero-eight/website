@@ -1,4 +1,4 @@
-import { searchFetch } from "@/api/search";
+import { customFetch } from "@/api/helpers/custom-fetch.ts";
 import { useQuery } from "@tanstack/react-query";
 
 export function usePreviewFile(url: string | undefined) {
@@ -10,10 +10,9 @@ export function usePreviewFile(url: string | undefined) {
       }
 
       // Use Search client to add the auth token
-      return searchFetch.GET(url as any, {
+      return customFetch.GET(url, {
         parseAs: "blob",
         signal,
-        baseUrl: " ", // Remove base url
       });
     },
     enabled: !!url,

@@ -6,6 +6,9 @@ import { Middleware } from "openapi-fetch";
 
 export const authMiddleware: Middleware = {
   async onRequest({ request }) {
+    // Check the requested URL to add token only to our API
+    if (!request.url.startsWith("https://api.innohassle.ru/")) return;
+
     const token = getMyAccessToken();
     if (token) {
       const newRequest = request.clone();
@@ -15,6 +18,9 @@ export const authMiddleware: Middleware = {
     return request;
   },
   async onResponse({ response }) {
+    // Check the final URL to ensure we are handling only our API
+    if (!response.url.startsWith("https://api.innohassle.ru/")) return;
+
     if (response.status === 401) {
       invalidateMyAccessToken();
       throw new Error("Unauthorized");
