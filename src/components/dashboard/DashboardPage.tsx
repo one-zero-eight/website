@@ -113,6 +113,7 @@ export function DashboardPage() {
               />
             )}
             <PersonalCard
+              onClick={() => window.open("https://youtu.be/dQw4w9WgXcQ")}
               name={
                 <span className="flex items-center">
                   Moodle
