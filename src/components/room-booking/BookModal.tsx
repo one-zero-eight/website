@@ -8,8 +8,8 @@ import {
   useRole,
   useTransitionStyles,
 } from "@floating-ui/react";
-import React, { useCallback, useRef, useState } from "react";
-import { BookingData } from "./RoomBookingPage.tsx";
+import { useCallback, useRef, useState } from "react";
+import type { NewBooking } from "./BookingTimeline.vue";
 
 function getBookingUrl(booking: {
   myUniRoomId: number;
@@ -34,7 +34,7 @@ export function BookModal({
   open,
   onOpenChange,
 }: {
-  data?: BookingData;
+  data?: NewBooking;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
