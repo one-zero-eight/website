@@ -294,9 +294,11 @@ export default function CalendarViewer({
 
 function renderEventListMonth({ event }: EventContentArg) {
   return (
-    <div className="text-left">
-      {event.title}{" "}
-      <span className="text-inactive">{event.extendedProps.location}</span>
+    <div className="flex flex-wrap gap-x-1 text-left">
+      {event.title}
+      <span className="break-all text-inactive">
+        {event.extendedProps.location}
+      </span>
     </div>
   );
 }
