@@ -532,6 +532,8 @@ function handleBookingClick(event: MouseEvent) {
       pendingBookingData && pendingBooking?.pressedAt ? '' : null
     "
   >
+    <div v-if="roomsLoading || bookingsLoading" :class="$style.loading" />
+
     <div :class="$style.corner">
       <h2 v-if="!isMobile">Timeline</h2>
     </div>
@@ -1115,5 +1117,28 @@ $timebox-height: 20px;
 .timeline:not([data-new-pressed]) .new-booking-ruler-end,
 .timeline:not([data-new-pressed]) .new-booking-timebox-end {
   visibility: hidden;
+}
+
+.loading {
+  content: "";
+  animation: loading 1.5s infinite linear;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: white;
+  z-index: 10;
+}
+
+@keyframes loading {
+  0% {
+    left: -20%;
+    right: 100%;
+  }
+  100% {
+    left: 100%;
+    right: -20%;
+  }
 }
 </style>
