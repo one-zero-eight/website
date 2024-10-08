@@ -98,7 +98,7 @@
     "zod": "^3.23.8"
   },
   "lint-staged": {
-    "{app,components,lib,public}/**/*.{js,ts,jsx,tsx,mdx}": [
+    "{src,public}/**/*.{js,ts,jsx,tsx,mdx|vue}": [
       "eslint --fix",
       "prettier --write --ignore-unknown"
     ],
