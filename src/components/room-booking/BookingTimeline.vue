@@ -1,34 +1,32 @@
 <script setup lang="ts">
-import type { MaybeRef } from 'vue'
-import type { components } from "@/api/room-booking/types"
-import { roomBookingFetch } from "@/api/room-booking";
-import { useEventListener, useNow } from '@vueuse/core'
-import { computed, onMounted, ref, shallowRef, toRaw, unref } from 'vue'
+import { roomBookingFetch, type roomBookingTypes } from "@/api/room-booking";
+import { useEventListener, useMediaQuery, useNow } from "@vueuse/core";
+import type { MaybeRef } from "vue";
+import { computed, onMounted, ref, shallowRef, toRaw, unref } from "vue";
 
-export type Room = components['schemas']['Room']
 export interface NewBooking {
-  from: Date
-  to: Date
-  room: Room
+  from: Date;
+  to: Date;
+  room: roomBookingTypes.SchemaRoom;
 }
-export type Booking = Omit<components['schemas']['Booking'], 'start' | 'end'> & {
-  id: string
-  startsAt: Date
-  endsAt: Date
-}
+export type Booking = Omit<roomBookingTypes.SchemaBooking, "start" | "end"> & {
+  id: string;
+  startsAt: Date;
+  endsAt: Date;
+};
 
 const emit = defineEmits<{
-  book: [newBooking: NewBooking]
-  bookingClick: [booking: Booking]
-}>()
+  book: [newBooking: NewBooking];
+  bookingClick: [booking: Booking];
+}>();
 
-const PLACEHOLDER_ROOMS = Array
-  .from({ length: 15 })
-  .fill('placeholder') as ('placeholder'[])
+const PLACEHOLDER_ROOMS = Array.from({ length: 15 }).fill(
+  "placeholder",
+) as "placeholder"[];
 
-const PLACEHOLDER_BOOKINGS = Array
-  .from({ length: 10 })
-  .fill('placeholder') as ('placeholder'[])
+const PLACEHOLDER_BOOKINGS = Array.from({ length: 10 }).fill(
+  "placeholder",
+) as "placeholder"[];
 
 const T = {
   Ms: 1,
@@ -36,119 +34,130 @@ const T = {
   Min: 1000 * 60,
   Hour: 1000 * 60 * 60,
   Day: 1000 * 60 * 60 * 24,
-}
+};
 
 onMounted(() => {
   scrollToNow({
-    behavior: 'instant',
-    position: 'left',
+    behavior: "instant",
+    position: "left",
     offsetMs: -30 * T.Min,
-  })
-})
+  });
+});
 
-const PIXELS_PER_MINUTE = 100 / 30
-const MIN_BOOKING_DURATION_MINUTES = 15
-const BOOKING_DURATION_STEP = 5
+const PIXELS_PER_MINUTE = 100 / 30;
+const MIN_BOOKING_DURATION_MINUTES = 15;
+const BOOKING_DURATION_STEP = 5;
 
-const SIDEBAR_WIDTH = 200
-const HEADER_HEIGHT = 60
-const ROW_HEIGHT = 50
+const DESKTOP_SIDEBAR_WIDTH = 200;
+const MOBILE_SIDEBAR_WIDTH = 70;
+const HEADER_HEIGHT = 60;
+const ROW_HEIGHT = 50;
 
-const msToPx = (ms: number) => (ms / T.Min) * PIXELS_PER_MINUTE
-const px = (n: number) => `${n}px`
+const isMobile = useMediaQuery("(max-width: 768px)");
+const sidebarWidth = computed(() =>
+  isMobile.value ? MOBILE_SIDEBAR_WIDTH : DESKTOP_SIDEBAR_WIDTH,
+);
+const sidebarWidthPx = computed(() => px(sidebarWidth.value));
+
+const msToPx = (ms: number) => (ms / T.Min) * PIXELS_PER_MINUTE;
+const px = (n: number) => `${n}px`;
 
 interface BookingPosition {
-  offsetX: number
-  length: number
+  offsetX: number;
+  length: number;
 }
 
 function msBetween(a: MaybeRef<Date | number>, b: MaybeRef<Date | number>) {
-  a = unref(a)
-  b = unref(b)
+  a = unref(a);
+  b = unref(b);
   return (
-    (b instanceof Date ? b.getTime() : b)
-    - (a instanceof Date ? a.getTime() : a)
-  )
+    (b instanceof Date ? b.getTime() : b) -
+    (a instanceof Date ? a.getTime() : a)
+  );
 }
 
 function dateBoundsMinutes(d: Date, step: number, size: number): [Date, Date] {
-  const l = new Date(d)
-  l.setMinutes(0, 0, 0)
+  const l = new Date(d);
+  l.setMinutes(0, 0, 0);
 
   // Find the nearest point before `d` that is divisible by step.
   while (l.getTime() + step * T.Min < d.getTime()) {
-    l.setMinutes(l.getMinutes() + step)
+    l.setMinutes(l.getMinutes() + step);
   }
 
   // Go back until `d` is after the middle.
-  while (l.getTime() + (size * T.Min / 2) - (step * T.Min) > d.getTime()) {
-    l.setMinutes(l.getMinutes() - step)
+  while (l.getTime() + (size * T.Min) / 2 - step * T.Min > d.getTime()) {
+    l.setMinutes(l.getMinutes() - step);
   }
 
-  const r = new Date(l.getTime() + size * T.Min)
+  const r = new Date(l.getTime() + size * T.Min);
 
-  return [l, r]
+  return [l, r];
 }
 
 function overlappingDates(...items: Date[]): [Date, Date] {
-  items.sort((a, b) => a.getTime() - b.getTime())
-  return [items.at(0)!, items.at(-1)!]
+  items.sort((a, b) => a.getTime() - b.getTime());
+  return [items.at(0)!, items.at(-1)!];
 }
 
 function durationFormatted(durationMs: number): string {
-  const hours = Math.floor(durationMs / T.Hour)
-  const minutes = Math.floor((durationMs % T.Hour) / T.Min)
-  return `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes}m` : ''}`
+  const hours = Math.floor(durationMs / T.Hour);
+  const minutes = Math.floor((durationMs % T.Hour) / T.Min);
+  return `${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m` : ""}`;
 }
 
 function clockTime(d: Date): string {
-  const hh = d.getHours().toString().padStart(2, '0')
-  const mm = d.getMinutes().toString().padStart(2, '0')
-  return `${hh}:${mm}`
+  const hh = d.getHours().toString().padStart(2, "0");
+  const mm = d.getMinutes().toString().padStart(2, "0");
+  return `${hh}:${mm}`;
 }
 
 function dayTitle(d: Date) {
-  return d.toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'short',
-    weekday: 'short',
-  })
+  return d.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    weekday: "short",
+  });
 }
 
-const startDate = new Date()
-startDate.setHours(0, 0, 0, 0)
-const endDate = new Date(startDate.getTime() + 7 * T.Day)
+const startDate = new Date();
+startDate.setHours(0, 0, 0, 0);
+const endDate = new Date(startDate.getTime() + 7 * T.Day);
 
-const actualRooms = shallowRef<(Room)[]>([])
-const roomsLoading = shallowRef(true)
-roomBookingFetch.GET('/rooms/')
+const actualRooms = shallowRef<roomBookingTypes.SchemaRoom[]>([]);
+const roomsLoading = shallowRef(true);
+roomBookingFetch
+  .GET("/rooms/")
   .then(({ data }) => {
-    if (!data)
-      throw new Error('no data')
+    if (!data) throw new Error("no data");
 
-    roomsLoading.value = false
-    actualRooms.value = data
+    roomsLoading.value = false;
+    actualRooms.value = data;
   })
   .catch((err) => {
-    console.error('Failed to load rooms:', err)
+    console.error("Failed to load rooms:", err);
     // eslint-disable-next-line no-alert
-    alert('Failed to load rooms. Try again later.')
-  })
+    alert("Failed to load rooms. Try again later.");
+  });
 
 // TODO: remove this, when backend will return booking UIDs.
-let bookingIdCounter = 0
+let bookingIdCounter = 0;
 
-const actualBookings = shallowRef<Map<Booking['id'], Booking>>()
-const bookingsLoading = shallowRef(true)
-roomBookingFetch.GET('/bookings/', { params: { query: { start: startDate.toISOString(), end: endDate.toISOString() } } })
+const actualBookings = shallowRef<Map<Booking["id"], Booking>>();
+const bookingsLoading = shallowRef(true);
+roomBookingFetch
+  .GET("/bookings/", {
+    params: {
+      query: { start: startDate.toISOString(), end: endDate.toISOString() },
+    },
+  })
   .then(({ data, error }) => {
     if (error?.detail)
-      throw new Error(`validation error: ${JSON.stringify(error.detail)}`)
+      throw new Error(`validation error: ${JSON.stringify(error.detail)}`);
 
-    if (!data)
-      throw new Error('no data')
+    if (!data) throw new Error("no data");
 
-    const map = new Map<Booking['id'], Booking>()
+    const map = new Map<Booking["id"], Booking>();
 
     for (const booking of data) {
       const mappedBooking = {
@@ -156,86 +165,85 @@ roomBookingFetch.GET('/bookings/', { params: { query: { start: startDate.toISOSt
         id: (++bookingIdCounter).toString(),
         startsAt: new Date(booking.start),
         endsAt: new Date(booking.end),
-      }
+      };
 
-      map.set(mappedBooking.id, mappedBooking)
+      map.set(mappedBooking.id, mappedBooking);
     }
 
-    bookingsLoading.value = false
-    actualBookings.value = map
+    bookingsLoading.value = false;
+    actualBookings.value = map;
   })
   .catch((err) => {
-    console.error('Failed to load bookings:', err)
+    console.error("Failed to load bookings:", err);
     // eslint-disable-next-line no-alert
-    alert('Failed to load bookings. Try again later.')
-  })
+    alert("Failed to load bookings. Try again later.");
+  });
 
 const actualBookingsByRoomSorted = computed(() => {
-  const map = new Map<Room['id'], Booking[]>()
+  const map = new Map<roomBookingTypes.SchemaRoom["id"], Booking[]>();
 
   for (const booking of actualBookings.value?.values() ?? []) {
-    const bookings = map.get(booking.room_id)
-    if (bookings)
-      bookings.push(booking)
-    else
-      map.set(booking.room_id, [booking])
+    const bookings = map.get(booking.room_id);
+    if (bookings) bookings.push(booking);
+    else map.set(booking.room_id, [booking]);
   }
 
   // Need to sort arrays, because later the binary search will be used on them.
-  map.forEach(bookings => bookings.sort(
-    // We assume that if booking A starts before any booking B, A also ends
-    // before B start.
-    (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
-  ))
+  map.forEach((bookings) =>
+    bookings.sort(
+      // We assume that if booking A starts before any booking B, A also ends
+      // before B start.
+      (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
+    ),
+  );
 
-  return map
-})
+  return map;
+});
 
-const HOURS_TIMES = Array
-  .from({ length: 24 })
+const HOURS_TIMES = Array.from({ length: 24 })
   .fill(null)
-  .map((_, h) => `${h.toString().padStart(2, '0')}:00`)
+  .map((_, h) => `${h.toString().padStart(2, "0")}:00`);
 
-const timelineStart = shallowRef(startDate)
-const timelineEnd = shallowRef(endDate)
+const timelineStart = shallowRef(startDate);
+const timelineEnd = shallowRef(endDate);
 
-const now = useNow({ interval: T.Sec })
-const nowRulerX = computed(() => px(msToPx(msBetween(timelineStart, now))))
+const now = useNow({ interval: T.Sec });
+const nowRulerX = computed(() => px(msToPx(msBetween(timelineStart, now))));
 
 const timelineDates = computed(() => {
-  const dates = []
-  let date = new Date(timelineStart.value.getTime())
-  const end = timelineEnd.value
+  const dates = [];
+  let date = new Date(timelineStart.value.getTime());
+  const end = timelineEnd.value;
   while (date < end) {
-    dates.push(date)
-    date = new Date(date.getTime() + T.Day)
+    dates.push(date);
+    date = new Date(date.getTime() + T.Day);
   }
-  return dates
-})
+  return dates;
+});
 
 const bookingPositions = computed(() => {
-  const start = timelineStart.value
-  const positions = new Map<Booking['id'], BookingPosition>()
+  const start = timelineStart.value;
+  const positions = new Map<Booking["id"], BookingPosition>();
 
   for (const bookings of actualBookingsByRoomSorted.value.values()) {
-    let roomLength = 0
+    let roomLength = 0;
     for (const { id, startsAt, endsAt } of bookings) {
       // Need to do this sort of calculation due to how the bookings
       // are rendered on the timeline: they are rendered one-by-one
       // in a flex container, so the actual position of each booking
       // depends on previous bookings.
 
-      const length = msToPx(msBetween(startsAt, endsAt))
+      const length = msToPx(msBetween(startsAt, endsAt));
       positions.set(id, {
         offsetX: msToPx(msBetween(start, startsAt)) - roomLength,
         length,
-      })
-      roomLength += length
+      });
+      roomLength += length;
     }
   }
 
-  return positions
-})
+  return positions;
+});
 
 /**
  * Returns boolean indicating whether the range intersects any of
@@ -245,90 +253,90 @@ const bookingPositions = computed(() => {
  * @param b End of input range.
  * @param roomId ID of the room, which bookings should be checked.
  */
-function intersectsSomeBooking(
-  a: Date,
-  b: Date,
-  roomId: string,
-): boolean {
-  const aMs = a.getTime()
-  const bMs = b.getTime()
+function intersectsSomeBooking(a: Date, b: Date, roomId: string): boolean {
+  const aMs = a.getTime();
+  const bMs = b.getTime();
 
-  if (aMs >= bMs)
-    throw new Error('invalid range limits')
+  if (aMs >= bMs) throw new Error("invalid range limits");
 
-  const bookings = actualBookingsByRoomSorted.value.get(roomId)
-  if (!bookings || bookings.length === 0)
-    return false
+  const bookings = actualBookingsByRoomSorted.value.get(roomId);
+  if (!bookings || bookings.length === 0) return false;
 
-  let l = 0
-  let r = bookings.length - 1
+  let l = 0;
+  let r = bookings.length - 1;
   while (l <= r) {
-    const m = Math.floor((l + r) / 2)
-    const mBooking = bookings[m]
-    if (mBooking.endsAt.getTime() <= aMs)
-      l = m + 1
-    else if (mBooking.startsAt.getTime() >= bMs)
-      r = m - 1
-    else
-      return true
+    const m = Math.floor((l + r) / 2);
+    const mBooking = bookings[m];
+    if (mBooking.endsAt.getTime() <= aMs) l = m + 1;
+    else if (mBooking.startsAt.getTime() >= bMs) r = m - 1;
+    else return true;
   }
-  return false
+  return false;
 }
 
-const scrollerEl = ref<HTMLElement | null>(null)
-const wrapperEl = ref<HTMLElement | null>(null)
-const overlayEl = ref<HTMLElement | null>(null)
+const scrollerEl = ref<HTMLElement | null>(null);
+const wrapperEl = ref<HTMLElement | null>(null);
+const overlayEl = ref<HTMLElement | null>(null);
 
 interface PendingBooking {
-  roomIdx: number
-  room: Room
-  pressedAt?: Date
-  hoveredAt: Date
+  roomIdx: number;
+  room: roomBookingTypes.SchemaRoom;
+  pressedAt?: Date;
+  hoveredAt: Date;
 }
 
 function pendingBookingSafeRange(booking: PendingBooking): null | [Date, Date] {
-  const { pressedAt, hoveredAt, room } = booking
+  const { pressedAt, hoveredAt, room } = booking;
 
   let [l, r] = (() => {
     if (pressedAt) {
       return overlappingDates(
-        ...dateBoundsMinutes(pressedAt, BOOKING_DURATION_STEP, MIN_BOOKING_DURATION_MINUTES),
-        ...dateBoundsMinutes(hoveredAt, BOOKING_DURATION_STEP, BOOKING_DURATION_STEP),
-      )
+        ...dateBoundsMinutes(
+          pressedAt,
+          BOOKING_DURATION_STEP,
+          MIN_BOOKING_DURATION_MINUTES,
+        ),
+        ...dateBoundsMinutes(
+          hoveredAt,
+          BOOKING_DURATION_STEP,
+          BOOKING_DURATION_STEP,
+        ),
+      );
     }
-    return dateBoundsMinutes(hoveredAt, BOOKING_DURATION_STEP, MIN_BOOKING_DURATION_MINUTES)
-  })()
+    return dateBoundsMinutes(
+      hoveredAt,
+      BOOKING_DURATION_STEP,
+      MIN_BOOKING_DURATION_MINUTES,
+    );
+  })();
 
-  if (msBetween(now, r) < 0)
-    return null // booking is in the past
+  if (msBetween(now, r) < 0) return null; // booking is in the past
 
-  const [, safeL] = dateBoundsMinutes(now.value, 5, 5)
-  safeL.setMinutes(safeL.getMinutes() + 5)
+  const [, safeL] = dateBoundsMinutes(now.value, 5, 5);
+  safeL.setMinutes(safeL.getMinutes() + 5);
 
-  if (msBetween(safeL, l) < 0) { // Booking start is too close to `now`.
+  if (msBetween(safeL, l) < 0) {
+    // Booking start is too close to `now`.
     if (msBetween(safeL, r) < MIN_BOOKING_DURATION_MINUTES * T.Min)
       // Booking end is also too close to `now`.
-      return null
+      return null;
 
-    l = safeL
+    l = safeL;
   }
 
-  if (intersectsSomeBooking(l, r, room.id))
-    return null
+  if (intersectsSomeBooking(l, r, room.id)) return null;
 
-  return [l, r]
+  return [l, r];
 }
 
-const pendingBooking = ref<PendingBooking | null>(null)
+const pendingBooking = ref<PendingBooking | null>(null);
 const pendingBookingData = computed(() => {
-  if (!pendingBooking.value)
-    return null
+  if (!pendingBooking.value) return null;
 
-  const safeRange = pendingBookingSafeRange(pendingBooking.value)
-  if (!safeRange)
-    return null
+  const safeRange = pendingBookingSafeRange(pendingBooking.value);
+  if (!safeRange) return null;
 
-  const [l, r] = safeRange
+  const [l, r] = safeRange;
 
   return {
     start: l,
@@ -336,174 +344,169 @@ const pendingBookingData = computed(() => {
     duration: msBetween(l, r),
     x: msToPx(msBetween(timelineStart, l)),
     y: pendingBooking.value.roomIdx * ROW_HEIGHT,
-  }
-})
+  };
+});
 
 function eventWithinOverlay(event: MouseEvent) {
-  const rect = overlayEl.value?.getBoundingClientRect()
-  if (!rect)
-    return false
+  const rect = overlayEl.value?.getBoundingClientRect();
+  if (!rect) return false;
 
-  const { x, y, width: w, height: h } = rect
-  const { clientX: x0, clientY: y0 } = event
+  const { x, y, width: w, height: h } = rect;
+  const { clientX: x0, clientY: y0 } = event;
 
-  return (
-    (x0 >= x && x0 <= (x + w))
-    && (y0 >= y && y0 <= (y + h))
-  )
+  return x0 >= x && x0 <= x + w && y0 >= y && y0 <= y + h;
 }
 
 function slotByClientCoordinates(x: number, y: number) {
-  const rect = wrapperEl.value?.getBoundingClientRect()
+  const rect = wrapperEl.value?.getBoundingClientRect();
 
-  if (!rect)
-    return null
+  if (!rect) return null;
 
-  const { x: cornerX, y: cornerY } = rect
-  x -= (cornerX + SIDEBAR_WIDTH)
-  y -= (cornerY + HEADER_HEIGHT)
+  const { x: cornerX, y: cornerY } = rect;
+  x -= cornerX + sidebarWidth.value;
+  y -= cornerY + HEADER_HEIGHT;
 
-  const roomIdx = Math.floor(y / ROW_HEIGHT)
-  const room = actualRooms.value[roomIdx]
-  if (!room)
-    return null
+  const roomIdx = Math.floor(y / ROW_HEIGHT);
+  const room = actualRooms.value[roomIdx];
+  if (!room) return null;
 
-  const date = new Date(timelineStart.value.getTime() + (x / PIXELS_PER_MINUTE * T.Min))
+  const date = new Date(
+    timelineStart.value.getTime() + (x / PIXELS_PER_MINUTE) * T.Min,
+  );
 
-  return { room, roomIdx, date }
+  return { room, roomIdx, date };
 }
 
-useEventListener(wrapperEl, 'mousemove', (event) => {
+useEventListener(wrapperEl, "mousemove", (event) => {
   if (!eventWithinOverlay(event)) {
-    pendingBooking.value = null
-    return
+    pendingBooking.value = null;
+    return;
   }
 
-  const slot = slotByClientCoordinates(event.clientX, event.clientY)
+  const slot = slotByClientCoordinates(event.clientX, event.clientY);
   if (!slot) {
-    pendingBooking.value = null
-    return
+    pendingBooking.value = null;
+    return;
   }
 
   if (pendingBooking.value?.pressedAt) {
-    pendingBooking.value.hoveredAt = slot.date
-  }
-  else {
+    pendingBooking.value.hoveredAt = slot.date;
+  } else {
     pendingBooking.value = {
       roomIdx: slot.roomIdx,
       room: slot.room,
       hoveredAt: slot.date,
-    }
+    };
   }
-})
-useEventListener(wrapperEl, 'mousedown', (event) => {
+});
+useEventListener(wrapperEl, "mousedown", (event) => {
   if (!eventWithinOverlay(event)) {
-    pendingBooking.value = null
-    return
+    pendingBooking.value = null;
+    return;
   }
 
-  const slot = slotByClientCoordinates(event.clientX, event.clientY)
+  const slot = slotByClientCoordinates(event.clientX, event.clientY);
   if (!slot) {
-    pendingBooking.value = null
-    return
+    pendingBooking.value = null;
+    return;
   }
 
-  event.preventDefault()
-  event.stopImmediatePropagation()
+  event.preventDefault();
+  event.stopImmediatePropagation();
 
   pendingBooking.value = {
     roomIdx: slot.roomIdx,
     room: slot.room,
     hoveredAt: slot.date,
     pressedAt: slot.date,
-  }
-})
-useEventListener(wrapperEl, 'mouseup', (event) => {
+  };
+});
+useEventListener(wrapperEl, "mouseup", (event) => {
   if (!pendingBooking.value?.pressedAt) {
-    pendingBooking.value = null
-    return
+    pendingBooking.value = null;
+    return;
   }
 
   if (!eventWithinOverlay(event)) {
-    pendingBooking.value = null
-    return
+    pendingBooking.value = null;
+    return;
   }
 
-  const safeRange = pendingBookingSafeRange(pendingBooking.value)
+  const safeRange = pendingBookingSafeRange(pendingBooking.value);
   if (!safeRange) {
-    pendingBooking.value = null
-    return
+    pendingBooking.value = null;
+    return;
   }
 
-  emit('book', {
+  emit("book", {
     from: safeRange[0],
     to: safeRange[1],
     room: toRaw(pendingBooking.value.room),
-  })
+  });
 
-  pendingBooking.value = null
-})
-useEventListener(wrapperEl, 'mouseleave', () => {
-  pendingBooking.value = null
-})
+  pendingBooking.value = null;
+});
+useEventListener(wrapperEl, "mouseleave", () => {
+  pendingBooking.value = null;
+});
 
 interface ScrollToOptions {
   /** Date to scroll to. */
-  to: Date
+  to: Date;
   /** Behavior of scroll. */
-  behavior?: 'smooth' | 'instant'
+  behavior?: "smooth" | "instant";
   /** Position where the target date should be aligned. */
-  position?: 'left' | 'center' | 'right'
+  position?: "left" | "center" | "right";
   /** Offset to shift the target position by. */
-  offsetMs?: number
+  offsetMs?: number;
 }
 
 function scrollTo(options: ScrollToOptions) {
-  const el = scrollerEl.value
+  const el = scrollerEl.value;
 
-  if (!el)
-    return
+  if (!el) return;
 
   const {
     to,
-    behavior = 'smooth',
-    position = 'center',
+    behavior = "smooth",
+    position = "center",
     offsetMs = 0,
-  } = options
+  } = options;
 
-  const { width } = el.getBoundingClientRect()
-  const toLeftPx = msToPx(msBetween(timelineStart, to))
+  const { width } = el.getBoundingClientRect();
+  const toLeftPx = msToPx(msBetween(timelineStart, to));
 
   const scrollLeftPx = (() => {
     switch (position) {
-      case 'left': return toLeftPx
-      case 'center': return toLeftPx - ((width - SIDEBAR_WIDTH) / 2)
-      case 'right': return toLeftPx - (width - SIDEBAR_WIDTH) + 1
+      case "left":
+        return toLeftPx;
+      case "center":
+        return toLeftPx - (width - sidebarWidth.value) / 2;
+      case "right":
+        return toLeftPx - (width - sidebarWidth.value) + 1;
     }
-  })()
+  })();
 
   el.scrollTo({
     behavior,
     left: scrollLeftPx + msToPx(offsetMs),
-  })
+  });
 }
 
-function scrollToNow(options?: Omit<ScrollToOptions, 'to'>) {
+function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
   scrollTo({
     ...options,
     to: now.value,
-  })
+  });
 }
 
 function handleBookingClick(event: MouseEvent) {
   if (event.currentTarget instanceof HTMLElement) {
-    const bookingId = event.currentTarget.dataset.bookingId
+    const bookingId = event.currentTarget.dataset.bookingId;
     if (bookingId) {
-      const booking = actualBookings.value?.get(bookingId)
-      if (booking)
-        emit('bookingClick', booking)
-      else
-        console.warn(`undefined booking clicked (ID=${bookingId})`)
+      const booking = actualBookings.value?.get(bookingId);
+      if (booking) emit("bookingClick", booking);
+      else console.warn(`undefined booking clicked (ID=${bookingId})`);
     }
   }
 }
@@ -513,29 +516,34 @@ function handleBookingClick(event: MouseEvent) {
   <div
     :class="$style.timeline"
     :style="{
-      '--sidebar-width': px(SIDEBAR_WIDTH),
+      '--sidebar-width': sidebarWidthPx,
       '--header-height': px(HEADER_HEIGHT),
       '--row-height': px(ROW_HEIGHT),
       '--ppm': PIXELS_PER_MINUTE,
       '--now-x': nowRulerX,
       ...(pendingBookingData && {
-        'cursor': 'crosshair',
+        cursor: 'crosshair',
         '--new-x': px(pendingBookingData.x),
         '--new-y': px(pendingBookingData.y),
         '--new-length': px(msToPx(pendingBookingData.duration)),
       }),
     }"
-    :data-new-pressed="(pendingBookingData && pendingBooking?.pressedAt) ? '' : null"
+    :data-new-pressed="
+      pendingBookingData && pendingBooking?.pressedAt ? '' : null
+    "
   >
     <div :class="$style.corner">
-      <h2>Timeline</h2>
+      <h2 v-if="!isMobile">Timeline</h2>
     </div>
 
     <div ref="scrollerEl" :class="$style.scroller">
       <div ref="wrapperEl" :class="$style.wrapper">
         <span :class="$style['now-ruler']" />
         <div :class="$style['now-timebox-wrapper']">
-          <span :class="$style['now-timebox']" @click="scrollToNow({ position: 'center' })">
+          <span
+            :class="$style['now-timebox']"
+            @click="scrollToNow({ position: 'center' })"
+          >
             {{ clockTime(now) }}
           </span>
         </div>
@@ -557,20 +565,42 @@ function handleBookingClick(event: MouseEvent) {
 
         <svg :class="$style['rulers-svg']" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="Rulers" x="0" y="0" :width="PIXELS_PER_MINUTE * 60" height="100%" patternUnits="userSpaceOnUse">
+            <pattern
+              id="Rulers"
+              x="0"
+              y="0"
+              :width="PIXELS_PER_MINUTE * 60"
+              height="100%"
+              patternUnits="userSpaceOnUse"
+            >
               <rect x="0" y="0" height="100%" width="1" />
-              <rect :x="PIXELS_PER_MINUTE * 15" y="0" height="100%" width="1" opacity="0.4" />
-              <rect :x="PIXELS_PER_MINUTE * 30" y="0" height="100%" width="1" opacity="0.7" />
-              <rect :x="PIXELS_PER_MINUTE * 45" y="0" height="100%" width="1" opacity="0.4" />
+              <rect
+                :x="PIXELS_PER_MINUTE * 15"
+                y="0"
+                height="100%"
+                width="1"
+                opacity="0.4"
+              />
+              <rect
+                :x="PIXELS_PER_MINUTE * 30"
+                y="0"
+                height="100%"
+                width="1"
+                opacity="0.7"
+              />
+              <rect
+                :x="PIXELS_PER_MINUTE * 45"
+                y="0"
+                height="100%"
+                width="1"
+                opacity="0.4"
+              />
             </pattern>
           </defs>
           <rect fill="url(#Rulers)" width="100%" height="100%" />
         </svg>
 
-        <div
-          v-if="pendingBookingData"
-          :class="$style['new-booking']"
-        >
+        <div v-if="pendingBookingData" :class="$style['new-booking']">
           <div>
             <span>{{ durationFormatted(pendingBookingData.duration) }}</span>
           </div>
@@ -595,8 +625,8 @@ function handleBookingClick(event: MouseEvent) {
 
         <div :class="$style.body">
           <div
-            v-for="(room, i) in (roomsLoading ? PLACEHOLDER_ROOMS : actualRooms)"
-            :key="room === 'placeholder' ? i : room.id "
+            v-for="(room, i) in roomsLoading ? PLACEHOLDER_ROOMS : actualRooms"
+            :key="room === 'placeholder' ? i : room.id"
             :class="$style.row"
           >
             <div
@@ -605,22 +635,35 @@ function handleBookingClick(event: MouseEvent) {
                 [$style.placeholder]: room === 'placeholder',
               }"
             >
-              <span>
-                {{ room === 'placeholder' ? 'PLACEHOLDER' : room.title }}
+              <span v-if="isMobile" style="width: 100%; text-align: center">
+                {{ room === "placeholder" ? "PLA" : room.short_name }}
+              </span>
+              <span v-else>
+                {{ room === "placeholder" ? "PLACEHOLDER" : room.title }}
               </span>
             </div>
 
             <div
-              v-for="(booking, j) in ((room === 'placeholder' || bookingsLoading) ? PLACEHOLDER_BOOKINGS : actualBookingsByRoomSorted.get(room.id)?.values())"
+              v-for="(booking, j) in room === 'placeholder' || bookingsLoading
+                ? PLACEHOLDER_BOOKINGS
+                : actualBookingsByRoomSorted.get(room.id)?.values()"
               :key="booking === 'placeholder' ? j : booking.id"
               :class="{
                 [$style.booking]: true,
                 [$style.placeholder]: booking === 'placeholder',
               }"
-              :style="(booking === 'placeholder' ? {} : {
-                '--left': px(bookingPositions.get(booking.id)?.offsetX ?? 0),
-                '--width': px(bookingPositions.get(booking.id)?.length ?? 0),
-              })"
+              :style="
+                booking === 'placeholder'
+                  ? {}
+                  : {
+                      '--left': px(
+                        bookingPositions.get(booking.id)?.offsetX ?? 0,
+                      ),
+                      '--width': px(
+                        bookingPositions.get(booking.id)?.length ?? 0,
+                      ),
+                    }
+              "
             >
               <div v-if="booking === 'placeholder'">
                 <span>PLACEHOLDER</span>
@@ -918,7 +961,7 @@ $timebox-height: 20px;
 
   &::before,
   &::after {
-    content: '';
+    content: "";
     display: block;
   }
 
