@@ -40,7 +40,7 @@ onMounted(() => {
   scrollToNow({
     behavior: "instant",
     position: "left",
-    offsetMs: -30 * T.Min,
+    offsetMs: -20 * T.Min,
   });
 });
 
@@ -544,7 +544,12 @@ function handleBookingClick(event: MouseEvent) {
         <div :class="$style['now-timebox-wrapper']">
           <span
             :class="$style['now-timebox']"
-            @click="scrollToNow({ position: 'center' })"
+            @click="
+              scrollToNow({
+                position: 'left',
+                offsetMs: -20 * T.Min,
+              })
+            "
           >
             {{ clockTime(now) }}
           </span>
