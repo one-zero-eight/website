@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { roomBookingFetch, type roomBookingTypes } from "@/api/room-booking";
 import { useEventListener, useMediaQuery, useNow } from "@vueuse/core";
-import type { MaybeRef } from "vue";
-import { computed, onMounted, ref, shallowRef, toRaw, unref } from "vue";
+import {
+  computed,
+  MaybeRef,
+  onMounted,
+  ref,
+  shallowRef,
+  toRaw,
+  unref,
+  watch,
+} from "vue";
 
 export interface NewBooking {
   from: Date;
@@ -347,6 +355,13 @@ const pendingBookingData = computed(() => {
   };
 });
 
+const bookingRangeChanging = ref<
+  "idle" | "dragging" | "left-side" | "right-side" | null
+>(null);
+watch(pendingBooking, () => {
+  if (!pendingBooking.value) bookingRangeChanging.value = null;
+});
+
 function eventWithinOverlay(event: MouseEvent) {
   const rect = overlayEl.value?.getBoundingClientRect();
   if (!rect) return false;
@@ -357,7 +372,7 @@ function eventWithinOverlay(event: MouseEvent) {
   return x0 >= x && x0 <= x + w && y0 >= y && y0 <= y + h;
 }
 
-function slotByClientCoordinates(x: number, y: number) {
+function positionByClientCoordinates(x: number, y: number) {
   const rect = wrapperEl.value?.getBoundingClientRect();
 
   if (!rect) return null;
@@ -366,18 +381,71 @@ function slotByClientCoordinates(x: number, y: number) {
   x -= cornerX + sidebarWidth.value;
   y -= cornerY + HEADER_HEIGHT;
 
-  const roomIdx = Math.floor(y / ROW_HEIGHT);
+  return { x, y };
+}
+
+function slotByClientCoordinates(x: number, y: number) {
+  const pos = positionByClientCoordinates(x, y);
+  if (!pos) return null;
+
+  const roomIdx = Math.floor(pos.y / ROW_HEIGHT);
   const room = actualRooms.value[roomIdx];
   if (!room) return null;
 
   const date = new Date(
-    timelineStart.value.getTime() + (x / PIXELS_PER_MINUTE) * T.Min,
+    timelineStart.value.getTime() + (pos.x / PIXELS_PER_MINUTE) * T.Min,
   );
 
   return { room, roomIdx, date };
 }
 
 useEventListener(wrapperEl, "mousemove", (event) => {
+  if (bookingRangeChanging.value === "left-side") {
+    const slot = slotByClientCoordinates(event.clientX, event.clientY);
+    if (!slot) return;
+
+    const safeRange = pendingBookingSafeRange(pendingBooking.value!);
+    if (!safeRange) return;
+
+    if (
+      msBetween(slot.date, safeRange[1]) <
+      MIN_BOOKING_DURATION_MINUTES * T.Min
+    ) {
+      return;
+    }
+
+    pendingBooking.value = {
+      ...pendingBooking.value!,
+      pressedAt: slot.date,
+    };
+    return;
+  }
+
+  if (bookingRangeChanging.value === "right-side") {
+    const slot = slotByClientCoordinates(event.clientX, event.clientY);
+    if (!slot) return;
+
+    const safeRange = pendingBookingSafeRange(pendingBooking.value!);
+    if (!safeRange) return;
+
+    if (
+      msBetween(safeRange[0], slot.date) <
+      MIN_BOOKING_DURATION_MINUTES * T.Min
+    ) {
+      return;
+    }
+
+    pendingBooking.value = {
+      ...pendingBooking.value!,
+      hoveredAt: slot.date,
+    };
+    return;
+  }
+
+  if (bookingRangeChanging.value) {
+    return;
+  }
+
   if (!eventWithinOverlay(event)) {
     pendingBooking.value = null;
     return;
@@ -411,6 +479,32 @@ useEventListener(wrapperEl, "mousedown", (event) => {
     return;
   }
 
+  if (
+    bookingRangeChanging.value &&
+    pendingBookingData.value &&
+    pendingBooking.value?.roomIdx === slot.roomIdx
+  ) {
+    const leftX = pendingBookingData.value.x;
+    const rightX = leftX + msToPx(pendingBookingData.value.duration);
+
+    const clientPos = positionByClientCoordinates(event.clientX, event.clientY);
+    if (!clientPos) return;
+
+    const HANDLE_PADDING = 10;
+    if (Math.abs(clientPos.x - leftX) < HANDLE_PADDING) {
+      bookingRangeChanging.value = "left-side";
+      return;
+    } else if (Math.abs(clientPos.x - rightX) < HANDLE_PADDING) {
+      bookingRangeChanging.value = "right-side";
+      return;
+    } else if (clientPos.x > leftX && clientPos.x < rightX) {
+      bookingRangeChanging.value = "dragging";
+      return;
+    }
+
+    bookingRangeChanging.value = null; // Start new booking
+  }
+
   event.preventDefault();
   event.stopImmediatePropagation();
 
@@ -422,6 +516,11 @@ useEventListener(wrapperEl, "mousedown", (event) => {
   };
 });
 useEventListener(wrapperEl, "mouseup", (event) => {
+  if (bookingRangeChanging.value) {
+    bookingRangeChanging.value = "idle";
+    return;
+  }
+
   if (!pendingBooking.value?.pressedAt) {
     pendingBooking.value = null;
     return;
@@ -438,6 +537,15 @@ useEventListener(wrapperEl, "mouseup", (event) => {
     return;
   }
 
+  if (
+    msBetween(safeRange[0], safeRange[1]) ===
+    MIN_BOOKING_DURATION_MINUTES * T.Min
+  ) {
+    // Let user change the range via dragging
+    bookingRangeChanging.value = "idle";
+    return;
+  }
+
   emit("book", {
     from: safeRange[0],
     to: safeRange[1],
@@ -446,7 +554,11 @@ useEventListener(wrapperEl, "mouseup", (event) => {
 
   pendingBooking.value = null;
 });
+useEventListener(wrapperEl, "touchstart", (event) => {});
 useEventListener(wrapperEl, "mouseleave", () => {
+  if (bookingRangeChanging.value) {
+    return;
+  }
   pendingBooking.value = null;
 });
 
@@ -608,7 +720,7 @@ function handleBookingClick(event: MouseEvent) {
         </svg>
 
         <div v-if="pendingBookingData" :class="$style['new-booking']">
-          <div>
+          <div :class="$style['with-handles']">
             <span>{{ durationFormatted(pendingBookingData.duration) }}</span>
           </div>
         </div>
@@ -1063,6 +1175,27 @@ $timebox-height: 20px;
     border: 1px solid var(--c-textbox-borders-purple);
     background: var(--c-textbox-bg-purple);
     color: var(--c-textbox-text-purple);
+  }
+}
+
+.with-handles {
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    width: 4px;
+    cursor: w-resize;
+    background-color: var(--c-text);
+  }
+  &::before {
+    left: 4px;
+    border-radius: borders.$radius-md 0 0 borders.$radius-md;
+  }
+  &::after {
+    right: 4px;
+    border-radius: 0 borders.$radius-md borders.$radius-md 0;
   }
 }
 
