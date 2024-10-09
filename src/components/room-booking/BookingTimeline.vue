@@ -720,7 +720,11 @@ function handleBookingClick(event: MouseEvent) {
         </svg>
 
         <div v-if="pendingBookingData" :class="$style['new-booking']">
-          <div :class="$style['with-handles']">
+          <div
+            :class="{
+              [$style['with-handles']]: !!bookingRangeChanging,
+            }"
+          >
             <span>{{ durationFormatted(pendingBookingData.duration) }}</span>
           </div>
         </div>
