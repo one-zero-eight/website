@@ -1,4 +1,5 @@
 import Sidebar from "@/components/layout/Sidebar.tsx";
+import OfflineNotification from '@/components/layout/Offline.tsx';  
 import {
   createRootRouteWithContext,
   Link,
@@ -21,7 +22,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     });
 
     return (
-      <>
+      <><OfflineNotification/>
         <Helmet titleTemplate="%s — InNoHassle" defaultTitle="InNoHassle">
           <link rel="canonical" href={canonical} />
         </Helmet>
