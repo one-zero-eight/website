@@ -389,6 +389,7 @@ export interface components {
        * Id
        * Format: objectid
        * @description MongoDB document ObjectID
+       * @default None
        * @example 5eb7cf5a86d9755df3a6c593
        */
       id: string;
@@ -409,6 +410,7 @@ export interface components {
        * Id
        * Format: objectid
        * @description MongoDB document ObjectID
+       * @default None
        * @example 5eb7cf5a86d9755df3a6c593
        */
       id: string;
