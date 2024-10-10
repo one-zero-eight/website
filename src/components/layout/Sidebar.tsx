@@ -53,6 +53,18 @@ const items: Item[] = [
       ),
     },
   ]),
+  ...((import.meta.env.VITE_DISABLE_SEARCH && []) || [
+    {
+      title: "Maps",
+      path: "/maps",
+      badge: (
+        <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
+          NEW
+        </span>
+      ),
+      icon: <span className="icon-[material-symbols--map-outline] text-4xl" />,
+    },
+  ]),
   {
     title: "Scholarship",
     path: "/scholarship",
