@@ -1,4 +1,3 @@
-import { eventsFetch } from "@/api/events";
 import { authMiddleware } from "@/api/helpers/auth-middleware.ts";
 import createQueryClient from "@/api/helpers/create-query-client.ts";
 import createFetchClient from "openapi-fetch";
@@ -9,5 +8,5 @@ export type { searchTypes };
 export const searchFetch = createFetchClient<searchTypes.paths>({
   baseUrl: import.meta.env.VITE_SEARCH_API_URL,
 });
-eventsFetch.use(authMiddleware);
+searchFetch.use(authMiddleware);
 export const $search = createQueryClient(searchFetch, "search");
