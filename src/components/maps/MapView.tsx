@@ -16,10 +16,11 @@ export function MapView({ scene }: { scene: mapsTypes.SchemaScene }) {
 
   // Set fullscreen mode when the fullscreen state changes
   useEffect(() => {
+    // requestFullscreen and exitFullscreen are not supported on iPhone Safari
     if (fullscreen) {
-      document.body.requestFullscreen();
+      document.body.requestFullscreen?.();
     } else {
-      document.exitFullscreen();
+      document.exitFullscreen?.();
     }
   }, [fullscreen]);
 
