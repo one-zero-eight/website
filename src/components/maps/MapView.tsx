@@ -14,6 +14,41 @@ export function MapView({ scene }: { scene: mapsTypes.SchemaScene }) {
   const [fullscreen, setFullscreen] = useState(false);
   const switchFullscreen = useCallback(() => setFullscreen((v) => !v), []);
 
+  // Set fullscreen mode when the fullscreen state changes
+  useEffect(() => {
+    if (fullscreen) {
+      document.body.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }, [fullscreen]);
+
+  // Exit fullscreen mode when the user exits fullscreen mode using the browser
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setFullscreen(false);
+      }
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+    };
+  }, []);
+
+  // Exit fullscreen mode when the user presses the Escape key
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setFullscreen(false);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
+
   return (
     <FullscreenMode enable={fullscreen}>
       <div className="relative h-full">
