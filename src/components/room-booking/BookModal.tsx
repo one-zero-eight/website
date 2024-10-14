@@ -116,28 +116,6 @@ export function BookModal({
                   }}
                 >
                   <div className="flex flex-col gap-2">
-                    <div className="text-xl text-text-secondary/75">
-                      Room: <b>{data?.room.title}</b>
-                    </div>
-                    <div className="text-xl text-text-secondary/75">
-                      Time:{" "}
-                      <b>
-                        {data?.start.toLocaleString("ru-RU", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }) +
-                          " - " +
-                          data?.end.toLocaleString("ru-RU", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                      </b>
-                    </div>
-
                     <div className="flex flex-row items-center gap-4">
                       <div className="text-xl text-text-secondary/75">
                         Title:
@@ -150,10 +128,62 @@ export function BookModal({
                       />
                     </div>
 
-                    <div className="flex flex-row justify-end">
+                    <div className="flex flex-row items-center gap-2 text-xl text-text-secondary/75">
+                      <div className="flex h-fit w-6">
+                        <span className="icon-[material-symbols--location-on-outline] text-2xl" />
+                      </div>
+                      <p className="flex w-full items-center whitespace-pre-wrap py-1 font-medium [overflow-wrap:anywhere]">
+                        {data?.room.title}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-row items-center gap-2 text-xl text-text-secondary/75">
+                      <div className="flex h-fit w-6">
+                        <span className="icon-[material-symbols--today-outline] text-2xl" />
+                      </div>
+                      <p className="flex w-full items-center whitespace-pre-wrap py-1 font-medium [overflow-wrap:anywhere]">
+                        {data?.start.toLocaleString("en-US", {
+                          day: "2-digit",
+                          month: "long",
+                        })}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-row items-center gap-2 text-xl text-text-secondary/75">
+                      <div className="flex h-fit w-6">
+                        <span className="icon-[material-symbols--schedule-outline] text-2xl" />
+                      </div>
+                      {data && (
+                        <p className="flex w-full items-center whitespace-pre-wrap py-1 font-medium [overflow-wrap:anywhere]">
+                          {data.start.toLocaleString("ru-RU", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }) +
+                            " - " +
+                            data.end.toLocaleString("ru-RU", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }) +
+                            " (" +
+                            Math.round(
+                              (data.end.getTime() - data.start.getTime()) /
+                                60000,
+                            ) +
+                            " min)"}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-row gap-2">
+                      <button
+                        className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary-main px-4 py-2 text-lg font-medium hover:bg-primary-hover"
+                        onClick={() => onOpenChange(false)}
+                      >
+                        Cancel
+                      </button>
                       <button
                         type="submit"
-                        className="flex w-fit items-center justify-center gap-4 rounded-2xl border-2 border-focus bg-base px-4 py-2 text-lg font-medium hover:bg-primary-hover"
+                        className="flex w-full items-center justify-center gap-4 rounded-2xl border-2 border-focus bg-primary-main px-4 py-2 text-lg font-medium hover:bg-primary-hover"
                       >
                         Book
                         <span className="icon-[material-symbols--check] text-2xl text-icon-main" />
