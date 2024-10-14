@@ -9,7 +9,7 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import { useCallback, useRef, useState } from "react";
-import type { NewBooking } from "./BookingTimeline.vue";
+import type { Slot } from "./BookingTimeline.vue";
 
 function getBookingUrl(booking: {
   myUniRoomId: number;
@@ -34,7 +34,7 @@ export function BookModal({
   open,
   onOpenChange,
 }: {
-  data?: NewBooking;
+  data?: Slot;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -65,8 +65,8 @@ export function BookModal({
       getBookingUrl({
         myUniRoomId: data.room.my_uni_id,
         title: title,
-        start: data.from,
-        end: data.to,
+        start: data.start,
+        end: data.end,
       }),
     );
     setTitle("");
@@ -122,14 +122,14 @@ export function BookModal({
                     <div className="text-xl text-text-secondary/75">
                       Time:{" "}
                       <b>
-                        {data?.from.toLocaleString("ru-RU", {
+                        {data?.start.toLocaleString("ru-RU", {
                           day: "2-digit",
                           month: "2-digit",
                           hour: "2-digit",
                           minute: "2-digit",
                         }) +
                           " - " +
-                          data?.to.toLocaleString("ru-RU", {
+                          data?.end.toLocaleString("ru-RU", {
                             day: "2-digit",
                             month: "2-digit",
                             hour: "2-digit",

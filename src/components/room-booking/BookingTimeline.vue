@@ -1,40 +1,37 @@
 <script setup lang="ts">
+import type { MaybeRef } from "vue";
 import { roomBookingFetch, type roomBookingTypes } from "@/api/room-booking";
-import { useEventListener, useMediaQuery, useNow } from "@vueuse/core";
-import {
-  computed,
-  MaybeRef,
-  onMounted,
-  ref,
-  shallowRef,
-  toRaw,
-  unref,
-  watch,
-} from "vue";
+import { useMediaQuery, useNow } from "@vueuse/core";
+import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
 
-export interface NewBooking {
-  from: Date;
-  to: Date;
-  room: roomBookingTypes.SchemaRoom;
-}
-export type Booking = Omit<roomBookingTypes.SchemaBooking, "start" | "end"> & {
-  id: string;
-  startsAt: Date;
-  endsAt: Date;
-};
+/* ========================================================================== */
+/* ================================ Options ================================= */
+/* ========================================================================== */
 
 const emit = defineEmits<{
-  book: [newBooking: NewBooking];
+  book: [slot: Slot];
   bookingClick: [booking: Booking];
 }>();
 
-const PLACEHOLDER_ROOMS = Array.from({ length: 15 }).fill(
-  "placeholder",
-) as "placeholder"[];
+/* ========================================================================== */
+/* =============================== Constants ================================ */
+/* ========================================================================== */
 
-const PLACEHOLDER_BOOKINGS = Array.from({ length: 10 }).fill(
-  "placeholder",
-) as "placeholder"[];
+const COMPACT_VERSION_THRESHOLD_PX = 768;
+
+const SIDEBAR_WIDTH_DEFAULT = 200;
+const SIDEBAR_WIDTH_COMPACT = 65;
+
+const PIXELS_PER_MINUTE_DEFAULT = 100 / 30;
+const PIXELS_PER_MINUTE_COMPACT = 85 / 30;
+
+const HEADER_HEIGHT = 60;
+const ROW_HEIGHT = 50;
+
+const MIN_BOOKING_DURATION_MINUTES = 15;
+const BOOKING_DURATION_STEP = 5;
+
+const NEW_BOOKING_BOX_ID = "new-booking-box";
 
 const T = {
   Ms: 1,
@@ -44,36 +41,71 @@ const T = {
   Day: 1000 * 60 * 60 * 24,
 };
 
-onMounted(() => {
-  scrollToNow({
-    behavior: "instant",
-    position: "left",
-    offsetMs: -20 * T.Min,
-  });
-});
+const PLACEHOLDER_ROOMS = Array.from({ length: 15 }).fill(
+  "placeholder",
+) as "placeholder"[];
 
-const PIXELS_PER_MINUTE = 100 / 30;
-const MIN_BOOKING_DURATION_MINUTES = 15;
-const BOOKING_DURATION_STEP = 5;
+const PLACEHOLDER_BOOKINGS = Array.from({ length: 10 }).fill(
+  "placeholder",
+) as "placeholder"[];
 
-const DESKTOP_SIDEBAR_WIDTH = 200;
-const MOBILE_SIDEBAR_WIDTH = 70;
-const HEADER_HEIGHT = 60;
-const ROW_HEIGHT = 50;
+const HOURS_TIMES = Array.from({ length: 24 })
+  .fill(null)
+  .map((_, h) => `${h.toString().padStart(2, "0")}:00`);
 
-const isMobile = useMediaQuery("(max-width: 768px)");
-const sidebarWidth = computed(() =>
-  isMobile.value ? MOBILE_SIDEBAR_WIDTH : DESKTOP_SIDEBAR_WIDTH,
-);
-const sidebarWidthPx = computed(() => px(sidebarWidth.value));
+/* ========================================================================== */
+/* ================================= Types ================================== */
+/* ========================================================================== */
 
-const msToPx = (ms: number) => (ms / T.Min) * PIXELS_PER_MINUTE;
-const px = (n: number) => `${n}px`;
+export type Room = roomBookingTypes.SchemaRoom & {
+  /** Index of the room in the list of all rooms on the timeline. */
+  idx: number;
+};
 
-interface BookingPosition {
+export type Booking = Omit<roomBookingTypes.SchemaBooking, "start" | "end"> & {
+  id: string;
+  startsAt: Date;
+  endsAt: Date;
+};
+
+export type Slot = {
+  room: Room;
+  start: Date;
+  end: Date;
+};
+
+type Position = {
+  room: Room;
+  date: Date;
+};
+
+type BookingPosition = {
   offsetX: number;
   length: number;
-}
+};
+
+/* ========================================================================== */
+/* ============================== Compact Mode ============================== */
+/* ========================================================================== */
+
+const compactModeEnabled = useMediaQuery(
+  `(max-width: ${COMPACT_VERSION_THRESHOLD_PX}px)`,
+);
+const sidebarWidth = computed(() =>
+  compactModeEnabled.value ? SIDEBAR_WIDTH_COMPACT : SIDEBAR_WIDTH_DEFAULT,
+);
+const pixelsPerMinute = computed(() =>
+  compactModeEnabled.value
+    ? PIXELS_PER_MINUTE_COMPACT
+    : PIXELS_PER_MINUTE_DEFAULT,
+);
+
+/* ========================================================================== */
+/* =============================== Utilities ================================ */
+/* ========================================================================== */
+
+const px = (n: number) => `${n}px`;
+const msToPx = (ms: number) => (ms / T.Min) * pixelsPerMinute.value;
 
 function msBetween(a: MaybeRef<Date | number>, b: MaybeRef<Date | number>) {
   a = unref(a);
@@ -82,30 +114,6 @@ function msBetween(a: MaybeRef<Date | number>, b: MaybeRef<Date | number>) {
     (b instanceof Date ? b.getTime() : b) -
     (a instanceof Date ? a.getTime() : a)
   );
-}
-
-function dateBoundsMinutes(d: Date, step: number, size: number): [Date, Date] {
-  const l = new Date(d);
-  l.setMinutes(0, 0, 0);
-
-  // Find the nearest point before `d` that is divisible by step.
-  while (l.getTime() + step * T.Min < d.getTime()) {
-    l.setMinutes(l.getMinutes() + step);
-  }
-
-  // Go back until `d` is after the middle.
-  while (l.getTime() + (size * T.Min) / 2 - step * T.Min > d.getTime()) {
-    l.setMinutes(l.getMinutes() - step);
-  }
-
-  const r = new Date(l.getTime() + size * T.Min);
-
-  return [l, r];
-}
-
-function overlappingDates(...items: Date[]): [Date, Date] {
-  items.sort((a, b) => a.getTime() - b.getTime());
-  return [items.at(0)!, items.at(-1)!];
 }
 
 function durationFormatted(durationMs: number): string {
@@ -128,11 +136,61 @@ function dayTitle(d: Date) {
   });
 }
 
+// TODO: Rename it and document.
+function dateBoundsMinutes(d: Date, step: number, size: number): [Date, Date] {
+  const gridScale = step * T.Min;
+  const targetDuration = size * T.Min;
+
+  let leftMs = d.getTime() - Math.round(targetDuration / 2);
+  const leftLeftMs = leftMs - (leftMs % gridScale);
+  const leftRightMs = leftLeftMs + gridScale;
+  leftMs =
+    leftMs - leftLeftMs < leftRightMs - leftMs ? leftLeftMs : leftRightMs;
+  const rightMs = leftMs + Math.round(targetDuration / gridScale) * gridScale;
+
+  return [new Date(leftMs), new Date(rightMs)];
+}
+
+function overlappingDates(...items: Date[]): [Date, Date] {
+  items.sort((a, b) => a.getTime() - b.getTime());
+  return [items.at(0)!, items.at(-1)!];
+}
+
+/* ========================================================================== */
+/* ============================= Initialization ============================= */
+/* ========================================================================== */
+
 const startDate = new Date();
 startDate.setHours(0, 0, 0, 0);
 const endDate = new Date(startDate.getTime() + 7 * T.Day);
 
-const actualRooms = shallowRef<roomBookingTypes.SchemaRoom[]>([]);
+const timelineStart = shallowRef(startDate);
+const timelineEnd = shallowRef(endDate);
+
+const timelineDates = computed(() => {
+  const dates = [];
+  let date = new Date(timelineStart.value.getTime());
+  const end = timelineEnd.value;
+  while (date < end) {
+    dates.push(date);
+    date = new Date(date.getTime() + T.Day);
+  }
+  return dates;
+});
+
+onMounted(() => {
+  scrollToNow({
+    behavior: "instant",
+    position: "left",
+    offsetMs: -30 * T.Min,
+  });
+});
+
+/* ========================================================================== */
+/* ============================= Data Fetching ============================== */
+/* ========================================================================== */
+
+const actualRooms = shallowRef<Room[]>([]);
 const roomsLoading = shallowRef(true);
 roomBookingFetch
   .GET("/rooms/")
@@ -140,7 +198,7 @@ roomBookingFetch
     if (!data) throw new Error("no data");
 
     roomsLoading.value = false;
-    actualRooms.value = data;
+    actualRooms.value = data.map((room, idx) => ({ ...room, idx }));
   })
   .catch((err) => {
     console.error("Failed to load rooms:", err);
@@ -188,7 +246,7 @@ roomBookingFetch
   });
 
 const actualBookingsByRoomSorted = computed(() => {
-  const map = new Map<roomBookingTypes.SchemaRoom["id"], Booking[]>();
+  const map = new Map<Room["id"], Booking[]>();
 
   for (const booking of actualBookings.value?.values() ?? []) {
     const bookings = map.get(booking.room_id);
@@ -208,26 +266,12 @@ const actualBookingsByRoomSorted = computed(() => {
   return map;
 });
 
-const HOURS_TIMES = Array.from({ length: 24 })
-  .fill(null)
-  .map((_, h) => `${h.toString().padStart(2, "0")}:00`);
-
-const timelineStart = shallowRef(startDate);
-const timelineEnd = shallowRef(endDate);
+/* ========================================================================== */
+/* ============================= Interactivity ============================== */
+/* ========================================================================== */
 
 const now = useNow({ interval: T.Sec });
 const nowRulerX = computed(() => px(msToPx(msBetween(timelineStart, now))));
-
-const timelineDates = computed(() => {
-  const dates = [];
-  let date = new Date(timelineStart.value.getTime());
-  const end = timelineEnd.value;
-  while (date < end) {
-    dates.push(date);
-    date = new Date(date.getTime() + T.Day);
-  }
-  return dates;
-});
 
 const bookingPositions = computed(() => {
   const start = timelineStart.value;
@@ -282,18 +326,21 @@ function intersectsSomeBooking(a: Date, b: Date, roomId: string): boolean {
   return false;
 }
 
-const scrollerEl = ref<HTMLElement | null>(null);
+/** Element with unlimited size that holds all elements of the timeline. */
 const wrapperEl = ref<HTMLElement | null>(null);
+
+/** Element that limits the size of timeline content and makes it scrollable. */
+const scrollerEl = ref<HTMLElement | null>(null);
+
+/** Element that is positioned on the interactive area of the timeline. */
 const overlayEl = ref<HTMLElement | null>(null);
 
-interface PendingBooking {
-  roomIdx: number;
-  room: roomBookingTypes.SchemaRoom;
-  pressedAt?: Date;
+// TODO: Rename, refactor and document it.
+function pendingBookingSafeRange(booking: {
+  room: Room;
   hoveredAt: Date;
-}
-
-function pendingBookingSafeRange(booking: PendingBooking): null | [Date, Date] {
+  pressedAt?: Date;
+}): null | [Date, Date] {
   const { pressedAt, hoveredAt, room } = booking;
 
   let [l, r] = (() => {
@@ -337,42 +384,16 @@ function pendingBookingSafeRange(booking: PendingBooking): null | [Date, Date] {
   return [l, r];
 }
 
-const pendingBooking = ref<PendingBooking | null>(null);
-const pendingBookingData = computed(() => {
-  if (!pendingBooking.value) return null;
-
-  const safeRange = pendingBookingSafeRange(pendingBooking.value);
-  if (!safeRange) return null;
-
-  const [l, r] = safeRange;
-
-  return {
-    start: l,
-    end: r,
-    duration: msBetween(l, r),
-    x: msToPx(msBetween(timelineStart, l)),
-    y: pendingBooking.value.roomIdx * ROW_HEIGHT,
-  };
-});
-
-const bookingRangeChanging = ref<
-  "idle" | "dragging" | "left-side" | "right-side" | null
->(null);
-watch(pendingBooking, () => {
-  if (!pendingBooking.value) bookingRangeChanging.value = null;
-});
-
-function eventWithinOverlay(event: MouseEvent) {
+function clientCoordinatesWithinOverlay(x0: number, y0: number): boolean {
   const rect = overlayEl.value?.getBoundingClientRect();
   if (!rect) return false;
 
   const { x, y, width: w, height: h } = rect;
-  const { clientX: x0, clientY: y0 } = event;
 
   return x0 >= x && x0 <= x + w && y0 >= y && y0 <= y + h;
 }
 
-function positionByClientCoordinates(x: number, y: number) {
+function positionByClientCoordinates(x: number, y: number): Position | null {
   const rect = wrapperEl.value?.getBoundingClientRect();
 
   if (!rect) return null;
@@ -381,188 +402,453 @@ function positionByClientCoordinates(x: number, y: number) {
   x -= cornerX + sidebarWidth.value;
   y -= cornerY + HEADER_HEIGHT;
 
-  return { x, y };
-}
-
-function slotByClientCoordinates(x: number, y: number) {
-  const pos = positionByClientCoordinates(x, y);
-  if (!pos) return null;
-
-  const roomIdx = Math.floor(pos.y / ROW_HEIGHT);
+  const roomIdx = Math.floor(y / ROW_HEIGHT);
   const room = actualRooms.value[roomIdx];
   if (!room) return null;
 
   const date = new Date(
-    timelineStart.value.getTime() + (pos.x / PIXELS_PER_MINUTE) * T.Min,
+    timelineStart.value.getTime() + (x / pixelsPerMinute.value) * T.Min,
   );
 
-  return { room, roomIdx, date };
+  return { room, date };
 }
 
-useEventListener(wrapperEl, "mousemove", (event) => {
-  if (bookingRangeChanging.value === "left-side") {
-    const slot = slotByClientCoordinates(event.clientX, event.clientY);
-    if (!slot) return;
-
-    const safeRange = pendingBookingSafeRange(pendingBooking.value!);
-    if (!safeRange) return;
-
-    if (
-      msBetween(slot.date, safeRange[1]) <
-      MIN_BOOKING_DURATION_MINUTES * T.Min
-    ) {
-      return;
+type InteractionState =
+  | {
+      /** User didn't start to interact with the timeline. */
+      type: "idle";
     }
-
-    pendingBooking.value = {
-      ...pendingBooking.value!,
-      pressedAt: slot.date,
-    };
-    return;
-  }
-
-  if (bookingRangeChanging.value === "right-side") {
-    const slot = slotByClientCoordinates(event.clientX, event.clientY);
-    if (!slot) return;
-
-    const safeRange = pendingBookingSafeRange(pendingBooking.value!);
-    if (!safeRange) return;
-
-    if (
-      msBetween(safeRange[0], slot.date) <
-      MIN_BOOKING_DURATION_MINUTES * T.Min
-    ) {
-      return;
+  | {
+      /** User is hovering mouse over the timeline. */
+      type: "mouse-hovering";
+      hoverAt: Position;
     }
-
-    pendingBooking.value = {
-      ...pendingBooking.value!,
-      hoveredAt: slot.date,
-    };
-    return;
-  }
-
-  if (bookingRangeChanging.value) {
-    return;
-  }
-
-  if (!eventWithinOverlay(event)) {
-    pendingBooking.value = null;
-    return;
-  }
-
-  const slot = slotByClientCoordinates(event.clientX, event.clientY);
-  if (!slot) {
-    pendingBooking.value = null;
-    return;
-  }
-
-  if (pendingBooking.value?.pressedAt) {
-    pendingBooking.value.hoveredAt = slot.date;
-  } else {
-    pendingBooking.value = {
-      roomIdx: slot.roomIdx,
-      room: slot.room,
-      hoveredAt: slot.date,
-    };
-  }
-});
-useEventListener(wrapperEl, "mousedown", (event) => {
-  if (!eventWithinOverlay(event)) {
-    pendingBooking.value = null;
-    return;
-  }
-
-  const slot = slotByClientCoordinates(event.clientX, event.clientY);
-  if (!slot) {
-    pendingBooking.value = null;
-    return;
-  }
-
-  if (
-    bookingRangeChanging.value &&
-    pendingBookingData.value &&
-    pendingBooking.value?.roomIdx === slot.roomIdx
-  ) {
-    const leftX = pendingBookingData.value.x;
-    const rightX = leftX + msToPx(pendingBookingData.value.duration);
-
-    const clientPos = positionByClientCoordinates(event.clientX, event.clientY);
-    if (!clientPos) return;
-
-    const HANDLE_PADDING = 10;
-    if (Math.abs(clientPos.x - leftX) < HANDLE_PADDING) {
-      bookingRangeChanging.value = "left-side";
-      return;
-    } else if (Math.abs(clientPos.x - rightX) < HANDLE_PADDING) {
-      bookingRangeChanging.value = "right-side";
-      return;
-    } else if (clientPos.x > leftX && clientPos.x < rightX) {
-      bookingRangeChanging.value = "dragging";
-      return;
+  | {
+      /** User pressed on the timeline with the mouse and is dragging it. */
+      type: "mouse-dragging";
+      clickAt: Position;
+      dragAt: Position;
     }
+  | {
+      /**
+       * User intended to create a new booking using the touchscreen, but isn't
+       * touching it currently.
+       */
+      type: "touch-inactive";
+      slot: Slot;
+    }
+  | {
+      /** User is dragging the edge of a new booking to adjust its' time. */
+      type: "touch-dragging-edge";
+      slot: Slot;
+      edge: "left" | "right";
+      touchId: number;
+    };
 
-    bookingRangeChanging.value = null; // Start new booking
-  }
+type InteractionState_<S extends InteractionState["type"]> = Extract<
+  InteractionState,
+  { type: S }
+>;
+
+const interactionState = shallowRef<InteractionState>({ type: "idle" });
+
+// FIXME: Hack to distinguish mouse events from touch events.
+let lastTouchTimeStamp = -100000000;
+const isTouchEvent = (e: Event) =>
+  Math.abs(lastTouchTimeStamp - e.timeStamp) < T.Sec;
+
+const stateListenerTransitionMap: {
+  [S in InteractionState["type"]]: {
+    [E in keyof HTMLElementEventMap]?: (
+      event: HTMLElementEventMap[E],
+      currentState: InteractionState_<S>,
+    ) => InteractionState | null;
+  };
+} = {
+  idle: {
+    touchstart: (event) => {
+      lastTouchTimeStamp = event.timeStamp;
+      return null;
+    },
+    mousemove: transition1_mousemove,
+    mousedown: transition2_mousedown,
+  },
+  "mouse-hovering": {
+    mousemove: transition1_mousemove,
+    mousedown: transition2_mousedown,
+    mouseleave: transition3_mouseleave,
+  },
+  "mouse-dragging": {
+    mousemove: transition4_mousemove,
+    mouseleave: transition3_mouseleave,
+    mouseup: transition5_mouseup,
+  },
+  "touch-inactive": {
+    touchstart: (event, state) => {
+      const [touch] = event.changedTouches; // Ignore other touches.
+      const { clientX: x0, clientY: y0 } = touch;
+
+      if (!clientCoordinatesWithinOverlay(x0, y0)) return null;
+
+      const boxRect = document
+        .getElementById(NEW_BOOKING_BOX_ID)
+        ?.getBoundingClientRect();
+      if (!boxRect) return null;
+
+      const touchedEdge = (() => {
+        const { x, y, width, height } = boxRect;
+
+        if (!(y - 6 <= y0 && y0 <= y + height + 6))
+          // Vertical hit.
+          return null;
+
+        const distToLeft = Math.abs(x0 - x);
+        const distToRight = Math.abs(x0 - (x + width));
+
+        if (distToLeft < distToRight && distToLeft < 12) return "left";
+        if (distToRight < distToLeft && distToRight < 12) return "right";
+
+        return null;
+      })();
+
+      if (touchedEdge === null) return null;
+
+      event.preventDefault();
+
+      return {
+        type: "touch-dragging-edge",
+        slot: state.slot,
+        edge: touchedEdge,
+        touchId: touch.identifier,
+      };
+    },
+  },
+  "touch-dragging-edge": {
+    touchmove: (event, state) => {
+      const touch = Array.from(event.changedTouches).find(
+        ({ identifier }) => identifier === state.touchId,
+      );
+      if (!touch) return null;
+
+      event.preventDefault();
+
+      const { clientX, clientY } = touch;
+
+      if (!clientCoordinatesWithinOverlay(clientX, clientY)) return null;
+
+      const pos = positionByClientCoordinates(clientX, clientY);
+      if (!pos) return null;
+
+      // TODO: calculate it in a better way.
+      const newSlot = (() => {
+        switch (state.edge) {
+          case "left": {
+            const range = pendingBookingSafeRange({
+              room: state.slot.room,
+              pressedAt: state.slot.end,
+              hoveredAt: pos.date,
+            });
+            if (!range) return null;
+            return {
+              room: state.slot.room,
+              start: range[0],
+              end: state.slot.end,
+            };
+          }
+          case "right": {
+            const range = pendingBookingSafeRange({
+              room: state.slot.room,
+              pressedAt: state.slot.start,
+              hoveredAt: pos.date,
+            });
+            if (!range) return null;
+            return {
+              room: state.slot.room,
+              start: state.slot.start,
+              end: range[1],
+            };
+          }
+        }
+      })();
+
+      if (!newSlot) return null;
+
+      return {
+        ...state,
+        slot: newSlot,
+      };
+    },
+    touchend: transition6_touchend,
+    touchcancel: transition6_touchend,
+  },
+};
+
+function transition1_mousemove(event: MouseEvent): InteractionState | null {
+  if (isTouchEvent(event)) return null;
+
+  const { clientX, clientY } = event;
+
+  if (!clientCoordinatesWithinOverlay(clientX, clientY))
+    return { type: "idle" };
+
+  const pos = positionByClientCoordinates(clientX, clientY);
+  if (!pos) return { type: "idle" };
+
+  return {
+    type: "mouse-hovering",
+    hoverAt: pos,
+  };
+}
+
+function transition2_mousedown(
+  event: MouseEvent,
+  state: InteractionState,
+): InteractionState | null {
+  if (isTouchEvent(event) && state.type !== "idle") return null;
+
+  const { clientX, clientY } = event;
+
+  if (!clientCoordinatesWithinOverlay(clientX, clientY))
+    return { type: "idle" };
+
+  const pos = positionByClientCoordinates(clientX, clientY);
+  if (!pos) return { type: "idle" };
 
   event.preventDefault();
   event.stopImmediatePropagation();
 
-  pendingBooking.value = {
-    roomIdx: slot.roomIdx,
-    room: slot.room,
-    hoveredAt: slot.date,
-    pressedAt: slot.date,
+  if (isTouchEvent(event)) {
+    const range = pendingBookingSafeRange({
+      room: pos.room,
+      hoveredAt: pos.date,
+    });
+
+    if (!range) return null;
+
+    return {
+      type: "touch-inactive",
+      slot: {
+        room: pos.room,
+        start: range[0],
+        end: range[1],
+      },
+    };
+  }
+
+  return {
+    type: "mouse-dragging",
+    clickAt: pos,
+    dragAt: pos,
   };
-});
-useEventListener(wrapperEl, "mouseup", (event) => {
-  if (bookingRangeChanging.value) {
-    bookingRangeChanging.value = "idle";
-    return;
-  }
+}
 
-  if (!pendingBooking.value?.pressedAt) {
-    pendingBooking.value = null;
-    return;
-  }
+function transition3_mouseleave(_: MouseEvent): InteractionState {
+  return { type: "idle" };
+}
 
-  if (!eventWithinOverlay(event)) {
-    pendingBooking.value = null;
-    return;
-  }
+function transition4_mousemove(
+  event: MouseEvent,
+  state: InteractionState_<"mouse-dragging">,
+): InteractionState {
+  const { clientX, clientY } = event;
 
-  const safeRange = pendingBookingSafeRange(pendingBooking.value);
-  if (!safeRange) {
-    pendingBooking.value = null;
-    return;
-  }
+  if (!clientCoordinatesWithinOverlay(clientX, clientY))
+    return { type: "idle" };
 
-  if (
-    msBetween(safeRange[0], safeRange[1]) ===
-    MIN_BOOKING_DURATION_MINUTES * T.Min
-  ) {
-    // Let user change the range via dragging
-    bookingRangeChanging.value = "idle";
-    return;
-  }
+  const pos = positionByClientCoordinates(clientX, clientY);
+  if (!pos) return { type: "idle" };
 
-  emit("book", {
-    from: safeRange[0],
-    to: safeRange[1],
-    room: toRaw(pendingBooking.value.room),
+  event.preventDefault();
+  event.stopImmediatePropagation();
+
+  return {
+    type: "mouse-dragging",
+    clickAt: state.clickAt,
+    dragAt: pos,
+  };
+}
+
+function transition5_mouseup(
+  event: MouseEvent,
+  state: InteractionState_<"mouse-dragging">,
+): InteractionState {
+  const { clientX, clientY } = event;
+
+  if (!clientCoordinatesWithinOverlay(clientX, clientY))
+    return { type: "idle" };
+
+  const range = pendingBookingSafeRange({
+    room: state.clickAt.room,
+    pressedAt: state.clickAt.date,
+    hoveredAt: state.dragAt.date,
   });
 
-  pendingBooking.value = null;
-});
-useEventListener(wrapperEl, "touchstart", (event) => {});
-useEventListener(wrapperEl, "mouseleave", () => {
-  if (bookingRangeChanging.value) {
-    return;
+  if (!range) return { type: "idle" };
+
+  emit("book", {
+    room: state.clickAt.room,
+    start: range[0],
+    end: range[1],
+  });
+
+  return { type: "idle" };
+}
+
+function transition6_touchend(
+  event: TouchEvent,
+  state: InteractionState_<"touch-dragging-edge">,
+): InteractionState | null {
+  const touch = Array.from(event.changedTouches).find(
+    ({ identifier }) => identifier === state.touchId,
+  );
+  if (!touch) return null;
+
+  event.preventDefault();
+
+  return {
+    type: "touch-inactive",
+    slot: state.slot,
+  };
+}
+
+function handleBoookingCancel() {
+  interactionState.value = { type: "idle" };
+}
+
+function handleBoookingConfirm() {
+  switch (interactionState.value.type) {
+    case "idle":
+    case "mouse-hovering":
+    case "mouse-dragging":
+      return;
+    case "touch-inactive":
+    case "touch-dragging-edge":
+      emit("book", interactionState.value.slot);
+      interactionState.value = { type: "idle" };
+      break;
+    default:
+      interactionState.value satisfies never;
   }
-  pendingBooking.value = null;
+}
+
+watch(
+  [() => interactionState.value.type, wrapperEl],
+  ([newState, el], _, onCleanup) => {
+    if (!el) return;
+
+    const [, eventsMap] = Object.entries(stateListenerTransitionMap).find(
+      ([state]) => state === newState,
+    )!;
+
+    const cleanupFns = Object.entries(eventsMap).map(
+      ([eventName, listener]) => {
+        const listenerWrapped = (event: any) => {
+          const newState = listener(event, interactionState.value);
+          if (newState != null) interactionState.value = newState;
+        };
+        el.addEventListener(eventName, listenerWrapped);
+        return () => el.removeEventListener(eventName, listenerWrapped);
+      },
+    );
+
+    onCleanup(() => {
+      cleanupFns.forEach((fn) => {
+        try {
+          fn();
+        } catch (err) {
+          console.error("Failed to execute cleanup function:", err);
+        }
+      });
+    });
+  },
+  { immediate: true, flush: "post" },
+);
+
+const newBookingTouched = computed(() => {
+  switch (interactionState.value.type) {
+    case "idle":
+    case "mouse-hovering":
+    case "mouse-dragging":
+      return false;
+    case "touch-inactive":
+    case "touch-dragging-edge":
+      return true;
+    default:
+      return interactionState.value satisfies never;
+  }
 });
 
-interface ScrollToOptions {
+const newBookingSlot = computed<Slot | null>(() => {
+  const state = interactionState.value;
+  switch (state.type) {
+    case "idle":
+      return null;
+    case "mouse-hovering": {
+      const range = pendingBookingSafeRange({
+        room: state.hoverAt.room,
+        hoveredAt: state.hoverAt.date,
+      });
+
+      if (!range) return null;
+
+      return {
+        room: state.hoverAt.room,
+        start: range[0],
+        end: range[1],
+      };
+    }
+    case "mouse-dragging": {
+      const range = pendingBookingSafeRange({
+        room: state.clickAt.room,
+        pressedAt: state.clickAt.date,
+        hoveredAt: state.dragAt.date,
+      });
+
+      if (!range) return null;
+
+      return {
+        room: state.clickAt.room,
+        start: range[0],
+        end: range[1],
+      };
+    }
+    case "touch-inactive":
+      return state.slot;
+    case "touch-dragging-edge":
+      return state.slot;
+    default:
+      return state satisfies never;
+  }
+});
+
+const newBookingData = computed(() => {
+  const slot = newBookingSlot.value;
+
+  if (!slot) return null;
+
+  return {
+    duration: msBetween(slot.start, slot.end),
+    x: msToPx(msBetween(timelineStart, slot.start)),
+    y: slot.room.idx * ROW_HEIGHT,
+  };
+});
+
+function handleBookingClick(event: MouseEvent) {
+  if (event.currentTarget instanceof HTMLElement) {
+    const bookingId = event.currentTarget.dataset.bookingId;
+    if (bookingId) {
+      const booking = actualBookings.value?.get(bookingId);
+      if (booking) emit("bookingClick", booking);
+      else console.warn(`Click on undefined booking with ID "${bookingId}".`);
+    }
+  }
+}
+
+/* ========================================================================== */
+/* =============================== Scrolling ================================ */
+/* ========================================================================== */
+
+type ScrollToOptions = {
   /** Date to scroll to. */
   to: Date;
   /** Behavior of scroll. */
@@ -571,7 +857,7 @@ interface ScrollToOptions {
   position?: "left" | "center" | "right";
   /** Offset to shift the target position by. */
   offsetMs?: number;
-}
+};
 
 function scrollTo(options: ScrollToOptions) {
   const el = scrollerEl.value;
@@ -611,203 +897,200 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
     to: now.value,
   });
 }
-
-function handleBookingClick(event: MouseEvent) {
-  if (event.currentTarget instanceof HTMLElement) {
-    const bookingId = event.currentTarget.dataset.bookingId;
-    if (bookingId) {
-      const booking = actualBookings.value?.get(bookingId);
-      if (booking) emit("bookingClick", booking);
-      else console.warn(`undefined booking clicked (ID=${bookingId})`);
-    }
-  }
-}
 </script>
 
 <template>
-  <div
-    :class="$style.timeline"
-    :style="{
-      '--sidebar-width': sidebarWidthPx,
-      '--header-height': px(HEADER_HEIGHT),
-      '--row-height': px(ROW_HEIGHT),
-      '--ppm': PIXELS_PER_MINUTE,
-      '--now-x': nowRulerX,
-      ...(pendingBookingData && {
-        cursor: 'crosshair',
-        '--new-x': px(pendingBookingData.x),
-        '--new-y': px(pendingBookingData.y),
-        '--new-length': px(msToPx(pendingBookingData.duration)),
-      }),
-    }"
-    :data-new-pressed="
-      pendingBookingData && pendingBooking?.pressedAt ? '' : null
-    "
-  >
-    <div v-if="roomsLoading || bookingsLoading" :class="$style.loading" />
+  <div :class="$style.root">
+    <div
+      :class="$style.timeline"
+      :style="{
+        '--sidebar-width': px(sidebarWidth),
+        '--header-height': px(HEADER_HEIGHT),
+        '--row-height': px(ROW_HEIGHT),
+        '--ppm': pixelsPerMinute,
+        '--now-x': nowRulerX,
+        ...(newBookingData && {
+          cursor: 'crosshair',
+          '--new-x': px(newBookingData.x),
+          '--new-y': px(newBookingData.y),
+          '--new-length': px(msToPx(newBookingData.duration)),
+        }),
+      }"
+      :data-new-pressed="
+        interactionState.type === 'mouse-dragging' || newBookingTouched
+          ? ''
+          : null
+      "
+      :data-new-touched="newBookingTouched ? '' : null"
+    >
+      <div :class="$style.corner">
+        <h2 v-show="!compactModeEnabled">Timeline</h2>
+      </div>
 
-    <div :class="$style.corner">
-      <h2 v-if="!isMobile">Timeline</h2>
-    </div>
-
-    <div ref="scrollerEl" :class="$style.scroller">
-      <div ref="wrapperEl" :class="$style.wrapper">
-        <span :class="$style['now-ruler']" />
-        <div :class="$style['now-timebox-wrapper']">
-          <span
-            :class="$style['now-timebox']"
-            @click="
-              scrollToNow({
-                position: 'left',
-                offsetMs: -20 * T.Min,
-              })
-            "
-          >
-            {{ clockTime(now) }}
-          </span>
-        </div>
-
-        <template v-if="pendingBookingData">
-          <span :class="$style['new-booking-ruler-start']" />
-          <span :class="$style['new-booking-ruler-end']" />
-          <div :class="$style['new-booking-timeboxes-wrapper']">
-            <div :class="$style['new-booking-timeboxes-container']">
-              <span :class="$style['new-booking-timebox-start']">
-                {{ clockTime(pendingBookingData.start) }}
-              </span>
-              <span :class="$style['new-booking-timebox-end']">
-                {{ clockTime(pendingBookingData.end) }}
-              </span>
-            </div>
-          </div>
-        </template>
-
-        <svg :class="$style['rulers-svg']" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern
-              id="Rulers"
-              x="0"
-              y="0"
-              :width="PIXELS_PER_MINUTE * 60"
-              height="100%"
-              patternUnits="userSpaceOnUse"
+      <div ref="scrollerEl" :class="$style.scroller">
+        <div ref="wrapperEl" :class="$style.wrapper">
+          <span :class="$style['now-ruler']" />
+          <div :class="$style['now-timebox-wrapper']">
+            <span
+              :class="$style['now-timebox']"
+              @click="scrollToNow({ position: 'center' })"
             >
-              <rect x="0" y="0" height="100%" width="1" />
-              <rect
-                :x="PIXELS_PER_MINUTE * 15"
-                y="0"
-                height="100%"
-                width="1"
-                opacity="0.4"
-              />
-              <rect
-                :x="PIXELS_PER_MINUTE * 30"
-                y="0"
-                height="100%"
-                width="1"
-                opacity="0.7"
-              />
-              <rect
-                :x="PIXELS_PER_MINUTE * 45"
-                y="0"
-                height="100%"
-                width="1"
-                opacity="0.4"
-              />
-            </pattern>
-          </defs>
-          <rect fill="url(#Rulers)" width="100%" height="100%" />
-        </svg>
-
-        <div v-if="pendingBookingData" :class="$style['new-booking']">
-          <div
-            :class="{
-              [$style['with-handles']]: !!bookingRangeChanging,
-            }"
-          >
-            <span>{{ durationFormatted(pendingBookingData.duration) }}</span>
-          </div>
-        </div>
-
-        <div :class="$style.header">
-          <div
-            v-for="day in timelineDates"
-            :key="day.toString()"
-            :class="$style['header-item']"
-          >
-            <span :class="$style['header-item-day']">
-              {{ dayTitle(day) }}
+              {{ clockTime(now) }}
             </span>
-            <div :class="$style['header-item-hours']">
-              <span v-for="h in HOURS_TIMES" :key="h">
-                <span>{{ h }}</span>
-              </span>
+          </div>
+
+          <template v-if="newBookingSlot">
+            <span :class="$style['new-booking-ruler-start']" />
+            <span :class="$style['new-booking-ruler-end']" />
+            <div :class="$style['new-booking-timeboxes-wrapper']">
+              <div :class="$style['new-booking-timeboxes-container']">
+                <span :class="$style['new-booking-timebox-start']">
+                  {{ clockTime(newBookingSlot.start) }}
+                </span>
+                <span :class="$style['new-booking-timebox-end']">
+                  {{ clockTime(newBookingSlot.end) }}
+                </span>
+              </div>
+            </div>
+          </template>
+
+          <svg :class="$style['rulers-svg']" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern
+                id="Rulers"
+                x="0"
+                y="0"
+                :width="pixelsPerMinute * 60"
+                height="100%"
+                patternUnits="userSpaceOnUse"
+              >
+                <rect x="0" y="0" height="100%" width="1" />
+                <rect
+                  :x="pixelsPerMinute * 15"
+                  y="0"
+                  height="100%"
+                  width="1"
+                  opacity="0.4"
+                />
+                <rect
+                  :x="pixelsPerMinute * 30"
+                  y="0"
+                  height="100%"
+                  width="1"
+                  opacity="0.7"
+                />
+                <rect
+                  :x="pixelsPerMinute * 45"
+                  y="0"
+                  height="100%"
+                  width="1"
+                  opacity="0.4"
+                />
+              </pattern>
+            </defs>
+            <rect fill="url(#Rulers)" width="100%" height="100%" />
+          </svg>
+
+          <div v-if="newBookingData" :class="$style['new-booking']">
+            <div :id="NEW_BOOKING_BOX_ID">
+              <span>{{ durationFormatted(newBookingData.duration) }}</span>
             </div>
           </div>
-        </div>
 
-        <div :class="$style.body">
-          <div
-            v-for="(room, i) in roomsLoading ? PLACEHOLDER_ROOMS : actualRooms"
-            :key="room === 'placeholder' ? i : room.id"
-            :class="$style.row"
-          >
+          <div :class="$style.header">
             <div
-              :class="{
-                [$style['row-header']]: true,
-                [$style.placeholder]: room === 'placeholder',
-              }"
+              v-for="day in timelineDates"
+              :key="day.toString()"
+              :class="$style['header-item']"
             >
-              <span v-if="isMobile" style="width: 100%; text-align: center">
-                {{ room === "placeholder" ? "PLA" : room.short_name }}
+              <span :class="$style['header-item-day']">
+                {{ dayTitle(day) }}
               </span>
-              <span v-else>
-                {{ room === "placeholder" ? "PLACEHOLDER" : room.title }}
-              </span>
-            </div>
-
-            <div
-              v-for="(booking, j) in room === 'placeholder' || bookingsLoading
-                ? PLACEHOLDER_BOOKINGS
-                : actualBookingsByRoomSorted.get(room.id)?.values()"
-              :key="booking === 'placeholder' ? j : booking.id"
-              :class="{
-                [$style.booking]: true,
-                [$style.placeholder]: booking === 'placeholder',
-              }"
-              :style="
-                booking === 'placeholder'
-                  ? {}
-                  : {
-                      '--left': px(
-                        bookingPositions.get(booking.id)?.offsetX ?? 0,
-                      ),
-                      '--width': px(
-                        bookingPositions.get(booking.id)?.length ?? 0,
-                      ),
-                    }
-              "
-            >
-              <div v-if="booking === 'placeholder'">
-                <span>PLACEHOLDER</span>
+              <div :class="$style['header-item-hours']">
+                <span v-for="h in HOURS_TIMES" :key="h">
+                  <span>{{ h }}</span>
+                </span>
               </div>
+            </div>
+          </div>
+
+          <div :class="$style.body">
+            <div
+              v-for="(room, i) in roomsLoading
+                ? PLACEHOLDER_ROOMS
+                : actualRooms"
+              :key="room === 'placeholder' ? i : room.id"
+              :class="$style.row"
+            >
               <div
-                v-else
-                :title="booking.title"
-                :data-booking-id="booking.id"
-                @click="handleBookingClick"
+                :class="{
+                  [$style['row-header']]: true,
+                  [$style.placeholder]: room === 'placeholder',
+                }"
               >
                 <span>
-                  {{ booking.title }}
+                  {{
+                    room === "placeholder"
+                      ? "xxx"
+                      : compactModeEnabled
+                        ? room.short_name
+                        : room.title
+                  }}
                 </span>
+              </div>
+
+              <div
+                v-for="(booking, j) in room === 'placeholder' || bookingsLoading
+                  ? PLACEHOLDER_BOOKINGS
+                  : actualBookingsByRoomSorted.get(room.id)?.values()"
+                :key="booking === 'placeholder' ? j : booking.id"
+                :class="{
+                  [$style.booking]: true,
+                  [$style.placeholder]: booking === 'placeholder',
+                }"
+                :style="
+                  booking === 'placeholder'
+                    ? {}
+                    : {
+                        '--left': px(
+                          bookingPositions.get(booking.id)?.offsetX ?? 0,
+                        ),
+                        '--width': px(
+                          bookingPositions.get(booking.id)?.length ?? 0,
+                        ),
+                      }
+                "
+              >
+                <div v-if="booking === 'placeholder'">
+                  <span>PLACEHOLDER</span>
+                </div>
+                <div
+                  v-else
+                  :title="booking.title"
+                  :data-booking-id="booking.id"
+                  @click="handleBookingClick"
+                >
+                  <span>
+                    {{ booking.title }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <div ref="overlayEl" :class="$style.overlay" />
     </div>
 
-    <div ref="overlayEl" :class="$style.overlay" />
+    <div v-if="newBookingTouched" :class="$style.buttons">
+      <button :class="$style['button-secondary']" @click="handleBoookingCancel">
+        Cancel
+      </button>
+      <button :class="$style['button-primary']" @click="handleBoookingConfirm">
+        Book
+      </button>
+    </div>
   </div>
 </template>
 
@@ -821,6 +1104,7 @@ function handleBookingClick(event: MouseEvent) {
 
 $timebox-width: 50px;
 $timebox-height: 20px;
+$button-height: 50px;
 
 @mixin text-sm {
   font-size: 0.875rem;
@@ -848,15 +1132,22 @@ $timebox-height: 20px;
   }
 }
 
-@mixin timebox {
+@mixin timebox(
+  $text-color,
+  $bg-color: transparent,
+  $border-color: transparent
+) {
   @include text-sm;
   width: $timebox-width;
   height: $timebox-height;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: var(--c-text-muted-2);
   user-select: none;
+  color: $text-color;
+  background: $bg-color;
+  border: 1px solid $border-color;
+  border-radius: borders.$radius-xs;
 }
 
 @mixin skeleton {
@@ -872,7 +1163,7 @@ $timebox-height: 20px;
   }
 }
 
-.timeline {
+.root {
   --c-bg-items: #{colors.$gray-50};
   --c-bg-sheet: #{colors.$gray-100};
   --c-borders: #{colors.$gray-200};
@@ -891,7 +1182,7 @@ $timebox-height: 20px;
 }
 
 :global(.dark) {
-  .timeline {
+  .root {
     --c-bg-items: #{colors.$gray-950};
     --c-bg-sheet: #{colors.$gray-900};
     --c-borders: #{colors.$gray-800};
@@ -910,14 +1201,19 @@ $timebox-height: 20px;
   }
 }
 
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
 .timeline {
   position: relative;
   overflow: hidden;
   background: var(--c-bg-sheet);
   border: 1px solid var(--c-borders);
   border-radius: borders.$radius-md;
-  display: flex;
-  max-height: 100%;
 }
 
 .corner {
@@ -954,8 +1250,14 @@ $timebox-height: 20px;
 .scroller {
   position: relative;
   overflow: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
   scrollbar-width: none;
+  max-height: 100%;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .wrapper {
@@ -1005,8 +1307,11 @@ $timebox-height: 20px;
         width: calc(var(--ppm) * 60px);
 
         & > span {
-          @include timebox;
-          transform: translateX(-50%);
+          @include timebox(var(--c-text-muted-2));
+          transform: translate(
+            -50%,
+            1px
+          ); // 1px down to align with dynamic timeboxes.
         }
       }
     }
@@ -1041,7 +1346,7 @@ $timebox-height: 20px;
   position: sticky;
   left: 0;
   z-index: 1;
-  flex: 0 0 var(--sidebar-width);
+  width: var(--sidebar-width);
   display: flex;
   align-items: center;
   padding: 0 12px;
@@ -1051,6 +1356,12 @@ $timebox-height: 20px;
   border-color: var(--c-borders);
   border-style: solid;
   border-right-width: 1px;
+
+  & > span {
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 
   &.placeholder {
     & > span {
@@ -1098,16 +1409,15 @@ $timebox-height: 20px;
 }
 
 .now-timebox {
-  @include timebox;
-
+  @include timebox(
+    var(--c-textbox-text-red),
+    var(--c-textbox-bg-red),
+    var(--c-textbox-borders-red)
+  );
   position: sticky;
   right: 0;
   left: var(--sidebar-width);
   transform: translateY(var(--header-height));
-  background: var(--c-textbox-bg-red);
-  color: var(--c-textbox-text-red);
-  border: 1px solid var(--c-textbox-borders-red);
-  border-radius: borders.$radius-xs;
   cursor: pointer;
 }
 
@@ -1174,6 +1484,7 @@ $timebox-height: 20px;
   height: var(--row-height);
 
   & > div {
+    position: relative;
     padding: 0;
     justify-content: center;
     border: 1px solid var(--c-textbox-borders-purple);
@@ -1182,24 +1493,25 @@ $timebox-height: 20px;
   }
 }
 
-.with-handles {
+.timeline[data-new-touched] .new-booking > div {
   &::before,
   &::after {
     content: "";
     position: absolute;
-    top: 10px;
-    bottom: 10px;
-    width: 4px;
-    cursor: w-resize;
-    background-color: var(--c-text);
+    width: 5px;
+    height: 80%;
+    top: 50%;
+    border-radius: 100px;
+    background: var(--c-textbox-borders-purple);
   }
+
   &::before {
-    left: 4px;
-    border-radius: borders.$radius-md 0 0 borders.$radius-md;
+    left: 0;
+    transform: translate(-50%, -50%);
   }
   &::after {
-    right: 4px;
-    border-radius: 0 borders.$radius-md borders.$radius-md 0;
+    right: 0;
+    transform: translate(50%, -50%);
   }
 }
 
@@ -1225,13 +1537,12 @@ $timebox-height: 20px;
 
 .new-booking-timebox-start,
 .new-booking-timebox-end {
-  @include timebox;
-
+  @include timebox(
+    var(--c-textbox-text-purple),
+    var(--c-textbox-bg-purple),
+    var(--c-textbox-borders-purple)
+  );
   flex: 0 0 auto;
-  background: var(--c-textbox-bg-purple);
-  color: var(--c-textbox-text-purple);
-  border: 1px solid var(--c-textbox-borders-purple);
-  border-radius: borders.$radius-xs;
 }
 .new-booking-timebox-start {
   margin-right: auto;
@@ -1261,26 +1572,28 @@ $timebox-height: 20px;
   visibility: hidden;
 }
 
-.loading {
-  content: "";
-  animation: loading 1.5s infinite linear;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 2px;
-  background: white;
-  z-index: 10;
-}
+.buttons {
+  display: flex;
+  gap: 8px;
 
-@keyframes loading {
-  0% {
-    left: -20%;
-    right: 100%;
+  & button {
+    @include text-md();
+    @include effects.shadow-2();
+    height: $button-height;
+    flex: 1 0 auto;
+    border-radius: borders.$radius-md;
   }
-  100% {
-    left: 100%;
-    right: -20%;
+
+  & .button-secondary {
+    color: var(--c-text-muted);
+    background: var(--c-bg-items);
+    border: 1px solid var(--c-borders);
+  }
+
+  & .button-primary {
+    color: var(--c-textbox-text-purple);
+    background: var(--c-textbox-bg-purple);
+    border: 1px solid var(--c-textbox-borders-purple);
   }
 }
 </style>

@@ -1,20 +1,20 @@
 import { BookModal } from "@/components/room-booking/BookModal.tsx";
 import { lazy, Suspense, useState } from "react";
-import type { NewBooking } from "./BookingTimeline.vue";
+import type { Slot } from "./BookingTimeline.vue";
 
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/BookingTimeline.tsx"),
 );
 
 export function RoomBookingPage() {
-  const [bookingModalData, setBookingModalData] = useState<NewBooking>();
+  const [bookingModalData, setBookingModalData] = useState<Slot>();
   const [modalOpen, setModalOpen] = useState(false);
   return (
     <>
       <Suspense>
         <BookingTimeline
-          className="flex max-h-full"
-          onBook={(newBooking: NewBooking) => {
+          className="h-full"
+          onBook={(newBooking: Slot) => {
             setBookingModalData(newBooking);
             setModalOpen(true);
           }}
