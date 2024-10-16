@@ -15,7 +15,48 @@ import type { Slot } from "./BookingTimeline.vue";
 function durationFormatted(durationMs: number): string {
   const hours = Math.floor(durationMs / (3600 * 1000));
   const minutes = Math.floor((durationMs % (3600 * 1000)) / (60 * 1000));
-  return `${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m` : ""}`;
+  return `${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m` : ""}`.trim();
+}
+
+function checkBookingErrors({ room, start, end }: Slot): string | null {
+  if (end.getTime() < start.getTime()) {
+    return "End time should be after start time";
+  }
+
+  if (end.getTime() - start.getTime() > 3 * 3600 * 1000) {
+    return "Booking duration should not exceed 3 hours";
+  }
+
+  if (room.restrict_daytime) {
+    // Should not cover Monday-Friday 8:00-19:00.
+    // Assume that duration is <= 3 hours (checked above).
+
+    if (start.getDay() === 0 || start.getDay() === 6) {
+      // Check if booking is on weekend
+      return null;
+    }
+
+    const startSecondsFromDayStart =
+      start.getHours() * 3600 + start.getMinutes() * 60 + start.getSeconds();
+    const endSecondsFromDayStart =
+      end.getHours() * 3600 +
+      end.getMinutes() * 60 +
+      end.getSeconds() +
+      (end.getDay() === start.getDay() ? 0 : 24 * 3600);
+
+    if (
+      startSecondsFromDayStart >= 19 * 3600 &&
+      endSecondsFromDayStart <= (24 + 8) * 3600
+    ) {
+      return null;
+    }
+    if (startSecondsFromDayStart >= 0 && endSecondsFromDayStart <= 8 * 3600) {
+      return null;
+    }
+
+    return "Lecture rooms are available only at night 19:00-8:00, or full day on weekends";
+  }
+  return null;
 }
 
 export function BookModal({
@@ -35,6 +76,8 @@ export function BookModal({
   // Role props for screen readers
   const role = useRole(context);
   const { getFloatingProps } = useInteractions([dismiss, role]);
+
+  const errorMessage = data ? checkBookingErrors(data) : null;
 
   const {
     mutate,
@@ -179,6 +222,12 @@ export function BookModal({
                         </p>
                       )}
                     </div>
+
+                    {errorMessage && (
+                      <div className="flex flex-row gap-2 rounded-2xl border-2 border-red-500/50 bg-red-800/50 p-2">
+                        {errorMessage}
+                      </div>
+                    )}
 
                     {creationError && (
                       <div className="flex flex-row gap-2 rounded-2xl border-2 border-red-500/50 bg-red-800/50 p-2">
