@@ -203,8 +203,7 @@ roomBookingFetch
   })
   .catch((err) => {
     console.error("Failed to load rooms:", err);
-    // eslint-disable-next-line no-alert
-    alert("Failed to load rooms. Try again later.");
+    // TODO: show error message to the user.
   });
 
 // TODO: remove this, when backend will return booking UIDs.
@@ -242,8 +241,7 @@ roomBookingFetch
   })
   .catch((err) => {
     console.error("Failed to load bookings:", err);
-    // eslint-disable-next-line no-alert
-    alert("Failed to load bookings. Try again later.");
+    // TODO: show error message to the user.
   });
 
 const actualBookingsByRoomSorted = computed(() => {
