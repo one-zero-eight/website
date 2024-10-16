@@ -31,8 +31,43 @@ export interface paths {
     /** Bookings */
     get: operations["bookings_bookings"];
     put?: never;
+    /** Create Booking */
+    post: operations["bookings_create_booking"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bookings/my": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** My Bookings */
+    get: operations["bookings_my_bookings"];
+    put?: never;
     post?: never;
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bookings/{booking_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete Booking */
+    delete: operations["bookings_delete_booking"];
     options?: never;
     head?: never;
     patch?: never;
@@ -63,6 +98,25 @@ export interface components {
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
+    };
+    /** MyUniBooking */
+    MyUniBooking: {
+      /** Id */
+      id: number;
+      /** Room Id */
+      room_id: string;
+      /** Title */
+      title: string;
+      /**
+       * Start
+       * Format: date-time
+       */
+      start: string;
+      /**
+       * End
+       * Format: date-time
+       */
+      end: string;
     };
     /**
      * Room
@@ -125,6 +179,7 @@ export interface components {
 export type SchemaBooking = components["schemas"]["Booking"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaMyUniBooking = components["schemas"]["MyUniBooking"];
 export type SchemaRoom = components["schemas"]["Room"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
@@ -152,9 +207,9 @@ export interface operations {
   bookings_bookings: {
     parameters: {
       query: {
-        /** @example 2024-10-09T12:11+00:00 */
+        /** @example 2024-10-16T20:56+00:00 */
         start: string;
-        /** @example 2024-10-09T21:11+00:00 */
+        /** @example 2024-10-17T05:56+00:00 */
         end: string;
       };
       header?: never;
@@ -170,6 +225,91 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Booking"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  bookings_create_booking: {
+    parameters: {
+      query: {
+        room_id: string;
+        title: string;
+        start: string;
+        end: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": boolean;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  bookings_my_bookings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyUniBooking"][];
+        };
+      };
+    };
+  };
+  bookings_delete_booking: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        booking_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": boolean;
         };
       };
       /** @description Validation Error */

@@ -1,3 +1,4 @@
+import { $roomBooking } from "@/api/room-booking";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -8,25 +9,13 @@ import {
   useRole,
   useTransitionStyles,
 } from "@floating-ui/react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Slot } from "./BookingTimeline.vue";
 
-function getBookingUrl(booking: {
-  myUniRoomId: number;
-  title: string;
-  start: Date;
-  end: Date;
-}) {
-  // Need to add Moscow offset.
-  const fmtDate = (d: Date) =>
-    new Date(d.getTime() + 3 * 60 * 60 * 1000).toISOString().slice(0, 16);
-
-  const url = new URL(import.meta.env.VITE_BOOKING_MY_UNI_URL);
-  url.searchParams.set("room", booking.myUniRoomId.toString());
-  url.searchParams.set("title", booking.title);
-  url.searchParams.set("start", fmtDate(booking.start));
-  url.searchParams.set("end", fmtDate(booking.end));
-  return url.toString();
+function durationFormatted(durationMs: number): string {
+  const hours = Math.floor(durationMs / (3600 * 1000));
+  const minutes = Math.floor((durationMs % (3600 * 1000)) / (60 * 1000));
+  return `${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m` : ""}`;
 }
 
 export function BookModal({
@@ -39,20 +28,29 @@ export function BookModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const { context, refs } = useFloating({ open, onOpenChange });
-
   // Transition effect
   const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
-
   // Event listeners to change the open state
   const dismiss = useDismiss(context, { outsidePressEvent: "mousedown" });
   // Role props for screen readers
   const role = useRole(context);
-
   const { getFloatingProps } = useInteractions([dismiss, role]);
+
+  const {
+    mutate,
+    isPending,
+    error: creationError,
+    reset,
+  } = $roomBooking.useMutation("post", "/bookings/");
 
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState("");
+
+  useEffect(() => {
+    setTitle("");
+    reset();
+  }, [data, reset]);
 
   const submitBooking = useCallback(() => {
     if (!data) return;
@@ -61,17 +59,26 @@ export function BookModal({
       return;
     }
 
-    window.open(
-      getBookingUrl({
-        myUniRoomId: data.room.my_uni_id,
-        title: title,
-        start: data.start,
-        end: data.end,
-      }),
+    mutate(
+      {
+        params: {
+          query: {
+            room_id: data.room.id,
+            title: title,
+            start: data.start.toISOString(),
+            end: data.end.toISOString(),
+          },
+        },
+      },
+      {
+        onSuccess: () => {
+          setTitle("");
+          onOpenChange(false);
+          reset();
+        },
+      },
     );
-    setTitle("");
-    onOpenChange(false);
-  }, [title, data, onOpenChange]);
+  }, [data, title, mutate, onOpenChange, reset]);
 
   if (!isMounted) {
     return null;
@@ -99,7 +106,7 @@ export function BookModal({
                 {/* Heading and description */}
                 <div className="mb-2 flex w-full flex-row">
                   <div className="grow items-center text-3xl font-semibold">
-                    Create new booking
+                    New booking
                   </div>
                   <button
                     className="-mr-2 -mt-2 h-52 w-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75 @lg/export:-mr-6 @lg/export:-mt-6"
@@ -116,17 +123,13 @@ export function BookModal({
                   }}
                 >
                   <div className="flex flex-col gap-2">
-                    <div className="flex flex-row items-center gap-4">
-                      <div className="text-xl text-text-secondary/75">
-                        Title:
-                      </div>
-                      <input
-                        ref={titleInputRef}
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full grow rounded-xl bg-secondary-main p-2 outline-none focus:ring-2 focus:ring-focus"
-                      />
-                    </div>
+                    <input
+                      ref={titleInputRef}
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Enter title"
+                      className="w-full grow rounded-xl bg-secondary-main p-2 outline-none focus:ring-2 focus:ring-focus"
+                    />
 
                     <div className="flex flex-row items-center gap-2 text-xl text-text-secondary/75">
                       <div className="flex h-fit w-6">
@@ -145,6 +148,10 @@ export function BookModal({
                         {data?.start.toLocaleString("en-US", {
                           day: "2-digit",
                           month: "long",
+                        })}
+                        ,{" "}
+                        {data?.start.toLocaleString("en-US", {
+                          weekday: "long",
                         })}
                       </p>
                     </div>
@@ -165,14 +172,21 @@ export function BookModal({
                               minute: "2-digit",
                             }) +
                             " (" +
-                            Math.round(
-                              (data.end.getTime() - data.start.getTime()) /
-                                60000,
+                            durationFormatted(
+                              data.end.getTime() - data.start.getTime(),
                             ) +
-                            " min)"}
+                            ")"}
                         </p>
                       )}
                     </div>
+
+                    {creationError && (
+                      <div className="flex flex-row gap-2 rounded-2xl border-2 border-red-500/50 bg-red-800/50 p-2">
+                        Cannot book the room:{" "}
+                        {creationError.detail?.toString() ??
+                          (creationError.toString() || "Unknown error")}
+                      </div>
+                    )}
 
                     <div className="flex flex-row gap-2">
                       <button
@@ -183,10 +197,15 @@ export function BookModal({
                       </button>
                       <button
                         type="submit"
-                        className="flex w-full items-center justify-center gap-4 rounded-2xl border-2 border-focus bg-primary-main px-4 py-2 text-lg font-medium hover:bg-primary-hover"
+                        className="flex w-full items-center justify-center gap-4 rounded-2xl border-2 border-focus/50 bg-focus/25 px-4 py-2 text-lg font-medium hover:bg-focus/50"
+                        disabled={isPending}
                       >
                         Book
-                        <span className="icon-[material-symbols--check] text-2xl text-icon-main" />
+                        {!isPending ? (
+                          <span className="icon-[material-symbols--check] text-2xl text-icon-main" />
+                        ) : (
+                          <span className="icon-[mdi--loading] animate-spin text-2xl text-icon-main" />
+                        )}
                       </button>
                     </div>
                   </div>
