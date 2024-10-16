@@ -116,8 +116,10 @@ export function BookModal({
       {
         onSuccess: () => {
           setTitle("");
-          onOpenChange(false);
           reset();
+          // Refresh window to update caches in Vue
+          window.location.reload();
+          onOpenChange(false);
         },
       },
     );
