@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { MaybeRef } from "vue";
 import { roomBookingFetch, type roomBookingTypes } from "@/api/room-booking";
 import { useMediaQuery, useNow } from "@vueuse/core";
+import type { MaybeRef } from "vue";
 import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
 
 /* ========================================================================== */
@@ -1204,7 +1204,9 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
                   :data-booking-id="booking.id"
                   @click="handleBookingClick"
                 >
-                  <span>{{ booking.title }}</span>
+                  <span>{{
+                    booking.title.replace("Students Booking Service", "").trim()
+                  }}</span>
                 </div>
               </div>
             </div>
