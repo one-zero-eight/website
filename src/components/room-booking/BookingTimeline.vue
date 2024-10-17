@@ -1568,7 +1568,7 @@ $button-height: 50px;
 
     & > span {
       position: sticky;
-      left: var(--sidebar-width);
+      left: calc(var(--sidebar-width) + 6px);
       overflow: hidden;
       text-overflow: ellipsis;
     }
