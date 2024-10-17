@@ -1,17 +1,15 @@
-import { BookModal } from "@/components/room-booking/BookModal.tsx";
-import { ViewBookingModal } from "@/components/room-booking/ViewBookingModal.tsx";
 import { lazy, Suspense, useState } from "react";
 import type { Booking, Slot } from "./BookingTimeline.vue";
+import { BookingModal } from "@/components/room-booking/BookingModal.tsx";
 
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/BookingTimeline.tsx"),
 );
 
 export function RoomBookingPage() {
-  const [bookingModalData, setBookingModalData] = useState<Slot>();
   const [modalOpen, setModalOpen] = useState(false);
-  const [viewBookingModalData, setViewBookingModalData] = useState<Booking>();
-  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [newBookingSlot, setNewBookingSlot] = useState<Slot>();
+  const [bookingDetails, setBookingDetails] = useState<Booking>();
 
   return (
     <>
@@ -19,24 +17,22 @@ export function RoomBookingPage() {
         <BookingTimeline
           className="h-full"
           onBook={(newBooking: Slot) => {
-            setBookingModalData(newBooking);
+            setNewBookingSlot(newBooking);
+            setBookingDetails(undefined);
             setModalOpen(true);
           }}
           onBookingClick={(booking: Booking) => {
-            setViewBookingModalData(booking);
-            setViewModalOpen(true);
+            setBookingDetails(booking);
+            setNewBookingSlot(undefined);
+            setModalOpen(true);
           }}
         />
       </Suspense>
-      <BookModal
-        data={bookingModalData}
+      <BookingModal
+        newSlot={newBookingSlot}
+        detailsBooking={bookingDetails}
         open={modalOpen}
         onOpenChange={setModalOpen}
-      />
-      <ViewBookingModal
-        data={viewBookingModalData}
-        open={viewModalOpen}
-        onOpenChange={setViewModalOpen}
       />
     </>
   );

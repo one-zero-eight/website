@@ -3,6 +3,12 @@ import { roomBookingFetch, type roomBookingTypes } from "@/api/room-booking";
 import { useMediaQuery, useNow } from "@vueuse/core";
 import type { MaybeRef } from "vue";
 import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
+import {
+  T,
+  durationFormatted,
+  msBetween as msBetweenDates,
+  clockTime,
+} from "@/lib/utils/dates";
 
 /* ========================================================================== */
 /* ================================ Options ================================= */
@@ -27,14 +33,6 @@ const PIXELS_PER_MINUTE_COMPACT = 85 / 30;
 
 const HEADER_HEIGHT = 60;
 const ROW_HEIGHT = 50;
-
-const T = {
-  Ms: 1,
-  Sec: 1000,
-  Min: 1000 * 60,
-  Hour: 1000 * 60 * 60,
-  Day: 1000 * 60 * 60 * 24,
-};
 
 const TIME_GRID_SCALE = 5 * T.Min;
 const MIN_BOOKING_DURATION = 15 * T.Min;
@@ -109,24 +107,7 @@ const px = (n: number) => `${n}px`;
 const msToPx = (ms: number) => (ms / T.Min) * pixelsPerMinute.value;
 
 function msBetween(a: MaybeRef<Date | number>, b: MaybeRef<Date | number>) {
-  a = unref(a);
-  b = unref(b);
-  return (
-    (b instanceof Date ? b.getTime() : b) -
-    (a instanceof Date ? a.getTime() : a)
-  );
-}
-
-function durationFormatted(durationMs: number): string {
-  const hours = Math.floor(durationMs / T.Hour);
-  const minutes = Math.floor((durationMs % T.Hour) / T.Min);
-  return `${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m` : ""}`;
-}
-
-function clockTime(d: Date): string {
-  const hh = d.getHours().toString().padStart(2, "0");
-  const mm = d.getMinutes().toString().padStart(2, "0");
-  return `${hh}:${mm}`;
+  return msBetweenDates(unref(a), unref(b));
 }
 
 function dayTitle(d: Date) {
@@ -433,6 +414,9 @@ function validRangeForPosition(
 
   // TODO: Should we snap to the grid after adjusting range? Because bookings
   //  are not guaranteed to snap to the grid.
+
+  // 3. May be before now after adjusing.
+  if (l < safeLeft) return null;
 
   return [l, r];
 }

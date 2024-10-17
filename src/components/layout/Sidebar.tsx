@@ -157,7 +157,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
       <div
         className={clsx(
           "fixed inset-0 flex transition-colors lgw-smh:hidden",
-          isOpened ? "visible z-[2] block bg-black/50" : "z-[-1] bg-black/0",
+          isOpened ? "visible z-[10] block bg-black/50" : "z-[-1] bg-black/0",
         )}
         onClick={() => setOpened(false)}
       />
