@@ -131,6 +131,7 @@ const MapViewer = memo(function MapViewer({
     // Support panning using mouse
     const onMouseDown = (e: MouseEvent) => {
       e.preventDefault();
+      container.style.cursor = "grabbing";
 
       const startX = e.clientX;
       const startY = e.clientY;
@@ -144,6 +145,7 @@ const MapViewer = memo(function MapViewer({
       const onMouseUp = () => {
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);
+        container.style.cursor = "grab";
       };
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
