@@ -34,15 +34,14 @@ export function MapsPage({ sceneId }: { sceneId: string | undefined }) {
           <div className="flex min-w-56 flex-col gap-2">
             <h3 className="text-2xl font-semibold">Legend:</h3>
             {currentScene.legend?.map((legendEntry) => (
-              <div
-                key={legendEntry.legend_id}
-                className="flex flex-row items-center gap-2"
-              >
+              <div key={legendEntry.legend_id} className="flex flex-row gap-2">
                 <div
-                  className="h-4 w-4 rounded-full"
+                  className="mt-1.5 h-4 w-4 flex-shrink-0 rounded-full"
                   style={{ backgroundColor: legendEntry.color ?? undefined }}
                 />
-                <span>{legendEntry.legend}</span>
+                <span className="whitespace-pre-wrap">
+                  {legendEntry.legend}
+                </span>
               </div>
             ))}
           </div>
