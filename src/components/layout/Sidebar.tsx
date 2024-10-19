@@ -120,7 +120,7 @@ const externalItems: Item[] = [
   },
   {
     title: "Baam",
-    path: "https://baam.duckdns.org/s",
+    path: "https://baam.tatar/s",
     icon: (
       <span className="icon-[material-symbols--qr-code-rounded] text-4xl" />
     ),
