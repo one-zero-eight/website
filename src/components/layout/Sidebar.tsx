@@ -137,6 +137,13 @@ const externalItems: Item[] = [
       <span className="icon-[material-symbols--account-circle-outline] text-4xl" />
     ),
   },
+  {
+    title: "InnoDataHub",
+    path: "https://booking-innodatahub.innopolis.university",
+    icon: (
+      <span className="icon-[material-symbols--memory-outline-rounded] text-4xl" />
+    ),
+  },
 ];
 
 export const SidebarContext = createContext<{
