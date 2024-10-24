@@ -22,7 +22,7 @@ const items: Item[] = [
       <span className="icon-[material-symbols--space-dashboard-outline] text-4xl" />
     ),
   },
-  ...((import.meta.env.VITE_DISABLE_SEARCH && []) || [
+  ...((import.meta.env.VITE_HIDE_SEARCH && []) || [
     {
       title: "Search",
       path: "/search",
@@ -41,19 +41,17 @@ const items: Item[] = [
       <span className="icon-[material-symbols--calendar-month-outline-rounded] text-4xl" />
     ),
   },
-  ...((import.meta.env.VITE_DISABLE_BOOKING && []) || [
-    {
-      title: "Room booking",
-      path: "/room-booking",
-      icon: <span className="icon-[ph--door-open] text-4xl" />,
-      badge: (
-        <span className="ml-2 rounded-full bg-rose-700 px-2 py-1 text-xs font-semibold text-white">
-          BETA
-        </span>
-      ),
-    },
-  ]),
-  ...((import.meta.env.VITE_DISABLE_SEARCH && []) || [
+  {
+    title: "Room booking",
+    path: "/room-booking",
+    icon: <span className="icon-[ph--door-open] text-4xl" />,
+    badge: (
+      <span className="ml-2 rounded-full bg-rose-700 px-2 py-1 text-xs font-semibold text-white">
+        BETA
+      </span>
+    ),
+  },
+  ...((import.meta.env.VITE_HIDE_MAPS && []) || [
     {
       title: "Maps",
       path: "/maps",
