@@ -73,7 +73,7 @@ const items: Item[] = [
   },
   {
     title: "Dorms",
-    path: "/rooms",
+    path: "/dorms",
     badge: (
       <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
         NEW

@@ -1,4 +1,4 @@
-export function DormRoomsPage() {
+export function DormsPage() {
   return (
     <div className="grid grid-cols-1 gap-4 p-4">
       <div className="flex flex-col gap-4">
@@ -11,7 +11,7 @@ export function DormRoomsPage() {
               What is it?
             </p>
             <p className="text-lg text-text-secondary/75">
-              InNoHassle Rooms bot is a tool for managing tasks, duties, and
+              InNoHassle Dorms bot is a tool for managing tasks, duties, and
               rules in your dormitory room. It helps you to split duties between
               roommates and track them.
             </p>
