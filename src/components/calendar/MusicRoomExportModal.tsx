@@ -79,14 +79,14 @@ export function MusicRoomExportModal({
             className="flex h-fit w-full flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-1/2"
           >
             <div className="overflow-hidden rounded-2xl bg-popup">
-              <div className="flex flex-col p-4 @2xl/export:p-8">
+              <div className="flex flex-col p-4">
                 {/* Heading and description */}
                 <div className="mb-2 flex w-full flex-row">
                   <div className="grow items-center text-3xl font-semibold">
                     Export music room bookings
                   </div>
                   <button
-                    className="-mr-2 -mt-2 h-52 w-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75 @lg/export:-mr-6 @lg/export:-mt-6"
+                    className="-mr-2 -mt-2 h-52 w-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
@@ -97,7 +97,7 @@ export function MusicRoomExportModal({
                   calendar application and it will be updated on changes.
                 </div>
                 {/* Export steps */}
-                <ul className="my-4 list-decimal pl-5 text-text-secondary/75">
+                <ul className="mt-4 list-decimal pl-5 text-text-secondary/75">
                   <li>
                     Copy the personal link.
                     {!scheduleKey ? (
@@ -129,21 +129,19 @@ export function MusicRoomExportModal({
                   </li>
                   <li>Paste the link and click Add.</li>
                 </ul>
-                {/* Calendar itself */}
-                <div className="-mx-4 -mb-4 @2xl/export:-mx-8 @2xl/export:-mb-8">
-                  <Calendar
-                    urls={[
-                      {
-                        url: getMyMusicRoomLink(),
-                        color: "seagreen",
-                        sourceLink: "https://t.me/InnoMusicRoomBot",
-                        updatedAt: new Date().toISOString(),
-                      },
-                    ]}
-                    viewId="popup"
-                  />
-                </div>
               </div>
+              {/* Calendar itself */}
+              <Calendar
+                urls={[
+                  {
+                    url: getMyMusicRoomLink(),
+                    color: "seagreen",
+                    sourceLink: "https://t.me/InnoMusicRoomBot",
+                    updatedAt: new Date().toISOString(),
+                  },
+                ]}
+                viewId="popup"
+              />
             </div>
           </div>
         </FloatingFocusManager>

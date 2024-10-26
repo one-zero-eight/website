@@ -9,8 +9,8 @@ export function MapsPage({ sceneId }: { sceneId: string | undefined }) {
     scenes?.find((scene) => scene.scene_id === sceneId) ?? scenes?.[0];
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-row flex-wrap gap-2">
+    <div className="flex grow flex-col">
+      <div className="flex flex-row flex-wrap gap-2 p-4">
         {scenes?.map((scene) => (
           <Link
             key={scene.scene_id}
@@ -28,10 +28,10 @@ export function MapsPage({ sceneId }: { sceneId: string | undefined }) {
 
       {currentScene && (
         <div className="flex flex-row flex-wrap gap-4 2xl:flex-nowrap">
-          <div className="-mx-4 @2xl/main:-mx-12 2xl:mr-0">
+          <div className="">
             <MapView scene={currentScene} />
           </div>
-          <div className="flex min-w-56 flex-col gap-2">
+          <div className="flex min-w-56 flex-col gap-2 px-2">
             <h3 className="text-2xl font-semibold">Legend:</h3>
             {currentScene.legend?.map((legendEntry) => (
               <div key={legendEntry.legend_id} className="flex flex-row gap-2">

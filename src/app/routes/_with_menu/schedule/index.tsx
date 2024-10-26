@@ -1,11 +1,11 @@
-import { NavbarTemplate } from "@/components/layout/Navbar.tsx";
+import { Topbar } from "@/components/layout/Topbar.tsx";
 import { ScheduleMainPage } from "@/components/schedule/ScheduleMainPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/schedule/")({
   component: () => (
-    <div className="flex flex-col p-4 @container/content @2xl/main:p-12">
+    <div className="flex min-h-full flex-col overflow-y-auto @container/content">
       <Helmet>
         <title>Schedule</title>
         <meta
@@ -16,23 +16,7 @@ export const Route = createFileRoute("/_with_menu/schedule/")({
           }
         />
       </Helmet>
-      <NavbarTemplate
-        title="InNoHassle ecosystem"
-        description={
-          <>
-            Services developed by{" "}
-            <a
-              href="https://t.me/one_zero_eight"
-              className="selected"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              one-zero-eight
-            </a>{" "}
-            community for Innopolis students.
-          </>
-        }
-      />
+      <Topbar title="Schedule" />
       <ScheduleMainPage />
     </div>
   ),

@@ -1,11 +1,11 @@
-import { NavbarTemplate } from "@/components/layout/Navbar.tsx";
+import { Topbar } from "@/components/layout/Topbar.tsx";
 import { RoomBookingPage } from "@/components/room-booking/RoomBookingPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/room-booking")({
   component: () => (
-    <div className="flex h-[100dvh] flex-col p-4 @container/content @2xl/main:p-12">
+    <div className="flex min-h-full flex-col overflow-y-auto @container/content">
       <Helmet>
         <title>Room booking</title>
         <meta
@@ -14,13 +14,8 @@ export const Route = createFileRoute("/_with_menu/room-booking")({
         />
       </Helmet>
 
-      <NavbarTemplate
-        title="Room booking"
-        description="Book auditoriums and meeting rooms in Innopolis University."
-      />
-      <div className="mt-4 flex-grow overflow-hidden">
-        <RoomBookingPage />
-      </div>
+      <Topbar title="Room booking" />
+      <RoomBookingPage />
     </div>
   ),
 });

@@ -1328,8 +1328,6 @@ $button-height: 50px;
   position: relative;
   overflow: hidden;
   background: var(--c-bg-sheet);
-  border: 1px solid var(--c-borders);
-  border-radius: borders.$radius-md;
 
   &[data-has-new] {
     cursor: crosshair !important;

@@ -1,4 +1,4 @@
-import { NavbarTemplate } from "@/components/layout/Navbar.tsx";
+import { Topbar } from "@/components/layout/Topbar.tsx";
 import { MapsPage } from "@/components/maps/MapsPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_with_menu/maps")({
   component: function RouteComponent() {
     const { sceneId } = Route.useSearch();
     return (
-      <div className="flex flex-col p-4 @container/content @2xl/main:p-12">
+      <div className="flex min-h-full flex-col overflow-y-auto @container/content">
         <Helmet>
           <title>Maps</title>
           <meta
@@ -24,13 +24,8 @@ export const Route = createFileRoute("/_with_menu/maps")({
           />
         </Helmet>
 
-        <NavbarTemplate
-          title="Maps"
-          description="View plans of Innopolis University."
-        />
-        <div className="mt-4 flex-grow">
-          <MapsPage sceneId={sceneId} />
-        </div>
+        <Topbar title="Maps" />
+        <MapsPage sceneId={sceneId} />
       </div>
     );
   },

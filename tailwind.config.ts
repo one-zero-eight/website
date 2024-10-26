@@ -53,7 +53,6 @@ const config: Config = {
       },
       fontFamily: {
         rubik: ["Rubik Variable", "sans-serif"],
-        primary: ["Rubik Variable", "sans-serif"],
         handwritten: ["Fuzzy Bubbles", "sans-serif"],
       },
       screens: {

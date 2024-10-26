@@ -278,7 +278,7 @@ export default function CalendarViewer({
   }, [urls]);
 
   return (
-    <div className={isLoading ? "calendar-loading" : undefined}>
+    <div className={isLoading ? "calendar-loading overflow-clip" : undefined}>
       {calendarComponent}
       {popoverInfo.event && popoverInfo.eventElement && (
         <CalendarEventPopover
@@ -367,7 +367,7 @@ function renderEventDayGridMonth({
         {event.title || <>&nbsp;</>}
       </div>
       {timeText && (
-        <div className="ml-1 hidden w-fit text-right text-xs text-inactive @5xl/main:block">
+        <div className="ml-1 hidden w-fit text-right text-xs text-inactive @5xl/content:block">
           {timeText}
         </div>
       )}

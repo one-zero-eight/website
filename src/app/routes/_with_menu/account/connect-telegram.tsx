@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_with_menu/account/connect-telegram")({
         <link rel="canonical" href="https://innohassle.ru/account" />
       </Helmet>
 
-      <div className="my-4 flex w-full max-w-md flex-col gap-4 rounded-2xl bg-primary-main px-4 py-6 @container/account">
+      <div className="m-4 flex w-full max-w-md flex-col gap-4 rounded-2xl bg-primary-main px-4 py-6 @container/account">
         <img
           src="/icon.svg"
           alt="InNoHassle logo"

@@ -59,8 +59,8 @@ export default function ScheduleList({ category }: ScheduleListProps) {
         );
 
   return (
-    <>
-      <div className="mt-4 flex flex-row flex-wrap justify-center gap-4 @2xl/content:justify-between">
+    <div className="p-4">
+      <div className="flex flex-row flex-wrap justify-center gap-4 @2xl/content:justify-between">
         <div className="flex flex-row flex-wrap justify-center gap-4 @2xl/content:justify-normal">
           <CategoriesDropdown category={category} />
           {categoryInfo?.filtersTagTypes.map((v) => (
@@ -83,8 +83,6 @@ export default function ScheduleList({ category }: ScheduleListProps) {
           />
         </div>
       </div>
-
-      <hr className="border-b-1 mt-4 w-full border-border" />
 
       {Object.keys(groups).length > 0 ? (
         Object.keys(groups)
@@ -111,6 +109,6 @@ export default function ScheduleList({ category }: ScheduleListProps) {
           <GroupCardTagSkeleton />
         </>
       )}
-    </>
+    </div>
   );
 }

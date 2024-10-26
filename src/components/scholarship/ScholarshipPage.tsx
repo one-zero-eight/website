@@ -8,11 +8,11 @@ import ScholarshipCalculator from "@/components/scholarship/ScholarshipCalculato
 export function ScholarshipPage() {
   return (
     <>
-      <div className="my-4 max-w-2xl self-center">
+      <div className="max-w-2xl self-center p-4">
         <ScholarshipCalculator />
       </div>
 
-      <div className="mt-4 flex max-w-2xl flex-col self-center">
+      <div className="flex max-w-2xl flex-col self-center p-4">
         <h2 className="text-center text-3xl">Information</h2>
 
         <h3 className="mt-4 text-2xl">Academic scholarships:</h3>

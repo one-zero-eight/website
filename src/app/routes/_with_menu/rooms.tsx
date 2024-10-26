@@ -1,11 +1,11 @@
 import { DormRoomsPage } from "@/components/dorm-rooms/DormRoomsPage.tsx";
-import { NavbarTemplate } from "@/components/layout/Navbar.tsx";
+import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/rooms")({
   component: () => (
-    <div className="flex flex-col p-4 @container/content @2xl/main:p-12">
+    <div className="flex min-h-full flex-col overflow-y-auto @container/content">
       <Helmet>
         <title>Dorm rooms</title>
         <meta
@@ -14,10 +14,7 @@ export const Route = createFileRoute("/_with_menu/rooms")({
         />
       </Helmet>
 
-      <NavbarTemplate
-        title="Dorm rooms"
-        description="Split duties in your dormitory room."
-      />
+      <Topbar title="Dorm rooms" />
       <DormRoomsPage />
     </div>
   ),

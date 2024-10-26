@@ -34,18 +34,16 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
   // 404 page
   notFoundComponent: () => (
-    <div className="flex flex-row">
+    <div className="flex h-full flex-row">
       <Sidebar>
-        <main className="w-full @container/main">
-          <div className="flex h-[100dvh] flex-row justify-center p-4 @container/content @2xl/main:p-12">
-            <div className="flex flex-col justify-center text-center">
-              <h1 className="mb-8 text-4xl font-bold">404 / not found</h1>
-              <Link to="/" className="selected">
-                Go to main
-              </Link>
-            </div>
+        <div className="flex h-full flex-grow flex-col">
+          <div className="flex h-full flex-col justify-center text-center @container/content">
+            <h1 className="mb-4 text-4xl font-bold">404 / not found</h1>
+            <Link to="/" className="selected">
+              Go to dashboard
+            </Link>
           </div>
-        </main>
+        </div>
       </Sidebar>
     </div>
   ),

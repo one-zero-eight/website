@@ -1,11 +1,11 @@
 import { DashboardPage } from "@/components/dashboard/DashboardPage.tsx";
-import { NavbarTemplate } from "@/components/layout/Navbar.tsx";
+import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/dashboard")({
   component: () => (
-    <div className="flex flex-col p-4 @container/content @2xl/main:p-12">
+    <div className="flex min-h-full flex-col overflow-y-auto @container/content">
       <Helmet>
         <title>Dashboard</title>
         <meta
@@ -14,10 +14,7 @@ export const Route = createFileRoute("/_with_menu/dashboard")({
         />
       </Helmet>
 
-      <NavbarTemplate
-        title="Dashboard"
-        description="Your cozy space on this planet."
-      />
+      <Topbar title="Dashboard" />
       <DashboardPage />
     </div>
   ),

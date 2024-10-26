@@ -1,4 +1,5 @@
 import Tooltip from "@/components/common/Tooltip.tsx";
+import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import SidebarSection from "@/components/layout/SidebarSection";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
@@ -168,64 +169,60 @@ function Sidebar({ children }: React.PropsWithChildren) {
       />
       <aside
         className={clsx(
-          "fixed top-0 z-10 h-[100dvh] shrink-0 overflow-y-auto bg-sidebar px-8 py-8 transition-transform lgw-smh:sticky lgw-smh:translate-x-0 lgw-smh:py-4 lgw-smh:transition-none",
+          "fixed top-0 z-10 h-full shrink-0 overflow-y-auto bg-sidebar p-4 transition-transform lgw-smh:sticky lgw-smh:translate-x-0 lgw-smh:transition-none",
           isOpened ? "translate-x-0 transform" : "-translate-x-full transform",
         )}
       >
-        <div className="flex min-h-full flex-col items-center justify-start">
-          <Link to="/" onClick={() => setOpened(false)} className="mb-4 flex">
-            <Logo className="fill-text-main" />
-          </Link>
-          <nav className="flex grow flex-col">
-            {items.map((item) => (
-              <SidebarSection
-                key={item.title}
-                title={item.title}
-                badge={item.badge}
-                icon={item.icon}
-                selected={currentItem?.path === item.path}
-                path={item.path}
-                onClick={() =>
-                  item.path !== "#" ? setOpened(false) : undefined
-                }
-              />
-            ))}
-            <div className="mx-2.5 my-1 h-0.5 rounded-full bg-gray-500/20" />
-            {externalItems.map((item) => (
-              <SidebarSection
-                key={item.title}
-                title={item.title}
-                badge={item.badge}
-                icon={item.icon}
-                selected={false}
-                path={item.path}
-                onClick={() =>
-                  item.path !== "#" ? setOpened(false) : undefined
-                }
-                external={true}
-              />
-            ))}
-          </nav>
-          <div className="flex grow"></div>
-          <br />
-          <a
-            href="https://t.me/one_zero_eight"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="my-4 text-center"
+        <div className="flex min-h-full flex-col items-start justify-start">
+          <Link
+            to="/"
+            onClick={() => setOpened(false)}
+            className="flex place-self-center"
           >
-            <span className="underline underline-offset-2">one-zero-eight</span>{" "}
-            💜
-          </a>
-          <div className="flex flex-row gap-2">
+            <Logo />
+          </Link>
+
+          {items.map((item) => (
+            <SidebarSection
+              key={item.title}
+              title={item.title}
+              badge={item.badge}
+              icon={item.icon}
+              selected={currentItem?.path === item.path}
+              path={item.path}
+              onClick={() => (item.path !== "#" ? setOpened(false) : undefined)}
+            />
+          ))}
+          <div className="my-1 h-0.5 w-full rounded-full bg-gray-500/20" />
+          {externalItems.map((item) => (
+            <SidebarSection
+              key={item.title}
+              title={item.title}
+              badge={item.badge}
+              icon={item.icon}
+              selected={false}
+              path={item.path}
+              onClick={() => (item.path !== "#" ? setOpened(false) : undefined)}
+              external={true}
+            />
+          ))}
+
+          <div className="flex grow"></div>
+          <div className="flex flex-row gap-2 place-self-center lgw-smh:hidden">
+            <SwitchThemeButton />
+            <LeaveFeedbackButton />
+            <UserMenu isMobile={true} isSidebar={true} />
+          </div>
+          <div className="my-1 flex h-0.5 w-full rounded-full bg-gray-500/20 lgw-smh:hidden" />
+          <div className="flex flex-row gap-2 place-self-center">
             <Tooltip content="GitHub">
               <a
                 href="https://github.com/one-zero-eight"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-2xl"
+                className="rounded-xl"
               >
-                <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-secondary-main hover:bg-secondary-hover">
+                <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary-main">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
                     <span className="icon-[mdi--github] text-4xl" />
                   </div>
@@ -237,9 +234,9 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 href="https://t.me/one_zero_eight"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-2xl"
+                className="rounded-xl"
               >
-                <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-secondary-main hover:bg-secondary-hover">
+                <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary-main">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
                     <span className="icon-[uil--telegram-alt] text-4xl" />
                   </div>
@@ -251,19 +248,15 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 href="https://www.youtube.com/@one-zero-eight"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-2xl"
+                className="rounded-xl"
               >
-                <div className="ml-auto flex h-18p w-18p flex-col items-center justify-center rounded-2xl bg-secondary-main hover:bg-secondary-hover">
+                <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary-main">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
                     <span className="icon-[hugeicons--youtube] text-4xl" />
                   </div>
                 </div>
               </a>
             </Tooltip>
-          </div>
-          <div className="mt-4 flex w-full flex-row items-center justify-center gap-4 lgw-smh:hidden">
-            <SwitchThemeButton />
-            <UserMenu isMobile={true} isSidebar={true} />
           </div>
         </div>
       </aside>

@@ -1,4 +1,4 @@
-import { NavbarTemplate } from "@/components/layout/Navbar.tsx";
+import { Topbar } from "@/components/layout/Topbar.tsx";
 import ScheduleList from "@/components/schedule/ScheduleList.tsx";
 import { getCategoryInfoBySlug } from "@/lib/events/events-view-config.ts";
 import { createFileRoute, redirect } from "@tanstack/react-router";
@@ -14,16 +14,13 @@ export const Route = createFileRoute("/_with_menu/schedule/$category")({
     }
 
     return (
-      <div className="flex flex-col p-4 @container/content @2xl/main:p-12">
+      <div className="flex min-h-full flex-col overflow-y-auto @container/content">
         <Helmet>
           <title>{categoryInfo.title} — Schedule</title>
           <meta name="description" content={categoryInfo.shortDescription} />
         </Helmet>
 
-        <NavbarTemplate
-          title={`Schedule — ${categoryInfo.title}`}
-          description={categoryInfo.shortDescription}
-        />
+        <Topbar title={`Schedule — ${categoryInfo.title}`} />
         <ScheduleList category={category} />
       </div>
     );

@@ -16,7 +16,7 @@ function SidebarSection(props: SectionProps) {
   const element = (
     <div
       className={clsx(
-        "flex select-none flex-row justify-center rounded-2xl p-2 hover:bg-gray-500/10",
+        "flex select-none flex-row justify-center rounded-xl px-2 py-1.5 hover:bg-gray-500/10",
         props.selected
           ? "text-focus"
           : props.path === "#"
@@ -61,6 +61,7 @@ function SidebarSection(props: SectionProps) {
       onClick={props.onClick}
       target={props.path.startsWith("/") ? undefined : "_blank"}
       rel={props.path.startsWith("/") ? undefined : "noopener noreferrer"}
+      className="w-full"
     >
       {element}
     </Link>

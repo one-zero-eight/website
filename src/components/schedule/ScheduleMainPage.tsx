@@ -5,10 +5,10 @@ import { DashboardButton } from "@/components/schedule/DashboardButton.tsx";
 export function ScheduleMainPage() {
   return (
     <>
-      <h2 className="my-4 text-center text-3xl font-medium">
+      <h2 className="py-4 text-center text-3xl font-medium">
         Choose the category
       </h2>
-      <div className="my-4 flex justify-center">
+      <div className="flex justify-center">
         <DashboardButton />
       </div>
       <CategoryContainer />

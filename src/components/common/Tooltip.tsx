@@ -28,13 +28,7 @@ export default function Tooltip({
     open: isOpen,
     onOpenChange: setIsOpen,
     whileElementsMounted: autoUpdate,
-    middleware: [
-      offset(5),
-      flip({
-        fallbackAxisSideDirection: "start",
-      }),
-      shift(),
-    ],
+    middleware: [offset(5), flip(), shift()],
   });
 
   // Transition effect
@@ -73,7 +67,7 @@ export default function Tooltip({
             ref={refs.setFloating}
             style={{ ...floatingStyles, ...transitionStyles }}
             {...getFloatingProps()}
-            className="pointer-events-none z-10 rounded-xl bg-primary-main px-8 py-2 text-sm text-text-main drop-shadow-md"
+            className="pointer-events-none z-10 rounded-xl bg-primary-main px-4 py-2 text-sm text-text-main drop-shadow-md"
           >
             {content}
           </div>

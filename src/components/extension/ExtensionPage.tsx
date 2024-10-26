@@ -2,7 +2,7 @@ import ExtensionScreenshotPNG from "/extension-screenshot.png";
 
 export function ExtensionPage() {
   return (
-    <div className="my-4 grid grid-cols-1 gap-4 @xl/content:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 p-4 @xl/content:grid-cols-2">
       <div className="flex flex-col gap-4">
         <div className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6">
           <div className="w-12">

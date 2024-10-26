@@ -3,11 +3,11 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_with_menu")({
   component: () => (
-    <div className="flex flex-row">
+    <div className="flex h-full flex-row">
       <Sidebar>
-        <main className="min-h-[100dvh] w-full @container/main">
+        <div className="flex h-full flex-grow flex-col">
           <Outlet />
-        </main>
+        </div>
       </Sidebar>
     </div>
   ),

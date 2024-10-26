@@ -36,7 +36,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   };
 
   return (
-    <div className="mt-4 flex grow flex-col gap-4">
+    <div className="flex grow flex-col gap-4 p-4">
       <SearchField runSearch={runSearch} currentQuery={searchQuery} />
 
       {searchResult && (

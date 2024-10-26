@@ -18,7 +18,7 @@ const categoriesIcons: {
 
 export function CategoryContainer() {
   return (
-    <div className="my-4 flex w-full flex-row flex-wrap justify-center gap-y-8 @xl/content:gap-x-18p @5xl/content:gap-x-20 @7xl/content:gap-x-28">
+    <div className="flex w-full flex-row flex-wrap justify-center gap-y-8 py-4 @xl/content:gap-x-18p @5xl/content:gap-x-20 @7xl/content:gap-x-28">
       {Object.entries(viewConfig.categories)
         .filter(([_, v]) => !v.outdated)
         .map(([_, v]) => (

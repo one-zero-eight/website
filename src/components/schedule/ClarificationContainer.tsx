@@ -3,7 +3,7 @@ import { ClarificationCard } from "@/components/schedule/ClarificationCard";
 
 export function ClarificationContainer() {
   return (
-    <div className="my-4 grid w-full grid-cols-1 place-items-center gap-y-10 @container/clarify @2xl/content:grid-cols-3 @5xl/content:grid-cols-7">
+    <div className="grid w-full grid-cols-1 place-items-center gap-y-10 p-4 @container/clarify @2xl/content:grid-cols-3 @5xl/content:grid-cols-7">
       <ClarificationCard
         icon={
           <>
