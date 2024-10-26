@@ -57,7 +57,7 @@ export function DormsPage() {
           </div>
         </a>
         <a
-          href="https://t.me/chelekushka"
+          href="https://t.me/maximf3"
           target="_blank"
           className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
         >
