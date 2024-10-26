@@ -26,12 +26,12 @@ export function EventGroupPage({ alias }: { alias: string }) {
         </Helmet>
       )}
       <Topbar title="Group" />
-      <div
-        style={{ backgroundImage: "url(/background-pattern.svg)" }}
-        className="min-h-64 bg-primary-main bg-repeat p-4"
-      />
       {group && (
         <div className="flex min-h-full flex-col overflow-y-auto @container/content">
+          <div
+            style={{ backgroundImage: "url(/background-pattern.svg)" }}
+            className="min-h-64 bg-primary-main bg-repeat p-4"
+          />
           <div className="p-4">
             <div className="mb-4 flex items-start justify-between gap-4">
               <div className="flex min-h-full flex-grow flex-col gap-2">
