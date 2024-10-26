@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark h-full overflow-hidden">
+<html lang="en" class="dark h-full [scrollbar-width:none]">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -36,7 +36,7 @@
     <script type="module" src="/src/app/entry-client.tsx"></script>
   </head>
 
-  <body class="h-full overflow-hidden">
+  <body class="h-full">
     <!-- Notice in case of disabled JavaScript -->
     <noscript class="flex w-full justify-center bg-red-700 p-8">
       You need to enable JavaScript to run this app.
@@ -45,7 +45,7 @@
     <!-- Main app container -->
     <div id="app" class="h-full font-rubik text-lg text-text-main">
       <!-- Show loading state. App will replace this after rendering -->
-      <div class="flex h-screen w-full items-center justify-center">
+      <div class="flex h-full w-full items-center justify-center">
         <span
           class="icon-[mdi--loading] animate-spin text-2xl text-icon-main"
         ></span>
