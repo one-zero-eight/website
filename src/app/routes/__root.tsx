@@ -1,5 +1,5 @@
 import Sidebar from "@/components/layout/Sidebar.tsx";
-import OfflineNotification from '@/components/layout/Offline.tsx';  
+import OfflineNotification from "@/components/layout/OfflineNotification.tsx";
 import {
   createRootRouteWithContext,
   Link,
