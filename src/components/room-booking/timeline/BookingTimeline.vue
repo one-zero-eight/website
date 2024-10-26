@@ -314,7 +314,10 @@ function rangeIntersectingBookings(
 
   if (l !== r) return [];
 
-  if (bookings[l].startsAt.getTime() >= bMs)
+  if (
+    bookings[l].startsAt.getTime() >= bMs ||
+    bookings[l].endsAt.getTime() <= aMs
+  )
     // First and doesn't intersect.
     return [];
 
@@ -568,6 +571,7 @@ function validSlotByState(state: InteractionState): Slot | null {
         state.hoverAt.room.id,
       );
 
+      console.log({ range });
       if (!range) return null;
 
       return {
