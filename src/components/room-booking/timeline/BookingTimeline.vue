@@ -571,7 +571,6 @@ function validSlotByState(state: InteractionState): Slot | null {
         state.hoverAt.room.id,
       );
 
-      console.log({ range });
       if (!range) return null;
 
       return {
