@@ -26,7 +26,7 @@ const OfflineNotification: React.FC = () => {
 
   // Если пользователь нажал на крестик или интернет есть — скрываем сообщение
   if (isClosed) return null;
-  if (isOffline) return null;
+  if (!isOffline) return null;
 
   return (
     <div className={`fixed inset-0 z-50 flex items-start justify-center`}>
