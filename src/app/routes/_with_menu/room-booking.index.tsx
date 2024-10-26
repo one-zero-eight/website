@@ -1,6 +1,6 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
-import { RoomBookingPage } from "@/components/room-booking/RoomBookingPage.tsx";
+import { RoomBookingPage } from "@/components/room-booking/timeline/RoomBookingPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 

@@ -1,11 +1,11 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
-import { BookingModal } from "@/components/room-booking/BookingModal.tsx";
+import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { lazy, Suspense, useState } from "react";
 import type { Booking, Slot } from "./BookingTimeline.vue";
 
 const BookingTimeline = lazy(
-  () => import("@/components/room-booking/BookingTimeline.tsx"),
+  () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),
 );
 
 export function RoomBookingPage() {

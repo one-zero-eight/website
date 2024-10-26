@@ -1,5 +1,11 @@
 import { $roomBooking } from "@/api/room-booking";
 import {
+  clockTime,
+  durationFormatted,
+  msBetween,
+  T,
+} from "@/lib/utils/dates.ts";
+import {
   FloatingFocusManager,
   FloatingOverlay,
   FloatingPortal,
@@ -11,7 +17,6 @@ import {
 } from "@floating-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Booking, Slot } from "./BookingTimeline.vue";
-import { T, clockTime, durationFormatted, msBetween } from "@/lib/utils/dates";
 
 function bookingWarningForSlot({ room, start, end }: Slot) {
   const diffMs = msBetween(start, end);

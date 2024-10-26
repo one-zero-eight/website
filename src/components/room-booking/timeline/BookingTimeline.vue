@@ -1,18 +1,32 @@
 <script setup lang="ts">
 import { roomBookingFetch, type roomBookingTypes } from "@/api/room-booking";
+import {
+  clockTime,
+  durationFormatted,
+  msBetween as msBetweenDates,
+  T,
+} from "@/lib/utils/dates.ts";
 import { useMediaQuery, useNow } from "@vueuse/core";
 import type { MaybeRef } from "vue";
 import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
-import {
-  T,
-  durationFormatted,
-  msBetween as msBetweenDates,
-  clockTime,
-} from "@/lib/utils/dates";
 
 /* ========================================================================== */
 /* ================================ Options ================================= */
 /* ========================================================================== */
+
+const props = defineProps<{
+  startDate: Date;
+  endDate: Date;
+
+  rooms: roomBookingTypes.SchemaRoom[] | undefined;
+  isRoomsPending: boolean;
+
+  bookings: roomBookingTypes.SchemaBooking[] | undefined;
+  isBookingsPending: boolean;
+
+  myBookings: roomBookingTypes.SchemaMyUniBooking[] | undefined;
+  isMyBookingsPending: boolean;
+}>();
 
 const emit = defineEmits<{
   book: [slot: Slot];
