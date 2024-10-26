@@ -1,9 +1,10 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import { RoomBookingPage } from "@/components/room-booking/RoomBookingPage.tsx";
+import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
+import { BookingsListPage } from "@/components/room-booking/BookingsListPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
-export const Route = createFileRoute("/_with_menu/room-booking")({
+export const Route = createFileRoute("/_with_menu/room-booking/list")({
   component: () => (
     <div className="flex min-h-full flex-col overflow-y-auto @container/content">
       <Helmet>
@@ -15,7 +16,8 @@ export const Route = createFileRoute("/_with_menu/room-booking")({
       </Helmet>
 
       <Topbar title="Room booking" />
-      <RoomBookingPage />
+      <BookingPageTabs />
+      <BookingsListPage />
     </div>
   ),
 });
