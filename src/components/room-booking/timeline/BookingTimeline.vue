@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { roomBookingFetch, type roomBookingTypes } from "@/api/room-booking";
+import { type roomBookingTypes } from "@/api/room-booking";
 import {
   clockTime,
   durationFormatted,
@@ -8,7 +8,14 @@ import {
 } from "@/lib/utils/dates.ts";
 import { useMediaQuery, useNow } from "@vueuse/core";
 import type { MaybeRef } from "vue";
-import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
+import {
+  computed,
+  onMounted,
+  ref,
+  shallowRef,
+  unref,
+  watch,
+} from "vue"; /* ========================================================================== */
 
 /* ========================================================================== */
 /* ================================ Options ================================= */
@@ -79,6 +86,7 @@ export type Booking = Omit<roomBookingTypes.SchemaBooking, "start" | "end"> & {
   id: string;
   startsAt: Date;
   endsAt: Date;
+  myBookingId: number | undefined;
 };
 
 export type Slot = {
@@ -156,12 +164,8 @@ function timeGridNeighbors(
 /* ============================= Initialization ============================= */
 /* ========================================================================== */
 
-const startDate = new Date();
-startDate.setHours(0, 0, 0, 0);
-const endDate = new Date(startDate.getTime() + 7 * T.Day);
-
-const timelineStart = shallowRef(startDate);
-const timelineEnd = shallowRef(endDate);
+const timelineStart = shallowRef(props.startDate);
+const timelineEnd = shallowRef(props.endDate);
 
 const timelineDates = computed(() => {
   const dates = [];
@@ -183,61 +187,42 @@ onMounted(() => {
 });
 
 /* ========================================================================== */
-/* ============================= Data Fetching ============================== */
+/* ============================= Data Preparing ============================= */
 /* ========================================================================== */
 
-const actualRooms = shallowRef<Room[]>([]);
-const roomsLoading = shallowRef(true);
-roomBookingFetch
-  .GET("/rooms/")
-  .then(({ data }) => {
-    if (!data) throw new Error("no data");
-
-    roomsLoading.value = false;
-    actualRooms.value = data.map((room, idx) => ({ ...room, idx }));
-  })
-  .catch((err) => {
-    console.error("Failed to load rooms:", err);
-    // TODO: show error message to the user.
-  });
+const actualRooms = computed(
+  () => props.rooms?.map((room, idx) => ({ ...room, idx })) ?? [],
+);
+const roomsLoading = computed(() => props.isRoomsPending);
 
 // TODO: remove this, when backend will return booking UIDs.
 let bookingIdCounter = 0;
 
-const actualBookings = shallowRef<Map<Booking["id"], Booking>>();
-const bookingsLoading = shallowRef(true);
-roomBookingFetch
-  .GET("/bookings/", {
-    params: {
-      query: { start: startDate.toISOString(), end: endDate.toISOString() },
-    },
-  })
-  .then(({ data, error }) => {
-    if (error?.detail)
-      throw new Error(`validation error: ${JSON.stringify(error.detail)}`);
+const actualBookings = computed<Map<Booking["id"], Booking>>(() => {
+  const map = new Map<Booking["id"], Booking>();
 
-    if (!data) throw new Error("no data");
+  for (const booking of props.bookings ?? []) {
+    const myBooking = props.myBookings?.find(
+      (myBooking) =>
+        myBooking.room_id === booking.room_id &&
+        myBooking.start === booking.start &&
+        myBooking.end === booking.end,
+    );
+    const mappedBooking: Booking = {
+      ...booking,
+      id: (++bookingIdCounter).toString(),
+      startsAt: new Date(booking.start),
+      endsAt: new Date(booking.end),
+      myBookingId: myBooking?.id,
+      title: myBooking?.title ?? booking.title,
+    };
 
-    const map = new Map<Booking["id"], Booking>();
+    map.set(mappedBooking.id, mappedBooking);
+  }
 
-    for (const booking of data) {
-      const mappedBooking = {
-        ...booking,
-        id: (++bookingIdCounter).toString(),
-        startsAt: new Date(booking.start),
-        endsAt: new Date(booking.end),
-      };
-
-      map.set(mappedBooking.id, mappedBooking);
-    }
-
-    bookingsLoading.value = false;
-    actualBookings.value = map;
-  })
-  .catch((err) => {
-    console.error("Failed to load bookings:", err);
-    // TODO: show error message to the user.
-  });
+  return map;
+});
+const bookingsLoading = computed(() => props.isBookingsPending);
 
 const actualBookingsByRoomSorted = computed(() => {
   const map = new Map<Room["id"], Booking[]>();
@@ -1142,7 +1127,14 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
 
           <!-- Body of the timeline (rooms and bookings). -->
           <div
-            v-memo="[roomsLoading, bookingsLoading, compactModeEnabled]"
+            v-memo="[
+              roomsLoading,
+              actualRooms,
+              bookingsLoading,
+              actualBookingsByRoomSorted,
+              myBookings,
+              compactModeEnabled,
+            ]"
             :class="$style.body"
           >
             <div
@@ -1176,6 +1168,8 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
                 :key="booking === 'placeholder' ? j : booking.id"
                 :class="{
                   [$style.booking]: true,
+                  [$style.myBooking]:
+                    typeof booking !== 'string' && !!booking.myBookingId,
                   [$style.placeholder]: booking === 'placeholder',
                 }"
                 :style="
@@ -1306,6 +1300,9 @@ $button-height: 50px;
   --c-textbox-bg-purple: #{colors.$purple-400};
   --c-textbox-text-purple: #{colors.$purple-900};
   --c-textbox-borders-purple: #{colors.$purple-600};
+  --c-textbox-bg-green: #{colors.$green-400};
+  --c-textbox-text-green: #{colors.$green-900};
+  --c-textbox-borders-green: #{colors.$green-600};
   --c-ruler-now: #{colors.$red-600};
   --c-ruler-new: #{colors.$purple-600};
   --c-skeleton-bg: #{colors.$gray-300};
@@ -1325,6 +1322,9 @@ $button-height: 50px;
     --c-textbox-bg-purple: #{colors.$purple-900};
     --c-textbox-text-purple: #{colors.$purple-500};
     --c-textbox-borders-purple: #{colors.$purple-700};
+    --c-textbox-bg-green: #{colors.$green-900};
+    --c-textbox-text-green: #{colors.$green-500};
+    --c-textbox-borders-green: #{colors.$green-700};
     --c-ruler-now: #{colors.$red-800};
     --c-ruler-new: #{colors.$purple-800};
     --c-skeleton-bg: #{colors.$gray-800};
@@ -1565,6 +1565,12 @@ $button-height: 50px;
   position: relative;
   left: var(--left);
   width: var(--width);
+
+  &.myBooking > div {
+    border: 1px solid var(--c-textbox-borders-green);
+    background: var(--c-textbox-bg-green);
+    color: var(--c-textbox-text-green);
+  }
 
   & > div {
     background: var(--c-bg-items);

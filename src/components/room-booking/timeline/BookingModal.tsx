@@ -15,6 +15,8 @@ import {
   useRole,
   useTransitionStyles,
 } from "@floating-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Booking, Slot } from "./BookingTimeline.vue";
 
@@ -94,6 +96,8 @@ export function BookingModal({
   const role = useRole(context);
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
+  const queryClient = useQueryClient();
+
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
   const {
     mutate,
@@ -133,13 +137,23 @@ export function BookingModal({
         onSuccess: () => {
           setTitle("");
           reset();
-          // Refresh window to update caches in Vue
-          window.location.reload();
           onOpenChange(false);
+
+          queryClient.invalidateQueries({
+            queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
+          });
+
+          // Refetch bookings after some time
+          setTimeout(() => {
+            queryClient.invalidateQueries({
+              // All /bookings/ queries, with any params
+              queryKey: ["roomBooking", "get", "/bookings/"],
+            });
+          }, 3000);
         },
       },
     );
-  }, [newSlot, title, mutate, onOpenChange, reset]);
+  }, [newSlot, title, mutate, reset, queryClient, onOpenChange]);
 
   if (!isMounted) {
     return null;
@@ -223,6 +237,17 @@ export function BookingModal({
     </div>
   );
 
+  const MyBookingButtons = (
+    <div className="flex flex-row gap-2">
+      <Link
+        to="/room-booking/list"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
+      >
+        Manage my booking
+      </Link>
+    </div>
+  );
+
   return (
     <FloatingPortal>
       <FloatingOverlay
@@ -298,6 +323,7 @@ export function BookingModal({
                     {BookingLocation}
                     {BookingDate}
                     {BookingTime}
+                    {detailsBooking?.myBookingId && MyBookingButtons}
                   </div>
                 )}
               </div>

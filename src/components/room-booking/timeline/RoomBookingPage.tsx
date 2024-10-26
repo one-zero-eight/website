@@ -1,6 +1,8 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { $roomBooking } from "@/api/room-booking";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
+import { T } from "@/lib/utils/dates.ts";
 import { lazy, Suspense, useState } from "react";
 import type { Booking, Slot } from "./BookingTimeline.vue";
 
@@ -14,6 +16,29 @@ export function RoomBookingPage() {
   const [bookingDetails, setBookingDetails] = useState<Booking>();
 
   const { me } = useMe();
+
+  const [startDate] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
+  const [endDate] = useState(new Date(startDate.getTime() + 7 * T.Day));
+
+  const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
+    "get",
+    "/rooms/",
+  );
+  const { data: bookings, isPending: isBookingsPending } =
+    $roomBooking.useQuery(
+      "get",
+      "/bookings/",
+      {
+        params: {
+          query: { start: startDate.toISOString(), end: endDate.toISOString() },
+        },
+      },
+      {
+        refetchInterval: 5 * T.Min,
+      },
+    );
+  const { data: myBookings, isPending: isMyBookingsPending } =
+    $roomBooking.useQuery("get", "/bookings/my");
 
   if (!me) {
     return (
@@ -33,6 +58,14 @@ export function RoomBookingPage() {
         <Suspense>
           <BookingTimeline
             className="h-full"
+            startDate={startDate}
+            endDate={endDate}
+            rooms={rooms}
+            isRoomsPending={isRoomsPending}
+            bookings={bookings}
+            isBookingsPending={isBookingsPending}
+            myBookings={myBookings}
+            isMyBookingsPending={isMyBookingsPending}
             onBook={(newBooking: Slot) => {
               setNewBookingSlot(newBooking);
               setBookingDetails(undefined);
