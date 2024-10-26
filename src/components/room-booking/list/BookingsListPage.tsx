@@ -72,6 +72,10 @@ export function BookingCard({
         queryClient.invalidateQueries({
           queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
         });
+        queryClient.invalidateQueries({
+          // All /bookings/ queries, with any params
+          queryKey: ["roomBooking", "get", "/bookings/"],
+        });
       },
     },
   );
