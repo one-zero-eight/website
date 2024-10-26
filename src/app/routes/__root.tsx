@@ -22,7 +22,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     });
 
     return (
-      <><OfflineNotification/>
+      <>
+        <OfflineNotification />
         <Helmet titleTemplate="%s — InNoHassle" defaultTitle="InNoHassle">
           <link rel="canonical" href={canonical} />
         </Helmet>
