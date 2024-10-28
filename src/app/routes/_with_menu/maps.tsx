@@ -1,19 +1,21 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { MapsPage } from "@/components/maps/MapsPage.tsx";
+import { MapsPageTabs } from "@/components/maps/MapsPageTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/maps")({
   validateSearch: (
     search: Record<string, unknown>,
-  ): { sceneId: string | undefined } => {
+  ): { sceneId?: string; q?: string } => {
     return {
       sceneId: (search.sceneId as string) ?? undefined,
+      q: (search.q as string) ?? undefined,
     };
   },
 
   component: function RouteComponent() {
-    const { sceneId } = Route.useSearch();
+    const { sceneId, q } = Route.useSearch();
     return (
       <div className="flex min-h-full flex-col overflow-y-auto @container/content">
         <Helmet>
@@ -25,7 +27,8 @@ export const Route = createFileRoute("/_with_menu/maps")({
         </Helmet>
 
         <Topbar title="Maps" />
-        <MapsPage sceneId={sceneId} />
+        <MapsPageTabs />
+        <MapsPage sceneId={sceneId} q={q} />
       </div>
     );
   },

@@ -1,5 +1,5 @@
 import { mapsTypes } from "@/api/maps";
-import { getMapImageUrl } from "@/api/maps/map-image.ts";
+import { useMapImage } from "@/api/maps/map-image.ts";
 import { FloatingOverlay, FloatingPortal } from "@floating-ui/react";
 import {
   memo,
@@ -10,7 +10,13 @@ import {
   useState,
 } from "react";
 
-export function MapView({ scene }: { scene: mapsTypes.SchemaScene }) {
+export function MapView({
+  scene,
+  highlightAreas,
+}: {
+  scene: mapsTypes.SchemaScene;
+  highlightAreas: mapsTypes.SchemaSearchResult[];
+}) {
   const [fullscreen, setFullscreen] = useState(false);
   const switchFullscreen = useCallback(() => setFullscreen((v) => !v), []);
 
@@ -20,7 +26,9 @@ export function MapView({ scene }: { scene: mapsTypes.SchemaScene }) {
     if (fullscreen) {
       document.body.requestFullscreen?.();
     } else {
-      document.exitFullscreen?.();
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.();
+      }
     }
   }, [fullscreen]);
 
@@ -52,8 +60,8 @@ export function MapView({ scene }: { scene: mapsTypes.SchemaScene }) {
 
   return (
     <FullscreenMode enable={fullscreen}>
-      <div className="relative h-full">
-        <MapViewer scene={scene} />
+      <div className="relative h-full w-full">
+        <MapViewer scene={scene} highlightAreas={highlightAreas} />
         <button
           className="absolute bottom-2 right-2 flex h-fit rounded-xl bg-primary-main/50 px-2 py-2 hover:bg-primary-main/75"
           onClick={() => switchFullscreen()}
@@ -82,22 +90,26 @@ function FullscreenMode({
 
 const MapViewer = memo(function MapViewer({
   scene,
+  highlightAreas,
 }: {
   scene: mapsTypes.SchemaScene;
+  highlightAreas: mapsTypes.SchemaSearchResult[];
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
   const options = useRef({
     offsetX: 0,
     offsetY: 0,
     zoom: 1,
   });
 
+  const { data: mapSvg } = useMapImage(scene.svg_file);
+
   const updateImage = () => {
     if (!containerRef.current || !imageRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const imageWidth = imageRef.current.width * options.current.zoom;
-    const imageHeight = imageRef.current.height * options.current.zoom;
+    const imageWidth = imageRef.current.clientWidth * options.current.zoom;
+    const imageHeight = imageRef.current.clientHeight * options.current.zoom;
 
     options.current.offsetX = Math.max(
       Math.min(options.current.offsetX, rect.width * 0.8),
@@ -117,8 +129,8 @@ const MapViewer = memo(function MapViewer({
     if (!containerRef.current || !imageRef.current) return;
     // Set initial offset to center the image
     const rect = containerRef.current.getBoundingClientRect();
-    const imageWidth = imageRef.current.width;
-    const imageHeight = imageRef.current.height;
+    const imageWidth = imageRef.current.clientWidth;
+    const imageHeight = imageRef.current.clientHeight;
     options.current.offsetX = (rect.width - imageWidth) / 2;
     options.current.offsetY = (rect.height - imageHeight) / 2;
     updateImage();
@@ -267,14 +279,29 @@ const MapViewer = memo(function MapViewer({
   return (
     <div
       ref={containerRef}
-      className="h-full cursor-grab overflow-hidden rounded-xl bg-gray-50"
+      className="h-full w-full cursor-grab overflow-hidden rounded-xl bg-gray-50"
     >
-      <img
-        ref={imageRef}
-        src={getMapImageUrl(scene.svg_file)}
-        alt={scene.title}
-        draggable={false}
-      />
+      <style type="text/css">
+        {highlightAreas?.length
+          ? `
+        @keyframes pulse {
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 0.5; }
+        }
+        ${highlightAreas.map((s) => `[id="${s.area.svg_polygon_id}"]`).join(",")} {
+          fill: violet !important;
+          animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        `
+          : ""}
+      </style>
+      {mapSvg?.data && (
+        <div
+          ref={imageRef}
+          dangerouslySetInnerHTML={{ __html: mapSvg.data }}
+          className="block h-full w-full overflow-hidden [&>svg]:h-full [&>svg]:w-full"
+        />
+      )}
     </div>
   );
 });

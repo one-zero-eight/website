@@ -122,8 +122,9 @@ export interface components {
     SearchResult: {
       /** Scene Id */
       scene_id: string;
-      /** Matching Area Indexes */
-      matching_area_indexes: number[];
+      area: components["schemas"]["Area"];
+      /** Area Index */
+      area_index: number;
     };
     /** ValidationError */
     ValidationError: {

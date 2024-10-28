@@ -1,52 +1,65 @@
 import { $maps } from "@/api/maps";
 import { MapView } from "@/components/maps/MapView.tsx";
-import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
-export function MapsPage({ sceneId }: { sceneId: string | undefined }) {
+export function MapsPage({
+  sceneId,
+  q,
+}: {
+  sceneId: string | undefined;
+  q: string | undefined;
+}) {
+  const navigate = useNavigate();
   const { data: scenes } = $maps.useQuery("get", "/scenes/");
+  const { data: searchResult } = $maps.useQuery(
+    "get",
+    "/scenes/areas/search",
+    {
+      params: { query: { query: q ?? "" } },
+    },
+    {
+      enabled: q !== undefined,
+    },
+  );
+
+  useEffect(() => {
+    // Show correct floor by navigating to URL with first sceneId
+    const firstSceneId = searchResult?.[0]?.scene_id;
+    if (firstSceneId !== undefined && firstSceneId !== sceneId) {
+      navigate({
+        to: "/maps",
+        search: { sceneId: firstSceneId, q: q },
+      });
+    }
+  }, [searchResult, sceneId, q, navigate]);
+
   const currentScene =
     scenes?.find((scene) => scene.scene_id === sceneId) ?? scenes?.[0];
 
+  if (!currentScene) {
+    // Loading scenes or some error...
+    return <></>;
+  }
+
   return (
-    <div className="flex grow flex-col">
-      <div className="flex flex-row flex-wrap gap-2 p-4">
-        {scenes?.map((scene) => (
-          <Link
-            key={scene.scene_id}
-            to="/maps"
-            search={{ sceneId: scene.scene_id }}
-            className={clsx(
-              "rounded-xl bg-primary-main px-4 py-2 text-lg font-semibold hover:bg-primary-hover",
-              scene.scene_id === sceneId ? "bg-primary-hover" : "",
-            )}
-          >
-            {scene.title}
-          </Link>
-        ))}
+    <div className="mt-1 flex grow flex-col gap-4 @3xl/content:flex-row">
+      <div className="min-h-[600px] grow">
+        <MapView scene={currentScene} highlightAreas={searchResult ?? []} />
       </div>
 
-      {currentScene && (
-        <div className="flex flex-row flex-wrap gap-4 2xl:flex-nowrap">
-          <div className="">
-            <MapView scene={currentScene} />
+      <div className="flex w-full shrink-0 flex-col gap-2 px-2 @3xl/content:w-64">
+        <h3 className="text-2xl font-semibold">Legend:</h3>
+        {currentScene.legend?.map((legendEntry) => (
+          <div key={legendEntry.legend_id} className="flex flex-row gap-2">
+            <div
+              className="mt-1.5 h-4 w-4 flex-shrink-0 rounded-full"
+              style={{ backgroundColor: legendEntry.color ?? undefined }}
+            />
+            <span className="whitespace-pre-wrap">{legendEntry.legend}</span>
           </div>
-          <div className="flex min-w-56 flex-col gap-2 px-2">
-            <h3 className="text-2xl font-semibold">Legend:</h3>
-            {currentScene.legend?.map((legendEntry) => (
-              <div key={legendEntry.legend_id} className="flex flex-row gap-2">
-                <div
-                  className="mt-1.5 h-4 w-4 flex-shrink-0 rounded-full"
-                  style={{ backgroundColor: legendEntry.color ?? undefined }}
-                />
-                <span className="whitespace-pre-wrap">
-                  {legendEntry.legend}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 }
