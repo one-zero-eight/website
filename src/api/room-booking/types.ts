@@ -207,9 +207,9 @@ export interface operations {
   bookings_bookings: {
     parameters: {
       query: {
-        /** @example 2024-10-16T20:56+00:00 */
+        /** @example 2024-10-27T21:01+00:00 */
         start: string;
-        /** @example 2024-10-17T05:56+00:00 */
+        /** @example 2024-10-28T06:01+00:00 */
         end: string;
       };
       header?: never;

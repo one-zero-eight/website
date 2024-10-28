@@ -21,46 +21,118 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/scenes/areas/search": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Search Areas */
+    get: operations["scenes_search_areas"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
     /** Area */
     Area: {
-      /** Svg Polygon Id */
+      /**
+       * Svg Polygon Id
+       * @description ID of the polygon in the SVG
+       */
       svg_polygon_id?: string | null;
-      /** Title */
+      /**
+       * Title
+       * @description Title of the area
+       */
       title?: string | null;
-      /** Legend Id */
+      /**
+       * Legend Id
+       * @description ID of the legend (if any)
+       */
       legend_id?: string | null;
+      /**
+       * Description
+       * @description Description of the area
+       */
+      description?: string | null;
+    };
+    /** HTTPValidationError */
+    HTTPValidationError: {
+      /** Detail */
+      detail?: components["schemas"]["ValidationError"][];
     };
     /** LegendEntry */
     LegendEntry: {
-      /** Legend Id */
+      /**
+       * Legend Id
+       * @description ID of the legend
+       */
       legend_id: string;
-      /** Color */
+      /**
+       * Color
+       * @description Color of the legend
+       */
       color?: string | null;
-      /** Legend */
+      /**
+       * Legend
+       * @description Description of the legend (may contain multiple lines)
+       */
       legend?: string | null;
     };
     /** Scene */
     Scene: {
-      /** Scene Id */
+      /**
+       * Scene Id
+       * @description ID of the scene
+       */
       scene_id: string;
-      /** Title */
+      /**
+       * Title
+       * @description Title of the scene
+       */
       title: string;
-      /** Svg File */
+      /**
+       * Svg File
+       * @description Path to the SVG file in /static
+       */
       svg_file: string;
       /**
        * Legend
+       * @description Legend of the scene
        * @default []
        */
       legend: components["schemas"]["LegendEntry"][];
       /**
        * Areas
+       * @description Areas of the scene
        * @default []
        */
       areas: components["schemas"]["Area"][];
+    };
+    /** SearchResult */
+    SearchResult: {
+      /** Scene Id */
+      scene_id: string;
+      /** Matching Area Indexes */
+      matching_area_indexes: number[];
+    };
+    /** ValidationError */
+    ValidationError: {
+      /** Location */
+      loc: (string | number)[];
+      /** Message */
+      msg: string;
+      /** Error Type */
+      type: string;
     };
   };
   responses: never;
@@ -70,8 +142,12 @@ export interface components {
   pathItems: never;
 }
 export type SchemaArea = components["schemas"]["Area"];
+export type SchemaHttpValidationError =
+  components["schemas"]["HTTPValidationError"];
 export type SchemaLegendEntry = components["schemas"]["LegendEntry"];
 export type SchemaScene = components["schemas"]["Scene"];
+export type SchemaSearchResult = components["schemas"]["SearchResult"];
+export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
   scenes_scenes: {
@@ -90,6 +166,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Scene"][];
+        };
+      };
+    };
+  };
+  scenes_search_areas: {
+    parameters: {
+      query: {
+        query: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SearchResult"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };

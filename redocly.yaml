@@ -1,0 +1,36 @@
+apis:
+  accounts:
+    root: https://api.innohassle.ru/accounts/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/accounts/types.ts
+      #  --root-types --enum
+  events:
+    root: https://api.innohassle.ru/events/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/events/types.ts
+      #  --root-types --enum
+  maps:
+    root: https://api.innohassle.ru/maps/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/maps/types.ts
+      #  --root-types --enum
+  music:
+    root: https://api.innohassle.ru/music-room/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/music-room/types.ts
+      #  --root-types --enum
+  room:
+    root: https://api.innohassle.ru/room-booking/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/room-booking/types.ts
+      #  --root-types --enum
+  search:
+    root: https://api.innohassle.ru/search/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/search/types.ts
+      #  --root-types --enum
+  sports:
+    root: https://api.innohassle.ru/sports/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/sports/types.ts
+      #  --root-types --enum

@@ -1831,7 +1831,9 @@ export interface operations {
         user_id: number;
         export_type: string;
       };
-      header?: never;
+      header?: {
+        "user-agent"?: string | null;
+      };
       path: {
         event_group_alias: string;
       };

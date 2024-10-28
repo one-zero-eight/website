@@ -14,12 +14,7 @@
     "prettier:check": "prettier --ignore-unknown --check .",
     "lint-staged": "lint-staged",
     "prepare": "husky",
-    "gen:api": "pnpm run gen:accounts && pnpm run gen:events && pnpm run gen:maps && pnpm run gen:room-booking && pnpm run gen:search",
-    "gen:accounts": "openapi-typescript https://api.innohassle.ru/accounts/staging-v0/openapi.json -o ./src/api/accounts/types.ts --root-types --enum",
-    "gen:events": "openapi-typescript https://api.innohassle.ru/events/staging-v0/openapi.json -o ./src/api/events/types.ts --root-types --enum",
-    "gen:maps": "openapi-typescript https://api.innohassle.ru/maps/staging-v0/openapi.json -o ./src/api/maps/types.ts --root-types --enum",
-    "gen:room-booking": "openapi-typescript https://api.innohassle.ru/room-booking/staging-v0/openapi.json -o ./src/api/room-booking/types.ts --root-types --enum",
-    "gen:search": "openapi-typescript https://api.innohassle.ru/search/staging-v0/openapi.json -o ./src/api/search/types.ts --root-types --enum",
+    "gen:api": "pnpm exec openapi-typescript --root-types --enum",
     "release": "bumpp package.json",
     "update-deps": "taze minor -wIrl"
   },

@@ -336,6 +336,16 @@ export interface components {
       name?: string | null;
       /** Issued At */
       issued_at?: string | null;
+      /**
+       * Is Student
+       * @default false
+       */
+      is_student: boolean;
+      /**
+       * Is Staff
+       * @default false
+       */
+      is_staff: boolean;
     };
     /** ValidationError */
     ValidationError: {
