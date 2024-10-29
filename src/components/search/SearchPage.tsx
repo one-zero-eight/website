@@ -1,4 +1,6 @@
+import { useMe } from "@/api/accounts/user.ts";
 import { $search, searchTypes } from "@/api/search";
+import { AuthWall } from "@/components/common/AuthWall.tsx";
 import PreviewCard from "@/components/search/PreviewCard.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
@@ -7,6 +9,7 @@ import { useEffect, useState } from "react";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const navigate = useNavigate();
+  const { me } = useMe();
 
   const [previewSource, setPreviewSource] =
     useState<searchTypes.SchemaSearchResponse["source"]>();
@@ -34,6 +37,10 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const runSearch = (query: string) => {
     navigate({ to: "/search", search: { q: query } });
   };
+
+  if (!me) {
+    return <AuthWall />;
+  }
 
   return (
     <div className="flex grow flex-col gap-4 p-4">

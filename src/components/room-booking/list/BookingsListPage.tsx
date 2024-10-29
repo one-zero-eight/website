@@ -1,6 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
-import { SignInButton } from "@/components/common/SignInButton.tsx";
+import { AuthWall } from "@/components/common/AuthWall.tsx";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { DeleteBookingModal } from "@/components/room-booking/list/DeleteBookingModal.tsx";
 import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
@@ -13,16 +13,7 @@ export function BookingsListPage() {
   const { data: bookings } = $roomBooking.useQuery("get", "/bookings/my");
 
   if (!me) {
-    // Unauthenticated
-    return (
-      <>
-        <h2 className="my-4 text-3xl font-medium">Sign in to get access</h2>
-        <p className="mb-4 text-lg text-text-secondary/75">
-          Access convenient booking service with your Innopolis account.
-        </p>
-        <SignInButton />
-      </>
-    );
+    return <AuthWall />;
   }
 
   if (bookings === undefined) {

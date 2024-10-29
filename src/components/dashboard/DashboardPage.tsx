@@ -2,7 +2,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { $events, eventsTypes } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { URLType } from "@/components/calendar/CalendarViewer.tsx";
-import { SignInButton } from "@/components/common/SignInButton.tsx";
+import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton.tsx";
 import { PersonalCard } from "@/components/schedule/group-card/PersonalCard.tsx";
@@ -25,16 +25,7 @@ export function DashboardPage() {
   const { isSuccess: musicRoomIsSuccess } = useMyMusicRoom();
 
   if (!me) {
-    return (
-      <>
-        <h2 className="my-4 text-3xl font-medium">Sign in to get access</h2>
-        <p className="mb-4 text-lg text-text-secondary/75">
-          View your academic groups and save favorite schedule with your
-          Innopolis account.
-        </p>
-        <SignInButton />
-      </>
-    );
+    return <AuthWall />;
   }
 
   return (

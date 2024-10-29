@@ -1,6 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
-import { SignInButton } from "@/components/common/SignInButton.tsx";
+import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
 import { lazy, Suspense, useState } from "react";
@@ -41,15 +41,7 @@ export function RoomBookingPage() {
     $roomBooking.useQuery("get", "/bookings/my");
 
   if (!me) {
-    return (
-      <>
-        <h2 className="my-4 text-3xl font-medium">Sign in to get access</h2>
-        <p className="mb-4 text-lg text-text-secondary/75">
-          Access convenient booking service with your Innopolis account.
-        </p>
-        <SignInButton />
-      </>
-    );
+    return <AuthWall />;
   }
 
   return (
