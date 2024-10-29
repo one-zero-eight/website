@@ -1,4 +1,5 @@
 import { navigateToSignIn } from "@/api/accounts/sign-in.ts";
+import Tooltip from "@/components/common/Tooltip.tsx";
 import clsx from "clsx";
 import { forwardRef } from "react";
 
@@ -31,24 +32,21 @@ export const SignInButton = forwardRef(function SignInButton_(
   );
 });
 
-export const SignInButtonIcon = forwardRef(function SignInButtonIcon(
-  { onClick, className, signInRedirect }: SignInButtonProps,
-  ref: React.Ref<HTMLButtonElement>,
-) {
+export function SignInButtonIcon({
+  onClick,
+  signInRedirect,
+}: SignInButtonProps) {
   return (
-    <button
-      ref={ref}
-      rel="nofollow noindex"
-      className={clsx(
-        "flex h-18p w-18p items-center justify-center rounded-2xl bg-primary-main hover:bg-primary-hover",
-        className,
-      )}
-      onClick={(e) => {
-        navigateToSignIn(signInRedirect);
-        onClick?.(e);
-      }}
-    >
-      <span className="icon-[material-symbols--login] -ml-1 text-4xl text-icon-main/50" />
-    </button>
+    <Tooltip content="Sign in">
+      <button
+        className="flex h-14 w-14 flex-col items-center justify-center rounded-xl text-icon-main/50 hover:bg-secondary-main"
+        onClick={(e) => {
+          navigateToSignIn(signInRedirect);
+          onClick?.(e);
+        }}
+      >
+        <span className="icon-[material-symbols--login-rounded] text-4xl" />
+      </button>
+    </Tooltip>
   );
-});
+}
