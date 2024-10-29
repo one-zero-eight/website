@@ -1,7 +1,7 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-const OfflineNotification: React.FC = () => {
+export default function OfflineNotification() {
   const [isOffline, setIsOffline] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
 
@@ -29,20 +29,16 @@ const OfflineNotification: React.FC = () => {
   if (!isOffline) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-start justify-center`}>
-      <div
-        className={`flex items-center justify-between rounded-lg bg-red-600 px-6 py-3 text-white shadow-lg`}
+    <div className="fixed left-1/2 top-2 z-50 mx-auto flex -translate-x-1/2 items-center justify-between rounded-lg bg-red-600 shadow-lg">
+      <p className="pl-3 text-[16px] font-medium text-white">
+        No internet connection!
+      </p>
+      <button
+        className="flex p-2 pr-3 text-white hover:text-gray-300"
+        onClick={() => setIsClosed(true)}
       >
-        <p className="text-sm md:text-base">No internet connection!</p>
-        <button
-          className="ml-4 text-lg font-bold text-white hover:text-gray-300 md:text-xl"
-          onClick={() => setIsClosed(true)}
-        >
-          &times;
-        </button>
-      </div>
+        <span className="icon-[material-symbols--close] text-2xl" />
+      </button>
     </div>
   );
-};
-
-export default OfflineNotification;
+}
