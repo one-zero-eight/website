@@ -24,7 +24,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     return (
       <>
         <OfflineNotification />
-        <Helmet titleTemplate="%s — InNoHassle" defaultTitle="InNoHassle">
+        <Helmet
+          titleTemplate="%s — InNoHassle"
+          defaultTitle="InNoHassle"
+          // Update immediately, even when tab is not focused
+          defer={false}
+        >
           <link rel="canonical" href={canonical} />
         </Helmet>
 
