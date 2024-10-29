@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/sport")({
   component: () => (
-    <div className="flex min-h-full flex-col overflow-y-auto @container/content">
+    <>
       <Helmet>
         <title>Sport bot</title>
         <meta
@@ -16,6 +16,6 @@ export const Route = createFileRoute("/_with_menu/sport")({
 
       <Topbar title="Sport" />
       <SportPage />
-    </div>
+    </>
   ),
 });

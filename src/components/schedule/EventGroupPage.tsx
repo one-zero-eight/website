@@ -18,15 +18,11 @@ export function EventGroupPage({ alias }: { alias: string }) {
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
   if (!group) {
-    return (
-      <div className="flex min-h-full flex-col overflow-y-auto @container/content">
-        <Topbar title="Group" />
-      </div>
-    );
+    return <Topbar title="Group" />;
   }
 
   return (
-    <div className="flex min-h-full flex-col overflow-y-auto @container/content">
+    <>
       <Helmet>
         <title>{group.name} group — Schedule</title>
         <meta name="description" content={group.description ?? undefined} />
@@ -87,6 +83,6 @@ export function EventGroupPage({ alias }: { alias: string }) {
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
       />
-    </div>
+    </>
   );
 }

@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_with_menu/schedule/$category")({
     }
 
     return (
-      <div className="flex min-h-full flex-col overflow-y-auto @container/content">
+      <>
         <Helmet>
           <title>{categoryInfo.title} — Schedule</title>
           <meta name="description" content={categoryInfo.shortDescription} />
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_with_menu/schedule/$category")({
 
         <Topbar title={`Schedule — ${categoryInfo.title}`} />
         <ScheduleList category={category} />
-      </div>
+      </>
     );
   },
 

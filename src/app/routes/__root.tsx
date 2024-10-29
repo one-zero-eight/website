@@ -1,5 +1,5 @@
-import Sidebar from "@/components/layout/Sidebar.tsx";
 import OfflineNotification from "@/components/layout/Offline.tsx";
+import Sidebar from "@/components/layout/Sidebar.tsx";
 import {
   createRootRouteWithContext,
   Link,
@@ -43,13 +43,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   notFoundComponent: () => (
     <div className="flex h-full flex-row">
       <Sidebar>
-        <div className="flex h-full flex-grow flex-col">
-          <div className="flex h-full flex-col justify-center text-center @container/content">
-            <h1 className="mb-4 text-4xl font-bold">404 / not found</h1>
-            <Link to="/" className="selected">
-              Go to dashboard
-            </Link>
-          </div>
+        <div className="flex min-h-full grow flex-col items-center justify-center overflow-y-auto @container/content">
+          <h1 className="mb-4 text-4xl font-bold">404 / not found</h1>
+          <Link to="/dashboard" className="selected">
+            Go to dashboard
+          </Link>
         </div>
       </Sidebar>
     </div>

@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/dorms")({
   component: () => (
-    <div className="flex min-h-full flex-col overflow-y-auto @container/content">
+    <>
       <Helmet>
         <title>Dorms</title>
         <meta
@@ -16,6 +16,6 @@ export const Route = createFileRoute("/_with_menu/dorms")({
 
       <Topbar title="Dorms" />
       <DormsPage />
-    </div>
+    </>
   ),
 });

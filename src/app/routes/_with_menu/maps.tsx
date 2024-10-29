@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_with_menu/maps")({
   component: function RouteComponent() {
     const { sceneId, q } = Route.useSearch();
     return (
-      <div className="flex min-h-full flex-col overflow-y-auto @container/content">
+      <>
         <Helmet>
           <title>Maps</title>
           <meta
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_with_menu/maps")({
         <Topbar title="Maps" />
         <MapsPageTabs />
         <MapsPage sceneId={sceneId} q={q} />
-      </div>
+      </>
     );
   },
 });

@@ -20,18 +20,16 @@ export const Route = createFileRoute("/_with_menu/search")({
     const { q } = Route.useSearch();
     return (
       <Suspense>
-        <div className="flex min-h-full flex-col overflow-y-auto @container/content">
-          <Helmet>
-            <title>Search</title>
-            <meta
-              name="description"
-              content="Search anything at Innopolis University."
-            />
-          </Helmet>
+        <Helmet>
+          <title>Search</title>
+          <meta
+            name="description"
+            content="Search anything at Innopolis University."
+          />
+        </Helmet>
 
-          <Topbar title="Search" />
-          <SearchPage searchQuery={q} />
-        </div>
+        <Topbar title="Search" />
+        <SearchPage searchQuery={q} />
       </Suspense>
     );
   },
