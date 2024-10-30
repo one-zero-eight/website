@@ -1,4 +1,3 @@
-import Tooltip from "@/components/common/Tooltip";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 
@@ -17,11 +16,7 @@ function SidebarSection(props: SectionProps) {
     <div
       className={clsx(
         "flex select-none flex-row justify-center rounded-xl px-2 py-1.5 hover:bg-gray-500/10",
-        props.selected
-          ? "text-focus"
-          : props.path === "#"
-            ? "text-disabled"
-            : "text-inactive",
+        props.selected ? "text-brand-violet" : "text-inactive",
       )}
     >
       {props.icon}
@@ -29,11 +24,7 @@ function SidebarSection(props: SectionProps) {
         className={clsx(
           "ml-4",
           "flex w-fit items-center whitespace-nowrap text-lg font-semibold",
-          props.selected
-            ? "selected"
-            : props.path === "#"
-              ? "text-disabled"
-              : "text-inactive",
+          props.selected ? "selected" : "text-inactive",
         )}
       >
         {props.title}
@@ -47,22 +38,8 @@ function SidebarSection(props: SectionProps) {
     </div>
   );
 
-  if (props.path === "#") {
-    return (
-      <Tooltip content="Coming soon">
-        <div tabIndex={0}>{element}</div>
-      </Tooltip>
-    );
-  }
-
   return (
-    <Link
-      to={props.path}
-      onClick={props.onClick}
-      target={props.path.startsWith("/") ? undefined : "_blank"}
-      rel={props.path.startsWith("/") ? undefined : "noopener noreferrer"}
-      className="w-full"
-    >
+    <Link to={props.path} onClick={props.onClick} className="w-full">
       {element}
     </Link>
   );

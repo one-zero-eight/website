@@ -299,7 +299,7 @@ export function BookingModal({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Enter title..."
-                        className="w-full grow rounded-xl bg-secondary-main px-4 py-2 text-xl outline-none focus:ring-2 focus:ring-focus"
+                        className="w-full grow rounded-xl bg-secondary-main px-4 py-2 text-xl outline-none focus:ring-2 focus:ring-brand-violet"
                       />
 
                       {BookingLocation}

@@ -36,7 +36,7 @@ export default function ScheduleLinkCopy({
         className="w-full grow rounded-xl bg-secondary-main p-2"
       />
       <button
-        className="w-fit rounded-xl p-2 text-focus hover:bg-secondary-main"
+        className="w-fit rounded-xl p-2 text-brand-violet hover:bg-secondary-main"
         ref={copyButtonRef}
         onClick={copy}
       >

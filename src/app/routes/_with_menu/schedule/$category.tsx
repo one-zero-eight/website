@@ -1,5 +1,5 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import ScheduleList from "@/components/schedule/ScheduleList.tsx";
+import SchedulePage from "@/components/schedule/SchedulePage.tsx";
 import { getCategoryInfoBySlug } from "@/lib/events/events-view-config.ts";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
@@ -20,8 +20,8 @@ export const Route = createFileRoute("/_with_menu/schedule/$category")({
           <meta name="description" content={categoryInfo.shortDescription} />
         </Helmet>
 
-        <Topbar title={`Schedule — ${categoryInfo.title}`} />
-        <ScheduleList category={category} />
+        <Topbar title="Schedule" />
+        <SchedulePage category={category} />
       </>
     );
   },

@@ -21,7 +21,7 @@ function Tab({ title, to }: { title: string; to: string }) {
       to={to}
       className={clsx(
         "px-2 py-1",
-        pathname === to && "border-b-2 border-b-focus",
+        pathname === to && "border-b-2 border-b-brand-violet",
       )}
     >
       {title}

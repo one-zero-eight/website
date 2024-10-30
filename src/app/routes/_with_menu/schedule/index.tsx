@@ -1,5 +1,5 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import { ScheduleMainPage } from "@/components/schedule/ScheduleMainPage.tsx";
+import SchedulePage from "@/components/schedule/SchedulePage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
@@ -16,8 +16,9 @@ export const Route = createFileRoute("/_with_menu/schedule/")({
           }
         />
       </Helmet>
+
       <Topbar title="Schedule" />
-      <ScheduleMainPage />
+      <SchedulePage category={null} />
     </>
   ),
 });

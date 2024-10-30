@@ -17,12 +17,12 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
   return (
     <div
       className={clsx(
-        "flex h-fit max-h-full min-w-0 flex-col gap-2 rounded-lg border border-default bg-sidebar p-4 md:basis-1/2",
+        "flex h-fit max-h-full min-w-0 flex-col gap-2 rounded-lg border border-secondary-hover bg-sidebar p-4 md:basis-1/2",
         "fixed inset-8 top-8 z-10 md:visible md:static",
       )}
     >
       <div className="flex flex-row items-center justify-between">
-        <p className="text-base-content text-2xl font-semibold dark:text-white">
+        <p className="text-2xl font-semibold dark:text-white">
           {source.display_name}
         </p>
         <span
@@ -31,7 +31,7 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
         />
       </div>
       <a href={source?.link} target="_blank" className="w-fit max-w-full">
-        <p className="truncate pb-3 text-xs font-normal text-breadcrumbs hover:underline">
+        <p className="truncate pb-3 text-xs font-normal text-[#93bd58] hover:underline">
           {source.breadcrumbs.join(" > ")}
         </p>
       </a>

@@ -28,7 +28,7 @@ const items: Item[] = [
       title: "Search",
       path: "/search",
       badge: (
-        <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
+        <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
           NEW
         </span>
       ),
@@ -57,7 +57,7 @@ const items: Item[] = [
       title: "Maps",
       path: "/maps",
       badge: (
-        <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
+        <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
           NEW
         </span>
       ),
@@ -75,7 +75,7 @@ const items: Item[] = [
     title: "Dorms",
     path: "/dorms",
     badge: (
-      <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
+      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
         NEW
       </span>
     ),
@@ -99,7 +99,7 @@ const items: Item[] = [
     title: "Extension",
     path: "/extension",
     badge: (
-      <span className="ml-2 rounded-full bg-focus px-2 py-1 text-xs font-semibold text-white">
+      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
         NEW
       </span>
     ),

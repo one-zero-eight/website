@@ -28,7 +28,7 @@ export function MapsPageTabs() {
     <div className="flex shrink-0 flex-col whitespace-nowrap @3xl/content:flex-row">
       <form
         onSubmit={onSubmit}
-        className="flex items-center border-b-[1px] border-b-secondary-hover px-2 pb-[1px] focus-within:border-b-2 focus-within:border-b-focus focus-within:pb-0"
+        className="flex items-center border-b-[1px] border-b-secondary-hover px-2 pb-[1px] focus-within:border-b-2 focus-within:border-b-brand-violet focus-within:pb-0"
       >
         <input
           ref={inputRef}
@@ -46,15 +46,15 @@ export function MapsPageTabs() {
 
       <div className="flex grow flex-row overflow-x-auto whitespace-nowrap">
         <div className="w-2 shrink-0 border-b-[1px] border-b-secondary-hover @3xl/content:w-1" />
-        {scenes?.map((scene) => (
+        {scenes?.map((scene, i) => (
           <Link
             key={scene.scene_id}
             to="/maps"
             search={{ sceneId: scene.scene_id }}
             className={clsx(
               "px-2 py-1",
-              scene.scene_id === sceneId
-                ? "border-b-2 border-b-focus"
+              scene.scene_id === sceneId || (sceneId === undefined && i === 0)
+                ? "border-b-2 border-b-brand-violet"
                 : "border-b-[1px] border-b-secondary-hover",
             )}
           >

@@ -194,7 +194,7 @@ export default function ScholarshipCalculator() {
           onChange={(e) => onMarksChange(e.target.value, course)}
           autoComplete="off"
           spellCheck={false}
-          className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-focus bg-base p-3 font-handwritten text-transparent caret-focus outline-none"
+          className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-brand-violet bg-base p-3 font-handwritten text-transparent caret-brand-violet outline-none"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
           rows={1}
           maxLength={50}
@@ -213,7 +213,7 @@ export default function ScholarshipCalculator() {
         {marks.length !== 0 && (
           <button
             onClick={() => onMarksChange("", course)}
-            className="absolute -right-1 -top-1 h-7 w-7 rounded-2xl bg-base p-2 align-middle text-lg text-focus"
+            className="absolute -right-1 -top-1 h-7 w-7 rounded-2xl bg-base p-2 align-middle text-lg text-brand-violet"
             style={{ lineHeight: 0 }}
           >
             X
@@ -222,13 +222,13 @@ export default function ScholarshipCalculator() {
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
         <div className="text-xl font-medium">Course:</div>
-        <div className="flex w-48 flex-row overflow-clip rounded-2xl border-2 border-focus bg-base">
+        <div className="flex w-48 flex-row overflow-clip rounded-2xl border-2 border-brand-violet bg-base">
           <button
             onClick={() => onMarksChange(marks.join(""), "B24")}
             className={clsx(
-              "w-full rounded-l-2xl p-2 text-center font-handwritten transition-colors hover:bg-focus/20",
+              "w-full rounded-l-2xl p-2 text-center font-handwritten transition-colors hover:bg-brand-violet/20",
               course === "B24"
-                ? "bg-focus/10 text-focus"
+                ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
             )}
           >
@@ -237,9 +237,9 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B23")}
             className={clsx(
-              "w-full p-2 text-center font-handwritten transition-colors hover:bg-focus/20",
+              "w-full p-2 text-center font-handwritten transition-colors hover:bg-brand-violet/20",
               course === "B23"
-                ? "bg-focus/10 text-focus"
+                ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
             )}
           >
@@ -248,9 +248,9 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B22")}
             className={clsx(
-              "w-full rounded-r-2xl p-2 text-center font-handwritten transition-colors hover:bg-focus/20",
+              "w-full rounded-r-2xl p-2 text-center font-handwritten transition-colors hover:bg-brand-violet/20",
               course === "B22"
-                ? "bg-focus/10 text-focus"
+                ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
             )}
           >
@@ -271,7 +271,7 @@ export default function ScholarshipCalculator() {
           spellCheck={false}
           className={clsx(
             "w-48 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
-            !errorGPA ? "border-focus" : "border-red-500",
+            !errorGPA ? "border-brand-violet" : "border-red-500",
           )}
           style={{
             color: !errorGPA ? calculateColorGPA(Number(displayGPA)) : "red",
@@ -291,7 +291,7 @@ export default function ScholarshipCalculator() {
           spellCheck={false}
           className={clsx(
             "rubles-input w-48 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
-            !errorScholarship ? "border-focus" : "border-red-500",
+            !errorScholarship ? "border-brand-violet" : "border-red-500",
           )}
           style={{
             color: !errorScholarship

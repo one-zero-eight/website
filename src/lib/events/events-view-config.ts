@@ -37,7 +37,7 @@ export const viewConfig: ViewConfig = {
       title: "Sports",
       shortDescription: "Schedule of sport classes in F24.",
       filtersTagTypes: [],
-      groupingTagType: undefined,
+      groupingTagType: "category",
       showTagTypes: ["category"],
       outdated: false,
     },
@@ -50,6 +50,7 @@ export const viewConfig: ViewConfig = {
       showTagTypes: ["cleaning"],
       outdated: false,
     },
+    /*
     bootcamp2024: {
       alias: "bootcamp2024",
       title: "Bootcamp",
@@ -71,6 +72,7 @@ export const viewConfig: ViewConfig = {
       ],
       outdated: true,
     },
+    */
   },
 };
 

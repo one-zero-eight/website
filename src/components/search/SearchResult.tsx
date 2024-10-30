@@ -17,7 +17,7 @@ export default function SearchResult({
       className={clsx(
         "flex cursor-pointer flex-col rounded-lg !border bg-sidebar p-4 hover:bg-primary-hover",
         isSelected
-          ? "border-[#9747FF] drop-shadow-[0_0_4px_#9747FF]"
+          ? "border-brand-violet drop-shadow-[0_0_4px_#9747FF]"
           : "border-gray-400",
       )}
     >
@@ -30,14 +30,14 @@ export default function SearchResult({
       ) : response.source.type === "telegram" ? (
         <span className="icon-[uil--telegram-alt] text-3xl text-[#27A7E7]" />
       ) : null}
-      <p className="text-base-content text-xs font-semibold dark:text-white md:text-2xl">
+      <p className="text-xs font-semibold dark:text-white md:text-2xl">
         {response.source.display_name}
       </p>
       <a
         href={response.source.link}
         target="_blank"
         onClickCapture={(e) => e.stopPropagation()}
-        className="w-fit max-w-full truncate text-xs text-breadcrumbs hover:underline"
+        className="w-fit max-w-full truncate text-xs text-[#93bd58] hover:underline"
       >
         {response.source.breadcrumbs.join(" > ")}
       </a>

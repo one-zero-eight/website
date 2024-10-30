@@ -60,7 +60,7 @@ export function MapView({
 
   return (
     <FullscreenMode enable={fullscreen}>
-      <div className="relative h-full w-full">
+      <div className="relative h-full w-full overflow-hidden">
         <MapViewer scene={scene} highlightAreas={highlightAreas} />
         <button
           className="absolute bottom-2 right-2 flex h-fit rounded-xl bg-primary-main/50 px-2 py-2 hover:bg-primary-main/75"
@@ -279,7 +279,7 @@ const MapViewer = memo(function MapViewer({
   return (
     <div
       ref={containerRef}
-      className="h-full w-full cursor-grab overflow-hidden rounded-xl bg-gray-50"
+      className="flex h-full max-h-full w-full cursor-grab overflow-hidden rounded-xl bg-gray-50"
     >
       <style type="text/css">
         {highlightAreas?.length
@@ -299,7 +299,7 @@ const MapViewer = memo(function MapViewer({
         <div
           ref={imageRef}
           dangerouslySetInnerHTML={{ __html: mapSvg.data }}
-          className="block h-full w-full overflow-hidden [&>svg]:h-full [&>svg]:w-full"
+          className="h-full w-full [&>svg]:!h-full [&>svg]:!w-full"
         />
       )}
     </div>
