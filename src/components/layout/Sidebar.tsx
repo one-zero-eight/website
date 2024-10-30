@@ -57,8 +57,8 @@ const items: Item[] = [
       title: "Maps",
       path: "/maps",
       badge: (
-        <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-          NEW
+        <span className="ml-2 rounded-full bg-rose-700 px-2 py-1 text-xs font-semibold text-white">
+          BETA
         </span>
       ),
       icon: <span className="icon-[material-symbols--map-outline] text-4xl" />,
@@ -74,11 +74,6 @@ const items: Item[] = [
   {
     title: "Dorms",
     path: "/dorms",
-    badge: (
-      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-        NEW
-      </span>
-    ),
     icon: (
       <span className="icon-[material-symbols--nest-multi-room-outline-rounded] text-4xl" />
     ),
@@ -98,11 +93,6 @@ const items: Item[] = [
   {
     title: "Extension",
     path: "/extension",
-    badge: (
-      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-        NEW
-      </span>
-    ),
     icon: (
       <span className="icon-[material-symbols--extension-outline] text-4xl" />
     ),
