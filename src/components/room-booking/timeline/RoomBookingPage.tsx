@@ -3,17 +3,45 @@ import { $roomBooking } from "@/api/room-booking";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
-import { lazy, Suspense, useState } from "react";
-import type { Booking, Slot } from "./BookingTimeline.vue";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import type { Booking, ScrollToOptions, Slot } from "./BookingTimeline.vue";
+import { getRouteApi } from "@tanstack/react-router";
 
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),
 );
 
+type TimelineRef = {
+  __veauryVueRef__: {
+    scrollTo: (options: ScrollToOptions) => void;
+  };
+};
+
+const routeApi = getRouteApi("/_with_menu/room-booking/");
+
 export function RoomBookingPage() {
+  const search = routeApi.useSearch();
   const [modalOpen, setModalOpen] = useState(false);
   const [newBookingSlot, setNewBookingSlot] = useState<Slot>();
   const [bookingDetails, setBookingDetails] = useState<Booking>();
+  const timelineRef = useRef<TimelineRef | null>(null);
+  const [timelineLoaded, setTimelineLoaded] = useState(false);
+
+  const setTimelineRef = (x: TimelineRef) => {
+    timelineRef.current = x;
+    setTimelineLoaded(true);
+  };
+
+  useEffect(() => {
+    if (timelineLoaded && search.d) {
+      timelineRef.current?.__veauryVueRef__.scrollTo({
+        to: new Date(search.d),
+        behavior: "smooth",
+        offsetMs: T.Min * 20,
+        position: "left",
+      });
+    }
+  }, [timelineLoaded, search.d]);
 
   const { me } = useMe();
 
@@ -68,6 +96,7 @@ export function RoomBookingPage() {
               setNewBookingSlot(undefined);
               setModalOpen(true);
             }}
+            ref={setTimelineRef}
           />
         </Suspense>
       </div>

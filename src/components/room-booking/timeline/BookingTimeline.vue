@@ -8,14 +8,7 @@ import {
 } from "@/lib/utils/dates.ts";
 import { useMediaQuery, useNow } from "@vueuse/core";
 import type { MaybeRef } from "vue";
-import {
-  computed,
-  onMounted,
-  ref,
-  shallowRef,
-  unref,
-  watch,
-} from "vue"; /* ========================================================================== */
+import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
 
 /* ========================================================================== */
 /* ================================ Options ================================= */
@@ -39,6 +32,8 @@ const emit = defineEmits<{
   book: [slot: Slot];
   bookingClick: [booking: Booking];
 }>();
+
+defineExpose({ scrollTo });
 
 /* ========================================================================== */
 /* =============================== Constants ================================ */
@@ -959,7 +954,7 @@ function handleBookingClick(event: MouseEvent) {
 /* =============================== Scrolling ================================ */
 /* ========================================================================== */
 
-type ScrollToOptions = {
+export type ScrollToOptions = {
   /** Date to scroll to. */
   to: Date;
   /** Behavior of scroll. */
