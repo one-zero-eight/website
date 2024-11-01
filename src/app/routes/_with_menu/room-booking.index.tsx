@@ -4,6 +4,10 @@ import { RoomBookingPage } from "@/components/room-booking/timeline/RoomBookingP
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
+type RoomBookingSearch = {
+  d?: number;
+};
+
 export const Route = createFileRoute("/_with_menu/room-booking/")({
   component: () => (
     <>
@@ -20,4 +24,16 @@ export const Route = createFileRoute("/_with_menu/room-booking/")({
       <RoomBookingPage />
     </>
   ),
+  validateSearch: (search): RoomBookingSearch => {
+    const unix =
+      typeof search.d === "number"
+        ? search.d
+        : typeof search.d === "string"
+          ? Number.parseInt(search.d)
+          : NaN;
+    if (!Number.isNaN(unix) && unix > Date.UTC(0)) {
+      return { d: unix };
+    }
+    return {};
+  },
 });
