@@ -1,5 +1,5 @@
 import { $maps } from "@/api/maps";
-import { MapView } from "@/components/maps/MapView.tsx";
+import { MapView } from "@/components/maps/viewer/MapView.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 

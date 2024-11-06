@@ -1,95 +1,10 @@
 import { mapsTypes } from "@/api/maps";
 import { useMapImage } from "@/api/maps/map-image.ts";
-import { FloatingOverlay, FloatingPortal } from "@floating-ui/react";
-import {
-  memo,
-  PropsWithChildren,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { DetailsPopup } from "@/components/maps/viewer/DetailsPopup.tsx";
+import { memo, useEffect, useRef, useState } from "react";
 import { useEventListener } from "usehooks-ts";
 
-export function MapView({
-  scene,
-  highlightAreas,
-}: {
-  scene: mapsTypes.SchemaScene;
-  highlightAreas: mapsTypes.SchemaSearchResult[];
-}) {
-  const [fullscreen, setFullscreen] = useState(false);
-  const switchFullscreen = useCallback(() => setFullscreen((v) => !v), []);
-
-  // Set fullscreen mode when the fullscreen state changes
-  useEffect(() => {
-    // requestFullscreen and exitFullscreen are not supported on iPhone Safari
-    if (fullscreen) {
-      document.body.requestFullscreen?.();
-    } else {
-      if (document.fullscreenElement) {
-        document.exitFullscreen?.();
-      }
-    }
-  }, [fullscreen]);
-
-  // Exit fullscreen mode when the user exits fullscreen mode using the browser
-  useEffect(() => {
-    const onFullscreenChange = () => {
-      if (!document.fullscreenElement) {
-        setFullscreen(false);
-      }
-    };
-    document.addEventListener("fullscreenchange", onFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", onFullscreenChange);
-    };
-  }, []);
-
-  // Exit fullscreen mode when the user presses the Escape key
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setFullscreen(false);
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, []);
-
-  return (
-    <FullscreenMode enable={fullscreen}>
-      <div className="relative h-full w-full overflow-hidden">
-        <MapViewer scene={scene} highlightAreas={highlightAreas} />
-        <button
-          className="absolute bottom-2 right-2 flex h-fit rounded-xl bg-primary-main/50 px-2 py-2 hover:bg-primary-main/75"
-          onClick={() => switchFullscreen()}
-        >
-          <span className="icon-[material-symbols--fullscreen] text-2xl" />
-        </button>
-      </div>
-    </FullscreenMode>
-  );
-}
-
-function FullscreenMode({
-  children,
-  enable,
-}: PropsWithChildren<{ enable: boolean }>) {
-  if (!enable) return <>{children}</>;
-
-  return (
-    <FloatingPortal>
-      <FloatingOverlay className="z-10 bg-gray-900/75">
-        {children}
-      </FloatingOverlay>
-    </FloatingPortal>
-  );
-}
-
-const MapViewer = memo(function MapViewer({
+export const MapViewer = memo(function MapViewer({
   scene,
   highlightAreas,
 }: {
@@ -105,6 +20,9 @@ const MapViewer = memo(function MapViewer({
   });
 
   const { data: mapSvg } = useMapImage(scene.svg_file);
+  const [popupArea, setPopupArea] = useState<mapsTypes.SchemaArea>();
+  const [popupIsOpen, setPopupIsOpen] = useState(false);
+  const [popupElement, setPopupElement] = useState<Element | null>(null);
 
   const updateImage = () => {
     if (!containerRef.current || !imageRef.current) return;
@@ -287,6 +205,70 @@ const MapViewer = memo(function MapViewer({
     { passive: false }, // Prevent page scrolling
   );
 
+  // Detect area clicks using mouse
+  useEventListener(
+    "mousedown",
+    (e) => {
+      const onMouseUp = (e2: MouseEvent) => {
+        window.removeEventListener("mouseup", onMouseUp);
+
+        // If the coordinates almost did not change, assume it is a click
+        if (
+          Math.abs(e.clientX - e2.clientX) <= 15 &&
+          Math.abs(e.clientY - e2.clientY) <= 15
+        ) {
+          // Find the nearest element with id
+          const el = (e.target as HTMLElement | null)?.closest("[id]");
+          // Find matching area
+          const area = scene.areas.find((a) => a.svg_polygon_id === el?.id);
+          if (!el || !area) return;
+
+          // Show popup
+          setPopupElement(el);
+          setPopupArea(area);
+          setPopupIsOpen(true);
+        }
+      };
+      window.addEventListener("mouseup", onMouseUp);
+    },
+    containerRef,
+  );
+
+  // Detect area clicks using touches
+  useEventListener(
+    "touchstart",
+    (e) => {
+      if (e.touches.length !== 1) return;
+
+      const onTouchEnd = (e2: TouchEvent) => {
+        window.removeEventListener("touchend", onTouchEnd);
+        if (e2.touches.length !== 0) return;
+        console.log(e2.changedTouches);
+
+        // If the coordinates almost did not change, assume it is a click
+        if (
+          Math.abs(e.touches[0].clientX - e2.changedTouches[0].clientX) <= 15 &&
+          Math.abs(e.touches[0].clientY - e2.changedTouches[0].clientY) <= 15
+        ) {
+          // Find the nearest element with id
+          const el = (e.target as HTMLElement | null)?.closest("[id]");
+          // Find matching area
+          const area = scene.areas.find((a) => a.svg_polygon_id === el?.id);
+          if (!el || !area) return;
+
+          // Show popup
+          setPopupElement(el);
+          setPopupArea(area);
+          setPopupIsOpen(true);
+        } else {
+          setPopupIsOpen(false);
+        }
+      };
+      window.addEventListener("touchend", onTouchEnd);
+    },
+    containerRef,
+  );
+
   // Center to the highlighted areas when they change
   useEffect(() => {
     if (!highlightAreas.length) return;
@@ -337,6 +319,21 @@ const MapViewer = memo(function MapViewer({
     options.current.offsetY = offsetY;
     options.current.zoom = zoom;
     updateImage();
+
+    // Show popup
+    if (highlightAreas.length === 1) {
+      const area = highlightAreas[0].area;
+      const el = imageRef.current?.querySelector(
+        `[id="${area.svg_polygon_id}"]`,
+      );
+      if (el) {
+        setPopupElement(el);
+        setPopupArea(area);
+        setPopupIsOpen(true);
+      } else {
+        setPopupIsOpen(false);
+      }
+    }
   }, [scene, highlightAreas, mapSvg?.data]);
 
   return (
@@ -365,6 +362,12 @@ const MapViewer = memo(function MapViewer({
           className="h-full w-full [&>svg]:!h-full [&>svg]:!w-full"
         />
       )}
+      <DetailsPopup
+        elementRef={popupElement}
+        area={popupArea}
+        isOpen={popupIsOpen}
+        setIsOpen={setPopupIsOpen}
+      />
     </div>
   );
 });
