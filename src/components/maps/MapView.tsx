@@ -126,7 +126,13 @@ const MapViewer = memo(function MapViewer({
   };
 
   useEffect(() => {
+    // Update on every rerender to match the latest state
+    updateImage();
+  });
+
+  useEffect(() => {
     if (!containerRef.current || !imageRef.current) return;
+    if (options.current.offsetX !== 0 || options.current.offsetY !== 0) return;
     // Set initial offset to center the image
     const rect = containerRef.current.getBoundingClientRect();
     const imageWidth = imageRef.current.clientWidth;
