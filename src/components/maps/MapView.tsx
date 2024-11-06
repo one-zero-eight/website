@@ -337,7 +337,7 @@ const MapViewer = memo(function MapViewer({
     options.current.offsetY = offsetY;
     options.current.zoom = zoom;
     updateImage();
-  }, [scene, highlightAreas]);
+  }, [scene, highlightAreas, mapSvg?.data]);
 
   return (
     <div
