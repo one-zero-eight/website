@@ -287,6 +287,58 @@ const MapViewer = memo(function MapViewer({
     { passive: false }, // Prevent page scrolling
   );
 
+  // Center to the highlighted areas when they change
+  useEffect(() => {
+    if (!highlightAreas.length) return;
+    if (!containerRef.current || !imageRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const imageRect = imageRef.current.getBoundingClientRect();
+
+    const areaIds = highlightAreas.map(
+      (s) => s.area.svg_polygon_id ?? undefined,
+    );
+    const areas = areaIds.map((id) =>
+      imageRef.current?.querySelector(`[id="${id}"]`),
+    );
+    const areasRect: DOMRect[] = areas
+      .map((area) => area?.getBoundingClientRect())
+      .filter((r) => r !== undefined);
+    if (!areasRect.length) return;
+
+    const minX = Math.min(
+      ...areasRect.map((r) => (r.left - imageRect.left) / options.current.zoom),
+    );
+    const minY = Math.min(
+      ...areasRect.map((r) => (r.top - imageRect.top) / options.current.zoom),
+    );
+    const maxX = Math.max(
+      ...areasRect.map(
+        (r) => (r.right - imageRect.left) / options.current.zoom,
+      ),
+    );
+    const maxY = Math.max(
+      ...areasRect.map(
+        (r) => (r.bottom - imageRect.top) / options.current.zoom,
+      ),
+    );
+
+    const zoomX = rect.width / (maxX - minX + 50);
+    const zoomY = rect.height / (maxY - minY + 50);
+    const zoom = Math.min(Math.max(Math.min(zoomX, zoomY), 0.5), 4);
+
+    const areaCenterX = minX + (maxX - minX) / 2;
+    const areaCenterY = minY + (maxY - minY) / 2;
+
+    const offsetX = rect.width / 2 - areaCenterX * zoom;
+    const offsetY = rect.height / 2 - areaCenterY * zoom;
+
+    options.current.offsetX = offsetX;
+    options.current.offsetY = offsetY;
+    options.current.zoom = zoom;
+    updateImage();
+  }, [scene, highlightAreas]);
+
   return (
     <div
       ref={containerRef}
