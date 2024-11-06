@@ -17,7 +17,7 @@ export function MapsPageTabs() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    inputRef.current?.focus();
+    inputRef.current?.blur();
     // Set search query in URL
     if (searchText) {
       navigate({ to: "/maps", search: { q: searchText, sceneId } });
