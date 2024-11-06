@@ -20,6 +20,9 @@ importers:
       '@fontsource/fuzzy-bubbles':
         specifier: ^5.1.0
         version: 5.1.0
+      '@fontsource/roboto':
+        specifier: ^5.1.0
+        version: 5.1.0
       '@fullcalendar/core':
         specifier: ^6.1.15
         version: 6.1.15
@@ -1191,6 +1194,9 @@ packages:
 
   '@fontsource/fuzzy-bubbles@5.1.0':
     resolution: {integrity: sha512-8yZlkaMnEfc2eYpF3JOm1BwL8wwasagFN6s7pwTt2DJCUuzcwETdigKphUHdfpeImQRtqcb6iJfFKq1GXCQqQg==}
+
+  '@fontsource/roboto@5.1.0':
+    resolution: {integrity: sha512-cFRRC1s6RqPygeZ8Uw/acwVHqih8Czjt6Q0MwoUoDe9U3m4dH1HmNDRBZyqlMSFwgNAUKgFImncKdmDHyKpwdg==}
 
   '@fullcalendar/core@6.1.15':
     resolution: {integrity: sha512-BuX7o6ALpLb84cMw1FCB9/cSgF4JbVO894cjJZ6kP74jzbUZNjtwffwRdA+Id8rrLjT30d/7TrkW90k4zbXB5Q==}
@@ -5552,6 +5558,8 @@ snapshots:
   '@fontsource-variable/rubik@5.1.0': {}
 
   '@fontsource/fuzzy-bubbles@5.1.0': {}
+
+  '@fontsource/roboto@5.1.0': {}
 
   '@fullcalendar/core@6.1.15':
     dependencies:

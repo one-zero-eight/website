@@ -23,6 +23,7 @@
     "@floating-ui/react": "^0.26.24",
     "@fontsource-variable/rubik": "^5.1.0",
     "@fontsource/fuzzy-bubbles": "^5.1.0",
+    "@fontsource/roboto": "^5.1.0",
     "@fullcalendar/core": "^6.1.15",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/interaction": "^6.1.15",

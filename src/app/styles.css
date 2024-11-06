@@ -1,5 +1,6 @@
 @import "@fontsource-variable/rubik";
 @import "@fontsource/fuzzy-bubbles";
+@import "@fontsource/roboto";
 
 @tailwind base;
 @tailwind components;
