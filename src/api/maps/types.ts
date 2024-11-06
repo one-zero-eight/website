@@ -55,6 +55,11 @@ export interface components {
        */
       title?: string | null;
       /**
+       * Ru Title
+       * @description Title in Russian
+       */
+      ru_title?: string | null;
+      /**
        * Legend Id
        * @description ID of the legend (if any)
        */
@@ -64,6 +69,23 @@ export interface components {
        * @description Description of the area
        */
       description?: string | null;
+      /**
+       * People
+       * @description List of people for this area
+       * @default []
+       */
+      people: string[];
+      /**
+       * Prioritized
+       * @description Priority for multi-floor areas
+       * @default false
+       */
+      prioritized: boolean;
+      /**
+       * Room Booking Id
+       * @description ID of the room in Room Booking API (if any)
+       */
+      room_booking_id?: string | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {

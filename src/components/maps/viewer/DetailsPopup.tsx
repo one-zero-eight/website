@@ -14,6 +14,7 @@ import {
   useRole,
   useTransitionStyles,
 } from "@floating-ui/react";
+import { Link } from "@tanstack/react-router";
 import React, { useEffect, useRef } from "react";
 
 export function DetailsPopup({
@@ -96,6 +97,30 @@ export function DetailsPopup({
               <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
                 {area.description}
               </p>
+            </div>
+          )}
+          {area.people.length >= 1 && (
+            <div className="flex flex-row gap-2">
+              <div className="w-6">
+                <span className="icon-[material-symbols--user-attributes-rounded] text-2xl" />
+              </div>
+              <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                {/* Show only English names */}
+                {area.people.filter((v) => /^[A-Za-z -]+$/.test(v)).join(",\n")}
+              </p>
+            </div>
+          )}
+          {area.room_booking_id && (
+            <div className="flex flex-row gap-2">
+              <div className="w-6">
+                <span className="icon-[ph--door-open] text-2xl" />
+              </div>
+              <Link
+                to="/room-booking"
+                className="flex w-full whitespace-pre-wrap py-1 underline underline-offset-2 [overflow-wrap:anywhere]"
+              >
+                Book this room
+              </Link>
             </div>
           )}
           <FloatingArrow
