@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useEventListener } from "usehooks-ts";
 
 export function MapView({
   scene,
@@ -142,14 +143,14 @@ const MapViewer = memo(function MapViewer({
     updateImage();
   }, []);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Support panning using mouse
-    const onMouseDown = (e: MouseEvent) => {
+  // Support panning using mouse
+  useEventListener(
+    "mousedown",
+    (e) => {
       e.preventDefault();
-      container.style.cursor = "grabbing";
+      if (!containerRef.current) return;
+
+      containerRef.current.style.cursor = "grabbing";
 
       const startX = e.clientX;
       const startY = e.clientY;
@@ -163,18 +164,25 @@ const MapViewer = memo(function MapViewer({
       const onMouseUp = () => {
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);
-        container.style.cursor = "grab";
+        if (containerRef.current) {
+          containerRef.current.style.cursor = "grab";
+        }
       };
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
-    };
+    },
+    containerRef,
+  );
 
-    // Support zooming using mouse wheel
-    const onWheel = (e: WheelEvent) => {
+  // Support zooming using mouse wheel
+  useEventListener(
+    "wheel",
+    (e) => {
       e.preventDefault();
+      if (!containerRef.current) return;
 
       // Should zoom to the center of the wheel event
-      const rect = container.getBoundingClientRect();
+      const rect = containerRef.current.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
       const oldZoom = options.current.zoom;
@@ -189,10 +197,15 @@ const MapViewer = memo(function MapViewer({
       options.current.offsetY =
         mouseY - (mouseY - options.current.offsetY) * zoomRatio;
       updateImage();
-    };
+    },
+    containerRef,
+    { passive: false }, // Prevent page scrolling
+  );
 
-    // Support panning using touches
-    const onTouchStartPanning = (e: TouchEvent) => {
+  // Support panning using touches
+  useEventListener(
+    "touchstart",
+    (e) => {
       e.preventDefault();
       if (e.touches.length !== 1) return;
 
@@ -211,15 +224,21 @@ const MapViewer = memo(function MapViewer({
       };
       window.addEventListener("touchmove", onTouchMove);
       window.addEventListener("touchend", onTouchEnd);
-    };
+    },
+    containerRef,
+    { passive: false }, // Prevent page scrolling
+  );
 
-    // Support zooming using touches
-    const onTouchStartZooming = (e: TouchEvent) => {
+  // Support zooming using touches
+  useEventListener(
+    "touchstart",
+    (e) => {
       e.preventDefault();
+      if (!containerRef.current) return;
       if (e.touches.length !== 2) return;
 
       // Should zoom to the center of the two touches
-      const rect = container.getBoundingClientRect();
+      const rect = containerRef.current.getBoundingClientRect();
       const startOffsetX = options.current.offsetX;
       const startOffsetY = options.current.offsetY;
       const touch1 = e.touches[0];
@@ -263,24 +282,10 @@ const MapViewer = memo(function MapViewer({
       };
       window.addEventListener("touchmove", onTouchMove);
       window.addEventListener("touchend", onTouchEnd);
-    };
-
-    // Add listeners to the container
-    container.addEventListener("mousedown", onMouseDown);
-    container.addEventListener("wheel", onWheel, { passive: false });
-    container.addEventListener("touchstart", onTouchStartPanning, {
-      passive: false,
-    });
-    container.addEventListener("touchstart", onTouchStartZooming, {
-      passive: false,
-    });
-    return () => {
-      container.removeEventListener("mousedown", onMouseDown);
-      container.removeEventListener("wheel", onWheel);
-      container.removeEventListener("touchstart", onTouchStartPanning);
-      container.removeEventListener("touchstart", onTouchStartZooming);
-    };
-  }, []);
+    },
+    containerRef,
+    { passive: false }, // Prevent page scrolling
+  );
 
   return (
     <div
