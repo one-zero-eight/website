@@ -74,17 +74,11 @@ When the API types change, run `pnpm run gen:api` to generate new client types a
 ### Run for development
 
 1. Start development server: `pnpm run dev`
-2. Open in the browser: http://localhost:3000
+2. Add `127.0.0.1 local.innohassle.ru` to your `/etc/hosts` file (on Windows: `C:\Windows\System32\drivers\etc\hosts`).
+3. Open in the browser: https://local.innohassle.ru:3000 or https://localhost:3000
    > The page will be reloaded when you edit the code
 
-To access API from local server, you have to set up a https proxy from 'local.innohassle.ru':
-
-1. Install Docker and Docker Compose
-2. Run `docker-compose up -d` in the root of the project
-3. Add `127.0.0.1 local.innohassle.ru` to your /etc/hosts file
-4. Access the website from the local server using the URL `https://local.innohassle.ru`
-5. This will redirect all requests to `http://localhost:3000`, so don't stop your development server
-6. To stop the proxy, run `docker-compose down`
+You must use HTTPS with domain https://local.innohassle.ru:3000 to access APIs with your account.
 
 ### Run for production
 

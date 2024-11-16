@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import veauryVitePlugins from "veaury/vite/esm/index.mjs";
 import { defineConfig } from "vite";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
+import mkcert from "vite-plugin-mkcert";
 import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { version } from "./package.json";
@@ -12,6 +13,9 @@ import { version } from "./package.json";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    // HTTPS support in development
+    mkcert(),
+
     // Enable routing via TanStack Router
     TanStackRouterVite({
       routesDirectory: "src/app/routes",
