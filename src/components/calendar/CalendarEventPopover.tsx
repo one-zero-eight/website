@@ -116,7 +116,8 @@ export default function CalendarEventPopover({
                   </div>
                   <div className="flex flex-row gap-1">
                     {locations.map((location: string, index: number) =>
-                      location !== "ONLINE" && location !== "ОНЛАЙН" ? (
+                      location.toUpperCase() !== "ONLINE" &&
+                      location.toUpperCase() !== "ОНЛАЙН" ? (
                         <div className="flex flex-row items-center gap-1">
                           <Link
                             key={index}
