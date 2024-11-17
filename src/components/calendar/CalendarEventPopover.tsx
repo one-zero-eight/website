@@ -12,6 +12,7 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import { EventApi } from "@fullcalendar/core";
+import { Link } from "@tanstack/react-router";
 import moment from "moment";
 import React, { useEffect } from "react";
 
@@ -67,6 +68,10 @@ export default function CalendarEventPopover({
   // Merge all the interactions into prop getters
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
+  let locations: string[] | undefined = undefined;
+  if (event.extendedProps?.location)
+    locations = event.extendedProps?.location.split("/");
+
   return (
     <>
       {isMounted && (
@@ -104,14 +109,39 @@ export default function CalendarEventPopover({
                     : moment(event.startStr).format("dddd, D MMMM")}
                 </p>
               </div>
-              {event.extendedProps?.location && (
+              {locations && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
                     <span className="icon-[material-symbols--location-on-outline] text-2xl" />
                   </div>
-                  <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
-                    {event.extendedProps.location}
-                  </p>
+                  <div className="flex flex-row gap-1">
+                    {locations.map((location: string, index: number) =>
+                      location !== "ONLINE" && location !== "ОНЛАЙН" ? (
+                        <div className="flex flex-row items-center gap-1">
+                          <Link
+                            key={index}
+                            to="/maps"
+                            search={{
+                              q: location,
+                            }}
+                            target="_blank"
+                            className="flex w-full whitespace-pre-wrap py-1 underline underline-offset-2 [overflow-wrap:anywhere]"
+                          >
+                            {location}
+                          </Link>
+                          {index !== locations.length - 1 && (
+                            <p className="py-1">/</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="flex w-full whitespace-pre-wrap py-1">
+                          {location.concat(
+                            index !== locations.length - 1 ? " / " : "",
+                          )}
+                        </p>
+                      ),
+                    )}
+                  </div>
                 </div>
               )}
               {event.extendedProps?.description && (
