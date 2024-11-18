@@ -3,6 +3,7 @@ import { $events, eventsTypes } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { URLType } from "@/components/calendar/CalendarViewer.tsx";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
+import { AcademicCalendarWidget } from "@/components/dashboard/AcademicCalendarWidget.tsx";
 import { AccountWidget } from "@/components/dashboard/AccountWidget.tsx";
 import { SportsWidget } from "@/components/dashboard/SportsWidget.tsx";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
@@ -32,8 +33,9 @@ export function DashboardPage() {
 
   return (
     <>
-      <div className="px-4">
+      <div className="flex flex-col gap-4 px-4 py-4">
         <AccountWidget />
+        <AcademicCalendarWidget />
         <SportsWidget />
         <div className="flex flex-col justify-between gap-4 @container/sections @6xl/content:flex-row @6xl/content:gap-8">
           <details className="flex w-full flex-col @container/schedule @6xl/content:w-1/2">
@@ -114,7 +116,7 @@ export function DashboardPage() {
             )}
           </details>
         </div>
-        <h2 className="my-4 text-3xl font-medium">Your calendar</h2>
+        <h2 className="text-3xl font-medium">Your calendar</h2>
       </div>
       <Calendar
         urls={

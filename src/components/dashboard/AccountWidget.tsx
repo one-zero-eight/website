@@ -6,7 +6,7 @@ export function AccountWidget() {
   if (!me) return null;
 
   return (
-    <div className="my-4 flex max-w-full flex-row gap-4 @container/account">
+    <div className="flex max-w-full flex-row gap-4 @container/account">
       <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full bg-border text-icon-main/50 @xl/account:h-24 @xl/account:w-24">
         {me.telegram?.photo_url ? (
           <img
