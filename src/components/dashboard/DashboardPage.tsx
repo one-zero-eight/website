@@ -3,6 +3,8 @@ import { $events, eventsTypes } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { URLType } from "@/components/calendar/CalendarViewer.tsx";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
+import { AccountWidget } from "@/components/dashboard/AccountWidget.tsx";
+import { SportsWidget } from "@/components/dashboard/SportsWidget.tsx";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton.tsx";
 import { PersonalCard } from "@/components/schedule/group-card/PersonalCard.tsx";
@@ -31,43 +33,8 @@ export function DashboardPage() {
   return (
     <>
       <div className="px-4">
-        <div className="my-4 flex max-w-full flex-row gap-4 @container/account">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full bg-border text-icon-main/50 @xl/account:h-24 @xl/account:w-24">
-            {me.telegram?.photo_url ? (
-              <img
-                src={me.telegram.photo_url}
-                alt="Your avatar"
-                className="rounded-full border-2 border-icon-main/50"
-              />
-            ) : (
-              <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-5xl @xl/account:text-6xl" />
-            )}
-          </div>
-          <div className="flex flex-col justify-center overflow-x-hidden">
-            <p className="break-words text-2xl">{me.innopolis_sso?.name}</p>
-            <p className="overflow-ellipsis text-text-secondary/75">
-              {me.innopolis_sso?.email}
-            </p>
-          </div>
-        </div>
-        <a
-          href="https://t.me/one_zero_eight"
-          className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
-        >
-          <div className="w-12">
-            <span className="icon-[ic--baseline-telegram] text-5xl text-brand-violet" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <p className="text-2xl font-semibold text-text-main">
-              Telegram channel
-            </p>
-            <p className="text-lg text-text-secondary/75">
-              Join <span className="text-brand-violet">one-zero-eight</span>{" "}
-              channel in Telegram for all important information about
-              InNoHassle.
-            </p>
-          </div>
-        </a>
+        <AccountWidget />
+        <SportsWidget />
         <div className="flex flex-col justify-between gap-4 @container/sections @6xl/content:flex-row @6xl/content:gap-8">
           <details className="flex w-full flex-col @container/schedule @6xl/content:w-1/2">
             <summary className="my-4 text-3xl font-medium">Schedule</summary>
