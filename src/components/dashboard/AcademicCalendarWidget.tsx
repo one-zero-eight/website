@@ -28,9 +28,10 @@ export function AcademicCalendarWidget() {
         </div>
         <a
           href="https://eduwiki.innopolis.university/index.php/AcademicCalendar"
-          className="text-base text-text-secondary/75 hover:underline"
+          className="w-fit text-base text-text-secondary/75 hover:underline"
         >
-          *based on <span className="text-brand-violet">Eduwiki</span>.
+          *based on <span className="text-brand-violet">Eduwiki</span>
+          <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />
         </a>
       </div>
     </div>
