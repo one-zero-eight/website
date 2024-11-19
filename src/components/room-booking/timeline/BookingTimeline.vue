@@ -1339,7 +1339,6 @@ $button-height: 50px;
 .timeline {
   position: relative;
   overflow: hidden;
-  background: var(--c-bg-sheet);
 
   &[data-has-new] {
     cursor: crosshair !important;
@@ -1588,6 +1587,10 @@ $button-height: 50px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
+  }
+
+  &.placeholder > div {
+    opacity: 0.5;
   }
 
   &.placeholder {

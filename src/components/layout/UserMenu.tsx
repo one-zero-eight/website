@@ -75,7 +75,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
         >
           <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-xl hover:bg-secondary">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-contrast/50">
-              <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-4xl" />
+              <span className="icon-[material-symbols--snowboarding-rounded] text-4xl" />
             </div>
           </div>
         </button>
