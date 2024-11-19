@@ -35,8 +35,10 @@ export function DashboardPage() {
     <>
       <div className="flex flex-col gap-4 px-4 py-4">
         <AccountWidget />
-        <AcademicCalendarWidget />
-        <SportsWidget />
+        <div className="grid gap-4 @4xl/content:grid-cols-2">
+          <AcademicCalendarWidget />
+          <SportsWidget />
+        </div>
         <div className="flex flex-col justify-between gap-4 @container/sections @6xl/content:flex-row @6xl/content:gap-8">
           <details className="flex w-full flex-col @container/schedule @6xl/content:w-1/2">
             <summary className="my-4 text-3xl font-medium">Schedule</summary>
