@@ -41,8 +41,10 @@
     </script>
     <!-- Add snow for non-Safari browsers -->
     <script>
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        document.documentElement.classList.toggle("snow", !isSafari);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(
+        navigator.userAgent,
+      );
+      document.documentElement.classList.toggle("snow", !isSafari);
     </script>
 
     <!-- Inject main styles to index.html -->
