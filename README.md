@@ -1,6 +1,6 @@
 <p align="center" style="background-color: white">
   <a href="https://innohassle.ru">
-    <img alt="InNoHassle" height="300px" src="https://raw.githubusercontent.com/one-zero-eight/InNoHassle-Design/212a5c06590c4d469a0a894481c09915a4b1735f/logo/ing-white-outline-transparent.svg">
+    <img alt="InNoHassle" height="300px" src="https://raw.githubusercontent.com/one-zero-eight/design/212a5c06590c4d469a0a894481c09915a4b1735f/logo/ing-white-outline-transparent.svg">
   </a>
 </p>
 
@@ -49,7 +49,7 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 
 ### Technologies
 
-- [Node.js 20+](https://nodejs.org) & [TypeScript](https://www.typescriptlang.org/)
+- [Node.js](https://nodejs.org) & [TypeScript](https://www.typescriptlang.org/)
 - [React](https://react.dev/) & [Vite](https://vitejs.dev/) & [TanStack Router](https://tanstack.com/router/latest/docs/framework/react/overview)
 - [Vue](https://vuejs.org/) & [Veaury](https://github.com/gloriasoft/veaury)
 - Styling: [TailwindCSS](https://tailwindcss.com/), [Iconify](https://iconify.design/)
@@ -59,32 +59,35 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 
 ## Development
 
-### Getting started
+### Set up for development
 
-1. Install Node.js 20+, pnpm
+1. Install [Node.js 20+](https://nodejs.org), [pnpm](https://pnpm.io)
 2. Install dependencies: `pnpm install`
-3. Set up pre-commit hooks (for formatting and linting): `pnpm run prepare`
-4. Copy environment variables file: `cp .env.example .env.local`
-5. Edit variables in `.env.local` if you want to use a different API server
-   > Do not change the ID of the trackers so that they are not enabled in development
-6. Set up your IDE to autoformat code with Prettier and use ESLint
-
-When the API types change, run `pnpm run gen:api` to generate new client types and functions.
-
-### Run for development
-
-1. Start development server: `pnpm run dev`
-2. Add `127.0.0.1 local.innohassle.ru` to your `/etc/hosts` file (on Windows: `C:\Windows\System32\drivers\etc\hosts`).
-3. Open in the browser: https://local.innohassle.ru:3000 or https://localhost:3000
+3. Start development server: `pnpm run dev`
+4. Open in the browser: https://local.innohassle.ru:3000
    > The page will be reloaded when you edit the code
 
-You must use HTTPS with domain https://local.innohassle.ru:3000 to access APIs with your account.
+> [!IMPORTANT]
+> You must use HTTPS with domain https://local.innohassle.ru:3000 to access APIs with your account.
 
-### Run for production
+> [!TIP]
+> When the API types change, you can run `pnpm run gen:api` to generate new client types and functions.
+
+### Preview production build
 
 1. Build the application: `pnpm run build`
 2. Run the production-like server: `pnpm run preview`
-3. Open in the browser: http://localhost:3000
+3. Open in the browser: https://local.innohassle.ru:3000
+
+### Project structure
+
+- `src/` - main source code
+  - `app/` - entry point of the application
+    - `routes` - routing via [TanStack Router](https://tanstack.com/router/latest/docs/framework/react/guide/file-based-routing)
+  - `components/` - components split by pages
+  - `lib/` - utilities and domain-specific logic
+  - `api/` - API clients and types
+- `public/` - static files
 
 ## Contributing
 

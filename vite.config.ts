@@ -14,7 +14,9 @@ import { version } from "./package.json";
 export default defineConfig({
   plugins: [
     // HTTPS support in development
-    mkcert(),
+    mkcert({
+      hosts: ["local.innohassle.ru"],
+    }),
 
     // Enable routing via TanStack Router
     TanStackRouterVite({

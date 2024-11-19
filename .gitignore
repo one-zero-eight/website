@@ -17,7 +17,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # secrets
-.env
 .env*.local
 *.pem
 
@@ -27,3 +26,4 @@ yarn-error.log*
 
 # misc
 .DS_Store
+.
