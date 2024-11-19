@@ -82,7 +82,7 @@ export function DetailsPopup({
           ref={refs.setFloating}
           style={{ ...floatingStyles, ...transitionStyles }}
           {...getFloatingProps()}
-          className="z-10 flex max-w-md flex-col gap-2 rounded-2xl bg-primary p-4 text-sm text-text-main drop-shadow-md"
+          className="z-10 flex max-w-md flex-col gap-2 rounded-2xl bg-primary p-4 text-sm text-contrast drop-shadow-md"
         >
           <div className="flex flex-row gap-2">
             <div className="text-bold flex whitespace-pre-wrap text-xl [overflow-wrap:anywhere]">

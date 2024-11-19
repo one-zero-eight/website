@@ -47,7 +47,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       <SearchField runSearch={runSearch} currentQuery={searchQuery} />
 
       {searchResult && (
-        <p className="py-4 text-2xl font-semibold text-text-main">
+        <p className="py-4 text-2xl font-semibold text-contrast">
           {searchResult.responses.length > 0
             ? `Results for: ${searchResult.searched_for}`
             : `No matched results for: ${searchResult.searched_for}`}

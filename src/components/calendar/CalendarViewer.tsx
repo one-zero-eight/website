@@ -327,13 +327,13 @@ function renderEventTimeGridWeek({
       style={{
         borderLeftColor: border,
         backgroundColor: `color-mix(in srgb, ${background} 40%, transparent)`,
-        color: `color-mix(in srgb, ${background} 75%, rgb(var(--color-text)))`,
+        color: `color-mix(in srgb, ${background} 75%, rgb(var(--color-contrast)))`,
       }}
     >
       <span
         className="line-clamp-2 text-sm font-medium"
         style={{
-          color: `color-mix(in srgb, ${background} 60%, rgb(var(--color-text)))`,
+          color: `color-mix(in srgb, ${background} 60%, rgb(var(--color-contrast)))`,
         }}
       >
         {event.title}
@@ -363,7 +363,7 @@ function renderEventDayGridMonth({
         className="fc-daygrid-event-dot"
         style={{ borderColor: borderColor || backgroundColor }}
       />
-      <div className="fc-event-title w-full max-w-full text-xs text-text-main">
+      <div className="fc-event-title w-full max-w-full text-xs text-contrast">
         {event.title || <>&nbsp;</>}
       </div>
       {timeText && (

@@ -6,7 +6,7 @@ export function GroupCardSkeleton() {
         <div className="my-1 h-4 w-24 animate-pulse rounded-xl bg-secondary" />
       </div>
       <div className="flex select-none flex-row place-items-center">
-        <div className="-mr-2 h-52 w-52 animate-pulse rounded-2xl bg-secondary" />
+        <div className="-mr-2 h-12 w-12 animate-pulse rounded-2xl bg-secondary" />
       </div>
     </div>
   );

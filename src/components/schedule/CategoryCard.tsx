@@ -24,7 +24,7 @@ export function CategoryCard({
     >
       <div className="w-12 text-brand-violet">{icon}</div>
       <div className="flex flex-col gap-2">
-        <p className="text-2xl font-semibold text-text-main">
+        <p className="text-2xl font-semibold text-contrast">
           {title}
           {outdated && (
             <span className="ml-2 w-fit rounded-xl border border-dashed border-red-500 px-2 py-1 text-sm text-red-500 blur-0">
@@ -32,7 +32,7 @@ export function CategoryCard({
             </span>
           )}
         </p>
-        <p className="text-lg text-text-secondary/75">{shortDescription}</p>
+        <p className="text-lg text-contrast/75">{shortDescription}</p>
       </div>
     </Link>
   );

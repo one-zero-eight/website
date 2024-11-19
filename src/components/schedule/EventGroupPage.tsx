@@ -37,7 +37,7 @@ export function EventGroupPage({ alias }: { alias: string }) {
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex min-h-full flex-grow flex-col gap-2">
             <h1 className="text-3xl font-semibold">{group.name}</h1>
-            <p className="whitespace-pre-wrap text-base text-text-secondary/75">
+            <p className="whitespace-pre-wrap text-base text-contrast/75">
               {group.description ||
                 "Hello world, this is a long description about my life and this elective."}
             </p>

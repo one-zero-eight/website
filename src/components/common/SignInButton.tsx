@@ -26,7 +26,7 @@ export const SignInButton = forwardRef(function SignInButton_(
         onClick?.(e);
       }}
     >
-      <span className="icon-[material-symbols--login] -ml-2 text-4xl text-icon-main" />
+      <span className="icon-[material-symbols--login] -ml-2 text-4xl text-contrast" />
       Sign in
     </button>
   );
@@ -39,7 +39,7 @@ export function SignInButtonIcon({
   return (
     <Tooltip content="Sign in">
       <button
-        className="flex h-14 w-14 flex-col items-center justify-center rounded-xl text-icon-main/50 hover:bg-secondary"
+        className="flex h-14 w-14 flex-col items-center justify-center rounded-xl text-contrast/50 hover:bg-secondary"
         onClick={(e) => {
           navigateToSignIn(signInRedirect);
           onClick?.(e);

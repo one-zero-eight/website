@@ -11,12 +11,12 @@ export default function HideButton({ groupId }: { groupId: number }) {
           e.preventDefault();
           switchHideFavorite?.();
         }}
-        className="h-52 w-52 rounded-2xl p-2 text-4xl hover:bg-secondary-hover"
+        className="flex h-12 w-12 items-center justify-center rounded-2xl text-4xl hover:bg-secondary-hover"
       >
         {isHidden ? (
-          <span className="icon-[material-symbols--visibility-off-outline] text-icon-main/50" />
+          <span className="icon-[material-symbols--visibility-off-outline] text-contrast/50" />
         ) : (
-          <span className="icon-[material-symbols--visibility-outline] text-icon-main/50" />
+          <span className="icon-[material-symbols--visibility-outline] text-contrast/50" />
         )}
       </button>
     </Tooltip>

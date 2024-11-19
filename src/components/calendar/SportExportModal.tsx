@@ -78,7 +78,7 @@ export function SportExportModal({
             {...getFloatingProps()}
             className="flex h-fit w-full flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-1/2"
           >
-            <div className="overflow-hidden rounded-2xl bg-popup">
+            <div className="overflow-hidden rounded-2xl bg-floating">
               <div className="flex flex-col p-4">
                 {/* Heading and description */}
                 <div className="mb-2 flex w-full flex-row">
@@ -86,19 +86,19 @@ export function SportExportModal({
                     Export sport trainings
                   </div>
                   <button
-                    className="-mr-2 -mt-2 h-52 w-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75"
+                    className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
                   </button>
                 </div>
-                <div className="text-text-secondary/75">
+                <div className="text-contrast/75">
                   You can add your personal sport trainings schedule to your
                   favorite calendar application and it will be updated on
                   changes.
                 </div>
                 {/* Export steps */}
-                <ul className="mt-4 list-decimal pl-5 text-text-secondary/75">
+                <ul className="mt-4 list-decimal pl-5 text-contrast/75">
                   <li>
                     Copy the personal link.
                     {!scheduleKey ? (
@@ -120,11 +120,11 @@ export function SportExportModal({
                       href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
                       target="_blank"
                     >
-                      <span className="icon-[material-symbols--link] text-icon-main/50" />
+                      <span className="icon-[material-symbols--link] text-contrast/50" />
                       Google Calendar
                     </a>
                     <a className="ml-4 flex w-fit flex-row items-center gap-x-2">
-                      <span className="icon-[material-symbols--help-outline] text-icon-main/50" />
+                      <span className="icon-[material-symbols--help-outline] text-contrast/50" />
                       Other applications: find in settings
                     </a>
                   </li>

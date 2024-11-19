@@ -47,7 +47,7 @@ export function ConnectTelegramPage() {
         <h1 className="break-words text-center text-2xl font-medium">
           Sign in to get access
         </h1>
-        <p className="text-center text-text-secondary/75">
+        <p className="text-center text-contrast/75">
           Use your Innopolis account
           <br />
           to access InNoHassle services.
@@ -67,7 +67,7 @@ export function ConnectTelegramPage() {
         </h1>
         <div className="flex flex-col justify-center overflow-x-hidden text-center">
           <p className="break-words text-xl">{me.innopolis_sso?.name}</p>
-          <p className="overflow-ellipsis text-text-secondary/75">
+          <p className="overflow-ellipsis text-contrast/75">
             {me.innopolis_sso?.email}
           </p>
         </div>
@@ -87,10 +87,10 @@ export function ConnectTelegramPage() {
       <h1 className="break-words text-center text-2xl font-medium">Success!</h1>
       <div className="flex flex-col justify-center overflow-x-hidden text-center">
         <p className="break-words text-xl">{me.innopolis_sso?.name}</p>
-        <p className="overflow-ellipsis text-text-secondary/75">
+        <p className="overflow-ellipsis text-contrast/75">
           {me.innopolis_sso?.email}
         </p>
-        <p className="overflow-ellipsis text-text-secondary/75">
+        <p className="overflow-ellipsis text-contrast/75">
           @{me.telegram.username}
         </p>
       </div>

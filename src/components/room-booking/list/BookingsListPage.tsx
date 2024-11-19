@@ -111,7 +111,7 @@ export function BookingCard({
             <Link
               to="/room-booking"
               search={{ d: new Date(booking.start).getTime() }}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-icon-main/50 hover:bg-secondary-hover"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-contrast/50 hover:bg-secondary-hover"
             >
               <span className="icon-[tabler--list-search] text-2xl" />
             </Link>
@@ -125,7 +125,7 @@ export function BookingCard({
               {!isPending ? (
                 <span className="icon-[material-symbols--close-rounded] text-2xl" />
               ) : (
-                <span className="icon-[mdi--loading] animate-spin text-2xl text-icon-main" />
+                <span className="icon-[mdi--loading] animate-spin text-2xl text-contrast" />
               )}
             </button>
           </Tooltip>

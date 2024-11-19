@@ -51,20 +51,20 @@ export function SignInModal({
             {...getFloatingProps()}
             className="flex p-4"
           >
-            <div className="h-fit max-w-2xl overflow-hidden rounded-2xl bg-popup">
+            <div className="h-fit max-w-2xl overflow-hidden rounded-2xl bg-floating">
               <div className="flex flex-col p-4 @lg/modal:p-8">
                 <div className="mb-2 flex w-full flex-row">
                   <div className="grow items-center text-3xl font-semibold">
                     Sign in to get access
                   </div>
                   <button
-                    className="-mr-2 -mt-2 h-52 w-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75 @lg/modal:-mr-6 @lg/modal:-mt-6"
+                    className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 @lg/modal:-mr-6 @lg/modal:-mt-6"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
                   </button>
                 </div>
-                <div className="mb-4 text-text-secondary/75">
+                <div className="mb-4 text-contrast/75">
                   Use your Innopolis account to access all features of this
                   service.
                 </div>

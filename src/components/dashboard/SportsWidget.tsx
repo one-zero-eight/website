@@ -27,14 +27,14 @@ export function SportsWidget() {
         <span className="icon-[material-symbols--exercise-outline] text-5xl text-brand-violet" />
       </div>
       <div className="flex flex-col">
-        <p className="text-2xl font-semibold text-text-main">
+        <p className="text-2xl font-semibold text-contrast">
           Sports:{" "}
           <span className="font-normal">
             {earnedHours} / {semesterHours}
             {debtHours ? ` (+${debtHours} debt)` : null} hours
           </span>
         </p>
-        <p className="mt-2 text-lg text-text-secondary/75">
+        <p className="mt-2 text-lg text-contrast/75">
           <span className="font-semibold">Deadline:</span>{" "}
           {deadline.toLocaleDateString("en-US", {
             month: "long",
@@ -45,14 +45,14 @@ export function SportsWidget() {
         </p>
         <a
           href="https://t.me/sportinIU/566"
-          className="w-fit text-lg text-text-secondary/75 hover:underline"
+          className="w-fit text-lg text-contrast/75 hover:underline"
         >
           Register for <span className="text-brand-violet">Fitness test</span>
           <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />
         </a>
         <a
           href="https://t.me/IUSportBot"
-          className="w-fit text-lg text-text-secondary/75 hover:underline"
+          className="w-fit text-lg text-contrast/75 hover:underline"
         >
           Check in for sports in the{" "}
           <span className="text-brand-violet">Sports bot</span>

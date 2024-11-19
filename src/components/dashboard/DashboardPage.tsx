@@ -102,7 +102,7 @@ export function DashboardPage() {
             <summary className="my-4 text-3xl font-medium">Favorites</summary>
             {eventsUser?.favorite_event_groups === undefined ||
             eventsUser.favorite_event_groups.length === 0 ? (
-              <p className="mb-4 text-lg text-text-secondary/75">
+              <p className="mb-4 text-lg text-contrast/75">
                 Add favorite calendars using star button.
                 <br />
                 <Link to="/schedule" className="underline underline-offset-4">

@@ -9,32 +9,32 @@ export function ExtensionPage() {
             <span className="icon-[material-symbols--quick-reference-outline-rounded] text-5xl text-brand-violet" />
           </div>
           <div className="flex flex-col gap-2">
-            <p className="flex items-center text-2xl font-semibold text-text-main">
+            <p className="flex items-center text-2xl font-semibold text-contrast">
               What is it?
             </p>
-            <p className="text-lg text-text-secondary/75">
+            <p className="text-lg text-contrast/75">
               InNoHassle Tools is a browser extension that provides convenient
               tools for Moodle, InNoHassle and other services at Innopolis
               University.
             </p>
-            <p className="flex items-center text-2xl font-semibold text-text-main">
+            <p className="flex items-center text-2xl font-semibold text-contrast">
               Features:
             </p>
-            <p className="text-lg text-text-secondary">
+            <p className="text-lg text-contrast">
               🔄{" "}
-              <span className="text-text-secondary/75">
+              <span className="text-contrast/75">
                 Autologin to Moodle without entering credentials
               </span>
             </p>
-            <p className="text-lg text-text-secondary">
+            <p className="text-lg text-contrast">
               🔗{" "}
-              <span className="text-text-secondary/75">
+              <span className="text-contrast/75">
                 Quick links to your courses and IU resources
               </span>
             </p>
-            <p className="text-lg text-text-secondary">
+            <p className="text-lg text-contrast">
               🔍{" "}
-              <span className="text-text-secondary/75">
+              <span className="text-contrast/75">
                 Integrated AI search engine for all Moodle materials
               </span>
             </p>
@@ -49,11 +49,11 @@ export function ExtensionPage() {
             <span className="icon-[logos--chrome] text-5xl text-brand-violet" />
           </div>
           <div className="flex flex-col gap-2">
-            <p className="flex items-center text-2xl font-semibold text-text-main">
+            <p className="flex items-center text-2xl font-semibold text-contrast">
               Chrome extension
               <span className="icon-[material-symbols--open-in-new-rounded] ml-1" />
             </p>
-            <p className="text-lg text-text-secondary/75">
+            <p className="text-lg text-contrast/75">
               Install the extension for Chromium-based browsers (Chrome, Edge,
               Yandex Browser, Arc) from the Chrome Web Store.
             </p>
@@ -68,11 +68,11 @@ export function ExtensionPage() {
             <span className="icon-[logos--firefox] text-5xl text-brand-violet" />
           </div>
           <div className="flex flex-col gap-2">
-            <p className="flex items-center text-2xl font-semibold text-text-main">
+            <p className="flex items-center text-2xl font-semibold text-contrast">
               Firefox extension
               <span className="icon-[material-symbols--open-in-new-rounded] ml-1" />
             </p>
-            <p className="text-lg text-text-secondary/75">
+            <p className="text-lg text-contrast/75">
               Install the extension for Firefox-based browsers from our servers
               (supports automatic updates).
             </p>
@@ -84,14 +84,14 @@ export function ExtensionPage() {
           className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
         >
           <div className="w-12">
-            <span className="icon-[mdi--github] text-5xl text-text-main" />
+            <span className="icon-[mdi--github] text-5xl text-contrast" />
           </div>
           <div className="flex flex-col gap-2">
-            <p className="flex items-center text-2xl font-semibold text-text-main">
+            <p className="flex items-center text-2xl font-semibold text-contrast">
               GitHub
               <span className="icon-[material-symbols--open-in-new-rounded] ml-1" />
             </p>
-            <p className="text-lg text-text-secondary/75">
+            <p className="text-lg text-contrast/75">
               Check out the source code, report issues and contribute to the
               project on GitHub.
             </p>

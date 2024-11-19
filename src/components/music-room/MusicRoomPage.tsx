@@ -20,10 +20,10 @@ export function MusicRoomPage() {
                 <span className="icon-[mdi--robot-excited-outline] text-5xl text-brand-violet" />
               </div>
               <div className="flex flex-col gap-2">
-                <p className="text-2xl font-semibold text-text-main">
+                <p className="text-2xl font-semibold text-contrast">
                   Telegram bot
                 </p>
-                <p className="text-lg text-text-secondary/75">
+                <p className="text-lg text-contrast/75">
                   Register in Telegram bot to book timeslots.
                 </p>
               </div>
@@ -36,10 +36,10 @@ export function MusicRoomPage() {
                 <span className="icon-[material-symbols--quick-reference-outline-rounded] text-5xl text-brand-violet" />
               </div>
               <div className="flex flex-col gap-2">
-                <p className="text-2xl font-semibold text-text-main">
+                <p className="text-2xl font-semibold text-contrast">
                   Instructions
                 </p>
-                <p className="text-lg text-text-secondary/75">
+                <p className="text-lg text-contrast/75">
                   Read rules and guides on how to access the Music room. Every
                   visitor should accept these conditions.
                 </p>
@@ -58,10 +58,10 @@ export function MusicRoomPage() {
                 <span className="icon-[ic--baseline-telegram] text-5xl text-brand-violet" />
               </div>
               <div className="flex flex-col gap-2">
-                <p className="text-2xl font-semibold text-text-main">
+                <p className="text-2xl font-semibold text-contrast">
                   Telegram chat
                 </p>
-                <p className="text-lg text-text-secondary/75">
+                <p className="text-lg text-contrast/75">
                   Join telegram chat to receive latest news about Music room and
                   ask questions.
                 </p>

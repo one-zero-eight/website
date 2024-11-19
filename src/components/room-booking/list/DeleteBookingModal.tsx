@@ -50,7 +50,7 @@ export function DeleteBookingModal({
             {...getFloatingProps()}
             className="flex h-fit w-full max-w-lg flex-col p-4 outline-none"
           >
-            <div className="overflow-hidden rounded-2xl bg-popup">
+            <div className="overflow-hidden rounded-2xl bg-floating">
               <div className="flex flex-col p-4 @2xl/modal:p-8">
                 {/* Heading and description */}
                 <div className="mb-4 flex w-full flex-row">
@@ -58,7 +58,7 @@ export function DeleteBookingModal({
                     Confirm deletion
                   </div>
                   <button
-                    className="-mr-2 -mt-2 h-52 w-52 rounded-2xl p-2 text-icon-main/50 hover:bg-primary-hover/50 hover:text-icon-hover/75 @lg/export:-mr-6 @lg/export:-mt-6"
+                    className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 @lg/export:-mr-6 @lg/export:-mt-6"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
@@ -66,7 +66,7 @@ export function DeleteBookingModal({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <div className="flex flex-row gap-2 text-xl text-text-secondary/75">
+                  <div className="flex flex-row gap-2 text-xl text-contrast/75">
                     <p className="flex w-full items-center whitespace-pre-wrap py-1 font-semibold [overflow-wrap:anywhere]">
                       Are you sure you want to delete this booking?
                     </p>

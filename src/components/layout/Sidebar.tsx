@@ -159,7 +159,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
       />
       <aside
         className={clsx(
-          "fixed top-0 z-10 h-full shrink-0 overflow-y-auto bg-sidebar p-4 transition-transform lgw-smh:sticky lgw-smh:translate-x-0 lgw-smh:transition-none",
+          "fixed top-0 z-10 h-full shrink-0 overflow-y-auto bg-floating p-4 transition-transform lgw-smh:sticky lgw-smh:translate-x-0 lgw-smh:transition-none",
           isOpened ? "translate-x-0 transform" : "-translate-x-full transform",
         )}
       >
@@ -213,7 +213,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 className="rounded-xl"
               >
                 <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-contrast/50">
                     <span className="icon-[mdi--github] text-4xl" />
                   </div>
                 </div>
@@ -227,7 +227,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 className="rounded-xl"
               >
                 <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-contrast/50">
                     <span className="icon-[uil--telegram-alt] text-4xl" />
                   </div>
                 </div>
@@ -241,7 +241,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 className="rounded-xl"
               >
                 <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-contrast/50">
                     <span className="icon-[hugeicons--youtube] text-4xl" />
                   </div>
                 </div>

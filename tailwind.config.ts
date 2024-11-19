@@ -4,16 +4,9 @@ const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}", "index.html"],
   theme: {
     extend: {
-      width: {
-        52: "3.25rem",
-      },
-      height: {
-        52: "3.25rem",
-      },
       colors: {
         pagebg: "rgba(var(--color-pagebg) / <alpha-value>)",
-        sidebar: "rgba(var(--color-sidebar) / <alpha-value>)",
-        popup: "rgba(var(--color-popup) / <alpha-value>)",
+        floating: "rgba(var(--color-floating) / <alpha-value>)",
         primary: {
           DEFAULT: "rgba(var(--color-primary) / <alpha-value>)",
           hover: "rgba(var(--color-primary-hover) / <alpha-value>)",
@@ -22,19 +15,8 @@ const config: Config = {
           DEFAULT: "rgba(var(--color-secondary) / <alpha-value>)",
           hover: "rgba(var(--color-secondary-hover) / <alpha-value>)",
         },
-        border: {
-          DEFAULT: "rgba(var(--color-border) / <alpha-value>)",
-          hover: "rgba(var(--color-border-hover) / <alpha-value>)",
-        },
         inactive: "rgba(var(--color-inactive) / <alpha-value>)",
-        icon: {
-          main: "rgba(var(--color-icon) / <alpha-value>)",
-          hover: "rgba(var(--color-icon-hover) / <alpha-value>)",
-        },
-        text: {
-          main: "rgba(var(--color-text) / <alpha-value>)",
-          secondary: "rgba(var(--color-text-secondary) / <alpha-value>)",
-        },
+        contrast: "rgba(var(--color-contrast) / <alpha-value>)",
         brand: {
           violet: "rgba(var(--color-brand-violet) / <alpha-value>)",
           gradient: {
