@@ -16,7 +16,11 @@ export default function LinkIconButton({
       <button
         onClick={(e) => {
           e.stopPropagation();
-          navigate({ to: href });
+          if (href.startsWith("/")) {
+            navigate({ to: href });
+          } else {
+            window.open(href, "_blank");
+          }
         }}
         className="-mr-2 h-52 w-52 rounded-2xl p-2 text-4xl text-icon-main/50 hover:bg-secondary-hover hover:text-icon-hover/75"
       >
