@@ -20,7 +20,7 @@ export function CategoryCard({
       key={slug}
       to="/schedule/$category"
       params={{ category: slug }}
-      className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
+      className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
     >
       <div className="w-12 text-brand-violet">{icon}</div>
       <div className="flex flex-col gap-2">

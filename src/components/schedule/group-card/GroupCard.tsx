@@ -27,7 +27,7 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
       as="div"
       to="/schedule/event-groups/$alias"
       params={{ alias: group.alias }}
-      className="flex min-h-fit min-w-fit max-w-full basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl bg-primary-main p-4 hover:bg-primary-hover"
+      className="flex min-h-fit min-w-fit max-w-full basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl bg-primary p-4 hover:bg-primary-hover"
     >
       <div className="flex flex-col gap-0.5">
         <p className="text-xl font-medium">{group.name}</p>

@@ -14,7 +14,7 @@ export function MusicRoomPage() {
           <div className="flex flex-col gap-4">
             <a
               href="https://t.me/InnoMusicRoomBot"
-              className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
+              className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
             >
               <div className="w-12">
                 <span className="icon-[mdi--robot-excited-outline] text-5xl text-brand-violet" />
@@ -30,7 +30,7 @@ export function MusicRoomPage() {
             </a>
             <Link
               to="/music-room/instructions"
-              className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
+              className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
             >
               <div className="w-12">
                 <span className="icon-[material-symbols--quick-reference-outline-rounded] text-5xl text-brand-violet" />
@@ -52,7 +52,7 @@ export function MusicRoomPage() {
                 const url = atob(encodedURL);
                 window.open(url, "_blank");
               }}
-              className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 text-left hover:bg-secondary-main"
+              className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 text-left hover:bg-secondary"
             >
               <div className="w-12">
                 <span className="icon-[ic--baseline-telegram] text-5xl text-brand-violet" />
@@ -68,7 +68,7 @@ export function MusicRoomPage() {
               </div>
             </button>
           </div>
-          <div className="flex w-full flex-row items-center justify-center rounded-2xl bg-primary-main p-4">
+          <div className="flex w-full flex-row items-center justify-center rounded-2xl bg-primary p-4">
             <iframe
               width="704"
               height="396"

@@ -82,7 +82,7 @@ export function BookingCard({
 
   return (
     <>
-      <div className="group flex flex-row rounded-lg border-[1px] border-primary-hover bg-primary-main px-4 py-2">
+      <div className="group flex flex-row rounded-lg border-[1px] border-primary-hover bg-primary px-4 py-2">
         <div className="flex grow flex-col">
           <h2 className="text-gray-900 dark:text-gray-100">{booking.title}</h2>
           <p className="text-base text-gray-600 dark:text-gray-400">

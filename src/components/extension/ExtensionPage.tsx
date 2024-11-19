@@ -4,7 +4,7 @@ export function ExtensionPage() {
   return (
     <div className="grid grid-cols-1 gap-4 p-4 @xl/content:grid-cols-2">
       <div className="flex flex-col gap-4">
-        <div className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6">
+        <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6">
           <div className="w-12">
             <span className="icon-[material-symbols--quick-reference-outline-rounded] text-5xl text-brand-violet" />
           </div>
@@ -43,7 +43,7 @@ export function ExtensionPage() {
         <a
           href="https://chromewebstore.google.com/detail/innohassle-tools/cbeffcchbpgcmaphbpnnnjbaighmobmn"
           target="_blank"
-          className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
+          className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
         >
           <div className="w-12">
             <span className="icon-[logos--chrome] text-5xl text-brand-violet" />
@@ -62,7 +62,7 @@ export function ExtensionPage() {
         <a
           href="https://api.innohassle.ru/extension/latest-firefox.xpi"
           target="_blank"
-          className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
+          className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
         >
           <div className="w-12">
             <span className="icon-[logos--firefox] text-5xl text-brand-violet" />
@@ -81,7 +81,7 @@ export function ExtensionPage() {
         <a
           href="https://github.com/one-zero-eight/browser-extension"
           target="_blank"
-          className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
+          className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
         >
           <div className="w-12">
             <span className="icon-[mdi--github] text-5xl text-text-main" />
@@ -98,7 +98,7 @@ export function ExtensionPage() {
           </div>
         </a>
       </div>
-      <div className="flex w-full flex-row items-center justify-center rounded-2xl bg-primary-main p-4">
+      <div className="flex w-full flex-row items-center justify-center rounded-2xl bg-primary p-4">
         <img
           src={ExtensionScreenshotPNG}
           alt="extension screenshot"

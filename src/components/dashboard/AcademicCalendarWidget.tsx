@@ -15,7 +15,7 @@ export function AcademicCalendarWidget() {
   if (!academicCalendar) return null;
 
   return (
-    <div className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6">
+    <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6">
       <div className="w-12">
         <span className="icon-[ph--books] text-5xl text-brand-violet" />
       </div>

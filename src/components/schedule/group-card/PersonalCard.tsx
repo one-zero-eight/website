@@ -18,7 +18,7 @@ export function PersonalCard({
 
   return (
     <div
-      className="flex min-h-fit min-w-fit max-w-full basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl bg-primary-main p-4 hover:bg-primary-hover"
+      className="flex min-h-fit min-w-fit max-w-full basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl bg-primary p-4 hover:bg-primary-hover"
       onClick={() => pageUrl && navigate({ to: pageUrl })}
     >
       <div className="flex flex-col gap-0.5">

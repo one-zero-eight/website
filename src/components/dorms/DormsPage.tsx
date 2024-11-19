@@ -2,7 +2,7 @@ export function DormsPage() {
   return (
     <div className="grid grid-cols-1 gap-4 p-4">
       <div className="flex flex-col gap-4">
-        <div className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6">
+        <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6">
           <div className="w-12">
             <span className="icon-[material-symbols--quick-reference-outline-rounded] text-5xl text-brand-violet" />
           </div>
@@ -41,7 +41,7 @@ export function DormsPage() {
         <a
           href="https://t.me/IURoomsBot"
           target="_blank"
-          className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
+          className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
         >
           <div className="w-12">
             <span className="icon-[mdi--robot-excited-outline] text-5xl text-brand-violet" />
@@ -59,7 +59,7 @@ export function DormsPage() {
         <a
           href="https://t.me/maximf3"
           target="_blank"
-          className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6 hover:bg-secondary-main"
+          className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
         >
           <div className="w-12">
             <span className="icon-[ic--baseline-telegram] text-5xl text-brand-violet" />

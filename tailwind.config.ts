@@ -15,11 +15,11 @@ const config: Config = {
         sidebar: "rgba(var(--color-sidebar) / <alpha-value>)",
         popup: "rgba(var(--color-popup) / <alpha-value>)",
         primary: {
-          main: "rgba(var(--color-primary) / <alpha-value>)",
+          DEFAULT: "rgba(var(--color-primary) / <alpha-value>)",
           hover: "rgba(var(--color-primary-hover) / <alpha-value>)",
         },
         secondary: {
-          main: "rgba(var(--color-secondary) / <alpha-value>)",
+          DEFAULT: "rgba(var(--color-secondary) / <alpha-value>)",
           hover: "rgba(var(--color-secondary-hover) / <alpha-value>)",
         },
         border: {

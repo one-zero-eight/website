@@ -212,7 +212,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 rel="noopener noreferrer"
                 className="rounded-xl"
               >
-                <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary-main">
+                <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
                     <span className="icon-[mdi--github] text-4xl" />
                   </div>
@@ -226,7 +226,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 rel="noopener noreferrer"
                 className="rounded-xl"
               >
-                <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary-main">
+                <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
                     <span className="icon-[uil--telegram-alt] text-4xl" />
                   </div>
@@ -240,7 +240,7 @@ function Sidebar({ children }: React.PropsWithChildren) {
                 rel="noopener noreferrer"
                 className="rounded-xl"
               >
-                <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary-main">
+                <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-icon-main/50">
                     <span className="icon-[hugeicons--youtube] text-4xl" />
                   </div>

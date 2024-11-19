@@ -74,7 +74,7 @@ export function DeleteBookingModal({
 
                   <div className="flex flex-row gap-2">
                     <button
-                      className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary-main px-4 py-2 text-lg font-medium hover:bg-primary-hover dark:bg-primary-hover dark:hover:bg-primary-main"
+                      className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary px-4 py-2 text-lg font-medium hover:bg-primary-hover dark:bg-primary-hover dark:hover:bg-primary"
                       onClick={() => onOpenChange(false)}
                     >
                       Back
