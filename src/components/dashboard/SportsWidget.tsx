@@ -1,7 +1,9 @@
 import { $sports } from "@/api/sports";
+import { useNowMS } from "@/lib/utils/use-now.ts";
 
 export function SportsWidget() {
   const { data: sportInfo } = $sports.useQuery("get", "/users/sport_info");
+  const nowMs = useNowMS(!!sportInfo);
 
   if (!sportInfo) return null;
 
@@ -12,12 +14,12 @@ export function SportsWidget() {
   const semesterHours = sportInfo.ongoing_semester.hours_sem_max;
   const debtHours = sportInfo.ongoing_semester.debt;
 
-  /* TODO: Fetch the end date of current semester from sports
-  const deadline = new Date(sportInfo.ongoing_semester.deadline);
+  // TODO: Fetch the end date of current semester from sports
+  const deadline = new Date("2024-12-08");
   const daysLeft = Math.max(
     0,
-    Math.floor((deadline.getTime() - nowMs) / (1000 * 60 * 60 * 24)),
-  );*/
+    Math.ceil((deadline.getTime() - nowMs) / (1000 * 60 * 60 * 24)),
+  );
 
   return (
     <div className="group flex flex-row gap-4 rounded-2xl bg-primary-main px-4 py-6">
@@ -29,7 +31,7 @@ export function SportsWidget() {
           Sports: {earnedHours} / {semesterHours}
           {debtHours ? ` (+${debtHours} debt)` : null} hours
         </p>
-        {/*<p className="text-lg text-text-secondary/75">
+        <p className="text-lg text-text-secondary/75">
           Deadline:{" "}
           {deadline.toLocaleDateString("en-US", {
             month: "long",
@@ -37,7 +39,7 @@ export function SportsWidget() {
             year: "numeric",
           })}{" "}
           ({daysLeft} days left)
-        </p>*/}
+        </p>
         <a
           href="https://t.me/IUSportBot"
           className="text-lg text-text-secondary/75 hover:underline"
