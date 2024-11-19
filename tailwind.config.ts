@@ -11,7 +11,7 @@ const config: Config = {
         52: "3.25rem",
       },
       colors: {
-        base: "rgba(var(--color-base) / <alpha-value>)",
+        pagebg: "rgba(var(--color-pagebg) / <alpha-value>)",
         sidebar: "rgba(var(--color-sidebar) / <alpha-value>)",
         popup: "rgba(var(--color-popup) / <alpha-value>)",
         primary: {

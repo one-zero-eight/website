@@ -189,7 +189,7 @@ export default function CalendarViewer({
             return <div>{text}</div>;
           } else {
             return (
-              <div className="-mt-6 flex h-12 translate-y-2 items-center justify-end bg-base">
+              <div className="-mt-6 flex h-12 translate-y-2 items-center justify-end bg-pagebg">
                 {text}
               </div>
             );

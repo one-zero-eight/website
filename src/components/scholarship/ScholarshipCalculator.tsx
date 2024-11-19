@@ -194,7 +194,7 @@ export default function ScholarshipCalculator() {
           onChange={(e) => onMarksChange(e.target.value, course)}
           autoComplete="off"
           spellCheck={false}
-          className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-brand-violet bg-base p-3 font-handwritten text-transparent caret-brand-violet outline-none"
+          className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-brand-violet bg-pagebg p-3 font-handwritten text-transparent caret-brand-violet outline-none"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
           rows={1}
           maxLength={50}
@@ -213,7 +213,7 @@ export default function ScholarshipCalculator() {
         {marks.length !== 0 && (
           <button
             onClick={() => onMarksChange("", course)}
-            className="absolute -right-1 -top-1 h-7 w-7 rounded-2xl bg-base p-2 align-middle text-lg text-brand-violet"
+            className="absolute -right-1 -top-1 h-7 w-7 rounded-2xl bg-pagebg p-2 align-middle text-lg text-brand-violet"
             style={{ lineHeight: 0 }}
           >
             X
@@ -222,7 +222,7 @@ export default function ScholarshipCalculator() {
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
         <div className="text-xl font-medium">Course:</div>
-        <div className="flex w-48 flex-row overflow-clip rounded-2xl border-2 border-brand-violet bg-base">
+        <div className="flex w-48 flex-row overflow-clip rounded-2xl border-2 border-brand-violet bg-pagebg">
           <button
             onClick={() => onMarksChange(marks.join(""), "B24")}
             className={clsx(
@@ -270,7 +270,7 @@ export default function ScholarshipCalculator() {
           autoComplete="off"
           spellCheck={false}
           className={clsx(
-            "w-48 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
+            "w-48 rounded-2xl border-2 bg-pagebg p-2 text-center font-handwritten outline-none",
             !errorGPA ? "border-brand-violet" : "border-red-500",
           )}
           style={{
@@ -290,7 +290,7 @@ export default function ScholarshipCalculator() {
           autoComplete="off"
           spellCheck={false}
           className={clsx(
-            "rubles-input w-48 rounded-2xl border-2 bg-base p-2 text-center font-handwritten outline-none",
+            "rubles-input w-48 rounded-2xl border-2 bg-pagebg p-2 text-center font-handwritten outline-none",
             !errorScholarship ? "border-brand-violet" : "border-red-500",
           )}
           style={{

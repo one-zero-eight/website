@@ -20,7 +20,7 @@ export default function SearchField({
         <input
           autoComplete="off"
           spellCheck={false}
-          className="inset-0 h-10 w-full resize-none rounded-lg border-2 border-brand-violet bg-base p-3 text-base caret-brand-violet outline-none dark:text-white"
+          className="inset-0 h-10 w-full resize-none rounded-lg border-2 border-brand-violet bg-pagebg p-3 text-base caret-brand-violet outline-none dark:text-white"
           placeholder="Search anything"
           onChange={(e) => setText(e.target.value)}
           value={text}

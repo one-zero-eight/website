@@ -18,7 +18,7 @@ export const SignInButton = forwardRef(function SignInButton_(
       ref={ref}
       rel="nofollow noindex"
       className={clsx(
-        "flex h-14 w-fit items-center justify-center gap-4 rounded-2xl border-2 border-brand-violet bg-base px-6 py-2 text-xl font-medium hover:bg-primary-hover",
+        "flex h-14 w-fit items-center justify-center gap-4 rounded-2xl border-2 border-brand-violet bg-pagebg px-6 py-2 text-xl font-medium hover:bg-primary-hover",
         className,
       )}
       onClick={(e) => {

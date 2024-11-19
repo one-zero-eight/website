@@ -8,7 +8,7 @@
 
 @layer base {
   :root {
-    @apply bg-base;
+    @apply bg-pagebg;
     color-scheme: light;
     accent-color: var(--color-brand-violet);
 
@@ -16,7 +16,7 @@
     --color-brand-gradient-start: 154 46 255; /* #9A2EFF */
     --color-brand-gradient-end: 209 35 162; /* #D1233E */
 
-    --color-base: 255 255 255; /* #FFFFFF */
+    --color-pagebg: 255 255 255; /* #FFFFFF */
     --color-primary: 235 237 239; /* #EBEDEF */
     --color-primary-hover: 223 225 229; /* #DFE1E5 */
     --color-sidebar: 242 243 245; /* #F2F3F5 */
@@ -33,7 +33,7 @@
   }
   :root[class~="dark"] {
     color-scheme: dark;
-    --color-base: 11 11 11; /* #0B0B0B */
+    --color-pagebg: 11 11 11; /* #0B0B0B */
     --color-primary: 38 38 38; /* #262626 */
     --color-primary-hover: 28 28 28; /* #1C1C1C */
     --color-sidebar: 27 27 27; /* #1B1B1B */
