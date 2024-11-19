@@ -226,7 +226,7 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B24")}
             className={clsx(
-              "w-full rounded-l-2xl p-2 text-center font-handwritten transition-colors hover:bg-brand-violet/20",
+              "w-full rounded-l-2xl p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
               course === "B24"
                 ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
@@ -237,7 +237,7 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B23")}
             className={clsx(
-              "w-full p-2 text-center font-handwritten transition-colors hover:bg-brand-violet/20",
+              "w-full p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
               course === "B23"
                 ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
@@ -248,7 +248,7 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B22")}
             className={clsx(
-              "w-full rounded-r-2xl p-2 text-center font-handwritten transition-colors hover:bg-brand-violet/20",
+              "w-full rounded-r-2xl p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
               course === "B22"
                 ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",

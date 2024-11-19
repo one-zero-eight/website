@@ -12,7 +12,7 @@ export function ScholarshipPage() {
         <ScholarshipCalculator />
       </div>
 
-      <div className="flex max-w-2xl flex-col self-center p-4">
+      <div className="flex max-w-2xl flex-col self-center p-4 text-lg">
         <h2 className="text-center text-3xl">Information</h2>
 
         <h3 className="mt-4 text-2xl">Academic scholarships:</h3>
