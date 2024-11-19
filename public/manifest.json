@@ -1,7 +1,7 @@
 {
   "name": "InNoHassle",
   "short_name": "InNoHassle",
-  "description": "InNoHassle ecosystem: schedule, scholarship calculator, and more.",
+  "description": "InNoHassle ecosystem: schedule, maps, room booking, and more.",
   "start_url": "/?from=pwa",
   "scope": "/",
   "display": "standalone",
@@ -9,9 +9,26 @@
   "theme_color": "#9747ff",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/favicon.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "description": "All your important information in one place.",
+      "url": "/dashboard"
+    },
+    {
+      "name": "Maps",
+      "description": "Plans of the university.",
+      "url": "/maps"
+    },
+    {
+      "name": "Room booking",
+      "description": "Book rooms in the university.",
+      "url": "/room-booking"
     }
   ]
 }
