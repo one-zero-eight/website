@@ -5,6 +5,7 @@ import Tooltip from "@/components/common/Tooltip.tsx";
 import { DeleteBookingModal } from "@/components/room-booking/list/DeleteBookingModal.tsx";
 import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
 import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import React, { useMemo, useState } from "react";
 
@@ -106,6 +107,16 @@ export function BookingCard({
             isPending ? "visible" : "invisible",
           )}
         >
+          <Tooltip content="Show on timeline">
+            <Link
+              to="/room-booking"
+              search={{ d: new Date(booking.start).getTime() }}
+              className="flex h-8 w-8 items-center justify-center rounded-md text-icon-main/50 hover:bg-secondary-hover"
+            >
+              <span className="icon-[tabler--list-search] text-2xl" />
+            </Link>
+          </Tooltip>
+
           <Tooltip content="Delete booking">
             <button
               className="flex h-8 w-8 items-center justify-center rounded-md border-[1px] border-red-400 bg-red-200 text-red-600 hover:bg-red-300 dark:border-red-600 dark:bg-red-800 dark:text-red-400 dark:hover:bg-red-700"

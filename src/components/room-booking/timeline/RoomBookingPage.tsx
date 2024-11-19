@@ -3,9 +3,9 @@ import { $roomBooking } from "@/api/room-booking";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
+import { getRouteApi } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { Booking, ScrollToOptions, Slot } from "./BookingTimeline.vue";
-import { getRouteApi } from "@tanstack/react-router";
 
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),
@@ -37,7 +37,7 @@ export function RoomBookingPage() {
       timelineRef.current?.__veauryVueRef__.scrollTo({
         to: new Date(search.d),
         behavior: "smooth",
-        offsetMs: T.Min * 20,
+        offsetMs: -T.Min * 20,
         position: "left",
       });
     }
