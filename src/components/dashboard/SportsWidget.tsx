@@ -31,7 +31,7 @@ export function SportsWidget() {
           Sports:{" "}
           <span className="font-normal">
             {earnedHours} / {semesterHours}
-            {debtHours ? ` (+${debtHours} debt)` : null} hours
+            {debtHours ? `+${debtHours} (debt)` : null} hours
           </span>
         </p>
         <p className="mt-2 text-lg text-contrast/75">
