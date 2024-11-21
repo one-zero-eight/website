@@ -57,7 +57,7 @@ jobs:
     if: github.repository_owner == 'one-zero-eight' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     name: Deploy to server for ${{ github.event.inputs.environment || 'staging' }}
     needs: build
-    runs-on: self-hosted
+    runs-on: [self-hosted, innohassle]
     environment:
       name: ${{ github.event.inputs.environment || 'staging' }}
       url: ${{ vars.DEPLOY_URL }}
