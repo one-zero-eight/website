@@ -1,4 +1,6 @@
 import { mapsTypes } from "@/api/maps";
+import Tooltip from "@/components/common/Tooltip.tsx";
+import { getMapAreaUrl } from "@/lib/maps/links.ts";
 import {
   arrow,
   autoUpdate,
@@ -15,15 +17,19 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import { Link } from "@tanstack/react-router";
-import React, { useEffect, useRef } from "react";
+import clsx from "clsx";
+import { useEffect, useRef, useState } from "react";
+import { useCopyToClipboard } from "usehooks-ts";
 
 export function DetailsPopup({
   elementRef,
+  scene,
   area,
   isOpen,
   setIsOpen,
 }: {
   elementRef: Element | null;
+  scene: mapsTypes.SchemaScene;
   area: mapsTypes.SchemaArea | undefined;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -84,10 +90,12 @@ export function DetailsPopup({
           {...getFloatingProps()}
           className="z-10 flex max-w-md flex-col gap-2 rounded-2xl bg-primary p-4 text-sm text-contrast drop-shadow-md"
         >
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row justify-between gap-2">
             <div className="text-bold flex whitespace-pre-wrap text-xl [overflow-wrap:anywhere]">
-              Room: <span className="font-medium">{area.title}</span>
+              <span className="font-medium">{area.title}</span>
             </div>
+
+            <ShareButton scene={scene} area={area} />
           </div>
           {area.description && (
             <div className="flex flex-row gap-2">
@@ -131,5 +139,54 @@ export function DetailsPopup({
         </div>
       </FloatingFocusManager>
     </FloatingPortal>
+  );
+}
+
+function ShareButton({
+  scene,
+  area,
+}: {
+  scene: mapsTypes.SchemaScene;
+  area: mapsTypes.SchemaArea;
+}) {
+  const [_, _copy] = useCopyToClipboard();
+  const [copied, setCopied] = useState(false);
+  const [timer, setTimer] = useState<any>();
+
+  const copy = () => {
+    const url = getMapAreaUrl(scene, area);
+
+    _copy(url).then((ok) => {
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
+      if (ok) {
+        setCopied(true);
+        setTimer(setTimeout(() => setCopied(false), 1500));
+      } else {
+        setCopied(false);
+      }
+    });
+  };
+
+  return (
+    <Tooltip
+      content={
+        <div className={copied ? "text-green-700 dark:text-green-500" : ""}>
+          {!copied ? "Share link to this room" : "Link copied!"}
+        </div>
+      }
+    >
+      <button
+        type="button"
+        className={clsx(
+          "flex items-center justify-center rounded-full hover:bg-secondary-hover",
+          copied && "text-green-700 dark:text-green-500",
+        )}
+        onClick={() => copy()}
+      >
+        <span className="icon-[material-symbols--share-outline] text-2xl" />
+      </button>
+    </Tooltip>
   );
 }

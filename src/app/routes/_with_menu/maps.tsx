@@ -7,15 +7,20 @@ import { Helmet } from "react-helmet-async";
 export const Route = createFileRoute("/_with_menu/maps")({
   validateSearch: (
     search: Record<string, unknown>,
-  ): { sceneId?: string; q?: string } => {
+  ): { scene?: string; q?: string; area?: string } => {
     return {
-      sceneId: (search.sceneId as string) ?? undefined,
-      q: (search.q as string) ?? undefined,
+      scene: search.scene
+        ? search.scene.toString()
+        : search.sceneId // Backward compatibility with 'sceneId' query parameter
+          ? search.sceneId.toString()
+          : undefined,
+      area: search.area ? search.area.toString() : undefined,
+      q: search.q ? search.q.toString() : undefined,
     };
   },
 
   component: function RouteComponent() {
-    const { sceneId, q } = Route.useSearch();
+    const { scene, area, q } = Route.useSearch();
     return (
       <>
         <Helmet>
@@ -28,7 +33,7 @@ export const Route = createFileRoute("/_with_menu/maps")({
 
         <Topbar title="Maps" />
         <MapsPageTabs />
-        <MapsPage sceneId={sceneId} q={q} />
+        <MapsPage sceneId={scene} areaId={area} q={q} />
       </>
     );
   },

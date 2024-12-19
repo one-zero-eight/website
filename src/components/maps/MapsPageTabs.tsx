@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 export function MapsPageTabs() {
   const navigate = useNavigate();
   const { data: scenes } = $maps.useQuery("get", "/scenes/");
-  const { sceneId, q } = useLocation({ select: ({ search }) => search });
+  const { scene: sceneId, q } = useLocation({ select: ({ search }) => search });
   const [searchText, setSearchText] = useState(q ?? "");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -20,7 +20,7 @@ export function MapsPageTabs() {
     inputRef.current?.blur();
     // Set search query in URL
     if (searchText) {
-      navigate({ to: "/maps", search: { q: searchText, sceneId } });
+      navigate({ to: "/maps", search: { q: searchText, scene: sceneId } });
     }
   };
 
@@ -50,7 +50,7 @@ export function MapsPageTabs() {
           <Link
             key={scene.scene_id}
             to="/maps"
-            search={{ sceneId: scene.scene_id }}
+            search={{ scene: scene.scene_id }}
             className={clsx(
               "px-2 py-1",
               scene.scene_id === sceneId || (sceneId === undefined && i === 0)

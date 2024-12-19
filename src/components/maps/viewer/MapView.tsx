@@ -8,7 +8,7 @@ export function MapView({
   highlightAreas,
 }: {
   scene: mapsTypes.SchemaScene;
-  highlightAreas: mapsTypes.SchemaSearchResult[];
+  highlightAreas: mapsTypes.SchemaArea[];
 }) {
   const [fullscreen, setFullscreen] = useState(false);
   const switchFullscreen = useCallback(() => setFullscreen((v) => !v), []);

@@ -5,9 +5,11 @@ import { useEffect } from "react";
 
 export function MapsPage({
   sceneId,
+  areaId,
   q,
 }: {
   sceneId: string | undefined;
+  areaId: string | undefined;
   q: string | undefined;
 }) {
   const navigate = useNavigate();
@@ -23,13 +25,19 @@ export function MapsPage({
     },
   );
 
+  const requestedArea = scenes
+    ?.flatMap((scene) => scene.areas)
+    .find((area) => area.svg_polygon_id === areaId);
+  const requestedAreas = requestedArea ? [requestedArea] : undefined;
+
   useEffect(() => {
+    if (!searchResult || searchResult.length === 0) return;
     // Show correct floor by navigating to URL with first sceneId
-    const firstSceneId = searchResult?.[0]?.scene_id;
+    const firstSceneId = searchResult[0].scene_id;
     if (firstSceneId !== undefined && firstSceneId !== sceneId) {
       navigate({
         to: "/maps",
-        search: { sceneId: firstSceneId, q: q },
+        search: { scene: firstSceneId, q: q },
         replace: true, // Do not add useless history entries not to break the back button
       });
     }
@@ -46,7 +54,12 @@ export function MapsPage({
   return (
     <div className="mt-1 flex grow flex-col gap-4 @3xl/content:flex-row">
       <div className="min-h-[600px] grow">
-        <MapView scene={currentScene} highlightAreas={searchResult ?? []} />
+        <MapView
+          scene={currentScene}
+          highlightAreas={
+            searchResult?.map((res) => res.area) ?? requestedAreas ?? []
+          }
+        />
       </div>
 
       <div className="flex w-full shrink-0 flex-col gap-2 px-2 @3xl/content:w-64">

@@ -9,7 +9,7 @@ export const MapViewer = memo(function MapViewer({
   highlightAreas,
 }: {
   scene: mapsTypes.SchemaScene;
-  highlightAreas: mapsTypes.SchemaSearchResult[];
+  highlightAreas: mapsTypes.SchemaArea[];
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
@@ -277,9 +277,7 @@ export const MapViewer = memo(function MapViewer({
     const rect = containerRef.current.getBoundingClientRect();
     const imageRect = imageRef.current.getBoundingClientRect();
 
-    const areaIds = highlightAreas.map(
-      (s) => s.area.svg_polygon_id ?? undefined,
-    );
+    const areaIds = highlightAreas.map((s) => s.svg_polygon_id ?? undefined);
     const areas = areaIds.map((id) =>
       imageRef.current?.querySelector(`[id="${id}"]`),
     );
@@ -322,7 +320,7 @@ export const MapViewer = memo(function MapViewer({
 
     // Show popup
     if (highlightAreas.length === 1) {
-      const area = highlightAreas[0].area;
+      const area = highlightAreas[0];
       const el = imageRef.current?.querySelector(
         `[id="${area.svg_polygon_id}"]`,
       );
@@ -348,7 +346,7 @@ export const MapViewer = memo(function MapViewer({
           0%, 100% { opacity: 0.2; }
           50% { opacity: 0.5; }
         }
-        ${highlightAreas.map((s) => `[id="${s.area.svg_polygon_id}"]`).join(",")} {
+        ${highlightAreas.map((s) => `[id="${s.svg_polygon_id}"]`).join(",")} {
           fill: violet !important;
           animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
@@ -364,6 +362,7 @@ export const MapViewer = memo(function MapViewer({
       )}
       <DetailsPopup
         elementRef={popupElement}
+        scene={scene}
         area={popupArea}
         isOpen={popupIsOpen}
         setIsOpen={setPopupIsOpen}
