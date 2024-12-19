@@ -22,13 +22,13 @@ export function NewYearWidget() {
         <span className="icon-[twemoji--christmas-tree] text-5xl text-brand-violet" />
       </div>
       <div className="flex flex-col">
-        <p className="text-2xl font-semibold text-contrast">
+        <div className="text-2xl font-semibold text-contrast">
           New Year Countdown:{" "}
           <span className="font-normal">{daysLeft} days</span>
           <p className="mt-2 text-lg text-contrast/75">
             {hoursLeft} hours, {minutesLeft} minutes, {secondsLeft} seconds
           </p>
-        </p>
+        </div>
       </div>
     </div>
   );
