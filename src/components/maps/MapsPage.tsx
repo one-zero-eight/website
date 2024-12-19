@@ -30,6 +30,7 @@ export function MapsPage({
       navigate({
         to: "/maps",
         search: { sceneId: firstSceneId, q: q },
+        replace: true, // Do not add useless history entries not to break the back button
       });
     }
   }, [searchResult, sceneId, q, navigate]);
