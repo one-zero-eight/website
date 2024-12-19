@@ -118,9 +118,11 @@ export default function CalendarEventPopover({
                     {locations.map((location: string, index: number) =>
                       location.toUpperCase() !== "ONLINE" &&
                       location.toUpperCase() !== "ОНЛАЙН" ? (
-                        <div className="flex flex-row items-center gap-1">
+                        <div
+                          key={index}
+                          className="flex flex-row items-center gap-1"
+                        >
                           <Link
-                            key={index}
                             to="/maps"
                             search={{
                               q: location,
@@ -135,7 +137,10 @@ export default function CalendarEventPopover({
                           )}
                         </div>
                       ) : (
-                        <p className="flex w-full whitespace-pre-wrap py-1">
+                        <p
+                          key={index}
+                          className="flex w-full whitespace-pre-wrap py-1"
+                        >
                           {location.concat(
                             index !== locations.length - 1 ? " / " : "",
                           )}
