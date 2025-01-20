@@ -17,25 +17,27 @@ export const viewConfig: ViewConfig = {
     "core-courses": {
       alias: "core-courses",
       title: "Core Courses",
-      shortDescription: "Academic schedule for core courses in F24.",
+      shortDescription: "Academic schedule for core courses in S25.",
       filtersTagTypes: ["core-courses"],
       groupingTagType: "core-courses",
       showTagTypes: ["core-courses"],
       outdated: false,
     },
+    /*
     electives: {
       alias: "electives",
       title: "Electives",
-      shortDescription: "Academic schedule for electives in F24.",
+      shortDescription: "Academic schedule for electives in S25.",
       filtersTagTypes: ["electives"],
       groupingTagType: "electives",
       showTagTypes: ["electives"],
       outdated: false,
     },
+    */
     sports: {
       alias: "sports",
       title: "Sports",
-      shortDescription: "Schedule of sport classes in F24.",
+      shortDescription: "Schedule of sport classes.",
       filtersTagTypes: [],
       groupingTagType: "category",
       showTagTypes: ["category"],
