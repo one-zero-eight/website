@@ -23,7 +23,6 @@ export const viewConfig: ViewConfig = {
       showTagTypes: ["core-courses"],
       outdated: false,
     },
-    /*
     electives: {
       alias: "electives",
       title: "Electives",
@@ -33,7 +32,6 @@ export const viewConfig: ViewConfig = {
       showTagTypes: ["electives"],
       outdated: false,
     },
-    */
     sports: {
       alias: "sports",
       title: "Sports",
