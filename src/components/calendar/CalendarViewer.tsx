@@ -390,8 +390,8 @@ function renderDayHeader({ date }: DayHeaderContentArg) {
 
 function calculateWeek(date: Date) {
   // Calculate academic week number
-  const semesterStart = new Date("2024-08-26").getTime(); // Monday, first day of first week
-  const semesterEnd = new Date("2024-12-30").getTime(); // Monday, the day after the last week
+  const semesterStart = new Date("2025-01-20").getTime(); // Monday, first day of first week
+  const semesterEnd = new Date("2025-06-30").getTime(); // Monday, the day after the last week
 
   const time = date.getTime();
   if (time < semesterStart || time >= semesterEnd) {

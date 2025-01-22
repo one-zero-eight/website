@@ -5,7 +5,7 @@ import { URLType } from "@/components/calendar/CalendarViewer.tsx";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { AcademicCalendarWidget } from "@/components/dashboard/AcademicCalendarWidget.tsx";
 import { AccountWidget } from "@/components/dashboard/AccountWidget.tsx";
-import { NewYearWidget } from "@/components/dashboard/NewYearWidget.tsx";
+import { CountdownWidget } from "@/components/dashboard/CountdownWidget.tsx";
 import { SportsWidget } from "@/components/dashboard/SportsWidget.tsx";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton.tsx";
@@ -39,7 +39,7 @@ export function DashboardPage() {
         <div className="grid gap-4 @4xl/content:grid-cols-2">
           <AcademicCalendarWidget />
           <SportsWidget />
-          <NewYearWidget />
+          <CountdownWidget />
         </div>
         <div className="flex flex-col justify-between gap-4 @container/sections @6xl/content:flex-row @6xl/content:gap-8">
           <details className="flex w-full flex-col @container/schedule @6xl/content:w-1/2">

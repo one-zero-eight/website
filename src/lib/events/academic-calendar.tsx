@@ -9,44 +9,45 @@ export type AcademicCalendar = {
 // prettier-ignore
 export const academicCalendar: AcademicCalendar[] = [{
     groupPrefix: "B21",
-    Title: () => <p>[B21] Semester F24: <span className="font-normal">Aug 26 - Dec 21</span></p>,
+    Title: () => <p>[B21] Semester S25</p>,
     Details: () => <>
-      <p><span className="font-semibold">Winter break:</span> Dec 22 - Jan 12</p>
+      <p><span className="font-semibold">Spring break:</span> May 25 - May 31</p>
+      <p><span className="font-semibold">Thesis defense:</span> June 1 - July 13</p>
     </>,
 }, {
     groupPrefix: "B22",
-    Title: () => <p>[B22] Semester F24: <span className="font-normal">Aug 26 - Dec 20</span></p>,
+    Title: () => <p>[B22] Semester S25: <span className="font-normal">Jan 20 - May 16</span></p>,
     Details: () => <>
-      <p><span className="font-semibold">Exams:</span> Dec 10 - Dec 20</p>
-      <p><span className="font-semibold">Winter break:</span> Dec 21 - Jan 19</p>
+      <p><span className="font-semibold">Exams:</span> May 8 - May 16</p>
+      <p><span className="font-semibold">Spring break:</span> May 17 - May 25</p>
     </>,
 }, {
     groupPrefix: "B23",
-    Title: () => <p>[B23] Semester F24: <span className="font-normal">Aug 26 - Dec 23</span></p>,
+    Title: () => <p>[B23] Semester S25: <span className="font-normal">Jan 20 - May 22</span></p>,
     Details: () => <>
-      <p><span className="font-semibold">Exams:</span> Dec 10 - Dec 23</p>
-      <p><span className="font-semibold">Winter break:</span> Dec 24 - Jan 19</p>
+      <p><span className="font-semibold">Exams:</span> May 8 - May 22</p>
+      <p><span className="font-semibold">Spring break:</span> May 23 - June 1</p>
     </>,
 }, {
     groupPrefix: "B24-AI360",
-    Title: () => <p>[B24-AI360] Semester F24: <span className="font-normal">Aug 26 - Dec 28</span></p>,
+    Title: () => <p>[B24-AI360] Semester S25: <span className="font-normal">Jan 20 - June 29</span></p>,
     Details: () => <>
-      <p><span className="font-semibold">Exams:</span> Dec 10 - Dec 28</p>
-      <p><span className="font-semibold">Winter break:</span> Dec 29 - Jan 19</p>
+      <p><span className="font-semibold">Exams:</span> May 30 - June 29</p>
+      <p><span className="font-semibold">Summer break:</span> June 30 - Aug 24</p>
     </>,
 }, {
     groupPrefix: "B24",
-    Title: () => <p>[B24] Semester F24: <span className="font-normal">Aug 26 - Dec 22</span></p>,
+    Title: () => <p>[B24] Semester S25: <span className="font-normal">Jan 20 - May 22</span></p>,
     Details: () => <>
-      <p><span className="font-semibold">Exams:</span> Dec 10 - Dec 22</p>
-      <p><span className="font-semibold">Winter break:</span> Dec 23 - Jan 19</p>
+      <p><span className="font-semibold">Exams:</span> May 8 - May 22</p>
+      <p><span className="font-semibold">Spring break:</span> May 23 - June 1</p>
     </>,
 }, {
     groupPrefix: "M24",
-    Title: () => <p>[M24] Semester F24: <span className="font-normal">Aug 26 - Dec 22</span></p>,
+    Title: () => <p>[M24] Semester S25: <span className="font-normal">Jan 20 - May 22</span></p>,
     Details: () => <>
-      <p><span className="font-semibold">Exams:</span> Dec 10 - Dec 22</p>
-      <p><span className="font-semibold">Winter break:</span> Dec 23 - Jan 19</p>
+      <p><span className="font-semibold">Exams:</span> May 8 - May 22</p>
+      <p><span className="font-semibold">Spring break:</span> May 23 - June 1</p>
     </>,
 }];
 

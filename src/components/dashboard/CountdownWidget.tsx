@@ -1,11 +1,11 @@
 import { useNowMS } from "@/lib/utils/use-now.ts";
 
-export function NewYearWidget() {
+export function CountdownWidget() {
   const nowMs = useNowMS(true, 1000);
 
-  const nextYear = new Date().getFullYear() + 1;
+  const currentYear = new Date().getFullYear();
   const deadlineMs =
-    new Date(`${nextYear}-01-01`).getTime() - 3 * 60 * 60 * 1000;
+    new Date(`${currentYear}-06-01`).getTime() - 3 * 60 * 60 * 1000;
   const daysLeft = Math.max(
     0,
     Math.floor((deadlineMs - nowMs) / (1000 * 60 * 60 * 24)),
@@ -19,12 +19,11 @@ export function NewYearWidget() {
   return (
     <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6">
       <div className="w-12">
-        <span className="icon-[twemoji--christmas-tree] text-5xl text-brand-violet" />
+        <span className="icon-[twemoji--sun] text-5xl text-brand-violet" />
       </div>
       <div className="flex flex-col">
         <div className="text-2xl font-semibold text-contrast">
-          New Year Countdown:{" "}
-          <span className="font-normal">{daysLeft} days</span>
+          Summer Countdown: <span className="font-normal">{daysLeft} days</span>
           <p className="mt-2 text-lg text-contrast/75">
             {hoursLeft} hours, {minutesLeft} minutes, {secondsLeft} seconds
           </p>

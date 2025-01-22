@@ -15,7 +15,7 @@ export function SportsWidget() {
   const debtHours = sportInfo.ongoing_semester.debt;
 
   // TODO: Fetch the end date of current semester from sports
-  const deadline = new Date("2024-12-08");
+  const deadline = new Date("2025-05-04");
   const daysLeft = Math.max(
     0,
     Math.ceil((deadline.getTime() - nowMs) / (1000 * 60 * 60 * 24)),
@@ -43,13 +43,6 @@ export function SportsWidget() {
           })}{" "}
           ({daysLeft} days left)
         </p>
-        <a
-          href="https://t.me/sportinIU/566"
-          className="w-fit text-lg text-contrast/75 hover:underline"
-        >
-          Register for <span className="text-brand-violet">Fitness test</span>
-          <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />
-        </a>
         <a
           href="https://t.me/IUSportBot"
           className="w-fit text-lg text-contrast/75 hover:underline"
