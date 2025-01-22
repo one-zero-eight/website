@@ -167,7 +167,9 @@ export default function CalendarEventPopover({
                   </div>
                   <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
                     Calendar updated at:{" "}
-                    {moment(event.extendedProps.updatedAt).format("DD.MM HH:m")}
+                    {moment(event.extendedProps.updatedAt).format(
+                      "DD.MM HH:mm",
+                    )}
                   </p>
                 </div>
               )}
