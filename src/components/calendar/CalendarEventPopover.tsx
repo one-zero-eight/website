@@ -110,9 +110,7 @@ export default function CalendarEventPopover({
                 </p>
               </div>
               {locations && (
-                <div className="flex flex-row gap-2">
-                  {" "}
-                  {/* Added flex-wrap here */}
+                <div className="flex flex-row flex-wrap gap-2">
                   <div className="w-6">
                     <span className="icon-[material-symbols--location-on-outline] text-2xl" />
                   </div>
