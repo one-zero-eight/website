@@ -116,7 +116,6 @@ export default function CalendarEventPopover({
                     <span className="icon-[material-symbols--location-on-outline] text-2xl" />
                   </div>
                   <div className="flex flex-row flex-wrap gap-1">
-                    {" "}
                     {locations.map((location: string, index: number) =>
                       location.toUpperCase() !== "ONLINE" &&
                       location.toUpperCase() !== "ОНЛАЙН" ? (
