@@ -109,6 +109,7 @@ export default function CalendarEventPopover({
                     : moment(event.startStr).format("dddd, D MMMM")}
                 </p>
               </div>
+
               {locations && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
@@ -116,7 +117,6 @@ export default function CalendarEventPopover({
                   </div>
                   <div className="flex flex-row flex-wrap gap-1">
                     {" "}
-                    {/* Added flex-wrap here */}
                     {locations.map((location: string, index: number) =>
                       location.toUpperCase() !== "ONLINE" &&
                       location.toUpperCase() !== "ОНЛАЙН" ? (
