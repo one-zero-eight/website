@@ -111,10 +111,14 @@ export default function CalendarEventPopover({
               </div>
               {locations && (
                 <div className="flex flex-row gap-2">
+                  {" "}
+                  {/* Added flex-wrap here */}
                   <div className="w-6">
                     <span className="icon-[material-symbols--location-on-outline] text-2xl" />
                   </div>
-                  <div className="flex flex-row gap-1">
+                  <div className="flex flex-row flex-wrap gap-1">
+                    {" "}
+                    {/* Added flex-wrap here */}
                     {locations.map((location: string, index: number) =>
                       location.toUpperCase() !== "ONLINE" &&
                       location.toUpperCase() !== "ОНЛАЙН" ? (
@@ -133,18 +137,18 @@ export default function CalendarEventPopover({
                             {location}
                           </Link>
                           {index !== locations.length - 1 && (
-                            <p className="py-1">/</p>
+                            <span className="py-1">/</span>
                           )}
                         </div>
                       ) : (
-                        <p
+                        <span
                           key={index}
                           className="flex w-full whitespace-pre-wrap py-1"
                         >
                           {location.concat(
                             index !== locations.length - 1 ? " / " : "",
                           )}
-                        </p>
+                        </span>
                       ),
                     )}
                   </div>
