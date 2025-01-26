@@ -1,6 +1,5 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $events, eventsTypes } from "@/api/events";
-import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { URLType } from "@/components/calendar/CalendarViewer.tsx";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { AcademicCalendarWidget } from "@/components/dashboard/AcademicCalendarWidget.tsx";
@@ -19,6 +18,8 @@ import {
 } from "@/lib/events/links.ts";
 import { Link } from "@tanstack/react-router";
 import { useWindowSize } from "usehooks-ts";
+import { Calendar } from "../calendar/Calendar";
+import Links from "./Links";
 
 export function DashboardPage() {
   const { width } = useWindowSize();
@@ -148,6 +149,7 @@ export function DashboardPage() {
         }
         viewId="page"
       />
+      <Links />
     </>
   );
 }
