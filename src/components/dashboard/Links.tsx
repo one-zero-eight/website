@@ -47,7 +47,31 @@ const Links = () => {
           onChange={(value) => setActiveGroup(value)}
         />
       </div>
-      <div className="flex min-h-[500px] items-start gap-6">
+      <div className="flex min-h-[500px] flex-row-reverse items-start gap-6">
+        {/* Category List */}
+        <div className="hidden flex-1 lg:block xxl:hidden">
+          <h3 className="text-lg font-semibold text-contrast">
+            Group of Services
+          </h3>
+          <div>
+            {groups.map(({ value }) => (
+              <button
+                type="button"
+                key={value}
+                onClick={() => setActiveGroup(value)}
+                className={clsx(
+                  "block p-2",
+                  activeGroup === value
+                    ? "font-bold text-brand-violet"
+                    : "text-contrast/75",
+                )}
+              >
+                {value}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Resources Grid */}
         <div className="grid flex-[4] grid-cols-1 gap-5 lg:grid-cols-3 xxl:grid-cols-2">
           {universityResources
@@ -76,30 +100,6 @@ const Links = () => {
                 </div>
               </a>
             ))}
-        </div>
-
-        {/* Category List */}
-        <div className="hidden flex-1 lg:block xxl:hidden">
-          <h3 className="text-lg font-semibold text-contrast">
-            Group of Services
-          </h3>
-          <div>
-            {groups.map(({ value }) => (
-              <button
-                type="button"
-                key={value}
-                onClick={() => setActiveGroup(value)}
-                className={clsx(
-                  "block p-2",
-                  activeGroup === value
-                    ? "font-bold text-brand-violet"
-                    : "text-contrast/75",
-                )}
-              >
-                {value}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     </div>
