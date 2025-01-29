@@ -48,7 +48,7 @@ const Links = () => {
       </div>
       <div className="flex min-h-[500px] items-start gap-6">
         {/* Resources Grid */}
-        <div className="grid flex-[4] gap-5 lg:grid-cols-3 xxl:grid-cols-2">
+        <div className="grid flex-[4] grid-cols-1 gap-5 lg:grid-cols-3 xxl:grid-cols-2">
           {universityResources
             .filter((item) => activeGroup === item.category)
             .map((resource, index) => (

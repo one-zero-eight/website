@@ -32,7 +32,7 @@ const config: Config = {
       screens: {
         "lgw-smh": { raw: "(min-width: 1024px) and (min-height: 600px)" },
         "4xl": { raw: "(min-width: 2048px)" },
-        xxl: { raw: "(max-width : 1550px)" },
+        xxl: { raw: "(max-width : 1550px) and (min-width: 768px)" },
       },
       typography: {
         // Remove blockquote styling from Tailwind Typography

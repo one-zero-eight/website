@@ -23,7 +23,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   };
 
   return (
-    <div className="relative hidden xxl:block">
+    <div className="relative sm:block lg:hidden xxl:block">
       {/* Select Input */}
       <div
         className="flex w-full cursor-pointer items-center justify-between rounded-md border border-brand-violet p-2 md:w-64"
