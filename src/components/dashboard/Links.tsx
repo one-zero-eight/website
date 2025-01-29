@@ -1,6 +1,7 @@
 import { groups } from "@/lib/links/constants";
 import CustomSelect from "@/lib/links/customSelector";
 import universityResources from "@/lib/links/universityResources";
+import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 
 const Links = () => {
@@ -82,21 +83,23 @@ const Links = () => {
           <h3 className="text-lg font-semibold text-contrast">
             Group of Services
           </h3>
-          <ul>
+          <div>
             {groups.map(({ value }) => (
-              <li
+              <button
+                type="button"
                 key={value}
                 onClick={() => setActiveGroup(value)}
-                className={`cursor-pointer p-2 ${
+                className={clsx(
+                  "block p-2",
                   activeGroup === value
                     ? "font-bold text-brand-violet"
-                    : "text-contrast/75"
-                }`}
+                    : "text-contrast/75",
+                )}
               >
                 {value}
-              </li>
+              </button>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
     </div>
