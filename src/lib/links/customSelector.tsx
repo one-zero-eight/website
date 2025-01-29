@@ -12,6 +12,7 @@ import {
   useListNavigation,
   useRole,
 } from "@floating-ui/react";
+import clsx from "clsx";
 import React, { useRef, useState } from "react";
 
 interface Option {
@@ -112,14 +113,24 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 return (
                   <div
                     key={option.value}
-                    className={`cursor-pointer rounded-md px-4 py-2 hover:bg-secondary ${activeIndex === index ? "bg-secondary" : ""}`}
+                    ref={(node) => {
+                      listRef.current[index] = node;
+                    }}
+                    role="option"
+                    tabIndex={index === activeIndex ? 0 : -1}
+                    aria-selected={index === activeIndex}
+                    className={clsx(
+                      "cursor-pointer rounded-md px-4 py-2 hover:bg-secondary",
+                      activeIndex === index && "bg-secondary",
+                    )}
                     {...getItemProps({
-                      ref(node) {
-                        listRef.current[index] = node;
-                      },
-                      role: "option",
-                      "aria-selected": selectedValue === option.value,
                       onClick: () => handleSelect(option.value, index),
+                      onKeyDown(event) {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleSelect(option.value, index);
+                        }
+                      },
                     })}
                   >
                     {option.value}
