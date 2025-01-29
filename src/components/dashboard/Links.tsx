@@ -1,3 +1,4 @@
+import { groups } from "@/lib/links/constants";
 import CustomSelect from "@/lib/links/customSelector";
 import universityResources from "@/lib/links/universityResources";
 import { useEffect, useRef, useState } from "react";
@@ -32,16 +33,7 @@ const Links = () => {
       }
     };
   }, [activeGroup]);
-  const options = [
-    { value: "Academic" },
-    { value: "Financial" },
-    { value: "Support" },
-    { value: "Extracurricular" },
-    { value: "Housing" },
-    { value: "Transport" },
-    { value: "Communication" },
-    { value: "Navigation" },
-  ];
+
   return (
     <div className="px-4 py-8">
       <div className="flex flex-col justify-around py-4 md:flex-row md:items-center md:justify-between">
@@ -49,14 +41,14 @@ const Links = () => {
           All University Services
         </h3>
         <CustomSelect
-          options={options}
+          options={groups}
           selectedValue={activeGroup}
           onChange={(value) => setActiveGroup(value)}
         />
       </div>
       <div className="flex min-h-[500px] items-start gap-6">
         {/* Resources Grid */}
-        <div className="grid flex-[4] gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid flex-[4] gap-5 lg:grid-cols-3 xxl:grid-cols-2">
           {universityResources
             .filter((item) => activeGroup === item.category)
             .map((resource, index) => (
@@ -86,31 +78,22 @@ const Links = () => {
         </div>
 
         {/* Category List */}
-        <div className="hidden flex-1 lg:block">
+        <div className="hidden flex-1 lg:block xxl:hidden">
           <h3 className="text-lg font-semibold text-contrast">
             Group of Services
           </h3>
           <ul>
-            {[
-              "Academic",
-              "Financial",
-              "Support",
-              "Extracurricular",
-              "Housing",
-              "Transport",
-              "Communication",
-              "Navigation",
-            ].map((category) => (
+            {groups.map(({ value }) => (
               <li
-                key={category}
-                onClick={() => setActiveGroup(category)}
+                key={value}
+                onClick={() => setActiveGroup(value)}
                 className={`cursor-pointer p-2 ${
-                  activeGroup === category
+                  activeGroup === value
                     ? "font-bold text-brand-violet"
                     : "text-contrast/75"
                 }`}
               >
-                {category}
+                {value}
               </li>
             ))}
           </ul>
