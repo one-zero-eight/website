@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 
 const Links = () => {
-  const [activeGroup, setActiveGroup] = useState("Academic");
+  const [activeGroup, setActiveGroup] = useState("All");
   const [visibleItems, setVisibleItems] = useState<number[]>([]);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
@@ -75,7 +75,9 @@ const Links = () => {
         {/* Resources Grid */}
         <div className="grid flex-[4] grid-cols-1 gap-5 lg:grid-cols-3 xxl:grid-cols-2">
           {universityResources
-            .filter((item) => activeGroup === item.category)
+            .filter(
+              (item) => activeGroup === item.category || activeGroup === "All",
+            )
             .map((resource, index) => (
               <a
                 href={resource.url}
