@@ -1,11 +1,26 @@
 import { $sports } from "@/api/sports";
 import { useNowMS } from "@/lib/utils/use-now.ts";
+import { useEffect } from "react";
+import { useLocalStorage } from "usehooks-ts";
 
 export function SportsWidget() {
-  const { data: sportInfo } = $sports.useQuery("get", "/users/sport_info");
+  const [widgetShown, setWidgetShown] = useLocalStorage("widget-sports", false);
+  const { data: sportInfo, isPending } = $sports.useQuery(
+    "get",
+    "/users/sport_info",
+  );
   const nowMs = useNowMS(!!sportInfo);
 
-  if (!sportInfo) return null;
+  useEffect(() => {
+    setWidgetShown((v) => (v && isPending) || !!sportInfo);
+  }, [setWidgetShown, isPending, sportInfo]);
+
+  if (!sportInfo) {
+    if (!widgetShown) return null;
+    return (
+      <div className="group flex min-h-32 animate-pulse flex-row gap-4 rounded-2xl bg-primary px-4 py-6" />
+    );
+  }
 
   const earnedHours =
     sportInfo.ongoing_semester.hours_not_self +

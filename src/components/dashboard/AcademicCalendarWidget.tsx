@@ -1,18 +1,39 @@
 import { $events } from "@/api/events";
 import { findAcademicCalendarByGroups } from "@/lib/events/academic-calendar.tsx";
+import { useEffect } from "react";
+import { useLocalStorage } from "usehooks-ts";
 
 export function AcademicCalendarWidget() {
-  const { data: eventGroups } = $events.useQuery("get", "/event-groups/");
-  const { data: predefined } = $events.useQuery("get", "/users/me/predefined");
+  const [widgetShown, setWidgetShown] = useLocalStorage(
+    "widget-academic-calendar",
+    false,
+  );
+  const { data: eventGroups, isPending: isPending1 } = $events.useQuery(
+    "get",
+    "/event-groups/",
+  );
+  const { data: predefined, isPending: isPending2 } = $events.useQuery(
+    "get",
+    "/users/me/predefined",
+  );
 
-  if (!eventGroups || !predefined) return null;
+  const groups = predefined?.event_groups
+    ?.map((v) => eventGroups?.event_groups.find((g) => g.id === v)?.name)
+    ?.filter((v) => v) as string[];
+  const academicCalendar = findAcademicCalendarByGroups(groups || []);
 
-  const groups = predefined.event_groups
-    .map((v) => eventGroups.event_groups.find((g) => g.id === v)?.name)
-    .filter((v) => v) as string[];
-  const academicCalendar = findAcademicCalendarByGroups(groups);
+  useEffect(() => {
+    setWidgetShown(
+      (v) => (v && (isPending1 || isPending2)) || !!academicCalendar,
+    );
+  }, [setWidgetShown, isPending1, isPending2, academicCalendar]);
 
-  if (!academicCalendar) return null;
+  if (!eventGroups || !predefined || !academicCalendar) {
+    if (!widgetShown) return null;
+    return (
+      <div className="group flex min-h-32 animate-pulse flex-row gap-4 rounded-2xl bg-primary px-4 py-6" />
+    );
+  }
 
   return (
     <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6">
