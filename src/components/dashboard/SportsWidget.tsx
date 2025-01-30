@@ -37,19 +37,19 @@ export function SportsWidget() {
   );
 
   return (
-    <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6">
+    <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-4">
       <div className="w-12">
         <span className="icon-[material-symbols--exercise-outline] text-5xl text-brand-violet" />
       </div>
       <div className="flex flex-col">
-        <p className="text-2xl font-semibold text-contrast">
+        <p className="text-lg font-semibold text-contrast">
           Sports:{" "}
           <span className="font-normal">
             {earnedHours} / {semesterHours}
             {debtHours ? `+${debtHours} (debt)` : null} hours
           </span>
         </p>
-        <p className="mt-2 text-lg text-contrast/75">
+        <p className="text-contrast/75">
           <span className="font-semibold">Deadline:</span>{" "}
           {deadline.toLocaleDateString("en-US", {
             month: "long",
@@ -60,7 +60,7 @@ export function SportsWidget() {
         </p>
         <a
           href="https://t.me/IUSportBot"
-          className="w-fit text-lg text-contrast/75 hover:underline"
+          className="w-fit text-contrast/75 hover:underline"
         >
           Check in for sports in the{" "}
           <span className="text-brand-violet">Sports bot</span>

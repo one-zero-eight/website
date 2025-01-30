@@ -37,7 +37,7 @@ export function DashboardPage() {
     <>
       <div className="flex flex-col gap-4 px-4 py-4">
         <AccountWidget />
-        <div className="grid gap-4 @4xl/content:grid-cols-2">
+        <div className="grid gap-4 @4xl/content:grid-cols-2 @7xl/content:grid-cols-3">
           <AcademicCalendarWidget />
           <SportsWidget />
           <CountdownWidget />

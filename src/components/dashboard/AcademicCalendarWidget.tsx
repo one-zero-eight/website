@@ -36,20 +36,20 @@ export function AcademicCalendarWidget() {
   }
 
   return (
-    <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6">
+    <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-4">
       <div className="w-12">
         <span className="icon-[ph--books] text-5xl text-brand-violet" />
       </div>
       <div className="flex flex-col">
-        <div className="text-2xl font-semibold text-contrast">
+        <div className="text-lg font-semibold text-contrast">
           <academicCalendar.Title />
         </div>
-        <div className="mt-2 whitespace-pre-wrap text-lg text-contrast/75">
+        <div className="whitespace-pre-wrap text-contrast/75">
           <academicCalendar.Details />
         </div>
         <a
           href="https://eduwiki.innopolis.university/index.php/AcademicCalendar"
-          className="w-fit text-base text-contrast/75 hover:underline"
+          className="w-fit text-sm text-contrast/75 hover:underline"
         >
           *based on <span className="text-brand-violet">Eduwiki</span>
           <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />

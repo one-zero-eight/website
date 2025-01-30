@@ -17,16 +17,16 @@ export function CountdownWidget() {
   const secondsLeft = Math.max(0, Math.floor((deadlineMs - nowMs) / 1000)) % 60;
 
   return (
-    <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6">
+    <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-4">
       <div className="w-12">
         <span className="icon-[twemoji--sun] text-5xl text-brand-violet" />
       </div>
       <div className="flex flex-col">
-        <div className="text-2xl font-semibold text-contrast">
+        <div className="text-lg font-semibold text-contrast">
           Summer Countdown: <span className="font-normal">{daysLeft} days</span>
-          <p className="mt-2 text-lg text-contrast/75">
-            {hoursLeft} hours, {minutesLeft} minutes, {secondsLeft} seconds
-          </p>
+        </div>
+        <div className="text-contrast/75">
+          {hoursLeft} hours, {minutesLeft} minutes, {secondsLeft} seconds
         </div>
       </div>
     </div>
