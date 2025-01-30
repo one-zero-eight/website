@@ -1,4 +1,5 @@
 export const groups = [
+  { value: "All" },
   { value: "Academic" },
   { value: "Financial" },
   { value: "Support" },
