@@ -7,13 +7,9 @@ export function LeaveFeedbackButton() {
         href="https://forms.gle/2vMmu4vSoVShvbMw6"
         target="_blank"
         rel="noopener noreferrer"
-        className="rounded-xl"
+        className="flex items-center justify-center rounded-xl p-2 hover:bg-secondary"
       >
-        <div className="ml-auto flex h-14 w-14 flex-col items-center justify-center rounded-2xl hover:bg-secondary">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-contrast/50">
-            <span className="icon-[material-symbols--maps-ugc-outline-rounded] text-4xl" />
-          </div>
-        </div>
+        <span className="icon-[material-symbols--maps-ugc-outline-rounded] text-3xl text-inactive" />
       </a>
     </Tooltip>
   );
