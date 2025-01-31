@@ -18,10 +18,13 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         autoFocus={true}
       />
       {searchQuery.length > 0 && (
-        <span
-          className="icon-[material-symbols--close] absolute right-2 top-3 text-brand-violet"
+        <button
+          type="button"
           onClick={() => setSearchQuery("")}
-        />
+          className="absolute right-2 top-1/2 -translate-y-1/2 transform"
+        >
+          <span className="icon-[material-symbols--close] text-brand-violet" />
+        </button>
       )}
     </div>
   );
