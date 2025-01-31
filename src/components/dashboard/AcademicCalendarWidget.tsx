@@ -37,11 +37,10 @@ export function AcademicCalendarWidget() {
 
   return (
     <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-4">
-      <div className="w-12">
-        <span className="icon-[ph--books] text-5xl text-brand-violet" />
-      </div>
+      <span className="icon-[ph--books] hidden w-12 shrink-0 text-5xl text-brand-violet sm:block" />
       <div className="flex flex-col">
-        <div className="text-lg font-semibold text-contrast">
+        <div className="flex text-lg font-semibold text-contrast">
+          <span className="icon-[ph--books] mr-2 shrink-0 text-3xl text-brand-violet sm:hidden" />
           <academicCalendar.Title />
         </div>
         <div className="whitespace-pre-wrap text-contrast/75">

@@ -38,15 +38,16 @@ export function SportsWidget() {
 
   return (
     <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-4">
-      <div className="w-12">
-        <span className="icon-[material-symbols--exercise-outline] text-5xl text-brand-violet" />
-      </div>
+      <span className="icon-[material-symbols--exercise-outline] hidden w-12 shrink-0 text-5xl text-brand-violet sm:block" />
       <div className="flex flex-col">
-        <p className="text-lg font-semibold text-contrast">
-          Sports:{" "}
-          <span className="font-normal">
-            {earnedHours} / {semesterHours}
-            {debtHours ? `+${debtHours} (debt)` : null} hours
+        <p className="flex items-center text-lg font-semibold text-contrast">
+          <span className="icon-[material-symbols--exercise-outline] mr-2 shrink-0 text-3xl text-brand-violet sm:hidden" />
+          <span>
+            Sports:{" "}
+            <span className="font-normal">
+              {earnedHours} / {semesterHours}
+              {debtHours ? `+${debtHours} (debt)` : null} hours
+            </span>
           </span>
         </p>
         <p className="text-contrast/75">
