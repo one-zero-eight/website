@@ -12,6 +12,10 @@
 }
 
 .fc {
+  .fc-scroller {
+    scrollbar-width: none;
+  }
+
   .fc-timegrid-slot-minor {
     @apply border-t-0;
   }
@@ -21,14 +25,14 @@
   }
 
   .fc-header-toolbar.fc-toolbar {
-    @apply mb-4 flex-wrap gap-y-2;
+    @apply mb-0 gap-y-2 overflow-x-auto;
 
     .fc-toolbar-chunk {
       @apply flex items-center justify-center gap-1;
     }
 
     .fc-button {
-      @apply m-0 rounded-xl border-0 text-lg outline-0;
+      @apply m-0 text-nowrap rounded-xl border-0 text-base outline-0;
 
       &:focus-visible {
         @apply border-0 outline-0;
@@ -36,12 +40,16 @@
     }
 
     .fc-toolbar-title {
-      @apply m-0 inline min-w-[100px] text-center text-lg;
+      @apply m-0 inline min-w-[85px] text-center text-base;
     }
 
     .fc-toolbar-chunk div:has(.fc-toolbar-title) {
       @apply flex items-center justify-center gap-1 rounded-xl border-0 bg-primary outline-0;
     }
+  }
+
+  .fc-scrollgrid {
+    @apply border-none;
   }
 
   .fc-scrollgrid-section:has(.fc-timegrid-divider) {
@@ -54,6 +62,9 @@
 
   .fc-scrollgrid-section > td {
     border-bottom-style: dashed;
+  }
+  .fc-scrollgrid-section.fc-scrollgrid-section-liquid > td {
+    border-bottom-style: none;
   }
 
   .fc-col-header-cell-cushion {

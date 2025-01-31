@@ -1,5 +1,6 @@
 import { eventsTypes } from "@/api/events";
 import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
+import { SourcesDialog } from "@/components/calendar/SourcesDialog.tsx";
 import {
   DayHeaderContentArg,
   EventApi,
@@ -11,6 +12,7 @@ import listPlugin from "@fullcalendar/list";
 import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import clsx from "clsx";
 import moment from "moment/moment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
@@ -31,10 +33,12 @@ export default function CalendarViewer({
   urls,
   initialView = "listMonth",
   viewId = "",
+  isFullPage = false,
 }: {
   urls: URLType[];
   initialView?: string;
   viewId?: string;
+  isFullPage?: boolean;
 }) {
   const [popoverInfo, setPopoverInfo] = useState({
     opened: false,
@@ -42,6 +46,8 @@ export default function CalendarViewer({
     eventElement: undefined as HTMLElement | undefined,
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  const [sourcesDialogOpen, setSourcesDialogOpen] = useState(false);
 
   const setIsOpenCallback = useCallback(
     (opened: boolean) =>
@@ -118,7 +124,9 @@ export default function CalendarViewer({
         }}
         headerToolbar={{
           // Buttons in header
-          left: "prev,title,next today",
+          left: isFullPage
+            ? "prev,title,next today sources"
+            : "prev,title,next today",
           center: undefined,
           right: "timeGrid3 timeGridWeek dayGridMonth listMonth",
         }}
@@ -128,6 +136,14 @@ export default function CalendarViewer({
           timeGrid3: "3 days",
           timeGridWeek: "Week",
           dayGridMonth: "Month",
+        }}
+        customButtons={{
+          sources: {
+            text: "Sources",
+            click() {
+              setSourcesDialogOpen(true);
+            },
+          },
         }}
         titleFormat={(arg) => {
           if (arg.date.year === new Date().getFullYear()) {
@@ -201,10 +217,10 @@ export default function CalendarViewer({
         weekNumberFormat={{ week: "long" }} // Show "Week 1", not "W1"
         weekNumberClassNames="text-sm week-cell" // Small text size
         weekNumberCalculation={calculateWeek} // Display academic week numbers
-        // height="100dvh" // Full height
-        contentHeight="auto" // Do not add scrollbar
-        stickyHeaderDates={false}
+        height={isFullPage ? "100%" : undefined} // Full height
+        contentHeight={isFullPage ? undefined : "auto"} // Do not add scrollbar on in-page calendars
         eventInteractive={true} // Make event tabbable
+        expandRows={true}
         eventClassNames="cursor-pointer text-sm rounded-md !bg-transparent border-0 overflow-clip"
         eventClick={(info) => {
           info.jsEvent.preventDefault();
@@ -216,7 +232,7 @@ export default function CalendarViewer({
             opened: !(prev.opened && prev.eventElement === info.el),
           }));
         }}
-        slotMinTime="07:00:00" // Cut everything earlier than 7am
+        // slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
         scrollTimeReset={false} // Do not reset scroll on date switch
         noEventsContent={() => "No events this month"} // Custom message
@@ -274,11 +290,35 @@ export default function CalendarViewer({
           calendarApi.addEventSource(eventSource);
         }
       }
+
+      if (isFullPage) {
+        calendarApi.addEventSource([
+          {
+            id: "feb-6",
+            title: "Introduction to one-zero-eight. 2025 edition",
+            start: new Date("2025-02-06T18:30:00Z"),
+            end: new Date("2025-02-06T21:00:00Z"),
+            color: "#9747ff",
+            extendedProps: {
+              location: "108",
+              sourceLink: "https://t.me/one_zero_eight",
+              description:
+                "Come to look back on our journey, celebrate achievements, and uncover our history and secret plans.\nEnjoy live music, great food, and take part in the launch of our contest!\nMore details in the telegram post:",
+            },
+          },
+        ]);
+      }
     });
-  }, [urls]);
+  }, [urls, isFullPage]);
 
   return (
-    <div className={isLoading ? "calendar-loading overflow-clip" : undefined}>
+    <div
+      className={clsx(
+        "overflow-clip",
+        isFullPage ? "h-full" : "",
+        isLoading && "calendar-loading",
+      )}
+    >
       {calendarComponent}
       {popoverInfo.event && popoverInfo.eventElement && (
         <CalendarEventPopover
@@ -288,6 +328,10 @@ export default function CalendarViewer({
           eventElement={popoverInfo.eventElement}
         />
       )}
+      <SourcesDialog
+        open={sourcesDialogOpen}
+        onOpenChange={setSourcesDialogOpen}
+      />
     </div>
   );
 }
@@ -344,7 +388,12 @@ function renderEventTimeGridWeek({
           {timeText}
         </span>
       )}
-      <span className="line-clamp-2 text-xs">
+      <span
+        className={clsx(
+          "line-clamp-2 text-xs",
+          event.allDay && "hidden sm:inline",
+        )}
+      >
         {event.extendedProps.location}
       </span>
     </div>

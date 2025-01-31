@@ -20,6 +20,7 @@ import { Route as WithmenuMapsImport } from "./routes/_with_menu/maps";
 import { Route as WithmenuExtensionImport } from "./routes/_with_menu/extension";
 import { Route as WithmenuDormsImport } from "./routes/_with_menu/dorms";
 import { Route as WithmenuDashboardImport } from "./routes/_with_menu/dashboard";
+import { Route as WithmenuCalendarImport } from "./routes/_with_menu/calendar";
 import { Route as WithmenuAccountRouteImport } from "./routes/_with_menu/account/route";
 import { Route as WithmenuScheduleIndexImport } from "./routes/_with_menu/schedule/index";
 import { Route as WithmenuRoomBookingIndexImport } from "./routes/_with_menu/room-booking.index";
@@ -76,6 +77,11 @@ const WithmenuDormsRoute = WithmenuDormsImport.update({
 
 const WithmenuDashboardRoute = WithmenuDashboardImport.update({
   path: "/dashboard",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
+
+const WithmenuCalendarRoute = WithmenuCalendarImport.update({
+  path: "/calendar",
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
@@ -160,6 +166,13 @@ declare module "@tanstack/react-router" {
       path: "/account";
       fullPath: "/account";
       preLoaderRoute: typeof WithmenuAccountRouteImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
+    "/_with_menu/calendar": {
+      id: "/_with_menu/calendar";
+      path: "/calendar";
+      fullPath: "/calendar";
+      preLoaderRoute: typeof WithmenuCalendarImport;
       parentRoute: typeof WithmenuRouteImport;
     };
     "/_with_menu/dashboard": {
@@ -301,6 +314,7 @@ const WithmenuAccountRouteRouteWithChildren =
 
 interface WithmenuRouteRouteChildren {
   WithmenuAccountRouteRoute: typeof WithmenuAccountRouteRouteWithChildren;
+  WithmenuCalendarRoute: typeof WithmenuCalendarRoute;
   WithmenuDashboardRoute: typeof WithmenuDashboardRoute;
   WithmenuDormsRoute: typeof WithmenuDormsRoute;
   WithmenuExtensionRoute: typeof WithmenuExtensionRoute;
@@ -320,6 +334,7 @@ interface WithmenuRouteRouteChildren {
 
 const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuAccountRouteRoute: WithmenuAccountRouteRouteWithChildren,
+  WithmenuCalendarRoute: WithmenuCalendarRoute,
   WithmenuDashboardRoute: WithmenuDashboardRoute,
   WithmenuDormsRoute: WithmenuDormsRoute,
   WithmenuExtensionRoute: WithmenuExtensionRoute,
@@ -345,6 +360,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "": typeof WithmenuRouteRouteWithChildren;
   "/account": typeof WithmenuAccountRouteRouteWithChildren;
+  "/calendar": typeof WithmenuCalendarRoute;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/dorms": typeof WithmenuDormsRoute;
   "/extension": typeof WithmenuExtensionRoute;
@@ -367,6 +383,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "": typeof WithmenuRouteRouteWithChildren;
+  "/calendar": typeof WithmenuCalendarRoute;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/dorms": typeof WithmenuDormsRoute;
   "/extension": typeof WithmenuExtensionRoute;
@@ -391,6 +408,7 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/_with_menu": typeof WithmenuRouteRouteWithChildren;
   "/_with_menu/account": typeof WithmenuAccountRouteRouteWithChildren;
+  "/_with_menu/calendar": typeof WithmenuCalendarRoute;
   "/_with_menu/dashboard": typeof WithmenuDashboardRoute;
   "/_with_menu/dorms": typeof WithmenuDormsRoute;
   "/_with_menu/extension": typeof WithmenuExtensionRoute;
@@ -416,6 +434,7 @@ export interface FileRouteTypes {
     | "/"
     | ""
     | "/account"
+    | "/calendar"
     | "/dashboard"
     | "/dorms"
     | "/extension"
@@ -437,6 +456,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | ""
+    | "/calendar"
     | "/dashboard"
     | "/dorms"
     | "/extension"
@@ -459,6 +479,7 @@ export interface FileRouteTypes {
     | "/"
     | "/_with_menu"
     | "/_with_menu/account"
+    | "/_with_menu/calendar"
     | "/_with_menu/dashboard"
     | "/_with_menu/dorms"
     | "/_with_menu/extension"
@@ -512,6 +533,7 @@ export const routeTree = rootRoute
       "filePath": "_with_menu/route.tsx",
       "children": [
         "/_with_menu/account",
+        "/_with_menu/calendar",
         "/_with_menu/dashboard",
         "/_with_menu/dorms",
         "/_with_menu/extension",
@@ -536,6 +558,10 @@ export const routeTree = rootRoute
         "/_with_menu/account/connect-telegram",
         "/_with_menu/account/"
       ]
+    },
+    "/_with_menu/calendar": {
+      "filePath": "_with_menu/calendar.tsx",
+      "parent": "/_with_menu"
     },
     "/_with_menu/dashboard": {
       "filePath": "_with_menu/dashboard.tsx",

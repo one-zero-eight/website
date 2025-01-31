@@ -50,6 +50,14 @@ const items: (LocalLink | ExternalLink | SeparatorItem)[] = [
   },
   {
     type: "local",
+    title: "Calendar",
+    path: "/calendar",
+    icon: (
+      <span className="icon-[material-symbols--calendar-month-outline-rounded]" />
+    ),
+  },
+  {
+    type: "local",
     title: "Maps",
     path: "/maps",
     icon: <span className="icon-[material-symbols--map-outline]" />,
