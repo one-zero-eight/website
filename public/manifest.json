@@ -17,18 +17,55 @@
   "shortcuts": [
     {
       "name": "Dashboard",
+      "short_name": "Dashboard",
       "description": "All your important information in one place.",
-      "url": "/dashboard"
+      "url": "/dashboard?from=pwa",
+      "icons": [
+        {
+          "src": "/favicon.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Calendar",
+      "short_name": "Calendar",
+      "description": "Personal calendar with all your events.",
+      "url": "/calendar?from=pwa",
+      "icons": [
+        {
+          "src": "/favicon.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Maps",
-      "description": "Plans of the university.",
-      "url": "/maps"
+      "short_name": "Maps",
+      "description": "Floor plans of the university.",
+      "url": "/maps?from=pwa",
+      "icons": [
+        {
+          "src": "/favicon.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Room booking",
-      "description": "Book rooms in the university.",
-      "url": "/room-booking"
+      "short_name": "Room booking",
+      "description": "Book auditoriums and meeting rooms in the university.",
+      "url": "/room-booking?from=pwa",
+      "icons": [
+        {
+          "src": "/favicon.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }
