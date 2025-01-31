@@ -66,7 +66,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   return (
     <div className="relative sm:block lg:hidden xxl:block">
       <div
-        className="flex w-full cursor-pointer items-center justify-between rounded-md border border-brand-violet p-2 md:w-64"
+        className="flex w-full cursor-pointer items-center justify-between rounded-md border border-brand-violet p-2"
         ref={refs.setReference}
         {...getReferenceProps({
           tabIndex: 0,
