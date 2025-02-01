@@ -14,7 +14,6 @@ export const SearchInput: React.FC<
         placeholder="Search services..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        autoFocus={true}
       />
       {searchQuery.length > 0 && (
         <button
