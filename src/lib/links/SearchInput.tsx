@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 interface SearchInputProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -5,9 +7,19 @@ interface SearchInputProps {
 export const SearchInput: React.FC<
   SearchInputProps & React.HTMLProps<HTMLDivElement>
 > = ({ searchQuery, setSearchQuery, ...props }) => {
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      // Autofocus the input field, without scrolling the page
+      ref.current.focus({ preventScroll: true });
+    }
+  }, []);
+
   return (
     <div className="relative flex w-full items-center gap-2" {...props}>
       <input
+        ref={ref}
         autoComplete="off"
         spellCheck={false}
         className="inset-0 h-10 w-full resize-none rounded-lg border-2 border-brand-violet bg-pagebg p-3 text-base caret-brand-violet outline-none dark:text-white"
