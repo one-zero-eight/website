@@ -4,8 +4,6 @@ import { App } from "./app.tsx";
 import { registerServiceWorker } from "./register-sw.ts";
 import { getRouter } from "./router.ts";
 
-import "./pwa-prompt.ts"; // Import here to handle event
-
 // Init service worker
 registerServiceWorker();
 

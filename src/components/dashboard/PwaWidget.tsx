@@ -1,4 +1,4 @@
-import { usePwaPrompt } from "@/app/pwa-prompt.ts";
+import { usePwaPrompt } from "@/app/pwa-prompt.tsx";
 
 export function PwaWidget() {
   const deferredPrompt = usePwaPrompt();

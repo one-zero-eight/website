@@ -1,5 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { AuthManager } from "@/api/helpers/AuthManager.tsx";
+import { PwaPromptProvider } from "@/app/pwa-prompt.tsx";
 import { queryClient } from "@/app/query-client.ts";
 import { GoogleAnalytics } from "@/lib/tracking/GoogleAnalytics.tsx";
 import { UserInfoTracker } from "@/lib/tracking/UserInfoTracker.tsx";
@@ -13,7 +14,9 @@ import { useTernaryDarkMode } from "usehooks-ts";
 export function App({ router }: { router: Register["router"] }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppRouter router={router} />
+      <PwaPromptProvider>
+        <AppRouter router={router} />
+      </PwaPromptProvider>
 
       <YandexMetrika />
       <GoogleAnalytics />
