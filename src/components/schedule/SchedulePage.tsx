@@ -18,7 +18,10 @@ export default function SchedulePage({
   category: string | null;
 }) {
   const categoryInfo = getCategoryInfoBySlug(category ?? "");
-  const { data, isPending } = $events.useQuery("get", "/event-groups/");
+  const { data, isPending, error, refetch } = $events.useQuery(
+    "get",
+    "/event-groups/",
+  );
 
   const [filters, setFilters] = useState<{ [key: string]: string | undefined }>(
     {},
@@ -62,6 +65,24 @@ export default function SchedulePage({
       },
       {} as { [key: string]: eventsTypes.SchemaViewEventGroup[] },
     );
+
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center gap-2 p-4">
+        <h2 className="text-xl font-bold">Error Loading Schedule</h2>
+        <p className="text-inactive">
+          {(error as any).message ||
+            "An error occurred while fetching the data. Please try again later."}
+        </p>
+        <button
+          onClick={refetch}
+          className="w-fit rounded-md text-brand-violet"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
