@@ -1,12 +1,5 @@
 const universityResources = [
   {
-    title: "Gradebook – My University",
-    url: "https://my.university.innopolis.ru/profile/personal-form/index?tab=validations",
-    description: "View your marks for all previous semesters.",
-    icon: "icon-[material-symbols--assignment-outline]",
-    category: "Academic",
-  },
-  {
     title: "My University",
     url: "https://my.university.innopolis.ru/",
     description:
@@ -15,15 +8,14 @@ const universityResources = [
     category: "Academic",
   },
   {
-    title: "Templates of applications",
-    url: "https://my.university.innopolis.ru/profile/applications",
-    description:
-      "Access and download templates for various university applications.",
-    icon: "icon-[material-symbols--article-outline]",
+    title: "Gradebook – My University",
+    url: "https://my.university.innopolis.ru/profile/personal-form/index?tab=validations",
+    description: "View your marks for all previous semesters.",
+    icon: "icon-[material-symbols--assignment-outline]",
     category: "Academic",
   },
   {
-    title: "Request references",
+    title: "Request references – My University",
     url: "https://my.university.innopolis.ru/profile/edu-certs/create",
     description: "Request a reference about studying or other things.",
     icon: "icon-[material-symbols--description-outline]",
@@ -38,7 +30,15 @@ const universityResources = [
     category: "Financial",
   },
   {
-    title: "Scholarship calculator",
+    title: "Templates of applications – My University",
+    url: "https://my.university.innopolis.ru/profile/applications",
+    description:
+      "Access and download templates for various university applications.",
+    icon: "icon-[material-symbols--article-outline]",
+    category: "Academic",
+  },
+  {
+    title: "Scholarship calculator - InNoHassle",
     url: "https://innohassle.ru/scholarship",
     description:
       "Calculate your expected scholarship for the next semester in InNoHassle.",
@@ -52,6 +52,13 @@ const universityResources = [
       "Book an appointment with a psychologist by using this service.",
     icon: "icon-[material-symbols--psychology-outline]",
     category: "Support",
+  },
+  {
+    title: "Eduwiki",
+    url: "https://eduwiki.innopolis.university/index.php/Main_Page",
+    description: "View the official documents from DoE.",
+    icon: "icon-[material-symbols--library-books-outline]",
+    category: "Academic",
   },
   {
     title: "Academic calendar – Eduwiki",
@@ -70,7 +77,7 @@ const universityResources = [
     category: "Academic",
   },
   {
-    title: "Classes schedule – Eduwiki",
+    title: "Schedule – Eduwiki",
     url: "https://eduwiki.innopolis.university/index.php/All:Schedule",
     description: "View the official schedule of classes.",
     icon: "icon-[material-symbols--schedule-outline]",
@@ -81,13 +88,6 @@ const universityResources = [
     url: "https://innohassle.ru/schedule",
     description: "Conveniently view your schedule in the calendar.",
     icon: "icon-[material-symbols--today-outline]",
-    category: "Academic",
-  },
-  {
-    title: "Eduwiki",
-    url: "https://eduwiki.innopolis.university/index.php/Main_Page",
-    description: "View the official documents from DoE.",
-    icon: "icon-[material-symbols--library-books-outline]",
     category: "Academic",
   },
   {
@@ -128,7 +128,7 @@ const universityResources = [
     category: "Extracurricular",
   },
   {
-    title: "Collect attendance",
+    title: "Collect attendance - Baam",
     url: "https://baam.tatar/AttendanceCheck",
     description: "Track and manage attendance for events and activities.",
     icon: "icon-[material-symbols--checklist]",
@@ -150,15 +150,7 @@ const universityResources = [
     category: "Housing",
   },
   {
-    title: "Dormitory information",
-    url: "https://t.me/campus_info",
-    description:
-      "Get the latest updates and information about dormitory life and rules.",
-    icon: "icon-[material-symbols--info-outline]",
-    category: "Housing",
-  },
-  {
-    title: "Service request",
+    title: "Service request in dormitory",
     url: "https://hotel.innopolis.university/studentaccommodation/#block2944",
     description:
       "Submit requests for maintenance or services in your dormitory.",
@@ -166,14 +158,22 @@ const universityResources = [
     category: "Housing",
   },
   {
-    title: "Student accommodation support",
+    title: "Dormitory information channel",
+    url: "https://t.me/campus_info",
+    description:
+      "Get the latest updates and information about dormitory life and rules.",
+    icon: "icon-[material-symbols--info-outline]",
+    category: "Housing",
+  },
+  {
+    title: "Student dormitory support",
     url: "https://t.me/Inno_dorm",
     description: "Get assistance and support for dormitory-related issues.",
     icon: "icon-[material-symbols--support-agent]",
     category: "Housing",
   },
   {
-    title: "Hotel administration",
+    title: "Dormitory administration",
     url: "https://t.me/hoteluni",
     description:
       "Contact the hotel administration for official inquiries and concerns.",
@@ -189,7 +189,7 @@ const universityResources = [
     category: "Extracurricular",
   },
   {
-    title: "Handbook",
+    title: "Handbook - Campus life",
     url: "http://campuslife.innopolis.ru/handbook2023",
     description:
       "Access the official student handbook for campus rules, policies, and guidelines.",
@@ -197,7 +197,7 @@ const universityResources = [
     category: "Extracurricular",
   },
   {
-    title: "Clubs",
+    title: "Clubs - Campus life",
     url: "http://campuslife.innopolis.ru/clubs",
     description: "Explore and join student clubs and organizations on campus.",
     icon: "icon-[material-symbols--diversity-3]",
@@ -251,12 +251,12 @@ const universityResources = [
     title: "Bus schedule",
     url: "https://t.me/InnaHelpBot",
     description:
-      "Quickly find any city organization and view the bus schedule.",
+      "Quickly find any city organization and view the bus schedule via Inna bot.",
     icon: "icon-[material-symbols--directions-bus-outline]",
     category: "Transport",
   },
   {
-    title: "Bus information",
+    title: "Bus information channel",
     url: "https://t.me/innobus",
     description: "View news about the current bus location.",
     icon: "icon-[material-symbols--map-outline]",
@@ -300,7 +300,7 @@ const universityResources = [
     category: "Technical",
   },
   {
-    title: "Contact for urgent messages",
+    title: "Contact for urgent messages - IT support",
     url: "https://t.me/iuithelp",
     description: "Reach out for urgent assistance or inquiries via Telegram.",
     icon: "icon-[material-symbols--contact-support-outline]",
@@ -314,7 +314,7 @@ const universityResources = [
     category: "Communication",
   },
   {
-    title: "Calendar",
+    title: "Outlook Calendar",
     url: "https://mail.innopolis.ru/owa/#path=/calendar",
     description:
       "Access and manage your university schedule, events, and deadlines.",
