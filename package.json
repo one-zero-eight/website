@@ -1,6 +1,6 @@
 {
   "name": "innohassle-website",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.11.0",
