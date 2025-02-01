@@ -68,9 +68,9 @@ const Links = () => {
   );
 
   return (
-    <div className="px-4 py-8">
-      <div className="flex flex-col gap-4 py-4 lg:flex-row">
-        <h3 className="my-8 text-2xl font-medium sm:my-2 sm:text-3xl lg:flex-[4] xxl:flex-none">
+    <div>
+      <div className="flex flex-col gap-4 pb-4 lg:flex-row">
+        <h3 className="text-2xl font-medium sm:text-3xl lg:flex-[4] xxl:flex-none">
           All University Services
         </h3>
         <div className="grid items-center gap-4 md:grid-cols-2 md:gap-6 lg:flex lg:flex-1 xxl:grid xxl:flex-auto xxl:grid-cols-2">
@@ -126,15 +126,22 @@ const Links = () => {
                     : "",
                 )}
               >
-                <div className="w-8">
-                  <span
-                    className={`text-3xl ${resource.icon} text-brand-violet`}
-                  />
-                </div>
+                <span
+                  className={clsx(
+                    resource.icon,
+                    "hidden w-8 shrink-0 text-3xl text-brand-violet sm:block",
+                  )}
+                />
                 <div>
-                  <h3 className="text-lg font-semibold text-contrast">
-                    {resource.title}
-                  </h3>
+                  <p className="flex text-lg font-semibold text-contrast">
+                    <span
+                      className={clsx(
+                        resource.icon,
+                        "mr-2 mt-1 shrink-0 text-xl text-brand-violet sm:hidden",
+                      )}
+                    />
+                    <span>{resource.title}</span>
+                  </p>
                   <p className="text-sm text-contrast/75">
                     {resource.description}
                   </p>
