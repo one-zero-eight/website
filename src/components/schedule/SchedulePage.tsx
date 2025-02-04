@@ -10,7 +10,8 @@ import {
 } from "@/lib/events/events-view-config";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import React, { useEffect, useState } from "react";
+import Fuse from "fuse.js";
+import React, { useEffect, useMemo, useState } from "react";
 
 export default function SchedulePage({
   category,
@@ -38,8 +39,25 @@ export default function SchedulePage({
     setFilters({});
   }, [category]);
 
+  // Create a fuse instance from event_groups
+  const fuse = useMemo(() => {
+    if (!data?.event_groups) return null;
+    return new Fuse(data.event_groups, {
+      keys: ["name"],
+    });
+  }, [data?.event_groups]);
+
+  //
+  const filteredByFuzzaSearch = useMemo(() => {
+    if (!fuse || !search) return data?.event_groups || [];
+
+    const result = fuse.search(search);
+
+    return result.map((result) => result.item);
+  }, [search, fuse, data?.event_groups]);
+
   // Apply filters and group elements
-  const groups = data?.event_groups
+  const groups = filteredByFuzzaSearch
     // Filter by tags
     .filter((v) =>
       tagsFilter.every(
