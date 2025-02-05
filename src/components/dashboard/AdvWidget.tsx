@@ -10,13 +10,14 @@ export function AdvWidget() {
         <Logo108 className="mt-2" />
       </div>
       <div className="flex flex-col">
-        <div className="text-violet selected flex text-lg font-semibold">
+        <div className="text-violet flex text-lg font-semibold">
           <div className="w-8 shrink-0 sm:hidden">
             <Logo108 className="mr-2 mt-2" />
           </div>
-          Introduction to one-zero-eight
+          Today!
+          <span className="selected ml-1">Introduction to one-zero-eight</span>
         </div>
-        <div className="text-contrast/75">Feb. 6, Thursday, 18:30</div>
+        <div className="text-contrast/75">18:30 - room 108</div>
         <div className="w-fit text-contrast/75 group-hover:underline">
           View event program:{" "}
           <span className="text-brand-violet">@one_zero_eight</span>
