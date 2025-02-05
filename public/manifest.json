@@ -16,26 +16,13 @@
   ],
   "shortcuts": [
     {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "All your important information in one place.",
-      "url": "/dashboard?from=pwa",
-      "icons": [
-        {
-          "src": "/favicon.png",
-          "sizes": "512x512",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
       "name": "Calendar",
       "short_name": "Calendar",
       "description": "Personal calendar with all your events.",
       "url": "/calendar?from=pwa",
       "icons": [
         {
-          "src": "/favicon.png",
+          "src": "/shortcut-calendar.png",
           "sizes": "512x512",
           "type": "image/png"
         }
@@ -48,7 +35,7 @@
       "url": "/maps?from=pwa",
       "icons": [
         {
-          "src": "/favicon.png",
+          "src": "/shortcut-map.png",
           "sizes": "512x512",
           "type": "image/png"
         }
@@ -61,7 +48,7 @@
       "url": "/room-booking?from=pwa",
       "icons": [
         {
-          "src": "/favicon.png",
+          "src": "/shortcut-room-booking.png",
           "sizes": "512x512",
           "type": "image/png"
         }
