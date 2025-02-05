@@ -8,6 +8,7 @@ import {
   getCategoryInfoBySlug,
   viewConfig,
 } from "@/lib/events/events-view-config";
+import { preprocessText } from "@/lib/utils/searchUtils";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import Fuse from "fuse.js";
@@ -42,8 +43,16 @@ export default function SchedulePage({
   // Create a fuse instance from event_groups
   const fuse = useMemo(() => {
     if (!data?.event_groups) return null;
-    return new Fuse(data.event_groups, {
-      keys: ["name"],
+
+    // Extend index to include alternative spellings
+    const extendedEventGroups = data.event_groups.map((group) => ({
+      ...group,
+      searchKeys: preprocessText(group.name ?? ""), // Store multiple search representations
+    }));
+
+    return new Fuse(extendedEventGroups, {
+      keys: ["searchKeys"], // Search through all possible variants
+      threshold: 0.3,
     });
   }, [data?.event_groups]);
 
@@ -51,9 +60,15 @@ export default function SchedulePage({
   const filteredByFuzzaSearch = useMemo(() => {
     if (!fuse || !search) return data?.event_groups || [];
 
-    const result = fuse.search(search);
+    // Preprocess user input
+    const processedSearchTerms = preprocessText(search);
 
-    return result.map((result) => result.item);
+    // Search using all variants
+    const result = processedSearchTerms.flatMap((term) => fuse.search(term));
+
+    // Remove duplicates and return matches
+    const uniqueResults = Array.from(new Set(result.map((res) => res.item)));
+    return uniqueResults;
   }, [search, fuse, data?.event_groups]);
 
   // Apply filters and group elements
@@ -65,9 +80,7 @@ export default function SchedulePage({
       ),
     )
     // Filter by search
-    .filter((v) =>
-      v.name?.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-    )
+
     // Sort by alias
     .sort((a, b) => a.alias.localeCompare(b.alias))
     // Group by tag
