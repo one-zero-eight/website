@@ -1,6 +1,8 @@
 import Logo108 from "@/components/icons/Logo108.tsx";
 
 export function AdvWidget() {
+  return null;
+
   return (
     <a
       href="https://t.me/one_zero_eight"

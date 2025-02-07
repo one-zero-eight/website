@@ -290,24 +290,6 @@ export default function CalendarViewer({
           calendarApi.addEventSource(eventSource);
         }
       }
-
-      if (isFullPage) {
-        calendarApi.addEventSource([
-          {
-            id: "feb-6",
-            title: "Introduction to one-zero-eight. 2025 edition",
-            start: new Date("2025-02-06T18:30:00Z"),
-            end: new Date("2025-02-06T21:00:00Z"),
-            color: "#9747ff",
-            extendedProps: {
-              location: "108",
-              sourceLink: "https://t.me/one_zero_eight",
-              description:
-                "Come to look back on our journey, celebrate achievements, and uncover our history and secret plans.\nEnjoy live music, great food, and take part in the launch of our contest!\nMore details in the telegram post:",
-            },
-          },
-        ]);
-      }
     });
   }, [urls, isFullPage]);
 
