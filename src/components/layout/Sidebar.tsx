@@ -123,7 +123,7 @@ const items: (LocalLink | ExternalLink | SeparatorItem)[] = [
   {
     type: "external",
     title: "Innopoints",
-    link: "https://ipts.innopolis.university/",
+    link: "https://my.innopolis.university/event",
     icon: <span className="icon-[material-symbols--loyalty-outline-rounded]" />,
   },
   {
@@ -131,12 +131,6 @@ const items: (LocalLink | ExternalLink | SeparatorItem)[] = [
     title: "My University",
     link: "https://my.university.innopolis.ru",
     icon: <span className="icon-[material-symbols--account-circle-outline]" />,
-  },
-  {
-    type: "external",
-    title: "InnoDataHub",
-    link: "https://booking-innodatahub.innopolis.university",
-    icon: <span className="icon-[material-symbols--memory-outline-rounded]" />,
   },
 ];
 
