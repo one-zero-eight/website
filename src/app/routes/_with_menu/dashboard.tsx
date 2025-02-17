@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_with_menu/dashboard")({
         />
       </Helmet>
 
-      <Topbar title="Dashboard" />
+      <Topbar title="Dashboard" hideOnMobile />
       <DashboardPage />
     </>
   ),

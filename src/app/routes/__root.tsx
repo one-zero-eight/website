@@ -1,3 +1,4 @@
+import { BottomNavigation } from "@/components/layout/BottomNavigation.tsx";
 import OfflineNotification from "@/components/layout/Offline.tsx";
 import Sidebar from "@/components/layout/Sidebar.tsx";
 import {
@@ -41,15 +42,19 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
   // 404 page
   notFoundComponent: () => (
-    <div className="flex h-full flex-row">
-      <Sidebar>
+    <div className="flex h-full flex-col">
+      <div className="flex grow">
+        <Sidebar />
+
         <div className="flex min-h-full grow flex-col items-center justify-center overflow-y-auto @container/content">
           <h1 className="mb-4 text-4xl font-bold">404 / not found</h1>
           <Link to="/dashboard" className="selected">
             Go to dashboard
           </Link>
         </div>
-      </Sidebar>
+      </div>
+
+      <BottomNavigation />
     </div>
   ),
 });

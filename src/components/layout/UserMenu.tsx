@@ -2,7 +2,6 @@ import { navigateToSignOut } from "@/api/accounts/sign-in.ts";
 import { useMe } from "@/api/accounts/user.ts";
 import { SignInButtonIcon } from "@/components/common/SignInButton";
 import Tooltip from "@/components/common/Tooltip.tsx";
-import { SidebarContext } from "@/components/layout/Sidebar";
 import {
   autoUpdate,
   flip,
@@ -19,7 +18,7 @@ import {
 } from "@floating-ui/react";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import { useContext, useState } from "react";
+import { useState } from "react";
 
 type UserMenuProps = {
   isMobile: boolean;
@@ -28,7 +27,6 @@ type UserMenuProps = {
 function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   const { me } = useMe();
   const [isOpen, setIsOpen] = useState(false);
-  const { setOpened: setSidebarOpened } = useContext(SidebarContext);
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
@@ -55,14 +53,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   ]);
 
   if (!me) {
-    return (
-      <SignInButtonIcon
-        onClick={() => {
-          setIsOpen(false);
-          setSidebarOpened(false);
-        }}
-      />
-    );
+    return <SignInButtonIcon onClick={() => setIsOpen(false)} />;
   }
 
   return (
@@ -116,20 +107,17 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                   </div>
                   <Link
                     to="/dashboard"
-                    onClick={() => {
-                      setIsOpen(false);
-                      setSidebarOpened(false);
-                    }}
+                    onClick={() => setIsOpen(false)}
                     className="flex w-full flex-row items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-primary px-6 py-2 text-center text-contrast/75 hover:bg-secondary-hover"
                   >
                     <span className="icon-[material-symbols--account-circle] text-2xl" />
                     My dashboard
                   </Link>
                   <button
+                    type="button"
                     onClick={() => {
                       navigateToSignOut();
                       setIsOpen(false);
-                      setSidebarOpened(false);
                     }}
                     className="flex w-full cursor-pointer flex-row items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-primary px-6 py-2 text-center text-contrast/75 hover:bg-secondary-hover"
                   >

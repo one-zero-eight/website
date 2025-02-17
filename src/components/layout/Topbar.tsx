@@ -1,12 +1,22 @@
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
-import { SidebarMenuButton } from "@/components/layout/Sidebar";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
+import clsx from "clsx";
 
-export function Topbar({ title }: { title: React.ReactNode }) {
+export function Topbar({
+  title,
+  hideOnMobile = false,
+}: {
+  title: string;
+  hideOnMobile?: boolean;
+}) {
   return (
-    <nav className="flex w-full flex-row items-center justify-between border-b-[1px] border-b-secondary-hover">
-      <SidebarMenuButton className="flex h-fit py-4 pl-4 lgw-smh:hidden" />
+    <nav
+      className={clsx(
+        "w-full flex-row items-center justify-between border-b-[1px] border-b-secondary-hover",
+        hideOnMobile ? "hidden lgw-smh:flex" : "flex",
+      )}
+    >
       <div className="flex-grow px-4 py-2">
         <h1 className="mr-2 text-3xl font-medium">{title}</h1>
       </div>

@@ -1,10 +1,10 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
-import { BookingsListPage } from "@/components/room-booking/list/BookingsListPage.tsx";
+import { RoomBookingRules } from "@/components/room-booking/rules/RoomBookingRules.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
-export const Route = createFileRoute("/_with_menu/room-booking/list")({
+export const Route = createFileRoute("/_with_menu/room-booking/rules")({
   component: () => (
     <>
       <Helmet>
@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_with_menu/room-booking/list")({
         />
       </Helmet>
 
-      <Topbar title="Room booking" />
+      <Topbar title="Room booking" hideOnMobile />
       <BookingPageTabs />
-      <BookingsListPage />
+      <RoomBookingRules />
     </>
   ),
 });

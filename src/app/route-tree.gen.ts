@@ -16,6 +16,7 @@ import { Route as IndexImport } from "./routes/index";
 import { Route as WithmenuSportImport } from "./routes/_with_menu/sport";
 import { Route as WithmenuSearchImport } from "./routes/_with_menu/search";
 import { Route as WithmenuScholarshipImport } from "./routes/_with_menu/scholarship";
+import { Route as WithmenuMenuImport } from "./routes/_with_menu/menu";
 import { Route as WithmenuMapsImport } from "./routes/_with_menu/maps";
 import { Route as WithmenuExtensionImport } from "./routes/_with_menu/extension";
 import { Route as WithmenuDormsImport } from "./routes/_with_menu/dorms";
@@ -23,12 +24,12 @@ import { Route as WithmenuDashboardImport } from "./routes/_with_menu/dashboard"
 import { Route as WithmenuCalendarImport } from "./routes/_with_menu/calendar";
 import { Route as WithmenuAccountRouteImport } from "./routes/_with_menu/account/route";
 import { Route as WithmenuScheduleIndexImport } from "./routes/_with_menu/schedule/index";
-import { Route as WithmenuRoomBookingIndexImport } from "./routes/_with_menu/room-booking.index";
+import { Route as WithmenuRoomBookingIndexImport } from "./routes/_with_menu/room-booking/index";
 import { Route as WithmenuMusicRoomIndexImport } from "./routes/_with_menu/music-room.index";
 import { Route as WithmenuAccountIndexImport } from "./routes/_with_menu/account/index";
 import { Route as WithmenuScheduleCategoryImport } from "./routes/_with_menu/schedule/$category";
-import { Route as WithmenuRoomBookingRulesImport } from "./routes/_with_menu/room-booking.rules";
-import { Route as WithmenuRoomBookingListImport } from "./routes/_with_menu/room-booking.list";
+import { Route as WithmenuRoomBookingRulesImport } from "./routes/_with_menu/room-booking/rules";
+import { Route as WithmenuRoomBookingListImport } from "./routes/_with_menu/room-booking/list";
 import { Route as WithmenuMusicRoomInstructionsImport } from "./routes/_with_menu/music-room.instructions";
 import { Route as WithmenuAccountConnectTelegramImport } from "./routes/_with_menu/account/connect-telegram";
 import { Route as WithmenuScheduleEventGroupsAliasImport } from "./routes/_with_menu/schedule/event-groups.$alias";
@@ -57,6 +58,11 @@ const WithmenuSearchRoute = WithmenuSearchImport.update({
 
 const WithmenuScholarshipRoute = WithmenuScholarshipImport.update({
   path: "/scholarship",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
+
+const WithmenuMenuRoute = WithmenuMenuImport.update({
+  path: "/menu",
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
@@ -203,6 +209,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof WithmenuMapsImport;
       parentRoute: typeof WithmenuRouteImport;
     };
+    "/_with_menu/menu": {
+      id: "/_with_menu/menu";
+      path: "/menu";
+      fullPath: "/menu";
+      preLoaderRoute: typeof WithmenuMenuImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
     "/_with_menu/scholarship": {
       id: "/_with_menu/scholarship";
       path: "/scholarship";
@@ -319,6 +332,7 @@ interface WithmenuRouteRouteChildren {
   WithmenuDormsRoute: typeof WithmenuDormsRoute;
   WithmenuExtensionRoute: typeof WithmenuExtensionRoute;
   WithmenuMapsRoute: typeof WithmenuMapsRoute;
+  WithmenuMenuRoute: typeof WithmenuMenuRoute;
   WithmenuScholarshipRoute: typeof WithmenuScholarshipRoute;
   WithmenuSearchRoute: typeof WithmenuSearchRoute;
   WithmenuSportRoute: typeof WithmenuSportRoute;
@@ -339,6 +353,7 @@ const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuDormsRoute: WithmenuDormsRoute,
   WithmenuExtensionRoute: WithmenuExtensionRoute,
   WithmenuMapsRoute: WithmenuMapsRoute,
+  WithmenuMenuRoute: WithmenuMenuRoute,
   WithmenuScholarshipRoute: WithmenuScholarshipRoute,
   WithmenuSearchRoute: WithmenuSearchRoute,
   WithmenuSportRoute: WithmenuSportRoute,
@@ -365,6 +380,7 @@ export interface FileRoutesByFullPath {
   "/dorms": typeof WithmenuDormsRoute;
   "/extension": typeof WithmenuExtensionRoute;
   "/maps": typeof WithmenuMapsRoute;
+  "/menu": typeof WithmenuMenuRoute;
   "/scholarship": typeof WithmenuScholarshipRoute;
   "/search": typeof WithmenuSearchRoute;
   "/sport": typeof WithmenuSportRoute;
@@ -388,6 +404,7 @@ export interface FileRoutesByTo {
   "/dorms": typeof WithmenuDormsRoute;
   "/extension": typeof WithmenuExtensionRoute;
   "/maps": typeof WithmenuMapsRoute;
+  "/menu": typeof WithmenuMenuRoute;
   "/scholarship": typeof WithmenuScholarshipRoute;
   "/search": typeof WithmenuSearchRoute;
   "/sport": typeof WithmenuSportRoute;
@@ -413,6 +430,7 @@ export interface FileRoutesById {
   "/_with_menu/dorms": typeof WithmenuDormsRoute;
   "/_with_menu/extension": typeof WithmenuExtensionRoute;
   "/_with_menu/maps": typeof WithmenuMapsRoute;
+  "/_with_menu/menu": typeof WithmenuMenuRoute;
   "/_with_menu/scholarship": typeof WithmenuScholarshipRoute;
   "/_with_menu/search": typeof WithmenuSearchRoute;
   "/_with_menu/sport": typeof WithmenuSportRoute;
@@ -439,6 +457,7 @@ export interface FileRouteTypes {
     | "/dorms"
     | "/extension"
     | "/maps"
+    | "/menu"
     | "/scholarship"
     | "/search"
     | "/sport"
@@ -461,6 +480,7 @@ export interface FileRouteTypes {
     | "/dorms"
     | "/extension"
     | "/maps"
+    | "/menu"
     | "/scholarship"
     | "/search"
     | "/sport"
@@ -484,6 +504,7 @@ export interface FileRouteTypes {
     | "/_with_menu/dorms"
     | "/_with_menu/extension"
     | "/_with_menu/maps"
+    | "/_with_menu/menu"
     | "/_with_menu/scholarship"
     | "/_with_menu/search"
     | "/_with_menu/sport"
@@ -538,6 +559,7 @@ export const routeTree = rootRoute
         "/_with_menu/dorms",
         "/_with_menu/extension",
         "/_with_menu/maps",
+        "/_with_menu/menu",
         "/_with_menu/scholarship",
         "/_with_menu/search",
         "/_with_menu/sport",
@@ -579,6 +601,10 @@ export const routeTree = rootRoute
       "filePath": "_with_menu/maps.tsx",
       "parent": "/_with_menu"
     },
+    "/_with_menu/menu": {
+      "filePath": "_with_menu/menu.tsx",
+      "parent": "/_with_menu"
+    },
     "/_with_menu/scholarship": {
       "filePath": "_with_menu/scholarship.tsx",
       "parent": "/_with_menu"
@@ -600,11 +626,11 @@ export const routeTree = rootRoute
       "parent": "/_with_menu"
     },
     "/_with_menu/room-booking/list": {
-      "filePath": "_with_menu/room-booking.list.tsx",
+      "filePath": "_with_menu/room-booking/list.tsx",
       "parent": "/_with_menu"
     },
     "/_with_menu/room-booking/rules": {
-      "filePath": "_with_menu/room-booking.rules.tsx",
+      "filePath": "_with_menu/room-booking/rules.tsx",
       "parent": "/_with_menu"
     },
     "/_with_menu/schedule/$category": {
@@ -620,7 +646,7 @@ export const routeTree = rootRoute
       "parent": "/_with_menu"
     },
     "/_with_menu/room-booking/": {
-      "filePath": "_with_menu/room-booking.index.tsx",
+      "filePath": "_with_menu/room-booking/index.tsx",
       "parent": "/_with_menu"
     },
     "/_with_menu/schedule/": {

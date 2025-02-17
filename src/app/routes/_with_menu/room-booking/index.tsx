@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_with_menu/room-booking/")({
         />
       </Helmet>
 
-      <Topbar title="Room booking" />
+      <Topbar title="Room booking" hideOnMobile />
       <BookingPageTabs />
       <RoomBookingPage />
     </>

@@ -1,0 +1,16 @@
+import { MorePage } from "@/components/layout/MorePage.tsx";
+import { createFileRoute } from "@tanstack/react-router";
+import { Helmet } from "react-helmet-async";
+
+export const Route = createFileRoute("/_with_menu/menu")({
+  component: () => (
+    <>
+      <Helmet>
+        <title>Menu</title>
+        <meta name="description" content="Services list for navigation." />
+      </Helmet>
+
+      <MorePage />
+    </>
+  ),
+});

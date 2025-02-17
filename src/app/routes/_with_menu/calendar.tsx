@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_with_menu/calendar")({
         <meta name="description" content="View your personal calendar." />
       </Helmet>
 
-      <Topbar title="Calendar" />
+      <Topbar title="Calendar" hideOnMobile />
       <CalendarPage />
     </>
   ),

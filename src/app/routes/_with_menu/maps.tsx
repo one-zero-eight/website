@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_with_menu/maps")({
           />
         </Helmet>
 
-        <Topbar title="Maps" />
+        <Topbar title="Maps" hideOnMobile />
         <MapsPageTabs />
         <MapsPage sceneId={scene} areaId={area} q={q} />
       </>

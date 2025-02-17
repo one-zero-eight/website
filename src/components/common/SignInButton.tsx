@@ -39,13 +39,14 @@ export function SignInButtonIcon({
   return (
     <Tooltip content="Sign in">
       <button
-        className="flex h-14 w-14 flex-col items-center justify-center rounded-xl text-contrast/50 hover:bg-secondary"
+        type="button"
+        className="flex items-center justify-center rounded-xl p-2 hover:bg-secondary"
         onClick={(e) => {
           navigateToSignIn(signInRedirect);
           onClick?.(e);
         }}
       >
-        <span className="icon-[material-symbols--login-rounded] text-4xl" />
+        <span className="icon-[material-symbols--login-rounded] -ml-2 text-3xl text-brand-violet" />
       </button>
     </Tooltip>
   );
