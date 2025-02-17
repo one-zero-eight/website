@@ -337,7 +337,7 @@ export const MapViewer = memo(function MapViewer({
   return (
     <div
       ref={containerRef}
-      className="flex h-full max-h-full w-full cursor-grab overflow-hidden rounded-xl bg-gray-50/50 dark:bg-gray-50/90"
+      className="flex h-full max-h-full w-full cursor-grab overflow-hidden bg-gray-50/50 dark:bg-gray-50/90"
     >
       <style type="text/css">
         {highlightAreas?.length

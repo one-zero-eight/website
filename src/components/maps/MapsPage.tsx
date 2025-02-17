@@ -52,7 +52,7 @@ export function MapsPage({
   }
 
   return (
-    <div className="mt-1 flex grow overflow-auto">
+    <div className="flex grow overflow-auto">
       <MapView
         scene={currentScene}
         highlightAreas={
