@@ -56,6 +56,7 @@ export function MapView({
       <div className="relative h-full w-full overflow-hidden">
         <MapViewer scene={scene} highlightAreas={highlightAreas} />
         <button
+          type="button"
           className="absolute bottom-2 right-2 flex h-fit rounded-xl bg-primary/50 px-2 py-2 hover:bg-primary/75"
           onClick={() => switchFullscreen()}
         >

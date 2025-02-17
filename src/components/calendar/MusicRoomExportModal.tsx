@@ -86,6 +86,7 @@ export function MusicRoomExportModal({
                     Export music room bookings
                   </div>
                   <button
+                    type="button"
                     className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75"
                     onClick={() => onOpenChange(false)}
                   >

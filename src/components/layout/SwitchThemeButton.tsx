@@ -11,6 +11,7 @@ export default function SwitchThemeButton() {
   return (
     <Tooltip content="Switch theme">
       <button
+        type="button"
         className="flex items-center justify-center rounded-xl p-2 hover:bg-secondary"
         onClick={() =>
           setTernaryDarkMode((prev) => (prev === "dark" ? "light" : "dark"))

@@ -34,6 +34,7 @@ export default function OfflineNotification() {
         No internet connection!
       </p>
       <button
+        type="button"
         className="flex p-2 pr-3 text-white hover:text-gray-300"
         onClick={() => setIsClosed(true)}
       >

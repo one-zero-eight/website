@@ -58,6 +58,7 @@ export function DeleteBookingModal({
                     Confirm deletion
                   </div>
                   <button
+                    type="button"
                     className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 @lg/export:-mr-6 @lg/export:-mt-6"
                     onClick={() => onOpenChange(false)}
                   >
@@ -74,12 +75,14 @@ export function DeleteBookingModal({
 
                   <div className="flex flex-row gap-2">
                     <button
+                      type="button"
                       className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary px-4 py-2 text-lg font-medium hover:bg-primary-hover dark:bg-primary-hover dark:hover:bg-primary"
                       onClick={() => onOpenChange(false)}
                     >
                       Back
                     </button>
                     <button
+                      type="button"
                       className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-red-400 bg-red-200 px-4 py-2 text-lg font-medium text-red-900 hover:bg-red-300 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
                       onClick={() => onConfirm()}
                     >

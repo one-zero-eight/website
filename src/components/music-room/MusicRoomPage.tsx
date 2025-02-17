@@ -46,6 +46,7 @@ export function MusicRoomPage() {
               </div>
             </Link>
             <button
+              type="button"
               onClick={() => {
                 const encodedURL =
                   "aHR0cHM6Ly90Lm1lL2pvaW5jaGF0L0RqaHlaa0JOLUZtWlN0eFRCNDBxd1E=";

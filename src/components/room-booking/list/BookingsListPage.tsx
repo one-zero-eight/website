@@ -119,6 +119,7 @@ export function BookingCard({
 
           <Tooltip content="Delete booking">
             <button
+              type="button"
               className="flex h-8 w-8 items-center justify-center rounded-md border-[1px] border-red-400 bg-red-200 text-red-600 hover:bg-red-300 dark:border-red-600 dark:bg-red-800 dark:text-red-400 dark:hover:bg-red-700"
               onClick={() => setConfirmDialogOpen(true)}
             >
