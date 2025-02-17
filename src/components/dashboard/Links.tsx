@@ -1,7 +1,7 @@
 import { groups } from "@/lib/links/constants";
 import CustomSelect from "@/lib/links/customSelector";
+import { resourcesList } from "@/lib/links/resources-list.ts";
 import { SearchInput } from "@/lib/links/SearchInput";
-import universityResources from "@/lib/links/universityResources";
 import clsx from "clsx";
 import Fuse from "fuse.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -15,8 +15,12 @@ const Links = () => {
 
   const fuse = useMemo(
     () =>
-      new Fuse(universityResources, {
-        keys: ["title", "description"],
+      new Fuse(resourcesList, {
+        keys: [
+          { name: "resource", weight: 5 },
+          { name: "title", weight: 3 },
+          { name: "description", weight: 1 },
+        ],
         threshold: 0.3,
       }),
     [],
@@ -26,7 +30,7 @@ const Links = () => {
     if (searchQuery) {
       return fuse.search(searchQuery).map((result) => result.item);
     }
-    return universityResources.filter(
+    return resourcesList.filter(
       (item) => activeGroup === item.category || activeGroup === "All",
     );
   }, [searchQuery, activeGroup, fuse]);
@@ -140,7 +144,10 @@ const Links = () => {
                         "mr-2 mt-1 shrink-0 text-xl text-brand-violet sm:hidden",
                       )}
                     />
-                    <span>{resource.title}</span>
+                    <span>
+                      {resource.resource}
+                      {resource.title && `: ${resource.title}`}
+                    </span>
                   </p>
                   <p className="text-sm text-contrast/75">
                     {resource.description}

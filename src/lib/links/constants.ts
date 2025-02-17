@@ -1,11 +1,10 @@
 export const groups = [
   { value: "All" },
   { value: "Academic" },
-  { value: "Financial" },
-  { value: "Support" },
+  { value: "Technical" },
   { value: "Extracurricular" },
+  { value: "Support" },
   { value: "Housing" },
-  { value: "Transport" },
-  { value: "Communication" },
   { value: "Navigation" },
+  { value: "Financial" },
 ];
