@@ -1,6 +1,8 @@
+import { useMe } from "@/api/accounts/user.ts";
 import { $events, eventsTypes } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { URLType } from "@/components/calendar/CalendarViewer.tsx";
+import { AuthWall } from "@/components/common/AuthWall.tsx";
 import {
   getICSLink,
   getMyMoodleLink,
@@ -15,6 +17,12 @@ export function CalendarPage() {
   const { data: predefined } = $events.useQuery("get", "/users/me/predefined");
 
   const initialWidth = useRef(window.innerWidth);
+
+  const { me } = useMe();
+
+  if (!me) {
+    return <AuthWall />;
+  }
 
   return (
     <div className="grow overflow-hidden">
