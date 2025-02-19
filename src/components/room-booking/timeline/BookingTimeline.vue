@@ -245,7 +245,9 @@ const actualBookingsByRoomSorted = computed(() => {
 /* ========================================================================== */
 
 const now = useNow({ interval: T.Sec });
-const nowRulerX = computed(() => px(msToPx(msBetween(timelineStart, now))));
+const nowRulerCssVars = computed(() => ({
+  "--now-x": px(msToPx(msBetween(timelineStart, now))),
+}));
 
 const bookingPositions = computed(() => {
   const start = timelineStart.value;
@@ -930,12 +932,14 @@ const newBookingData = computed(() => {
 
   return {
     duration,
-    length: px(msToPx(duration)),
-    x: px(msToPx(msBetween(timelineStart, slot.start))),
-    y: px(slot.room.idx * ROW_HEIGHT),
     durationText: durationFormatted(duration),
     startTime: clockTime(slot.start),
     endTime: clockTime(slot.end),
+    cssVars: {
+      "--new-x": px(msToPx(msBetween(timelineStart, slot.start))),
+      "--new-y": px(slot.room.idx * ROW_HEIGHT),
+      "--new-length": px(msToPx(duration)),
+    },
   };
 });
 
@@ -1014,14 +1018,6 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
         '--header-height': px(HEADER_HEIGHT),
         '--row-height': px(ROW_HEIGHT),
         '--ppm': pixelsPerMinute,
-        '--now-x': nowRulerX,
-        ...(newBookingData
-          ? {
-              '--new-x': newBookingData.x,
-              '--new-y': newBookingData.y,
-              '--new-length': newBookingData.length,
-            }
-          : {}),
       }"
       :data-has-new="newBookingData ? '' : null"
       :data-new-pressed="
@@ -1076,8 +1072,8 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
           </svg>
 
           <!-- Current time elements. -->
-          <span :class="$style['now-ruler']" />
-          <div :class="$style['now-timebox-wrapper']">
+          <span :class="$style['now-ruler']" :style="nowRulerCssVars" />
+          <div :class="$style['now-timebox-wrapper']" :style="nowRulerCssVars">
             <span
               :class="$style['now-timebox']"
               @click="scrollToNow({ position: 'center' })"
@@ -1087,10 +1083,19 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
           </div>
 
           <!-- New booking elements. -->
-          <span :class="$style['new-booking-ruler-start']" />
-          <span :class="$style['new-booking-ruler-end']" />
+          <span
+            :class="$style['new-booking-ruler-start']"
+            :style="newBookingData?.cssVars"
+          />
+          <span
+            :class="$style['new-booking-ruler-end']"
+            :style="newBookingData?.cssVars"
+          />
           <div :class="$style['new-booking-timeboxes-wrapper']">
-            <div :class="$style['new-booking-timeboxes-container']">
+            <div
+              :class="$style['new-booking-timeboxes-container']"
+              :style="newBookingData?.cssVars"
+            >
               <span :class="$style['new-booking-timebox-start']">
                 {{ newBookingData?.startTime }}
               </span>
@@ -1099,7 +1104,7 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
               </span>
             </div>
           </div>
-          <div :class="$style['new-booking']">
+          <div :class="$style['new-booking']" :style="newBookingData?.cssVars">
             <div :id="NEW_BOOKING_BOX_ID">
               <span>{{ newBookingData?.durationText }}</span>
             </div>
@@ -1667,7 +1672,6 @@ $button-height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-  will-change: left, width;
 }
 
 .new-booking-timebox-start,
@@ -1693,7 +1697,6 @@ $button-height: 50px;
   height: 100%;
   width: 1px;
   background: var(--c-ruler-new);
-  will-change: left;
 }
 .new-booking-ruler-start {
   left: calc(var(--sidebar-width) + var(--new-x));
