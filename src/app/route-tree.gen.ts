@@ -21,6 +21,7 @@ import { Route as WithmenuMapsImport } from "./routes/_with_menu/maps";
 import { Route as WithmenuExtensionImport } from "./routes/_with_menu/extension";
 import { Route as WithmenuDormsImport } from "./routes/_with_menu/dorms";
 import { Route as WithmenuDashboardImport } from "./routes/_with_menu/dashboard";
+import { Route as WithmenuCourseMaterialsImport } from "./routes/_with_menu/course-materials";
 import { Route as WithmenuCalendarImport } from "./routes/_with_menu/calendar";
 import { Route as WithmenuAccountRouteImport } from "./routes/_with_menu/account/route";
 import { Route as WithmenuScheduleIndexImport } from "./routes/_with_menu/schedule/index";
@@ -83,6 +84,11 @@ const WithmenuDormsRoute = WithmenuDormsImport.update({
 
 const WithmenuDashboardRoute = WithmenuDashboardImport.update({
   path: "/dashboard",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
+
+const WithmenuCourseMaterialsRoute = WithmenuCourseMaterialsImport.update({
+  path: "/course-materials",
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
@@ -179,6 +185,13 @@ declare module "@tanstack/react-router" {
       path: "/calendar";
       fullPath: "/calendar";
       preLoaderRoute: typeof WithmenuCalendarImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
+    "/_with_menu/course-materials": {
+      id: "/_with_menu/course-materials";
+      path: "/course-materials";
+      fullPath: "/course-materials";
+      preLoaderRoute: typeof WithmenuCourseMaterialsImport;
       parentRoute: typeof WithmenuRouteImport;
     };
     "/_with_menu/dashboard": {
@@ -328,6 +341,7 @@ const WithmenuAccountRouteRouteWithChildren =
 interface WithmenuRouteRouteChildren {
   WithmenuAccountRouteRoute: typeof WithmenuAccountRouteRouteWithChildren;
   WithmenuCalendarRoute: typeof WithmenuCalendarRoute;
+  WithmenuCourseMaterialsRoute: typeof WithmenuCourseMaterialsRoute;
   WithmenuDashboardRoute: typeof WithmenuDashboardRoute;
   WithmenuDormsRoute: typeof WithmenuDormsRoute;
   WithmenuExtensionRoute: typeof WithmenuExtensionRoute;
@@ -349,6 +363,7 @@ interface WithmenuRouteRouteChildren {
 const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuAccountRouteRoute: WithmenuAccountRouteRouteWithChildren,
   WithmenuCalendarRoute: WithmenuCalendarRoute,
+  WithmenuCourseMaterialsRoute: WithmenuCourseMaterialsRoute,
   WithmenuDashboardRoute: WithmenuDashboardRoute,
   WithmenuDormsRoute: WithmenuDormsRoute,
   WithmenuExtensionRoute: WithmenuExtensionRoute,
@@ -376,6 +391,7 @@ export interface FileRoutesByFullPath {
   "": typeof WithmenuRouteRouteWithChildren;
   "/account": typeof WithmenuAccountRouteRouteWithChildren;
   "/calendar": typeof WithmenuCalendarRoute;
+  "/course-materials": typeof WithmenuCourseMaterialsRoute;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/dorms": typeof WithmenuDormsRoute;
   "/extension": typeof WithmenuExtensionRoute;
@@ -400,6 +416,7 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "": typeof WithmenuRouteRouteWithChildren;
   "/calendar": typeof WithmenuCalendarRoute;
+  "/course-materials": typeof WithmenuCourseMaterialsRoute;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/dorms": typeof WithmenuDormsRoute;
   "/extension": typeof WithmenuExtensionRoute;
@@ -426,6 +443,7 @@ export interface FileRoutesById {
   "/_with_menu": typeof WithmenuRouteRouteWithChildren;
   "/_with_menu/account": typeof WithmenuAccountRouteRouteWithChildren;
   "/_with_menu/calendar": typeof WithmenuCalendarRoute;
+  "/_with_menu/course-materials": typeof WithmenuCourseMaterialsRoute;
   "/_with_menu/dashboard": typeof WithmenuDashboardRoute;
   "/_with_menu/dorms": typeof WithmenuDormsRoute;
   "/_with_menu/extension": typeof WithmenuExtensionRoute;
@@ -453,6 +471,7 @@ export interface FileRouteTypes {
     | ""
     | "/account"
     | "/calendar"
+    | "/course-materials"
     | "/dashboard"
     | "/dorms"
     | "/extension"
@@ -476,6 +495,7 @@ export interface FileRouteTypes {
     | "/"
     | ""
     | "/calendar"
+    | "/course-materials"
     | "/dashboard"
     | "/dorms"
     | "/extension"
@@ -500,6 +520,7 @@ export interface FileRouteTypes {
     | "/_with_menu"
     | "/_with_menu/account"
     | "/_with_menu/calendar"
+    | "/_with_menu/course-materials"
     | "/_with_menu/dashboard"
     | "/_with_menu/dorms"
     | "/_with_menu/extension"
@@ -555,6 +576,7 @@ export const routeTree = rootRoute
       "children": [
         "/_with_menu/account",
         "/_with_menu/calendar",
+        "/_with_menu/course-materials",
         "/_with_menu/dashboard",
         "/_with_menu/dorms",
         "/_with_menu/extension",
@@ -583,6 +605,10 @@ export const routeTree = rootRoute
     },
     "/_with_menu/calendar": {
       "filePath": "_with_menu/calendar.tsx",
+      "parent": "/_with_menu"
+    },
+    "/_with_menu/course-materials": {
+      "filePath": "_with_menu/course-materials.tsx",
       "parent": "/_with_menu"
     },
     "/_with_menu/dashboard": {

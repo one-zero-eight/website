@@ -5,7 +5,6 @@ import { transliterate } from "transliteration";
 export function transliterates(text: string): string {
   return transliterate(text); // Converts "Привет" → "Privet"
 }
-
 // Handle Russian keyboard mismatches
 const keyboardMap: { [key: string]: string } = {
   й: "q",
