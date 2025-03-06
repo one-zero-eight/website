@@ -1,10 +1,10 @@
 import { groups } from "@/lib/links/constants";
-import CustomSelect from "@/lib/links/customSelector";
 import { resourcesList } from "@/lib/links/resources-list.ts";
 import { SearchInput } from "@/lib/links/SearchInput";
 import clsx from "clsx";
 import Fuse from "fuse.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import CustomSelect from "../common/customSelector";
 
 const Links = () => {
   const [activeGroup, setActiveGroup] = useState("All");
@@ -82,6 +82,7 @@ const Links = () => {
             options={groups}
             selectedValue={activeGroup}
             onChange={setActiveGroup}
+            className="sm:block lg:hidden xxl:block"
           />
           <SearchInput
             onKeyDown={handleKeyDown}
