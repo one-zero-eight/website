@@ -1,7 +1,9 @@
+import { $search } from "@/api/search";
 import { useState } from "react";
 import CustomSelect from "../common/customSelector";
 import pattern from "./pattern.svg";
-const data = [
+
+const datas = [
   {
     id: 1,
     name: "DSAI",
@@ -64,23 +66,36 @@ export function CourseMaterialsPage() {
     { value: "B23" },
     { value: "B24" },
   ];
+  const {
+    data: courses,
+    isPending,
+    error,
+  } = $search.useQuery("get", "/moodle/courses", {});
+  console.log(courses, "23");
+  if (isPending) {
+    return <div>Loading...</div>;
+  }
 
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center gap-4 px-4 py-4">
-      <div className="flex w-[90%] flex-col gap-[30px]">
-        <div className="flex">
-          <div className="flex flex-1 gap-[10px]">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-4 px-4 py-4">
+      <div className="flex w-full max-w-[1200px] flex-col gap-[30px]">
+        <div className="flex flex-col gap-4 md:flex-row">
+          <div className="flex w-full flex-col gap-[10px] md:flex-1 md:flex-row">
             <input
               autoComplete="off"
               spellCheck={false}
-              className="inset-0 h-10 w-[50%] resize-none rounded-lg border-2 border-brand-violet bg-pagebg p-3 text-base caret-brand-violet outline-none dark:text-white"
+              className="h-10 w-full resize-none rounded-lg border-2 border-brand-violet bg-pagebg p-3 text-base caret-brand-violet outline-none dark:text-white md:w-[50%]"
               placeholder="Search services..."
             />
-            <button className="flex h-10 w-[93px] items-center justify-center gap-2 rounded-lg bg-brand-violet px-2 py-1 text-base font-normal leading-6 text-white shadow-[0px-0px-4px-#00000040] hover:bg-[#6600CC]">
+            <button className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-violet px-2 py-1 text-base font-normal leading-6 text-white shadow-[0px-0px-4px-#00000040] hover:bg-[#6600CC] md:w-[93px]">
+              <span className="icon-[material-symbols--search-rounded] h-4 w-4" />
               Search
             </button>
           </div>
-          <div className="grid flex-1 grid-cols-2 gap-[10px]">
+          <div className="grid w-full grid-cols-1 gap-[10px] sm:grid-cols-2 md:flex-1">
             <CustomSelect
               selectedValue={selectedCourse}
               onChange={setSelectedCourse}
@@ -95,8 +110,8 @@ export function CourseMaterialsPage() {
             />
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-[20px]">
-          {data.map((item) => (
+        <div className="grid grid-cols-1 gap-[20px] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {datas.map((item) => (
             <div
               key={`card-${item.id}`}
               className="h-[250px] rounded-[20px] bg-primary"
@@ -110,11 +125,9 @@ export function CourseMaterialsPage() {
               </div>
               <div className="flex flex-col gap-2 p-5">
                 <h3 className="text-lg font-semibold text-contrast">
-                  {" "}
                   {item.name}
                 </h3>
                 <p className="text-sm font-semibold text-contrast">
-                  {" "}
                   Year : {item.year}
                 </p>
               </div>
