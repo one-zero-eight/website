@@ -90,7 +90,7 @@ export function SourcesDialog({
                         <LinkIconButton
                           href="https://t.me/IUSportBot"
                           icon={
-                            <span className="icon-[mdi--robot-excited-outline] text-[#78DBE2]" />
+                            <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
                           }
                           tooltip="Open Telegram bot"
                         />
@@ -105,7 +105,7 @@ export function SourcesDialog({
                           <LinkIconButton
                             href="https://t.me/InnoMusicRoomBot"
                             icon={
-                              <span className="icon-[mdi--robot-excited-outline] text-[#78DBE2]" />
+                              <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
                             }
                             tooltip="Open Telegram bot"
                           />
@@ -126,7 +126,7 @@ export function SourcesDialog({
                         <LinkIconButton
                           href="/extension"
                           icon={
-                            <span className="icon-[material-symbols--extension-outline] text-[#78DBE2]" />
+                            <span className="icon-[material-symbols--extension-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
                           }
                           tooltip="Install the browser extension to sync Moodle calendar"
                         />
