@@ -39,6 +39,9 @@ export function CalendarPage() {
                 predefined.event_groups,
                 eventGroups,
                 eventsUser.id,
+                eventsUser.music_room_hidden,
+                eventsUser.sports_hidden,
+                eventsUser.moodle_hidden,
               )
         }
         initialView={
@@ -63,6 +66,9 @@ function getCalendarsToShow(
   predefined: number[],
   eventGroups: eventsTypes.SchemaListEventGroupsResponseOutput,
   userId: number | undefined,
+  music_room_hidden: boolean,
+  sports_hidden: boolean,
+  moodle_hidden: boolean,
 ): URLType[] {
   // Remove hidden calendars
   const toShow: URLType[] = favorites.concat(predefined).flatMap((v) => {
@@ -73,25 +79,33 @@ function getCalendarsToShow(
   });
 
   // Add personal calendars
-  toShow.push({
-    url: getMyMusicRoomLink(),
-    color: "seagreen",
-    sourceLink: "https://t.me/InnoMusicRoomBot",
-    updatedAt: new Date().toISOString(),
-  });
-  toShow.push({
-    url: getMySportLink(),
-    color: "seagreen",
-    sourceLink: "https://sport.innopolis.university",
-    updatedAt: new Date().toISOString(),
-  });
-  toShow.push({
-    url: getMyMoodleLink(),
-    color: "seagreen",
-    sourceLink:
-      "https://moodle.innopolis.university/calendar/view.php?view=month",
-    updatedAt: new Date().toISOString(),
-  });
+  if (!music_room_hidden) {
+    toShow.push({
+      url: getMyMusicRoomLink(),
+      color: "seagreen",
+      sourceLink: "https://t.me/InnoMusicRoomBot",
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  if (!sports_hidden) {
+    toShow.push({
+      url: getMySportLink(),
+      color: "seagreen",
+      sourceLink: "https://sport.innopolis.university",
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  if (!moodle_hidden) {
+    toShow.push({
+      url: getMyMoodleLink(),
+      color: "seagreen",
+      sourceLink:
+        "https://moodle.innopolis.university/calendar/view.php?view=month",
+      updatedAt: new Date().toISOString(),
+    });
+  }
 
   // Return unique items
   return toShow.filter((value, index, array) => array.indexOf(value) === index);
