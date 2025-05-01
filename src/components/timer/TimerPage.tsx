@@ -44,7 +44,6 @@ const TimerPage = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [timerShape, setTimerShape] = useState<TimerShape>("circle");
   const [timerSize, setTimerSize] = useState<number>(100);
-  const [settingsPanelWidth, setSettingsPanelWidth] = useState<number>(320);
   const [timerColor, setTimerColor] = useState<string>("#9747ff");
 
   const settingsPanelRef = useRef<HTMLDivElement>(null);
@@ -90,19 +89,25 @@ const TimerPage = () => {
     localStorage.setItem("timerPanelSettings", JSON.stringify(settings));
   }, [isSettingsOpen, timerShape, timerColor, timerSize]);
 
+  /*
   useEffect(() => {
     const updatePanelWidth = () => {
-      if (settingsPanelRef.current) {
+      if (settingsPanelRef.current && isSettingsOpen) {
         const width = settingsPanelRef.current.offsetWidth;
-        setSettingsPanelWidth(width);
       }
     };
-    updatePanelWidth();
+    // Обновляем при открытии
+    if (isSettingsOpen) {
+      // немного отложим, чтобы DOM успел "открыть" панель
+      setTimeout(updatePanelWidth, 50);
+    }
+
     window.addEventListener("resize", updatePanelWidth);
     return () => {
       window.removeEventListener("resize", updatePanelWidth);
     };
-  }, []);
+  }, [isSettingsOpen]);
+  */
 
   useEffect(() => {
     const savedState = localStorage.getItem("timerState");
@@ -186,7 +191,7 @@ const TimerPage = () => {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, isPaused]);
+  }, [isRunning, isPaused, handleTimerComplete, saveState]);
 
   useEffect(() => {
     document.documentElement.style.setProperty("--timer-color", timerColor);
@@ -287,7 +292,7 @@ const TimerPage = () => {
     showToast("The timer stopped");
   };
 
-  const handleTimerComplete = () => {
+  const handleTimerComplete = useCallback(() => {
     setIsRunning(false);
     setIsPaused(false);
     setTime("00:00:00");
@@ -296,23 +301,26 @@ const TimerPage = () => {
     }
     localStorage.removeItem("timerState");
     showToast("Time is up!");
-  };
+  }, []);
 
-  const saveState = (seconds: number) => {
-    localStorage.setItem(
-      "timerState",
-      JSON.stringify({
-        title,
-        secondsLeft: seconds,
-        isRunning,
-        isPaused,
-        lastUpdate: Date.now(),
-        timerShape,
-        timerColor,
-        timerSize,
-      }),
-    );
-  };
+  const saveState = useCallback(
+    (seconds: number) => {
+      localStorage.setItem(
+        "timerState",
+        JSON.stringify({
+          title,
+          secondsLeft: seconds,
+          isRunning,
+          isPaused,
+          lastUpdate: Date.now(),
+          timerShape,
+          timerColor,
+          timerSize,
+        }),
+      );
+    },
+    [title, isRunning, isPaused, timerShape, timerColor, timerSize],
+  );
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTimerColor(e.target.value);
@@ -404,21 +412,20 @@ const TimerPage = () => {
           </div>
         </div>
       </div>
-      <button
-        className={`settings-toggle ${isSettingsOpen ? "open" : ""}`}
-        onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-        aria-label="Toggle settings"
-        style={{
-          right: isSettingsOpen ? `${settingsPanelWidth}px` : "0",
-        }}
-      >
-        <Settings size={20} />
-      </button>
       <div
         ref={settingsPanelRef}
         className={`settings-panel ${isSettingsOpen ? "open" : ""}`}
       >
-        <h3 className="settings-title">Timer Settings</h3>
+        <button
+          className="settings-toggle"
+          onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+          aria-label="Toggle settings"
+        >
+          <Settings size={20} />
+        </button>
+
+        <h3 className="settings-title">Settings</h3>
+
         <div className="settings-section">
           <h4>Shape</h4>
           <div className="shape-buttons">
@@ -442,9 +449,9 @@ const TimerPage = () => {
             </button>
           </div>
         </div>
+
         <div className="settings-section">
           <h4>Size</h4>
-
           <input
             type="range"
             min="50"
@@ -455,6 +462,7 @@ const TimerPage = () => {
           />
           <div className="size-value">{timerSize}%</div>
         </div>
+
         <div className="settings-section">
           <h4>Color</h4>
           <input
@@ -468,6 +476,7 @@ const TimerPage = () => {
           </div>
         </div>
       </div>
+
       {showStopDialog && (
         <div className="dialog-overlay">
           <div className="dialog-content">
