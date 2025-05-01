@@ -274,44 +274,57 @@ input:checked + .slider:before {
   box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
 }
 /* Settings Panel */
+
 .settings-toggle {
-  position: fixed;
-  right: 0;
+  position: absolute;
+  left: -40px;
   top: 50%;
   transform: translateY(-50%);
+  width: 40px;
   background: white;
-  border: none;
+  border: 1px solid #9747ff;
+  border-right: none;
   padding: 1rem 0.5rem;
   border-radius: 0.5rem 0 0 0.5rem;
   cursor: pointer;
   z-index: 40;
   color: #1a1a1a;
-
-  border: 1px solid #9747ff;
-  border-right: none;
-  transition: right 0.3s ease;
+  transition: background 0.3s ease;
 }
+.settings-toggle:hover {
+  background: #9ca3af;
+}
+
 .settings-toggle:hover {
   background: #9ca3af;
   color: #1a1a1a;
 }
 .settings-panel {
+  box-sizing: border-box;
   position: fixed;
-  right: -100%;
   top: 0;
-  min-width: fit-content;
+  right: 0;
   width: 320px;
   height: 100vh;
   background: white;
-  padding: 2rem;
-  transition: right 0.3s ease;
+  padding: 2rem 2rem 2rem 2rem;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
   z-index: 30;
   border-left: 1px solid #9747ff;
   border-top: 1px solid #9747ff;
   color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
 }
 .settings-panel.open {
+  transform: translateX(0%);
+}
+
+.settings-panel.open {
   right: 0;
+  position: fixed;
+  display: block;
 }
 .settings-panel h3 {
   font-size: 1.5rem;
@@ -478,6 +491,10 @@ input:checked + .slider:before {
   }
 }
 
+:root {
+  --settings-panel-width: 280px;
+}
+
 @media (max-width: 640px) {
   .timer-container {
     padding: 1rem;
@@ -495,11 +512,5 @@ input:checked + .slider:before {
 
   .timer-button {
     padding: 0.75rem 1.5rem;
-  }
-  .settings-panel {
-    width: 280px;
-  }
-  .settings-toggle.open {
-    right: 280px;
   }
 }
