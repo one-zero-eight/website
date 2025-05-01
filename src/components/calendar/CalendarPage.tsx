@@ -64,7 +64,7 @@ function getCalendarsToShow(
   favorites: number[],
   hidden: number[],
   predefined: number[],
-  eventGroups: eventsTypes.SchemaListEventGroupsResponseOutput,
+  eventGroups: eventsTypes.SchemaListEventGroupsResponse,
   userId: number | undefined,
   music_room_hidden: boolean,
   sports_hidden: boolean,

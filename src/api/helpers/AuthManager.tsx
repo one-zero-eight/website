@@ -4,6 +4,10 @@ import {
   invalidateMyAccessToken,
   useMyAccessToken,
 } from "@/api/helpers/access-token.ts";
+import {
+  invalidateMySportAccessToken,
+  useMySportAccessToken,
+} from "@/api/helpers/sport-access-token.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { PropsWithChildren, useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
@@ -23,11 +27,20 @@ export function AuthManager({ children }: PropsWithChildren) {
     null,
   );
 
+  const [sportToken, setSportToken] = useMySportAccessToken();
+  const { refetch: refetchMySportToken } = $accounts.useQuery(
+    "get",
+    "/tokens/generate-my-sport-token",
+    {},
+    { enabled: false },
+  );
+
   useEffect(() => {
     if (me || !isPending) {
       setStoredMe(me ?? null);
       if (!me) {
         invalidateMyAccessToken();
+        invalidateMySportAccessToken();
         if (shouldAutoSignIn()) {
           navigateToSignIn(window.location.href, "none");
         }
@@ -46,6 +59,18 @@ export function AuthManager({ children }: PropsWithChildren) {
       });
     }
   }, [me, token, setToken, refetchMyToken, queryClient]);
+
+  useEffect(() => {
+    // If the user doesn't have personal access token for services, we should fetch it
+    if (!sportToken && me) {
+      refetchMySportToken().then((result) => {
+        if (result.isSuccess) {
+          setSportToken(result.data.access_token);
+          queryClient.clear();
+        }
+      });
+    }
+  }, [me, sportToken, setSportToken, refetchMySportToken, queryClient]);
 
   return <>{children}</>;
 }
