@@ -268,13 +268,13 @@ export interface components {
       /**
        * Time Start
        * Format: date-time
-       * @example 2024-10-27T20:33:00
+       * @example 2025-02-19T16:08:00
        */
       time_start: string;
       /**
        * Time End
        * Format: date-time
-       * @example 2024-10-27T21:33:00
+       * @example 2025-02-19T17:08:00
        */
       time_end: string;
     };
@@ -555,8 +555,9 @@ export interface operations {
   bookings_form_schedule: {
     parameters: {
       query?: {
-        /** @example 2024-10-21 */
+        /** @example 2025-02-17 */
         start_of_week?: string | null;
+        from_user_id?: number | null;
       };
       header?: never;
       path?: never;
@@ -702,7 +703,7 @@ export interface operations {
       query?: {
         /**
          * @description Date for which to get remaining hours (iso format). Default: server-side today
-         * @example 2024-10-27
+         * @example 2025-02-19
          */
         date?: string | null;
       };
@@ -737,7 +738,7 @@ export interface operations {
       query?: {
         /**
          * @description Date for which to get remaining hours (iso format). Default: server-side today
-         * @example 2024-10-27
+         * @example 2025-02-19
          */
         date?: string | null;
       };
@@ -801,6 +802,7 @@ export interface operations {
   };
 }
 export enum UserStatus {
+  banned = "banned",
   free = "free",
   middle = "middle",
   senior = "senior",

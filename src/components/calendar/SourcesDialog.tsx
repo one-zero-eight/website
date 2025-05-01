@@ -14,6 +14,7 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import { Link } from "@tanstack/react-router";
+import { PathsUsersMeTargetHidePostParametersPathTarget as Type } from "@/api/events/types.ts";
 
 export function SourcesDialog({
   open,
@@ -86,11 +87,12 @@ export function SourcesDialog({
                       name="Sport"
                       description="Your sport schedule"
                       pageUrl="/sport"
+                      targetType={Type.sports}
                       buttons={
                         <LinkIconButton
                           href="https://t.me/IUSportBot"
                           icon={
-                            <span className="icon-[mdi--robot-excited-outline] text-[#78DBE2]" />
+                            <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
                           }
                           tooltip="Open Telegram bot"
                         />
@@ -101,11 +103,12 @@ export function SourcesDialog({
                         name="Music room"
                         description="Your room bookings"
                         pageUrl="/music-room"
+                        targetType={Type.music_room}
                         buttons={
                           <LinkIconButton
                             href="https://t.me/InnoMusicRoomBot"
                             icon={
-                              <span className="icon-[mdi--robot-excited-outline] text-[#78DBE2]" />
+                              <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
                             }
                             tooltip="Open Telegram bot"
                           />
@@ -122,11 +125,12 @@ export function SourcesDialog({
                         </span>
                       }
                       description="Your Moodle deadlines"
+                      targetType={Type.moodle}
                       buttons={
                         <LinkIconButton
                           href="/extension"
                           icon={
-                            <span className="icon-[material-symbols--extension-outline] text-[#78DBE2]" />
+                            <span className="icon-[material-symbols--extension-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
                           }
                           tooltip="Install the browser extension to sync Moodle calendar"
                         />
