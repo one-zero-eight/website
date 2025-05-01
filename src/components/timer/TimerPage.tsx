@@ -418,7 +418,7 @@ const TimerPage = () => {
         ref={settingsPanelRef}
         className={`settings-panel ${isSettingsOpen ? "open" : ""}`}
       >
-        <h3>Timer Settings</h3>
+        <h3 className="settings-title">Timer Settings</h3>
         <div className="settings-section">
           <h4>Shape</h4>
           <div className="shape-buttons">
