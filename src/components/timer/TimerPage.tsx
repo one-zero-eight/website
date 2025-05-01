@@ -110,6 +110,13 @@ const TimerPage = () => {
   */
 
   useEffect(() => {
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [handleVisibilityChange]);
+
+  useEffect(() => {
     const savedState = localStorage.getItem("timerState");
     if (savedState) {
       const {
@@ -143,7 +150,7 @@ const TimerPage = () => {
     };
   }, []);
 
-  const handleVisibilityChange = () => {
+  const handleVisibilityChange = useCallback(() => {
     if (document.hidden) {
       lastUpdateRef.current = Date.now();
     } else if (isRunning && !isPaused) {
@@ -156,7 +163,7 @@ const TimerPage = () => {
         return newValue;
       });
     }
-  };
+  }, [isRunning, isPaused]);
 
   const showToast = (message: string) => {
     const id = toastIdCounter.current++;
