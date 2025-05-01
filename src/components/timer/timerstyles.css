@@ -86,8 +86,8 @@ input:checked + .slider:before {
 
 /* Timer container */
 .timer-container {
-  min-height: 100vh;
   display: flex;
+  flex-grow: 1;
   flex-direction: column;
   align-items: center;
   padding: 2rem;
@@ -302,10 +302,11 @@ input:checked + .slider:before {
 .settings-panel {
   box-sizing: border-box;
   position: fixed;
+  display: none;
   top: 0;
   right: 0;
   width: 320px;
-  height: 100vh;
+  height: 100%;
   background: white;
   padding: 2rem 2rem 2rem 2rem;
   transform: translateX(100%);
