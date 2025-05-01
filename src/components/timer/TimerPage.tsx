@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Settings } from "lucide-react";
 import "./timerstyles.css";
 
@@ -78,6 +78,17 @@ const TimerPage = () => {
     }
   }, []);
 
+  const handleTimerComplete = useCallback(() => {
+    setIsRunning(false);
+    setIsPaused(false);
+    setTime("00:00:00");
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    localStorage.removeItem("timerState");
+    showToast("Time is up!");
+  }, []);
+
   // Save panel settings to localStorage whenever they change
   useEffect(() => {
     const settings: TimerSettings = {
@@ -108,13 +119,6 @@ const TimerPage = () => {
     };
   }, [isSettingsOpen]);
   */
-
-  useEffect(() => {
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [handleVisibilityChange]);
 
   useEffect(() => {
     const savedState = localStorage.getItem("timerState");
@@ -165,6 +169,13 @@ const TimerPage = () => {
     }
   }, [isRunning, isPaused]);
 
+  useEffect(() => {
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [handleVisibilityChange]);
+
   const showToast = (message: string) => {
     const id = toastIdCounter.current++;
     setToasts((prev) => [...prev, { id, message }]);
@@ -176,6 +187,25 @@ const TimerPage = () => {
   const removeToast = (id: number) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
+
+  const saveState = useCallback(
+    (seconds: number) => {
+      localStorage.setItem(
+        "timerState",
+        JSON.stringify({
+          title,
+          secondsLeft: seconds,
+          isRunning,
+          isPaused,
+          lastUpdate: Date.now(),
+          timerShape,
+          timerColor,
+          timerSize,
+        }),
+      );
+    },
+    [title, isRunning, isPaused, timerShape, timerColor, timerSize],
+  );
 
   useEffect(() => {
     if (isRunning && !isPaused) {
@@ -298,36 +328,6 @@ const TimerPage = () => {
     localStorage.removeItem("timerState");
     showToast("The timer stopped");
   };
-
-  const handleTimerComplete = useCallback(() => {
-    setIsRunning(false);
-    setIsPaused(false);
-    setTime("00:00:00");
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    localStorage.removeItem("timerState");
-    showToast("Time is up!");
-  }, []);
-
-  const saveState = useCallback(
-    (seconds: number) => {
-      localStorage.setItem(
-        "timerState",
-        JSON.stringify({
-          title,
-          secondsLeft: seconds,
-          isRunning,
-          isPaused,
-          lastUpdate: Date.now(),
-          timerShape,
-          timerColor,
-          timerSize,
-        }),
-      );
-    },
-    [title, isRunning, isPaused, timerShape, timerColor, timerSize],
-  );
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTimerColor(e.target.value);
