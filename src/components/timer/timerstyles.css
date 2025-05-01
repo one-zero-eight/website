@@ -102,18 +102,21 @@ input:checked + .slider:before {
   font-weight: 600;
   padding: 0.5rem 1rem;
   margin-bottom: 3rem;
-  border: 1px solid #e2e8f0;
+
   border-radius: 0.5rem;
   outline: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  border: 1px solid #1a1a1a;
+
+  background: #e2e8f0;
+  color: #2a2a2a;
 }
+
 .timer-title:disabled {
   background-color: rgba(241, 245, 249, 0.1);
   cursor: not-allowed;
 }
 .timer-title::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: #464646;
 }
 .timer-display {
   border-color: var(--timer-color);
@@ -128,7 +131,7 @@ input:checked + .slider:before {
   text-align: center;
 
   font-family: "Digital", monospace;
-  background-color: #000;
+  background-color: white;
   color: var(--timer-color);
   border: 3px solid var(--timer-color);
   border-radius: 50%;
@@ -146,6 +149,41 @@ input:checked + .slider:before {
   animation: timer-glow 1.5s infinite alternate ease-in-out;
 }
 
+/*Dark styles */
+
+.dark .settings-title {
+  color: white;
+}
+
+.dark .timer-title {
+  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+.dark .timer-title::placeholder {
+  color: #e2e8f0;
+}
+
+.dark .timer-display {
+  background-color: black;
+}
+.dark .settings-panel {
+  background-color: #1a1a1a;
+  color: white;
+}
+.dark .settings-toggle {
+  background-color: #1a1a1a;
+  color: white;
+}
+.dark .toast {
+  background-color: #1a1a1a;
+  color: white;
+}
+.dark .shape-button {
+  background-color: #1a1a1a;
+  color: white;
+}
 /* Анимация мягкого свечения */
 @keyframes timer-glow {
   0% {
@@ -241,19 +279,21 @@ input:checked + .slider:before {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  background: #1a1a1a;
+  background: white;
   border: none;
   padding: 1rem 0.5rem;
   border-radius: 0.5rem 0 0 0.5rem;
   cursor: pointer;
   z-index: 40;
-  color: #fff;
+  color: #1a1a1a;
+
   border: 1px solid #9747ff;
   border-right: none;
   transition: right 0.3s ease;
 }
 .settings-toggle:hover {
-  background: #2a2a2a;
+  background: #9ca3af;
+  color: #1a1a1a;
 }
 .settings-panel {
   position: fixed;
@@ -262,12 +302,13 @@ input:checked + .slider:before {
   min-width: fit-content;
   width: 320px;
   height: 100vh;
-  background: #1a1a1a;
+  background: white;
   padding: 2rem;
   transition: right 0.3s ease;
   z-index: 30;
   border-left: 1px solid #9747ff;
-  color: white;
+  border-top: 1px solid #9747ff;
+  color: #1a1a1a;
 }
 .settings-panel.open {
   right: 0;
@@ -294,8 +335,8 @@ input:checked + .slider:before {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   border: 1px solid #9747ff;
-  background: transparent;
-  color: white;
+  background: white;
+  color: #1a1a1a;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -406,8 +447,8 @@ input:checked + .slider:before {
   z-index: 50;
 }
 .toast {
-  background-color: rgba(0, 0, 0, 0.9);
-  color: white;
+  background-color: white;
+  color: #1a1a1a;
   padding: 1rem 1.5rem;
   border-radius: 2rem;
   box-shadow:
