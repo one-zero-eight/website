@@ -38,6 +38,7 @@ export function AuthManager({ children }: PropsWithChildren) {
     {},
     { enabled: false },
   );
+
   const [sportTokenRefetchCount, setSportTokenRefetchCount] = useState(0);
   const shouldRefetchSportToken =
     !sportToken && me && sportTokenRefetchCount < 2;
@@ -69,8 +70,7 @@ export function AuthManager({ children }: PropsWithChildren) {
 
   useEffect(() => {
     // If the user doesn't have personal access token for services, we should fetch it
-    if (shouldRefetchSportToken) {
-      setSportTokenRefetchCount((v) => v + 1);
+    if (!sportToken && me) {
       refetchMySportToken().then((result) => {
         if (result.isSuccess) {
           setSportToken(result.data.access_token);
@@ -78,24 +78,7 @@ export function AuthManager({ children }: PropsWithChildren) {
         }
       });
     }
-  }, [
-    shouldRefetchSportToken,
-    setSportToken,
-    refetchMySportToken,
-    queryClient,
-  ]);
-
-  useEffect(() => {
-    // Log out if the user has outdated Innopolis SSO info
-    if (
-      me?.innopolis_sso?.issued_at &&
-      new Date(me.innopolis_sso.issued_at) < new Date("2025-06-01T00:00:00Z") &&
-      localStorage.getItem("loggedOutJune") !== "true"
-    ) {
-      localStorage.setItem("loggedOutJune", "true"); // Prevent multiple logouts
-      navigateToSignOut();
-    }
-  }, [me]);
+  }, [me, sportToken, setSportToken, refetchMySportToken, queryClient]);
 
   return <>{children}</>;
 }
