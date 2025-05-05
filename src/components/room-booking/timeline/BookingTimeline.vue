@@ -1385,13 +1385,7 @@ $button-height: 50px;
   position: relative;
   overflow: auto;
   overscroll-behavior: none;
-  scrollbar-width: none;
   max-height: 100%;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
 }
 
 .wrapper {
