@@ -14,7 +14,7 @@ export default function Sidebar() {
   return (
     <aside
       className={clsx(
-        "sticky top-0 hidden h-full shrink-0 overflow-y-auto bg-floating py-4 lgw-smh:flex",
+        "sticky top-0 hidden h-full shrink-0 overflow-y-auto overflow-x-hidden bg-floating py-4 lgw-smh:flex",
         !isMinimized ? "px-4" : "px-1",
       )}
     >
@@ -129,7 +129,7 @@ function SidebarLink({
       className={clsx(
         "flex w-full select-none rounded-xl py-1 text-inactive hover:bg-gray-500/10",
         "[&.is-active]:text-brand-violet",
-        !isMinimized ? "px-2 text-4xl" : "px-1 text-3xl",
+        !isMinimized ? "px-2 text-4xl" : "justify-center px-1 text-3xl",
       )}
       activeProps={{ className: "is-active" }}
       {...props}
