@@ -3,7 +3,7 @@ import { PropsWithChildren, ReactElement } from "react";
 
 export function BottomNavigation() {
   return (
-    <nav className="flex h-12 w-full shrink-0 overflow-hidden bg-floating lgw-smh:hidden">
+    <nav className="flex h-12 w-full shrink-0 overflow-hidden bg-floating lg:hidden">
       <BottomNavigationLink
         to="/dashboard"
         title="Dashboard"

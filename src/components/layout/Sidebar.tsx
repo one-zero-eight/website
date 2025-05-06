@@ -14,7 +14,7 @@ export default function Sidebar() {
   return (
     <aside
       className={clsx(
-        "sticky top-0 hidden h-full shrink-0 overflow-y-auto overflow-x-hidden bg-floating py-4 lgw-smh:flex",
+        "sticky top-0 hidden h-full shrink-0 overflow-y-auto overflow-x-hidden bg-floating py-4 lg:flex",
         !isMinimized ? "px-4" : "px-1",
       )}
     >
