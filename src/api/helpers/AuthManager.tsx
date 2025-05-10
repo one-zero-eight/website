@@ -9,7 +9,7 @@ import {
   useMySportAccessToken,
 } from "@/api/helpers/sport-access-token.ts";
 import { useQueryClient } from "@tanstack/react-query";
-import { PropsWithChildren, useEffect } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 export function AuthManager({ children }: PropsWithChildren) {
@@ -34,6 +34,9 @@ export function AuthManager({ children }: PropsWithChildren) {
     {},
     { enabled: false },
   );
+  const [sportTokenRefetchCount, setSportTokenRefetchCount] = useState(0);
+  const shouldRefetchSportToken =
+    !sportToken && me && sportTokenRefetchCount < 2;
 
   useEffect(() => {
     if (me || !isPending) {
@@ -62,7 +65,8 @@ export function AuthManager({ children }: PropsWithChildren) {
 
   useEffect(() => {
     // If the user doesn't have personal access token for services, we should fetch it
-    if (!sportToken && me) {
+    if (shouldRefetchSportToken) {
+      setSportTokenRefetchCount((v) => v + 1);
       refetchMySportToken().then((result) => {
         if (result.isSuccess) {
           setSportToken(result.data.access_token);
@@ -70,7 +74,12 @@ export function AuthManager({ children }: PropsWithChildren) {
         }
       });
     }
-  }, [me, sportToken, setSportToken, refetchMySportToken, queryClient]);
+  }, [
+    shouldRefetchSportToken,
+    setSportToken,
+    refetchMySportToken,
+    queryClient,
+  ]);
 
   return <>{children}</>;
 }
