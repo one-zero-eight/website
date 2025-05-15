@@ -30,9 +30,20 @@ const Links = () => {
     if (searchQuery) {
       return fuse.search(searchQuery).map((result) => result.item);
     }
-    return resourcesList.filter(
-      (item) => activeGroup === item.category || activeGroup === "All",
-    );
+    return resourcesList
+      .filter((item) => activeGroup === item.category || activeGroup === "All")
+      .sort((a, b) => {
+        const numA = Number(localStorage.getItem(a.url));
+        const numB = Number(localStorage.getItem(b.url));
+        if (!numA || !numB || numA === numB) {
+          // TODO: use YandexMetrika stats
+
+          return 0;
+        }
+        if (numA < numB) return 1;
+        if (numA > numB) return -1;
+        return 0;
+      });
   }, [searchQuery, activeGroup, fuse]);
 
   useEffect(() => {
@@ -119,6 +130,12 @@ const Links = () => {
             {filteredResources.map((resource, index) => (
               <a
                 href={resource.url}
+                onClick={(e) => {
+                  e.preventDefault();
+                  const count =
+                    Math.max(Number(localStorage.getItem(resource.url)), 0) + 1;
+                  localStorage.setItem(resource.url, count.toString());
+                }}
                 target="_blank"
                 rel="nofollow noreferrer"
                 key={index}
