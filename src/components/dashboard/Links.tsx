@@ -28,17 +28,20 @@ const Links = () => {
 
   const filteredResources = useMemo(() => {
     if (searchQuery) {
-      return fuse.search(searchQuery).map((result) => result.item);
+      return fuse
+        .search(searchQuery)
+        .map((result) => result.item)
+        .sort((a, b) => {
+          const numA = Number(localStorage.getItem(a.url)) || a.frequency;
+          const numB = Number(localStorage.getItem(b.url)) || b.frequency;
+          if (numA < numB) return 1;
+          if (numA > numB) return -1;
+          return 0;
+        });
     }
-    return resourcesList
-      .filter((item) => activeGroup === item.category || activeGroup === "All")
-      .sort((a, b) => {
-        const numA = Number(localStorage.getItem(a.url)) || a.frequency;
-        const numB = Number(localStorage.getItem(b.url)) || b.frequency;
-        if (numA < numB) return 1;
-        if (numA > numB) return -1;
-        return 0;
-      });
+    return resourcesList.filter(
+      (item) => activeGroup === item.category || activeGroup === "All",
+    );
   }, [searchQuery, activeGroup, fuse]);
 
   useEffect(() => {
