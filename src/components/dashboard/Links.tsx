@@ -33,8 +33,8 @@ const Links = () => {
     return resourcesList
       .filter((item) => activeGroup === item.category || activeGroup === "All")
       .sort((a, b) => {
-        const numA = Math.max(Number(localStorage.getItem(a.url)), a.frequency);
-        const numB = Math.max(Number(localStorage.getItem(b.url)), b.frequency);
+        const numA = Number(localStorage.getItem(a.url)) || a.frequency;
+        const numB = Number(localStorage.getItem(b.url)) || b.frequency;
         if (numA < numB) return 1;
         if (numA > numB) return -1;
         return 0;
