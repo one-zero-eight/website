@@ -26,7 +26,7 @@ export const resourcesList: ResourceType[] = [
     description: "View your marks for all previous semesters.",
     icon: "icon-[material-symbols--assignment-outline]",
     category: "Academic",
-    frequency: 18,
+    frequency: 0,
   },
   {
     url: "https://my.university.innopolis.ru/profile/edu-certs/create",
@@ -35,7 +35,7 @@ export const resourcesList: ResourceType[] = [
     description: "Request a reference about studying or other things.",
     icon: "icon-[material-symbols--description-outline]",
     category: "Academic",
-    frequency: 18,
+    frequency: 0,
   },
   {
     url: "https://my.university.innopolis.ru/profile/personal-form/index?tab=scholarship",
@@ -45,7 +45,7 @@ export const resourcesList: ResourceType[] = [
       "See how the scholarship is calculated for your current semester in My University.",
     icon: "icon-[material-symbols--credit-card-outline]",
     category: "Financial",
-    frequency: 18,
+    frequency: 0,
   },
   {
     url: "https://my.university.innopolis.ru/profile/applications",
@@ -55,7 +55,7 @@ export const resourcesList: ResourceType[] = [
       "Access and download templates for various university applications.",
     icon: "icon-[material-symbols--article-outline]",
     category: "Academic",
-    frequency: 18,
+    frequency: 0,
   },
   {
     url: "https://innohassle.ru/scholarship",
@@ -94,7 +94,7 @@ export const resourcesList: ResourceType[] = [
       "View the official academic calendar with holidays and study days.",
     icon: "icon-[material-symbols--calendar-month-outline]",
     category: "Academic",
-    frequency: 3,
+    frequency: 2,
   },
   {
     url: "https://eduwiki.innopolis.university/index.php/ALL:StudyPlan",
@@ -104,7 +104,7 @@ export const resourcesList: ResourceType[] = [
       "View the study plan with a documented amount of required studying hours.",
     icon: "icon-[material-symbols--book-outline]",
     category: "Academic",
-    frequency: 3,
+    frequency: 0,
   },
   {
     url: "https://eduwiki.innopolis.university/index.php/All:Schedule",
@@ -113,7 +113,7 @@ export const resourcesList: ResourceType[] = [
     description: "View the official schedule of classes.",
     icon: "icon-[material-symbols--schedule-outline]",
     category: "Academic",
-    frequency: 3,
+    frequency: 0,
   },
   {
     url: "https://innohassle.ru/schedule",
@@ -246,7 +246,7 @@ export const resourcesList: ResourceType[] = [
       "Access the official student handbook for campus rules, policies, and guidelines.",
     icon: "icon-[material-symbols--menu-book-outline]",
     category: "Extracurricular",
-    frequency: 1,
+    frequency: 0,
   },
   {
     url: "http://campuslife.innopolis.ru/clubs",
@@ -255,7 +255,7 @@ export const resourcesList: ResourceType[] = [
     description: "Explore and join student clubs and organizations on campus.",
     icon: "icon-[material-symbols--diversity-3]",
     category: "Extracurricular",
-    frequency: 1,
+    frequency: 0,
   },
   {
     url: "https://vm.innopolis.university/",
