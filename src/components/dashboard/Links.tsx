@@ -1,9 +1,15 @@
 import { groups } from "@/lib/links/constants";
 import CustomSelect from "@/lib/links/customSelector";
-import { resourcesList } from "@/lib/links/resources-list.ts";
+import {
+  globalFrequencies,
+  resourcesList,
+} from "@/lib/links/resources-list.ts";
 import { SearchInput } from "@/lib/links/SearchInput";
+import {
+  createFuseInstance,
+  getFilteredResources,
+} from "@/lib/links/searchUtils";
 import clsx from "clsx";
-import Fuse from "fuse.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const Links = () => {
@@ -14,68 +20,27 @@ const Links = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const fuse = useMemo(
-    () =>
-      new Fuse(resourcesList, {
-        keys: [
-          { name: "resource", weight: 5 },
-          { name: "title", weight: 3 },
-          { name: "description", weight: 1 },
-        ],
-        threshold: 0.3,
-      }),
+    () => createFuseInstance(resourcesList),
     [],
   );
 
-  const filteredResources = useMemo(() => {
-    if (searchQuery) {
-      const fuseResults = fuse.search(searchQuery).map((result) => result.item);
-      const fuseRanking = fuseResults.map((item, index) => ({
-        item,
-        rankFuse: index + 1,
-      }));
+  const userFrequencies = useMemo(() => {
+    const stored = localStorage.getItem("userFrequencies");
+    return stored ? JSON.parse(stored) : {};
+  }, []);
 
-      const preferenceRanking = [...fuseResults].sort((a, b) => {
-        const numA = Number(localStorage.getItem(a.url)) || a.frequency;
-        const numB = Number(localStorage.getItem(b.url)) || b.frequency;
-        return numB - numA;
-      });
-
-      const preferenceRankMap = new Map();
-      preferenceRanking.forEach((item, index) => {
-        preferenceRankMap.set(item.url, index + 1);
-      });
-
-      const k = 60;
-      const itemsWithRRF = fuseRanking.map(({ item, rankFuse }) => {
-        const rankPreference =
-          preferenceRankMap.get(item.url) || fuseResults.length + 1;
-        const score = 1 / (rankFuse + k) + 1 / (rankPreference + k);
-        return { item, score };
-      });
-      itemsWithRRF.sort((a, b) => b.score - a.score);
-      return itemsWithRRF.map(({ item }) => item);
-
-      // return fuse
-      //   .search(searchQuery)
-      //   .map((result) => result.item)
-      //   .sort((a, b) => {
-      //   const numA = Number(localStorage.getItem(a.url)) || a.frequency;
-      //   const numB = Number(localStorage.getItem(b.url)) || b.frequency;
-      //   if (numA < numB) return 1;
-      //   if (numA > numB) return -1;
-      //   return 0;
-      // });
-    }
-    return resourcesList
-      .filter((item) => activeGroup === item.category || activeGroup === "All")
-      .sort((a, b) => {
-        const numA = Number(localStorage.getItem(a.url)) || a.frequency;
-        const numB = Number(localStorage.getItem(b.url)) || b.frequency;
-        if (numA < numB) return 1;
-        if (numA > numB) return -1;
-        return 0;
-      });
-  }, [searchQuery, activeGroup, fuse]);
+  const filteredResources = useMemo(
+    () =>
+      getFilteredResources(
+        resourcesList,
+        searchQuery,
+        activeGroup,
+        fuse,
+        globalFrequencies,
+        userFrequencies,
+      ),
+    [searchQuery, activeGroup, fuse, userFrequencies],
+  );
 
   useEffect(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -160,13 +125,10 @@ const Links = () => {
           <div className="grid flex-[4] grid-cols-1 gap-5 lg:grid-cols-3 xxl:grid-cols-2">
             {filteredResources.map((resource, index) => (
               <a
-                onClick={() => {
-                  const count =
-                    Math.max(
-                      Number(localStorage.getItem(resource.url)),
-                      resource.frequency,
-                    ) + 1;
-                  localStorage.setItem(resource.url, count.toString());
+                onClick={(e) => {
+                  const frequencies = JSON.parse(localStorage.getItem('userFrequencies') || '{}');
+                  frequencies[resource.url] = (frequencies[resource.url] || 0) + 1;
+                  localStorage.setItem('userFrequencies', JSON.stringify(frequencies));
                 }}
                 href={resource.url}
                 target="_blank"
