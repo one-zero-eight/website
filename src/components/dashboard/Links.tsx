@@ -28,20 +28,53 @@ const Links = () => {
 
   const filteredResources = useMemo(() => {
     if (searchQuery) {
-      return fuse
-        .search(searchQuery)
-        .map((result) => result.item)
-        .sort((a, b) => {
-          const numA = Number(localStorage.getItem(a.url)) || a.frequency;
-          const numB = Number(localStorage.getItem(b.url)) || b.frequency;
-          if (numA < numB) return 1;
-          if (numA > numB) return -1;
-          return 0;
-        });
+      const fuseResults = fuse.search(searchQuery).map((result) => result.item);
+      const fuseRanking = fuseResults.map((item, index) => ({
+        item,
+        rankFuse: index + 1,
+      }));
+
+      const preferenceRanking = [...fuseResults].sort((a, b) => {
+        const numA = Number(localStorage.getItem(a.url)) || a.frequency;
+        const numB = Number(localStorage.getItem(b.url)) || b.frequency;
+        return numB - numA;
+      });
+
+      const preferenceRankMap = new Map();
+      preferenceRanking.forEach((item, index) => {
+        preferenceRankMap.set(item.url, index + 1);
+      });
+
+      const k = 60;
+      const itemsWithRRF = fuseRanking.map(({ item, rankFuse }) => {
+        const rankPreference =
+          preferenceRankMap.get(item.url) || fuseResults.length + 1;
+        const score = 1 / (rankFuse + k) + 1 / (rankPreference + k);
+        return { item, score };
+      });
+      itemsWithRRF.sort((a, b) => b.score - a.score);
+      return itemsWithRRF.map(({ item }) => item);
+
+      // return fuse
+      //   .search(searchQuery)
+      //   .map((result) => result.item)
+      //   .sort((a, b) => {
+      //   const numA = Number(localStorage.getItem(a.url)) || a.frequency;
+      //   const numB = Number(localStorage.getItem(b.url)) || b.frequency;
+      //   if (numA < numB) return 1;
+      //   if (numA > numB) return -1;
+      //   return 0;
+      // });
     }
-    return resourcesList.filter(
-      (item) => activeGroup === item.category || activeGroup === "All",
-    );
+    return resourcesList
+      .filter((item) => activeGroup === item.category || activeGroup === "All")
+      .sort((a, b) => {
+        const numA = Number(localStorage.getItem(a.url)) || a.frequency;
+        const numB = Number(localStorage.getItem(b.url)) || b.frequency;
+        if (numA < numB) return 1;
+        if (numA > numB) return -1;
+        return 0;
+      });
   }, [searchQuery, activeGroup, fuse]);
 
   useEffect(() => {
