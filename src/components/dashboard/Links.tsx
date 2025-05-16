@@ -36,8 +36,7 @@ const Links = () => {
         const numA = Number(localStorage.getItem(a.url));
         const numB = Number(localStorage.getItem(b.url));
         if (!numA || !numB || numA === numB) {
-          // TODO: use YandexMetrika stats
-
+          // Some logic with global frequency
           return 0;
         }
         if (numA < numB) return 1;
@@ -129,13 +128,12 @@ const Links = () => {
           <div className="grid flex-[4] grid-cols-1 gap-5 lg:grid-cols-3 xxl:grid-cols-2">
             {filteredResources.map((resource, index) => (
               <a
-                href={resource.url}
-                onClick={(e) => {
-                  e.preventDefault();
+                onClick={() => {
                   const count =
                     Math.max(Number(localStorage.getItem(resource.url)), 0) + 1;
                   localStorage.setItem(resource.url, count.toString());
                 }}
+                href={resource.url}
                 target="_blank"
                 rel="nofollow noreferrer"
                 key={index}
