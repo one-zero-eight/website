@@ -33,12 +33,8 @@ const Links = () => {
     return resourcesList
       .filter((item) => activeGroup === item.category || activeGroup === "All")
       .sort((a, b) => {
-        const numA = Number(localStorage.getItem(a.url));
-        const numB = Number(localStorage.getItem(b.url));
-        if (!numA || !numB || numA === numB) {
-          // Some logic with global frequency
-          return 0;
-        }
+        const numA = Math.max(Number(localStorage.getItem(a.url)), a.frequency);
+        const numB = Math.max(Number(localStorage.getItem(b.url)), b.frequency);
         if (numA < numB) return 1;
         if (numA > numB) return -1;
         return 0;
@@ -130,7 +126,10 @@ const Links = () => {
               <a
                 onClick={() => {
                   const count =
-                    Math.max(Number(localStorage.getItem(resource.url)), 0) + 1;
+                    Math.max(
+                      Number(localStorage.getItem(resource.url)),
+                      resource.frequency,
+                    ) + 1;
                   localStorage.setItem(resource.url, count.toString());
                 }}
                 href={resource.url}
