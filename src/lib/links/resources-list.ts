@@ -72,6 +72,15 @@ export const resourcesList: ResourceType[] = [
     frequency: 1521,
   },
   {
+    url: "https://t.me/IUSportBot",
+    resource: "InNoHassle",
+    title: "Sport bot",
+    description: "Conveniently check in for sports in Telegram.",
+    icon: "icon-[material-symbols--sports-soccer]",
+    category: "Extracurricular",
+    frequency: 637,
+  },
+  {
     url: "https://my.innopolis.university/event",
     resource: "New My University",
     title: "Events for innopoints",

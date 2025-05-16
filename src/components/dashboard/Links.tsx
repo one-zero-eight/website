@@ -19,10 +19,7 @@ const Links = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const fuse = useMemo(
-    () => createFuseInstance(resourcesList),
-    [],
-  );
+  const fuse = useMemo(() => createFuseInstance(resourcesList), []);
 
   const userFrequencies = useMemo(() => {
     const stored = localStorage.getItem("userFrequencies");
@@ -125,10 +122,16 @@ const Links = () => {
           <div className="grid flex-[4] grid-cols-1 gap-5 lg:grid-cols-3 xxl:grid-cols-2">
             {filteredResources.map((resource, index) => (
               <a
-                onClick={(e) => {
-                  const frequencies = JSON.parse(localStorage.getItem('userFrequencies') || '{}');
-                  frequencies[resource.url] = (frequencies[resource.url] || 0) + 1;
-                  localStorage.setItem('userFrequencies', JSON.stringify(frequencies));
+                onClick={() => {
+                  const frequencies = JSON.parse(
+                    localStorage.getItem("userFrequencies") || "{}",
+                  );
+                  frequencies[resource.url] =
+                    (frequencies[resource.url] || 0) + 1;
+                  localStorage.setItem(
+                    "userFrequencies",
+                    JSON.stringify(frequencies),
+                  );
                 }}
                 href={resource.url}
                 target="_blank"
