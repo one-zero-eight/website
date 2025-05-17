@@ -61,6 +61,14 @@ const Links = () => {
 
       if (event.key === "Enter") {
         event.preventDefault();
+
+        const frequencies = JSON.parse(
+          localStorage.getItem("userFrequencies") || "{}",
+        );
+        frequencies[filteredResources[activeIndex].url] =
+          (frequencies[filteredResources[activeIndex].url] || 0) + 1;
+        localStorage.setItem("userFrequencies", JSON.stringify(frequencies));
+
         window.open(filteredResources[activeIndex].url, "_blank");
       } else if (event.key === "ArrowDown") {
         event.preventDefault();
