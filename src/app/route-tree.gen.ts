@@ -16,6 +16,7 @@ import { Route as IndexImport } from "./routes/index";
 import { Route as WithmenuSportImport } from "./routes/_with_menu/sport";
 import { Route as WithmenuSearchImport } from "./routes/_with_menu/search";
 import { Route as WithmenuScholarshipImport } from "./routes/_with_menu/scholarship";
+import { Route as WithmenuPrintersImport } from "./routes/_with_menu/printers";
 import { Route as WithmenuMenuImport } from "./routes/_with_menu/menu";
 import { Route as WithmenuMapsImport } from "./routes/_with_menu/maps";
 import { Route as WithmenuExtensionImport } from "./routes/_with_menu/extension";
@@ -58,6 +59,11 @@ const WithmenuSearchRoute = WithmenuSearchImport.update({
 
 const WithmenuScholarshipRoute = WithmenuScholarshipImport.update({
   path: "/scholarship",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
+
+const WithmenuPrintersRoute = WithmenuPrintersImport.update({
+  path: "/printers",
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
@@ -216,6 +222,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof WithmenuMenuImport;
       parentRoute: typeof WithmenuRouteImport;
     };
+    "/_with_menu/printers": {
+      id: "/_with_menu/printers";
+      path: "/printers";
+      fullPath: "/printers";
+      preLoaderRoute: typeof WithmenuPrintersImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
     "/_with_menu/scholarship": {
       id: "/_with_menu/scholarship";
       path: "/scholarship";
@@ -333,6 +346,7 @@ interface WithmenuRouteRouteChildren {
   WithmenuExtensionRoute: typeof WithmenuExtensionRoute;
   WithmenuMapsRoute: typeof WithmenuMapsRoute;
   WithmenuMenuRoute: typeof WithmenuMenuRoute;
+  WithmenuPrintersRoute: typeof WithmenuPrintersRoute;
   WithmenuScholarshipRoute: typeof WithmenuScholarshipRoute;
   WithmenuSearchRoute: typeof WithmenuSearchRoute;
   WithmenuSportRoute: typeof WithmenuSportRoute;
@@ -354,6 +368,7 @@ const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuExtensionRoute: WithmenuExtensionRoute,
   WithmenuMapsRoute: WithmenuMapsRoute,
   WithmenuMenuRoute: WithmenuMenuRoute,
+  WithmenuPrintersRoute: WithmenuPrintersRoute,
   WithmenuScholarshipRoute: WithmenuScholarshipRoute,
   WithmenuSearchRoute: WithmenuSearchRoute,
   WithmenuSportRoute: WithmenuSportRoute,
@@ -381,6 +396,7 @@ export interface FileRoutesByFullPath {
   "/extension": typeof WithmenuExtensionRoute;
   "/maps": typeof WithmenuMapsRoute;
   "/menu": typeof WithmenuMenuRoute;
+  "/printers": typeof WithmenuPrintersRoute;
   "/scholarship": typeof WithmenuScholarshipRoute;
   "/search": typeof WithmenuSearchRoute;
   "/sport": typeof WithmenuSportRoute;
@@ -405,6 +421,7 @@ export interface FileRoutesByTo {
   "/extension": typeof WithmenuExtensionRoute;
   "/maps": typeof WithmenuMapsRoute;
   "/menu": typeof WithmenuMenuRoute;
+  "/printers": typeof WithmenuPrintersRoute;
   "/scholarship": typeof WithmenuScholarshipRoute;
   "/search": typeof WithmenuSearchRoute;
   "/sport": typeof WithmenuSportRoute;
@@ -431,6 +448,7 @@ export interface FileRoutesById {
   "/_with_menu/extension": typeof WithmenuExtensionRoute;
   "/_with_menu/maps": typeof WithmenuMapsRoute;
   "/_with_menu/menu": typeof WithmenuMenuRoute;
+  "/_with_menu/printers": typeof WithmenuPrintersRoute;
   "/_with_menu/scholarship": typeof WithmenuScholarshipRoute;
   "/_with_menu/search": typeof WithmenuSearchRoute;
   "/_with_menu/sport": typeof WithmenuSportRoute;
@@ -458,6 +476,7 @@ export interface FileRouteTypes {
     | "/extension"
     | "/maps"
     | "/menu"
+    | "/printers"
     | "/scholarship"
     | "/search"
     | "/sport"
@@ -481,6 +500,7 @@ export interface FileRouteTypes {
     | "/extension"
     | "/maps"
     | "/menu"
+    | "/printers"
     | "/scholarship"
     | "/search"
     | "/sport"
@@ -505,6 +525,7 @@ export interface FileRouteTypes {
     | "/_with_menu/extension"
     | "/_with_menu/maps"
     | "/_with_menu/menu"
+    | "/_with_menu/printers"
     | "/_with_menu/scholarship"
     | "/_with_menu/search"
     | "/_with_menu/sport"
@@ -560,6 +581,7 @@ export const routeTree = rootRoute
         "/_with_menu/extension",
         "/_with_menu/maps",
         "/_with_menu/menu",
+        "/_with_menu/printers",
         "/_with_menu/scholarship",
         "/_with_menu/search",
         "/_with_menu/sport",
@@ -603,6 +625,10 @@ export const routeTree = rootRoute
     },
     "/_with_menu/menu": {
       "filePath": "_with_menu/menu.tsx",
+      "parent": "/_with_menu"
+    },
+    "/_with_menu/printers": {
+      "filePath": "_with_menu/printers.tsx",
       "parent": "/_with_menu"
     },
     "/_with_menu/scholarship": {

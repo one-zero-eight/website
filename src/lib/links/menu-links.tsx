@@ -83,6 +83,12 @@ export const items: ItemType[] = [
   },
   {
     type: "local",
+    title: "Printers",
+    to: "/printers",
+    icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
+  },
+  {
+    type: "local",
     title: "Dorms",
     to: "/dorms",
     icon: (
