@@ -72,15 +72,6 @@ export const resourcesList: ResourceType[] = [
     frequency: 1521,
   },
   {
-    url: "https://t.me/IUSportBot",
-    resource: "InNoHassle",
-    title: "Sport bot",
-    description: "Conveniently check in for sports in Telegram.",
-    icon: "icon-[material-symbols--sports-soccer]",
-    category: "Extracurricular",
-    frequency: 637,
-  },
-  {
     url: "https://my.innopolis.university/event",
     resource: "New My University",
     title: "Events for innopoints",
@@ -137,6 +128,73 @@ export const resourcesList: ResourceType[] = [
     category: "Academic",
     frequency: 0,
   },
+  // < My University <
+
+  // > InNoHassle >
+  {
+    url: "https://t.me/IUSportBot",
+    resource: "InNoHassle",
+    title: "Sport bot",
+    description: "Conveniently check in for sports in Telegram.",
+    icon: "icon-[material-symbols--sports-soccer]",
+    category: "Extracurricular",
+    frequency: INNOHASSLE_FREQUENCY,
+  },
+  {
+    url: "https://t.me/InnoPrintBot",
+    resource: "InNoHassle",
+    title: "Inno Print Bot",
+    description: "Quickly print & scan on university printers.",
+    icon: "icon-[material-symbols--print]",
+    category: "Technical",
+    frequency: INNOHASSLE_FREQUENCY,
+  },
+  {
+    url: "https://t.me/InnoMusicRoomBot",
+    resource: "InNoHassle",
+    title: "Music room",
+    description: "Access the music room with musical equipment.",
+    icon: "icon-[material-symbols--music-note]",
+    category: "Extracurricular",
+    frequency: INNOHASSLE_FREQUENCY,
+  },
+  {
+    url: "https://t.me/IURoomsBot",
+    resource: "InNoHassle",
+    title: "Dorms bot",
+    description:
+      "Manage your dormitory room and split duties with your roommates.",
+    icon: "icon-[material-symbols--home-work-outline]",
+    category: "Housing",
+    frequency: INNOHASSLE_FREQUENCY,
+  },
+  {
+    url: "https://innohassle.ru/maps",
+    resource: "InNoHassle",
+    title: "Maps",
+    description: "Find any place in Innopolis.",
+    icon: "icon-[material-symbols--map-outline]",
+    category: "Navigation",
+    frequency: INNOHASSLE_FREQUENCY,
+  },
+  {
+    url: "https://innohassle.ru/room-booking",
+    resource: "InNoHassle",
+    title: "Room booking",
+    description: "Book the meeting rooms and auditoriums in the university.",
+    icon: "icon-[material-symbols--door-open-outline-rounded]",
+    category: "Navigation",
+    frequency: INNOHASSLE_FREQUENCY,
+  },
+  {
+    url: "https://innohassle.ru/calendar",
+    resource: "InNoHassle",
+    title: "Calendar",
+    description: "View your personal schedule with classes, sports, deadlines.",
+    icon: "icon-[material-symbols--calendar-month-outline-rounded]",
+    category: "Academic",
+    frequency: INNOHASSLE_FREQUENCY,
+  },
   {
     url: "https://innohassle.ru/scholarship",
     resource: "InNoHassle",
@@ -187,16 +245,6 @@ export const resourcesList: ResourceType[] = [
     icon: "icon-[material-symbols--calendar-month-outline]",
     category: "Academic",
     frequency: 2,
-  },
-  {
-    url: "https://eduwiki.innopolis.university/index.php/ALL:StudyPlan",
-    resource: "Eduwiki",
-    title: "Study plan",
-    description:
-      "View the study plan with a documented amount of required studying hours.",
-    icon: "icon-[material-symbols--book-outline]",
-    category: "Academic",
-    frequency: 0,
   },
   {
     url: "https://eduwiki.innopolis.university/index.php/All:Schedule",
@@ -358,6 +406,15 @@ export const resourcesList: ResourceType[] = [
     icon: "icon-[material-symbols--contact-support-outline]",
     category: "Technical",
     frequency: 0,
+  },
+  {
+    url: "https://booking-innodatahub.innopolis.university/",
+    resource: "InnoDataHub",
+    title: null,
+    description: "Book powerful computing resources.",
+    icon: "icon-[material-symbols--storage]",
+    category: "Technical",
+    frequency: 37,
   },
   // < Technical <
 
