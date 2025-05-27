@@ -46,7 +46,6 @@ const TimerPage = () => {
   const [timerSize, setTimerSize] = useState<number>(100);
   const [timerColor, setTimerColor] = useState<string>("#9747ff");
 
-  const settingsPanelRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number>();
   const toastIdCounter = useRef(0);
   const lastUpdateRef = useRef<number>(Date.now());
@@ -373,14 +372,39 @@ const TimerPage = () => {
 
   return (
     <div className="timer-container">
-      <input
-        type="text"
-        placeholder="Enter the reason for this cute timer..."
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        disabled={isRunning}
-        className="timer-title"
-      />
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <input
+          type="text"
+          placeholder="Enter the reason for this cute timer..."
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          disabled={isRunning}
+          className="timer-title"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        />
+        <button
+          onClick={() => setIsSettingsOpen(true)}
+          aria-label="Open settings"
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+
+            width: "2rem",
+            display: "flex",
+            alignItems: "start",
+            justifyContent: "start",
+            marginLeft: "0.5rem",
+          }}
+        >
+          <Settings size={20} color="#9747ff" />
+        </button>
+      </div>
+
       <div className="timer-content">
         <div className="wc">
           <input
@@ -419,70 +443,74 @@ const TimerPage = () => {
           </div>
         </div>
       </div>
-      <div
-        ref={settingsPanelRef}
-        className={`settings-panel ${isSettingsOpen ? "open" : ""}`}
-      >
-        <button
-          className="settings-toggle"
-          onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-          aria-label="Toggle settings"
-        >
-          <Settings size={20} />
-        </button>
+      {isSettingsOpen && (
+        <div className="dialog-overlay">
+          <div className="dialog-content">
+            <div className="dialog-header">
+              <h3 className="dialog-title">Settings</h3>
+            </div>
 
-        <h3 className="settings-title">Settings</h3>
+            <div className="settings-section">
+              <h4>Shape</h4>
+              <div className="shape-buttons">
+                <button
+                  className={`shape-button ${timerShape === "none" ? "active" : ""}`}
+                  onClick={() => handleShapeChange("none")}
+                >
+                  None
+                </button>
+                <button
+                  className={`shape-button ${timerShape === "circle" ? "active" : ""}`}
+                  onClick={() => handleShapeChange("circle")}
+                >
+                  Circle
+                </button>
+                <button
+                  className={`shape-button ${timerShape === "square" ? "active" : ""}`}
+                  onClick={() => handleShapeChange("square")}
+                >
+                  Square
+                </button>
+              </div>
+            </div>
 
-        <div className="settings-section">
-          <h4>Shape</h4>
-          <div className="shape-buttons">
-            <button
-              className={`shape-button ${timerShape === "none" ? "active" : ""}`}
-              onClick={() => handleShapeChange("none")}
-            >
-              None
-            </button>
-            <button
-              className={`shape-button ${timerShape === "circle" ? "active" : ""}`}
-              onClick={() => handleShapeChange("circle")}
-            >
-              Circle
-            </button>
-            <button
-              className={`shape-button ${timerShape === "square" ? "active" : ""}`}
-              onClick={() => handleShapeChange("square")}
-            >
-              Square
-            </button>
+            <div className="settings-section">
+              <h4>Size</h4>
+              <input
+                type="range"
+                min="50"
+                max="300"
+                value={timerSize}
+                onChange={handleSizeChange}
+                className="size-slider"
+              />
+              <div className="size-value">{timerSize}%</div>
+            </div>
+
+            <div className="settings-section">
+              <h4>Color</h4>
+              <input
+                type="color"
+                value={timerColor}
+                onChange={handleColorChange}
+                className="color-slider"
+              />
+              <div className="size-value" style={{ color: timerColor }}>
+                {timerColor.toUpperCase()}
+              </div>
+            </div>
+
+            <div className="dialog-footer">
+              <button
+                className="dialog-button dialog-cancel"
+                onClick={() => setIsSettingsOpen(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
-
-        <div className="settings-section">
-          <h4>Size</h4>
-          <input
-            type="range"
-            min="50"
-            max="300"
-            value={timerSize}
-            onChange={handleSizeChange}
-            className="size-slider"
-          />
-          <div className="size-value">{timerSize}%</div>
-        </div>
-
-        <div className="settings-section">
-          <h4>Color</h4>
-          <input
-            type="color"
-            value={timerColor}
-            onChange={handleColorChange}
-            className="color-slider"
-          />
-          <div className="size-value" style={{ color: timerColor }}>
-            {timerColor.toUpperCase()}
-          </div>
-        </div>
-      </div>
+      )}
 
       {showStopDialog && (
         <div className="dialog-overlay">
