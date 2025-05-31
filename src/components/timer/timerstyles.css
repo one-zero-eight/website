@@ -42,13 +42,12 @@
 
 /* Title input */
 .timer-title {
-  width: 100%;
-  max-width: 28rem;
+  width: 30vw; /* всё ещё ограничиваем */
   text-align: center;
   font-size: 1.25rem;
   font-weight: 600;
   padding: 0.5rem 1rem;
-  margin-bottom: 3rem;
+  margin-bottom: 7rem;
   border-radius: 0.5rem;
   outline: none;
   border: 1px solid #1a1a1a;
@@ -512,4 +511,17 @@
     #ff00ff,
     #ff0000
   );
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.settings-button:hover svg {
+  animation: spin 1s linear infinite;
 }
