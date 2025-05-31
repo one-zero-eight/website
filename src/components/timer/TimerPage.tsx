@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useLocalStorage } from "usehooks-ts";
 import { Settings } from "lucide-react";
 import "./timerstyles.css";
 
@@ -9,12 +10,14 @@ interface Toast {
 
 type TimerShape = "none" | "circle" | "square";
 
+/*
 interface TimerSettings {
   isSettingsOpen: boolean;
   timerShape: TimerShape;
-  timerSize: number; // Теперь храним в процентах
+  timerSize: number; 
   timerColor: string;
 }
+*/
 
 function hexToRgba(hex: string, alpha: number): string {
   hex = hex.replace(/^#/, "");
@@ -41,10 +44,25 @@ const TimerPage = () => {
   const [showStopDialog, setShowStopDialog] = useState<boolean>(false);
   const [secondsLeft, setSecondsLeft] = useState<number>(0);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  /*
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [timerShape, setTimerShape] = useState<TimerShape>("circle");
   const [timerSize, setTimerSize] = useState<number>(100);
   const [timerColor, setTimerColor] = useState<string>("#9747ff");
+  */
+  const [isSettingsOpen, setIsSettingsOpen] = useLocalStorage<boolean>(
+    "timerSettingsOpen",
+    false,
+  );
+  const [timerShape, setTimerShape] = useLocalStorage<TimerShape>(
+    "timerShape",
+    "circle",
+  );
+  const [timerSize, setTimerSize] = useLocalStorage<number>("timerSize", 100);
+  const [timerColor, setTimerColor] = useLocalStorage<string>(
+    "timerColor",
+    "#9747ff",
+  );
 
   const timerRef = useRef<number>();
   const toastIdCounter = useRef(0);
@@ -57,7 +75,7 @@ const TimerPage = () => {
   }, [timerColor]);
 
   // Load panel settings from localStorage
-  useEffect(() => {
+  /* useEffect(() => {
     const savedPanelSettings = localStorage.getItem("timerPanelSettings");
     if (savedPanelSettings) {
       const settings: TimerSettings = JSON.parse(savedPanelSettings);
@@ -75,7 +93,7 @@ const TimerPage = () => {
       setTimerSize(settings.timerSize);
       setTimerColor(settings.timerColor);
     }
-  }, []);
+  }, []); */
 
   const handleTimerComplete = useCallback(() => {
     setIsRunning(false);
@@ -88,7 +106,7 @@ const TimerPage = () => {
     showToast("Time is up!");
   }, []);
 
-  // Save panel settings to localStorage whenever they change
+  /*
   useEffect(() => {
     const settings: TimerSettings = {
       isSettingsOpen,
@@ -99,7 +117,6 @@ const TimerPage = () => {
     localStorage.setItem("timerPanelSettings", JSON.stringify(settings));
   }, [isSettingsOpen, timerShape, timerColor, timerSize]);
 
-  /*
   useEffect(() => {
     const updatePanelWidth = () => {
       if (settingsPanelRef.current && isSettingsOpen) {
@@ -168,13 +185,6 @@ const TimerPage = () => {
     }
   }, [isRunning, isPaused]);
 
-  useEffect(() => {
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [handleVisibilityChange]);
-
   const showToast = (message: string) => {
     const id = toastIdCounter.current++;
     setToasts((prev) => [...prev, { id, message }]);
@@ -228,10 +238,6 @@ const TimerPage = () => {
       }
     };
   }, [isRunning, isPaused, handleTimerComplete, saveState]);
-
-  useEffect(() => {
-    document.documentElement.style.setProperty("--timer-color", timerColor);
-  }, [timerColor]);
 
   const formatTime = (totalSeconds: number) => {
     if (isNaN(totalSeconds) || totalSeconds < 0) {
@@ -328,9 +334,17 @@ const TimerPage = () => {
     showToast("The timer stopped");
   };
 
+  // color change changing and check
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTimerColor(e.target.value);
-    saveState(secondsLeft);
+    const value = e.target.value;
+    const isValidHex = /^#([0-9A-F]{3}){1,2}$/i.test(value);
+
+    if (isValidHex) {
+      setTimerColor(value);
+      saveState(secondsLeft);
+    } else {
+      showToast("Invalid color format");
+    }
   };
 
   const getTimerClassName = () => {
@@ -358,10 +372,16 @@ const TimerPage = () => {
     color: timerColor,
   } as React.CSSProperties;
 
-  // Ползунок размера
+  // Ползунок размера, добавлен снеппинг
+  const snapTo = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250];
+
   const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newSize = parseInt(e.target.value);
-    setTimerSize(newSize);
+    const raw = parseInt(e.target.value, 10);
+    const snapped = snapTo.reduce((prev, curr) =>
+      Math.abs(curr - raw) < Math.abs(prev - raw) ? curr : prev,
+    );
+
+    setTimerSize(snapped);
     saveState(secondsLeft);
   };
 
@@ -479,7 +499,7 @@ const TimerPage = () => {
               <input
                 type="range"
                 min="50"
-                max="300"
+                max="250"
                 value={timerSize}
                 onChange={handleSizeChange}
                 className="size-slider"
