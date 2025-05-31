@@ -392,10 +392,10 @@ const TimerPage = () => {
 
   return (
     <div className="timer-container">
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
         <input
           type="text"
-          placeholder="Enter the reason for this cute timer..."
+          placeholder="Timer title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={isRunning}
@@ -409,19 +409,20 @@ const TimerPage = () => {
         <button
           onClick={() => setIsSettingsOpen(true)}
           aria-label="Open settings"
+          className="settings-button"
           style={{
             background: "transparent",
             border: "none",
             cursor: "pointer",
 
-            width: "2rem",
             display: "flex",
-            alignItems: "start",
-            justifyContent: "start",
-            marginLeft: "0.5rem",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0.5rem",
+            padding: "0.5rem",
           }}
         >
-          <Settings size={20} color="#9747ff" />
+          <Settings size={24} color="#9747ff" />
         </button>
       </div>
 
