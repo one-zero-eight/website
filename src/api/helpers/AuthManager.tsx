@@ -1,5 +1,9 @@
 import { $accounts, accountsTypes } from "@/api/accounts";
-import { navigateToSignIn, shouldAutoSignIn } from "@/api/accounts/sign-in.ts";
+import {
+  navigateToSignIn,
+  navigateToSignOut,
+  shouldAutoSignIn,
+} from "@/api/accounts/sign-in.ts";
 import {
   invalidateMyAccessToken,
   useMyAccessToken,
@@ -80,6 +84,18 @@ export function AuthManager({ children }: PropsWithChildren) {
     refetchMySportToken,
     queryClient,
   ]);
+
+  useEffect(() => {
+    // Log out if the user has outdated Innopolis SSO info
+    if (
+      me?.innopolis_sso?.issued_at &&
+      new Date(me.innopolis_sso.issued_at) < new Date("2025-06-01T00:00:00Z") &&
+      localStorage.getItem("loggedOutJune") !== "true"
+    ) {
+      localStorage.setItem("loggedOutJune", "true"); // Prevent multiple logouts
+      navigateToSignOut();
+    }
+  }, [me]);
 
   return <>{children}</>;
 }
