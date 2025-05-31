@@ -66,7 +66,7 @@
 }
 
 .timer-title::placeholder {
-  color: #464646;
+  color: #a0a0a0; /* раньше было #464646 */
 }
 
 .dark .timer-title {
@@ -76,7 +76,7 @@
 }
 
 .dark .timer-title::placeholder {
-  color: #e2e8f0;
+  color: #898989;
 }
 
 /* Timer display */
