@@ -17,7 +17,7 @@ export const viewConfig: ViewConfig = {
     "core-courses": {
       alias: "core-courses",
       title: "Core Courses",
-      shortDescription: "Academic schedule for core courses in S25.",
+      shortDescription: "Academic schedule for core courses.",
       filtersTagTypes: ["core-courses"],
       groupingTagType: "core-courses",
       showTagTypes: ["core-courses"],
@@ -26,7 +26,7 @@ export const viewConfig: ViewConfig = {
     electives: {
       alias: "electives",
       title: "Electives",
-      shortDescription: "Academic schedule for electives in S25.",
+      shortDescription: "Academic schedule for electives.",
       filtersTagTypes: ["electives"],
       groupingTagType: "electives",
       showTagTypes: ["electives"],
