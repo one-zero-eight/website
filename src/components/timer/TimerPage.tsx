@@ -356,7 +356,15 @@ const TimerPage = () => {
 
   return (
     <div className="timer-container">
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "1rem" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "1rem",
+          marginBottom: "5rem",
+          padding: "1rem",
+        }}
+      >
         <input
           type="text"
           placeholder="Timer title..."
@@ -382,8 +390,6 @@ const TimerPage = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            margin: "0.5rem",
-            padding: "0.5rem",
           }}
         >
           <Settings size={24} color="#9747ff" />
