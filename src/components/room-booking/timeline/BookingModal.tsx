@@ -219,6 +219,7 @@ export function BookingModal({
   const NewBookingButtons = (
     <div className="flex flex-row gap-2">
       <button
+        type="button"
         className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary px-4 py-2 text-lg font-medium hover:bg-primary-hover dark:bg-primary-hover dark:hover:bg-primary"
         onClick={() => onOpenChange(false)}
       >
@@ -273,6 +274,7 @@ export function BookingModal({
                     {newSlot ? "New booking" : "Booking details"}
                   </div>
                   <button
+                    type="button"
                     className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 @lg/export:-mr-6 @lg/export:-mt-6"
                     onClick={() => onOpenChange(false)}
                   >
