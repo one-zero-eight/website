@@ -10,15 +10,6 @@ interface Toast {
 
 type TimerShape = "none" | "circle" | "square";
 
-/*
-interface TimerSettings {
-  isSettingsOpen: boolean;
-  timerShape: TimerShape;
-  timerSize: number; 
-  timerColor: string;
-}
-*/
-
 function hexToRgba(hex: string, alpha: number): string {
   hex = hex.replace(/^#/, "");
   let r, g, b;
@@ -44,12 +35,7 @@ const TimerPage = () => {
   const [showStopDialog, setShowStopDialog] = useState<boolean>(false);
   const [secondsLeft, setSecondsLeft] = useState<number>(0);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  /*
-  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
-  const [timerShape, setTimerShape] = useState<TimerShape>("circle");
-  const [timerSize, setTimerSize] = useState<number>(100);
-  const [timerColor, setTimerColor] = useState<string>("#9747ff");
-  */
+
   const [isSettingsOpen, setIsSettingsOpen] = useLocalStorage<boolean>(
     "timerSettingsOpen",
     false,
@@ -74,27 +60,6 @@ const TimerPage = () => {
     document.documentElement.style.setProperty("--timer-glow", glowColor);
   }, [timerColor]);
 
-  // Load panel settings from localStorage
-  /* useEffect(() => {
-    const savedPanelSettings = localStorage.getItem("timerPanelSettings");
-    if (savedPanelSettings) {
-      const settings: TimerSettings = JSON.parse(savedPanelSettings);
-
-      // Конвертируем старые значения из rem в проценты
-      if (settings.timerSize > 100) {
-        // Старый формат rem
-        const baseSize = 35; // Стандартный размер в rem
-        const newSize = Math.round((settings.timerSize / baseSize) * 100);
-        settings.timerSize = Math.min(Math.max(newSize, 50), 300);
-      }
-
-      setIsSettingsOpen(settings.isSettingsOpen);
-      setTimerShape(settings.timerShape);
-      setTimerSize(settings.timerSize);
-      setTimerColor(settings.timerColor);
-    }
-  }, []); */
-
   const handleTimerComplete = useCallback(() => {
     setIsRunning(false);
     setIsPaused(false);
@@ -105,36 +70,6 @@ const TimerPage = () => {
     localStorage.removeItem("timerState");
     showToast("Time is up!");
   }, []);
-
-  /*
-  useEffect(() => {
-    const settings: TimerSettings = {
-      isSettingsOpen,
-      timerShape,
-      timerColor,
-      timerSize,
-    };
-    localStorage.setItem("timerPanelSettings", JSON.stringify(settings));
-  }, [isSettingsOpen, timerShape, timerColor, timerSize]);
-
-  useEffect(() => {
-    const updatePanelWidth = () => {
-      if (settingsPanelRef.current && isSettingsOpen) {
-        const width = settingsPanelRef.current.offsetWidth;
-      }
-    };
-    // Обновляем при открытии
-    if (isSettingsOpen) {
-      // немного отложим, чтобы DOM успел "открыть" панель
-      setTimeout(updatePanelWidth, 50);
-    }
-
-    window.addEventListener("resize", updatePanelWidth);
-    return () => {
-      window.removeEventListener("resize", updatePanelWidth);
-    };
-  }, [isSettingsOpen]);
-  */
 
   useEffect(() => {
     const savedState = localStorage.getItem("timerState");
@@ -334,7 +269,7 @@ const TimerPage = () => {
     showToast("The timer stopped");
   };
 
-  // color change changing and check
+  // color change and check
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const isValidHex = /^#([0-9A-F]{3}){1,2}$/i.test(value);
@@ -372,7 +307,7 @@ const TimerPage = () => {
     color: timerColor,
   } as React.CSSProperties;
 
-  // Ползунок размера, добавлен снеппинг
+  // scale snapping
   const snapTo = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250];
 
   const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
