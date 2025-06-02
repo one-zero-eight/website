@@ -269,6 +269,35 @@ const TimerPage = () => {
     showToast("The timer stopped");
   };
 
+  const closeSettingsWithSave = () => {
+    saveState(secondsLeft);
+    setIsSettingsOpen(false);
+  };
+
+  const saveAllSettings = useCallback(() => {
+    localStorage.setItem(
+      "timerState",
+      JSON.stringify({
+        title,
+        secondsLeft,
+        isRunning,
+        isPaused,
+        lastUpdate: Date.now(),
+        timerShape,
+        timerColor,
+        timerSize,
+      }),
+    );
+  }, [
+    title,
+    secondsLeft,
+    isRunning,
+    isPaused,
+    timerShape,
+    timerColor,
+    timerSize,
+  ]);
+
   // color change and check
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -276,7 +305,7 @@ const TimerPage = () => {
 
     if (isValidHex) {
       setTimerColor(value);
-      saveState(secondsLeft);
+      // saveState(secondsLeft);
     } else {
       showToast("Invalid color format");
     }
@@ -317,12 +346,12 @@ const TimerPage = () => {
     );
 
     setTimerSize(snapped);
-    saveState(secondsLeft);
+    // saveState(secondsLeft);
   };
 
   const handleShapeChange = (shape: TimerShape) => {
     setTimerShape(shape);
-    saveState(secondsLeft);
+    // saveState(secondsLeft);
   };
 
   return (
@@ -400,7 +429,14 @@ const TimerPage = () => {
         </div>
       </div>
       {isSettingsOpen && (
-        <div className="dialog-overlay">
+        <div
+          className="dialog-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeSettingsWithSave();
+            }
+          }}
+        >
           <div className="dialog-content">
             <div className="dialog-header">
               <h3 className="dialog-title">Settings</h3>
@@ -459,9 +495,12 @@ const TimerPage = () => {
             <div className="dialog-footer">
               <button
                 className="dialog-button dialog-cancel"
-                onClick={() => setIsSettingsOpen(false)}
+                onClick={() => {
+                  saveAllSettings();
+                  setIsSettingsOpen(false);
+                }}
               >
-                Close
+                Save & Close
               </button>
             </div>
           </div>
@@ -469,8 +508,15 @@ const TimerPage = () => {
       )}
 
       {showStopDialog && (
-        <div className="dialog-overlay">
-          <div className="dialog-content">
+        <div
+          className="dialog-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowStopDialog(false);
+            }
+          }}
+        >
+          <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
             <div className="dialog-header">
               <h3 className="dialog-title">Stop Timer</h3>
               <p className="dialog-description">
