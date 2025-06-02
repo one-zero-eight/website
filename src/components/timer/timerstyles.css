@@ -42,21 +42,26 @@
 
 /* Title input */
 .timer-title {
-  width: 30vw; /* всё ещё ограничиваем */
-  text-align: center;
-  font-size: 1.25rem;
+  flex-grow: 1;
+  font-size: 1.75rem;
   font-weight: 600;
   padding: 0.5rem 1rem;
-  margin-bottom: 7rem;
   border-radius: 0.5rem;
   outline: none;
   border: 1px solid #1a1a1a;
   background: #e2e8f0;
   color: #2a2a2a;
+  text-align: center;
   transition:
     background-color 0.3s ease,
     color 0.3s ease,
     border 0.3s ease;
+  margin-right: 1rem;
+  height: 100%;
+  padding: 0.5rem 5rem;
+
+  width: 90%;
+  box-sizing: border-box;
 }
 
 .timer-title:disabled {
@@ -234,6 +239,18 @@
   opacity: 1;
 }
 
+.timer-header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3rem;
+  margin-bottom: 3rem;
+  width: 100%;
+  max-width: 30vw;
+  min-width: 200px;
+  box-sizing: border-box;
+}
+
 /* Dialog */
 .dialog-overlay {
   position: fixed;
@@ -325,6 +342,23 @@
   background-color: #dc2626;
 }
 
+.settings-button {
+  height: 100%;
+  min-width: 4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #9747ff;
+  background: white;
+  color: #9747ff;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
 /* Toast */
 .toast-container {
   position: fixed;
@@ -364,7 +398,6 @@
   color: white;
 }
 
-/* Анимация появления */
 @keyframes slide-in {
   from {
     transform: translateX(100%);
@@ -377,6 +410,22 @@
 }
 
 @media (max-width: 640px) {
+  .timer-header-container {
+    max-width: 90vw;
+    margin-bottom: 2rem;
+  }
+
+  .timer-title {
+    max-width: 60vw;
+    font-size: 1rem;
+    margin-right: 0.5rem;
+    padding: 0;
+  }
+
+  .settings-button {
+    min-width: 3.5rem;
+  }
+
   .timer-container {
     padding: 1rem;
   }
@@ -499,7 +548,6 @@
   border-radius: 4px;
 }
 
-/* Optional: dark theme adjustments for color slider */
 .dark .color-slider {
   background: linear-gradient(
     to right,

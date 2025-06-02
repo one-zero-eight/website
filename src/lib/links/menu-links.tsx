@@ -68,7 +68,6 @@ export const items: ItemType[] = [
     ),
     hideOnMore: true,
   },
-  { type: "separator", hideOnMore: true },
   {
     type: "local",
     title: "Timer",
