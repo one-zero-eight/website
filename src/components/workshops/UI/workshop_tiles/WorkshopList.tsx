@@ -16,6 +16,7 @@ type WorkshopListProps = {
   title: string;
   remove: (workshop: Workshop) => void;
   edit: (workshop: Workshop) => void;
+  openDescription: (workshop: Workshop) => void;
 };
 
 const WorkshopList: React.FC<WorkshopListProps> = ({
@@ -23,6 +24,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
   title,
   remove,
   edit,
+  openDescription,
 }) => {
   return (
     <div style={{ textAlign: "center" }} className="workshop-list">
@@ -35,6 +37,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
               remove={remove}
               edit={edit}
               workshop={workshop}
+              openDescription={openDescription}
               key={workshop.id}
             />
           ))

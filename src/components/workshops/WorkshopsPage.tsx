@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import "./styles/App.css";
 import WorkshopList from "./UI/workshop_tiles/WorkshopList";
-import PostForm from "./UI/post_form/PostForm";
+import PostForm from "@/components/workshops/UI/post_form/PostForm.tsx";
 import Modal from "./UI/modal/ModalWindow";
-
+import Description from "./UI/description_form/Description";
 type Workshop = {
   id: number;
   title: string;
@@ -26,6 +26,15 @@ export function WorkshopsPage() {
     /* Стэйт для редактируемого воркшопа */
   }
   const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
+  const [descriptionVisible, setDescriptionVisible] = useState(false);
+  const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(
+    null,
+  );
+
+  const openDescription = (workshop: Workshop) => {
+    setSelectedWorkshop(workshop);
+    setDescriptionVisible(true);
+  };
 
   const createWorkshop = (newWorkshop: Workshop) => {
     setWorkshops([...workshops, newWorkshop]);
@@ -69,6 +78,7 @@ export function WorkshopsPage() {
         edit={editWorkshop}
         workshops={workshops}
         title={"Workshops list"}
+        openDescription={openDescription}
       />
       {/* Модалка для создания нового воркшопа чекай UI/modal */}
       <Modal visible={modalVisible} onClose={handleModalClose}>
@@ -91,6 +101,12 @@ export function WorkshopsPage() {
           onUpdate={updateWorkshop}
           existingId={editingWorkshop?.id}
         />
+      </Modal>
+      <Modal
+        visible={descriptionVisible}
+        onClose={() => setDescriptionVisible(false)}
+      >
+        <Description workshop={selectedWorkshop} />
       </Modal>
       <a
         href="https://t.me/maximf3"

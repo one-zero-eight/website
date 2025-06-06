@@ -64,7 +64,27 @@
   color: #ff5252;
   transform: scale(1.1);
 }
-
+.check-in-button {
+  position: absolute;
+  bottom: 12px;
+  right: 45%;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #bcdfbc;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+.check-in-button:hover {
+  background: rgba(167, 202, 167, 0.2);
+  color: #aad6aa;
+  transform: scale(1.1);
+}
 .edit-button {
   position: absolute;
   bottom: 12px;

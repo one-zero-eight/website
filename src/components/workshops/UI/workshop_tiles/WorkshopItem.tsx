@@ -14,13 +14,22 @@ type WorkshopItemProps = {
   workshop: Workshop;
   remove: (workshop: Workshop) => void;
   edit: (workshop: Workshop) => void;
+  openDescription: (workshop: Workshop) => void;
 };
 
 const WorkshopItem: React.FC<WorkshopItemProps> = ({
   workshop,
   remove,
   edit,
+  openDescription,
 }) => {
+  const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Проверяем, что клик был не по кнопкам
+    if (!(e.target as HTMLElement).closest("button")) {
+      openDescription(workshop);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -32,9 +41,8 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     return timeString;
   };
   return (
-    <div className="workshop-tile">
+    <div className="workshop-tile" onClick={handleContentClick}>
       <h3>{workshop.title}</h3>
-      <p className="workshop-description">{workshop.body}</p>
       {workshop.date && (
         <div className="workshop-datetime">
           <p>
@@ -49,14 +57,30 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         </div>
       )}
       <button
-        onClick={() => remove(workshop)}
+        onClick={(e) => {
+          e.stopPropagation();
+          remove(workshop);
+        }}
         className="delete-button"
         title="Delete workshop"
       >
         <span className="icon-[material-symbols--delete-outline-rounded] text-xl" />
-      </button>{" "}
+      </button>
       <button
-        onClick={() => edit(workshop)}
+        onClick={(e) => {
+          e.stopPropagation();
+          remove(workshop);
+        }}
+        className="check-in-button"
+        title="Check in"
+      >
+        <span className="icon-[material-symbols--add-rounded] text-xl" />
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          edit(workshop);
+        }}
         className="edit-button"
         title="Edit workshop"
       >
