@@ -13,6 +13,7 @@ type Workshop = {
   startTime: string;
   endTime: string;
   room: string;
+  maxPlaces: number;
 };
 
 type PostFormProps = {
@@ -43,6 +44,7 @@ const PostForm: React.FC<PostFormProps> = ({
     startTime: initialWorkshop?.startTime || "",
     endTime: initialWorkshop?.endTime || "",
     room: initialWorkshop?.room || "",
+    maxPlaces: initialWorkshop?.maxPlaces || 0,
   });
 
   const [titleError, setTitleError] = useState("");
@@ -66,6 +68,7 @@ const PostForm: React.FC<PostFormProps> = ({
         ...workshop,
         id: existingId,
         room: workshop.room.trim() || "TBA", // Подставляем TBA если поле пустое
+        maxPlaces: workshop.maxPlaces || 0,
       };
       onUpdate(updatedWorkshop);
 
@@ -81,6 +84,7 @@ const PostForm: React.FC<PostFormProps> = ({
         ...workshop,
         id: Date.now(),
         room: workshop.room.trim() || "TBA", // Подставляем TBA если поле пустое
+        maxPlaces: workshop.maxPlaces || 0,
       };
       create(newWorkshop);
     }
@@ -96,6 +100,7 @@ const PostForm: React.FC<PostFormProps> = ({
         startTime: "",
         endTime: "",
         room: "",
+        maxPlaces: 0,
       });
       setTitleError("");
     }
@@ -133,12 +138,16 @@ const PostForm: React.FC<PostFormProps> = ({
         startTime={workshop.startTime}
         endTime={workshop.endTime}
         room={workshop.room}
+        maxPlaces={workshop.maxPlaces}
         onDateChange={(date) => setWorkshop({ ...workshop, date })}
         onStartTimeChange={(startTime) =>
           setWorkshop({ ...workshop, startTime })
         }
         onEndTimeChange={(endTime) => setWorkshop({ ...workshop, endTime })}
         onRoomChange={(room) => setWorkshop({ ...workshop, room })}
+        onMaxPlacesChange={(maxPlaces) =>
+          setWorkshop({ ...workshop, maxPlaces })
+        }
       />{" "}
       <div className={classes["button-container"]}>
         <button className={classes["add-button"]} type="submit">

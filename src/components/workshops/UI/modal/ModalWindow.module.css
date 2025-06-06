@@ -18,20 +18,18 @@
   padding: 20px 24px 20px;
   border-radius: 12px;
   color: white;
-  /* max-height: 80vh; */
   min-width: 320px;
   max-width: 500px;
   width: 100%;
-  /* overflow-y: auto; 
-  overflow-x: hidden;  */
   position: relative;
   transform: scale(0.8);
   opacity: 0;
   animation: scaleIn 0.3s ease forwards;
-  /* word-wrap: break-word; 
-  white-space: pre-wrap;  */
 }
-
+.modal-content-special {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
 .modal-close {
   position: absolute;
   top: 8px;

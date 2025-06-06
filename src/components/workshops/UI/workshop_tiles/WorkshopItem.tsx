@@ -9,6 +9,7 @@ type Workshop = {
   startTime: string;
   endTime: string;
   room: string;
+  maxPlaces: number;
 };
 
 type WorkshopItemProps = {
@@ -25,9 +26,14 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   openDescription,
 }) => {
   const [workshopChosen, setWorkshopChosen] = useState(false);
+  {
+    /* Стэйт для управления количеством записанных людей */
+  }
+  const [signedPeople, setSignedPeople] = useState<number>(0);
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Проверяем, что клик был не по кнопкам
-    if (!(e.target as HTMLElement).closest("button")) {
+    const target = e.target as HTMLElement;
+    if (!target.closest("button")) {
       openDescription(workshop);
     }
   };
@@ -49,12 +55,13 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            setWorkshopChosen(true);
+            setWorkshopChosen(false);
+            setSignedPeople(signedPeople - 1);
           }}
           className="check-out-button"
           title="Check out"
         >
-          <span className="icon-[icon-park-outline:minus] text-xl" />
+          <span className="icon-[material-symbols--remove] text-xl" />
         </button>
       );
     } else {
@@ -62,7 +69,8 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            setWorkshopChosen(false);
+            setWorkshopChosen(true);
+            setSignedPeople(signedPeople + 1);
           }}
           className="check-in-button"
           title="Check in"
@@ -75,7 +83,13 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
 
   return (
     <div className="workshop-tile" onClick={handleContentClick}>
-      <h3>{workshop.title}</h3>
+      <p className="workshop-places">
+        {" "}
+        {workshop.maxPlaces > 0
+          ? signedPeople + "/" + workshop.maxPlaces
+          : "No limit on number of people"}
+      </p>
+      <h3> {workshop.title}</h3>
       {workshop.date && (
         <div className="workshop-datetime">
           <p>

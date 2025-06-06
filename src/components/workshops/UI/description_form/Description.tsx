@@ -8,6 +8,7 @@ type Workshop = {
   date: string;
   startTime: string;
   endTime: string;
+  room: string;
 };
 
 interface WorkshopProps {
@@ -20,7 +21,11 @@ const Description: React.FC<WorkshopProps> = ({ workshop }) => {
   return (
     <div className="description-content">
       <h2 className="description-title">{workshop.title}</h2>
-      <div className="description-body">{workshop.body}</div>
+      <p>{workshop.body}</p>
+      <div className="description-body">
+        {workshop.date} {workshop.startTime} - {workshop.endTime} room:{" "}
+        {workshop.room}{" "}
+      </div>
     </div>
   );
 };

@@ -4,6 +4,7 @@ import WorkshopList from "./UI/workshop_tiles/WorkshopList";
 import PostForm from "@/components/workshops/UI/post_form/PostForm.tsx";
 import Modal from "./UI/modal/ModalWindow";
 import Description from "./UI/description_form/Description";
+import styles from "./UI/modal/ModalWindow.module.css";
 type Workshop = {
   id: number;
   title: string;
@@ -12,6 +13,7 @@ type Workshop = {
   startTime: string;
   endTime: string;
   room: string;
+  maxPlaces: number;
 };
 
 export function WorkshopsPage() {
@@ -95,6 +97,7 @@ export function WorkshopsPage() {
                   startTime: editingWorkshop.startTime,
                   endTime: editingWorkshop.endTime,
                   room: editingWorkshop.room,
+                  maxPlaces: editingWorkshop.maxPlaces,
                 }
               : undefined
           }
@@ -107,10 +110,11 @@ export function WorkshopsPage() {
       <Modal
         visible={descriptionVisible}
         onClose={() => setDescriptionVisible(false)}
+        className={styles["modal-content-special"]}
       >
         <Description workshop={selectedWorkshop} />
       </Modal>
-      <a
+      {/*<a
         href="https://t.me/maximf3"
         target="_blank"
         className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
@@ -128,7 +132,7 @@ export function WorkshopsPage() {
             developers.
           </p>
         </div>
-      </a>
+      </a>*/}
     </div>
   );
 }

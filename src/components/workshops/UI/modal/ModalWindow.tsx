@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import styles from "./ModalWindow.module.css";
 
 type ModalProps = {
+  className?: string;
   visible: boolean;
   onClose: () => void;
   children: React.ReactNode;
@@ -10,7 +11,12 @@ type ModalProps = {
 {
   /* Компонент модалки в пропсы принимает видимость, обработчик закрытия и контент */
 }
-const Modal: React.FC<ModalProps> = ({ visible, onClose, children }) => {
+const Modal: React.FC<ModalProps> = ({
+  visible,
+  onClose,
+  children,
+  className = "",
+}) => {
   useEffect(() => {
     {
       /* Обработчик для закрытия модалки по клавише Escape */
@@ -38,7 +44,7 @@ const Modal: React.FC<ModalProps> = ({ visible, onClose, children }) => {
   return (
     <div className={styles["modal-backdrop"]}>
       <div
-        className={styles["modal-content"]}
+        className={`${styles["modal-content"]} ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         <button className={styles["modal-close"]} onClick={onClose}>

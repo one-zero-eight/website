@@ -10,6 +10,7 @@ type Workshop = {
   startTime: string;
   endTime: string;
   room: string;
+  maxPlaces: number;
 };
 
 type WorkshopListProps = {

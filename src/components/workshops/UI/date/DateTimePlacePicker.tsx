@@ -6,10 +6,12 @@ export interface DateTimePickerProps {
   startTime: string;
   endTime: string;
   room: string;
+  maxPlaces: number;
   onDateChange: (date: string) => void;
   onStartTimeChange: (time: string) => void;
   onEndTimeChange: (time: string) => void;
   onRoomChange: (room: string) => void;
+  onMaxPlacesChange: (maxPlaces: number) => void;
 }
 
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
@@ -17,10 +19,12 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   startTime,
   endTime,
   room,
+  maxPlaces,
   onDateChange,
   onStartTimeChange,
   onEndTimeChange,
   onRoomChange,
+  onMaxPlacesChange,
 }) => {
   return (
     <div className={classes.dateTimeContainer}>
@@ -43,6 +47,17 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
             onChange={(e) => onRoomChange(e.target.value)}
             className={classes.dateTimeInput}
             placeholder="Room"
+          />
+        </div>
+
+        <div className={classes.inputGroup}>
+          <label className={classes.label}>Places</label>
+          <input
+            type="text"
+            value={maxPlaces}
+            onChange={(e) => onMaxPlacesChange(e.target.value)}
+            className={classes.dateTimeInput}
+            placeholder="limit"
           />
         </div>
       </div>

@@ -29,7 +29,11 @@
   margin: 0 0 8px;
   font-weight: 600;
 }
-
+.workshop-places {
+  color: rgba(var(--color-brand-violet) / 1);
+  font-size: 16px;
+  margin: 0 0 8px;
+}
 .workshop-description {
   max-height: 80px;
   overflow: hidden;
@@ -40,6 +44,15 @@
   -webkit-box-orient: vertical;
   line-height: 1.4;
   margin-bottom: 12px;
+}
+.clickable-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  cursor: pointer;
 }
 
 .delete-button {
