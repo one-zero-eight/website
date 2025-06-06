@@ -129,6 +129,12 @@ export const items: ItemType[] = [
       </span>
     ),
   },
+  {
+    type: "local",
+    title: "Workshops",
+    to: "/workshops",
+    icon: <span className="icon-[material-symbols--construction-rounded]" />,
+  },
   { type: "separator" },
   {
     type: "external",

@@ -1,0 +1,89 @@
+.workshop-list {
+  padding: 20px;
+  color: white;
+}
+
+.workshop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.workshop-tile {
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  padding: 16px;
+  padding-bottom: 50px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  transition: 0.2s ease;
+  position: relative;
+}
+
+.workshop-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 12px rgba(120, 0, 255, 0.4);
+}
+.workshop-tile h3 {
+  font-size: 18px;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.workshop-description {
+  max-height: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.delete-button {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ff6b6b;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.delete-button:hover {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff5252;
+  transform: scale(1.1);
+}
+
+.edit-button {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(var(--color-brand-violet) / 1);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.edit-button:hover {
+  background: rgba(var(--color-brand-violet) / 0.2);
+  color: rgba(var(--color-brand-violet) / 0.8);
+  transform: scale(1.1);
+}

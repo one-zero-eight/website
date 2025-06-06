@@ -132,7 +132,8 @@ function SidebarLink({
   return (
     <Link
       className={clsx(
-        "flex w-full select-none rounded-xl py-1 text-inactive hover:bg-gray-500/10",
+        // "flex w-full select-none rounded-xl py-1 text-inactive hover:bg-gray-500/10",
+        "py-0.3 flex w-full select-none rounded-xl text-inactive hover:bg-gray-500/10",
         "[&.is-active]:text-brand-violet",
         !isMinimized ? "px-2 text-4xl" : "justify-center px-1 text-3xl",
       )}

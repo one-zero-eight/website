@@ -1,0 +1,22 @@
+.workshopTextArea {
+  width: 100%;
+  min-height: 120px;
+  max-height: 200px;
+  padding: 10px 15px;
+  margin: 8px 0;
+  border: 1px solid rgba(200, 200, 200, 0.3);
+  border-radius: 8px;
+  background-color: rgba(200, 200, 200, 0.1);
+  color: #ffffff;
+  font-size: 14px;
+  font-family: inherit;
+  resize: none;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.workshopTextArea:focus {
+  outline: none;
+  border-color: rgba(122, 122, 210, 0.6);
+  box-shadow: 0 0 5px rgba(122, 122, 210, 0.3);
+}

@@ -1,0 +1,58 @@
+import React from "react";
+import classes from "./DateTimePicker.module.css";
+
+export interface DateTimePickerProps {
+  date: string;
+  startTime: string;
+  endTime: string;
+  onDateChange: (date: string) => void;
+  onStartTimeChange: (time: string) => void;
+  onEndTimeChange: (time: string) => void;
+}
+
+const DateTimePicker: React.FC<DateTimePickerProps> = ({
+  date,
+  startTime,
+  endTime,
+  onDateChange,
+  onStartTimeChange,
+  onEndTimeChange,
+}) => {
+  return (
+    <div className={classes.dateTimeContainer}>
+      <div className={classes.inputGroup}>
+        <label className={classes.label}>Date</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => onDateChange(e.target.value)}
+          className={classes.dateTimeInput}
+        />
+      </div>
+
+      <div className={classes.timeGroup}>
+        <div className={classes.inputGroup}>
+          <label className={classes.label}>Start Time</label>
+          <input
+            type="time"
+            value={startTime}
+            onChange={(e) => onStartTimeChange(e.target.value)}
+            className={classes.dateTimeInput}
+          />
+        </div>
+
+        <div className={classes.inputGroup}>
+          <label className={classes.label}>End Time</label>
+          <input
+            type="time"
+            value={endTime}
+            onChange={(e) => onEndTimeChange(e.target.value)}
+            className={classes.dateTimeInput}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DateTimePicker;

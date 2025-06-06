@@ -14,6 +14,7 @@ import { Route as rootRoute } from "./routes/__root";
 import { Route as WithmenuRouteImport } from "./routes/_with_menu/route";
 import { Route as IndexImport } from "./routes/index";
 import { Route as FormsSubmitImport } from "./routes/forms.submit";
+import { Route as WithmenuWorkshopsImport } from "./routes/_with_menu/workshops";
 import { Route as WithmenuSportImport } from "./routes/_with_menu/sport";
 import { Route as WithmenuSearchImport } from "./routes/_with_menu/search";
 import { Route as WithmenuScholarshipImport } from "./routes/_with_menu/scholarship";
@@ -53,6 +54,11 @@ const IndexRoute = IndexImport.update({
 const FormsSubmitRoute = FormsSubmitImport.update({
   path: "/forms/submit",
   getParentRoute: () => rootRoute,
+} as any);
+
+const WithmenuWorkshopsRoute = WithmenuWorkshopsImport.update({
+  path: "/workshops",
+  getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
 const WithmenuSportRoute = WithmenuSportImport.update({
@@ -282,6 +288,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof FormsSubmitImport;
       parentRoute: typeof rootRoute;
     };
+    "/_with_menu/workshops": {
+      id: "/_with_menu/workshops";
+      path: "/workshops";
+      fullPath: "/workshops";
+      preLoaderRoute: typeof WithmenuWorkshopsImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
     "/_with_menu/account/connect-telegram": {
       id: "/_with_menu/account/connect-telegram";
       path: "/connect-telegram";
@@ -392,6 +405,7 @@ interface WithmenuRouteRouteChildren {
   WithmenuScholarshipRoute: typeof WithmenuScholarshipRoute;
   WithmenuSearchRoute: typeof WithmenuSearchRoute;
   WithmenuSportRoute: typeof WithmenuSportRoute;
+  WithmenuWorkshopsRoute: typeof WithmenuWorkshopsRoute;
   WithmenuMusicRoomInstructionsRoute: typeof WithmenuMusicRoomInstructionsRoute;
   WithmenuRoomBookingListRoute: typeof WithmenuRoomBookingListRoute;
   WithmenuRoomBookingRulesRoute: typeof WithmenuRoomBookingRulesRoute;
@@ -415,6 +429,7 @@ const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuScholarshipRoute: WithmenuScholarshipRoute,
   WithmenuSearchRoute: WithmenuSearchRoute,
   WithmenuSportRoute: WithmenuSportRoute,
+  WithmenuWorkshopsRoute: WithmenuWorkshopsRoute,
   WithmenuMusicRoomInstructionsRoute: WithmenuMusicRoomInstructionsRoute,
   WithmenuRoomBookingListRoute: WithmenuRoomBookingListRoute,
   WithmenuRoomBookingRulesRoute: WithmenuRoomBookingRulesRoute,
@@ -445,6 +460,7 @@ export interface FileRoutesByFullPath {
   "/search": typeof WithmenuSearchRoute;
   "/sport": typeof WithmenuSportRoute;
   "/forms/submit": typeof FormsSubmitRoute;
+  "/workshops": typeof WithmenuWorkshopsRoute;
   "/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
   "/account/token": typeof WithmenuAccountTokenRoute;
   "/music-room/instructions": typeof WithmenuMusicRoomInstructionsRoute;
@@ -473,6 +489,7 @@ export interface FileRoutesByTo {
   "/search": typeof WithmenuSearchRoute;
   "/sport": typeof WithmenuSportRoute;
   "/forms/submit": typeof FormsSubmitRoute;
+  "/workshops": typeof WithmenuWorkshopsRoute;
   "/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
   "/account/token": typeof WithmenuAccountTokenRoute;
   "/music-room/instructions": typeof WithmenuMusicRoomInstructionsRoute;
@@ -503,6 +520,7 @@ export interface FileRoutesById {
   "/_with_menu/search": typeof WithmenuSearchRoute;
   "/_with_menu/sport": typeof WithmenuSportRoute;
   "/forms/submit": typeof FormsSubmitRoute;
+  "/_with_menu/workshops": typeof WithmenuWorkshopsRoute;
   "/_with_menu/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
   "/_with_menu/account/token": typeof WithmenuAccountTokenRoute;
   "/_with_menu/music-room/instructions": typeof WithmenuMusicRoomInstructionsRoute;
@@ -534,6 +552,7 @@ export interface FileRouteTypes {
     | "/search"
     | "/sport"
     | "/forms/submit"
+    | "/workshops"
     | "/account/connect-telegram"
     | "/account/token"
     | "/music-room/instructions"
@@ -561,6 +580,7 @@ export interface FileRouteTypes {
     | "/search"
     | "/sport"
     | "/forms/submit"
+    | "/workshops"
     | "/account/connect-telegram"
     | "/account/token"
     | "/music-room/instructions"
@@ -589,6 +609,7 @@ export interface FileRouteTypes {
     | "/_with_menu/search"
     | "/_with_menu/sport"
     | "/forms/submit"
+    | "/_with_menu/workshops"
     | "/_with_menu/account/connect-telegram"
     | "/_with_menu/account/token"
     | "/_with_menu/music-room/instructions"
@@ -650,6 +671,7 @@ export const routeTree = rootRoute
         "/_with_menu/scholarship",
         "/_with_menu/search",
         "/_with_menu/sport",
+        "/_with_menu/workshops",
         "/_with_menu/music-room/instructions",
         "/_with_menu/room-booking/list",
         "/_with_menu/room-booking/rules",
@@ -715,6 +737,10 @@ export const routeTree = rootRoute
     },
     "/forms/submit": {
       "filePath": "forms.submit.tsx"
+    },
+    "/_with_menu/workshops": {
+      "filePath": "_with_menu/workshops.tsx",
+      "parent": "/_with_menu"
     },
     "/_with_menu/account/connect-telegram": {
       "filePath": "_with_menu/account/connect-telegram.tsx",

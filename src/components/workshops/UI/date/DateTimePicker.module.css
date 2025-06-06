@@ -1,0 +1,90 @@
+.dateTimeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 8px 0;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dateTimeInput {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid rgba(200, 200, 200, 0.3);
+  border-radius: 8px;
+  background-color: rgba(200, 200, 200, 0.1);
+  color: #ffffff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.dateTimeInput:focus {
+  outline: none;
+  border-color: rgba(122, 122, 210, 0.6);
+  box-shadow: 0 0 5px rgba(122, 122, 210, 0.3);
+}
+
+.dateTimeInput::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+.timeGroup {
+  display: flex;
+  gap: 12px;
+}
+
+.timeGroup .inputGroup {
+  flex: 1;
+}
+
+.dateTimeInput[type="date"]::-webkit-datetime-edit,
+.dateTimeInput[type="time"]::-webkit-datetime-edit {
+  color: #ffffff;
+}
+
+.dateTimeInput[type="date"]::-webkit-datetime-edit-text,
+.dateTimeInput[type="time"]::-webkit-datetime-edit-text {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dateTimeInput[type="date"]::-webkit-datetime-edit-month-field,
+.dateTimeInput[type="date"]::-webkit-datetime-edit-day-field,
+.dateTimeInput[type="date"]::-webkit-datetime-edit-year-field,
+.dateTimeInput[type="time"]::-webkit-datetime-edit-hour-field,
+.dateTimeInput[type="time"]::-webkit-datetime-edit-minute-field {
+  color: #ffffff;
+}
+
+/* Force English date format display */
+.dateTimeInput[type="date"] {
+  -webkit-locale: "en-US";
+}
+
+.dateTimeInput[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  direction: ltr;
+}
+
+.dateTimeInput[type="date"]:before {
+  content: attr(placeholder);
+  color: rgba(255, 255, 255, 0.6);
+  position: absolute;
+  pointer-events: none;
+}
+
+.dateTimeInput[type="date"]:focus:before,
+.dateTimeInput[type="date"]:valid:before {
+  display: none;
+}
