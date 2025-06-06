@@ -85,6 +85,27 @@
   color: #aad6aa;
   transform: scale(1.1);
 }
+.check-out-button {
+  position: absolute;
+  bottom: 12px;
+  right: 45%;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ff6b6b;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+.check-out-button:hover {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff5252;
+  transform: scale(1.1);
+}
 .edit-button {
   position: absolute;
   bottom: 12px;

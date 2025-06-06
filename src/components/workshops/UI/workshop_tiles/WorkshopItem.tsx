@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./WorkshopList.css";
 
 type Workshop = {
@@ -24,6 +24,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   edit,
   openDescription,
 }) => {
+  const [workshopChosen, setWorkshopChosen] = useState(false);
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Проверяем, что клик был не по кнопкам
     if (!(e.target as HTMLElement).closest("button")) {
@@ -41,6 +42,37 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     if (!timeString) return "";
     return timeString;
   };
+
+  function renderButton(workshopChosen: boolean) {
+    if (workshopChosen) {
+      return (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setWorkshopChosen(true);
+          }}
+          className="check-out-button"
+          title="Check out"
+        >
+          <span className="icon-[icon-park-outline:minus] text-xl" />
+        </button>
+      );
+    } else {
+      return (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setWorkshopChosen(false);
+          }}
+          className="check-in-button"
+          title="Check in"
+        >
+          <span className="icon-[material-symbols--add-rounded] text-xl" />
+        </button>
+      );
+    }
+  }
+
   return (
     <div className="workshop-tile" onClick={handleContentClick}>
       <h3>{workshop.title}</h3>
@@ -72,16 +104,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       >
         <span className="icon-[material-symbols--delete-outline-rounded] text-xl" />
       </button>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          remove(workshop);
-        }}
-        className="check-in-button"
-        title="Check in"
-      >
-        <span className="icon-[material-symbols--add-rounded] text-xl" />
-      </button>
+      {renderButton(workshopChosen)}
       <button
         onClick={(e) => {
           e.stopPropagation();
