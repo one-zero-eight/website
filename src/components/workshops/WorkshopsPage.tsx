@@ -11,6 +11,7 @@ type Workshop = {
   date: string;
   startTime: string;
   endTime: string;
+  room: string;
 };
 
 export function WorkshopsPage() {
@@ -38,7 +39,6 @@ export function WorkshopsPage() {
 
   const createWorkshop = (newWorkshop: Workshop) => {
     setWorkshops([...workshops, newWorkshop]);
-    setModalVisible(false);
   };
 
   const removeWorkshop = (workshop: Workshop) => {
@@ -94,12 +94,14 @@ export function WorkshopsPage() {
                   date: editingWorkshop.date,
                   startTime: editingWorkshop.startTime,
                   endTime: editingWorkshop.endTime,
+                  room: editingWorkshop.room,
                 }
               : undefined
           }
           isEditing={!!editingWorkshop}
           onUpdate={updateWorkshop}
           existingId={editingWorkshop?.id}
+          onClose={handleModalClose}
         />
       </Modal>
       <Modal

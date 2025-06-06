@@ -9,6 +9,7 @@ type Workshop = {
   date: string;
   startTime: string;
   endTime: string;
+  room: string;
 };
 
 type WorkshopListProps = {

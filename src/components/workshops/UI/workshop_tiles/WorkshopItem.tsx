@@ -8,6 +8,7 @@ type Workshop = {
   date: string;
   startTime: string;
   endTime: string;
+  room: string;
 };
 
 type WorkshopItemProps = {
@@ -52,6 +53,11 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
             <p>
               <strong>Time:</strong> {formatTime(workshop.startTime)} -{" "}
               {formatTime(workshop.endTime)}
+            </p>
+          )}
+          {workshop.room && (
+            <p>
+              <strong>Room:</strong> {workshop.room}
             </p>
           )}
         </div>

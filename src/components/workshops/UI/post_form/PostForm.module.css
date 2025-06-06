@@ -6,6 +6,18 @@
   letter-spacing: 0.5px;
 }
 
+.required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+
 .button-container {
   text-align: center;
   margin-top: 20px;

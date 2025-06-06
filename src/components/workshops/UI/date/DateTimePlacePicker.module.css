@@ -5,6 +5,19 @@
   margin: 8px 0;
 }
 
+.dateRoomGroup {
+  display: flex;
+  gap: 12px;
+}
+
+.dateRoomGroup .inputGroup:first-child {
+  flex: 2;
+}
+
+.dateRoomGroup .inputGroup:last-child {
+  flex: 1;
+}
+
 .inputGroup {
   display: flex;
   flex-direction: column;

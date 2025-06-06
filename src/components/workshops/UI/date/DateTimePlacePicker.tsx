@@ -1,33 +1,50 @@
 import React from "react";
-import classes from "./DateTimePicker.module.css";
+import classes from "./DateTimePlacePicker.module.css";
 
 export interface DateTimePickerProps {
   date: string;
   startTime: string;
   endTime: string;
+  room: string;
   onDateChange: (date: string) => void;
   onStartTimeChange: (time: string) => void;
   onEndTimeChange: (time: string) => void;
+  onRoomChange: (room: string) => void;
 }
 
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
   date,
   startTime,
   endTime,
+  room,
   onDateChange,
   onStartTimeChange,
   onEndTimeChange,
+  onRoomChange,
 }) => {
   return (
     <div className={classes.dateTimeContainer}>
-      <div className={classes.inputGroup}>
-        <label className={classes.label}>Date</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => onDateChange(e.target.value)}
-          className={classes.dateTimeInput}
-        />
+      <div className={classes.dateRoomGroup}>
+        <div className={classes.inputGroup}>
+          <label className={classes.label}>Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => onDateChange(e.target.value)}
+            className={classes.dateTimeInput}
+          />
+        </div>
+
+        <div className={classes.inputGroup}>
+          <label className={classes.label}>Room</label>
+          <input
+            type="text"
+            value={room}
+            onChange={(e) => onRoomChange(e.target.value)}
+            className={classes.dateTimeInput}
+            placeholder="Room"
+          />
+        </div>
       </div>
 
       <div className={classes.timeGroup}>
