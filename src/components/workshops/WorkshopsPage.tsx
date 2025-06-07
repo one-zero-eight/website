@@ -5,6 +5,8 @@ import PostForm from "@/components/workshops/UI/post_form/PostForm.tsx";
 import Modal from "./UI/modal/ModalWindow";
 import Description from "./UI/description_form/Description";
 import styles from "./UI/modal/ModalWindow.module.css";
+import { workshopsFetch } from "@/api/workshops";
+
 type Workshop = {
   id: number;
   title: string;
@@ -33,6 +35,8 @@ export function WorkshopsPage() {
   const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(
     null,
   );
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState("");
 
   const openDescription = (workshop: Workshop) => {
     setSelectedWorkshop(workshop);
@@ -59,14 +63,42 @@ export function WorkshopsPage() {
     setEditingWorkshop(null);
     setModalVisible(false);
   };
-
   const handleModalClose = () => {
     setModalVisible(false);
     setEditingWorkshop(null);
   };
+  const handleTestRegister = async () => {
+    try {
+      const { data, error } = await workshopsFetch.POST("/users/register", {
+        body: {
+          email: "test-user1",
+          password: "test-password1",
+        },
+      });
+
+      if (error) {
+        console.error("Registration failed:", error);
+        alert("Registration failed");
+      } else {
+        console.log("Registration successful:", data);
+        alert(`Registration successful! Token: ${data.access_token}`);
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      alert("Error during registration");
+    }
+  };
 
   return (
     <div className="App">
+      <button
+        className="reg-button"
+        title="Test register"
+        onClick={handleTestRegister}
+        style={{ marginRight: "10px" }}
+      >
+        Test register
+      </button>
       <button
         className="fab-button"
         title="Add new workshop"

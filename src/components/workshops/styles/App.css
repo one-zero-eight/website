@@ -30,3 +30,24 @@
 .fab-button:hover {
   background-color: rgba(var(--color-brand-violet) / 0.8);
 }
+
+.reg-button {
+  position: fixed;
+  right: 14px;
+  bottom: 82px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: rgba(var(--color-brand-violet) / 1);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 1001;
+  transition: background-color 0.2s ease;
+}
+
+.reg-button:hover {
+  background-color: rgba(var(--color-brand-violet) / 0.8);
+}

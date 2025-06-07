@@ -67,9 +67,19 @@ export default defineConfig({
       },
     },
   },
-
   define: {
     // Inject the app version variable
     __VERSION__: JSON.stringify(version),
+  },
+
+  server: {
+    proxy: {
+      // ПРОКСИ ДЛЯ РАБОТЫ С ЛОКАЛКОЙ БЭКЕНД-ЧАСТЬЮ
+      '/api/workshops': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/workshops/, ''),
+      },
+    },
   },
 });
