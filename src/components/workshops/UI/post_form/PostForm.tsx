@@ -14,10 +14,11 @@ type Workshop = {
   endTime: string;
   room: string;
   maxPlaces: number;
+  isActive?: boolean;
 };
 
 type PostFormProps = {
-  create: (workshop: Workshop) => void;
+  create: (workshop: Workshop) => Promise<void>;
   initialWorkshop?: Omit<Workshop, "id">;
   isEditing?: boolean;
   onUpdate?: (workshop: Workshop) => void;
@@ -45,10 +46,11 @@ const PostForm: React.FC<PostFormProps> = ({
     endTime: initialWorkshop?.endTime || "",
     room: initialWorkshop?.room || "",
     maxPlaces: initialWorkshop?.maxPlaces || 0,
+    isActive: true,
   });
 
   const [titleError, setTitleError] = useState("");
-  const addNewWorkshop = (e: React.FormEvent<HTMLFormElement>) => {
+  const addNewWorkshop = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Проверяем, заполнено ли поле title
@@ -86,23 +88,29 @@ const PostForm: React.FC<PostFormProps> = ({
         room: workshop.room.trim() || "TBA", // Подставляем TBA если поле пустое
         maxPlaces: workshop.maxPlaces || 0,
       };
-      create(newWorkshop);
-    }
 
-    {
-      /* Сброс формы после добавления или обновления */
-    }
-    if (!isEditing) {
-      setWorkshop({
-        title: "",
-        body: "",
-        date: "",
-        startTime: "",
-        endTime: "",
-        room: "",
-        maxPlaces: 0,
-      });
-      setTitleError("");
+      try {
+        await create(newWorkshop);
+        // Сброс формы после успешного создания
+        setWorkshop({
+          title: "",
+          body: "",
+          date: "",
+          startTime: "",
+          endTime: "",
+          room: "",
+          maxPlaces: 0,
+          isActive: true,
+        });
+        setTitleError("");
+
+        // Закрываем форму
+        if (onClose) {
+          onClose();
+        }
+      } catch (error) {
+        console.error("Error creating workshop:", error);
+      }
     }
   };
 
@@ -149,6 +157,31 @@ const PostForm: React.FC<PostFormProps> = ({
           setWorkshop({ ...workshop, maxPlaces })
         }
       />{" "}
+      <div
+        style={{
+          margin: "16px 0",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+        }}
+      >
+        <input
+          type="checkbox"
+          id="isActive"
+          checked={workshop.isActive}
+          onChange={(e) =>
+            setWorkshop({ ...workshop, isActive: e.target.checked })
+          }
+          style={{ width: "auto" }}
+        />
+        <label
+          htmlFor="isActive"
+          className={classes.label}
+          style={{ margin: 0 }}
+        >
+          Active Workshop
+        </label>
+      </div>
       <div className={classes["button-container"]}>
         <button className={classes["add-button"]} type="submit">
           {isEditing ? "UPDATE" : "ADD"}

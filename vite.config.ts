@@ -76,7 +76,7 @@ export default defineConfig({
     proxy: {
       // ПРОКСИ ДЛЯ РАБОТЫ С ЛОКАЛКОЙ БЭКЕНД-ЧАСТЬЮ
       '/api/workshops': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:9000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/workshops/, ''),
       },

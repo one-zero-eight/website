@@ -7,7 +7,13 @@ import { Middleware } from "openapi-fetch";
 export const authMiddleware: Middleware = {
   async onRequest({ request }) {
     // Check the requested URL to add token only to our API
-    if (!request.url.startsWith("https://api.innohassle.ru/")) return;
+    if (
+      !(
+        request.url.startsWith("https://api.innohassle.ru/") ||
+        request.url.includes("api/workshops")
+      )
+    )
+      return;
 
     const token = getMyAccessToken();
     if (token) {
@@ -19,7 +25,13 @@ export const authMiddleware: Middleware = {
   },
   async onResponse({ response }) {
     // Check the final URL to ensure we are handling only our API
-    if (!response.url.startsWith("https://api.innohassle.ru/")) return;
+    if (
+      !(
+        response.url.startsWith("https://api.innohassle.ru/") ||
+        response.url.includes("api/workshops")
+      )
+    )
+      return;
 
     if (response.status === 401) {
       invalidateMyAccessToken();
