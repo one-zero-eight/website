@@ -82,6 +82,71 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/my_checkins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["get_my_checkins"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/workshops/{workshop_id}/checkin": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: { workshop_id: string };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["check_out"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/workshops/{workshop_id}/checkout": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: { workshop_id: string };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["check_out"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+
+  "/api/workshops/{workshop_id}/checkins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: { workshop_id: string };
+      cookie?: never;
+    };
+    get: operations["checkins"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   //Другие эндпоинты здесь, следуя тому же шаблону
 }
 /**
@@ -143,6 +208,23 @@ export interface components {
         msg: string;
         type: string;
       }>;
+    };
+    GetMyWorkshopsResponse: {
+      myWorkshops: Array<{
+        id: string;
+        name: string;
+        alias: string;
+        dtstart: string;
+        dtend: string;
+        place: string;
+        is_active: boolean;
+      }>;
+    };
+    CheckInOutResponse: {
+      message: string;
+    };
+    GetCheckInsResponse: {
+      checkIns: string;
     };
     // Другие схемы здесь
   };
@@ -376,6 +458,152 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ValidationError"];
+        };
+      };
+    };
+  };
+  get_my_checkins: {
+    parameters: {
+      query?: {
+        page?: number;
+        limit?: number;
+        category?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GetMyWorkshopsResponse"];
+        };
+      };
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  check_in: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: { workshop_id: string };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CheckInOutResponse"];
+        };
+      };
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ValidationError"];
+        };
+      };
+    };
+  };
+  check_out: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: { workshop_id: string };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CheckInOutResponse"];
+        };
+      };
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ValidationError"];
+        };
+      };
+    };
+  };
+  checkins: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: { workshop_id: string };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GetCheckInsResponse"];
+        };
       };
       422: {
         headers: {

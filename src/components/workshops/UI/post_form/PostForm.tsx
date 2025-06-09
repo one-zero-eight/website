@@ -6,7 +6,7 @@ import DateTimePlacePicker from "../date/DateTimePlacePicker";
 import classes from "./PostForm.module.css";
 
 type Workshop = {
-  id: number;
+  id: string;
   title: string;
   body: string;
   date: string;
@@ -22,7 +22,7 @@ type PostFormProps = {
   initialWorkshop?: Omit<Workshop, "id">;
   isEditing?: boolean;
   onUpdate?: (workshop: Workshop) => void;
-  existingId?: number;
+  existingId?: string;
   onClose?: () => void;
 };
 
@@ -84,7 +84,7 @@ const PostForm: React.FC<PostFormProps> = ({
       }
       const newWorkshop = {
         ...workshop,
-        id: Date.now(),
+        id: Date.now().toString(),
         room: workshop.room.trim() || "TBA", // Подставляем TBA если поле пустое
         maxPlaces: workshop.maxPlaces || 0,
       };

@@ -2,7 +2,7 @@ import React from "react";
 import "./Description.css";
 
 type Workshop = {
-  id: number;
+  id: string;
   title: string;
   body: string;
   date: string;

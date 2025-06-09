@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./WorkshopList.css";
+import { workshopsFetch } from "@/api/workshops";
 
 type Workshop = {
-  id: number;
+  id: string;
   title: string;
   body: string;
   date: string;
@@ -17,6 +18,7 @@ type WorkshopItemProps = {
   remove: (workshop: Workshop) => void;
   edit: (workshop: Workshop) => void;
   openDescription: (workshop: Workshop) => void;
+  token: string | null;
 };
 
 const WorkshopItem: React.FC<WorkshopItemProps> = ({
@@ -24,6 +26,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   remove,
   edit,
   openDescription,
+  token,
 }) => {
   const [workshopChosen, setWorkshopChosen] = useState(false);
   {
@@ -48,38 +51,87 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     if (!timeString) return "";
     return timeString;
   };
-
-  function renderButton(workshopChosen: boolean) {
-    if (workshopChosen) {
-      return (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setWorkshopChosen(false);
-            setSignedPeople(signedPeople - 1);
-          }}
-          className="check-out-button"
-          title="Check out"
-        >
-          <span className="icon-[material-symbols--remove] text-xl" />
-        </button>
-      );
-    } else {
-      return (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setWorkshopChosen(true);
-            setSignedPeople(signedPeople + 1);
-          }}
-          className="check-in-button"
-          title="Check in"
-        >
-          <span className="icon-[material-symbols--add-rounded] text-xl" />
-        </button>
-      );
+  useEffect(() => {
+    if (!token) {
+      setWorkshopChosen(false);
     }
-  }
+  }, [token]);
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await workshopsFetch.GET(`/users/my_checkins`);
+      if (!error && Array.isArray(data)) {
+        const isCheckedIn = data.some((w) => w.id === workshop.id);
+        setWorkshopChosen(isCheckedIn);
+      }
+
+      const { data: checkinsData, error: checkinsError } =
+        await workshopsFetch.GET(`/api/workshops/{workshop_id}/checkins`, {
+          params: {
+            path: { workshop_id: workshop.id.toString() },
+          },
+        });
+
+      if (!checkinsError && checkinsData) {
+        setSignedPeople(parseInt(checkinsData.checkIns));
+      }
+    })();
+  }, [workshop.id]);
+
+  const handleCheckIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    if (workshop.maxPlaces > 0 && signedPeople >= workshop.maxPlaces) {
+      return;
+    }
+
+    try {
+      const { data, error } = await workshopsFetch.POST(
+        `/api/workshops/{workshop_id}/checkin`,
+        {
+          params: {
+            path: { workshop_id: workshop.id.toString() },
+          },
+        },
+      );
+
+      if (!error) {
+        setWorkshopChosen(true);
+        setSignedPeople((count) => count + 1);
+        alert("You check in " + data);
+      } else {
+        alert("Impossible to check in" + error);
+      }
+    } catch (error) {
+      console.error("Check-in failed", error);
+      alert("Error occur when trying to check in.");
+    }
+  };
+
+  const handleCheckOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    try {
+      const { data, error } = await workshopsFetch.POST(
+        `/api/workshops/{workshop_id}/checkout`,
+        {
+          params: {
+            path: { workshop_id: workshop.id.toString() },
+          },
+        },
+      );
+
+      if (!error) {
+        setWorkshopChosen(false);
+        setSignedPeople((count) => Math.max(0, count - 1));
+        alert("You check out " + data);
+      } else {
+        alert("Impossible to check out");
+      }
+    } catch (error) {
+      console.error("Check-out failed", error);
+      alert("Error occur when trying to check out");
+    }
+  };
 
   return (
     <div className="workshop-tile" onClick={handleContentClick}>
@@ -118,7 +170,24 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       >
         <span className="icon-[material-symbols--delete-outline-rounded] text-xl" />
       </button>
-      {renderButton(workshopChosen)}
+      {workshopChosen ? (
+        <button
+          disabled={signedPeople === workshop.maxPlaces}
+          onClick={handleCheckOut}
+          className="check-out-button"
+          title="Check out"
+        >
+          <span className="icon-[material-symbols--remove] text-xl" />
+        </button>
+      ) : (
+        <button
+          onClick={handleCheckIn}
+          className="check-in-button"
+          title="Check in"
+        >
+          <span className="icon-[material-symbols--add-rounded] text-xl" />
+        </button>
+      )}
       <button
         onClick={(e) => {
           e.stopPropagation();

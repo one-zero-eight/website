@@ -3,7 +3,7 @@ import WorkshopItem from "./WorkshopItem";
 import "./WorkshopList.css";
 
 type Workshop = {
-  id: number;
+  id: string;
   title: string;
   body: string;
   date: string;
@@ -19,6 +19,7 @@ type WorkshopListProps = {
   remove: (workshop: Workshop) => void;
   edit: (workshop: Workshop) => void;
   openDescription: (workshop: Workshop) => void;
+  token: string | null;
 };
 
 const WorkshopList: React.FC<WorkshopListProps> = ({
@@ -27,6 +28,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
   remove,
   edit,
   openDescription,
+  token,
 }) => {
   return (
     <div style={{ textAlign: "center" }} className="workshop-list">
@@ -40,6 +42,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
               edit={edit}
               workshop={workshop}
               openDescription={openDescription}
+              token={token}
               key={workshop.id}
             />
           ))

@@ -9,7 +9,7 @@ import { workshopsFetch } from "@/api/workshops";
 import { useMyAccessToken } from "@/api/helpers/access-token";
 
 type Workshop = {
-  id: number;
+  id: string;
   title: string;
   body: string;
   date: string;
@@ -90,7 +90,7 @@ export function WorkshopsPage() {
         // Сервер вернул данные в своём формате, нужно преобразовать их
         // обратно в формат нашего фронтенда для отображения
         const localWorkshop: Workshop = {
-          id: parseInt(data.id) || Date.now(), // преобразуем id в число
+          id: data.id,
           title: data.name, // name -> title
           body: newWorkshop.body, // сохраняем оригинальное описание
           date: newWorkshop.date, // сохраняем оригинальные данные
@@ -157,7 +157,7 @@ export function WorkshopsPage() {
       // POST используется для создания новых ресурсов (в данном случае - нового пользователя)
       const { data, error } = await workshopsFetch.POST("/users/register", {
         body: {
-          email: "test-user4", // email пользователя
+          email: "test-user20", // email пользователя
           password: "test-password4", // пароль пользователя
         },
       });
@@ -255,6 +255,7 @@ export function WorkshopsPage() {
         workshops={workshops}
         title={"Workshops list"}
         openDescription={openDescription}
+        token={token}
       />
       {/* Модалка для создания нового воркшопа чекай UI/modal */}
       <Modal visible={modalVisible} onClose={handleModalClose}>
