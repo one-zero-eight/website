@@ -55,7 +55,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <input
             type="text"
             value={maxPlaces}
-            onChange={(e) => onMaxPlacesChange(e.target.value)}
+            onChange={(e) => onMaxPlacesChange(Number(e.target.value))}
             className={classes.dateTimeInput}
             placeholder="limit"
           />

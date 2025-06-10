@@ -32,22 +32,6 @@
  * };
  */
 export interface paths {
-  "/users/register": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["users_register"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/users/change_role": {
     parameters: {
       query: {
@@ -60,22 +44,6 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["users_change_role"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/workshops/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["create_workshop"];
     delete?: never;
     options?: never;
     head?: never;
@@ -169,38 +137,8 @@ export interface paths {
  */
 export interface components {
   schemas: {
-    RegisterRequest: {
-      email: string;
-      password: string;
-    };
-    RegisterResponse: {
-      access_token: string;
-      token_type: string;
-    };
     ChangeRoleResponse: {
       message: string;
-    };
-    CreateWorkshopRequest: {
-      name: string;
-      alias: string;
-      dtstart: string;
-      dtend: string;
-      place: string;
-      capacity: number;
-      remain_places: number;
-      is_active: boolean;
-    };
-    CreateWorkshopResponse: {
-      name: string;
-      alias: string;
-      dtstart: string;
-      dtend: string;
-      place: string;
-      capacity: number;
-      remain_places: number;
-      is_active: boolean;
-      id: string;
-      created_at: string;
     };
     ValidationError: {
       detail: Array<{
@@ -330,49 +268,6 @@ export interface components {
  * ВАЖНО: Имя операции должно совпадать с тем, что указано в paths!
  */
 export interface operations {
-  users_register: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RegisterRequest"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["RegisterResponse"];
-        };
-      };
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            detail: Array<{
-              loc: (string | number)[];
-              msg: string;
-              type: string;
-            }>;
-          };
-        };
-      };
-    };
-  };
   users_change_role: {
     parameters: {
       query: {
@@ -416,55 +311,6 @@ export interface operations {
               type: string;
             }>;
           };
-        };
-      };
-    };
-  };
-  create_workshop: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateWorkshopRequest"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["CreateWorkshopResponse"];
-        };
-      };
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ValidationError"];
         };
       };
     };

@@ -18,7 +18,6 @@ type WorkshopItemProps = {
   remove: (workshop: Workshop) => void;
   edit: (workshop: Workshop) => void;
   openDescription: (workshop: Workshop) => void;
-  token: string | null;
 };
 
 const WorkshopItem: React.FC<WorkshopItemProps> = ({
@@ -26,7 +25,6 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   remove,
   edit,
   openDescription,
-  token,
 }) => {
   const [workshopChosen, setWorkshopChosen] = useState(false);
   {
@@ -51,11 +49,6 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     if (!timeString) return "";
     return timeString;
   };
-  useEffect(() => {
-    if (!token) {
-      setWorkshopChosen(false);
-    }
-  }, [token]);
 
   useEffect(() => {
     (async () => {
