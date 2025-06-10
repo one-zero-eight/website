@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./styles/App.css";
 import WorkshopList from "./UI/workshop_tiles/WorkshopList";
 import PostForm from "@/components/workshops/UI/post_form/PostForm.tsx";
@@ -38,12 +38,119 @@ export function WorkshopsPage() {
     setDescriptionVisible(true);
   };
 
-  const createWorkshop = async (newWorkshop: Workshop) => {
-    // TODO: Добавить логику создания воркшопа
+  const loadWorkshops = async () => {
+    try {
+      const { data, error } = await workshopsFetch.GET("/api/workshops/", {
+        params: {
+          query: {
+            limit: 100,
+          },
+        },
+      });
+
+      if (error) {
+        console.error("Failed to load workshops:", error);
+      } else if (data) {
+        // Преобразуем данные API в формат Workshop
+        const transformedWorkshops: Workshop[] = data.map((workshop) => ({
+          id: workshop.id,
+          title: workshop.name,
+          body: workshop.description,
+          date: workshop.dtstart.split("T")[0], // Берем только дату
+          startTime: workshop.dtstart.split("T")[1]?.split(".")[0] || "", // Берем время без миллисекунд
+          endTime: workshop.dtend.split("T")[1]?.split(".")[0] || "",
+          room: workshop.place,
+          maxPlaces: workshop.capacity,
+        }));
+        setWorkshops(transformedWorkshops);
+      }
+    } catch (error) {
+      console.error("Error loading workshops:", error);
+    }
   };
 
-  const removeWorkshop = (workshop: Workshop) => {
-    setWorkshops(workshops.filter((w) => w.id !== workshop.id));
+  // Загружаем воркшопы при монтировании компонента
+  useEffect(() => {
+    loadWorkshops();
+  }, []);
+
+  const createWorkshop = async (newWorkshop: Workshop) => {
+    try {
+      // Преобразуем формат даты и времени в ISO формат для API
+      const startDateTime = `${newWorkshop.date}T${newWorkshop.startTime}`;
+      const endDateTime = `${newWorkshop.date}T${newWorkshop.endTime}`;
+
+      // Создаем объект запроса в формате API
+      const createRequest = {
+        name: newWorkshop.title,
+        description: newWorkshop.body,
+        capacity: newWorkshop.maxPlaces,
+        remain_places: newWorkshop.maxPlaces, // Изначально все места свободны
+        place: newWorkshop.room || "TBA",
+        dtstart: startDateTime,
+        dtend: endDateTime,
+      };
+
+      const { data, error } = await workshopsFetch.POST("/api/workshops/", {
+        body: createRequest,
+      });
+
+      if (error) {
+        console.error("Failed to create workshop:", error);
+        alert(`Failed to create workshop: ${JSON.stringify(error)}`);
+      } else if (data) {
+        console.log("Workshop created successfully:", data);
+        alert("Workshop created successfully!");
+
+        // Преобразуем ответ API обратно в формат Workshop и добавляем в список
+        const createdWorkshop: Workshop = {
+          id: data.id,
+          title: data.name,
+          body: data.description,
+          date: data.dtstart.split("T")[0],
+          startTime: data.dtstart.split("T")[1]?.split(".")[0] || "",
+          endTime: data.dtend.split("T")[1]?.split(".")[0] || "",
+          room: data.place,
+          maxPlaces: data.capacity,
+        };
+
+        setWorkshops((prevWorkshops) => [...prevWorkshops, createdWorkshop]);
+      }
+    } catch (error) {
+      console.error("Error creating workshop:", error);
+      alert(
+        `Error creating workshop: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  };
+
+  const removeWorkshop = async (workshop: Workshop) => {
+    try {
+      const { data, error } = await workshopsFetch.DELETE(
+        `/api/workshops/{workshop_id}`,
+        {
+          params: {
+            path: { workshop_id: workshop.id },
+          },
+        },
+      );
+
+      if (error) {
+        console.error("Failed to delete workshop:", error);
+        alert(`Failed to delete workshop: ${JSON.stringify(error)}`);
+      } else {
+        console.log("Workshop deleted successfully:", data);
+        alert("Workshop deleted successfully!");
+
+        // Удаляем воркшоп из локального состояния
+        setWorkshops(workshops.filter((w) => w.id !== workshop.id));
+      }
+    } catch (error) {
+      console.error("Error deleting workshop:", error);
+      alert(
+        `Error deleting workshop: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   };
 
   const editWorkshop = (workshop: Workshop) => {
@@ -51,12 +158,55 @@ export function WorkshopsPage() {
     setModalVisible(true);
   };
 
-  const updateWorkshop = (updatedWorkshop: Workshop) => {
-    setWorkshops(
-      workshops.map((w) => (w.id === updatedWorkshop.id ? updatedWorkshop : w)),
-    );
-    setEditingWorkshop(null);
-    setModalVisible(false);
+  const updateWorkshop = async (updatedWorkshop: Workshop) => {
+    try {
+      // Преобразуем формат даты и времени в ISO формат для API
+      const startDateTime = `${updatedWorkshop.date}T${updatedWorkshop.startTime}`;
+      const endDateTime = `${updatedWorkshop.date}T${updatedWorkshop.endTime}`;
+
+      // Создаем объект запроса в формате API
+      const updateRequest = {
+        name: updatedWorkshop.title,
+        description: updatedWorkshop.body,
+        capacity: updatedWorkshop.maxPlaces,
+        place: updatedWorkshop.room || "TBA",
+        dtstart: startDateTime,
+        dtend: endDateTime,
+        is_active: updatedWorkshop.isActive ?? true,
+      };
+
+      const { data, error } = await workshopsFetch.PUT(
+        `/api/workshops/{workshop_id}`,
+        {
+          params: {
+            path: { workshop_id: updatedWorkshop.id },
+          },
+          body: updateRequest,
+        },
+      );
+
+      if (error) {
+        console.error("Failed to update workshop:", error);
+        alert(`Failed to update workshop: ${JSON.stringify(error)}`);
+      } else if (data) {
+        console.log("Workshop updated successfully:", data);
+        alert("Workshop updated successfully!");
+
+        // Обновляем воркшоп в локальном состоянии
+        setWorkshops(
+          workshops.map((w) =>
+            w.id === updatedWorkshop.id ? updatedWorkshop : w,
+          ),
+        );
+        setEditingWorkshop(null);
+        setModalVisible(false);
+      }
+    } catch (error) {
+      console.error("Error updating workshop:", error);
+      alert(
+        `Error updating workshop: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   };
   const handleModalClose = () => {
     setModalVisible(false);

@@ -99,6 +99,40 @@ export interface paths {
     trace?: never;
   };
 
+  "/api/workshops/": {
+    parameters: {
+      query?: {
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["get_all_workshops"];
+    put?: never;
+    post: operations["create_workshop"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/workshops/{workshop_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: { workshop_id: string };
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["update_workshop"];
+    post?: never;
+    delete: operations["delete_workshop"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/workshops/{workshop_id}/checkins": {
     parameters: {
       query?: never;
@@ -147,6 +181,26 @@ export interface components {
         type: string;
       }>;
     };
+    Workshop: {
+      id: string;
+      name: string;
+      description: string;
+      dtstart: string;
+      dtend: string;
+      place: string;
+      capacity: number;
+      remain_places: number;
+    };
+    GetAllWorkshopsResponse: Array<{
+      id: string;
+      name: string;
+      description: string;
+      dtstart: string;
+      dtend: string;
+      place: string;
+      capacity: number;
+      remain_places: number;
+    }>;
     GetMyWorkshopsResponse: {
       myWorkshops: Array<{
         id: string;
@@ -163,6 +217,35 @@ export interface components {
     };
     GetCheckInsResponse: {
       checkIns: string;
+    };
+    CreateWorkshopRequest: {
+      name: string;
+      description: string;
+      capacity: number;
+      remain_places: number;
+      place: string;
+      dtstart: string;
+      dtend: string;
+    };
+    CreateWorkshopResponse: {
+      id: string;
+      name: string;
+      description: string;
+      dtstart: string;
+      dtend: string;
+      place: string;
+      capacity: number;
+      remain_places: number;
+    };
+    UpdateWorkshopRequest: {
+      name: string;
+      alias?: string;
+      description: string;
+      dtstart: string;
+      dtend: string;
+      place: string;
+      capacity: number;
+      is_active: boolean;
     };
     // Другие схемы здесь
   };
@@ -450,6 +533,184 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["GetCheckInsResponse"];
         };
+      };
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ValidationError"];
+        };
+      };
+    };
+  };
+  get_all_workshops: {
+    parameters: {
+      query?: {
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GetAllWorkshopsResponse"];
+        };
+      };
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ValidationError"];
+        };
+      };
+    };
+  };
+  create_workshop: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateWorkshopRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CreateWorkshopResponse"];
+        };
+      };
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ValidationError"];
+        };
+      };
+    };
+  };
+  update_workshop: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: { workshop_id: string };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateWorkshopRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": string;
+        };
+      };
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ValidationError"];
+        };
+      };
+    };
+  };
+  delete_workshop: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: { workshop_id: string };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": string;
+        };
+      };
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       422: {
         headers: {
