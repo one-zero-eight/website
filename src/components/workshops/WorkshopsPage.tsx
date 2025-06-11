@@ -226,12 +226,9 @@ export function WorkshopsPage() {
         console.log("Workshop updated successfully:", data);
         alert("Workshop updated successfully!");
 
-        // Обновляем воркшоп в локальном состоянии
-        setWorkshops(
-          workshops.map((w) =>
-            w.id === updatedWorkshop.id ? updatedWorkshop : w,
-          ),
-        );
+        // Перезагружаем данные с сервера для обновления состояния
+        await loadWorkshops();
+
         setEditingWorkshop(null);
         setModalVisible(false);
       }
@@ -325,6 +322,7 @@ export function WorkshopsPage() {
                   endTime: editingWorkshop.endTime,
                   room: editingWorkshop.room,
                   maxPlaces: editingWorkshop.maxPlaces,
+                  remainPlaces: editingWorkshop.remainPlaces, // Добавляем remainPlaces
                 }
               : undefined
           }

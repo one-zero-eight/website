@@ -47,6 +47,7 @@ const PostForm: React.FC<PostFormProps> = ({
     endTime: initialWorkshop?.endTime || "",
     room: initialWorkshop?.room || "",
     maxPlaces: initialWorkshop?.maxPlaces || 0,
+    remainPlaces: initialWorkshop?.remainPlaces,
     isActive: true,
   });
 
@@ -72,6 +73,7 @@ const PostForm: React.FC<PostFormProps> = ({
         id: existingId,
         room: workshop.room.trim() || "TBA", // Подставляем TBA если поле пустое
         maxPlaces: workshop.maxPlaces || 0,
+        remainPlaces: workshop.remainPlaces,
       };
       onUpdate(updatedWorkshop);
 
@@ -101,6 +103,7 @@ const PostForm: React.FC<PostFormProps> = ({
           endTime: "",
           room: "",
           maxPlaces: 0,
+          remainPlaces: undefined,
           isActive: true,
         });
         setTitleError("");
