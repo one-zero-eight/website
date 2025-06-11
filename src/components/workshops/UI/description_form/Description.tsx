@@ -9,6 +9,7 @@ type Workshop = {
   startTime: string;
   endTime: string;
   room: string;
+  remainPlaces?: number; // Добавляем поле для оставшихся мест
 };
 
 interface WorkshopProps {

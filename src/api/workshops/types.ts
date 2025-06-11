@@ -190,6 +190,7 @@ export interface components {
       place: string;
       capacity: number;
       remain_places: number;
+      is_active: boolean;
     };
     GetAllWorkshopsResponse: Array<{
       id: string;
@@ -200,6 +201,7 @@ export interface components {
       place: string;
       capacity: number;
       remain_places: number;
+      is_active: boolean;
     }>;
     GetMyWorkshopsResponse: {
       myWorkshops: Array<{
@@ -226,6 +228,7 @@ export interface components {
       place: string;
       dtstart: string;
       dtend: string;
+      is_active: boolean;
     };
     CreateWorkshopResponse: {
       id: string;
@@ -236,6 +239,7 @@ export interface components {
       place: string;
       capacity: number;
       remain_places: number;
+      is_active: boolean;
     };
     UpdateWorkshopRequest: {
       name: string;

@@ -17,6 +17,7 @@ type Workshop = {
   endTime: string;
   room: string;
   maxPlaces: number;
+  remainPlaces?: number; // Добавляем поле для оставшихся мест
   isActive?: boolean;
 };
 
@@ -50,25 +51,50 @@ export function WorkshopsPage() {
 
       if (error) {
         console.error("Failed to load workshops:", error);
-      } else if (data) {
-        // Преобразуем данные API в формат Workshop
-        const transformedWorkshops: Workshop[] = data.map((workshop) => ({
+        // Можно добавить уведомление пользователю о проблеме
+        alert(`Failed to load workshops: ${JSON.stringify(error)}`);
+        return;
+      }
+
+      if (!data || !Array.isArray(data)) {
+        console.error("Invalid data received from API:", data);
+        return;
+      }
+
+      // Преобразуем данные API в формат Workshop
+      const transformedWorkshops: Workshop[] = data.map((workshop) => {
+        // Более надежный парсинг времени
+        const parseTime = (isoString: string): string => {
+          try {
+            const date = new Date(isoString);
+            return date.toTimeString().substring(0, 5); // HH:MM
+          } catch {
+            return (
+              isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || ""
+            );
+          }
+        };
+
+        return {
           id: workshop.id,
           title: workshop.name,
           body: workshop.description,
           date: workshop.dtstart.split("T")[0], // Берем только дату
-          startTime:
-            workshop.dtstart.split("T")[1]?.split(".")[0]?.substring(0, 5) ||
-            "", // Берем время без миллисекунд
-          endTime:
-            workshop.dtend.split("T")[1]?.split(".")[0]?.substring(0, 5) || "",
+          startTime: parseTime(workshop.dtstart),
+          endTime: parseTime(workshop.dtend),
           room: workshop.place,
           maxPlaces: workshop.capacity,
-        }));
-        setWorkshops(transformedWorkshops);
-      }
+          remainPlaces: workshop.remain_places || 0, // Добавляем обработку оставшихся мест
+          isActive: workshop.is_active,
+        };
+      });
+
+      setWorkshops(transformedWorkshops);
     } catch (error) {
       console.error("Error loading workshops:", error);
+      alert(
+        `Error loading workshops: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   };
 
@@ -87,11 +113,12 @@ export function WorkshopsPage() {
       const createRequest = {
         name: newWorkshop.title,
         description: newWorkshop.body,
-        capacity: newWorkshop.maxPlaces,
+        capacity: newWorkshop.maxPlaces || 500,
         remain_places: newWorkshop.maxPlaces, // Изначально все места свободны
         place: newWorkshop.room || "TBA",
         dtstart: startDateTime,
         dtend: endDateTime,
+        is_active: newWorkshop.isActive ?? true, // По умолчанию активный
       };
 
       const { data, error } = await workshopsFetch.POST("/api/workshops/", {
@@ -115,6 +142,8 @@ export function WorkshopsPage() {
           endTime: data.dtend.split("T")[1]?.split(".")[0] || "",
           room: data.place,
           maxPlaces: data.capacity,
+          remainPlaces: data.remain_places || data.capacity, // Используем remain_places или capacity как fallback
+          isActive: data.is_active,
         };
 
         setWorkshops((prevWorkshops) => [...prevWorkshops, createdWorkshop]);
@@ -172,6 +201,8 @@ export function WorkshopsPage() {
         name: updatedWorkshop.title,
         description: updatedWorkshop.body,
         capacity: updatedWorkshop.maxPlaces,
+        remain_places:
+          updatedWorkshop.remainPlaces || updatedWorkshop.maxPlaces,
         place: updatedWorkshop.room || "TBA",
         dtstart: startDateTime,
         dtend: endDateTime,

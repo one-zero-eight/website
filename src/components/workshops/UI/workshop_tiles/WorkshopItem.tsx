@@ -11,6 +11,7 @@ type Workshop = {
   endTime: string;
   room: string;
   maxPlaces: number;
+  remainPlaces?: number; // Добавляем поле для оставшихся мест
 };
 
 type WorkshopItemProps = {
@@ -49,7 +50,6 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     if (!timeString) return "";
     return timeString;
   };
-
   useEffect(() => {
     (async () => {
       const { data, error } = await workshopsFetch.GET(`/users/my_checkins`);
@@ -58,18 +58,26 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         setWorkshopChosen(isCheckedIn);
       }
 
-      const { data: checkinsData, error: checkinsError } =
-        await workshopsFetch.GET(`/api/workshops/{workshop_id}/checkins`, {
-          params: {
-            path: { workshop_id: workshop.id.toString() },
-          },
-        });
+      // Используем remainPlaces из пропсов воркшопа если есть, иначе делаем API запрос
+      if (workshop.remainPlaces !== undefined) {
+        // Вычисляем количество записанных людей из remainPlaces
+        const signedCount = workshop.maxPlaces - workshop.remainPlaces;
+        setSignedPeople(Math.max(0, signedCount)); // Не допускаем отрицательных значений
+      } else {
+        // Fallback к API запросу если remainPlaces недоступно
+        const { data: checkinsData, error: checkinsError } =
+          await workshopsFetch.GET(`/api/workshops/{workshop_id}/checkins`, {
+            params: {
+              path: { workshop_id: workshop.id.toString() },
+            },
+          });
 
-      if (!checkinsError && checkinsData) {
-        setSignedPeople(parseInt(checkinsData.checkIns));
+        if (!checkinsError && checkinsData) {
+          setSignedPeople(parseInt(checkinsData.checkIns));
+        }
       }
     })();
-  }, [workshop.id]);
+  }, [workshop.id, workshop.remainPlaces, workshop.maxPlaces]);
 
   const handleCheckIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();

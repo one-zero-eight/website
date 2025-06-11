@@ -14,6 +14,7 @@ type Workshop = {
   endTime: string;
   room: string;
   maxPlaces: number;
+  remainPlaces?: number; // Добавляем поле для оставшихся мест
   isActive?: boolean;
 };
 
