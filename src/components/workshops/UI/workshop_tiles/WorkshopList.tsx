@@ -20,6 +20,7 @@ type WorkshopListProps = {
   remove: (workshop: Workshop) => void;
   edit: (workshop: Workshop) => void;
   openDescription: (workshop: Workshop) => void;
+  currentUserRole: "user" | "admin";
 };
 
 const WorkshopList: React.FC<WorkshopListProps> = ({
@@ -28,6 +29,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
   remove,
   edit,
   openDescription,
+  currentUserRole,
 }) => {
   return (
     <div style={{ textAlign: "center" }} className="workshop-list">
@@ -42,6 +44,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
               workshop={workshop}
               openDescription={openDescription}
               key={workshop.id}
+              currentUserRole={currentUserRole}
             />
           ))
         ) : (

@@ -314,21 +314,29 @@ export function WorkshopsPage() {
       {/* Показываем кнопку изменения роли только если пользователь авторизован */}
       {currentUser && (
         <button
-          className="admin-button"
+          className="fab-button"
           title={`Set ${currentUser.role === "admin" ? "user" : "admin"} role`}
           onClick={handleRoleChangeRequest}
-          style={{ marginRight: "10px" }}
+          style={{
+            bottom: currentUser.role === "admin" ? "80px" : "24px",
+          }}
         >
           Set {currentUser.role === "admin" ? "user" : "admin"}
         </button>
       )}
-      <button
-        className="fab-button"
-        title="Add new workshop"
-        onClick={() => setModalVisible(true)}
-      >
-        Add workshop
-      </button>{" "}
+      {/* Показываем кнопку добавления воркшопа только для администраторов */}
+      {currentUser?.role === "admin" && (
+        <button
+          className="fab-button"
+          title="Add new workshop"
+          onClick={() => setModalVisible(true)}
+          style={{
+            bottom: "24px",
+          }}
+        >
+          Add workshop
+        </button>
+      )}{" "}
       {/* Отрисовка списка воркшопов из UI/workshop_tiles */}
       <WorkshopList
         remove={removeWorkshop}
@@ -336,6 +344,7 @@ export function WorkshopsPage() {
         workshops={workshops}
         title={"Workshops list"}
         openDescription={openDescription}
+        currentUserRole={currentUser?.role || "user"}
       />
       {/* Модалка для создания нового воркшопа чекай UI/modal */}
       <Modal visible={modalVisible} onClose={handleModalClose}>
@@ -353,7 +362,7 @@ export function WorkshopsPage() {
                   endTime: editingWorkshop.endTime,
                   room: editingWorkshop.room,
                   maxPlaces: editingWorkshop.maxPlaces,
-                  remainPlaces: editingWorkshop.remainPlaces, // Добавляем remainPlaces
+                  remainPlaces: editingWorkshop.remainPlaces,
                 }
               : undefined
           }

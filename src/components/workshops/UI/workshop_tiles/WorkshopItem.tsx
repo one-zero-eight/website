@@ -19,6 +19,7 @@ type WorkshopItemProps = {
   remove: (workshop: Workshop) => void;
   edit: (workshop: Workshop) => void;
   openDescription: (workshop: Workshop) => void;
+  currentUserRole: "user" | "admin";
 };
 
 const WorkshopItem: React.FC<WorkshopItemProps> = ({
@@ -26,6 +27,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   remove,
   edit,
   openDescription,
+  currentUserRole,
 }) => {
   const [workshopChosen, setWorkshopChosen] = useState(false);
   {
@@ -161,16 +163,31 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           )}
         </div>
       )}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          remove(workshop);
-        }}
-        className="delete-button"
-        title="Delete workshop"
-      >
-        <span className="icon-[material-symbols--delete-outline-rounded] text-xl" />
-      </button>
+      {/* Показываем кнопки управления только для администраторов */}
+      {currentUserRole === "admin" && (
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              remove(workshop);
+            }}
+            className="delete-button"
+            title="Delete workshop"
+          >
+            <span className="icon-[material-symbols--delete-outline-rounded] text-xl" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              edit(workshop);
+            }}
+            className="edit-button"
+            title="Edit workshop"
+          >
+            <span className="icon-[mynaui--pencil] text-xl" />
+          </button>
+        </>
+      )}
       {workshopChosen ? (
         <button
           disabled={signedPeople === workshop.maxPlaces}
@@ -189,16 +206,6 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           <span className="icon-[material-symbols--add-rounded] text-xl" />
         </button>
       )}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          edit(workshop);
-        }}
-        className="edit-button"
-        title="Edit workshop"
-      >
-        <span className="icon-[mynaui--pencil] text-xl" />
-      </button>
     </div>
   );
 };
