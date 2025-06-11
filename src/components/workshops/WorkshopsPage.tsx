@@ -21,6 +21,14 @@ type Workshop = {
   isActive?: boolean;
 };
 
+type User = {
+  id: string;
+  innohassle_id: string;
+  email: string;
+  name: string;
+  role: "user" | "admin";
+};
+
 export function WorkshopsPage() {
   // ===== СОСТОЯНИЕ КОМПОНЕНТА =====
   // Стэйт для хранения списка воркшопов
@@ -33,10 +41,33 @@ export function WorkshopsPage() {
   const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(
     null,
   );
+  // Стэйт для хранения информации о текущем пользователе
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const openDescription = (workshop: Workshop) => {
     setSelectedWorkshop(workshop);
     setDescriptionVisible(true);
+  };
+
+  // Функция для загрузки информации о текущем пользователе
+  const loadCurrentUser = async () => {
+    try {
+      const { data, error } = await workshopsFetch.GET("/users/me");
+
+      if (error) {
+        console.error("Failed to load current user:", error);
+        // Если пользователь не авторизован, просто не показываем кнопку изменения роли
+        setCurrentUser(null);
+        return;
+      }
+
+      if (data) {
+        setCurrentUser(data);
+      }
+    } catch (error) {
+      console.error("Error loading current user:", error);
+      setCurrentUser(null);
+    }
   };
 
   const loadWorkshops = async () => {
@@ -101,6 +132,7 @@ export function WorkshopsPage() {
   // Загружаем воркшопы при монтировании компонента
   useEffect(() => {
     loadWorkshops();
+    loadCurrentUser(); // Загружаем информацию о пользователе
   }, []);
 
   const createWorkshop = async (newWorkshop: Workshop) => {
@@ -246,34 +278,30 @@ export function WorkshopsPage() {
 
   const handleRoleChangeRequest = async () => {
     try {
-      // ===== ПРИМЕР АВТОРИЗОВАННОГО ЗАПРОСА С ПАРАМЕТРАМИ =====
+      // Определяем новую роль на основе текущей роли пользователя
+      const newRole = currentUser?.role === "admin" ? "user" : "admin";
 
-      // Логируем текущий токен для отладки
-      console.log("Making role change request...");
+      console.log(`Changing role to: ${newRole}`);
 
-      // 1. ОТПРАВЛЯЕМ ЗАПРОС С ПАРАМЕТРАМИ ЗАПРОСА (query parameters)
-      // Параметры запроса добавляются к URL в виде ?role=admin
-      // Токен автоматически добавляется библиотекой workshopsFetch
       const { data, error } = await workshopsFetch.POST("/users/change_role", {
         params: {
           query: {
-            role: "admin", // Параметр запроса: какую роль установить
+            role: newRole,
           },
         },
       });
 
-      // 2. ОБРАБОТКА ОТВЕТА
       if (error) {
-        // Возможные ошибки: нет прав, неверный токен, роль не существует
         console.error("Role change failed:", error);
         alert(`Role change failed: ${JSON.stringify(error)}`);
       } else {
-        // Успешное изменение роли
         console.log("Role changed successfully:", data);
-        alert("Admin role granted successfully!");
+        alert(`Role changed to ${newRole} successfully!`);
+
+        // Перезагружаем информацию о пользователе для обновления UI
+        await loadCurrentUser();
       }
     } catch (error) {
-      // Критические ошибки
       console.error("Error during role change:", error);
       alert(
         `Error during role change: ${error instanceof Error ? error.message : String(error)}`,
@@ -283,14 +311,17 @@ export function WorkshopsPage() {
 
   return (
     <div className="App">
-      <button
-        className="admin-button"
-        title="Set admin role"
-        onClick={handleRoleChangeRequest}
-        style={{ marginRight: "10px" }}
-      >
-        Set admin
-      </button>
+      {/* Показываем кнопку изменения роли только если пользователь авторизован */}
+      {currentUser && (
+        <button
+          className="admin-button"
+          title={`Set ${currentUser.role === "admin" ? "user" : "admin"} role`}
+          onClick={handleRoleChangeRequest}
+          style={{ marginRight: "10px" }}
+        >
+          Set {currentUser.role === "admin" ? "user" : "admin"}
+        </button>
+      )}
       <button
         className="fab-button"
         title="Add new workshop"

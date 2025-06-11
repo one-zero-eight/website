@@ -50,6 +50,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["users_get_me"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/my_checkins": {
     parameters: {
       query?: never;
@@ -173,6 +189,13 @@ export interface components {
   schemas: {
     ChangeRoleResponse: {
       message: string;
+    };
+    CurrentUser: {
+      id: string;
+      innohassle_id: string;
+      email: string;
+      name: string;
+      role: "user" | "admin";
     };
     ValidationError: {
       detail: Array<{
@@ -399,6 +422,31 @@ export interface operations {
             }>;
           };
         };
+      };
+    };
+  };
+  users_get_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CurrentUser"];
+        };
+      };
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
