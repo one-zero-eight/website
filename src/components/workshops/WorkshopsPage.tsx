@@ -57,8 +57,11 @@ export function WorkshopsPage() {
           title: workshop.name,
           body: workshop.description,
           date: workshop.dtstart.split("T")[0], // Берем только дату
-          startTime: workshop.dtstart.split("T")[1]?.split(".")[0] || "", // Берем время без миллисекунд
-          endTime: workshop.dtend.split("T")[1]?.split(".")[0] || "",
+          startTime:
+            workshop.dtstart.split("T")[1]?.split(".")[0]?.substring(0, 5) ||
+            "", // Берем время без миллисекунд
+          endTime:
+            workshop.dtend.split("T")[1]?.split(".")[0]?.substring(0, 5) || "",
           room: workshop.place,
           maxPlaces: workshop.capacity,
         }));
