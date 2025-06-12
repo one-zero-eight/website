@@ -82,7 +82,6 @@ export function WorkshopsPage() {
 
       if (error) {
         console.error("Failed to load workshops:", error);
-        // Можно добавить уведомление пользователю о проблеме
         alert(`Failed to load workshops: ${JSON.stringify(error)}`);
         return;
       }
@@ -94,11 +93,10 @@ export function WorkshopsPage() {
 
       // Преобразуем данные API в формат Workshop
       const transformedWorkshops: Workshop[] = data.map((workshop) => {
-        // Более надежный парсинг времени
         const parseTime = (isoString: string): string => {
           try {
             const date = new Date(isoString);
-            return date.toTimeString().substring(0, 5); // HH:MM
+            return date.toTimeString().substring(0, 5);
           } catch {
             return (
               isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || ""
@@ -131,9 +129,20 @@ export function WorkshopsPage() {
 
   // Загружаем воркшопы при монтировании компонента
   useEffect(() => {
-    handleLogin();
     loadWorkshops();
-    loadCurrentUser(); // Загружаем информацию о пользователе
+
+    // Загружаем информацию о пользователе с повторной попыткой если нет в датабазе
+    const loadUserWithRetry = async () => {
+      await loadCurrentUser();
+
+      if (!currentUser) {
+        setTimeout(async () => {
+          await loadCurrentUser();
+        }, 100);
+      }
+    };
+
+    loadUserWithRetry();
   }, []);
 
   const createWorkshop = async (newWorkshop: Workshop) => {
@@ -306,33 +315,6 @@ export function WorkshopsPage() {
       console.error("Error during role change:", error);
       alert(
         `Error during role change: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-  };
-
-  const handleLogin = async () => {
-    try {
-      const { data, error } = await workshopsFetch.POST("/users/change_role", {
-        params: {
-          query: {
-            role: "user",
-          },
-        },
-      });
-
-      if (error) {
-        console.error("Log in failed:", error);
-        alert(`Log in failed: ${JSON.stringify(error)}`);
-      } else {
-        console.log("Log in successfully!:", data);
-
-        // Перезагружаем информацию о пользователе для обновления UI
-        await loadCurrentUser();
-      }
-    } catch (error) {
-      console.error("Error during log in:", error);
-      alert(
-        `Error during log in: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   };
