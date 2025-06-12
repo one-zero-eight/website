@@ -20,7 +20,7 @@ type Workshop = {
   remainPlaces?: number; // Добавляем поле для оставшихся мест
   isActive?: boolean;
 };
-
+/*jefjkd*/
 type User = {
   id: string;
   innohassle_id: string;
