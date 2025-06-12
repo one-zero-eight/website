@@ -131,6 +131,7 @@ export function WorkshopsPage() {
 
   // Загружаем воркшопы при монтировании компонента
   useEffect(() => {
+    handleLogin();
     loadWorkshops();
     loadCurrentUser(); // Загружаем информацию о пользователе
   }, []);
@@ -305,6 +306,33 @@ export function WorkshopsPage() {
       console.error("Error during role change:", error);
       alert(
         `Error during role change: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  };
+
+  const handleLogin = async () => {
+    try {
+      const { data, error } = await workshopsFetch.POST("/users/change_role", {
+        params: {
+          query: {
+            role: "user",
+          },
+        },
+      });
+
+      if (error) {
+        console.error("Log in failed:", error);
+        alert(`Log in failed: ${JSON.stringify(error)}`);
+      } else {
+        console.log("Log in successfully!:", data);
+
+        // Перезагружаем информацию о пользователе для обновления UI
+        await loadCurrentUser();
+      }
+    } catch (error) {
+      console.error("Error during log in:", error);
+      alert(
+        `Error during log in: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   };
