@@ -5,7 +5,7 @@ export function CountdownWidget() {
 
   const currentYear = new Date().getFullYear();
   const deadlineMs =
-    new Date(`${currentYear}-06-01`).getTime() - 3 * 60 * 60 * 1000;
+    new Date(`${currentYear}-06-21`).getTime() - 3 * 60 * 60 * 1000;
   const daysLeft = Math.max(
     0,
     Math.floor((deadlineMs - nowMs) / (1000 * 60 * 60 * 24)),
@@ -23,7 +23,7 @@ export function CountdownWidget() {
         <div className="flex text-lg font-semibold text-contrast">
           <span className="icon-[twemoji--sun] mr-2 shrink-0 text-3xl text-brand-violet sm:hidden" />
           <span>
-            Summer Countdown:{" "}
+            Summer solstice countdown:{" "}
             <span className="font-normal">{daysLeft} days</span>
           </span>
         </div>
