@@ -10,22 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository (with submodules)
+      - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          submodules: 'recursive'  # Critical for submodules
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
-      
-      - name: Install pnpm
+
+      - name: Setup pnpm (use version from package.json)
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          
+
       - name: Install Dependencies and Build
         run: |
           pnpm install
