@@ -56,7 +56,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
               fontSize: "1.3rem",
             }}
           >
-            <h2 style={{ color: "gray" }}>No workshops yet!</h2>
+            <h2 style={{ color: "gray" }}>No workshops yet testtt!</h2>
           </div>
         )}
       </div>
