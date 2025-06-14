@@ -10,7 +10,8 @@ export const authMiddleware: Middleware = {
     if (
       !(
         request.url.startsWith("https://api.innohassle.ru/") ||
-        request.url.includes("api/workshops")
+        request.url.includes("api/workshops") ||
+        request.url.startsWith("https://workshops.innohassle.ru/")
       )
     )
       return;
