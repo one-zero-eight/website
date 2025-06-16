@@ -1,20 +1,24 @@
-import { CourseMaterialsPage } from "@/components/course-materials/CourseMaterialsPage";
+import { CataloguePage } from "@/components/course-materials/Catalogue";
 import { Topbar } from "@/components/layout/Topbar";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
-export const Route = createFileRoute("/_with_menu/course-materials")({
-  component: () => (
+export const Route = createFileRoute("/_with_menu/catalogue/")({
+  component: CatalogueLayout,
+});
+
+function CatalogueLayout() {
+  return (
     <>
       <Helmet>
-        <title>Course Materials</title>
+        <title>Catalogue</title>
         <meta
           name="description"
           content="All course materials of previous years"
         />
       </Helmet>
-      <Topbar title="Course Materials" />
-      <CourseMaterialsPage />
+      <Topbar title="Catalogue" />
+      <CataloguePage />
     </>
-  ),
-});
+  );
+}

@@ -107,6 +107,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/event-groups/by-tag-alias": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Event Group By Tag Alias
+     * @description Delete event groups by its tag alias
+     */
+    delete: operations["event_groups_delete_event_group_by_tag_alias"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/event-groups/{event_group_id}/schedule.ics": {
     parameters: {
       query?: never;
@@ -450,6 +470,46 @@ export interface paths {
      */
     post: operations["tags_batch_create_tags"];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/tags/by-alias": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Tag
+     * @description Delete tag by alias
+     */
+    delete: operations["tags_delete_tag"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/tags/by-type": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Tag By Type
+     * @description Delete tag by type
+     */
+    delete: operations["tags_delete_tag_by_type"];
     options?: never;
     head?: never;
     patch?: never;
@@ -882,15 +942,7 @@ export interface components {
      * ListEventGroupsResponse
      * @description Represents a list of event groups.
      */
-    "ListEventGroupsResponse-Input": {
-      /** Event Groups */
-      event_groups: components["schemas"]["ViewEventGroup"][];
-    };
-    /**
-     * ListEventGroupsResponse
-     * @description Represents a list of event groups.
-     */
-    "ListEventGroupsResponse-Output": {
+    ListEventGroupsResponse: {
       /** Event Groups */
       event_groups: components["schemas"]["ViewEventGroup"][];
     };
@@ -1078,10 +1130,8 @@ export type SchemaLinkedCalendarCreate =
   components["schemas"]["LinkedCalendarCreate"];
 export type SchemaLinkedCalendarView =
   components["schemas"]["LinkedCalendarView"];
-export type SchemaListEventGroupsResponseInput =
-  components["schemas"]["ListEventGroupsResponse-Input"];
-export type SchemaListEventGroupsResponseOutput =
-  components["schemas"]["ListEventGroupsResponse-Output"];
+export type SchemaListEventGroupsResponse =
+  components["schemas"]["ListEventGroupsResponse"];
 export type SchemaListTagsResponse = components["schemas"]["ListTagsResponse"];
 export type SchemaUpdateEventGroup = components["schemas"]["UpdateEventGroup"];
 export type SchemaUserPredefinedGroupsResponse =
@@ -1112,7 +1162,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ListEventGroupsResponse-Input"];
+          "application/json": components["schemas"]["ListEventGroupsResponse"];
         };
       };
     };
@@ -1183,7 +1233,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ListEventGroupsResponse-Input"];
+          "application/json": components["schemas"]["ListEventGroupsResponse"];
         };
       };
       /** @description Unable to verify credentials OR Credentials not provided */
@@ -1400,6 +1450,37 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  event_groups_delete_event_group_by_tag_alias: {
+    parameters: {
+      query: {
+        tag_alias: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Event groups deleted successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": number;
+        };
       };
       /** @description Validation Error */
       422: {
@@ -2055,6 +2136,82 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ListTagsResponse"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  tags_delete_tag: {
+    parameters: {
+      query: {
+        tag_alias: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tag deleted successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  tags_delete_tag_by_type: {
+    parameters: {
+      query: {
+        tag_type: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tag deleted successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
         };
       };
       /** @description Unable to verify credentials OR Credentials not provided */

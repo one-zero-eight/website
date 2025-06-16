@@ -252,6 +252,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/tokens/generate-my-sport-token": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Generate My Sport Token
+     * @description Generate access token for current user for access https://sport.innopolis.university/api/swagger/
+     */
+    get: operations["tokens_generate_my_sport_token"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/logout": {
     parameters: {
       query?: never;
@@ -872,6 +892,33 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+    };
+  };
+  tokens_generate_my_sport_token: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Token */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TokenData"];
+        };
+      };
+      /** @description User does not have a session cookie or `uid` in the session */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

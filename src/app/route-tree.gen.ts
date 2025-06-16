@@ -21,17 +21,18 @@ import { Route as WithmenuMapsImport } from "./routes/_with_menu/maps";
 import { Route as WithmenuExtensionImport } from "./routes/_with_menu/extension";
 import { Route as WithmenuDormsImport } from "./routes/_with_menu/dorms";
 import { Route as WithmenuDashboardImport } from "./routes/_with_menu/dashboard";
-import { Route as WithmenuCourseMaterialsImport } from "./routes/_with_menu/course-materials";
 import { Route as WithmenuCalendarImport } from "./routes/_with_menu/calendar";
 import { Route as WithmenuAccountRouteImport } from "./routes/_with_menu/account/route";
 import { Route as WithmenuScheduleIndexImport } from "./routes/_with_menu/schedule/index";
 import { Route as WithmenuRoomBookingIndexImport } from "./routes/_with_menu/room-booking/index";
 import { Route as WithmenuMusicRoomIndexImport } from "./routes/_with_menu/music-room.index";
+import { Route as WithmenuCatalogueIndexImport } from "./routes/_with_menu/catalogue/index";
 import { Route as WithmenuAccountIndexImport } from "./routes/_with_menu/account/index";
 import { Route as WithmenuScheduleCategoryImport } from "./routes/_with_menu/schedule/$category";
 import { Route as WithmenuRoomBookingRulesImport } from "./routes/_with_menu/room-booking/rules";
 import { Route as WithmenuRoomBookingListImport } from "./routes/_with_menu/room-booking/list";
 import { Route as WithmenuMusicRoomInstructionsImport } from "./routes/_with_menu/music-room.instructions";
+import { Route as WithmenuCatalogueCourseImport } from "./routes/_with_menu/catalogue/$course";
 import { Route as WithmenuAccountConnectTelegramImport } from "./routes/_with_menu/account/connect-telegram";
 import { Route as WithmenuScheduleEventGroupsAliasImport } from "./routes/_with_menu/schedule/event-groups.$alias";
 
@@ -87,11 +88,6 @@ const WithmenuDashboardRoute = WithmenuDashboardImport.update({
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
-const WithmenuCourseMaterialsRoute = WithmenuCourseMaterialsImport.update({
-  path: "/course-materials",
-  getParentRoute: () => WithmenuRouteRoute,
-} as any);
-
 const WithmenuCalendarRoute = WithmenuCalendarImport.update({
   path: "/calendar",
   getParentRoute: () => WithmenuRouteRoute,
@@ -114,6 +110,11 @@ const WithmenuRoomBookingIndexRoute = WithmenuRoomBookingIndexImport.update({
 
 const WithmenuMusicRoomIndexRoute = WithmenuMusicRoomIndexImport.update({
   path: "/music-room/",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
+
+const WithmenuCatalogueIndexRoute = WithmenuCatalogueIndexImport.update({
+  path: "/catalogue/",
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
@@ -142,6 +143,11 @@ const WithmenuMusicRoomInstructionsRoute =
     path: "/music-room/instructions",
     getParentRoute: () => WithmenuRouteRoute,
   } as any);
+
+const WithmenuCatalogueCourseRoute = WithmenuCatalogueCourseImport.update({
+  path: "/catalogue/$course",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
 
 const WithmenuAccountConnectTelegramRoute =
   WithmenuAccountConnectTelegramImport.update({
@@ -185,13 +191,6 @@ declare module "@tanstack/react-router" {
       path: "/calendar";
       fullPath: "/calendar";
       preLoaderRoute: typeof WithmenuCalendarImport;
-      parentRoute: typeof WithmenuRouteImport;
-    };
-    "/_with_menu/course-materials": {
-      id: "/_with_menu/course-materials";
-      path: "/course-materials";
-      fullPath: "/course-materials";
-      preLoaderRoute: typeof WithmenuCourseMaterialsImport;
       parentRoute: typeof WithmenuRouteImport;
     };
     "/_with_menu/dashboard": {
@@ -257,6 +256,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof WithmenuAccountConnectTelegramImport;
       parentRoute: typeof WithmenuAccountRouteImport;
     };
+    "/_with_menu/catalogue/$course": {
+      id: "/_with_menu/catalogue/$course";
+      path: "/catalogue/$course";
+      fullPath: "/catalogue/$course";
+      preLoaderRoute: typeof WithmenuCatalogueCourseImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
     "/_with_menu/music-room/instructions": {
       id: "/_with_menu/music-room/instructions";
       path: "/music-room/instructions";
@@ -291,6 +297,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/account/";
       preLoaderRoute: typeof WithmenuAccountIndexImport;
       parentRoute: typeof WithmenuAccountRouteImport;
+    };
+    "/_with_menu/catalogue/": {
+      id: "/_with_menu/catalogue/";
+      path: "/catalogue";
+      fullPath: "/catalogue";
+      preLoaderRoute: typeof WithmenuCatalogueIndexImport;
+      parentRoute: typeof WithmenuRouteImport;
     };
     "/_with_menu/music-room/": {
       id: "/_with_menu/music-room/";
@@ -341,7 +354,6 @@ const WithmenuAccountRouteRouteWithChildren =
 interface WithmenuRouteRouteChildren {
   WithmenuAccountRouteRoute: typeof WithmenuAccountRouteRouteWithChildren;
   WithmenuCalendarRoute: typeof WithmenuCalendarRoute;
-  WithmenuCourseMaterialsRoute: typeof WithmenuCourseMaterialsRoute;
   WithmenuDashboardRoute: typeof WithmenuDashboardRoute;
   WithmenuDormsRoute: typeof WithmenuDormsRoute;
   WithmenuExtensionRoute: typeof WithmenuExtensionRoute;
@@ -350,10 +362,12 @@ interface WithmenuRouteRouteChildren {
   WithmenuScholarshipRoute: typeof WithmenuScholarshipRoute;
   WithmenuSearchRoute: typeof WithmenuSearchRoute;
   WithmenuSportRoute: typeof WithmenuSportRoute;
+  WithmenuCatalogueCourseRoute: typeof WithmenuCatalogueCourseRoute;
   WithmenuMusicRoomInstructionsRoute: typeof WithmenuMusicRoomInstructionsRoute;
   WithmenuRoomBookingListRoute: typeof WithmenuRoomBookingListRoute;
   WithmenuRoomBookingRulesRoute: typeof WithmenuRoomBookingRulesRoute;
   WithmenuScheduleCategoryRoute: typeof WithmenuScheduleCategoryRoute;
+  WithmenuCatalogueIndexRoute: typeof WithmenuCatalogueIndexRoute;
   WithmenuMusicRoomIndexRoute: typeof WithmenuMusicRoomIndexRoute;
   WithmenuRoomBookingIndexRoute: typeof WithmenuRoomBookingIndexRoute;
   WithmenuScheduleIndexRoute: typeof WithmenuScheduleIndexRoute;
@@ -363,7 +377,6 @@ interface WithmenuRouteRouteChildren {
 const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuAccountRouteRoute: WithmenuAccountRouteRouteWithChildren,
   WithmenuCalendarRoute: WithmenuCalendarRoute,
-  WithmenuCourseMaterialsRoute: WithmenuCourseMaterialsRoute,
   WithmenuDashboardRoute: WithmenuDashboardRoute,
   WithmenuDormsRoute: WithmenuDormsRoute,
   WithmenuExtensionRoute: WithmenuExtensionRoute,
@@ -372,10 +385,12 @@ const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuScholarshipRoute: WithmenuScholarshipRoute,
   WithmenuSearchRoute: WithmenuSearchRoute,
   WithmenuSportRoute: WithmenuSportRoute,
+  WithmenuCatalogueCourseRoute: WithmenuCatalogueCourseRoute,
   WithmenuMusicRoomInstructionsRoute: WithmenuMusicRoomInstructionsRoute,
   WithmenuRoomBookingListRoute: WithmenuRoomBookingListRoute,
   WithmenuRoomBookingRulesRoute: WithmenuRoomBookingRulesRoute,
   WithmenuScheduleCategoryRoute: WithmenuScheduleCategoryRoute,
+  WithmenuCatalogueIndexRoute: WithmenuCatalogueIndexRoute,
   WithmenuMusicRoomIndexRoute: WithmenuMusicRoomIndexRoute,
   WithmenuRoomBookingIndexRoute: WithmenuRoomBookingIndexRoute,
   WithmenuScheduleIndexRoute: WithmenuScheduleIndexRoute,
@@ -391,7 +406,6 @@ export interface FileRoutesByFullPath {
   "": typeof WithmenuRouteRouteWithChildren;
   "/account": typeof WithmenuAccountRouteRouteWithChildren;
   "/calendar": typeof WithmenuCalendarRoute;
-  "/course-materials": typeof WithmenuCourseMaterialsRoute;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/dorms": typeof WithmenuDormsRoute;
   "/extension": typeof WithmenuExtensionRoute;
@@ -401,11 +415,13 @@ export interface FileRoutesByFullPath {
   "/search": typeof WithmenuSearchRoute;
   "/sport": typeof WithmenuSportRoute;
   "/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
+  "/catalogue/$course": typeof WithmenuCatalogueCourseRoute;
   "/music-room/instructions": typeof WithmenuMusicRoomInstructionsRoute;
   "/room-booking/list": typeof WithmenuRoomBookingListRoute;
   "/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/account/": typeof WithmenuAccountIndexRoute;
+  "/catalogue": typeof WithmenuCatalogueIndexRoute;
   "/music-room": typeof WithmenuMusicRoomIndexRoute;
   "/room-booking": typeof WithmenuRoomBookingIndexRoute;
   "/schedule": typeof WithmenuScheduleIndexRoute;
@@ -416,7 +432,6 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "": typeof WithmenuRouteRouteWithChildren;
   "/calendar": typeof WithmenuCalendarRoute;
-  "/course-materials": typeof WithmenuCourseMaterialsRoute;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/dorms": typeof WithmenuDormsRoute;
   "/extension": typeof WithmenuExtensionRoute;
@@ -426,11 +441,13 @@ export interface FileRoutesByTo {
   "/search": typeof WithmenuSearchRoute;
   "/sport": typeof WithmenuSportRoute;
   "/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
+  "/catalogue/$course": typeof WithmenuCatalogueCourseRoute;
   "/music-room/instructions": typeof WithmenuMusicRoomInstructionsRoute;
   "/room-booking/list": typeof WithmenuRoomBookingListRoute;
   "/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/account": typeof WithmenuAccountIndexRoute;
+  "/catalogue": typeof WithmenuCatalogueIndexRoute;
   "/music-room": typeof WithmenuMusicRoomIndexRoute;
   "/room-booking": typeof WithmenuRoomBookingIndexRoute;
   "/schedule": typeof WithmenuScheduleIndexRoute;
@@ -443,7 +460,6 @@ export interface FileRoutesById {
   "/_with_menu": typeof WithmenuRouteRouteWithChildren;
   "/_with_menu/account": typeof WithmenuAccountRouteRouteWithChildren;
   "/_with_menu/calendar": typeof WithmenuCalendarRoute;
-  "/_with_menu/course-materials": typeof WithmenuCourseMaterialsRoute;
   "/_with_menu/dashboard": typeof WithmenuDashboardRoute;
   "/_with_menu/dorms": typeof WithmenuDormsRoute;
   "/_with_menu/extension": typeof WithmenuExtensionRoute;
@@ -453,11 +469,13 @@ export interface FileRoutesById {
   "/_with_menu/search": typeof WithmenuSearchRoute;
   "/_with_menu/sport": typeof WithmenuSportRoute;
   "/_with_menu/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
+  "/_with_menu/catalogue/$course": typeof WithmenuCatalogueCourseRoute;
   "/_with_menu/music-room/instructions": typeof WithmenuMusicRoomInstructionsRoute;
   "/_with_menu/room-booking/list": typeof WithmenuRoomBookingListRoute;
   "/_with_menu/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/_with_menu/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/_with_menu/account/": typeof WithmenuAccountIndexRoute;
+  "/_with_menu/catalogue/": typeof WithmenuCatalogueIndexRoute;
   "/_with_menu/music-room/": typeof WithmenuMusicRoomIndexRoute;
   "/_with_menu/room-booking/": typeof WithmenuRoomBookingIndexRoute;
   "/_with_menu/schedule/": typeof WithmenuScheduleIndexRoute;
@@ -471,7 +489,6 @@ export interface FileRouteTypes {
     | ""
     | "/account"
     | "/calendar"
-    | "/course-materials"
     | "/dashboard"
     | "/dorms"
     | "/extension"
@@ -481,11 +498,13 @@ export interface FileRouteTypes {
     | "/search"
     | "/sport"
     | "/account/connect-telegram"
+    | "/catalogue/$course"
     | "/music-room/instructions"
     | "/room-booking/list"
     | "/room-booking/rules"
     | "/schedule/$category"
     | "/account/"
+    | "/catalogue"
     | "/music-room"
     | "/room-booking"
     | "/schedule"
@@ -495,7 +514,6 @@ export interface FileRouteTypes {
     | "/"
     | ""
     | "/calendar"
-    | "/course-materials"
     | "/dashboard"
     | "/dorms"
     | "/extension"
@@ -505,11 +523,13 @@ export interface FileRouteTypes {
     | "/search"
     | "/sport"
     | "/account/connect-telegram"
+    | "/catalogue/$course"
     | "/music-room/instructions"
     | "/room-booking/list"
     | "/room-booking/rules"
     | "/schedule/$category"
     | "/account"
+    | "/catalogue"
     | "/music-room"
     | "/room-booking"
     | "/schedule"
@@ -520,7 +540,6 @@ export interface FileRouteTypes {
     | "/_with_menu"
     | "/_with_menu/account"
     | "/_with_menu/calendar"
-    | "/_with_menu/course-materials"
     | "/_with_menu/dashboard"
     | "/_with_menu/dorms"
     | "/_with_menu/extension"
@@ -530,11 +549,13 @@ export interface FileRouteTypes {
     | "/_with_menu/search"
     | "/_with_menu/sport"
     | "/_with_menu/account/connect-telegram"
+    | "/_with_menu/catalogue/$course"
     | "/_with_menu/music-room/instructions"
     | "/_with_menu/room-booking/list"
     | "/_with_menu/room-booking/rules"
     | "/_with_menu/schedule/$category"
     | "/_with_menu/account/"
+    | "/_with_menu/catalogue/"
     | "/_with_menu/music-room/"
     | "/_with_menu/room-booking/"
     | "/_with_menu/schedule/"
@@ -576,7 +597,6 @@ export const routeTree = rootRoute
       "children": [
         "/_with_menu/account",
         "/_with_menu/calendar",
-        "/_with_menu/course-materials",
         "/_with_menu/dashboard",
         "/_with_menu/dorms",
         "/_with_menu/extension",
@@ -585,10 +605,12 @@ export const routeTree = rootRoute
         "/_with_menu/scholarship",
         "/_with_menu/search",
         "/_with_menu/sport",
+        "/_with_menu/catalogue/$course",
         "/_with_menu/music-room/instructions",
         "/_with_menu/room-booking/list",
         "/_with_menu/room-booking/rules",
         "/_with_menu/schedule/$category",
+        "/_with_menu/catalogue/",
         "/_with_menu/music-room/",
         "/_with_menu/room-booking/",
         "/_with_menu/schedule/",
@@ -605,10 +627,6 @@ export const routeTree = rootRoute
     },
     "/_with_menu/calendar": {
       "filePath": "_with_menu/calendar.tsx",
-      "parent": "/_with_menu"
-    },
-    "/_with_menu/course-materials": {
-      "filePath": "_with_menu/course-materials.tsx",
       "parent": "/_with_menu"
     },
     "/_with_menu/dashboard": {
@@ -647,6 +665,10 @@ export const routeTree = rootRoute
       "filePath": "_with_menu/account/connect-telegram.tsx",
       "parent": "/_with_menu/account"
     },
+    "/_with_menu/catalogue/$course": {
+      "filePath": "_with_menu/catalogue/$course.tsx",
+      "parent": "/_with_menu"
+    },
     "/_with_menu/music-room/instructions": {
       "filePath": "_with_menu/music-room.instructions.tsx",
       "parent": "/_with_menu"
@@ -666,6 +688,10 @@ export const routeTree = rootRoute
     "/_with_menu/account/": {
       "filePath": "_with_menu/account/index.tsx",
       "parent": "/_with_menu/account"
+    },
+    "/_with_menu/catalogue/": {
+      "filePath": "_with_menu/catalogue/index.tsx",
+      "parent": "/_with_menu"
     },
     "/_with_menu/music-room/": {
       "filePath": "_with_menu/music-room.index.tsx",

@@ -70,13 +70,13 @@ export const items: ItemType[] = [
   },
   {
     type: "local",
-    title: "All Materials",
+    title: "Catalogue",
     badge: (
       <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
         NEW
       </span>
     ),
-    to: "/course-materials",
+    to: "/catalogue",
     icon: <span className="icon-[material-symbols--book-5-rounded]" />,
     hideOnMore: true,
   },

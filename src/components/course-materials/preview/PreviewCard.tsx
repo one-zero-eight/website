@@ -1,9 +1,9 @@
 import { searchTypes } from "@/api/search";
-import TelegramPreview from "@/components/search/TelegramPreview";
+import MoodleUnknownPreview from "@/components/course-materials/preview/MoodleUnknownPreview";
+import TelegramPreview from "@/components/course-materials/preview/TelegramPreview";
 import clsx from "clsx";
 import { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import MoodleUnknownPreview from "./MoodleUnknownPreview";
 import MoodleUrlPreview from "./MoodleUrlPreview";
 
 const PdfPreview = lazy(() => import("./PdfPreview"));
