@@ -225,6 +225,7 @@ export interface components {
       capacity: number;
       remain_places: number;
       is_active: boolean;
+      isRegistrable: boolean;
     }>;
     GetMyWorkshopsResponse: {
       myWorkshops: Array<{

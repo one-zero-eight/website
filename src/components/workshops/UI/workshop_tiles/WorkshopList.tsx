@@ -16,7 +16,6 @@ type Workshop = {
 
 type WorkshopListProps = {
   workshops: Workshop[];
-  title: string;
   remove: (workshop: Workshop) => void;
   edit: (workshop: Workshop) => void;
   openDescription: (workshop: Workshop) => void;
@@ -25,7 +24,6 @@ type WorkshopListProps = {
 
 const WorkshopList: React.FC<WorkshopListProps> = ({
   workshops,
-  title,
   remove,
   edit,
   openDescription,
@@ -33,7 +31,6 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
 }) => {
   return (
     <div style={{ textAlign: "center" }} className="workshop-list">
-      <h1 style={{ fontSize: "2rem" }}>{title}</h1>
       <div className="workshop-grid">
         {/* Тернарное? выражение чтобы плейсходдер рисовать если нет воркшопов */}
         {workshops.length ? (

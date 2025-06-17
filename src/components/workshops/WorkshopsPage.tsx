@@ -19,6 +19,7 @@ type Workshop = {
   maxPlaces: number;
   remainPlaces?: number; // Добавляем поле для оставшихся мест
   isActive?: boolean;
+  isRegistrable?: boolean; // Добавляем поле для возможности регистрации
 };
 /*jefjkd*/
 type User = {
@@ -103,7 +104,6 @@ export function WorkshopsPage() {
             );
           }
         };
-
         return {
           id: workshop.id,
           title: workshop.name,
@@ -115,6 +115,7 @@ export function WorkshopsPage() {
           maxPlaces: workshop.capacity,
           remainPlaces: workshop.remain_places || 0, // Добавляем обработку оставшихся мест
           isActive: workshop.is_active,
+          isRegistrable: workshop.isRegistrable, // Добавляем поле для возможности регистрации
         };
       });
 
@@ -352,7 +353,6 @@ export function WorkshopsPage() {
         remove={removeWorkshop}
         edit={editWorkshop}
         workshops={workshops}
-        title={"Workshops list"}
         openDescription={openDescription}
         currentUserRole={currentUser?.role || "user"}
       />
