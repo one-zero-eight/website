@@ -27,7 +27,7 @@ const SearchIcon: React.FC<Props> = ({
       d="M6.21382 8.43628L1.21521 13.4349"
       stroke={stroke}
       strokeLinecap="round"
-      stroke-linejoin="round"
+      strokeLinejoin="round"
     />
   </svg>
 );

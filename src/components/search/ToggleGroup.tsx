@@ -35,6 +35,7 @@ const ToggleGroup = ({ currentTabText }: { currentTabText: string }) => {
         const isActive = active === option;
         return (
           <button
+            type="button"
             key={option}
             onClick={() => handleClick(option)}
             className={clsx(
