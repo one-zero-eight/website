@@ -19,7 +19,7 @@ type Workshop = {
 };
 
 type PostFormProps = {
-  create: (workshop: Workshop) => Promise<void>;
+  create: (workshop: Workshop) => Promise<boolean>;
   initialWorkshop?: Omit<Workshop, "id">;
   isEditing?: boolean;
   onUpdate?: (workshop: Workshop) => void;
@@ -91,29 +91,32 @@ const PostForm: React.FC<PostFormProps> = ({
         room: workshop.room.trim() || "TBA", // Подставляем TBA если поле пустое
         maxPlaces: workshop.maxPlaces || 0,
       };
-
       try {
-        await create(newWorkshop);
-        // Сброс формы после успешного создания
-        setWorkshop({
-          title: "",
-          body: "",
-          date: "",
-          startTime: "",
-          endTime: "",
-          room: "",
-          maxPlaces: 0,
-          remainPlaces: undefined,
-          isActive: true,
-        });
-        setTitleError("");
+        const success = await create(newWorkshop);
+        if (success) {
+          // Сброс формы после успешного создания
+          setWorkshop({
+            title: "",
+            body: "",
+            date: "",
+            startTime: "",
+            endTime: "",
+            room: "",
+            maxPlaces: 0,
+            remainPlaces: undefined,
+            isActive: true,
+          });
+          setTitleError("");
 
-        // Закрываем форму
-        if (onClose) {
-          onClose();
+          // Закрываем форму только при успешном создании
+          if (onClose) {
+            onClose();
+          }
         }
+        // Если success === false, модалка остается открытой
       } catch (error) {
         console.error("Error creating workshop:", error);
+        // При ошибке модалка также остается открытой
       }
     }
   };

@@ -80,10 +80,11 @@ export function WorkshopsPage() {
           },
         },
       });
-
       if (error) {
         console.error("Failed to load workshops:", error);
-        alert(`Failed to load workshops: ${JSON.stringify(error)}`);
+        alert(
+          `Failed to load workshops. Please check your connection and try again.`,
+        );
         return;
       }
 
@@ -122,9 +123,7 @@ export function WorkshopsPage() {
       setWorkshops(transformedWorkshops);
     } catch (error) {
       console.error("Error loading workshops:", error);
-      alert(
-        `Error loading workshops: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      alert(`Unable to load workshops. Please refresh the page and try again.`);
     }
   };
 
@@ -145,8 +144,7 @@ export function WorkshopsPage() {
 
     loadUserWithRetry();
   }, []);
-
-  const createWorkshop = async (newWorkshop: Workshop) => {
+  const createWorkshop = async (newWorkshop: Workshop): Promise<boolean> => {
     try {
       // Преобразуем формат даты и времени в ISO формат для API
       const startDateTime = `${newWorkshop.date}T${newWorkshop.startTime}`;
@@ -167,13 +165,14 @@ export function WorkshopsPage() {
       const { data, error } = await workshopsFetch.POST("/api/workshops/", {
         body: createRequest,
       });
-
       if (error) {
         console.error("Failed to create workshop:", error);
-        alert(`Failed to create workshop: ${JSON.stringify(error)}`);
+        alert(
+          `Failed to create workshop. Please check all fields and try again.`,
+        );
+        return false;
       } else if (data) {
         console.log("Workshop created successfully:", data);
-        alert("Workshop created successfully!");
 
         // Преобразуем ответ API обратно в формат Workshop и добавляем в список
         const createdWorkshop: Workshop = {
@@ -190,13 +189,16 @@ export function WorkshopsPage() {
         };
 
         setWorkshops((prevWorkshops) => [...prevWorkshops, createdWorkshop]);
+        return true;
       }
     } catch (error) {
       console.error("Error creating workshop:", error);
       alert(
-        `Error creating workshop: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to create workshop. Please check all fields and try again.`,
       );
+      return false;
     }
+    return false;
   };
 
   const removeWorkshop = async (workshop: Workshop) => {
@@ -209,22 +211,18 @@ export function WorkshopsPage() {
           },
         },
       );
-
       if (error) {
         console.error("Failed to delete workshop:", error);
-        alert(`Failed to delete workshop: ${JSON.stringify(error)}`);
+        alert(`Failed to delete workshop. Please try again.`);
       } else {
         console.log("Workshop deleted successfully:", data);
-        alert("Workshop deleted successfully!");
 
         // Удаляем воркшоп из локального состояния
         setWorkshops(workshops.filter((w) => w.id !== workshop.id));
       }
     } catch (error) {
       console.error("Error deleting workshop:", error);
-      alert(
-        `Error deleting workshop: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      alert(`Failed to delete workshop. Please try again.`);
     }
   };
 
@@ -261,13 +259,13 @@ export function WorkshopsPage() {
           body: updateRequest,
         },
       );
-
       if (error) {
         console.error("Failed to update workshop:", error);
-        alert(`Failed to update workshop: ${JSON.stringify(error)}`);
+        alert(
+          `Failed to update workshop. Please check all fields and try again.`,
+        );
       } else if (data) {
         console.log("Workshop updated successfully:", data);
-        alert("Workshop updated successfully!");
 
         // Перезагружаем данные с сервера для обновления состояния
         await loadWorkshops();
@@ -278,7 +276,7 @@ export function WorkshopsPage() {
     } catch (error) {
       console.error("Error updating workshop:", error);
       alert(
-        `Error updating workshop: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to update workshop. Please check all fields and try again.`,
       );
     }
   };
@@ -301,22 +299,18 @@ export function WorkshopsPage() {
           },
         },
       });
-
       if (error) {
         console.error("Role change failed:", error);
-        alert(`Role change failed: ${JSON.stringify(error)}`);
+        alert(`Failed to change role. Please try again.`);
       } else {
         console.log("Role changed successfully:", data);
-        alert(`Role changed to ${newRole} successfully!`);
 
         // Перезагружаем информацию о пользователе для обновления UI
         await loadCurrentUser();
       }
     } catch (error) {
       console.error("Error during role change:", error);
-      alert(
-        `Error during role change: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      alert(`Failed to change role. Please try again.`);
     }
   };
 
