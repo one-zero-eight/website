@@ -1,5 +1,5 @@
 import { useRouter } from "@tanstack/react-router";
-import React, { useState } from "react";
+import React from "react";
 import clsx from "clsx";
 import SearchIcon from "./icons/Search";
 import AskIcon from "./icons/Ask";
@@ -15,15 +15,17 @@ const iconsMap: Record<Option, JSX.Element> = {
 };
 
 const ToggleGroup = ({ currentTabText }: { currentTabText: string }) => {
-  const [active, setActive] = useState<Option>("Search");
   const router = useRouter();
+  const pathname = router.state.location.pathname;
+
+  const active =
+    options.find((opt) => pathname.includes(opt.toLowerCase())) || "Search";
 
   const handleClick = (option: Option) => {
-    setActive(option);
     const path = `/${option.toLowerCase()}`;
     router.navigate({
       to: path,
-      search: (prev) => ({ ...prev, query: currentTabText }),
+      search: () => ({ q: currentTabText }),
     });
   };
 
