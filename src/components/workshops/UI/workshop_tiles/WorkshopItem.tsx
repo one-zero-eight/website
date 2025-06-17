@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./WorkshopList.css";
 import { workshopsFetch } from "@/api/workshops";
+import { useNavigate } from "@tanstack/react-router";
 
 type Workshop = {
   id: string;
@@ -29,6 +30,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   openDescription,
   currentUserRole,
 }) => {
+  const navigate = useNavigate();
   const [workshopChosen, setWorkshopChosen] = useState(false);
   {
     /* Стэйт для управления количеством записанных людей */
@@ -47,10 +49,19 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     const date = new Date(dateString);
     return date.toLocaleDateString("ru-RU");
   };
-
   const formatTime = (timeString: string) => {
     if (!timeString) return "";
     return timeString;
+  };
+
+  const handleRoomClick = (e: React.MouseEvent<HTMLParagraphElement>) => {
+    e.stopPropagation();
+    if (workshop.room) {
+      navigate({
+        to: "/maps",
+        search: { q: workshop.room },
+      });
+    }
   };
   useEffect(() => {
     (async () => {
@@ -147,18 +158,22 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       <h3> {workshop.title}</h3>
       {workshop.date && (
         <div className="workshop-datetime">
-          <p>
-            <strong>Date:</strong> {formatDate(workshop.date)}
-          </p>
+          <p>{formatDate(workshop.date)}</p>
           {workshop.startTime && workshop.endTime && (
             <p>
-              <strong>Time:</strong> {formatTime(workshop.startTime)} -{" "}
-              {formatTime(workshop.endTime)}
+              {formatTime(workshop.startTime)} - {formatTime(workshop.endTime)}
             </p>
-          )}
+          )}{" "}
           {workshop.room && (
             <p>
-              <strong>Room:</strong> {workshop.room}
+              <strong>Room:</strong>{" "}
+              <span
+                onClick={handleRoomClick}
+                className="cursor-pointer text-brand-violet hover:underline"
+                title="Click to view on map"
+              >
+                {workshop.room}
+              </span>
             </p>
           )}
         </div>
