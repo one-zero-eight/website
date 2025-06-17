@@ -46,6 +46,14 @@ const SearchFilters = () => {
         <div
           className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50"
           onClick={() => setOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setOpen(false);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close modal"
         />
       )}
 
