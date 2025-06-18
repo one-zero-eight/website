@@ -32,7 +32,7 @@ type User = {
 
 export function WorkshopsPage() {
   // ===== СОСТОЯНИЕ КОМПОНЕНТА =====
-  // Стэйт для хранения списка воркшопов
+  // Стэйт для хранения списка ворк
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   // Стэйт для управления видимостью модального окна
   const [modalVisible, setModalVisible] = useState(false);
