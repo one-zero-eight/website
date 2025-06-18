@@ -311,7 +311,7 @@ const TimerPage = () => {
 
     if (isValidHex) {
       setTimerColor(value);
-      // saveState(secondsLeft);
+      saveState(secondsLeft);
     } else {
       showToast("Invalid color format");
     }
@@ -352,12 +352,12 @@ const TimerPage = () => {
     );
 
     setTimerSize(snapped);
-    // saveState(secondsLeft);
+    saveState(secondsLeft);
   };
 
   const handleShapeChange = (shape: TimerShape) => {
     setTimerShape(shape);
-    // saveState(secondsLeft);
+    saveState(secondsLeft);
   };
 
   return (
