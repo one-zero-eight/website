@@ -155,7 +155,7 @@ export function WorkshopsPage() {
         name: newWorkshop.title,
         description: newWorkshop.body,
         capacity: newWorkshop.maxPlaces || 500,
-        remain_places: newWorkshop.maxPlaces, // Изначально все места свободны
+        remain_places: newWorkshop.maxPlaces || 500, // Изначально все места свободны
         place: newWorkshop.room || "TBA",
         dtstart: startDateTime,
         dtend: endDateTime,

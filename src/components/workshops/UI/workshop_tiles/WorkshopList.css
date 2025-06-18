@@ -33,6 +33,12 @@
   color: rgba(var(--color-brand-violet) / 1);
   font-size: 16px;
   margin: 0 0 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.icon-[mdi--infinity] {
+  margin-top: 2px;
 }
 .workshop-description {
   max-height: 80px;
