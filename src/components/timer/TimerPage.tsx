@@ -72,6 +72,12 @@ const TimerPage = () => {
   }, []);
 
   useEffect(() => {
+    if (isRunning) {
+      saveState(secondsLeft);
+    }
+  }, [isPaused]);
+
+  useEffect(() => {
     const savedState = localStorage.getItem("timerState");
     if (savedState) {
       const {
