@@ -205,7 +205,6 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       )}
       {workshopChosen ? (
         <button
-          disabled={signedPeople === workshop.maxPlaces}
           onClick={handleCheckOut}
           className="check-out-button"
           title="Check out"
@@ -214,6 +213,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         </button>
       ) : (
         <button
+          disabled={signedPeople === workshop.maxPlaces}
           onClick={handleCheckIn}
           className="check-in-button"
           title="Check in"
