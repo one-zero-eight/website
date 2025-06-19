@@ -107,6 +107,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { data, error } = await workshopsFetch.POST(
         `/api/workshops/{workshop_id}/checkin`,
         {
@@ -119,9 +120,8 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       if (!error) {
         setWorkshopChosen(true);
         setSignedPeople((count) => count + 1);
-        alert("You check in " + data);
       } else {
-        alert("Impossible to check in" + error);
+        alert("Failed to check in");
       }
     } catch (error) {
       console.error("Check-in failed", error);
@@ -132,6 +132,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   const handleCheckOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { data, error } = await workshopsFetch.POST(
         `/api/workshops/{workshop_id}/checkout`,
         {
@@ -144,9 +145,8 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       if (!error) {
         setWorkshopChosen(false);
         setSignedPeople((count) => Math.max(0, count - 1));
-        alert("You check out " + data);
       } else {
-        alert("Impossible to check out");
+        alert("Failed to check out");
       }
     } catch (error) {
       console.error("Check-out failed", error);

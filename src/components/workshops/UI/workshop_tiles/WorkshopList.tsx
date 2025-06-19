@@ -23,7 +23,9 @@ type WorkshopListProps = {
   openDescription: (workshop: Workshop) => void;
   currentUserRole: "user" | "admin";
 };
-
+type WorkshopsByDate<Workshop> = {
+  [tag: string]: Workshop[];
+};
 const WorkshopList: React.FC<WorkshopListProps> = ({
   workshops,
   remove,
@@ -31,34 +33,91 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
   openDescription,
   currentUserRole,
 }) => {
+  const groups: WorkshopsByDate<Workshop> = {};
+  workshops.forEach((workshop) => {
+    const dateTag = workshop.date;
+    if (!groups[dateTag]) {
+      groups[dateTag] = [];
+    }
+    groups[dateTag].push(workshop);
+  });
+  const currday = (dayInDig: number) => {
+    if (dayInDig === 1) {
+      return "Monday";
+    } else if (dayInDig === 2) {
+      return "Tuesday";
+    } else if (dayInDig === 3) {
+      return "Wednesday";
+    } else if (dayInDig === 4) {
+      return "Thursday";
+    } else if (dayInDig === 5) {
+      return "Friday";
+    } else if (dayInDig === 6) {
+      return "Saturday";
+    } else {
+      return "Sunday";
+    }
+  };
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = date.getDay();
+    return currday(day) + " " + date.toLocaleDateString("ru-RU");
+  };
   return (
-    <div style={{ textAlign: "center" }} className="workshop-list">
-      <div className="workshop-grid">
-        {/* Тернарное? выражение чтобы плейсходдер рисовать если нет воркшопов */}
-        {workshops.length ? (
-          workshops.map((workshop) => (
-            <WorkshopItem
-              remove={remove}
-              edit={edit}
-              workshop={workshop}
-              openDescription={openDescription}
-              key={workshop.id}
-              currentUserRole={currentUserRole}
-            />
+    <div style={{ textAlign: "center" }} className="flex flex-col gap-2 px-4">
+      {/* Тернарное? выражение чтобы плейсходдер рисовать если нет воркшопов */}
+      {groups && Object.keys(groups).length > 0 ? (
+        Object.keys(groups)
+          .sort()
+          .map((tagName) => (
+            <React.Fragment key={tagName}>
+              <div className="my-4 flex w-full flex-wrap justify-between">
+                <div className="text-3xl font-medium">
+                  {formatDate(tagName)}
+                </div>
+                <div className="mb-1 mt-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
+                  {groups[tagName]
+                    .sort((a, b) => {
+                      const [hoursA, minutesA] = a.startTime
+                        .split(":")
+                        .map(Number);
+                      const [hoursB, minutesB] = b.startTime
+                        .split(":")
+                        .map(Number);
+
+                      return (
+                        hoursA * 60 +
+                        minutesA * 60 -
+                        (hoursB * 60 + minutesB * 60)
+                      );
+                    })
+                    .map((workshop) => (
+                      <WorkshopItem
+                        remove={remove}
+                        edit={edit}
+                        workshop={workshop}
+                        openDescription={openDescription}
+                        key={workshop.id}
+                        currentUserRole={currentUserRole}
+                      />
+                    ))}
+                </div>
+              </div>
+            </React.Fragment>
           ))
-        ) : (
-          <div
-            style={{
-              gridColumn: "1 / -1",
-              textAlign: "center",
-              width: "100%",
-              fontSize: "1.3rem",
-            }}
-          >
-            <h2 style={{ color: "gray" }}>No workshops yet!</h2>
-          </div>
-        )}
-      </div>
+      ) : (
+        <div
+          style={{
+            gridColumn: "1 / -1",
+            textAlign: "center",
+            width: "100%",
+            fontSize: "1.3rem",
+          }}
+        >
+          <h2 style={{ color: "gray" }}>No workshops yet!</h2>
+        </div>
+      )}
     </div>
   );
 };
