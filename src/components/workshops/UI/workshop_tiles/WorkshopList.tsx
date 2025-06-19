@@ -12,6 +12,8 @@ type Workshop = {
   room: string;
   maxPlaces: number;
   remainPlaces?: number; // Добавляем поле для оставшихся мест
+  isActive?: boolean;
+  isRegistrable?: boolean;
 };
 
 type WorkshopListProps = {

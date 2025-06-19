@@ -13,6 +13,8 @@ type Workshop = {
   room: string;
   maxPlaces: number;
   remainPlaces?: number; // Добавляем поле для оставшихся мест
+  isActive?: boolean;
+  isRegistrable?: boolean;
 };
 
 type WorkshopItemProps = {
@@ -36,6 +38,11 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     /* Стэйт для управления количеством записанных людей */
   }
   const [signedPeople, setSignedPeople] = useState<number>(0);
+  // Функция для проверки активности воркшопа
+  const isWorkshopActive = () => {
+    return workshop.isActive !== false && workshop.isRegistrable !== false;
+  };
+
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Проверяем, что клик был не по кнопкам
     const target = e.target as HTMLElement;
@@ -146,9 +153,11 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       alert("Error occur when trying to check out");
     }
   };
-
   return (
-    <div className="workshop-tile" onClick={handleContentClick}>
+    <div
+      className={`workshop-tile ${!isWorkshopActive() ? "workshop-inactive" : ""}`}
+      onClick={handleContentClick}
+    >
       <p className="workshop-places">
         {" "}
         {workshop.maxPlaces > 0
@@ -161,6 +170,9 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         )}
       </p>
       <h3> {workshop.title}</h3>
+      {!isWorkshopActive() && (
+        <p className="workshop-status-inactive">Inactive</p>
+      )}
       {workshop.date && (
         <div className="workshop-datetime">
           <p>{formatDate(workshop.date)}</p>
@@ -208,24 +220,26 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           </button>
         </>
       )}
-      {workshopChosen ? (
-        <button
-          onClick={handleCheckOut}
-          className="check-out-button"
-          title="Check out"
-        >
-          <span className="icon-[material-symbols--remove] text-xl" />
-        </button>
-      ) : (
-        <button
-          disabled={signedPeople === workshop.maxPlaces}
-          onClick={handleCheckIn}
-          className="check-in-button"
-          title="Check in"
-        >
-          <span className="icon-[material-symbols--add-rounded] text-xl" />
-        </button>
-      )}
+      {/* Показываем кнопки записи только для активных воркшопов */}
+      {isWorkshopActive() &&
+        (workshopChosen ? (
+          <button
+            onClick={handleCheckOut}
+            className="check-out-button"
+            title="Check out"
+          >
+            <span className="icon-[material-symbols--remove] text-xl" />
+          </button>
+        ) : (
+          <button
+            disabled={signedPeople === workshop.maxPlaces}
+            onClick={handleCheckIn}
+            className="check-in-button"
+            title="Check in"
+          >
+            <span className="icon-[material-symbols--add-rounded] text-xl" />
+          </button>
+        ))}
     </div>
   );
 };
