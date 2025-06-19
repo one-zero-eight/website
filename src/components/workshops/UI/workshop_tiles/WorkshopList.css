@@ -172,9 +172,9 @@
 
 .workshop-status-inactive {
   position: absolute;
-  top: 85%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  bottom: 12px;
+  transform: translateX(-50%);
   color: #ff6b6b;
   font-size: 14px;
   font-weight: 600;
