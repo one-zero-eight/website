@@ -24,6 +24,17 @@
   transform: translateY(-3px);
   box-shadow: 0 0 12px rgba(120, 0, 255, 0.4);
 }
+
+.workshop-tile.workshop-chosen {
+  background-color: #1e2e1e;
+  background: linear-gradient(135deg, #1a2b1a 0%, #1e2e1e 100%);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.workshop-tile.workshop-chosen:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.5);
+}
 .workshop-tile h3 {
   font-size: 18px;
   margin: 0 0 8px;

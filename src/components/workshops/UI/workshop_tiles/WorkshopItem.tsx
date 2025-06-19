@@ -155,7 +155,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   };
   return (
     <div
-      className={`workshop-tile ${!isWorkshopActive() ? "workshop-inactive" : ""}`}
+      className={`workshop-tile ${!isWorkshopActive() ? "workshop-inactive" : ""} ${workshopChosen ? "workshop-chosen" : ""}`}
       onClick={handleContentClick}
     >
       <p className="workshop-places">
