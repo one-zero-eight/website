@@ -21,7 +21,7 @@ type Workshop = {
   isActive?: boolean;
   isRegistrable?: boolean;
 };
-/*jefjkd*/
+
 type User = {
   id: string;
   innohassle_id: string;
