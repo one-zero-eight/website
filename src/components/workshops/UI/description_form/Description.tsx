@@ -25,11 +25,12 @@ const formatTime = (timeString: string) => {
   return timeString;
 };
 const urlRegex = /https?:\/\/(.\.?)+\..+/;
+const telegramUsernameRegex = /(^|\s)@[a-zA-Z0-9_]{5,32}\b/;
 
 const ReplaceURL = (str: string) => {
   const texts = str.split(" ").reduce(
     (acc: { array: string[]; urls: string[]; text: string }, text) => {
-      if (urlRegex.test(text)) {
+      if (urlRegex.test(text) || telegramUsernameRegex.test(text)) {
         acc.array.push(acc.text);
         acc.urls.push(text);
         acc.text = " ";
@@ -47,11 +48,24 @@ const ReplaceURL = (str: string) => {
   if (texts.text) texts.array.push(texts.text);
 
   const links = texts.urls.map((url) => {
-    return (
-      <a className="links" href={url} target="_blank" key={url}>
-        {url}
-      </a>
-    );
+    if (telegramUsernameRegex.test(url)) {
+      return (
+        <a
+          className="links"
+          href={"https://t.me/" + url.slice(1)}
+          target="_blank"
+          key={url}
+        >
+          {url}
+        </a>
+      );
+    } else {
+      return (
+        <a className="links" href={url} target="_blank" key={url}>
+          {url}
+        </a>
+      );
+    }
   });
 
   const merged = [];
