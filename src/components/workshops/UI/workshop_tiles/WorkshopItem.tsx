@@ -51,11 +51,11 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("ru-RU");
-  };
+  // const formatDate = (dateString: string) => {
+  //   if (!dateString) return "";
+  //   const date = new Date(dateString);
+  //   return date.toLocaleDateString("ru-RU");
+  // };
   const formatTime = (timeString: string) => {
     if (!timeString) return "";
     return timeString;
