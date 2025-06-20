@@ -38,7 +38,7 @@ const PostForm: React.FC<PostFormProps> = ({
   {
     /*Создаем состояние workshop хуком useState
     Если какое-то свойство не определено, используется пустая строка */
-  }
+  }  
   const [workshop, setWorkshop] = useState({
     title: initialWorkshop?.title || "",
     body: initialWorkshop?.body || "",
@@ -48,7 +48,7 @@ const PostForm: React.FC<PostFormProps> = ({
     room: initialWorkshop?.room || "",
     maxPlaces: initialWorkshop?.maxPlaces || 0,
     remainPlaces: initialWorkshop?.remainPlaces,
-    isActive: true,
+    isActive: initialWorkshop?.isActive,
   });
 
   const [titleError, setTitleError] = useState("");

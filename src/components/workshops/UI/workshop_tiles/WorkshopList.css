@@ -3,12 +3,12 @@
   color: white;
 }
 
-.workshop-grid {
+/* .workshop-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
   margin-top: 16px;
-}
+} */
 
 .workshop-tile {
   background-color: #1e1e1e;
@@ -18,6 +18,8 @@
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   transition: 0.2s ease;
   position: relative;
+  max-width: 260px;
+  width: 100%;
 }
 
 .workshop-tile:hover {
@@ -43,11 +45,20 @@
 .workshop-places {
   color: rgba(var(--color-brand-violet) / 1);
   font-size: 16px;
-  margin: 0 0 8px;
+  margin-right: 6px;
   display: flex;
-  justify-content: center;
+  justify-content: right;
   align-items: center;
 }
+
+.workshop-time {
+  color: rgba(var(--color-brand-violet) / 1);
+  font-size: 16px;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
 .icon-[mdi--infinity] {
   margin-top: 2px;
 }

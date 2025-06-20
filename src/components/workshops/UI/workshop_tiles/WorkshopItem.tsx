@@ -153,46 +153,41 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       alert("Error occur when trying to check out");
     }
   };
-  return (
-    <div
+  return (    <div
       className={`workshop-tile ${!isWorkshopActive() ? "workshop-inactive" : ""} ${workshopChosen ? "workshop-chosen" : ""}`}
       onClick={handleContentClick}
     >
-      <p className="workshop-places">
-        {" "}
-        {workshop.maxPlaces > 0
-          ? workshop.maxPlaces === 500
-            ? signedPeople + "/"
-            : signedPeople + "/" + workshop.maxPlaces
-          : "No limit on number of people"}
-        {workshop.maxPlaces === 500 && (
-          <span className="icon-[mdi--infinity]"></span>
+      <div className="workshop-header flex justify-between items-center">
+        {workshop.startTime && workshop.endTime && (
+          <p className="workshop-time">
+            {formatTime(workshop.startTime)} - {formatTime(workshop.endTime)}
+          </p>
         )}
-      </p>
-      <h3> {workshop.title}</h3>
-      {!isWorkshopActive() && (
-        <p className="workshop-status-inactive">Inactive</p>
-      )}
-      {workshop.date && (
-        <div className="workshop-datetime">
-          <p>{formatDate(workshop.date)}</p>
-          {workshop.startTime && workshop.endTime && (
-            <p>
-              {formatTime(workshop.startTime)} - {formatTime(workshop.endTime)}
-            </p>
-          )}{" "}
-          {workshop.room && (
-            <p>
-              <strong>Room:</strong>{" "}
-              <span
-                onClick={handleRoomClick}
-                className="cursor-pointer text-brand-violet hover:underline"
-                title="Click to view on map"
-              >
-                {workshop.room}
-              </span>
-            </p>
+        <p className="workshop-places">
+          {workshop.maxPlaces > 0
+            ? workshop.maxPlaces === 500
+              ? signedPeople + "/"
+              : signedPeople + "/" + workshop.maxPlaces
+            : "No limit on number of people"}
+          {workshop.maxPlaces === 500 && (
+            <span className="icon-[mdi--infinity]"></span>
           )}
+        </p>
+      </div>
+      <h3> {workshop.title}</h3>      
+      {!isWorkshopActive() && (<p className="workshop-status-inactive">Inactive</p>)}      
+      {workshop.room && (
+        <div className="workshop-room">
+          <p>
+            <strong>Room:</strong>{" "}
+            <span
+              onClick={handleRoomClick}
+              className="cursor-pointer text-brand-violet hover:underline"
+              title="Click to view on map"
+            >
+              {workshop.room}
+            </span>
+          </p>
         </div>
       )}
       {/* Показываем кнопки управления только для администраторов */}
