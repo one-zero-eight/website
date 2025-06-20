@@ -72,11 +72,11 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
           .sort()
           .map((tagName) => (
             <React.Fragment key={tagName}>
-              <div className="my-4 flex w-full flex-wrap justify-between">
+              <div className="my-1 flex w-full flex-wrap justify-between">
                 <div className="text-3xl font-medium">
                   {formatDate(tagName)}
                 </div>
-                <div className="mb-1 mt-4 flex w-full flex-wrap gap-x-2 gap-y-4">
+                <div className="mb-1 mt-4 flex w-full flex-wrap gap-x-2 gap-y-2">
                   {groups[tagName]
                     .sort((a, b) => {
                       const [hoursA, minutesA] = a.startTime

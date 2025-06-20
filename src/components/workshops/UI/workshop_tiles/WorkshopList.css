@@ -141,7 +141,7 @@
 .check-in-button:hover {
   background: rgba(167, 202, 167, 0.2);
   color: #aad6aa;
-  transform: scale(1.1);
+  transform: translateX(50%) scale(1.1);
 }
 .check-out-button {
   position: absolute;
@@ -163,7 +163,7 @@
 .check-out-button:hover {
   background: rgba(255, 107, 107, 0.2);
   color: #ff5252;
-  transform: scale(1.1);
+  transform: translateX(50%) scale(1.1);
 }
 .edit-button {
   position: absolute;
