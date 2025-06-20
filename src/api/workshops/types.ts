@@ -214,6 +214,7 @@ export interface components {
       capacity: number;
       remain_places: number;
       is_active: boolean;
+      is_registrable: boolean;
     };
     GetAllWorkshopsResponse: Array<{
       id: string;
@@ -225,7 +226,7 @@ export interface components {
       capacity: number;
       remain_places: number;
       is_active: boolean;
-      isRegistrable: boolean;
+      is_registrable: boolean;
     }>;
     GetMyWorkshopsResponse: {
       myWorkshops: Array<{
@@ -236,6 +237,7 @@ export interface components {
         dtend: string;
         place: string;
         is_active: boolean;
+        is_registrable: boolean;
       }>;
     };
     CheckInOutResponse: {

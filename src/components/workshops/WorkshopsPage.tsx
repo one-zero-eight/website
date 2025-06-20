@@ -80,6 +80,7 @@ export function WorkshopsPage() {
           },
         },
       });
+      console.log("Workshops data:", data);
       if (error) {
         console.error("Failed to load workshops:", error);
         alert(
@@ -114,13 +115,14 @@ export function WorkshopsPage() {
           endTime: parseTime(workshop.dtend),
           room: workshop.place,
           maxPlaces: workshop.capacity,
-          remainPlaces: workshop.remain_places || 0, // Добавляем обработку оставшихся мест
+          remainPlaces: workshop.remain_places, // Добавляем обработку оставшихся мест
           isActive: workshop.is_active,
-          isRegistrable: workshop.isRegistrable, // Добавляем поле для возможности регистрации
+          isRegistrable: workshop.is_registrable, // Добавляем поле для возможности регистрации
         };
       });
 
       setWorkshops(transformedWorkshops);
+      console.log("Workshops loaded successfully:", transformedWorkshops);
     } catch (error) {
       console.error("Error loading workshops:", error);
       alert(`Unable to load workshops. Please refresh the page and try again.`);

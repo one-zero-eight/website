@@ -14,8 +14,9 @@ type Workshop = {
   endTime: string;
   room: string;
   maxPlaces: number;
-  remainPlaces?: number; // Добавляем поле для оставшихся мест
+  remainPlaces?: number;
   isActive?: boolean;
+  isRegistrable?: boolean;
 };
 
 type PostFormProps = {
@@ -132,7 +133,7 @@ const PostForm: React.FC<PostFormProps> = ({
   return (
     <form onSubmit={addNewWorkshop}>
       <label className={classes.label}>
-        Title <span className={classes.required}>*</span>
+        Title
       </label>
       <WorkshopInput
         value={workshop.title}
