@@ -43,6 +43,17 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     return workshop.isActive !== false && workshop.isRegistrable !== false;
   };
 
+  // Функция для получения текста статуса неактивности
+  const getInactiveStatusText = () => {
+    if (workshop.isRegistrable === false && workshop.isActive !== false) {
+      // Только isRegistrable false показываем дату и время начала
+      return `Inactive due ${workshop.date} ${formatTime(workshop.startTime)}`;
+    } else {
+      // isActive false или оба false просто Inactive
+      return "Inactive";
+    }
+  };
+
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Проверяем, что клик был не по кнопкам
     const target = e.target as HTMLElement;
@@ -177,7 +188,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       </div>
       <h3> {workshop.title}</h3>
       {!isWorkshopActive() && (
-        <p className="workshop-status-inactive">Inactive</p>
+        <p className="workshop-status-inactive">{getInactiveStatusText()}</p>
       )}
       {workshop.room && (
         <div className="workshop-room">
