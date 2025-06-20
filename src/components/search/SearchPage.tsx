@@ -4,6 +4,7 @@ import { AuthWall } from "@/components/common/AuthWall.tsx";
 import PreviewCard from "@/components/search/PreviewCard.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
+import SearchFilters from "@/components/search/SearchFilters.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -45,6 +46,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   return (
     <div className="flex grow flex-col gap-4 p-4">
       <SearchField runSearch={runSearch} currentQuery={searchQuery} />
+      <SearchFilters />
 
       {searchResult && (
         <p className="py-4 text-2xl font-semibold text-contrast">
