@@ -145,7 +145,7 @@ export function WorkshopsPage() {
     };
 
     loadUserWithRetry();
-  }, [currentUser]);
+  }, []);
   const createWorkshop = async (newWorkshop: Workshop): Promise<boolean> => {
     try {
       // Преобразуем формат даты и времени в ISO формат для API
@@ -369,6 +369,7 @@ export function WorkshopsPage() {
                   room: editingWorkshop.room,
                   maxPlaces: editingWorkshop.maxPlaces,
                   remainPlaces: editingWorkshop.remainPlaces,
+                  isActive: editingWorkshop.isActive,
                 }
               : undefined
           }

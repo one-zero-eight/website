@@ -49,7 +49,7 @@ const PostForm: React.FC<PostFormProps> = ({
     room: initialWorkshop?.room || "",
     maxPlaces: initialWorkshop?.maxPlaces || 0,
     remainPlaces: initialWorkshop?.remainPlaces,
-    isActive: initialWorkshop?.isActive,
+    isActive: initialWorkshop?.isActive ?? true,
   });
 
   const [titleError, setTitleError] = useState("");
