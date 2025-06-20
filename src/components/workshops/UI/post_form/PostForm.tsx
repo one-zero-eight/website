@@ -132,9 +132,7 @@ const PostForm: React.FC<PostFormProps> = ({
 
   return (
     <form onSubmit={addNewWorkshop}>
-      <label className={classes.label}>
-        Title
-      </label>
+      <label className={classes.label}>Title</label>
       <WorkshopInput
         value={workshop.title}
         onChange={handleTitleChange}
