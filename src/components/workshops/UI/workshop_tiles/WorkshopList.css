@@ -30,7 +30,6 @@
 .workshop-tile.workshop-chosen {
   background-color: #1e2e1e;
   background: linear-gradient(135deg, #1a2b1a 0%, #1e2e1e 100%);
-  border: 1px solid rgba(76, 175, 80, 0.4);
   box-shadow: 0 4px 16px rgba(76, 175, 80, 0.1);
 }
 
