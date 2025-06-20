@@ -38,7 +38,7 @@ const PostForm: React.FC<PostFormProps> = ({
   {
     /*Создаем состояние workshop хуком useState
     Если какое-то свойство не определено, используется пустая строка */
-  }  
+  }
   const [workshop, setWorkshop] = useState({
     title: initialWorkshop?.title || "",
     body: initialWorkshop?.body || "",

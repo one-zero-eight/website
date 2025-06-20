@@ -153,11 +153,12 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       alert("Error occur when trying to check out");
     }
   };
-  return (    <div
+  return (
+    <div
       className={`workshop-tile ${!isWorkshopActive() ? "workshop-inactive" : ""} ${workshopChosen ? "workshop-chosen" : ""}`}
       onClick={handleContentClick}
     >
-      <div className="workshop-header flex justify-between items-center">
+      <div className="workshop-header flex items-center justify-between">
         {workshop.startTime && workshop.endTime && (
           <p className="workshop-time">
             {formatTime(workshop.startTime)} - {formatTime(workshop.endTime)}
@@ -174,8 +175,10 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           )}
         </p>
       </div>
-      <h3> {workshop.title}</h3>      
-      {!isWorkshopActive() && (<p className="workshop-status-inactive">Inactive</p>)}      
+      <h3> {workshop.title}</h3>
+      {!isWorkshopActive() && (
+        <p className="workshop-status-inactive">Inactive</p>
+      )}
       {workshop.room && (
         <div className="workshop-room">
           <p>
