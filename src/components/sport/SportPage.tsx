@@ -21,9 +21,6 @@ export function SportPage() {
               <div className="flex flex-col gap-2">
                 <p className="flex items-center text-2xl font-semibold text-contrast">
                   Telegram bot
-                  <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-                    NEW
-                  </span>
                 </p>
                 <p className="text-lg text-contrast/75">
                   Use the new Telegram bot to check in for sports.
