@@ -46,6 +46,7 @@ const SearchFiltersModal = ({
           ref={refs.setFloating}
           {...getFloatingProps()}
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={() => {}}
           className="z-50 w-[500px] rounded-xl border border-gray-400 bg-floating p-6 text-black shadow-xl dark:bg-[#262626] dark:text-white"
         >
           <h2 className="mb-4 text-center text-xl font-bold">Search Filters</h2>
