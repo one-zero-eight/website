@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import ToggleGroup from "./ToggleGroup";
-import { useRouter, useLocation } from "@tanstack/react-router";
 
 export default function SearchField({
   runSearch,
@@ -10,8 +9,6 @@ export default function SearchField({
   currentQuery: string;
 }) {
   const [text, setText] = useState(currentQuery);
-  const router = useRouter();
-  const location = useLocation();
 
   useEffect(() => {
     setText(currentQuery);
@@ -22,13 +19,6 @@ export default function SearchField({
       className="flex"
       onSubmit={(e) => {
         e.preventDefault();
-        const currentPath = location.pathname;
-        const query = text.trim();
-
-        router.navigate({
-          to: currentPath,
-          search: (prev) => ({ ...prev, query }),
-        });
         runSearch(text);
       }}
     >

@@ -29,7 +29,9 @@ export default function SearchResult({
         <span className="icon-[material-symbols--school-outline] text-3xl text-[#F27F22]" />
       ) : response.source.type === "telegram" ? (
         <span className="icon-[uil--telegram-alt] text-3xl text-[#27A7E7]" />
-      ) : null}
+      ) : // ) : response.source.type === "web-site" ? (
+      //   <span className="icon-[token--botanix] text-3xl text-[#27A7E7]" /> //TODO: Change to real website icon
+      null}
       <p className="text-xs font-semibold dark:text-white md:text-2xl">
         {response.source.display_name}
       </p>

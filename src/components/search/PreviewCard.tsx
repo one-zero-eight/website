@@ -1,12 +1,14 @@
 import { searchTypes } from "@/api/search";
 import TelegramPreview from "@/components/search/TelegramPreview";
 import clsx from "clsx";
-import { lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import MoodleUnknownPreview from "./MoodleUnknownPreview";
 import MoodleUrlPreview from "./MoodleUrlPreview";
 
-const PdfPreview = lazy(() => import("./PdfPreview"));
+const PdfPreview = lazy(() =>
+  import("./PdfPreview").then((m) => ({ default: React.memo(m.default) })),
+);
 
 export declare type PreviewCardProps = {
   source: searchTypes.SchemaSearchResponse["source"];
