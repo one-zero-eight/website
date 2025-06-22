@@ -48,7 +48,7 @@ const Modal: React.FC<ModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <button className={styles["modal-close"]} onClick={onClose}>
-          🞬
+          x
         </button>
         {children}
       </div>
