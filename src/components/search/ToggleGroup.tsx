@@ -25,7 +25,7 @@ const ToggleGroup = ({ currentTabText }: { currentTabText: string }) => {
     const path = `/${option.toLowerCase()}`;
     router.navigate({
       to: path,
-      search: () => ({ q: currentTabText }),
+      search: { q: currentTabText },
     });
   };
 
@@ -39,7 +39,7 @@ const ToggleGroup = ({ currentTabText }: { currentTabText: string }) => {
             key={option}
             onClick={() => handleClick(option)}
             className={clsx(
-              "flex h-10 items-center gap-2 border-b-2 border-r-2 border-t-2 border-gray-400 px-4 py-2 text-sm font-medium transition-colors",
+              "flex items-center gap-2 border-b-2 border-r-2 border-t-2 border-gray-400 px-4 py-2 text-sm font-medium transition-colors",
               isActive
                 ? "bg-brand-violet text-white"
                 : "bg-transparent hover:bg-[#e6e6e6] dark:hover:bg-[#1e1e1e]",

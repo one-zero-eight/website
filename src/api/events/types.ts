@@ -866,6 +866,15 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /** InJsonAcademicGroup */
+    InJsonAcademicGroup: {
+      /** Name */
+      name: string;
+      /** Event Group Alias */
+      event_group_alias?: string | null;
+      /** User Emails */
+      user_emails?: string[];
+    };
     /** InJsonUser */
     InJsonUser: {
       /** Email */
@@ -877,6 +886,8 @@ export interface components {
     JsonPredefinedUsers: {
       /** Users */
       users?: components["schemas"]["InJsonUser"][];
+      /** Academic Groups */
+      academic_groups?: components["schemas"]["InJsonAcademicGroup"][];
     };
     /** LinenChangeEntry */
     LinenChangeEntry: {
@@ -1122,6 +1133,8 @@ export type SchemaCreateTag = components["schemas"]["CreateTag"];
 export type SchemaEntry = components["schemas"]["Entry"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaInJsonAcademicGroup =
+  components["schemas"]["InJsonAcademicGroup"];
 export type SchemaInJsonUser = components["schemas"]["InJsonUser"];
 export type SchemaJsonPredefinedUsers =
   components["schemas"]["JsonPredefinedUsers"];
@@ -2075,7 +2088,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": string[];
         };
       };
       /** @description Unable to verify credentials OR Credentials not provided */

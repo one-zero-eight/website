@@ -25,7 +25,7 @@ apis:
       output: ./src/api/room-booking/types.ts
       #  --root-types --enum
   search:
-    root: https://api.innohassle.ru/search/staging-v0/openapi.json
+    root: http://localhost:8004/openapi.json
     x-openapi-ts:
       output: ./src/api/search/types.ts
       #  --root-types --enum

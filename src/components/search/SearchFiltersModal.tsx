@@ -15,14 +15,21 @@ type Props = {
     userProps?: React.HTMLProps<HTMLElement>,
   ) => Record<string, unknown>;
   selected: Record<string, Record<string, boolean>>;
-  toggle: (group: string, value: string) => void;
+  checks: (group: string, value: string) => void;
   onClose: () => void;
 };
 
 const filters = {
-  fileType: ["PDF", "Web-site", "Text file", "Other"],
-  category: ["University", "Innopolis city", "Campus", "Other"],
-  source: ["Moodle", "Eduwiki", "Sport", "Campus life", "Other"],
+  fileType: [
+    { displayName: "PDF", internalName: "pdf" },
+    { displayName: "Web-site", internalName: "link_to_source" },
+  ],
+  source: [
+    { displayName: "Campus life", internalName: "campuslife" },
+    { displayName: "Eduwiki", internalName: "eduwiki" },
+    { displayName: "Hotel", internalName: "hotel" },
+    { displayName: "Moodle", internalName: "moodle" },
+  ],
 };
 
 const SearchFiltersModal = ({
@@ -30,7 +37,7 @@ const SearchFiltersModal = ({
   refs,
   getFloatingProps,
   selected,
-  toggle,
+  checks,
   onClose,
 }: Props) => {
   if (!open) return null;
@@ -50,7 +57,7 @@ const SearchFiltersModal = ({
           className="z-50 w-[500px] rounded-xl border border-gray-400 bg-floating p-6 text-black shadow-xl dark:bg-[#262626] dark:text-white"
         >
           <h2 className="mb-4 text-center text-xl font-bold">Search Filters</h2>
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 gap-6">
             {Object.entries(filters).map(([group, values]) => (
               <div key={group} className="flex flex-col items-center">
                 <div className="flex flex-col items-start text-left">
@@ -59,16 +66,16 @@ const SearchFiltersModal = ({
                   </h3>
                   {values.map((value) => (
                     <label
-                      key={value}
+                      key={value.displayName}
                       className="mb-1 flex items-center gap-1 text-sm"
                     >
                       <input
                         type="checkbox"
-                        checked={selected[group][value]}
-                        onChange={() => toggle(group, value)}
+                        checked={selected[group][value.internalName]}
+                        onChange={() => checks(group, value.internalName)}
                         className="accent-purple-500"
                       />
-                      {value}
+                      {value.displayName}
                     </label>
                   ))}
                 </div>

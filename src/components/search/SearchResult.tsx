@@ -35,8 +35,9 @@ export default function SearchResult({
       <p className="text-xs font-semibold dark:text-white md:text-2xl">
         {response.source.display_name}
       </p>
+      {/* TODO: Change as any after fixing api types */}
       <a
-        href={response.source.link}
+        href={(response.source as any).link}
         target="_blank"
         onClickCapture={(e) => e.stopPropagation()}
         className="w-fit max-w-full truncate text-xs text-[#93bd58] hover:underline"

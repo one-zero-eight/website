@@ -62,7 +62,17 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Bookings */
+    /**
+     * Bookings
+     * @description Get bookings for all or for specific rooms.
+     *
+     *     - If `room_id` is provided, get bookings for that room.
+     *     - If `room_ids` is provided, get bookings for specified rooms.
+     *     - If neither `room_id` nor `room_ids` is provided, get bookings for all rooms.
+     *     - If both `room_id` and `room_ids` are provided, get bookings for all specified rooms.
+     *
+     *     `include_red` only applies when getting all rooms and is `False` be default.
+     */
     get: operations["bookings_bookings"];
     put?: never;
     /** Create Booking */
@@ -176,7 +186,7 @@ export interface components {
        * My Uni Id
        * @description ID of room on My University portal
        */
-      my_uni_id: number;
+      my_uni_id?: number | null;
       /**
        * Capacity
        * @description Room capacity, amount of people
@@ -220,7 +230,9 @@ export type $defs = Record<string, never>;
 export interface operations {
   rooms_rooms: {
     parameters: {
-      query?: never;
+      query?: {
+        include_red?: boolean;
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -234,6 +246,15 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Room"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -320,8 +341,14 @@ export interface operations {
   bookings_bookings: {
     parameters: {
       query: {
+        room_id?: string | null;
+        room_ids?: string[] | null;
+        /** @description Start date */
         start: string;
+        /** @description End date */
         end: string;
+        /** @description Include red-access rooms bookings when getting all */
+        include_red?: boolean;
       };
       header?: never;
       path?: never;

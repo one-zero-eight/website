@@ -366,6 +366,8 @@ export interface components {
        * @default false
        */
       is_staff: boolean;
+      /** Group */
+      group?: string | null;
     };
     /** ValidationError */
     ValidationError: {

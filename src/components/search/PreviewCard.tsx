@@ -32,7 +32,12 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
           onClick={onClose}
         />
       </div>
-      <a href={source?.link} target="_blank" className="w-fit max-w-full">
+      {/* TODO: Change as any after fixing api types */}
+      <a
+        href={(source as any).link}
+        target="_blank"
+        className="w-fit max-w-full"
+      >
         <p className="truncate pb-3 text-xs font-normal text-[#93bd58] hover:underline">
           {source.breadcrumbs.join(" > ")}
         </p>

@@ -7,6 +7,10 @@ import SearchResult from "@/components/search/SearchResult.tsx";
 import SearchFilters from "@/components/search/SearchFilters.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import {
+  InfoSources,
+  PathsSearchSearchGetParametersQueryResponse_types,
+} from "@/api/search/types";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const navigate = useNavigate();
@@ -15,12 +19,102 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const [previewSource, setPreviewSource] =
     useState<searchTypes.SchemaSearchResponse["source"]>();
 
+  const initialFiltersState = {
+    fileType: {
+      pdf: true,
+      link_to_source: true,
+    },
+    source: {
+      campuslife: true,
+      eduwiki: true,
+      hotel: true,
+      moodle: true,
+    },
+  };
+
+  const [selected, setSelected] =
+    useState<Record<string, Record<string, boolean>>>(initialFiltersState);
+
+  const checks = (group: string, value: string) => {
+    setSelected((prev) => ({
+      ...prev,
+      [group]: {
+        ...prev[group],
+        [value]: !prev[group][value],
+      },
+    }));
+  };
+
+  const buildQueryFilters = () => {
+    const response_types: PathsSearchSearchGetParametersQueryResponse_types[] =
+      [];
+    const sources: InfoSources[] = [];
+    const query_categories: string[] = [];
+
+    if (!selected.fileType.pdf && !selected.fileType.link_to_source) {
+      response_types.push(
+        PathsSearchSearchGetParametersQueryResponse_types.pdf,
+      );
+      response_types.push(
+        PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
+      );
+    }
+
+    if (
+      !selected.source.campuslife &&
+      !selected.source.eduwiki &&
+      !selected.source.hotel &&
+      !selected.source.moodle
+    ) {
+      sources.push(InfoSources.campuslife);
+      sources.push(InfoSources.eduwiki);
+      sources.push(InfoSources.hotel);
+      sources.push(InfoSources.moodle);
+    }
+
+    Object.entries(selected).forEach(([group, values]) => {
+      const selectedValues = Object.entries(values)
+        .filter(([, checked]) => checked)
+        .map(([value]) => value);
+
+      if (group === "fileType") {
+        selectedValues.forEach((value) => {
+          if (value === "pdf")
+            response_types.push(
+              PathsSearchSearchGetParametersQueryResponse_types.pdf,
+            );
+          if (value === "link_to_source")
+            response_types.push(
+              PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
+            );
+        });
+      } else if (group === "source") {
+        selectedValues.forEach((value) => {
+          if (value === "campuslife") sources.push(InfoSources.campuslife);
+          if (value === "eduwiki") sources.push(InfoSources.eduwiki);
+          if (value === "hotel") sources.push(InfoSources.hotel);
+          if (value === "moodle") sources.push(InfoSources.moodle);
+        });
+      }
+    });
+    return { response_types, sources, query_categories };
+  };
+
+  const filters = buildQueryFilters();
+
   const { data: searchResult } = $search.useQuery(
     "get",
     "/search/search",
-    {
-      params: { query: { query: searchQuery } },
-    },
+    (() => {
+      return {
+        params: {
+          query: {
+            query: searchQuery,
+            ...filters,
+          },
+        },
+      };
+    })(),
     {
       enabled: searchQuery.length > 0,
       // Disable refetch
@@ -46,7 +140,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   return (
     <div className="flex grow flex-col gap-4 p-4">
       <SearchField runSearch={runSearch} currentQuery={searchQuery} />
-      <SearchFilters />
+      <SearchFilters selected={selected} checks={checks} />
 
       {searchResult && (
         <p className="py-4 text-2xl font-semibold text-contrast">

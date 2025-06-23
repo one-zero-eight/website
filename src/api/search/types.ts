@@ -58,6 +58,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/moodle/courses/grouped-by-semester": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Courses Grouped By Semester */
+    get: operations["moodle_get_courses_grouped_by_semester"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/moodle/courses/by-course-fullname/content": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Course Names Grouped */
+    get: operations["moodle_get_course_names_grouped"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/moodle/preview": {
     parameters: {
       query?: never;
@@ -194,17 +228,17 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/compute/corpora": {
+  "/{section}/parse": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get Corpora */
-    get: operations["compute_get_corpora"];
+    get?: never;
     put?: never;
-    post?: never;
+    /** Upload Markdown File */
+    post: operations["upload_markdown_file"];
     delete?: never;
     options?: never;
     head?: never;
@@ -215,6 +249,30 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** CampusLifeSource */
+    CampusLifeSource: {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: CampusLifeSourceType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Campus life"
+       *     ]
+       */
+      breadcrumbs: string[];
+    };
     /** Chat */
     Chat: {
       /** Id */
@@ -248,10 +306,29 @@ export interface components {
       /** Link */
       link: string;
     };
-    /** Detail */
-    Detail: {
-      /** Detail */
-      detail: string;
+    /** EduwikiSource */
+    EduwikiSource: {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: EduwikiSourceType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Educational Wiki Knowledgebase"
+       *     ]
+       */
+      breadcrumbs: string[];
     };
     /** FlattenInContentsWithPresignedUrl */
     FlattenInContentsWithPresignedUrl: {
@@ -267,6 +344,30 @@ export interface components {
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
+    };
+    /** HotelSource */
+    HotelSource: {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: HotelSourceType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Hotel"
+       *     ]
+       */
+      breadcrumbs: string[];
     };
     /** InContent */
     InContent: {
@@ -335,6 +436,11 @@ export interface components {
       /** Sections */
       sections: components["schemas"]["InSection"][];
     };
+    /**
+     * InfoSources
+     * @enum {string}
+     */
+    InfoSources: InfoSources;
     /** MessageSchema */
     MessageSchema: {
       /** Id */
@@ -539,19 +645,22 @@ export interface components {
     /** SearchResponse */
     SearchResponse: {
       /**
-       * Source
-       * @description Relevant source for the search.
-       */
-      source:
-        | components["schemas"]["MoodleFileSource"]
-        | components["schemas"]["MoodleUrlSource"]
-        | components["schemas"]["MoodleUnknownSource"]
-        | components["schemas"]["TelegramSource"];
-      /**
        * Score
        * @description Score of the search response. Multiple scores if was an aggregation of multiple chunks. Optional.
        */
       score: number | number[] | null;
+      /**
+       * Source
+       * @description Relevant source for the search.
+       */
+      source:
+        | components["schemas"]["EduwikiSource"]
+        | components["schemas"]["CampusLifeSource"]
+        | components["schemas"]["HotelSource"]
+        | components["schemas"]["MoodleFileSource"]
+        | components["schemas"]["MoodleUrlSource"]
+        | components["schemas"]["MoodleUnknownSource"]
+        | components["schemas"]["TelegramSource"];
     };
     /** SearchResponses */
     SearchResponses: {
@@ -629,13 +738,15 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaCampusLifeSource = components["schemas"]["CampusLifeSource"];
 export type SchemaChat = components["schemas"]["Chat"];
 export type SchemaDbMessageSchema = components["schemas"]["DBMessageSchema"];
-export type SchemaDetail = components["schemas"]["Detail"];
+export type SchemaEduwikiSource = components["schemas"]["EduwikiSource"];
 export type SchemaFlattenInContentsWithPresignedUrl =
   components["schemas"]["FlattenInContentsWithPresignedUrl"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaHotelSource = components["schemas"]["HotelSource"];
 export type SchemaInContent = components["schemas"]["InContent"];
 export type SchemaInContents = components["schemas"]["InContents"];
 export type SchemaInCourse = components["schemas"]["InCourse"];
@@ -643,6 +754,7 @@ export type SchemaInCourses = components["schemas"]["InCourses"];
 export type SchemaInModule = components["schemas"]["InModule"];
 export type SchemaInSection = components["schemas"]["InSection"];
 export type SchemaInSections = components["schemas"]["InSections"];
+export type SchemaInfoSources = components["schemas"]["InfoSources"];
 export type SchemaMessageSchema = components["schemas"]["MessageSchema"];
 export type SchemaMoodleContentSchemaInput =
   components["schemas"]["MoodleContentSchema-Input"];
@@ -665,6 +777,9 @@ export interface operations {
     parameters: {
       query: {
         query: string;
+        sources: components["schemas"]["InfoSources"][];
+        response_types: PathsSearchSearchGetParametersQueryResponse_types[];
+        query_categories: string[];
         limit?: number;
       };
       header?: never;
@@ -767,6 +882,68 @@ export interface operations {
       };
     };
   };
+  moodle_get_courses_grouped_by_semester: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Courses grouped by semester */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: string[];
+          };
+        };
+      };
+    };
+  };
+  moodle_get_course_names_grouped: {
+    parameters: {
+      query: {
+        /** @example [S25] Mathematical Analysis II / Математический анализ II */
+        course_fullname: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": (
+            | components["schemas"]["EduwikiSource"]
+            | components["schemas"]["CampusLifeSource"]
+            | components["schemas"]["HotelSource"]
+            | components["schemas"]["MoodleFileSource"]
+            | components["schemas"]["MoodleUrlSource"]
+            | components["schemas"]["MoodleUnknownSource"]
+            | components["schemas"]["TelegramSource"]
+          )[];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   moodle_preview_moodle: {
     parameters: {
       query: {
@@ -829,7 +1006,9 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>[];
+          "application/json": {
+            [key: string]: unknown;
+          }[];
         };
       };
     };
@@ -1006,16 +1185,18 @@ export interface operations {
       };
     };
   };
-  compute_get_corpora: {
+  upload_markdown_file: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        section: components["schemas"]["InfoSources"];
+      };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description Success */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
@@ -1024,21 +1205,40 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
+      /** @description Validation Error */
+      422: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Detail"];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
 }
+export enum PathsSearchSearchGetParametersQueryResponse_types {
+  pdf = "pdf",
+  link_to_source = "link_to_source",
+}
 export enum PathsSearchSearchSearch_query_idFeedbackPostParametersQueryFeedback {
   like = "like",
   dislike = "dislike",
+}
+export enum CampusLifeSourceType {
+  campuslife = "campuslife",
+}
+export enum EduwikiSourceType {
+  eduwiki = "eduwiki",
+}
+export enum HotelSourceType {
+  hotel = "hotel",
+}
+export enum InfoSources {
+  moodle = "moodle",
+  eduwiki = "eduwiki",
+  campuslife = "campuslife",
+  hotel = "hotel",
 }
 export enum MoodleFileSourceType {
   moodle_file = "moodle-file",

@@ -9,7 +9,12 @@ import { useState } from "react";
 import SearchFiltersModal from "./SearchFiltersModal";
 import SearchFiltersButton from "./SearchFiltersButton";
 
-const SearchFilters = () => {
+type SearchFiltersProps = {
+  selected: Record<string, Record<string, boolean>>;
+  checks: (group: string, value: string) => void;
+};
+
+const SearchFilters = ({ selected, checks }: SearchFiltersProps) => {
   const [open, setOpen] = useState(false);
 
   const { refs, context } = useFloating({
@@ -28,40 +33,6 @@ const SearchFilters = () => {
     role,
   ]);
 
-  const [selected, setSelected] = useState<
-    Record<string, Record<string, boolean>>
-  >({
-    fileType: {
-      PDF: false,
-      "Web-site": false,
-      "Text file": false,
-      Other: false,
-    },
-    category: {
-      University: false,
-      "Innopolis city": false,
-      Campus: false,
-      Other: false,
-    },
-    source: {
-      Moodle: false,
-      Eduwiki: false,
-      Sport: false,
-      "Campus life": false,
-      Other: false,
-    },
-  });
-
-  const toggle = (group: string, value: string) => {
-    setSelected((prev) => ({
-      ...prev,
-      [group]: {
-        ...prev[group],
-        [value]: !prev[group][value],
-      },
-    }));
-  };
-
   return (
     <>
       <SearchFiltersButton ref={refs.setReference} {...getReferenceProps()} />
@@ -71,7 +42,7 @@ const SearchFilters = () => {
         context={context}
         getFloatingProps={getProps}
         selected={selected}
-        toggle={toggle}
+        checks={checks}
         onClose={() => setOpen(false)}
       />
     </>
