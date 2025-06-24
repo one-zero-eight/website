@@ -1,17 +1,17 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import { AskPage } from "@/components/search/AskPage.tsx";
+import { AskPage } from "@/components/search/ask/AskPage";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 
-type SearchParams = {
+type AskParams = {
   q: string;
 };
 
 export const Route = createFileRoute("/_with_menu/ask")({
-  validateSearch: (search: Record<string, unknown>): SearchParams => {
+  validateSearch: (ask: Record<string, unknown>): AskParams => {
     return {
-      q: (search.q as string) ?? "",
+      q: (ask.q as string) ?? "",
     };
   },
 
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_with_menu/ask")({
         </Helmet>
 
         <Topbar title="Ask" />
-        <AskPage searchQuery={q} />
+        <AskPage askQuery={q} />
       </Suspense>
     );
   },

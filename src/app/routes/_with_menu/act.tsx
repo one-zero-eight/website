@@ -1,17 +1,17 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import { ActPage } from "@/components/search/ActPage.tsx";
+import { ActPage } from "@/components/search/act/ActPage";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 
-type SearchParams = {
+type ActParams = {
   q: string;
 };
 
 export const Route = createFileRoute("/_with_menu/act")({
-  validateSearch: (search: Record<string, unknown>): SearchParams => {
+  validateSearch: (act: Record<string, unknown>): ActParams => {
     return {
-      q: (search.q as string) ?? "",
+      q: (act.q as string) ?? "",
     };
   },
 
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_with_menu/act")({
         </Helmet>
 
         <Topbar title="Act" />
-        <ActPage searchQuery={q} />
+        <ActPage actQuery={q} />
       </Suspense>
     );
   },

@@ -1,12 +1,14 @@
 import { searchTypes } from "@/api/search";
 import TelegramPreview from "@/components/search/TelegramPreview";
 import clsx from "clsx";
-import { lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import MoodleUnknownPreview from "./MoodleUnknownPreview";
 import MoodleUrlPreview from "./MoodleUrlPreview";
 
-const PdfPreview = lazy(() => import("./PdfPreview"));
+const PdfPreview = lazy(() =>
+  import("./PdfPreview").then((m) => ({ default: React.memo(m.default) })),
+);
 
 export declare type PreviewCardProps = {
   source: searchTypes.SchemaSearchResponse["source"];
@@ -30,7 +32,13 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
           onClick={onClose}
         />
       </div>
-      <a href={source?.link} target="_blank" className="w-fit max-w-full">
+      <a
+        href={
+          "link" in source ? source.link : "url" in source ? source.url : ""
+        }
+        target="_blank"
+        className="w-fit max-w-full"
+      >
         <p className="truncate pb-3 text-xs font-normal text-[#93bd58] hover:underline">
           {source.breadcrumbs.join(" > ")}
         </p>
