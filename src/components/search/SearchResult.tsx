@@ -29,15 +29,24 @@ export default function SearchResult({
         <span className="icon-[material-symbols--school-outline] text-3xl text-[#F27F22]" />
       ) : response.source.type === "telegram" ? (
         <span className="icon-[uil--telegram-alt] text-3xl text-[#27A7E7]" />
-      ) : // ) : response.source.type === "web-site" ? (
-      //   <span className="icon-[token--botanix] text-3xl text-[#27A7E7]" /> //TODO: Change to real website icon
-      null}
+      ) : response.source.type === "campuslife" ? (
+        <span className="icon-[hugeicons--university] text-3xl text-[#F7922D]" />
+      ) : response.source.type === "hotel" ? (
+        <span className="icon-[material-symbols--hotel-rounded] text-3xl text-[#27A7E7]" />
+      ) : response.source.type === "eduwiki" ? (
+        <span className="icon-[flat-color-icons--wikipedia] text-3xl text-[#3EDF51]" />
+      ) : null}
       <p className="text-xs font-semibold dark:text-white md:text-2xl">
         {response.source.display_name}
       </p>
-      {/* TODO: Change as any after fixing api types */}
       <a
-        href={(response.source as any).link}
+        href={
+          "link" in response.source
+            ? response.source.link
+            : "url" in response.source
+              ? response.source.url
+              : ""
+        }
         target="_blank"
         onClickCapture={(e) => e.stopPropagation()}
         className="w-fit max-w-full truncate text-xs text-[#93bd58] hover:underline"

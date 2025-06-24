@@ -162,12 +162,15 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
               />
             ))}
           </div>
-          {previewSource && (
-            <PreviewCard
-              source={previewSource}
-              onClose={() => setPreviewSource(undefined)}
-            />
-          )}
+          {previewSource &&
+            (previewSource.type === "moodle-file" ||
+              previewSource.type === "moodle-url" ||
+              previewSource.type === "moodle-unknown") && (
+              <PreviewCard
+                source={previewSource}
+                onClose={() => setPreviewSource(undefined)}
+              />
+            )}
         </div>
       )}
     </div>

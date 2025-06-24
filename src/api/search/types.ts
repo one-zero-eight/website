@@ -779,7 +779,6 @@ export interface operations {
         query: string;
         sources: components["schemas"]["InfoSources"][];
         response_types: PathsSearchSearchGetParametersQueryResponse_types[];
-        query_categories: string[];
         limit?: number;
       };
       header?: never;

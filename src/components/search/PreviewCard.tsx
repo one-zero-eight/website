@@ -32,9 +32,10 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
           onClick={onClose}
         />
       </div>
-      {/* TODO: Change as any after fixing api types */}
       <a
-        href={(source as any).link}
+        href={
+          "link" in source ? source.link : "url" in source ? source.url : ""
+        }
         target="_blank"
         className="w-fit max-w-full"
       >
