@@ -6,7 +6,7 @@ import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
 import SearchFilters from "@/components/search/SearchFilters.tsx";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   InfoSources,
   PathsSearchSearchGetParametersQueryResponse_types,
@@ -32,11 +32,13 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     },
   };
 
-  const [selected, setSelected] =
+  const [appliedFilters, setAppliedFilters] =
+    useState<Record<string, Record<string, boolean>>>(initialFiltersState);
+  const [selectedFilters, setSelectedFilters] =
     useState<Record<string, Record<string, boolean>>>(initialFiltersState);
 
   const checks = (group: string, value: string) => {
-    setSelected((prev) => ({
+    setSelectedFilters((prev) => ({
       ...prev,
       [group]: {
         ...prev[group],
@@ -45,7 +47,9 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     }));
   };
 
-  const buildQueryFilters = () => {
+  const buildQueryFilters = (
+    selected: Record<string, Record<string, boolean>>,
+  ) => {
     const response_types: PathsSearchSearchGetParametersQueryResponse_types[] =
       [];
     const sources: InfoSources[] = [];
@@ -72,7 +76,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       sources.push(InfoSources.moodle);
     }
 
-    Object.entries(selected).forEach(([group, values]) => {
+    Object.entries(selectedFilters).forEach(([group, values]) => {
       const selectedValues = Object.entries(values)
         .filter(([, checked]) => checked)
         .map(([value]) => value);
@@ -100,7 +104,14 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     return { response_types, sources, query_categories };
   };
 
-  const filters = buildQueryFilters();
+  const filters = useMemo(
+    () => buildQueryFilters(appliedFilters),
+    [appliedFilters],
+  );
+
+  const applyFilters = () => {
+    setAppliedFilters(selectedFilters);
+  };
 
   const { data: searchResult } = $search.useQuery(
     "get",
@@ -140,7 +151,11 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   return (
     <div className="flex grow flex-col gap-4 p-4">
       <SearchField runSearch={runSearch} currentQuery={searchQuery} />
-      <SearchFilters selected={selected} checks={checks} />
+      <SearchFilters
+        selected={selectedFilters}
+        checks={checks}
+        applyFilters={applyFilters}
+      />
 
       {searchResult && (
         <p className="py-4 text-2xl font-semibold text-contrast">
@@ -153,14 +168,42 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       {searchResult && (
         <div className="flex flex-row gap-6">
           <div className="flex w-full flex-col justify-stretch gap-4 md:min-w-0 md:basis-1/2">
-            {searchResult.responses.map((response, i) => (
-              <SearchResult
-                key={i}
-                response={response}
-                isSelected={previewSource === response.source}
-                select={() => setPreviewSource(response.source)}
-              />
-            ))}
+            {searchResult.responses
+              .filter((e) => {
+                if (filters.response_types.length === 0) {
+                  return true;
+                }
+
+                const url = "url" in e.source ? e.source.url : "";
+
+                if (
+                  filters.response_types.includes(
+                    PathsSearchSearchGetParametersQueryResponse_types.pdf,
+                  ) &&
+                  url.endsWith(".pdf")
+                ) {
+                  return true;
+                }
+
+                if (
+                  filters.response_types.includes(
+                    PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
+                  ) &&
+                  !url.endsWith(".pdf")
+                ) {
+                  return true;
+                }
+
+                return false;
+              })
+              .map((response, i) => (
+                <SearchResult
+                  key={i}
+                  response={response}
+                  isSelected={previewSource === response.source}
+                  select={() => setPreviewSource(response.source)}
+                />
+              ))}
           </div>
           {previewSource &&
             (previewSource.type === "moodle-file" ||

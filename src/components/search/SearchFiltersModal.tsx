@@ -17,6 +17,7 @@ type Props = {
   selected: Record<string, Record<string, boolean>>;
   checks: (group: string, value: string) => void;
   onClose: () => void;
+  onApply: () => void;
 };
 
 const filters = {
@@ -39,6 +40,7 @@ const SearchFiltersModal = ({
   selected,
   checks,
   onClose,
+  onApply,
 }: Props) => {
   if (!open) return null;
 
@@ -83,7 +85,13 @@ const SearchFiltersModal = ({
             ))}
           </div>
           <div className="mt-6 flex justify-center">
-            <DefaultButton content="Done" onClick={onClose}></DefaultButton>
+            <DefaultButton
+              content="Done"
+              onClick={() => {
+                onApply();
+                onClose();
+              }}
+            ></DefaultButton>
           </div>
         </div>
       </FloatingOverlay>
