@@ -6,6 +6,7 @@ type ModalProps = {
   visible: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  title?: string;
 };
 {
   /* Компонент модалки в пропсы принимает видимость, обработчик закрытия и контент */
@@ -15,6 +16,7 @@ const Modal: React.FC<ModalProps> = ({
   onClose,
   children,
   className = "",
+  title,
 }) => {
   useEffect(() => {
     {
@@ -36,21 +38,32 @@ const Modal: React.FC<ModalProps> = ({
     return () => {
       document.removeEventListener("keydown", handleEscKey);
     };
-  }, [visible, onClose]);
-  if (!visible) return null;
+  }, [visible, onClose]);  if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[1000] animate-in fade-in duration-250 backdrop-blur-[3px]">      <div
-        className={`bg-floating p-5 px-6 pb-4 rounded-xl text-white min-w-80 max-w-lg w-full relative animate-in zoom-in-95 duration-300 whitespace-pre-wrap break-words ${className}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button 
-          className="absolute top-2 right-2 text-lg bg-transparent border-none text-white cursor-pointer z-10 w-6 h-6 flex rounded items-center justify-center p-0 transition-all duration-200 outline-none hover:text-red-500 focus:outline-none focus:shadow-none active:scale-90" 
-          onClick={onClose}
-        >
-          ×
-        </button>
-        {children}
+    <div className="fixed inset-0 z-10 grid place-items-center bg-black/75 @container/modal">
+      <div className="flex h-fit w-full max-w-lg flex-col p-4 outline-none">
+        <div className="overflow-hidden rounded-2xl bg-floating">          
+          <div className={`flex flex-col p-4 @2xl/modal:p-8 ${className}`}>
+            {/* Heading and close button */}
+            <div className="mb-0 flex w-full flex-row">
+              {title && (
+                <div className="grow items-center text-3xl font-semibold">
+                  {title}
+                </div>
+              )}
+              <button
+                type="button"
+                className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75"
+                onClick={onClose}
+              >
+                <span className="icon-[material-symbols--close] text-4xl" />
+              </button>
+            </div>
+            
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

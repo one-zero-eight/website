@@ -5,7 +5,6 @@ import WorkshopList from "./UI/workshop_tiles/WorkshopList";
 import PostForm from "@/components/workshops/UI/post_form/PostForm.tsx";
 import Modal from "./UI/modal/ModalWindow";
 import Description from "./UI/description_form/Description";
-import styles from "./UI/modal/ModalWindow.module.css";
 import { workshopsFetch } from "@/api/workshops";
 
 type Workshop = {
@@ -362,9 +361,12 @@ export function WorkshopsPage() {
         workshops={workshops}
         openDescription={openDescription}
         currentUserRole={currentUser?.role || "user"}
-      />
-      {/* Модалка для создания нового воркшопа чекай UI/modal */}
-      <Modal visible={modalVisible} onClose={handleModalClose}>
+      />      {/* Модалка для создания нового воркшопа чекай UI/modal */}
+      <Modal 
+        visible={modalVisible} 
+        onClose={handleModalClose}
+        title={editingWorkshop ? "Edit workshop" : "Create workshop"}
+      >
         {/* Форма для создания/редакта воркшопа чекай PostForm.tsx */}
         {/* Тут тернарка подставляет данные если ты в режиме редактирования */}
         <PostForm
@@ -393,7 +395,8 @@ export function WorkshopsPage() {
       <Modal
         visible={descriptionVisible}
         onClose={() => setDescriptionVisible(false)}
-        className={styles["modal-content-special"]}
+        title={selectedWorkshop?.title}
+        className="whitespace-pre-wrap break-words"
       >
         <Description workshop={selectedWorkshop} />
       </Modal>
