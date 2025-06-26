@@ -53,9 +53,9 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   };
 
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Проверяем, что клик был не по кнопкам
+    // Проверяем, что клик был не по кнопкам и не по ссылке на комнату
     const target = e.target as HTMLElement;
-    if (!target.closest("button")) {
+    if (!target.closest("button") && !target.closest('[title="Click to view on map"]')) {
       openDescription(workshop);
     }
   };
@@ -73,9 +73,8 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   const formatTime = (timeString: string) => {
     if (!timeString) return "";
     return timeString;
-  };
-
-  const handleRoomClick = (e: React.MouseEvent<HTMLParagraphElement>) => {
+  };  
+  const handleRoomClick = (e: React.MouseEvent<HTMLSpanElement>) => {
     e.stopPropagation();
     if (workshop.room) {
       navigate({
@@ -199,14 +198,13 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         <p className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 transform rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2 text-center text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px]">
           {getInactiveStatusText()}
         </p>
-      )}
-      {workshop.room && (
+      )}      {workshop.room && (
         <div className="my-2">
           <p className="m-0 text-base text-white/80">
             <strong>Room:</strong>{" "}
             <span
               onClick={handleRoomClick}
-              className="cursor-pointer text-brand-violet hover:underline"
+              className="relative z-[5] cursor-pointer text-brand-violet underline"
               title="Click to view on map"
             >
               {workshop.room}
