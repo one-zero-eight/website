@@ -211,8 +211,16 @@ export function WorkshopsPage() {
     }
     return false;
   };
-
   const removeWorkshop = async (workshop: Workshop) => {
+    // Показываем диалог подтверждения перед удалением
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the workshop "${workshop.title}"?\n\nThis action cannot be undone.`
+    );
+
+    if (!confirmDelete) {
+      return; // Если пользователь отменил, выходим из функции
+    }
+
     try {
       const { data, error } = await workshopsFetch.DELETE(
         `/api/workshops/{workshop_id}`,
