@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
-import "./styles/App.css";
 import WorkshopList from "./UI/workshop_tiles/WorkshopList";
 import PostForm from "@/components/workshops/UI/post_form/PostForm.tsx";
 import Modal from "./UI/modal/ModalWindow";
@@ -325,18 +324,16 @@ export function WorkshopsPage() {
       alert(`Failed to change role. Please try again.`);
     }
   };
-
   return (
-    <div className="App">
-      {/* Показываем кнопку изменения роли только если пользователь авторизован */}
+    <div className="w-full min-h-screen">      {/* Показываем кнопку изменения роли только если пользователь авторизован */}
       {currentUser && (
-        <button
-          className="fab-button"
+        <button          className={`fixed right-6 z-[1001] px-5 py-3 rounded-lg border-none bg-brand-violet text-white text-base font-bold cursor-pointer shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80 ${
+            currentUser.role === "admin" 
+              ? "bottom-28 lg:bottom-16" // 112px на мобиле, 64px на десктопе
+              : "bottom-20 lg:bottom-3"   // 80px на мобиле, 12px на десктопе
+          }`}
           title={`Set ${currentUser.role === "admin" ? "user" : "admin"} role`}
           onClick={handleRoleChangeRequest}
-          style={{
-            bottom: currentUser.role === "admin" ? "80px" : "24px",
-          }}
         >
           Set {currentUser.role === "admin" ? "user" : "admin"}
         </button>
@@ -344,12 +341,9 @@ export function WorkshopsPage() {
       {/* Показываем кнопку добавления воркшопа только для администраторов */}
       {currentUser?.role === "admin" && (
         <button
-          className="fab-button"
+          className="fixed right-6 bottom-14 lg:bottom-3 z-[1001] px-5 py-3 rounded-lg border-none bg-brand-violet text-white text-base font-bold cursor-pointer shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80"
           title="Add new workshop"
           onClick={() => setModalVisible(true)}
-          style={{
-            bottom: "24px",
-          }}
         >
           Add workshop
         </button>
