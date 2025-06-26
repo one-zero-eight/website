@@ -204,7 +204,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
             <strong>Room:</strong>{" "}
             <span
               onClick={handleRoomClick}
-              className="relative z-[5] cursor-pointer text-brand-violet underline"
+              className="relative z-[5] cursor-pointer text-brand-violet underline hover:text-brand-violet/80"
               title="Click to view on map"
             >
               {workshop.room}

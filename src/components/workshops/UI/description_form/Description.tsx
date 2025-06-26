@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 type Workshop = {
   id: string;
@@ -83,6 +84,18 @@ const ReplaceURL = (str: string) => {
   return merged;
 };
 const Description: React.FC<WorkshopProps> = ({ workshop }) => {
+  const navigate = useNavigate();
+  
+  const handleRoomClick = (e: React.MouseEvent<HTMLSpanElement>) => {
+    e.stopPropagation();
+    if (workshop?.room) {
+      navigate({
+        to: "/maps",
+        search: { q: workshop.room },
+      });
+    }
+  };
+  
   if (!workshop) return <div>No description</div>;
   return (
     <div className="flex flex-col p-5 text-contrast">
@@ -92,7 +105,13 @@ const Description: React.FC<WorkshopProps> = ({ workshop }) => {
           <span className="icon-[material-symbols--location-on-outline] text-2xl" />
         </div>
         <p className="flex w-full items-center whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
-          {workshop.room}
+          <span
+            onClick={handleRoomClick}
+            className="cursor-pointer text-brand-violet underline hover:text-brand-violet/80"
+            title="Click to view on map"
+          >
+            {workshop.room}
+          </span>
         </p>
       </div>
       <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">
