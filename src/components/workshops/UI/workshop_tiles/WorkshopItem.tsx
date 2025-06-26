@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import "./WorkshopList.css";
 import { workshopsFetch } from "@/api/workshops";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -163,36 +162,41 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       console.error("Check-out failed", error);
       alert("Error occur when trying to check out");
     }
-  };
-  return (
+  };  return (
     <div
-      className={`workshop-tile ${!isWorkshopActive() ? "workshop-inactive" : ""} ${workshopChosen ? "workshop-chosen" : ""}`}
+      className={`
+        relative max-w-[280px] w-full bg-[#1e1e1e] rounded-2xl p-4 pb-[55px] 
+        shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+        hover:transform hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]
+        ${!isWorkshopActive() ? "opacity-60 grayscale-[50%] hover:transform-none hover:shadow-[0_0_8px_rgba(0,0,0,0.3)]" : ""} 
+        ${workshopChosen ? "bg-[#1e2e1e] bg-gradient-to-br from-[#1a2b1a] to-[#1e2e1e] shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)]" : ""}
+      `}
       onClick={handleContentClick}
     >
-      <div className="workshop-header flex items-center justify-between">
+      <div className="flex items-center justify-between">
         {workshop.startTime && workshop.endTime && (
-          <p className="workshop-time">
+          <p className="text-brand-violet text-[15px] flex justify-start items-center font-medium">
             {formatTime(workshop.startTime)} - {formatTime(workshop.endTime)}
           </p>
         )}
-        <p className="workshop-places">
+        <p className="text-brand-violet text-[15px] flex justify-end items-center font-medium">
           {workshop.maxPlaces > 0
             ? workshop.maxPlaces === 500
               ? signedPeople + "/"
               : signedPeople + "/" + workshop.maxPlaces
             : "No limit on number of people"}
           {workshop.maxPlaces === 500 && (
-            <span className="icon-[mdi--infinity]"></span>
+            <span className="icon-[mdi--infinity] mt-0.5"></span>
           )}
         </p>
       </div>
-      <h3> {workshop.title}</h3>
+      <h3 className="text-lg my-1.5 mb-2 font-semibold leading-[1.3] text-white"> {workshop.title}</h3>
       {!isWorkshopActive() && (
-        <p className="workshop-status-inactive">{getInactiveStatusText()}</p>
+        <p className="absolute left-1/2 bottom-3 transform -translate-x-1/2 text-[#ff6b6b] text-sm font-semibold text-center bg-[rgba(255,107,107,0.15)] px-4 py-2 rounded-xl border border-[rgba(255,107,107,0.3)] z-10 pointer-events-none backdrop-blur-[8px]">{getInactiveStatusText()}</p>
       )}
       {workshop.room && (
-        <div className="workshop-room">
-          <p>
+        <div className="my-2">
+          <p className="m-0 text-base text-white/80">
             <strong>Room:</strong>{" "}
             <span
               onClick={handleRoomClick}
@@ -204,6 +208,10 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           </p>
         </div>
       )}
+
+      {/* Кликабельная область */}
+      <div className="absolute top-0 left-0 right-0 bottom-0 z-0 cursor-pointer"></div>
+
       {/* Показываем кнопки управления только для администраторов */}
       {currentUserRole === "admin" && (
         <>
@@ -212,7 +220,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
               e.stopPropagation();
               remove(workshop);
             }}
-            className="delete-button"
+            className="absolute bottom-3 right-3 p-2.5 bg-black/40 text-[#ff6b6b] border border-[#ff6b6b]/20 rounded-xl cursor-pointer flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-[12px] hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252] hover:scale-110 hover:border-[#ff5252]/40"
             title="Delete workshop"
           >
             <span className="icon-[material-symbols--delete-outline-rounded] text-xl" />
@@ -222,7 +230,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
               e.stopPropagation();
               edit(workshop);
             }}
-            className="edit-button"
+            className="absolute bottom-3 left-3 p-2.5 bg-black/40 text-brand-violet border border-brand-violet/20 rounded-xl cursor-pointer flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-[12px] hover:bg-brand-violet/20 hover:text-brand-violet/80 hover:scale-110 hover:border-brand-violet/40"
             title="Edit workshop"
           >
             <span className="icon-[mynaui--pencil] text-xl" />
@@ -234,7 +242,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         (workshopChosen ? (
           <button
             onClick={handleCheckOut}
-            className="check-out-button"
+            className="absolute bottom-3 right-1/2 transform translate-x-1/2 p-2.5 bg-black/40 text-[#ff6b6b] border border-[#ff6b6b]/20 rounded-xl cursor-pointer flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-[12px] hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252] hover:transform hover:translate-x-1/2 hover:scale-110 hover:border-[#ff5252]/40"
             title="Check out"
           >
             <span className="icon-[material-symbols--remove] text-xl" />
@@ -243,7 +251,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           <button
             disabled={signedPeople === workshop.maxPlaces}
             onClick={handleCheckIn}
-            className="check-in-button"
+            className="absolute bottom-3 right-1/2 transform translate-x-1/2 p-2.5 bg-black/40 text-[#bcdfbc] border border-[#bcdfbc]/20 rounded-xl cursor-pointer flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-[12px] hover:bg-[rgba(167,202,167,0.2)] hover:text-[#aad6aa] hover:transform hover:translate-x-1/2 hover:scale-110 hover:border-[#aad6aa]/40 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Check in"
           >
             <span className="icon-[material-symbols--add-rounded] text-xl" />

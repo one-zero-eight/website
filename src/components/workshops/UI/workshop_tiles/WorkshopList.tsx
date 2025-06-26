@@ -1,6 +1,5 @@
 import React from "react";
 import WorkshopItem from "./WorkshopItem";
-import "./WorkshopList.css";
 
 type Workshop = {
   id: string;
@@ -105,17 +104,9 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
                 </div>
               </div>
             </React.Fragment>
-          ))
-      ) : (
-        <div
-          style={{
-            gridColumn: "1 / -1",
-            textAlign: "center",
-            width: "100%",
-            fontSize: "1.3rem",
-          }}
-        >
-          <h2 style={{ color: "gray" }}>No workshops yet!</h2>
+          ))      ) : (
+        <div className="col-span-full text-center w-full text-xl">
+          <h2 className="text-gray-500">No workshops yet!</h2>
         </div>
       )}
     </div>
