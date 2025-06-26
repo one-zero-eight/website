@@ -167,9 +167,11 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       alert("Error occur when trying to check out");
     }
   };
-  return (
-    <div
-      className={`relative w-full max-w-[280px] rounded-2xl bg-[#1e1e1e] p-4 pb-[55px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)] ${!isWorkshopActive() ? "opacity-60 grayscale-[50%] hover:transform-none hover:shadow-[0_0_8px_rgba(0,0,0,0.3)]" : ""} ${workshopChosen ? "bg-[#1e2e1e] bg-gradient-to-br from-[#1a2b1a] to-[#1e2e1e] shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)]" : ""} `}
+  return (    
+  <div
+      className={`relative w-full max-w-[280px] rounded-2xl bg-[#1e1e1e] border p-4 pb-[55px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] 
+        ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "opacity-60 grayscale-[50%] border-brand-violet/30"} 
+        ${workshopChosen ? "bg-[#1e2e1e] bg-gradient-to-br from-[#1a2b1a] to-[#1e2e1e] shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] border-green-500/60" : "border-brand-violet/40"} `}
       onClick={handleContentClick}
     >
       <div className="flex items-center justify-between">
