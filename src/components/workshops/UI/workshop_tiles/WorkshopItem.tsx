@@ -41,12 +41,11 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   const isWorkshopActive = () => {
     return workshop.isActive !== false && workshop.isRegistrable !== false;
   };
-
   // Функция для получения текста статуса неактивности
   const getInactiveStatusText = () => {
     if (workshop.isRegistrable === false && workshop.isActive !== false) {
       // Только isRegistrable false показываем дату и время начала
-      return `Inactive due ${workshop.date} ${formatTime(workshop.startTime)}`;
+      return `Inactive due ${formatStartDate(workshop.date)} ${formatTime(workshop.startTime)}`;
     } else {
       // isActive false или оба false просто Inactive
       return "Inactive";
@@ -60,12 +59,17 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       openDescription(workshop);
     }
   };
-
-  // const formatDate = (dateString: string) => {
-  //   if (!dateString) return "";
-  //   const date = new Date(dateString);
-  //   return date.toLocaleDateString("ru-RU");
-  // };
+  const formatStartDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    // Вычитаем один день
+    const previousDay = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+    const day = previousDay.getDate().toString().padStart(2, '0');
+    const month = (previousDay.getMonth() + 1).toString().padStart(2, '0');
+    const year = previousDay.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
+  
   const formatTime = (timeString: string) => {
     if (!timeString) return "";
     return timeString;
