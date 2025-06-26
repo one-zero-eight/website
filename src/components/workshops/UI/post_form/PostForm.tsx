@@ -131,15 +131,21 @@ const PostForm: React.FC<PostFormProps> = ({
 
   return (
     <form onSubmit={addNewWorkshop}>
-      <label className="text-white text-xs font-medium uppercase tracking-wider">Title</label>
+      <label className="text-xs font-medium uppercase tracking-wider text-white">
+        Title
+      </label>
       <WorkshopInput
         value={workshop.title}
         onChange={handleTitleChange}
         type="text"
         placeholder="Title"
       />
-      {titleError && <div className="text-red-500 text-xs mt-1 mb-2">{titleError}</div>}
-      <label className="text-white text-xs font-medium uppercase tracking-wider">Description</label>
+      {titleError && (
+        <div className="mb-2 mt-1 text-xs text-red-500">{titleError}</div>
+      )}
+      <label className="text-xs font-medium uppercase tracking-wider text-white">
+        Description
+      </label>
       <WorkshopTextArea
         value={workshop.body}
         onChange={(e) => setWorkshop({ ...workshop, body: e.target.value })}
@@ -160,7 +166,8 @@ const PostForm: React.FC<PostFormProps> = ({
         onRoomChange={(room) => setWorkshop({ ...workshop, room })}
         onMaxPlacesChange={(maxPlaces) =>
           setWorkshop({ ...workshop, maxPlaces })
-        }      />{" "}
+        }
+      />{" "}
       <div className="my-4 flex items-center gap-2">
         <input
           type="checkbox"
@@ -173,10 +180,11 @@ const PostForm: React.FC<PostFormProps> = ({
         />
         <label
           htmlFor="isActive"
-          className="text-white text-xs font-medium uppercase tracking-wider m-0"
+          className="m-0 text-xs font-medium uppercase tracking-wider text-white"
         >
           Active Workshop
-        </label>      </div>
+        </label>{" "}
+      </div>
       <div className="flex flex-row gap-2">
         <button
           type="button"
@@ -185,7 +193,7 @@ const PostForm: React.FC<PostFormProps> = ({
         >
           Cancel
         </button>
-        <button 
+        <button
           type="submit"
           className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
         >

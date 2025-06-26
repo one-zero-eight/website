@@ -49,7 +49,7 @@ const ReplaceURL = (str: string) => {
     if (telegramUsernameRegex.test(url)) {
       return (
         <a
-          className="text-brand-violet hover:text-brand-violet/80 hover:scale-110 transition-all duration-200"
+          className="text-brand-violet transition-all duration-200 hover:scale-110 hover:text-brand-violet/80"
           href={"https://t.me/" + url.slice(1)}
           target="_blank"
           rel="noopener noreferrer"
@@ -60,10 +60,10 @@ const ReplaceURL = (str: string) => {
       );
     } else {
       return (
-        <a 
-          className="text-brand-violet hover:text-brand-violet/80 hover:scale-110 transition-all duration-200" 
-          href={url} 
-          target="_blank" 
+        <a
+          className="text-brand-violet transition-all duration-200 hover:scale-110 hover:text-brand-violet/80"
+          href={url}
+          target="_blank"
           rel="noopener noreferrer"
           key={url}
         >
@@ -85,8 +85,8 @@ const ReplaceURL = (str: string) => {
 const Description: React.FC<WorkshopProps> = ({ workshop }) => {
   if (!workshop) return <div>No description</div>;
   return (
-    <div className="text-contrast p-5 flex flex-col">
-      <p className="text-lg mb-1.5">{ReplaceURL(workshop.body)}</p>
+    <div className="flex flex-col p-5 text-contrast">
+      <p className="mb-1.5 text-lg">{ReplaceURL(workshop.body)}</p>
       <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">
         <div className="flex h-fit w-6">
           <span className="icon-[material-symbols--location-on-outline] text-2xl" />

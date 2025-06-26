@@ -325,12 +325,15 @@ export function WorkshopsPage() {
     }
   };
   return (
-    <div className="w-full min-h-screen">      {/* Показываем кнопку изменения роли только если пользователь авторизован */}
+    <div className="min-h-screen w-full">
+      {" "}
+      {/* Показываем кнопку изменения роли только если пользователь авторизован */}
       {currentUser && (
-        <button          className={`fixed right-6 z-[1001] px-5 py-3 rounded-lg border-none bg-brand-violet text-white text-base font-bold cursor-pointer shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80 ${
-            currentUser.role === "admin" 
+        <button
+          className={`fixed right-6 z-[1001] cursor-pointer rounded-lg border-none bg-brand-violet px-5 py-3 text-base font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80 ${
+            currentUser.role === "admin"
               ? "bottom-28 lg:bottom-16" // 112px на мобиле, 64px на десктопе
-              : "bottom-20 lg:bottom-3"   // 80px на мобиле, 12px на десктопе
+              : "bottom-20 lg:bottom-3" // 80px на мобиле, 12px на десктопе
           }`}
           title={`Set ${currentUser.role === "admin" ? "user" : "admin"} role`}
           onClick={handleRoleChangeRequest}
@@ -341,7 +344,7 @@ export function WorkshopsPage() {
       {/* Показываем кнопку добавления воркшопа только для администраторов */}
       {currentUser?.role === "admin" && (
         <button
-          className="fixed right-6 bottom-14 lg:bottom-3 z-[1001] px-5 py-3 rounded-lg border-none bg-brand-violet text-white text-base font-bold cursor-pointer shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80"
+          className="fixed bottom-14 right-6 z-[1001] cursor-pointer rounded-lg border-none bg-brand-violet px-5 py-3 text-base font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80 lg:bottom-3"
           title="Add new workshop"
           onClick={() => setModalVisible(true)}
         >
@@ -355,9 +358,10 @@ export function WorkshopsPage() {
         workshops={workshops}
         openDescription={openDescription}
         currentUserRole={currentUser?.role || "user"}
-      />      {/* Модалка для создания нового воркшопа чекай UI/modal */}
-      <Modal 
-        visible={modalVisible} 
+      />{" "}
+      {/* Модалка для создания нового воркшопа чекай UI/modal */}
+      <Modal
+        visible={modalVisible}
         onClose={handleModalClose}
         title={editingWorkshop ? "Edit workshop" : "Create workshop"}
       >

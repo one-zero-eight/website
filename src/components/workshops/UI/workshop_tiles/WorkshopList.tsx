@@ -104,8 +104,9 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
                 </div>
               </div>
             </React.Fragment>
-          ))      ) : (
-        <div className="col-span-full text-center w-full text-xl">
+          ))
+      ) : (
+        <div className="col-span-full w-full text-center text-xl">
           <h2 className="text-gray-500">No workshops yet!</h2>
         </div>
       )}

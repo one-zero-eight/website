@@ -38,12 +38,13 @@ const Modal: React.FC<ModalProps> = ({
     return () => {
       document.removeEventListener("keydown", handleEscKey);
     };
-  }, [visible, onClose]);  if (!visible) return null;
+  }, [visible, onClose]);
+  if (!visible) return null;
 
   return (
     <div className="fixed inset-0 z-10 grid place-items-center bg-black/75 @container/modal">
       <div className="flex h-fit w-full max-w-lg flex-col p-4 outline-none">
-        <div className="overflow-hidden rounded-2xl bg-floating">          
+        <div className="overflow-hidden rounded-2xl bg-floating">
           <div className={`flex flex-col p-4 @2xl/modal:p-8 ${className}`}>
             {/* Heading and close button */}
             <div className="mb-0 flex w-full flex-row">
@@ -60,7 +61,7 @@ const Modal: React.FC<ModalProps> = ({
                 <span className="icon-[material-symbols--close] text-4xl" />
               </button>
             </div>
-            
+
             {children}
           </div>
         </div>
