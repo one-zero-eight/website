@@ -1,5 +1,4 @@
 import React from "react";
-import "./Description.css";
 
 type Workshop = {
   id: string;
@@ -46,14 +45,14 @@ const ReplaceURL = (str: string) => {
   );
 
   if (texts.text) texts.array.push(texts.text);
-
   const links = texts.urls.map((url) => {
     if (telegramUsernameRegex.test(url)) {
       return (
         <a
-          className="links"
+          className="text-brand-violet hover:text-brand-violet/80 hover:scale-110 transition-all duration-200"
           href={"https://t.me/" + url.slice(1)}
           target="_blank"
+          rel="noopener noreferrer"
           key={url}
         >
           {url}
@@ -61,7 +60,13 @@ const ReplaceURL = (str: string) => {
       );
     } else {
       return (
-        <a className="links" href={url} target="_blank" key={url}>
+        <a 
+          className="text-brand-violet hover:text-brand-violet/80 hover:scale-110 transition-all duration-200" 
+          href={url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          key={url}
+        >
           {url}
         </a>
       );
@@ -80,8 +85,8 @@ const ReplaceURL = (str: string) => {
 const Description: React.FC<WorkshopProps> = ({ workshop }) => {
   if (!workshop) return <div>No description</div>;
   return (
-    <div className="description-content">
-      <p className="text-lg" style={{ marginBottom: "5px" }}>{ReplaceURL(workshop.body)}</p>
+    <div className="text-contrast p-5 flex flex-col">
+      <p className="text-lg mb-1.5">{ReplaceURL(workshop.body)}</p>
       <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">
         <div className="flex h-fit w-6">
           <span className="icon-[material-symbols--location-on-outline] text-2xl" />
