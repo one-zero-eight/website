@@ -1,6 +1,5 @@
 import React from "react";
 import { useEffect } from "react";
-import styles from "./ModalWindow.module.css";
 
 type ModalProps = {
   className?: string;
@@ -38,17 +37,18 @@ const Modal: React.FC<ModalProps> = ({
       document.removeEventListener("keydown", handleEscKey);
     };
   }, [visible, onClose]);
-
   if (!visible) return null;
 
   return (
-    <div className={styles["modal-backdrop"]}>
-      <div
-        className={`${styles["modal-content"]} ${className}`}
+    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[1000] animate-in fade-in duration-250 backdrop-blur-[3px]">      <div
+        className={`bg-floating p-5 px-6 pb-4 rounded-xl text-white min-w-80 max-w-lg w-full relative animate-in zoom-in-95 duration-300 whitespace-pre-wrap break-words ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <button className={styles["modal-close"]} onClick={onClose}>
-          x
+        <button 
+          className="absolute top-2 right-2 text-lg bg-transparent border-none text-white cursor-pointer z-10 w-6 h-6 flex rounded items-center justify-center p-0 transition-all duration-200 outline-none hover:text-red-500 focus:outline-none focus:shadow-none active:scale-90" 
+          onClick={onClose}
+        >
+          ×
         </button>
         {children}
       </div>
