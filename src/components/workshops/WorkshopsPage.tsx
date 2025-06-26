@@ -330,7 +330,7 @@ export function WorkshopsPage() {
       {/* Показываем кнопку изменения роли только если пользователь авторизован */}
       {currentUser && (
         <button
-          className={`fixed right-2 lg:right-6 z-[1001] cursor-pointer rounded-lg border-none bg-brand-violet px-5 py-3 text-base font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80 ${
+          className={`fixed right-2 z-[1001] cursor-pointer rounded-lg border-none bg-brand-violet px-5 py-3 text-base font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80 lg:right-6 ${
             currentUser.role === "admin"
               ? "bottom-28 lg:bottom-16" // 112px на мобиле, 64px на десктопе
               : "bottom-20 lg:bottom-3" // 80px на мобиле, 12px на десктопе
@@ -344,7 +344,7 @@ export function WorkshopsPage() {
       {/* Показываем кнопку добавления воркшопа только для администраторов */}
       {currentUser?.role === "admin" && (
         <button
-          className="fixed bottom-14 right-2 lg:right-6 z-[1001] cursor-pointer rounded-lg border-none bg-brand-violet px-5 py-3 text-base font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80 lg:bottom-3"
+          className="fixed bottom-14 right-2 z-[1001] cursor-pointer rounded-lg border-none bg-brand-violet px-5 py-3 text-base font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80 lg:bottom-3 lg:right-6"
           title="Add new workshop"
           onClick={() => setModalVisible(true)}
         >
