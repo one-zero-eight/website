@@ -34,7 +34,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
             type="date"
             value={date}
             onChange={(e) => onDateChange(e.target.value)}
-            className="w-full px-4 py-2.5 border border-white/30 rounded-lg bg-white/10 text-white text-sm transition-all duration-300 focus:outline-none focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+            className="w-full px-4 py-2.5 border border-white/30 rounded-lg bg-white/10 text-white text-sm transition-all duration-300 outline-none focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer"
           />
         </div>
 
@@ -44,7 +44,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
             type="text"
             value={room}
             onChange={(e) => onRoomChange(e.target.value)}
-            className="w-full px-4 py-2.5 border border-white/30 rounded-lg bg-white/10 text-white text-sm transition-all duration-300 focus:outline-none focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)]"
+            className="w-full px-4 py-2.5 border border-white/30 rounded-lg bg-white/10 text-white text-sm transition-all duration-300 outline-none focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)]"
             placeholder="Room"
           />
         </div>
@@ -55,7 +55,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
             type="text"
             value={maxPlaces}
             onChange={(e) => onMaxPlacesChange(Number(e.target.value))}
-            className="w-full px-4 py-2.5 border border-white/30 rounded-lg bg-white/10 text-white text-sm transition-all duration-300 focus:outline-none focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)]"
+            className="w-full px-4 py-2.5 border border-white/30 rounded-lg bg-white/10 text-white text-sm transition-all duration-300 outline-none focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)]"
             placeholder="limit"
           />
         </div>
@@ -68,7 +68,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
             type="time"
             value={startTime}
             onChange={(e) => onStartTimeChange(e.target.value)}
-            className="w-full px-4 py-2.5 border border-white/30 rounded-lg bg-white/10 text-white text-sm transition-all duration-300 focus:outline-none focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+            className="w-full px-4 py-2.5 border border-white/30 rounded-lg bg-white/10 text-white text-sm transition-all duration-300 outline-none focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer"
           />
         </div>
 
@@ -78,7 +78,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
             type="time"
             value={endTime}
             onChange={(e) => onEndTimeChange(e.target.value)}
-            className="w-full px-4 py-2.5 border border-white/30 rounded-lg bg-white/10 text-white text-sm transition-all duration-300 focus:outline-none focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+            className="w-full px-4 py-2.5 border border-white/30 rounded-lg bg-white/10 text-white text-sm transition-all duration-300 outline-none focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer"
           />
         </div>
       </div>
