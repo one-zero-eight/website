@@ -12,9 +12,14 @@ import SearchFiltersButton from "./SearchFiltersButton";
 type SearchFiltersProps = {
   selected: Record<string, Record<string, boolean>>;
   checks: (group: string, value: string) => void;
+  applyFilters: () => void;
 };
 
-const SearchFilters = ({ selected, checks }: SearchFiltersProps) => {
+const SearchFilters = ({
+  selected,
+  checks,
+  applyFilters,
+}: SearchFiltersProps) => {
   const [open, setOpen] = useState(false);
 
   const { refs, context } = useFloating({
@@ -44,6 +49,7 @@ const SearchFilters = ({ selected, checks }: SearchFiltersProps) => {
         selected={selected}
         checks={checks}
         onClose={() => setOpen(false)}
+        onApply={() => applyFilters()}
       />
     </>
   );
