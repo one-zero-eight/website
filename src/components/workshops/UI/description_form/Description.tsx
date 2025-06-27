@@ -145,7 +145,9 @@ const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
   if (!workshop) return <div>No description</div>;
   return (
     <div className="flex flex-col p-5 text-contrast">
-      <p className="mb-1.5 text-lg">{ReplaceURL(workshop.body)}</p>
+      <div className="mb-1.5 text-lg max-h-24 overflow-y-auto leading-6">
+        {ReplaceURL(workshop.body)}
+      </div>
       <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">
         <div className="flex h-fit w-6">
           <span className="icon-[material-symbols--location-on-outline] text-2xl" />
