@@ -99,8 +99,8 @@ const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
   const [loadingParticipants, setLoadingParticipants] = useState(false);
 
   const displayLimit = 5; // Количество участников для отображения по умолчанию
-  const visibleParticipants = showAllParticipants 
-    ? participants 
+  const visibleParticipants = showAllParticipants
+    ? participants
     : participants.slice(0, displayLimit);
   const hiddenCount = participants.length - displayLimit;
 
@@ -116,7 +116,7 @@ const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
             params: {
               path: { workshop_id: workshop.id },
             },
-          }
+          },
         );
 
         if (!error && data) {
@@ -131,7 +131,7 @@ const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
 
     fetchParticipants();
   }, [workshop?.id, refreshTrigger]);
-  
+
   const handleRoomClick = (e: React.MouseEvent<HTMLSpanElement>) => {
     e.stopPropagation();
     if (workshop?.room) {
@@ -141,11 +141,11 @@ const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
       });
     }
   };
-  
+
   if (!workshop) return <div>No description</div>;
   return (
     <div className="flex flex-col p-5 text-contrast">
-      <div className="mb-1.5 text-lg max-h-24 overflow-y-auto leading-6">
+      <div className="mb-1.5 max-h-24 overflow-y-auto text-lg leading-6">
         {ReplaceURL(workshop.body)}
       </div>
       <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">
@@ -176,54 +176,54 @@ const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
         </div>
         {formatTime(workshop.startTime) + "-" + formatTime(workshop.endTime)}
       </div>
-      
+
       {/* Секция с участниками */}
       <div className="mt-4 border-t border-contrast/20 pt-4">
-        <div className="flex flex-row items-center gap-2 text-xl text-contrast/75 mb-3">
+        <div className="mb-3 flex flex-row items-center gap-2 text-xl text-contrast/75">
           <div className="flex h-fit w-6">
             <span className="icon-[material-symbols--group-outline] text-2xl" />
           </div>
-          <p className="font-medium">
-            Participants ({participants.length})
-          </p>
+          <p className="font-medium">Participants ({participants.length})</p>
         </div>
-        
+
         {loadingParticipants ? (
           <div className="flex items-center justify-center py-4">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-brand-violet border-t-transparent"></div>
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-violet border-t-transparent"></div>
           </div>
         ) : participants.length > 0 ? (
           <div className="space-y-2">
             {visibleParticipants.map((participant, index) => (
-              <div 
+              <div
                 key={participant.id}
-                className="flex items-center gap-2 text-contrast/80 text-base"
+                className="flex items-center gap-2 text-base text-contrast/80"
               >
-                <span className="text-brand-violet text-m">•</span>
-                <span className="font-mono text-m">{participant.email}</span>
+                <span className="text-m text-brand-violet">•</span>
+                <span className="text-m font-mono">{participant.email}</span>
               </div>
             ))}
-            
+
             {hiddenCount > 0 && !showAllParticipants && (
               <button
                 onClick={() => setShowAllParticipants(true)}
-                className="text-brand-violet hover:text-brand-violet/80 text-sm mt-2 transition-colors duration-200"
+                className="mt-2 text-sm text-brand-violet transition-colors duration-200 hover:text-brand-violet/80"
               >
                 and {hiddenCount} more participants
               </button>
             )}
-            
+
             {showAllParticipants && participants.length > displayLimit && (
               <button
                 onClick={() => setShowAllParticipants(false)}
-                className="text-brand-violet hover:text-brand-violet/80 text-sm mt-2 transition-colors duration-200"
+                className="mt-2 text-sm text-brand-violet transition-colors duration-200 hover:text-brand-violet/80"
               >
                 Hide
               </button>
             )}
           </div>
         ) : (
-          <p className="text-contrast/60 text-base">No one has checked in yet!</p>
+          <p className="text-base text-contrast/60">
+            No one has checked in yet!
+          </p>
         )}
       </div>
     </div>

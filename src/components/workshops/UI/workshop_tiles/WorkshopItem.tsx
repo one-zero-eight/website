@@ -57,7 +57,10 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Проверяем, что клик был не по кнопкам и не по ссылке на комнату
     const target = e.target as HTMLElement;
-    if (!target.closest("button") && !target.closest('[title="Click to view on map"]')) {
+    if (
+      !target.closest("button") &&
+      !target.closest('[title="Click to view on map"]')
+    ) {
       openDescription(workshop);
     }
   };
@@ -66,16 +69,16 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     const date = new Date(dateString);
     // Вычитаем один день
     const previousDay = new Date(date.getTime() - 24 * 60 * 60 * 1000);
-    const day = previousDay.getDate().toString().padStart(2, '0');
-    const month = (previousDay.getMonth() + 1).toString().padStart(2, '0');
+    const day = previousDay.getDate().toString().padStart(2, "0");
+    const month = (previousDay.getMonth() + 1).toString().padStart(2, "0");
     const year = previousDay.getFullYear();
     return `${day}.${month}.${year}`;
   };
-  
+
   const formatTime = (timeString: string) => {
     if (!timeString) return "";
     return timeString;
-  };  
+  };
   const handleRoomClick = (e: React.MouseEvent<HTMLSpanElement>) => {
     e.stopPropagation();
     if (workshop.room) {
@@ -170,20 +173,22 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       alert("Error occur when trying to check out");
     }
   };
-  return (    
-  <div
-      className={`relative w-full max-w-[280px] rounded-2xl bg-[#1e1e1e] border p-4 pb-[55px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] 
-        ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} 
-        ${workshopChosen ? "bg-[#1e2e1e] bg-gradient-to-br from-[#1a2b1a] to-[#1e2e1e] shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] border-green-500/60" : "border-brand-violet/40"} `}
+  return (
+    <div
+      className={`relative w-full max-w-[280px] rounded-2xl border bg-[#1e1e1e] p-4 pb-[55px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-500/60 bg-[#1e2e1e] bg-gradient-to-br from-[#1a2b1a] to-[#1e2e1e] shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)]" : "border-brand-violet/40"} `}
       onClick={handleContentClick}
     >
       <div className="flex items-center justify-between">
         {workshop.startTime && workshop.endTime && (
-          <p className={`flex items-center justify-start text-[15px] font-medium text-brand-violet ${!isWorkshopActive() ? "opacity-50" : ""}`}>
+          <p
+            className={`flex items-center justify-start text-[15px] font-medium text-brand-violet ${!isWorkshopActive() ? "opacity-50" : ""}`}
+          >
             {formatTime(workshop.startTime)} - {formatTime(workshop.endTime)}
           </p>
         )}
-        <p className={`flex items-center justify-end text-[15px] font-medium text-brand-violet ${!isWorkshopActive() ? "opacity-50" : ""}`}>
+        <p
+          className={`flex items-center justify-end text-[15px] font-medium text-brand-violet ${!isWorkshopActive() ? "opacity-50" : ""}`}
+        >
           {workshop.maxPlaces > 0
             ? workshop.maxPlaces === 500
               ? signedPeople + "/"
@@ -194,14 +199,17 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           )}
         </p>
       </div>
-      <h3 className={`my-1.5 mb-2 text-lg font-semibold leading-[1.3] text-white break-words overflow-hidden ${!isWorkshopActive() ? "opacity-50" : ""}`}>
+      <h3
+        className={`my-1.5 mb-2 overflow-hidden break-words text-lg font-semibold leading-[1.3] text-white ${!isWorkshopActive() ? "opacity-50" : ""}`}
+      >
         {workshop.title}
       </h3>
       {!isWorkshopActive() && (
         <p className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 transform rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2 text-center text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px]">
           {getInactiveStatusText()}
         </p>
-      )}      {workshop.room && (
+      )}{" "}
+      {workshop.room && (
         <div className={`my-2 ${!isWorkshopActive() ? "opacity-50" : ""}`}>
           <p className="m-0 text-base text-white/80">
             <strong>Room:</strong>{" "}
@@ -215,10 +223,8 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           </p>
         </div>
       )}
-
       {/* Кликабельная область */}
       <div className="absolute bottom-0 left-0 right-0 top-0 z-0 cursor-pointer"></div>
-
       {/* Показываем кнопки управления только для администраторов */}
       {currentUserRole === "admin" && (
         <>

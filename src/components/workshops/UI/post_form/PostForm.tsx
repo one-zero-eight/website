@@ -81,9 +81,11 @@ const PostForm: React.FC<PostFormProps> = ({
 
     // Проверка даты и времени (не должна быть в прошлом)
     if (workshop.date && workshop.startTime) {
-      const workshopDateTime = new Date(`${workshop.date}T${workshop.startTime}`);
+      const workshopDateTime = new Date(
+        `${workshop.date}T${workshop.startTime}`,
+      );
       const now = new Date();
-      
+
       if (workshopDateTime < now) {
         newErrors.date = "Workshop cannot be scheduled in the past";
       }
@@ -92,7 +94,7 @@ const PostForm: React.FC<PostFormProps> = ({
       const workshopDate = new Date(workshop.date);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       if (workshopDate < today) {
         newErrors.date = "Workshop cannot be scheduled in the past";
       }
@@ -102,7 +104,7 @@ const PostForm: React.FC<PostFormProps> = ({
     if (workshop.startTime && workshop.endTime) {
       const startTime = new Date(`2000-01-01T${workshop.startTime}`);
       const endTime = new Date(`2000-01-01T${workshop.endTime}`);
-      
+
       if (startTime >= endTime) {
         newErrors.time = "Start time must be earlier than end time";
       }
@@ -162,7 +164,7 @@ const PostForm: React.FC<PostFormProps> = ({
             remainPlaces: undefined,
             isActive: true,
           });
-          
+
           // Очищаем ошибки после успешного создания
           setErrors({});
 

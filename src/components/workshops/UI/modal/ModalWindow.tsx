@@ -45,11 +45,13 @@ const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-10 grid place-items-center bg-black/75 @container/modal">
       <div className="flex h-fit w-full max-w-lg flex-col p-4 outline-none">
         <div className="overflow-hidden rounded-2xl bg-floating">
-          <div className={`flex flex-col p-4 @2xl/modal:p-8 min-w-0 ${className}`}>
+          <div
+            className={`flex min-w-0 flex-col p-4 @2xl/modal:p-8 ${className}`}
+          >
             {/* Heading and close button */}
             <div className="mb-0 flex w-full flex-row">
               {title && (
-                <div className="grow items-center text-3xl font-semibold break-words overflow-hidden pr-2">
+                <div className="grow items-center overflow-hidden break-words pr-2 text-3xl font-semibold">
                   {title}
                 </div>
               )}

@@ -52,7 +52,7 @@ export function WorkshopsPage() {
 
   // Функция для обновления данных участников в модальном окне
   const refreshParticipants = () => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   // Функция для загрузки информации о текущем пользователе
@@ -221,7 +221,7 @@ export function WorkshopsPage() {
   const removeWorkshop = async (workshop: Workshop) => {
     // Показываем диалог подтверждения перед удалением
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete the workshop "${workshop.title}"?\n\nThis action cannot be undone.`
+      `Are you sure you want to delete the workshop "${workshop.title}"?\n\nThis action cannot be undone.`,
     );
 
     if (!confirmDelete) {
