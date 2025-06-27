@@ -132,7 +132,7 @@ const PostForm: React.FC<PostFormProps> = ({
   return (
     <form onSubmit={addNewWorkshop}>
       <label className="text-xs font-medium uppercase tracking-wider text-white">
-        Title
+        Title <span className="text-red-500">*</span>
       </label>
       <WorkshopInput
         value={workshop.title}

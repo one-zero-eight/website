@@ -30,7 +30,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
       <div className="flex gap-3">
         <div className="flex flex-[2] flex-col gap-1">
           <label className="text-xs font-medium uppercase tracking-wider text-white">
-            Date
+            Date <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
@@ -70,7 +70,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
       <div className="flex gap-3">
         <div className="flex flex-1 flex-col gap-1">
           <label className="text-xs font-medium uppercase tracking-wider text-white">
-            Start Time
+            Start Time <span className="text-red-500">*</span>
           </label>
           <input
             type="time"
@@ -82,7 +82,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
         <div className="flex flex-1 flex-col gap-1">
           <label className="text-xs font-medium uppercase tracking-wider text-white">
-            End Time
+            End Time <span className="text-red-500">*</span>
           </label>
           <input
             type="time"
