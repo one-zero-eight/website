@@ -244,8 +244,11 @@ export interface components {
       message: string;
     };
     GetCheckInsResponse: {
-      checkIns: string;
-    };
+      id: string;
+      innohassle_id: string;
+      role: "admin" | "user";
+      email: string;
+    }[];
     CreateWorkshopRequest: {
       name: string;
       description: string;

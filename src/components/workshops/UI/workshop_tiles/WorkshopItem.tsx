@@ -105,8 +105,8 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
             },
           });
 
-        if (!checkinsError && checkinsData) {
-          setSignedPeople(parseInt(checkinsData.checkIns));
+        if (!checkinsError && checkinsData && Array.isArray(checkinsData)) {
+          setSignedPeople(checkinsData.length);
         }
       }
     })();
