@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { workshopsFetch } from "@/api/workshops";
