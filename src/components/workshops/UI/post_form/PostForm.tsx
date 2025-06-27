@@ -51,18 +51,8 @@ const PostForm: React.FC<PostFormProps> = ({
     isActive: initialWorkshop?.isActive ?? true,
   });
 
-  const [titleError, setTitleError] = useState("");
   const addNewWorkshop = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    // Проверяем, заполнено ли поле title
-    if (!workshop.title.trim()) {
-      setTitleError("'Title' field is required");
-      return;
-    }
-
-    // Очищаем ошибку, если title заполнен
-    setTitleError("");
 
     if (isEditing && onUpdate && existingId) {
       {
@@ -106,7 +96,6 @@ const PostForm: React.FC<PostFormProps> = ({
             remainPlaces: undefined,
             isActive: true,
           });
-          setTitleError("");
 
           // Закрываем форму только при успешном создании
           if (onClose) {
@@ -123,10 +112,6 @@ const PostForm: React.FC<PostFormProps> = ({
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setWorkshop({ ...workshop, title: e.target.value });
-    // Очищаем ошибку при начале ввода
-    if (titleError) {
-      setTitleError("");
-    }
   };
 
   return (
@@ -140,9 +125,6 @@ const PostForm: React.FC<PostFormProps> = ({
         type="text"
         placeholder="Title"
       />
-      {titleError && (
-        <div className="mb-2 mt-1 text-xs text-red-500">{titleError}</div>
-      )}
       <label className="text-xs font-medium uppercase tracking-wider text-white">
         Description
       </label>
