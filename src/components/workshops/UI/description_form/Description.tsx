@@ -10,7 +10,7 @@ type Workshop = {
   startTime: string;
   endTime: string;
   room: string;
-  remainPlaces?: number; // Добавляем поле для оставшихся мест
+  remainPlaces?: number;
 };
 
 type Participant = {
@@ -22,7 +22,7 @@ type Participant = {
 
 interface WorkshopProps {
   workshop: Workshop | null;
-  refreshTrigger?: number; // Добавляем пропс для принудительного обновления
+  refreshTrigger?: number;
 }
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
