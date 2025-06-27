@@ -22,6 +22,7 @@ type WorkshopItemProps = {
   edit: (workshop: Workshop) => void;
   openDescription: (workshop: Workshop) => void;
   currentUserRole: "user" | "admin";
+  refreshParticipants: () => void;
 };
 
 const WorkshopItem: React.FC<WorkshopItemProps> = ({
@@ -30,6 +31,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   edit,
   openDescription,
   currentUserRole,
+  refreshParticipants,
 }) => {
   const navigate = useNavigate();
   const [workshopChosen, setWorkshopChosen] = useState(false);
@@ -133,6 +135,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       if (!error) {
         setWorkshopChosen(true);
         setSignedPeople((count) => count + 1);
+        refreshParticipants(); // Refresh participant data
       } else {
         alert("Failed to check in");
       }
@@ -158,6 +161,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       if (!error) {
         setWorkshopChosen(false);
         setSignedPeople((count) => Math.max(0, count - 1));
+        refreshParticipants(); // Refresh participant data
       } else {
         alert("Failed to check out");
       }

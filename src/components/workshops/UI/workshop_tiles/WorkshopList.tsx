@@ -21,6 +21,7 @@ type WorkshopListProps = {
   edit: (workshop: Workshop) => void;
   openDescription: (workshop: Workshop) => void;
   currentUserRole: "user" | "admin";
+  refreshParticipants: () => void;
 };
 type WorkshopsByDate<Workshop> = {
   [tag: string]: Workshop[];
@@ -31,6 +32,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
   edit,
   openDescription,
   currentUserRole,
+  refreshParticipants,
 }) => {
   const groups: WorkshopsByDate<Workshop> = {};
   workshops.forEach((workshop) => {
@@ -99,6 +101,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
                         openDescription={openDescription}
                         key={workshop.id}
                         currentUserRole={currentUserRole}
+                        refreshParticipants={refreshParticipants}
                       />
                     ))}
                 </div>

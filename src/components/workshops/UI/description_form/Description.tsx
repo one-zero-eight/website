@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { workshopsFetch } from "@/api/workshops";
 
 type Workshop = {
   id: string;
@@ -12,8 +13,16 @@ type Workshop = {
   remainPlaces?: number; // Добавляем поле для оставшихся мест
 };
 
+type Participant = {
+  id: string;
+  innohassle_id: string;
+  role: "admin" | "user";
+  email: string;
+};
+
 interface WorkshopProps {
   workshop: Workshop | null;
+  refreshTrigger?: number; // Добавляем пропс для принудительного обновления
 }
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
@@ -83,8 +92,45 @@ const ReplaceURL = (str: string) => {
 
   return merged;
 };
-const Description: React.FC<WorkshopProps> = ({ workshop }) => {
+const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
   const navigate = useNavigate();
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [showAllParticipants, setShowAllParticipants] = useState(false);
+  const [loadingParticipants, setLoadingParticipants] = useState(false);
+
+  const displayLimit = 5; // Количество участников для отображения по умолчанию
+  const visibleParticipants = showAllParticipants 
+    ? participants 
+    : participants.slice(0, displayLimit);
+  const hiddenCount = participants.length - displayLimit;
+
+  useEffect(() => {
+    if (!workshop?.id) return;
+
+    const fetchParticipants = async () => {
+      setLoadingParticipants(true);
+      try {
+        const { data, error } = await workshopsFetch.GET(
+          `/api/workshops/{workshop_id}/checkins`,
+          {
+            params: {
+              path: { workshop_id: workshop.id },
+            },
+          }
+        );
+
+        if (!error && data) {
+          setParticipants(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch participants:", error);
+      } finally {
+        setLoadingParticipants(false);
+      }
+    };
+
+    fetchParticipants();
+  }, [workshop?.id, refreshTrigger]);
   
   const handleRoomClick = (e: React.MouseEvent<HTMLSpanElement>) => {
     e.stopPropagation();
@@ -127,6 +173,56 @@ const Description: React.FC<WorkshopProps> = ({ workshop }) => {
           <span className="icon-[material-symbols--schedule-outline] text-2xl" />
         </div>
         {formatTime(workshop.startTime) + "-" + formatTime(workshop.endTime)}
+      </div>
+      
+      {/* Секция с участниками */}
+      <div className="mt-4 border-t border-contrast/20 pt-4">
+        <div className="flex flex-row items-center gap-2 text-xl text-contrast/75 mb-3">
+          <div className="flex h-fit w-6">
+            <span className="icon-[material-symbols--group-outline] text-2xl" />
+          </div>
+          <p className="font-medium">
+            Participants ({participants.length})
+          </p>
+        </div>
+        
+        {loadingParticipants ? (
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-brand-violet border-t-transparent"></div>
+          </div>
+        ) : participants.length > 0 ? (
+          <div className="space-y-2">
+            {visibleParticipants.map((participant, index) => (
+              <div 
+                key={participant.id}
+                className="flex items-center gap-2 text-contrast/80 text-base"
+              >
+                <span className="text-brand-violet text-m">•</span>
+                <span className="font-mono text-m">{participant.email}</span>
+              </div>
+            ))}
+            
+            {hiddenCount > 0 && !showAllParticipants && (
+              <button
+                onClick={() => setShowAllParticipants(true)}
+                className="text-brand-violet hover:text-brand-violet/80 text-sm mt-2 transition-colors duration-200"
+              >
+                and {hiddenCount} more participants
+              </button>
+            )}
+            
+            {showAllParticipants && participants.length > displayLimit && (
+              <button
+                onClick={() => setShowAllParticipants(false)}
+                className="text-brand-violet hover:text-brand-violet/80 text-sm mt-2 transition-colors duration-200"
+              >
+                Hide
+              </button>
+            )}
+          </div>
+        ) : (
+          <p className="text-contrast/60 text-base">No one has checked in yet!</p>
+        )}
       </div>
     </div>
   );
