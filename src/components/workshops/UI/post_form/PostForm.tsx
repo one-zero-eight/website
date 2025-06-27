@@ -51,8 +51,74 @@ const PostForm: React.FC<PostFormProps> = ({
     isActive: initialWorkshop?.isActive ?? true,
   });
 
+  const [errors, setErrors] = useState<{
+    title?: string;
+    date?: string;
+    startTime?: string;
+    endTime?: string;
+    time?: string;
+  }>({});
+
+  const validateForm = (): boolean => {
+    const newErrors: typeof errors = {};
+
+    // Проверка обязательных полей
+    if (!workshop.title.trim()) {
+      newErrors.title = "Title is required";
+    }
+
+    if (!workshop.date) {
+      newErrors.date = "Date is required";
+    }
+
+    if (!workshop.startTime) {
+      newErrors.startTime = "Start time is required";
+    }
+
+    if (!workshop.endTime) {
+      newErrors.endTime = "End time is required";
+    }
+
+    // Проверка даты и времени (не должна быть в прошлом)
+    if (workshop.date && workshop.startTime) {
+      const workshopDateTime = new Date(`${workshop.date}T${workshop.startTime}`);
+      const now = new Date();
+      
+      if (workshopDateTime < now) {
+        newErrors.date = "Workshop cannot be scheduled in the past";
+      }
+    } else if (workshop.date) {
+      // Если только дата указана, проверяем только дату
+      const workshopDate = new Date(workshop.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (workshopDate < today) {
+        newErrors.date = "Workshop cannot be scheduled in the past";
+      }
+    }
+
+    // Проверка времени (время начала должно быть меньше времени окончания)
+    if (workshop.startTime && workshop.endTime) {
+      const startTime = new Date(`2000-01-01T${workshop.startTime}`);
+      const endTime = new Date(`2000-01-01T${workshop.endTime}`);
+      
+      if (startTime >= endTime) {
+        newErrors.time = "Start time must be earlier than end time";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const addNewWorkshop = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Валидация формы
+    if (!validateForm()) {
+      return;
+    }
 
     if (isEditing && onUpdate && existingId) {
       {
@@ -96,6 +162,9 @@ const PostForm: React.FC<PostFormProps> = ({
             remainPlaces: undefined,
             isActive: true,
           });
+          
+          // Очищаем ошибки после успешного создания
+          setErrors({});
 
           // Закрываем форму только при успешном создании
           if (onClose) {
@@ -112,6 +181,34 @@ const PostForm: React.FC<PostFormProps> = ({
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setWorkshop({ ...workshop, title: e.target.value });
+    // Очищаем ошибку заголовка при изменении
+    if (errors.title) {
+      setErrors({ ...errors, title: undefined });
+    }
+  };
+
+  const handleDateChange = (date: string) => {
+    setWorkshop({ ...workshop, date });
+    // Очищаем ошибки даты при изменении
+    if (errors.date) {
+      setErrors({ ...errors, date: undefined });
+    }
+  };
+
+  const handleStartTimeChange = (startTime: string) => {
+    setWorkshop({ ...workshop, startTime });
+    // Очищаем ошибки времени при изменении
+    if (errors.startTime || errors.time) {
+      setErrors({ ...errors, startTime: undefined, time: undefined });
+    }
+  };
+
+  const handleEndTimeChange = (endTime: string) => {
+    setWorkshop({ ...workshop, endTime });
+    // Очищаем ошибки времени при изменении
+    if (errors.endTime || errors.time) {
+      setErrors({ ...errors, endTime: undefined, time: undefined });
+    }
   };
 
   return (
@@ -125,6 +222,9 @@ const PostForm: React.FC<PostFormProps> = ({
         type="text"
         placeholder="Title"
       />
+      {errors.title && (
+        <p className="mt-1 text-sm text-red-400">{errors.title}</p>
+      )}
       <label className="text-xs font-medium uppercase tracking-wider text-white">
         Description
       </label>
@@ -140,16 +240,27 @@ const PostForm: React.FC<PostFormProps> = ({
         endTime={workshop.endTime}
         room={workshop.room}
         maxPlaces={workshop.maxPlaces}
-        onDateChange={(date) => setWorkshop({ ...workshop, date })}
-        onStartTimeChange={(startTime) =>
-          setWorkshop({ ...workshop, startTime })
-        }
-        onEndTimeChange={(endTime) => setWorkshop({ ...workshop, endTime })}
+        onDateChange={handleDateChange}
+        onStartTimeChange={handleStartTimeChange}
+        onEndTimeChange={handleEndTimeChange}
         onRoomChange={(room) => setWorkshop({ ...workshop, room })}
         onMaxPlacesChange={(maxPlaces) =>
           setWorkshop({ ...workshop, maxPlaces })
         }
-      />{" "}
+      />
+      {/* Отображение ошибок валидации */}
+      {errors.date && (
+        <p className="mt-1 text-sm text-red-400">{errors.date}</p>
+      )}
+      {errors.startTime && (
+        <p className="mt-1 text-sm text-red-400">{errors.startTime}</p>
+      )}
+      {errors.endTime && (
+        <p className="mt-1 text-sm text-red-400">{errors.endTime}</p>
+      )}
+      {errors.time && (
+        <p className="mt-1 text-sm text-red-400">{errors.time}</p>
+      )}
       <div className="my-4 flex items-center gap-2">
         <input
           type="checkbox"
