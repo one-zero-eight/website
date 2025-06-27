@@ -194,8 +194,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           )}
         </p>
       </div>
-      <h3 className={`my-1.5 mb-2 text-lg font-semibold leading-[1.3] text-white ${!isWorkshopActive() ? "opacity-50" : ""}`}>
-        {" "}
+      <h3 className={`my-1.5 mb-2 text-lg font-semibold leading-[1.3] text-white break-words overflow-hidden ${!isWorkshopActive() ? "opacity-50" : ""}`}>
         {workshop.title}
       </h3>
       {!isWorkshopActive() && (
