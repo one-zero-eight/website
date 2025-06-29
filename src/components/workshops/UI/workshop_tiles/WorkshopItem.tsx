@@ -104,7 +104,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       } else {
         // Fallback к API запросу если remainPlaces недоступно
         const { data: checkinsData, error: checkinsError } =
-          await workshopsFetch.GET(`/api/workshops/{workshop_id}/checkins`, {
+          await workshopsFetch.GET(`/workshops/{workshop_id}/checkins`, {
             params: {
               path: { workshop_id: workshop.id.toString() },
             },
@@ -127,7 +127,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { data, error } = await workshopsFetch.POST(
-        `/api/workshops/{workshop_id}/checkin`,
+        `/workshops/{workshop_id}/checkin`,
         {
           params: {
             path: { workshop_id: workshop.id.toString() },
@@ -153,7 +153,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { data, error } = await workshopsFetch.POST(
-        `/api/workshops/{workshop_id}/checkout`,
+        `/workshops/{workshop_id}/checkout`,
         {
           params: {
             path: { workshop_id: workshop.id.toString() },
