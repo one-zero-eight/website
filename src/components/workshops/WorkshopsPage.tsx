@@ -78,7 +78,7 @@ export function WorkshopsPage() {
 
   const loadWorkshops = async () => {
     try {
-      const { data, error } = await workshopsFetch.GET("/api/workshops/", {
+      const { data, error } = await workshopsFetch.GET("/workshops/", {
         params: {
           query: {
             limit: 100,
@@ -169,7 +169,7 @@ export function WorkshopsPage() {
         is_active: newWorkshop.isActive ?? true, // По умолчанию активный
       };
 
-      const { data, error } = await workshopsFetch.POST("/api/workshops/", {
+      const { data, error } = await workshopsFetch.POST("/workshops/", {
         body: createRequest,
       });
       if (error) {
@@ -230,7 +230,7 @@ export function WorkshopsPage() {
 
     try {
       const { data, error } = await workshopsFetch.DELETE(
-        `/api/workshops/{workshop_id}`,
+        `/workshops/{workshop_id}`,
         {
           params: {
             path: { workshop_id: workshop.id },
@@ -277,7 +277,7 @@ export function WorkshopsPage() {
       };
 
       const { data, error } = await workshopsFetch.PUT(
-        `/api/workshops/{workshop_id}`,
+        `/workshops/{workshop_id}`,
         {
           params: {
             path: { workshop_id: updatedWorkshop.id },

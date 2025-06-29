@@ -112,7 +112,7 @@ const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
       setLoadingParticipants(true);
       try {
         const { data, error } = await workshopsFetch.GET(
-          `/api/workshops/{workshop_id}/checkins`,
+          `/workshops/{workshop_id}/checkins`,
           {
             params: {
               path: { workshop_id: workshop.id },

@@ -82,7 +82,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/api/workshops/{workshop_id}/checkin": {
+  "/workshops/{workshop_id}/checkin": {
     parameters: {
       query?: never;
       header?: never;
@@ -98,7 +98,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/api/workshops/{workshop_id}/checkout": {
+  "/workshops/{workshop_id}/checkout": {
     parameters: {
       query?: never;
       header?: never;
@@ -115,7 +115,7 @@ export interface paths {
     trace?: never;
   };
 
-  "/api/workshops/": {
+  "/workshops/": {
     parameters: {
       query?: {
         limit?: number;
@@ -133,7 +133,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/api/workshops/{workshop_id}": {
+  "/workshops/{workshop_id}": {
     parameters: {
       query?: never;
       header?: never;
@@ -149,7 +149,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/api/workshops/{workshop_id}/checkins": {
+  "/workshops/{workshop_id}/checkins": {
     parameters: {
       query?: never;
       header?: never;
