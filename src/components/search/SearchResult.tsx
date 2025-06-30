@@ -5,22 +5,47 @@ export default function SearchResult({
   response,
   isSelected,
   select,
+  hasPreview,
 }: {
   response: searchTypes.SchemaSearchResponse;
   isSelected: boolean;
   select: () => void;
+  hasPreview?: boolean;
 }) {
+  const link =
+    "link" in response.source
+      ? response.source.link
+      : "url" in response.source
+        ? response.source.url
+        : "";
+
+  const handleClick = () => {
+    if (
+      response.source.type !== "moodle-file" &&
+      response.source.type !== "moodle-url" &&
+      response.source.type !== "moodle-unknown" &&
+      response.source.type !== "telegram"
+    ) {
+      select();
+      if (link) {
+        window.open(link, "_blank");
+      }
+    }
+  };
   return (
     <div
-      onClick={() => select()}
+      onClick={handleClick}
       tabIndex={0}
       className={clsx(
-        "flex cursor-pointer flex-col rounded-lg !border bg-floating p-4 hover:bg-primary-hover",
+        "relative flex cursor-pointer flex-col rounded-lg !border bg-floating p-4 hover:bg-primary-hover",
         isSelected
           ? "border-brand-violet drop-shadow-[0_0_4px_#9747FF]"
           : "border-gray-400",
       )}
     >
+      {!hasPreview && (
+        <span className="text-muted-foreground icon-[akar-icons--link-out] absolute right-2 top-2 text-lg text-black dark:text-white" />
+      )}
       {response.source.type === "moodle-file" ? (
         <span className="icon-[material-symbols--school-outline] text-3xl text-[#F27F22]" />
       ) : response.source.type === "moodle-url" ? (
@@ -40,13 +65,7 @@ export default function SearchResult({
         {response.source.display_name}
       </p>
       <a
-        href={
-          "link" in response.source
-            ? response.source.link
-            : "url" in response.source
-              ? response.source.url
-              : ""
-        }
+        href={link}
         target="_blank"
         onClickCapture={(e) => e.stopPropagation()}
         className="w-fit max-w-full truncate text-xs text-[#93bd58] hover:underline"
