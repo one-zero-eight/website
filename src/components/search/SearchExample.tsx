@@ -1,17 +1,25 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 
 type SearchExampleProps = {
   searchQueries: string[];
 };
 
 export function SearchExample({ searchQueries }: SearchExampleProps) {
+  const [example, setExample] = useState(
+    searchQueries[Math.floor(Math.random() * searchQueries.length)],
+  );
   const navigate = useNavigate();
   if (searchQueries.length === 0) return null;
 
-  const query = searchQueries[Math.floor(Math.random() * searchQueries.length)];
-
   const runSearch = (query: string) => {
     navigate({ to: "/search", search: { q: query } });
+  };
+
+  const setNewExample = () => {
+    const newExample =
+      searchQueries[Math.floor(Math.random() * searchQueries.length)];
+    setExample(newExample);
   };
 
   return (
@@ -22,10 +30,11 @@ export function SearchExample({ searchQueries }: SearchExampleProps) {
         className="text-brand-violet hover:underline"
         onClick={(e) => {
           e.preventDefault();
-          runSearch(query);
+          runSearch(example);
+          setNewExample();
         }}
       >
-        {query}
+        {example}
       </a>
     </p>
   );
