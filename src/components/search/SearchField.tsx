@@ -1,12 +1,28 @@
 import { useState, useEffect } from "react";
 import ToggleGroup from "./ToggleGroup";
+import { SearchExample } from "./SearchExample";
+import SearchFilters from "./SearchFilters";
+
+const searchQueryExamples = [
+  "Innopolis clubs",
+  "Innopolis University",
+  "Innopolis University courses",
+  "Innopolis University professors",
+  "Innopolis University events",
+];
 
 export default function SearchField({
   runSearch,
   currentQuery,
+  selectedFilters,
+  checks,
+  applyFilters,
 }: {
   runSearch: (query: string) => void;
   currentQuery: string;
+  selectedFilters: Record<string, Record<string, boolean>>;
+  checks: (group: string, value: string) => void;
+  applyFilters: () => void;
 }) {
   const [text, setText] = useState(currentQuery);
 
@@ -23,7 +39,7 @@ export default function SearchField({
       }}
     >
       <div className="flex w-full gap-6">
-        <div className="justify-stretch md:min-w-0 md:basis-1/2">
+        <div className="flex flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2">
           <input
             autoComplete="off"
             spellCheck={false}
@@ -33,9 +49,15 @@ export default function SearchField({
             value={text}
             autoFocus={true}
           />
+          <SearchExample searchQueries={searchQueryExamples} />
         </div>
-        <div className="justify-stretch md:min-w-0 md:basis-1/2">
+        <div className="flex flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2">
           <ToggleGroup currentTabText={text} />
+          <SearchFilters
+            selected={selectedFilters}
+            checks={checks}
+            applyFilters={applyFilters}
+          />
         </div>
       </div>
     </form>

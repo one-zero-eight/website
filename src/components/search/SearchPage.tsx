@@ -4,7 +4,6 @@ import { AuthWall } from "@/components/common/AuthWall.tsx";
 import PreviewCard from "@/components/search/PreviewCard.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
-import SearchFilters from "@/components/search/SearchFilters.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -135,9 +134,37 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     },
   );
 
+  const filteredResponses =
+    searchResult?.responses.filter((e) => {
+      if (filters.response_types.length === 0) {
+        return true;
+      }
+
+      const url = "url" in e.source ? e.source.url : "";
+
+      const isPdf =
+        filters.response_types.includes(
+          PathsSearchSearchGetParametersQueryResponse_types.pdf,
+        ) && url.endsWith(".pdf");
+
+      const isLink =
+        filters.response_types.includes(
+          PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
+        ) && !url.endsWith(".pdf");
+
+      return isPdf || isLink;
+    }) || [];
+
   useEffect(() => {
-    // Reset preview source when search result changes
-    setPreviewSource(searchResult?.responses[0]?.source);
+    if (
+      searchResult?.responses[0].source.type === "moodle-file" ||
+      searchResult?.responses[0].source.type === "moodle-url" ||
+      searchResult?.responses[0].source.type === "moodle-unknown" ||
+      searchResult?.responses[0].source.type === "telegram"
+    ) {
+      // Reset preview source when search result changes and it has an appropeiate type for preview
+      setPreviewSource(searchResult?.responses[0]?.source);
+    }
   }, [searchResult]);
 
   const runSearch = (query: string) => {
@@ -149,61 +176,37 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   }
 
   return (
-    <div className="flex grow flex-col gap-4 p-4">
-      <SearchField runSearch={runSearch} currentQuery={searchQuery} />
-      <SearchFilters
-        selected={selectedFilters}
+    <div className="flex grow flex-col gap-2 p-4">
+      <SearchField
+        runSearch={runSearch}
+        currentQuery={searchQuery}
+        selectedFilters={selectedFilters}
         checks={checks}
         applyFilters={applyFilters}
       />
-
       {searchResult && (
-        <p className="py-4 text-2xl font-semibold text-contrast">
-          {searchResult.responses.length > 0
+        <p className="py-4 text-xl font-semibold text-contrast">
+          {filteredResponses.length > 0
             ? `Results for: ${searchResult.searched_for}`
             : `No matched results for: ${searchResult.searched_for}`}
         </p>
       )}
-
       {searchResult && (
         <div className="flex flex-row gap-6">
           <div className="flex w-full flex-col justify-stretch gap-4 md:min-w-0 md:basis-1/2">
-            {searchResult.responses
-              .filter((e) => {
-                if (filters.response_types.length === 0) {
-                  return true;
+            {filteredResponses.map((response, i) => (
+              <SearchResult
+                key={i}
+                response={response}
+                isSelected={previewSource === response.source}
+                select={() => setPreviewSource(response.source)}
+                hasPreview={
+                  response.source.type === "moodle-file" ||
+                  response.source.type === "moodle-url" ||
+                  response.source.type === "moodle-unknown"
                 }
-
-                const url = "url" in e.source ? e.source.url : "";
-
-                if (
-                  filters.response_types.includes(
-                    PathsSearchSearchGetParametersQueryResponse_types.pdf,
-                  ) &&
-                  url.endsWith(".pdf")
-                ) {
-                  return true;
-                }
-
-                if (
-                  filters.response_types.includes(
-                    PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
-                  ) &&
-                  !url.endsWith(".pdf")
-                ) {
-                  return true;
-                }
-
-                return false;
-              })
-              .map((response, i) => (
-                <SearchResult
-                  key={i}
-                  response={response}
-                  isSelected={previewSource === response.source}
-                  select={() => setPreviewSource(response.source)}
-                />
-              ))}
+              />
+            ))}
           </div>
           {previewSource &&
             (previewSource.type === "moodle-file" ||
