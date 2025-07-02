@@ -6,6 +6,13 @@ export function AskResult({
 }: {
   response: searchTypes.SchemaSearchResponse;
 }) {
+  const link =
+    "link" in response.source
+      ? response.source.link
+      : "url" in response.source
+        ? response.source.url
+        : "";
+
   return (
     <div
       tabIndex={0}
@@ -13,7 +20,7 @@ export function AskResult({
         "flex cursor-pointer flex-col rounded-lg !border border-gray-400 bg-floating p-4 hover:bg-primary-hover",
       )}
     >
-      {response.source.link}
+      {link}
     </div>
   );
 }

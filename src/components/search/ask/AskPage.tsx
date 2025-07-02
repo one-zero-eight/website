@@ -15,9 +15,9 @@ export function AskPage({ askQuery }: { askQuery: string }) {
 
   const { data: askResult } = $search.useQuery(
     "get",
-    "/search/search", //TODO: Update this endpoint to the correct one for act
+    "/search/search", //TODO: Update this endpoint to the correct one for ask
     {
-      params: { query: { query: askQuery } },
+      params: { query: { query: askQuery, sources: [], response_types: [] } },
     },
     {
       enabled: askQuery.length > 0,
@@ -39,7 +39,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
       {askResult ? (
         <span>- Here, what I found...</span>
       ) : (
-        <span>Sorry, I can't answer</span>
+        <span>- Sorry, I can't answer</span>
       )}
       {askResult && (
         <div className="flex flex-row gap-6">

@@ -17,7 +17,7 @@ export function ActPage({ actQuery }: { actQuery: string }) {
     "get",
     "/search/search", //TODO: Update this endpoint to the correct one for asking questions
     {
-      params: { query: { query: actQuery } },
+      params: { query: { query: actQuery, sources: [], response_types: [] } },
     },
     {
       enabled: actQuery.length > 0,
@@ -43,7 +43,7 @@ export function ActPage({ actQuery }: { actQuery: string }) {
           </div>
         </div>
       ) : (
-        <span>Sorry, I can't help you</span>
+        <span>- Sorry, I can't help you</span>
       )}
     </div>
   );
