@@ -33,7 +33,7 @@ export default function SearchField({
   return (
     <div className="flex w-full gap-6">
       <form
-        className="flex flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2"
+        className="flex w-full flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2"
         onSubmit={(e) => {
           e.preventDefault();
           runSearch(text);
@@ -43,7 +43,7 @@ export default function SearchField({
           <input
             autoComplete="off"
             spellCheck={false}
-            className="inset-0 h-10 w-full resize-none rounded-lg border-2 border-brand-violet bg-pagebg pl-3 text-base caret-brand-violet outline-none dark:text-white"
+            className="inset-0 h-10 resize-none rounded-lg border-2 border-brand-violet bg-pagebg pl-3 text-base caret-brand-violet outline-none dark:text-white"
             placeholder="Enter query..."
             onChange={(e) => setText(e.target.value)}
             value={text}

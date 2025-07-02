@@ -30,6 +30,8 @@ const filters = {
     { displayName: "Eduwiki", internalName: "eduwiki" },
     { displayName: "Hotel", internalName: "hotel" },
     { displayName: "Moodle", internalName: "moodle" },
+    { displayName: "Maps", internalName: "maps" },
+    { displayName: "Residents", internalName: "residents" },
   ],
 };
 
@@ -66,20 +68,39 @@ const SearchFiltersModal = ({
                   <h3 className="mb-2 text-sm font-semibold capitalize">
                     {group.replace(/([A-Z])/g, " $1")}
                   </h3>
-                  {values.map((value) => (
-                    <label
-                      key={value.displayName}
-                      className="mb-1 flex items-center gap-1 text-sm"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selected[group][value.internalName]}
-                        onChange={() => checks(group, value.internalName)}
-                        className="accent-purple-500"
-                      />
-                      {value.displayName}
-                    </label>
-                  ))}
+                  {values.length <= 4 &&
+                    values.map((value) => (
+                      <label
+                        key={value.displayName}
+                        className="mb-1 flex items-center gap-1 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selected[group][value.internalName]}
+                          onChange={() => checks(group, value.internalName)}
+                          className="accent-purple-500"
+                        />
+                        {value.displayName}
+                      </label>
+                    ))}
+                  {values.length > 4 && (
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                      {values.map((value) => (
+                        <label
+                          key={value.displayName}
+                          className="flex items-center gap-1 text-sm"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selected[group][value.internalName]}
+                            onChange={() => checks(group, value.internalName)}
+                            className="accent-purple-500"
+                          />
+                          {value.displayName}
+                        </label>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

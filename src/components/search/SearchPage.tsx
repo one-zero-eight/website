@@ -28,6 +28,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       eduwiki: true,
       hotel: true,
       moodle: true,
+      maps: true,
+      residents: true,
     },
   };
 
@@ -73,6 +75,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       sources.push(InfoSources.eduwiki);
       sources.push(InfoSources.hotel);
       sources.push(InfoSources.moodle);
+      sources.push(InfoSources.maps);
+      sources.push(InfoSources.residents);
     }
 
     Object.entries(selectedFilters).forEach(([group, values]) => {
@@ -97,6 +101,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           if (value === "eduwiki") sources.push(InfoSources.eduwiki);
           if (value === "hotel") sources.push(InfoSources.hotel);
           if (value === "moodle") sources.push(InfoSources.moodle);
+          if (value === "maps") sources.push(InfoSources.maps);
+          if (value === "residents") sources.push(InfoSources.residents);
         });
       }
     });
@@ -157,10 +163,10 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
 
   useEffect(() => {
     if (
-      searchResult?.responses[0].source.type === "moodle-file" ||
-      searchResult?.responses[0].source.type === "moodle-url" ||
-      searchResult?.responses[0].source.type === "moodle-unknown" ||
-      searchResult?.responses[0].source.type === "telegram"
+      searchResult?.responses[0]?.source.type === "moodle-file" ||
+      searchResult?.responses[0]?.source.type === "moodle-url" ||
+      searchResult?.responses[0]?.source.type === "moodle-unknown" ||
+      searchResult?.responses[0]?.source.type === "telegram"
     ) {
       // Reset preview source when search result changes and it has an appropeiate type for preview
       setPreviewSource(searchResult?.responses[0]?.source);
