@@ -20,9 +20,9 @@ export default function SearchField({
 }: {
   runSearch: (query: string) => void;
   currentQuery: string;
-  selectedFilters: Record<string, Record<string, boolean>>;
-  checks: (group: string, value: string) => void;
-  applyFilters: () => void;
+  selectedFilters?: Record<string, Record<string, boolean>>;
+  checks?: (group: string, value: string) => void;
+  applyFilters?: () => void;
 }) {
   const [text, setText] = useState(currentQuery);
 
@@ -31,15 +31,15 @@ export default function SearchField({
   }, [currentQuery]);
 
   return (
-    <form
-      className="flex"
-      onSubmit={(e) => {
-        e.preventDefault();
-        runSearch(text);
-      }}
-    >
-      <div className="flex w-full gap-6">
-        <div className="flex flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2">
+    <div className="flex w-full gap-6">
+      <form
+        className="flex flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          runSearch(text);
+        }}
+      >
+        <div className="flex flex-col gap-2">
           <input
             autoComplete="off"
             spellCheck={false}
@@ -51,15 +51,17 @@ export default function SearchField({
           />
           <SearchExample searchQueries={searchQueryExamples} />
         </div>
-        <div className="flex flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2">
-          <ToggleGroup currentTabText={text} />
+      </form>
+      <div className="flex flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2">
+        <ToggleGroup currentTabText={text} />
+        {selectedFilters && checks && applyFilters && (
           <SearchFilters
             selected={selectedFilters}
             checks={checks}
             applyFilters={applyFilters}
           />
-        </div>
+        )}
       </div>
-    </form>
+    </div>
   );
 }

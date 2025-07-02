@@ -5,7 +5,7 @@ import {
   useRole,
   useInteractions,
 } from "@floating-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SearchFiltersModal from "./SearchFiltersModal";
 import SearchFiltersButton from "./SearchFiltersButton";
 
@@ -37,6 +37,13 @@ const SearchFilters = ({
     dismiss,
     role,
   ]);
+
+  useEffect(() => {
+    if (!open) {
+      const active = document.activeElement as HTMLElement | null;
+      if (active) active.blur();
+    }
+  }, [open]);
 
   return (
     <>
