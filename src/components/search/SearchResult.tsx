@@ -1,5 +1,6 @@
 import { searchTypes } from "@/api/search";
 import clsx from "clsx";
+import Markdown from "react-markdown";
 
 export default function SearchResult({
   response,
@@ -116,7 +117,17 @@ export default function SearchResult({
           {response.source.breadcrumbs.join(" > ")}
         </a>
 
-        {previewText && <p className="truncate text-xs">{previewText}</p>}
+        {previewText && (
+          <div className="max-w-full overflow-hidden truncate text-ellipsis whitespace-nowrap text-xs">
+            <Markdown
+              components={{
+                p: ({ children }) => <span>{children}</span>,
+              }}
+            >
+              {previewText}
+            </Markdown>
+          </div>
+        )}
       </div>
 
       {!hasPreview && (
