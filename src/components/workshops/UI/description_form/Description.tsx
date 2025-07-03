@@ -100,13 +100,13 @@ const ReplaceURL = (str: string) => {
 
   return merged;
 };
-const Description: React.FC<WorkshopProps> = ({ 
-  workshop, 
-  refreshTrigger, 
-  remove, 
-  edit, 
-  currentUserRole, 
-  refreshParticipants 
+const Description: React.FC<WorkshopProps> = ({
+  workshop,
+  refreshTrigger,
+  remove,
+  edit,
+  currentUserRole,
+  refreshParticipants,
 }) => {
   const navigate = useNavigate();
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -192,11 +192,16 @@ const Description: React.FC<WorkshopProps> = ({
         setSignedPeople(participants.length);
       }
     })();
-  }, [workshop?.id, workshop?.remainPlaces, workshop?.maxPlaces, participants.length]);
+  }, [
+    workshop?.id,
+    workshop?.remainPlaces,
+    workshop?.maxPlaces,
+    participants.length,
+  ]);
 
   const handleCheckIn = async () => {
     if (!workshop?.id) return;
-    
+
     if (workshop.maxPlaces > 0 && signedPeople >= workshop.maxPlaces) {
       return;
     }
@@ -226,7 +231,7 @@ const Description: React.FC<WorkshopProps> = ({
 
   const handleCheckOut = async () => {
     if (!workshop?.id) return;
-    
+
     try {
       const { data, error } = await workshopsFetch.POST(
         `/workshops/{workshop_id}/checkout`,
@@ -295,15 +300,6 @@ const Description: React.FC<WorkshopProps> = ({
         {formatTime(workshop.startTime) + "-" + formatTime(workshop.endTime)}
       </div>
 
-      {/* Плашка неактивности */}
-      {!isWorkshopActive() && (
-        <div className="mt-4 flex justify-center">
-          <p className="rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2 text-center text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px]">
-            {getInactiveStatusText()}
-          </p>
-        </div>
-      )}
-
       {/* Кнопки управления и записи */}
       <div className="mt-4 flex flex-wrap gap-3 border-b border-contrast/20 pb-4">
         {/* Кнопки управления для администраторов */}
@@ -328,8 +324,8 @@ const Description: React.FC<WorkshopProps> = ({
           </>
         )}
 
-        {/* Кнопки записи для активных воркшопов */}
-        {isWorkshopActive() && (
+        {/* Кнопки записи для активных воркшопов или плашка неактивности */}
+        {isWorkshopActive() ? (
           workshopChosen ? (
             <button
               onClick={handleCheckOut}
@@ -341,7 +337,9 @@ const Description: React.FC<WorkshopProps> = ({
             </button>
           ) : (
             <button
-              disabled={workshop.maxPlaces > 0 && signedPeople >= workshop.maxPlaces}
+              disabled={
+                workshop.maxPlaces > 0 && signedPeople >= workshop.maxPlaces
+              }
               onClick={handleCheckIn}
               className="flex items-center justify-center gap-2 rounded-xl border border-[#bcdfbc]/30 bg-[#bcdfbc]/10 px-4 py-2.5 text-[#bcdfbc] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 hover:border-[#aad6aa]/50 hover:bg-[rgba(167,202,167,0.2)] hover:text-[#aad6aa] disabled:cursor-not-allowed disabled:opacity-50"
               title="Check in"
@@ -350,6 +348,14 @@ const Description: React.FC<WorkshopProps> = ({
               <span className="text-sm font-medium">Check in</span>
             </button>
           )
+        ) : (
+          /* Плашка неактивности вместо кнопки записи */
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2.5 text-[#ff6b6b] backdrop-blur-[8px]">
+            <span className="icon-[material-symbols--block] text-lg" />
+            <span className="text-sm font-medium">
+              {getInactiveStatusText()}
+            </span>
+          </div>
         )}
       </div>
 

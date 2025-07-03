@@ -7,6 +7,7 @@ type ModalProps = {
   onClose: () => void;
   children: React.ReactNode;
   title?: string;
+  zIndex?: number;
 };
 {
   /* Компонент модалки в пропсы принимает видимость, обработчик закрытия и контент */
@@ -17,6 +18,7 @@ const Modal: React.FC<ModalProps> = ({
   children,
   className = "",
   title,
+  zIndex = 10,
 }) => {
   useEffect(() => {
     {
@@ -42,7 +44,10 @@ const Modal: React.FC<ModalProps> = ({
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-10 grid place-items-center bg-black/75 @container/modal">
+    <div
+      className={`fixed inset-0 grid place-items-center bg-black/75 @container/modal`}
+      style={{ zIndex }}
+    >
       <div className="flex h-fit w-full max-w-lg flex-col p-4 outline-none">
         <div className="overflow-hidden rounded-2xl bg-floating">
           <div
