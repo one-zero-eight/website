@@ -11,7 +11,10 @@ type Workshop = {
   startTime: string;
   endTime: string;
   room: string;
+  maxPlaces: number;
   remainPlaces?: number;
+  isActive?: boolean;
+  isRegistrable?: boolean;
 };
 
 type Participant = {
@@ -24,6 +27,10 @@ type Participant = {
 interface WorkshopProps {
   workshop: Workshop | null;
   refreshTrigger?: number;
+  remove?: (workshop: Workshop) => Promise<void>;
+  edit?: (workshop: Workshop) => void;
+  currentUserRole?: "user" | "admin";
+  refreshParticipants?: () => void;
 }
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
@@ -93,17 +100,51 @@ const ReplaceURL = (str: string) => {
 
   return merged;
 };
-const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
+const Description: React.FC<WorkshopProps> = ({ 
+  workshop, 
+  refreshTrigger, 
+  remove, 
+  edit, 
+  currentUserRole, 
+  refreshParticipants 
+}) => {
   const navigate = useNavigate();
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [showAllParticipants, setShowAllParticipants] = useState(false);
   const [loadingParticipants, setLoadingParticipants] = useState(false);
+  const [workshopChosen, setWorkshopChosen] = useState(false);
+  const [signedPeople, setSignedPeople] = useState<number>(0);
 
   const displayLimit = 5; // Количество участников для отображения по умолчанию
   const visibleParticipants = showAllParticipants
     ? participants
     : participants.slice(0, displayLimit);
   const hiddenCount = participants.length - displayLimit;
+
+  // Функция для проверки активности воркшопа
+  const isWorkshopActive = () => {
+    return workshop?.isActive !== false && workshop?.isRegistrable !== false;
+  };
+
+  // Функция для получения текста статуса неактивности
+  const getInactiveStatusText = () => {
+    if (workshop?.isRegistrable === false && workshop?.isActive !== false) {
+      return `Inactive due ${formatDate(workshop.date)} ${formatTime(workshop.startTime)}`;
+    } else {
+      return "Inactive";
+    }
+  };
+
+  // Функция для форматирования даты начала (как в WorkshopItem)
+  const formatStartDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const previousDay = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+    const day = previousDay.getDate().toString().padStart(2, "0");
+    const month = (previousDay.getMonth() + 1).toString().padStart(2, "0");
+    const year = previousDay.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
 
   useEffect(() => {
     if (!workshop?.id) return;
@@ -132,6 +173,82 @@ const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
 
     fetchParticipants();
   }, [workshop?.id, refreshTrigger]);
+
+  useEffect(() => {
+    if (!workshop?.id) return;
+
+    (async () => {
+      const { data, error } = await workshopsFetch.GET(`/users/my_checkins`);
+      if (!error && Array.isArray(data)) {
+        const isCheckedIn = data.some((w) => w.id === workshop.id);
+        setWorkshopChosen(isCheckedIn);
+      }
+
+      // Используем remainPlaces из пропсов воркшопа если есть, иначе используем количество участников
+      if (workshop.remainPlaces !== undefined && workshop.maxPlaces) {
+        const signedCount = workshop.maxPlaces - workshop.remainPlaces;
+        setSignedPeople(Math.max(0, signedCount));
+      } else {
+        setSignedPeople(participants.length);
+      }
+    })();
+  }, [workshop?.id, workshop?.remainPlaces, workshop?.maxPlaces, participants.length]);
+
+  const handleCheckIn = async () => {
+    if (!workshop?.id) return;
+    
+    if (workshop.maxPlaces > 0 && signedPeople >= workshop.maxPlaces) {
+      return;
+    }
+
+    try {
+      const { data, error } = await workshopsFetch.POST(
+        `/workshops/{workshop_id}/checkin`,
+        {
+          params: {
+            path: { workshop_id: workshop.id.toString() },
+          },
+        },
+      );
+
+      if (!error) {
+        setWorkshopChosen(true);
+        setSignedPeople((count) => count + 1);
+        refreshParticipants?.();
+      } else {
+        alert("Failed to check in");
+      }
+    } catch (error) {
+      console.error("Check-in failed", error);
+      alert("Error occur when trying to check in.");
+    }
+  };
+
+  const handleCheckOut = async () => {
+    if (!workshop?.id) return;
+    
+    try {
+      const { data, error } = await workshopsFetch.POST(
+        `/workshops/{workshop_id}/checkout`,
+        {
+          params: {
+            path: { workshop_id: workshop.id.toString() },
+          },
+        },
+      );
+
+      if (!error) {
+        setWorkshopChosen(false);
+        setSignedPeople((count) => Math.max(0, count - 1));
+        refreshParticipants?.();
+      } else {
+        alert("Failed to check out");
+      }
+    } catch (error) {
+      console.error("Check-out failed", error);
+      alert("Error occur when trying to check out");
+    }
+  };
 
   const handleRoomClick = (e: React.MouseEvent<HTMLSpanElement>) => {
     e.stopPropagation();
@@ -178,8 +295,66 @@ const Description: React.FC<WorkshopProps> = ({ workshop, refreshTrigger }) => {
         {formatTime(workshop.startTime) + "-" + formatTime(workshop.endTime)}
       </div>
 
+      {/* Плашка неактивности */}
+      {!isWorkshopActive() && (
+        <div className="mt-4 flex justify-center">
+          <p className="rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2 text-center text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px]">
+            {getInactiveStatusText()}
+          </p>
+        </div>
+      )}
+
+      {/* Кнопки управления и записи */}
+      <div className="mt-4 flex flex-wrap gap-3 border-b border-contrast/20 pb-4">
+        {/* Кнопки управления для администраторов */}
+        {currentUserRole === "admin" && (
+          <>
+            <button
+              onClick={() => edit?.(workshop)}
+              className="flex items-center justify-center gap-2 rounded-xl border border-brand-violet/30 bg-brand-violet/10 px-4 py-2.5 text-brand-violet backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 hover:border-brand-violet/50 hover:bg-brand-violet/20 hover:text-brand-violet/90"
+              title="Edit workshop"
+            >
+              <span className="icon-[mynaui--pencil] text-lg" />
+              <span className="text-sm font-medium">Edit</span>
+            </button>
+            <button
+              onClick={async () => await remove?.(workshop)}
+              className="flex items-center justify-center gap-2 rounded-xl border border-[#ff6b6b]/30 bg-[#ff6b6b]/10 px-4 py-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 hover:border-[#ff5252]/50 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
+              title="Delete workshop"
+            >
+              <span className="icon-[material-symbols--delete-outline-rounded] text-lg" />
+              <span className="text-sm font-medium">Delete</span>
+            </button>
+          </>
+        )}
+
+        {/* Кнопки записи для активных воркшопов */}
+        {isWorkshopActive() && (
+          workshopChosen ? (
+            <button
+              onClick={handleCheckOut}
+              className="flex items-center justify-center gap-2 rounded-xl border border-[#ff6b6b]/30 bg-[#ff6b6b]/10 px-4 py-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 hover:border-[#ff5252]/50 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
+              title="Check out"
+            >
+              <span className="icon-[material-symbols--remove] text-lg" />
+              <span className="text-sm font-medium">Check out</span>
+            </button>
+          ) : (
+            <button
+              disabled={workshop.maxPlaces > 0 && signedPeople >= workshop.maxPlaces}
+              onClick={handleCheckIn}
+              className="flex items-center justify-center gap-2 rounded-xl border border-[#bcdfbc]/30 bg-[#bcdfbc]/10 px-4 py-2.5 text-[#bcdfbc] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 hover:border-[#aad6aa]/50 hover:bg-[rgba(167,202,167,0.2)] hover:text-[#aad6aa] disabled:cursor-not-allowed disabled:opacity-50"
+              title="Check in"
+            >
+              <span className="icon-[material-symbols--add-rounded] text-lg" />
+              <span className="text-sm font-medium">Check in</span>
+            </button>
+          )
+        )}
+      </div>
+
       {/* Секция с участниками */}
-      <div className="mt-4 border-t border-contrast/20 pt-4">
+      <div className="mt-4">
         <div className="mb-3 flex flex-row items-center gap-2 text-xl text-contrast/75">
           <div className="flex h-fit w-6">
             <span className="icon-[material-symbols--group-outline] text-2xl" />

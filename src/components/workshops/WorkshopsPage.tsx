@@ -412,7 +412,14 @@ export function WorkshopsPage() {
         title={selectedWorkshop?.title}
         className="whitespace-pre-wrap break-words"
       >
-        <Description workshop={selectedWorkshop} />
+        <Description 
+          workshop={selectedWorkshop} 
+          refreshTrigger={refreshTrigger}
+          remove={removeWorkshop}
+          edit={editWorkshop}
+          currentUserRole={currentUser?.role || "user"}
+          refreshParticipants={refreshParticipants}
+        />
       </Modal>
       {/*<a
         href="https://t.me/maximf3"
