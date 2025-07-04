@@ -53,6 +53,7 @@ export function WorkshopsPage() {
   // Функция для обновления данных участников в модальном окне
   const refreshParticipants = () => {
     setRefreshTrigger((prev) => prev + 1);
+    loadWorkshops();
   };
 
   // Функция для загрузки информации о текущем пользователе
