@@ -264,11 +264,43 @@ const PostForm: React.FC<PostFormProps> = ({
     });
   };
 
+  const handleClearForm = () => {
+    // Очищаем все поля формы
+    setWorkshop({
+      title: "",
+      body: "",
+      date: "",
+      startTime: "",
+      endTime: "",
+      room: "",
+      maxPlaces: 0,
+      remainPlaces: undefined,
+      isActive: true,
+    });
+    
+    // Очищаем все ошибки
+    setErrors({});
+    
+    // Очищаем сохраненные данные в localStorage
+    clearSavedData();
+  };
+
   return (
     <form onSubmit={addNewWorkshop}>
-      <label className="text-xs font-medium uppercase tracking-wider text-white">
-        Title <span className="text-red-500">*</span>
-      </label>
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-medium uppercase tracking-wider text-white">
+          Title <span className="text-red-500">*</span>
+        </label>
+        {!isEditing && (
+          <button
+            type="button"
+            className="px-3 py-1 text-xs font-medium text-red-900 bg-red-200 border border-red-400 rounded-lg hover:bg-red-300 dark:bg-red-900 dark:text-red-300 dark:border-red-600 dark:hover:bg-red-950"
+            onClick={handleClearForm}
+          >
+            Clear Form
+          </button>
+        )}
+      </div>
       <WorkshopInput
         value={workshop.title}
         onChange={handleTitleChange}
