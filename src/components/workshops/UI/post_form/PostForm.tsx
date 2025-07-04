@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import WorkshopInput from "../input/WorkshopInput";
 import WorkshopTextArea from "../input/WorkshopTextArea";
 import DateTimePlacePicker from "../date/DateTimePlacePicker";
@@ -58,6 +58,44 @@ const PostForm: React.FC<PostFormProps> = ({
     endTime?: string;
     time?: string;
   }>({});
+
+  const storageKey = isEditing ? null : 'workshop-form-draft';
+
+  // Загружаем сохраненные данные при монтировании компонента (только для создания)
+  useEffect(() => {
+    if (!isEditing && storageKey) {
+      const savedData = localStorage.getItem(storageKey);
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          setWorkshop(parsedData);
+        } catch (error) {
+          console.error('Error parsing saved form data:', error);
+        }
+      }
+    }
+  }, [isEditing, storageKey]);
+
+  // Сохраняем данные в localStorage при изменении формы (только для создания)
+  useEffect(() => {
+    if (!isEditing && storageKey) {
+      // Сохраняем только если есть хотя бы одно заполненное поле
+      const hasContent = workshop.title || workshop.body || workshop.date || 
+                        workshop.startTime || workshop.endTime || workshop.room || 
+                        workshop.maxPlaces > 0;
+      
+      if (hasContent) {
+        localStorage.setItem(storageKey, JSON.stringify(workshop));
+      }
+    }
+  }, [workshop, isEditing, storageKey]);
+
+  // Функция для очистки сохраненных данных
+  const clearSavedData = () => {
+    if (storageKey) {
+      localStorage.removeItem(storageKey);
+    }
+  };
 
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
@@ -152,6 +190,9 @@ const PostForm: React.FC<PostFormProps> = ({
       try {
         const success = await create(newWorkshop);
         if (success) {
+          // Очищаем сохраненные данные после успешного создания
+          clearSavedData();
+          
           // Сброс формы после успешного создания
           setWorkshop({
             title: "",
