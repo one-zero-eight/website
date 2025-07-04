@@ -175,7 +175,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   };
   return (
     <div
-      className={`relative w-full max-w-[280px] rounded-2xl border bg-[#1e1e1e] p-4 pb-[55px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-500/60 bg-[#1e2e1e] bg-gradient-to-br from-[#1a2b1a] to-[#1e2e1e] shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)]" : "border-brand-violet/40"} `}
+      className={`relative w-full max-w-[280px] rounded-2xl border bg-primary p-4 pb-[55px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-500/60 bg-gradient-to-br from-green-500/10 to-green-500/5 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)]" : "border-brand-violet/40"} `}
       onClick={handleContentClick}
     >
       <div className="flex items-center justify-between">
@@ -200,18 +200,18 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         </p>
       </div>
       <h3
-        className={`my-1.5 mb-2 overflow-hidden break-words text-lg font-semibold leading-[1.3] text-white ${!isWorkshopActive() ? "opacity-50" : ""}`}
+        className={`my-1.5 mb-2 overflow-hidden break-words text-lg font-semibold leading-[1.3] text-contrast ${!isWorkshopActive() ? "opacity-50" : ""}`}
       >
         {workshop.title}
       </h3>
       {!isWorkshopActive() && (
-        <p className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 transform rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2 text-center text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px]">
+        <p className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 transform rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2 text-center text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)]">
           {getInactiveStatusText()}
         </p>
       )}{" "}
       {workshop.room && (
         <div className={`my-2 ${!isWorkshopActive() ? "opacity-50" : ""}`}>
-          <p className="m-0 text-base text-white/80">
+          <p className="m-0 text-base text-contrast/80">
             <strong>Room:</strong>{" "}
             <span
               onClick={handleRoomClick}
@@ -233,7 +233,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
               e.stopPropagation();
               remove(workshop);
             }}
-            className="absolute bottom-3 right-3 flex cursor-pointer items-center justify-center rounded-xl border border-[#ff6b6b]/20 bg-black/40 p-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
+            className="absolute bottom-3 right-3 flex cursor-pointer items-center justify-center rounded-xl border border-[#ff6b6b]/20 bg-primary/80 p-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
             title="Delete workshop"
           >
             <span className="icon-[material-symbols--delete-outline-rounded] text-xl" />
@@ -243,7 +243,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
               e.stopPropagation();
               edit(workshop);
             }}
-            className="absolute bottom-3 left-3 flex cursor-pointer items-center justify-center rounded-xl border border-brand-violet/20 bg-black/40 p-2.5 text-brand-violet backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-brand-violet/40 hover:bg-brand-violet/20 hover:text-brand-violet/80"
+            className="absolute bottom-3 left-3 flex cursor-pointer items-center justify-center rounded-xl border border-brand-violet/20 bg-primary/80 p-2.5 text-brand-violet backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-brand-violet/40 hover:bg-brand-violet/20 hover:text-brand-violet/80"
             title="Edit workshop"
           >
             <span className="icon-[mynaui--pencil] text-xl" />
@@ -255,7 +255,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         (workshopChosen ? (
           <button
             onClick={handleCheckOut}
-            className="absolute bottom-3 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-xl border border-[#ff6b6b]/20 bg-black/40 p-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
+            className="absolute bottom-3 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-xl border border-[#ff6b6b]/20 bg-primary/80 p-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
             title="Check out"
           >
             <span className="icon-[material-symbols--remove] text-xl" />
@@ -264,7 +264,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           <button
             disabled={signedPeople === workshop.maxPlaces}
             onClick={handleCheckIn}
-            className="absolute bottom-3 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-xl border border-[#bcdfbc]/20 bg-black/40 p-2.5 text-[#bcdfbc] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-[#aad6aa]/40 hover:bg-[rgba(167,202,167,0.2)] hover:text-[#aad6aa] disabled:cursor-not-allowed disabled:opacity-50"
+            className="absolute bottom-3 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-xl border border-[#bcdfbc]/20 bg-primary/80 p-2.5 text-[#bcdfbc] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-[#aad6aa]/40 hover:bg-[rgba(167,202,167,0.2)] hover:text-[#aad6aa] disabled:cursor-not-allowed disabled:opacity-50"
             title="Check in"
           >
             <span className="icon-[material-symbols--add-rounded] text-xl" />
