@@ -11,6 +11,7 @@ export interface DateTimePickerProps {
   onEndTimeChange: (time: string) => void;
   onRoomChange: (room: string) => void;
   onMaxPlacesChange: (maxPlaces: number) => void;
+  isPlacesDisabled?: boolean;
 }
 
 const DateTimePicker: React.FC<DateTimePickerProps> = ({
@@ -24,6 +25,7 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   onEndTimeChange,
   onRoomChange,
   onMaxPlacesChange,
+  isPlacesDisabled,
 }) => {
   return (
     <div className="my-2 flex flex-col gap-4">
@@ -57,13 +59,19 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <label className="text-xs font-medium uppercase tracking-wider text-white">
             Places
           </label>
-          <input
-            type="text"
-            value={maxPlaces}
-            onChange={(e) => onMaxPlacesChange(Number(e.target.value))}
-            className="w-full rounded-lg border border-white/30 bg-white/10 px-4 py-2.5 text-sm text-white outline-none transition-all duration-300 focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)]"
-            placeholder="limit"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              value={isPlacesDisabled ? "" : maxPlaces}
+              onChange={(e) => onMaxPlacesChange(Number(e.target.value))}
+              disabled={isPlacesDisabled}
+              className="w-full rounded-lg border border-white/30 bg-white/10 px-4 py-2.5 text-sm text-white outline-none transition-all duration-300 focus:border-violet-400/60 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)]"
+              placeholder={isPlacesDisabled ? "" : "limit"}
+            />
+            {isPlacesDisabled && (
+              <span className="icon-[mdi--infinity] absolute left-3 top-1/2 -translate-y-1/2 text-xl text-white" />
+            )}
+          </div>
         </div>
       </div>
 

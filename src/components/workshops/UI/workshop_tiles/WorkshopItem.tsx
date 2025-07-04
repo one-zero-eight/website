@@ -189,7 +189,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         <p
           className={`flex items-center justify-end text-[15px] font-medium text-brand-violet ${!isWorkshopActive() ? "opacity-50" : ""}`}
         >
-          {workshop.maxPlaces > 0
+          {workshop.maxPlaces >= 0
             ? workshop.maxPlaces === 500
               ? signedPeople + "/"
               : signedPeople + "/" + workshop.maxPlaces

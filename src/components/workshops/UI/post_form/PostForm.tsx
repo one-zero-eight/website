@@ -212,6 +212,16 @@ const PostForm: React.FC<PostFormProps> = ({
       setErrors({ ...errors, endTime: undefined, time: undefined });
     }
   };
+  const isUnlimited = workshop.maxPlaces === 500;
+
+  const handleUnlimitedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setWorkshop({
+      ...workshop,
+      maxPlaces: checked ? 500 : 0,
+      remainPlaces: checked ? 500 : undefined,
+    });
+  };
 
   return (
     <form onSubmit={addNewWorkshop}>
@@ -249,6 +259,7 @@ const PostForm: React.FC<PostFormProps> = ({
         onMaxPlacesChange={(maxPlaces) =>
           setWorkshop({ ...workshop, maxPlaces })
         }
+        isPlacesDisabled={isUnlimited}
       />
       {/* Отображение ошибок валидации */}
       {errors.date && (
@@ -263,22 +274,39 @@ const PostForm: React.FC<PostFormProps> = ({
       {errors.time && (
         <p className="mt-1 text-sm text-red-400">{errors.time}</p>
       )}
-      <div className="my-4 flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="isActive"
-          checked={workshop.isActive}
-          onChange={(e) =>
-            setWorkshop({ ...workshop, isActive: e.target.checked })
-          }
-          className="w-auto"
-        />
-        <label
-          htmlFor="isActive"
-          className="m-0 text-xs font-medium uppercase tracking-wider text-white"
-        >
-          Active Workshop
-        </label>{" "}
+      <div className="my-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="isActive"
+            checked={workshop.isActive}
+            onChange={(e) =>
+              setWorkshop({ ...workshop, isActive: e.target.checked })
+            }
+            className="w-auto"
+          />
+          <label
+            htmlFor="isActive"
+            className="m-0 text-xs font-medium uppercase tracking-wider text-white"
+          >
+            Active Workshop
+          </label>{" "}
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="isUnlimited"
+            checked={isUnlimited}
+            onChange={handleUnlimitedChange}
+            className="w-auto"
+          />
+          <label
+            htmlFor="isUnlimited"
+            className="m-0 text-xs font-medium uppercase tracking-wider text-white"
+          >
+            Unlimited Places
+          </label>
+        </div>
       </div>
       <div className="flex flex-row gap-2">
         <button
