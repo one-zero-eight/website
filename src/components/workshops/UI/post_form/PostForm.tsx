@@ -293,7 +293,7 @@ const PostForm: React.FC<PostFormProps> = ({
   return (
     <form onSubmit={addNewWorkshop}>
       <div className="flex items-center justify-between">
-        <label className="text-xs font-medium uppercase tracking-wider text-white">
+        <label className="text-xs font-medium uppercase tracking-wider text-gray-800 dark:text-white">
           Title <span className="text-red-500">*</span>
         </label>
         {!isEditing && (
@@ -313,9 +313,11 @@ const PostForm: React.FC<PostFormProps> = ({
         placeholder="Title"
       />
       {errors.title && (
-        <p className="mt-1 text-sm text-red-400">{errors.title}</p>
+        <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+          {errors.title}
+        </p>
       )}
-      <label className="text-xs font-medium uppercase tracking-wider text-white">
+      <label className="text-xs font-medium uppercase tracking-wider text-gray-800 dark:text-white">
         Description
       </label>
       <WorkshopTextArea
@@ -341,16 +343,24 @@ const PostForm: React.FC<PostFormProps> = ({
       />
       {/* Отображение ошибок валидации */}
       {errors.date && (
-        <p className="mt-1 text-sm text-red-400">{errors.date}</p>
+        <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+          {errors.date}
+        </p>
       )}
       {errors.startTime && (
-        <p className="mt-1 text-sm text-red-400">{errors.startTime}</p>
+        <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+          {errors.startTime}
+        </p>
       )}
       {errors.endTime && (
-        <p className="mt-1 text-sm text-red-400">{errors.endTime}</p>
+        <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+          {errors.endTime}
+        </p>
       )}
       {errors.time && (
-        <p className="mt-1 text-sm text-red-400">{errors.time}</p>
+        <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+          {errors.time}
+        </p>
       )}
       <div className="my-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -365,7 +375,7 @@ const PostForm: React.FC<PostFormProps> = ({
           />
           <label
             htmlFor="isActive"
-            className="m-0 text-xs font-medium uppercase tracking-wider text-white"
+            className="m-0 text-xs font-medium uppercase tracking-wider text-gray-800 dark:text-white"
           >
             Active Workshop
           </label>{" "}
@@ -380,7 +390,7 @@ const PostForm: React.FC<PostFormProps> = ({
           />
           <label
             htmlFor="isUnlimited"
-            className="m-0 text-xs font-medium uppercase tracking-wider text-white"
+            className="m-0 text-xs font-medium uppercase tracking-wider text-gray-800 dark:text-white"
           >
             Unlimited Places
           </label>
@@ -389,7 +399,7 @@ const PostForm: React.FC<PostFormProps> = ({
       <div className="flex flex-row gap-2">
         <button
           type="button"
-          className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary px-4 py-2 text-lg font-medium hover:bg-primary-hover dark:bg-primary-hover dark:hover:bg-primary"
+          className="flex w-full items-center justify-center gap-4 rounded-2xl bg-gray-200 px-4 py-2 text-lg font-medium text-gray-800 hover:bg-gray-300 dark:bg-primary-hover dark:text-white dark:hover:bg-primary"
           onClick={() => onClose && onClose()}
         >
           Cancel
