@@ -49,7 +49,7 @@ const Modal: React.FC<ModalProps> = ({
       style={{ zIndex }}
       onClick={onClose}
     >
-      <div 
+      <div
         className="flex h-fit w-full max-w-lg flex-col p-4 outline-none"
         onClick={(e) => e.stopPropagation()}
       >

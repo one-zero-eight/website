@@ -59,7 +59,7 @@ const PostForm: React.FC<PostFormProps> = ({
     time?: string;
   }>({});
 
-  const storageKey = isEditing ? null : 'workshop-form-draft';
+  const storageKey = isEditing ? null : "workshop-form-draft";
 
   // Загружаем сохраненные данные при монтировании компонента (только для создания)
   useEffect(() => {
@@ -70,7 +70,7 @@ const PostForm: React.FC<PostFormProps> = ({
           const parsedData = JSON.parse(savedData);
           setWorkshop(parsedData);
         } catch (error) {
-          console.error('Error parsing saved form data:', error);
+          console.error("Error parsing saved form data:", error);
         }
       }
     }
@@ -80,10 +80,15 @@ const PostForm: React.FC<PostFormProps> = ({
   useEffect(() => {
     if (!isEditing && storageKey) {
       // Сохраняем только если есть хотя бы одно заполненное поле
-      const hasContent = workshop.title || workshop.body || workshop.date || 
-                        workshop.startTime || workshop.endTime || workshop.room || 
-                        workshop.maxPlaces > 0;
-      
+      const hasContent =
+        workshop.title ||
+        workshop.body ||
+        workshop.date ||
+        workshop.startTime ||
+        workshop.endTime ||
+        workshop.room ||
+        workshop.maxPlaces > 0;
+
       if (hasContent) {
         localStorage.setItem(storageKey, JSON.stringify(workshop));
       }
@@ -192,7 +197,7 @@ const PostForm: React.FC<PostFormProps> = ({
         if (success) {
           // Очищаем сохраненные данные после успешного создания
           clearSavedData();
-          
+
           // Сброс формы после успешного создания
           setWorkshop({
             title: "",
@@ -277,10 +282,10 @@ const PostForm: React.FC<PostFormProps> = ({
       remainPlaces: undefined,
       isActive: true,
     });
-    
+
     // Очищаем все ошибки
     setErrors({});
-    
+
     // Очищаем сохраненные данные в localStorage
     clearSavedData();
   };
@@ -294,7 +299,7 @@ const PostForm: React.FC<PostFormProps> = ({
         {!isEditing && (
           <button
             type="button"
-            className="px-3 py-1 text-xs font-medium text-red-900 bg-red-200 border border-red-400 rounded-lg hover:bg-red-300 dark:bg-red-900 dark:text-red-300 dark:border-red-600 dark:hover:bg-red-950"
+            className="rounded-lg border border-red-400 bg-red-200 px-3 py-1 text-xs font-medium text-red-900 hover:bg-red-300 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
             onClick={handleClearForm}
           >
             Clear Form
