@@ -47,8 +47,12 @@ const Modal: React.FC<ModalProps> = ({
     <div
       className={`fixed inset-0 grid place-items-center bg-black/75 @container/modal`}
       style={{ zIndex }}
+      onClick={onClose}
     >
-      <div className="flex h-fit w-full max-w-lg flex-col p-4 outline-none">
+      <div 
+        className="flex h-fit w-full max-w-lg flex-col p-4 outline-none"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="overflow-hidden rounded-2xl bg-floating">
           <div
             className={`flex min-w-0 flex-col p-4 @2xl/modal:p-8 ${className}`}
