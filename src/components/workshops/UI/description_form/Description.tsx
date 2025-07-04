@@ -341,7 +341,7 @@ const Description: React.FC<WorkshopProps> = ({
                 workshop.maxPlaces > 0 && signedPeople >= workshop.maxPlaces
               }
               onClick={handleCheckIn}
-              className="flex items-center justify-center gap-2 rounded-xl border border-[#bcdfbc]/30 bg-[#bcdfbc]/10 px-4 py-2.5 text-[#bcdfbc] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 hover:border-[#aad6aa]/50 hover:bg-[rgba(167,202,167,0.2)] hover:text-[#aad6aa] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center gap-2 rounded-xl border border-green-700/30 bg-green-600/10 px-4 py-2.5 text-green-700 backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#bcdfbc]/30 dark:bg-[#bcdfbc]/10 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/50 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa]"
               title="Check in"
             >
               <span className="icon-[material-symbols--add-rounded] text-lg" />

@@ -175,7 +175,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   };
   return (
     <div
-      className={`relative w-full max-w-[280px] rounded-2xl border bg-primary p-4 pb-[55px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-500/60 bg-gradient-to-br from-green-500/10 to-green-500/5 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)]" : "border-brand-violet/40"} `}
+      className={`relative w-full max-w-[280px] rounded-2xl border bg-primary p-4 pb-[55px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-700/60 bg-gradient-to-br from-green-600/20 to-green-700/10 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] dark:border-green-500/60 dark:from-green-500/10 dark:to-green-500/5" : "border-brand-violet/40"} `}
       onClick={handleContentClick}
     >
       <div className="flex items-center justify-between">
@@ -264,7 +264,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           <button
             disabled={signedPeople === workshop.maxPlaces}
             onClick={handleCheckIn}
-            className="absolute bottom-3 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-xl border border-[#bcdfbc]/20 bg-primary/80 p-2.5 text-[#bcdfbc] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-[#aad6aa]/40 hover:bg-[rgba(167,202,167,0.2)] hover:text-[#aad6aa] disabled:cursor-not-allowed disabled:opacity-50"
+            className="absolute bottom-3 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-xl border border-green-700/30 bg-primary/80 p-2.5 text-green-700 backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#bcdfbc]/20 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/40 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa]"
             title="Check in"
           >
             <span className="icon-[material-symbols--add-rounded] text-xl" />
