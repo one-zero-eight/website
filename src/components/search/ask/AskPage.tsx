@@ -1,32 +1,33 @@
 import { useMe } from "@/api/accounts/user.ts";
-import { $search } from "@/api/search";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
-import { useNavigate } from "@tanstack/react-router";
 import { AskResult } from "./AskResult";
+import { useState } from "react";
+import { fetchAsk } from "@/api/search/ask";
+import { useQueryClient } from "@tanstack/react-query";
+import { searchTypes } from "@/api/search";
 
 export function AskPage({ askQuery }: { askQuery: string }) {
-  const navigate = useNavigate();
   const { me } = useMe();
+  const [result, setResult] = useState<searchTypes.SchemaAskResponses>();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const runSearch = (query: string) => {
-    navigate({ to: "/ask", search: { q: query } });
+  const queryClient = useQueryClient();
+
+  const runSearch = async (query: string) => {
+    setIsLoading(true);
+    try {
+      const data = await queryClient.fetchQuery({
+        queryKey: ["ask", query],
+        queryFn: () => fetchAsk(query),
+      });
+      setResult(data);
+    } catch (error) {
+      console.error("Error executing the /ask/ request:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const { data: askResult } = $search.useQuery(
-    "get",
-    "/search/search", //TODO: Update this endpoint to the correct one for ask
-    {
-      params: { query: { query: askQuery, sources: [], response_types: [] } },
-    },
-    {
-      enabled: askQuery.length > 0,
-      // Disable refetch
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-    },
-  );
 
   if (!me) {
     return <AuthWall />;
@@ -35,16 +36,18 @@ export function AskPage({ askQuery }: { askQuery: string }) {
   return (
     <div className="flex grow flex-col gap-4 p-4">
       <SearchField runSearch={runSearch} currentQuery={askQuery} />
-      <span>AI assistant:</span>
-      {askResult ? (
-        <span>- Here, what I found...</span>
+      <span className="font-semibold">AI Assistant:</span>{" "}
+      {isLoading ? (
+        <span>- Thinking...</span>
+      ) : result ? (
+        <span>- Here's what I found:</span>
       ) : (
-        <span>- Sorry, I can't answer</span>
+        <span>- Ask me anything!</span>
       )}
-      {askResult && (
+      {result && (
         <div className="flex flex-row gap-6">
           <div className="flex w-full flex-col justify-stretch gap-4 md:min-w-0">
-            <AskResult response={askResult.responses[0]} />
+            <AskResult response={result} />
           </div>
         </div>
       )}
