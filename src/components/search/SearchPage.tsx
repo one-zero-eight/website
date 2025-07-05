@@ -120,7 +120,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     setAppliedFilters(selectedFilters);
   };
 
-  const { data: searchResult } = $search.useQuery(
+  const { data: searchResult, isLoading } = $search.useQuery(
     "get",
     "/search/search",
     (() => {
@@ -208,6 +208,11 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           {filteredResponses.length > 0
             ? `Results for: ${searchResult.searched_for}`
             : `No matched results for: ${searchResult.searched_for}`}
+        </p>
+      )}
+      {isLoading && (
+        <p className="py-4 text-xl font-semibold text-contrast">
+          Loading search results...
         </p>
       )}
       {searchResult && (

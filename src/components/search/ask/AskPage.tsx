@@ -2,31 +2,30 @@ import { useMe } from "@/api/accounts/user.ts";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import { AskResult } from "./AskResult";
-import { useState } from "react";
-import { fetchAsk } from "@/api/search/ask";
-import { useQueryClient } from "@tanstack/react-query";
-import { searchTypes } from "@/api/search";
+import { useNavigate } from "@tanstack/react-router";
+import { $search } from "@/api/search";
 
 export function AskPage({ askQuery }: { askQuery: string }) {
   const { me } = useMe();
-  const [result, setResult] = useState<searchTypes.SchemaAskResponses>();
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const queryClient = useQueryClient();
+  const { data: result, isLoading } = $search.useQuery(
+    "post",
+    "/ask/",
+    {
+      body: { query: askQuery },
+    },
+    {
+      enabled: askQuery.length > 0,
+      // Disable refetch
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
 
-  const runSearch = async (query: string) => {
-    setIsLoading(true);
-    try {
-      const data = await queryClient.fetchQuery({
-        queryKey: ["ask", query],
-        queryFn: () => fetchAsk(query),
-      });
-      setResult(data);
-    } catch (error) {
-      console.error("Error executing the /ask/ request:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  const runSearch = (query: string) => {
+    navigate({ to: "/ask", search: { q: query } });
   };
 
   if (!me) {
