@@ -280,6 +280,11 @@ export interface components {
        */
       search_responses: components["schemas"]["SearchResponse"][];
     };
+    /** Body_ask_ask_by_query */
+    Body_ask_ask_by_query: {
+      /** Query */
+      query: string;
+    };
     /** CampusLifeSource */
     CampusLifeSource: {
       /**
@@ -815,6 +820,8 @@ export interface components {
   pathItems: never;
 }
 export type SchemaAskResponses = components["schemas"]["AskResponses"];
+export type SchemaBodyAskAskByQuery =
+  components["schemas"]["Body_ask_ask_by_query"];
 export type SchemaCampusLifeSource = components["schemas"]["CampusLifeSource"];
 export type SchemaChat = components["schemas"]["Chat"];
 export type SchemaDbMessageSchema = components["schemas"]["DBMessageSchema"];
@@ -937,7 +944,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": string;
+        "application/json": components["schemas"]["Body_ask_ask_by_query"];
       };
     };
     responses: {
