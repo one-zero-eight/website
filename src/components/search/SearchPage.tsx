@@ -69,7 +69,9 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       !selected.source.campuslife &&
       !selected.source.eduwiki &&
       !selected.source.hotel &&
-      !selected.source.moodle
+      !selected.source.moodle &&
+      !selected.source.maps &&
+      !selected.source.residents
     ) {
       sources.push(InfoSources.campuslife);
       sources.push(InfoSources.eduwiki);
@@ -118,7 +120,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     setAppliedFilters(selectedFilters);
   };
 
-  const { data: searchResult } = $search.useQuery(
+  const { data: searchResult, isLoading } = $search.useQuery(
     "get",
     "/search/search",
     (() => {
@@ -141,32 +143,43 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   );
 
   const filteredResponses =
-    searchResult?.responses.filter((e) => {
-      if (filters.response_types.length === 0) {
-        return true;
-      }
+    searchResult?.responses
+      .filter((e) => {
+        if (filters.response_types.length === 0) {
+          return true;
+        }
 
-      const url = "url" in e.source ? e.source.url : "";
+        const url = "url" in e.source ? e.source.url : "";
 
-      const isPdf =
-        filters.response_types.includes(
-          PathsSearchSearchGetParametersQueryResponse_types.pdf,
-        ) && url.endsWith(".pdf");
+        const isPdf =
+          filters.response_types.includes(
+            PathsSearchSearchGetParametersQueryResponse_types.pdf,
+          ) && url.endsWith(".pdf");
 
-      const isLink =
-        filters.response_types.includes(
-          PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
-        ) && !url.endsWith(".pdf");
+        const isLink =
+          filters.response_types.includes(
+            PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
+          ) && !url.endsWith(".pdf");
 
-      return isPdf || isLink;
-    }) || [];
+        return isPdf || isLink;
+      })
+      .filter((e) => {
+        if (filters.sources.length == 0) {
+          return true;
+        }
+
+        const sourceType = e.source.type as string;
+        return filters.sources.includes(sourceType as InfoSources);
+      }) || [];
 
   useEffect(() => {
+    const first = searchResult?.responses?.[0];
     if (
-      searchResult?.responses[0]?.source.type === "moodle-file" ||
-      searchResult?.responses[0]?.source.type === "moodle-url" ||
-      searchResult?.responses[0]?.source.type === "moodle-unknown" ||
-      searchResult?.responses[0]?.source.type === "telegram"
+      first &&
+      (first.source.type === "moodle-file" ||
+        first.source.type === "moodle-url" ||
+        first.source.type === "moodle-unknown" ||
+        first.source.type === "telegram")
     ) {
       // Reset preview source when search result changes and it has an appropeiate type for preview
       setPreviewSource(searchResult?.responses[0]?.source);
@@ -195,6 +208,11 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           {filteredResponses.length > 0
             ? `Results for: ${searchResult.searched_for}`
             : `No matched results for: ${searchResult.searched_for}`}
+        </p>
+      )}
+      {isLoading && (
+        <p className="py-4 text-xl font-semibold text-contrast">
+          Loading search results...
         </p>
       )}
       {searchResult && (

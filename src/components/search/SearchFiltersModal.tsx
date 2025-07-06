@@ -68,7 +68,7 @@ const SearchFiltersModal = ({
                   <h3 className="mb-2 text-sm font-semibold capitalize">
                     {group.replace(/([A-Z])/g, " $1")}
                   </h3>
-                  {values.length <= 4 &&
+                  {values.length <= 4 ? (
                     values.map((value) => (
                       <label
                         key={value.displayName}
@@ -82,9 +82,9 @@ const SearchFiltersModal = ({
                         />
                         {value.displayName}
                       </label>
-                    ))}
-                  {values.length > 4 && (
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                    ))
+                  ) : (
+                    <div className="grid h-20 gap-x-4 gap-y-1 overflow-auto pr-4">
                       {values.map((value) => (
                         <label
                           key={value.displayName}

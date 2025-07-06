@@ -1,26 +1,37 @@
 import { searchTypes } from "@/api/search";
 import clsx from "clsx";
+import Markdown from "react-markdown";
 
 export function AskResult({
   response,
 }: {
-  response: searchTypes.SchemaSearchResponse;
+  response: searchTypes.SchemaAskResponses;
 }) {
-  const link =
-    "link" in response.source
-      ? response.source.link
-      : "url" in response.source
-        ? response.source.url
-        : "";
+  const { answer, search_responses } = response;
 
   return (
     <div
       tabIndex={0}
       className={clsx(
-        "flex cursor-pointer flex-col rounded-lg !border border-gray-400 bg-floating p-4 hover:bg-primary-hover",
+        "flex cursor-pointer flex-col gap-4 rounded-lg !border border-gray-400 bg-floating p-4 hover:bg-primary-hover",
       )}
     >
-      {link}
+      <Markdown>{answer}</Markdown>
+      <div>
+        {"Source: "}
+        <a
+          className="text-brand-violet hover:underline"
+          href={
+            "link" in search_responses[0].source
+              ? search_responses[0].source.link
+              : "url" in search_responses[0].source
+                ? search_responses[0].source.url
+                : ""
+          }
+        >
+          {search_responses[0].source.type}
+        </a>
+      </div>
     </div>
   );
 }
