@@ -11,6 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from "./routes/__root";
+import { Route as FormsImport } from "./routes/forms";
 import { Route as WithmenuRouteImport } from "./routes/_with_menu/route";
 import { Route as IndexImport } from "./routes/index";
 import { Route as WithmenuSportImport } from "./routes/_with_menu/sport";
@@ -37,6 +38,11 @@ import { Route as WithmenuAccountConnectTelegramImport } from "./routes/_with_me
 import { Route as WithmenuScheduleEventGroupsAliasImport } from "./routes/_with_menu/schedule/event-groups.$alias";
 
 // Create/Update Routes
+
+const FormsRoute = FormsImport.update({
+  path: "/forms",
+  getParentRoute: () => rootRoute,
+} as any);
 
 const WithmenuRouteRoute = WithmenuRouteImport.update({
   id: "/_with_menu",
@@ -177,6 +183,13 @@ declare module "@tanstack/react-router" {
       path: "";
       fullPath: "";
       preLoaderRoute: typeof WithmenuRouteImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/forms": {
+      id: "/forms";
+      path: "/forms";
+      fullPath: "/forms";
+      preLoaderRoute: typeof FormsImport;
       parentRoute: typeof rootRoute;
     };
     "/_with_menu/account": {
@@ -404,6 +417,7 @@ const WithmenuRouteRouteWithChildren = WithmenuRouteRoute._addFileChildren(
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "": typeof WithmenuRouteRouteWithChildren;
+  "/forms": typeof FormsRoute;
   "/account": typeof WithmenuAccountRouteRouteWithChildren;
   "/calendar": typeof WithmenuCalendarRoute;
   "/dashboard": typeof WithmenuDashboardRoute;
@@ -431,6 +445,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "": typeof WithmenuRouteRouteWithChildren;
+  "/forms": typeof FormsRoute;
   "/calendar": typeof WithmenuCalendarRoute;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/dorms": typeof WithmenuDormsRoute;
@@ -458,6 +473,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute;
   "/": typeof IndexRoute;
   "/_with_menu": typeof WithmenuRouteRouteWithChildren;
+  "/forms": typeof FormsRoute;
   "/_with_menu/account": typeof WithmenuAccountRouteRouteWithChildren;
   "/_with_menu/calendar": typeof WithmenuCalendarRoute;
   "/_with_menu/dashboard": typeof WithmenuDashboardRoute;
@@ -487,6 +503,7 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | ""
+    | "/forms"
     | "/account"
     | "/calendar"
     | "/dashboard"
@@ -513,6 +530,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | ""
+    | "/forms"
     | "/calendar"
     | "/dashboard"
     | "/dorms"
@@ -538,6 +556,7 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/_with_menu"
+    | "/forms"
     | "/_with_menu/account"
     | "/_with_menu/calendar"
     | "/_with_menu/dashboard"
@@ -566,11 +585,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   WithmenuRouteRoute: typeof WithmenuRouteRouteWithChildren;
+  FormsRoute: typeof FormsRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   WithmenuRouteRoute: WithmenuRouteRouteWithChildren,
+  FormsRoute: FormsRoute,
 };
 
 export const routeTree = rootRoute
@@ -586,7 +607,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/_with_menu"
+        "/_with_menu",
+        "/forms"
       ]
     },
     "/": {
@@ -615,6 +637,9 @@ export const routeTree = rootRoute
         "/_with_menu/schedule/",
         "/_with_menu/schedule/event-groups/$alias"
       ]
+    },
+    "/forms": {
+      "filePath": "forms.tsx"
     },
     "/_with_menu/account": {
       "filePath": "_with_menu/account/route.tsx",
