@@ -94,7 +94,7 @@ export default function SearchResult({
       onClick={handleClick}
       tabIndex={0}
       className={clsx(
-        "relative flex cursor-pointer gap-4 rounded-lg !border bg-floating p-4 hover:bg-primary-hover md:basis-1/2",
+        "relative flex cursor-pointer gap-4 rounded-lg !border bg-floating p-4 hover:bg-primary-hover",
         isSelected
           ? "border-brand-violet drop-shadow-[0_0_4px_#9747FF]"
           : "border-gray-400",
