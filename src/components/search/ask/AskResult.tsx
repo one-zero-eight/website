@@ -22,14 +22,15 @@ export function AskResult({
         <a
           className="text-brand-violet hover:underline"
           href={
-            "link" in search_responses[0].source
+            search_responses[0] &&
+            ("link" in search_responses[0].source
               ? search_responses[0].source.link
               : "url" in search_responses[0].source
                 ? search_responses[0].source.url
-                : ""
+                : "")
           }
         >
-          {search_responses[0].source.type}
+          {search_responses[0] ? search_responses[0].source.type : "-"}
         </a>
       </div>
     </div>
