@@ -57,4 +57,29 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       <BottomNavigation />
     </div>
   ),
+
+  // 403 page
+  errorComponent: ({ error }) => {
+    if (error?.message?.includes("403")) {
+      return (
+        <div className="flex h-full flex-col">
+          <div className="flex grow">
+            <Sidebar />
+
+            <div className="flex min-h-full grow flex-col items-center justify-center overflow-y-auto @container/content">
+              <h1 className="mb-2 text-4xl font-bold">403 / forbidden</h1>
+              <p className="mb-4 text-contrast/70">
+                You don't have permission to access this page.
+              </p>
+              <Link to="/dashboard" className="selected">
+                Go to dashboard
+              </Link>
+            </div>
+          </div>
+
+          <BottomNavigation />
+        </div>
+      );
+    }
+  },
 });

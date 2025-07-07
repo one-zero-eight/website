@@ -1,4 +1,5 @@
 import Tooltip from "@/components/common/Tooltip.tsx";
+import { useMe } from "@/api/accounts/user.ts";
 import { items } from "@/lib/links/menu-links.tsx";
 import { Link, LinkOptions } from "@tanstack/react-router";
 import clsx from "clsx";
@@ -10,6 +11,7 @@ export default function Sidebar() {
     "sidebar-minimized",
     false,
   );
+  const { me } = useMe();
 
   return (
     <aside
@@ -44,7 +46,10 @@ export default function Sidebar() {
               key={index}
               className="my-1 h-0.5 w-full rounded-full bg-gray-500/20"
             />
-          ) : item.type === "local" ? (
+          ) : // Hide Forms item for non-staff users
+          item.type === "local" &&
+            item.title === "Forms" &&
+            !me?.innopolis_sso?.is_staff ? null : item.type === "local" ? (
             <SidebarLink
               key={index}
               title={item.title}
