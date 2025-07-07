@@ -9,6 +9,14 @@ export function AskResult({
 }) {
   const { answer, search_responses } = response;
 
+  const uniqueSources = search_responses.filter(
+    (item, index, self) =>
+      index === self.findIndex((s) => s.source.type === item.source.type),
+  );
+
+  const getSourceLink = (s: searchTypes.SchemaSearchResponse) =>
+    "link" in s.source ? s.source.link : "url" in s.source ? s.source.url : "";
+
   return (
     <div
       tabIndex={0}
@@ -17,22 +25,28 @@ export function AskResult({
       )}
     >
       <Markdown>{answer}</Markdown>
-      <div>
-        {"Source: "}
-        <a
-          className="text-brand-violet hover:underline"
-          href={
-            search_responses[0] &&
-            ("link" in search_responses[0].source
-              ? search_responses[0].source.link
-              : "url" in search_responses[0].source
-                ? search_responses[0].source.url
-                : "")
-          }
-        >
-          {search_responses[0] ? search_responses[0].source.type : "-"}
-        </a>
-      </div>
+
+      {uniqueSources.length > 0 && (
+        <div>
+          <span>Sources: </span>
+          {uniqueSources.map((s, i) => {
+            const link = getSourceLink(s);
+            return (
+              <span key={link || i}>
+                <a
+                  className="text-brand-violet hover:underline"
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {s.source.type}
+                </a>
+                {i < uniqueSources.length - 1 && ", "}
+              </span>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
