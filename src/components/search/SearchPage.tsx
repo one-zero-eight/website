@@ -65,20 +65,21 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       );
     }
 
-    if (
-      !selected.source.campuslife &&
-      !selected.source.eduwiki &&
-      !selected.source.hotel &&
-      !selected.source.moodle &&
-      !selected.source.maps &&
-      !selected.source.residents
-    ) {
-      sources.push(InfoSources.campuslife);
-      sources.push(InfoSources.eduwiki);
-      sources.push(InfoSources.hotel);
-      sources.push(InfoSources.moodle);
-      sources.push(InfoSources.maps);
-      sources.push(InfoSources.residents);
+    const allSourcesSelected =
+      selected.source.campuslife &&
+      selected.source.eduwiki &&
+      selected.source.hotel &&
+      selected.source.moodle &&
+      selected.source.maps &&
+      selected.source.residents;
+
+    if (!allSourcesSelected) {
+      if (selected.source.campuslife) sources.push(InfoSources.campuslife);
+      if (selected.source.eduwiki) sources.push(InfoSources.eduwiki);
+      if (selected.source.hotel) sources.push(InfoSources.hotel);
+      if (selected.source.moodle) sources.push(InfoSources.moodle);
+      if (selected.source.maps) sources.push(InfoSources.maps);
+      if (selected.source.residents) sources.push(InfoSources.residents);
     }
 
     Object.entries(selectedFilters).forEach(([group, values]) => {
@@ -123,19 +124,19 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const { data: searchResult, isLoading } = $search.useQuery(
     "get",
     "/search/search",
-    (() => {
-      return {
-        params: {
-          query: {
-            query: searchQuery,
-            ...filters,
-          },
+    {
+      params: {
+        query: {
+          query: searchQuery,
+          response_types: filters.response_types,
+          ...(filters.response_types.length > 0 && {
+            response_types: filters.response_types,
+          }),
         },
-      };
-    })(),
+      },
+    },
     {
       enabled: searchQuery.length > 0,
-      // Disable refetch
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
