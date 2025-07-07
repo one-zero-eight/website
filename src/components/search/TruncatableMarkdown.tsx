@@ -23,16 +23,17 @@ const TruncatableMarkdown = ({
   const truncatedText = useMemo(() => {
     if (!shouldTruncate) return text;
 
-    // Find first sentence that starts with #
-    const match = text.match(/(^|\n)(?=#+ )/);
-
-    if (match && match.index !== undefined) {
-      return text.slice(0, match.index).trim();
+    const titleMatch = text.match(/(^|\n)(?=#+ )/);
+    if (titleMatch && titleMatch.index !== undefined) {
+      const slice = text.slice(0, titleMatch.index).trim();
+      if (slice) return slice;
     }
 
-    // Return empty article if no titles
-    const fallback = text.match(/[^#\s].+?(\n|$)/);
-    return fallback ? fallback[0].trim() : text;
+    const fallbackLine = text
+      .split("\n")
+      .find((line) => line.trim() && !line.trim().startsWith("#"));
+
+    return fallbackLine ? fallbackLine.trim() : text;
   }, [text, shouldTruncate]);
 
   return (
