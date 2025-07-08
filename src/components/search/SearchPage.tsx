@@ -30,6 +30,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       moodle: true,
       maps: true,
       residents: true,
+      resources: true,
     },
   };
 
@@ -71,7 +72,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       selected.source.hotel &&
       selected.source.moodle &&
       selected.source.maps &&
-      selected.source.residents;
+      selected.source.residents &&
+      selected.source.resources;
 
     if (!allSourcesSelected) {
       if (selected.source.campuslife) sources.push(InfoSources.campuslife);
@@ -80,6 +82,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       if (selected.source.moodle) sources.push(InfoSources.moodle);
       if (selected.source.maps) sources.push(InfoSources.maps);
       if (selected.source.residents) sources.push(InfoSources.residents);
+      if (selected.source.resources) sources.push(InfoSources.resources);
     }
 
     Object.entries(selectedFilters).forEach(([group, values]) => {
@@ -106,6 +109,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           if (value === "moodle") sources.push(InfoSources.moodle);
           if (value === "maps") sources.push(InfoSources.maps);
           if (value === "residents") sources.push(InfoSources.residents);
+          if (value === "resources") sources.push(InfoSources.resources);
         });
       }
     });

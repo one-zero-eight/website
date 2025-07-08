@@ -19,7 +19,6 @@ export default function SearchResult({
       : "url" in response.source
         ? response.source.url
         : "";
-
   const previewText =
     "preview_text" in response.source ? response.source.preview_text : "";
 

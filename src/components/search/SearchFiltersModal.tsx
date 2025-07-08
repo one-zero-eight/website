@@ -23,7 +23,7 @@ type Props = {
 const filters = {
   fileType: [
     { displayName: "PDF", internalName: "pdf" },
-    { displayName: "Web-site", internalName: "link_to_source" },
+    { displayName: "Website", internalName: "link_to_source" },
   ],
   source: [
     { displayName: "Campus life", internalName: "campuslife" },

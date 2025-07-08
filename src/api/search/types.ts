@@ -724,6 +724,30 @@ export interface components {
        */
       breadcrumbs: string[];
     };
+    /** ResourcesSource */
+    ResourcesSource: {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: ResourcesSourceType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Resources"
+       *     ]
+       */
+      breadcrumbs: string[];
+    };
     /** SearchResponse */
     SearchResponse: {
       /**
@@ -744,7 +768,8 @@ export interface components {
         | components["schemas"]["MoodleUrlSource"]
         | components["schemas"]["MoodleUnknownSource"]
         | components["schemas"]["TelegramSource"]
-        | components["schemas"]["ResidentsSource"];
+        | components["schemas"]["ResidentsSource"]
+        | components["schemas"]["ResourcesSource"];
     };
     /** SearchResponses */
     SearchResponses: {
@@ -854,6 +879,7 @@ export type SchemaMoodleUrlSource = components["schemas"]["MoodleUrlSource"];
 export type SchemaPdfLocation = components["schemas"]["PdfLocation"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaResidentsSource = components["schemas"]["ResidentsSource"];
+export type SchemaResourcesSource = components["schemas"]["ResourcesSource"];
 export type SchemaSearchResponse = components["schemas"]["SearchResponse"];
 export type SchemaSearchResponses = components["schemas"]["SearchResponses"];
 export type SchemaTelegramSource = components["schemas"]["TelegramSource"];
@@ -1065,6 +1091,7 @@ export interface operations {
             | components["schemas"]["MoodleUnknownSource"]
             | components["schemas"]["TelegramSource"]
             | components["schemas"]["ResidentsSource"]
+            | components["schemas"]["ResourcesSource"]
           )[];
         };
       };
@@ -1379,6 +1406,7 @@ export enum InfoSources {
   hotel = "hotel",
   maps = "maps",
   residents = "residents",
+  resources = "resources",
 }
 export enum MapsSourceType {
   maps = "maps",
@@ -1394,6 +1422,9 @@ export enum MoodleUrlSourceType {
 }
 export enum ResidentsSourceType {
   residents = "residents",
+}
+export enum ResourcesSourceType {
+  resources = "resources",
 }
 export enum TelegramSourceType {
   telegram = "telegram",
