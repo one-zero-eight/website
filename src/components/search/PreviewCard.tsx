@@ -20,7 +20,7 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
     <div
       className={clsx(
         "flex h-fit max-h-full min-w-0 flex-col gap-2 rounded-lg border border-secondary-hover bg-floating p-4 md:basis-1/2",
-        "fixed inset-8 top-8 z-10 md:visible md:static",
+        "static z-10 md:sticky md:top-4",
       )}
     >
       <div className="flex flex-row items-center justify-between">

@@ -7,7 +7,7 @@ const TruncatableMarkdown = ({
   sourse_type,
 }: {
   text: string;
-  sourse_type:
+  gisourse_type:
     | searchTypes.EduwikiSourceType
     | searchTypes.CampusLifeSourceType
     | searchTypes.HotelSourceType
