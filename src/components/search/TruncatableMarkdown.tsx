@@ -1,26 +1,44 @@
-import React, { useEffect, useRef, useState } from "react";
+import { searchTypes } from "@/api/search";
+import { useMemo } from "react";
 import Markdown from "react-markdown";
 
-const TruncatableMarkdown = ({ text }: { text: string }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [shouldTruncate, setShouldTruncate] = useState(true);
+const TruncatableMarkdown = ({
+  text,
+  sourse_type,
+}: {
+  text: string;
+  sourse_type:
+    | searchTypes.EduwikiSourceType
+    | searchTypes.CampusLifeSourceType
+    | searchTypes.HotelSourceType
+    | searchTypes.MapsSourceType
+    | searchTypes.MoodleFileSourceType
+    | searchTypes.MoodleUrlSourceType
+    | searchTypes.MoodleUnknownSourceType
+    | searchTypes.TelegramSourceType
+    | searchTypes.ResidentsSourceType
+    | searchTypes.ResourcesSourceType;
+}) => {
+  const shouldTruncate = sourse_type !== "maps";
 
-  useEffect(() => {
-    if (containerRef.current) {
-      const count = containerRef.current.childElementCount;
-      setShouldTruncate(count === 1);
+  const truncatedText = useMemo(() => {
+    if (!shouldTruncate) return text;
+
+    const titleMatch = text.match(/(^|\n)(?=#+ )/);
+    if (titleMatch && titleMatch.index !== undefined) {
+      const slice = text.slice(0, titleMatch.index).trim();
+      if (slice) return slice;
     }
-  }, [text]);
+
+    const fallbackLine = text
+      .split("\n")
+      .find((line) => line.trim() && !line.trim().startsWith("#"));
+
+    return fallbackLine ? fallbackLine.trim() : text;
+  }, [text, shouldTruncate]);
 
   return (
-    <div
-      ref={containerRef}
-      className={`${
-        shouldTruncate
-          ? "max-w-full overflow-hidden truncate text-ellipsis whitespace-nowrap text-xs"
-          : "flex max-w-full flex-col text-xs"
-      } `}
-    >
+    <div className="text-muted-foreground w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs">
       <Markdown
         components={{
           p: ({ children }) => <span>{children}</span>,
@@ -32,9 +50,10 @@ const TruncatableMarkdown = ({ text }: { text: string }) => {
           h6: ({ children }) => <span>{children}</span>,
         }}
       >
-        {text}
+        {truncatedText}
       </Markdown>
     </div>
   );
 };
+
 export default TruncatableMarkdown;

@@ -35,7 +35,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
   return (
     <div className="flex grow flex-col gap-4 p-4">
       <SearchField runSearch={runSearch} currentQuery={askQuery} />
-      <span className="font-semibold">AI Assistant:</span>{" "}
+      <span className="font-semibold">{"AI Assistant: "}</span>
       {isLoading ? (
         <span>- Thinking...</span>
       ) : result ? (
