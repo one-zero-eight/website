@@ -1,6 +1,7 @@
 import { searchTypes } from "@/api/search";
 import clsx from "clsx";
 import { useState } from "react";
+import { MapsPage } from "../maps/MapsPage";
 
 export default function IframePreviewCard({
   source,
@@ -12,42 +13,53 @@ export default function IframePreviewCard({
   const [hasError, setHasError] = useState(false);
 
   const url = "url" in source ? source.url : "";
+  const parsedUrl = new URL(url);
 
-  const isInsecureUrl = url.startsWith("http://");
+  const isInsecureUrl =
+    url.startsWith("http://") ||
+    url.startsWith("https://hotel.innopolis.university/");
   const showIframe = !!url && !hasError && !isInsecureUrl;
 
   return (
     <div
       className={clsx(
-        "relative flex h-fit max-h-full min-w-0 flex-col gap-4 rounded-lg border border-secondary-hover bg-floating p-4 md:basis-1/2",
-        "fixed inset-8 top-8 z-10 md:visible md:static",
+        "flex h-fit max-h-full min-w-0 flex-col gap-2 rounded-lg border border-secondary-hover bg-floating p-4 md:basis-1/2",
+        "static z-10 md:sticky md:top-4",
       )}
     >
-      <div className="flex justify-between">
+      <div className="flex flex-row items-center justify-between">
         <p className="truncate text-xs font-semibold dark:text-white md:text-2xl">
           {source.display_name}
         </p>
         <button
-          onClick={onClose}
+          onClick={() => {
+            onClose();
+          }}
           className="bg-background hover:bg-accent items-end rounded-full px-2 py-1 text-sm shadow-md"
         >
           ✕
         </button>
       </div>
       {showIframe ? (
-        <iframe
-          src={url}
-          sandbox=""
-          onError={() => setHasError(true)}
-          title="Preview"
-          className="border-border h-[50vh] w-full rounded-xl border"
-          loading="lazy"
-        />
+        source.type === "maps" ? (
+          <MapsPage
+            sceneId={parsedUrl.searchParams.get("scene") ?? undefined}
+            areaId={parsedUrl.searchParams.get("area") ?? undefined}
+            q={undefined}
+          />
+        ) : (
+          <iframe
+            src={url}
+            onError={() => setHasError(true)}
+            title="Preview"
+            className="border-border h-[50vh] w-full rounded-xl border"
+            loading="lazy"
+          />
+        )
       ) : (
-        <div className="border-border text-muted flex h-[50vh] w-full items-center justify-center rounded-xl border p-4">
-          {isInsecureUrl
-            ? "This site does not support secure preview. Please, open it directly."
-            : "Preview unavailable — try opening the website instead."}
+        <div className="border-border text-muted flex h-[25vh] w-full items-center justify-center rounded-xl border p-4 md:h-[50vh]">
+          {isInsecureUrl &&
+            "Sorry, this site does not support preview. Please, open it directly."}
         </div>
       )}
       <div className="flex justify-center">

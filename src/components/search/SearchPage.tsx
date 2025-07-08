@@ -75,7 +75,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       selected.source.maps &&
       selected.source.residents &&
       selected.source.resources;
-
+      
     if (!allSourcesSelected) {
       if (selected.source.campuslife) sources.push(InfoSources.campuslife);
       if (selected.source.eduwiki) sources.push(InfoSources.eduwiki);
@@ -85,7 +85,6 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       if (selected.source.residents) sources.push(InfoSources.residents);
       if (selected.source.resources) sources.push(InfoSources.resources);
     }
-
     Object.entries(selectedFilters).forEach(([group, values]) => {
       const selectedValues = Object.entries(values)
         .filter(([, checked]) => checked)
@@ -180,21 +179,13 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
 
   useEffect(() => {
     const first = filteredResponses[0];
-    if (first) {
+    if (first && previewSource === undefined) {
       // Reset preview source when search result changes and it has an appropeiate type for preview
       setPreviewSource(first.source);
     }
   }, [searchResult]);
 
   useEffect(() => {
-    if (
-      filteredResponses.length > 0 &&
-      (!previewSource ||
-        !filteredResponses.some((r) => r.source === previewSource))
-    ) {
-      setPreviewSource(filteredResponses[0].source);
-    }
-
     //Reset preview if no sources in filtered
     if (filteredResponses.length === 0 && previewSource) {
       setPreviewSource(undefined);

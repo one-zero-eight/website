@@ -21,7 +21,7 @@ export function AskResult({
     <div
       tabIndex={0}
       className={clsx(
-        "flex cursor-pointer flex-col gap-4 rounded-lg !border border-gray-400 bg-floating p-4 hover:bg-primary-hover",
+        "flex flex-col gap-4 rounded-lg !border border-gray-400 bg-floating p-4 hover:bg-primary-hover",
       )}
     >
       <Markdown>{answer}</Markdown>

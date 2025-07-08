@@ -6,7 +6,6 @@ export default function SearchResult({
   response,
   isSelected,
   select,
-  hasPreview,
 }: {
   response: searchTypes.SchemaSearchResponse;
   isSelected: boolean;
@@ -93,14 +92,16 @@ export default function SearchResult({
         <p className="truncate text-xs font-semibold dark:text-white md:text-2xl">
           {response.source.display_name}
         </p>
-        <a
-          href={link}
-          target="_blank"
-          onClickCapture={(e) => e.stopPropagation()}
-          className="truncate text-xs text-[#93bd58] hover:underline"
-        >
-          {response.source.breadcrumbs.join(" > ")}
-        </a>
+        <div>
+          <a
+            href={link}
+            target="_blank"
+            onClickCapture={(e) => e.stopPropagation()}
+            className="truncate text-xs text-[#93bd58] hover:underline"
+          >
+            {response.source.breadcrumbs.join(" > ")}
+          </a>
+        </div>
         {previewText && (
           <TruncatableMarkdown
             text={previewText}
@@ -108,16 +109,6 @@ export default function SearchResult({
           />
         )}
       </div>
-
-      {!hasPreview && (
-        <span
-          className={clsx(
-            "icon-[akar-icons--link-out]",
-            "mt-1 h-4 w-4",
-            "text-muted-foreground text-black dark:text-white",
-          )}
-        />
-      )}
     </div>
   );
 }
