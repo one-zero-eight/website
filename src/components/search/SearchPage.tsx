@@ -75,7 +75,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       selected.source.maps &&
       selected.source.residents &&
       selected.source.resources;
-      
+
     if (!allSourcesSelected) {
       if (selected.source.campuslife) sources.push(InfoSources.campuslife);
       if (selected.source.eduwiki) sources.push(InfoSources.eduwiki);
