@@ -6,7 +6,6 @@ export default function SearchResult({
   response,
   isSelected,
   select,
-  hasPreview,
 }: {
   response: searchTypes.SchemaSearchResponse;
   isSelected: boolean;
@@ -23,23 +22,11 @@ export default function SearchResult({
     "preview_text" in response.source ? response.source.preview_text : "";
 
   const handleClick = () => {
-    if (
-      response.source.type !== "moodle-file" &&
-      response.source.type !== "moodle-url" &&
-      response.source.type !== "moodle-unknown" &&
-      response.source.type !== "telegram"
-    ) {
-      select();
-      if (link) {
-        window.open(link, "_blank");
-      }
-    } else {
-      select();
-    }
+    select();
   };
 
   const getIcon = () => {
-    const base = "text-3xl";
+    const base = "text-2xl md:text-3xl";
     switch (response.source.type) {
       case "moodle-file":
       case "moodle-url":
@@ -93,42 +80,35 @@ export default function SearchResult({
       onClick={handleClick}
       tabIndex={0}
       className={clsx(
-        "relative flex cursor-pointer gap-4 rounded-lg !border bg-floating p-4 hover:bg-primary-hover",
+        "relative grid grid-cols-[2rem_1fr_auto] items-start gap-4 rounded-lg !border bg-floating p-4 hover:bg-primary-hover",
         isSelected
           ? "border-brand-violet drop-shadow-[0_0_4px_#9747FF]"
           : "border-gray-400",
       )}
     >
-      <div className="mt-1 flex w-10 flex-shrink-0 items-start justify-center">
-        {getIcon()}
-      </div>
+      <div className="flex items-start justify-center">{getIcon()}</div>
 
       <div className="flex flex-col gap-2 overflow-hidden">
-        <p className="text-xs font-semibold dark:text-white md:text-2xl">
+        <p className="truncate text-xs font-semibold dark:text-white md:text-2xl">
           {response.source.display_name}
         </p>
-        <a
-          href={link}
-          target="_blank"
-          onClickCapture={(e) => e.stopPropagation()}
-          className="w-fit max-w-full truncate text-xs text-[#93bd58] hover:underline"
-        >
-          {response.source.breadcrumbs.join(" > ")}
-        </a>
-
-        {previewText && <TruncatableMarkdown text={previewText} />}
+        <div>
+          <a
+            href={link}
+            target="_blank"
+            onClickCapture={(e) => e.stopPropagation()}
+            className="truncate text-xs text-[#93bd58] hover:underline"
+          >
+            {response.source.breadcrumbs.join(" > ")}
+          </a>
+        </div>
+        {previewText && (
+          <TruncatableMarkdown
+            text={previewText}
+            sourse_type={response.source.type}
+          />
+        )}
       </div>
-
-      {!hasPreview && (
-        <span
-          className={clsx(
-            "absolute right-2 top-[16px]",
-            "icon-[akar-icons--link-out]",
-            "h-5 w-5",
-            "text-muted-foreground text-black dark:text-white",
-          )}
-        />
-      )}
     </div>
   );
 }

@@ -10,6 +10,7 @@ import {
   InfoSources,
   PathsSearchSearchGetParametersQueryResponse_types,
 } from "@/api/search/types";
+import IframePreviewCard from "./IframePreviewCard";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const navigate = useNavigate();
@@ -84,7 +85,6 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       if (selected.source.residents) sources.push(InfoSources.residents);
       if (selected.source.resources) sources.push(InfoSources.resources);
     }
-
     Object.entries(selectedFilters).forEach(([group, values]) => {
       const selectedValues = Object.entries(values)
         .filter(([, checked]) => checked)
@@ -178,18 +178,19 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       }) || [];
 
   useEffect(() => {
-    const first = searchResult?.responses?.[0];
-    if (
-      first &&
-      (first.source.type === "moodle-file" ||
-        first.source.type === "moodle-url" ||
-        first.source.type === "moodle-unknown" ||
-        first.source.type === "telegram")
-    ) {
+    const first = filteredResponses[0];
+    if (first && previewSource === undefined) {
       // Reset preview source when search result changes and it has an appropeiate type for preview
-      setPreviewSource(searchResult?.responses[0]?.source);
+      setPreviewSource(first.source);
     }
   }, [searchResult]);
+
+  useEffect(() => {
+    //Reset preview if no sources in filtered
+    if (filteredResponses.length === 0 && previewSource) {
+      setPreviewSource(undefined);
+    }
+  }, [filteredResponses]);
 
   const runSearch = (query: string) => {
     navigate({ to: "/search", search: { q: query } });
@@ -230,22 +231,32 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
                 isSelected={previewSource === response.source}
                 select={() => setPreviewSource(response.source)}
                 hasPreview={
-                  response.source.type === "moodle-file" ||
-                  response.source.type === "moodle-url" ||
-                  response.source.type === "moodle-unknown"
+                  response.source?.type === "moodle-file" ||
+                  response.source?.type === "moodle-url" ||
+                  response.source?.type === "moodle-unknown" ||
+                  response.source?.type === "telegram"
                 }
               />
             ))}
           </div>
           {previewSource &&
-            (previewSource.type === "moodle-file" ||
-              previewSource.type === "moodle-url" ||
-              previewSource.type === "moodle-unknown") && (
-              <PreviewCard
+          (previewSource.type === "moodle-file" ||
+            previewSource.type === "moodle-url" ||
+            previewSource.type === "moodle-unknown" ||
+            previewSource.type === "telegram") ? (
+            <PreviewCard
+              source={previewSource}
+              onClose={() => setPreviewSource(undefined)}
+            />
+          ) : (
+            previewSource &&
+            "url" in previewSource && (
+              <IframePreviewCard
                 source={previewSource}
                 onClose={() => setPreviewSource(undefined)}
               />
-            )}
+            )
+          )}
         </div>
       )}
     </div>
