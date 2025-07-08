@@ -7,7 +7,7 @@ const TruncatableMarkdown = ({
   sourse_type,
 }: {
   text: string;
-  gisourse_type:
+  sourse_type:
     | searchTypes.EduwikiSourceType
     | searchTypes.CampusLifeSourceType
     | searchTypes.HotelSourceType
@@ -16,7 +16,8 @@ const TruncatableMarkdown = ({
     | searchTypes.MoodleUrlSourceType
     | searchTypes.MoodleUnknownSourceType
     | searchTypes.TelegramSourceType
-    | searchTypes.ResidentsSourceType;
+    | searchTypes.ResidentsSourceType
+    | searchTypes.ResourcesSourceType;
 }) => {
   const shouldTruncate = sourse_type !== "maps";
 
