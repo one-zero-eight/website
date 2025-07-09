@@ -57,7 +57,7 @@ export default function IframePreviewCard({
           />
         )
       ) : (
-        <div className="border-border text-muted flex h-[25vh] w-full items-center justify-center rounded-xl border p-4 md:h-[50vh]">
+        <div className="border-border text-muted flex h-[25vh] w-full items-center justify-center rounded-xl border p-4 text-center md:h-[50vh]">
           {isInsecureUrl &&
             "Sorry, this site does not support preview. Please, open it directly."}
         </div>
