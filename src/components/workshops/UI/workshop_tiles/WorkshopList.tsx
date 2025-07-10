@@ -74,7 +74,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
           .map((tagName) => (
             <React.Fragment key={tagName}>
               <div className="my-1 flex w-full flex-wrap justify-between">
-                <div className="text-3xl font-medium">
+                <div className="text-2xl font-medium sm:text-3xl">
                   {formatDate(tagName)}
                 </div>
                 <div className="mb-1 mt-4 flex w-full flex-wrap justify-center gap-x-2 gap-y-2 sm:justify-start">
