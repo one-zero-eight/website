@@ -208,7 +208,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         <p className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 transform rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2 text-center text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)]">
           {getInactiveStatusText()}
         </p>
-      )}{" "}
+      )}
       {workshop.room && (
         <div className={`my-2 ${!isWorkshopActive() ? "opacity-50" : ""}`}>
           <p className="m-0 text-base text-contrast/80">
