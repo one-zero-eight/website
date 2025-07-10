@@ -90,10 +90,17 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   };
   useEffect(() => {
     (async () => {
-      const { data, error } = await workshopsFetch.GET(`/users/my_checkins`);
-      if (!error && Array.isArray(data)) {
-        const isCheckedIn = data.some((w) => w.id === workshop.id);
-        setWorkshopChosen(isCheckedIn);
+      try {
+        const { data, error } = await workshopsFetch.GET(`/users/my_checkins`);
+        if (!error && Array.isArray(data)) {
+          const isCheckedIn = data.some((w) => w.id === workshop.id);
+          setWorkshopChosen(isCheckedIn);
+        } else {
+          // В случае любой ошибки считаем, что пользователь не записан
+          setWorkshopChosen(false);
+        }
+      } catch (err) {
+        setWorkshopChosen(false);
       }
 
       // Используем remainPlaces из пропсов воркшопа если есть, иначе делаем API запрос
