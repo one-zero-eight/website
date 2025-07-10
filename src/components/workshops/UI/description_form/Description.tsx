@@ -380,7 +380,9 @@ const Description: React.FC<WorkshopProps> = ({
                 className="flex items-center gap-2 text-base text-contrast/80"
               >
                 <span className="text-m text-brand-violet">•</span>
-                <span className="text-m font-mono">{participant.email}</span>
+                <span className="text-m font-mono">
+                  {participant.email.split("@")[0]}
+                </span>
               </div>
             ))}
 
