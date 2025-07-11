@@ -1,6 +1,7 @@
 import { searchTypes } from "@/api/search";
 import { useMemo } from "react";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const TruncatableMarkdown = ({
   text,
@@ -40,6 +41,7 @@ const TruncatableMarkdown = ({
   return (
     <div className="text-muted-foreground line-clamp-2 w-full overflow-hidden text-xs">
       <Markdown
+        remarkPlugins={[remarkGfm]}
         components={{
           p: ({ children }) => <span>{children}</span>,
           h1: ({ children }) => <span>{children}</span>,
@@ -48,6 +50,7 @@ const TruncatableMarkdown = ({
           h4: ({ children }) => <span>{children}</span>,
           h5: ({ children }) => <span>{children}</span>,
           h6: ({ children }) => <span>{children}</span>,
+          li: ({ children }) => <li className="ml-5 list-disc">{children}</li>,
         }}
       >
         {truncatedText}

@@ -1,6 +1,7 @@
 import { searchTypes } from "@/api/search";
 import clsx from "clsx";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export function AskResult({
   response,
@@ -24,7 +25,27 @@ export function AskResult({
         "flex flex-col gap-4 rounded-lg !border border-gray-400 bg-floating p-4 hover:bg-primary-hover",
       )}
     >
-      <Markdown>{answer}</Markdown>
+      <Markdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          a: ({ href }) => (
+            <a
+              href={href ?? "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-violet hover:underline"
+            >
+              {"link"}
+            </a>
+          ),
+          p: ({ children }) => (
+            <p className="whitespace-pre-wrap">{children}</p>
+          ),
+          li: ({ children }) => <li className="ml-5 list-disc">{children}</li>,
+        }}
+      >
+        {answer}
+      </Markdown>
 
       {uniqueSources.length > 0 && (
         <div>
