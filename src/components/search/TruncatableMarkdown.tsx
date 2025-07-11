@@ -38,7 +38,7 @@ const TruncatableMarkdown = ({
   }, [text, shouldTruncate]);
 
   return (
-    <div className="text-muted-foreground w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs">
+    <div className="text-muted-foreground line-clamp-2 w-full overflow-hidden text-xs">
       <Markdown
         components={{
           p: ({ children }) => <span>{children}</span>,
