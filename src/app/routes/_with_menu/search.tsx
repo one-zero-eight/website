@@ -1,5 +1,5 @@
-import { Topbar } from "@/components/layout/Topbar.tsx";
 import { SearchPage } from "@/components/search/SearchPage.tsx";
+import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Helmet } from "react-helmet-async";
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_with_menu/search")({
           />
         </Helmet>
 
-        <Topbar title="Search" />
+        <TopbarWithToggleGroup currentTabText={q} />
         <SearchPage searchQuery={q} />
       </Suspense>
     );

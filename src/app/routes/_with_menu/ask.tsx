@@ -1,5 +1,5 @@
-import { Topbar } from "@/components/layout/Topbar.tsx";
 import { AskPage } from "@/components/search/ask/AskPage";
+import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Helmet } from "react-helmet-async";
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_with_menu/ask")({
           />
         </Helmet>
 
-        <Topbar title="Ask" />
+        <TopbarWithToggleGroup currentTabText={q} />
         <AskPage askQuery={q} />
       </Suspense>
     );

@@ -34,7 +34,11 @@ export function ActPage({ actQuery }: { actQuery: string }) {
 
   return (
     <div className="flex grow flex-col gap-4 p-4">
-      <SearchField runSearch={runSearch} currentQuery={actQuery} />
+      <SearchField
+        pageType="act"
+        runSearch={runSearch}
+        currentQuery={actQuery}
+      />
       <span>AI assistant:</span>
       {actResult ? (
         <div className="flex flex-row gap-6">

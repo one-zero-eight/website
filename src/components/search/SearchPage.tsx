@@ -203,6 +203,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   return (
     <div className="flex grow flex-col gap-2 p-4">
       <SearchField
+        pageType="search"
         runSearch={runSearch}
         currentQuery={searchQuery}
         selectedFilters={selectedFilters}
