@@ -11,6 +11,7 @@ const SelectSourcesFilterButton = forwardRef<HTMLButtonElement, Props>(
       <button
         ref={ref}
         {...props}
+        type="button"
         className={
           "flex h-10 items-center gap-2 rounded-lg border-2 border-gray-400 bg-transparent px-2 py-2 text-sm font-medium text-black hover:bg-[#e6e6e6] dark:text-white dark:hover:bg-[#1e1e1e]" +
           (className ? " " + className : "")
