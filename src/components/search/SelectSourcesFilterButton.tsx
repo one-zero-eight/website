@@ -12,11 +12,11 @@ const SelectSourcesFilterButton = forwardRef<HTMLButtonElement, Props>(
         ref={ref}
         {...props}
         className={
-          "flex h-10 items-center gap-4 rounded-lg border-2 border-gray-400 bg-transparent px-4 py-2 text-sm font-medium text-black hover:bg-[#e6e6e6] dark:text-white dark:hover:bg-[#1e1e1e]" +
+          "flex h-10 items-center gap-2 rounded-lg border-2 border-gray-400 bg-transparent px-2 py-2 text-sm font-medium text-black hover:bg-[#e6e6e6] dark:text-white dark:hover:bg-[#1e1e1e]" +
           (className ? " " + className : "")
         }
       >
-        Select sources
+        <span className="hidden md:inline">Sources</span>
         <span
           className={`align-center" flex h-5 w-5 justify-center ${
             open ? "rotate-180" : ""

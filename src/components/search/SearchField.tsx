@@ -33,6 +33,7 @@ export default function SearchField({
   return (
     <div className="flex w-full gap-6">
       <form
+        name="search"
         className="flex w-full flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2"
         onSubmit={(e) => {
           e.preventDefault();
@@ -52,7 +53,7 @@ export default function SearchField({
           <SearchExample searchQueries={searchQueryExamples} />
         </div>
       </form>
-      <div className="flex justify-between md:min-w-0 md:basis-1/2">
+      <div className="flex justify-between gap-6 md:min-w-0 md:basis-1/2">
         <ToggleGroup currentTabText={text} />
         {selectedFilters && checks && applyFilters && (
           <SelectSourcesFilter

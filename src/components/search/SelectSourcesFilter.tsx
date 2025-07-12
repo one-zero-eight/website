@@ -6,6 +6,8 @@ import {
   useInteractions,
   useRole,
   FloatingPortal,
+  flip,
+  shift,
 } from "@floating-ui/react";
 import { useState } from "react";
 import SelectSourcesFilterButton from "./SelectSourcesFilterButton";
@@ -39,7 +41,8 @@ const SelectSourcesFilter = ({
     open: isOpen,
     onOpenChange: setIsOpen,
     whileElementsMounted: autoUpdate,
-    middleware: [offset(8)],
+    placement: "bottom-end",
+    middleware: [offset(8), flip(), shift()],
   });
 
   const dismiss = useDismiss(context);
@@ -64,10 +67,9 @@ const SelectSourcesFilter = ({
             ref={refs.setFloating}
             style={{
               ...floatingStyles,
-              width:
-                (refs.reference.current as HTMLElement | null)?.offsetWidth ??
-                "auto",
+              width: 170,
               zIndex: 10,
+              transformOrigin: "top right",
             }}
             {...getFloatingProps()}
           >
