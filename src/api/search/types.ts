@@ -724,6 +724,11 @@ export interface components {
        */
       breadcrumbs: string[];
     };
+    /**
+     * Resources
+     * @enum {string}
+     */
+    Resources: Resources;
     /** ResourcesSource */
     ResourcesSource: {
       /**
@@ -740,6 +745,7 @@ export interface components {
        * @enum {string}
        */
       type: ResourcesSourceType;
+      resource_type: components["schemas"]["Resources"];
       /**
        * Breadcrumbs
        * @default [
@@ -879,6 +885,7 @@ export type SchemaMoodleUrlSource = components["schemas"]["MoodleUrlSource"];
 export type SchemaPdfLocation = components["schemas"]["PdfLocation"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaResidentsSource = components["schemas"]["ResidentsSource"];
+export type SchemaResources = components["schemas"]["Resources"];
 export type SchemaResourcesSource = components["schemas"]["ResourcesSource"];
 export type SchemaSearchResponse = components["schemas"]["SearchResponse"];
 export type SchemaSearchResponses = components["schemas"]["SearchResponses"];
@@ -1422,6 +1429,10 @@ export enum MoodleUrlSourceType {
 }
 export enum ResidentsSourceType {
   residents = "residents",
+}
+export enum Resources {
+  innohassle = "innohassle",
+  myuni = "myuni",
 }
 export enum ResourcesSourceType {
   resources = "resources",

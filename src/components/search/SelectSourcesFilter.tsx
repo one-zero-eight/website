@@ -27,6 +27,8 @@ const filters = {
     { displayName: "Moodle", internalName: "moodle" },
     { displayName: "Maps", internalName: "maps" },
     { displayName: "Residents", internalName: "residents" },
+    { displayName: "InNoHassle", internalName: "innohassle" },
+    { displayName: "My University", internalName: "myuni" },
   ],
 };
 
@@ -60,7 +62,6 @@ const SelectSourcesFilter = ({
         {...getReferenceProps()}
         onClick={() => setIsOpen((prev) => !prev)}
       />
-
       {isOpen && (
         <FloatingPortal>
           <div

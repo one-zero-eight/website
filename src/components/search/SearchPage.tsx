@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   InfoSources,
   PathsSearchSearchGetParametersQueryResponse_types,
+  Resources,
 } from "@/api/search/types";
 import IframePreviewCard from "./IframePreviewCard";
 
@@ -31,7 +32,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       moodle: true,
       maps: true,
       residents: true,
-      resources: true,
+      myuni: true,
+      innohassle: true,
     },
   };
 
@@ -55,7 +57,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   ) => {
     const response_types: PathsSearchSearchGetParametersQueryResponse_types[] =
       [];
-    const sources: InfoSources[] = [];
+    const sources: (InfoSources | Resources)[] = [];
     const query_categories: string[] = [];
 
     if (!selected.fileType.pdf && !selected.fileType.link_to_source) {
@@ -74,7 +76,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       selected.source.moodle &&
       selected.source.maps &&
       selected.source.residents &&
-      selected.source.resources;
+      selected.source.myuni &&
+      selected.source.innohassle;
 
     if (!allSourcesSelected) {
       if (selected.source.campuslife) sources.push(InfoSources.campuslife);
@@ -83,7 +86,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       if (selected.source.moodle) sources.push(InfoSources.moodle);
       if (selected.source.maps) sources.push(InfoSources.maps);
       if (selected.source.residents) sources.push(InfoSources.residents);
-      if (selected.source.resources) sources.push(InfoSources.resources);
+      if (selected.source.innohassle) sources.push(Resources.innohassle);
+      if (selected.source.myuni) sources.push(Resources.myuni);
     }
     Object.entries(selectedFilters).forEach(([group, values]) => {
       const selectedValues = Object.entries(values)
@@ -109,7 +113,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           if (value === "moodle") sources.push(InfoSources.moodle);
           if (value === "maps") sources.push(InfoSources.maps);
           if (value === "residents") sources.push(InfoSources.residents);
-          if (value === "resources") sources.push(InfoSources.resources);
+          if (value === "innohassle") sources.push(Resources.innohassle);
+          if (value === "myuni") sources.push(Resources.myuni);
         });
       }
     });
@@ -170,10 +175,14 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       })
       .filter((e) => {
         if (filters.sources.length == 0) {
-          return true;
+          return false;
         }
 
         const sourceType = e.source.type as string;
+        if (e.source.type === "resources") {
+          const resourceType = e.source.resource_type as string;
+          return filters.sources.includes(resourceType as InfoSources);
+        }
         return filters.sources.includes(sourceType as InfoSources);
       }) || [];
 
