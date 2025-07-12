@@ -8,7 +8,7 @@ export const DefaultButton = ({
   return (
     <button
       onClick={onClick}
-      className="rounded-md bg-purple-600 px-6 py-2 font-semibold text-white hover:bg-purple-700"
+      className="h-10 rounded-md bg-brand-violet px-6 font-semibold text-white hover:bg-purple-600"
     >
       {content}
     </button>

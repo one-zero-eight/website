@@ -38,7 +38,7 @@ const SelectSourcesFilterModal = ({
                   type="checkbox"
                   checked={selected[group][value.internalName]}
                   onChange={() => checks(group, value.internalName)}
-                  className="accent-purple-500"
+                  className="accent-purple-600"
                 />
                 {value.displayName}
               </label>
@@ -47,7 +47,7 @@ const SelectSourcesFilterModal = ({
         </div>
       ))}
 
-      <div className="mt-4 flex justify-center">
+      <div className="flex justify-center">
         <DefaultButton
           content="Done"
           onClick={() => {
