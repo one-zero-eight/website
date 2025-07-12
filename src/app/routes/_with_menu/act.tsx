@@ -1,5 +1,5 @@
-import { Topbar } from "@/components/layout/Topbar.tsx";
 import { ActPage } from "@/components/search/act/ActPage";
+import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Helmet } from "react-helmet-async";
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_with_menu/act")({
           />
         </Helmet>
 
-        <Topbar title="Act" />
+        <TopbarWithToggleGroup currentTabText={q} />
         <ActPage actQuery={q} />
       </Suspense>
     );

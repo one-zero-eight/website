@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
-import ToggleGroup from "./ToggleGroup";
 import { SearchExample } from "./SearchExample";
 import SelectSourcesFilter from "./SelectSourcesFilter";
+import { DefaultButton } from "./DefaultButton";
+import SearchIcon from "./icons/Search";
+import AskIcon from "./icons/Ask";
+import ActIcon from "./icons/Act";
 
 const searchQueryExamples = [
   "Innopolis clubs",
@@ -11,18 +14,35 @@ const searchQueryExamples = [
   "Innopolis University events",
 ];
 
+type PageType = "search" | "ask" | "act";
+type Option = PageType[number];
+
+const contentMap: Record<PageType, string> = {
+  search: "Search",
+  ask: "Ask",
+  act: "Act",
+};
+
+const iconsMap: Record<Option, JSX.Element> = {
+  search: <SearchIcon />,
+  ask: <AskIcon />,
+  act: <ActIcon />,
+};
+
 export default function SearchField({
   runSearch,
   currentQuery,
   selectedFilters,
   checks,
   applyFilters,
+  pageType,
 }: {
   runSearch: (query: string) => void;
   currentQuery: string;
   selectedFilters?: Record<string, Record<string, boolean>>;
   checks?: (group: string, value: string) => void;
   applyFilters?: () => void;
+  pageType: PageType;
 }) {
   const [text, setText] = useState(currentQuery);
 
@@ -31,7 +51,7 @@ export default function SearchField({
   }, [currentQuery]);
 
   return (
-    <div className="flex w-full gap-6">
+    <div className="flex w-full gap-4">
       <form
         name="search"
         className="flex w-full flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2"
@@ -50,17 +70,35 @@ export default function SearchField({
             value={text}
             autoFocus={true}
           />
-          <SearchExample searchQueries={searchQueryExamples} />
+          <div className="hidden md:inline">
+            <SearchExample searchQueries={searchQueryExamples} />
+          </div>
+          {selectedFilters && checks && applyFilters && (
+            <div className="inline md:hidden">
+              <SelectSourcesFilter
+                selected={selectedFilters}
+                checks={checks}
+                applyFilters={applyFilters}
+              />
+            </div>
+          )}
         </div>
       </form>
-      <div className="flex justify-between gap-6 md:min-w-0 md:basis-1/2">
-        <ToggleGroup currentTabText={text} />
+      <div className="flex justify-between gap-4 md:min-w-0 md:basis-1/2">
+        <DefaultButton
+          content={contentMap[pageType]}
+          onClick={() => runSearch(text)}
+          icon={iconsMap[pageType]}
+          border
+        />
         {selectedFilters && checks && applyFilters && (
-          <SelectSourcesFilter
-            selected={selectedFilters}
-            checks={checks}
-            applyFilters={applyFilters}
-          />
+          <div className="hidden md:inline">
+            <SelectSourcesFilter
+              selected={selectedFilters}
+              checks={checks}
+              applyFilters={applyFilters}
+            />
+          </div>
         )}
       </div>
     </div>

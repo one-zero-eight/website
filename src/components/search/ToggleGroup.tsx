@@ -1,18 +1,8 @@
 import { useRouter } from "@tanstack/react-router";
-import React from "react";
 import clsx from "clsx";
-import SearchIcon from "./icons/Search";
-import AskIcon from "./icons/Ask";
-import ActIcon from "./icons/Act";
 
 const options = ["Search", "Ask", "Act"] as const;
 type Option = (typeof options)[number];
-
-const iconsMap: Record<Option, JSX.Element> = {
-  Search: <SearchIcon />,
-  Ask: <AskIcon />,
-  Act: <ActIcon />,
-};
 
 const ToggleGroup = ({ currentTabText }: { currentTabText: string }) => {
   const router = useRouter();
@@ -30,8 +20,8 @@ const ToggleGroup = ({ currentTabText }: { currentTabText: string }) => {
   };
 
   return (
-    <div className="bg-page-bg inline-flex rounded-lg text-black dark:text-white">
-      {options.map((option, index) => {
+    <div className="bg-page-bg inline-flex text-black dark:text-white lg:pt-[5px]">
+      {options.map((option) => {
         const isActive = active === option;
         return (
           <button
@@ -39,20 +29,11 @@ const ToggleGroup = ({ currentTabText }: { currentTabText: string }) => {
             key={option}
             onClick={() => handleClick(option)}
             className={clsx(
-              "flex h-10 items-center gap-2 border-b-2 border-r-2 border-t-2 border-gray-400 px-4 py-2 text-sm font-medium transition-colors",
-              isActive
-                ? "bg-brand-violet text-white"
-                : "bg-transparent hover:bg-[#e6e6e6] dark:hover:bg-[#1e1e1e]",
-              index === 0 && "rounded-l-lg border-l-2",
-              index === options.length - 1 && "rounded-r-lg",
+              "flex w-[90px] justify-center bg-transparent px-4 font-medium transition-colors hover:bg-[#e6e6e6] dark:hover:bg-[#1e1e1e]",
+              isActive ? "border-b-2 border-brand-violet text-white" : "",
             )}
           >
-            <span className="h-4 w-4">
-              {React.cloneElement(iconsMap[option], {
-                stroke: isActive ? "white" : "#9747FF",
-              })}
-            </span>
-            <span className="hidden md:inline">{option}</span>
+            <span className="pb-2 pt-4 lg:pt-6">{option}</span>
           </button>
         );
       })}

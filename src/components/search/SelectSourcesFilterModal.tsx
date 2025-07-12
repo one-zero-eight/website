@@ -38,7 +38,7 @@ const SelectSourcesFilterModal = ({
                   type="checkbox"
                   checked={selected[group][value.internalName]}
                   onChange={() => checks(group, value.internalName)}
-                  className="accent-purple-600"
+                  className="cursor-pointer accent-purple-600"
                 />
                 {value.displayName}
               </label>
