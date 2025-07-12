@@ -38,10 +38,8 @@ export function AskPage({ askQuery }: { askQuery: string }) {
       <span className="font-semibold">{"AI Assistant: "}</span>
       {isLoading ? (
         <span>- Thinking...</span>
-      ) : result ? (
-        <span>- Here's what I found:</span>
       ) : (
-        <span>- Ask me anything!</span>
+        !result && <span>- Ask me anything!</span>
       )}
       {result && (
         <div className="flex flex-row gap-6">

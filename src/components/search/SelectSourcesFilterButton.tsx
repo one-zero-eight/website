@@ -1,0 +1,32 @@
+import { forwardRef } from "react";
+import SearchFiltersIcon from "./icons/SearchFilters";
+
+type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  open?: boolean;
+};
+
+const SelectSourcesFilterButton = forwardRef<HTMLButtonElement, Props>(
+  ({ open, className, ...props }, ref) => (
+    <>
+      <button
+        ref={ref}
+        {...props}
+        className={
+          "flex h-10 items-center gap-4 rounded-lg border-2 border-gray-400 bg-transparent px-4 py-2 text-sm font-medium text-black hover:bg-[#e6e6e6] dark:text-white dark:hover:bg-[#1e1e1e]" +
+          (className ? " " + className : "")
+        }
+      >
+        Select sources
+        <span
+          className={`align-center" flex h-5 w-5 justify-center ${
+            open ? "rotate-180" : ""
+          }`}
+        >
+          <SearchFiltersIcon className="block" />
+        </span>
+      </button>
+    </>
+  ),
+);
+
+export default SelectSourcesFilterButton;

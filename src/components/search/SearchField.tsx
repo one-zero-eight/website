@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ToggleGroup from "./ToggleGroup";
 import { SearchExample } from "./SearchExample";
-import SearchFilters from "./SearchFilters";
+import SelectSourcesFilter from "./SelectSourcesFilter";
 
 const searchQueryExamples = [
   "Innopolis clubs",
@@ -52,10 +52,10 @@ export default function SearchField({
           <SearchExample searchQueries={searchQueryExamples} />
         </div>
       </form>
-      <div className="flex flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2">
+      <div className="flex justify-between md:min-w-0 md:basis-1/2">
         <ToggleGroup currentTabText={text} />
         {selectedFilters && checks && applyFilters && (
-          <SearchFilters
+          <SelectSourcesFilter
             selected={selectedFilters}
             checks={checks}
             applyFilters={applyFilters}
