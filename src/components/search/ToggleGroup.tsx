@@ -30,7 +30,7 @@ const ToggleGroup = ({ currentTabText }: { currentTabText: string }) => {
             onClick={() => handleClick(option)}
             className={clsx(
               "flex w-[90px] justify-center bg-transparent px-4 font-medium transition-colors hover:bg-[#e6e6e6] dark:hover:bg-[#1e1e1e]",
-              isActive ? "border-b-2 border-brand-violet text-white" : "",
+              isActive ? "border-b-2 border-brand-violet" : "",
             )}
           >
             <span className="pb-2 pt-4 lg:pt-6">{option}</span>

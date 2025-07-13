@@ -13,7 +13,7 @@ const SelectSourcesFilterButton = forwardRef<HTMLButtonElement, Props>(
         {...props}
         type="button"
         className={
-          "flex h-10 items-center gap-2 rounded-lg border-2 border-gray-400 bg-transparent px-2 py-2 text-sm font-medium text-black hover:bg-[#e6e6e6] dark:text-white dark:hover:bg-[#1e1e1e]" +
+          "flex items-center gap-2 rounded-lg bg-transparent px-2 text-sm font-medium text-black hover:bg-[#e6e6e6] dark:text-white dark:hover:bg-[#1e1e1e] md:h-10 md:border-2 md:border-gray-400 md:py-2" +
           (className ? " " + className : "")
         }
       >
