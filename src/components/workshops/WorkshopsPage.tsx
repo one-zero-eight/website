@@ -26,6 +26,7 @@ type User = {
   email: string;
   name: string;
   role: "user" | "admin";
+  t_alias?: string;
 };
 
 export function WorkshopsPage() {

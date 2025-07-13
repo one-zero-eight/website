@@ -22,6 +22,7 @@ type Participant = {
   innohassle_id: string;
   role: "admin" | "user";
   email: string;
+  t_alias?: string;
 };
 
 interface WorkshopProps {
@@ -382,6 +383,10 @@ const Description: React.FC<WorkshopProps> = ({
                 <span className="text-m text-brand-violet">•</span>
                 <span className="text-m font-mono">
                   {participant.email.split("@")[0]}
+                  {currentUserRole === "admin" &&
+                    (participant.t_alias === "None"
+                      ? " (no tg alias)"
+                      : " (" + participant.t_alias + ")")}
                 </span>
               </div>
             ))}

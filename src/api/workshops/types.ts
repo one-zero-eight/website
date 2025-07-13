@@ -196,6 +196,7 @@ export interface components {
       email: string;
       name: string;
       role: "user" | "admin";
+      t_alias?: string;
     };
     ValidationError: {
       detail: Array<{
@@ -248,6 +249,7 @@ export interface components {
       innohassle_id: string;
       role: "admin" | "user";
       email: string;
+      t_alias?: string;
     }[];
     CreateWorkshopRequest: {
       name: string;
