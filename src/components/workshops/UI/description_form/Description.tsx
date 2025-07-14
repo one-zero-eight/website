@@ -42,64 +42,58 @@ const formatTime = (timeString: string) => {
   if (!timeString) return "";
   return timeString;
 };
-const urlRegex = /https?:\/\/(.\.?)+\..+/;
-const telegramUsernameRegex = /(^|\s)@[a-zA-Z0-9_]{5,32}\b/;
-
 const ReplaceURL = (str: string) => {
-  const texts = str.split(" ").reduce(
-    (acc: { array: string[]; urls: string[]; text: string }, text) => {
-      if (urlRegex.test(text) || telegramUsernameRegex.test(text)) {
-        acc.array.push(acc.text);
-        acc.urls.push(text);
-        acc.text = " ";
-
-        return acc;
+  const result: (string | JSX.Element)[] = [];
+  let buffer = "";
+  for (let i = 0; i < str.length; i++) {
+    const urlMatch = str.slice(i).match(/^https?:\/\/[^\s<>{}|\\^[\]`"()]+/i);
+    if (urlMatch) {
+      if (buffer) {
+        result.push(buffer);
+        buffer = "";
       }
-
-      acc.text += `${text} `;
-
-      return acc;
-    },
-    { array: [], urls: [], text: "" },
-  );
-
-  if (texts.text) texts.array.push(texts.text);
-  const links = texts.urls.map((url) => {
-    if (telegramUsernameRegex.test(url)) {
-      return (
+      const url = urlMatch[0];
+      result.push(
         <a
-          className="text-brand-violet transition-all duration-200 hover:scale-110 hover:text-brand-violet/80"
-          href={"https://t.me/" + url.slice(1)}
-          target="_blank"
-          rel="noopener noreferrer"
-          key={url}
-        >
-          {url}
-        </a>
-      );
-    } else {
-      return (
-        <a
-          className="text-brand-violet transition-all duration-200 hover:scale-110 hover:text-brand-violet/80"
+          className="text-brand-violet hover:scale-110 hover:text-brand-violet/80"
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          key={url}
+          key={`url-${i}`}
         >
           {url}
-        </a>
+        </a>,
       );
+      i += url.length - 1;
+      continue;
     }
-  });
-
-  const merged = [];
-
-  for (let i = 0; i < texts.array.length; i += 1) {
-    merged.push(texts.array[i]);
-    if (links[i]) merged.push(links[i]);
+    const tgMatch = str.slice(i).match(/^@[a-zA-Z0-9_]{5,32}\b/);
+    if (tgMatch) {
+      if (buffer) {
+        result.push(buffer);
+        buffer = "";
+      }
+      const username = tgMatch[0];
+      result.push(
+        <a
+          className="text-brand-violet hover:scale-110 hover:text-brand-violet/80"
+          href={`https://t.me/${username.slice(1)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          key={`tg-${i}`}
+        >
+          {username}
+        </a>,
+      );
+      i += username.length - 1;
+      continue;
+    }
+    buffer += str[i];
   }
-
-  return merged;
+  if (buffer) {
+    result.push(buffer);
+  }
+  return result;
 };
 const Description: React.FC<WorkshopProps> = ({
   workshop,
