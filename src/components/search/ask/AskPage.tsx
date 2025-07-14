@@ -9,7 +9,11 @@ export function AskPage({ askQuery }: { askQuery: string }) {
   const { me } = useMe();
   const navigate = useNavigate();
 
-  const { data: result, isLoading } = $search.useQuery(
+  const {
+    data: result,
+    error,
+    isLoading,
+  } = $search.useQuery(
     "post",
     "/ask/",
     {
@@ -35,15 +39,19 @@ export function AskPage({ askQuery }: { askQuery: string }) {
   return (
     <div className="flex grow flex-col gap-4 p-4">
       <SearchField
-        pageType="ask"
         runSearch={runSearch}
         currentQuery={askQuery}
+        pageType="ask"
       />
       <span className="font-semibold">{"AI Assistant: "}</span>
       {isLoading ? (
-        <span>- Thinking...</span>
+        <span>Thinking...</span>
+      ) : result ? (
+        <></>
+      ) : error ? (
+        <span>- Sorry, I can't help you with this question.</span>
       ) : (
-        !result && <span>- Ask me anything!</span>
+        <span>- Ask me anything!</span>
       )}
       {result && (
         <div className="flex flex-row gap-6">
