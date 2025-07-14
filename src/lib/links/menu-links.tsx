@@ -118,6 +118,17 @@ export const items: ItemType[] = [
     to: "/extension",
     icon: <span className="icon-[material-symbols--extension-outline]" />,
   },
+  {
+    type: "local",
+    title: "Forms",
+    to: "/forms",
+    icon: <span className="icon-[material-symbols--description-outline]" />,
+    badge: (
+      <span className="ml-2 rounded-full bg-yellow-700 px-2 py-1 text-xs font-semibold text-white">
+        STAFF
+      </span>
+    ),
+  },
   { type: "separator" },
   {
     type: "external",
