@@ -63,7 +63,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
     if (!dateString) return "";
     const date = new Date(dateString);
     const day = date.getDay();
-    return currday(day) + " " + date.toLocaleDateString("ru-RU");
+    return currday(day) + " " + date.getDate();
   };
   return (
     <div style={{ textAlign: "center" }} className="flex flex-col gap-2 px-4">
