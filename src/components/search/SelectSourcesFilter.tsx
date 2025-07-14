@@ -29,6 +29,7 @@ const filters = {
     { displayName: "Residents", internalName: "residents" },
     { displayName: "InNoHassle", internalName: "innohassle" },
     { displayName: "My University", internalName: "myuni" },
+    { displayName: "ITHelp Wiki", internalName: "ithelp" },
   ],
 };
 

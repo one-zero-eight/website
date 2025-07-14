@@ -1433,6 +1433,7 @@ export enum ResidentsSourceType {
 export enum Resources {
   innohassle = "innohassle",
   myuni = "myuni",
+  ithelp = "ithelp",
 }
 export enum ResourcesSourceType {
   resources = "resources",

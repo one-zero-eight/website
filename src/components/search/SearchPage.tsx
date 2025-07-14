@@ -34,6 +34,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       residents: true,
       myuni: true,
       innohassle: true,
+      ithelp: true,
     },
   };
 
@@ -77,7 +78,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       selected.source.maps &&
       selected.source.residents &&
       selected.source.myuni &&
-      selected.source.innohassle;
+      selected.source.innohassle &&
+      selected.source.ithelp;
 
     if (!allSourcesSelected) {
       if (selected.source.campuslife) sources.push(InfoSources.campuslife);
@@ -88,6 +90,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       if (selected.source.residents) sources.push(InfoSources.residents);
       if (selected.source.innohassle) sources.push(Resources.innohassle);
       if (selected.source.myuni) sources.push(Resources.myuni);
+      if (selected.source.ithelp) sources.push(Resources.ithelp);
     }
     Object.entries(selectedFilters).forEach(([group, values]) => {
       const selectedValues = Object.entries(values)
@@ -115,6 +118,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           if (value === "residents") sources.push(InfoSources.residents);
           if (value === "innohassle") sources.push(Resources.innohassle);
           if (value === "myuni") sources.push(Resources.myuni);
+          if (value === "ithelp") sources.push(Resources.ithelp);
         });
       }
     });
