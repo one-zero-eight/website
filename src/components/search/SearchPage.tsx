@@ -121,6 +121,10 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     return { response_types, sources, query_categories };
   };
 
+  const isMobile =
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 767px)").matches;
+
   const filters = useMemo(
     () => buildQueryFilters(appliedFilters),
     [appliedFilters],
@@ -188,7 +192,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
 
   useEffect(() => {
     const first = filteredResponses[0];
-    if (first && previewSource === undefined) {
+    if (first && previewSource === undefined && !isMobile) {
       // Reset preview source when search result changes and it has an appropeiate type for preview
       setPreviewSource(first.source);
     }
@@ -240,16 +244,12 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
                 response={response}
                 isSelected={previewSource === response.source}
                 select={() => setPreviewSource(response.source)}
-                hasPreview={
-                  response.source?.type === "moodle-file" ||
-                  response.source?.type === "moodle-url" ||
-                  response.source?.type === "moodle-unknown" ||
-                  response.source?.type === "telegram"
-                }
+                isMobile={isMobile}
               />
             ))}
           </div>
           {previewSource &&
+          !isMobile &&
           (previewSource.type === "moodle-file" ||
             previewSource.type === "moodle-url" ||
             previewSource.type === "moodle-unknown" ||
@@ -260,6 +260,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
             />
           ) : (
             previewSource &&
+            !isMobile &&
             "url" in previewSource && (
               <IframePreviewCard
                 source={previewSource}

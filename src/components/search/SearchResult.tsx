@@ -5,12 +5,13 @@ import TruncatableMarkdown from "./TruncatableMarkdown";
 export default function SearchResult({
   response,
   isSelected,
+  isMobile,
   select,
 }: {
   response: searchTypes.SchemaSearchResponse;
   isSelected: boolean;
+  isMobile: boolean;
   select: () => void;
-  hasPreview?: boolean;
 }) {
   const link =
     "link" in response.source
@@ -22,6 +23,9 @@ export default function SearchResult({
     "preview_text" in response.source ? response.source.preview_text : "";
 
   const handleClick = () => {
+    if (isMobile && link) {
+      window.open(link, "_blank");
+    }
     select();
   };
 
@@ -71,7 +75,9 @@ export default function SearchResult({
           />
         );
       default:
-        return <span className={`icon-[quill--search] ${base} text-white`} />;
+        return (
+          <span className={`icon-[quill--search] ${base} text-brand-violet`} />
+        );
     }
   };
 
@@ -80,7 +86,7 @@ export default function SearchResult({
       onClick={handleClick}
       tabIndex={0}
       className={clsx(
-        "relative grid grid-cols-[2rem_1fr_auto] items-start gap-4 rounded-lg !border bg-floating p-4 hover:bg-primary-hover",
+        "relative grid cursor-pointer grid-cols-[2rem_1fr_auto] items-start gap-4 rounded-lg !border bg-floating p-4 hover:bg-primary-hover",
         isSelected
           ? "border-brand-violet drop-shadow-[0_0_4px_#9747FF]"
           : "border-gray-400",
