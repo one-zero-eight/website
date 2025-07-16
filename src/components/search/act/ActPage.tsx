@@ -13,11 +13,15 @@ export function ActPage({ actQuery }: { actQuery: string }) {
     navigate({ to: "/act", search: { q: query } });
   };
 
-  const { data: actResult } = $search.useQuery(
-    "get",
-    "/search/search", //TODO: Update this endpoint to the correct one for asking questions
+  const {
+    data: result,
+    isLoading,
+    error,
+  } = $search.useQuery(
+    "post",
+    "/act/",
     {
-      params: { query: { query: actQuery, sources: [], response_types: [] } },
+      body: { query: actQuery },
     },
     {
       enabled: actQuery.length > 0,
@@ -39,15 +43,27 @@ export function ActPage({ actQuery }: { actQuery: string }) {
         runSearch={runSearch}
         currentQuery={actQuery}
       />
-      <span>AI assistant:</span>
-      {actResult ? (
+      <span className="font-semibold">AI assistant:</span>
+      {isLoading ? (
+        <span>- Executing...</span>
+      ) : result ? (
         <div className="flex flex-row gap-6">
           <div className="flex w-full flex-col justify-stretch gap-4 md:min-w-0">
-            <ActResult response={actResult.responses[0]} />
+            <ActResult response={result} />
           </div>
         </div>
+      ) : error ? (
+        <span>- Sorry, I can't help you with this question.</span>
       ) : (
-        <span>- Sorry, I can't help you</span>
+        <>
+          <div className="flex flex-row gap-1">
+            <div>-</div>
+            <div className="flex flex-col gap-1">
+              <span>Hi! I'm AI assistant.</span>
+              <span>I can help you to book the music room.</span>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
