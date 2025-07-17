@@ -1,7 +1,23 @@
 import { searchTypes } from "@/api/search";
 import clsx from "clsx";
 import { useState } from "react";
+import { componentByPath, resolvePageByUrl } from "./innohassleRoutes";
 import { MapsPage } from "../maps/MapsPage";
+
+function DynamicPageComponent({ url }: { url: string }) {
+  const result = resolvePageByUrl(url);
+
+  if (!result) {
+    return (
+      <div className="border-border text-muted flex h-[25vh] w-full items-center justify-center rounded-xl border p-4 text-center md:h-[50vh]">
+        Sorry, this site does not support preview. Please, open it directly.
+      </div>
+    );
+  }
+
+  const { Component, props } = result;
+  return <Component {...props} />;
+}
 
 export default function IframePreviewCard({
   source,
@@ -15,10 +31,15 @@ export default function IframePreviewCard({
   const url = "url" in source ? source.url : "";
   const parsedUrl = new URL(url);
 
+  const component = componentByPath[parsedUrl.pathname];
+  const isInnohassleComponent = !!component;
+
   const isInsecureUrl =
     url.startsWith("http://") ||
-    url.startsWith("https://hotel.innopolis.university/");
-  const showIframe = !!url && !hasError && !isInsecureUrl;
+    url.startsWith("https://hotel.innopolis.university/") ||
+    url.startsWith("https://help.university.innopolis.ru/");
+
+  const isExternalPage = !!url && !hasError && !component;
 
   return (
     <div
@@ -40,28 +61,44 @@ export default function IframePreviewCard({
           ✕
         </button>
       </div>
-      {showIframe ? (
-        source.type === "maps" ? (
-          <MapsPage
-            sceneId={parsedUrl.searchParams.get("scene") ?? undefined}
-            areaId={parsedUrl.searchParams.get("area") ?? undefined}
-            q={undefined}
-          />
-        ) : (
-          <iframe
-            src={url}
-            onError={() => setHasError(true)}
-            title="Preview"
-            className="border-border h-[50vh] w-full rounded-xl border"
-            loading="lazy"
-          />
-        )
+      {!isInsecureUrl ? (
+        <>
+          {isInnohassleComponent ? (
+            component.component === MapsPage ? (
+              <div className="border-border h-[50vh] overflow-hidden rounded-xl border">
+                <MapsPage
+                  sceneId={parsedUrl.searchParams.get("scene") ?? undefined}
+                  areaId={parsedUrl.searchParams.get("area") ?? undefined}
+                  q={undefined}
+                />
+              </div>
+            ) : (
+              <div className="border-border h-[50vh] w-full rounded-xl border">
+                <div className="h-full w-full overflow-hidden rounded-[0.75rem]">
+                  <div className="h-full w-full overflow-auto">
+                    <DynamicPageComponent url={url} />
+                  </div>
+                </div>
+              </div>
+            )
+          ) : (
+            isExternalPage && (
+              <iframe
+                src={url}
+                onError={() => setHasError(true)}
+                title="Preview"
+                className="border-border h-[50vh] w-full rounded-xl border"
+                loading="lazy"
+              />
+            )
+          )}
+        </>
       ) : (
         <div className="border-border text-muted flex h-[25vh] w-full items-center justify-center rounded-xl border p-4 text-center md:h-[50vh]">
-          {isInsecureUrl &&
-            "Sorry, this site does not support preview. Please, open it directly."}
+          Sorry, this site does not support preview. Please, open it directly.
         </div>
       )}
+
       <div className="flex justify-center">
         <a href={url} className="hover:underline">
           {"Go to website ->"}

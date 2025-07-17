@@ -55,6 +55,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/act/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Act By Query */
+    post: operations["ask_act_by_query"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/telegram/messages": {
     parameters: {
       query?: never;
@@ -266,6 +283,25 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** ActResponses */
+    ActResponses: {
+      /** Query */
+      query: string;
+      /** Answer */
+      answer: string;
+      /** @description Assigned act query index */
+      act_query_id: components["schemas"]["PydanticObjectId"] | null;
+      /**
+       * Tool Calls
+       * @description Which tools were used.
+       */
+      tool_calls: unknown[];
+      /**
+       * Messages
+       * @description Chat history for llm (do not show on frontend).
+       */
+      messages: unknown[];
+    };
     /** AskResponses */
     AskResponses: {
       /** Query */
@@ -279,6 +315,11 @@ export interface components {
        * @description Responses to the search query.
        */
       search_responses: components["schemas"]["SearchResponse"][];
+    };
+    /** Body_ask_act_by_query */
+    Body_ask_act_by_query: {
+      /** Query */
+      query: string;
     };
     /** Body_ask_ask_by_query */
     Body_ask_ask_by_query: {
@@ -850,7 +891,10 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaActResponses = components["schemas"]["ActResponses"];
 export type SchemaAskResponses = components["schemas"]["AskResponses"];
+export type SchemaBodyAskActByQuery =
+  components["schemas"]["Body_ask_act_by_query"];
 export type SchemaBodyAskAskByQuery =
   components["schemas"]["Body_ask_ask_by_query"];
 export type SchemaCampusLifeSource = components["schemas"]["CampusLifeSource"];
@@ -988,6 +1032,53 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AskResponses"];
+        };
+      };
+      /** @description Chat timed out */
+      408: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description ML service error */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ask_act_by_query: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_act_by_query"];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ActResponses"];
         };
       };
       /** @description Chat timed out */

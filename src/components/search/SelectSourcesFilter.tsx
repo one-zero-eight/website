@@ -26,7 +26,7 @@ const filters = {
     { displayName: "Hotel", internalName: "hotel" },
     { displayName: "Moodle", internalName: "moodle" },
     { displayName: "Maps", internalName: "maps" },
-    { displayName: "Residents", internalName: "residents" },
+    { displayName: "Innopolis Residents", internalName: "residents" },
     { displayName: "InNoHassle", internalName: "innohassle" },
     { displayName: "My University", internalName: "myuni" },
     { displayName: "ITHelp Wiki", internalName: "ithelp" },
@@ -69,7 +69,7 @@ const SelectSourcesFilter = ({
             ref={refs.setFloating}
             style={{
               ...floatingStyles,
-              width: 170,
+              width: 200,
               zIndex: 10,
               transformOrigin: "top right",
             }}

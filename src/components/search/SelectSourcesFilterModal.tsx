@@ -28,7 +28,7 @@ const SelectSourcesFilterModal = ({
     <div className="flex flex-col gap-4 rounded-xl border border-gray-400 bg-floating p-4 text-black shadow-xl dark:text-white">
       {Object.entries(filters).map(([group, values]) => (
         <div key={group}>
-          <div className="flex flex-col gap-1 pr-1">
+          <div className="flex flex-col gap-2 pr-1 md:gap-1">
             {values.map((value) => (
               <label
                 key={value.internalName}
@@ -38,7 +38,7 @@ const SelectSourcesFilterModal = ({
                   type="checkbox"
                   checked={selected[group][value.internalName]}
                   onChange={() => checks(group, value.internalName)}
-                  className="cursor-pointer accent-purple-600"
+                  className="accent-purple-600"
                 />
                 {value.displayName}
               </label>
