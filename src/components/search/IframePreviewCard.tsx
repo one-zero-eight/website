@@ -65,7 +65,7 @@ export default function IframePreviewCard({
         <>
           {isInnohassleComponent ? (
             component.component === MapsPage ? (
-              <div className="border-border h-[50vh] overflow-hidden rounded-xl border">
+              <div className="border-border h-[50vh] overflow-hidden rounded-xl border @container/content">
                 <MapsPage
                   sceneId={parsedUrl.searchParams.get("scene") ?? undefined}
                   areaId={parsedUrl.searchParams.get("area") ?? undefined}
@@ -73,7 +73,7 @@ export default function IframePreviewCard({
                 />
               </div>
             ) : (
-              <div className="border-border h-[50vh] w-full rounded-xl border">
+              <div className="border-border h-[50vh] w-full rounded-xl border @container/content">
                 <div className="h-full w-full overflow-hidden rounded-[0.75rem]">
                   <div className="h-full w-full overflow-auto">
                     <DynamicPageComponent url={url} />
