@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import WorkshopInput from "../input/WorkshopInput";
 import WorkshopTextArea from "../input/WorkshopTextArea";
 import DateTimePlacePicker from "../date/DateTimePlacePicker";
+import { useToast } from "../../toast";
 
 type Workshop = {
   id: string;
@@ -61,6 +62,8 @@ const PostForm: React.FC<PostFormProps> = ({
 
   const storageKey = isEditing ? null : "workshop-form-draft";
 
+  const { showConfirm, showSuccess, showError, showWarning } = useToast();
+
   // Загружаем сохраненные данные при монтировании компонента (только для создания)
   useEffect(() => {
     if (!isEditing && storageKey) {
@@ -108,18 +111,22 @@ const PostForm: React.FC<PostFormProps> = ({
     // Проверка обязательных полей
     if (!workshop.title.trim()) {
       newErrors.title = "Title is required";
+      showError("Validation Error", "Title is required");
     }
 
     if (!workshop.date) {
       newErrors.date = "Date is required";
+      showError("Validation Error", "Date is required");
     }
 
     if (!workshop.startTime) {
       newErrors.startTime = "Start time is required";
+      showError("Validation Error", "Start time is required");
     }
 
     if (!workshop.endTime) {
       newErrors.endTime = "End time is required";
+      showError("Validation Error", "End time is required");
     }
 
     // Проверка даты и времени (не должна быть в прошлом)
@@ -131,6 +138,7 @@ const PostForm: React.FC<PostFormProps> = ({
 
       if (workshopDateTime < now) {
         newErrors.date = "Workshop cannot be scheduled in the past";
+        showError("Validation Error", "Workshop cannot be scheduled in the past");
       }
     } else if (workshop.date) {
       // Если только дата указана, проверяем только дату
@@ -140,6 +148,7 @@ const PostForm: React.FC<PostFormProps> = ({
 
       if (workshopDate < today) {
         newErrors.date = "Workshop cannot be scheduled in the past";
+        showError("Validation Error", "Workshop cannot be scheduled in the past");
       }
     }
 
@@ -150,6 +159,7 @@ const PostForm: React.FC<PostFormProps> = ({
 
       if (startTime >= endTime) {
         newErrors.time = "Start time must be earlier than end time";
+        showError("Validation Error", "Start time must be earlier than end time");
       }
     }
 
