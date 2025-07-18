@@ -37,7 +37,8 @@ export default function IframePreviewCard({
   const isInsecureUrl =
     url.startsWith("http://") ||
     url.startsWith("https://hotel.innopolis.university/") ||
-    url.startsWith("https://help.university.innopolis.ru/");
+    url.startsWith("https://help.university.innopolis.ru/") ||
+    url.startsWith("https://my.university.innopolis.ru/");
 
   const isExternalPage = !!url && !hasError && !component;
 
