@@ -46,6 +46,16 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   };
   // Функция для получения текста статуса неактивности
   const getInactiveStatusText = () => {
+    // Проверяем, прошел ли воркшоп
+    const now = new Date();
+    const workshopDate = new Date(workshop.date);
+    const [hours, minutes] = workshop.endTime.split(':').map(Number);
+    workshopDate.setHours(hours, minutes, 0, 0);
+    
+    if (workshopDate < now) {
+      return "Outdated";
+    }
+    
     if (workshop.isRegistrable === false && workshop.isActive !== false) {
       // Только isRegistrable false показываем дату и время начала
       return `Inactive due ${formatStartDate(workshop.date)} ${formatTime(workshop.startTime)}`;
