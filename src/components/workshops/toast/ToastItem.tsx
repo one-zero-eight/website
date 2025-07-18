@@ -30,7 +30,7 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
 
   const getToastStyles = () => {
     const baseStyles =
-      "flex items-start gap-3 p-4 rounded-lg shadow-lg border-l-4 transition-all duration-300 ease-in-out transform";
+      "flex items-start gap-3 p-4 rounded-lg shadow-lg border-l-4 transition-all duration-300 ease-in-out transform bg-primary text-contrast";
 
     if (isLeaving) {
       return `${baseStyles} translate-x-full opacity-0`;
@@ -38,15 +38,15 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
 
     switch (toast.type) {
       case "success":
-        return `${baseStyles} bg-green-50 border-green-500 text-green-800`;
+        return `${baseStyles} border-green-500`;
       case "error":
-        return `${baseStyles} bg-red-50 border-red-500 text-red-800`;
+        return `${baseStyles} border-red-500`;
       case "warning":
-        return `${baseStyles} bg-yellow-50 border-yellow-500 text-yellow-800`;
+        return `${baseStyles} border-yellow-500`;
       case "info":
-        return `${baseStyles} bg-blue-50 border-blue-500 text-blue-800`;
+        return `${baseStyles} border-blue-500`;
       default:
-        return `${baseStyles} bg-gray-50 border-gray-500 text-gray-800`;
+        return `${baseStyles} border-gray-500`;
     }
   };
 
@@ -122,7 +122,7 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
       </div>
       <button
         onClick={handleClose}
-        className="ml-2 flex-shrink-0 rounded p-1 transition-colors hover:bg-black/10"
+        className="ml-2 flex-shrink-0 rounded p-1 transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
         aria-label="Close notification"
       >
         <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">

@@ -104,22 +104,22 @@ export function ConfirmDialog({
       />
 
       {/* Dialog */}
-      <div className="relative mx-4 w-full max-w-md transform rounded-lg bg-white shadow-xl transition-all">
+      <div className="relative mx-4 w-full max-w-md transform rounded-lg bg-primary shadow-xl transition-all">
         <div className="p-6">
           {/* Icon and Title */}
           <div className="mb-4 flex items-center gap-3">
             {getIcon()}
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <h3 className="text-lg font-semibold text-contrast">{title}</h3>
           </div>
 
           {/* Message */}
-          <p className="mb-6 leading-relaxed text-gray-600">{message}</p>
+          <p className="mb-6 leading-relaxed text-contrast opacity-80">{message}</p>
 
           {/* Actions */}
           <div className="flex justify-end gap-3">
             <button
               onClick={onCancel}
-              className="rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              className="rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:ring-gray-400"
             >
               {cancelText}
             </button>

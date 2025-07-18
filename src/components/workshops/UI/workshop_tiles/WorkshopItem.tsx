@@ -164,7 +164,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
           "You have successfully registered for this workshop.",
         );
       } else {
-        showError("Check-in Failed", "Failed to check in. Please try again.");
+        showError("Check-in Failed", "Failed to check in. Please try again. Probably you have overlapping workshops");
       }
     } catch (error) {
       console.error("Check-in failed", error);
