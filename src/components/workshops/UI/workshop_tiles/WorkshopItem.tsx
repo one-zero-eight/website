@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { workshopsFetch } from "@/api/workshops";
 import { useNavigate } from "@tanstack/react-router";
+import { useToast } from "../../toast";
 
 type Workshop = {
   id: string;
@@ -35,6 +36,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   refreshParticipants,
 }) => {
   const navigate = useNavigate();
+  const { showError, showSuccess } = useToast();
   const [workshopChosen, setWorkshopChosen] = useState(false);
   {
     /* Стэйт для управления количеством записанных людей */
@@ -157,12 +159,16 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         setWorkshopChosen(true);
         setSignedPeople((count) => count + 1);
         refreshParticipants(); // Refresh participant data
+        showSuccess(
+          "Check-in Successful",
+          "You have successfully registered for this workshop.",
+        );
       } else {
-        alert("Failed to check in");
+        showError("Check-in Failed", "Failed to check in. Please try again.");
       }
     } catch (error) {
       console.error("Check-in failed", error);
-      alert("Error occur when trying to check in.");
+      showError("Check-in Error", "Error occurred when trying to check in.");
     }
   };
 
@@ -183,12 +189,16 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         setWorkshopChosen(false);
         setSignedPeople((count) => Math.max(0, count - 1));
         refreshParticipants(); // Refresh participant data
+        showSuccess(
+          "Check-out Successful",
+          "You have successfully unregistered from this workshop.",
+        );
       } else {
-        alert("Failed to check out");
+        showError("Check-out Failed", "Failed to check out. Please try again.");
       }
     } catch (error) {
       console.error("Check-out failed", error);
-      alert("Error occur when trying to check out");
+      showError("Check-out Error", "Error occurred when trying to check out.");
     }
   };
   return (

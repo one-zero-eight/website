@@ -5,6 +5,7 @@ import PostForm from "@/components/workshops/UI/post_form/PostForm.tsx";
 import Modal from "./UI/modal/ModalWindow";
 import Description from "./UI/description_form/Description";
 import { workshopsFetch } from "@/api/workshops";
+import { useToast } from "./toast";
 
 type Workshop = {
   id: string;
@@ -30,6 +31,8 @@ type User = {
 };
 
 export function WorkshopsPage() {
+  const { showConfirm, showSuccess, showError, showWarning } = useToast();
+
   // ===== СОСТОЯНИЕ КОМПОНЕНТА =====
   // Стэйт для хранения списка воркшопов
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
@@ -90,8 +93,9 @@ export function WorkshopsPage() {
       console.log("Workshops data:", data);
       if (error) {
         console.error("Failed to load workshops:", error);
-        alert(
-          `Failed to load workshops. Please check your connection and try again.`,
+        showError(
+          "Loading Failed",
+          "Failed to load workshops. Please check your connection and try again.",
         );
         return;
       }
@@ -132,7 +136,10 @@ export function WorkshopsPage() {
       console.log("Workshops loaded successfully:", transformedWorkshops);
     } catch (error) {
       console.error("Error loading workshops:", error);
-      alert(`Unable to load workshops. Please refresh the page and try again.`);
+      showError(
+        "Loading Error",
+        "Unable to load workshops. Please refresh the page and try again.",
+      );
     }
   };
 
@@ -176,12 +183,17 @@ export function WorkshopsPage() {
       });
       if (error) {
         console.error("Failed to create workshop:", error);
-        alert(
-          `Failed to create workshop. Please check all fields and try again.`,
+        showError(
+          "Creation Failed",
+          "Failed to create workshop. Please check all fields and try again.",
         );
         return false;
       } else if (data) {
         console.log("Workshop created successfully:", data);
+        showSuccess(
+          "Workshop Created",
+          `Workshop "${data.name}" has been successfully created.`,
+        );
 
         const parseTime = (isoString: string): string => {
           try {
@@ -213,8 +225,9 @@ export function WorkshopsPage() {
       }
     } catch (error) {
       console.error("Error creating workshop:", error);
-      alert(
-        `Failed to create workshop. Please check all fields and try again.`,
+      showError(
+        "Creation Error",
+        "Failed to create workshop. Please check all fields and try again.",
       );
       return false;
     }
@@ -222,11 +235,15 @@ export function WorkshopsPage() {
   };
   const removeWorkshop = async (workshop: Workshop) => {
     // Показываем диалог подтверждения перед удалением
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete the workshop "${workshop.title}"?\n\nThis action cannot be undone.`,
-    );
+    const confirmed = await showConfirm({
+      title: "Delete Workshop",
+      message: `Are you sure you want to delete the workshop "${workshop.title}"?\n\nThis action cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "error",
+    });
 
-    if (!confirmDelete) {
+    if (!confirmed) {
       return; // Если пользователь отменил, выходим из функции
     }
 
@@ -241,16 +258,23 @@ export function WorkshopsPage() {
       );
       if (error) {
         console.error("Failed to delete workshop:", error);
-        alert(`Failed to delete workshop. Please try again.`);
+        showError(
+          "Delete Failed",
+          "Failed to delete workshop. Please try again.",
+        );
       } else {
         console.log("Workshop deleted successfully:", data);
+        showSuccess(
+          "Workshop Deleted",
+          `Workshop "${workshop.title}" has been successfully deleted.`,
+        );
 
         // Удаляем воркшоп из локального состояния
         setWorkshops(workshops.filter((w) => w.id !== workshop.id));
       }
     } catch (error) {
       console.error("Error deleting workshop:", error);
-      alert(`Failed to delete workshop. Please try again.`);
+      showError("Delete Error", "Failed to delete workshop. Please try again.");
     }
   };
 
@@ -289,11 +313,16 @@ export function WorkshopsPage() {
       );
       if (error) {
         console.error("Failed to update workshop:", error);
-        alert(
-          `Failed to update workshop. Please check all fields and try again.`,
+        showError(
+          "Update Failed",
+          "Failed to update workshop. Please check all fields and try again.",
         );
       } else if (data) {
         console.log("Workshop updated successfully:", data);
+        showSuccess(
+          "Workshop Updated",
+          "Workshop has been successfully updated.",
+        );
 
         // Перезагружаем данные с сервера для обновления состояния
         await loadWorkshops();
@@ -303,8 +332,9 @@ export function WorkshopsPage() {
       }
     } catch (error) {
       console.error("Error updating workshop:", error);
-      alert(
-        `Failed to update workshop. Please check all fields and try again.`,
+      showError(
+        "Update Error",
+        "Failed to update workshop. Please check all fields and try again.",
       );
     }
   };
@@ -329,16 +359,23 @@ export function WorkshopsPage() {
       });
       if (error) {
         console.error("Role change failed:", error);
-        alert(`Failed to change role. Please try again.`);
+        showError(
+          "Role Change Failed",
+          "Failed to change role. Please try again.",
+        );
       } else {
         console.log("Role changed successfully:", data);
+        showSuccess("Role Changed", `Role successfully changed to ${newRole}.`);
 
         // Перезагружаем информацию о пользователе для обновления UI
         await loadCurrentUser();
       }
     } catch (error) {
       console.error("Error during role change:", error);
-      alert(`Failed to change role. Please try again.`);
+      showError(
+        "Role Change Error",
+        "Failed to change role. Please try again.",
+      );
     }
   };
   return (
