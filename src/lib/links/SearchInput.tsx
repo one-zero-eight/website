@@ -25,7 +25,7 @@ export const SearchInput: React.FC<
         autoComplete="off"
         spellCheck={false}
         readOnly={readOnly} // Will be reset to false after mounting
-        className="inset-0 h-10 w-full resize-none rounded-lg border-2 border-brand-violet bg-pagebg p-3 text-base caret-brand-violet outline-none dark:text-white"
+        className="inset-0 h-10 w-full resize-none rounded-lg border border-brand-violet bg-pagebg p-3 text-base caret-brand-violet outline-none dark:text-white"
         placeholder="Search services..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}

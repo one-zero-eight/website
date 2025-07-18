@@ -5,8 +5,10 @@ import remarkGfm from "remark-gfm";
 
 export function AskResult({
   response,
+  hasError,
 }: {
   response: searchTypes.SchemaAskResponses;
+  hasError?: boolean;
 }) {
   const { answer, search_responses } = response;
 
@@ -22,30 +24,36 @@ export function AskResult({
     <div
       tabIndex={0}
       className={clsx(
-        "flex flex-col gap-4 rounded-lg !border border-gray-400 bg-floating p-4 hover:bg-primary-hover",
+        "flex flex-col gap-2 self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-white",
       )}
     >
-      <Markdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          a: ({ href }) => (
-            <a
-              href={href ?? "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-brand-violet hover:underline"
-            >
-              {"link"}
-            </a>
-          ),
-          p: ({ children }) => (
-            <p className="whitespace-pre-wrap">{children}</p>
-          ),
-          li: ({ children }) => <li className="ml-5 list-disc">{children}</li>,
-        }}
-      >
-        {answer}
-      </Markdown>
+      {!hasError ? (
+        <Markdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            a: ({ href }) => (
+              <a
+                href={href ?? "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-violet hover:underline"
+              >
+                {"link"}
+              </a>
+            ),
+            p: ({ children }) => (
+              <p className="whitespace-pre-wrap">{children}</p>
+            ),
+            li: ({ children }) => (
+              <li className="ml-5 list-disc">{children}</li>
+            ),
+          }}
+        >
+          {answer}
+        </Markdown>
+      ) : (
+        <span>- Sorry, I can't help you with this question.</span>
+      )}
 
       {uniqueSources.length > 0 && (
         <div>

@@ -247,9 +247,16 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
         </p>
       )}
       {isLoading && (
-        <p className="py-4 text-xl font-semibold text-contrast">
-          Loading search results...
-        </p>
+        <>
+          <p className="py-4 text-xl font-semibold text-contrast">
+            Loading search results...
+          </p>
+          <div className="skeleton flex flex-col gap-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-24 w-full rounded-lg"></div>
+            ))}
+          </div>
+        </>
       )}
       {searchResult && (
         <div className="flex flex-row gap-6">

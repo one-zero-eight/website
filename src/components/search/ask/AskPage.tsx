@@ -2,13 +2,19 @@ import { useMe } from "@/api/accounts/user.ts";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import { AskResult } from "./AskResult";
-import { useNavigate } from "@tanstack/react-router";
-import { $search } from "@/api/search";
-import { useState } from "react";
+import { $search, searchTypes } from "@/api/search";
+import { useEffect, useState } from "react";
+
+type Message =
+  | { role: "user"; content: string }
+  | { role: "assistant"; response: searchTypes.SchemaAskResponses };
 
 export function AskPage({ askQuery }: { askQuery: string }) {
   const { me } = useMe();
-  const navigate = useNavigate();
+
+  const [inputQuery, setInputQuery] = useState(askQuery);
+
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
 
@@ -31,9 +37,17 @@ export function AskPage({ askQuery }: { askQuery: string }) {
     },
   );
 
+  useEffect(() => {
+    if (result && submittedQuery) {
+      setMessages((prev) => [...prev, { role: "assistant", response: result }]);
+      setSubmittedQuery(null);
+    }
+  }, [result]);
+
   const runSearch = (query: string) => {
-    navigate({ to: "/ask", search: { q: query } });
+    setMessages((prev) => [...prev, { role: "user", content: query }]);
     setSubmittedQuery(query);
+    setInputQuery("");
   };
 
   if (!me) {
@@ -44,26 +58,43 @@ export function AskPage({ askQuery }: { askQuery: string }) {
     <div className="flex grow flex-col gap-4 p-4">
       <SearchField
         runSearch={runSearch}
-        currentQuery={askQuery}
+        currentQuery={inputQuery}
+        setCurrentQuery={setInputQuery}
         pageType="ask"
       />
-      <span className="font-semibold">{"AI Assistant: "}</span>
-      {isLoading ? (
-        <span>Thinking...</span>
-      ) : result ? (
-        <></>
-      ) : error ? (
-        <span>- Sorry, I can't help you with this question.</span>
-      ) : (
+
+      {messages.length === 0 && !isLoading && !error && (
         <span>- Ask me anything!</span>
       )}
-      {result && (
-        <div className="flex flex-row gap-6">
-          <div className="flex w-full flex-col justify-stretch gap-4 md:min-w-0">
-            <AskResult response={result} />
-          </div>
-        </div>
-      )}
+
+      {isLoading ? (
+        <span>Thinking...</span>
+      ) : error ? (
+        <span>- Sorry, I can't help you with this question.</span>
+      ) : null}
+
+      <div className="mt-4 flex flex-col-reverse gap-6">
+        {messages.map((msg, i) =>
+          msg.role === "user" ? (
+            <div className="flex max-w-[80%] flex-col gap-1 self-start">
+              <a
+                className="text-inactive"
+                href="https://search.innohassle.ru/dashboard"
+              >
+                {me.innopolis_sso?.name?.split(" ")[0]}
+              </a>
+              <div
+                key={i}
+                className="mb-4 self-start rounded-lg rounded-tl-none bg-primary px-4 py-2 text-white"
+              >
+                {msg.content}
+              </div>
+            </div>
+          ) : (
+            <AskResult key={i} response={msg.response} />
+          ),
+        )}
+      </div>
     </div>
   );
 }

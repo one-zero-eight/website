@@ -36,6 +36,7 @@ export default function SearchField({
   checks,
   applyFilters,
   pageType,
+  setCurrentQuery,
 }: {
   runSearch: (query: string) => void;
   currentQuery: string;
@@ -43,12 +44,20 @@ export default function SearchField({
   checks?: (group: string, value: string) => void;
   applyFilters?: () => void;
   pageType: PageType;
+  setCurrentQuery?: (value: string) => void; // сделаем опциональным на всякий случай
 }) {
   const [text, setText] = useState(currentQuery);
 
   useEffect(() => {
     setText(currentQuery);
   }, [currentQuery]);
+
+  const handleSearch = () => {
+    runSearch(text);
+    if (setCurrentQuery && pageType === "ask") {
+      setCurrentQuery("");
+    }
+  };
 
   return (
     <div className="flex w-full sm:gap-4">
@@ -57,7 +66,7 @@ export default function SearchField({
         className="flex w-full flex-col justify-stretch gap-2 md:min-w-0 md:basis-1/2"
         onSubmit={(e) => {
           e.preventDefault();
-          runSearch(text);
+          handleSearch();
         }}
       >
         <div className="flex flex-col gap-4 md:gap-2">
@@ -89,7 +98,7 @@ export default function SearchField({
       <div className="flex justify-between gap-4 md:min-w-0 md:basis-1/2">
         <PageActionButton
           content={contentMap[pageType]}
-          onClick={() => runSearch(text)}
+          onClick={handleSearch}
           icon={iconsMap[pageType]}
           border
         />

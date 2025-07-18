@@ -47,7 +47,7 @@ export function ActPage({ actQuery }: { actQuery: string }) {
         runSearch={runSearch}
         currentQuery={actQuery}
       />
-      <span className="font-semibold">AI Assistant:</span>
+      <span>AI Assistant:</span>
       {isLoading ? (
         <span>- Executing...</span>
       ) : result ? (
