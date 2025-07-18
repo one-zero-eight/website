@@ -42,17 +42,20 @@ export function ToastProvider({ children }: ToastProviderProps) {
     };
 
     setToasts((prev) => [...prev, newToast]);
-
-    // Автоматически скрываем тост через указанное время
-    if (newToast.duration && newToast.duration > 0) {
-      setTimeout(() => {
-        hideToast(id);
-      }, newToast.duration);
-    }
   }, []);
 
   const hideToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    // Помечаем toast как скрывающийся, но не удаляем сразу
+    setToasts((prev) =>
+      prev.map((toast) =>
+        toast.id === id ? { ...toast, isVisible: false } : toast
+      )
+    );
+
+    // Удаляем toast из массива после времени анимации (300ms)
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 300);
   }, []);
 
   const showSuccess = useCallback(

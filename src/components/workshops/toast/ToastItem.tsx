@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Toast as ToastType } from "./types";
 
 interface ToastItemProps {
@@ -8,14 +8,37 @@ interface ToastItemProps {
 
 export function ToastItem({ toast, onClose }: ToastItemProps) {
   const [isLeaving, setIsLeaving] = useState(false);
+  const [isEntering, setIsEntering] = useState(true);
 
-  const handleClose = () => {
-    setIsLeaving(true);
-    // Даем время для анимации закрытия
-    setTimeout(() => {
-      onClose(toast.id);
-    }, 300);
-  };
+  // Отслеживаем изменение isVisible из пропса
+  useEffect(() => {
+    if (toast.isVisible === false && !isLeaving) {
+      setIsLeaving(true);
+      // Через время анимации удаляем компонент
+      setTimeout(() => {
+        onClose(toast.id);
+      }, 300);
+    }
+  }, [toast.isVisible, isLeaving, onClose, toast.id]);
+
+  const handleClose = useCallback(() => {
+    if (!isLeaving) {
+      setIsLeaving(true);
+      // Даем время для анимации закрытия
+      setTimeout(() => {
+        onClose(toast.id);
+      }, 300);
+    }
+  }, [onClose, toast.id, isLeaving]);
+
+  useEffect(() => {
+    // Запускаем анимацию появления
+    const timer = setTimeout(() => {
+      setIsEntering(false);
+    }, 50); // Небольшая задержка для запуска анимации
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Автоматическое закрытие если задана продолжительность
   useEffect(() => {
@@ -26,13 +49,17 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
 
       return () => clearTimeout(timer);
     }
-  }, [toast.duration]);
+  }, [toast.duration, handleClose]);
 
   const getToastStyles = () => {
     const baseStyles =
       "flex items-start gap-3 p-4 rounded-lg shadow-lg border-l-4 transition-all duration-300 ease-in-out transform bg-primary text-contrast";
 
     if (isLeaving) {
+      return `${baseStyles} translate-x-full opacity-0`;
+    }
+
+    if (isEntering) {
       return `${baseStyles} translate-x-full opacity-0`;
     }
 
