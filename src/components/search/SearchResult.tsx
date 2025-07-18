@@ -110,6 +110,7 @@ export default function SearchResult({
         </div>
         {previewText && (
           <TruncatableMarkdown
+            isSelected={isSelected}
             text={previewText}
             sourse_type={response.source.type}
           />
