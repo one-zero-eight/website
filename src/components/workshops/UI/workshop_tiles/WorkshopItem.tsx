@@ -103,26 +103,19 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   };
   useEffect(() => {
     (async () => {
-      try {
-        const { data, error } = await workshopsFetch.GET(`/users/my_checkins`);
-        if (!error && Array.isArray(data)) {
-          const isCheckedIn = data.some((w) => w.id === workshop.id);
-          setWorkshopChosen(isCheckedIn);
-        } else {
-          // В случае любой ошибки считаем, что пользователь не записан
-          setWorkshopChosen(false);
-        }
-      } catch (err) {
+      const { data, error } = await workshopsFetch.GET(`/users/my_checkins`);
+      if (!error && Array.isArray(data)) {
+        const isCheckedIn = data.some((w) => w.id === workshop.id);
+        setWorkshopChosen(isCheckedIn);
+      } else {
         setWorkshopChosen(false);
       }
 
       // Используем remainPlaces из пропсов воркшопа если есть, иначе делаем API запрос
       if (workshop.remainPlaces !== undefined) {
-        // Вычисляем количество записанных людей из remainPlaces
         const signedCount = workshop.maxPlaces - workshop.remainPlaces;
-        setSignedPeople(Math.max(0, signedCount)); // Не допускаем отрицательных значений
+        setSignedPeople(Math.max(0, signedCount));
       } else {
-        // Fallback к API запросу если remainPlaces недоступно
         const { data: checkinsData, error: checkinsError } =
           await workshopsFetch.GET(`/workshops/{workshop_id}/checkins`, {
             params: {
@@ -144,61 +137,50 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       return;
     }
 
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { data, error } = await workshopsFetch.POST(
-        `/workshops/{workshop_id}/checkin`,
-        {
-          params: {
-            path: { workshop_id: workshop.id.toString() },
-          },
+    const { error } = await workshopsFetch.POST(
+      `/workshops/{workshop_id}/checkin`,
+      {
+        params: {
+          path: { workshop_id: workshop.id.toString() },
         },
-      );
+      },
+    );
 
-      if (!error) {
-        setWorkshopChosen(true);
-        setSignedPeople((count) => count + 1);
-        refreshParticipants(); // Refresh participant data
-        showSuccess(
-          "Check-in Successful",
-          "You have successfully checked-in for this workshop.",
-        );
-      } else {
-        showError("Check-in Failed", "Failed to check in. Please try again. Probably you have overlapping workshops");
-      }
-    } catch (error) {
-      console.error("Check-in failed", error);
-      showError("Check-in Error", "Error occurred when trying to check in.");
+    if (!error) {
+      setWorkshopChosen(true);
+      setSignedPeople((count) => count + 1);
+      refreshParticipants();
+      showSuccess(
+        "Check-in Successful",
+        "You have successfully checked-in for this workshop.",
+      );
+    } else {
+      showError("Check-in Failed", "Failed to check in. Please try again. Probably you have overlapping workshops");
     }
   };
 
   const handleCheckOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { data, error } = await workshopsFetch.POST(
-        `/workshops/{workshop_id}/checkout`,
-        {
-          params: {
-            path: { workshop_id: workshop.id.toString() },
-          },
+    
+    const { error } = await workshopsFetch.POST(
+      `/workshops/{workshop_id}/checkout`,
+      {
+        params: {
+          path: { workshop_id: workshop.id.toString() },
         },
-      );
+      },
+    );
 
-      if (!error) {
-        setWorkshopChosen(false);
-        setSignedPeople((count) => Math.max(0, count - 1));
-        refreshParticipants(); // Refresh participant data
-        showSuccess(
-          "Check-out Successful",
-          "You have successfully checked-out from this workshop.",
-        );
-      } else {
-        showError("Check-out Failed", "Failed to check out. Please try again.");
-      }
-    } catch (error) {
-      console.error("Check-out failed", error);
-      showError("Check-out Error", "Error occurred when trying to check out.");
+    if (!error) {
+      setWorkshopChosen(false);
+      setSignedPeople((count) => Math.max(0, count - 1));
+      refreshParticipants();
+      showSuccess(
+        "Check-out Successful",
+        "You have successfully checked-out from this workshop.",
+      );
+    } else {
+      showError("Check-out Failed", "Failed to check out. Please try again.");
     }
   };
   return (

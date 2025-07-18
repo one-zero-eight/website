@@ -62,85 +62,66 @@ export function WorkshopsPage() {
 
   // Функция для загрузки информации о текущем пользователе
   const loadCurrentUser = async () => {
-    try {
-      const { data, error } = await workshopsFetch.GET("/users/me");
+    const { data, error } = await workshopsFetch.GET("/users/me");
 
-      if (error) {
-        console.error("Failed to load current user:", error);
-        // Если пользователь не авторизован, просто не показываем кнопку изменения роли
-        setCurrentUser(null);
-        return;
-      }
-
-      if (data) {
-        setCurrentUser(data);
-      }
-    } catch (error) {
-      console.error("Error loading current user:", error);
+    if (error) {
       setCurrentUser(null);
+      return;
+    }
+
+    if (data) {
+      setCurrentUser(data);
     }
   };
 
   const loadWorkshops = async () => {
-    try {
-      const { data, error } = await workshopsFetch.GET("/workshops/", {
-        params: {
-          query: {
-            limit: 100,
-          },
+    const { data, error } = await workshopsFetch.GET("/workshops/", {
+      params: {
+        query: {
+          limit: 100,
         },
-      });
-      console.log("Workshops data:", data);
-      if (error) {
-        console.error("Failed to load workshops:", error);
-        showError(
-          "Loading Failed",
-          "Failed to load workshops. Please check your connection and try again.",
-        );
-        return;
-      }
-
-      if (!data || !Array.isArray(data)) {
-        console.error("Invalid data received from API:", data);
-        return;
-      }
-
-      // Преобразуем данные API в формат Workshop
-      const transformedWorkshops: Workshop[] = data.map((workshop) => {
-        const parseTime = (isoString: string): string => {
-          try {
-            const date = new Date(isoString);
-            return date.toTimeString().substring(0, 5);
-          } catch {
-            return (
-              isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || ""
-            );
-          }
-        };
-        return {
-          id: workshop.id,
-          title: workshop.name,
-          body: workshop.description,
-          date: workshop.dtstart.split("T")[0], // Берем только дату
-          startTime: parseTime(workshop.dtstart),
-          endTime: parseTime(workshop.dtend),
-          room: workshop.place,
-          maxPlaces: workshop.capacity,
-          remainPlaces: workshop.remain_places, // Добавляем обработку оставшихся мест
-          isActive: workshop.is_active,
-          isRegistrable: workshop.is_registrable, // Добавляем поле для возможности регистрации
-        };
-      });
-
-      setWorkshops(transformedWorkshops);
-      console.log("Workshops loaded successfully:", transformedWorkshops);
-    } catch (error) {
-      console.error("Error loading workshops:", error);
+      },
+    });
+    
+    if (error) {
       showError(
-        "Loading Error",
-        "Unable to load workshops. Please refresh the page and try again.",
+        "Loading Failed",
+        "Failed to load workshops. Please check your connection and try again.",
       );
+      return;
     }
+
+    if (!data || !Array.isArray(data)) {
+      return;
+    }
+
+    const transformedWorkshops: Workshop[] = data.map((workshop) => {
+      const parseTime = (isoString: string): string => {
+        try {
+          const date = new Date(isoString);
+          return date.toTimeString().substring(0, 5);
+        } catch {
+          return (
+            isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || ""
+          );
+        }
+      };
+      return {
+        id: workshop.id,
+        title: workshop.name,
+        body: workshop.description,
+        date: workshop.dtstart.split("T")[0],
+        startTime: parseTime(workshop.dtstart),
+        endTime: parseTime(workshop.dtend),
+        room: workshop.place,
+        maxPlaces: workshop.capacity,
+        remainPlaces: workshop.remain_places,
+        isActive: workshop.is_active,
+        isRegistrable: workshop.is_registrable,
+      };
+    });
+
+    setWorkshops(transformedWorkshops);
   };
 
   // Загружаем воркшопы при монтировании компонента
@@ -161,80 +142,69 @@ export function WorkshopsPage() {
     loadUserWithRetry();
   }, []);
   const createWorkshop = async (newWorkshop: Workshop): Promise<boolean> => {
-    try {
-      // Преобразуем формат даты и времени в ISO формат для API
-      const startDateTime = `${newWorkshop.date}T${newWorkshop.startTime}`;
-      const endDateTime = `${newWorkshop.date}T${newWorkshop.endTime}`;
+    const startDateTime = `${newWorkshop.date}T${newWorkshop.startTime}`;
+    const endDateTime = `${newWorkshop.date}T${newWorkshop.endTime}`;
 
-      // Создаем объект запроса в формате API
-      const createRequest = {
-        name: newWorkshop.title,
-        description: newWorkshop.body,
-        capacity: newWorkshop.maxPlaces || 500,
-        remain_places: newWorkshop.maxPlaces || 500, // Изначально все места свободны
-        place: newWorkshop.room || "TBA",
-        dtstart: startDateTime,
-        dtend: endDateTime,
-        is_active: newWorkshop.isActive ?? true, // По умолчанию активный
-      };
+    const createRequest = {
+      name: newWorkshop.title,
+      description: newWorkshop.body,
+      capacity: newWorkshop.maxPlaces || 500,
+      remain_places: newWorkshop.maxPlaces || 500,
+      place: newWorkshop.room || "TBA",
+      dtstart: startDateTime,
+      dtend: endDateTime,
+      is_active: newWorkshop.isActive ?? true,
+    };
 
-      const { data, error } = await workshopsFetch.POST("/workshops/", {
-        body: createRequest,
-      });
-      if (error) {
-        console.error("Failed to create workshop:", error);
-        showError(
-          "Creation Failed",
-          "Failed to create workshop. Please check all fields and try again.",
-        );
-        return false;
-      } else if (data) {
-        console.log("Workshop created successfully:", data);
-        showSuccess(
-          "Workshop Created",
-          `Workshop "${data.name}" has been successfully created.`,
-        );
-
-        const parseTime = (isoString: string): string => {
-          try {
-            const date = new Date(isoString);
-            return date.toTimeString().substring(0, 5);
-          } catch {
-            return (
-              isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || ""
-            );
-          }
-        };
-
-        // Преобразуем ответ API обратно в формат Workshop и добавляем в список
-        const createdWorkshop: Workshop = {
-          id: data.id,
-          title: data.name,
-          body: data.description,
-          date: data.dtstart.split("T")[0],
-          startTime: parseTime(data.dtstart),
-          endTime: parseTime(data.dtend),
-          room: data.place,
-          maxPlaces: data.capacity,
-          remainPlaces: data.remain_places || data.capacity,
-          isActive: data.is_active,
-        };
-
-        setWorkshops((prevWorkshops) => [...prevWorkshops, createdWorkshop]);
-        return true;
-      }
-    } catch (error) {
-      console.error("Error creating workshop:", error);
+    const { data, error } = await workshopsFetch.POST("/workshops/", {
+      body: createRequest,
+    });
+    
+    if (error) {
       showError(
-        "Creation Error",
+        "Creation Failed",
         "Failed to create workshop. Please check all fields and try again.",
       );
       return false;
     }
+    
+    if (data) {
+      showSuccess(
+        "Workshop Created",
+        `Workshop "${data.name}" has been successfully created.`,
+      );
+
+      const parseTime = (isoString: string): string => {
+        try {
+          const date = new Date(isoString);
+          return date.toTimeString().substring(0, 5);
+        } catch {
+          return (
+            isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || ""
+          );
+        }
+      };
+
+      const createdWorkshop: Workshop = {
+        id: data.id,
+        title: data.name,
+        body: data.description,
+        date: data.dtstart.split("T")[0],
+        startTime: parseTime(data.dtstart),
+        endTime: parseTime(data.dtend),
+        room: data.place,
+        maxPlaces: data.capacity,
+        remainPlaces: data.remain_places || data.capacity,
+        isActive: data.is_active,
+      };
+
+      setWorkshops((prevWorkshops) => [...prevWorkshops, createdWorkshop]);
+      return true;
+    }
+    
     return false;
   };
   const removeWorkshop = async (workshop: Workshop) => {
-    // Показываем диалог подтверждения перед удалением
     const confirmed = await showConfirm({
       title: "Delete Workshop",
       message: `Are you sure you want to delete the workshop "${workshop.title}"?\n\nThis action cannot be undone.`,
@@ -244,37 +214,29 @@ export function WorkshopsPage() {
     });
 
     if (!confirmed) {
-      return; // Если пользователь отменил, выходим из функции
+      return;
     }
 
-    try {
-      const { data, error } = await workshopsFetch.DELETE(
-        `/workshops/{workshop_id}`,
-        {
-          params: {
-            path: { workshop_id: workshop.id },
-          },
+    const { error } = await workshopsFetch.DELETE(
+      `/workshops/{workshop_id}`,
+      {
+        params: {
+          path: { workshop_id: workshop.id },
         },
+      },
+    );
+    
+    if (error) {
+      showError(
+        "Delete Failed",
+        "Failed to delete workshop. Please try again.",
       );
-      if (error) {
-        console.error("Failed to delete workshop:", error);
-        showError(
-          "Delete Failed",
-          "Failed to delete workshop. Please try again.",
-        );
-      } else {
-        console.log("Workshop deleted successfully:", data);
-        showSuccess(
-          "Workshop Deleted",
-          `Workshop "${workshop.title}" has been successfully deleted.`,
-        );
-
-        // Удаляем воркшоп из локального состояния
-        setWorkshops(workshops.filter((w) => w.id !== workshop.id));
-      }
-    } catch (error) {
-      console.error("Error deleting workshop:", error);
-      showError("Delete Error", "Failed to delete workshop. Please try again.");
+    } else {
+      showSuccess(
+        "Workshop Deleted",
+        `Workshop "${workshop.title}" has been successfully deleted.`,
+      );
+      setWorkshops(workshops.filter((w) => w.id !== workshop.id));
     }
   };
 
@@ -284,58 +246,44 @@ export function WorkshopsPage() {
   };
 
   const updateWorkshop = async (updatedWorkshop: Workshop) => {
-    try {
-      // Преобразуем формат даты и времени в ISO формат для API
-      const startDateTime = `${updatedWorkshop.date}T${updatedWorkshop.startTime}`;
-      const endDateTime = `${updatedWorkshop.date}T${updatedWorkshop.endTime}`;
+    const startDateTime = `${updatedWorkshop.date}T${updatedWorkshop.startTime}`;
+    const endDateTime = `${updatedWorkshop.date}T${updatedWorkshop.endTime}`;
 
-      // Создаем объект запроса в формате API
-      const updateRequest = {
-        name: updatedWorkshop.title,
-        description: updatedWorkshop.body,
-        capacity: updatedWorkshop.maxPlaces,
-        remain_places:
-          updatedWorkshop.remainPlaces || updatedWorkshop.maxPlaces,
-        place: updatedWorkshop.room || "TBA",
-        dtstart: startDateTime,
-        dtend: endDateTime,
-        is_active: updatedWorkshop.isActive ?? true,
-      };
+    const updateRequest = {
+      name: updatedWorkshop.title,
+      description: updatedWorkshop.body,
+      capacity: updatedWorkshop.maxPlaces,
+      remain_places:
+        updatedWorkshop.remainPlaces || updatedWorkshop.maxPlaces,
+      place: updatedWorkshop.room || "TBA",
+      dtstart: startDateTime,
+      dtend: endDateTime,
+      is_active: updatedWorkshop.isActive ?? true,
+    };
 
-      const { data, error } = await workshopsFetch.PUT(
-        `/workshops/{workshop_id}`,
-        {
-          params: {
-            path: { workshop_id: updatedWorkshop.id },
-          },
-          body: updateRequest,
+    const { error } = await workshopsFetch.PUT(
+      `/workshops/{workshop_id}`,
+      {
+        params: {
+          path: { workshop_id: updatedWorkshop.id },
         },
-      );
-      if (error) {
-        console.error("Failed to update workshop:", error);
-        showError(
-          "Update Failed",
-          "Failed to update workshop. Please check all fields and try again.",
-        );
-      } else if (data) {
-        console.log("Workshop updated successfully:", data);
-        showSuccess(
-          "Workshop Updated",
-          "Workshop has been successfully updated.",
-        );
-
-        // Перезагружаем данные с сервера для обновления состояния
-        await loadWorkshops();
-
-        setEditingWorkshop(null);
-        setModalVisible(false);
-      }
-    } catch (error) {
-      console.error("Error updating workshop:", error);
+        body: updateRequest,
+      },
+    );
+    
+    if (error) {
       showError(
-        "Update Error",
+        "Update Failed",
         "Failed to update workshop. Please check all fields and try again.",
       );
+    } else {
+      showSuccess(
+        "Workshop Updated",
+        "Workshop has been successfully updated.",
+      );
+      await loadWorkshops();
+      setEditingWorkshop(null);
+      setModalVisible(false);
     }
   };
   const handleModalClose = () => {
@@ -344,38 +292,24 @@ export function WorkshopsPage() {
   };
 
   const handleRoleChangeRequest = async () => {
-    try {
-      // Определяем новую роль на основе текущей роли пользователя
-      const newRole = currentUser?.role === "admin" ? "user" : "admin";
+    const newRole = currentUser?.role === "admin" ? "user" : "admin";
 
-      console.log(`Changing role to: ${newRole}`);
-
-      const { data, error } = await workshopsFetch.POST("/users/change_role", {
-        params: {
-          query: {
-            role: newRole,
-          },
+    const { error } = await workshopsFetch.POST("/users/change_role", {
+      params: {
+        query: {
+          role: newRole,
         },
-      });
-      if (error) {
-        console.error("Role change failed:", error);
-        showError(
-          "Role Change Failed",
-          "Failed to change role. Please try again.",
-        );
-      } else {
-        console.log("Role changed successfully:", data);
-        showSuccess("Role Changed", `Role successfully changed to ${newRole}.`);
-
-        // Перезагружаем информацию о пользователе для обновления UI
-        await loadCurrentUser();
-      }
-    } catch (error) {
-      console.error("Error during role change:", error);
+      },
+    });
+    
+    if (error) {
       showError(
-        "Role Change Error",
+        "Role Change Failed",
         "Failed to change role. Please try again.",
       );
+    } else {
+      showSuccess("Role Changed", `Role successfully changed to ${newRole}.`);
+      await loadCurrentUser();
     }
   };
   return (

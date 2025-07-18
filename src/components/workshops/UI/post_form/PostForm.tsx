@@ -69,12 +69,8 @@ const PostForm: React.FC<PostFormProps> = ({
     if (!isEditing && storageKey) {
       const savedData = localStorage.getItem(storageKey);
       if (savedData) {
-        try {
-          const parsedData = JSON.parse(savedData);
-          setWorkshop(parsedData);
-        } catch (error) {
-          console.error("Error parsing saved form data:", error);
-        }
+        const parsedData = JSON.parse(savedData);
+        setWorkshop(parsedData);
       }
     }
   }, [isEditing, storageKey]);
@@ -205,10 +201,7 @@ const PostForm: React.FC<PostFormProps> = ({
       try {
         const success = await create(newWorkshop);
         if (success) {
-          // Очищаем сохраненные данные после успешного создания
           clearSavedData();
-
-          // Сброс формы после успешного создания
           setWorkshop({
             title: "",
             body: "",
@@ -220,19 +213,13 @@ const PostForm: React.FC<PostFormProps> = ({
             remainPlaces: undefined,
             isActive: true,
           });
-
-          // Очищаем ошибки после успешного создания
           setErrors({});
-
-          // Закрываем форму только при успешном создании
           if (onClose) {
             onClose();
           }
         }
-        // Если success === false, модалка остается открытой
       } catch (error) {
-        console.error("Error creating workshop:", error);
-        // При ошибке модалка также остается открытой
+        // При ошибке модалка остается открытой
       }
     }
   };

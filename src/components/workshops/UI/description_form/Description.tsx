@@ -148,24 +148,19 @@ const Description: React.FC<WorkshopProps> = ({
 
     const fetchParticipants = async () => {
       setLoadingParticipants(true);
-      try {
-        const { data, error } = await workshopsFetch.GET(
-          `/workshops/{workshop_id}/checkins`,
-          {
-            params: {
-              path: { workshop_id: workshop.id },
-            },
+      const { data, error } = await workshopsFetch.GET(
+        `/workshops/{workshop_id}/checkins`,
+        {
+          params: {
+            path: { workshop_id: workshop.id },
           },
-        );
+        },
+      );
 
-        if (!error && data) {
-          setParticipants(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch participants:", error);
-      } finally {
-        setLoadingParticipants(false);
+      if (!error && data) {
+        setParticipants(data);
       }
+      setLoadingParticipants(false);
     };
 
     fetchParticipants();
@@ -203,60 +198,50 @@ const Description: React.FC<WorkshopProps> = ({
       return;
     }
 
-    try {
-      const { data, error } = await workshopsFetch.POST(
-        `/workshops/{workshop_id}/checkin`,
-        {
-          params: {
-            path: { workshop_id: workshop.id.toString() },
-          },
+    const { error } = await workshopsFetch.POST(
+      `/workshops/{workshop_id}/checkin`,
+      {
+        params: {
+          path: { workshop_id: workshop.id.toString() },
         },
-      );
+      },
+    );
 
-      if (!error) {
-        setWorkshopChosen(true);
-        setSignedPeople((count) => count + 1);
-        refreshParticipants?.();
-        showSuccess(
-          "Check-in Successful",
-          "You have successfully checked-in for this workshop.",
-        );
-      } else {
-        showError("Check-in Failed", "Failed to check in. Please try again.");
-      }
-    } catch (error) {
-      console.error("Check-in failed", error);
-      showError("Check-in Error", "Error occurred when trying to check in.");
+    if (!error) {
+      setWorkshopChosen(true);
+      setSignedPeople((count) => count + 1);
+      refreshParticipants?.();
+      showSuccess(
+        "Check-in Successful",
+        "You have successfully checked-in for this workshop.",
+      );
+    } else {
+      showError("Check-in Failed", "Failed to check in. Please try again.");
     }
   };
 
   const handleCheckOut = async () => {
     if (!workshop?.id) return;
 
-    try {
-      const { data, error } = await workshopsFetch.POST(
-        `/workshops/{workshop_id}/checkout`,
-        {
-          params: {
-            path: { workshop_id: workshop.id.toString() },
-          },
+    const { error } = await workshopsFetch.POST(
+      `/workshops/{workshop_id}/checkout`,
+      {
+        params: {
+          path: { workshop_id: workshop.id.toString() },
         },
-      );
+      },
+    );
 
-      if (!error) {
-        setWorkshopChosen(false);
-        setSignedPeople((count) => Math.max(0, count - 1));
-        refreshParticipants?.();
-        showSuccess(
-          "Check-out Successful",
-          "You have successfully checked-out from this workshop.",
-        );
-      } else {
-        showError("Check-out Failed", "Failed to check out. Please try again.");
-      }
-    } catch (error) {
-      console.error("Check-out failed", error);
-      showError("Check-out Error", "Error occurred when trying to check out.");
+    if (!error) {
+      setWorkshopChosen(false);
+      setSignedPeople((count) => Math.max(0, count - 1));
+      refreshParticipants?.();
+      showSuccess(
+        "Check-out Successful",
+        "You have successfully checked-out from this workshop.",
+      );
+    } else {
+      showError("Check-out Failed", "Failed to check out. Please try again.");
     }
   };
 
