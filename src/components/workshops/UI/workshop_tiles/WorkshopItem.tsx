@@ -223,7 +223,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         {workshop.title}
       </h3>
       {!isWorkshopActive() && (
-        <p className="pointer-events-none absolute bottom-1.5 sm:bottom-3 left-1/2 z-[1] -translate-x-1/2 transform rounded-md sm:rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-2 sm:px-4 py-1.5 sm:py-2.5 text-center text-[10px] sm:text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)]">
+        <p className="pointer-events-none absolute bottom-1.5 sm:bottom-3 left-1/2 z-[1] -translate-x-1/2 transform rounded-md sm:rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-1.5 sm:px-4 py-1 sm:py-2.5 text-center text-[9px] sm:text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)] max-w-[calc(100%-12px)] leading-normal">
           {getInactiveStatusText()}
         </p>
       )}
