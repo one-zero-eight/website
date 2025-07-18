@@ -55,7 +55,7 @@ const ReplaceURL = (str: string) => {
       const url = urlMatch[0];
       result.push(
         <a
-          className="text-brand-violet hover:scale-110 hover:text-brand-violet/80"
+          className="text-brand-violet hover:scale-110 hover:text-brand-violet/80 break-all"
           href={url}
           target="_blank"
           rel="noopener noreferrer"
@@ -76,7 +76,7 @@ const ReplaceURL = (str: string) => {
       const username = tgMatch[0];
       result.push(
         <a
-          className="text-brand-violet hover:scale-110 hover:text-brand-violet/80"
+          className="text-brand-violet hover:scale-110 hover:text-brand-violet/80 break-all"
           href={`https://t.me/${username.slice(1)}`}
           target="_blank"
           rel="noopener noreferrer"
@@ -263,7 +263,7 @@ const Description: React.FC<WorkshopProps> = ({
   if (!workshop) return <div>No description</div>;
   return (
     <div className="flex flex-col p-5 text-contrast">
-      <div className="mb-1.5 max-h-24 overflow-y-auto text-lg leading-6">
+      <div className="mb-1.5 max-h-24 overflow-y-auto text-lg leading-6 break-words [overflow-wrap:anywhere]">
         {ReplaceURL(workshop.body)}
       </div>
       <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">

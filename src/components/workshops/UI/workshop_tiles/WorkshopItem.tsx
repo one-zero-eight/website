@@ -223,7 +223,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         {workshop.title}
       </h3>
       {!isWorkshopActive() && (
-        <p className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 transform rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2 text-center text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)]">
+        <p className="pointer-events-none absolute bottom-3 left-1/2 z-[1] -translate-x-1/2 transform rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2 text-center text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)]">
           {getInactiveStatusText()}
         </p>
       )}
@@ -251,7 +251,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
               e.stopPropagation();
               remove(workshop);
             }}
-            className="absolute bottom-3 right-3 flex cursor-pointer items-center justify-center rounded-xl border border-[#ff6b6b]/20 bg-primary/80 p-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
+            className="absolute bottom-3 right-3 z-[5] flex cursor-pointer items-center justify-center rounded-xl border border-[#ff6b6b]/20 bg-primary/80 p-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
             title="Delete workshop"
           >
             <span className="icon-[material-symbols--delete-outline-rounded] text-xl" />
@@ -261,7 +261,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
               e.stopPropagation();
               edit(workshop);
             }}
-            className="absolute bottom-3 left-3 flex cursor-pointer items-center justify-center rounded-xl border border-brand-violet/20 bg-primary/80 p-2.5 text-brand-violet backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-brand-violet/40 hover:bg-brand-violet/20 hover:text-brand-violet/80"
+            className="absolute bottom-3 left-3 z-[5] flex cursor-pointer items-center justify-center rounded-xl border border-brand-violet/20 bg-primary/80 p-2.5 text-brand-violet backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-brand-violet/40 hover:bg-brand-violet/20 hover:text-brand-violet/80"
             title="Edit workshop"
           >
             <span className="icon-[mynaui--pencil] text-xl" />
