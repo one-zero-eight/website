@@ -82,7 +82,7 @@ export function WorkshopsPage() {
         },
       },
     });
-    
+
     if (error) {
       showError(
         "Loading Failed",
@@ -101,9 +101,7 @@ export function WorkshopsPage() {
           const date = new Date(isoString);
           return date.toTimeString().substring(0, 5);
         } catch {
-          return (
-            isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || ""
-          );
+          return isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || "";
         }
       };
       return {
@@ -159,7 +157,7 @@ export function WorkshopsPage() {
     const { data, error } = await workshopsFetch.POST("/workshops/", {
       body: createRequest,
     });
-    
+
     if (error) {
       showError(
         "Creation Failed",
@@ -167,7 +165,7 @@ export function WorkshopsPage() {
       );
       return false;
     }
-    
+
     if (data) {
       showSuccess(
         "Workshop Created",
@@ -179,9 +177,7 @@ export function WorkshopsPage() {
           const date = new Date(isoString);
           return date.toTimeString().substring(0, 5);
         } catch {
-          return (
-            isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || ""
-          );
+          return isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || "";
         }
       };
 
@@ -201,7 +197,7 @@ export function WorkshopsPage() {
       setWorkshops((prevWorkshops) => [...prevWorkshops, createdWorkshop]);
       return true;
     }
-    
+
     return false;
   };
   const removeWorkshop = async (workshop: Workshop) => {
@@ -217,15 +213,12 @@ export function WorkshopsPage() {
       return;
     }
 
-    const { error } = await workshopsFetch.DELETE(
-      `/workshops/{workshop_id}`,
-      {
-        params: {
-          path: { workshop_id: workshop.id },
-        },
+    const { error } = await workshopsFetch.DELETE(`/workshops/{workshop_id}`, {
+      params: {
+        path: { workshop_id: workshop.id },
       },
-    );
-    
+    });
+
     if (error) {
       showError(
         "Delete Failed",
@@ -253,24 +246,20 @@ export function WorkshopsPage() {
       name: updatedWorkshop.title,
       description: updatedWorkshop.body,
       capacity: updatedWorkshop.maxPlaces,
-      remain_places:
-        updatedWorkshop.remainPlaces || updatedWorkshop.maxPlaces,
+      remain_places: updatedWorkshop.remainPlaces || updatedWorkshop.maxPlaces,
       place: updatedWorkshop.room || "TBA",
       dtstart: startDateTime,
       dtend: endDateTime,
       is_active: updatedWorkshop.isActive ?? true,
     };
 
-    const { error } = await workshopsFetch.PUT(
-      `/workshops/{workshop_id}`,
-      {
-        params: {
-          path: { workshop_id: updatedWorkshop.id },
-        },
-        body: updateRequest,
+    const { error } = await workshopsFetch.PUT(`/workshops/{workshop_id}`, {
+      params: {
+        path: { workshop_id: updatedWorkshop.id },
       },
-    );
-    
+      body: updateRequest,
+    });
+
     if (error) {
       showError(
         "Update Failed",
@@ -301,7 +290,7 @@ export function WorkshopsPage() {
         },
       },
     });
-    
+
     if (error) {
       showError(
         "Role Change Failed",

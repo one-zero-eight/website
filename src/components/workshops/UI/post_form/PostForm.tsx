@@ -134,7 +134,10 @@ const PostForm: React.FC<PostFormProps> = ({
 
       if (workshopDateTime < now) {
         newErrors.date = "Workshop cannot be scheduled in the past";
-        showError("Validation Error", "Workshop cannot be scheduled in the past");
+        showError(
+          "Validation Error",
+          "Workshop cannot be scheduled in the past",
+        );
       }
     } else if (workshop.date) {
       // Если только дата указана, проверяем только дату
@@ -144,7 +147,10 @@ const PostForm: React.FC<PostFormProps> = ({
 
       if (workshopDate < today) {
         newErrors.date = "Workshop cannot be scheduled in the past";
-        showError("Validation Error", "Workshop cannot be scheduled in the past");
+        showError(
+          "Validation Error",
+          "Workshop cannot be scheduled in the past",
+        );
       }
     }
 
@@ -155,7 +161,10 @@ const PostForm: React.FC<PostFormProps> = ({
 
       if (startTime >= endTime) {
         newErrors.time = "Start time must be earlier than end time";
-        showError("Validation Error", "Start time must be earlier than end time");
+        showError(
+          "Validation Error",
+          "Start time must be earlier than end time",
+        );
       }
     }
 

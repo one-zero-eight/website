@@ -51,7 +51,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     // Проверяем, прошел ли воркшоп
     const now = new Date();
     const workshopDate = new Date(workshop.date);
-    const [hours, minutes] = workshop.endTime.split(":").map(Number);
+    const [hours, minutes] = workshop.startTime.split(":").map(Number);
     workshopDate.setHours(hours, minutes, 0, 0);
 
     if (workshopDate < now) {
@@ -155,13 +155,16 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         "You have successfully checked-in for this workshop.",
       );
     } else {
-      showError("Check-in Failed", "Failed to check in. Please try again. Probably you have overlapping workshops");
+      showError(
+        "Check-in Failed",
+        "Failed to check in. Please try again. Probably you have overlapping workshops",
+      );
     }
   };
 
   const handleCheckOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    
+
     const { error } = await workshopsFetch.POST(
       `/workshops/{workshop_id}/checkout`,
       {

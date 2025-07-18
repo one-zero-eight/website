@@ -48,8 +48,8 @@ export function ToastProvider({ children }: ToastProviderProps) {
     // Помечаем toast как скрывающийся, но не удаляем сразу
     setToasts((prev) =>
       prev.map((toast) =>
-        toast.id === id ? { ...toast, isVisible: false } : toast
-      )
+        toast.id === id ? { ...toast, isVisible: false } : toast,
+      ),
     );
 
     // Удаляем toast из массива после времени анимации (300ms)

@@ -113,7 +113,9 @@ export function ConfirmDialog({
           </div>
 
           {/* Message */}
-          <p className="mb-6 leading-relaxed text-contrast opacity-80">{message}</p>
+          <p className="mb-6 leading-relaxed text-contrast opacity-80">
+            {message}
+          </p>
 
           {/* Actions */}
           <div className="flex justify-end gap-3">
