@@ -66,7 +66,10 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
     return currday(day) + " " + date.getDate();
   };
   return (
-    <div style={{ textAlign: "center" }} className="flex flex-col gap-2 px-4 pb-28">
+    <div
+      style={{ textAlign: "center" }}
+      className="flex flex-col gap-2 px-4 pb-28"
+    >
       {/* Тернарное? выражение чтобы плейсходдер рисовать если нет воркшопов */}
       {groups && Object.keys(groups).length > 0 ? (
         Object.keys(groups)
@@ -77,7 +80,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
                 <div className="text-2xl font-medium sm:text-3xl">
                   {formatDate(tagName)}
                 </div>
-                <div className="mb-1 mt-4 flex w-full flex-wrap gap-x-2 gap-y-2 justify-start">
+                <div className="mb-1 mt-4 flex w-full flex-wrap justify-start gap-x-2 gap-y-2">
                   {groups[tagName]
                     .sort((a, b) => {
                       const [hoursA, minutesA] = a.startTime

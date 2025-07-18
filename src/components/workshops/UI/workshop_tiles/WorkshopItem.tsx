@@ -223,8 +223,9 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         {workshop.title}
       </h3>
       {!isWorkshopActive() && (
-        <p className={`pointer-events-none absolute bottom-1.5 left-1/2 z-[1] max-w-[calc(100%-12px)] -translate-x-1/2 sm:rounded-xl transform rounded-md border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] text-center font-medium leading-normal text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)] 
-        ${getInactiveStatusText().startsWith('Inactive due') ? 'px-1 py-1 text-[10px] sm:bottom-3 sm:px-2 sm:py-1.5 sm:text-sm' : 'px-1.5 py-[5px] text-xs sm:bottom-3 sm:px-4 sm:py-2.5 sm:text-sm'}`}>
+        <p
+          className={`pointer-events-none absolute bottom-1.5 left-1/2 z-[1] max-w-[calc(100%-12px)] -translate-x-1/2 transform rounded-md border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] text-center font-medium leading-normal text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)] sm:rounded-xl ${getInactiveStatusText().startsWith("Inactive due") ? "px-1 py-1 text-[10px] sm:bottom-3 sm:px-2 sm:py-1.5 sm:text-sm" : "px-1.5 py-[5px] text-xs sm:bottom-3 sm:px-4 sm:py-2.5 sm:text-sm"}`}
+        >
           {getInactiveStatusText()}
         </p>
       )}
