@@ -193,19 +193,19 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   };
   return (
     <div
-      className={`relative w-full max-w-[280px] rounded-2xl border bg-primary p-4 pb-[55px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-700/60 bg-gradient-to-br from-green-600/20 to-green-700/10 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] dark:border-green-500/60 dark:from-green-500/10 dark:to-green-500/5" : "border-brand-violet/40"} `}
+      className={`relative w-full max-w-[150px] sm:max-w-[280px] rounded-lg sm:rounded-2xl border bg-primary p-2.5 sm:p-4 pb-[38px] sm:pb-[55px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-700/60 bg-gradient-to-br from-green-600/20 to-green-700/10 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] dark:border-green-500/60 dark:from-green-500/10 dark:to-green-500/5" : "border-brand-violet/40"} `}
       onClick={handleContentClick}
     >
       <div className="flex items-center justify-between">
         {workshop.startTime && workshop.endTime && (
           <p
-            className={`flex items-center justify-start text-[15px] font-medium text-brand-violet ${!isWorkshopActive() ? "opacity-50" : ""}`}
+            className={`flex items-center justify-start text-xs sm:text-[15px] font-medium text-brand-violet ${!isWorkshopActive() ? "opacity-50" : ""}`}
           >
             {formatTime(workshop.startTime)} - {formatTime(workshop.endTime)}
           </p>
         )}
         <p
-          className={`flex items-center justify-end text-[15px] font-medium text-brand-violet ${!isWorkshopActive() ? "opacity-50" : ""}`}
+          className={`flex items-center justify-end text-xs sm:text-[15px] font-medium text-brand-violet ${!isWorkshopActive() ? "opacity-50" : ""}`}
         >
           {workshop.maxPlaces >= 0
             ? workshop.maxPlaces === 500
@@ -218,18 +218,18 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         </p>
       </div>
       <h3
-        className={`my-1.5 mb-2 overflow-hidden break-words text-lg font-semibold leading-[1.3] text-contrast ${!isWorkshopActive() ? "opacity-50" : ""}`}
+        className={`my-0.5 sm:my-1.5 mb-1 sm:mb-2 overflow-hidden break-words text-sm sm:text-lg font-semibold leading-[1.2] sm:leading-[1.3] text-contrast ${!isWorkshopActive() ? "opacity-50" : ""}`}
       >
         {workshop.title}
       </h3>
       {!isWorkshopActive() && (
-        <p className="pointer-events-none absolute bottom-3 left-1/2 z-[1] -translate-x-1/2 transform rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2.5 text-center text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)]">
+        <p className="pointer-events-none absolute bottom-1.5 sm:bottom-3 left-1/2 z-[1] -translate-x-1/2 transform rounded-md sm:rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-2 sm:px-4 py-1.5 sm:py-2.5 text-center text-[10px] sm:text-sm font-semibold text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)]">
           {getInactiveStatusText()}
         </p>
       )}
       {workshop.room && (
-        <div className={`my-2 ${!isWorkshopActive() ? "opacity-50" : ""}`}>
-          <p className="m-0 text-base text-contrast/80">
+        <div className={`my-1 sm:my-2 ${!isWorkshopActive() ? "opacity-50" : ""}`}>
+          <p className="m-0 text-xs sm:text-base text-contrast/80">
             <strong>Room:</strong>{" "}
             <span
               onClick={handleRoomClick}
@@ -251,20 +251,20 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
               e.stopPropagation();
               remove(workshop);
             }}
-            className="absolute bottom-3 right-3 z-[5] flex cursor-pointer items-center justify-center rounded-xl border border-[#ff6b6b]/20 bg-primary/80 p-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
+            className="absolute bottom-1.5 sm:bottom-3 right-1.5 sm:right-3 z-[5] flex cursor-pointer items-center justify-center rounded-md sm:rounded-xl border border-[#ff6b6b]/20 bg-primary/80 p-1.5 sm:p-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
             title="Delete workshop"
           >
-            <span className="icon-[material-symbols--delete-outline-rounded] text-xl" />
+            <span className="icon-[material-symbols--delete-outline-rounded] text-base sm:text-xl" />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               edit(workshop);
             }}
-            className="absolute bottom-3 left-3 z-[5] flex cursor-pointer items-center justify-center rounded-xl border border-brand-violet/20 bg-primary/80 p-2.5 text-brand-violet backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-brand-violet/40 hover:bg-brand-violet/20 hover:text-brand-violet/80"
+            className="absolute bottom-1.5 sm:bottom-3 left-1.5 sm:left-3 z-[5] flex cursor-pointer items-center justify-center rounded-md sm:rounded-xl border border-brand-violet/20 bg-primary/80 p-1.5 sm:p-2.5 text-brand-violet backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:border-brand-violet/40 hover:bg-brand-violet/20 hover:text-brand-violet/80"
             title="Edit workshop"
           >
-            <span className="icon-[mynaui--pencil] text-xl" />
+            <span className="icon-[mynaui--pencil] text-base sm:text-xl" />
           </button>
         </>
       )}
@@ -273,19 +273,19 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         (workshopChosen ? (
           <button
             onClick={handleCheckOut}
-            className="absolute bottom-3 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-xl border border-[#ff6b6b]/20 bg-primary/80 p-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
+            className="absolute bottom-1.5 sm:bottom-3 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-md sm:rounded-xl border border-[#ff6b6b]/20 bg-primary/80 p-1.5 sm:p-2.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
             title="Check out"
           >
-            <span className="icon-[material-symbols--remove] text-xl" />
+            <span className="icon-[material-symbols--remove] text-base sm:text-xl" />
           </button>
         ) : (
           <button
             disabled={signedPeople === workshop.maxPlaces}
             onClick={handleCheckIn}
-            className="absolute bottom-3 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-xl border border-green-700/30 bg-primary/80 p-2.5 text-green-700 backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#bcdfbc]/20 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/40 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa]"
+            className="absolute bottom-1.5 sm:bottom-3 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-md sm:rounded-xl border border-green-700/30 bg-primary/80 p-1.5 sm:p-2.5 text-green-700 backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#bcdfbc]/20 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/40 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa]"
             title="Check in"
           >
-            <span className="icon-[material-symbols--add-rounded] text-xl" />
+            <span className="icon-[material-symbols--add-rounded] text-base sm:text-xl" />
           </button>
         ))}
     </div>
