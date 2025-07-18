@@ -70,9 +70,11 @@ export default function SearchField({
             value={text}
             autoFocus={true}
           />
-          <div className="hidden md:inline">
-            <SearchExample searchQueries={searchQueryExamples} />
-          </div>
+          {pageType === "search" && (
+            <div className="hidden md:inline">
+              <SearchExample searchQueries={searchQueryExamples} />
+            </div>
+          )}
           {selectedFilters && checks && applyFilters && (
             <div className="inline md:hidden">
               <SelectSourcesFilter

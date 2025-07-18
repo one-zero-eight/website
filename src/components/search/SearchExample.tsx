@@ -10,6 +10,7 @@ export function SearchExample({ searchQueries }: SearchExampleProps) {
     searchQueries[Math.floor(Math.random() * searchQueries.length)],
   );
   const navigate = useNavigate();
+
   if (searchQueries.length === 0) return null;
 
   const runSearch = (query: string) => {
@@ -17,8 +18,14 @@ export function SearchExample({ searchQueries }: SearchExampleProps) {
   };
 
   const setNewExample = () => {
-    const newExample =
-      searchQueries[Math.floor(Math.random() * searchQueries.length)];
+    if (searchQueries.length <= 1) return;
+    let newExample = example;
+
+    while (newExample === example) {
+      newExample =
+        searchQueries[Math.floor(Math.random() * searchQueries.length)];
+    }
+
     setExample(newExample);
   };
 

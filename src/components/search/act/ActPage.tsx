@@ -4,13 +4,17 @@ import SearchField from "@/components/search/SearchField.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { ActResult } from "./ActResult";
 import { $search } from "@/api/search";
+import { useState } from "react";
 
 export function ActPage({ actQuery }: { actQuery: string }) {
   const navigate = useNavigate();
   const { me } = useMe();
 
+  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
+
   const runSearch = (query: string) => {
     navigate({ to: "/act", search: { q: query } });
+    setSubmittedQuery(query);
   };
 
   const {
@@ -21,10 +25,10 @@ export function ActPage({ actQuery }: { actQuery: string }) {
     "post",
     "/act/",
     {
-      body: { query: actQuery },
+      body: { query: submittedQuery ?? "" },
     },
     {
-      enabled: actQuery.length > 0,
+      enabled: submittedQuery !== null && submittedQuery.length > 0,
       // Disable refetch
       refetchOnMount: false,
       refetchOnWindowFocus: false,
@@ -43,7 +47,7 @@ export function ActPage({ actQuery }: { actQuery: string }) {
         runSearch={runSearch}
         currentQuery={actQuery}
       />
-      <span className="font-semibold">AI assistant:</span>
+      <span className="font-semibold">AI Assistant:</span>
       {isLoading ? (
         <span>- Executing...</span>
       ) : result ? (
@@ -59,7 +63,7 @@ export function ActPage({ actQuery }: { actQuery: string }) {
           <div className="flex flex-row gap-1">
             <div>-</div>
             <div className="flex flex-col gap-1">
-              <span>Hi! I'm AI assistant.</span>
+              <span>Hi! I'm AI Assistant.</span>
               <span>I can help you to book the music room.</span>
             </div>
           </div>

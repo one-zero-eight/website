@@ -4,10 +4,13 @@ import SearchField from "@/components/search/SearchField.tsx";
 import { AskResult } from "./AskResult";
 import { useNavigate } from "@tanstack/react-router";
 import { $search } from "@/api/search";
+import { useState } from "react";
 
 export function AskPage({ askQuery }: { askQuery: string }) {
   const { me } = useMe();
   const navigate = useNavigate();
+
+  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
 
   const {
     data: result,
@@ -17,10 +20,10 @@ export function AskPage({ askQuery }: { askQuery: string }) {
     "post",
     "/ask/",
     {
-      body: { query: askQuery },
+      body: { query: submittedQuery ?? "" },
     },
     {
-      enabled: askQuery.length > 0,
+      enabled: submittedQuery !== null && submittedQuery.length > 0,
       // Disable refetch
       refetchOnMount: false,
       refetchOnWindowFocus: false,
@@ -30,6 +33,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
 
   const runSearch = (query: string) => {
     navigate({ to: "/ask", search: { q: query } });
+    setSubmittedQuery(query);
   };
 
   if (!me) {

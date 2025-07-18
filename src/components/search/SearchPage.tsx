@@ -5,7 +5,7 @@ import PreviewCard from "@/components/search/PreviewCard.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   InfoSources,
   PathsSearchSearchGetParametersQueryResponse_types,
@@ -16,6 +16,9 @@ import IframePreviewCard from "./IframePreviewCard";
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const navigate = useNavigate();
   const { me } = useMe();
+
+  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
+  const didInit = useRef<boolean>(false);
 
   const [previewSource, setPreviewSource] =
     useState<searchTypes.SchemaSearchResponse["source"]>();
@@ -144,7 +147,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     {
       params: {
         query: {
-          query: searchQuery,
+          query: submittedQuery || "",
           response_types: filters.response_types,
           ...(filters.response_types.length > 0 && {
             response_types: filters.response_types,
@@ -153,7 +156,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       },
     },
     {
-      enabled: searchQuery.length > 0,
+      enabled: Boolean(submittedQuery?.length),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
@@ -209,8 +212,17 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     }
   }, [filteredResponses]);
 
+  useEffect(() => {
+    if (didInit.current) {
+      setSubmittedQuery(searchQuery);
+    } else {
+      didInit.current = true;
+    }
+  }, [searchQuery]);
+
   const runSearch = (query: string) => {
     navigate({ to: "/search", search: { q: query } });
+    setSubmittedQuery(query);
   };
 
   if (!me) {
