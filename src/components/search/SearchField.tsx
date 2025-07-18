@@ -44,7 +44,7 @@ export default function SearchField({
   checks?: (group: string, value: string) => void;
   applyFilters?: () => void;
   pageType: PageType;
-  setCurrentQuery?: (value: string) => void; // сделаем опциональным на всякий случай
+  setCurrentQuery?: (value: string) => void;
 }) {
   const [text, setText] = useState(currentQuery);
 
@@ -56,6 +56,7 @@ export default function SearchField({
     runSearch(text);
     if (setCurrentQuery && pageType === "ask") {
       setCurrentQuery("");
+      setText("");
     }
   };
 
