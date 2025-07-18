@@ -56,11 +56,11 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
       "flex items-start gap-3 p-4 rounded-lg shadow-lg border-l-4 transition-all duration-300 ease-in-out transform bg-primary text-contrast";
 
     if (isLeaving) {
-      return `${baseStyles} translate-x-full opacity-0`;
+      return `${baseStyles} translate-y-[-100%] opacity-0 sm:translate-y-0 sm:translate-x-full`;
     }
 
     if (isEntering) {
-      return `${baseStyles} translate-x-full opacity-0`;
+      return `${baseStyles} translate-y-[-100%] opacity-0 sm:translate-y-0 sm:translate-x-full`;
     }
 
     switch (toast.type) {
