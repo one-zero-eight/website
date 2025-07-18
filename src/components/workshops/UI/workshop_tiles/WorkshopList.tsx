@@ -66,7 +66,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
     return currday(day) + " " + date.getDate();
   };
   return (
-    <div style={{ textAlign: "center" }} className="flex flex-col gap-2 px-4">
+    <div style={{ textAlign: "center" }} className="flex flex-col gap-2 px-4 pb-28">
       {/* Тернарное? выражение чтобы плейсходдер рисовать если нет воркшопов */}
       {groups && Object.keys(groups).length > 0 ? (
         Object.keys(groups)
