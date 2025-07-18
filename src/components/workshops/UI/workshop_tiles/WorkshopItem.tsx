@@ -42,6 +42,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     /* Стэйт для управления количеством записанных людей */
   }
   const [signedPeople, setSignedPeople] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(false);
   // Функция для проверки активности воркшопа
   const isWorkshopActive = () => {
     return workshop.isActive !== false && workshop.isRegistrable !== false;
@@ -133,9 +134,13 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   const handleCheckIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
+    if (isLoading) return;
+
     if (workshop.maxPlaces > 0 && signedPeople >= workshop.maxPlaces) {
       return;
     }
+
+    setIsLoading(true);
 
     const { error } = await workshopsFetch.POST(
       `/workshops/{workshop_id}/checkin`,
@@ -160,10 +165,16 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         "Failed to check in. Please try again. Probably you have overlapping workshops",
       );
     }
+
+    setIsLoading(false);
   };
 
   const handleCheckOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
+
+    if (isLoading) return;
+
+    setIsLoading(true);
 
     const { error } = await workshopsFetch.POST(
       `/workshops/{workshop_id}/checkout`,
@@ -185,6 +196,8 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
     } else {
       showError("Check-out Failed", "Failed to check out. Please try again.");
     }
+
+    setIsLoading(false);
   };
   return (
     <div
@@ -272,16 +285,17 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         (workshopChosen ? (
           <button
             onClick={handleCheckOut}
-            className="absolute bottom-1.5 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-md border border-[#ff6b6b]/20 bg-primary/80 p-1.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252] sm:bottom-3 sm:rounded-xl sm:p-2.5"
+            disabled={isLoading}
+            className="absolute bottom-1.5 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-md border border-[#ff6b6b]/20 bg-primary/80 p-1.5 text-[#ff6b6b] backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 sm:bottom-3 sm:rounded-xl sm:p-2.5"
             title="Check out"
           >
             <span className="text-xs font-medium sm:text-sm">Check out</span>
           </button>
         ) : (
           <button
-            disabled={signedPeople === workshop.maxPlaces}
+            disabled={signedPeople === workshop.maxPlaces || isLoading}
             onClick={handleCheckIn}
-            className="absolute bottom-1.5 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-md border border-green-700/30 bg-primary/80 p-1.5 text-green-700 backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#bcdfbc]/20 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/40 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa] sm:bottom-3 sm:rounded-xl sm:p-2.5"
+            className="absolute bottom-1.5 right-1/2 flex translate-x-1/2 transform cursor-pointer items-center justify-center rounded-md border border-green-700/30 bg-primary/80 p-1.5 text-green-700 backdrop-blur-[12px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:translate-x-1/2 hover:scale-110 hover:transform hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 dark:border-[#bcdfbc]/20 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/40 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa] sm:bottom-3 sm:rounded-xl sm:p-2.5"
             title="Check in"
           >
             <span className="text-xs font-medium sm:text-sm">Check in</span>
