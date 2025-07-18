@@ -161,7 +161,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         refreshParticipants(); // Refresh participant data
         showSuccess(
           "Check-in Successful",
-          "You have successfully registered for this workshop.",
+          "You have successfully checked-in for this workshop.",
         );
       } else {
         showError("Check-in Failed", "Failed to check in. Please try again. Probably you have overlapping workshops");
@@ -191,7 +191,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         refreshParticipants(); // Refresh participant data
         showSuccess(
           "Check-out Successful",
-          "You have successfully unregistered from this workshop.",
+          "You have successfully checked-out from this workshop.",
         );
       } else {
         showError("Check-out Failed", "Failed to check out. Please try again.");
