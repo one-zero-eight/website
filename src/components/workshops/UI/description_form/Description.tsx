@@ -378,9 +378,22 @@ const Description: React.FC<WorkshopProps> = ({
                 <span className="text-m font-mono">
                   {participant.email.split("@")[0]}
                   {currentUserRole === "admin" &&
-                    (participant.t_alias === "None"
-                      ? " (no tg alias)"
-                      : " (" + participant.t_alias + ")")}
+                    (participant.t_alias === "None" ? (
+                      " (no tg alias)"
+                    ) : (
+                      <>
+                        {" ("}
+                        <a
+                          href={`https://t.me/${participant.t_alias}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-brand-violet hover:scale-110 hover:text-brand-violet/80"
+                        >
+                          @{participant.t_alias}
+                        </a>
+                        {")"}
+                      </>
+                    ))}
                 </span>
               </div>
             ))}
