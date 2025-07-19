@@ -251,10 +251,16 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           <p className="py-4 text-xl font-semibold text-contrast">
             Loading search results...
           </p>
-          <div className="skeleton flex flex-col gap-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-24 w-full rounded-lg"></div>
-            ))}
+          <div className="flex w-full flex-row gap-6">
+            <div className="flex flex-col gap-4 md:w-1/2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="group flex grid min-h-32 w-full animate-pulse items-start rounded-lg bg-floating p-4"
+                />
+              ))}
+            </div>
+            <div className="group flex hidden animate-pulse md:inline md:h-[50vh] md:w-1/2 md:min-w-0 md:basis-1/2 md:justify-stretch md:rounded-lg md:bg-floating"></div>
           </div>
         </>
       )}

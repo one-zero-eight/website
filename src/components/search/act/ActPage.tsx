@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { ActResult } from "./ActResult";
 import { $search } from "@/api/search";
 import { useState } from "react";
+import AnimatedDots from "../AnimatedDots";
 
 export function ActPage({ actQuery }: { actQuery: string }) {
   const navigate = useNavigate();
@@ -49,7 +50,10 @@ export function ActPage({ actQuery }: { actQuery: string }) {
       />
       <span>AI Assistant:</span>
       {isLoading ? (
-        <span>- Executing...</span>
+        <div className="flex self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
+          <span>- Executing</span>
+          <AnimatedDots></AnimatedDots>
+        </div>
       ) : result ? (
         <div className="flex flex-row gap-6">
           <div className="flex w-full flex-col justify-stretch gap-4 md:min-w-0">
@@ -57,7 +61,9 @@ export function ActPage({ actQuery }: { actQuery: string }) {
           </div>
         </div>
       ) : error ? (
-        <span>- Sorry, I can't help you with this question.</span>
+        <div className="flex flex-col gap-2 self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
+          <span>- Sorry, I can't help you with this question.</span>
+        </div>
       ) : (
         <>
           <div className="flex flex-row gap-1">

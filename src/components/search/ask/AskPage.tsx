@@ -4,6 +4,7 @@ import SearchField from "@/components/search/SearchField.tsx";
 import { AskResult } from "./AskResult";
 import { $search, searchTypes } from "@/api/search";
 import { useEffect, useState } from "react";
+import AnimatedDots from "../AnimatedDots";
 
 type Message =
   | { role: "user"; content: string }
@@ -68,9 +69,14 @@ export function AskPage({ askQuery }: { askQuery: string }) {
       )}
 
       {isLoading ? (
-        <span>Thinking...</span>
+        <div className="flex self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
+          <span>- Thinking</span>
+          <AnimatedDots></AnimatedDots>
+        </div>
       ) : error ? (
-        <span>- Sorry, I can't help you with this question.</span>
+        <div className="flex flex-col gap-2 self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
+          <span>- Sorry, I can't help you with this question.</span>
+        </div>
       ) : null}
 
       <div className="mt-4 flex flex-col-reverse gap-6">
