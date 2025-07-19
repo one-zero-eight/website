@@ -135,9 +135,9 @@ export const items: ItemType[] = [
     to: "/workshops",
     icon: <span className="icon-[material-symbols--construction-rounded]" />,
     badge: (
-        <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-          NEW
-        </span>
+      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
+        NEW
+      </span>
     ),
   },
   { type: "separator" },
