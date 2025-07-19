@@ -59,7 +59,7 @@ jobs:
           if-no-files-found: error
 
   deploy:
-    if: github.repository_owner == 'inno-sport-inh' && (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main')
+    if: github.repository_owner == 'inno-sport-inh' && (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/cicd')
     name: Deploy to production server
     needs: build
     runs-on: ubuntu-latest
