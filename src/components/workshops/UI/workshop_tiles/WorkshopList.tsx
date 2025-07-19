@@ -80,7 +80,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
                 <div className="text-2xl font-medium sm:text-3xl">
                   {formatDate(tagName)}
                 </div>
-                <div className="mb-1 mt-4 flex w-full flex-wrap justify-start gap-x-2 gap-y-2">
+                <div className="mb-1 mt-4 grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2 sm:grid-cols-[repeat(auto-fit,minmax(225px,1fr))]">
                   {groups[tagName]
                     .sort((a, b) => {
                       const [hoursA, minutesA] = a.startTime

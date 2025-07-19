@@ -201,7 +201,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   };
   return (
     <div
-      className={`relative w-full max-w-[150px] rounded-lg border bg-primary p-2.5 pb-[38px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] sm:max-w-[280px] sm:rounded-2xl sm:p-4 sm:pb-[55px] ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-700/60 bg-gradient-to-br from-green-600/20 to-green-700/10 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] dark:border-green-500/60 dark:from-green-500/10 dark:to-green-500/5" : "border-brand-violet/40"} `}
+      className={`relative w-full rounded-lg border bg-primary p-2.5 pb-[38px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] sm:rounded-2xl sm:p-4 sm:pb-[55px] ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-700/60 bg-gradient-to-br from-green-600/20 to-green-700/10 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] dark:border-green-500/60 dark:from-green-500/10 dark:to-green-500/5" : "border-brand-violet/40"} `}
       onClick={handleContentClick}
     >
       <div className="flex items-center justify-between">
