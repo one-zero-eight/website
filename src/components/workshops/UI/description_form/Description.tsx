@@ -102,6 +102,24 @@ const processTextNode = (text: string): (string | JSX.Element)[] => {
 };
 
 const MarkdownWithCustomLinks: React.FC<{ children: string }> = ({ children }) => {
+  // Функция для обработки различных типов children
+  const processChildrenRecursively = (children: React.ReactNode): React.ReactNode => {
+    if (typeof children === 'string') {
+      return processTextNode(children);
+    }
+    
+    if (Array.isArray(children)) {
+      return children.map((child, index) => {
+        if (typeof child === 'string') {
+          return <React.Fragment key={index}>{processTextNode(child)}</React.Fragment>;
+        }
+        return child;
+      });
+    }
+    
+    return children;
+  };
+
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
@@ -121,20 +139,24 @@ const MarkdownWithCustomLinks: React.FC<{ children: string }> = ({ children }) =
             target="_blank"
             rel="noopener noreferrer"
           >
-            {children}
+            {processChildrenRecursively(children)}
           </a>
         ),
-        // Стилизация жирного текста
+        // Стилизация жирного текста с обработкой текста внутри
         strong: ({ children }) => (
-          <strong className="font-bold">{children}</strong>
+          <strong className="font-bold">
+            {processChildrenRecursively(children)}
+          </strong>
         ),
-        // Стилизация курсива
+        // Стилизация курсива с обработкой текста внутри
         em: ({ children }) => (
-          <em className="italic">{children}</em>
+          <em className="italic">
+            {processChildrenRecursively(children)}
+          </em>
         ),
         // Стилизация параграфов
         p: ({ children }) => (
-          <p className="mb-2 last:mb-0">{children}</p>
+          <p className="mb-2 last:mb-0">{processChildrenRecursively(children)}</p>
         ),
       }}
     >
