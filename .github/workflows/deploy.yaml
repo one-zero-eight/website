@@ -1,84 +1,66 @@
-name: Build static files and deploy
+name: Build static files and deploy website
 
 on:
-  # Allow manual trigger of the workflow
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: Environment to deploy to
-        type: environment
-        required: true
-  # Verify build on any push; deploy only on main branch
   push:
-  # Verify build in pull requests
-  pull_request:
+    branches:
+      - cicd
 
 jobs:
   build:
     name: Build static files
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'staging' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure environment variables
-        run: echo "${{ vars.ENV_VARIABLES }}" > .env.local
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Set up Node
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Build
-        run: pnpm run build
-
-      - name: List files
         run: |
-          # Save the list of files as a GitHub Actions step summary
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          ls -lAhR ./dist 2>&1 | tee -a $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          npm install
+          npm run build
+
+      - name: Archive build artifacts
+        run: tar czf site.tar.gz ./dist
 
       - uses: actions/upload-artifact@v4
         with:
-          name: static-files
-          path: dist/
-          if-no-files-found: error
+          name: site-build
+          path: site.tar.gz
 
   deploy:
-    if: github.repository_owner == 'one-zero-eight' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
-    name: Deploy to server for ${{ github.event.inputs.environment || 'staging' }}
+    if: github.repository_owner == 'inno-sport-inh'
+    name: Deploy to /var/www/sport.innonohassle.ru
     needs: build
-    runs-on: [self-hosted, innohassle]
-    environment:
-      name: ${{ github.event.inputs.environment || 'staging' }}
-      url: ${{ vars.DEPLOY_URL }}
-    concurrency:
-      group: ${{ github.event.inputs.environment || 'staging' }}
-      cancel-in-progress: false
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: static-files
-          path: dist
+          name: site-build
+          path: .
 
-      - name: Copy files via SSH
+      - name: Copy archive to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
-          source: "./dist/*"
-          target: ${{ secrets.SSH_TARGET_DIR }}
-          strip_components: 1
-          overwrite: true
-          rm: true
+          port: ${{ secrets.SSH_PORT }}
+          source: "site.tar.gz"
+          target: "/tmp/"
+
+      - name: Extract on server and reload Nginx
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            mkdir -p /var/www/sport.innonohassle.ru
+            tar xzf /tmp/site.tar.gz -C /var/www/sport.innonohassle.ru --strip-components=1
+            rm /tmp/site.tar.gz
+            sudo systemctl reload nginx
