@@ -17,11 +17,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
 
       - name: Install dependencies
-        run: |
-          npm install
-          npm run build
+        run: pnpm install --frozen-lockfile
+
+      - name: Build project
+        run: pnpm run build
 
       - name: Archive build artifacts
         run: tar czf site.tar.gz ./dist
