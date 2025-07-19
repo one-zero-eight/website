@@ -60,7 +60,7 @@ const TruncatableMarkdown = ({
           a: ({ href, children, ...props }) => (
             <a
               href={href}
-              className="text-blue-500 hover:underline"
+              className="text-contrast underline"
               target="_blank"
               rel="noopener noreferrer"
               {...props}
