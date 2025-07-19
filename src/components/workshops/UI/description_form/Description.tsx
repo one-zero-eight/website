@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { workshopsFetch } from "@/api/workshops";
 import { useToast } from "../../toast";
 
@@ -43,11 +45,13 @@ const formatTime = (timeString: string) => {
   if (!timeString) return "";
   return timeString;
 };
-const ReplaceURL = (str: string) => {
+
+const processTextNode = (text: string): (string | JSX.Element)[] => {
   const result: (string | JSX.Element)[] = [];
   let buffer = "";
-  for (let i = 0; i < str.length; i++) {
-    const urlMatch = str.slice(i).match(/^https?:\/\/[^\s<>{}|\\^[\]`"()]+/i);
+  
+  for (let i = 0; i < text.length; i++) {
+    const urlMatch = text.slice(i).match(/^https?:\/\/[^\s<>{}|\\^[\]`"()]+/i);
     if (urlMatch) {
       if (buffer) {
         result.push(buffer);
@@ -68,7 +72,7 @@ const ReplaceURL = (str: string) => {
       i += url.length - 1;
       continue;
     }
-    const tgMatch = str.slice(i).match(/^@[a-zA-Z0-9_]{5,32}\b/);
+    const tgMatch = text.slice(i).match(/^@[a-zA-Z0-9_]{5,32}\b/);
     if (tgMatch) {
       if (buffer) {
         result.push(buffer);
@@ -89,13 +93,56 @@ const ReplaceURL = (str: string) => {
       i += username.length - 1;
       continue;
     }
-    buffer += str[i];
+    buffer += text[i];
   }
   if (buffer) {
     result.push(buffer);
   }
   return result;
 };
+
+const MarkdownWithCustomLinks: React.FC<{ children: string }> = ({ children }) => {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        // Переопределяем рендеринг текстовых узлов для обработки URL и Telegram алиасов
+        text: ({ children }) => {
+          if (typeof children === 'string') {
+            return <>{processTextNode(children)}</>;
+          }
+          return <>{children}</>;
+        },
+        // Стилизация ссылок в markdown
+        a: ({ href, children }) => (
+          <a
+            className="break-all text-brand-violet hover:scale-110 hover:text-brand-violet/80"
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {children}
+          </a>
+        ),
+        // Стилизация жирного текста
+        strong: ({ children }) => (
+          <strong className="font-bold">{children}</strong>
+        ),
+        // Стилизация курсива
+        em: ({ children }) => (
+          <em className="italic">{children}</em>
+        ),
+        // Стилизация параграфов
+        p: ({ children }) => (
+          <p className="mb-2 last:mb-0">{children}</p>
+        ),
+      }}
+    >
+      {children}
+    </ReactMarkdown>
+  );
+};
+
 const Description: React.FC<WorkshopProps> = ({
   workshop,
   refreshTrigger,
@@ -259,7 +306,7 @@ const Description: React.FC<WorkshopProps> = ({
   return (
     <div className="flex flex-col p-5 text-contrast">
       <div className="mb-1.5 max-h-24 overflow-y-auto break-words text-lg leading-6 [overflow-wrap:anywhere]">
-        {ReplaceURL(workshop.body)}
+        <MarkdownWithCustomLinks>{workshop.body}</MarkdownWithCustomLinks>
       </div>
       <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">
         <div className="flex h-fit w-6">
