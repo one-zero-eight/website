@@ -21,8 +21,8 @@ export function ToastContainer() {
     return null;
   }
 
-  // На мобильных устройствах показываем только один toast (первый)
-  const toastsToShow = isMobile ? toasts.slice(0, 1) : toasts;
+  // На мобильных устройствах показываем только один toast (последний)
+  const toastsToShow = isMobile ? toasts.slice(-1) : toasts;
 
   return (
     <div className="pointer-events-none fixed left-1/2 top-4 z-50 w-full max-w-sm -translate-x-1/2 space-y-3 px-4 sm:left-auto sm:right-4 sm:top-4 sm:translate-x-0 sm:px-0">
