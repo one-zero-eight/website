@@ -65,7 +65,10 @@ export function AskPage({ askQuery }: { askQuery: string }) {
       />
 
       {messages.length === 0 && !isLoading && !error && (
-        <span>- Ask me anything!</span>
+        <div className="flex flex-col gap-4">
+          <span>AI Assistant:</span>
+          <span>- Ask me anything!</span>
+        </div>
       )}
 
       {isLoading ? (

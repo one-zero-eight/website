@@ -141,7 +141,11 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     setAppliedFilters(selectedFilters);
   };
 
-  const { data: searchResult, isLoading } = $search.useQuery(
+  const {
+    data: searchResult,
+    isLoading,
+    refetch,
+  } = $search.useQuery(
     "get",
     "/search/search",
     {
@@ -222,7 +226,11 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
 
   const runSearch = (query: string) => {
     navigate({ to: "/search", search: { q: query } });
-    setSubmittedQuery(query);
+    if (query === submittedQuery) {
+      refetch();
+    } else {
+      setSubmittedQuery(query);
+    }
   };
 
   if (!me) {
@@ -260,7 +268,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
                 />
               ))}
             </div>
-            <div className="group flex hidden animate-pulse md:inline md:h-[50vh] md:w-1/2 md:min-w-0 md:basis-1/2 md:justify-stretch md:rounded-lg md:bg-floating"></div>
+            <div className="group flex hidden animate-pulse md:inline md:h-[375px] md:w-1/2 md:min-w-0 md:basis-1/2 md:justify-stretch md:rounded-lg md:bg-floating"></div>
           </div>
         </>
       )}
