@@ -3,7 +3,7 @@ name: Build static files and deploy website
 on:
   push:
     branches:
-      - cicd
+      - main
 
 jobs:
   build:
@@ -39,7 +39,7 @@ jobs:
 
   deploy:
     if: github.repository_owner == 'inno-sport-inh'
-    name: Deploy to /var/www/sport.innonohassle.ru
+    name: Deploy on server
     needs: build
     runs-on: ubuntu-latest
     steps:
