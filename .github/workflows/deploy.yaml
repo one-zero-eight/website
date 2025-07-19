@@ -95,6 +95,7 @@ jobs:
           fingerprint: ${{ secrets.SSH_FINGERPRINT }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            set -e
             mkdir -p /var/www/sport.innohassle.ru
             tar xzf /tmp/site.tar.gz -C /var/www/sport.innohassle.ru --strip-components=1
             rm /tmp/site.tar.gz
