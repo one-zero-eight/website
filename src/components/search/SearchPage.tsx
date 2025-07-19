@@ -266,31 +266,37 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
                 key={i}
                 response={response}
                 isSelected={previewSource === response.source}
-                select={() => setPreviewSource(response.source)}
+                select={() =>
+                  setPreviewSource((prev) =>
+                    prev === response.source ? undefined : response.source,
+                  )
+                }
                 isMobile={isMobile}
               />
             ))}
           </div>
-          {previewSource &&
-          !isMobile &&
-          (previewSource.type === "moodle-file" ||
-            previewSource.type === "moodle-url" ||
-            previewSource.type === "moodle-unknown" ||
-            previewSource.type === "telegram") ? (
-            <PreviewCard
-              source={previewSource}
-              onClose={() => setPreviewSource(undefined)}
-            />
-          ) : (
-            previewSource &&
+          <div className="flex hidden w-full justify-stretch md:inline md:min-w-0 md:basis-1/2">
+            {previewSource &&
             !isMobile &&
-            "url" in previewSource && (
-              <IframePreviewCard
+            (previewSource.type === "moodle-file" ||
+              previewSource.type === "moodle-url" ||
+              previewSource.type === "moodle-unknown" ||
+              previewSource.type === "telegram") ? (
+              <PreviewCard
                 source={previewSource}
                 onClose={() => setPreviewSource(undefined)}
               />
-            )
-          )}
+            ) : (
+              previewSource &&
+              !isMobile &&
+              "url" in previewSource && (
+                <IframePreviewCard
+                  source={previewSource}
+                  onClose={() => setPreviewSource(undefined)}
+                />
+              )
+            )}
+          </div>
         </div>
       )}
     </div>

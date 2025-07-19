@@ -19,7 +19,7 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
   return (
     <div
       className={clsx(
-        "flex h-fit max-h-full min-w-0 flex-col gap-2 rounded-lg border border-secondary-hover bg-floating p-4 md:basis-1/2",
+        "flex h-fit max-h-full w-full min-w-0 flex-col gap-2 rounded-lg border border-secondary-hover bg-floating p-4",
         "static z-10 md:sticky md:top-4",
       )}
     >
