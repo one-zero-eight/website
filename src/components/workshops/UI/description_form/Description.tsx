@@ -49,7 +49,7 @@ const formatTime = (timeString: string) => {
 const processTextNode = (text: string): (string | JSX.Element)[] => {
   const result: (string | JSX.Element)[] = [];
   let buffer = "";
-  
+
   for (let i = 0; i < text.length; i++) {
     const urlMatch = text.slice(i).match(/^https?:\/\/[^\s<>{}|\\^[\]`"()]+/i);
     if (urlMatch) {
@@ -101,22 +101,30 @@ const processTextNode = (text: string): (string | JSX.Element)[] => {
   return result;
 };
 
-const MarkdownWithCustomLinks: React.FC<{ children: string }> = ({ children }) => {
+const MarkdownWithCustomLinks: React.FC<{ children: string }> = ({
+  children,
+}) => {
   // Функция для обработки различных типов children
-  const processChildrenRecursively = (children: React.ReactNode): React.ReactNode => {
-    if (typeof children === 'string') {
+  const processChildrenRecursively = (
+    children: React.ReactNode,
+  ): React.ReactNode => {
+    if (typeof children === "string") {
       return processTextNode(children);
     }
-    
+
     if (Array.isArray(children)) {
       return children.map((child, index) => {
-        if (typeof child === 'string') {
-          return <React.Fragment key={index}>{processTextNode(child)}</React.Fragment>;
+        if (typeof child === "string") {
+          return (
+            <React.Fragment key={index}>
+              {processTextNode(child)}
+            </React.Fragment>
+          );
         }
         return child;
       });
     }
-    
+
     return children;
   };
 
@@ -126,7 +134,7 @@ const MarkdownWithCustomLinks: React.FC<{ children: string }> = ({ children }) =
       components={{
         // Переопределяем рендеринг текстовых узлов для обработки URL и Telegram алиасов
         text: ({ children }) => {
-          if (typeof children === 'string') {
+          if (typeof children === "string") {
             return <>{processTextNode(children)}</>;
           }
           return <>{children}</>;
@@ -150,13 +158,13 @@ const MarkdownWithCustomLinks: React.FC<{ children: string }> = ({ children }) =
         ),
         // Стилизация курсива с обработкой текста внутри
         em: ({ children }) => (
-          <em className="italic">
-            {processChildrenRecursively(children)}
-          </em>
+          <em className="italic">{processChildrenRecursively(children)}</em>
         ),
         // Стилизация параграфов
         p: ({ children }) => (
-          <p className="mb-2 last:mb-0">{processChildrenRecursively(children)}</p>
+          <p className="mb-2 last:mb-0">
+            {processChildrenRecursively(children)}
+          </p>
         ),
       }}
     >
