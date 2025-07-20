@@ -94,7 +94,12 @@
     "vite-tsconfig-paths": "^5.0.1",
     "vue": "^3.5.10",
     "workbox-window": "^7.1.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "axios": "^1.10.0",
+    "date-fns": "^2.30.0",
+    "lucide-react": "^0.263.1",
+    "react-router-dom": "^6.8.1",
+    "zustand": "^4.3.6"
   },
   "lint-staged": {
     "{src,public}/**/*.{js,ts,jsx,tsx,mdx|vue}": [
