@@ -353,6 +353,17 @@ export const MapViewer = memo(function MapViewer({
         `
           : ""}
       </style>
+      <style type="text/css">
+        {`
+        ${scene.areas.map((a) => `[id="${a.svg_polygon_id}"]`).join(",")} {
+          cursor: pointer;
+        }
+        ${scene.areas.map((a) => `[id="${a.svg_polygon_id}"]:hover`).join(",")} {
+          opacity: 0.2 !important;
+          fill: violet !important;
+        }
+        `}
+      </style>
       {mapSvg?.data && (
         <div
           ref={imageRef}

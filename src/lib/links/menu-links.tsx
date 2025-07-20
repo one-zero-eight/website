@@ -95,6 +95,17 @@ export const items: ItemType[] = [
   },
   {
     type: "local",
+    title: "Printers",
+    to: "/printers",
+    icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
+    badge: (
+      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
+        NEW
+      </span>
+    ),
+  },
+  {
+    type: "local",
     title: "Dorms",
     to: "/dorms",
     icon: (
@@ -118,6 +129,17 @@ export const items: ItemType[] = [
     title: "Extension",
     to: "/extension",
     icon: <span className="icon-[material-symbols--extension-outline]" />,
+  },
+  {
+    type: "local",
+    title: "Forms",
+    to: "/forms",
+    icon: <span className="icon-[material-symbols--description-outline]" />,
+    badge: (
+      <span className="ml-2 rounded-full bg-yellow-700 px-2 py-1 text-xs font-semibold text-white">
+        STAFF
+      </span>
+    ),
   },
   { type: "separator" },
   {

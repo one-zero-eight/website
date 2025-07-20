@@ -1,8 +1,15 @@
 import { groups } from "@/lib/links/constants";
-import { resourcesList } from "@/lib/links/resources-list.ts";
+import CustomSelect from "@/lib/links/customSelector";
+import {
+  globalFrequencies,
+  resourcesList,
+} from "@/lib/links/resources-list.ts";
 import { SearchInput } from "@/lib/links/SearchInput";
+import {
+  createFuseInstance,
+  getFilteredResources,
+} from "@/lib/links/searchUtils";
 import clsx from "clsx";
-import Fuse from "fuse.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CustomSelect from "../common/customSelector";
 
@@ -13,27 +20,25 @@ const Links = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const fuse = useMemo(
-    () =>
-      new Fuse(resourcesList, {
-        keys: [
-          { name: "resource", weight: 5 },
-          { name: "title", weight: 3 },
-          { name: "description", weight: 1 },
-        ],
-        threshold: 0.3,
-      }),
-    [],
-  );
+  const fuse = useMemo(() => createFuseInstance(resourcesList), []);
 
-  const filteredResources = useMemo(() => {
-    if (searchQuery) {
-      return fuse.search(searchQuery).map((result) => result.item);
-    }
-    return resourcesList.filter(
-      (item) => activeGroup === item.category || activeGroup === "All",
-    );
-  }, [searchQuery, activeGroup, fuse]);
+  const userFrequencies = useMemo(() => {
+    const stored = localStorage.getItem("userFrequencies");
+    return stored ? JSON.parse(stored) : {};
+  }, []);
+
+  const filteredResources = useMemo(
+    () =>
+      getFilteredResources(
+        resourcesList,
+        searchQuery,
+        activeGroup,
+        fuse,
+        globalFrequencies,
+        userFrequencies,
+      ),
+    [searchQuery, activeGroup, fuse, userFrequencies],
+  );
 
   useEffect(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -57,6 +62,14 @@ const Links = () => {
 
       if (event.key === "Enter") {
         event.preventDefault();
+
+        const frequencies = JSON.parse(
+          localStorage.getItem("userFrequencies") || "{}",
+        );
+        frequencies[filteredResources[activeIndex].url] =
+          (frequencies[filteredResources[activeIndex].url] || 0) + 1;
+        localStorage.setItem("userFrequencies", JSON.stringify(frequencies));
+
         window.open(filteredResources[activeIndex].url, "_blank");
       } else if (event.key === "ArrowDown") {
         event.preventDefault();
@@ -119,6 +132,17 @@ const Links = () => {
           <div className="grid flex-[4] grid-cols-1 gap-5 lg:grid-cols-3 xxl:grid-cols-2">
             {filteredResources.map((resource, index) => (
               <a
+                onClick={() => {
+                  const frequencies = JSON.parse(
+                    localStorage.getItem("userFrequencies") || "{}",
+                  );
+                  frequencies[resource.url] =
+                    (frequencies[resource.url] || 0) + 1;
+                  localStorage.setItem(
+                    "userFrequencies",
+                    JSON.stringify(frequencies),
+                  );
+                }}
                 href={resource.url}
                 target="_blank"
                 rel="nofollow noreferrer"

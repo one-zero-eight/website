@@ -1,4 +1,5 @@
 import Tooltip from "@/components/common/Tooltip.tsx";
+import { useMe } from "@/api/accounts/user.ts";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton.tsx";
 import UserMenu from "@/components/layout/UserMenu.tsx";
@@ -7,6 +8,8 @@ import { Link, LinkOptions } from "@tanstack/react-router";
 import clsx from "clsx";
 
 export function MorePage() {
+  const { me } = useMe();
+
   return (
     <div className="flex min-h-full flex-col items-start justify-start">
       {/* Social links */}
@@ -56,7 +59,10 @@ export function MorePage() {
               key={index}
               className="my-1 h-0.5 w-full rounded-full bg-gray-500/20"
             />
-          ) : item.type === "local" ? (
+          ) : // Hide Forms item for non-staff users
+          item.type === "local" &&
+            item.title === "Forms" &&
+            !me?.innopolis_sso?.is_staff ? null : item.type === "local" ? (
             <MenuLink
               key={index}
               title={item.title}

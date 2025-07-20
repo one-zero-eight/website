@@ -14,13 +14,13 @@ export function Topbar({
     <nav
       className={clsx(
         "w-full flex-row items-center justify-between border-b-[1px] border-b-secondary-hover",
-        hideOnMobile ? "hidden lgw-smh:flex" : "flex",
+        hideOnMobile ? "hidden lg:flex" : "flex",
       )}
     >
       <div className="flex-grow px-4 py-2">
         <h1 className="mr-2 text-3xl font-medium">{title}</h1>
       </div>
-      <div className="hidden items-center py-2 pr-4 lgw-smh:flex">
+      <div className="hidden items-center py-2 pr-4 lg:flex">
         <SwitchThemeButton />
         <LeaveFeedbackButton />
         <UserMenu isMobile={false} isSidebar={false} />

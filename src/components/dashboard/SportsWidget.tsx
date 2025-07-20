@@ -1,21 +1,35 @@
-import { $sports } from "@/api/sports";
+import { $sport } from "@/api/sport";
 import { useNowMS } from "@/lib/utils/use-now.ts";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 export function SportsWidget() {
   const [widgetShown, setWidgetShown] = useLocalStorage("widget-sports", false);
-  const { data: sportInfo, isPending } = $sports.useQuery(
+  const { data: profile, isPending: profileIsPending } = $sport.useQuery(
     "get",
-    "/users/sport_info",
+    "/profile/student",
   );
-  const nowMs = useNowMS(!!sportInfo);
+  const hasSportProfile = !!profile;
+  const { data: hours } = $sport.useQuery(
+    "get",
+    "/attendance/{student_id}/hours",
+    { params: { path: { student_id: Number(profile?.id) } } },
+    { enabled: !!profile },
+  );
+  const { data: semesters } = $sport.useQuery(
+    "get",
+    "/semester",
+    {},
+    { enabled: !!profile },
+  );
+
+  const nowMs = useNowMS(hasSportProfile);
 
   useEffect(() => {
-    setWidgetShown((v) => (v && isPending) || !!sportInfo);
-  }, [setWidgetShown, isPending, sportInfo]);
+    setWidgetShown((v) => (v && profileIsPending) || hasSportProfile);
+  }, [setWidgetShown, profileIsPending, hasSportProfile]);
 
-  if (!sportInfo) {
+  if (!hasSportProfile || !hours || !semesters) {
     if (!widgetShown) return null;
     return (
       <div className="group flex min-h-32 animate-pulse flex-row gap-4 rounded-2xl bg-primary px-4 py-6" />
@@ -23,14 +37,17 @@ export function SportsWidget() {
   }
 
   const earnedHours =
-    sportInfo.ongoing_semester.hours_not_self +
-    sportInfo.ongoing_semester.hours_self_not_debt +
-    sportInfo.ongoing_semester.hours_self_debt;
-  const semesterHours = sportInfo.ongoing_semester.hours_sem_max;
-  const debtHours = sportInfo.ongoing_semester.debt;
+    hours.ongoing_semester.hours_not_self +
+    hours.ongoing_semester.hours_self_not_debt +
+    hours.ongoing_semester.hours_self_debt;
+  const semesterHours = hours.ongoing_semester.hours_sem_max;
+  const debtHours = hours.ongoing_semester.debt;
 
-  // TODO: Fetch the end date of current semester from sports
-  const deadline = new Date("2025-05-04");
+  const currentSemester = semesters.find(
+    (s) => s.id === hours.ongoing_semester.id_sem,
+  );
+
+  const deadline = new Date(currentSemester?.end || "2025-05-04");
   const daysLeft = Math.max(
     0,
     Math.ceil((deadline.getTime() - nowMs) / (1000 * 60 * 60 * 24)),

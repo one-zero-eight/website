@@ -1,8 +1,11 @@
 import { useNavigate } from "@tanstack/react-router";
+import { PathsUsersMeTargetHidePostParametersPathTarget as Type } from "@/api/events/types.ts";
+import HideButtonPersonal from "@/components/schedule/personal-card/HideButtonPersonal.tsx";
 
 export type PersonalCardProps = {
   name: React.ReactNode;
   description: React.ReactNode;
+  targetType: Type;
   buttons?: React.ReactNode;
   pageUrl?: string;
   canHide?: boolean;
@@ -13,9 +16,10 @@ export function PersonalCard({
   description,
   buttons,
   pageUrl,
+  targetType,
+  canHide = true,
 }: PersonalCardProps) {
   const navigate = useNavigate();
-
   return (
     <div
       className="flex min-h-fit min-w-fit max-w-full basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl bg-primary p-4 hover:bg-primary-hover"
@@ -26,7 +30,7 @@ export function PersonalCard({
         <p className="text-inactive">{description}</p>
       </div>
       <div className="flex select-none flex-row place-items-center">
-        {/*{canHide && <HideButton groupId={group.id} />}*/}
+        {canHide && <HideButtonPersonal target={targetType} />}
         {buttons}
       </div>
     </div>

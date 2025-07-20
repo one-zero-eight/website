@@ -13,7 +13,15 @@ export function DashboardPage() {
   const { me } = useMe();
 
   if (!me) {
-    return <AuthWall />;
+    return (
+      <div className="flex flex-col gap-64">
+        <AuthWall />
+
+        <div className="px-4 py-4">
+          <Links />
+        </div>
+      </div>
+    );
   }
 
   return (
