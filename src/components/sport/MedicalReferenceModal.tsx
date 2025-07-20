@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { AlertCircle } from 'lucide-react';
-import { studentAPI } from '../services/studentAPI';
-import { useModalKeyboard } from '../hooks/useModalKeyboard';
-import { MedicalReferenceUploadResponse } from '../services/types';
+import React, { useState } from "react";
+import { AlertCircle } from "lucide-react";
+import { studentAPI } from "./services/studentAPI";
+import { useModalKeyboard } from "./hooks/useModalKeyboard";
+import { MedicalReferenceUploadResponse } from "./services/types";
 
 interface MedicalReferenceModalProps {
   isOpen: boolean;
@@ -16,9 +16,9 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
   onSuccess,
 }) => {
   const [formData, setFormData] = useState({
-    startDate: '',
-    endDate: '',
-    studentComment: '',
+    startDate: "",
+    endDate: "",
+    studentComment: "",
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -29,9 +29,9 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
 
   const resetForm = () => {
     setFormData({
-      startDate: '',
-      endDate: '',
-      studentComment: '',
+      startDate: "",
+      endDate: "",
+      studentComment: "",
     });
     setSelectedFile(null);
     setErrors([]);
@@ -54,18 +54,18 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
       if (!allowedTypes.includes(file.type)) {
-        setErrors(['Please select an image file (JPEG, JPG, PNG)']);
+        setErrors(["Please select an image file (JPEG, JPG, PNG)"]);
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setErrors(['File size must not exceed 5MB']);
+        setErrors(["File size must not exceed 5MB"]);
         return;
       }
-      
+
       setSelectedFile(file);
       setErrors([]);
     }
@@ -75,19 +75,23 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
     const newErrors: string[] = [];
 
     if (!selectedFile) {
-      newErrors.push('Please select a medical reference file');
+      newErrors.push("Please select a medical reference file");
     }
 
     if (!formData.startDate) {
-      newErrors.push('Please specify the start date of illness');
+      newErrors.push("Please specify the start date of illness");
     }
 
     if (!formData.endDate) {
-      newErrors.push('Please specify the end date of illness');
+      newErrors.push("Please specify the end date of illness");
     }
 
-    if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
-      newErrors.push('Start date cannot be later than end date');
+    if (
+      formData.startDate &&
+      formData.endDate &&
+      formData.startDate > formData.endDate
+    ) {
+      newErrors.push("Start date cannot be later than end date");
     }
 
     setErrors(newErrors);
@@ -107,15 +111,15 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
         selectedFile!,
         formData.startDate,
         formData.endDate,
-        formData.studentComment || undefined
+        formData.studentComment || undefined,
       );
 
       // Success
       handleClose();
       onSuccess?.(response);
     } catch (error) {
-      console.error('Error uploading medical reference:', error);
-      setErrors(['Error uploading medical reference. Please try again.']);
+      console.error("Error uploading medical reference:", error);
+      setErrors(["Error uploading medical reference. Please try again."]);
     } finally {
       setIsUploading(false);
     }
@@ -124,43 +128,58 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
-      <div className="innohassle-card bg-floating max-w-md w-full max-h-[90vh] overflow-y-auto border-2 border-secondary/50">
+      <div className="innohassle-card max-h-[90vh] w-full max-w-md overflow-y-auto border-2 border-secondary/50 bg-floating">
         <div className="p-6">
-          <div className="flex justify-between items-start mb-6">
+          <div className="mb-6 flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold text-contrast mb-2">
+              <h2 className="mb-2 text-xl font-bold text-contrast">
                 Medical Reference Submission
               </h2>
-              <p className="text-inactive text-sm leading-relaxed mb-3">
-                Please submit an image of the medical reference. Specify the range of dates (illness period) and leave comments if necessary.
+              <p className="mb-3 text-sm leading-relaxed text-inactive">
+                Please submit an image of the medical reference. Specify the
+                range of dates (illness period) and leave comments if necessary.
               </p>
-              <div className="p-3 bg-gradient-to-r from-brand-violet/10 to-brand-violet/5 rounded-lg border border-brand-violet/20">
-                <p className="text-sm text-contrast font-medium">
-                  ℹ️ The week missed due to illness is compensated by two sports hours.
+              <div className="rounded-lg border border-brand-violet/20 bg-gradient-to-r from-brand-violet/10 to-brand-violet/5 p-3">
+                <p className="text-sm font-medium text-contrast">
+                  ℹ️ The week missed due to illness is compensated by two sports
+                  hours.
                 </p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="text-inactive hover:text-contrast transition-colors duration-200 ml-4 flex-shrink-0"
+              className="ml-4 flex-shrink-0 text-inactive transition-colors duration-200 hover:text-contrast"
               disabled={isUploading}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
 
           {errors.length > 0 && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="text-red-700 text-sm space-y-1">
+            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+              <div className="space-y-1 text-sm text-red-700">
                 {errors.map((error, index) => (
                   <div key={index} className="flex items-start">
-                    <AlertCircle size={16} className="mt-0.5 mr-2 flex-shrink-0" />
+                    <AlertCircle
+                      size={16}
+                      className="mr-2 mt-0.5 flex-shrink-0"
+                    />
                     <span>{error}</span>
                   </div>
                 ))}
@@ -171,7 +190,7 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* File Upload */}
             <div>
-              <label className="block text-sm font-semibold text-contrast mb-3">
+              <label className="mb-3 block text-sm font-semibold text-contrast">
                 Reference *
               </label>
               <div className="relative">
@@ -180,18 +199,16 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
                   accept="image/jpeg,image/jpg,image/png"
                   onChange={handleFileChange}
                   disabled={isUploading}
-                  className="w-full p-3 bg-primary border-2 border-secondary rounded-lg 
-                           text-contrast placeholder-inactive
-                           focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/20 
-                           file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
-                           file:text-sm file:font-medium file:bg-brand-violet/10 file:text-brand-violet
-                           hover:file:bg-brand-violet/20 disabled:opacity-50 transition-all duration-200"
+                  className="w-full rounded-lg border-2 border-secondary bg-primary p-3 text-contrast placeholder-inactive transition-all duration-200 file:mr-4 file:rounded-md file:border-0 file:bg-brand-violet/10 file:px-4 file:py-2 file:text-sm file:font-medium file:text-brand-violet hover:file:bg-brand-violet/20 focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/20 disabled:opacity-50"
                   required
                 />
               </div>
               {selectedFile && (
-                <p className="text-sm text-inactive mt-2 bg-secondary/30 p-2 rounded">
-                  Selected file: <span className="text-contrast font-medium">{selectedFile.name}</span>
+                <p className="mt-2 rounded bg-secondary/30 p-2 text-sm text-inactive">
+                  Selected file:{" "}
+                  <span className="font-medium text-contrast">
+                    {selectedFile.name}
+                  </span>
                 </p>
               )}
             </div>
@@ -199,7 +216,7 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
             {/* Date Range */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-contrast mb-3">
+                <label className="mb-3 block text-sm font-semibold text-contrast">
                   Start Date *
                 </label>
                 <input
@@ -209,15 +226,12 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
                     setFormData({ ...formData, startDate: e.target.value })
                   }
                   disabled={isUploading}
-                  className="w-full p-3 bg-primary border-2 border-secondary rounded-lg 
-                           text-contrast placeholder-inactive
-                           focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/20 
-                           disabled:opacity-50 transition-all duration-200"
+                  className="w-full rounded-lg border-2 border-secondary bg-primary p-3 text-contrast placeholder-inactive transition-all duration-200 focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/20 disabled:opacity-50"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-contrast mb-3">
+                <label className="mb-3 block text-sm font-semibold text-contrast">
                   End Date *
                 </label>
                 <input
@@ -227,10 +241,7 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
                     setFormData({ ...formData, endDate: e.target.value })
                   }
                   disabled={isUploading}
-                  className="w-full p-3 bg-primary border-2 border-secondary rounded-lg 
-                           text-contrast placeholder-inactive
-                           focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/20 
-                           disabled:opacity-50 transition-all duration-200"
+                  className="w-full rounded-lg border-2 border-secondary bg-primary p-3 text-contrast placeholder-inactive transition-all duration-200 focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/20 disabled:opacity-50"
                   required
                 />
               </div>
@@ -238,7 +249,7 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
 
             {/* Comments */}
             <div>
-              <label className="block text-sm font-semibold text-contrast mb-3">
+              <label className="mb-3 block text-sm font-semibold text-contrast">
                 Comments (optional)
               </label>
               <textarea
@@ -249,10 +260,7 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
                 rows={3}
                 disabled={isUploading}
                 placeholder="Additional information about the medical reference..."
-                className="w-full p-3 bg-primary border-2 border-secondary rounded-lg 
-                         text-contrast placeholder-inactive
-                         focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/20 
-                         disabled:opacity-50 transition-all duration-200 resize-none"
+                className="w-full resize-none rounded-lg border-2 border-secondary bg-primary p-3 text-contrast placeholder-inactive transition-all duration-200 focus:border-brand-violet focus:ring-2 focus:ring-brand-violet/20 disabled:opacity-50"
               />
             </div>
 
@@ -262,25 +270,40 @@ export const MedicalReferenceModal: React.FC<MedicalReferenceModalProps> = ({
                 type="button"
                 onClick={handleClose}
                 disabled={isUploading}
-                className="flex-1 innohassle-button-secondary px-4 py-3 font-medium transition-all duration-300 disabled:opacity-50"
+                className="innohassle-button-secondary flex-1 px-4 py-3 font-medium transition-all duration-300 disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isUploading}
-                className="flex-1 innohassle-button-primary px-4 py-3 font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="innohassle-button-primary flex flex-1 items-center justify-center px-4 py-3 font-medium transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isUploading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Uploading...
                   </>
                 ) : (
-                  'Submit Reference'
+                  "Submit Reference"
                 )}
               </button>
             </div>

@@ -1,7 +1,20 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronDown, ChevronUp, HelpCircle, Search, BookOpen, Users, Clock, Calendar, Filter, X, LucideIcon, Loader2 } from 'lucide-react';
-import { searchFAQItems } from '../utils/searchUtils';
-import { faqAPI, FAQResponse } from '../services/api';
+import React, { useState, useMemo, useEffect } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  HelpCircle,
+  Search,
+  BookOpen,
+  Users,
+  Clock,
+  Calendar,
+  Filter,
+  X,
+  LucideIcon,
+  Loader2,
+} from "lucide-react";
+import { searchFAQItems } from "./utils/searchUtils";
+import { faqAPI, FAQResponse } from "./services/api";
 
 interface FAQItem {
   id: number;
@@ -24,12 +37,12 @@ interface FAQCategory {
 
 const FAQPage: React.FC = () => {
   const [openItems, setOpenItems] = useState<number[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [searchOptions, setSearchOptions] = useState({
     typoTolerance: true,
     multiWordSupport: true,
     exactMatch: false,
-    fuzzyThreshold: 0.7
+    fuzzyThreshold: 0.7,
   });
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [faqData, setFaqData] = useState<FAQResponse>({});
@@ -44,15 +57,18 @@ const FAQPage: React.FC = () => {
         setError(null);
         const data = await faqAPI.getFAQ();
         setFaqData(data);
-        console.log('📋 FAQ data loaded:', data);
+        console.log("📋 FAQ data loaded:", data);
       } catch (error) {
-        console.error('Error loading FAQ:', error);
-        setError('Failed to load FAQ data. Please try again later.');
+        console.error("Error loading FAQ:", error);
+        setError("Failed to load FAQ data. Please try again later.");
         // Set fallback data if API fails
         setFaqData({
-          "How many hours should I get per semester?": "You should get 30 hours.",
-          "How can I get sport hours throught a semester?": "Firstly, choose a sport or sportclub for whole semester.\r\nSecondly, try to train at least once per week on schedule.\r\n\r\nAdditional opportunities to get extra hours:\r\n1) Use self sports variants and upload results on site.\r\n2) Participate on sports events.",
-          "I have medical reference about illness what do I need to do?": "Upload this reference on site.\r\nAfter approving you'll get 2 sport hours per week depending on the time frame."
+          "How many hours should I get per semester?":
+            "You should get 30 hours.",
+          "How can I get sport hours throught a semester?":
+            "Firstly, choose a sport or sportclub for whole semester.\r\nSecondly, try to train at least once per week on schedule.\r\n\r\nAdditional opportunities to get extra hours:\r\n1) Use self sports variants and upload results on site.\r\n2) Participate on sports events.",
+          "I have medical reference about illness what do I need to do?":
+            "Upload this reference on site.\r\nAfter approving you'll get 2 sport hours per week depending on the time frame.",
         });
       } finally {
         setIsLoading(false);
@@ -71,144 +87,174 @@ const FAQPage: React.FC = () => {
     // Function to categorize FAQ items based on keywords
     const categorizeItem = (question: string): number => {
       const lowerQuestion = question.toLowerCase();
-      
-      if (lowerQuestion.includes('medical') || lowerQuestion.includes('health') || lowerQuestion.includes('illness') || lowerQuestion.includes('injury') || lowerQuestion.includes('insurance')) {
+
+      if (
+        lowerQuestion.includes("medical") ||
+        lowerQuestion.includes("health") ||
+        lowerQuestion.includes("illness") ||
+        lowerQuestion.includes("injury") ||
+        lowerQuestion.includes("insurance")
+      ) {
         return 4; // Medical & Health
       }
-      if (lowerQuestion.includes('hours') || lowerQuestion.includes('semester') || lowerQuestion.includes('exam') || lowerQuestion.includes('project') || lowerQuestion.includes('test')) {
+      if (
+        lowerQuestion.includes("hours") ||
+        lowerQuestion.includes("semester") ||
+        lowerQuestion.includes("exam") ||
+        lowerQuestion.includes("project") ||
+        lowerQuestion.includes("test")
+      ) {
         return 1; // Requirements & Hours
       }
-      if (lowerQuestion.includes('sport') || lowerQuestion.includes('change') || lowerQuestion.includes('choose') || lowerQuestion.includes('group')) {
+      if (
+        lowerQuestion.includes("sport") ||
+        lowerQuestion.includes("change") ||
+        lowerQuestion.includes("choose") ||
+        lowerQuestion.includes("group")
+      ) {
         return 2; // Sports & Activities
       }
-      if (lowerQuestion.includes('online') || lowerQuestion.includes('student')) {
+      if (
+        lowerQuestion.includes("online") ||
+        lowerQuestion.includes("student")
+      ) {
         return 3; // Online Students
       }
-      
+
       return 5; // General
     };
 
     const categories = [
       {
         id: 1,
-        title: 'Requirements & Hours',
+        title: "Requirements & Hours",
         icon: BookOpen,
-        color: 'bg-blue-500/10 text-blue-500',
-        items: [] as FAQItem[]
+        color: "bg-blue-500/10 text-blue-500",
+        items: [] as FAQItem[],
       },
       {
         id: 2,
-        title: 'Sports & Activities',
+        title: "Sports & Activities",
         icon: Calendar,
-        color: 'bg-brand-violet/10 text-brand-violet',
-        items: [] as FAQItem[]
+        color: "bg-brand-violet/10 text-brand-violet",
+        items: [] as FAQItem[],
       },
       {
         id: 3,
-        title: 'Online Students',
+        title: "Online Students",
         icon: Users,
-        color: 'bg-green-500/10 text-green-500',
-        items: [] as FAQItem[]
+        color: "bg-green-500/10 text-green-500",
+        items: [] as FAQItem[],
       },
       {
         id: 4,
-        title: 'Medical & Health',
+        title: "Medical & Health",
         icon: Clock,
-        color: 'bg-red-500/10 text-red-500',
-        items: [] as FAQItem[]
+        color: "bg-red-500/10 text-red-500",
+        items: [] as FAQItem[],
       },
       {
         id: 5,
-        title: 'General Information',
+        title: "General Information",
         icon: HelpCircle,
-        color: 'bg-orange-500/10 text-orange-500',
-        items: [] as FAQItem[]
-      }
+        color: "bg-orange-500/10 text-orange-500",
+        items: [] as FAQItem[],
+      },
     ];
 
     let itemId = 1;
     Object.entries(faqData).forEach(([question, answer]) => {
       const categoryId = categorizeItem(question);
-      const category = categories.find(c => c.id === categoryId);
-      
+      const category = categories.find((c) => c.id === categoryId);
+
       if (category) {
         category.items.push({
           id: itemId++,
           question,
-          answer: answer.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n') // Convert escaped newlines
+          answer: answer.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n"), // Convert escaped newlines
         });
       }
     });
 
     // Filter out empty categories
-    return categories.filter(category => category.items.length > 0);
+    return categories.filter((category) => category.items.length > 0);
   }, [faqData]);
 
   const toggleItem = (itemId: number) => {
-    setOpenItems(prev => 
-      prev.includes(itemId) 
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
+    setOpenItems((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId],
     );
   };
 
   const filteredCategories = useMemo(() => {
     if (!searchTerm.trim()) {
-      return faqCategories.map(category => ({
+      return faqCategories.map((category) => ({
         ...category,
-        items: category.items.map(item => ({
+        items: category.items.map((item) => ({
           ...item,
           searchScore: 0,
-          searchMatches: []
-        }))
+          searchMatches: [],
+        })),
       }));
     }
 
-    return faqCategories.map(category => {
-      const allItems = category.items;
-      const searchResults = searchFAQItems(allItems, searchTerm, searchOptions);
-      
-      return {
-        ...category,
-        items: searchResults
-      };
-    }).filter(category => category.items.length > 0);
+    return faqCategories
+      .map((category) => {
+        const allItems = category.items;
+        const searchResults = searchFAQItems(
+          allItems,
+          searchTerm,
+          searchOptions,
+        );
+
+        return {
+          ...category,
+          items: searchResults,
+        };
+      })
+      .filter((category) => category.items.length > 0);
   }, [faqCategories, searchTerm, searchOptions]);
 
   const clearSearch = () => {
-    setSearchTerm('');
+    setSearchTerm("");
     setOpenItems([]);
   };
 
   const toggleAllInCategory = (categoryId: number) => {
-    const category = filteredCategories.find(c => c.id === categoryId);
+    const category = filteredCategories.find((c) => c.id === categoryId);
     if (!category) return;
 
-    const categoryItemIds = category.items.map(item => item.id);
-    const allCategoryItemsOpen = categoryItemIds.every(id => openItems.includes(id));
-    
+    const categoryItemIds = category.items.map((item) => item.id);
+    const allCategoryItemsOpen = categoryItemIds.every((id) =>
+      openItems.includes(id),
+    );
+
     if (allCategoryItemsOpen) {
       // Close all items in this category
-      setOpenItems(prev => prev.filter(id => !categoryItemIds.includes(id)));
+      setOpenItems((prev) =>
+        prev.filter((id) => !categoryItemIds.includes(id)),
+      );
     } else {
       // Open all items in this category
-      setOpenItems(prev => [...new Set([...prev, ...categoryItemIds])]);
+      setOpenItems((prev) => [...new Set([...prev, ...categoryItemIds])]);
     }
   };
 
   const renderAnswer = (answer: string) => {
     // Handle HTML content
-    if (answer.includes('<p>') || answer.includes('<strong>')) {
+    if (answer.includes("<p>") || answer.includes("<strong>")) {
       return <div dangerouslySetInnerHTML={{ __html: answer }} />;
     }
-    
+
     // Handle plain text with line breaks
     return (
       <div>
-        {answer.split('\n').map((line, index) => (
+        {answer.split("\n").map((line, index) => (
           <React.Fragment key={index}>
             {line}
-            {index < answer.split('\n').length - 1 && <br />}
+            {index < answer.split("\n").length - 1 && <br />}
           </React.Fragment>
         ))}
       </div>
@@ -217,74 +263,84 @@ const FAQPage: React.FC = () => {
 
   const highlightText = (text: string, matches: string[]) => {
     if (!matches.length) return text;
-    
-    const regex = new RegExp(`(${matches.join('|')})`, 'gi');
+
+    const regex = new RegExp(`(${matches.join("|")})`, "gi");
     const parts = text.split(regex);
-    
-    return parts.map((part, index) => 
-      matches.some(match => part.toLowerCase().includes(match.toLowerCase())) ? (
-        <mark key={index} className="bg-yellow-200 text-yellow-900 px-1 rounded">
+
+    return parts.map((part, index) =>
+      matches.some((match) =>
+        part.toLowerCase().includes(match.toLowerCase()),
+      ) ? (
+        <mark
+          key={index}
+          className="rounded bg-yellow-200 px-1 text-yellow-900"
+        >
           {part}
         </mark>
       ) : (
         <span key={index}>{part}</span>
-      )
+      ),
     );
   };
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto p-6 space-y-8">
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-brand-violet/20 to-brand-violet/10 rounded-2xl flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-brand-violet animate-spin" />
+      <div className="mx-auto max-w-4xl space-y-8 p-6">
+        <div className="py-12 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-violet/20 to-brand-violet/10">
+            <Loader2 className="h-8 w-8 animate-spin text-brand-violet" />
           </div>
-          <h2 className="text-xl font-semibold text-contrast mb-2">Loading FAQ</h2>
-          <p className="text-inactive">Please wait while we fetch the latest FAQ data...</p>
+          <h2 className="mb-2 text-xl font-semibold text-contrast">
+            Loading FAQ
+          </h2>
+          <p className="text-inactive">
+            Please wait while we fetch the latest FAQ data...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
+    <div className="mx-auto max-w-4xl space-y-8 p-6">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-br from-brand-violet/20 to-brand-violet/10 rounded-2xl">
-          <HelpCircle className="w-8 h-8 text-brand-violet" />
+        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-violet/20 to-brand-violet/10">
+          <HelpCircle className="h-8 w-8 text-brand-violet" />
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-contrast mb-4 bg-gradient-to-r from-brand-violet to-brand-violet/80 bg-clip-text text-transparent">
+        <h1 className="mb-4 bg-gradient-to-r from-brand-violet to-brand-violet/80 bg-clip-text text-3xl font-bold text-contrast text-transparent sm:text-4xl">
           Frequently Asked Questions
         </h1>
-        <p className="text-lg text-inactive max-w-2xl mx-auto">
-          Find answers to common questions about sports requirements, booking sessions, and more.
+        <p className="mx-auto max-w-2xl text-lg text-inactive">
+          Find answers to common questions about sports requirements, booking
+          sessions, and more.
         </p>
         {error && (
-          <div className="mt-4 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl text-orange-500 text-sm">
+          <div className="mt-4 rounded-xl border border-orange-500/20 bg-orange-500/10 p-4 text-sm text-orange-500">
             {error}
           </div>
         )}
       </div>
 
       {/* Search Section */}
-      <div className="innohassle-card p-6 bg-gradient-to-br from-floating to-primary/30 border-2 border-secondary/50 hover:border-brand-violet/30 transition-all duration-300">
+      <div className="innohassle-card border-2 border-secondary/50 bg-gradient-to-br from-floating to-primary/30 p-6 transition-all duration-300 hover:border-brand-violet/30">
         <div className="space-y-4">
           {/* Main Search */}
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-inactive w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transform text-inactive" />
             <input
               type="text"
               placeholder="Search FAQ items..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-12 py-4 bg-primary/50 border-2 border-secondary/50 rounded-2xl focus:border-brand-violet focus:outline-none text-contrast placeholder-inactive transition-all duration-200"
+              className="w-full rounded-2xl border-2 border-secondary/50 bg-primary/50 py-4 pl-12 pr-12 text-contrast placeholder-inactive transition-all duration-200 focus:border-brand-violet focus:outline-none"
             />
             {searchTerm && (
               <button
                 onClick={clearSearch}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-inactive hover:text-contrast transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 transform text-inactive transition-colors hover:text-contrast"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             )}
           </div>
@@ -292,34 +348,44 @@ const FAQPage: React.FC = () => {
           {/* Advanced Search Toggle */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-sm text-inactive">
-              <Search className="w-4 h-4" />
+              <Search className="h-4 w-4" />
               <span>
-                {searchTerm 
-                  ? `Found ${filteredCategories.reduce((acc, cat) => acc + cat.items.length, 0)} results` 
-                  : `${faqCategories.reduce((acc, cat) => acc + cat.items.length, 0)} FAQ items available`
-                }
+                {searchTerm
+                  ? `Found ${filteredCategories.reduce((acc, cat) => acc + cat.items.length, 0)} results`
+                  : `${faqCategories.reduce((acc, cat) => acc + cat.items.length, 0)} FAQ items available`}
               </span>
             </div>
             <button
               onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
-              className="flex items-center space-x-2 text-sm text-brand-violet hover:text-brand-violet/80 transition-colors"
+              className="flex items-center space-x-2 text-sm text-brand-violet transition-colors hover:text-brand-violet/80"
             >
-              <Filter className="w-4 h-4" />
+              <Filter className="h-4 w-4" />
               <span>Advanced Search</span>
-              {showAdvancedSearch ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              {showAdvancedSearch ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
             </button>
           </div>
 
           {/* Advanced Search Options */}
           {showAdvancedSearch && (
-            <div className="bg-primary/30 rounded-xl p-4 border border-secondary/30">
-              <h4 className="text-sm font-semibold text-contrast mb-3">Search Options</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="rounded-xl border border-secondary/30 bg-primary/30 p-4">
+              <h4 className="mb-3 text-sm font-semibold text-contrast">
+                Search Options
+              </h4>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label className="flex items-center space-x-2 text-sm">
                   <input
                     type="checkbox"
                     checked={searchOptions.typoTolerance}
-                    onChange={(e) => setSearchOptions(prev => ({ ...prev, typoTolerance: e.target.checked }))}
+                    onChange={(e) =>
+                      setSearchOptions((prev) => ({
+                        ...prev,
+                        typoTolerance: e.target.checked,
+                      }))
+                    }
                     className="rounded border-secondary/50 text-brand-violet focus:ring-brand-violet focus:ring-offset-0"
                   />
                   <span className="text-contrast">Typo tolerance</span>
@@ -328,7 +394,12 @@ const FAQPage: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={searchOptions.multiWordSupport}
-                    onChange={(e) => setSearchOptions(prev => ({ ...prev, multiWordSupport: e.target.checked }))}
+                    onChange={(e) =>
+                      setSearchOptions((prev) => ({
+                        ...prev,
+                        multiWordSupport: e.target.checked,
+                      }))
+                    }
                     className="rounded border-secondary/50 text-brand-violet focus:ring-brand-violet focus:ring-offset-0"
                   />
                   <span className="text-contrast">Multi-word search</span>
@@ -337,7 +408,12 @@ const FAQPage: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={searchOptions.exactMatch}
-                    onChange={(e) => setSearchOptions(prev => ({ ...prev, exactMatch: e.target.checked }))}
+                    onChange={(e) =>
+                      setSearchOptions((prev) => ({
+                        ...prev,
+                        exactMatch: e.target.checked,
+                      }))
+                    }
                     className="rounded border-secondary/50 text-brand-violet focus:ring-brand-violet focus:ring-offset-0"
                   />
                   <span className="text-contrast">Exact match only</span>
@@ -350,10 +426,17 @@ const FAQPage: React.FC = () => {
                     max="1"
                     step="0.1"
                     value={searchOptions.fuzzyThreshold}
-                    onChange={(e) => setSearchOptions(prev => ({ ...prev, fuzzyThreshold: parseFloat(e.target.value) }))}
+                    onChange={(e) =>
+                      setSearchOptions((prev) => ({
+                        ...prev,
+                        fuzzyThreshold: parseFloat(e.target.value),
+                      }))
+                    }
                     className="flex-1 accent-brand-violet"
                   />
-                  <span className="text-inactive w-8">{searchOptions.fuzzyThreshold}</span>
+                  <span className="w-8 text-inactive">
+                    {searchOptions.fuzzyThreshold}
+                  </span>
                 </div>
               </div>
             </div>
@@ -364,12 +447,14 @@ const FAQPage: React.FC = () => {
       {/* FAQ Categories */}
       <div className="space-y-6">
         {filteredCategories.length === 0 ? (
-          <div className="text-center py-12 innohassle-card">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-secondary/30 to-secondary/20 rounded-2xl flex items-center justify-center">
-              <Search className="w-8 h-8 text-inactive" />
+          <div className="innohassle-card py-12 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary/30 to-secondary/20">
+              <Search className="h-8 w-8 text-inactive" />
             </div>
-            <h3 className="text-xl font-semibold text-contrast mb-2">No results found</h3>
-            <p className="text-inactive mb-4">
+            <h3 className="mb-2 text-xl font-semibold text-contrast">
+              No results found
+            </h3>
+            <p className="mb-4 text-inactive">
               Try adjusting your search terms or browse all categories below.
             </p>
             <button
@@ -381,18 +466,26 @@ const FAQPage: React.FC = () => {
           </div>
         ) : (
           filteredCategories.map((category) => (
-            <div key={category.id} className="innohassle-card overflow-hidden border-2 border-secondary/30 hover:border-brand-violet/40 transition-all duration-300">
+            <div
+              key={category.id}
+              className="innohassle-card overflow-hidden border-2 border-secondary/30 transition-all duration-300 hover:border-brand-violet/40"
+            >
               {/* Category Header */}
-              <div className="bg-gradient-to-r from-primary/50 to-secondary/30 border-b border-secondary/50 px-6 py-4">
+              <div className="border-b border-secondary/50 bg-gradient-to-r from-primary/50 to-secondary/30 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${category.color}`}>
-                      <category.icon className="w-5 h-5" />
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${category.color}`}
+                    >
+                      <category.icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-contrast">{category.title}</h2>
+                      <h2 className="text-xl font-bold text-contrast">
+                        {category.title}
+                      </h2>
                       <p className="text-sm text-inactive">
-                        {category.items.length} question{category.items.length !== 1 ? 's' : ''}
+                        {category.items.length} question
+                        {category.items.length !== 1 ? "s" : ""}
                       </p>
                     </div>
                   </div>
@@ -400,7 +493,9 @@ const FAQPage: React.FC = () => {
                     onClick={() => toggleAllInCategory(category.id)}
                     className="innohassle-button-secondary px-4 py-2 text-sm"
                   >
-                    {category.items.every(item => openItems.includes(item.id)) ? 'Collapse All' : 'Expand All'}
+                    {category.items.every((item) => openItems.includes(item.id))
+                      ? "Collapse All"
+                      : "Expand All"}
                   </button>
                 </div>
               </div>
@@ -412,24 +507,31 @@ const FAQPage: React.FC = () => {
                     {/* Question */}
                     <button
                       onClick={() => toggleItem(item.id)}
-                      className="w-full px-6 py-5 text-left hover:bg-primary/30 transition-all duration-200 focus:outline-none focus:bg-primary/40"
+                      className="w-full px-6 py-5 text-left transition-all duration-200 hover:bg-primary/30 focus:bg-primary/40 focus:outline-none"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1 pr-4">
-                          <h3 className="text-lg font-semibold text-contrast group-hover:text-brand-violet transition-colors duration-200">
-                            {highlightText(item.question, (item as FAQItemWithSearch).searchMatches || [])}
+                          <h3 className="text-lg font-semibold text-contrast transition-colors duration-200 group-hover:text-brand-violet">
+                            {highlightText(
+                              item.question,
+                              (item as FAQItemWithSearch).searchMatches || [],
+                            )}
                           </h3>
                           {(item as FAQItemWithSearch).searchScore > 0 && (
-                            <p className="text-sm text-brand-violet mt-1">
-                              Search relevance: {((item as FAQItemWithSearch).searchScore * 100).toFixed(0)}%
+                            <p className="mt-1 text-sm text-brand-violet">
+                              Search relevance:{" "}
+                              {(
+                                (item as FAQItemWithSearch).searchScore * 100
+                              ).toFixed(0)}
+                              %
                             </p>
                           )}
                         </div>
                         <div className="flex-shrink-0">
                           {openItems.includes(item.id) ? (
-                            <ChevronUp className="w-5 h-5 text-brand-violet" />
+                            <ChevronUp className="h-5 w-5 text-brand-violet" />
                           ) : (
-                            <ChevronDown className="w-5 h-5 text-inactive group-hover:text-brand-violet transition-colors duration-200" />
+                            <ChevronDown className="h-5 w-5 text-inactive transition-colors duration-200 group-hover:text-brand-violet" />
                           )}
                         </div>
                       </div>
@@ -438,8 +540,8 @@ const FAQPage: React.FC = () => {
                     {/* Answer */}
                     {openItems.includes(item.id) && (
                       <div className="px-6 pb-5 pt-2">
-                        <div className="bg-gradient-to-r from-floating to-primary/20 rounded-2xl p-4 border border-secondary/30">
-                          <div className="prose prose-sm max-w-none text-contrast prose-headings:text-contrast prose-strong:text-contrast prose-p:text-contrast prose-li:text-contrast">
+                        <div className="rounded-2xl border border-secondary/30 bg-gradient-to-r from-floating to-primary/20 p-4">
+                          <div className="prose prose-sm max-w-none text-contrast prose-headings:text-contrast prose-p:text-contrast prose-strong:text-contrast prose-li:text-contrast">
                             {renderAnswer(item.answer)}
                           </div>
                         </div>
@@ -454,15 +556,18 @@ const FAQPage: React.FC = () => {
       </div>
 
       {/* Help Section */}
-      <div className="text-center innohassle-card p-8 bg-gradient-to-br from-brand-violet/5 via-transparent to-brand-violet/10 border-2 border-brand-violet/20">
-        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-brand-violet/20 to-brand-violet/10 rounded-2xl flex items-center justify-center">
-          <HelpCircle className="w-8 h-8 text-brand-violet" />
+      <div className="innohassle-card border-2 border-brand-violet/20 bg-gradient-to-br from-brand-violet/5 via-transparent to-brand-violet/10 p-8 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-violet/20 to-brand-violet/10">
+          <HelpCircle className="h-8 w-8 text-brand-violet" />
         </div>
-        <h3 className="text-xl font-bold text-contrast mb-2">Still have questions?</h3>
-        <p className="text-inactive mb-4">
-          Can't find what you're looking for? Contact our support team for personalized assistance.
+        <h3 className="mb-2 text-xl font-bold text-contrast">
+          Still have questions?
+        </h3>
+        <p className="mb-4 text-inactive">
+          Can't find what you're looking for? Contact our support team for
+          personalized assistance.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <button className="innohassle-button-primary px-6 py-3">
             Contact Support
           </button>
