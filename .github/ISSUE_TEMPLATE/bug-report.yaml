@@ -1,0 +1,40 @@
+name: 🐞 Bug report
+description: Report an issue with innohassle.ru
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug 💜
+        Please fill out the form below to help us understand and reproduce the issue.
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: Bug description
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Your device details
+      placeholder: Mobile or desktop, OS, browser
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Steps to reproduce the behavior.
+      placeholder: 1. Go to https://...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Screenshots / Additional context
+      description: Attach screenshots or screencast and provide any additional information. If you intend to submit a PR for this issue, tell us in the description. Thanks!
+      placeholder: Additional information
+    validations:
+      required: false

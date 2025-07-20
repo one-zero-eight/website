@@ -1,0 +1,19 @@
+name: Link issue to InNoHassle project
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - transferred
+
+jobs:
+  add-to-project:
+    name: Add issue to project
+    if: github.repository_owner == 'one-zero-eight' # Do not run in forks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v1.0.2
+        with:
+          project-url: https://github.com/orgs/one-zero-eight/projects/4
+          github-token: ${{ secrets.ACTIONS_PAT_PROJECTS }}
