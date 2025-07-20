@@ -146,9 +146,6 @@ importers:
       ical.js:
         specifier: ^2.1.0
         version: 2.1.0
-      lint-staged:
-        specifier: ^15.2.10
-        version: 15.2.10
       lucide-react:
         specifier: ^0.263.1
         version: 0.263.1(react@18.3.1)
@@ -255,6 +252,9 @@ importers:
       chalk:
         specifier: ^5.4.1
         version: 5.4.1
+      lint-staged:
+        specifier: ^15.2.10
+        version: 15.2.10
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.16.5)(typescript@5.6.2)

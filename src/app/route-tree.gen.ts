@@ -26,16 +26,24 @@ import { Route as WithmenuDormsImport } from "./routes/_with_menu/dorms";
 import { Route as WithmenuDashboardImport } from "./routes/_with_menu/dashboard";
 import { Route as WithmenuCalendarImport } from "./routes/_with_menu/calendar";
 import { Route as WithmenuAccountRouteImport } from "./routes/_with_menu/account/route";
+import { Route as WithmenuSportIndexImport } from "./routes/_with_menu/sport/index";
 import { Route as WithmenuScheduleIndexImport } from "./routes/_with_menu/schedule/index";
 import { Route as WithmenuRoomBookingIndexImport } from "./routes/_with_menu/room-booking/index";
 import { Route as WithmenuMusicRoomIndexImport } from "./routes/_with_menu/music-room.index";
 import { Route as WithmenuAccountIndexImport } from "./routes/_with_menu/account/index";
+import { Route as WithmenuSportScheduleImport } from "./routes/_with_menu/sport/schedule";
+import { Route as WithmenuSportHistoryImport } from "./routes/_with_menu/sport/history";
+import { Route as WithmenuSportFitnessTestImport } from "./routes/_with_menu/sport/fitness-test";
+import { Route as WithmenuSportFaqImport } from "./routes/_with_menu/sport/faq";
+import { Route as WithmenuSportClubsImport } from "./routes/_with_menu/sport/clubs";
 import { Route as WithmenuScheduleCategoryImport } from "./routes/_with_menu/schedule/$category";
 import { Route as WithmenuRoomBookingRulesImport } from "./routes/_with_menu/room-booking/rules";
 import { Route as WithmenuRoomBookingListImport } from "./routes/_with_menu/room-booking/list";
 import { Route as WithmenuMusicRoomInstructionsImport } from "./routes/_with_menu/music-room.instructions";
 import { Route as WithmenuAccountTokenImport } from "./routes/_with_menu/account/token";
 import { Route as WithmenuAccountConnectTelegramImport } from "./routes/_with_menu/account/connect-telegram";
+import { Route as WithmenuSportFitnessSessionSessionIdImport } from "./routes/_with_menu/sport/fitness-session.$sessionId";
+import { Route as WithmenuSportClubClubIdImport } from "./routes/_with_menu/sport/club.$clubId";
 import { Route as WithmenuScheduleEventGroupsAliasImport } from "./routes/_with_menu/schedule/event-groups.$alias";
 
 // Create/Update Routes
@@ -115,6 +123,11 @@ const WithmenuAccountRouteRoute = WithmenuAccountRouteImport.update({
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
+const WithmenuSportIndexRoute = WithmenuSportIndexImport.update({
+  path: "/",
+  getParentRoute: () => WithmenuSportRoute,
+} as any);
+
 const WithmenuScheduleIndexRoute = WithmenuScheduleIndexImport.update({
   path: "/schedule/",
   getParentRoute: () => WithmenuRouteRoute,
@@ -133,6 +146,31 @@ const WithmenuMusicRoomIndexRoute = WithmenuMusicRoomIndexImport.update({
 const WithmenuAccountIndexRoute = WithmenuAccountIndexImport.update({
   path: "/",
   getParentRoute: () => WithmenuAccountRouteRoute,
+} as any);
+
+const WithmenuSportScheduleRoute = WithmenuSportScheduleImport.update({
+  path: "/schedule",
+  getParentRoute: () => WithmenuSportRoute,
+} as any);
+
+const WithmenuSportHistoryRoute = WithmenuSportHistoryImport.update({
+  path: "/history",
+  getParentRoute: () => WithmenuSportRoute,
+} as any);
+
+const WithmenuSportFitnessTestRoute = WithmenuSportFitnessTestImport.update({
+  path: "/fitness-test",
+  getParentRoute: () => WithmenuSportRoute,
+} as any);
+
+const WithmenuSportFaqRoute = WithmenuSportFaqImport.update({
+  path: "/faq",
+  getParentRoute: () => WithmenuSportRoute,
+} as any);
+
+const WithmenuSportClubsRoute = WithmenuSportClubsImport.update({
+  path: "/clubs",
+  getParentRoute: () => WithmenuSportRoute,
 } as any);
 
 const WithmenuScheduleCategoryRoute = WithmenuScheduleCategoryImport.update({
@@ -166,6 +204,17 @@ const WithmenuAccountConnectTelegramRoute =
     path: "/connect-telegram",
     getParentRoute: () => WithmenuAccountRouteRoute,
   } as any);
+
+const WithmenuSportFitnessSessionSessionIdRoute =
+  WithmenuSportFitnessSessionSessionIdImport.update({
+    path: "/fitness-session/$sessionId",
+    getParentRoute: () => WithmenuSportRoute,
+  } as any);
+
+const WithmenuSportClubClubIdRoute = WithmenuSportClubClubIdImport.update({
+  path: "/club/$clubId",
+  getParentRoute: () => WithmenuSportRoute,
+} as any);
 
 const WithmenuScheduleEventGroupsAliasRoute =
   WithmenuScheduleEventGroupsAliasImport.update({
@@ -324,6 +373,41 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof WithmenuScheduleCategoryImport;
       parentRoute: typeof WithmenuRouteImport;
     };
+    "/_with_menu/sport/clubs": {
+      id: "/_with_menu/sport/clubs";
+      path: "/clubs";
+      fullPath: "/sport/clubs";
+      preLoaderRoute: typeof WithmenuSportClubsImport;
+      parentRoute: typeof WithmenuSportImport;
+    };
+    "/_with_menu/sport/faq": {
+      id: "/_with_menu/sport/faq";
+      path: "/faq";
+      fullPath: "/sport/faq";
+      preLoaderRoute: typeof WithmenuSportFaqImport;
+      parentRoute: typeof WithmenuSportImport;
+    };
+    "/_with_menu/sport/fitness-test": {
+      id: "/_with_menu/sport/fitness-test";
+      path: "/fitness-test";
+      fullPath: "/sport/fitness-test";
+      preLoaderRoute: typeof WithmenuSportFitnessTestImport;
+      parentRoute: typeof WithmenuSportImport;
+    };
+    "/_with_menu/sport/history": {
+      id: "/_with_menu/sport/history";
+      path: "/history";
+      fullPath: "/sport/history";
+      preLoaderRoute: typeof WithmenuSportHistoryImport;
+      parentRoute: typeof WithmenuSportImport;
+    };
+    "/_with_menu/sport/schedule": {
+      id: "/_with_menu/sport/schedule";
+      path: "/schedule";
+      fullPath: "/sport/schedule";
+      preLoaderRoute: typeof WithmenuSportScheduleImport;
+      parentRoute: typeof WithmenuSportImport;
+    };
     "/_with_menu/account/": {
       id: "/_with_menu/account/";
       path: "/";
@@ -352,12 +436,33 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof WithmenuScheduleIndexImport;
       parentRoute: typeof WithmenuRouteImport;
     };
+    "/_with_menu/sport/": {
+      id: "/_with_menu/sport/";
+      path: "/";
+      fullPath: "/sport/";
+      preLoaderRoute: typeof WithmenuSportIndexImport;
+      parentRoute: typeof WithmenuSportImport;
+    };
     "/_with_menu/schedule/event-groups/$alias": {
       id: "/_with_menu/schedule/event-groups/$alias";
       path: "/schedule/event-groups/$alias";
       fullPath: "/schedule/event-groups/$alias";
       preLoaderRoute: typeof WithmenuScheduleEventGroupsAliasImport;
       parentRoute: typeof WithmenuRouteImport;
+    };
+    "/_with_menu/sport/club/$clubId": {
+      id: "/_with_menu/sport/club/$clubId";
+      path: "/club/$clubId";
+      fullPath: "/sport/club/$clubId";
+      preLoaderRoute: typeof WithmenuSportClubClubIdImport;
+      parentRoute: typeof WithmenuSportImport;
+    };
+    "/_with_menu/sport/fitness-session/$sessionId": {
+      id: "/_with_menu/sport/fitness-session/$sessionId";
+      path: "/fitness-session/$sessionId";
+      fullPath: "/sport/fitness-session/$sessionId";
+      preLoaderRoute: typeof WithmenuSportFitnessSessionSessionIdImport;
+      parentRoute: typeof WithmenuSportImport;
     };
   }
 }
@@ -379,6 +484,33 @@ const WithmenuAccountRouteRouteChildren: WithmenuAccountRouteRouteChildren = {
 const WithmenuAccountRouteRouteWithChildren =
   WithmenuAccountRouteRoute._addFileChildren(WithmenuAccountRouteRouteChildren);
 
+interface WithmenuSportRouteChildren {
+  WithmenuSportClubsRoute: typeof WithmenuSportClubsRoute;
+  WithmenuSportFaqRoute: typeof WithmenuSportFaqRoute;
+  WithmenuSportFitnessTestRoute: typeof WithmenuSportFitnessTestRoute;
+  WithmenuSportHistoryRoute: typeof WithmenuSportHistoryRoute;
+  WithmenuSportScheduleRoute: typeof WithmenuSportScheduleRoute;
+  WithmenuSportIndexRoute: typeof WithmenuSportIndexRoute;
+  WithmenuSportClubClubIdRoute: typeof WithmenuSportClubClubIdRoute;
+  WithmenuSportFitnessSessionSessionIdRoute: typeof WithmenuSportFitnessSessionSessionIdRoute;
+}
+
+const WithmenuSportRouteChildren: WithmenuSportRouteChildren = {
+  WithmenuSportClubsRoute: WithmenuSportClubsRoute,
+  WithmenuSportFaqRoute: WithmenuSportFaqRoute,
+  WithmenuSportFitnessTestRoute: WithmenuSportFitnessTestRoute,
+  WithmenuSportHistoryRoute: WithmenuSportHistoryRoute,
+  WithmenuSportScheduleRoute: WithmenuSportScheduleRoute,
+  WithmenuSportIndexRoute: WithmenuSportIndexRoute,
+  WithmenuSportClubClubIdRoute: WithmenuSportClubClubIdRoute,
+  WithmenuSportFitnessSessionSessionIdRoute:
+    WithmenuSportFitnessSessionSessionIdRoute,
+};
+
+const WithmenuSportRouteWithChildren = WithmenuSportRoute._addFileChildren(
+  WithmenuSportRouteChildren,
+);
+
 interface WithmenuRouteRouteChildren {
   WithmenuAccountRouteRoute: typeof WithmenuAccountRouteRouteWithChildren;
   WithmenuCalendarRoute: typeof WithmenuCalendarRoute;
@@ -391,7 +523,7 @@ interface WithmenuRouteRouteChildren {
   WithmenuPrintersRoute: typeof WithmenuPrintersRoute;
   WithmenuScholarshipRoute: typeof WithmenuScholarshipRoute;
   WithmenuSearchRoute: typeof WithmenuSearchRoute;
-  WithmenuSportRoute: typeof WithmenuSportRoute;
+  WithmenuSportRoute: typeof WithmenuSportRouteWithChildren;
   WithmenuMusicRoomInstructionsRoute: typeof WithmenuMusicRoomInstructionsRoute;
   WithmenuRoomBookingListRoute: typeof WithmenuRoomBookingListRoute;
   WithmenuRoomBookingRulesRoute: typeof WithmenuRoomBookingRulesRoute;
@@ -414,7 +546,7 @@ const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuPrintersRoute: WithmenuPrintersRoute,
   WithmenuScholarshipRoute: WithmenuScholarshipRoute,
   WithmenuSearchRoute: WithmenuSearchRoute,
-  WithmenuSportRoute: WithmenuSportRoute,
+  WithmenuSportRoute: WithmenuSportRouteWithChildren,
   WithmenuMusicRoomInstructionsRoute: WithmenuMusicRoomInstructionsRoute,
   WithmenuRoomBookingListRoute: WithmenuRoomBookingListRoute,
   WithmenuRoomBookingRulesRoute: WithmenuRoomBookingRulesRoute,
@@ -443,7 +575,7 @@ export interface FileRoutesByFullPath {
   "/printers": typeof WithmenuPrintersRoute;
   "/scholarship": typeof WithmenuScholarshipRoute;
   "/search": typeof WithmenuSearchRoute;
-  "/sport": typeof WithmenuSportRoute;
+  "/sport": typeof WithmenuSportRouteWithChildren;
   "/forms/submit": typeof FormsSubmitRoute;
   "/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
   "/account/token": typeof WithmenuAccountTokenRoute;
@@ -451,11 +583,19 @@ export interface FileRoutesByFullPath {
   "/room-booking/list": typeof WithmenuRoomBookingListRoute;
   "/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/schedule/$category": typeof WithmenuScheduleCategoryRoute;
+  "/sport/clubs": typeof WithmenuSportClubsRoute;
+  "/sport/faq": typeof WithmenuSportFaqRoute;
+  "/sport/fitness-test": typeof WithmenuSportFitnessTestRoute;
+  "/sport/history": typeof WithmenuSportHistoryRoute;
+  "/sport/schedule": typeof WithmenuSportScheduleRoute;
   "/account/": typeof WithmenuAccountIndexRoute;
   "/music-room": typeof WithmenuMusicRoomIndexRoute;
   "/room-booking": typeof WithmenuRoomBookingIndexRoute;
   "/schedule": typeof WithmenuScheduleIndexRoute;
+  "/sport/": typeof WithmenuSportIndexRoute;
   "/schedule/event-groups/$alias": typeof WithmenuScheduleEventGroupsAliasRoute;
+  "/sport/club/$clubId": typeof WithmenuSportClubClubIdRoute;
+  "/sport/fitness-session/$sessionId": typeof WithmenuSportFitnessSessionSessionIdRoute;
 }
 
 export interface FileRoutesByTo {
@@ -471,7 +611,6 @@ export interface FileRoutesByTo {
   "/printers": typeof WithmenuPrintersRoute;
   "/scholarship": typeof WithmenuScholarshipRoute;
   "/search": typeof WithmenuSearchRoute;
-  "/sport": typeof WithmenuSportRoute;
   "/forms/submit": typeof FormsSubmitRoute;
   "/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
   "/account/token": typeof WithmenuAccountTokenRoute;
@@ -479,11 +618,19 @@ export interface FileRoutesByTo {
   "/room-booking/list": typeof WithmenuRoomBookingListRoute;
   "/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/schedule/$category": typeof WithmenuScheduleCategoryRoute;
+  "/sport/clubs": typeof WithmenuSportClubsRoute;
+  "/sport/faq": typeof WithmenuSportFaqRoute;
+  "/sport/fitness-test": typeof WithmenuSportFitnessTestRoute;
+  "/sport/history": typeof WithmenuSportHistoryRoute;
+  "/sport/schedule": typeof WithmenuSportScheduleRoute;
   "/account": typeof WithmenuAccountIndexRoute;
   "/music-room": typeof WithmenuMusicRoomIndexRoute;
   "/room-booking": typeof WithmenuRoomBookingIndexRoute;
   "/schedule": typeof WithmenuScheduleIndexRoute;
+  "/sport": typeof WithmenuSportIndexRoute;
   "/schedule/event-groups/$alias": typeof WithmenuScheduleEventGroupsAliasRoute;
+  "/sport/club/$clubId": typeof WithmenuSportClubClubIdRoute;
+  "/sport/fitness-session/$sessionId": typeof WithmenuSportFitnessSessionSessionIdRoute;
 }
 
 export interface FileRoutesById {
@@ -501,7 +648,7 @@ export interface FileRoutesById {
   "/_with_menu/printers": typeof WithmenuPrintersRoute;
   "/_with_menu/scholarship": typeof WithmenuScholarshipRoute;
   "/_with_menu/search": typeof WithmenuSearchRoute;
-  "/_with_menu/sport": typeof WithmenuSportRoute;
+  "/_with_menu/sport": typeof WithmenuSportRouteWithChildren;
   "/forms/submit": typeof FormsSubmitRoute;
   "/_with_menu/account/connect-telegram": typeof WithmenuAccountConnectTelegramRoute;
   "/_with_menu/account/token": typeof WithmenuAccountTokenRoute;
@@ -509,11 +656,19 @@ export interface FileRoutesById {
   "/_with_menu/room-booking/list": typeof WithmenuRoomBookingListRoute;
   "/_with_menu/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/_with_menu/schedule/$category": typeof WithmenuScheduleCategoryRoute;
+  "/_with_menu/sport/clubs": typeof WithmenuSportClubsRoute;
+  "/_with_menu/sport/faq": typeof WithmenuSportFaqRoute;
+  "/_with_menu/sport/fitness-test": typeof WithmenuSportFitnessTestRoute;
+  "/_with_menu/sport/history": typeof WithmenuSportHistoryRoute;
+  "/_with_menu/sport/schedule": typeof WithmenuSportScheduleRoute;
   "/_with_menu/account/": typeof WithmenuAccountIndexRoute;
   "/_with_menu/music-room/": typeof WithmenuMusicRoomIndexRoute;
   "/_with_menu/room-booking/": typeof WithmenuRoomBookingIndexRoute;
   "/_with_menu/schedule/": typeof WithmenuScheduleIndexRoute;
+  "/_with_menu/sport/": typeof WithmenuSportIndexRoute;
   "/_with_menu/schedule/event-groups/$alias": typeof WithmenuScheduleEventGroupsAliasRoute;
+  "/_with_menu/sport/club/$clubId": typeof WithmenuSportClubClubIdRoute;
+  "/_with_menu/sport/fitness-session/$sessionId": typeof WithmenuSportFitnessSessionSessionIdRoute;
 }
 
 export interface FileRouteTypes {
@@ -540,11 +695,19 @@ export interface FileRouteTypes {
     | "/room-booking/list"
     | "/room-booking/rules"
     | "/schedule/$category"
+    | "/sport/clubs"
+    | "/sport/faq"
+    | "/sport/fitness-test"
+    | "/sport/history"
+    | "/sport/schedule"
     | "/account/"
     | "/music-room"
     | "/room-booking"
     | "/schedule"
-    | "/schedule/event-groups/$alias";
+    | "/sport/"
+    | "/schedule/event-groups/$alias"
+    | "/sport/club/$clubId"
+    | "/sport/fitness-session/$sessionId";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
@@ -559,7 +722,6 @@ export interface FileRouteTypes {
     | "/printers"
     | "/scholarship"
     | "/search"
-    | "/sport"
     | "/forms/submit"
     | "/account/connect-telegram"
     | "/account/token"
@@ -567,11 +729,19 @@ export interface FileRouteTypes {
     | "/room-booking/list"
     | "/room-booking/rules"
     | "/schedule/$category"
+    | "/sport/clubs"
+    | "/sport/faq"
+    | "/sport/fitness-test"
+    | "/sport/history"
+    | "/sport/schedule"
     | "/account"
     | "/music-room"
     | "/room-booking"
     | "/schedule"
-    | "/schedule/event-groups/$alias";
+    | "/sport"
+    | "/schedule/event-groups/$alias"
+    | "/sport/club/$clubId"
+    | "/sport/fitness-session/$sessionId";
   id:
     | "__root__"
     | "/"
@@ -595,11 +765,19 @@ export interface FileRouteTypes {
     | "/_with_menu/room-booking/list"
     | "/_with_menu/room-booking/rules"
     | "/_with_menu/schedule/$category"
+    | "/_with_menu/sport/clubs"
+    | "/_with_menu/sport/faq"
+    | "/_with_menu/sport/fitness-test"
+    | "/_with_menu/sport/history"
+    | "/_with_menu/sport/schedule"
     | "/_with_menu/account/"
     | "/_with_menu/music-room/"
     | "/_with_menu/room-booking/"
     | "/_with_menu/schedule/"
-    | "/_with_menu/schedule/event-groups/$alias";
+    | "/_with_menu/sport/"
+    | "/_with_menu/schedule/event-groups/$alias"
+    | "/_with_menu/sport/club/$clubId"
+    | "/_with_menu/sport/fitness-session/$sessionId";
   fileRoutesById: FileRoutesById;
 }
 
@@ -711,7 +889,17 @@ export const routeTree = rootRoute
     },
     "/_with_menu/sport": {
       "filePath": "_with_menu/sport.tsx",
-      "parent": "/_with_menu"
+      "parent": "/_with_menu",
+      "children": [
+        "/_with_menu/sport/clubs",
+        "/_with_menu/sport/faq",
+        "/_with_menu/sport/fitness-test",
+        "/_with_menu/sport/history",
+        "/_with_menu/sport/schedule",
+        "/_with_menu/sport/",
+        "/_with_menu/sport/club/$clubId",
+        "/_with_menu/sport/fitness-session/$sessionId"
+      ]
     },
     "/forms/submit": {
       "filePath": "forms.submit.tsx"
@@ -740,6 +928,26 @@ export const routeTree = rootRoute
       "filePath": "_with_menu/schedule/$category.tsx",
       "parent": "/_with_menu"
     },
+    "/_with_menu/sport/clubs": {
+      "filePath": "_with_menu/sport/clubs.tsx",
+      "parent": "/_with_menu/sport"
+    },
+    "/_with_menu/sport/faq": {
+      "filePath": "_with_menu/sport/faq.tsx",
+      "parent": "/_with_menu/sport"
+    },
+    "/_with_menu/sport/fitness-test": {
+      "filePath": "_with_menu/sport/fitness-test.tsx",
+      "parent": "/_with_menu/sport"
+    },
+    "/_with_menu/sport/history": {
+      "filePath": "_with_menu/sport/history.tsx",
+      "parent": "/_with_menu/sport"
+    },
+    "/_with_menu/sport/schedule": {
+      "filePath": "_with_menu/sport/schedule.tsx",
+      "parent": "/_with_menu/sport"
+    },
     "/_with_menu/account/": {
       "filePath": "_with_menu/account/index.tsx",
       "parent": "/_with_menu/account"
@@ -756,9 +964,21 @@ export const routeTree = rootRoute
       "filePath": "_with_menu/schedule/index.tsx",
       "parent": "/_with_menu"
     },
+    "/_with_menu/sport/": {
+      "filePath": "_with_menu/sport/index.tsx",
+      "parent": "/_with_menu/sport"
+    },
     "/_with_menu/schedule/event-groups/$alias": {
       "filePath": "_with_menu/schedule/event-groups.$alias.tsx",
       "parent": "/_with_menu"
+    },
+    "/_with_menu/sport/club/$clubId": {
+      "filePath": "_with_menu/sport/club.$clubId.tsx",
+      "parent": "/_with_menu/sport"
+    },
+    "/_with_menu/sport/fitness-session/$sessionId": {
+      "filePath": "_with_menu/sport/fitness-session.$sessionId.tsx",
+      "parent": "/_with_menu/sport"
     }
   }
 }
