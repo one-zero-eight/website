@@ -1,0 +1,479 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    accent-color: rgb(var(--color-brand-violet));
+
+    --color-brand-violet: 151 71 255; /* #9747FF */
+    --color-brand-gradient-start: 154 46 255; /* #9A2EFF */
+    --color-brand-gradient-end: 209 35 162; /* #D123A2 */
+
+    /* Light theme - WHITE background */
+    --color-pagebg: 255 255 255; /* Pure white #FFFFFF */
+    --color-primary: 248 250 252; /* Very light gray #F8FAFC */
+    --color-primary-hover: 241 245 249; /* Light gray #F1F5F9 */
+    --color-floating: 255 255 255; /* Pure white #FFFFFF */
+    --color-secondary: 226 232 240; /* Light border #E2E8F0 */
+    --color-secondary-hover: 203 213 225; /* Medium border #CBD5E1 */
+    --color-inactive: 100 116 139; /* Gray text #64748B */
+    --color-contrast: 15 23 42; /* Dark text #0F172A */
+  }
+
+  :root[class~="dark"] {
+    color-scheme: dark;
+    --color-pagebg: 11 11 11; /* #0B0B0B */
+    --color-primary: 38 38 38; /* #262626 */
+    --color-primary-hover: 28 28 28; /* #1C1C1C */
+    --color-floating: 27 27 27; /* #1B1B1B */
+    --color-secondary: 34 34 34; /* #222222 */
+    --color-secondary-hover: 55 55 55; /* #373737 */
+    --color-inactive: 105 105 105; /* #696969 */
+    --color-contrast: 255 255 255; /* #FFFFFF */
+  }
+  
+  html {
+    font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: rgb(var(--color-pagebg)) !important;
+  }
+  
+  body {
+    background-color: rgb(var(--color-pagebg)) !important;
+    color: rgb(var(--color-contrast));
+    margin: 0;
+    line-height: 1.6;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+  }
+
+  #root {
+    background-color: rgb(var(--color-pagebg)) !important;
+    min-height: 100vh;
+  }
+
+  /* Ensure all containers use correct background */
+  .main-container {
+    background-color: rgb(var(--color-pagebg)) !important;
+  }
+
+  /* Force bg updates on theme change */
+  * {
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  }
+}
+
+@layer components {
+  .selected {
+    background: linear-gradient(90deg, rgb(var(--color-brand-gradient-start)) 0%, rgb(var(--color-brand-gradient-end)) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* InnoHassle component styles */
+  .innohassle-card {
+    background-color: rgb(var(--color-floating));
+    border: 1px solid rgb(var(--color-secondary));
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+  }
+  
+  .innohassle-button {
+    font-weight: 500;
+    border-radius: 0.75rem;
+    transition: all 0.2s;
+    outline: none;
+    padding: 0.5rem 1rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .innohassle-button:focus {
+    box-shadow: 0 0 0 2px rgb(var(--color-pagebg)), 0 0 0 4px rgb(var(--color-brand-violet));
+  }
+  
+  .innohassle-button-primary {
+    color: white;
+    background: linear-gradient(90deg, rgb(var(--color-brand-gradient-start)) 0%, rgb(var(--color-brand-violet)) 100%);
+    border-radius: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: none;
+  }
+  
+  .innohassle-button-primary:hover {
+    background: linear-gradient(90deg, rgba(var(--color-brand-gradient-start), 0.9) 0%, rgba(var(--color-brand-violet), 0.9) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px 0 rgba(var(--color-brand-violet), 0.3);
+  }
+  
+  .innohassle-button-primary:focus {
+    box-shadow: none;
+    outline: none;
+  }
+  
+  .innohassle-button-secondary {
+    background-color: rgb(var(--color-secondary));
+    color: rgb(var(--color-contrast));
+    border: 1px solid rgb(var(--color-primary));
+    border-radius: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  
+  .innohassle-button-secondary:hover {
+    background-color: rgb(var(--color-secondary-hover));
+    transform: translateY(-1px);
+  }
+  
+  .innohassle-button-secondary:focus {
+    box-shadow: 0 0 0 2px rgb(var(--color-pagebg)), 0 0 0 4px rgb(var(--color-inactive));
+  }
+  
+  .innohassle-button-success {
+    background-color: #16a34a;
+    color: white;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: none;
+  }
+  
+  .innohassle-button-success:hover {
+    background-color: #15803d;
+    transform: translateY(-1px);
+  }
+  
+  .innohassle-button-error {
+    background-color: #dc2626;
+    color: white;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: none;
+  }
+  
+  .innohassle-button-error:hover {
+    background-color: #b91c1c;
+    transform: translateY(-1px);
+  }
+  
+  .innohassle-button-error:focus {
+    box-shadow: none;
+    outline: none;
+  }
+  
+  .innohassle-input {
+    background-color: rgb(var(--color-floating));
+    border: 1px solid rgb(var(--color-secondary));
+    color: rgb(var(--color-contrast));
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    transition: colors 0.2s;
+  }
+  
+  .innohassle-input::placeholder {
+    color: rgb(var(--color-inactive));
+  }
+  
+  .innohassle-input:focus {
+    border-color: rgb(var(--color-brand-violet));
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(var(--color-brand-violet), 0.5);
+  }
+  
+  .innohassle-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .innohassle-badge-success {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .innohassle-badge-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .innohassle-badge-error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .innohassle-badge-primary {
+    color: white;
+    border: 1px solid rgba(var(--color-brand-violet), 0.3);
+    background: linear-gradient(90deg, rgba(var(--color-brand-gradient-start), 0.8) 0%, rgba(var(--color-brand-violet), 0.8) 100%);
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  /* Light theme specific adjustments for better visibility */
+  :root .innohassle-badge-primary {
+    color: white;
+    background: linear-gradient(90deg, rgb(var(--color-brand-gradient-start)) 0%, rgb(var(--color-brand-violet)) 100%);
+    border: 1px solid rgba(var(--color-brand-violet), 0.2);
+  }
+
+  /* Past activity specific styles */
+  .activity-past {
+    background-color: rgba(var(--color-inactive), 0.05) !important;
+    border: 1px solid rgba(var(--color-inactive), 0.15) !important;
+    opacity: 0.4;
+    filter: grayscale(1);
+  }
+
+  /* Dark theme adjustments for past activities */
+  :root[class~="dark"] .activity-past {
+    background-color: rgba(var(--color-inactive), 0.08) !important;
+    border-color: rgba(var(--color-inactive), 0.2) !important;
+    opacity: 0.3;
+  }
+
+  /* Dark theme adjustments for badges */
+  :root[class~="dark"] .innohassle-badge-success {
+    background-color: #14532d;
+    color: #bbf7d0;
+    border-color: #166534;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  :root[class~="dark"] .innohassle-badge-warning {
+    background-color: #78350f;
+    color: #fde68a;
+    border-color: #92400e;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  :root[class~="dark"] .innohassle-badge-error {
+    background-color: #7f1d1d;
+    color: #fecaca;
+    border-color: #991b1b;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* Light theme specific improvements for better visibility */
+  :root .innohassle-button-secondary {
+    background-color: rgb(var(--color-secondary));
+    color: rgb(var(--color-contrast));
+    border: 1px solid rgb(var(--color-secondary));
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  
+  :root .innohassle-button-secondary:hover {
+    background-color: rgb(var(--color-secondary-hover));
+    border-color: rgb(var(--color-secondary-hover));
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Light theme primary button - filled by default, outline on hover */
+  :root .innohassle-button-primary {
+    border: 2px solid transparent;
+  }
+  
+  :root .innohassle-button-primary:hover {
+    background: rgb(var(--color-pagebg));
+    color: rgb(var(--color-brand-violet));
+    border: 2px solid rgb(var(--color-brand-violet));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px 0 rgba(var(--color-brand-violet), 0.3);
+  }
+  
+  /* Light theme card improvements */
+  :root .innohassle-card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+  
+  /* Dark theme overrides */
+  :root[class~="dark"] .innohassle-button-secondary {
+    background-color: rgb(var(--color-secondary));
+    color: rgb(var(--color-contrast));
+    border: 1px solid rgb(var(--color-primary));
+    box-shadow: none;
+  }
+  
+  :root[class~="dark"] .innohassle-button-secondary:hover {
+    background-color: rgb(var(--color-secondary-hover));
+    border-color: rgb(var(--color-primary));
+    box-shadow: none;
+  }
+  
+  :root[class~="dark"] .innohassle-button-primary {
+    border: 2px solid transparent;
+  }
+  
+  :root[class~="dark"] .innohassle-button-primary:hover {
+    background: rgb(var(--color-pagebg));
+    color: rgb(var(--color-brand-violet));
+    border: 2px solid rgb(var(--color-brand-violet));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px 0 rgba(var(--color-brand-violet), 0.3);
+  }
+  
+  :root[class~="dark"] .innohassle-button-outline {
+    background-color: transparent;
+    color: rgb(var(--color-brand-violet));
+    border: 2px solid rgb(var(--color-brand-violet));
+  }
+  
+  :root[class~="dark"] .innohassle-button-outline:hover {
+    background-color: rgb(var(--color-brand-violet));
+    color: white;
+    border: 2px solid rgb(var(--color-brand-violet));
+    transform: translateY(-1px);
+    box-shadow: none;
+  }
+  
+  :root[class~="dark"] .innohassle-card {
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* Enhanced design animations and effects */
+@keyframes shimmer {
+  0% { transform: translateX(-200%) skewX(-12deg); }
+  100% { transform: translateX(200%) skewX(-12deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--color-brand-violet), 0.7); }
+  50% { box-shadow: 0 0 0 8px rgba(var(--color-brand-violet), 0); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* Progress bar enhancements */
+.progress-container {
+  position: relative;
+}
+
+.progress-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.progress-indicator {
+  box-shadow: 0 0 0 3px rgb(var(--color-brand-violet));
+}
+
+/* Hover effects */
+.progress-container:hover .progress-fill::after {
+  animation: shimmer 1s ease-in-out infinite;
+}
+
+.progress-container:hover .progress-indicator {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px rgba(var(--color-brand-violet), 0.6);
+}
+
+/* Responsive progress bar */
+@media (max-width: 640px) {
+  .progress-container {
+    height: 1.25rem;
+  }
+  
+  .progress-indicator {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+/* Safe area support for iOS devices */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mobile bottom navigation spacing */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  /* Add bottom padding to main content to avoid overlap with bottom navbar */
+  .mobile-content-bottom-padding {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0));
+  }
+}
+
+/* Improved mobile navbar styling */
+.mobile-navbar {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode support for mobile navbar */
+@media (prefers-color-scheme: dark) {
+  .mobile-navbar {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  }
+}
