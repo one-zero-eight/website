@@ -1,0 +1,102 @@
+name: Build static files and deploy website
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        type: environment
+        required: true
+
+  push:
+    branches:
+      - main
+
+  pull_request:
+
+jobs:
+  build:
+    name: Build static files
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure environment variables
+        run: echo "${{ vars.ENV_VARIABLES }}" > .env.local
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.11.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.17.1
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Show files
+        run: |
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          ls -lAhR ./dist | tee -a $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Archive build
+        run: tar czf site.tar.gz ./dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-build
+          path: site.tar.gz
+          if-no-files-found: error
+
+  deploy:
+    if: github.repository_owner == 'inno-sport-inh' && (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main')
+    name: Deploy to production server
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ vars.DEPLOY_URL }}
+    concurrency:
+      group: ${{ github.event.inputs.environment || 'production' }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site-build
+          path: .
+
+      - name: Copy archive to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "site.tar.gz"
+          target: "/tmp/"
+
+      - name: Extract and reload Nginx
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+            mkdir -p /var/www/sport.innohassle.ru
+            tar xzf /tmp/site.tar.gz -C /var/www/sport.innohassle.ru --strip-components=1
+            rm /tmp/site.tar.gz
+            sudo systemctl reload nginx
