@@ -19,6 +19,8 @@ export function AskPage({ askQuery }: { askQuery: string }) {
 
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
 
+  const [chatId, setChatId] = useState<string | null>(null);
+
   const {
     data: result,
     error,
@@ -27,7 +29,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
     "post",
     "/ask/",
     {
-      body: { query: submittedQuery ?? "" },
+      body: { query: submittedQuery ?? "", chat_id: chatId },
     },
     {
       enabled: submittedQuery !== null && submittedQuery.length > 0,
@@ -42,6 +44,10 @@ export function AskPage({ askQuery }: { askQuery: string }) {
     if (result && submittedQuery) {
       setMessages((prev) => [...prev, { role: "assistant", response: result }]);
       setSubmittedQuery(null);
+
+      if (result.chat_id && !chatId) {
+        setChatId(result.chat_id);
+      }
     }
   }, [result]);
 

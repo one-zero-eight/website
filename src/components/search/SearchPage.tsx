@@ -144,6 +144,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const {
     data: searchResult,
     isLoading,
+    error,
     refetch,
   } = $search.useQuery(
     "get",
@@ -311,6 +312,13 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
               )
             )}
           </div>
+        </div>
+      )}
+      {error && (
+        <div>
+          <p className="py-4 text-xl font-semibold text-contrast">
+            Sorry, something gone wrong.
+          </p>
         </div>
       )}
     </div>

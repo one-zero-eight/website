@@ -308,6 +308,8 @@ export interface components {
       query: string;
       /** Answer */
       answer: string;
+      /** @description Assigned chat index */
+      chat_id: components["schemas"]["PydanticObjectId"] | null;
       /** @description Assigned ask query index */
       ask_query_id: components["schemas"]["PydanticObjectId"] | null;
       /**
@@ -315,6 +317,11 @@ export interface components {
        * @description Responses to the search query.
        */
       search_responses: components["schemas"]["SearchResponse"][];
+      /**
+       * Messages
+       * @description Chat history for llm (do not show on frontend).
+       */
+      messages: unknown[];
     };
     /** Body_ask_act_by_query */
     Body_ask_act_by_query: {
@@ -325,6 +332,7 @@ export interface components {
     Body_ask_ask_by_query: {
       /** Query */
       query: string;
+      chat_id?: components["schemas"]["PydanticObjectId"] | null;
     };
     /** CampusLifeSource */
     CampusLifeSource: {
@@ -1525,6 +1533,10 @@ export enum Resources {
   innohassle = "innohassle",
   myuni = "myuni",
   ithelp = "ithelp",
+  academic_calendar = "academic_calendar",
+  psychologist = "psychologist",
+  university_events = "university_events",
+  university_store = "university_store",
 }
 export enum ResourcesSourceType {
   resources = "resources",
