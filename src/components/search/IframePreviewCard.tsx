@@ -38,7 +38,9 @@ export default function IframePreviewCard({
     url.startsWith("http://") ||
     url.startsWith("https://hotel.innopolis.university/") ||
     url.startsWith("https://help.university.innopolis.ru/") ||
-    url.startsWith("https://my.university.innopolis.ru/");
+    url.startsWith("https://my.university.innopolis.ru/") ||
+    url.startsWith("https://disk.yandex.ru/") ||
+    url.startsWith("https://my.innopolis.university/");
 
   const isExternalPage = !!url && !hasError && !component;
 
@@ -101,7 +103,12 @@ export default function IframePreviewCard({
       )}
 
       <div className="flex justify-center">
-        <a href={url} className="hover:underline">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline"
+        >
           {"Go to website ->"}
         </a>
       </div>

@@ -1535,8 +1535,6 @@ export enum Resources {
   ithelp = "ithelp",
   academic_calendar = "academic_calendar",
   psychologist = "psychologist",
-  university_events = "university_events",
-  university_store = "university_store",
 }
 export enum ResourcesSourceType {
   resources = "resources",

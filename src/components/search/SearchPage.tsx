@@ -38,6 +38,8 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       myuni: true,
       innohassle: true,
       ithelp: true,
+      academic_calendar: true,
+      psychologist: true,
     },
   };
 
@@ -82,7 +84,9 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       selected.source.residents &&
       selected.source.myuni &&
       selected.source.innohassle &&
-      selected.source.ithelp;
+      selected.source.ithelp &&
+      selected.source.psychologist &&
+      selected.source.academic_calendar;
 
     if (!allSourcesSelected) {
       if (selected.source.campuslife) sources.push(InfoSources.campuslife);
@@ -94,6 +98,9 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       if (selected.source.innohassle) sources.push(Resources.innohassle);
       if (selected.source.myuni) sources.push(Resources.myuni);
       if (selected.source.ithelp) sources.push(Resources.ithelp);
+      if (selected.source.academic_calendar)
+        sources.push(Resources.academic_calendar);
+      if (selected.source.psychologist) sources.push(Resources.psychologist);
     }
     Object.entries(selectedFilters).forEach(([group, values]) => {
       const selectedValues = Object.entries(values)
@@ -122,6 +129,9 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           if (value === "innohassle") sources.push(Resources.innohassle);
           if (value === "myuni") sources.push(Resources.myuni);
           if (value === "ithelp") sources.push(Resources.ithelp);
+          if (value === "academic_calendar")
+            sources.push(Resources.academic_calendar);
+          if (value === "psychologist") sources.push(Resources.psychologist);
         });
       }
     });

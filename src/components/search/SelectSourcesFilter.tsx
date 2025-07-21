@@ -30,6 +30,8 @@ const filters = {
     { displayName: "InNoHassle", internalName: "innohassle" },
     { displayName: "My University", internalName: "myuni" },
     { displayName: "ITHelp Wiki", internalName: "ithelp" },
+    { displayName: "Academic calendar", internalName: "academic_calendar" },
+    { displayName: "Psychologist", internalName: "psychologist" },
   ],
 };
 
