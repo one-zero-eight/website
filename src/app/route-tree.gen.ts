@@ -83,11 +83,6 @@ const WithmenuRouteRoute = WithmenuRouteImport.update({
   getParentRoute: () => rootRoute,
 } as any);
 
-const SimpleRouteRoute = SimpleRouteImport.update({
-  id: "/_simple",
-  getParentRoute: () => rootRoute,
-} as any);
-
 const IndexRoute = IndexImport.update({
   path: "/",
   getParentRoute: () => rootRoute,
