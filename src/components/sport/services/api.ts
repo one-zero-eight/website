@@ -1,11 +1,5 @@
 // API Configuration
-const API_BASE_URL =
-  import.meta.env.DEV ||
-  window.location.hostname === "localhost" ||
-  window.location.hostname.includes("vercel.app") ||
-  window.location.hostname.includes("t9d.store")
-    ? "/api" // Use proxy in development, local preview, and Vercel deployment
-    : import.meta.env.VITE_API_BASE_URL || "http://t9d.store/api"; // Use direct URL only for other production deployments
+const API_BASE_URL = "http://t9d.store/api";
 
 import { getMyAccessToken } from "@/api/helpers/access-token.ts";
 
