@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Clock, Loader2, AlertCircle, Calendar } from "lucide-react";
 import { clubsAPI, Club, ClubGroup } from "./services/api";
+import { AuthWall } from "@/components/common/AuthWall.tsx";
 
 const ClubsPage: React.FC = () => {
   const [clubs, setClubs] = useState<Club[]>([]);
@@ -10,6 +11,13 @@ const ClubsPage: React.FC = () => {
   // State for opening description by club id
   const [descOpen, setDescOpen] = useState<{ [clubId: number]: boolean }>({});
 
+  // Проверка авторизации
+  const isAuthenticated = !!localStorage.getItem("accessToken");
+  if (!isAuthenticated) {
+    return <AuthWall signInRedirect={window.location.pathname} />;
+  }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     const fetchClubs = async () => {
       try {
