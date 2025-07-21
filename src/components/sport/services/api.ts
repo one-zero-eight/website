@@ -14,7 +14,7 @@ class APIError extends Error {
   }
 }
 
-// Получить токен и сохранить в localStorage
+// Получить токен и сохранить в localStorage (вызывать только после логина)
 export async function fetchAndStoreToken() {
   const response = await fetch(
     "https://api.innohassle.ru/accounts/v0/tokens/generate-my-token",
@@ -28,6 +28,18 @@ export async function fetchAndStoreToken() {
   return data.access_token;
 }
 
+// Получить токен из localStorage
+function getStoredToken(): string | null {
+  try {
+    const raw = localStorage.getItem("accessToken");
+    if (!raw) return null;
+    // Если токен был сохранён как строка в JSON
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 // Generic API request handler
 async function apiRequest<T>(
   endpoint: string,
@@ -35,14 +47,17 @@ async function apiRequest<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  // Получаем токен непосредственно перед запросом
-  const token = await fetchAndStoreToken();
+  // Получаем токен из localStorage
+  const token = getStoredToken();
+  if (!token) {
+    throw new Error(
+      "Authentication required: no access token found. Please sign in.",
+    );
+  }
   const baseHeaders: Record<string, string> = {
     Accept: "application/json",
+    Authorization: `Bearer ${token}`,
   };
-  if (token) {
-    baseHeaders["Authorization"] = `Bearer ${token}`;
-  }
 
   // Add Content-Type only if it's not FormData
   if (!(options.body instanceof FormData)) {
