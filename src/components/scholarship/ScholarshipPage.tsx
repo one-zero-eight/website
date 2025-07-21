@@ -15,7 +15,7 @@ export function ScholarshipPage() {
       <div className="flex max-w-2xl flex-col self-center p-4 text-lg">
         <h2 className="text-center text-3xl">Information</h2>
 
-        <h3 className="mt-4 text-2xl">Academic scholarships:</h3>
+        <h3 className="mt-4 text-2xl">Academic sch111111olarships:</h3>
         <p>
           For the first semester &mdash; scholarship from the admissions
           department.
