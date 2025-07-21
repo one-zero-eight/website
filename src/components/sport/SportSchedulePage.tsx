@@ -1,13 +1,16 @@
-import SchedulePage from './SchedulePage';
-import { SportNavigation } from './SportNavigation';
+import SchedulePage from "./SchedulePage";
+import TopBar from "./TopBar";
 
 export function SportSchedulePage() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'rgb(var(--color-pagebg))' }}>
-      <main className="px-4 py-8 mobile-content-bottom-padding">
-        <SportNavigation />
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "rgb(var(--color-pagebg))" }}
+    >
+      <TopBar />
+      <main className="mobile-content-bottom-padding px-4 py-8">
         <SchedulePage />
       </main>
     </div>
   );
-} 
+}
