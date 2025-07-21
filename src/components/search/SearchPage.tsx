@@ -154,6 +154,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const {
     data: searchResult,
     isLoading,
+    isFetching,
     error,
     refetch,
   } = $search.useQuery(
@@ -258,14 +259,14 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
         checks={checks}
         applyFilters={applyFilters}
       />
-      {searchResult && (
+      {!(isLoading || isFetching) && searchResult && (
         <p className="py-4 text-xl font-semibold text-contrast">
           {filteredResponses.length > 0
             ? `Results for: ${searchResult.searched_for}`
             : `No matched results for: ${searchResult.searched_for}`}
         </p>
       )}
-      {isLoading && (
+      {(isLoading || isFetching) && (
         <>
           <p className="py-4 text-xl font-semibold text-contrast">
             Loading search results...

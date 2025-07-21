@@ -4,7 +4,7 @@ import SearchField from "@/components/search/SearchField.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { ActResult } from "./ActResult";
 import { $search } from "@/api/search";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AnimatedDots from "../AnimatedDots";
 
 export function ActPage({ actQuery }: { actQuery: string }) {
@@ -12,16 +12,14 @@ export function ActPage({ actQuery }: { actQuery: string }) {
   const { me } = useMe();
 
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
-
-  const runSearch = (query: string) => {
-    navigate({ to: "/act", search: { q: query } });
-    setSubmittedQuery(query);
-  };
+  const didInit = useRef(false);
 
   const {
     data: result,
     isLoading,
+    isFetching,
     error,
+    refetch,
   } = $search.useQuery(
     "post",
     "/act/",
@@ -37,6 +35,23 @@ export function ActPage({ actQuery }: { actQuery: string }) {
     },
   );
 
+  useEffect(() => {
+    if (didInit.current) {
+      setSubmittedQuery(actQuery);
+    } else {
+      didInit.current = true;
+    }
+  }, [actQuery]);
+
+  const runSearch = (query: string) => {
+    navigate({ to: "/act", search: { q: query } });
+    if (query === submittedQuery) {
+      refetch();
+    } else {
+      setSubmittedQuery(query);
+    }
+  };
+
   if (!me) {
     return <AuthWall />;
   }
@@ -49,7 +64,7 @@ export function ActPage({ actQuery }: { actQuery: string }) {
         currentQuery={actQuery}
       />
       <span>AI Assistant:</span>
-      {isLoading ? (
+      {isLoading || isFetching ? (
         <div className="flex self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
           <span>- Executing</span>
           <AnimatedDots></AnimatedDots>
