@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@tanstack/react-router";
 import {
   User,
   LogOut,
@@ -51,19 +51,17 @@ const TopBar: React.FC = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden items-center space-x-1 md:flex">
-              <NavLink
-                to="/schedule"
-                end
-                className={({ isActive }) => {
-                  const active = isActive || location.pathname === "/";
-                  return `flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    active
-                      ? "text-white"
-                      : "text-inactive hover:bg-secondary hover:text-contrast"
-                  }`;
-                }}
-                style={({ isActive }) =>
-                  isActive || location.pathname === "/"
+              <Link
+                to="/sport/schedule"
+                className={`flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  location.pathname === "/sport/schedule" ||
+                  location.pathname === "/sport"
+                    ? "text-white"
+                    : "text-inactive hover:bg-secondary hover:text-contrast"
+                }`}
+                style={
+                  location.pathname === "/sport/schedule" ||
+                  location.pathname === "/sport"
                     ? {
                         background:
                           "linear-gradient(90deg, #9A2EFF 0%, #9747FF 100%)",
@@ -73,18 +71,16 @@ const TopBar: React.FC = () => {
               >
                 <Calendar size={16} />
                 <span>Schedule</span>
-              </NavLink>
-              <NavLink
-                to="/history"
-                className={({ isActive }) =>
-                  `flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-white"
-                      : "text-inactive hover:bg-secondary hover:text-contrast"
-                  }`
-                }
-                style={({ isActive }) =>
-                  isActive
+              </Link>
+              <Link
+                to="/sport/history"
+                className={`flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  location.pathname === "/sport/history"
+                    ? "text-white"
+                    : "text-inactive hover:bg-secondary hover:text-contrast"
+                }`}
+                style={
+                  location.pathname === "/sport/history"
                     ? {
                         background:
                           "linear-gradient(90deg, #9A2EFF 0%, #9747FF 100%)",
@@ -94,18 +90,16 @@ const TopBar: React.FC = () => {
               >
                 <BarChart3 size={16} />
                 <span>History</span>
-              </NavLink>
-              <NavLink
-                to="/clubs"
-                className={({ isActive }) =>
-                  `flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-white"
-                      : "text-inactive hover:bg-secondary hover:text-contrast"
-                  }`
-                }
-                style={({ isActive }) =>
-                  isActive
+              </Link>
+              <Link
+                to="/sport/clubs"
+                className={`flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  location.pathname === "/sport/clubs"
+                    ? "text-white"
+                    : "text-inactive hover:bg-secondary hover:text-contrast"
+                }`}
+                style={
+                  location.pathname === "/sport/clubs"
                     ? {
                         background:
                           "linear-gradient(90deg, #9A2EFF 0%, #9747FF 100%)",
@@ -115,19 +109,17 @@ const TopBar: React.FC = () => {
               >
                 <Users size={16} />
                 <span>Clubs</span>
-              </NavLink>
+              </Link>
 
-              <NavLink
-                to="/faq"
-                className={({ isActive }) =>
-                  `flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-white"
-                      : "text-inactive hover:bg-secondary hover:text-contrast"
-                  }`
-                }
-                style={({ isActive }) =>
-                  isActive
+              <Link
+                to="/sport/faq"
+                className={`flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  location.pathname === "/sport/faq"
+                    ? "text-white"
+                    : "text-inactive hover:bg-secondary hover:text-contrast"
+                }`}
+                style={
+                  location.pathname === "/sport/faq"
                     ? {
                         background:
                           "linear-gradient(90deg, #9A2EFF 0%, #9747FF 100%)",
@@ -137,7 +129,7 @@ const TopBar: React.FC = () => {
               >
                 <HelpCircle size={16} />
                 <span>FAQ</span>
-              </NavLink>
+              </Link>
             </nav>
 
             {/* User section */}
@@ -215,19 +207,17 @@ const TopBar: React.FC = () => {
         <div
           className={`grid gap-1 px-2 py-2 ${isStudent && isAdmin ? "grid-cols-6" : isStudent || isAdmin ? "grid-cols-5" : "grid-cols-4"}`}
         >
-          <NavLink
-            to="/schedule"
-            end
-            className={({ isActive }) => {
-              const active = isActive || location.pathname === "/";
-              return `flex flex-col items-center space-y-1 rounded-lg px-1 py-3 text-xs font-medium transition-all duration-200 ${
-                active
-                  ? "scale-105 text-white"
-                  : "text-inactive hover:scale-105 hover:bg-secondary hover:text-contrast"
-              }`;
-            }}
-            style={({ isActive }) =>
-              isActive || location.pathname === "/"
+          <Link
+            to="/sport/schedule"
+            className={`flex flex-col items-center space-y-1 rounded-lg px-1 py-3 text-xs font-medium transition-all duration-200 ${
+              location.pathname === "/sport/schedule" ||
+              location.pathname === "/sport"
+                ? "scale-105 text-white"
+                : "text-inactive hover:scale-105 hover:bg-secondary hover:text-contrast"
+            }`}
+            style={
+              location.pathname === "/sport/schedule" ||
+              location.pathname === "/sport"
                 ? {
                     background:
                       "linear-gradient(90deg, #9A2EFF 0%, #9747FF 100%)",
@@ -237,18 +227,16 @@ const TopBar: React.FC = () => {
           >
             <Calendar size={16} />
             <span>Schedule</span>
-          </NavLink>
-          <NavLink
-            to="/history"
-            className={({ isActive }) =>
-              `flex flex-col items-center space-y-1 rounded-lg px-1 py-3 text-xs font-medium transition-all duration-200 ${
-                isActive
-                  ? "scale-105 text-white"
-                  : "text-inactive hover:scale-105 hover:bg-secondary hover:text-contrast"
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
+          </Link>
+          <Link
+            to="/sport/history"
+            className={`flex flex-col items-center space-y-1 rounded-lg px-1 py-3 text-xs font-medium transition-all duration-200 ${
+              location.pathname === "/sport/history"
+                ? "scale-105 text-white"
+                : "text-inactive hover:scale-105 hover:bg-secondary hover:text-contrast"
+            }`}
+            style={
+              location.pathname === "/sport/history"
                 ? {
                     background:
                       "linear-gradient(90deg, #9A2EFF 0%, #9747FF 100%)",
@@ -258,18 +246,16 @@ const TopBar: React.FC = () => {
           >
             <BarChart3 size={16} />
             <span>History</span>
-          </NavLink>
-          <NavLink
-            to="/clubs"
-            className={({ isActive }) =>
-              `flex flex-col items-center space-y-1 rounded-lg px-1 py-3 text-xs font-medium transition-all duration-200 ${
-                isActive
-                  ? "scale-105 text-white"
-                  : "text-inactive hover:scale-105 hover:bg-secondary hover:text-contrast"
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
+          </Link>
+          <Link
+            to="/sport/clubs"
+            className={`flex flex-col items-center space-y-1 rounded-lg px-1 py-3 text-xs font-medium transition-all duration-200 ${
+              location.pathname === "/sport/clubs"
+                ? "scale-105 text-white"
+                : "text-inactive hover:scale-105 hover:bg-secondary hover:text-contrast"
+            }`}
+            style={
+              location.pathname === "/sport/clubs"
                 ? {
                     background:
                       "linear-gradient(90deg, #9A2EFF 0%, #9747FF 100%)",
@@ -279,19 +265,17 @@ const TopBar: React.FC = () => {
           >
             <Users size={16} />
             <span>Clubs</span>
-          </NavLink>
+          </Link>
 
-          <NavLink
-            to="/faq"
-            className={({ isActive }) =>
-              `flex flex-col items-center space-y-1 rounded-lg px-1 py-3 text-xs font-medium transition-all duration-200 ${
-                isActive
-                  ? "scale-105 text-white"
-                  : "text-inactive hover:scale-105 hover:bg-secondary hover:text-contrast"
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
+          <Link
+            to="/sport/faq"
+            className={`flex flex-col items-center space-y-1 rounded-lg px-1 py-3 text-xs font-medium transition-all duration-200 ${
+              location.pathname === "/sport/faq"
+                ? "scale-105 text-white"
+                : "text-inactive hover:scale-105 hover:bg-secondary hover:text-contrast"
+            }`}
+            style={
+              location.pathname === "/sport/faq"
                 ? {
                     background:
                       "linear-gradient(90deg, #9A2EFF 0%, #9747FF 100%)",
@@ -301,7 +285,7 @@ const TopBar: React.FC = () => {
           >
             <HelpCircle size={16} />
             <span>FAQ</span>
-          </NavLink>
+          </Link>
         </div>
       </nav>
     </>

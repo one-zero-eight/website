@@ -1,6 +1,7 @@
 @import "@fontsource-variable/rubik";
 @import "@fontsource/fuzzy-bubbles";
 @import "@fontsource/roboto";
+@import "../components/sport/index.css";
 
 @tailwind base;
 @tailwind components;
