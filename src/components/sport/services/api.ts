@@ -29,16 +29,16 @@ export async function fetchAndStoreToken() {
 }
 
 // Получить токен из localStorage
-function getStoredToken(): string | null {
-  try {
-    const raw = localStorage.getItem("accessToken");
-    if (!raw) return null;
-    // Если токен был сохранён как строка в JSON
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
+// function getStoredToken(): string | null {
+//   try {
+//     const raw = localStorage.getItem("accessToken");
+//     if (!raw) return null;
+//     // Если токен был сохранён как строка в JSON
+//     return JSON.parse(raw);
+//   } catch {
+//     return null;
+//   }
+// }
 
 // Generic API request handler
 async function apiRequest<T>(
@@ -48,7 +48,7 @@ async function apiRequest<T>(
   const url = `${API_BASE_URL}${endpoint}`;
 
   // Получаем токен из localStorage
-  const token = getStoredToken();
+  const token = fetchAndStoreToken();
   if (!token) {
     throw new Error(
       "Authentication required: no access token found. Please sign in.",
