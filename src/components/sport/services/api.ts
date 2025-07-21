@@ -1,7 +1,7 @@
 // API Configuration
 const API_BASE_URL = "http://t9d.store/api";
 
-import { getMyAccessToken } from "@/api/helpers/access-token.ts";
+// import { getMyAccessToken } from "@/api/helpers/access-token.ts";
 
 class APIError extends Error {
   constructor(
@@ -14,6 +14,20 @@ class APIError extends Error {
   }
 }
 
+// Получить токен и сохранить в localStorage
+export async function fetchAndStoreToken() {
+  const response = await fetch(
+    "https://api.innohassle.ru/accounts/v0/tokens/generate-my-token",
+    {
+      credentials: "include",
+    },
+  );
+  if (!response.ok) throw new Error("Не удалось получить токен");
+  const data = await response.json();
+  localStorage.setItem("accessToken", JSON.stringify(data.access_token));
+  return data.access_token;
+}
+
 // Generic API request handler
 async function apiRequest<T>(
   endpoint: string,
@@ -21,8 +35,8 @@ async function apiRequest<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  // Create base headers without Content-Type
-  const token = getMyAccessToken();
+  // Получаем токен непосредственно перед запросом
+  const token = await fetchAndStoreToken();
   const baseHeaders: Record<string, string> = {
     Accept: "application/json",
   };
