@@ -17,7 +17,7 @@ class APIError extends Error {
 // Получить токен и сохранить в localStorage
 export async function fetchAndStoreToken() {
   const response = await fetch(
-    "https://api.innohassle.ru/accounts/v0/tokens/generate-my-token",
+    "http://api.innohassle.ru/accounts/v0/tokens/generate-my-token",
     {
       credentials: "include",
     },
