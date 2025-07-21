@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = "https://sport-proxy.innohassle.ru/";
+const API_BASE_URL = "https://sport-proxy.innohassle.ru/api";
 
 // import { getMyAccessToken } from "@/api/helpers/access-token.ts";
 
