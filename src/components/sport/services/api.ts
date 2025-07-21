@@ -1,7 +1,7 @@
 // API Configuration
 const API_BASE_URL = "https://sport-proxy.innohassle.ru/api";
 
-// import { getMyAccessToken } from "@/api/helpers/access-token.ts";
+import { getMySportAccessToken } from "@/api/helpers/sport-access-token.ts";
 
 class APIError extends Error {
   constructor(
@@ -14,32 +14,6 @@ class APIError extends Error {
   }
 }
 
-// Получить токен и сохранить в localStorage (вызывать только после логина)
-export async function fetchAndStoreToken() {
-  const response = await fetch(
-    "https://api.innohassle.ru/accounts/v0/tokens/generate-my-token",
-    {
-      credentials: "include",
-    },
-  );
-  if (!response.ok) throw new Error("Не удалось получить токен");
-  const data = await response.json();
-  localStorage.setItem("accessToken", JSON.stringify(data.access_token));
-  return data.access_token;
-}
-
-// Получить токен из localStorage
-// function getStoredToken(): string | null {
-//   try {
-//     const raw = localStorage.getItem("accessToken");
-//     if (!raw) return null;
-//     // Если токен был сохранён как строка в JSON
-//     return JSON.parse(raw);
-//   } catch {
-//     return null;
-//   }
-// }
-
 // Generic API request handler
 async function apiRequest<T>(
   endpoint: string,
@@ -47,8 +21,8 @@ async function apiRequest<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  // Получаем токен из localStorage
-  const token = fetchAndStoreToken();
+  // Получаем токен через getMySportAccessToken
+  const token = getMySportAccessToken();
   if (!token) {
     throw new Error(
       "Authentication required: no access token found. Please sign in.",
