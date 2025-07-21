@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = "http://t9d.store/api";
+const API_BASE_URL = "https://sport-proxy.innohassle.ru/";
 
 // import { getMyAccessToken } from "@/api/helpers/access-token.ts";
 
