@@ -35,8 +35,8 @@ import { Route as WithmenuScheduleCategoryImport } from "./routes/_with_menu/sch
 import { Route as WithmenuRoomBookingRulesImport } from "./routes/_with_menu/room-booking/rules";
 import { Route as WithmenuRoomBookingListImport } from "./routes/_with_menu/room-booking/list";
 import { Route as WithmenuMusicRoomInstructionsImport } from "./routes/_with_menu/music-room.instructions";
-import { Route as WithmenuAccountTokenImport } from "./routes/_with_menu/account/token";
 import { Route as WithmenuCatalogueCourseImport } from "./routes/_with_menu/catalogue/$course";
+import { Route as WithmenuAccountTokenImport } from "./routes/_with_menu/account/token";
 import { Route as WithmenuAccountConnectTelegramImport } from "./routes/_with_menu/account/connect-telegram";
 import { Route as WithmenuScheduleEventGroupsAliasImport } from "./routes/_with_menu/schedule/event-groups.$alias";
 
@@ -162,6 +162,11 @@ const WithmenuMusicRoomInstructionsRoute =
     path: "/music-room/instructions",
     getParentRoute: () => WithmenuRouteRoute,
   } as any);
+
+const WithmenuCatalogueCourseRoute = WithmenuCatalogueCourseImport.update({
+  path: "/catalogue/$course",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
 
 const WithmenuAccountTokenRoute = WithmenuAccountTokenImport.update({
   path: "/token",

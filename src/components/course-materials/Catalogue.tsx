@@ -1,6 +1,6 @@
 import { $search, searchTypes } from "@/api/search";
 import { useEffect, useMemo, useState } from "react";
-import CustomSelect from "../common/customSelector";
+import CustomSelect from "../common/CustomSelector";
 import PreviewCard from "./preview/PreviewCard";
 
 // Types
@@ -24,6 +24,8 @@ interface SearchControlsProps {
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
   categories: Array<{ value: string }>;
+  isPending: boolean;
+  isSearching: boolean;
 }
 
 // Custom Hook for course data
@@ -53,41 +55,52 @@ const SearchControls = ({
   selectedCategory,
   onCategoryChange,
   categories,
+  isPending,
+  isSearching,
 }: SearchControlsProps) => (
-  <div className="flex flex-col gap-4 md:flex-row">
-    <div className="flex w-full flex-col gap-[10px] md:flex-1 md:flex-row">
-      <input
-        value={searchTerm}
-        onChange={(e) => onSearchChange(e.target.value)}
-        autoComplete="off"
-        spellCheck={false}
-        className="h-10 w-full resize-none rounded-lg border-2 border-brand-violet bg-pagebg p-3 text-base caret-brand-violet outline-none dark:text-white md:w-[50%]"
-        placeholder="Search services..."
-      />
-      <button className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-violet px-2 py-1 text-base font-normal leading-6 text-white shadow-[0px-0px-4px-#00000040] hover:bg-[#6600CC] md:w-[93px]">
-        <span className="icon-[material-symbols--search-rounded] h-4 w-4" />
-        Search
+  <div className="flex flex-col gap-4 lg:flex-row">
+    <div className="flex w-full flex-col gap-3 sm:flex-row lg:flex-1">
+      <div className="relative flex-1">
+        <input
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          autoComplete="off"
+          spellCheck={false}
+          disabled={isPending}
+          className="h-12 w-full resize-none rounded-xl border-2 border-brand-violet/20 bg-pagebg p-4 pr-12 text-base caret-brand-violet outline-none transition-all duration-200 focus:border-brand-violet disabled:opacity-50 dark:text-white"
+          placeholder="Search courses..."
+        />
+        <span className="icon-[material-symbols--search-rounded] absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-contrast/50" />
+      </div>
+      <button
+        disabled={isPending || isSearching}
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-violet px-6 text-base font-medium text-white shadow-lg transition-all duration-200 hover:bg-[#6600CC] hover:shadow-xl disabled:opacity-50 sm:w-auto"
+      >
+        {isPending || isSearching ? (
+          <span className="icon-[material-symbols--sync] h-5 w-5 animate-spin" />
+        ) : (
+          <span className="icon-[material-symbols--search-rounded] h-5 w-5" />
+        )}
+        {isPending ? "Loading..." : isSearching ? "Searching..." : "Search"}
       </button>
     </div>
-    <div className="flex w-full flex-1 justify-end">
+    <div className="flex w-full justify-end lg:w-auto">
       <CustomSelect
         selectedValue={selectedCategory}
         onChange={onCategoryChange}
         options={categories}
-        className="w-[300px]"
+        className="w-full lg:w-[250px]"
       />
     </div>
   </div>
 );
 
-// Custom Hook for filtered courses (updated to maintain grouping)
 function useFilteredCourses(
   coursesGroup: CoursesGroup,
   selectedCategory: string,
   searchTerm: string,
 ) {
   return useMemo(() => {
-    // Get all courses grouped by trimester
     const trimesterGroups = Object.entries(coursesGroup).map(
       ([trimester, courses]) => {
         const parsedCourses = courses.map((raw, idx) => {
@@ -112,7 +125,6 @@ function useFilteredCourses(
       },
     );
 
-    // Filter based on selected category and search term
     return trimesterGroups
       .filter(
         (group) =>
@@ -128,29 +140,31 @@ function useFilteredCourses(
           );
         }),
       }))
-      .filter((group) => group.courses.length > 0); // Remove empty groups
+      .filter((group) => group.courses.length > 0);
   }, [coursesGroup, selectedCategory, searchTerm]);
 }
 
-// Updated CourseCard component for list view
 const CourseCard = ({
   course,
   setPreviewSource,
+  preview,
 }: CourseCardProps & {
+  preview: searchTypes.SchemaSearchResponse["source"] | undefined;
   setPreviewSource: (
     source: searchTypes.SchemaSearchResponse["source"],
   ) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { data: searchResult, refetch } = $search.useQuery(
+  const { data: courseData, refetch } = $search.useQuery(
     "get",
-    "/search/search",
+    "/moodle/courses/by-course-fullname/content",
     {
-      params: { query: { query: course.originalTitle } },
+      params: { query: { course_fullname: course.originalTitle } },
     },
     {
-      enabled: false, // Disabled by default, we'll trigger manually
+      enabled: false,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
@@ -162,58 +176,92 @@ const CourseCard = ({
       setIsExpanded(false);
       return;
     }
+
+    setIsLoading(true);
     try {
-      // Manually trigger the query when clicked
       const { data } = await refetch();
 
-      if (data?.responses?.[0]?.source && !isExpanded) {
-        setPreviewSource(data.responses[0].source);
+      if (data && !isExpanded && !preview) {
+        setPreviewSource(data[0]);
       }
-      console.log(data);
-      setIsExpanded(true); // Expand to show results
+      setIsExpanded(true);
     } catch (error) {
       console.error("Error fetching course content:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onSelect();
     }
   };
 
   return (
-    <div className="mb-2 rounded-lg">
+    <div className="mb-3 rounded-xl border border-secondary-hover bg-floating transition-all duration-200 hover:border-brand-violet/30">
       <div
-        className="flex cursor-pointer items-center gap-4 rounded-lg p-3 hover:bg-secondary-hover"
-        onClick={() => onSelect(course.originalTitle)}
+        className="flex cursor-pointer items-center gap-4 rounded-xl border-[1px] border-transparent p-4 transition-all duration-200 hover:bg-secondary-hover"
+        onClick={() => onSelect()}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-expanded={isExpanded}
+        aria-label={`${isExpanded ? "Collapse" : "Expand"} course ${course.engTitle || course.originalTitle}`}
       >
-        <span
-          className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-4xl text-brand-violet`}
-        />
-        <div className="flex-1">
-          <h3 className="text-base font-medium">{course.engTitle}</h3>
-          <p className="text-sm text-contrast/75">{course.rusTitle}</p>
+        <div className="flex-shrink-0">
+          {isLoading ? (
+            <span className="icon-[material-symbols--sync] animate-spin text-3xl text-brand-violet" />
+          ) : (
+            <span
+              className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-3xl text-brand-violet transition-all duration-200`}
+            />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-base font-medium">
+            {course.engTitle || course.originalTitle}
+          </h3>
+          {course.rusTitle && (
+            <p className="truncate text-sm text-contrast/75">
+              {course.rusTitle}
+            </p>
+          )}
         </div>
         <span
-          className={`icon-[material-symbols--chevron-${isExpanded ? "down" : "right"}] text-contrast/50`}
+          className={`icon-[material-symbols--chevron-${isExpanded ? "down" : "right"}] text-contrast/50 transition-transform duration-200`}
         />
       </div>
-      {isExpanded && searchResult && (
-        <div className="p-3 pl-8">
-          {searchResult.responses.map((response, index) => (
-            <div
-              key={index}
-              className="flex gap-3 rounded-lg p-2 hover:bg-secondary-hover"
-            >
-              <span className="icon-[material-symbols--description] bg-brand-violet text-3xl" />
-              <div className="flex-1">
-                <p className="text-md font-medium">
-                  {response.source?.display_name || "Untitled"}
-                </p>
-                <a
-                  href={response.source?.link}
-                  className="text-sm text-gray-500 hover:text-blue-500"
-                >
-                  {response.source?.link || ""}
-                </a>
+      {isExpanded && courseData && (
+        <div className="rounded-b-xl border-t border-secondary-hover bg-pagebg/50 p-4">
+          <div className="space-y-2">
+            {courseData.map((source, index) => (
+              <div
+                onClick={() => setPreviewSource(source)}
+                key={index}
+                className="flex cursor-pointer gap-3 rounded-lg border-b border-secondary-hover p-3 transition-all duration-200 hover:bg-secondary-hover"
+              >
+                <span className="icon-[material-symbols--description] flex-shrink-0 text-2xl text-brand-violet" />
+                <div className="min-w-0 flex-1 space-y-0">
+                  <p className="truncate text-sm font-medium">
+                    {source?.display_name || "Untitled"}
+                  </p>
+                  {source?.link && (
+                    <a
+                      href={source.link}
+                      className="inline-block truncate text-xs text-gray-500 hover:text-blue-500"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Open source
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -225,8 +273,10 @@ const TrimesterGroup = ({
   trimester,
   courses,
   setPreviewSource,
+  preview,
 }: {
   trimester: string;
+  preview: searchTypes.SchemaSearchResponse["source"] | undefined;
   courses: ParsedCourse[];
   setPreviewSource: (
     source: searchTypes.SchemaSearchResponse["source"],
@@ -234,25 +284,42 @@ const TrimesterGroup = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setIsExpanded(!isExpanded);
+    }
+  };
+
   return (
-    <div className="">
+    <div className="rounded-xl border border-secondary-hover bg-floating p-4">
       <div
-        className="flex cursor-pointer items-center gap-2"
+        className="flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-all duration-200 focus:bg-secondary-hover focus:outline-none focus:ring-2 focus:ring-brand-violet/50"
         onClick={() => setIsExpanded(!isExpanded)}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-expanded={isExpanded}
+        aria-label={`${isExpanded ? "Collapse" : "Expand"} trimester ${trimester}`}
       >
-        {/* <span className="icon-[material-symbols--folder-open-rounded] text-4xl text-brand-violet"></span> */}
         <span
-          className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-4xl text-brand-violet`}
+          className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-3xl text-brand-violet transition-all duration-200`}
         />
-        <h2 className="text-2xl font-semibold">{trimester}</h2>
-        <span className="text-sm text-contrast/50">
-          {courses.length} courses
-        </span>
+        <div className="flex-1">
+          <h2 className="text-xl font-semibold sm:text-2xl">{trimester}</h2>
+          <p className="text-sm text-contrast/50">
+            {courses.length} course{courses.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <span
+          className={`icon-[material-symbols--chevron-${isExpanded ? "down" : "right"}] text-contrast/50 transition-transform duration-200`}
+        />
       </div>
       {isExpanded && (
-        <div className="space-y-2 pl-8">
+        <div className="mt-4 space-y-2">
           {courses.map((course) => (
             <CourseCard
+              preview={preview}
               key={`card-${course.id}`}
               course={course}
               setPreviewSource={setPreviewSource}
@@ -264,64 +331,161 @@ const TrimesterGroup = ({
   );
 };
 
+// Loading skeleton component
+const LoadingSkeleton = () => (
+  <div className="space-y-6">
+    {[1, 2, 3].map((i) => (
+      <div
+        key={i}
+        className="rounded-xl border border-secondary-hover bg-floating p-4"
+      >
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 animate-pulse rounded bg-contrast/20" />
+          <div className="flex-1">
+            <div className="h-6 w-32 animate-pulse rounded bg-contrast/20" />
+            <div className="mt-1 h-4 w-24 animate-pulse rounded bg-contrast/20" />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 // Main Component (updated for new layout)
 export function CataloguePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [previewSource, setPreviewSource] =
     useState<searchTypes.SchemaSearchResponse["source"]>();
+  const [showPreview, setShowPreview] = useState(false);
+
   const { coursesGroup, categories, isPending, error } = useCourseData();
   const trimesterGroups = useFilteredCourses(
     coursesGroup,
     selectedCategory,
-    searchTerm,
+    debouncedSearchTerm,
   );
-  useEffect(() => {
-    if (trimesterGroups.length > 0 && trimesterGroups[0].courses.length > 0) {
-      // You might need to fetch the content for the first course here
-      // or modify your data flow to include initial content
-    }
-  }, [trimesterGroups]);
 
-  if (error) return <div>Error</div>;
-  if (isPending) return <div>Loading...</div>;
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Auto-expand first group on mobile when no preview is shown
+  useEffect(() => {
+    if (trimesterGroups.length > 0 && !showPreview) {
+      // Auto-expand logic can be added here if needed
+    }
+  }, [trimesterGroups, showPreview]);
+
+  // Scroll to top when search results change
+  useEffect(() => {
+    const courseListElement = document.querySelector("[data-course-list]");
+    if (courseListElement) {
+      courseListElement.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [debouncedSearchTerm, selectedCategory]);
+
+  // Handle preview close
+  const handleClosePreview = () => {
+    setPreviewSource(undefined);
+    setShowPreview(false);
+  };
+
+  // Handle preview open
+  const handleOpenPreview = (
+    source: searchTypes.SchemaSearchResponse["source"],
+  ) => {
+    setPreviewSource(source);
+    setShowPreview(true);
+  };
+
+  if (error) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <span className="icon-[material-symbols--error-outline] text-6xl text-red-500" />
+          <p className="mt-4 text-lg font-medium">Failed to load courses</p>
+          <p className="text-contrast/75">Please try again later</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-11 px-4 py-4">
+    <div className="space-y-6 px-4 py-4 sm:space-y-8">
       <SearchControls
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
         categories={categories}
+        isPending={isPending}
+        isSearching={searchTerm !== debouncedSearchTerm}
       />
 
-      <div className="flex w-full gap-4">
-        <div className="flex max-h-[calc(100vh-200px)] w-1/2 max-w-[1200px] flex-1 flex-col gap-[30px] overflow-y-auto">
-          <div className="flex flex-col gap-6">
-            {trimesterGroups.length > 0 ? (
-              trimesterGroups.map((group) => (
-                <TrimesterGroup
-                  setPreviewSource={setPreviewSource}
-                  key={group.trimester}
-                  trimester={group.trimester}
-                  courses={group.courses}
-                />
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center py-10 text-contrast/50">
-                <span className="icon-[material-symbols--search-off] text-4xl" />
-                <p className="mt-2 text-lg">No courses found</p>
-              </div>
-            )}
+      {/* Mobile Preview Overlay */}
+      {showPreview && previewSource && (
+        <div className="fixed inset-0 z-50 bg-black/50 lg:hidden">
+          <div className="absolute inset-4 bottom-4 top-4 overflow-hidden rounded-xl bg-pagebg">
+            <PreviewCard source={previewSource} onClose={handleClosePreview} />
           </div>
         </div>
-        <div className="w-1/2 flex-1">
-          {previewSource && (
-            <PreviewCard
-              source={previewSource}
-              onClose={() => setPreviewSource(undefined)}
-            />
+      )}
+
+      <div className="flex w-full gap-4 lg:gap-6">
+        {/* Course List */}
+        <div
+          className="flex max-h-[calc(100vh-200px)] w-full flex-col gap-6 overflow-y-auto lg:w-1/2 lg:max-w-[600px]"
+          data-course-list
+        >
+          {isPending ? (
+            <LoadingSkeleton />
+          ) : trimesterGroups.length > 0 ? (
+            trimesterGroups.map((group) => (
+              <TrimesterGroup
+                preview={previewSource}
+                setPreviewSource={handleOpenPreview}
+                key={group.trimester}
+                trimester={group.trimester}
+                courses={group.courses}
+              />
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-contrast/50">
+              <span className="icon-[material-symbols--search-off] text-6xl" />
+              <p className="mt-4 text-xl font-medium">No courses found</p>
+              <p className="text-center text-sm">
+                Try adjusting your search terms or category filter
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Preview */}
+        <div className="hidden w-1/2 flex-1 lg:block">
+          {previewSource ? (
+            <div className="sticky top-4">
+              <PreviewCard
+                source={previewSource}
+                onClose={handleClosePreview}
+              />
+            </div>
+          ) : (
+            <div className="flex h-[400px] items-center justify-center rounded-xl border-2 border-dashed border-contrast/20">
+              <div className="text-center text-contrast/50">
+                <span className="icon-[material-symbols--preview] text-6xl" />
+                <p className="mt-4 text-lg font-medium">Select a course</p>
+                <p className="text-sm">
+                  Choose a course from the list to preview its content
+                </p>
+              </div>
+            </div>
           )}
         </div>
       </div>

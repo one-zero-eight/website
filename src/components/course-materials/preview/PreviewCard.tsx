@@ -17,38 +17,67 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
   return (
     <div
       className={clsx(
-        "flex h-fit max-h-full min-w-0 flex-col gap-2 rounded-lg border border-secondary-hover bg-floating p-4 md:basis-1/2",
-        "fixed inset-8 top-8 z-10 md:visible md:static",
+        "flex h-full min-w-0 flex-col gap-4 rounded-xl border border-secondary-hover bg-floating p-4",
+        "overflow-hidden",
       )}
     >
       <div className="flex flex-row items-center justify-between">
-        <p className="text-2xl font-semibold dark:text-white">
+        <p className="text-lg font-semibold dark:text-white sm:text-xl lg:text-2xl">
           {source.display_name}
         </p>
-        <span
-          className="icon-[material-symbols--close] text-2xl md:invisible"
+        <button
           onClick={onClose}
-        />
+          className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200 hover:bg-secondary-hover"
+        >
+          <span className="icon-[material-symbols--close] text-xl" />
+        </button>
       </div>
-      <a href={source?.link} target="_blank" className="w-fit max-w-full">
-        <p className="truncate pb-3 text-xs font-normal text-[#93bd58] hover:underline">
-          {source.breadcrumbs.join(" > ")}
-        </p>
-      </a>
 
-      <ErrorBoundary fallback={<div>Some error occurred</div>}>
-        {source.type === "moodle-file" ? (
-          <Suspense>
-            <PdfPreview source={source} searchText="" />
-          </Suspense>
-        ) : source.type === "telegram" ? (
-          <TelegramPreview source={source} />
-        ) : source.type === "moodle-url" ? (
-          <MoodleUrlPreview source={source} />
-        ) : source.type === "moodle-unknown" ? (
-          <MoodleUnknownPreview source={source} />
-        ) : null}
-      </ErrorBoundary>
+      {source?.link && (
+        <a href={source.link} target="_blank" className="w-fit max-w-full">
+          <p className="truncate text-xs font-normal text-[#93bd58] hover:underline">
+            {source.breadcrumbs.join(" > ")}
+          </p>
+        </a>
+      )}
+
+      <div className="flex-1 overflow-auto">
+        <ErrorBoundary
+          fallback={
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center text-contrast/50">
+                <span className="icon-[material-symbols--error-outline] text-4xl" />
+                <p className="mt-2">Failed to load preview</p>
+              </div>
+            </div>
+          }
+        >
+          {source.type === "moodle-file" ? (
+            <Suspense
+              fallback={
+                <div className="flex h-full items-center justify-center">
+                  <span className="icon-[material-symbols--sync] animate-spin text-4xl text-brand-violet" />
+                </div>
+              }
+            >
+              <PdfPreview source={source} searchText="" />
+            </Suspense>
+          ) : source.type === "telegram" ? (
+            <TelegramPreview source={source} />
+          ) : source.type === "moodle-url" ? (
+            <MoodleUrlPreview source={source} />
+          ) : source.type === "moodle-unknown" ? (
+            <MoodleUnknownPreview source={source} />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center text-contrast/50">
+                <span className="icon-[material-symbols--preview] text-4xl" />
+                <p className="mt-2">Preview not available</p>
+              </div>
+            </div>
+          )}
+        </ErrorBoundary>
+      </div>
     </div>
   );
 }
