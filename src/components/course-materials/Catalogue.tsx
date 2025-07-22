@@ -107,12 +107,19 @@ function useFilteredCourses(
           const start = raw.indexOf("[");
           const trimmed = start >= 0 ? raw.slice(start) : raw;
           const [left, right] = trimmed.split(/\s*\/\s*/, 2);
-          const m = left.match(/^\[(.*?)\]\s*(.*)$/) ?? [];
+          const bracketIndex = left.indexOf("]");
+          let trimester = "";
+          let engTitle = "";
+
+          if (bracketIndex > 0) {
+            trimester = left.slice(1, bracketIndex).trim();
+            engTitle = left.slice(bracketIndex + 1).trim();
+          }
 
           return {
             id: idx,
-            trimester: m[1]?.trim() || "",
-            engTitle: m[2]?.trim() || "",
+            trimester: trimester,
+            engTitle: engTitle,
             rusTitle: (right || "").trim(),
             originalTitle: raw,
           };
