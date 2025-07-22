@@ -23,12 +23,14 @@ interface CustomSelectProps {
   options: Option[];
   selectedValue: string;
   onChange: (value: string) => void;
+  className?: string;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
   options,
   selectedValue,
   onChange,
+  className,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -64,7 +66,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   };
 
   return (
-    <div className="relative sm:block lg:hidden xxl:block">
+    <div className={clsx(className, "relative")}>
       <div
         className="flex w-full cursor-pointer items-center justify-between rounded-md border border-brand-violet p-2"
         ref={refs.setReference}
@@ -105,8 +107,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 position: strategy,
                 top: y ?? 0,
                 left: x ?? 0,
+                width: (refs.reference.current as HTMLElement)?.offsetWidth,
               }}
-              className="z-10 mt-1 w-full rounded-md border border-brand-violet bg-primary shadow-lg md:w-64"
+              className="z-10 mt-1 rounded-md border border-brand-violet bg-primary shadow-lg"
               {...getFloatingProps()}
             >
               {options.map((option, index) => {

@@ -2,13 +2,10 @@ import { useMe } from "@/api/accounts/user.ts";
 import { $search, searchTypes } from "@/api/search";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import PreviewCard from "@/components/course-materials/preview/PreviewCard";
-import SearchField from "@/components/search/SearchField.tsx";
-import SearchResult from "@/components/search/SearchResult.tsx";
-import { useNavigate } from "@tanstack/react-router";
+import SearchResult from "@/components/course-materials/SearchResult.tsx";
 import { useEffect, useState } from "react";
 
-export function SearchPage({ searchQuery }: { searchQuery: string }) {
-  const navigate = useNavigate();
+export function CoursePage({ course }: { course: string }) {
   const { me } = useMe();
 
   const [previewSource, setPreviewSource] =
@@ -18,10 +15,10 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     "get",
     "/search/search",
     {
-      params: { query: { query: searchQuery } },
+      params: { query: { query: course } },
     },
     {
-      enabled: searchQuery.length > 0,
+      enabled: course.length > 0,
       // Disable refetch
       refetchOnMount: false,
       refetchOnWindowFocus: false,
@@ -34,21 +31,16 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     setPreviewSource(searchResult?.responses[0]?.source);
   }, [searchResult]);
 
-  const runSearch = (query: string) => {
-    navigate({ to: "/search", search: { q: query } });
-  };
-
   if (!me) {
     return <AuthWall />;
   }
 
   return (
     <div className="flex grow flex-col gap-4 p-4">
-      <SearchField runSearch={runSearch} currentQuery={searchQuery} />
       {searchResult && (
         <p className="py-4 text-2xl font-semibold text-contrast">
           {searchResult.responses.length > 0
-            ? `Results for: ${searchResult.searched_for}`
+            ? `${searchResult.searched_for}`
             : `No matched results for: ${searchResult.searched_for}`}
         </p>
       )}
