@@ -22,6 +22,7 @@ export interface CreateWorkshopRequest {
   dtstart: string;
   dtend: string;
   is_active: boolean;
+  is_registrable?: boolean;
 }
 
 interface UpdateWorkshopRequest {
@@ -33,6 +34,7 @@ interface UpdateWorkshopRequest {
   dtstart: string;
   dtend: string;
   is_active: boolean;
+  is_registrable?: boolean;
 }
 
 /**
@@ -65,8 +67,8 @@ export const useWorkshops = (): UseWorkshopsResult => {
       room: apiWorkshop.place,
       maxPlaces: apiWorkshop.capacity,
       remainPlaces: apiWorkshop.remain_places,
-      isActive: apiWorkshop.is_active,
-      isRegistrable: apiWorkshop.is_registrable,
+      isActive: apiWorkshop.is_active ?? true,
+      isRegistrable: apiWorkshop.is_registrable ?? true,
     };
   }, [parseTime]);
 
@@ -121,6 +123,7 @@ export const useWorkshops = (): UseWorkshopsResult => {
         dtstart: startDateTime,
         dtend: endDateTime,
         is_active: newWorkshop.isActive ?? true,
+        is_registrable: newWorkshop.isRegistrable ?? true,
       };
 
       const { data, error: apiError } = await workshopsFetch.POST("/workshops/", {
@@ -165,6 +168,7 @@ export const useWorkshops = (): UseWorkshopsResult => {
         dtstart: startDateTime,
         dtend: endDateTime,
         is_active: updatedWorkshop.isActive ?? true,
+        is_registrable: updatedWorkshop.isRegistrable ?? true,
       };
 
       const { error: apiError } = await workshopsFetch.PUT(`/workshops/{workshop_id}`, {
