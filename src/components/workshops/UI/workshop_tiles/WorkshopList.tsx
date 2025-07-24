@@ -1,31 +1,6 @@
 import React from "react";
 import WorkshopItem from "./WorkshopItem";
-
-type Workshop = {
-  id: string;
-  title: string;
-  body: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  room: string;
-  maxPlaces: number;
-  remainPlaces?: number;
-  isActive?: boolean;
-  isRegistrable?: boolean;
-};
-
-type WorkshopListProps = {
-  workshops: Workshop[];
-  remove: (workshop: Workshop) => void;
-  edit: (workshop: Workshop) => void;
-  openDescription: (workshop: Workshop) => void;
-  currentUserRole: "user" | "admin";
-  refreshParticipants: () => void;
-};
-type WorkshopsByDate<Workshop> = {
-  [tag: string]: Workshop[];
-};
+import type { Workshop, WorkshopListProps, WorkshopsByDate } from "../../types";
 const WorkshopList: React.FC<WorkshopListProps> = ({
   workshops,
   remove,

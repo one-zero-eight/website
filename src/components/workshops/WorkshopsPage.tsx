@@ -6,29 +6,7 @@ import Modal from "./UI/modal/ModalWindow";
 import Description from "./UI/description_form/Description";
 import { workshopsFetch } from "@/api/workshops";
 import { useToast } from "./toast";
-
-type Workshop = {
-  id: string;
-  title: string;
-  body: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  room: string;
-  maxPlaces: number;
-  remainPlaces?: number;
-  isActive?: boolean;
-  isRegistrable?: boolean;
-};
-
-type User = {
-  id: string;
-  innohassle_id: string;
-  email: string;
-  name: string;
-  role: "user" | "admin";
-  t_alias?: string;
-};
+import type { Workshop, User } from "./types";
 
 export function WorkshopsPage() {
   const { showConfirm, showSuccess, showError, showWarning } = useToast();

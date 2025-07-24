@@ -5,29 +5,7 @@ import WorkshopInput from "../input/WorkshopInput";
 import WorkshopTextArea from "../input/WorkshopTextArea";
 import DateTimePlacePicker from "../date/DateTimePlacePicker";
 import { useToast } from "../../toast";
-
-type Workshop = {
-  id: string;
-  title: string;
-  body: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  room: string;
-  maxPlaces: number;
-  remainPlaces?: number;
-  isActive?: boolean;
-  isRegistrable?: boolean;
-};
-
-type PostFormProps = {
-  create: (workshop: Workshop) => Promise<boolean>;
-  initialWorkshop?: Omit<Workshop, "id">;
-  isEditing?: boolean;
-  onUpdate?: (workshop: Workshop) => void;
-  existingId?: string;
-  onClose?: () => void;
-};
+import type { Workshop, PostFormProps } from "../../types";
 
 const PostForm: React.FC<PostFormProps> = ({
   create,

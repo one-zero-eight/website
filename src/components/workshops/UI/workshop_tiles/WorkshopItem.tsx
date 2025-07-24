@@ -3,29 +3,7 @@ import React, { useEffect, useState } from "react";
 import { workshopsFetch } from "@/api/workshops";
 import { useNavigate } from "@tanstack/react-router";
 import { useToast } from "../../toast";
-
-type Workshop = {
-  id: string;
-  title: string;
-  body: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  room: string;
-  maxPlaces: number;
-  remainPlaces?: number;
-  isActive?: boolean;
-  isRegistrable?: boolean;
-};
-
-type WorkshopItemProps = {
-  workshop: Workshop;
-  remove: (workshop: Workshop) => void;
-  edit: (workshop: Workshop) => void;
-  openDescription: (workshop: Workshop) => void;
-  currentUserRole: "user" | "admin";
-  refreshParticipants: () => void;
-};
+import type { Workshop, WorkshopItemProps } from "../../types";
 
 const WorkshopItem: React.FC<WorkshopItemProps> = ({
   workshop,

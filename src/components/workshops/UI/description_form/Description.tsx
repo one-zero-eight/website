@@ -5,37 +5,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { workshopsFetch } from "@/api/workshops";
 import { useToast } from "../../toast";
+import type { Workshop, Participant, WorkshopDescriptionProps } from "../../types";
 
-type Workshop = {
-  id: string;
-  title: string;
-  body: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  room: string;
-  maxPlaces: number;
-  remainPlaces?: number;
-  isActive?: boolean;
-  isRegistrable?: boolean;
-};
-
-type Participant = {
-  id: string;
-  innohassle_id: string;
-  role: "admin" | "user";
-  email: string;
-  t_alias?: string;
-};
-
-interface WorkshopProps {
-  workshop: Workshop | null;
-  refreshTrigger?: number;
-  remove?: (workshop: Workshop) => Promise<void>;
-  edit?: (workshop: Workshop) => void;
-  currentUserRole?: "user" | "admin";
-  refreshParticipants?: () => void;
-}
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -173,7 +144,7 @@ const MarkdownWithCustomLinks: React.FC<{ children: string }> = ({
   );
 };
 
-const Description: React.FC<WorkshopProps> = ({
+const Description: React.FC<WorkshopDescriptionProps> = ({
   workshop,
   refreshTrigger,
   remove,
