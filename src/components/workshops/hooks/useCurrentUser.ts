@@ -46,34 +46,40 @@ export const useCurrentUser = (): UseCurrentUserResult => {
   }, []);
 
   // Изменение роли пользователя
-  const changeRole = useCallback(async (newRole: "user" | "admin"): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
+  const changeRole = useCallback(
+    async (newRole: "user" | "admin"): Promise<boolean> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const { error: apiError } = await workshopsFetch.POST("/users/change_role", {
-        params: {
-          query: {
-            role: newRole,
+      try {
+        const { error: apiError } = await workshopsFetch.POST(
+          "/users/change_role",
+          {
+            params: {
+              query: {
+                role: newRole,
+              },
+            },
           },
-        },
-      });
+        );
 
-      if (apiError) {
-        setError("Failed to change role. Please try again.");
+        if (apiError) {
+          setError("Failed to change role. Please try again.");
+          return false;
+        }
+
+        // Обновляем информацию о пользователе
+        await loadCurrentUser();
+        return true;
+      } catch (err) {
+        setError("An unexpected error occurred while changing role.");
         return false;
+      } finally {
+        setLoading(false);
       }
-
-      // Обновляем информацию о пользователе
-      await loadCurrentUser();
-      return true;
-    } catch (err) {
-      setError("An unexpected error occurred while changing role.");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [loadCurrentUser]);
+    },
+    [loadCurrentUser],
+  );
 
   // Загружаем пользователя при монтировании с повторной попыткой
   useEffect(() => {

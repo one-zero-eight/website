@@ -19,31 +19,42 @@ export interface UseWorkshopRegistrationResult {
  */
 export const useWorkshopRegistration = (): UseWorkshopRegistrationResult => {
   const [myCheckins, setMyCheckins] = useState<Workshop[]>([]);
-  const [participantsByWorkshop, setParticipantsByWorkshop] = useState<Record<string, Participant[]>>({});
+  const [participantsByWorkshop, setParticipantsByWorkshop] = useState<
+    Record<string, Participant[]>
+  >({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Проверка, зарегистрирован ли пользователь на воркшоп
-  const isRegistered = useCallback((workshopId: string): boolean => {
-    return myCheckins.some((workshop) => workshop.id === workshopId);
-  }, [myCheckins]);
+  const isRegistered = useCallback(
+    (workshopId: string): boolean => {
+      return myCheckins.some((workshop) => workshop.id === workshopId);
+    },
+    [myCheckins],
+  );
 
   // Получение списка участников воркшопа
-  const getParticipants = useCallback((workshopId: string): Participant[] => {
-    return participantsByWorkshop[workshopId] || [];
-  }, [participantsByWorkshop]);
+  const getParticipants = useCallback(
+    (workshopId: string): Participant[] => {
+      return participantsByWorkshop[workshopId] || [];
+    },
+    [participantsByWorkshop],
+  );
 
   // Подсчет количества записанных людей
-  const getSignedPeopleCount = useCallback((workshop: Workshop): number => {
-    // Если есть remainPlaces, вычисляем через него
-    if (workshop.remainPlaces !== undefined && workshop.maxPlaces > 0) {
-      return Math.max(0, workshop.maxPlaces - workshop.remainPlaces);
-    }
-    
-    // Иначе берем количество участников из локального состояния
-    const participants = getParticipants(workshop.id);
-    return participants.length;
-  }, [getParticipants]);
+  const getSignedPeopleCount = useCallback(
+    (workshop: Workshop): number => {
+      // Если есть remainPlaces, вычисляем через него
+      if (workshop.remainPlaces !== undefined && workshop.maxPlaces > 0) {
+        return Math.max(0, workshop.maxPlaces - workshop.remainPlaces);
+      }
+
+      // Иначе берем количество участников из локального состояния
+      const participants = getParticipants(workshop.id);
+      return participants.length;
+    },
+    [getParticipants],
+  );
 
   // Загрузка списка воркшопов, на которые записан пользователь
   const loadMyCheckins = useCallback(async () => {
@@ -51,7 +62,8 @@ export const useWorkshopRegistration = (): UseWorkshopRegistrationResult => {
     setError(null);
 
     try {
-      const { data, error: apiError } = await workshopsFetch.GET("/users/my_checkins");
+      const { data, error: apiError } =
+        await workshopsFetch.GET("/users/my_checkins");
 
       if (apiError) {
         setError("Failed to load your registrations.");
@@ -80,7 +92,7 @@ export const useWorkshopRegistration = (): UseWorkshopRegistrationResult => {
           params: {
             path: { workshop_id: workshopId },
           },
-        }
+        },
       );
 
       if (apiError) {
@@ -102,68 +114,76 @@ export const useWorkshopRegistration = (): UseWorkshopRegistrationResult => {
   }, []);
 
   // Регистрация на воркшоп
-  const checkIn = useCallback(async (workshopId: string): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
+  const checkIn = useCallback(
+    async (workshopId: string): Promise<boolean> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const { error: apiError } = await workshopsFetch.POST(
-        "/workshops/{workshop_id}/checkin",
-        {
-          params: {
-            path: { workshop_id: workshopId },
+      try {
+        const { error: apiError } = await workshopsFetch.POST(
+          "/workshops/{workshop_id}/checkin",
+          {
+            params: {
+              path: { workshop_id: workshopId },
+            },
           },
+        );
+
+        if (apiError) {
+          setError(
+            "Failed to check in. Please try again. Probably you have overlapping workshops.",
+          );
+          return false;
         }
-      );
 
-      if (apiError) {
-        setError("Failed to check in. Please try again. Probably you have overlapping workshops.");
+        // Обновляем локальные данные
+        await loadMyCheckins();
+        await loadParticipants(workshopId);
+        return true;
+      } catch (err) {
+        setError("An unexpected error occurred during check-in.");
         return false;
+      } finally {
+        setLoading(false);
       }
-
-      // Обновляем локальные данные
-      await loadMyCheckins();
-      await loadParticipants(workshopId);
-      return true;
-    } catch (err) {
-      setError("An unexpected error occurred during check-in.");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [loadMyCheckins, loadParticipants]);
+    },
+    [loadMyCheckins, loadParticipants],
+  );
 
   // Отмена регистрации на воркшоп
-  const checkOut = useCallback(async (workshopId: string): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
+  const checkOut = useCallback(
+    async (workshopId: string): Promise<boolean> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const { error: apiError } = await workshopsFetch.POST(
-        "/workshops/{workshop_id}/checkout",
-        {
-          params: {
-            path: { workshop_id: workshopId },
+      try {
+        const { error: apiError } = await workshopsFetch.POST(
+          "/workshops/{workshop_id}/checkout",
+          {
+            params: {
+              path: { workshop_id: workshopId },
+            },
           },
+        );
+
+        if (apiError) {
+          setError("Failed to check out. Please try again.");
+          return false;
         }
-      );
 
-      if (apiError) {
-        setError("Failed to check out. Please try again.");
+        // Обновляем локальные данные
+        await loadMyCheckins();
+        await loadParticipants(workshopId);
+        return true;
+      } catch (err) {
+        setError("An unexpected error occurred during check-out.");
         return false;
+      } finally {
+        setLoading(false);
       }
-
-      // Обновляем локальные данные
-      await loadMyCheckins();
-      await loadParticipants(workshopId);
-      return true;
-    } catch (err) {
-      setError("An unexpected error occurred during check-out.");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [loadMyCheckins, loadParticipants]);
+    },
+    [loadMyCheckins, loadParticipants],
+  );
 
   // Загружаем данные о регистрациях при монтировании
   useEffect(() => {

@@ -1,7 +1,12 @@
 import React from "react";
 import WorkshopItem from "./WorkshopItem";
 import type { Workshop, WorkshopListProps } from "../../types";
-import { groupWorkshopsByDate, sortWorkshopsByTime, getDayName, formatDateWithDay } from "../../utils";
+import {
+  groupWorkshopsByDate,
+  sortWorkshopsByTime,
+  getDayName,
+  formatDateWithDay,
+} from "../../utils";
 
 /**
  * Компонент списка воркшопов с группировкой по датам

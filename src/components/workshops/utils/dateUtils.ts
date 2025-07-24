@@ -60,12 +60,12 @@ export const formatStartDate = (dateString: string): string => {
 export const getDayName = (dayNumber: number): string => {
   const days = {
     1: "Monday",
-    2: "Tuesday", 
+    2: "Tuesday",
     3: "Wednesday",
     4: "Thursday",
     5: "Friday",
     6: "Saturday",
-    7: "Sunday"
+    7: "Sunday",
   };
   return days[dayNumber as keyof typeof days] || "Unknown";
 };
@@ -102,11 +102,11 @@ export const createDateTime = (date: string, time: string): string => {
  */
 export const isWorkshopPast = (date: string, startTime: string): boolean => {
   if (!date || !startTime) return false;
-  
+
   const now = new Date();
   const workshopDate = new Date(date);
   const [hours, minutes] = startTime.split(":").map(Number);
   workshopDate.setHours(hours, minutes, 0, 0);
-  
+
   return workshopDate < now;
 };

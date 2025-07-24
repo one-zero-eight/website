@@ -19,7 +19,7 @@ import type { Workshop } from "./types";
  */
 export function WorkshopsPage() {
   const { showConfirm, showSuccess, showError, showWarning } = useToast();
-  
+
   const {
     workshops,
     loading: workshopsLoading,
@@ -27,7 +27,7 @@ export function WorkshopsPage() {
     createWorkshop,
     updateWorkshop,
     removeWorkshop: removeWorkshopAPI,
-    refreshWorkshops
+    refreshWorkshops,
   } = useWorkshops();
 
   const {
@@ -35,13 +35,15 @@ export function WorkshopsPage() {
     loading: userLoading,
     error: userError,
     changeRole,
-    isAdmin
+    isAdmin,
   } = useCurrentUser();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
   const [descriptionVisible, setDescriptionVisible] = useState(false);
-  const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null);
+  const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(
+    null,
+  );
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   /**
@@ -68,21 +70,23 @@ export function WorkshopsPage() {
    * @param newWorkshop - данные нового воркшопа
    * @returns Promise<boolean> - успешность операции
    */
-  const handleCreateWorkshop = async (newWorkshop: Workshop): Promise<boolean> => {
+  const handleCreateWorkshop = async (
+    newWorkshop: Workshop,
+  ): Promise<boolean> => {
     const success = await createWorkshop(newWorkshop);
-    
+
     if (success) {
       showSuccess(
         "Workshop Created",
-        `Workshop "${newWorkshop.title}" has been successfully created.`
+        `Workshop "${newWorkshop.title}" has been successfully created.`,
       );
     } else {
       showError(
         "Creation Failed",
-        "Failed to create workshop. Please check all fields and try again."
+        "Failed to create workshop. Please check all fields and try again.",
       );
     }
-    
+
     return success;
   };
 
@@ -105,16 +109,16 @@ export function WorkshopsPage() {
     }
 
     const success = await removeWorkshopAPI(workshop);
-    
+
     if (success) {
       showSuccess(
         "Workshop Deleted",
-        `Workshop "${workshop.title}" has been successfully deleted.`
+        `Workshop "${workshop.title}" has been successfully deleted.`,
       );
     } else {
       showError(
         "Delete Failed",
-        "Failed to delete workshop. Please try again."
+        "Failed to delete workshop. Please try again.",
       );
     }
   };
@@ -134,18 +138,18 @@ export function WorkshopsPage() {
    */
   const handleUpdateWorkshop = async (updatedWorkshop: Workshop) => {
     const success = await updateWorkshop(updatedWorkshop);
-    
+
     if (success) {
       showSuccess(
         "Workshop Updated",
-        "Workshop has been successfully updated."
+        "Workshop has been successfully updated.",
       );
       setEditingWorkshop(null);
       setModalVisible(false);
     } else {
       showError(
         "Update Failed",
-        "Failed to update workshop. Please check all fields and try again."
+        "Failed to update workshop. Please check all fields and try again.",
       );
     }
   };
@@ -164,16 +168,16 @@ export function WorkshopsPage() {
    */
   const handleRoleChangeRequest = async () => {
     if (!currentUser) return;
-    
+
     const newRole = currentUser.role === "admin" ? "user" : "admin";
     const success = await changeRole(newRole);
-    
+
     if (success) {
       showSuccess("Role Changed", `Role successfully changed to ${newRole}.`);
     } else {
       showError(
         "Role Change Failed",
-        "Failed to change role. Please try again."
+        "Failed to change role. Please try again.",
       );
     }
   };
@@ -202,7 +206,7 @@ export function WorkshopsPage() {
           Set {currentUser.role === "admin" ? "user" : "admin"}
         </button>
       )}
-      
+
       {/* Кнопка добавления воркшопа - показывается только администраторам */}
       {isAdmin && (
         <button
@@ -213,7 +217,7 @@ export function WorkshopsPage() {
           Add workshop
         </button>
       )}
-      
+
       {/* Основной компонент со списком воркшопов */}
       <WorkshopList
         remove={handleRemoveWorkshop}
@@ -223,7 +227,7 @@ export function WorkshopsPage() {
         currentUserRole={currentUser?.role || "user"}
         refreshParticipants={refreshParticipants}
       />
-      
+
       {/* Модальное окно для создания/редактирования воркшопа */}
       <Modal
         visible={modalVisible}
@@ -256,7 +260,7 @@ export function WorkshopsPage() {
           onClose={handleModalClose}
         />
       </Modal>
-      
+
       {/* Модальное окно с подробным описанием воркшопа */}
       <Modal
         visible={descriptionVisible}

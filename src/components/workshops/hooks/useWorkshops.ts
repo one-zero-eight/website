@@ -58,16 +58,21 @@ export const useWorkshops = (): UseWorkshopsResult => {
     setError(null);
 
     try {
-      const { data, error: apiError } = await workshopsFetch.GET("/workshops/", {
-        params: {
-          query: {
-            limit: 100,
+      const { data, error: apiError } = await workshopsFetch.GET(
+        "/workshops/",
+        {
+          params: {
+            query: {
+              limit: 100,
+            },
           },
         },
-      });
+      );
 
       if (apiError) {
-        setError("Failed to load workshops. Please check your connection and try again.");
+        setError(
+          "Failed to load workshops. Please check your connection and try again.",
+        );
         return;
       }
 
@@ -86,121 +91,144 @@ export const useWorkshops = (): UseWorkshopsResult => {
   }, []);
 
   // Создание нового воркшопа
-  const createWorkshop = useCallback(async (newWorkshop: Workshop): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
+  const createWorkshop = useCallback(
+    async (newWorkshop: Workshop): Promise<boolean> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const startDateTime = `${newWorkshop.date}T${newWorkshop.startTime}`;
-      const endDateTime = `${newWorkshop.date}T${newWorkshop.endTime}`;
+      try {
+        const startDateTime = `${newWorkshop.date}T${newWorkshop.startTime}`;
+        const endDateTime = `${newWorkshop.date}T${newWorkshop.endTime}`;
 
-      const createRequest: CreateWorkshopRequest = {
-        name: newWorkshop.title,
-        description: newWorkshop.body,
-        capacity: newWorkshop.maxPlaces || 500,
-        remain_places: newWorkshop.maxPlaces || 500,
-        place: newWorkshop.room || "TBA",
-        dtstart: startDateTime,
-        dtend: endDateTime,
-        is_active: newWorkshop.isActive ?? true,
-        is_registrable: newWorkshop.isRegistrable ?? true,
-      };
+        const createRequest: CreateWorkshopRequest = {
+          name: newWorkshop.title,
+          description: newWorkshop.body,
+          capacity: newWorkshop.maxPlaces || 500,
+          remain_places: newWorkshop.maxPlaces || 500,
+          place: newWorkshop.room || "TBA",
+          dtstart: startDateTime,
+          dtend: endDateTime,
+          is_active: newWorkshop.isActive ?? true,
+          is_registrable: newWorkshop.isRegistrable ?? true,
+        };
 
-      const { data, error: apiError } = await workshopsFetch.POST("/workshops/", {
-        body: createRequest,
-      });
+        const { data, error: apiError } = await workshopsFetch.POST(
+          "/workshops/",
+          {
+            body: createRequest,
+          },
+        );
 
-      if (apiError) {
-        setError("Failed to create workshop. Please check all fields and try again.");
+        if (apiError) {
+          setError(
+            "Failed to create workshop. Please check all fields and try again.",
+          );
+          return false;
+        }
+
+        if (data) {
+          const createdWorkshop = transformWorkshopFromAPI(data);
+          setWorkshops((prev) => [...prev, createdWorkshop]);
+          return true;
+        }
+
         return false;
+      } catch (err) {
+        setError("An unexpected error occurred while creating workshop.");
+        return false;
+      } finally {
+        setLoading(false);
       }
-
-      if (data) {
-        const createdWorkshop = transformWorkshopFromAPI(data);
-        setWorkshops((prev) => [...prev, createdWorkshop]);
-        return true;
-      }
-
-      return false;
-    } catch (err) {
-      setError("An unexpected error occurred while creating workshop.");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   // Обновление воркшопа
-  const updateWorkshop = useCallback(async (updatedWorkshop: Workshop): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
+  const updateWorkshop = useCallback(
+    async (updatedWorkshop: Workshop): Promise<boolean> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const startDateTime = `${updatedWorkshop.date}T${updatedWorkshop.startTime}`;
-      const endDateTime = `${updatedWorkshop.date}T${updatedWorkshop.endTime}`;
+      try {
+        const startDateTime = `${updatedWorkshop.date}T${updatedWorkshop.startTime}`;
+        const endDateTime = `${updatedWorkshop.date}T${updatedWorkshop.endTime}`;
 
-      const updateRequest: UpdateWorkshopRequest = {
-        name: updatedWorkshop.title,
-        description: updatedWorkshop.body,
-        capacity: updatedWorkshop.maxPlaces,
-        remain_places: updatedWorkshop.remainPlaces || updatedWorkshop.maxPlaces,
-        place: updatedWorkshop.room || "TBA",
-        dtstart: startDateTime,
-        dtend: endDateTime,
-        is_active: updatedWorkshop.isActive ?? true,
-        is_registrable: updatedWorkshop.isRegistrable ?? true,
-      };
+        const updateRequest: UpdateWorkshopRequest = {
+          name: updatedWorkshop.title,
+          description: updatedWorkshop.body,
+          capacity: updatedWorkshop.maxPlaces,
+          remain_places:
+            updatedWorkshop.remainPlaces || updatedWorkshop.maxPlaces,
+          place: updatedWorkshop.room || "TBA",
+          dtstart: startDateTime,
+          dtend: endDateTime,
+          is_active: updatedWorkshop.isActive ?? true,
+          is_registrable: updatedWorkshop.isRegistrable ?? true,
+        };
 
-      const { error: apiError } = await workshopsFetch.PUT(`/workshops/{workshop_id}`, {
-        params: {
-          path: { workshop_id: updatedWorkshop.id },
-        },
-        body: updateRequest,
-      });
+        const { error: apiError } = await workshopsFetch.PUT(
+          `/workshops/{workshop_id}`,
+          {
+            params: {
+              path: { workshop_id: updatedWorkshop.id },
+            },
+            body: updateRequest,
+          },
+        );
 
-      if (apiError) {
-        setError("Failed to update workshop. Please check all fields and try again.");
+        if (apiError) {
+          setError(
+            "Failed to update workshop. Please check all fields and try again.",
+          );
+          return false;
+        }
+
+        // Обновляем локальный список
+        await loadWorkshops();
+        return true;
+      } catch (err) {
+        setError("An unexpected error occurred while updating workshop.");
         return false;
+      } finally {
+        setLoading(false);
       }
-
-      // Обновляем локальный список
-      await loadWorkshops();
-      return true;
-    } catch (err) {
-      setError("An unexpected error occurred while updating workshop.");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [loadWorkshops]);
+    },
+    [loadWorkshops],
+  );
 
   // Удаление воркшопа
-  const removeWorkshop = useCallback(async (workshop: Workshop): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
+  const removeWorkshop = useCallback(
+    async (workshop: Workshop): Promise<boolean> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const { error: apiError } = await workshopsFetch.DELETE(`/workshops/{workshop_id}`, {
-        params: {
-          path: { workshop_id: workshop.id },
-        },
-      });
+      try {
+        const { error: apiError } = await workshopsFetch.DELETE(
+          `/workshops/{workshop_id}`,
+          {
+            params: {
+              path: { workshop_id: workshop.id },
+            },
+          },
+        );
 
-      if (apiError) {
-        setError("Failed to delete workshop. Please try again.");
+        if (apiError) {
+          setError("Failed to delete workshop. Please try again.");
+          return false;
+        }
+
+        // Удаляем из локального списка
+        setWorkshops((prev) => prev.filter((w) => w.id !== workshop.id));
+        return true;
+      } catch (err) {
+        setError("An unexpected error occurred while deleting workshop.");
         return false;
+      } finally {
+        setLoading(false);
       }
-
-      // Удаляем из локального списка
-      setWorkshops((prev) => prev.filter((w) => w.id !== workshop.id));
-      return true;
-    } catch (err) {
-      setError("An unexpected error occurred while deleting workshop.");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   // Принудительное обновление списка
   const refreshWorkshops = useCallback(() => {

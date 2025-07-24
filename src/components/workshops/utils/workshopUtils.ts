@@ -53,15 +53,18 @@ export const getSignedPeopleCount = (workshop: Workshop): number => {
  * @param currentSignedCount - Текущее количество записанных
  * @returns true если можно записаться
  */
-export const canRegisterForWorkshop = (workshop: Workshop, currentSignedCount: number): boolean => {
+export const canRegisterForWorkshop = (
+  workshop: Workshop,
+  currentSignedCount: number,
+): boolean => {
   if (!isWorkshopActive(workshop)) {
     return false;
   }
-  
+
   if (workshop.maxPlaces <= 0) {
     return true; // Безлимитный воркшоп
   }
-  
+
   return currentSignedCount < workshop.maxPlaces;
 };
 
@@ -71,7 +74,10 @@ export const canRegisterForWorkshop = (workshop: Workshop, currentSignedCount: n
  * @param signedCount - Количество записанных участников
  * @returns Строка для отображения (например: "5/20" или "5/∞")
  */
-export const getParticipantsDisplayText = (workshop: Workshop, signedCount: number): string => {
+export const getParticipantsDisplayText = (
+  workshop: Workshop,
+  signedCount: number,
+): string => {
   if (workshop.maxPlaces >= 0) {
     if (workshop.maxPlaces === 500) {
       return `${signedCount}/∞`;
@@ -95,9 +101,11 @@ export const isUnlimitedWorkshop = (workshop: Workshop): boolean => {
  * @param workshops - Массив воркшопов
  * @returns Объект с воркшопами, сгруппированными по датам
  */
-export const groupWorkshopsByDate = <T extends Workshop>(workshops: T[]): Record<string, T[]> => {
+export const groupWorkshopsByDate = <T extends Workshop>(
+  workshops: T[],
+): Record<string, T[]> => {
   const groups: Record<string, T[]> = {};
-  
+
   workshops.forEach((workshop) => {
     const dateTag = workshop.date;
     if (!groups[dateTag]) {
@@ -105,7 +113,7 @@ export const groupWorkshopsByDate = <T extends Workshop>(workshops: T[]): Record
     }
     groups[dateTag].push(workshop);
   });
-  
+
   return groups;
 };
 
@@ -114,12 +122,14 @@ export const groupWorkshopsByDate = <T extends Workshop>(workshops: T[]): Record
  * @param workshops - Массив воркшопов
  * @returns Отсортированный массив воркшопов
  */
-export const sortWorkshopsByTime = <T extends Workshop>(workshops: T[]): T[] => {
+export const sortWorkshopsByTime = <T extends Workshop>(
+  workshops: T[],
+): T[] => {
   return workshops.sort((a, b) => {
     const [hoursA, minutesA] = a.startTime.split(":").map(Number);
     const [hoursB, minutesB] = b.startTime.split(":").map(Number);
-    
-    return (hoursA * 60 + minutesA) - (hoursB * 60 + minutesB);
+
+    return hoursA * 60 + minutesA - (hoursB * 60 + minutesB);
   });
 };
 

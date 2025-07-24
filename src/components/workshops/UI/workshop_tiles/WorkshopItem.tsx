@@ -4,14 +4,14 @@ import { workshopsFetch } from "@/api/workshops";
 import { useNavigate } from "@tanstack/react-router";
 import { useToast } from "../../toast";
 import type { Workshop, WorkshopItemProps } from "../../types";
-import { 
-  isWorkshopActive, 
-  getInactiveStatusText, 
-  getSignedPeopleCount, 
+import {
+  isWorkshopActive,
+  getInactiveStatusText,
+  getSignedPeopleCount,
   getParticipantsDisplayText,
   formatTime,
   formatStartDate,
-  isUnlimitedWorkshop
+  isUnlimitedWorkshop,
 } from "../../utils";
 
 const WorkshopItem: React.FC<WorkshopItemProps> = ({

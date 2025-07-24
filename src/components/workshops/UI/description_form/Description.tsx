@@ -5,9 +5,16 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { workshopsFetch } from "@/api/workshops";
 import { useToast } from "../../toast";
-import type { Workshop, Participant, WorkshopDescriptionProps } from "../../types";
+import type {
+  Workshop,
+  Participant,
+  WorkshopDescriptionProps,
+} from "../../types";
 import { formatDate, formatTime } from "../../utils/dateUtils";
-import { isWorkshopActive, getInactiveStatusText } from "../../utils/workshopUtils";
+import {
+  isWorkshopActive,
+  getInactiveStatusText,
+} from "../../utils/workshopUtils";
 
 const processTextNode = (text: string): (string | JSX.Element)[] => {
   const result: (string | JSX.Element)[] = [];
@@ -157,7 +164,6 @@ const Description: React.FC<WorkshopDescriptionProps> = ({
     ? participants
     : participants.slice(0, displayLimit);
   const hiddenCount = participants.length - displayLimit;
-
 
   useEffect(() => {
     if (!workshop?.id) return;
