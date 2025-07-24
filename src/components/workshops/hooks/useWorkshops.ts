@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { workshopsFetch } from "@/api/workshops";
 import type { Workshop } from "../types";
+import { transformWorkshopFromAPI } from "../utils";
 
 export interface UseWorkshopsResult {
   workshops: Workshop[];
@@ -37,40 +38,10 @@ interface UpdateWorkshopRequest {
   is_registrable?: boolean;
 }
 
-/**
- * Хук для работы с воркшопами - загрузка, создание, обновление, удаление
- */
 export const useWorkshops = (): UseWorkshopsResult => {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Функция для парсинга времени из ISO строки
-  const parseTime = useCallback((isoString: string): string => {
-    try {
-      const date = new Date(isoString);
-      return date.toTimeString().substring(0, 5);
-    } catch {
-      return isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || "";
-    }
-  }, []);
-
-  // Функция для трансформации данных с сервера в клиентский формат
-  const transformWorkshopData = useCallback((apiWorkshop: any): Workshop => {
-    return {
-      id: apiWorkshop.id,
-      title: apiWorkshop.name,
-      body: apiWorkshop.description,
-      date: apiWorkshop.dtstart.split("T")[0],
-      startTime: parseTime(apiWorkshop.dtstart),
-      endTime: parseTime(apiWorkshop.dtend),
-      room: apiWorkshop.place,
-      maxPlaces: apiWorkshop.capacity,
-      remainPlaces: apiWorkshop.remain_places,
-      isActive: apiWorkshop.is_active ?? true,
-      isRegistrable: apiWorkshop.is_registrable ?? true,
-    };
-  }, [parseTime]);
 
   // Загрузка списка воркшопов
   const loadWorkshops = useCallback(async () => {
@@ -96,14 +67,14 @@ export const useWorkshops = (): UseWorkshopsResult => {
         return;
       }
 
-      const transformedWorkshops = data.map(transformWorkshopData);
+      const transformedWorkshops = data.map(transformWorkshopFromAPI);
       setWorkshops(transformedWorkshops);
     } catch (err) {
       setError("An unexpected error occurred while loading workshops.");
     } finally {
       setLoading(false);
     }
-  }, [transformWorkshopData]);
+  }, []);
 
   // Создание нового воркшопа
   const createWorkshop = useCallback(async (newWorkshop: Workshop): Promise<boolean> => {
@@ -136,7 +107,7 @@ export const useWorkshops = (): UseWorkshopsResult => {
       }
 
       if (data) {
-        const createdWorkshop = transformWorkshopData(data);
+        const createdWorkshop = transformWorkshopFromAPI(data);
         setWorkshops((prev) => [...prev, createdWorkshop]);
         return true;
       }
@@ -148,7 +119,7 @@ export const useWorkshops = (): UseWorkshopsResult => {
     } finally {
       setLoading(false);
     }
-  }, [transformWorkshopData]);
+  }, []);
 
   // Обновление воркшопа
   const updateWorkshop = useCallback(async (updatedWorkshop: Workshop): Promise<boolean> => {

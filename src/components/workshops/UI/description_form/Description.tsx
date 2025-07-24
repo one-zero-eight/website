@@ -6,16 +6,8 @@ import remarkGfm from "remark-gfm";
 import { workshopsFetch } from "@/api/workshops";
 import { useToast } from "../../toast";
 import type { Workshop, Participant, WorkshopDescriptionProps } from "../../types";
-
-const formatDate = (dateString: string) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("ru-RU");
-};
-const formatTime = (timeString: string) => {
-  if (!timeString) return "";
-  return timeString;
-};
+import { formatDate, formatTime } from "../../utils/dateUtils";
+import { isWorkshopActive, getInactiveStatusText } from "../../utils/workshopUtils";
 
 const processTextNode = (text: string): (string | JSX.Element)[] => {
   const result: (string | JSX.Element)[] = [];
@@ -166,30 +158,6 @@ const Description: React.FC<WorkshopDescriptionProps> = ({
     : participants.slice(0, displayLimit);
   const hiddenCount = participants.length - displayLimit;
 
-  // Функция для проверки активности воркшопа
-  const isWorkshopActive = () => {
-    return workshop?.isActive !== false && workshop?.isRegistrable !== false;
-  };
-
-  // Функция для получения текста статуса неактивности
-  const getInactiveStatusText = () => {
-    if (workshop?.isRegistrable === false && workshop?.isActive !== false) {
-      return `Inactive due ${formatDate(workshop.date)} ${formatTime(workshop.startTime)}`;
-    } else {
-      return "Inactive";
-    }
-  };
-
-  // Функция для форматирования даты начала (как в WorkshopItem)
-  const formatStartDate = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const previousDay = new Date(date.getTime() - 24 * 60 * 60 * 1000);
-    const day = previousDay.getDate().toString().padStart(2, "0");
-    const month = (previousDay.getMonth() + 1).toString().padStart(2, "0");
-    const year = previousDay.getFullYear();
-    return `${day}.${month}.${year}`;
-  };
 
   useEffect(() => {
     if (!workshop?.id) return;
@@ -363,7 +331,7 @@ const Description: React.FC<WorkshopDescriptionProps> = ({
         )}
 
         {/* Кнопки записи для активных воркшопов или плашка неактивности */}
-        {isWorkshopActive() ? (
+        {isWorkshopActive(workshop) ? (
           workshopChosen ? (
             <button
               onClick={handleCheckOut}
@@ -391,7 +359,7 @@ const Description: React.FC<WorkshopDescriptionProps> = ({
           <div className="flex items-center justify-center gap-2 rounded-xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] px-4 py-2.5 text-[#ff6b6b] backdrop-blur-[8px]">
             <span className="icon-[material-symbols--block] text-lg" />
             <span className="text-sm font-medium">
-              {getInactiveStatusText()}
+              {getInactiveStatusText(workshop)}
             </span>
           </div>
         )}

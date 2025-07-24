@@ -4,6 +4,15 @@ import { workshopsFetch } from "@/api/workshops";
 import { useNavigate } from "@tanstack/react-router";
 import { useToast } from "../../toast";
 import type { Workshop, WorkshopItemProps } from "../../types";
+import { 
+  isWorkshopActive, 
+  getInactiveStatusText, 
+  getSignedPeopleCount, 
+  getParticipantsDisplayText,
+  formatTime,
+  formatStartDate,
+  isUnlimitedWorkshop
+} from "../../utils";
 
 const WorkshopItem: React.FC<WorkshopItemProps> = ({
   workshop,
@@ -16,35 +25,8 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   const navigate = useNavigate();
   const { showError, showSuccess } = useToast();
   const [workshopChosen, setWorkshopChosen] = useState(false);
-  {
-    /* Стэйт для управления количеством записанных людей */
-  }
   const [signedPeople, setSignedPeople] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
-  // Функция для проверки активности воркшопа
-  const isWorkshopActive = () => {
-    return workshop.isActive !== false && workshop.isRegistrable !== false;
-  };
-  // Функция для получения текста статуса неактивности
-  const getInactiveStatusText = () => {
-    // Проверяем, прошел ли воркшоп
-    const now = new Date();
-    const workshopDate = new Date(workshop.date);
-    const [hours, minutes] = workshop.startTime.split(":").map(Number);
-    workshopDate.setHours(hours, minutes, 0, 0);
-
-    if (workshopDate < now) {
-      return "Outdated";
-    }
-
-    if (workshop.isRegistrable === false && workshop.isActive !== false) {
-      // Только isRegistrable false показываем дату и время начала
-      return `Inactive due ${formatStartDate(workshop.date)} ${formatTime(workshop.startTime)}`;
-    } else {
-      // isActive false или оба false просто Inactive
-      return "Inactive";
-    }
-  };
 
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Проверяем, что клик был не по кнопкам и не по ссылке на комнату
@@ -56,21 +38,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       openDescription(workshop);
     }
   };
-  const formatStartDate = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    // Вычитаем один день
-    const previousDay = new Date(date.getTime() - 24 * 60 * 60 * 1000);
-    const day = previousDay.getDate().toString().padStart(2, "0");
-    const month = (previousDay.getMonth() + 1).toString().padStart(2, "0");
-    const year = previousDay.getFullYear();
-    return `${day}.${month}.${year}`;
-  };
 
-  const formatTime = (timeString: string) => {
-    if (!timeString) return "";
-    return timeString;
-  };
   const handleRoomClick = (e: React.MouseEvent<HTMLSpanElement>) => {
     e.stopPropagation();
     if (workshop.room) {
@@ -80,6 +48,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
       });
     }
   };
+
   useEffect(() => {
     (async () => {
       const { data, error } = await workshopsFetch.GET(`/users/my_checkins`);
@@ -90,11 +59,12 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         setWorkshopChosen(false);
       }
 
-      // Используем remainPlaces из пропсов воркшопа если есть, иначе делаем API запрос
-      if (workshop.remainPlaces !== undefined) {
-        const signedCount = workshop.maxPlaces - workshop.remainPlaces;
-        setSignedPeople(Math.max(0, signedCount));
+      // Используем утилиту для подсчета количества записанных людей
+      const currentSignedCount = getSignedPeopleCount(workshop);
+      if (currentSignedCount > 0) {
+        setSignedPeople(currentSignedCount);
       } else {
+        // Если утилита вернула 0, делаем API запрос для получения точного количества
         const { data: checkinsData, error: checkinsError } =
           await workshopsFetch.GET(`/workshops/{workshop_id}/checkins`, {
             params: {
@@ -179,19 +149,19 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
   };
   return (
     <div
-      className={`relative w-full rounded-lg border bg-primary p-2.5 pb-[38px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] sm:rounded-2xl sm:p-4 sm:pb-[55px] ${isWorkshopActive() ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-700/60 bg-gradient-to-br from-green-600/20 to-green-700/10 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] dark:border-green-500/60 dark:from-green-500/10 dark:to-green-500/5" : "border-brand-violet/40"} `}
+      className={`relative w-full rounded-lg border bg-primary p-2.5 pb-[38px] shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] sm:rounded-2xl sm:p-4 sm:pb-[55px] ${isWorkshopActive(workshop) ? "hover:-translate-y-1 hover:transform hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]" : "border-brand-violet/15"} ${workshopChosen ? "border-green-700/60 bg-gradient-to-br from-green-600/20 to-green-700/10 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] dark:border-green-500/60 dark:from-green-500/10 dark:to-green-500/5" : "border-brand-violet/40"} `}
       onClick={handleContentClick}
     >
       <div className="flex items-center justify-between">
         {workshop.startTime && workshop.endTime && (
           <p
-            className={`flex items-center justify-start text-xs font-medium text-brand-violet sm:text-[15px] ${!isWorkshopActive() ? "opacity-50" : ""}`}
+            className={`flex items-center justify-start text-xs font-medium text-brand-violet sm:text-[15px] ${!isWorkshopActive(workshop) ? "opacity-50" : ""}`}
           >
             {formatTime(workshop.startTime)} - {formatTime(workshop.endTime)}
           </p>
         )}
         <p
-          className={`flex items-center justify-end text-xs font-medium text-brand-violet sm:text-[15px] ${!isWorkshopActive() ? "opacity-50" : ""}`}
+          className={`flex items-center justify-end text-xs font-medium text-brand-violet sm:text-[15px] ${!isWorkshopActive(workshop) ? "opacity-50" : ""}`}
         >
           {workshop.maxPlaces >= 0
             ? workshop.maxPlaces === 500
@@ -204,20 +174,20 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         </p>
       </div>
       <h3
-        className={`my-0.5 mb-1 overflow-hidden break-words text-sm font-semibold leading-[1.2] text-contrast sm:my-1.5 sm:mb-2 sm:text-lg sm:leading-[1.3] ${!isWorkshopActive() ? "opacity-50" : ""}`}
+        className={`my-0.5 mb-1 overflow-hidden break-words text-sm font-semibold leading-[1.2] text-contrast sm:my-1.5 sm:mb-2 sm:text-lg sm:leading-[1.3] ${!isWorkshopActive(workshop) ? "opacity-50" : ""}`}
       >
         {workshop.title}
       </h3>
-      {!isWorkshopActive() && (
+      {!isWorkshopActive(workshop) && (
         <p
-          className={`pointer-events-none absolute bottom-1.5 left-1/2 z-[1] max-w-[calc(100%-12px)] -translate-x-1/2 transform rounded-md border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] text-center font-medium leading-normal text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)] sm:rounded-xl ${getInactiveStatusText().startsWith("Inactive due") ? "px-1 py-1 text-[10px] sm:bottom-3 sm:px-2 sm:py-1.5 sm:text-sm" : "px-1.5 py-[5px] text-xs sm:bottom-3 sm:px-4 sm:py-2.5 sm:text-sm"}`}
+          className={`pointer-events-none absolute bottom-1.5 left-1/2 z-[1] max-w-[calc(100%-12px)] -translate-x-1/2 transform rounded-md border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] text-center font-medium leading-normal text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)] sm:rounded-xl ${getInactiveStatusText(workshop).startsWith("Inactive due") ? "px-1 py-1 text-[10px] sm:bottom-3 sm:px-2 sm:py-1.5 sm:text-sm" : "px-1.5 py-[5px] text-xs sm:bottom-3 sm:px-4 sm:py-2.5 sm:text-sm"}`}
         >
-          {getInactiveStatusText()}
+          {getInactiveStatusText(workshop)}
         </p>
       )}
       {workshop.room && (
         <div
-          className={`my-1 sm:my-2 ${!isWorkshopActive() ? "opacity-50" : ""}`}
+          className={`my-1 sm:my-2 ${!isWorkshopActive(workshop) ? "opacity-50" : ""}`}
         >
           <p className="m-0 text-xs text-contrast/80 sm:text-base">
             <strong>Room:</strong>{" "}
@@ -259,7 +229,7 @@ const WorkshopItem: React.FC<WorkshopItemProps> = ({
         </>
       )}
       {/* Показываем кнопки записи только для активных воркшопов */}
-      {isWorkshopActive() &&
+      {isWorkshopActive(workshop) &&
         (workshopChosen ? (
           <button
             onClick={handleCheckOut}
