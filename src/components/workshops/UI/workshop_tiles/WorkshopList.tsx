@@ -2,6 +2,10 @@ import React from "react";
 import WorkshopItem from "./WorkshopItem";
 import type { Workshop, WorkshopListProps } from "../../types";
 import { groupWorkshopsByDate, sortWorkshopsByTime, getDayName, formatDateWithDay } from "../../utils";
+
+/**
+ * Компонент списка воркшопов с группировкой по датам
+ */
 const WorkshopList: React.FC<WorkshopListProps> = ({
   workshops,
   remove,
@@ -10,6 +14,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
   currentUserRole,
   refreshParticipants,
 }) => {
+  // Группируем воркшопы по датам для удобного отображения
   const groups = groupWorkshopsByDate(workshops);
 
   return (
@@ -17,7 +22,7 @@ const WorkshopList: React.FC<WorkshopListProps> = ({
       style={{ textAlign: "center" }}
       className="flex flex-col gap-2 px-4 pb-28"
     >
-      {/* Тернарное? выражение чтобы плейсходдер рисовать если нет воркшопов */}
+      {/* Условное отображение: либо список воркшопов, либо плейсхолдер */}
       {groups && Object.keys(groups).length > 0 ? (
         Object.keys(groups)
           .sort()

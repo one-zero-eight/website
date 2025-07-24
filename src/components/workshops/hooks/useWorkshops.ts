@@ -3,6 +3,9 @@ import { workshopsFetch } from "@/api/workshops";
 import type { Workshop } from "../types";
 import { transformWorkshopFromAPI } from "../utils";
 
+/**
+ * Хук для управления воркшопами
+ */
 export interface UseWorkshopsResult {
   workshops: Workshop[];
   loading: boolean;
@@ -14,6 +17,9 @@ export interface UseWorkshopsResult {
   refreshWorkshops: () => void;
 }
 
+/**
+ * Структура данных для создания воркшопа (API формат)
+ */
 export interface CreateWorkshopRequest {
   name: string;
   description: string;
@@ -26,6 +32,9 @@ export interface CreateWorkshopRequest {
   is_registrable?: boolean;
 }
 
+/**
+ * Структура данных для обновления воркшопа (API формат)
+ */
 interface UpdateWorkshopRequest {
   name: string;
   description: string;

@@ -7,6 +7,9 @@ import DateTimePlacePicker from "../date/DateTimePlacePicker";
 import { useToast } from "../../toast";
 import type { Workshop, PostFormProps } from "../../types";
 
+/**
+ * Форма создания и редактирования воркшопов
+ */
 const PostForm: React.FC<PostFormProps> = ({
   create,
   initialWorkshop,
@@ -15,10 +18,10 @@ const PostForm: React.FC<PostFormProps> = ({
   existingId,
   onClose,
 }) => {
-  {
-    /*Создаем состояние workshop хуком useState
-    Если какое-то свойство не определено, используется пустая строка */
-  }
+  /*
+   * Состояние формы воркшопа
+   * Если initialWorkshop не передан, используются значения по умолчанию
+   */
   const [workshop, setWorkshop] = useState({
     title: initialWorkshop?.title || "",
     body: initialWorkshop?.body || "",
