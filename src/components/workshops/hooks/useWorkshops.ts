@@ -1,0 +1,241 @@
+import { useState, useEffect, useCallback } from "react";
+import { workshopsFetch } from "@/api/workshops";
+import type { Workshop } from "../types";
+
+export interface UseWorkshopsResult {
+  workshops: Workshop[];
+  loading: boolean;
+  error: string | null;
+  loadWorkshops: () => Promise<void>;
+  createWorkshop: (workshop: Workshop) => Promise<boolean>;
+  updateWorkshop: (workshop: Workshop) => Promise<boolean>;
+  removeWorkshop: (workshop: Workshop) => Promise<boolean>;
+  refreshWorkshops: () => void;
+}
+
+export interface CreateWorkshopRequest {
+  name: string;
+  description: string;
+  capacity: number;
+  remain_places: number;
+  place: string;
+  dtstart: string;
+  dtend: string;
+  is_active: boolean;
+}
+
+interface UpdateWorkshopRequest {
+  name: string;
+  description: string;
+  capacity: number;
+  remain_places: number;
+  place: string;
+  dtstart: string;
+  dtend: string;
+  is_active: boolean;
+}
+
+/**
+ * Хук для работы с воркшопами - загрузка, создание, обновление, удаление
+ */
+export const useWorkshops = (): UseWorkshopsResult => {
+  const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Функция для парсинга времени из ISO строки
+  const parseTime = useCallback((isoString: string): string => {
+    try {
+      const date = new Date(isoString);
+      return date.toTimeString().substring(0, 5);
+    } catch {
+      return isoString.split("T")[1]?.split(".")[0]?.substring(0, 5) || "";
+    }
+  }, []);
+
+  // Функция для трансформации данных с сервера в клиентский формат
+  const transformWorkshopData = useCallback((apiWorkshop: any): Workshop => {
+    return {
+      id: apiWorkshop.id,
+      title: apiWorkshop.name,
+      body: apiWorkshop.description,
+      date: apiWorkshop.dtstart.split("T")[0],
+      startTime: parseTime(apiWorkshop.dtstart),
+      endTime: parseTime(apiWorkshop.dtend),
+      room: apiWorkshop.place,
+      maxPlaces: apiWorkshop.capacity,
+      remainPlaces: apiWorkshop.remain_places,
+      isActive: apiWorkshop.is_active,
+      isRegistrable: apiWorkshop.is_registrable,
+    };
+  }, [parseTime]);
+
+  // Загрузка списка воркшопов
+  const loadWorkshops = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error: apiError } = await workshopsFetch.GET("/workshops/", {
+        params: {
+          query: {
+            limit: 100,
+          },
+        },
+      });
+
+      if (apiError) {
+        setError("Failed to load workshops. Please check your connection and try again.");
+        return;
+      }
+
+      if (!data || !Array.isArray(data)) {
+        setError("Invalid data received from server.");
+        return;
+      }
+
+      const transformedWorkshops = data.map(transformWorkshopData);
+      setWorkshops(transformedWorkshops);
+    } catch (err) {
+      setError("An unexpected error occurred while loading workshops.");
+    } finally {
+      setLoading(false);
+    }
+  }, [transformWorkshopData]);
+
+  // Создание нового воркшопа
+  const createWorkshop = useCallback(async (newWorkshop: Workshop): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const startDateTime = `${newWorkshop.date}T${newWorkshop.startTime}`;
+      const endDateTime = `${newWorkshop.date}T${newWorkshop.endTime}`;
+
+      const createRequest: CreateWorkshopRequest = {
+        name: newWorkshop.title,
+        description: newWorkshop.body,
+        capacity: newWorkshop.maxPlaces || 500,
+        remain_places: newWorkshop.maxPlaces || 500,
+        place: newWorkshop.room || "TBA",
+        dtstart: startDateTime,
+        dtend: endDateTime,
+        is_active: newWorkshop.isActive ?? true,
+      };
+
+      const { data, error: apiError } = await workshopsFetch.POST("/workshops/", {
+        body: createRequest,
+      });
+
+      if (apiError) {
+        setError("Failed to create workshop. Please check all fields and try again.");
+        return false;
+      }
+
+      if (data) {
+        const createdWorkshop = transformWorkshopData(data);
+        setWorkshops((prev) => [...prev, createdWorkshop]);
+        return true;
+      }
+
+      return false;
+    } catch (err) {
+      setError("An unexpected error occurred while creating workshop.");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [transformWorkshopData]);
+
+  // Обновление воркшопа
+  const updateWorkshop = useCallback(async (updatedWorkshop: Workshop): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const startDateTime = `${updatedWorkshop.date}T${updatedWorkshop.startTime}`;
+      const endDateTime = `${updatedWorkshop.date}T${updatedWorkshop.endTime}`;
+
+      const updateRequest: UpdateWorkshopRequest = {
+        name: updatedWorkshop.title,
+        description: updatedWorkshop.body,
+        capacity: updatedWorkshop.maxPlaces,
+        remain_places: updatedWorkshop.remainPlaces || updatedWorkshop.maxPlaces,
+        place: updatedWorkshop.room || "TBA",
+        dtstart: startDateTime,
+        dtend: endDateTime,
+        is_active: updatedWorkshop.isActive ?? true,
+      };
+
+      const { error: apiError } = await workshopsFetch.PUT(`/workshops/{workshop_id}`, {
+        params: {
+          path: { workshop_id: updatedWorkshop.id },
+        },
+        body: updateRequest,
+      });
+
+      if (apiError) {
+        setError("Failed to update workshop. Please check all fields and try again.");
+        return false;
+      }
+
+      // Обновляем локальный список
+      await loadWorkshops();
+      return true;
+    } catch (err) {
+      setError("An unexpected error occurred while updating workshop.");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [loadWorkshops]);
+
+  // Удаление воркшопа
+  const removeWorkshop = useCallback(async (workshop: Workshop): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { error: apiError } = await workshopsFetch.DELETE(`/workshops/{workshop_id}`, {
+        params: {
+          path: { workshop_id: workshop.id },
+        },
+      });
+
+      if (apiError) {
+        setError("Failed to delete workshop. Please try again.");
+        return false;
+      }
+
+      // Удаляем из локального списка
+      setWorkshops((prev) => prev.filter((w) => w.id !== workshop.id));
+      return true;
+    } catch (err) {
+      setError("An unexpected error occurred while deleting workshop.");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Принудительное обновление списка
+  const refreshWorkshops = useCallback(() => {
+    loadWorkshops();
+  }, [loadWorkshops]);
+
+  // Загружаем воркшопы при монтировании
+  useEffect(() => {
+    loadWorkshops();
+  }, [loadWorkshops]);
+
+  return {
+    workshops,
+    loading,
+    error,
+    loadWorkshops,
+    createWorkshop,
+    updateWorkshop,
+    removeWorkshop,
+    refreshWorkshops,
+  };
+};
