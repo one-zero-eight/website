@@ -29,7 +29,7 @@ export interface StudentProfile {
   user_statuses: string[];
   student_info?: StudentInfo;
   trainer_info?: TrainerInfo;
-  
+
   // Compatibility with old API - for backward compatibility
   id?: string;
   name?: string;
@@ -176,7 +176,6 @@ export interface MedicalReferenceUploadResponse {
   end: string;
   uploaded: string;
 }
-
 
 export interface SelfSportUploadResponse {
   message?: string;

@@ -1,4 +1,4 @@
-import apiRequest from './api';
+import apiRequest from "./api";
 
 export interface FitnessTestSession {
   id: number;
@@ -24,10 +24,13 @@ export interface FitnessTestExercise {
 export interface FitnessTestSessionDetails {
   session: FitnessTestSession;
   exercises: FitnessTestExercise[];
-  results: Record<string, Array<{
-    student: any;
-    value: number;
-  }>>;
+  results: Record<
+    string,
+    Array<{
+      student: any;
+      value: number;
+    }>
+  >;
 }
 
 export interface FitnessTestStudentSuggestion {
@@ -37,18 +40,37 @@ export interface FitnessTestStudentSuggestion {
 
 export const fitnessTestAPI = {
   getSessions: async (): Promise<FitnessTestSession[]> => {
-    return apiRequest<FitnessTestSession[]>('/fitness-test/sessions');
+    return apiRequest<FitnessTestSession[]>("/fitness-test/sessions");
   },
-  getSessionDetails: async (sessionId: number): Promise<FitnessTestSessionDetails> => {
-    return apiRequest<FitnessTestSessionDetails>(`/fitness-test/sessions/${sessionId}`);
+  getSessionDetails: async (
+    sessionId: number,
+  ): Promise<FitnessTestSessionDetails> => {
+    return apiRequest<FitnessTestSessionDetails>(
+      `/fitness-test/sessions/${sessionId}`,
+    );
   },
-  searchStudents: async (term: string): Promise<FitnessTestStudentSuggestion[]> => {
-    return apiRequest<FitnessTestStudentSuggestion[]>(`/fitness-test/students/search?term=${encodeURIComponent(term)}`);
+  searchStudents: async (
+    term: string,
+  ): Promise<FitnessTestStudentSuggestion[]> => {
+    return apiRequest<FitnessTestStudentSuggestion[]>(
+      `/fitness-test/students/search?term=${encodeURIComponent(term)}`,
+    );
   },
-  uploadResults: async (sessionId: number, payload: { semester_id: number, retake: boolean, results: Array<{ student_id: string | number, exercise_id: number, value: string }> }) => {
+  uploadResults: async (
+    sessionId: number,
+    payload: {
+      semester_id: number;
+      retake: boolean;
+      results: Array<{
+        student_id: string | number;
+        exercise_id: number;
+        value: string;
+      }>;
+    },
+  ) => {
     return apiRequest(`/fitness-test/upload/${sessionId}`, {
-      method: 'POST',
-      body: JSON.stringify(payload)
+      method: "POST",
+      body: JSON.stringify(payload),
     });
   },
-}; 
+};

@@ -7,12 +7,9 @@ export const Route = createFileRoute("/_with_menu/sport/clubs")({
     <>
       <Helmet>
         <title>Clubs — Sport</title>
-        <meta
-          name="description"
-          content="Sport clubs and activities."
-        />
+        <meta name="description" content="Sport clubs and activities." />
       </Helmet>
       <SportClubsPage />
     </>
   ),
-}); 
+});

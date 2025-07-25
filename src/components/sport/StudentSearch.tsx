@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface StudentSearchProps {
   studentQuery: string;
@@ -17,28 +17,32 @@ const StudentSearch: React.FC<StudentSearchProps> = ({
   setSelectedStudent,
 }) => (
   <div className="mb-6">
-    <label className="block font-medium mb-1 text-contrast">Enter student name or email</label>
+    <label className="mb-1 block font-medium text-contrast">
+      Enter student name or email
+    </label>
     <input
       type="text"
-      className="w-full border-2 border-secondary/50 rounded-lg px-4 py-2 mb-1 focus:border-brand-violet outline-none transition-all"
+      className="mb-1 w-full rounded-lg border-2 border-secondary/50 px-4 py-2 outline-none transition-all focus:border-brand-violet"
       placeholder="Start typing..."
       value={studentQuery}
-      onChange={e => {
+      onChange={(e) => {
         setStudentQuery(e.target.value);
         setSelectedStudent(null);
       }}
       autoComplete="off"
     />
-    {studentSearchLoading && <div className="text-xs text-inactive">Searching...</div>}
+    {studentSearchLoading && (
+      <div className="text-xs text-inactive">Searching...</div>
+    )}
     {studentOptions.length > 0 && studentQuery.length > 0 && (
-      <ul className="border-2 border-secondary/50 rounded-lg bg-white dark:bg-neutral-900 shadow max-h-40 overflow-y-auto z-10 relative">
-        {studentOptions.map(option => (
+      <ul className="relative z-10 max-h-40 overflow-y-auto rounded-lg border-2 border-secondary/50 bg-white shadow dark:bg-neutral-900">
+        {studentOptions.map((option) => (
           <li
             key={option.value}
-            className="px-4 py-2 hover:bg-brand-violet/10 cursor-pointer text-contrast dark:text-white"
+            className="cursor-pointer px-4 py-2 text-contrast hover:bg-brand-violet/10 dark:text-white"
             onClick={() => {
               setSelectedStudent(option);
-              setStudentQuery(''); // clear input after selection
+              setStudentQuery(""); // clear input after selection
             }}
           >
             {option.label}

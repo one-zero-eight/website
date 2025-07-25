@@ -6,4 +6,4 @@ export const Route = createFileRoute("/_with_menu/sport/")({
       to: "/sport/schedule",
     });
   },
-}); 
+});
