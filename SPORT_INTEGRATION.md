@@ -5,7 +5,9 @@
 ## Структура интеграции
 
 ### Маршруты
+
 Спортивный раздел доступен по следующим маршрутам:
+
 - `/sport/schedule` - Расписание занятий
 - `/sport/clubs` - Список клубов
 - `/sport/club/:clubId` - Детали клуба
@@ -15,7 +17,9 @@
 - `/sport/fitness-session/:sessionId` - Детали фитнес-сессии
 
 ### Компоненты
+
 Все компоненты из `frontend-prod` интегрированы в `src/components/sport/`:
+
 - Страницы: `SchedulePage.tsx`, `ClubsPage.tsx`, `HistoryPage.tsx`, etc.
 - Компоненты: `TopBar.tsx`, навигация, формы
 - Утилиты: `hooks/`, `services/`, `store/`, `types/`, `utils/`
@@ -23,12 +27,15 @@
 ## Настройка поддомена
 
 ### 1. DNS настройки
+
 Добавьте A-запись для поддомена:
+
 ```
 sport.innohassle.ru. IN A <IP-адрес-сервера>
 ```
 
 ### 2. Nginx конфигурация
+
 Используйте файл `nginx-sport.conf` для настройки nginx:
 
 ```bash
@@ -46,7 +53,9 @@ sudo systemctl reload nginx
 ```
 
 ### 3. SSL сертификат
+
 Получите SSL сертификат для поддомена:
+
 ```bash
 sudo certbot --nginx -d sport.innohassle.ru
 ```
@@ -54,6 +63,7 @@ sudo certbot --nginx -d sport.innohassle.ru
 ## Развертывание
 
 ### 1. Сборка проекта
+
 ```bash
 cd website-main
 pnpm install
@@ -61,6 +71,7 @@ pnpm build
 ```
 
 ### 2. Развертывание на сервер
+
 ```bash
 # Скопируйте собранные файлы
 sudo cp -r dist/* /var/www/website-main/
@@ -71,11 +82,13 @@ sudo chmod -R 755 /var/www/website-main
 ```
 
 ### 3. Проверка
+
 Откройте https://sport.innohassle.ru в браузере.
 
 ## Разработка
 
 ### Локальная разработка
+
 ```bash
 # Запуск dev сервера
 pnpm dev
@@ -85,11 +98,13 @@ http://localhost:3000/sport/schedule
 ```
 
 ### API прокси
+
 В режиме разработки API запросы проксируются на `http://t9d.store/api/`.
 
 ## Зависимости
 
 Добавлены следующие зависимости из `frontend-prod`:
+
 - `axios` - HTTP клиент
 - `date-fns` - Работа с датами
 - `lucide-react` - Иконки
@@ -129,6 +144,7 @@ website-main/
 ## Миграция данных
 
 При необходимости миграции данных из старой системы:
+
 1. Экспортируйте данные из `frontend-prod`
 2. Импортируйте в новую систему через API
 3. Обновите конфигурацию API endpoints
@@ -136,6 +152,7 @@ website-main/
 ## Мониторинг
 
 Рекомендуется настроить мониторинг:
+
 - Логи nginx: `/var/log/nginx/access.log`
 - Логи приложения: через systemd или PM2
 - Мониторинг доступности: UptimeRobot или аналоги
@@ -145,4 +162,4 @@ website-main/
 - Все запросы перенаправляются на HTTPS
 - Настроены security headers в nginx
 - API запросы проксируются через nginx
-- Статические файлы кэшируются 
+- Статические файлы кэшируются

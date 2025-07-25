@@ -2,7 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 import { SportFitnessSessionPage } from "@/components/sport/SportFitnessSessionPage";
 
-export const Route = createFileRoute("/_with_menu/sport/fitness-session/$sessionId")({
+export const Route = createFileRoute(
+  "/_with_menu/sport/fitness-session/$sessionId",
+)({
   component: () => (
     <>
       <Helmet>
@@ -15,4 +17,4 @@ export const Route = createFileRoute("/_with_menu/sport/fitness-session/$session
       <SportFitnessSessionPage />
     </>
   ),
-}); 
+});

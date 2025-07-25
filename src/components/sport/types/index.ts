@@ -4,7 +4,7 @@ export interface Activity {
   time: string;
   dayOfWeek: string;
   date: Date;
-  status: 'free' | 'booked' | 'past';
+  status: "free" | "booked" | "past";
   maxParticipants: number;
   currentParticipants: number;
   isPast: boolean;

@@ -1,4 +1,4 @@
-import apiRequest from './api';
+import apiRequest from "./api";
 
 export interface Semester {
   id: number;
@@ -10,6 +10,6 @@ export interface Semester {
 
 export const semesterAPI = {
   getSemesters: async (): Promise<Semester[]> => {
-    return apiRequest<Semester[]>('/semester');
+    return apiRequest<Semester[]>("/semester");
   },
 };

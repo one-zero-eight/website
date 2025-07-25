@@ -15,4 +15,4 @@ export const Route = createFileRoute("/_with_menu/sport/club/$clubId")({
       <SportClubPage />
     </>
   ),
-}); 
+});

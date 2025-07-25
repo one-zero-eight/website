@@ -14,13 +14,12 @@ export const generateSessionId = (
   activity: string,
   day: string,
   time: string,
-  date: Date
+  date: Date,
 ): string => {
   // Create a consistent format that can be used by both pages
-  const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
-  return `${activity.toLowerCase().replace(/\s+/g, '-')}-${day.toLowerCase()}-${time.replace(/[:\s-]/g, '')}-${dateStr}`;
+  const dateStr = date.toISOString().split("T")[0]; // YYYY-MM-DD format
+  return `${activity.toLowerCase().replace(/\s+/g, "-")}-${day.toLowerCase()}-${time.replace(/[:\s-]/g, "")}-${dateStr}`;
 };
-
 
 /**
  * Formats a session date for display
@@ -33,16 +32,16 @@ export const formatSessionDate = (date: Date): string => {
   tomorrow.setDate(today.getDate() + 1);
   const nextWeek = new Date(today);
   nextWeek.setDate(today.getDate() + 7);
-  
+
   const isToday = date.toDateString() === today.toDateString();
   const isTomorrow = date.toDateString() === tomorrow.toDateString();
-  
-  if (isToday) return 'Today';
-  if (isTomorrow) return 'Tomorrow';
-  
-  return date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric'
+
+  if (isToday) return "Today";
+  if (isTomorrow) return "Tomorrow";
+
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
   });
 };

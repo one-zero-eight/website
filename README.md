@@ -14,5 +14,4 @@
 
 ## About
 
-This is the fork of the head repository for the developing frontend part of the website. 
-
+This is the fork of the head repository for the developing frontend part of the website.

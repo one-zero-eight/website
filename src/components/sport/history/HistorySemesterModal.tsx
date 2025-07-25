@@ -1,6 +1,10 @@
-import React from 'react';
-import SemesterDetailsModal from '../SemesterDetailsModal';
-import { StudentSemesterHistory, StudentHistoryTraining, FitnessTestResult } from '../../services/types';
+import React from "react";
+import SemesterDetailsModal from "../SemesterDetailsModal";
+import {
+  StudentSemesterHistory,
+  StudentHistoryTraining,
+  FitnessTestResult,
+} from "../../services/types";
 
 interface HistorySemesterModalProps {
   isOpen: boolean;
@@ -17,13 +21,13 @@ const HistorySemesterModal: React.FC<HistorySemesterModalProps> = ({
   semester,
   trainings,
   fitnessTest,
-  loading
+  loading,
 }) => {
   return (
     <SemesterDetailsModal
       isOpen={isOpen}
       onClose={onClose}
-      semesterName={semester?.semester_name || ''}
+      semesterName={semester?.semester_name || ""}
       trainings={trainings}
       fitnessTest={fitnessTest}
       loading={loading}
