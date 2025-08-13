@@ -1,4 +1,6 @@
+import { useMe } from "@/api/accounts/user.ts";
 import { $workshops, workshopsTypes } from "@/api/workshops";
+import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { formatDateWithDay } from "@/components/workshops/date-utils.ts";
 import {
   groupWorkshopsByDate,
@@ -24,6 +26,12 @@ export function WorkshopsListPage() {
 
   // Группируем воркшопы по датам для удобного отображения
   const groups = workshops ? groupWorkshopsByDate(workshops) : undefined;
+
+  const { me } = useMe();
+
+  if (!me) {
+    return <AuthWall />;
+  }
 
   return (
     <div className="w-full">
