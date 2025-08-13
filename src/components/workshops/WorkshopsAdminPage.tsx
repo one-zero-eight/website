@@ -60,20 +60,20 @@ export function WorkshopsAdminPage() {
               .map((tagName) => (
                 <React.Fragment key={tagName}>
                   <div className="my-1 flex w-full flex-col items-start">
-                    <div className="flex w-full flex-wrap gap-2">
+                    <div className="flex w-full flex-wrap gap-4">
                       <div className="text-2xl font-medium sm:text-3xl">
                         {formatDateWithDay(tagName)}
                       </div>
                       <button
                         type="button"
-                        className="flex cursor-pointer items-center gap-1 rounded-2xl border-none bg-brand-violet py-2 pl-2 pr-4 text-base font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80"
+                        className="flex cursor-pointer items-center gap-1 rounded-2xl border-none bg-brand-violet py-1 pl-2 pr-4 text-sm font-medium text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out hover:bg-brand-violet/80"
                         title="Add new workshop"
                         onClick={() => {
                           setModalDate(tagName);
                           setModalOpen(true);
                         }}
                       >
-                        <span className="icon-[material-symbols--add] shrink-0 text-2xl" />
+                        <span className="icon-[material-symbols--add] shrink-0 text-xl" />
                         Add workshop
                       </button>
                     </div>

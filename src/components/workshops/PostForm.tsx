@@ -49,7 +49,7 @@ export function PostForm({
     dtstart: initialWorkshop?.dtstart || "",
     dtend: initialWorkshop?.dtend || "",
     place: initialWorkshop?.place || "",
-    capacity: initialWorkshop?.capacity || 0,
+    capacity: initialWorkshop?.capacity || 500,
     remain_places: initialWorkshop?.remain_places || 0,
     is_active: initialWorkshop?.is_active ?? true,
     is_registrable: initialWorkshop?.is_registrable ?? false,
@@ -58,7 +58,7 @@ export function PostForm({
     startTime: "",
     endTime: "",
     room: initialWorkshop?.place || "",
-    maxPlaces: initialWorkshop?.capacity || 0,
+    maxPlaces: initialWorkshop?.capacity || 500,
     remainPlaces: initialWorkshop?.remain_places,
   });
 
@@ -279,8 +279,8 @@ export function PostForm({
       dtstart: initialWorkshop?.dtstart || `${initialDate}T18:00:00+03:00`,
       dtend: initialWorkshop?.dtend || `${initialDate}T20:00:00+03:00`,
       place: initialWorkshop?.place || "",
-      capacity: initialWorkshop?.capacity || 0,
-      remain_places: initialWorkshop?.remain_places || 0,
+      capacity: initialWorkshop?.capacity || 500,
+      remain_places: initialWorkshop?.remain_places || 500,
       is_active: initialWorkshop?.is_active ?? true,
       is_registrable: initialWorkshop?.is_registrable ?? false,
       // UI поля
@@ -288,7 +288,7 @@ export function PostForm({
       startTime,
       endTime,
       room: initialWorkshop?.place || "",
-      maxPlaces: initialWorkshop?.capacity || 0,
+      maxPlaces: initialWorkshop?.capacity || 500,
       remainPlaces: initialWorkshop?.remain_places,
     }));
   }, [initialDate, initialWorkshop]);
@@ -453,7 +453,7 @@ export function PostForm({
       dtstart,
       dtend,
       place: workshop.room.trim() || "TBA",
-      capacity: workshop.maxPlaces || 0,
+      capacity: workshop.maxPlaces || 500,
       is_active: workshop.is_active,
     };
   };
@@ -476,15 +476,15 @@ export function PostForm({
       dtstart: "",
       dtend: "",
       place: "",
-      capacity: 0,
-      remain_places: 0,
+      capacity: 500,
+      remain_places: 500,
       is_active: true,
       is_registrable: false,
       date: "",
       startTime: "",
       endTime: "",
       room: "",
-      maxPlaces: 0,
+      maxPlaces: 500,
       remainPlaces: undefined,
     });
 
