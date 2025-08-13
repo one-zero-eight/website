@@ -29,6 +29,11 @@ apis:
     x-openapi-ts:
       output: ./src/api/search/types.ts
       #  --root-types --enum
+  workshops:
+    root: https://api.innohassle.ru/workshops/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/workshops/types.ts
+      #  --root-types --enum
   sport:
     root: https://sport.innopolis.university/api/openapi.json
     x-openapi-ts:

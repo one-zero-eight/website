@@ -8,11 +8,8 @@ export const authMiddleware: Middleware = {
   async onRequest({ request }) {
     // Check the requested URL to add token only to our API
     if (
-      !(
-        request.url.startsWith("https://api.innohassle.ru/") ||
-        request.url.includes("api/workshops") ||
-        request.url.startsWith("https://workshops.innohassle.ru/")
-      )
+      !request.url.startsWith("https://api.innohassle.ru/") &&
+      !request.url.startsWith("http://localhost")
     )
       return;
 
@@ -27,11 +24,8 @@ export const authMiddleware: Middleware = {
   async onResponse({ response }) {
     // Check the final URL to ensure we are handling only our API
     if (
-      !(
-        response.url.startsWith("https://api.innohassle.ru/") ||
-        response.url.includes("api/workshops") ||
-        response.url.startsWith("https://workshops.innohassle.ru/")
-      )
+      !response.url.startsWith("https://api.innohassle.ru/") &&
+      !response.url.startsWith("http://localhost")
     )
       return;
 

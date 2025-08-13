@@ -2,6 +2,10 @@
  * Утилиты для работы с датами и временем
  */
 
+export const getDate = (dt: string) => {
+  return dt.split("T")[0];
+};
+
 /**
  * Парсит время из ISO строки в формат HH:mm
  * @param isoString - ISO строка с датой и временем
@@ -38,21 +42,6 @@ export const formatDate = (dateString: string): string => {
 };
 
 /**
- * Форматирует дату для отображения статуса (используется в WorkshopItem)
- * @param dateString - Дата в формате YYYY-MM-DD
- * @returns Дата в формате DD.MM.YYYY для статуса
- */
-export const formatStartDate = (dateString: string): string => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const previousDay = new Date(date.getTime() - 24 * 60 * 60 * 1000);
-  const day = previousDay.getDate().toString().padStart(2, "0");
-  const month = (previousDay.getMonth() + 1).toString().padStart(2, "0");
-  const year = previousDay.getFullYear();
-  return `${day}.${month}.${year}`;
-};
-
-/**
  * Получает название дня недели по номеру
  * @param dayNumber - Номер дня недели (1-7, где 1 = понедельник)
  * @returns Название дня недели
@@ -85,28 +74,15 @@ export const formatDateWithDay = (dateString: string): string => {
 };
 
 /**
- * Создает DateTime строку для API запроса
- * @param date - Дата в формате YYYY-MM-DD
- * @param time - Время в формате HH:mm
- * @returns ISO строка для API
- */
-export const createDateTime = (date: string, time: string): string => {
-  return `${date}T${time}`;
-};
-
-/**
  * Проверяет, прошла ли дата и время воркшопа
- * @param date - Дата воркшопа в формате YYYY-MM-DD
- * @param startTime - Время начала в формате HH:mm
+ * @param dtstart - Дата воркшопа в формате ISO
  * @returns true если воркшоп уже прошел
  */
-export const isWorkshopPast = (date: string, startTime: string): boolean => {
-  if (!date || !startTime) return false;
+export const isWorkshopPast = (dtstart: string): boolean => {
+  if (!dtstart) return false;
 
   const now = new Date();
-  const workshopDate = new Date(date);
-  const [hours, minutes] = startTime.split(":").map(Number);
-  workshopDate.setHours(hours, minutes, 0, 0);
+  const workshopDate = new Date(dtstart);
 
   return workshopDate < now;
 };

@@ -71,6 +71,17 @@ export const items: ItemType[] = [
   { type: "separator", hideOnMore: true },
   {
     type: "local",
+    title: "Workshops",
+    to: "/workshops",
+    icon: <span className="icon-[material-symbols--construction-rounded]" />,
+    badge: (
+      <span className="ml-2 rounded-full bg-green-700 px-2 py-1 text-xs font-semibold text-white">
+        IBC
+      </span>
+    ),
+  },
+  {
+    type: "local",
     title: "Schedule",
     to: "/schedule",
     icon: <span className="icon-[mdi--calendars]" />,
@@ -86,11 +97,6 @@ export const items: ItemType[] = [
     title: "Printers",
     to: "/printers",
     icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
-    badge: (
-      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-        NEW
-      </span>
-    ),
   },
   {
     type: "local",
@@ -126,17 +132,6 @@ export const items: ItemType[] = [
     badge: (
       <span className="ml-2 rounded-full bg-yellow-700 px-2 py-1 text-xs font-semibold text-white">
         STAFF
-      </span>
-    ),
-  },
-  {
-    type: "local",
-    title: "Workshops",
-    to: "/workshops",
-    icon: <span className="icon-[material-symbols--construction-rounded]" />,
-    badge: (
-      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-        NEW
       </span>
     ),
   },

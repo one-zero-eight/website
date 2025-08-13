@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {
+import {
   createContext,
+  ReactNode,
+  useCallback,
   useContext,
   useState,
-  useCallback,
-  ReactNode,
 } from "react";
-import { Toast, ToastContextType, ToastType, ConfirmOptions } from "./types";
-import { ConfirmDialog } from "./ConfirmDialog";
+import { ConfirmDialog } from "./ConfirmDialog.tsx";
+import { ConfirmOptions, Toast, ToastContextType } from "./types.ts";
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
@@ -37,6 +36,8 @@ export function ToastProvider({ children }: ToastProviderProps) {
     const id = generateId();
     const newToast: Toast = {
       ...toast,
+      title: toast.title.toString(),
+      message: toast.message ? toast.message.toString() : undefined,
       id,
       duration: toast.duration ?? 5000, // по умолчанию 5 секунд
       isVisible: true,
@@ -105,14 +106,14 @@ export function ToastProvider({ children }: ToastProviderProps) {
       confirmState.resolve(true);
     }
     setConfirmState({ isOpen: false, options: null, resolve: null });
-  }, [confirmState.resolve]);
+  }, [confirmState]);
 
   const handleCancel = useCallback(() => {
     if (confirmState.resolve) {
       confirmState.resolve(false);
     }
     setConfirmState({ isOpen: false, options: null, resolve: null });
-  }, [confirmState.resolve]);
+  }, [confirmState]);
 
   const value: ToastContextType = {
     toasts,

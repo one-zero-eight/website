@@ -1,20 +1,4 @@
-import React from "react";
-
-export interface DateTimePickerProps {
-  date: string;
-  startTime: string;
-  endTime: string;
-  room: string;
-  maxPlaces: number;
-  onDateChange: (date: string) => void;
-  onStartTimeChange: (time: string) => void;
-  onEndTimeChange: (time: string) => void;
-  onRoomChange: (room: string) => void;
-  onMaxPlacesChange: (maxPlaces: number) => void;
-  isPlacesDisabled?: boolean;
-}
-
-const DateTimePicker: React.FC<DateTimePickerProps> = ({
+export function DateTimePlacePicker({
   date,
   startTime,
   endTime,
@@ -26,7 +10,19 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
   onRoomChange,
   onMaxPlacesChange,
   isPlacesDisabled,
-}) => {
+}: {
+  date: string;
+  startTime: string;
+  endTime: string;
+  room: string;
+  maxPlaces: number;
+  onDateChange: (date: string) => void;
+  onStartTimeChange: (time: string) => void;
+  onEndTimeChange: (time: string) => void;
+  onRoomChange: (room: string) => void;
+  onMaxPlacesChange: (maxPlaces: number) => void;
+  isPlacesDisabled?: boolean;
+}) {
   return (
     <div className="my-2 flex flex-col gap-4">
       <div className="flex gap-3">
@@ -102,6 +98,4 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
       </div>
     </div>
   );
-};
-
-export default DateTimePicker;
+}

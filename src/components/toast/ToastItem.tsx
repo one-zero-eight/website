@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Toast as ToastType } from "./types";
+import clsx from "clsx";
+import { useCallback, useEffect, useState } from "react";
+import { Toast as ToastType } from "./types.ts";
 
 interface ToastItemProps {
   toast: ToastType;
@@ -52,28 +53,36 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
   }, [toast.duration, handleClose]);
 
   const getToastStyles = () => {
-    const baseStyles =
-      "flex items-start gap-3 p-4 rounded-lg shadow-lg border-l-4 transition-all duration-300 ease-in-out transform bg-primary text-contrast";
+    const baseStyles = [
+      "flex items-start gap-3 p-4 rounded-2xl shadow-lg border-l-4 transition-all duration-300 ease-in-out bg-floating text-contrast",
+      "transform-gpu",
+    ];
 
     if (isLeaving) {
-      return `${baseStyles} translate-y-[-100%] opacity-0 sm:translate-y-0 sm:translate-x-full`;
+      return clsx(
+        baseStyles,
+        "translate-y-[-100%] opacity-0 sm:translate-y-0 sm:translate-x-full",
+      );
     }
 
     if (isEntering) {
-      return `${baseStyles} translate-y-[-100%] opacity-0 sm:translate-y-0 sm:translate-x-full`;
+      return clsx(
+        baseStyles,
+        "translate-y-[-100%] opacity-0 sm:translate-y-0 sm:translate-x-full",
+      );
     }
 
     switch (toast.type) {
       case "success":
-        return `${baseStyles} border-green-500`;
+        return clsx(baseStyles, "border-green-500");
       case "error":
-        return `${baseStyles} border-red-500`;
+        return clsx(baseStyles, "border-red-500");
       case "warning":
-        return `${baseStyles} border-yellow-500`;
+        return clsx(baseStyles, "border-yellow-500");
       case "info":
-        return `${baseStyles} border-blue-500`;
+        return clsx(baseStyles, "border-blue-500");
       default:
-        return `${baseStyles} border-gray-500`;
+        return clsx(baseStyles, "border-gray-500");
     }
   };
 
@@ -144,21 +153,15 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
       <div className="min-w-0 flex-1">
         <h4 className="text-sm font-semibold">{toast.title}</h4>
         {toast.message && (
-          <p className="mt-1 text-sm opacity-90">{toast.message}</p>
+          <p className="mt-1 text-sm text-contrast/75">{toast.message}</p>
         )}
       </div>
       <button
         onClick={handleClose}
-        className="ml-2 flex-shrink-0 rounded p-1 transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
+        className="ml-2 flex-shrink-0 rounded-lg p-1 text-contrast/50 transition-colors hover:bg-primary-hover/50 hover:text-contrast/75"
         aria-label="Close notification"
       >
-        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fillRule="evenodd"
-            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-            clipRule="evenodd"
-          />
-        </svg>
+        <span className="icon-[material-symbols--close] text-lg" />
       </button>
     </div>
   );

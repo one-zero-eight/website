@@ -223,7 +223,7 @@ export default function createClient<
               path,
               init as InitWithUnknowns<typeof init>,
             );
-            if (error || !data) {
+            if (error || data === undefined) {
               throw error;
             }
             return data;
