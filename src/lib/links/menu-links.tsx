@@ -130,7 +130,7 @@ export const items: ItemType[] = [
     to: "/forms",
     icon: <span className="icon-[material-symbols--description-outline]" />,
     badge: (
-      <span className="ml-2 rounded-full bg-yellow-700 px-2 py-1 text-xs font-semibold text-white">
+      <span className="ml-2 rounded-full bg-yellow-500 px-2 py-1 text-xs font-semibold text-white">
         STAFF
       </span>
     ),
