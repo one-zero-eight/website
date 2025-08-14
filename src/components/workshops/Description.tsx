@@ -20,7 +20,7 @@ const processTextNode = (text: string): (string | React.JSX.Element)[] => {
       const url = urlMatch[0];
       result.push(
         <a
-          className="break-all text-brand-violet hover:scale-110 hover:text-brand-violet/80"
+          className="break-all text-brand-violet hover:text-brand-violet/80"
           href={url}
           target="_blank"
           rel="noopener noreferrer"
@@ -41,7 +41,7 @@ const processTextNode = (text: string): (string | React.JSX.Element)[] => {
       const username = tgMatch[0];
       result.push(
         <a
-          className="break-all text-brand-violet hover:scale-110 hover:text-brand-violet/80"
+          className="break-all text-brand-violet hover:text-brand-violet/80"
           href={`https://t.me/${username.slice(1)}`}
           target="_blank"
           rel="noopener noreferrer"
@@ -100,7 +100,7 @@ export function MarkdownWithCustomLinks({ children }: { children: string }) {
         // Стилизация ссылок в markdown
         a: ({ href, children }) => (
           <a
-            className="break-all text-brand-violet hover:scale-110 hover:text-brand-violet/80"
+            className="break-all text-brand-violet hover:text-brand-violet/80"
             href={href}
             target="_blank"
             rel="noopener noreferrer"
@@ -119,11 +119,7 @@ export function MarkdownWithCustomLinks({ children }: { children: string }) {
           <em className="italic">{processChildrenRecursively(children)}</em>
         ),
         // Стилизация параграфов
-        p: ({ children }) => (
-          <p className="mb-2 last:mb-0">
-            {processChildrenRecursively(children)}
-          </p>
-        ),
+        p: ({ children }) => <p>{processChildrenRecursively(children)}</p>,
       }}
     >
       {children}
@@ -156,11 +152,13 @@ export function Description({
   }
 
   return (
-    <div className="flex flex-col p-5 text-contrast">
-      <div className="mb-1.5 max-h-24 overflow-y-auto text-lg leading-6 [overflow-wrap:anywhere]">
-        <MarkdownWithCustomLinks>
-          {workshop.description || ""}
-        </MarkdownWithCustomLinks>
+    <div className="flex flex-col text-contrast">
+      <div className="flex max-h-[60vh] overflow-y-auto">
+        <div className="prose dark:prose-invert">
+          <MarkdownWithCustomLinks>
+            {workshop.description || ""}
+          </MarkdownWithCustomLinks>
+        </div>
       </div>
       <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">
         <div className="flex h-fit w-6">
@@ -222,6 +220,16 @@ export function Description({
                 <span className="text-m font-mono">
                   {participant.email.split("@")[0]}
                 </span>
+                {participant.telegram_username && (
+                  <a
+                    href={`https://t.me/${participant.telegram_username}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brand-violet hover:text-brand-violet/80"
+                  >
+                    @{participant.telegram_username}
+                  </a>
+                )}
               </div>
             ))}
 

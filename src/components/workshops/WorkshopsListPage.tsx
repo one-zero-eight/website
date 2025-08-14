@@ -1,5 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $workshops, workshopsTypes } from "@/api/workshops";
+import { ConnectTelegramPage } from "@/components/account/ConnectTelegramPage.tsx";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { formatDateWithDay } from "@/components/workshops/date-utils.ts";
 import {
@@ -33,6 +34,19 @@ export function WorkshopsListPage() {
     return <AuthWall />;
   }
 
+  if (!me.telegram) {
+    return (
+      <div className="m-4 flex w-full max-w-md flex-col gap-4 rounded-2xl bg-primary px-4 py-6 @container/account">
+        <img
+          src="/favicon.svg"
+          alt="InNoHassle logo"
+          className="h-24 w-24 self-center"
+        />
+        <ConnectTelegramPage />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
       {/* Основной компонент со списком воркшопов */}
@@ -50,8 +64,9 @@ export function WorkshopsListPage() {
                     </div>
                     {groups[tagName].length > 0 ? (
                       <div className="mb-1 mt-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
-                        {sortWorkshopsByTime(groups[tagName]).map(
-                          (workshop) => (
+                        {sortWorkshopsByTime(groups[tagName])
+                          .filter((workshop) => workshop.is_active)
+                          .map((workshop) => (
                             <WorkshopItem
                               key={workshop.id}
                               workshop={workshop}
@@ -60,8 +75,7 @@ export function WorkshopsListPage() {
                                 setModalOpen(true);
                               }}
                             />
-                          ),
-                        )}
+                          ))}
                       </div>
                     ) : (
                       <div className="col-span-full w-full text-left text-xl">
@@ -84,7 +98,6 @@ export function WorkshopsListPage() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         title={modalWorkshop?.name}
-        className="whitespace-pre-wrap break-words"
       >
         {modalWorkshop && <Description workshop={modalWorkshop} />}
       </ModalWindow>

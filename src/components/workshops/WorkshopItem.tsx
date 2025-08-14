@@ -16,17 +16,9 @@ export function WorkshopItem({
   openDescription: () => void;
 }) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
-  const { data: checkinsData } = $workshops.useQuery(
-    "get",
-    "/workshops/{workshop_id}/checkins",
-    {
-      params: { path: { workshop_id: workshop.id } },
-    },
-  );
 
   const checkedIn = !!myCheckins?.some((w) => w.id === workshop.id);
-  const signedPeople =
-    getSignedPeopleCount(workshop) || checkinsData?.length || 0;
+  const signedPeople = getSignedPeopleCount(workshop);
 
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Проверяем, что клик был не по кнопкам и не по ссылке на комнату

@@ -49,7 +49,7 @@ export function ModalWindow({
             ref={refs.setFloating}
             style={transitionStyles}
             {...getFloatingProps()}
-            className="flex h-fit w-full max-w-lg flex-col p-4 outline-none"
+            className="flex h-fit w-full max-w-xl flex-col p-4 outline-none"
           >
             <div className="overflow-hidden rounded-2xl bg-floating">
               <div
@@ -58,7 +58,7 @@ export function ModalWindow({
                 {/* Heading and close button */}
                 <div className="mb-0 flex w-full flex-row">
                   {title && (
-                    <div className="grow items-center overflow-hidden break-words pr-2 text-3xl font-semibold">
+                    <div className="grow items-center overflow-hidden break-words pr-2 text-2xl font-semibold">
                       {title}
                     </div>
                   )}

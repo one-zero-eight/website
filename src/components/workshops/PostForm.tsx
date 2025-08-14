@@ -342,35 +342,6 @@ export function PostForm({
       showError("Validation Error", "End time is required");
     }
 
-    // Проверка даты и времени (не должна быть в прошлом)
-    if (workshop.date && workshop.startTime) {
-      const workshopDateTime = new Date(
-        `${workshop.date}T${workshop.startTime}`,
-      );
-      const now = new Date();
-
-      if (workshopDateTime < now) {
-        newErrors.date = "Workshop cannot be scheduled in the past";
-        showError(
-          "Validation Error",
-          "Workshop cannot be scheduled in the past",
-        );
-      }
-    } else if (workshop.date) {
-      // Если только дата указана, проверяем только дату
-      const workshopDate = new Date(workshop.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (workshopDate < today) {
-        newErrors.date = "Workshop cannot be scheduled in the past";
-        showError(
-          "Validation Error",
-          "Workshop cannot be scheduled in the past",
-        );
-      }
-    }
-
     // Проверка времени (время начала должно быть меньше времени окончания)
     if (workshop.startTime && workshop.endTime) {
       const startTime = new Date(`2000-01-01T${workshop.startTime}`);

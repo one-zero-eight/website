@@ -14,16 +14,10 @@ export function CheckInButton({ workshopId }: { workshopId: string }) {
 
   const { data: workshops } = $workshops.useQuery("get", "/workshops/");
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
-  const { data: checkinsData } = $workshops.useQuery(
-    "get",
-    "/workshops/{workshop_id}/checkins",
-    { params: { path: { workshop_id: workshopId } } },
-  );
 
   const workshop = workshops?.find((w) => w.id === workshopId);
   const checkedIn = !!myCheckins?.some((w) => w.id === workshopId);
-  const signedPeople =
-    (workshop && getSignedPeopleCount(workshop)) || checkinsData?.length || 0;
+  const signedPeople = (workshop && getSignedPeopleCount(workshop)) || 0;
 
   const { mutate: checkIn, isPending: isCheckInPending } =
     $workshops.useMutation("post", "/workshops/{workshop_id}/checkin", {
