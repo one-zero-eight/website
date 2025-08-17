@@ -50,29 +50,15 @@ export const viewConfig: ViewConfig = {
       showTagTypes: ["cleaning"],
       outdated: false,
     },
-    /*
-    bootcamp2024: {
-      alias: "bootcamp2024",
+    bootcamp2025: {
+      alias: "bootcamp2025",
       title: "Bootcamp",
-      shortDescription: "Schedule of bootcamp activities in August, 2024.",
-      filtersTagTypes: ["bootcamp2024"],
-      groupingTagType: "bootcamp2024",
-      showTagTypes: ["bootcamp2024", "bootcamp2024-workshops-timeslot"],
-      outdated: true,
+      shortDescription: "Schedule of bootcamp activities in August, 2025.",
+      filtersTagTypes: ["bootcamp2025"],
+      groupingTagType: "bootcamp2025",
+      showTagTypes: ["bootcamp2025"],
+      outdated: false,
     },
-    "bootcamp2024-workshops": {
-      alias: "bootcamp2024-workshops",
-      title: "Workshops",
-      shortDescription: "Workshops on bootcamp in August, 2024.",
-      filtersTagTypes: ["bootcamp2024-workshops"],
-      groupingTagType: "bootcamp2024-workshops",
-      showTagTypes: [
-        "bootcamp2024-workshops",
-        "bootcamp2024-workshops-timeslot",
-      ],
-      outdated: true,
-    },
-    */
   },
 };
 
