@@ -349,7 +349,7 @@ function renderEventTimeGridWeek({
         : "#9A2EFF";
   return (
     <div
-      className="h-full border-l-4 p-1 text-left"
+      className="h-full border-l-4 p-1 text-left backdrop-blur-sm"
       style={{
         borderLeftColor: border,
         backgroundColor: `color-mix(in srgb, ${background} 40%, transparent)`,
