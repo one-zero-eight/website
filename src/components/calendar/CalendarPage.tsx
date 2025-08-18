@@ -8,6 +8,7 @@ import {
   getMyMoodleLink,
   getMyMusicRoomLink,
   getMySportLink,
+  getMyWorkshopsLink,
 } from "@/lib/events/links.ts";
 import { useRef } from "react";
 
@@ -106,6 +107,13 @@ function getCalendarsToShow(
       updatedAt: new Date().toISOString(),
     });
   }
+
+  toShow.push({
+    url: getMyWorkshopsLink(),
+    color: "seagreen",
+    sourceLink: "https://innohassle.ru/workshops",
+    updatedAt: new Date().toISOString(),
+  });
 
   // Return unique items
   return toShow.filter((value, index, array) => array.indexOf(value) === index);
