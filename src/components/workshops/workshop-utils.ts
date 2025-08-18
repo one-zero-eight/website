@@ -34,7 +34,7 @@ export const getInactiveStatusText = (
   }
 
   if (!workshop.is_registrable) {
-    return "Can check in only one day before";
+    return "Can check in only 24 hours before";
   } else {
     // isActive false или оба false просто Inactive
     return "Inactive";
