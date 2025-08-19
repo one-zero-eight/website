@@ -362,15 +362,6 @@ export const resourcesList: ResourceType[] = [
 
   // > Technical >
   {
-    url: "http://campuslife.innopolis.ru/clubs",
-    resource: "Campus life",
-    title: "Clubs",
-    description: "Explore and join student clubs and organizations on campus.",
-    icon: "icon-[material-symbols--diversity-3]",
-    category: "Extracurricular",
-    frequency: 0,
-  },
-  {
     url: "https://vm.innopolis.university/",
     resource: "IT help",
     title: "Virtual machines",
