@@ -5,7 +5,7 @@ import { formatDateWithDay } from "@/components/workshops/date-utils.ts";
 import { PostForm } from "@/components/workshops/PostForm.tsx";
 import {
   groupWorkshopsByDate,
-  sortWorkshopsByTime,
+  sortWorkshops,
 } from "@/components/workshops/workshop-utils.ts";
 import { WorkshopItem } from "@/components/workshops/WorkshopItem.tsx";
 import { useNavigate } from "@tanstack/react-router";
@@ -79,22 +79,20 @@ export function WorkshopsAdminPage() {
                     </div>
                     {groups[tagName].length > 0 ? (
                       <div className="mb-1 mt-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
-                        {sortWorkshopsByTime(groups[tagName]).map(
-                          (workshop) => (
-                            <WorkshopItem
-                              key={workshop.id}
-                              workshop={workshop}
-                              edit={() => {
-                                setModalWorkshop(workshop);
-                                setModalOpen(true);
-                              }}
-                              openDescription={() => {
-                                setModalWorkshop(workshop);
-                                setModalOpen(true);
-                              }}
-                            />
-                          ),
-                        )}
+                        {sortWorkshops(groups[tagName]).map((workshop) => (
+                          <WorkshopItem
+                            key={workshop.id}
+                            workshop={workshop}
+                            edit={() => {
+                              setModalWorkshop(workshop);
+                              setModalOpen(true);
+                            }}
+                            openDescription={() => {
+                              setModalWorkshop(workshop);
+                              setModalOpen(true);
+                            }}
+                          />
+                        ))}
                       </div>
                     ) : (
                       <div className="col-span-full w-full text-left text-xl">

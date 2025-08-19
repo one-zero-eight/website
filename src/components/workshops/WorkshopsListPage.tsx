@@ -5,7 +5,7 @@ import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { formatDateWithDay } from "@/components/workshops/date-utils.ts";
 import {
   groupWorkshopsByDate,
-  sortWorkshopsByTime,
+  sortWorkshops,
 } from "@/components/workshops/workshop-utils.ts";
 import { WorkshopItem } from "@/components/workshops/WorkshopItem.tsx";
 import React, { useState } from "react";
@@ -23,10 +23,15 @@ export function WorkshopsListPage() {
   const [modalWorkshop, setModalWorkshop] =
     useState<workshopsTypes.SchemaWorkshop | null>(null);
 
+  const [openedDays, setOpenedDays] = useState<string[]>([]);
+
   const { data: workshops } = $workshops.useQuery("get", "/workshops/");
 
   // Группируем воркшопы по датам для удобного отображения
   const groups = workshops ? groupWorkshopsByDate(workshops) : undefined;
+
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
 
   const { me } = useMe();
 
@@ -62,24 +67,40 @@ export function WorkshopsListPage() {
                     <div className="text-2xl font-medium sm:text-3xl">
                       {formatDateWithDay(tagName)}
                     </div>
-                    {groups[tagName].length > 0 ? (
-                      <div className="mb-1 mt-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
-                        {sortWorkshopsByTime(groups[tagName])
-                          .filter((workshop) => workshop.is_active)
-                          .map((workshop) => (
-                            <WorkshopItem
-                              key={workshop.id}
-                              workshop={workshop}
-                              openDescription={() => {
-                                setModalWorkshop(workshop);
-                                setModalOpen(true);
-                              }}
-                            />
-                          ))}
-                      </div>
+                    {new Date(tagName) > endOfDay ||
+                    openedDays.includes(tagName) ? (
+                      <>
+                        {groups[tagName].length > 0 ? (
+                          <div className="mb-1 mt-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
+                            {sortWorkshops(groups[tagName])
+                              .filter((workshop) => workshop.is_active)
+                              .map((workshop) => (
+                                <WorkshopItem
+                                  key={workshop.id}
+                                  workshop={workshop}
+                                  openDescription={() => {
+                                    setModalWorkshop(workshop);
+                                    setModalOpen(true);
+                                  }}
+                                />
+                              ))}
+                          </div>
+                        ) : (
+                          <div className="col-span-full w-full text-left text-xl">
+                            <h2 className="text-gray-500">No workshops yet!</h2>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="col-span-full w-full text-left text-xl">
-                        <h2 className="text-gray-500">No workshops yet!</h2>
+                        <button
+                          onClick={() =>
+                            setOpenedDays([...openedDays, tagName])
+                          }
+                          className="mt-2 text-sm text-brand-violet transition-colors duration-200 hover:text-brand-violet/80"
+                        >
+                          Show workshops
+                        </button>
                       </div>
                     )}
                   </div>
