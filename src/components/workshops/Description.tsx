@@ -214,15 +214,15 @@ export function Description({
             {visibleParticipants.map((participant) => (
               <div
                 key={participant.innohassle_id}
-                className="text-base text-contrast/80"
+                className="whitespace-pre-wrap text-base text-contrast/80"
               >
-                <span className="text-m text-brand-violet">• </span>
-                <span className="text-m font-mono">
-                  {participant.email.split("@")[0]}{" "}
+                <span className="select-none text-brand-violet">• </span>
+                <span className="font-mono">
+                  {participant.email.split("@")[0]}
                 </span>
-                {participant.name && (
-                  <span className="text-m">{participant.name} </span>
-                )}
+                {"\t"}
+                {participant.name && <span>{participant.name}</span>}
+                {"\t"}
                 {participant.telegram_username && (
                   <a
                     href={`https://t.me/${participant.telegram_username}`}
