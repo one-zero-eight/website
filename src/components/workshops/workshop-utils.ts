@@ -3,6 +3,7 @@
  */
 
 import { workshopsTypes } from "@/api/workshops";
+import { recommendedWorkshops } from "@/components/workshops/WorkshopItem.tsx";
 import { getDate, isWorkshopPast, parseTime } from "./date-utils.ts";
 
 /**
@@ -83,17 +84,27 @@ export const groupWorkshopsByDate = <T extends workshopsTypes.SchemaWorkshop>(
 };
 
 /**
- * Сортирует воркшопы по времени начала
+ * Сортирует воркшопы
  * @param workshops - Массив воркшопов
  * @returns Отсортированный массив воркшопов
  */
-export const sortWorkshopsByTime = <T extends workshopsTypes.SchemaWorkshop>(
+export const sortWorkshops = <T extends workshopsTypes.SchemaWorkshop>(
   workshops: T[],
 ): T[] => {
   return workshops.sort((a, b) => {
+    const isRecommendedA = recommendedWorkshops.includes(a.id);
+    const isRecommendedB = recommendedWorkshops.includes(b.id);
+    if (isRecommendedB !== isRecommendedA) {
+      return isRecommendedB ? 1 : -1; // Сначала рекомендованные
+    }
+
     const [hoursA, minutesA] = parseTime(a.dtstart).split(":").map(Number);
     const [hoursB, minutesB] = parseTime(b.dtstart).split(":").map(Number);
+    const result = hoursA * 60 + minutesA - (hoursB * 60 + minutesB);
+    if (result !== 0) {
+      return result; // Сначала ранние
+    }
 
-    return hoursA * 60 + minutesA - (hoursB * 60 + minutesB);
+    return a.id.localeCompare(b.id); // Сначала по ID
   });
 };

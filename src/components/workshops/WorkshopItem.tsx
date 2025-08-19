@@ -6,6 +6,12 @@ import React from "react";
 import { formatTime, parseTime } from "./date-utils.ts";
 import { getSignedPeopleCount, isWorkshopActive } from "./workshop-utils.ts";
 
+export const recommendedWorkshops = [
+  "397f5a06-561c-4d4e-8087-a4ff8b592ef6",
+  "e69d602f-4834-4b95-a803-d1e5c5808112",
+  "0ecb5deb-b82b-4ccc-b39d-a59084a9e3b8",
+];
+
 export function WorkshopItem({
   workshop,
   openDescription,
@@ -19,6 +25,7 @@ export function WorkshopItem({
 
   const checkedIn = !!myCheckins?.some((w) => w.id === workshop.id);
   const signedPeople = getSignedPeopleCount(workshop);
+  const isRecommended = recommendedWorkshops.includes(workshop.id);
 
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Проверяем, что клик был не по кнопкам и не по ссылке на комнату
@@ -41,6 +48,14 @@ export function WorkshopItem({
       )}
       onClick={handleContentClick}
     >
+      {/* Recommended Badge */}
+      {isRecommended && (
+        <div className="absolute -right-2 -top-2 z-10 flex items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+          <span className="icon-[mdi--star] mr-1 text-xs" />
+          Recommended
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         {workshop.dtstart && workshop.dtend && (
           <p
