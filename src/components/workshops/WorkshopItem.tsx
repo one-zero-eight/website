@@ -7,6 +7,7 @@ import { formatTime, parseTime } from "./date-utils.ts";
 import { getSignedPeopleCount, isWorkshopActive } from "./workshop-utils.ts";
 
 export const recommendedWorkshops = [
+  "158748f7-e215-48e6-af69-f36301c43a8b",
   "397f5a06-561c-4d4e-8087-a4ff8b592ef6",
   "e69d602f-4834-4b95-a803-d1e5c5808112",
   "0ecb5deb-b82b-4ccc-b39d-a59084a9e3b8",

@@ -92,10 +92,10 @@ export const sortWorkshops = <T extends workshopsTypes.SchemaWorkshop>(
   workshops: T[],
 ): T[] => {
   return workshops.sort((a, b) => {
-    const isRecommendedA = recommendedWorkshops.includes(a.id);
-    const isRecommendedB = recommendedWorkshops.includes(b.id);
+    const isRecommendedA = recommendedWorkshops.indexOf(a.id);
+    const isRecommendedB = recommendedWorkshops.indexOf(b.id);
     if (isRecommendedB !== isRecommendedA) {
-      return isRecommendedB ? 1 : -1; // Сначала рекомендованные
+      return isRecommendedA > isRecommendedB ? -1 : 1; // Сначала рекомендованные
     }
 
     const [hoursA, minutesA] = parseTime(a.dtstart).split(":").map(Number);
