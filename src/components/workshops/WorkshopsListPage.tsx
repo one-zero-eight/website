@@ -30,8 +30,8 @@ export function WorkshopsListPage() {
   // Группируем воркшопы по датам для удобного отображения
   const groups = workshops ? groupWorkshopsByDate(workshops) : undefined;
 
-  const endOfDay = new Date();
-  endOfDay.setHours(23, 59, 59, 999);
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
 
   const { me } = useMe();
 
@@ -67,7 +67,7 @@ export function WorkshopsListPage() {
                     <div className="text-2xl font-medium sm:text-3xl">
                       {formatDateWithDay(tagName)}
                     </div>
-                    {new Date(tagName) > endOfDay ||
+                    {new Date(tagName) > startOfDay ||
                     openedDays.includes(tagName) ? (
                       <>
                         {groups[tagName].length > 0 ? (
