@@ -13,6 +13,7 @@ export const recommendedWorkshops = [
   "e69d602f-4834-4b95-a803-d1e5c5808112",
   "0ecb5deb-b82b-4ccc-b39d-a59084a9e3b8",
   "877d5259-4819-4ef9-90ab-a2004bd061b0",
+  "04d48270-05ec-4c00-ad76-8363046b924f",
 ];
 
 export function WorkshopItem({
