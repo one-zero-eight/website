@@ -2,6 +2,10 @@ import { eventsTypes } from "@/api/events";
 import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
 import { SourcesDialog } from "@/components/calendar/SourcesDialog.tsx";
 import {
+  AcademicCalendar,
+  useMyAcademicCalendar,
+} from "@/lib/events/academic-calendar.tsx";
+import {
   DayHeaderContentArg,
   EventApi,
   EventContentArg,
@@ -40,6 +44,8 @@ export default function CalendarViewer({
   viewId?: string;
   isFullPage?: boolean;
 }) {
+  const { academicCalendar } = useMyAcademicCalendar();
+
   const [popoverInfo, setPopoverInfo] = useState({
     opened: false,
     event: undefined as EventApi | undefined,
@@ -167,7 +173,7 @@ export default function CalendarViewer({
               }
             },
             listDaySideFormat: (arg) =>
-              `Week ${calculateWeek(moment(arg.date).toDate())}`,
+              `Week ${calculateWeek(academicCalendar, moment(arg.date).toDate())}`,
           },
           timeGridWeek: {
             eventContent: renderEventTimeGridWeek,
@@ -216,7 +222,7 @@ export default function CalendarViewer({
         weekNumbers={true} // Display numbers of weeks
         weekNumberFormat={{ week: "long" }} // Show "Week 1", not "W1"
         weekNumberClassNames="text-sm week-cell" // Small text size
-        weekNumberCalculation={calculateWeek} // Display academic week numbers
+        weekNumberCalculation={(d) => calculateWeek(academicCalendar, d)} // Display academic week numbers
         height={isFullPage ? "100%" : undefined} // Full height
         contentHeight={isFullPage ? undefined : "auto"} // Do not add scrollbar on in-page calendars
         eventInteractive={true} // Make event tabbable
@@ -419,10 +425,17 @@ function renderDayHeader({ date }: DayHeaderContentArg) {
   );
 }
 
-function calculateWeek(date: Date) {
+function calculateWeek(
+  academicCalendar: AcademicCalendar | undefined,
+  date: Date,
+) {
+  if (!academicCalendar) {
+    return Infinity;
+  }
+
   // Calculate academic week number
-  const semesterStart = new Date("2025-06-02").getTime(); // Monday, first day of first week
-  const semesterEnd = new Date("2025-08-04").getTime(); // Monday, the day after the last week
+  const semesterStart = new Date(academicCalendar.startDate).getTime(); // Monday, first day of first week
+  const semesterEnd = new Date(academicCalendar.endDate).getTime(); // Monday, the day after the last week
 
   const time = date.getTime();
   if (time < semesterStart || time >= semesterEnd) {
