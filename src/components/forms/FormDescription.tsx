@@ -15,7 +15,16 @@ export function FormDescription() {
         >
           Yandex Forms
         </a>{" "}
-        URLs are supported.
+        URLs are supported. See the instructions{" "}
+        <a
+          href="https://disk.yandex.ru/i/syqHpBbQ4AfTMw"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-brand-violet-dark text-brand-violet underline"
+        >
+          here
+        </a>
+        .
       </p>
     </div>
   );

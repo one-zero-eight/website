@@ -23,12 +23,16 @@ export const Route = createFileRoute("/forms/submit")({
       if (!form || !me) return;
       const email = me.innopolis_sso?.email;
       if (!email) return;
+      const telegram = me.telegram?.username;
+      const fio = me.innopolis_sso?.name;
 
       // Redirect after 1 second
       const redirectTimeout = setTimeout(() => {
         try {
           const url = new URL(form);
           url.searchParams.append("email", email);
+          if (telegram) url.searchParams.append("telegram", "@" + telegram);
+          if (fio) url.searchParams.append("fio", fio);
           window.location.replace(url.toString());
         } catch {
           // Invalid URL, do nothing
