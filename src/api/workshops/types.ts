@@ -61,6 +61,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/{user_id}/checkins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get User Checkins */
+    get: operations["get_user_checkins_users__user_id__checkins_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/workshops/": {
     parameters: {
       query?: never;
@@ -236,7 +253,9 @@ export interface components {
       /** Email */
       email: string;
       /** Telegram Username */
-      telegram_username: string | null;
+      telegram_username?: string | null;
+      /** Name */
+      name?: string | null;
     };
     /** Workshop */
     Workshop: {
@@ -269,17 +288,18 @@ export interface components {
        */
       is_active: boolean;
       /**
-       * Is Registrable
-       * @default false
-       */
-      is_registrable: boolean;
-      /**
        * Created At
        * Format: date-time
        */
       created_at: string;
       /** Remain Places */
       readonly remain_places: number;
+      /**
+       * Is Registrable
+       * @description Marks whether users can register to the workshop.
+       *     Can be register only within 1 day before the workshop, and cannot be register after the workshop.
+       */
+      readonly is_registrable: boolean;
     };
   };
   responses: never;
@@ -375,6 +395,51 @@ export interface operations {
         content?: never;
       };
       /** @description User to change not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_user_checkins_users__user_id__checkins_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        user_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description User's check-ins retrieved successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Workshop"][];
+        };
+      };
+      /** @description Not authenticated */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description User not found */
       404: {
         headers: {
           [name: string]: unknown;

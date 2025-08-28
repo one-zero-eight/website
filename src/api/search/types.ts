@@ -38,6 +38,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/ask/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Ask By Query */
+    post: operations["ask_ask_by_query"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/act/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Act By Query */
+    post: operations["ask_act_by_query"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/telegram/messages": {
     parameters: {
       query?: never;
@@ -228,10 +262,102 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/{section}/parse": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Run Parse Route */
+    post: operations["run_parse_route"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** ActResponses */
+    ActResponses: {
+      /** Query */
+      query: string;
+      /** Answer */
+      answer: string;
+      /** @description Assigned act query index */
+      act_query_id: components["schemas"]["PydanticObjectId"] | null;
+      /**
+       * Tool Calls
+       * @description Which tools were used.
+       */
+      tool_calls: unknown[];
+      /**
+       * Messages
+       * @description Chat history for llm (do not show on frontend).
+       */
+      messages: unknown[];
+    };
+    /** AskResponses */
+    AskResponses: {
+      /** Query */
+      query: string;
+      /** Answer */
+      answer: string;
+      /** @description Assigned chat index */
+      chat_id: components["schemas"]["PydanticObjectId"] | null;
+      /** @description Assigned ask query index */
+      ask_query_id: components["schemas"]["PydanticObjectId"] | null;
+      /**
+       * Search Responses
+       * @description Responses to the search query.
+       */
+      search_responses: components["schemas"]["SearchResponse"][];
+      /**
+       * Messages
+       * @description Chat history for llm (do not show on frontend).
+       */
+      messages: unknown[];
+    };
+    /** Body_ask_act_by_query */
+    Body_ask_act_by_query: {
+      /** Query */
+      query: string;
+    };
+    /** Body_ask_ask_by_query */
+    Body_ask_ask_by_query: {
+      /** Query */
+      query: string;
+      chat_id?: components["schemas"]["PydanticObjectId"] | null;
+    };
+    /** CampusLifeSource */
+    CampusLifeSource: {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: CampusLifeSourceType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Campus life"
+       *     ]
+       */
+      breadcrumbs: string[];
+    };
     /** Chat */
     Chat: {
       /** Id */
@@ -265,6 +391,30 @@ export interface components {
       /** Link */
       link: string;
     };
+    /** EduwikiSource */
+    EduwikiSource: {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: EduwikiSourceType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "EduWiki"
+       *     ]
+       */
+      breadcrumbs: string[];
+    };
     /** FlattenInContentsWithPresignedUrl */
     FlattenInContentsWithPresignedUrl: {
       /** Course Id */
@@ -279,6 +429,30 @@ export interface components {
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
+    };
+    /** HotelSource */
+    HotelSource: {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: HotelSourceType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Hotel"
+       *     ]
+       */
+      breadcrumbs: string[];
     };
     /** InContent */
     InContent: {
@@ -347,6 +521,35 @@ export interface components {
       /** Sections */
       sections: components["schemas"]["InSection"][];
     };
+    /**
+     * InfoSources
+     * @enum {string}
+     */
+    InfoSources: InfoSources;
+    /** MapsSource */
+    MapsSource: {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: MapsSourceType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Maps"
+       *     ]
+       */
+      breadcrumbs: string[];
+    };
     /** MessageSchema */
     MessageSchema: {
       /** Id */
@@ -398,10 +601,8 @@ export interface components {
     /** MoodleCourse */
     MoodleCourse: {
       /**
-       * Id
        * Format: objectid
        * @description MongoDB document ObjectID
-       * @default None
        * @example 5eb7cf5a86d9755df3a6c593
        */
       id: string;
@@ -419,10 +620,8 @@ export interface components {
     /** MoodleEntry */
     MoodleEntry: {
       /**
-       * Id
        * Format: objectid
        * @description MongoDB document ObjectID
-       * @default None
        * @example 5eb7cf5a86d9755df3a6c593
        */
       id: string;
@@ -548,22 +747,84 @@ export interface components {
        */
       page_index: number;
     };
+    /** @example 5eb7cf5a86d9755df3a6c593 */
+    PydanticObjectId: string;
+    /** ResidentsSource */
+    ResidentsSource: {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: ResidentsSourceType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Residents"
+       *     ]
+       */
+      breadcrumbs: string[];
+    };
+    /**
+     * Resources
+     * @enum {string}
+     */
+    Resources: Resources;
+    /** ResourcesSource */
+    ResourcesSource: {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: ResourcesSourceType;
+      resource_type: components["schemas"]["Resources"];
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Resources"
+       *     ]
+       */
+      breadcrumbs: string[];
+    };
     /** SearchResponse */
     SearchResponse: {
-      /**
-       * Source
-       * @description Relevant source for the search.
-       */
-      source:
-        | components["schemas"]["MoodleFileSource"]
-        | components["schemas"]["MoodleUrlSource"]
-        | components["schemas"]["MoodleUnknownSource"]
-        | components["schemas"]["TelegramSource"];
       /**
        * Score
        * @description Score of the search response. Multiple scores if was an aggregation of multiple chunks. Optional.
        */
       score: number | number[] | null;
+      /**
+       * Source
+       * @description Relevant source for the search.
+       */
+      source:
+        | components["schemas"]["EduwikiSource"]
+        | components["schemas"]["CampusLifeSource"]
+        | components["schemas"]["HotelSource"]
+        | components["schemas"]["MapsSource"]
+        | components["schemas"]["MoodleFileSource"]
+        | components["schemas"]["MoodleUrlSource"]
+        | components["schemas"]["MoodleUnknownSource"]
+        | components["schemas"]["TelegramSource"]
+        | components["schemas"]["ResidentsSource"]
+        | components["schemas"]["ResourcesSource"];
     };
     /** SearchResponses */
     SearchResponses: {
@@ -577,11 +838,8 @@ export interface components {
        * @description Responses to the search query.
        */
       responses: components["schemas"]["SearchResponse"][];
-      /**
-       * Search Query Id
-       * @description Assigned search query index
-       */
-      search_query_id: string | null;
+      /** @description Assigned search query index */
+      search_query_id: components["schemas"]["PydanticObjectId"] | null;
     };
     /** TelegramSource */
     TelegramSource: {
@@ -641,12 +899,21 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaActResponses = components["schemas"]["ActResponses"];
+export type SchemaAskResponses = components["schemas"]["AskResponses"];
+export type SchemaBodyAskActByQuery =
+  components["schemas"]["Body_ask_act_by_query"];
+export type SchemaBodyAskAskByQuery =
+  components["schemas"]["Body_ask_ask_by_query"];
+export type SchemaCampusLifeSource = components["schemas"]["CampusLifeSource"];
 export type SchemaChat = components["schemas"]["Chat"];
 export type SchemaDbMessageSchema = components["schemas"]["DBMessageSchema"];
+export type SchemaEduwikiSource = components["schemas"]["EduwikiSource"];
 export type SchemaFlattenInContentsWithPresignedUrl =
   components["schemas"]["FlattenInContentsWithPresignedUrl"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaHotelSource = components["schemas"]["HotelSource"];
 export type SchemaInContent = components["schemas"]["InContent"];
 export type SchemaInContents = components["schemas"]["InContents"];
 export type SchemaInCourse = components["schemas"]["InCourse"];
@@ -654,6 +921,8 @@ export type SchemaInCourses = components["schemas"]["InCourses"];
 export type SchemaInModule = components["schemas"]["InModule"];
 export type SchemaInSection = components["schemas"]["InSection"];
 export type SchemaInSections = components["schemas"]["InSections"];
+export type SchemaInfoSources = components["schemas"]["InfoSources"];
+export type SchemaMapsSource = components["schemas"]["MapsSource"];
 export type SchemaMessageSchema = components["schemas"]["MessageSchema"];
 export type SchemaMoodleContentSchemaInput =
   components["schemas"]["MoodleContentSchema-Input"];
@@ -666,6 +935,10 @@ export type SchemaMoodleUnknownSource =
   components["schemas"]["MoodleUnknownSource"];
 export type SchemaMoodleUrlSource = components["schemas"]["MoodleUrlSource"];
 export type SchemaPdfLocation = components["schemas"]["PdfLocation"];
+export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
+export type SchemaResidentsSource = components["schemas"]["ResidentsSource"];
+export type SchemaResources = components["schemas"]["Resources"];
+export type SchemaResourcesSource = components["schemas"]["ResourcesSource"];
 export type SchemaSearchResponse = components["schemas"]["SearchResponse"];
 export type SchemaSearchResponses = components["schemas"]["SearchResponses"];
 export type SchemaTelegramSource = components["schemas"]["TelegramSource"];
@@ -676,6 +949,8 @@ export interface operations {
     parameters: {
       query: {
         query: string;
+        sources?: components["schemas"]["InfoSources"][];
+        response_types: PathsSearchSearchGetParametersQueryResponse_types[];
         limit?: number;
       };
       header?: never;
@@ -742,6 +1017,100 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+    };
+  };
+  ask_ask_by_query: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_ask_by_query"];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AskResponses"];
+        };
+      };
+      /** @description Chat timed out */
+      408: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description ML service error */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ask_act_by_query: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Body_ask_act_by_query"];
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ActResponses"];
+        };
+      };
+      /** @description Chat timed out */
+      408: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description ML service error */
+      502: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -819,10 +1188,16 @@ export interface operations {
         };
         content: {
           "application/json": (
+            | components["schemas"]["EduwikiSource"]
+            | components["schemas"]["CampusLifeSource"]
+            | components["schemas"]["HotelSource"]
+            | components["schemas"]["MapsSource"]
             | components["schemas"]["MoodleFileSource"]
             | components["schemas"]["MoodleUrlSource"]
             | components["schemas"]["MoodleUnknownSource"]
             | components["schemas"]["TelegramSource"]
+            | components["schemas"]["ResidentsSource"]
+            | components["schemas"]["ResourcesSource"]
           )[];
         };
       };
@@ -899,7 +1274,9 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": Record<string, never>[];
+          "application/json": {
+            [key: string]: unknown;
+          }[];
         };
       };
     };
@@ -1076,10 +1453,69 @@ export interface operations {
       };
     };
   };
+  run_parse_route: {
+    parameters: {
+      query?: {
+        indexing_is_needed?: boolean;
+        parsing_is_needed?: boolean;
+      };
+      header?: never;
+      path: {
+        section: components["schemas"]["InfoSources"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+}
+export enum PathsSearchSearchGetParametersQueryResponse_types {
+  pdf = "pdf",
+  link_to_source = "link_to_source",
 }
 export enum PathsSearchSearchSearch_query_idFeedbackPostParametersQueryFeedback {
   like = "like",
   dislike = "dislike",
+}
+export enum CampusLifeSourceType {
+  campuslife = "campuslife",
+}
+export enum EduwikiSourceType {
+  eduwiki = "eduwiki",
+}
+export enum HotelSourceType {
+  hotel = "hotel",
+}
+export enum InfoSources {
+  moodle = "moodle",
+  eduwiki = "eduwiki",
+  campuslife = "campuslife",
+  hotel = "hotel",
+  maps = "maps",
+  residents = "residents",
+  resources = "resources",
+}
+export enum MapsSourceType {
+  maps = "maps",
 }
 export enum MoodleFileSourceType {
   moodle_file = "moodle-file",
@@ -1089,6 +1525,21 @@ export enum MoodleUnknownSourceType {
 }
 export enum MoodleUrlSourceType {
   moodle_url = "moodle-url",
+}
+export enum ResidentsSourceType {
+  residents = "residents",
+}
+export enum Resources {
+  innohassle = "innohassle",
+  myuni = "myuni",
+  ithelp = "ithelp",
+  academic_calendar = "academic_calendar",
+  psychologist = "psychologist",
+  university_events = "university_events",
+  university_store = "university_store",
+}
+export enum ResourcesSourceType {
+  resources = "resources",
 }
 export enum TelegramSourceType {
   telegram = "telegram",

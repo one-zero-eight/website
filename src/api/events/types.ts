@@ -267,6 +267,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/me/workshops.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Workshops Current User Schedule
+     * @description Get schedule in ICS format for the current user
+     */
+    get: operations["ics_get_workshops_current_user_schedule"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/{user_id}/workshops.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Workshops User Schedule
+     * @description Get schedule in ICS format for the user; requires access key for `/users/{user_id}/workshops.ics` resource
+     */
+    get: operations["ics_get_workshops_user_schedule"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/me/moodle.ics": {
     parameters: {
       query?: never;
@@ -749,9 +789,11 @@ export interface components {
        * @default false
        */
       ru: boolean;
-      math?: components["schemas"]["Entry"] | null;
       english?: components["schemas"]["Entry"] | null;
       labs?: components["schemas"]["Entry"] | null;
+      math?: components["schemas"]["Entry"] | null;
+      programming?: components["schemas"]["Entry"] | null;
+      physics?: components["schemas"]["Entry"] | null;
     };
     /** Body_event_groups_batch_create_event_groups */
     Body_event_groups_batch_create_event_groups: {
@@ -781,8 +823,6 @@ export interface components {
       academic_groups: components["schemas"]["AcademicGroup"][];
       /** Buddy Groups */
       buddy_groups: components["schemas"]["BuddyGroup"][];
-      /** Workshops */
-      workshops: components["schemas"]["Workshop"][];
     };
     /** BuddyGroup */
     BuddyGroup: {
@@ -866,6 +906,15 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /** InJsonAcademicGroup */
+    InJsonAcademicGroup: {
+      /** Name */
+      name: string;
+      /** Event Group Alias */
+      event_group_alias?: string | null;
+      /** User Emails */
+      user_emails?: string[];
+    };
     /** InJsonUser */
     InJsonUser: {
       /** Email */
@@ -877,6 +926,8 @@ export interface components {
     JsonPredefinedUsers: {
       /** Users */
       users?: components["schemas"]["InJsonUser"][];
+      /** Academic Groups */
+      academic_groups?: components["schemas"]["InJsonAcademicGroup"][];
     };
     /** LinenChangeEntry */
     LinenChangeEntry: {
@@ -1064,33 +1115,6 @@ export interface components {
       /** Resource Path */
       resource_path: string;
     };
-    /** Workshop */
-    Workshop: {
-      /** Subject */
-      subject: string;
-      /** When */
-      when: string;
-      /**
-       * Instructor
-       * @default
-       */
-      instructor: string;
-      /**
-       * Location
-       * @default
-       */
-      location: string;
-      /**
-       * Limit
-       * @default
-       */
-      limit: string;
-      /**
-       * Checkin
-       * @default
-       */
-      checkin: string;
-    };
     /** _GetScheduleAccessKeyResponse */
     _GetScheduleAccessKeyResponse: {
       /** New */
@@ -1122,6 +1146,8 @@ export type SchemaCreateTag = components["schemas"]["CreateTag"];
 export type SchemaEntry = components["schemas"]["Entry"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaInJsonAcademicGroup =
+  components["schemas"]["InJsonAcademicGroup"];
 export type SchemaInJsonUser = components["schemas"]["InJsonUser"];
 export type SchemaJsonPredefinedUsers =
   components["schemas"]["JsonPredefinedUsers"];
@@ -1142,7 +1168,6 @@ export type SchemaViewTag = components["schemas"]["ViewTag"];
 export type SchemaViewUser = components["schemas"]["ViewUser"];
 export type SchemaViewUserScheduleKey =
   components["schemas"]["ViewUserScheduleKey"];
-export type SchemaWorkshop = components["schemas"]["Workshop"];
 export type SchemaGetScheduleAccessKeyResponse =
   components["schemas"]["_GetScheduleAccessKeyResponse"];
 export type $defs = Record<string, never>;
@@ -1763,6 +1788,61 @@ export interface operations {
       };
     };
   };
+  ics_get_workshops_current_user_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description ICS file with your workshops check-ins */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+          "text/calendar": string;
+        };
+      };
+    };
+  };
+  ics_get_workshops_user_schedule: {
+    parameters: {
+      query: {
+        access_key: string;
+      };
+      header?: never;
+      path: {
+        user_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description ICS file with your workshops check-ins */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+          "text/calendar": string;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   ics_get_moodle_user_schedule: {
     parameters: {
       query?: never;
@@ -2075,7 +2155,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": string[];
         };
       };
       /** @description Unable to verify credentials OR Credentials not provided */

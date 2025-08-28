@@ -700,6 +700,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/training_class": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["training_class_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1014,6 +1030,10 @@ export interface components {
       trainer_last_name: string;
       trainer_email: string;
     };
+    TrainingClass: {
+      readonly id: number;
+      name: string;
+    };
     TrainingGrades: {
       group_name: string;
       /** Format: date-time */
@@ -1128,6 +1148,7 @@ export type SchemaSports = components["schemas"]["Sports"];
 export type SchemaStudent = components["schemas"]["Student"];
 export type SchemaSuggestion = components["schemas"]["Suggestion"];
 export type SchemaTrainer = components["schemas"]["Trainer"];
+export type SchemaTrainingClass = components["schemas"]["TrainingClass"];
 export type SchemaTrainingGrades = components["schemas"]["TrainingGrades"];
 export type SchemaTrainingHour = components["schemas"]["TrainingHour"];
 export type SchemaUnenrollStudentRequest =
@@ -2388,6 +2409,33 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Error"];
+        };
+      };
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["NotFound"];
+        };
+      };
+    };
+  };
+  training_class_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TrainingClass"][];
         };
       };
       404: {
