@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
-import { Settings } from "lucide-react";
 import "./timerstyles.css";
 
 interface Toast {
@@ -398,7 +397,7 @@ const TimerPage = () => {
             justifyContent: "center",
           }}
         >
-          <Settings size={24} color="#9747ff" />
+          <span className="icon-[material-symbols--admin-panel-settings-outline] size-6 text-brand-violet" />
         </button>
       </div>
 
