@@ -302,8 +302,7 @@ export default function CalendarViewer({
   return (
     <div
       className={clsx(
-        "overflow-clip",
-        isFullPage ? "h-full" : "",
+        isFullPage ? "h-full overflow-clip" : "",
         isLoading && "calendar-loading",
       )}
     >
