@@ -68,7 +68,12 @@ export const items: ItemType[] = [
     ),
     hideOnMore: true,
   },
-  { type: "separator", hideOnMore: true },
+  {
+    type: "local",
+    title: "Timer",
+    to: "/timer",
+    icon: <span className="icon-[material-symbols--timer]" />,
+  },
   {
     type: "local",
     title: "Workshops",
