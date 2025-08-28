@@ -2,13 +2,12 @@ import { useMe } from "@/api/accounts/user.ts";
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { ConnectTelegramPage } from "@/components/account/ConnectTelegramPage.tsx";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
-import { formatDateWithDay } from "@/components/workshops/date-utils.ts";
 import {
   groupWorkshopsByDate,
   sortWorkshops,
 } from "@/components/workshops/workshop-utils.ts";
 import { WorkshopItem } from "@/components/workshops/WorkshopItem.tsx";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Description } from "./Description.tsx";
 import { ModalWindow } from "./ModalWindow.tsx";
 
@@ -23,15 +22,12 @@ export function WorkshopsListPage() {
   const [modalWorkshop, setModalWorkshop] =
     useState<workshopsTypes.SchemaWorkshop | null>(null);
 
-  const [openedDays, setOpenedDays] = useState<string[]>([]);
+  const [showPreviousDates, setShowPreviousDates] = useState(false);
 
   const { data: workshops } = $workshops.useQuery("get", "/workshops/");
 
   // Группируем воркшопы по датам для удобного отображения
   const groups = workshops ? groupWorkshopsByDate(workshops) : undefined;
-
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
 
   const { me } = useMe();
 
@@ -54,57 +50,32 @@ export function WorkshopsListPage() {
 
   return (
     <div className="w-full">
+      <div className="col-span-full w-full px-4 text-left text-xl">
+        <button
+          onClick={() => setShowPreviousDates((v) => !v)}
+          className="mt-2 text-sm text-brand-violet transition-colors duration-200 hover:text-brand-violet/80"
+        >
+          {showPreviousDates ? "Hide previous dates" : "Show previous dates"}
+        </button>
+      </div>
       {/* Основной компонент со списком воркшопов */}
       {workshops && (
-        <div className="flex flex-col gap-2 px-4 pb-28 text-center">
+        <div className="flex flex-col gap-2 px-4 text-center">
           {/* Условное отображение: либо список воркшопов, либо плейсхолдер */}
           {groups && Object.keys(groups).length > 0 ? (
             Object.keys(groups)
               .sort()
               .map((tagName) => (
-                <React.Fragment key={tagName}>
-                  <div className="my-1 flex w-full flex-wrap justify-between">
-                    <div className="text-2xl font-medium sm:text-3xl">
-                      {formatDateWithDay(tagName)}
-                    </div>
-                    {new Date(tagName) > startOfDay ||
-                    openedDays.includes(tagName) ? (
-                      <>
-                        {groups[tagName].length > 0 ? (
-                          <div className="mb-1 mt-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
-                            {sortWorkshops(groups[tagName])
-                              .filter((workshop) => workshop.is_active)
-                              .map((workshop) => (
-                                <WorkshopItem
-                                  key={workshop.id}
-                                  workshop={workshop}
-                                  openDescription={() => {
-                                    setModalWorkshop(workshop);
-                                    setModalOpen(true);
-                                  }}
-                                />
-                              ))}
-                          </div>
-                        ) : (
-                          <div className="col-span-full w-full text-left text-xl">
-                            <h2 className="text-gray-500">No workshops yet!</h2>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="col-span-full w-full text-left text-xl">
-                        <button
-                          onClick={() =>
-                            setOpenedDays([...openedDays, tagName])
-                          }
-                          className="mt-2 text-sm text-brand-violet transition-colors duration-200 hover:text-brand-violet/80"
-                        >
-                          Show workshops
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </React.Fragment>
+                <WorkshopsForDate
+                  key={tagName}
+                  isoDate={tagName}
+                  workshops={groups[tagName]}
+                  showPreviousDates={showPreviousDates}
+                  onSelect={(workshop) => {
+                    setModalWorkshop(workshop);
+                    setModalOpen(true);
+                  }}
+                />
               ))
           ) : (
             <div className="col-span-full w-full text-center text-xl">
@@ -123,5 +94,76 @@ export function WorkshopsListPage() {
         {modalWorkshop && <Description workshop={modalWorkshop} />}
       </ModalWindow>
     </div>
+  );
+}
+
+function WorkshopsForDate({
+  isoDate,
+  workshops,
+  onSelect,
+  showPreviousDates,
+}: {
+  isoDate: string;
+  workshops: workshopsTypes.SchemaWorkshop[];
+  onSelect: (workshop: workshopsTypes.SchemaWorkshop) => void;
+  showPreviousDates: boolean;
+}) {
+  const date = useMemo(() => new Date(isoDate), [isoDate]);
+
+  const startOfDay = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+
+  const isPreviousDate = date < startOfDay;
+
+  const [shouldShow, setShouldShow] = useState(!isPreviousDate);
+
+  if (isPreviousDate && !showPreviousDates) {
+    return null;
+  }
+  return (
+    <React.Fragment>
+      <div className="my-1 flex w-full flex-wrap justify-between">
+        <div className="text-2xl font-medium sm:text-3xl">
+          {date.toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          })}
+        </div>
+        {shouldShow ? (
+          <>
+            {workshops.length > 0 ? (
+              <div className="mb-1 mt-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
+                {sortWorkshops(workshops)
+                  .filter((workshop) => workshop.is_active)
+                  .map((workshop) => (
+                    <WorkshopItem
+                      key={workshop.id}
+                      workshop={workshop}
+                      openDescription={() => onSelect(workshop)}
+                    />
+                  ))}
+              </div>
+            ) : (
+              <div className="col-span-full w-full text-left text-xl">
+                <h2 className="text-gray-500">No workshops yet!</h2>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="col-span-full w-full text-left text-xl">
+            <button
+              onClick={() => setShouldShow(true)}
+              className="mt-2 text-sm text-brand-violet transition-colors duration-200 hover:text-brand-violet/80"
+            >
+              Show workshops
+            </button>
+          </div>
+        )}
+      </div>
+    </React.Fragment>
   );
 }

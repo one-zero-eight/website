@@ -64,13 +64,7 @@ export const getSignedPeopleCount = (
 export const groupWorkshopsByDate = <T extends workshopsTypes.SchemaWorkshop>(
   workshops: T[],
 ): Record<string, T[]> => {
-  const groups: Record<string, T[]> = {
-    "2025-08-19": [],
-    "2025-08-20": [],
-    "2025-08-21": [],
-    "2025-08-22": [],
-    "2025-08-23": [],
-  };
+  const groups: Record<string, T[]> = {};
 
   workshops.forEach((workshop) => {
     const dateTag = getDate(workshop.dtstart);

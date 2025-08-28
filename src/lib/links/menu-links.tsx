@@ -74,11 +74,6 @@ export const items: ItemType[] = [
     title: "Workshops",
     to: "/workshops",
     icon: <span className="icon-[material-symbols--construction-rounded]" />,
-    badge: (
-      <span className="ml-2 rounded-full bg-green-700 px-2 py-1 text-xs font-semibold text-white">
-        IBC
-      </span>
-    ),
   },
   ...((import.meta.env.VITE_HIDE_SEARCH && []) || [
     {

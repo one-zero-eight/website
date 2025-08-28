@@ -60,20 +60,6 @@ export const getDayName = (dayNumber: number): string => {
 };
 
 /**
- * Форматирует дату с днем недели для отображения в списке
- * @param dateString - Дата в формате YYYY-MM-DD
- * @returns Строка с датой и днем недели
- */
-export const formatDateWithDay = (dateString: string): string => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const day = date.getDay();
-  const dayName = getDayName(day === 0 ? 7 : day); // Воскресенье = 0, делаем его 7
-  const formattedDate = formatDate(dateString).split(".")[0];
-  return `${dayName} ${formattedDate}`;
-};
-
-/**
  * Проверяет, прошла ли дата и время воркшопа
  * @param dtstart - Дата воркшопа в формате ISO
  * @returns true если воркшоп уже прошел
