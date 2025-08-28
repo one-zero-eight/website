@@ -1,0 +1,95 @@
+import { useMe } from "@/api/accounts/user.ts";
+import { AuthWall } from "@/components/common/AuthWall.tsx";
+import SearchField from "@/components/search/SearchField.tsx";
+import { useNavigate } from "@tanstack/react-router";
+import { ActResult } from "./ActResult";
+import { $search } from "@/api/search";
+import { useEffect, useRef, useState } from "react";
+import AnimatedDots from "../AnimatedDots";
+
+export function ActPage({ actQuery }: { actQuery: string }) {
+  const navigate = useNavigate();
+  const { me } = useMe();
+
+  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
+  const didInit = useRef(false);
+
+  const {
+    data: result,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = $search.useQuery(
+    "post",
+    "/act/",
+    {
+      body: { query: submittedQuery ?? "" },
+    },
+    {
+      enabled: submittedQuery !== null && submittedQuery.length > 0,
+      // Disable refetch
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
+
+  useEffect(() => {
+    if (didInit.current) {
+      setSubmittedQuery(actQuery);
+    } else {
+      didInit.current = true;
+    }
+  }, [actQuery]);
+
+  const runSearch = (query: string) => {
+    navigate({ to: "/act", search: { q: query } });
+    if (query === submittedQuery) {
+      refetch();
+    } else {
+      setSubmittedQuery(query);
+    }
+  };
+
+  if (!me) {
+    return <AuthWall />;
+  }
+
+  return (
+    <div className="flex grow flex-col gap-4 p-4">
+      <SearchField
+        pageType="act"
+        runSearch={runSearch}
+        currentQuery={actQuery}
+      />
+      <span>AI Assistant:</span>
+      {isLoading || isFetching ? (
+        <div className="flex self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
+          <span>- Executing</span>
+          <AnimatedDots></AnimatedDots>
+        </div>
+      ) : result ? (
+        <div className="flex flex-row gap-6">
+          <div className="flex w-full flex-col justify-stretch gap-4 md:min-w-0">
+            <ActResult response={result} />
+          </div>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col gap-2 self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
+          <span>- Sorry, I can't help you with this question.</span>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-row gap-1">
+            <div>-</div>
+            <div className="flex flex-col gap-1">
+              <span>Hi! I'm AI Assistant.</span>
+              <span>I can help you to book the music room.</span>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

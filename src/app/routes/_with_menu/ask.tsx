@@ -1,35 +1,34 @@
-import { SearchPage } from "@/components/search/SearchPage.tsx";
+import { AskPage } from "@/components/search/ask/AskPage";
 import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 
-type SearchParams = {
-  // User's search query
+type AskParams = {
   q: string;
 };
 
-export const Route = createFileRoute("/_with_menu/search")({
-  validateSearch: (search: Record<string, unknown>): SearchParams => {
+export const Route = createFileRoute("/_with_menu/ask")({
+  validateSearch: (ask: Record<string, unknown>): AskParams => {
     return {
-      q: (search.q as string) ?? "",
+      q: (ask.q as string) ?? "",
     };
   },
 
-  component: function PageComponent() {
+  component: function AskPageComponent() {
     const { q } = Route.useSearch();
     return (
       <Suspense>
         <Helmet>
-          <title>Search</title>
+          <title>Ask</title>
           <meta
             name="description"
-            content="Search anything at Innopolis University."
+            content="Ask questions or find answers at Innopolis University."
           />
         </Helmet>
 
         <TopbarWithToggleGroup currentTabText={q} />
-        <SearchPage searchQuery={q} />
+        <AskPage askQuery={q} />
       </Suspense>
     );
   },

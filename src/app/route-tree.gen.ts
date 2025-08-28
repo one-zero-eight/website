@@ -25,6 +25,8 @@ import { Route as WithmenuExtensionImport } from "./routes/_with_menu/extension"
 import { Route as WithmenuDormsImport } from "./routes/_with_menu/dorms";
 import { Route as WithmenuDashboardImport } from "./routes/_with_menu/dashboard";
 import { Route as WithmenuCalendarImport } from "./routes/_with_menu/calendar";
+import { Route as WithmenuAskImport } from "./routes/_with_menu/ask";
+import { Route as WithmenuActImport } from "./routes/_with_menu/act";
 import { Route as WithmenuAccountRouteImport } from "./routes/_with_menu/account/route";
 import { Route as WithmenuWorkshopsIndexImport } from "./routes/_with_menu/workshops/index";
 import { Route as WithmenuScheduleIndexImport } from "./routes/_with_menu/schedule/index";
@@ -110,6 +112,16 @@ const WithmenuDashboardRoute = WithmenuDashboardImport.update({
 
 const WithmenuCalendarRoute = WithmenuCalendarImport.update({
   path: "/calendar",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
+
+const WithmenuAskRoute = WithmenuAskImport.update({
+  path: "/ask",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
+
+const WithmenuActRoute = WithmenuActImport.update({
+  path: "/act",
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
@@ -214,6 +226,20 @@ declare module "@tanstack/react-router" {
       path: "/account";
       fullPath: "/account";
       preLoaderRoute: typeof WithmenuAccountRouteImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
+    "/_with_menu/act": {
+      id: "/_with_menu/act";
+      path: "/act";
+      fullPath: "/act";
+      preLoaderRoute: typeof WithmenuActImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
+    "/_with_menu/ask": {
+      id: "/_with_menu/ask";
+      path: "/ask";
+      fullPath: "/ask";
+      preLoaderRoute: typeof WithmenuAskImport;
       parentRoute: typeof WithmenuRouteImport;
     };
     "/_with_menu/calendar": {
@@ -420,6 +446,8 @@ const WithmenuAccountRouteRouteWithChildren =
 
 interface WithmenuRouteRouteChildren {
   WithmenuAccountRouteRoute: typeof WithmenuAccountRouteRouteWithChildren;
+  WithmenuActRoute: typeof WithmenuActRoute;
+  WithmenuAskRoute: typeof WithmenuAskRoute;
   WithmenuCalendarRoute: typeof WithmenuCalendarRoute;
   WithmenuDashboardRoute: typeof WithmenuDashboardRoute;
   WithmenuDormsRoute: typeof WithmenuDormsRoute;
@@ -446,6 +474,8 @@ interface WithmenuRouteRouteChildren {
 
 const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuAccountRouteRoute: WithmenuAccountRouteRouteWithChildren,
+  WithmenuActRoute: WithmenuActRoute,
+  WithmenuAskRoute: WithmenuAskRoute,
   WithmenuCalendarRoute: WithmenuCalendarRoute,
   WithmenuDashboardRoute: WithmenuDashboardRoute,
   WithmenuDormsRoute: WithmenuDormsRoute,
@@ -478,6 +508,8 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "": typeof WithmenuRouteRouteWithChildren;
   "/account": typeof WithmenuAccountRouteRouteWithChildren;
+  "/act": typeof WithmenuActRoute;
+  "/ask": typeof WithmenuAskRoute;
   "/calendar": typeof WithmenuCalendarRoute;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/dorms": typeof WithmenuDormsRoute;
@@ -509,6 +541,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "": typeof WithmenuRouteRouteWithChildren;
+  "/act": typeof WithmenuActRoute;
+  "/ask": typeof WithmenuAskRoute;
   "/calendar": typeof WithmenuCalendarRoute;
   "/dashboard": typeof WithmenuDashboardRoute;
   "/dorms": typeof WithmenuDormsRoute;
@@ -542,6 +576,8 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/_with_menu": typeof WithmenuRouteRouteWithChildren;
   "/_with_menu/account": typeof WithmenuAccountRouteRouteWithChildren;
+  "/_with_menu/act": typeof WithmenuActRoute;
+  "/_with_menu/ask": typeof WithmenuAskRoute;
   "/_with_menu/calendar": typeof WithmenuCalendarRoute;
   "/_with_menu/dashboard": typeof WithmenuDashboardRoute;
   "/_with_menu/dorms": typeof WithmenuDormsRoute;
@@ -576,6 +612,8 @@ export interface FileRouteTypes {
     | "/"
     | ""
     | "/account"
+    | "/act"
+    | "/ask"
     | "/calendar"
     | "/dashboard"
     | "/dorms"
@@ -606,6 +644,8 @@ export interface FileRouteTypes {
   to:
     | "/"
     | ""
+    | "/act"
+    | "/ask"
     | "/calendar"
     | "/dashboard"
     | "/dorms"
@@ -637,6 +677,8 @@ export interface FileRouteTypes {
     | "/"
     | "/_with_menu"
     | "/_with_menu/account"
+    | "/_with_menu/act"
+    | "/_with_menu/ask"
     | "/_with_menu/calendar"
     | "/_with_menu/dashboard"
     | "/_with_menu/dorms"
@@ -702,6 +744,8 @@ export const routeTree = rootRoute
       "filePath": "_with_menu/route.tsx",
       "children": [
         "/_with_menu/account",
+        "/_with_menu/act",
+        "/_with_menu/ask",
         "/_with_menu/calendar",
         "/_with_menu/dashboard",
         "/_with_menu/dorms",
@@ -734,6 +778,14 @@ export const routeTree = rootRoute
         "/_with_menu/account/token",
         "/_with_menu/account/"
       ]
+    },
+    "/_with_menu/act": {
+      "filePath": "_with_menu/act.tsx",
+      "parent": "/_with_menu"
+    },
+    "/_with_menu/ask": {
+      "filePath": "_with_menu/ask.tsx",
+      "parent": "/_with_menu"
     },
     "/_with_menu/calendar": {
       "filePath": "_with_menu/calendar.tsx",

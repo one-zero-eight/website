@@ -82,3 +82,32 @@ jobs:
           strip_components: 1
           overwrite: true
           rm: true
+
+  deploy-capstone:
+    if: github.repository_owner == 'one-zero-eight' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/capstone'))
+    name: Deploy to capstone server
+    needs: build
+    runs-on: [self-hosted, innohassle]
+    environment:
+      name: ${{ github.event.inputs.environment || 'staging' }}
+    concurrency:
+      group: ${{ github.event.inputs.environment || 'staging' }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: static-files
+          path: dist
+
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          source: "./dist/*"
+          target: ${{ secrets.SSH_TARGET_DIR_CAPSTONE }}
+          strip_components: 1
+          overwrite: true
+          rm: true
