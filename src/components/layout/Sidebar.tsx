@@ -1,5 +1,5 @@
-import Tooltip from "@/components/common/Tooltip.tsx";
 import { useMe } from "@/api/accounts/user.ts";
+import Tooltip from "@/components/common/Tooltip.tsx";
 import { items } from "@/lib/links/menu-links.tsx";
 import { Link, LinkOptions } from "@tanstack/react-router";
 import clsx from "clsx";
@@ -44,7 +44,7 @@ export default function Sidebar() {
           item.type === "separator" ? (
             <div
               key={index}
-              className="my-1 h-0.5 w-full rounded-full bg-gray-500/20"
+              className="my-1 h-0.5 w-full shrink-0 rounded-full bg-gray-500/20"
             />
           ) : // Hide Forms item for non-staff users
           item.type === "local" &&

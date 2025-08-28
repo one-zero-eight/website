@@ -1,5 +1,5 @@
-import Tooltip from "@/components/common/Tooltip.tsx";
 import { useMe } from "@/api/accounts/user.ts";
+import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton.tsx";
 import UserMenu from "@/components/layout/UserMenu.tsx";
@@ -57,7 +57,7 @@ export function MorePage() {
           item.type === "separator" ? (
             <div
               key={index}
-              className="my-1 h-0.5 w-full rounded-full bg-gray-500/20"
+              className="my-1 h-0.5 w-full shrink-0 rounded-full bg-gray-500/20"
             />
           ) : // Hide Forms item for non-staff users
           item.type === "local" &&
