@@ -68,18 +68,6 @@ export const items: ItemType[] = [
     ),
     hideOnMore: true,
   },
-  {
-    type: "local",
-    title: "Catalogue",
-    badge: (
-      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-        NEW
-      </span>
-    ),
-    to: "/catalogue",
-    icon: <span className="icon-[material-symbols--book-5-rounded]" />,
-    hideOnMore: true,
-  },
   { type: "separator", hideOnMore: true },
   {
     type: "local",
@@ -92,6 +80,19 @@ export const items: ItemType[] = [
       </span>
     ),
   },
+  ...((import.meta.env.VITE_HIDE_SEARCH && []) || [
+    {
+      type: "local",
+      title: "Catalogue",
+      badge: (
+        <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
+          NEW
+        </span>
+      ),
+      to: "/catalogue",
+      icon: <span className="icon-[material-symbols--book-5-rounded]" />,
+    },
+  ]),
   {
     type: "local",
     title: "Schedule",

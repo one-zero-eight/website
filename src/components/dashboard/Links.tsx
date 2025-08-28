@@ -1,5 +1,5 @@
 import { groups } from "@/lib/links/constants";
-// import CustomSelect from "@/lib/links/customSelector";
+import CustomSelect from "@/lib/links/customSelector";
 import {
   globalFrequencies,
   resourcesList,
@@ -11,7 +11,6 @@ import {
 } from "@/lib/links/searchUtils";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import CustomSelect from "../common/CustomSelector";
 
 const Links = () => {
   const [activeGroup, setActiveGroup] = useState("All");

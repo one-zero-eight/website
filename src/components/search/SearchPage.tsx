@@ -1,7 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $search, searchTypes } from "@/api/search";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
-import PreviewCard from "@/components/course-materials/preview/PreviewCard";
+import PreviewCard from "@/components/search/PreviewCard.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
 import { useNavigate } from "@tanstack/react-router";
@@ -45,6 +45,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   return (
     <div className="flex grow flex-col gap-4 p-4">
       <SearchField runSearch={runSearch} currentQuery={searchQuery} />
+
       {searchResult && (
         <p className="py-4 text-2xl font-semibold text-contrast">
           {searchResult.responses.length > 0
@@ -52,6 +53,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
             : `No matched results for: ${searchResult.searched_for}`}
         </p>
       )}
+
       {searchResult && (
         <div className="flex flex-row gap-6">
           <div className="flex w-full flex-col justify-stretch gap-4 md:min-w-0 md:basis-1/2">

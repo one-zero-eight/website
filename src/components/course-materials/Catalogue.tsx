@@ -1,7 +1,7 @@
 import { $search, searchTypes } from "@/api/search";
 import { useEffect, useMemo, useState } from "react";
-import CustomSelect from "../common/CustomSelector";
-import PreviewCard from "./preview/PreviewCard";
+import CustomSelect from "../../lib/links/customSelector.tsx";
+import PreviewCard from "../search/PreviewCard.tsx";
 
 // Types
 type CoursesGroup = Record<string, string[]>;
