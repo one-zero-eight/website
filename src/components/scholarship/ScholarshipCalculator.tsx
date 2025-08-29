@@ -19,25 +19,25 @@ export default function ScholarshipCalculator() {
   const [_, setStorageMarks] = useLocalStorage<Mark[]>("scholarship-marks", []);
   const [__, setStorageCourse] = useLocalStorage<Courses>(
     "scholarship-course",
-    "B24",
+    "B25",
   );
   const [marks, setMarks] = useState<Mark[]>([]);
   const [displayGPA, setDisplayGPA] = useState("");
   const [errorGPA, setErrorGPA] = useState(false);
   const [displayScholarship, setDisplayScholarship] = useState("");
   const [errorScholarship, setErrorScholarship] = useState(false);
-  const [course, setCourse] = useState<Courses>("B24");
+  const [course, setCourse] = useState<Courses>("B25");
   const marksTextAreaRef = createRef<HTMLTextAreaElement>();
   const { width: windowWidth } = useWindowSize();
 
   useEffect(() => {
     const courseStored = window.localStorage.getItem("scholarship-course");
     const course =
-      courseStored === '"B22"'
-        ? "B22"
-        : courseStored === '"B23"'
-          ? "B23"
-          : "B24";
+      courseStored === '"B23"'
+        ? "B23"
+        : courseStored === '"B24"'
+          ? "B24"
+          : "B25";
     setCourse(course);
 
     const marks = window.localStorage.getItem("scholarship-marks");
@@ -224,9 +224,20 @@ export default function ScholarshipCalculator() {
         <div className="text-xl font-medium">Course:</div>
         <div className="flex w-48 flex-row overflow-clip rounded-2xl border-2 border-brand-violet bg-pagebg">
           <button
-            onClick={() => onMarksChange(marks.join(""), "B24")}
+            onClick={() => onMarksChange(marks.join(""), "B25")}
             className={clsx(
               "w-full rounded-l-2xl p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
+              course === "B25"
+                ? "bg-brand-violet/10 text-brand-violet"
+                : "bg-transparent text-gray-500",
+            )}
+          >
+            B25
+          </button>
+          <button
+            onClick={() => onMarksChange(marks.join(""), "B24")}
+            className={clsx(
+              "w-full p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
               course === "B24"
                 ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
@@ -237,24 +248,13 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B23")}
             className={clsx(
-              "w-full p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
+              "w-full rounded-r-2xl p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
               course === "B23"
                 ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
             )}
           >
             B23
-          </button>
-          <button
-            onClick={() => onMarksChange(marks.join(""), "B22")}
-            className={clsx(
-              "w-full rounded-r-2xl p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
-              course === "B22"
-                ? "bg-brand-violet/10 text-brand-violet"
-                : "bg-transparent text-gray-500",
-            )}
-          >
-            B22
           </button>
         </div>
       </div>

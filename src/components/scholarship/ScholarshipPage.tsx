@@ -33,8 +33,7 @@ export function ScholarshipPage() {
         </p>
         <p>
           <ScholarshipBmax className="-mt-1 inline fill-contrast" /> &mdash;
-          maximum scholarship amount (10,000₽ for B24 &amp; B23; 20,000₽ for
-          B22)
+          maximum scholarship amount (10,000₽ )
         </p>
         <p>
           <ScholarshipGPA className="inline fill-contrast" /> &mdash;
@@ -103,7 +102,7 @@ export function ScholarshipPage() {
         <p>
           See your marks on the{" "}
           <a
-            href="https://my.university.innopolis.ru/profile/personal-form/index?tab=validations"
+            href="https://my.innopolis.university/education"
             target="_blank"
             className="italic underline"
           >
