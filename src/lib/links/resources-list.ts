@@ -487,11 +487,11 @@ export const resourcesList: ResourceType[] = [
     frequency: 11,
   },
   {
-    url: "https://t.me/IU_cigen_bot",
-    resource: "Course image generator",
+    url: "https://t.me/InnoChatCleanerBot",
+    resource: "Chat cleaner",
     title: null,
     description:
-      "Quickly generate an image for your course chats and channels.",
+      "Remove 'joined the group' messages and quickly generate an avatar for your course chats and channels.",
     icon: "icon-[material-symbols--image-outline]",
     category: "Technical",
     frequency: 36,
