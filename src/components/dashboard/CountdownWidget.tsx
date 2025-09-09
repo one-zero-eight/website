@@ -3,9 +3,7 @@ import { useNowMS } from "@/lib/utils/use-now.ts";
 export function CountdownWidget() {
   const nowMs = useNowMS(true, 1000);
 
-  const currentYear = new Date().getFullYear();
-  const deadlineMs =
-    new Date(`${currentYear}-09-01`).getTime() - 3 * 60 * 60 * 1000;
+  const deadlineMs = new Date(`2026-01-01`).getTime() - 3 * 60 * 60 * 1000;
   const daysLeft = Math.max(
     0,
     Math.floor((deadlineMs - nowMs) / (1000 * 60 * 60 * 24)),
@@ -18,12 +16,13 @@ export function CountdownWidget() {
 
   return (
     <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-4">
-      <span className="icon-[noto--fallen-leaf] hidden w-12 shrink-0 text-5xl text-brand-violet sm:block" />
+      <span className="icon-[twemoji--christmas-tree] hidden w-12 shrink-0 text-5xl text-brand-violet sm:block" />
       <div className="flex flex-col">
         <div className="flex text-lg font-semibold text-contrast">
-          <span className="icon-[noto--fallen-leaf] mr-2 shrink-0 text-3xl text-brand-violet sm:hidden" />
+          <span className="icon-[twemoji--christmas-tree] mr-2 shrink-0 text-3xl text-brand-violet sm:hidden" />
           <span>
-            Fall countdown: <span className="font-normal">{daysLeft} days</span>
+            New Year countdown:{" "}
+            <span className="font-normal">{daysLeft} days</span>
           </span>
         </div>
         <div className="text-contrast/75">
