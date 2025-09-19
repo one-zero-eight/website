@@ -105,24 +105,28 @@ export default function CalendarViewer({
         }}
         eventDataTransform={(input) => {
           // Dates have Europe/Moscow timezone,
-          // but the sources doesn't set timezones,
+          // but the sources don't set timezones,
           // so the local zone is set
           if (typeof input.start == "string") {
+            let s = input.start;
             if (
-              !input.start.match(/Z\+/g)?.length &&
-              (input.start.match(/-/g)?.length || 0) <= 2
+              !s.match(/Z|\+/g)?.length &&
+              (s.match(/-/g)?.length || 0) <= 2
             ) {
-              input.start = new Date(input.start + "+03:00");
+              s += "+03:00";
             }
+            input.start = new Date(s);
           }
 
           if (typeof input.end == "string") {
+            let s = input.end;
             if (
-              !input.end.match(/Z\+/g)?.length &&
-              (input.end.match(/-/g)?.length || 0) <= 2
+              !s.match(/Z|\+/g)?.length &&
+              (s.match(/-/g)?.length || 0) <= 2
             ) {
-              input.end = new Date(input.end + "+03:00");
+              s += "+03:00";
             }
+            input.end = new Date(s);
           }
 
           if (input.start instanceof Date) {
