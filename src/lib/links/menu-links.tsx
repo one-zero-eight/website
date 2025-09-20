@@ -113,7 +113,7 @@ export const items: ItemType[] = [
     to: "/scholarship",
     icon: <span className="icon-[material-symbols--credit-card-outline]" />,
   },
-  { type: "separator", hideOnMore: true },
+  { type: "separator" },
   {
     type: "local",
     title: "Printers",
@@ -172,14 +172,8 @@ export const items: ItemType[] = [
   },
   {
     type: "external",
-    title: "Innopoints",
-    link: "https://my.innopolis.university/event",
-    icon: <span className="icon-[material-symbols--loyalty-outline-rounded]" />,
-  },
-  {
-    type: "external",
     title: "My University",
-    link: "https://my.university.innopolis.ru",
+    link: "https://my.innopolis.university",
     icon: <span className="icon-[material-symbols--account-circle-outline]" />,
   },
 ];

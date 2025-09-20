@@ -62,18 +62,17 @@ export const resourcesList: ResourceType[] = [
 
   // > My University >
   {
-    url: "https://my.university.innopolis.ru/",
+    url: "https://my.innopolis.university/",
     resource: "My University",
     title: null,
-    description:
-      "Request references, find out your grades, scholarship, fill the forms for internships.",
+    description: "Official students portal.",
     icon: "icon-[ic--baseline-school]",
     category: "Academic",
     frequency: 1521,
   },
   {
     url: "https://my.innopolis.university/event",
-    resource: "New My University",
+    resource: "My University",
     title: "Events for innopoints",
     description: "Earn innopoints by participating in projects and activities.",
     icon: "icon-[material-symbols--currency-ruble-rounded]",
@@ -82,7 +81,7 @@ export const resourcesList: ResourceType[] = [
   },
   {
     url: "https://my.innopolis.university/store",
-    resource: "New My University",
+    resource: "My University",
     title: "InnoStore",
     description:
       "Redeem your innopoints for cool merch and rewards at the InnoStore.",
@@ -91,7 +90,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 858 / 2 + 20,
   },
   {
-    url: "https://my.university.innopolis.ru/profile/personal-form/index?tab=validations",
+    url: "https://my.innopolis.university/education",
     resource: "My University",
     title: "Gradebook",
     description: "View your marks for all previous semesters.",
@@ -100,7 +99,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 0,
   },
   {
-    url: "https://my.university.innopolis.ru/profile/edu-certs/create",
+    url: "https://my.innopolis.university/papers",
     resource: "My University",
     title: "Request references",
     description: "Request a reference about studying or other things.",
@@ -110,7 +109,7 @@ export const resourcesList: ResourceType[] = [
   },
   {
     url: "https://my.university.innopolis.ru/profile/personal-form/index?tab=scholarship",
-    resource: "My University",
+    resource: "Legacy My University",
     title: "Scholarship",
     description:
       "See how the scholarship is calculated for your current semester in My University.",
@@ -120,7 +119,7 @@ export const resourcesList: ResourceType[] = [
   },
   {
     url: "https://my.university.innopolis.ru/profile/applications",
-    resource: "My University",
+    resource: "Legacy My University",
     title: "Templates of applications",
     description:
       "Access and download templates for various university applications.",
