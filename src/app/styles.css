@@ -45,6 +45,6 @@
 }
 
 .rubles-input {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='48px' width='192px'><text x='164' y='27' fill='gray' font-size='18px' font-family='sans-serif'>₽</text></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='48px' width='224px'><text x='196' y='27' fill='gray' font-size='18px' font-family='sans-serif'>₽</text></svg>");
   background-repeat: no-repeat;
 }

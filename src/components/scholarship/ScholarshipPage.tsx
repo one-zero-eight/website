@@ -33,7 +33,7 @@ export function ScholarshipPage() {
         </p>
         <p>
           <ScholarshipBmax className="-mt-1 inline fill-contrast" /> &mdash;
-          maximum scholarship amount (10,000₽ )
+          maximum scholarship amount (10,000₽ or 20,000₽ for masters)
         </p>
         <p>
           <ScholarshipGPA className="inline fill-contrast" /> &mdash;
@@ -56,7 +56,7 @@ export function ScholarshipPage() {
           </a>{" "}
           (+<i>12,000₽</i> for{" "}
           <a
-            href="https://innopolis.university/upload/iblock/0f7/d9batvrsu87higzhdr3ulkuzfmtakzzl/Об_утверждении_размеров_государственных_стипендий.pdf"
+            href="https://innopolis.university/upload/iblock/cae/qr81hpqswq2bucdwvyn0aphwlz5i4agy/Приказ_об_утверждении_размеров_государственных_стипендий.pdf"
             target="_blank"
             className="italic underline"
           >
