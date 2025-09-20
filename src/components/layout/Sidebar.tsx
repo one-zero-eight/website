@@ -138,6 +138,7 @@ function SidebarLink({
         !isMinimized ? "px-2 text-4xl" : "justify-center px-1 text-3xl",
       )}
       activeProps={{ className: "is-active" }}
+      target={external ? "_blank" : undefined}
       {...props}
     >
       {icon}
