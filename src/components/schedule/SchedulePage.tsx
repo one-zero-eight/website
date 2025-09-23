@@ -1,4 +1,4 @@
-import { $events, eventsTypes } from "@/api/events";
+import { $events, type eventsTypes } from "@/api/events";
 import { CategoryContainer } from "@/components/schedule/CategoryContainer.tsx";
 import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 import SearchBar from "@/components/schedule/SearchBar";
@@ -115,6 +115,34 @@ export default function SchedulePage({
     );
   }
 
+  const customCourse = {
+    id: 108,
+    alias: "fall25-b25-ro-108",
+    updated_at: Date.now().toString(),
+    created_at: Date.now().toString(),
+    path: "fall25-b25-ro-108",
+    name: "B25-RO-108",
+    description:
+      "one-zero-eight — is a community of Innopolis University students passionate about technology. We care about education we get, tools we use and place we live in. Our mission is to create the perfect environment for student life.",
+    tags: [
+      {
+        id: 1,
+        alias: "core-courses",
+        type: "category",
+        name: "Core Courses",
+        satellite: null,
+      },
+
+      {
+        id: 82033,
+        alias: "bs-year-1",
+        type: "core-courses",
+        name: "BS - Year 1",
+        satellite: null,
+      },
+    ],
+  };
+  console.log("SchedulePage", groups["BS - Year 1"]);
   return (
     <>
       <div className="flex shrink-0 flex-col whitespace-nowrap @3xl/content:flex-row">
@@ -161,6 +189,9 @@ export default function SchedulePage({
                 </div>
 
                 <div className="mb-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
+                  {tagName === "BS - Year 1" && (
+                    <GroupCard key="bs-year-1" group={customCourse} />
+                  )}
                   {groups[tagName].map((group) => (
                     <GroupCard key={group.path} group={group} />
                   ))}

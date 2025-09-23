@@ -143,7 +143,13 @@ function SidebarLink({
     >
       {icon}
       {!isMinimized && (
-        <div className="[.is-active_&]:selected ml-4 flex w-fit items-center whitespace-nowrap text-lg font-semibold text-inactive">
+        <div
+          className={clsx(
+            "[.is-active_&]:selected ml-4 flex w-fit items-center whitespace-nowrap text-lg font-semibold",
+            (title == "Maps" || title == "Schedule" || title == "Workshops") &&
+              "animated-text text-brand-violet",
+          )}
+        >
           {title}
         </div>
       )}

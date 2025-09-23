@@ -1,28 +1,38 @@
-import { $events } from "@/api/events";
-import { Calendar } from "@/components/calendar/Calendar.tsx";
-import { EventGroupExportModal } from "@/components/calendar/EventGroupExportModal.tsx";
-import { Topbar } from "@/components/layout/Topbar.tsx";
-import ExportButton from "@/components/schedule/ExportButton.tsx";
-import FavoriteButton from "@/components/schedule/group-card/FavoriteButton.tsx";
-import { getICSLink } from "@/lib/events/links.ts";
-import { useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { Topbar } from "../layout/Topbar";
+import FavoriteButton from "./group-card/FavoriteButton";
 import { useWindowSize } from "usehooks-ts";
-import CLubFestEvent from "./CLubFestEvent";
+import { Calendar } from "@/components/calendar/Calendar.tsx";
+const group = {
+  id: 108,
+  alias: "fall25-b25-ro-108",
+  updated_at: Date.now().toString(),
+  created_at: Date.now().toString(),
+  path: "fall25-b25-ro-108",
+  name: "B25-RO-108",
+  description:
+    "one-zero-eight — is a community of Innopolis University students passionate about technology. We care about education we get, tools we use and place we live in. Our mission is to create the perfect environment for student life.",
+  tags: [
+    {
+      id: 1,
+      alias: "core-courses",
+      type: "category",
+      name: "Core Courses",
+      satellite: null,
+    },
 
-export function EventGroupPage({ alias }: { alias: string }) {
-  const { data: eventsUser } = $events.useQuery("get", "/users/me");
-  const { data: group } = $events.useQuery("get", "/event-groups/by-alias", {
-    params: { query: { alias } },
-  });
+    {
+      id: 82033,
+      alias: "bs-year-1",
+      type: "core-courses",
+      name: "BS - Year 1",
+      satellite: null,
+    },
+  ],
+};
+
+const CLubFestEvent = () => {
   const { width } = useWindowSize();
-  const [exportModalOpen, setExportModalOpen] = useState(false);
-  if (!group && alias == "fall25-b25-ro-108") {
-    return <CLubFestEvent />;
-  }
-  if (!group) {
-    return <Topbar title="Group" />;
-  }
 
   return (
     <>
@@ -60,14 +70,12 @@ export function EventGroupPage({ alias }: { alias: string }) {
         </div>
         <div className="mt-4 flex flex-row flex-wrap items-center">
           <h2 className="flex grow text-3xl font-medium">Calendar</h2>
-          <ExportButton onClick={() => setExportModalOpen(true)} />
         </div>
       </div>
       <Calendar
         urls={[
           {
-            url: getICSLink(group.alias, eventsUser?.id),
-            eventGroup: group,
+            url: "/clubfest.ics",
           },
         ]}
         initialView={
@@ -81,11 +89,8 @@ export function EventGroupPage({ alias }: { alias: string }) {
         }
         viewId="page"
       />
-      <EventGroupExportModal
-        alias={group?.alias ?? ""}
-        open={exportModalOpen}
-        onOpenChange={setExportModalOpen}
-      />
     </>
   );
-}
+};
+
+export default CLubFestEvent;

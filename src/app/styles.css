@@ -48,3 +48,22 @@
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='48px' width='224px'><text x='196' y='27' fill='gray' font-size='18px' font-family='sans-serif'>₽</text></svg>");
   background-repeat: no-repeat;
 }
+
+.animated-text {
+  text-align: center;
+  animation: shine 2s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0%,
+  100% {
+    text-shadow:
+      0 0 5px #d1233e,
+      0 0 10px #d1233e;
+  }
+  50% {
+    text-shadow:
+      0 0 10px #ff2a6d,
+      0 0 20px #ff2a6d;
+  }
+}

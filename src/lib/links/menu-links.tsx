@@ -56,7 +56,9 @@ export const items: ItemType[] = [
     type: "local",
     title: "Maps",
     to: "/maps",
-    icon: <span className="icon-[material-symbols--map-outline-rounded]" />,
+    icon: (
+      <span className="icon-[material-symbols--map-outline-rounded] text-brand-violet" />
+    ),
     hideOnMore: true,
   },
   {
@@ -73,7 +75,9 @@ export const items: ItemType[] = [
     type: "local",
     title: "Workshops",
     to: "/workshops",
-    icon: <span className="icon-[material-symbols--construction-rounded]" />,
+    icon: (
+      <span className="icon-[material-symbols--construction-rounded] text-brand-violet" />
+    ),
   },
   ...((import.meta.env.VITE_HIDE_SEARCH && []) || [
     {
@@ -92,7 +96,7 @@ export const items: ItemType[] = [
     type: "local",
     title: "Schedule",
     to: "/schedule",
-    icon: <span className="icon-[mdi--calendars]" />,
+    icon: <span className="icon-[mdi--calendars] text-brand-violet" />,
   },
   ...((import.meta.env.VITE_HIDE_SEARCH && []) || [
     {

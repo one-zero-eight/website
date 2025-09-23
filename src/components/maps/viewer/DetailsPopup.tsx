@@ -100,10 +100,14 @@ export function DetailsPopup({
           {area.description && (
             <div className="flex flex-row gap-2">
               <div className="w-6">
-                <span className="icon-[material-symbols--notes] text-2xl" />
+                {area.title == "108" ? (
+                  <span className="icon-[material-symbols--user-attributes-rounded] text-2xl" />
+                ) : (
+                  <span className="icon-[material-symbols--notes] text-2xl" />
+                )}
               </div>
               <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
-                {area.description}
+                {area.title == "108" ? "Khayotbek Mamajonov" : area.description}
               </p>
             </div>
           )}
