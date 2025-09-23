@@ -5,6 +5,7 @@ import { queryClient } from "@/app/query-client.ts";
 import { GoogleAnalytics } from "@/lib/tracking/GoogleAnalytics.tsx";
 import { UserInfoTracker } from "@/lib/tracking/UserInfoTracker.tsx";
 import { YandexMetrika } from "@/lib/tracking/YandexMetrika.tsx";
+import { FoundPeopleProvider } from "@/lib/easter-eggs/FoundPeopleContext.tsx";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Register, RouterProvider } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -15,7 +16,9 @@ export function App({ router }: { router: Register["router"] }) {
   return (
     <QueryClientProvider client={queryClient}>
       <PwaPromptProvider>
-        <AppRouter router={router} />
+        <FoundPeopleProvider>
+          <AppRouter router={router} />
+        </FoundPeopleProvider>
       </PwaPromptProvider>
 
       <YandexMetrika />

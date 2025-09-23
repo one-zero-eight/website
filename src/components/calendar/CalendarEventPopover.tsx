@@ -14,7 +14,9 @@ import {
 import { EventApi } from "@fullcalendar/core";
 import { Link } from "@tanstack/react-router";
 import moment from "moment";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import FoundPersonModal from "@/components/common/FoundPersonModal.tsx";
+import { useFoundPeople } from "@/lib/easter-eggs/FoundPeopleContext.tsx";
 
 export type ScheduleDialogProps = {
   event: EventApi;
@@ -29,6 +31,8 @@ export default function CalendarEventPopover({
   setIsOpen,
   eventElement,
 }: React.PropsWithChildren<ScheduleDialogProps>) {
+  const [foundOpen, setFoundOpen] = useState(false);
+  const { markFound } = useFoundPeople();
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
@@ -156,8 +160,34 @@ export default function CalendarEventPopover({
                   <div className="w-6">
                     <span className="icon-[material-symbols--notes] text-2xl" />
                   </div>
-                  <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
-                    {event.extendedProps.description}
+                  <p className="w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                    {(() => {
+                      const text = String(event.extendedProps.description);
+                      const name = "Artem Bulgakov";
+                      const parts = text.split(name);
+                      if (parts.length === 1) return text;
+                      return (
+                        <>
+                          {parts.map((part: string, idx: number) => (
+                            <React.Fragment key={idx}>
+                              {part}
+                              {idx !== parts.length - 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    markFound("Artem Bulgakov");
+                                    setFoundOpen(true);
+                                  }}
+                                  className="underline underline-offset-2 hover:text-contrast"
+                                >
+                                  {name}
+                                </button>
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </>
+                      );
+                    })()}
                   </p>
                 </div>
               )}
@@ -190,6 +220,7 @@ export default function CalendarEventPopover({
               )}
             </div>
           </FloatingFocusManager>
+          <FoundPersonModal open={foundOpen} onOpenChange={setFoundOpen} />
         </FloatingPortal>
       )}
     </>

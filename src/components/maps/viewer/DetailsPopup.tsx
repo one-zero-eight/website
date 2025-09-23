@@ -1,5 +1,7 @@
 import { mapsTypes } from "@/api/maps";
 import Tooltip from "@/components/common/Tooltip.tsx";
+import FoundPersonModal from "@/components/common/FoundPersonModal.tsx";
+import { useFoundPeople } from "@/lib/easter-eggs/FoundPeopleContext.tsx";
 import { getMapAreaUrl } from "@/lib/maps/links.ts";
 import {
   arrow,
@@ -35,6 +37,8 @@ export function DetailsPopup({
   setIsOpen: (open: boolean) => void;
 }) {
   const arrowRef = useRef<SVGSVGElement>(null);
+  const [foundOpen, setFoundOpen] = useState(false);
+  const { markFound } = useFoundPeople();
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
@@ -107,7 +111,20 @@ export function DetailsPopup({
                 )}
               </div>
               <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
-                {area.title == "108" ? "Khayotbek Mamajonov" : area.description}
+                {area.title == "108" ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      markFound("Khayotbek Mamajonov");
+                      setFoundOpen(true);
+                    }}
+                    className="underline underline-offset-2 hover:text-contrast"
+                  >
+                    Khayotbek Mamajonov
+                  </button>
+                ) : (
+                  area.description
+                )}
               </p>
             </div>
           )}
@@ -142,6 +159,7 @@ export function DetailsPopup({
           />
         </div>
       </FloatingFocusManager>
+      <FoundPersonModal open={foundOpen} onOpenChange={setFoundOpen} />
     </FloatingPortal>
   );
 }
