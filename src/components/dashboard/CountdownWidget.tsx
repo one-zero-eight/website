@@ -22,7 +22,7 @@ export function CountdownWidget() {
           <span className="icon-[twemoji--christmas-tree] mr-2 shrink-0 text-3xl text-brand-violet sm:hidden" />
           <span>New Year countdown</span>
         </div>
-        <div className="text-contrast/75">
+        <div className="line-clamp-1 break-all text-contrast/75">
           {daysLeft} days, {hoursLeft} hours, {minutesLeft} minutes,{" "}
           {secondsLeft} seconds
         </div>
