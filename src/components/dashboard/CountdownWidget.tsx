@@ -20,13 +20,11 @@ export function CountdownWidget() {
       <div className="flex flex-col">
         <div className="flex text-lg font-semibold text-contrast">
           <span className="icon-[twemoji--christmas-tree] mr-2 shrink-0 text-3xl text-brand-violet sm:hidden" />
-          <span>
-            New Year countdown:{" "}
-            <span className="font-normal">{daysLeft} days</span>
-          </span>
+          <span>New Year countdown</span>
         </div>
         <div className="text-contrast/75">
-          {hoursLeft} hours, {minutesLeft} minutes, {secondsLeft} seconds
+          {daysLeft} days, {hoursLeft} hours, {minutesLeft} minutes,{" "}
+          {secondsLeft} seconds
         </div>
       </div>
     </div>
