@@ -45,6 +45,10 @@ export default function CalendarViewer({
   isFullPage?: boolean;
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
+  const academicCalendarRef = useRef(academicCalendar);
+  useEffect(() => {
+    academicCalendarRef.current = academicCalendar;
+  }, [academicCalendar]);
 
   const [popoverInfo, setPopoverInfo] = useState({
     opened: false,
@@ -213,7 +217,7 @@ export default function CalendarViewer({
               }
             },
             listDaySideFormat: (arg) =>
-              `Week ${calculateWeek(academicCalendar, moment(arg.date).toDate())}`,
+              `Week ${calculateWeek(academicCalendarRef.current, moment(arg.date).toDate())}`,
           },
           timeGridWeek: {
             eventContent: renderEventTimeGridWeek,
@@ -262,7 +266,9 @@ export default function CalendarViewer({
         weekNumbers={true} // Display numbers of weeks
         weekNumberFormat={{ week: "long" }} // Show "Week 1", not "W1"
         weekNumberClassNames="text-sm week-cell" // Small text size
-        weekNumberCalculation={(d) => calculateWeek(academicCalendar, d)} // Display academic week numbers
+        weekNumberCalculation={(d) =>
+          calculateWeek(academicCalendarRef.current, d)
+        } // Display academic week numbers
         height={isFullPage ? "100%" : undefined} // Full height
         contentHeight={isFullPage ? undefined : "auto"} // Do not add scrollbar on in-page calendars
         eventInteractive={true} // Make event tabbable
