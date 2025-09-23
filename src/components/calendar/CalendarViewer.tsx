@@ -103,8 +103,48 @@ export default function CalendarViewer({
             }
           }
         }}
+        eventDataTransform={(input) => {
+          // Dates have Europe/Moscow timezone,
+          // but the sources don't set timezones,
+          // so the local zone is set
+          if (typeof input.start == "string") {
+            let s = input.start;
+            if (
+              !s.match(/Z|\+/g)?.length &&
+              (s.match(/-/g)?.length || 0) <= 2
+            ) {
+              s += "+03:00";
+            }
+            input.start = new Date(s);
+          }
+
+          if (typeof input.end == "string") {
+            let s = input.end;
+            if (
+              !s.match(/Z|\+/g)?.length &&
+              (s.match(/-/g)?.length || 0) <= 2
+            ) {
+              s += "+03:00";
+            }
+            input.end = new Date(s);
+          }
+
+          if (input.start instanceof Date) {
+            input.start = new Date(
+              Number(input.start) - input.start.getTimezoneOffset() * 60 * 1000,
+            );
+          }
+
+          if (input.end instanceof Date) {
+            input.end = new Date(
+              Number(input.end) - input.end.getTimezoneOffset() * 60 * 1000,
+            );
+          }
+
+          return input;
+        }}
         progressiveEventRendering={true}
-        timeZone="Europe/Moscow" // Use the same timezone for everyone
+        timeZone="UTC+0" // Use the same timezone for everyone
         plugins={[
           momentPlugin,
           dayGridPlugin,
@@ -202,9 +242,9 @@ export default function CalendarViewer({
           )
             return null; // It's a line, not a label
           // Fix timezone
-          const text = moment(Number(arg.date) - 3 * 60 * 60 * 1000).format(
-            "HH:mm",
-          );
+          const text = moment(
+            Number(arg.date) + arg.date.getTimezoneOffset() * 60 * 1000,
+          ).format("HH:mm");
           const isNearTimeLabel =
             arg.date.getUTCMinutes() < 15 || arg.date.getUTCMinutes() > 45;
           if (!isNearTimeLabel) {
