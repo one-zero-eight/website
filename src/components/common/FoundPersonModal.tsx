@@ -13,6 +13,7 @@ import {
   TARGET_PEOPLE,
   useFoundPeople,
 } from "@/lib/easter-eggs/FoundPeopleContext.tsx";
+import Confetti from "react-confetti-boom";
 
 export function FoundPersonModal({
   open,
@@ -42,7 +43,7 @@ export function FoundPersonModal({
   return (
     <FloatingPortal>
       <FloatingOverlay
-        className="z-10 grid place-items-center bg-black/75 @container/export"
+        className="z-10 grid place-items-center bg-black/75 px-4 py-6 @container/export sm:px-8 sm:py-8"
         lockScroll
       >
         <FloatingFocusManager
@@ -54,31 +55,74 @@ export function FoundPersonModal({
             ref={refs.setFloating}
             style={transitionStyles}
             {...getFloatingProps()}
-            className="flex h-fit w-full flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-1/2"
+            className="w-full max-w-[680px]"
           >
-            <div className="overflow-hidden rounded-2xl bg-floating">
-              <div className="flex flex-col p-4">
-                <div className="mb-2 flex w-full flex-row">
-                  <div className="grow items-center text-3xl font-semibold">
+            {remaining === 0 && (
+              <Confetti
+                mode="boom"
+                colors={["#A855F7", "#EC4899", "#F59E0B", "#22C55E"]}
+                particleCount={140}
+              />
+            )}
+
+            <div className="overflow-hidden rounded-2xl bg-floating shadow-2xl ring-1 ring-white/10">
+              <div className="h-1 w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-500" />
+              <div className="flex flex-col p-4 sm:p-6">
+                <div className="mb-3 flex w-full flex-shrink-0 flex-row items-center gap-2 sm:gap-3">
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-xl sm:h-10 sm:w-10 sm:text-2xl">
+                    🎉
+                  </div>
+                  <div className="min-w-0 grow items-center break-words text-xl font-semibold leading-tight sm:text-2xl md:text-3xl lg:text-4xl">
                     Congrats you found the people
                   </div>
                   <button
                     ref={closeButtonRef}
                     type="button"
-                    className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75"
+                    className="-mr-2 -mt-2 flex h-10 w-10 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
                   </button>
                 </div>
-                <div className="text-contrast/75">
-                  You found {list.length} of {total} people
-                  {remaining > 0 ? ", keep going!" : " — great job!"}
+                <div className="text-contrast/80">
+                  {remaining > 0
+                    ? `You found ${list.length} of ${total} people — keep going!`
+                    : `You found ${list.length} of ${total} people — great job! 🏆`}
                 </div>
-                <ol className="mt-3 list-decimal pl-6 text-contrast/90">
+
+                <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-black/10">
+                  {remaining == 2 && (
+                    <img
+                      src="/tenor1.gif"
+                      alt="Ryan Gosling winks"
+                      className="block h-auto w-full"
+                      loading="lazy"
+                    />
+                  )}
+                  {remaining == 1 && (
+                    <img
+                      src="/tenor2.gif"
+                      alt="Ryan Gosling winks"
+                      className="block h-auto w-full"
+                      loading="lazy"
+                    />
+                  )}
+
+                  {remaining === 0 && (
+                    <img
+                      src="/tenor.gif"
+                      alt="Ryan Gosling winks"
+                      className="block h-auto w-full"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+
+                <ol className="mt-4 space-y-1 pl-5 text-contrast/90 [counter-reset:item]">
                   {list.map((name) => (
-                    <li key={name} className="py-0.5">
-                      {name}
+                    <li key={name} className="flex items-center gap-2 py-0.5">
+                      <span className="icon-[material-symbols--check-circle-rounded] text-green-500" />
+                      <span>{name}</span>
                     </li>
                   ))}
                 </ol>

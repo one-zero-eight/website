@@ -147,7 +147,7 @@ function SidebarLink({
           className={clsx(
             "[.is-active_&]:selected ml-4 flex w-fit items-center whitespace-nowrap text-lg font-semibold",
             (title == "Maps" || title == "Schedule" || title == "Workshops") &&
-              "animated-text text-brand-violet",
+              "animated-text text-brand-violet [.is-active_&]:text-brand-violet",
           )}
         >
           {title}

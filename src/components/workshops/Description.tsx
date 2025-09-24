@@ -2,11 +2,16 @@ import { $workshops, workshopsTypes } from "@/api/workshops";
 import { CheckInButton } from "@/components/workshops/CheckInButton.tsx";
 import { Link } from "@tanstack/react-router";
 import React, { useState } from "react";
+import FoundPersonModal from "@/components/common/FoundPersonModal.tsx";
+import { useFoundPeople } from "@/lib/easter-eggs/FoundPeopleContext.tsx";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { formatDate, formatTime, getDate, parseTime } from "./date-utils.ts";
 
-const processTextNode = (text: string): (string | React.JSX.Element)[] => {
+const processTextNode = (
+  text: string,
+  opts?: { onFound?: () => void },
+): (string | React.JSX.Element)[] => {
   const result: (string | React.JSX.Element)[] = [];
   let buffer = "";
 
@@ -53,6 +58,28 @@ const processTextNode = (text: string): (string | React.JSX.Element)[] => {
       i += username.length - 1;
       continue;
     }
+    // Easter egg: clickable name
+    const name = "Ruslan Belkov";
+    const tail = text.slice(i);
+    if (tail.startsWith(name)) {
+      if (buffer) {
+        result.push(buffer);
+        buffer = "";
+      }
+      result.push(
+        <button
+          key={`egg-${i}`}
+          type="button"
+          className="underline underline-offset-2 hover:text-contrast"
+          onClick={() => opts?.onFound && opts.onFound()}
+        >
+          {name}
+        </button>,
+      );
+      i += name.length - 1;
+      continue;
+    }
+
     buffer += text[i];
   }
   if (buffer) {
@@ -61,13 +88,19 @@ const processTextNode = (text: string): (string | React.JSX.Element)[] => {
   return result;
 };
 
-export function MarkdownWithCustomLinks({ children }: { children: string }) {
+export function MarkdownWithCustomLinks({
+  children,
+  onFound,
+}: {
+  children: string;
+  onFound?: () => void;
+}) {
   // Функция для обработки различных типов children
   const processChildrenRecursively = (
     children: React.ReactNode,
   ): React.ReactNode => {
     if (typeof children === "string") {
-      return processTextNode(children);
+      return processTextNode(children, { onFound });
     }
 
     if (Array.isArray(children)) {
@@ -75,7 +108,7 @@ export function MarkdownWithCustomLinks({ children }: { children: string }) {
         if (typeof child === "string") {
           return (
             <React.Fragment key={index}>
-              {processTextNode(child)}
+              {processTextNode(child, { onFound })}
             </React.Fragment>
           );
         }
@@ -90,10 +123,10 @@ export function MarkdownWithCustomLinks({ children }: { children: string }) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        // Переопределяем рендеринг текстовых узлов для обработки URL и Telegram алиасов
+        // Переопределяем рендеринг текстовых узлов для обработки URL, Telegram и клика по имени
         text: ({ children }) => {
           if (typeof children === "string") {
-            return <>{processTextNode(children)}</>;
+            return <>{processTextNode(children, { onFound })}</>;
           }
           return <>{children}</>;
         },
@@ -133,6 +166,8 @@ export function Description({
   workshop: workshopsTypes.SchemaWorkshop;
 }) {
   const [showAllParticipants, setShowAllParticipants] = useState(false);
+  const [foundOpen, setFoundOpen] = useState(false);
+  const { markFound } = useFoundPeople();
 
   const { data: participants, isPending: participantsIsPending } =
     $workshops.useQuery("get", "/workshops/{workshop_id}/checkins", {
@@ -155,7 +190,12 @@ export function Description({
     <div className="flex flex-col text-contrast">
       <div className="flex max-h-[60vh] overflow-y-auto">
         <div className="prose dark:prose-invert">
-          <MarkdownWithCustomLinks>
+          <MarkdownWithCustomLinks
+            onFound={() => {
+              markFound("Ruslan Belkov");
+              setFoundOpen(true);
+            }}
+          >
             {workshop.description || ""}
           </MarkdownWithCustomLinks>
         </div>
@@ -260,6 +300,7 @@ export function Description({
           </p>
         )}
       </div>
+      <FoundPersonModal open={foundOpen} onOpenChange={setFoundOpen} />
     </div>
   );
 }
