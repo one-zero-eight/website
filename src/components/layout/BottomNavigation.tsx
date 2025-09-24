@@ -1,4 +1,5 @@
 import { Link, LinkOptions } from "@tanstack/react-router";
+import clsx from "clsx";
 import { PropsWithChildren, ReactElement } from "react";
 
 export function BottomNavigation() {
@@ -22,7 +23,7 @@ export function BottomNavigation() {
         to="/maps"
         title="Maps"
         icon={
-          <span className="icon-[material-symbols--map-outline-rounded] [.is-active_&]:icon-[material-symbols--map-rounded]" />
+          <span className="icon-[material-symbols--map-outline-rounded] text-brand-violet [.is-active_&]:icon-[material-symbols--map-rounded]" />
         }
       />
       <BottomNavigationLink
@@ -55,7 +56,13 @@ function BottomNavigationLink({
       activeProps={{ className: "is-active" }}
     >
       {icon}
-      <div className="text-center text-xs [.is-active_&]:font-medium">
+      <div
+        className={clsx(
+          "text-center text-xs [.is-active_&]:font-medium",
+          title == "Maps" &&
+            "animated-text text-brand-violet [.is-active_&]:text-brand-violet",
+        )}
+      >
         {title}
       </div>
     </Link>
