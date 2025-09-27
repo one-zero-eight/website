@@ -28,6 +28,7 @@ import { Route as WithmenuDashboardImport } from "./routes/_with_menu/dashboard"
 import { Route as WithmenuCalendarImport } from "./routes/_with_menu/calendar";
 import { Route as WithmenuAskImport } from "./routes/_with_menu/ask";
 import { Route as WithmenuActImport } from "./routes/_with_menu/act";
+import { Route as Withmenu42Import } from "./routes/_with_menu/42";
 import { Route as WithmenuAccountRouteImport } from "./routes/_with_menu/account/route";
 import { Route as WithmenuWorkshopsIndexImport } from "./routes/_with_menu/workshops/index";
 import { Route as WithmenuScheduleIndexImport } from "./routes/_with_menu/schedule/index";
@@ -128,6 +129,11 @@ const WithmenuAskRoute = WithmenuAskImport.update({
 
 const WithmenuActRoute = WithmenuActImport.update({
   path: "/act",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
+
+const Withmenu42Route = Withmenu42Import.update({
+  path: "/42",
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
@@ -232,6 +238,13 @@ declare module "@tanstack/react-router" {
       path: "/account";
       fullPath: "/account";
       preLoaderRoute: typeof WithmenuAccountRouteImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
+    "/_with_menu/42": {
+      id: "/_with_menu/42";
+      path: "/42";
+      fullPath: "/42";
+      preLoaderRoute: typeof Withmenu42Import;
       parentRoute: typeof WithmenuRouteImport;
     };
     "/_with_menu/act": {
@@ -459,6 +472,7 @@ const WithmenuAccountRouteRouteWithChildren =
 
 interface WithmenuRouteRouteChildren {
   WithmenuAccountRouteRoute: typeof WithmenuAccountRouteRouteWithChildren;
+  Withmenu42Route: typeof Withmenu42Route;
   WithmenuActRoute: typeof WithmenuActRoute;
   WithmenuAskRoute: typeof WithmenuAskRoute;
   WithmenuCalendarRoute: typeof WithmenuCalendarRoute;
@@ -488,6 +502,7 @@ interface WithmenuRouteRouteChildren {
 
 const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuAccountRouteRoute: WithmenuAccountRouteRouteWithChildren,
+  Withmenu42Route: Withmenu42Route,
   WithmenuActRoute: WithmenuActRoute,
   WithmenuAskRoute: WithmenuAskRoute,
   WithmenuCalendarRoute: WithmenuCalendarRoute,
@@ -523,6 +538,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "": typeof WithmenuRouteRouteWithChildren;
   "/account": typeof WithmenuAccountRouteRouteWithChildren;
+  "/42": typeof Withmenu42Route;
   "/act": typeof WithmenuActRoute;
   "/ask": typeof WithmenuAskRoute;
   "/calendar": typeof WithmenuCalendarRoute;
@@ -557,6 +573,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "": typeof WithmenuRouteRouteWithChildren;
+  "/42": typeof Withmenu42Route;
   "/act": typeof WithmenuActRoute;
   "/ask": typeof WithmenuAskRoute;
   "/calendar": typeof WithmenuCalendarRoute;
@@ -593,6 +610,7 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/_with_menu": typeof WithmenuRouteRouteWithChildren;
   "/_with_menu/account": typeof WithmenuAccountRouteRouteWithChildren;
+  "/_with_menu/42": typeof Withmenu42Route;
   "/_with_menu/act": typeof WithmenuActRoute;
   "/_with_menu/ask": typeof WithmenuAskRoute;
   "/_with_menu/calendar": typeof WithmenuCalendarRoute;
@@ -630,6 +648,7 @@ export interface FileRouteTypes {
     | "/"
     | ""
     | "/account"
+    | "/42"
     | "/act"
     | "/ask"
     | "/calendar"
@@ -663,6 +682,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | ""
+    | "/42"
     | "/act"
     | "/ask"
     | "/calendar"
@@ -697,6 +717,7 @@ export interface FileRouteTypes {
     | "/"
     | "/_with_menu"
     | "/_with_menu/account"
+    | "/_with_menu/42"
     | "/_with_menu/act"
     | "/_with_menu/ask"
     | "/_with_menu/calendar"
@@ -765,6 +786,7 @@ export const routeTree = rootRoute
       "filePath": "_with_menu/route.tsx",
       "children": [
         "/_with_menu/account",
+        "/_with_menu/42",
         "/_with_menu/act",
         "/_with_menu/ask",
         "/_with_menu/calendar",
@@ -800,6 +822,10 @@ export const routeTree = rootRoute
         "/_with_menu/account/token",
         "/_with_menu/account/"
       ]
+    },
+    "/_with_menu/42": {
+      "filePath": "_with_menu/42.tsx",
+      "parent": "/_with_menu"
     },
     "/_with_menu/act": {
       "filePath": "_with_menu/act.tsx",
