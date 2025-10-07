@@ -21,6 +21,7 @@ import { Route as WithmenuScholarshipImport } from "./routes/_with_menu/scholars
 import { Route as WithmenuPrintersImport } from "./routes/_with_menu/printers";
 import { Route as WithmenuMenuImport } from "./routes/_with_menu/menu";
 import { Route as WithmenuMapsImport } from "./routes/_with_menu/maps";
+import { Route as WithmenuGuardImport } from "./routes/_with_menu/guard";
 import { Route as WithmenuFormsImport } from "./routes/_with_menu/forms";
 import { Route as WithmenuExtensionImport } from "./routes/_with_menu/extension";
 import { Route as WithmenuDormsImport } from "./routes/_with_menu/dorms";
@@ -36,6 +37,7 @@ import { Route as WithmenuRoomBookingIndexImport } from "./routes/_with_menu/roo
 import { Route as WithmenuMusicRoomIndexImport } from "./routes/_with_menu/music-room.index";
 import { Route as WithmenuCatalogueIndexImport } from "./routes/_with_menu/catalogue/index";
 import { Route as WithmenuAccountIndexImport } from "./routes/_with_menu/account/index";
+import { Route as GuardGoogleJoinDocumentImport } from "./routes/guard.google.join-document";
 import { Route as WithmenuWorkshopsAdminImport } from "./routes/_with_menu/workshops/admin";
 import { Route as WithmenuScheduleCategoryImport } from "./routes/_with_menu/schedule/$category";
 import { Route as WithmenuRoomBookingRulesImport } from "./routes/_with_menu/room-booking/rules";
@@ -94,6 +96,11 @@ const WithmenuMenuRoute = WithmenuMenuImport.update({
 
 const WithmenuMapsRoute = WithmenuMapsImport.update({
   path: "/maps",
+  getParentRoute: () => WithmenuRouteRoute,
+} as any);
+
+const WithmenuGuardRoute = WithmenuGuardImport.update({
+  path: "/guard",
   getParentRoute: () => WithmenuRouteRoute,
 } as any);
 
@@ -170,6 +177,11 @@ const WithmenuCatalogueIndexRoute = WithmenuCatalogueIndexImport.update({
 const WithmenuAccountIndexRoute = WithmenuAccountIndexImport.update({
   path: "/",
   getParentRoute: () => WithmenuAccountRouteRoute,
+} as any);
+
+const GuardGoogleJoinDocumentRoute = GuardGoogleJoinDocumentImport.update({
+  path: "/guard/google/join-document",
+  getParentRoute: () => rootRoute,
 } as any);
 
 const WithmenuWorkshopsAdminRoute = WithmenuWorkshopsAdminImport.update({
@@ -296,6 +308,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof WithmenuFormsImport;
       parentRoute: typeof WithmenuRouteImport;
     };
+    "/_with_menu/guard": {
+      id: "/_with_menu/guard";
+      path: "/guard";
+      fullPath: "/guard";
+      preLoaderRoute: typeof WithmenuGuardImport;
+      parentRoute: typeof WithmenuRouteImport;
+    };
     "/_with_menu/maps": {
       id: "/_with_menu/maps";
       path: "/maps";
@@ -401,6 +420,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof WithmenuWorkshopsAdminImport;
       parentRoute: typeof WithmenuRouteImport;
     };
+    "/guard/google/join-document": {
+      id: "/guard/google/join-document";
+      path: "/guard/google/join-document";
+      fullPath: "/guard/google/join-document";
+      preLoaderRoute: typeof GuardGoogleJoinDocumentImport;
+      parentRoute: typeof rootRoute;
+    };
     "/_with_menu/account/": {
       id: "/_with_menu/account/";
       path: "/";
@@ -480,6 +506,7 @@ interface WithmenuRouteRouteChildren {
   WithmenuDormsRoute: typeof WithmenuDormsRoute;
   WithmenuExtensionRoute: typeof WithmenuExtensionRoute;
   WithmenuFormsRoute: typeof WithmenuFormsRoute;
+  WithmenuGuardRoute: typeof WithmenuGuardRoute;
   WithmenuMapsRoute: typeof WithmenuMapsRoute;
   WithmenuMenuRoute: typeof WithmenuMenuRoute;
   WithmenuPrintersRoute: typeof WithmenuPrintersRoute;
@@ -510,6 +537,7 @@ const WithmenuRouteRouteChildren: WithmenuRouteRouteChildren = {
   WithmenuDormsRoute: WithmenuDormsRoute,
   WithmenuExtensionRoute: WithmenuExtensionRoute,
   WithmenuFormsRoute: WithmenuFormsRoute,
+  WithmenuGuardRoute: WithmenuGuardRoute,
   WithmenuMapsRoute: WithmenuMapsRoute,
   WithmenuMenuRoute: WithmenuMenuRoute,
   WithmenuPrintersRoute: WithmenuPrintersRoute,
@@ -546,6 +574,7 @@ export interface FileRoutesByFullPath {
   "/dorms": typeof WithmenuDormsRoute;
   "/extension": typeof WithmenuExtensionRoute;
   "/forms": typeof WithmenuFormsRoute;
+  "/guard": typeof WithmenuGuardRoute;
   "/maps": typeof WithmenuMapsRoute;
   "/menu": typeof WithmenuMenuRoute;
   "/printers": typeof WithmenuPrintersRoute;
@@ -561,6 +590,7 @@ export interface FileRoutesByFullPath {
   "/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/workshops/admin": typeof WithmenuWorkshopsAdminRoute;
+  "/guard/google/join-document": typeof GuardGoogleJoinDocumentRoute;
   "/account/": typeof WithmenuAccountIndexRoute;
   "/catalogue": typeof WithmenuCatalogueIndexRoute;
   "/music-room": typeof WithmenuMusicRoomIndexRoute;
@@ -581,6 +611,7 @@ export interface FileRoutesByTo {
   "/dorms": typeof WithmenuDormsRoute;
   "/extension": typeof WithmenuExtensionRoute;
   "/forms": typeof WithmenuFormsRoute;
+  "/guard": typeof WithmenuGuardRoute;
   "/maps": typeof WithmenuMapsRoute;
   "/menu": typeof WithmenuMenuRoute;
   "/printers": typeof WithmenuPrintersRoute;
@@ -596,6 +627,7 @@ export interface FileRoutesByTo {
   "/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/workshops/admin": typeof WithmenuWorkshopsAdminRoute;
+  "/guard/google/join-document": typeof GuardGoogleJoinDocumentRoute;
   "/account": typeof WithmenuAccountIndexRoute;
   "/catalogue": typeof WithmenuCatalogueIndexRoute;
   "/music-room": typeof WithmenuMusicRoomIndexRoute;
@@ -618,6 +650,7 @@ export interface FileRoutesById {
   "/_with_menu/dorms": typeof WithmenuDormsRoute;
   "/_with_menu/extension": typeof WithmenuExtensionRoute;
   "/_with_menu/forms": typeof WithmenuFormsRoute;
+  "/_with_menu/guard": typeof WithmenuGuardRoute;
   "/_with_menu/maps": typeof WithmenuMapsRoute;
   "/_with_menu/menu": typeof WithmenuMenuRoute;
   "/_with_menu/printers": typeof WithmenuPrintersRoute;
@@ -633,6 +666,7 @@ export interface FileRoutesById {
   "/_with_menu/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/_with_menu/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/_with_menu/workshops/admin": typeof WithmenuWorkshopsAdminRoute;
+  "/guard/google/join-document": typeof GuardGoogleJoinDocumentRoute;
   "/_with_menu/account/": typeof WithmenuAccountIndexRoute;
   "/_with_menu/catalogue/": typeof WithmenuCatalogueIndexRoute;
   "/_with_menu/music-room/": typeof WithmenuMusicRoomIndexRoute;
@@ -656,6 +690,7 @@ export interface FileRouteTypes {
     | "/dorms"
     | "/extension"
     | "/forms"
+    | "/guard"
     | "/maps"
     | "/menu"
     | "/printers"
@@ -671,6 +706,7 @@ export interface FileRouteTypes {
     | "/room-booking/rules"
     | "/schedule/$category"
     | "/workshops/admin"
+    | "/guard/google/join-document"
     | "/account/"
     | "/catalogue"
     | "/music-room"
@@ -690,6 +726,7 @@ export interface FileRouteTypes {
     | "/dorms"
     | "/extension"
     | "/forms"
+    | "/guard"
     | "/maps"
     | "/menu"
     | "/printers"
@@ -705,6 +742,7 @@ export interface FileRouteTypes {
     | "/room-booking/rules"
     | "/schedule/$category"
     | "/workshops/admin"
+    | "/guard/google/join-document"
     | "/account"
     | "/catalogue"
     | "/music-room"
@@ -725,6 +763,7 @@ export interface FileRouteTypes {
     | "/_with_menu/dorms"
     | "/_with_menu/extension"
     | "/_with_menu/forms"
+    | "/_with_menu/guard"
     | "/_with_menu/maps"
     | "/_with_menu/menu"
     | "/_with_menu/printers"
@@ -740,6 +779,7 @@ export interface FileRouteTypes {
     | "/_with_menu/room-booking/rules"
     | "/_with_menu/schedule/$category"
     | "/_with_menu/workshops/admin"
+    | "/guard/google/join-document"
     | "/_with_menu/account/"
     | "/_with_menu/catalogue/"
     | "/_with_menu/music-room/"
@@ -754,12 +794,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   WithmenuRouteRoute: typeof WithmenuRouteRouteWithChildren;
   FormsSubmitRoute: typeof FormsSubmitRoute;
+  GuardGoogleJoinDocumentRoute: typeof GuardGoogleJoinDocumentRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   WithmenuRouteRoute: WithmenuRouteRouteWithChildren,
   FormsSubmitRoute: FormsSubmitRoute,
+  GuardGoogleJoinDocumentRoute: GuardGoogleJoinDocumentRoute,
 };
 
 export const routeTree = rootRoute
@@ -776,7 +818,8 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/_with_menu",
-        "/forms/submit"
+        "/forms/submit",
+        "/guard/google/join-document"
       ]
     },
     "/": {
@@ -794,6 +837,7 @@ export const routeTree = rootRoute
         "/_with_menu/dorms",
         "/_with_menu/extension",
         "/_with_menu/forms",
+        "/_with_menu/guard",
         "/_with_menu/maps",
         "/_with_menu/menu",
         "/_with_menu/printers",
@@ -855,6 +899,10 @@ export const routeTree = rootRoute
       "filePath": "_with_menu/forms.tsx",
       "parent": "/_with_menu"
     },
+    "/_with_menu/guard": {
+      "filePath": "_with_menu/guard.tsx",
+      "parent": "/_with_menu"
+    },
     "/_with_menu/maps": {
       "filePath": "_with_menu/maps.tsx",
       "parent": "/_with_menu"
@@ -913,6 +961,9 @@ export const routeTree = rootRoute
     "/_with_menu/workshops/admin": {
       "filePath": "_with_menu/workshops/admin.tsx",
       "parent": "/_with_menu"
+    },
+    "/guard/google/join-document": {
+      "filePath": "guard.google.join-document.tsx"
     },
     "/_with_menu/account/": {
       "filePath": "_with_menu/account/index.tsx",

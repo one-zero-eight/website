@@ -146,6 +146,21 @@ export const items: ItemType[] = [
     to: "/extension",
     icon: <span className="icon-[material-symbols--extension-outline]" />,
   },
+  ...((import.meta.env.VITE_HIDE_SEARCH && []) || [
+    {
+      type: "local",
+      title: "Guard",
+      badge: (
+        <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
+          NEW
+        </span>
+      ),
+      to: "/guard",
+      icon: (
+        <span className="icon-[material-symbols--verified-user-outline-rounded]" />
+      ),
+    },
+  ]),
   {
     type: "local",
     title: "Forms",
