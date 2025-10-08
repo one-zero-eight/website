@@ -1,4 +1,6 @@
+import { useMe } from "@/api/accounts/user.ts";
 import { $guard, guardTypes } from "@/api/guard";
+import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { useState } from "react";
 import { GuardInstructions } from "./GuardInstructions.tsx";
 import { ServiceAccountInfo } from "./ServiceAccountInfo.tsx";
@@ -6,6 +8,7 @@ import { SetupForm } from "./SetupForm.tsx";
 import { SetupResult } from "./SetupResult.tsx";
 
 export function GuardPage() {
+  const { me } = useMe();
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [respondentRole, setRespondentRole] =
     useState<guardTypes.SetupSpreadsheetRequestRespondent_role>(
@@ -98,6 +101,10 @@ export function GuardPage() {
     setSpreadsheetId("");
     setError("");
   };
+
+  if (!me) {
+    return <AuthWall />;
+  }
 
   return (
     <div className="flex grow flex-col gap-4 p-4">
