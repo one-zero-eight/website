@@ -1,6 +1,6 @@
 name: 🚀 Feature request
 description: Propose a new feature to innohassle.ru
-labels: ["enhancement"]
+type: "feature"
 body:
   - type: markdown
     attributes:
