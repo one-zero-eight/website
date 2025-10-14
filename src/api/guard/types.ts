@@ -103,7 +103,7 @@ export interface components {
        * User Role
        * @enum {string}
        */
-      user_role: "writer" | "reader";
+      user_role: GoogleLinkUser_role;
       /** Slug */
       slug: string;
       /** Spreadsheet Id */
@@ -142,6 +142,13 @@ export interface components {
       /** Gmail */
       gmail: string;
     };
+    /** JoinDocumentResponse */
+    JoinDocumentResponse: {
+      /** Message */
+      message: string;
+      /** Spreadsheet Id */
+      spreadsheet_id: string;
+    };
     /** ServiceAccountEmailResponse */
     ServiceAccountEmailResponse: {
       /** Email */
@@ -155,7 +162,7 @@ export interface components {
        * Respondent Role
        * @enum {string}
        */
-      respondent_role: "writer" | "reader";
+      respondent_role: SetupSpreadsheetRequestRespondent_role;
     };
     /** SetupSpreadsheetResponse */
     SetupSpreadsheetResponse: {
@@ -184,6 +191,22 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaGoogleLink = components["schemas"]["GoogleLink"];
+export type SchemaGoogleLinkJoinInfo =
+  components["schemas"]["GoogleLinkJoinInfo"];
+export type SchemaHttpValidationError =
+  components["schemas"]["HTTPValidationError"];
+export type SchemaJoinDocumentRequest =
+  components["schemas"]["JoinDocumentRequest"];
+export type SchemaJoinDocumentResponse =
+  components["schemas"]["JoinDocumentResponse"];
+export type SchemaServiceAccountEmailResponse =
+  components["schemas"]["ServiceAccountEmailResponse"];
+export type SchemaSetupSpreadsheetRequest =
+  components["schemas"]["SetupSpreadsheetRequest"];
+export type SchemaSetupSpreadsheetResponse =
+  components["schemas"]["SetupSpreadsheetResponse"];
+export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
   get_service_account_email_google_service_account_email_get: {
@@ -231,7 +254,7 @@ export interface operations {
           "application/json": components["schemas"]["GoogleLink"][];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Invalid token OR No credentials provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -269,7 +292,7 @@ export interface operations {
           "application/json": components["schemas"]["SetupSpreadsheetResponse"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Invalid token OR No credentials provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -321,7 +344,7 @@ export interface operations {
           "application/json": components["schemas"]["GoogleLink"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Invalid token OR No credentials provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -381,10 +404,10 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["JoinDocumentResponse"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Invalid token OR No credentials provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -423,4 +446,12 @@ export interface operations {
       };
     };
   };
+}
+export enum GoogleLinkUser_role {
+  writer = "writer",
+  reader = "reader",
+}
+export enum SetupSpreadsheetRequestRespondent_role {
+  writer = "writer",
+  reader = "reader",
 }

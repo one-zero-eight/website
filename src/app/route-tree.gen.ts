@@ -37,7 +37,6 @@ import { Route as WithmenuRoomBookingIndexImport } from "./routes/_with_menu/roo
 import { Route as WithmenuMusicRoomIndexImport } from "./routes/_with_menu/music-room.index";
 import { Route as WithmenuCatalogueIndexImport } from "./routes/_with_menu/catalogue/index";
 import { Route as WithmenuAccountIndexImport } from "./routes/_with_menu/account/index";
-import { Route as GuardGoogleJoinDocumentImport } from "./routes/guard.google.join-document";
 import { Route as WithmenuWorkshopsAdminImport } from "./routes/_with_menu/workshops/admin";
 import { Route as WithmenuScheduleCategoryImport } from "./routes/_with_menu/schedule/$category";
 import { Route as WithmenuRoomBookingRulesImport } from "./routes/_with_menu/room-booking/rules";
@@ -46,6 +45,7 @@ import { Route as WithmenuMusicRoomInstructionsImport } from "./routes/_with_men
 import { Route as WithmenuAccountTokenImport } from "./routes/_with_menu/account/token";
 import { Route as WithmenuAccountConnectTelegramImport } from "./routes/_with_menu/account/connect-telegram";
 import { Route as WithmenuScheduleEventGroupsAliasImport } from "./routes/_with_menu/schedule/event-groups.$alias";
+import { Route as GuardGoogleDocumentsSlugJoinImport } from "./routes/guard.google.documents.$slug.join";
 
 // Create/Update Routes
 
@@ -179,11 +179,6 @@ const WithmenuAccountIndexRoute = WithmenuAccountIndexImport.update({
   getParentRoute: () => WithmenuAccountRouteRoute,
 } as any);
 
-const GuardGoogleJoinDocumentRoute = GuardGoogleJoinDocumentImport.update({
-  path: "/guard/google/join-document",
-  getParentRoute: () => rootRoute,
-} as any);
-
 const WithmenuWorkshopsAdminRoute = WithmenuWorkshopsAdminImport.update({
   path: "/workshops/admin",
   getParentRoute: () => WithmenuRouteRoute,
@@ -225,6 +220,12 @@ const WithmenuScheduleEventGroupsAliasRoute =
   WithmenuScheduleEventGroupsAliasImport.update({
     path: "/schedule/event-groups/$alias",
     getParentRoute: () => WithmenuRouteRoute,
+  } as any);
+
+const GuardGoogleDocumentsSlugJoinRoute =
+  GuardGoogleDocumentsSlugJoinImport.update({
+    path: "/guard/google/documents/$slug/join",
+    getParentRoute: () => rootRoute,
   } as any);
 
 // Populate the FileRoutesByPath interface
@@ -420,13 +421,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof WithmenuWorkshopsAdminImport;
       parentRoute: typeof WithmenuRouteImport;
     };
-    "/guard/google/join-document": {
-      id: "/guard/google/join-document";
-      path: "/guard/google/join-document";
-      fullPath: "/guard/google/join-document";
-      preLoaderRoute: typeof GuardGoogleJoinDocumentImport;
-      parentRoute: typeof rootRoute;
-    };
     "/_with_menu/account/": {
       id: "/_with_menu/account/";
       path: "/";
@@ -475,6 +469,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/schedule/event-groups/$alias";
       preLoaderRoute: typeof WithmenuScheduleEventGroupsAliasImport;
       parentRoute: typeof WithmenuRouteImport;
+    };
+    "/guard/google/documents/$slug/join": {
+      id: "/guard/google/documents/$slug/join";
+      path: "/guard/google/documents/$slug/join";
+      fullPath: "/guard/google/documents/$slug/join";
+      preLoaderRoute: typeof GuardGoogleDocumentsSlugJoinImport;
+      parentRoute: typeof rootRoute;
     };
   }
 }
@@ -590,7 +591,6 @@ export interface FileRoutesByFullPath {
   "/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/workshops/admin": typeof WithmenuWorkshopsAdminRoute;
-  "/guard/google/join-document": typeof GuardGoogleJoinDocumentRoute;
   "/account/": typeof WithmenuAccountIndexRoute;
   "/catalogue": typeof WithmenuCatalogueIndexRoute;
   "/music-room": typeof WithmenuMusicRoomIndexRoute;
@@ -598,6 +598,7 @@ export interface FileRoutesByFullPath {
   "/schedule": typeof WithmenuScheduleIndexRoute;
   "/workshops": typeof WithmenuWorkshopsIndexRoute;
   "/schedule/event-groups/$alias": typeof WithmenuScheduleEventGroupsAliasRoute;
+  "/guard/google/documents/$slug/join": typeof GuardGoogleDocumentsSlugJoinRoute;
 }
 
 export interface FileRoutesByTo {
@@ -627,7 +628,6 @@ export interface FileRoutesByTo {
   "/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/workshops/admin": typeof WithmenuWorkshopsAdminRoute;
-  "/guard/google/join-document": typeof GuardGoogleJoinDocumentRoute;
   "/account": typeof WithmenuAccountIndexRoute;
   "/catalogue": typeof WithmenuCatalogueIndexRoute;
   "/music-room": typeof WithmenuMusicRoomIndexRoute;
@@ -635,6 +635,7 @@ export interface FileRoutesByTo {
   "/schedule": typeof WithmenuScheduleIndexRoute;
   "/workshops": typeof WithmenuWorkshopsIndexRoute;
   "/schedule/event-groups/$alias": typeof WithmenuScheduleEventGroupsAliasRoute;
+  "/guard/google/documents/$slug/join": typeof GuardGoogleDocumentsSlugJoinRoute;
 }
 
 export interface FileRoutesById {
@@ -666,7 +667,6 @@ export interface FileRoutesById {
   "/_with_menu/room-booking/rules": typeof WithmenuRoomBookingRulesRoute;
   "/_with_menu/schedule/$category": typeof WithmenuScheduleCategoryRoute;
   "/_with_menu/workshops/admin": typeof WithmenuWorkshopsAdminRoute;
-  "/guard/google/join-document": typeof GuardGoogleJoinDocumentRoute;
   "/_with_menu/account/": typeof WithmenuAccountIndexRoute;
   "/_with_menu/catalogue/": typeof WithmenuCatalogueIndexRoute;
   "/_with_menu/music-room/": typeof WithmenuMusicRoomIndexRoute;
@@ -674,6 +674,7 @@ export interface FileRoutesById {
   "/_with_menu/schedule/": typeof WithmenuScheduleIndexRoute;
   "/_with_menu/workshops/": typeof WithmenuWorkshopsIndexRoute;
   "/_with_menu/schedule/event-groups/$alias": typeof WithmenuScheduleEventGroupsAliasRoute;
+  "/guard/google/documents/$slug/join": typeof GuardGoogleDocumentsSlugJoinRoute;
 }
 
 export interface FileRouteTypes {
@@ -706,14 +707,14 @@ export interface FileRouteTypes {
     | "/room-booking/rules"
     | "/schedule/$category"
     | "/workshops/admin"
-    | "/guard/google/join-document"
     | "/account/"
     | "/catalogue"
     | "/music-room"
     | "/room-booking"
     | "/schedule"
     | "/workshops"
-    | "/schedule/event-groups/$alias";
+    | "/schedule/event-groups/$alias"
+    | "/guard/google/documents/$slug/join";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
@@ -742,14 +743,14 @@ export interface FileRouteTypes {
     | "/room-booking/rules"
     | "/schedule/$category"
     | "/workshops/admin"
-    | "/guard/google/join-document"
     | "/account"
     | "/catalogue"
     | "/music-room"
     | "/room-booking"
     | "/schedule"
     | "/workshops"
-    | "/schedule/event-groups/$alias";
+    | "/schedule/event-groups/$alias"
+    | "/guard/google/documents/$slug/join";
   id:
     | "__root__"
     | "/"
@@ -779,14 +780,14 @@ export interface FileRouteTypes {
     | "/_with_menu/room-booking/rules"
     | "/_with_menu/schedule/$category"
     | "/_with_menu/workshops/admin"
-    | "/guard/google/join-document"
     | "/_with_menu/account/"
     | "/_with_menu/catalogue/"
     | "/_with_menu/music-room/"
     | "/_with_menu/room-booking/"
     | "/_with_menu/schedule/"
     | "/_with_menu/workshops/"
-    | "/_with_menu/schedule/event-groups/$alias";
+    | "/_with_menu/schedule/event-groups/$alias"
+    | "/guard/google/documents/$slug/join";
   fileRoutesById: FileRoutesById;
 }
 
@@ -794,14 +795,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   WithmenuRouteRoute: typeof WithmenuRouteRouteWithChildren;
   FormsSubmitRoute: typeof FormsSubmitRoute;
-  GuardGoogleJoinDocumentRoute: typeof GuardGoogleJoinDocumentRoute;
+  GuardGoogleDocumentsSlugJoinRoute: typeof GuardGoogleDocumentsSlugJoinRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   WithmenuRouteRoute: WithmenuRouteRouteWithChildren,
   FormsSubmitRoute: FormsSubmitRoute,
-  GuardGoogleJoinDocumentRoute: GuardGoogleJoinDocumentRoute,
+  GuardGoogleDocumentsSlugJoinRoute: GuardGoogleDocumentsSlugJoinRoute,
 };
 
 export const routeTree = rootRoute
@@ -819,7 +820,7 @@ export const routeTree = rootRoute
         "/",
         "/_with_menu",
         "/forms/submit",
-        "/guard/google/join-document"
+        "/guard/google/documents/$slug/join"
       ]
     },
     "/": {
@@ -962,9 +963,6 @@ export const routeTree = rootRoute
       "filePath": "_with_menu/workshops/admin.tsx",
       "parent": "/_with_menu"
     },
-    "/guard/google/join-document": {
-      "filePath": "guard.google.join-document.tsx"
-    },
     "/_with_menu/account/": {
       "filePath": "_with_menu/account/index.tsx",
       "parent": "/_with_menu/account"
@@ -992,6 +990,9 @@ export const routeTree = rootRoute
     "/_with_menu/schedule/event-groups/$alias": {
       "filePath": "_with_menu/schedule/event-groups.$alias.tsx",
       "parent": "/_with_menu"
+    },
+    "/guard/google/documents/$slug/join": {
+      "filePath": "guard.google.documents.$slug.join.tsx"
     }
   }
 }
