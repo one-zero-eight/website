@@ -79,6 +79,11 @@ export function GuardPage() {
     "/google/documents/{slug}/bans",
   );
 
+  const { mutate: unbanUser, isPending: _isUnbanning } = $guard.useMutation(
+    "delete",
+    "/google/documents/{slug}/bans/{user_id}",
+  );
+
   const extractSpreadsheetId = (input: string): string | null => {
     const match = input.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
     return match ? match[1] : null;
@@ -323,6 +328,34 @@ export function GuardPage() {
                 }}
               />
             )}
+
+            <div className="mt-6">
+              <h4 className="mb-2 text-base font-semibold">Banned</h4>
+              <BannedList
+                banned={(selectedDocument?.banned || []) as any}
+                search={joinsSearch}
+                onUnban={(userId) => {
+                  if (!selectedSlug) return;
+                  unbanUser(
+                    {
+                      params: { path: { slug: selectedSlug, user_id: userId } },
+                    },
+                    {
+                      onSuccess: async () => {
+                        await queryClient.invalidateQueries({
+                          queryKey: [
+                            "guard",
+                            "get",
+                            "/google/documents/{slug}",
+                            { params: { path: { slug: selectedSlug } } },
+                          ],
+                        });
+                      },
+                    },
+                  );
+                }}
+              />
+            </div>
           </div>
         ) : (
           <div>
@@ -460,6 +493,13 @@ type JoinItem = {
   joined_at: string;
 };
 
+type BannedItem = {
+  user_id: string;
+  gmail: string;
+  innomail: string;
+  banned_at: string;
+};
+
 function Email({ email }: { email: string }) {
   return (
     <span>
@@ -493,7 +533,7 @@ function JoinsList({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex max-h-80 flex-col gap-3 overflow-auto">
       {filtered.map((j) => (
         <div
           key={`${j.user_id}`}
@@ -508,15 +548,99 @@ function JoinsList({
               joined at {new Date(j.joined_at).toLocaleString()}
             </div>
           </div>
-          <button
-            onClick={() => onBan(j.user_id)}
-            className="ml-4 shrink-0 rounded-lg border-2 border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
-            title="Ban user"
-          >
-            Ban
-          </button>
+          <BanButton onClick={() => onBan(j.user_id)} />
         </div>
       ))}
     </div>
+  );
+}
+
+function BannedList({
+  banned,
+  search,
+  onUnban,
+}: {
+  banned: BannedItem[];
+  search: string;
+  onUnban: (userId: string) => void;
+}) {
+  const q = search.trim().toLowerCase();
+  const filtered = useMemo(() => {
+    if (!q) return banned;
+    return banned.filter(
+      (b) =>
+        (b.gmail || "").toLowerCase().includes(q) ||
+        (b.innomail || "").toLowerCase().includes(q),
+    );
+  }, [banned, q]);
+
+  if (!banned || banned.length === 0) {
+    return <div className="text-contrast/60">No banned users.</div>;
+  }
+
+  return (
+    <div className="flex max-h-80 flex-col gap-3 overflow-auto">
+      {filtered.map((b) => (
+        <div
+          key={`${b.user_id}`}
+          className="flex items-center justify-between rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3"
+        >
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <Email email={b.gmail} />
+              <Email email={b.innomail} />
+            </div>
+            <div className="text-xs text-contrast/50">
+              banned at {new Date(b.banned_at).toLocaleString()}
+            </div>
+          </div>
+          <UnbanButton onClick={() => onUnban(b.user_id)} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BanButton({ onClick }: { onClick: () => void }) {
+  const [pending, setPending] = useState(false);
+  return (
+    <button
+      onClick={async () => {
+        if (!confirm("Ban this user?")) return;
+        setPending(true);
+        try {
+          await onClick();
+        } finally {
+          setPending(false);
+        }
+      }}
+      disabled={pending}
+      className="ml-4 shrink-0 rounded-lg border-2 border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+      title="Ban user"
+    >
+      {pending ? "Banning..." : "Ban"}
+    </button>
+  );
+}
+
+function UnbanButton({ onClick }: { onClick: () => void }) {
+  const [pending, setPending] = useState(false);
+  return (
+    <button
+      onClick={async () => {
+        if (!confirm("Unban this user?")) return;
+        setPending(true);
+        try {
+          await onClick();
+        } finally {
+          setPending(false);
+        }
+      }}
+      disabled={pending}
+      className="ml-4 shrink-0 rounded-lg border-2 border-green-300 px-3 py-2 text-sm font-medium text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
+      title="Unban user"
+    >
+      {pending ? "Unbanning..." : "Unban"}
+    </button>
   );
 }

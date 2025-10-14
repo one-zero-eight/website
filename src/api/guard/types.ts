@@ -174,7 +174,7 @@ export interface components {
       /** Joins Count */
       joins_count: number;
       /** Banned */
-      banned?: string[] | null;
+      banned?: components["schemas"]["GoogleLinkBanInfo"][] | null;
       /** Banned Count */
       banned_count: number;
       /**
@@ -182,6 +182,23 @@ export interface components {
        * Format: date-time
        */
       created_at: string;
+    };
+    /** GoogleLinkBanInfo */
+    GoogleLinkBanInfo: {
+      /**
+       * User Id
+       * @example 5eb7cf5a86d9755df3a6c593
+       */
+      user_id: string;
+      /** Gmail */
+      gmail: string;
+      /** Innomail */
+      innomail: string;
+      /**
+       * Banned At
+       * Format: date-time
+       */
+      banned_at: string;
     };
     /** GoogleLinkJoinInfo */
     GoogleLinkJoinInfo: {
@@ -264,6 +281,8 @@ export interface components {
 export type SchemaBanUserRequest = components["schemas"]["BanUserRequest"];
 export type SchemaBanUserResponse = components["schemas"]["BanUserResponse"];
 export type SchemaGoogleLink = components["schemas"]["GoogleLink"];
+export type SchemaGoogleLinkBanInfo =
+  components["schemas"]["GoogleLinkBanInfo"];
 export type SchemaGoogleLinkJoinInfo =
   components["schemas"]["GoogleLinkJoinInfo"];
 export type SchemaHttpValidationError =
@@ -363,6 +382,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["SetupSpreadsheetResponse"];
         };
+      };
+      /** @description Spreadsheet already setup by another user */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Invalid token OR No credentials provided */
       401: {
@@ -545,7 +571,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Permission denied. Make sure the service account has access to the spreadsheet. */
+      /** @description Permission denied. Make sure the service account has access to the spreadsheet. OR Permission denied. You are banned from this document. */
       403: {
         headers: {
           [name: string]: unknown;
@@ -554,6 +580,13 @@ export interface operations {
       };
       /** @description Spreadsheet not found. */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description User already joined the document with another gmail */
+      409: {
         headers: {
           [name: string]: unknown;
         };
