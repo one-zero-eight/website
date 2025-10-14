@@ -1,14 +1,10 @@
-import { guardTypes } from "@/api/guard";
-
 interface SetupFormProps {
   spreadsheetId: string;
-  respondentRole: guardTypes.SetupSpreadsheetRequestRespondent_role;
+  respondentRole: "writer" | "reader";
   error: string;
   isSubmitting: boolean;
   onSpreadsheetIdChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRoleChange: (
-    role: guardTypes.SetupSpreadsheetRequestRespondent_role,
-  ) => void;
+  onRoleChange: (role: "writer" | "reader") => void;
   onBlur: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onClear: () => void;
@@ -71,8 +67,7 @@ export function SetupForm({
         <div className="flex gap-3">
           <label
             className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-2 transition-all ${
-              respondentRole ===
-              guardTypes.SetupSpreadsheetRequestRespondent_role.writer
+              respondentRole === "writer"
                 ? "border-brand-violet bg-brand-violet/10"
                 : "border-contrast/20 hover:border-contrast/40"
             }`}
@@ -80,16 +75,9 @@ export function SetupForm({
             <input
               type="radio"
               name="respondent_role"
-              value={guardTypes.SetupSpreadsheetRequestRespondent_role.writer}
-              checked={
-                respondentRole ===
-                guardTypes.SetupSpreadsheetRequestRespondent_role.writer
-              }
-              onChange={() =>
-                onRoleChange(
-                  guardTypes.SetupSpreadsheetRequestRespondent_role.writer,
-                )
-              }
+              value="writer"
+              checked={respondentRole === "writer"}
+              onChange={() => onRoleChange("writer")}
               className="h-4 w-4 accent-brand-violet"
             />
             <span className="font-medium text-contrast/90">
@@ -98,8 +86,7 @@ export function SetupForm({
           </label>
           <label
             className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-2 transition-all ${
-              respondentRole ===
-              guardTypes.SetupSpreadsheetRequestRespondent_role.reader
+              respondentRole === "reader"
                 ? "border-brand-violet bg-brand-violet/10"
                 : "border-contrast/20 hover:border-contrast/40"
             }`}
@@ -107,16 +94,9 @@ export function SetupForm({
             <input
               type="radio"
               name="respondent_role"
-              value={guardTypes.SetupSpreadsheetRequestRespondent_role.reader}
-              checked={
-                respondentRole ===
-                guardTypes.SetupSpreadsheetRequestRespondent_role.reader
-              }
-              onChange={() =>
-                onRoleChange(
-                  guardTypes.SetupSpreadsheetRequestRespondent_role.reader,
-                )
-              }
+              value="reader"
+              checked={respondentRole === "reader"}
+              onChange={() => onRoleChange("reader")}
               className="h-4 w-4 accent-brand-violet"
             />
             <span className="font-medium text-contrast/90">
