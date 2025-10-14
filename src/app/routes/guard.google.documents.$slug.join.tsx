@@ -5,6 +5,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
+const GMAIL_STORAGE_KEY = "guard_saved_gmail";
+
 export const Route = createFileRoute("/guard/google/documents/$slug/join")({
   component: function GuardGoogleJoinDocumentPage() {
     const { slug } = Route.useParams();
@@ -19,6 +21,13 @@ export const Route = createFileRoute("/guard/google/documents/$slug/join")({
       isSuccess,
       error,
     } = $guard.useMutation("post", "/google/documents/{slug}/joins");
+
+    useEffect(() => {
+      const savedGmail = localStorage.getItem(GMAIL_STORAGE_KEY);
+      if (savedGmail) {
+        setGmail(savedGmail);
+      }
+    }, []);
 
     useEffect(() => {
       if (countdown !== null && countdown > 0) {
@@ -46,6 +55,7 @@ export const Route = createFileRoute("/guard/google/documents/$slug/join")({
         },
         {
           onSuccess: (data) => {
+            localStorage.setItem(GMAIL_STORAGE_KEY, gmail.trim());
             const url = `https://docs.google.com/spreadsheets/d/${data.spreadsheet_id}/edit`;
             setRedirectUrl(url);
             setCountdown(3);
