@@ -1,10 +1,14 @@
+import { guardTypes } from "@/api/guard";
+
 interface SetupFormProps {
   spreadsheetId: string;
-  respondentRole: "writer" | "reader";
+  respondentRole: guardTypes.SetupSpreadsheetRequestRespondent_role;
   error: string;
   isSubmitting: boolean;
   onSpreadsheetIdChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRoleChange: (role: "writer" | "reader") => void;
+  onRoleChange: (
+    role: guardTypes.SetupSpreadsheetRequestRespondent_role,
+  ) => void;
   onBlur: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onClear: () => void;
@@ -30,7 +34,7 @@ export function SetupForm({
           htmlFor="spreadsheet_id"
           className="font-medium text-contrast/80"
         >
-          Spreadsheet ID:
+          Spreadsheet URL:
         </label>
         <div className="relative">
           <input
@@ -40,7 +44,7 @@ export function SetupForm({
             onChange={onSpreadsheetIdChange}
             onBlur={onBlur}
             onKeyDown={onKeyDown}
-            placeholder="e.g., 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+            placeholder="https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
             className={`w-full rounded-lg border-2 px-4 py-3 transition-colors ${
               error
                 ? "border-red-500 focus:border-red-500"
@@ -67,7 +71,8 @@ export function SetupForm({
         <div className="flex gap-3">
           <label
             className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-2 transition-all ${
-              respondentRole === "writer"
+              respondentRole ===
+              guardTypes.SetupSpreadsheetRequestRespondent_role.writer
                 ? "border-brand-violet bg-brand-violet/10"
                 : "border-contrast/20 hover:border-contrast/40"
             }`}
@@ -75,9 +80,16 @@ export function SetupForm({
             <input
               type="radio"
               name="respondent_role"
-              value="writer"
-              checked={respondentRole === "writer"}
-              onChange={() => onRoleChange("writer")}
+              value={guardTypes.SetupSpreadsheetRequestRespondent_role.writer}
+              checked={
+                respondentRole ===
+                guardTypes.SetupSpreadsheetRequestRespondent_role.writer
+              }
+              onChange={() =>
+                onRoleChange(
+                  guardTypes.SetupSpreadsheetRequestRespondent_role.writer,
+                )
+              }
               className="h-4 w-4 accent-brand-violet"
             />
             <span className="font-medium text-contrast/90">
@@ -86,7 +98,8 @@ export function SetupForm({
           </label>
           <label
             className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-2 transition-all ${
-              respondentRole === "reader"
+              respondentRole ===
+              guardTypes.SetupSpreadsheetRequestRespondent_role.reader
                 ? "border-brand-violet bg-brand-violet/10"
                 : "border-contrast/20 hover:border-contrast/40"
             }`}
@@ -94,9 +107,16 @@ export function SetupForm({
             <input
               type="radio"
               name="respondent_role"
-              value="reader"
-              checked={respondentRole === "reader"}
-              onChange={() => onRoleChange("reader")}
+              value={guardTypes.SetupSpreadsheetRequestRespondent_role.reader}
+              checked={
+                respondentRole ===
+                guardTypes.SetupSpreadsheetRequestRespondent_role.reader
+              }
+              onChange={() =>
+                onRoleChange(
+                  guardTypes.SetupSpreadsheetRequestRespondent_role.reader,
+                )
+              }
               className="h-4 w-4 accent-brand-violet"
             />
             <span className="font-medium text-contrast/90">

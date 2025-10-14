@@ -6,13 +6,15 @@ import { GuardInstructions } from "./GuardInstructions.tsx";
 import { ServiceAccountInfo } from "./ServiceAccountInfo.tsx";
 import { SetupForm } from "./SetupForm.tsx";
 import { SetupResult } from "./SetupResult.tsx";
+import { guardTypes } from "@/api/guard";
 
 export function GuardPage() {
   const { me } = useMe();
   const [spreadsheetId, setSpreadsheetId] = useState("");
-  const [respondentRole, setRespondentRole] = useState<"writer" | "reader">(
-    "writer",
-  );
+  const [respondentRole, setRespondentRole] =
+    useState<guardTypes.SetupSpreadsheetRequestRespondent_role>(
+      guardTypes.SetupSpreadsheetRequestRespondent_role.writer,
+    );
   const [error, setError] = useState("");
   const [setupResult, setSetupResult] = useState<{
     sheetTitle: string;
@@ -43,10 +45,21 @@ export function GuardPage() {
       },
     });
 
-  const validateSpreadsheetId = (id: string): string => {
-    if (!id.trim()) return "";
+  const extractSpreadsheetId = (input: string): string | null => {
+    const match = input.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    return match ? match[1] : null;
+  };
 
-    if (id.trim().length < 10) {
+  const validateSpreadsheetId = (input: string): string => {
+    if (!input.trim()) return "";
+
+    const extractedId = extractSpreadsheetId(input);
+
+    if (!extractedId) {
+      return "Invalid Google Spreadsheet URL";
+    }
+
+    if (extractedId.length < 10) {
       return "Spreadsheet ID seems too short";
     }
 
@@ -80,11 +93,17 @@ export function GuardPage() {
       return;
     }
 
+    const extractedId = extractSpreadsheetId(spreadsheetId);
+    if (!extractedId) {
+      setError("Failed to extract Spreadsheet ID");
+      return;
+    }
+
     setError("");
 
     setupSpreadsheet({
       body: {
-        spreadsheet_id: spreadsheetId.trim(),
+        spreadsheet_id: extractedId,
         respondent_role: respondentRole,
       },
     });

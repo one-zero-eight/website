@@ -5,24 +5,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 
-export type GuardGoogleJoinDocumentParams = {
-  spreadsheet_id: string | undefined;
-};
-
-export const Route = createFileRoute("/guard/google/join-document")({
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): GuardGoogleJoinDocumentParams => {
-    return {
-      spreadsheet_id:
-        typeof search.spreadsheet_id === "string"
-          ? search.spreadsheet_id
-          : undefined,
-    };
-  },
-
+export const Route = createFileRoute("/guard/google/documents/$slug/join")({
   component: function GuardGoogleJoinDocumentPage() {
-    const { spreadsheet_id } = Route.useSearch();
+    const { slug } = Route.useParams();
     const { me } = useMe();
     const [gmail, setGmail] = useState("");
     const [countdown, setCountdown] = useState<number | null>(null);
@@ -33,7 +18,7 @@ export const Route = createFileRoute("/guard/google/join-document")({
       isPending,
       isSuccess,
       error,
-    } = $guard.useMutation("post", "/google/join-document");
+    } = $guard.useMutation("post", "/google/documents/{slug}/joins");
 
     useEffect(() => {
       if (countdown !== null && countdown > 0) {
@@ -46,41 +31,28 @@ export const Route = createFileRoute("/guard/google/join-document")({
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      if (!spreadsheet_id || !gmail.trim()) return;
+      if (!slug || !gmail.trim()) return;
 
       joinDocument(
         {
+          params: {
+            path: {
+              slug: slug,
+            },
+          },
           body: {
             gmail: gmail.trim(),
-            spreadsheet_id: spreadsheet_id,
           },
         },
         {
-          onSuccess: () => {
-            const url = `https://docs.google.com/spreadsheets/d/${spreadsheet_id}/edit`;
+          onSuccess: (data) => {
+            const url = `https://docs.google.com/spreadsheets/d/${data.spreadsheet_id}/edit`;
             setRedirectUrl(url);
             setCountdown(3);
           },
         },
       );
     };
-
-    if (!spreadsheet_id) {
-      return (
-        <>
-          <Helmet>
-            <title>Error - Join InNoHassle Guard Document</title>
-          </Helmet>
-          <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
-            <div className="mb-4 text-6xl">❌</div>
-            <h2 className="mb-2 text-2xl font-bold">Error</h2>
-            <p className="text-lg text-contrast/70">
-              No spreadsheet ID provided in URL
-            </p>
-          </div>
-        </>
-      );
-    }
 
     if (!me) {
       return (
@@ -89,9 +61,7 @@ export const Route = createFileRoute("/guard/google/join-document")({
             <title>Sign In - Join InNoHassle Guard Document</title>
           </Helmet>
           <div className="flex h-full items-center justify-center">
-            <AuthWall
-              signInRedirect={`/guard/google/join-document?spreadsheet_id=${spreadsheet_id}`}
-            />
+            <AuthWall signInRedirect={`/guard/google/documents/${slug}/join`} />
           </div>
         </>
       );
