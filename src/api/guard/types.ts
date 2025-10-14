@@ -120,6 +120,11 @@ export interface components {
       banned?: string[] | null;
       /** Banned Count */
       banned_count: number;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
     };
     /** GoogleLinkJoinInfo */
     GoogleLinkJoinInfo: {
@@ -262,7 +267,7 @@ export interface operations {
           "application/json": components["schemas"]["GoogleLink"][];
         };
       };
-      /** @description Invalid token OR No credentials provided */
+      /** @description No credentials provided OR Invalid token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -300,7 +305,7 @@ export interface operations {
           "application/json": components["schemas"]["SetupSpreadsheetResponse"];
         };
       };
-      /** @description Invalid token OR No credentials provided */
+      /** @description No credentials provided OR Invalid token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -352,7 +357,7 @@ export interface operations {
           "application/json": components["schemas"]["GoogleLink"];
         };
       };
-      /** @description Invalid token OR No credentials provided */
+      /** @description No credentials provided OR Invalid token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -415,7 +420,7 @@ export interface operations {
           "application/json": components["schemas"]["JoinDocumentResponse"];
         };
       };
-      /** @description Invalid token OR No credentials provided */
+      /** @description No credentials provided OR Invalid token */
       401: {
         headers: {
           [name: string]: unknown;
