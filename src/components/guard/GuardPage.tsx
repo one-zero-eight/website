@@ -230,7 +230,7 @@ export function GuardPage() {
                     setSelectedSlug(null);
                     setJoinsSearch("");
                   }}
-                  className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:bg-primary/10"
+                  className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:border-contrast/40"
                 >
                   Back to documents
                 </button>
@@ -243,7 +243,7 @@ export function GuardPage() {
                   if (!selectedSlug) return;
                   handleCopy(selectedSlug);
                 }}
-                className={`rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium ${
+                className={`rounded-lg px-3.5 py-2.5 text-sm font-medium ${
                   slugCopied
                     ? "bg-green-500 text-white"
                     : "bg-brand-violet text-white hover:bg-[#6600CC]"
@@ -259,7 +259,7 @@ export function GuardPage() {
                   window.location.href = url;
                 }}
                 disabled={!selectedDocument?.spreadsheet_id}
-                className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:border-contrast/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Open spreadsheet
               </button>
@@ -281,7 +281,7 @@ export function GuardPage() {
                   );
                 }}
                 disabled={isDeleting}
-                className="rounded-lg border-2 border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border-2 border-red-500 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isDeleting
                   ? "Deleting document link..."
@@ -295,7 +295,7 @@ export function GuardPage() {
                 value={joinsSearch}
                 onChange={(e) => setJoinsSearch(e.target.value)}
                 placeholder="Search by gmail or innomail"
-                className="w-full rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3 outline-none transition-colors focus:border-primary focus:bg-primary/10"
+                className="w-full rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3 outline-none transition-colors focus:border-contrast/40 focus:bg-primary/10"
               />
             </div>
 
@@ -367,7 +367,7 @@ export function GuardPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by title or paste full join link or slug"
-                className="w-full rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3 outline-none transition-colors focus:border-primary focus:bg-primary/10"
+                className="w-full rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3 outline-none transition-colors focus:border-contrast/40 focus:bg-primary/10"
               />
             </div>
 
@@ -464,13 +464,13 @@ function DocumentsList({
           <div className="ml-4 flex shrink-0 items-center gap-2">
             <button
               onClick={() => onShowJoins(doc.slug)}
-              className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:bg-primary/10"
+              className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:border-contrast/40"
             >
               Show more
             </button>
             <button
               onClick={() => handleCopy(doc.slug)}
-              className={`rounded-lg px-3 py-2 text-sm font-medium text-white ${
+              className={`rounded-lg px-3.5 py-2.5 text-sm font-medium text-white ${
                 copiedSlug === doc.slug
                   ? "bg-green-600 hover:bg-green-600"
                   : "bg-brand-violet hover:bg-[#6600CC]"
@@ -615,7 +615,7 @@ function BanButton({ onClick }: { onClick: () => void }) {
         }
       }}
       disabled={pending}
-      className="ml-4 shrink-0 rounded-lg border-2 border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+      className="ml-4 shrink-0 rounded-lg border-2 border-red-500 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
       title="Ban user"
     >
       {pending ? "Banning..." : "Ban"}
@@ -637,7 +637,7 @@ function UnbanButton({ onClick }: { onClick: () => void }) {
         }
       }}
       disabled={pending}
-      className="ml-4 shrink-0 rounded-lg border-2 border-green-300 px-3 py-2 text-sm font-medium text-green-700 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
+      className="ml-4 shrink-0 rounded-lg border-2 border-green-500 px-3 py-2 text-sm font-medium text-green-500 hover:bg-green-500/20 disabled:cursor-not-allowed disabled:opacity-50"
       title="Unban user"
     >
       {pending ? "Unbanning..." : "Unban"}
