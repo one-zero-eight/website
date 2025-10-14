@@ -11,6 +11,7 @@ import { guardTypes } from "@/api/guard";
 export function GuardPage() {
   const { me } = useMe();
   const [spreadsheetId, setSpreadsheetId] = useState("");
+  const [title, setTitle] = useState("");
   const [respondentRole, setRespondentRole] =
     useState<guardTypes.SetupSpreadsheetRequestRespondent_role>(
       guardTypes.SetupSpreadsheetRequestRespondent_role.writer,
@@ -105,6 +106,7 @@ export function GuardPage() {
       body: {
         spreadsheet_id: extractedId,
         respondent_role: respondentRole,
+        title: title.trim() || undefined,
       },
     });
   };
@@ -144,10 +146,12 @@ export function GuardPage() {
           <SetupForm
             spreadsheetId={spreadsheetId}
             respondentRole={respondentRole}
+            title={title}
             error={error}
             isSubmitting={isSubmitting}
             onSpreadsheetIdChange={handleSpreadsheetIdChange}
             onRoleChange={setRespondentRole}
+            onTitleChange={(e) => setTitle(e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyPress}
             onClear={handleClear}

@@ -3,12 +3,14 @@ import { guardTypes } from "@/api/guard";
 interface SetupFormProps {
   spreadsheetId: string;
   respondentRole: guardTypes.SetupSpreadsheetRequestRespondent_role;
+  title: string;
   error: string;
   isSubmitting: boolean;
   onSpreadsheetIdChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRoleChange: (
     role: guardTypes.SetupSpreadsheetRequestRespondent_role,
   ) => void;
+  onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onClear: () => void;
@@ -18,10 +20,12 @@ interface SetupFormProps {
 export function SetupForm({
   spreadsheetId,
   respondentRole,
+  title,
   error,
   isSubmitting,
   onSpreadsheetIdChange,
   onRoleChange,
+  onTitleChange,
   onBlur,
   onKeyDown,
   onClear,
@@ -64,6 +68,20 @@ export function SetupForm({
         {error && (
           <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
         )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="title" className="font-medium text-contrast/80">
+          Title (optional):
+        </label>
+        <input
+          type="text"
+          id="title"
+          value={title}
+          onChange={onTitleChange}
+          placeholder="e.g., CSE electives"
+          className="w-full rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3 outline-none transition-colors focus:border-primary focus:bg-primary/10"
+        />
       </div>
 
       <div className="flex flex-col gap-2">
