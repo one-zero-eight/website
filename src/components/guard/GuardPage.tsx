@@ -61,6 +61,10 @@ export function GuardPage() {
         });
         setSpreadsheetId("");
         setError("");
+        // Refresh documents list
+        void queryClient.invalidateQueries({
+          queryKey: ["guard", "get", "/google/documents"],
+        });
       },
       onError: () => {
         setError(
@@ -274,7 +278,7 @@ export function GuardPage() {
                         setSelectedSlug(null);
                         setJoinsSearch("");
                         await queryClient.invalidateQueries({
-                          queryKey: ["guard", "get", "/google/documents", {}],
+                          queryKey: ["guard", "get", "/google/documents"],
                         });
                       },
                     },
