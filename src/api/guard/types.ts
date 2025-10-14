@@ -62,7 +62,11 @@ export interface paths {
     get: operations["get_document_google_documents__slug__get"];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Delete Document
+     * @description Delete a document link by slug (author only).
+     */
+    delete: operations["delete_document_google_documents__slug__delete"];
     options?: never;
     head?: never;
     patch?: never;
@@ -88,10 +92,63 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/google/documents/{slug}/bans": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ban User
+     * @description Ban user from the document by their innopolis email.
+     */
+    post: operations["ban_user_google_documents__slug__bans_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/google/documents/{slug}/bans/{user_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Unban User
+     * @description Unban user by user_id (author only).
+     */
+    delete: operations["unban_user_google_documents__slug__bans__user_id__delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** BanUserRequest */
+    BanUserRequest: {
+      /**
+       * User Id
+       * @example 5eb7cf5a86d9755df3a6c593
+       */
+      user_id: string;
+    };
+    /** BanUserResponse */
+    BanUserResponse: {
+      /** Message */
+      message: string;
+    };
     /** GoogleLink */
     GoogleLink: {
       /**
@@ -204,6 +261,8 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaBanUserRequest = components["schemas"]["BanUserRequest"];
+export type SchemaBanUserResponse = components["schemas"]["BanUserResponse"];
 export type SchemaGoogleLink = components["schemas"]["GoogleLink"];
 export type SchemaGoogleLinkJoinInfo =
   components["schemas"]["GoogleLinkJoinInfo"];
@@ -267,7 +326,7 @@ export interface operations {
           "application/json": components["schemas"]["GoogleLink"][];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Invalid token OR No credentials provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -305,7 +364,7 @@ export interface operations {
           "application/json": components["schemas"]["SetupSpreadsheetResponse"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Invalid token OR No credentials provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -357,7 +416,66 @@ export interface operations {
           "application/json": components["schemas"]["GoogleLink"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Invalid token OR No credentials provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not the author of this document */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Document not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  delete_document_google_documents__slug__delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Invalid token OR No credentials provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -420,7 +538,7 @@ export interface operations {
           "application/json": components["schemas"]["JoinDocumentResponse"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Invalid token OR No credentials provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -435,6 +553,136 @@ export interface operations {
         content?: never;
       };
       /** @description Spreadsheet not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ban_user_google_documents__slug__bans_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BanUserRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BanUserResponse"];
+        };
+      };
+      /** @description Invalid token OR No credentials provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not the author of this document */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Document not found OR User with user_id {request.user_id} not found in joins */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  unban_user_google_documents__slug__bans__user_id__delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+        user_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Invalid user_id */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid token OR No credentials provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not the author of this document */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Document not found */
       404: {
         headers: {
           [name: string]: unknown;
