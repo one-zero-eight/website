@@ -108,12 +108,18 @@ export interface components {
       slug: string;
       /** Spreadsheet Id */
       spreadsheet_id: string;
+      /** Title */
+      title?: string | null;
       /** Expire At */
       expire_at?: string | null;
       /** Joins */
-      joins: components["schemas"]["GoogleLinkJoinInfo"][];
+      joins?: components["schemas"]["GoogleLinkJoinInfo"][] | null;
+      /** Joins Count */
+      joins_count: number;
       /** Banned */
-      banned: string[];
+      banned?: string[] | null;
+      /** Banned Count */
+      banned_count: number;
     };
     /** GoogleLinkJoinInfo */
     GoogleLinkJoinInfo: {
@@ -163,6 +169,8 @@ export interface components {
        * @enum {string}
        */
       respondent_role: SetupSpreadsheetRequestRespondent_role;
+      /** Title */
+      title?: string | null;
     };
     /** SetupSpreadsheetResponse */
     SetupSpreadsheetResponse: {
