@@ -1,5 +1,5 @@
 import { useMe } from "@/api/accounts/user.ts";
-import { $guard, guardTypes } from "@/api/guard";
+import { $guard } from "@/api/guard";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { useState } from "react";
 import { GuardInstructions } from "./GuardInstructions.tsx";
@@ -10,10 +10,9 @@ import { SetupResult } from "./SetupResult.tsx";
 export function GuardPage() {
   const { me } = useMe();
   const [spreadsheetId, setSpreadsheetId] = useState("");
-  const [respondentRole, setRespondentRole] =
-    useState<guardTypes.SetupSpreadsheetRequestRespondent_role>(
-      guardTypes.SetupSpreadsheetRequestRespondent_role.writer,
-    );
+  const [respondentRole, setRespondentRole] = useState<"writer" | "reader">(
+    "writer",
+  );
   const [error, setError] = useState("");
   const [setupResult, setSetupResult] = useState<{
     sheetTitle: string;
@@ -26,7 +25,7 @@ export function GuardPage() {
     $guard.useQuery("get", "/google/service-account-email");
 
   const { mutate: setupSpreadsheet, isPending: isSubmitting } =
-    $guard.useMutation("post", "/google/setup-spreadsheet", {
+    $guard.useMutation("post", "/google/documents", {
       onSuccess: (data) => {
         setSetupResult({
           sheetTitle: data.sheet_title,

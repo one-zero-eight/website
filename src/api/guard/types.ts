@@ -24,7 +24,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/google/": {
+  "/google/documents": {
     parameters: {
       query?: never;
       header?: never;
@@ -32,10 +32,34 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Index
-     * @description Admin interface for setting up Google Sheets integration.
+     * Get Documents
+     * @description Get all documents for the user (brief info without joins and banned).
      */
-    get: operations["index_google__get"];
+    get: operations["get_documents_google_documents_get"];
+    put?: never;
+    /**
+     * Setup Spreadsheet
+     * @description Setup InNoHassle Guard sheet with description and return join link.
+     */
+    post: operations["setup_spreadsheet_google_documents_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/google/documents/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Document
+     * @description Get full document information including joins and banned users.
+     */
+    get: operations["get_document_google_documents__slug__get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -44,7 +68,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/google/setup-spreadsheet": {
+  "/google/documents/{slug}/joins": {
     parameters: {
       query?: never;
       header?: never;
@@ -54,34 +78,10 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Setup Spreadsheet
-     * @description Setup InNoHassle Guard sheet with description and return join link.
-     */
-    post: operations["setup_spreadsheet_google_setup_spreadsheet_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/google/join-document": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Join Document Page
-     * @description Frontend page for respondents to join the spreadsheet.
-     */
-    get: operations["join_document_page_google_join_document_get"];
-    put?: never;
-    /**
      * Join Document
      * @description Add user to the spreadsheet with specified role.
      */
-    post: operations["join_document_google_join_document_post"];
+    post: operations["join_document_google_documents__slug__joins_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -92,6 +92,46 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** GoogleLink */
+    GoogleLink: {
+      /**
+       * Author Id
+       * @example 5eb7cf5a86d9755df3a6c593
+       */
+      author_id: string;
+      /**
+       * User Role
+       * @enum {string}
+       */
+      user_role: "writer" | "reader";
+      /** Slug */
+      slug: string;
+      /** Spreadsheet Id */
+      spreadsheet_id: string;
+      /** Expire At */
+      expire_at?: string | null;
+      /** Joins */
+      joins: components["schemas"]["GoogleLinkJoinInfo"][];
+      /** Banned */
+      banned: string[];
+    };
+    /** GoogleLinkJoinInfo */
+    GoogleLinkJoinInfo: {
+      /**
+       * User Id
+       * @example 5eb7cf5a86d9755df3a6c593
+       */
+      user_id: string;
+      /** Gmail */
+      gmail: string;
+      /** Innomail */
+      innomail: string;
+      /**
+       * Joined At
+       * Format: date-time
+       */
+      joined_at: string;
+    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -101,8 +141,6 @@ export interface components {
     JoinDocumentRequest: {
       /** Gmail */
       gmail: string;
-      /** Spreadsheet Id */
-      spreadsheet_id: string;
     };
     /** ServiceAccountEmailResponse */
     ServiceAccountEmailResponse: {
@@ -117,7 +155,7 @@ export interface components {
        * Respondent Role
        * @enum {string}
        */
-      respondent_role: SetupSpreadsheetRequestRespondent_role;
+      respondent_role: "writer" | "reader";
     };
     /** SetupSpreadsheetResponse */
     SetupSpreadsheetResponse: {
@@ -146,17 +184,6 @@ export interface components {
   headers: never;
   pathItems: never;
 }
-export type SchemaHttpValidationError =
-  components["schemas"]["HTTPValidationError"];
-export type SchemaJoinDocumentRequest =
-  components["schemas"]["JoinDocumentRequest"];
-export type SchemaServiceAccountEmailResponse =
-  components["schemas"]["ServiceAccountEmailResponse"];
-export type SchemaSetupSpreadsheetRequest =
-  components["schemas"]["SetupSpreadsheetRequest"];
-export type SchemaSetupSpreadsheetResponse =
-  components["schemas"]["SetupSpreadsheetResponse"];
-export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
   get_service_account_email_google_service_account_email_get: {
@@ -186,7 +213,7 @@ export interface operations {
       };
     };
   };
-  index_google__get: {
+  get_documents_google_documents_get: {
     parameters: {
       query?: never;
       header?: never;
@@ -201,12 +228,26 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "text/html": string;
+          "application/json": components["schemas"]["GoogleLink"][];
         };
+      };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
-  setup_spreadsheet_google_setup_spreadsheet_post: {
+  setup_spreadsheet_google_documents_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -260,11 +301,13 @@ export interface operations {
       };
     };
   };
-  join_document_page_google_join_document_get: {
+  get_document_google_documents__slug__get: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        slug: string;
+      };
       cookie?: never;
     };
     requestBody?: never;
@@ -275,16 +318,55 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "text/html": string;
+          "application/json": components["schemas"]["GoogleLink"];
         };
+      };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not the author of this document */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Document not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
-  join_document_google_join_document_post: {
+  join_document_google_documents__slug__joins_post: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        slug: string;
+      };
       cookie?: never;
     };
     requestBody: {
@@ -341,8 +423,4 @@ export interface operations {
       };
     };
   };
-}
-export enum SetupSpreadsheetRequestRespondent_role {
-  writer = "writer",
-  reader = "reader",
 }
