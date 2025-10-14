@@ -74,12 +74,12 @@ export function GuardPage() {
     "/google/documents/{slug}",
   );
 
-  const { mutate: banUser, isPending: _isBanning } = $guard.useMutation(
+  const { mutateAsync: banUser } = $guard.useMutation(
     "post",
     "/google/documents/{slug}/bans",
   );
 
-  const { mutate: unbanUser, isPending: _isUnbanning } = $guard.useMutation(
+  const { mutateAsync: unbanUser } = $guard.useMutation(
     "delete",
     "/google/documents/{slug}/bans/{user_id}",
   );
@@ -305,26 +305,20 @@ export function GuardPage() {
               <JoinsList
                 joins={(selectedDocument?.joins || []) as any}
                 search={joinsSearch}
-                onBan={(userId) => {
+                onBan={async (userId) => {
                   if (!selectedSlug) return;
-                  banUser(
-                    {
-                      params: { path: { slug: selectedSlug } },
-                      body: { user_id: userId },
-                    },
-                    {
-                      onSuccess: async () => {
-                        await queryClient.invalidateQueries({
-                          queryKey: [
-                            "guard",
-                            "get",
-                            "/google/documents/{slug}",
-                            { params: { path: { slug: selectedSlug } } },
-                          ],
-                        });
-                      },
-                    },
-                  );
+                  await banUser({
+                    params: { path: { slug: selectedSlug } },
+                    body: { user_id: userId },
+                  });
+                  await queryClient.invalidateQueries({
+                    queryKey: [
+                      "guard",
+                      "get",
+                      "/google/documents/{slug}",
+                      { params: { path: { slug: selectedSlug } } },
+                    ],
+                  });
                 }}
               />
             )}
@@ -334,25 +328,19 @@ export function GuardPage() {
               <BannedList
                 banned={(selectedDocument?.banned || []) as any}
                 search={joinsSearch}
-                onUnban={(userId) => {
+                onUnban={async (userId) => {
                   if (!selectedSlug) return;
-                  unbanUser(
-                    {
-                      params: { path: { slug: selectedSlug, user_id: userId } },
-                    },
-                    {
-                      onSuccess: async () => {
-                        await queryClient.invalidateQueries({
-                          queryKey: [
-                            "guard",
-                            "get",
-                            "/google/documents/{slug}",
-                            { params: { path: { slug: selectedSlug } } },
-                          ],
-                        });
-                      },
-                    },
-                  );
+                  await unbanUser({
+                    params: { path: { slug: selectedSlug, user_id: userId } },
+                  });
+                  await queryClient.invalidateQueries({
+                    queryKey: [
+                      "guard",
+                      "get",
+                      "/google/documents/{slug}",
+                      { params: { path: { slug: selectedSlug } } },
+                    ],
+                  });
                 }}
               />
             </div>
