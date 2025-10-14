@@ -2,6 +2,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { $guard } from "@/api/guard";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { GuardInstructions } from "./GuardInstructions.tsx";
 import { ServiceAccountInfo } from "./ServiceAccountInfo.tsx";
 import { SetupForm } from "./SetupForm.tsx";
@@ -26,6 +27,8 @@ export function GuardPage() {
   const [search, setSearch] = useState("");
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [joinsSearch, setJoinsSearch] = useState("");
+  const queryClient = useQueryClient();
+  const [slugCopied, setSlugCopied] = useState<boolean>(false);
 
   const { data: serviceAccountData, isLoading: isLoadingEmail } =
     $guard.useQuery("get", "/google/service-account-email");
@@ -66,6 +69,16 @@ export function GuardPage() {
       },
     });
 
+  const { mutate: deleteDocument, isPending: isDeleting } = $guard.useMutation(
+    "delete",
+    "/google/documents/{slug}",
+  );
+
+  const { mutate: banUser, isPending: _isBanning } = $guard.useMutation(
+    "post",
+    "/google/documents/{slug}/bans",
+  );
+
   const extractSpreadsheetId = (input: string): string | null => {
     const match = input.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
     return match ? match[1] : null;
@@ -95,6 +108,17 @@ export function GuardPage() {
 
     if (error) {
       setError("");
+    }
+  };
+
+  const handleCopy = async (slug: string) => {
+    const link = `${window.location.origin}/guard/google/documents/${slug}/join`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setSlugCopied(true);
+      setTimeout(() => setSlugCopied(false), 2000);
+    } catch (_) {
+      // ignore
     }
   };
 
@@ -187,8 +211,7 @@ export function GuardPage() {
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div className="min-w-0">
-                <h2 className="text-xl font-semibold">Joins list</h2>
-                <h3 className="truncate text-base">
+                <h3 className="truncate text-lg">
                   {selectedDocument?.title || "Untitled"}
                 </h3>
                 <p className="text-sm font-normal text-contrast/60">
@@ -196,14 +219,68 @@ export function GuardPage() {
                   {new Date(selectedDocument?.created_at).toLocaleString()}
                 </p>
               </div>
+              <div className="ml-4 flex shrink-0 items-center gap-2">
+                <button
+                  onClick={() => {
+                    setSelectedSlug(null);
+                    setJoinsSearch("");
+                  }}
+                  className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:bg-primary/10"
+                >
+                  Back to documents
+                </button>
+              </div>
+            </div>
+
+            <div className="mb-4 flex items-center gap-2">
               <button
                 onClick={() => {
-                  setSelectedSlug(null);
-                  setJoinsSearch("");
+                  if (!selectedSlug) return;
+                  handleCopy(selectedSlug);
                 }}
-                className="ml-4 shrink-0 rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:bg-primary/10"
+                className={`rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium ${
+                  slugCopied
+                    ? "bg-green-500 text-white"
+                    : "bg-brand-violet text-white hover:bg-[#6600CC]"
+                }`}
               >
-                Back to documents
+                {slugCopied ? "Copied!" : "Copy link"}
+              </button>
+
+              <button
+                onClick={() => {
+                  if (!selectedDocument?.spreadsheet_id) return;
+                  const url = `https://docs.google.com/spreadsheets/d/${selectedDocument.spreadsheet_id}/edit`;
+                  window.location.href = url;
+                }}
+                disabled={!selectedDocument?.spreadsheet_id}
+                className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Open spreadsheet
+              </button>
+              <button
+                onClick={() => {
+                  if (!selectedSlug) return;
+                  if (!confirm("Delete this document link?")) return;
+                  deleteDocument(
+                    { params: { path: { slug: selectedSlug } } },
+                    {
+                      onSuccess: async () => {
+                        setSelectedSlug(null);
+                        setJoinsSearch("");
+                        await queryClient.invalidateQueries({
+                          queryKey: ["guard", "get", "/google/documents", {}],
+                        });
+                      },
+                    },
+                  );
+                }}
+                disabled={isDeleting}
+                className="rounded-lg border-2 border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isDeleting
+                  ? "Deleting document link..."
+                  : "Delete document link"}
               </button>
             </div>
 
@@ -223,6 +300,27 @@ export function GuardPage() {
               <JoinsList
                 joins={(selectedDocument?.joins || []) as any}
                 search={joinsSearch}
+                onBan={(userId) => {
+                  if (!selectedSlug) return;
+                  banUser(
+                    {
+                      params: { path: { slug: selectedSlug } },
+                      body: { user_id: userId },
+                    },
+                    {
+                      onSuccess: async () => {
+                        await queryClient.invalidateQueries({
+                          queryKey: [
+                            "guard",
+                            "get",
+                            "/google/documents/{slug}",
+                            { params: { path: { slug: selectedSlug } } },
+                          ],
+                        });
+                      },
+                    },
+                  );
+                }}
               />
             )}
           </div>
@@ -335,7 +433,7 @@ function DocumentsList({
               onClick={() => onShowJoins(doc.slug)}
               className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:bg-primary/10"
             >
-              Show joins
+              Show more
             </button>
             <button
               onClick={() => handleCopy(doc.slug)}
@@ -356,6 +454,7 @@ function DocumentsList({
 }
 
 type JoinItem = {
+  user_id: string;
   gmail: string;
   innomail: string;
   joined_at: string;
@@ -370,7 +469,15 @@ function Email({ email }: { email: string }) {
   );
 }
 
-function JoinsList({ joins, search }: { joins: JoinItem[]; search: string }) {
+function JoinsList({
+  joins,
+  search,
+  onBan,
+}: {
+  joins: JoinItem[];
+  search: string;
+  onBan: (userId: string) => void;
+}) {
   const q = search.trim().toLowerCase();
   const filtered = useMemo(() => {
     if (!q) return joins;
@@ -389,16 +496,25 @@ function JoinsList({ joins, search }: { joins: JoinItem[]; search: string }) {
     <div className="flex flex-col gap-3">
       {filtered.map((j) => (
         <div
-          key={`${j.gmail}-${j.innomail}`}
-          className="rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3"
+          key={`${j.user_id}`}
+          className="flex items-center justify-between rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3"
         >
-          <div className="flex items-center gap-2">
-            <Email email={j.gmail} />
-            <Email email={j.innomail} />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <Email email={j.gmail} />
+              <Email email={j.innomail} />
+            </div>
+            <div className="text-xs text-contrast/50">
+              joined at {new Date(j.joined_at).toLocaleString()}
+            </div>
           </div>
-          <div className="text-xs text-contrast/50">
-            joined at {new Date(j.joined_at).toLocaleString()}
-          </div>
+          <button
+            onClick={() => onBan(j.user_id)}
+            className="ml-4 shrink-0 rounded-lg border-2 border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+            title="Ban user"
+          >
+            Ban
+          </button>
         </div>
       ))}
     </div>

@@ -22,6 +22,10 @@ export const Route = createFileRoute("/guard/google/documents/$slug/join")({
       error,
     } = $guard.useMutation("post", "/google/documents/{slug}/joins");
 
+    const errorMessage = error
+      ? ((error as any)?.detail ?? "Failed to join document. Please try again.")
+      : null;
+
     useEffect(() => {
       const savedGmail = localStorage.getItem(GMAIL_STORAGE_KEY);
       if (savedGmail) {
@@ -150,7 +154,7 @@ export const Route = createFileRoute("/guard/google/documents/$slug/join")({
             <div className="mt-5 rounded-lg border border-red-200 bg-red-100 p-4 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300">
               <strong>❌ Error:</strong>
               <br />
-              Failed to join document. Please try again.
+              {errorMessage}
             </div>
           )}
         </div>
