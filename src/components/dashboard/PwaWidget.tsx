@@ -1,10 +1,14 @@
 import { usePwaPrompt } from "@/app/pwa-prompt.tsx";
+import { useLocalStorage } from "usehooks-ts";
 
 export function PwaWidget() {
   const deferredPrompt = usePwaPrompt();
+  const [widgetShown, setWidgetShown] = useLocalStorage("widget-pwa", true);
 
   // Don't show the widget if the browser does not support the PWA prompt
   if (!deferredPrompt) return null;
+  // Don't show if the user has closed the widget
+  if (!widgetShown) return null;
 
   return (
     <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-4">
@@ -26,6 +30,13 @@ export function PwaWidget() {
           <span className="text-brand-violet">Install</span>
         </button>
       </div>
+      <button
+        type="button"
+        className="-mr-4 -mt-4 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75"
+        onClick={() => setWidgetShown(false)}
+      >
+        <span className="icon-[material-symbols--close] text-xl" />
+      </button>
     </div>
   );
 }
