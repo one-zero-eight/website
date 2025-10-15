@@ -1,29 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
 import "./timerstyles.css";
 
 interface Toast {
   id: number;
   message: string;
-}
-
-type TimerShape = "none" | "circle" | "square";
-
-function hexToRgba(hex: string, alpha: number): string {
-  hex = hex.replace(/^#/, "");
-  let r, g, b;
-  if (hex.length === 3) {
-    r = parseInt(hex[0] + hex[0], 16);
-    g = parseInt(hex[1] + hex[1], 16);
-    b = parseInt(hex[2] + hex[2], 16);
-  } else if (hex.length === 6) {
-    r = parseInt(hex.substring(0, 2), 16);
-    g = parseInt(hex.substring(2, 4), 16);
-    b = parseInt(hex.substring(4, 6), 16);
-  } else {
-    return `rgba(0, 0, 0, ${alpha})`;
-  }
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 const TimerPage = () => {
@@ -32,41 +12,43 @@ const TimerPage = () => {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [showStopDialog, setShowStopDialog] = useState<boolean>(false);
+  const [showTimeUpMessage, setShowTimeUpMessage] = useState<boolean>(false);
   const [secondsLeft, setSecondsLeft] = useState<number>(0);
+  const [initialSeconds, setInitialSeconds] = useState<number>(0);
   const [toasts, setToasts] = useState<Toast[]>([]);
-
-  const [isSettingsOpen, setIsSettingsOpen] = useLocalStorage<boolean>(
-    "timerSettingsOpen",
-    false,
-  );
-  const [timerShape, setTimerShape] = useLocalStorage<TimerShape>(
-    "timerShape",
-    "circle",
-  );
-  const [timerSize, setTimerSize] = useLocalStorage<number>("timerSize", 100);
-  const [timerColor, setTimerColor] = useLocalStorage<string>(
-    "timerColor",
-    "#9747ff",
-  );
+  const [hours, setHours] = useState<string>("00");
+  const [minutes, setMinutes] = useState<string>("00");
+  const [seconds, setSeconds] = useState<string>("00");
 
   const timerRef = useRef<number>();
   const toastIdCounter = useRef(0);
   const lastUpdateRef = useRef<number>(Date.now());
-
-  useEffect(() => {
-    document.documentElement.style.setProperty("--timer-color", timerColor);
-    const glowColor = hexToRgba(timerColor, 0.5);
-    document.documentElement.style.setProperty("--timer-glow", glowColor);
-  }, [timerColor]);
+  const hoursRef = useRef<HTMLInputElement>(null);
+  const minutesRef = useRef<HTMLInputElement>(null);
+  const secondsRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleTimerComplete = useCallback(() => {
     setIsRunning(false);
     setIsPaused(false);
     setTime("00:00:00");
+    setHours("00");
+    setMinutes("00");
+    setSeconds("00");
+    setInitialSeconds(0);
+    setShowTimeUpMessage(true);
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
     localStorage.removeItem("timerState");
+
+    // Play sound
+    if (audioRef.current) {
+      audioRef.current.play().catch((error) => {
+        console.error("Error playing sound:", error);
+      });
+    }
+
     showToast("Time is up!");
   }, []);
 
@@ -82,12 +64,10 @@ const TimerPage = () => {
       const {
         title: savedTitle,
         secondsLeft: savedSeconds,
+        initialSeconds: savedInitialSeconds = 0,
         isRunning: savedIsRunning,
         isPaused: savedIsPaused,
         lastUpdate,
-        timerShape: savedShape,
-        timerSize: savedSize,
-        timerColor: savedColor = "#9747ff",
       } = JSON.parse(savedState);
 
       let adjustedSeconds = savedSeconds;
@@ -97,12 +77,10 @@ const TimerPage = () => {
       }
       setTitle(savedTitle);
       setSecondsLeft(adjustedSeconds);
+      setInitialSeconds(savedInitialSeconds);
       setIsRunning(savedIsRunning);
       setIsPaused(savedIsPaused);
-      setTimerShape(savedShape || "circle");
-      setTimerSize(savedSize || 35);
       formatTime(adjustedSeconds);
-      setTimerColor(savedColor);
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
@@ -144,16 +122,14 @@ const TimerPage = () => {
         JSON.stringify({
           title,
           secondsLeft: seconds,
+          initialSeconds,
           isRunning,
           isPaused,
           lastUpdate: Date.now(),
-          timerShape,
-          timerColor,
-          timerSize,
         }),
       );
     },
-    [title, isRunning, isPaused, timerShape, timerColor, timerSize],
+    [title, isRunning, isPaused, initialSeconds],
   );
 
   useEffect(() => {
@@ -182,43 +158,23 @@ const TimerPage = () => {
   const formatTime = (totalSeconds: number) => {
     if (isNaN(totalSeconds) || totalSeconds < 0) {
       setTime("00:00:00");
+      setHours("00");
+      setMinutes("00");
+      setSeconds("00");
       return;
     }
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    setTime(
-      `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`,
-    );
-  };
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
 
-  const parseTime = (timeString: string): number => {
-    const [hours = "0", minutes = "0", seconds = "0"] = timeString.split(":");
-    const h = parseInt(hours, 10);
-    const m = parseInt(minutes, 10);
-    const s = parseInt(seconds, 10);
-    if (isNaN(h) || isNaN(m) || isNaN(s)) {
-      return 0;
-    }
+    const formattedHours = h.toString().padStart(2, "0");
+    const formattedMinutes = m.toString().padStart(2, "0");
+    const formattedSeconds = s.toString().padStart(2, "0");
 
-    return h * 3600 + m * 60 + s;
-  };
-
-  const handleTimeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const parts = value.split(":");
-
-    if (parts.length > 3) return;
-
-    const isValid = parts.every((part, index) => {
-      const num = parseInt(part, 10);
-      if (isNaN(num)) return part === "";
-      if (index === 0) return part.length <= 2 && num >= 0;
-      return part.length <= 2 && num >= 0 && num < 60;
-    });
-    if (isValid) {
-      setTime(value);
-    }
+    setHours(formattedHours);
+    setMinutes(formattedMinutes);
+    setSeconds(formattedSeconds);
+    setTime(`${formattedHours}:${formattedMinutes}:${formattedSeconds}`);
   };
 
   const handleTimeBlur = () => {
@@ -240,18 +196,23 @@ const TimerPage = () => {
   };
 
   const handleStart = () => {
-    if (time === "00:00:00") {
+    const totalSeconds =
+      parseInt(hours, 10) * 3600 +
+      parseInt(minutes, 10) * 60 +
+      parseInt(seconds, 10);
+
+    if (totalSeconds === 0) {
       showToast("Error: set the right time");
       return;
     }
-    const seconds = parseTime(time);
-    if (seconds > 0) {
-      setIsRunning(true);
-      setIsPaused(false);
-      setSecondsLeft(seconds);
-      saveState(seconds);
-      showToast("The timer started");
-    }
+
+    setIsRunning(true);
+    setIsPaused(false);
+    setSecondsLeft(totalSeconds);
+    setInitialSeconds(totalSeconds);
+    setShowTimeUpMessage(false);
+    saveState(totalSeconds);
+    showToast("The timer started");
   };
 
   const handlePause = () => {
@@ -268,150 +229,386 @@ const TimerPage = () => {
     setIsRunning(false);
     setIsPaused(false);
     setTime("00:00:00");
+    setHours("00");
+    setMinutes("00");
+    setSeconds("00");
     setSecondsLeft(0);
+    setInitialSeconds(0);
     setShowStopDialog(false);
     localStorage.removeItem("timerState");
     showToast("The timer stopped");
   };
 
-  const closeSettingsWithSave = () => {
-    saveState(secondsLeft);
-    setIsSettingsOpen(false);
-  };
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    type: "H" | "M" | "S",
+  ) => {
+    const input = e.currentTarget;
+    const cursorPosition = input.selectionStart || 0;
+    const inputLength = input.value.length;
 
-  const saveAllSettings = useCallback(() => {
-    localStorage.setItem(
-      "timerState",
-      JSON.stringify({
-        title,
-        secondsLeft,
-        isRunning,
-        isPaused,
-        lastUpdate: Date.now(),
-        timerShape,
-        timerColor,
-        timerSize,
-      }),
-    );
-  }, [
-    title,
-    secondsLeft,
-    isRunning,
-    isPaused,
-    timerShape,
-    timerColor,
-    timerSize,
-  ]);
+    // Backspace at beginning - move to previous field
+    if (e.key === "Backspace" && cursorPosition === 0) {
+      e.preventDefault();
+      if (type === "M") {
+        hoursRef.current?.focus();
+        const hoursLength = hoursRef.current?.value.length || 0;
+        setTimeout(() => {
+          hoursRef.current?.setSelectionRange(hoursLength, hoursLength);
+        }, 0);
+      } else if (type === "S") {
+        minutesRef.current?.focus();
+        const minutesLength = minutesRef.current?.value.length || 0;
+        setTimeout(() => {
+          minutesRef.current?.setSelectionRange(minutesLength, minutesLength);
+        }, 0);
+      }
+      return;
+    }
 
-  // color change and check
-  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const isValidHex = /^#([0-9A-F]{3}){1,2}$/i.test(value);
+    // Backspace handling - shift digits left and pad with 0
+    if (e.key === "Backspace" && cursorPosition > 0) {
+      e.preventDefault();
+      const currentValue = input.value;
+      // Remove character at cursor position - 1
+      const newValue =
+        currentValue.slice(0, cursorPosition - 1) +
+        currentValue.slice(cursorPosition);
 
-    if (isValidHex) {
-      setTimerColor(value);
-      saveState(secondsLeft);
-    } else {
-      showToast("Invalid color format");
+      // Pad with 0 on the right to maintain 2 digits
+      const paddedValue = (newValue + "0").slice(0, 2);
+      const newCursorPos = cursorPosition - 1;
+
+      // Update the appropriate field
+      if (type === "H") {
+        setHours(paddedValue);
+        setTime(`${paddedValue}:${minutes}:${seconds}`);
+        setSecondsLeft(
+          parseInt(paddedValue, 10) * 3600 +
+            parseInt(minutes, 10) * 60 +
+            parseInt(seconds, 10),
+        );
+        setTimeout(
+          () => hoursRef.current?.setSelectionRange(newCursorPos, newCursorPos),
+          0,
+        );
+      } else if (type === "M") {
+        setMinutes(paddedValue);
+        setTime(`${hours}:${paddedValue}:${seconds}`);
+        setSecondsLeft(
+          parseInt(hours, 10) * 3600 +
+            parseInt(paddedValue, 10) * 60 +
+            parseInt(seconds, 10),
+        );
+        setTimeout(
+          () =>
+            minutesRef.current?.setSelectionRange(newCursorPos, newCursorPos),
+          0,
+        );
+      } else {
+        setSeconds(paddedValue);
+        setTime(`${hours}:${minutes}:${paddedValue}`);
+        setSecondsLeft(
+          parseInt(hours, 10) * 3600 +
+            parseInt(minutes, 10) * 60 +
+            parseInt(paddedValue, 10),
+        );
+        setTimeout(
+          () =>
+            secondsRef.current?.setSelectionRange(newCursorPos, newCursorPos),
+          0,
+        );
+      }
+      return;
+    }
+
+    // Right arrow at the end of input - move to next field
+    if (e.key === "ArrowRight" && cursorPosition === inputLength) {
+      e.preventDefault();
+      if (type === "H") {
+        minutesRef.current?.focus();
+        minutesRef.current?.setSelectionRange(0, 0);
+      } else if (type === "M") {
+        secondsRef.current?.focus();
+        secondsRef.current?.setSelectionRange(0, 0);
+      }
+    }
+
+    // Left arrow at the beginning of input - move to previous field
+    if (e.key === "ArrowLeft" && cursorPosition === 0) {
+      e.preventDefault();
+      if (type === "M") {
+        hoursRef.current?.focus();
+        hoursRef.current?.setSelectionRange(
+          hoursRef.current.value.length,
+          hoursRef.current.value.length,
+        );
+      } else if (type === "S") {
+        minutesRef.current?.focus();
+        minutesRef.current?.setSelectionRange(
+          minutesRef.current.value.length,
+          minutesRef.current.value.length,
+        );
+      }
     }
   };
 
-  const getTimerClassName = () => {
-    const baseClass = "timer-display";
-    const runningClass = isRunning && timerShape !== "none" ? "running" : "";
-    const shapeClass =
-      timerShape === "none"
-        ? "no-shape"
-        : timerShape === "square"
-          ? "square"
-          : "";
-    return `${baseClass} ${runningClass} ${shapeClass}`;
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Select all text when first focused
+    const input = e.target;
+    // Use setTimeout to ensure it happens after any other events
+    setTimeout(() => {
+      input.select();
+    }, 0);
   };
 
-  const timerStyles = {
-    "--timer-scale": timerSize / 100,
-    width: `calc(clamp(150px, 40vmin, 80vmin) * ${timerSize / 100})`,
-    height:
-      timerShape !== "none"
-        ? `calc(clamp(150px, 40vmin, 80vmin) * ${timerSize / 100})`
-        : "auto",
-    fontSize: `calc(clamp(24px, 7vmin, 12vmin) * ${timerSize / 100})`,
-    padding: `calc(3vmin * ${timerSize / 100})`,
-    borderColor: timerColor,
-    color: timerColor,
-  } as React.CSSProperties;
+  const handleSetTime = (value: string, type: "H" | "M" | "S") => {
+    if (value !== "" && !/^\d+$/.test(value)) {
+      return;
+    }
 
-  // scale snapping
-  const snapTo = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250];
+    const numValue = value === "" ? 0 : parseInt(value, 10);
 
-  const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = parseInt(e.target.value, 10);
-    const snapped = snapTo.reduce((prev, curr) =>
-      Math.abs(curr - raw) < Math.abs(prev - raw) ? curr : prev,
+    if (type === "H") {
+      const values = numValue.toLocaleString().slice(-2);
+      if (Number(values) > 23) {
+        setHours(`0${values[1]}`);
+        setTime(`0${values[1]}:${minutes}:${seconds}`);
+        setSecondsLeft(
+          parseInt(values[1], 10) * 3600 +
+            parseInt(minutes, 10) * 60 +
+            parseInt(seconds, 10),
+        );
+        minutesRef.current?.focus();
+        return;
+      }
+      const formatted = values.toString().padStart(2, "0");
+
+      setHours(formatted);
+      setTime(`${formatted}:${minutes}:${seconds}`);
+      setSecondsLeft(
+        parseInt(formatted, 10) * 3600 +
+          parseInt(minutes, 10) * 60 +
+          parseInt(seconds, 10),
+      );
+
+      // Auto-focus next field when user enters 2 digits
+      if (value.length >= 2) {
+        minutesRef.current?.focus();
+        setTimeout(() => minutesRef.current?.select(), 0);
+      }
+    } else if (type === "M") {
+      const values = numValue.toLocaleString().slice(-2);
+      if (Number(values) > 59) {
+        setMinutes(`0${values[1]}`);
+        setTime(`${hours}:0${values[1]}:${seconds}`);
+        setSecondsLeft(
+          parseInt(hours, 10) * 3600 +
+            parseInt(values[1], 10) * 60 +
+            parseInt(seconds, 10),
+        );
+        secondsRef.current?.focus();
+        setTimeout(() => secondsRef.current?.select(), 0);
+        return;
+      }
+      const formatted = values.toString().padStart(2, "0");
+      setMinutes(formatted);
+      setTime(`${hours}:${formatted}:${seconds}`);
+      setSecondsLeft(
+        parseInt(hours, 10) * 3600 +
+          parseInt(formatted, 10) * 60 +
+          parseInt(seconds, 10),
+      );
+
+      // Auto-focus next field when user enters 2 digits
+      if (value.length >= 2) {
+        secondsRef.current?.focus();
+        setTimeout(() => secondsRef.current?.select(), 0);
+      }
+    } else {
+      const values = numValue.toLocaleString().slice(-2);
+      if (Number(values) > 59) {
+        setSeconds(`0${values[1]}`);
+        setTime(`${hours}:${minutes}:0${values[1]}`);
+        setSecondsLeft(
+          parseInt(hours, 10) * 3600 +
+            parseInt(minutes, 10) * 60 +
+            parseInt(values[1], 10),
+        );
+        return;
+      }
+      const formatted = values.toString().padStart(2, "0");
+      setSeconds(formatted);
+      setTime(`${hours}:${minutes}:${formatted}`);
+      setSecondsLeft(
+        parseInt(hours, 10) * 3600 +
+          parseInt(minutes, 10) * 60 +
+          parseInt(formatted, 10),
+      );
+      // Seconds is the last field, no auto-focus needed
+    }
+  };
+
+  const setPresetTime = (hours: number, minutes: number) => {
+    if (isRunning) return; // Don't allow changing time while timer is running
+
+    const formattedHours = hours.toString().padStart(2, "0");
+    const formattedMinutes = minutes.toString().padStart(2, "0");
+
+    setHours(formattedHours);
+    setMinutes(formattedMinutes);
+    setSeconds("00");
+    setTime(`${formattedHours}:${formattedMinutes}:00`);
+    setSecondsLeft(hours * 3600 + minutes * 60);
+  };
+
+  const addTimeToRunningTimer = (minutesToAdd: number) => {
+    if (!isRunning) return; // Only work when timer is running
+
+    const newSecondsLeft = secondsLeft + minutesToAdd * 60;
+    const newInitialSeconds = initialSeconds + minutesToAdd * 60;
+
+    setSecondsLeft(newSecondsLeft);
+    setInitialSeconds(newInitialSeconds);
+    formatTime(newSecondsLeft);
+    saveState(newSecondsLeft);
+    showToast(
+      `Added ${minutesToAdd} minute${minutesToAdd > 1 ? "s" : ""} to timer`,
     );
-
-    setTimerSize(snapped);
-    saveState(secondsLeft);
   };
 
-  const handleShapeChange = (shape: TimerShape) => {
-    setTimerShape(shape);
-    saveState(secondsLeft);
+  const dismissTimeUpMessage = () => {
+    setShowTimeUpMessage(false);
+    // Stop the sound
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0; // Reset to beginning
+    }
   };
 
   return (
     <div className="timer-container">
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "1rem",
-          marginBottom: "5rem",
-          padding: "1rem",
-        }}
-      >
+      <div className="mb-12 flex flex-col items-center gap-4 p-4">
         <input
           type="text"
           placeholder="Timer title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          disabled={isRunning}
-          className="timer-title"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className="timer-title w-full max-w-[800px] rounded-lg border-none bg-transparent px-4 py-2 text-center text-[42px] font-bold outline-none transition-colors duration-300 focus:bg-gray-100"
         />
-        <button
-          onClick={() => setIsSettingsOpen(true)}
-          aria-label="Open settings"
-          className="settings-button"
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span className="icon-[material-symbols--admin-panel-settings-outline] size-6 text-brand-violet" />
-        </button>
       </div>
+
+      {/* Quick Timer Presets */}
+      {!isRunning && (
+        <div className="mb-8 flex flex-wrap justify-center gap-4 px-8">
+          <button
+            onClick={() => setPresetTime(0, 30)}
+            className="cursor-pointer rounded-xl border-2 border-brand-violet bg-gray-100 px-8 py-3 text-lg font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white"
+          >
+            30 mins
+          </button>
+          <button
+            onClick={() => setPresetTime(0, 45)}
+            className="cursor-pointer rounded-xl border-2 border-brand-violet bg-gray-100 px-8 py-3 text-lg font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white"
+          >
+            45 mins
+          </button>
+          <button
+            onClick={() => setPresetTime(1, 0)}
+            className="cursor-pointer rounded-xl border-2 border-brand-violet bg-gray-100 px-8 py-3 text-lg font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white"
+          >
+            1 hour
+          </button>
+          <button
+            onClick={() => setPresetTime(1, 30)}
+            className="cursor-pointer rounded-xl border-2 border-brand-violet bg-gray-100 px-8 py-3 text-lg font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white"
+          >
+            1:30 hours
+          </button>
+          <button
+            onClick={() => setPresetTime(2, 0)}
+            className="cursor-pointer rounded-xl border-2 border-brand-violet bg-gray-100 px-8 py-3 text-lg font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white"
+          >
+            2 hours
+          </button>
+        </div>
+      )}
 
       <div className="timer-content">
         <div className="wc">
-          <input
-            type="text"
-            value={time}
-            onChange={handleTimeInput}
-            onBlur={handleTimeBlur}
-            disabled={isRunning}
-            className={getTimerClassName()}
-            style={timerStyles}
-          />
+          <div className="flex w-[800px] flex-shrink-0 items-center justify-center gap-2 text-[150px] text-brand-violet">
+            <input
+              ref={hoursRef}
+              type="text"
+              size={15}
+              value={hours}
+              onChange={(e) => handleSetTime(e.target.value, "H")}
+              onKeyDown={(e) => handleKeyDown(e, "H")}
+              onFocus={handleInputFocus}
+              onBlur={handleTimeBlur}
+              disabled={isRunning}
+              className="w-auto min-w-0 bg-transparent p-0 text-center text-[160px] outline-none"
+            />{" "}
+            <span> : </span>
+            <input
+              ref={minutesRef}
+              type="text"
+              size={15}
+              value={minutes}
+              onChange={(e) => handleSetTime(e.target.value, "M")}
+              onKeyDown={(e) => handleKeyDown(e, "M")}
+              onFocus={handleInputFocus}
+              onBlur={handleTimeBlur}
+              disabled={isRunning}
+              className="w-auto min-w-0 bg-transparent p-0 text-center text-[160px] outline-none"
+            />
+            <span> : </span>
+            <input
+              ref={secondsRef}
+              type="text"
+              size={15}
+              value={seconds}
+              onChange={(e) => handleSetTime(e.target.value, "S")}
+              onKeyDown={(e) => handleKeyDown(e, "S")}
+              onFocus={handleInputFocus}
+              onBlur={handleTimeBlur}
+              disabled={isRunning}
+              className="w-auto min-w-0 bg-transparent p-0 text-center text-[160px] outline-none"
+            />
+          </div>
+
+          {/* Progress Bar */}
+          {isRunning && initialSeconds > 0 && (
+            <div className="mx-auto my-12 w-full max-w-[900px] px-8">
+              <div className="relative h-10 w-full overflow-hidden rounded-[25px] bg-gray-300 shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
+                <div
+                  className="h-full rounded-[25px] bg-brand-violet shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-linear"
+                  style={{
+                    width: `${((initialSeconds - secondsLeft) / initialSeconds) * 100}%`,
+                  }}
+                />
+              </div>
+              <div className="mt-6 flex justify-center text-[32px] font-semibold">
+                <span className="color-contrast">
+                  Time passed:{" "}
+                  <strong className="text-brand-violet">
+                    {Math.floor((initialSeconds - secondsLeft) / 60)}:
+                    {String((initialSeconds - secondsLeft) % 60).padStart(
+                      2,
+                      "0",
+                    )}
+                  </strong>
+                </span>
+              </div>
+              <div className="mt-4 text-center text-5xl font-bold text-brand-violet">
+                {Math.round(
+                  ((initialSeconds - secondsLeft) / initialSeconds) * 100,
+                )}
+                %
+              </div>
+            </div>
+          )}
+
           <div className="timer-controls">
             {!isRunning ? (
               <button
@@ -437,86 +634,47 @@ const TimerPage = () => {
               </>
             )}
           </div>
-        </div>
-      </div>
-      {isSettingsOpen && (
-        <div
-          className="dialog-overlay"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              closeSettingsWithSave();
-            }
-          }}
-        >
-          <div className="dialog-content">
-            <div className="dialog-header">
-              <h3 className="dialog-title">Settings</h3>
-            </div>
 
-            <div className="settings-section">
-              <h4>Shape</h4>
-              <div className="shape-buttons">
-                <button
-                  className={`shape-button ${timerShape === "none" ? "active" : ""}`}
-                  onClick={() => handleShapeChange("none")}
-                >
-                  None
-                </button>
-                <button
-                  className={`shape-button ${timerShape === "circle" ? "active" : ""}`}
-                  onClick={() => handleShapeChange("circle")}
-                >
-                  Circle
-                </button>
-                <button
-                  className={`shape-button ${timerShape === "square" ? "active" : ""}`}
-                  onClick={() => handleShapeChange("square")}
-                >
-                  Square
-                </button>
-              </div>
-            </div>
-
-            <div className="settings-section">
-              <h4>Size</h4>
-              <input
-                type="range"
-                min="50"
-                max="250"
-                value={timerSize}
-                onChange={handleSizeChange}
-                className="size-slider"
-              />
-              <div className="size-value">{timerSize}%</div>
-            </div>
-
-            <div className="settings-section">
-              <h4>Color</h4>
-              <input
-                type="color"
-                value={timerColor}
-                onChange={handleColorChange}
-                className="color-slider"
-              />
-              <div className="size-value" style={{ color: timerColor }}>
-                {timerColor.toUpperCase()}
-              </div>
-            </div>
-
-            <div className="dialog-footer">
+          {/* Add Time Buttons - Show when timer is running */}
+          {isRunning && (
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <span className="mr-2 self-center text-lg font-semibold text-gray-600">
+                Add time:
+              </span>
               <button
-                className="dialog-button dialog-cancel"
-                onClick={() => {
-                  saveAllSettings();
-                  setIsSettingsOpen(false);
-                }}
+                onClick={() => addTimeToRunningTimer(5)}
+                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-5 py-2 text-base font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white"
               >
-                Save & Close
+                +5 min
+              </button>
+              <button
+                onClick={() => addTimeToRunningTimer(10)}
+                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-5 py-2 text-base font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white"
+              >
+                +10 min
+              </button>
+              <button
+                onClick={() => addTimeToRunningTimer(15)}
+                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-5 py-2 text-base font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white"
+              >
+                +15 min
+              </button>
+              <button
+                onClick={() => addTimeToRunningTimer(20)}
+                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-5 py-2 text-base font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white"
+              >
+                +20 min
+              </button>
+              <button
+                onClick={() => addTimeToRunningTimer(30)}
+                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-5 py-2 text-base font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white"
+              >
+                +30 min
               </button>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
       {showStopDialog && (
         <div
@@ -552,6 +710,36 @@ const TimerPage = () => {
           </div>
         </div>
       )}
+
+      {/* Time's Up Message */}
+      {showTimeUpMessage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={dismissTimeUpMessage}
+        >
+          <div
+            className="animate-in fade-in zoom-in relative mx-4 max-w-2xl rounded-3xl bg-white p-12 text-center shadow-2xl duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-6 text-8xl">⏰</div>
+            <h2 className="mb-4 text-6xl font-bold text-brand-violet">
+              Time's Up!
+            </h2>
+            {title && (
+              <p className="mb-8 text-3xl font-semibold text-gray-700">
+                {title}
+              </p>
+            )}
+            <button
+              onClick={dismissTimeUpMessage}
+              className="mt-4 cursor-pointer rounded-xl border-2 border-brand-violet bg-brand-violet px-12 py-4 text-2xl font-bold text-white transition-all duration-300 hover:bg-purple-700 hover:shadow-xl"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="toast-container">
         {toasts.map((toast) => (
           <div
@@ -563,6 +751,9 @@ const TimerPage = () => {
           </div>
         ))}
       </div>
+
+      {/* Hidden audio element for timer completion sound */}
+      <audio ref={audioRef} src="/sound_timer.wav" preload="auto" loop />
     </div>
   );
 };

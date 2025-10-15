@@ -79,6 +79,7 @@
     "react-error-boundary": "^4.0.13",
     "react-helmet-async": "^2.0.5",
     "react-markdown": "^9.0.1",
+    "react-number-format": "^5.4.4",
     "react-pdf": "^9.1.0",
     "remark-gfm": "^4.0.0",
     "sass-embedded": "^1.79.4",
