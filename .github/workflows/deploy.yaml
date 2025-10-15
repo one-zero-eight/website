@@ -1,4 +1,4 @@
-name: Build static files and deploy
+name: Build and deploy
 
 on:
   # Allow manual trigger of the workflow
@@ -8,7 +8,7 @@ on:
         description: Environment to deploy to
         type: environment
         required: true
-  # Verify build on any push; deploy only on main branch
+  # Verify build on any push (but only deploy on main)
   push:
   # Verify build in pull requests
   pull_request:
@@ -17,51 +17,61 @@ jobs:
   build:
     name: Build static files
     runs-on: ubuntu-latest
+    permissions: # Permissions granted to the 'GITHUB_TOKEN'
+      contents: read
+      packages: write
+      pull-requests: write
+      security-events: write
+
     environment: ${{ github.event.inputs.environment || 'staging' }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: 👾 Checkout repository
+        uses: actions/checkout@v5
 
-      - name: Configure environment variables
+      - name: 📦 Configure environment variables
         run: echo "${{ vars.ENV_VARIABLES }}" > .env.local
 
-      - name: Install pnpm
+      - name: 📦 Install pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Set up Node
+      - name: 📦 Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Build
+      - name: ⚡️ Build
         run: pnpm run build
 
-      - name: List files
+      - name: ⚡️ List files
         run: |
           # Save the list of files as a GitHub Actions step summary
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           ls -lAhR ./dist 2>&1 | tee -a $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-      - uses: actions/upload-artifact@v4
+      - name: ⚡️ Upload files as artifact
+        uses: actions/upload-artifact@v4
         with:
           name: static-files
           path: dist/
           if-no-files-found: error
 
   deploy:
+    # Only on manual trigger or push to main
     if: github.repository_owner == 'one-zero-eight' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
-    name: Deploy to server for ${{ github.event.inputs.environment || 'staging' }}
+    name: ⚡️ Deploy to server for ${{ github.event.inputs.environment || 'staging' }}
     needs: build
     runs-on: [self-hosted, innohassle]
     environment:
+      # Set the environment name and URL to be displayed in GitHub
       name: ${{ github.event.inputs.environment || 'staging' }}
       url: ${{ vars.DEPLOY_URL }}
     concurrency:
+      # Set the concurrency group to prevent multiple deployments at once
       group: ${{ github.event.inputs.environment || 'staging' }}
       cancel-in-progress: false
     steps:
