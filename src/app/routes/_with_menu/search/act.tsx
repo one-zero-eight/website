@@ -5,13 +5,13 @@ import { Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 
 type ActParams = {
-  q: string;
+  q?: string;
 };
 
-export const Route = createFileRoute("/_with_menu/act")({
+export const Route = createFileRoute("/_with_menu/search/act")({
   validateSearch: (act: Record<string, unknown>): ActParams => {
     return {
-      q: (act.q as string) ?? "",
+      q: (act.q as string | undefined) ?? "",
     };
   },
 
@@ -27,8 +27,8 @@ export const Route = createFileRoute("/_with_menu/act")({
           />
         </Helmet>
 
-        <TopbarWithToggleGroup currentTabText={q} />
-        <ActPage actQuery={q} />
+        <TopbarWithToggleGroup currentTabText={q ?? ""} />
+        <ActPage actQuery={q ?? ""} />
       </Suspense>
     );
   },

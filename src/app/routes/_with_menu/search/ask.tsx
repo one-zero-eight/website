@@ -5,13 +5,13 @@ import { Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 
 type AskParams = {
-  q: string;
+  q?: string;
 };
 
-export const Route = createFileRoute("/_with_menu/ask")({
+export const Route = createFileRoute("/_with_menu/search/ask")({
   validateSearch: (ask: Record<string, unknown>): AskParams => {
     return {
-      q: (ask.q as string) ?? "",
+      q: (ask.q as string | undefined) ?? "",
     };
   },
 
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_with_menu/ask")({
         </Helmet>
 
         <TopbarWithToggleGroup currentTabText={q} />
-        <AskPage askQuery={q} />
+        <AskPage askQuery={q ?? ""} />
       </Suspense>
     );
   },

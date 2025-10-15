@@ -21,21 +21,18 @@ export type ItemType = (LocalLink | ExternalLink | SeparatorItem) & {
 };
 
 export const items: ItemType[] = [
-  ...((import.meta.env.VITE_HIDE_SEARCH && []) || [
-    {
-      type: "local",
-      title: "Search",
-      to: "/search",
-      icon: <span className="icon-[material-symbols--search]" />,
-      badge: (
-        <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-          NEW
-        </span>
-      ),
-      hideOnMore: true,
-    },
-    { type: "separator", hideOnMore: true },
-  ]),
+  {
+    type: "local",
+    title: "Search",
+    to: "/search",
+    icon: <span className="icon-[material-symbols--search]" />,
+    badge: (
+      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
+        NEW
+      </span>
+    ),
+  },
+  { type: "separator" },
   {
     type: "local",
     title: "Dashboard",
@@ -75,7 +72,7 @@ export const items: ItemType[] = [
     to: "/workshops",
     icon: <span className="icon-[material-symbols--construction-rounded]" />,
   },
-  ...((import.meta.env.VITE_HIDE_SEARCH && []) || [
+  ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
       title: "Catalogue",
@@ -94,7 +91,7 @@ export const items: ItemType[] = [
     to: "/schedule",
     icon: <span className="icon-[mdi--calendars]" />,
   },
-  ...((import.meta.env.VITE_HIDE_SEARCH && []) || [
+  ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
       title: "Timer",
@@ -146,7 +143,7 @@ export const items: ItemType[] = [
     to: "/extension",
     icon: <span className="icon-[material-symbols--extension-outline]" />,
   },
-  ...((import.meta.env.VITE_HIDE_SEARCH && []) || [
+  ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
       title: "Guard",

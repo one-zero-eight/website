@@ -6,13 +6,13 @@ import { Helmet } from "react-helmet-async";
 
 type SearchParams = {
   // User's search query
-  q: string;
+  q?: string;
 };
 
-export const Route = createFileRoute("/_with_menu/search")({
+export const Route = createFileRoute("/_with_menu/search/")({
   validateSearch: (search: Record<string, unknown>): SearchParams => {
     return {
-      q: (search.q as string) ?? "",
+      q: (search.q as string | undefined) ?? "",
     };
   },
 
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_with_menu/search")({
         </Helmet>
 
         <TopbarWithToggleGroup currentTabText={q} />
-        <SearchPage searchQuery={q} />
+        <SearchPage searchQuery={q ?? ""} />
       </Suspense>
     );
   },

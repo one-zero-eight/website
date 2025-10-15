@@ -1,15 +1,15 @@
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
-import ToggleGroup from "./ToggleGroup";
 import clsx from "clsx";
+import ToggleGroup from "./ToggleGroup";
 
 export function TopbarWithToggleGroup({
   hideOnMobile = false,
   currentTabText,
 }: {
   hideOnMobile?: boolean;
-  currentTabText: string;
+  currentTabText: string | undefined;
 }) {
   return (
     <nav
