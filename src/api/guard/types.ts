@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+  "/google/health": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Health Check
+     * @description Health check endpoint to verify service is running.
+     */
+    get: operations["health_check_google_health_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/google/service-account-email": {
     parameters: {
       query?: never;
@@ -24,7 +44,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/google/documents": {
+  "/google/files": {
     parameters: {
       query?: never;
       header?: never;
@@ -32,47 +52,23 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Documents
-     * @description Get all documents for the user (brief info without joins and banned).
+     * Get Files
+     * @description Get all files for the user (brief info without joins and banned).
      */
-    get: operations["get_documents_google_documents_get"];
+    get: operations["get_files_google_files_get"];
     put?: never;
     /**
-     * Setup Spreadsheet
-     * @description Setup InNoHassle Guard sheet with description and return join link.
+     * Create File
+     * @description Create a new Google file (spreadsheet or document) and return join link.
      */
-    post: operations["setup_spreadsheet_google_documents_post"];
+    post: operations["create_file_google_files_post"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/google/documents/{slug}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get Document
-     * @description Get full document information including joins and banned users.
-     */
-    get: operations["get_document_google_documents__slug__get"];
-    put?: never;
-    post?: never;
-    /**
-     * Delete Document
-     * @description Delete a document link by slug (author only).
-     */
-    delete: operations["delete_document_google_documents__slug__delete"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/google/documents/{slug}/joins": {
+  "/google/files/transfer": {
     parameters: {
       query?: never;
       header?: never;
@@ -82,17 +78,61 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Join Document
-     * @description Add user to the spreadsheet with specified role.
+     * Transfer File
+     * @description Accept ownership invitation for existing file, add it to system, cleanup public access, lock editors' sharing.
      */
-    post: operations["join_document_google_documents__slug__joins_post"];
+    post: operations["transfer_file_google_files_transfer_post"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/google/documents/{slug}/bans": {
+  "/google/files/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get File
+     * @description Get full file information including joins and banned users.
+     */
+    get: operations["get_file_google_files__slug__get"];
+    put?: never;
+    post?: never;
+    /**
+     * Delete File
+     * @description Delete a file by slug (author only).
+     */
+    delete: operations["delete_file_google_files__slug__delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/google/files/{slug}/joins": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Join File
+     * @description Add user to the file with specified role.
+     */
+    post: operations["join_file_google_files__slug__joins_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/google/files/{slug}/bans": {
     parameters: {
       query?: never;
       header?: never;
@@ -103,16 +143,16 @@ export interface paths {
     put?: never;
     /**
      * Ban User
-     * @description Ban user from the document by their innopolis email.
+     * @description Ban user from the file.
      */
-    post: operations["ban_user_google_documents__slug__bans_post"];
+    post: operations["ban_user_google_files__slug__bans_post"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/google/documents/{slug}/bans/{user_id}": {
+  "/google/files/{slug}/bans/{user_id}": {
     parameters: {
       query?: never;
       header?: never;
@@ -126,7 +166,27 @@ export interface paths {
      * Unban User
      * @description Unban user by user_id (author only).
      */
-    delete: operations["unban_user_google_documents__slug__bans__user_id__delete"];
+    delete: operations["unban_user_google_files__slug__bans__user_id__delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/google/files/{slug}/cleanup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cleanup File Permissions
+     * @description Remove any user permissions that are not present in sso_joins.
+     */
+    post: operations["cleanup_file_permissions_google_files__slug__cleanup_post"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -138,58 +198,95 @@ export interface components {
   schemas: {
     /** BanUserRequest */
     BanUserRequest: {
-      /**
-       * User Id
-       * @example 5eb7cf5a86d9755df3a6c593
-       */
-      user_id: string;
+      user_id: components["schemas"]["PydanticObjectId"];
     };
     /** BanUserResponse */
     BanUserResponse: {
       /** Message */
       message: string;
     };
-    /** GoogleLink */
-    GoogleLink: {
+    /** CleanupResponse */
+    CleanupResponse: {
+      /** Removed */
+      removed: number;
+    };
+    /** CreateFileRequest */
+    CreateFileRequest: {
       /**
-       * Author Id
-       * @example 5eb7cf5a86d9755df3a6c593
+       * File Type
+       * @enum {string}
        */
-      author_id: string;
+      file_type: CreateFileRequestFile_type;
+      /** Title */
+      title: string;
       /**
        * User Role
        * @enum {string}
        */
-      user_role: GoogleLinkUser_role;
+      user_role: CreateFileRequestUser_role;
+    };
+    /** CreateFileResponse */
+    CreateFileResponse: {
+      /** File Id */
+      file_id: string;
+      /**
+       * File Type
+       * @enum {string}
+       */
+      file_type: CreateFileResponseFile_type;
+      /** Title */
+      title: string;
+      /**
+       * User Role
+       * @enum {string}
+       */
+      user_role: CreateFileResponseUser_role;
+      /** Join Link */
+      join_link: string;
+    };
+    /** DeleteFileResponse */
+    DeleteFileResponse: {
+      /** Message */
+      message: string;
+    };
+    /** GoogleFile */
+    GoogleFile: {
+      author_id: components["schemas"]["PydanticObjectId"];
+      /**
+       * User Role
+       * @enum {string}
+       */
+      user_role: GoogleFileUser_role;
       /** Slug */
       slug: string;
-      /** Spreadsheet Id */
-      spreadsheet_id: string;
+      /** File Id */
+      file_id: string;
+      /**
+       * File Type
+       * @enum {string}
+       */
+      file_type: GoogleFileFile_type;
       /** Title */
-      title?: string | null;
+      title: string;
       /** Expire At */
       expire_at?: string | null;
-      /** Joins */
-      joins?: components["schemas"]["GoogleLinkJoinInfo"][] | null;
-      /** Joins Count */
-      joins_count: number;
-      /** Banned */
-      banned?: components["schemas"]["GoogleLinkBanInfo"][] | null;
-      /** Banned Count */
-      banned_count: number;
+      /** Sso Joins */
+      sso_joins?: components["schemas"]["GoogleFileSSOJoinInfo"][] | null;
+      /** Sso Joins Count */
+      sso_joins_count: number;
+      /** Sso Banned */
+      sso_banned?: components["schemas"]["GoogleFileSSOBanInfo"][] | null;
+      /** Sso Banned Count */
+      sso_banned_count: number;
       /**
        * Created At
        * Format: date-time
        */
       created_at: string;
     };
-    /** GoogleLinkBanInfo */
-    GoogleLinkBanInfo: {
-      /**
-       * User Id
-       * @example 5eb7cf5a86d9755df3a6c593
-       */
-      user_id: string;
+    /** GoogleFileSSOBanInfo */
+    GoogleFileSSOBanInfo: {
+      user_id: components["schemas"]["PydanticObjectId"];
       /** Gmail */
       gmail: string;
       /** Innomail */
@@ -200,13 +297,9 @@ export interface components {
        */
       banned_at: string;
     };
-    /** GoogleLinkJoinInfo */
-    GoogleLinkJoinInfo: {
-      /**
-       * User Id
-       * @example 5eb7cf5a86d9755df3a6c593
-       */
-      user_id: string;
+    /** GoogleFileSSOJoinInfo */
+    GoogleFileSSOJoinInfo: {
+      user_id: components["schemas"]["PydanticObjectId"];
       /** Gmail */
       gmail: string;
       /** Innomail */
@@ -222,45 +315,67 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
-    /** JoinDocumentRequest */
-    JoinDocumentRequest: {
+    /** HealthCheckResponse */
+    HealthCheckResponse: {
+      /** Status */
+      status: string;
+      /** Service */
+      service: string;
+    };
+    /** JoinFileRequest */
+    JoinFileRequest: {
       /** Gmail */
       gmail: string;
     };
-    /** JoinDocumentResponse */
-    JoinDocumentResponse: {
+    /** JoinFileResponse */
+    JoinFileResponse: {
       /** Message */
       message: string;
-      /** Spreadsheet Id */
-      spreadsheet_id: string;
+      /** File Id */
+      file_id: string;
     };
+    /** @example 5eb7cf5a86d9755df3a6c593 */
+    PydanticObjectId: string;
     /** ServiceAccountEmailResponse */
     ServiceAccountEmailResponse: {
       /** Email */
       email: string;
     };
-    /** SetupSpreadsheetRequest */
-    SetupSpreadsheetRequest: {
-      /** Spreadsheet Id */
-      spreadsheet_id: string;
+    /** TransferFileRequest */
+    TransferFileRequest: {
+      /** File Id */
+      file_id: string;
       /**
-       * Respondent Role
+       * User Role
        * @enum {string}
        */
-      respondent_role: SetupSpreadsheetRequestRespondent_role;
-      /** Title */
-      title?: string | null;
+      user_role: TransferFileRequestUser_role;
     };
-    /** SetupSpreadsheetResponse */
-    SetupSpreadsheetResponse: {
-      /** Sheet Title */
-      sheet_title: string;
-      /** Spreadsheet Id */
-      spreadsheet_id: string;
-      /** Role Display */
-      role_display: string;
+    /** TransferFileResponse */
+    TransferFileResponse: {
+      /** File Id */
+      file_id: string;
+      /**
+       * File Type
+       * @enum {string}
+       */
+      file_type: TransferFileResponseFile_type;
+      /** Title */
+      title: string;
+      /**
+       * User Role
+       * @enum {string}
+       */
+      user_role: TransferFileResponseUser_role;
       /** Join Link */
       join_link: string;
+      /** Cleanup Recommended */
+      cleanup_recommended: boolean;
+    };
+    /** UnbanUserResponse */
+    UnbanUserResponse: {
+      /** Message */
+      message: string;
     };
     /** ValidationError */
     ValidationError: {
@@ -280,26 +395,56 @@ export interface components {
 }
 export type SchemaBanUserRequest = components["schemas"]["BanUserRequest"];
 export type SchemaBanUserResponse = components["schemas"]["BanUserResponse"];
-export type SchemaGoogleLink = components["schemas"]["GoogleLink"];
-export type SchemaGoogleLinkBanInfo =
-  components["schemas"]["GoogleLinkBanInfo"];
-export type SchemaGoogleLinkJoinInfo =
-  components["schemas"]["GoogleLinkJoinInfo"];
+export type SchemaCleanupResponse = components["schemas"]["CleanupResponse"];
+export type SchemaCreateFileRequest =
+  components["schemas"]["CreateFileRequest"];
+export type SchemaCreateFileResponse =
+  components["schemas"]["CreateFileResponse"];
+export type SchemaDeleteFileResponse =
+  components["schemas"]["DeleteFileResponse"];
+export type SchemaGoogleFile = components["schemas"]["GoogleFile"];
+export type SchemaGoogleFileSsoBanInfo =
+  components["schemas"]["GoogleFileSSOBanInfo"];
+export type SchemaGoogleFileSsoJoinInfo =
+  components["schemas"]["GoogleFileSSOJoinInfo"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
-export type SchemaJoinDocumentRequest =
-  components["schemas"]["JoinDocumentRequest"];
-export type SchemaJoinDocumentResponse =
-  components["schemas"]["JoinDocumentResponse"];
+export type SchemaHealthCheckResponse =
+  components["schemas"]["HealthCheckResponse"];
+export type SchemaJoinFileRequest = components["schemas"]["JoinFileRequest"];
+export type SchemaJoinFileResponse = components["schemas"]["JoinFileResponse"];
+export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaServiceAccountEmailResponse =
   components["schemas"]["ServiceAccountEmailResponse"];
-export type SchemaSetupSpreadsheetRequest =
-  components["schemas"]["SetupSpreadsheetRequest"];
-export type SchemaSetupSpreadsheetResponse =
-  components["schemas"]["SetupSpreadsheetResponse"];
+export type SchemaTransferFileRequest =
+  components["schemas"]["TransferFileRequest"];
+export type SchemaTransferFileResponse =
+  components["schemas"]["TransferFileResponse"];
+export type SchemaUnbanUserResponse =
+  components["schemas"]["UnbanUserResponse"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
+  health_check_google_health_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HealthCheckResponse"];
+        };
+      };
+    };
+  };
   get_service_account_email_google_service_account_email_get: {
     parameters: {
       query?: never;
@@ -327,7 +472,7 @@ export interface operations {
       };
     };
   };
-  get_documents_google_documents_get: {
+  get_files_google_files_get: {
     parameters: {
       query?: never;
       header?: never;
@@ -342,15 +487,8 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["GoogleLink"][];
+          "application/json": components["schemas"]["GoogleFile"][];
         };
-      };
-      /** @description Invalid token OR No credentials provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
       };
       /** @description Internal Server Error */
       500: {
@@ -361,7 +499,7 @@ export interface operations {
       };
     };
   };
-  setup_spreadsheet_google_documents_post: {
+  create_file_google_files_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -370,7 +508,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetupSpreadsheetRequest"];
+        "application/json": components["schemas"]["CreateFileRequest"];
       };
     };
     responses: {
@@ -380,30 +518,56 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["SetupSpreadsheetResponse"];
+          "application/json": components["schemas"]["CreateFileResponse"];
         };
       };
-      /** @description Spreadsheet already setup by another user */
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  transfer_file_google_files_transfer_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TransferFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TransferFileResponse"];
+        };
+      };
+      /** @description Unsupported mimeType: {mime} */
       400: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Invalid token OR No credentials provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Service account {service_email()} does not have access to this spreadsheet. Please add the service account as an editor to the spreadsheet first. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -422,7 +586,7 @@ export interface operations {
       };
     };
   };
-  get_document_google_documents__slug__get: {
+  get_file_google_files__slug__get: {
     parameters: {
       query?: never;
       header?: never;
@@ -439,29 +603,8 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["GoogleLink"];
+          "application/json": components["schemas"]["GoogleFile"];
         };
-      };
-      /** @description Invalid token OR No credentials provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description You are not the author of this document */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Document not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -481,7 +624,7 @@ export interface operations {
       };
     };
   };
-  delete_document_google_documents__slug__delete: {
+  delete_file_google_files__slug__delete: {
     parameters: {
       query?: never;
       header?: never;
@@ -498,29 +641,8 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["DeleteFileResponse"];
         };
-      };
-      /** @description Invalid token OR No credentials provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description You are not the author of this document */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Document not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -540,7 +662,7 @@ export interface operations {
       };
     };
   };
-  join_document_google_documents__slug__joins_post: {
+  join_file_google_files__slug__joins_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -551,7 +673,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["JoinDocumentRequest"];
+        "application/json": components["schemas"]["JoinFileRequest"];
       };
     };
     responses: {
@@ -561,32 +683,11 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["JoinDocumentResponse"];
+          "application/json": components["schemas"]["JoinFileResponse"];
         };
       };
-      /** @description Invalid token OR No credentials provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Permission denied. Make sure the service account has access to the spreadsheet. OR Permission denied. You are banned from this document. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Spreadsheet not found. */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description User already joined the document with another gmail */
-      409: {
+      /** @description Gmail {e.gmail} does not exist or is not associated with a Google account */
+      400: {
         headers: {
           [name: string]: unknown;
         };
@@ -610,7 +711,7 @@ export interface operations {
       };
     };
   };
-  ban_user_google_documents__slug__bans_post: {
+  ban_user_google_files__slug__bans_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -634,21 +735,7 @@ export interface operations {
           "application/json": components["schemas"]["BanUserResponse"];
         };
       };
-      /** @description Invalid token OR No credentials provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description You are not the author of this document */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Document not found OR User with user_id {request.user_id} not found in joins */
+      /** @description User with user_id {request.user_id} not found in joins */
       404: {
         headers: {
           [name: string]: unknown;
@@ -673,7 +760,7 @@ export interface operations {
       };
     };
   };
-  unban_user_google_documents__slug__bans__user_id__delete: {
+  unban_user_google_files__slug__bans__user_id__delete: {
     parameters: {
       query?: never;
       header?: never;
@@ -691,36 +778,46 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["UnbanUserResponse"];
         };
       };
-      /** @description Invalid user_id */
-      400: {
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Invalid token OR No credentials provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
+    };
+  };
+  cleanup_file_permissions_google_files__slug__cleanup_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
       };
-      /** @description You are not the author of this document */
-      403: {
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
-      };
-      /** @description Document not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
+        content: {
+          "application/json": components["schemas"]["CleanupResponse"];
         };
-        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -741,11 +838,39 @@ export interface operations {
     };
   };
 }
-export enum GoogleLinkUser_role {
+export enum CreateFileRequestFile_type {
+  spreadsheet = "spreadsheet",
+  document = "document",
+}
+export enum CreateFileRequestUser_role {
   writer = "writer",
   reader = "reader",
 }
-export enum SetupSpreadsheetRequestRespondent_role {
+export enum CreateFileResponseFile_type {
+  spreadsheet = "spreadsheet",
+  document = "document",
+}
+export enum CreateFileResponseUser_role {
+  writer = "writer",
+  reader = "reader",
+}
+export enum GoogleFileUser_role {
+  writer = "writer",
+  reader = "reader",
+}
+export enum GoogleFileFile_type {
+  spreadsheet = "spreadsheet",
+  document = "document",
+}
+export enum TransferFileRequestUser_role {
+  writer = "writer",
+  reader = "reader",
+}
+export enum TransferFileResponseFile_type {
+  spreadsheet = "spreadsheet",
+  document = "document",
+}
+export enum TransferFileResponseUser_role {
   writer = "writer",
   reader = "reader",
 }

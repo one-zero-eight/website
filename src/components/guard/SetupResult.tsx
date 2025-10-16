@@ -1,15 +1,18 @@
 import { useState } from "react";
+import { buildSheetsUrl, buildDocsUrl } from "./utils";
 
 interface SetupResultProps {
   result: {
-    sheetTitle: string;
-    spreadsheetId: string;
+    title: string;
+    fileId: string;
+    fileType: string;
     roleDisplay: string;
     joinLink: string;
   };
+  onDismiss?: () => void;
 }
 
-export function SetupResult({ result }: SetupResultProps) {
+export function SetupResult({ result, onDismiss }: SetupResultProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -22,7 +25,10 @@ export function SetupResult({ result }: SetupResultProps) {
     }
   };
 
-  const spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${result.spreadsheetId}/edit`;
+  const fileUrl =
+    result.fileType === "spreadsheet"
+      ? buildSheetsUrl(result.fileId)
+      : buildDocsUrl(result.fileId);
 
   return (
     <div className="mt-6 rounded-lg border-2 border-green-200 bg-green-50 p-6 dark:border-green-800 dark:bg-green-900/20">
@@ -61,16 +67,28 @@ export function SetupResult({ result }: SetupResultProps) {
         </p>
       </div>
 
-      <div className="mt-6 border-t border-green-200 pt-6 dark:border-green-800">
+      <div className="mt-6 flex items-center justify-between border-t border-green-200 pt-6 dark:border-green-800">
         <a
-          href={spreadsheetUrl}
+          href={fileUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 font-medium text-brand-violet transition-colors hover:text-[#6600CC]"
         >
-          <span>Open Spreadsheet</span>
+          <span>
+            Open{" "}
+            {result.fileType === "spreadsheet" ? "Spreadsheet" : "Document"}
+          </span>
           <span className="icon-[material-symbols--open-in-new] text-lg" />
         </a>
+
+        {onDismiss ? (
+          <button
+            onClick={onDismiss}
+            className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:border-contrast/40"
+          >
+            Dismiss
+          </button>
+        ) : null}
       </div>
     </div>
   );

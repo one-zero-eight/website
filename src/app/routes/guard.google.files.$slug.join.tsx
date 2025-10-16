@@ -7,8 +7,8 @@ import { Helmet } from "react-helmet-async";
 
 const GMAIL_STORAGE_KEY = "guard_saved_gmail";
 
-export const Route = createFileRoute("/guard/google/documents/$slug/join")({
-  component: function GuardGoogleJoinDocumentPage() {
+export const Route = createFileRoute("/guard/google/files/$slug/join" as any)({
+  component: function GuardGoogleJoinFilePage() {
     const { slug } = Route.useParams();
     const { me } = useMe();
     const [gmail, setGmail] = useState("");
@@ -16,14 +16,14 @@ export const Route = createFileRoute("/guard/google/documents/$slug/join")({
     const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 
     const {
-      mutate: joinDocument,
+      mutate: joinFile,
       isPending,
       isSuccess,
       error,
-    } = $guard.useMutation("post", "/google/documents/{slug}/joins");
+    } = $guard.useMutation("post", "/google/files/{slug}/joins");
 
     const errorMessage = error
-      ? ((error as any)?.detail ?? "Failed to join document. Please try again.")
+      ? ((error as any)?.detail ?? "Failed to join file. Please try again.")
       : null;
 
     useEffect(() => {
@@ -46,21 +46,15 @@ export const Route = createFileRoute("/guard/google/documents/$slug/join")({
       e.preventDefault();
       if (!slug || !gmail.trim()) return;
 
-      joinDocument(
+      joinFile(
         {
-          params: {
-            path: {
-              slug: slug,
-            },
-          },
-          body: {
-            gmail: gmail.trim(),
-          },
+          params: { path: { slug } },
+          body: { gmail: gmail.trim() },
         },
         {
           onSuccess: (data) => {
             localStorage.setItem(GMAIL_STORAGE_KEY, gmail.trim());
-            const url = `https://docs.google.com/spreadsheets/d/${data.spreadsheet_id}/edit`;
+            const url = `https://docs.google.com/spreadsheets/d/${data.file_id}/edit`;
             setRedirectUrl(url);
             setCountdown(3);
           },
@@ -72,10 +66,10 @@ export const Route = createFileRoute("/guard/google/documents/$slug/join")({
       return (
         <>
           <Helmet>
-            <title>Sign In - Join InNoHassle Guard Document</title>
+            <title>Sign In - Join InNoHassle Guard File</title>
           </Helmet>
           <div className="flex h-full items-center justify-center">
-            <AuthWall signInRedirect={`/guard/google/documents/${slug}/join`} />
+            <AuthWall signInRedirect={`/guard/google/files/${slug}/join`} />
           </div>
         </>
       );
@@ -84,11 +78,11 @@ export const Route = createFileRoute("/guard/google/documents/$slug/join")({
     return (
       <div className="flex grow items-center justify-center p-5">
         <Helmet>
-          <title>Join InNoHassle Guard Document</title>
+          <title>Join InNoHassle Guard File</title>
         </Helmet>
         <div className="w-full max-w-xl rounded-xl bg-floating p-10 shadow-lg">
           <h1 className="mb-2 text-center text-3xl font-bold">
-            Join InNoHassle Guard Document
+            Join InNoHassle Guard File
           </h1>
           <p className="mb-8 text-center text-sm text-contrast/70">
             Enter your Gmail address to get access to the Google Spreadsheet
@@ -121,7 +115,7 @@ export const Route = createFileRoute("/guard/google/documents/$slug/join")({
                 disabled={isPending || !gmail.trim()}
                 className="w-full rounded-lg bg-brand-violet py-4 text-base font-medium text-white transition-colors hover:bg-[#6600CC] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isPending ? "Adding you to the document..." : "Join Document"}
+                {isPending ? "Adding you to the file..." : "Join File"}
               </button>
             </form>
           ) : null}
@@ -131,7 +125,7 @@ export const Route = createFileRoute("/guard/google/documents/$slug/join")({
               <div className="mb-2 inline-block">
                 <span className="icon-[mdi--loading] animate-spin text-5xl" />
               </div>
-              <p>Adding you to the document...</p>
+              <p>Adding you to the file...</p>
             </div>
           )}
 
