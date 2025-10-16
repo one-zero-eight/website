@@ -1,4 +1,6 @@
 import { mapsTypes } from "@/api/maps";
+import { $roomBooking } from "@/api/room-booking";
+import { RoomAccess_level } from "@/api/room-booking/types.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { getMapAreaUrl } from "@/lib/maps/links.ts";
 import {
@@ -119,17 +121,7 @@ export function DetailsPopup({
             </div>
           )}
           {area.room_booking_id && (
-            <div className="flex flex-row gap-2">
-              <div className="w-6">
-                <span className="icon-[ph--door-open] text-2xl" />
-              </div>
-              <Link
-                to="/room-booking"
-                className="flex w-full whitespace-pre-wrap py-1 underline underline-offset-2 [overflow-wrap:anywhere]"
-              >
-                Book this room
-              </Link>
-            </div>
+            <RoomBookingDetails roomId={area.room_booking_id} />
           )}
           <FloatingArrow
             ref={arrowRef}
@@ -139,6 +131,57 @@ export function DetailsPopup({
         </div>
       </FloatingFocusManager>
     </FloatingPortal>
+  );
+}
+
+function RoomBookingDetails({ roomId }: { roomId: string }) {
+  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
+  const room = rooms?.find((r) => r.id === roomId);
+
+  const accessLevelColors: Record<RoomAccess_level, string> = {
+    [RoomAccess_level.yellow]: "#FFD700", // Gold
+    [RoomAccess_level.red]: "#FF4500", // OrangeRed
+    [RoomAccess_level.special]: "#ac72e4", // Violet
+  };
+
+  return (
+    <>
+      {room?.capacity && (
+        <div className="flex flex-row gap-2">
+          <div className="w-6">
+            <span className="icon-[material-symbols--event-seat-outline-rounded] text-2xl" />
+          </div>
+          <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+            Capacity: {room.capacity} people
+          </p>
+        </div>
+      )}
+      {room?.access_level && (
+        <div className="flex flex-row gap-2">
+          <div
+            className="w-6"
+            style={{ color: accessLevelColors[room.access_level] || "inherit" }}
+          >
+            <span className="icon-[material-symbols--lock-open-circle-outline] text-2xl" />
+          </div>
+          <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+            Access level: {room.access_level}
+          </p>
+        </div>
+      )}
+      <div className="flex flex-row gap-2">
+        <div className="w-6">
+          <span className="icon-[ph--door-open] text-2xl" />
+        </div>
+        <Link
+          to="/room-booking/rooms/$room"
+          params={{ room: roomId }}
+          className="flex w-full whitespace-pre-wrap py-1 underline underline-offset-2 [overflow-wrap:anywhere]"
+        >
+          Book this room
+        </Link>
+      </div>
+    </>
   );
 }
 
