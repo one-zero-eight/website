@@ -34,9 +34,11 @@ export function useServiceAccountEmail() {
  */
 export function useGuardFiles() {
   const query = $guard.useQuery("get", "/google/files");
+
   return {
-    files: query.data?.files || [],
+    files: query.data || [],
     isLoading: query.isLoading,
+    error: query.error,
   };
 }
 

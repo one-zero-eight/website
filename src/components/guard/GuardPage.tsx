@@ -19,7 +19,11 @@ export function GuardPage() {
   const [detailsSearch, setDetailsSearch] = useState("");
 
   const { serviceEmail } = useServiceAccountEmail();
-  const { files, isLoading: isLoadingFiles } = useGuardFiles();
+  const {
+    files,
+    isLoading: isLoadingFiles,
+    error: filesError,
+  } = useGuardFiles();
   const { file: selectedFile, isLoading: isLoadingFile } =
     useGuardFile(selectedSlug);
   const mutations = useGuardMutations();
@@ -93,6 +97,11 @@ export function GuardPage() {
           <FilesSection search={filesSearch} onSearchChange={setFilesSearch}>
             {isLoadingFiles ? (
               <div className="text-contrast/70">Loading...</div>
+            ) : filesError ? (
+              <div className="rounded border-2 border-red-400 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-600 dark:bg-red-900/20 dark:text-red-200">
+                Error loading files:{" "}
+                {(filesError as any)?.message || "Unknown error"}
+              </div>
             ) : files.length > 0 ? (
               <FilesList
                 files={files}
