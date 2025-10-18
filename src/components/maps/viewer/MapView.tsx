@@ -6,9 +6,11 @@ import { MapViewer } from "./MapViewer.tsx";
 export function MapView({
   scene,
   highlightAreas,
+  disablePopup = false,
 }: {
   scene: mapsTypes.SchemaScene;
   highlightAreas: mapsTypes.SchemaArea[];
+  disablePopup?: boolean;
 }) {
   const [fullscreen, setFullscreen] = useState(false);
   const switchFullscreen = useCallback(() => setFullscreen((v) => !v), []);
@@ -54,14 +56,20 @@ export function MapView({
   return (
     <FullscreenMode enable={fullscreen}>
       <div className="relative h-full w-full overflow-hidden">
-        <MapViewer scene={scene} highlightAreas={highlightAreas} />
-        <button
-          type="button"
-          className="absolute bottom-2 right-2 flex h-fit rounded-xl bg-primary/50 px-2 py-2 hover:bg-primary/75"
-          onClick={() => switchFullscreen()}
-        >
-          <span className="icon-[material-symbols--fullscreen] text-2xl" />
-        </button>
+        <MapViewer
+          scene={scene}
+          highlightAreas={highlightAreas}
+          disablePopup={disablePopup}
+        />
+        {!disablePopup && (
+          <button
+            type="button"
+            className="absolute bottom-2 right-2 flex h-fit rounded-xl bg-primary/50 px-2 py-2 hover:bg-primary/75"
+            onClick={() => switchFullscreen()}
+          >
+            <span className="icon-[material-symbols--fullscreen] text-2xl" />
+          </button>
+        )}
       </div>
     </FullscreenMode>
   );

@@ -7,9 +7,11 @@ import { useEventListener } from "usehooks-ts";
 export const MapViewer = memo(function MapViewer({
   scene,
   highlightAreas,
+  disablePopup = false,
 }: {
   scene: mapsTypes.SchemaScene;
   highlightAreas: mapsTypes.SchemaArea[];
+  disablePopup?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
@@ -209,6 +211,8 @@ export const MapViewer = memo(function MapViewer({
   useEventListener(
     "mousedown",
     (e) => {
+      if (disablePopup) return;
+
       const onMouseUp = (e2: MouseEvent) => {
         window.removeEventListener("mouseup", onMouseUp);
 
@@ -238,6 +242,7 @@ export const MapViewer = memo(function MapViewer({
   useEventListener(
     "touchstart",
     (e) => {
+      if (disablePopup) return;
       if (e.touches.length !== 1) return;
 
       const onTouchEnd = (e2: TouchEvent) => {
@@ -356,11 +361,18 @@ export const MapViewer = memo(function MapViewer({
       <style type="text/css">
         {`
         ${scene.areas.map((a) => `[id="${a.svg_polygon_id}"]`).join(",")} {
-          cursor: pointer;
+          cursor: ${disablePopup ? "default" : "pointer"};
         }
-        ${scene.areas.map((a) => `[id="${a.svg_polygon_id}"]:hover`).join(",")} {
+        ${
+          !disablePopup
+            ? scene.areas
+                .map((a) => `[id="${a.svg_polygon_id}"]:hover`)
+                .join(",") +
+              ` {
           opacity: 0.2 !important;
           fill: violet !important;
+        }`
+            : ""
         }
         `}
       </style>
@@ -371,13 +383,15 @@ export const MapViewer = memo(function MapViewer({
           className="h-full w-full [&>svg]:!h-full [&>svg]:!w-full"
         />
       )}
-      <DetailsPopup
-        elementRef={popupElement}
-        scene={scene}
-        area={popupArea}
-        isOpen={popupIsOpen}
-        setIsOpen={setPopupIsOpen}
-      />
+      {!disablePopup && (
+        <DetailsPopup
+          elementRef={popupElement}
+          scene={scene}
+          area={popupArea}
+          isOpen={popupIsOpen}
+          setIsOpen={setPopupIsOpen}
+        />
+      )}
     </div>
   );
 });

@@ -2,7 +2,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import Tooltip from "@/components/common/Tooltip.tsx";
-import { DeleteBookingModal } from "@/components/room-booking/list/DeleteBookingModal.tsx";
+import { DeleteBookingModal } from "@/components/room-booking/bookings-list/DeleteBookingModal.tsx";
 import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";

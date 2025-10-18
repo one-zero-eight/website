@@ -1153,15 +1153,10 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
                   [$style.placeholder]: room === 'placeholder',
                 }"
               >
-                <span>
-                  {{
-                    room === "placeholder"
-                      ? "xxx"
-                      : compactModeEnabled
-                        ? room.short_name
-                        : room.title
-                  }}
-                </span>
+                <a v-if="room === 'placeholder'" href="#">xxx</a>
+                <a v-else :href="`/room-booking/rooms/${room.id}`">
+                  {{ compactModeEnabled ? room.short_name : room.title }}
+                </a>
               </div>
 
               <div
@@ -1481,14 +1476,18 @@ $button-height: 50px;
   border-style: solid;
   border-right-width: 1px;
 
-  & > span {
+  & > a {
     text-wrap: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   &.placeholder {
-    & > span {
+    & > a {
       @include skeleton;
       width: 100%;
     }
