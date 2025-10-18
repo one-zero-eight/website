@@ -73,7 +73,12 @@ function bookingWarningForSlot({ room, start, end }: Slot) {
 
 function sanitizeTitle(title: string | undefined): string {
   if (!title) return "";
-  return title.replace("Students Booking Service", "").trim();
+  const sanitized = title.replace("Students Booking Service", "").trim();
+  if (sanitized) {
+    return sanitized;
+  } else {
+    return title.trim(); // Do not remove "Students Booking Service" if it's the only content
+  }
 }
 
 export function BookingModal({
@@ -148,6 +153,10 @@ export function BookingModal({
             queryClient.invalidateQueries({
               // All /bookings/ queries, with any params
               queryKey: ["roomBooking", "get", "/bookings/"],
+            });
+            queryClient.invalidateQueries({
+              // All /room/{id}/bookings queries, with any params
+              queryKey: ["roomBooking", "get", "/room/{id}/bookings"],
             });
           }, 3000);
         },
