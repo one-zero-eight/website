@@ -488,46 +488,46 @@ const TimerPage = () => {
 
   return (
     <div className="timer-container">
-      <div className="mb-12 flex flex-col items-center gap-4 p-4">
+      <div className="mb-6 flex flex-col items-center gap-4 p-4 md:mb-12">
         <input
           type="text"
           placeholder="Timer title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="timer-title w-full max-w-[800px] rounded-lg border-none bg-transparent px-4 py-2 text-center text-[42px] font-bold outline-none transition-colors duration-300 focus:bg-gray-100"
+          className="timer-title w-full max-w-[800px] rounded-lg border-none bg-transparent px-4 py-2 text-center text-xl font-bold outline-none transition-colors duration-300 focus:bg-gray-100 sm:text-2xl md:text-3xl lg:text-[42px]"
         />
       </div>
 
       {/* Quick Timer Presets */}
       {!isRunning && (
-        <div className="mb-8 flex flex-wrap justify-center gap-4 px-8">
+        <div className="mb-6 flex flex-wrap justify-center gap-2 px-4 sm:gap-3 md:mb-8 md:gap-4 md:px-8">
           <button
             onClick={() => setPresetTime(0, 30)}
-            className="cursor-pointer rounded-xl border-2 border-brand-violet bg-gray-100 px-8 py-3 text-lg font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white"
+            className="cursor-pointer rounded-lg border-2 border-brand-violet bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
           >
             30 mins
           </button>
           <button
             onClick={() => setPresetTime(0, 45)}
-            className="cursor-pointer rounded-xl border-2 border-brand-violet bg-gray-100 px-8 py-3 text-lg font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white"
+            className="cursor-pointer rounded-lg border-2 border-brand-violet bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
           >
             45 mins
           </button>
           <button
             onClick={() => setPresetTime(1, 0)}
-            className="cursor-pointer rounded-xl border-2 border-brand-violet bg-gray-100 px-8 py-3 text-lg font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white"
+            className="cursor-pointer rounded-lg border-2 border-brand-violet bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
           >
             1 hour
           </button>
           <button
             onClick={() => setPresetTime(1, 30)}
-            className="cursor-pointer rounded-xl border-2 border-brand-violet bg-gray-100 px-8 py-3 text-lg font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white"
+            className="cursor-pointer rounded-lg border-2 border-brand-violet bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
           >
             1:30 hours
           </button>
           <button
             onClick={() => setPresetTime(2, 0)}
-            className="cursor-pointer rounded-xl border-2 border-brand-violet bg-gray-100 px-8 py-3 text-lg font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white"
+            className="cursor-pointer rounded-lg border-2 border-brand-violet bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:bg-brand-violet hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
           >
             2 hours
           </button>
@@ -536,7 +536,7 @@ const TimerPage = () => {
 
       <div className="timer-content">
         <div className="wc">
-          <div className="flex w-[800px] flex-shrink-0 items-center justify-center gap-2 text-[150px] text-brand-violet">
+          <div className="flex w-full max-w-[90vw] flex-shrink-0 items-center justify-center gap-1 text-5xl text-brand-violet sm:gap-2 sm:text-6xl md:w-[800px] md:text-7xl lg:text-[150px]">
             <input
               ref={hoursRef}
               type="text"
@@ -547,7 +547,7 @@ const TimerPage = () => {
               onFocus={handleInputFocus}
               onBlur={handleTimeBlur}
               disabled={isRunning}
-              className="w-auto min-w-0 bg-transparent p-0 text-center text-[160px] outline-none"
+              className="w-auto min-w-0 bg-transparent p-0 text-center text-5xl outline-none sm:text-6xl md:text-7xl lg:text-[160px]"
             />{" "}
             <span> : </span>
             <input
@@ -560,7 +560,7 @@ const TimerPage = () => {
               onFocus={handleInputFocus}
               onBlur={handleTimeBlur}
               disabled={isRunning}
-              className="w-auto min-w-0 bg-transparent p-0 text-center text-[160px] outline-none"
+              className="w-auto min-w-0 bg-transparent p-0 text-center text-5xl outline-none sm:text-6xl md:text-7xl lg:text-[160px]"
             />
             <span> : </span>
             <input
@@ -573,14 +573,14 @@ const TimerPage = () => {
               onFocus={handleInputFocus}
               onBlur={handleTimeBlur}
               disabled={isRunning}
-              className="w-auto min-w-0 bg-transparent p-0 text-center text-[160px] outline-none"
+              className="w-auto min-w-0 bg-transparent p-0 text-center text-5xl outline-none sm:text-6xl md:text-7xl lg:text-[160px]"
             />
           </div>
 
           {/* Progress Bar */}
           {isRunning && initialSeconds > 0 && (
-            <div className="mx-auto my-12 w-full max-w-[900px] px-8">
-              <div className="relative h-10 w-full overflow-hidden rounded-[25px] bg-gray-300 shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
+            <div className="mx-auto my-6 w-full max-w-[90vw] px-4 sm:my-8 md:my-12 md:max-w-[900px] md:px-8">
+              <div className="relative h-6 w-full overflow-hidden rounded-[25px] bg-gray-300 shadow-[0_4px_15px_rgba(0,0,0,0.15)] sm:h-8 md:h-10">
                 <div
                   className="h-full rounded-[25px] bg-brand-violet shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-linear"
                   style={{
@@ -588,7 +588,7 @@ const TimerPage = () => {
                   }}
                 />
               </div>
-              <div className="mt-6 flex justify-center text-[32px] font-semibold">
+              <div className="mt-4 flex justify-center text-lg font-semibold sm:text-xl md:mt-6 md:text-2xl lg:text-[32px]">
                 <span className="color-contrast">
                   Time passed:{" "}
                   <strong className="text-brand-violet">
@@ -600,7 +600,7 @@ const TimerPage = () => {
                   </strong>
                 </span>
               </div>
-              <div className="mt-4 text-center text-5xl font-bold text-brand-violet">
+              <div className="mt-2 text-center text-2xl font-bold text-brand-violet sm:text-3xl md:mt-4 md:text-4xl lg:text-5xl">
                 {Math.round(
                   ((initialSeconds - secondsLeft) / initialSeconds) * 100,
                 )}
@@ -637,37 +637,37 @@ const TimerPage = () => {
 
           {/* Add Time Buttons - Show when timer is running */}
           {isRunning && (
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <span className="mr-2 self-center text-lg font-semibold text-gray-600">
+            <div className="mt-4 flex flex-wrap justify-center gap-2 px-4 sm:gap-3 md:mt-8">
+              <span className="mr-1 w-full self-center text-center text-sm font-semibold text-gray-600 sm:mr-2 sm:w-auto sm:text-base md:text-lg">
                 Add time:
               </span>
               <button
                 onClick={() => addTimeToRunningTimer(5)}
-                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-5 py-2 text-base font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white"
+                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-3 py-1.5 text-sm font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white sm:px-4 sm:py-2 sm:text-base md:px-5"
               >
                 +5 min
               </button>
               <button
                 onClick={() => addTimeToRunningTimer(10)}
-                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-5 py-2 text-base font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white"
+                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-3 py-1.5 text-sm font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white sm:px-4 sm:py-2 sm:text-base md:px-5"
               >
                 +10 min
               </button>
               <button
                 onClick={() => addTimeToRunningTimer(15)}
-                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-5 py-2 text-base font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white"
+                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-3 py-1.5 text-sm font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white sm:px-4 sm:py-2 sm:text-base md:px-5"
               >
                 +15 min
               </button>
               <button
                 onClick={() => addTimeToRunningTimer(20)}
-                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-5 py-2 text-base font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white"
+                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-3 py-1.5 text-sm font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white sm:px-4 sm:py-2 sm:text-base md:px-5"
               >
                 +20 min
               </button>
               <button
                 onClick={() => addTimeToRunningTimer(30)}
-                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-5 py-2 text-base font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white"
+                className="cursor-pointer rounded-lg border-2 border-brand-violet bg-white px-3 py-1.5 text-sm font-semibold text-brand-violet transition-all duration-300 hover:bg-brand-violet hover:text-white sm:px-4 sm:py-2 sm:text-base md:px-5"
               >
                 +30 min
               </button>
@@ -714,25 +714,27 @@ const TimerPage = () => {
       {/* Time's Up Message */}
       {showTimeUpMessage && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           onClick={dismissTimeUpMessage}
         >
           <div
-            className="animate-in fade-in zoom-in relative mx-4 max-w-2xl rounded-3xl bg-white p-12 text-center shadow-2xl duration-300"
+            className="animate-in fade-in zoom-in relative mx-4 w-full max-w-2xl rounded-2xl bg-white p-6 text-center shadow-2xl duration-300 sm:rounded-3xl sm:p-8 md:p-12"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-6 text-8xl">⏰</div>
-            <h2 className="mb-4 text-6xl font-bold text-brand-violet">
+            <div className="mb-4 text-5xl sm:mb-6 sm:text-6xl md:text-7xl lg:text-8xl">
+              ⏰
+            </div>
+            <h2 className="mb-3 text-3xl font-bold text-brand-violet sm:text-4xl md:mb-4 md:text-5xl lg:text-6xl">
               Time's Up!
             </h2>
             {title && (
-              <p className="mb-8 text-3xl font-semibold text-gray-700">
+              <p className="mb-4 text-lg font-semibold text-gray-700 sm:text-xl md:mb-8 md:text-2xl lg:text-3xl">
                 {title}
               </p>
             )}
             <button
               onClick={dismissTimeUpMessage}
-              className="mt-4 cursor-pointer rounded-xl border-2 border-brand-violet bg-brand-violet px-12 py-4 text-2xl font-bold text-white transition-all duration-300 hover:bg-purple-700 hover:shadow-xl"
+              className="mt-2 cursor-pointer rounded-lg border-2 border-brand-violet bg-brand-violet px-6 py-2 text-base font-bold text-white transition-all duration-300 hover:bg-purple-700 hover:shadow-xl sm:px-8 sm:py-3 sm:text-lg md:mt-4 md:rounded-xl md:px-12 md:py-4 md:text-xl lg:text-2xl"
             >
               OK
             </button>

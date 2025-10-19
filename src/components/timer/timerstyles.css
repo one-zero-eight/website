@@ -36,8 +36,14 @@
   flex-grow: 1;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: 1rem;
   position: relative;
+}
+
+@media (min-width: 768px) {
+  .timer-container {
+    padding: 2rem;
+  }
 }
 
 /* Title input */
@@ -165,25 +171,65 @@
 
 .timer-controls {
   display: flex;
-  gap: 1.5rem;
+  gap: 0.75rem;
   justify-content: center;
   width: 100%;
-  margin: 2rem 0 3rem;
+  margin: 1.5rem 0 2rem;
   flex-wrap: wrap;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .timer-controls {
+    gap: 1rem;
+    margin: 2rem 0 2.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .timer-controls {
+    gap: 1.5rem;
+    margin: 2rem 0 3rem;
+    padding: 0;
+  }
 }
 
 .timer-button {
-  padding: 1rem 3rem;
-  font-size: clamp(1rem, 3vw, 1.25rem);
+  padding: 0.75rem 2rem;
+  font-size: 0.9rem;
   font-weight: 500;
   border: none;
-  border-radius: 2rem;
+  border-radius: 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
   color: white;
-  min-width: clamp(140px, 30vw, 160px);
+  min-width: 120px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+@media (min-width: 640px) {
+  .timer-button {
+    padding: 0.875rem 2.5rem;
+    font-size: 1rem;
+    min-width: 140px;
+    border-radius: 1.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .timer-button {
+    padding: 1rem 3rem;
+    font-size: 1.125rem;
+    min-width: 160px;
+    border-radius: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .timer-button {
+    font-size: 1.25rem;
+  }
 }
 
 .start-button {
@@ -265,8 +311,8 @@
 .dialog-content {
   background: white;
   color: #1a1a1a;
-  padding: 2rem;
-  border-radius: 1rem;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
   width: 90%;
   max-width: 32rem;
   box-shadow:
@@ -276,40 +322,83 @@
   transition: all 0.3s ease;
 }
 
+@media (min-width: 640px) {
+  .dialog-content {
+    padding: 2rem;
+    border-radius: 1rem;
+  }
+}
+
 .dark .dialog-content {
   background: #1a1a1a;
   color: white;
 }
 
 .dialog-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 640px) {
+  .dialog-header {
+    margin-bottom: 1.5rem;
+  }
 }
 
 .dialog-title {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .dialog-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
 }
 
 .dialog-description {
   color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .dialog-description {
+    font-size: 1rem;
+  }
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 640px) {
+  .dialog-footer {
+    gap: 1rem;
+    margin-top: 2rem;
+  }
 }
 
 .dialog-button {
-  padding: 0.75rem 1.5rem;
+  padding: 0.625rem 1.25rem;
   border-radius: 2rem;
   font-weight: 500;
   cursor: pointer;
-  min-width: 120px;
-  font-size: 1rem;
+  min-width: 100px;
+  font-size: 0.875rem;
   transition: all 0.3s ease;
+}
+
+@media (min-width: 640px) {
+  .dialog-button {
+    padding: 0.75rem 1.5rem;
+    min-width: 120px;
+    font-size: 1rem;
+  }
 }
 
 .dialog-cancel {
@@ -362,35 +451,65 @@
 /* Toast */
 .toast-container {
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.75rem;
   z-index: 50;
+}
+
+@media (min-width: 640px) {
+  .toast-container {
+    bottom: 1.5rem;
+    left: auto;
+    right: 1.5rem;
+    align-items: flex-end;
+  }
 }
 
 .toast {
   background-color: white;
   color: #1a1a1a;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1.25rem;
   border-radius: 2rem;
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.2),
     0 2px 4px -1px rgba(0, 0, 0, 0.1);
-  min-width: min(300px, 80vw);
-  max-width: min(400px, 90vw);
+  min-width: min(250px, 80vw);
+  max-width: min(350px, 90vw);
+  width: 100%;
   animation: slide-in 0.3s ease-out;
   border: 1px solid #9747ff;
   cursor: pointer;
   transition:
     transform 0.2s ease,
     opacity 0.2s ease;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .toast {
+    padding: 1rem 1.5rem;
+    min-width: min(300px, 80vw);
+    max-width: min(400px, 90vw);
+    width: auto;
+    text-align: left;
+    font-size: 1rem;
+  }
 }
 
 .toast:hover {
-  transform: translateX(-5px);
   opacity: 0.8;
+}
+
+@media (min-width: 640px) {
+  .toast:hover {
+    transform: translateX(-5px);
+  }
 }
 
 .dark .toast {
@@ -400,48 +519,36 @@
 
 @keyframes slide-in {
   from {
-    transform: translateX(100%);
+    transform: translateY(20px);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translateY(0);
     opacity: 1;
+  }
+}
+
+@media (min-width: 640px) {
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
 }
 
 @media (max-width: 640px) {
   .timer-header-container {
     max-width: 90vw;
-    margin-bottom: 2rem;
-  }
-
-  .timer-title {
-    max-width: 60vw;
-    font-size: 1rem;
-    margin-right: 0.5rem;
-    padding: 0;
+    margin-bottom: 1.5rem;
   }
 
   .settings-button {
     min-width: 3.5rem;
-  }
-
-  .timer-container {
-    padding: 1rem;
-  }
-
-  .timer-title {
-    max-width: 90vw;
-    font-size: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .timer-controls {
-    gap: 1rem;
-  }
-
-  .timer-button {
-    padding: 0.75rem 1.5rem;
   }
 }
 
