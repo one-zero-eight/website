@@ -297,7 +297,7 @@ export interface components {
       /**
        * Is Registrable
        * @description Marks whether users can register to the workshop.
-       *     Can be register only within 1 day before the workshop, and cannot be register after the workshop.
+       *     ~~Can be register only within 1 day before the workshop~~, and cannot be register after the workshop.
        */
       readonly is_registrable: boolean;
     };

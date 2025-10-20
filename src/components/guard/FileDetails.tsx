@@ -3,6 +3,7 @@ import { buildJoinLink, buildSheetsUrl, formatDate } from "./utils";
 import { CopyLinkButton } from "./CopyLinkButton";
 import { JoinsList } from "./JoinsList";
 import { BannedList } from "./BannedList";
+import { EditTitleButton } from "./EditTitleButton";
 import { MESSAGES } from "./consts";
 
 type FileDetailsData = {
@@ -32,6 +33,7 @@ interface FileDetailsProps {
   onSearchChange: (search: string) => void;
   onBack: () => void;
   onDelete: () => Promise<void>;
+  onUpdateTitle: (newTitle: string) => Promise<void>;
   onBan: (userId: string) => Promise<void>;
   onUnban: (userId: string) => Promise<void>;
 }
@@ -44,6 +46,7 @@ export function FileDetails({
   onSearchChange,
   onBack,
   onDelete,
+  onUpdateTitle,
   onBan,
   onUnban,
 }: FileDetailsProps) {
@@ -62,8 +65,11 @@ export function FileDetails({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <div className="min-w-0">
-          <h3 className="truncate text-lg">{file?.title || "Untitled"}</h3>
+        <div className="min-w-0 flex-1">
+          <EditTitleButton
+            currentTitle={file?.title || "Untitled"}
+            onSave={onUpdateTitle}
+          />
           <p className="text-sm font-normal text-contrast/60">
             {file?.user_role}, created at{" "}
             {file?.created_at ? formatDate(file.created_at) : "—"}

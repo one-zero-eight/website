@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { guardTypes } from "@/api/guard";
 import { useGuardMutations, FileRole } from "./hooks";
-import { extractSpreadsheetId, parseSlugFromJoinLink } from "./utils";
+import { extractSpreadsheetId } from "./utils";
 import { ModeToggle } from "./ModeToggle";
-import { CleanupAlert } from "./CleanupAlert";
-import { CreateInstructions, TransferInstructions } from "./Instructions";
+import { CreateInstructions, CopyInstructions } from "./Instructions";
 import { SetupResult } from "./SetupResult";
 import { ROLE_LABELS, DEFAULT_MODE } from "./consts";
 
@@ -13,7 +12,7 @@ interface SetupContainerProps {
 }
 
 export function SetupContainer({ serviceEmail }: SetupContainerProps) {
-  const [mode, setMode] = useState<"create" | "transfer">(DEFAULT_MODE);
+  const [mode, setMode] = useState<"create" | "copy">(DEFAULT_MODE);
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [title, setTitle] = useState("");
   const [respondentRole, setRespondentRole] = useState<FileRole>(
@@ -27,7 +26,6 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
     roleDisplay: string;
     joinLink: string;
   } | null>(null);
-  const [cleanupSlug, setCleanupSlug] = useState<string | null>(null);
 
   const mutations = useGuardMutations();
 
@@ -84,7 +82,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
       return;
     }
 
-    // Transfer mode
+    // Copy mode
     if (!spreadsheetId.trim()) {
       setError("Spreadsheet URL is required");
       return;
@@ -102,16 +100,16 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
       return;
     }
 
-    const transferRole =
+    const copyRole =
       respondentRole === FileRole.writer
-        ? guardTypes.TransferFileRequestUser_role.writer
-        : guardTypes.TransferFileRequestUser_role.reader;
+        ? guardTypes.CopyFileRequestUser_role.writer
+        : guardTypes.CopyFileRequestUser_role.reader;
 
-    mutations.transferFile.mutate(
+    mutations.copyFile.mutate(
       {
         body: {
           file_id: extractedId,
-          user_role: transferRole,
+          user_role: copyRole,
         },
       },
       {
@@ -119,41 +117,22 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
           setSetupResult({
             title: data.title,
             fileId: data.file_id,
-            fileType: "spreadsheet",
+            fileType: data.file_type,
             roleDisplay: data.user_role,
             joinLink: data.join_link,
           });
           setSpreadsheetId("");
           mutations.invalidateFiles();
-
-          if ((data as any).cleanup_recommended) {
-            const slug = parseSlugFromJoinLink(data.join_link || "");
-            if (slug) setCleanupSlug(slug);
-          }
         },
         onError: () => {
-          setError("Failed to transfer spreadsheet.");
-        },
-      },
-    );
-  };
-
-  const handleCleanup = () => {
-    if (!cleanupSlug) return;
-
-    mutations.cleanupFile.mutate(
-      { params: { path: { slug: cleanupSlug } } },
-      {
-        onSuccess: () => {
-          setCleanupSlug(null);
-          mutations.invalidateFile(cleanupSlug);
+          setError("Failed to copy spreadsheet.");
         },
       },
     );
   };
 
   const handleBlur = () => {
-    if (mode === "transfer" && spreadsheetId.trim()) {
+    if (mode === "copy" && spreadsheetId.trim()) {
       const validationError = validateSpreadsheetId(spreadsheetId);
       setError(validationError);
     }
@@ -162,7 +141,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
   const isSubmitting =
     mode === "create"
       ? mutations.createFile.isPending
-      : mutations.transferFile.isPending;
+      : mutations.copyFile.isPending;
 
   return (
     <div>
@@ -171,7 +150,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
       {mode === "create" ? (
         <CreateInstructions serviceEmail={serviceEmail} />
       ) : (
-        <TransferInstructions serviceEmail={serviceEmail} />
+        <CopyInstructions serviceEmail={serviceEmail} />
       )}
 
       <form
@@ -200,7 +179,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
           </div>
         )}
 
-        {mode === "transfer" && (
+        {mode === "copy" && (
           <div className="flex flex-col gap-2">
             <label
               htmlFor="spreadsheet_id"
@@ -270,10 +249,10 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
           {isSubmitting
             ? mode === "create"
               ? "Creating..."
-              : "Transferring..."
+              : "Copying..."
             : mode === "create"
               ? "Create InNoHassle Guard Sheet"
-              : "Protect Existing Sheet"}
+              : "Copy Existing Sheet"}
         </button>
       </form>
 
@@ -281,13 +260,6 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
         <SetupResult
           result={setupResult}
           onDismiss={() => setSetupResult(null)}
-        />
-      )}
-
-      {cleanupSlug && (
-        <CleanupAlert
-          onCleanup={handleCleanup}
-          isPending={mutations.cleanupFile.isPending}
         />
       )}
     </div>

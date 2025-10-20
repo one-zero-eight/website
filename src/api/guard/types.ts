@@ -68,7 +68,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/google/files/transfer": {
+  "/google/files/copy": {
     parameters: {
       query?: never;
       header?: never;
@@ -78,10 +78,10 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Transfer File
-     * @description Accept ownership invitation for existing file, add it to system, cleanup public access, lock editors' sharing.
+     * Copy File
+     * @description Copy an existing Google file to service account's drive and add it to the system.
      */
-    post: operations["transfer_file_google_files_transfer_post"];
+    post: operations["copy_file_google_files_copy_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -109,7 +109,11 @@ export interface paths {
     delete: operations["delete_file_google_files__slug__delete"];
     options?: never;
     head?: never;
-    patch?: never;
+    /**
+     * Update File
+     * @description Update file title (author only).
+     */
+    patch: operations["update_file_google_files__slug__patch"];
     trace?: never;
   };
   "/google/files/{slug}/joins": {
@@ -209,6 +213,35 @@ export interface components {
     CleanupResponse: {
       /** Removed */
       removed: number;
+    };
+    /** CopyFileRequest */
+    CopyFileRequest: {
+      /** File Id */
+      file_id: string;
+      /**
+       * User Role
+       * @enum {string}
+       */
+      user_role: CopyFileRequestUser_role;
+    };
+    /** CopyFileResponse */
+    CopyFileResponse: {
+      /** File Id */
+      file_id: string;
+      /**
+       * File Type
+       * @enum {string}
+       */
+      file_type: CopyFileResponseFile_type;
+      /** Title */
+      title: string;
+      /**
+       * User Role
+       * @enum {string}
+       */
+      user_role: CopyFileResponseUser_role;
+      /** Join Link */
+      join_link: string;
     };
     /** CreateFileRequest */
     CreateFileRequest: {
@@ -341,39 +374,22 @@ export interface components {
       /** Email */
       email: string;
     };
-    /** TransferFileRequest */
-    TransferFileRequest: {
-      /** File Id */
-      file_id: string;
-      /**
-       * User Role
-       * @enum {string}
-       */
-      user_role: TransferFileRequestUser_role;
-    };
-    /** TransferFileResponse */
-    TransferFileResponse: {
-      /** File Id */
-      file_id: string;
-      /**
-       * File Type
-       * @enum {string}
-       */
-      file_type: TransferFileResponseFile_type;
-      /** Title */
-      title: string;
-      /**
-       * User Role
-       * @enum {string}
-       */
-      user_role: TransferFileResponseUser_role;
-      /** Join Link */
-      join_link: string;
-      /** Cleanup Recommended */
-      cleanup_recommended: boolean;
-    };
     /** UnbanUserResponse */
     UnbanUserResponse: {
+      /** Message */
+      message: string;
+    };
+    /** UpdateFileRequest */
+    UpdateFileRequest: {
+      /** Title */
+      title: string;
+    };
+    /** UpdateFileResponse */
+    UpdateFileResponse: {
+      /** File Id */
+      file_id: string;
+      /** Title */
+      title: string;
       /** Message */
       message: string;
     };
@@ -396,6 +412,8 @@ export interface components {
 export type SchemaBanUserRequest = components["schemas"]["BanUserRequest"];
 export type SchemaBanUserResponse = components["schemas"]["BanUserResponse"];
 export type SchemaCleanupResponse = components["schemas"]["CleanupResponse"];
+export type SchemaCopyFileRequest = components["schemas"]["CopyFileRequest"];
+export type SchemaCopyFileResponse = components["schemas"]["CopyFileResponse"];
 export type SchemaCreateFileRequest =
   components["schemas"]["CreateFileRequest"];
 export type SchemaCreateFileResponse =
@@ -416,12 +434,12 @@ export type SchemaJoinFileResponse = components["schemas"]["JoinFileResponse"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaServiceAccountEmailResponse =
   components["schemas"]["ServiceAccountEmailResponse"];
-export type SchemaTransferFileRequest =
-  components["schemas"]["TransferFileRequest"];
-export type SchemaTransferFileResponse =
-  components["schemas"]["TransferFileResponse"];
 export type SchemaUnbanUserResponse =
   components["schemas"]["UnbanUserResponse"];
+export type SchemaUpdateFileRequest =
+  components["schemas"]["UpdateFileRequest"];
+export type SchemaUpdateFileResponse =
+  components["schemas"]["UpdateFileResponse"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
@@ -539,7 +557,7 @@ export interface operations {
       };
     };
   };
-  transfer_file_google_files_transfer_post: {
+  copy_file_google_files_copy_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -548,7 +566,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["TransferFileRequest"];
+        "application/json": components["schemas"]["CopyFileRequest"];
       };
     };
     responses: {
@@ -558,10 +576,10 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["TransferFileResponse"];
+          "application/json": components["schemas"]["CopyFileResponse"];
         };
       };
-      /** @description Unsupported mimeType: {mime} */
+      /** @description Unsupported mimeType: {mime_type} */
       400: {
         headers: {
           [name: string]: unknown;
@@ -642,6 +660,48 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["DeleteFileResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_file_google_files__slug__patch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateFileRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UpdateFileResponse"];
         };
       };
       /** @description Validation Error */
@@ -838,6 +898,18 @@ export interface operations {
     };
   };
 }
+export enum CopyFileRequestUser_role {
+  writer = "writer",
+  reader = "reader",
+}
+export enum CopyFileResponseFile_type {
+  spreadsheet = "spreadsheet",
+  document = "document",
+}
+export enum CopyFileResponseUser_role {
+  writer = "writer",
+  reader = "reader",
+}
 export enum CreateFileRequestFile_type {
   spreadsheet = "spreadsheet",
   document = "document",
@@ -861,16 +933,4 @@ export enum GoogleFileUser_role {
 export enum GoogleFileFile_type {
   spreadsheet = "spreadsheet",
   document = "document",
-}
-export enum TransferFileRequestUser_role {
-  writer = "writer",
-  reader = "reader",
-}
-export enum TransferFileResponseFile_type {
-  spreadsheet = "spreadsheet",
-  document = "document",
-}
-export enum TransferFileResponseUser_role {
-  writer = "writer",
-  reader = "reader",
 }

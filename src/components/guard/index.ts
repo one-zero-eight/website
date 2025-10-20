@@ -11,9 +11,10 @@ export { CleanupAlert } from "./CleanupAlert";
 export { CopyLinkButton } from "./CopyLinkButton";
 export {
   CreateInstructions,
-  TransferInstructions,
+  CopyInstructions,
   ServiceAccountEmail,
 } from "./Instructions";
+export { EditTitleButton } from "./EditTitleButton";
 export * from "./hooks";
 export * from "./utils";
 export * from "./consts";

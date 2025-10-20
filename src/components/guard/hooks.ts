@@ -70,9 +70,10 @@ export function useGuardMutations() {
   const queryClient = useQueryClient();
 
   const createFileMutation = $guard.useMutation("post", "/google/files");
-  const transferFileMutation = $guard.useMutation(
-    "post",
-    "/google/files/transfer",
+  const copyFileMutation = $guard.useMutation("post", "/google/files/copy");
+  const updateFileMutation = $guard.useMutation(
+    "patch",
+    "/google/files/{slug}",
   );
   const deleteFileMutation = $guard.useMutation(
     "delete",
@@ -97,10 +98,15 @@ export function useGuardMutations() {
       mutateAsync: createFileMutation.mutateAsync,
       isPending: createFileMutation.isPending,
     },
-    transferFile: {
-      mutate: transferFileMutation.mutate,
-      mutateAsync: transferFileMutation.mutateAsync,
-      isPending: transferFileMutation.isPending,
+    copyFile: {
+      mutate: copyFileMutation.mutate,
+      mutateAsync: copyFileMutation.mutateAsync,
+      isPending: copyFileMutation.isPending,
+    },
+    updateFile: {
+      mutate: updateFileMutation.mutate,
+      mutateAsync: updateFileMutation.mutateAsync,
+      isPending: updateFileMutation.isPending,
     },
     deleteFile: {
       mutate: deleteFileMutation.mutate,

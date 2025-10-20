@@ -9,7 +9,7 @@ export const ROLE_LABELS = {
 
 export const MODE_LABELS = {
   create: "Create Protected Spreadsheet",
-  transfer: "Protect Existing Spreadsheet",
+  copy: "Copy Existing Spreadsheet",
 } as const;
 
 export const MESSAGES = {

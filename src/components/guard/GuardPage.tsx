@@ -49,6 +49,18 @@ export function GuardPage() {
     setSelectedSlug(null);
   };
 
+  const handleUpdateTitle = async (newTitle: string) => {
+    if (!selectedSlug) return;
+
+    await mutations.updateFile.mutateAsync({
+      params: { path: { slug: selectedSlug } },
+      body: { title: newTitle },
+    });
+
+    mutations.invalidateFile(selectedSlug);
+    mutations.invalidateFiles();
+  };
+
   const handleBan = async (userId: string) => {
     if (!selectedSlug) return;
 
@@ -90,6 +102,7 @@ export function GuardPage() {
             onSearchChange={setDetailsSearch}
             onBack={handleBack}
             onDelete={handleDelete}
+            onUpdateTitle={handleUpdateTitle}
             onBan={handleBan}
             onUnban={handleUnban}
           />

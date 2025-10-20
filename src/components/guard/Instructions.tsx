@@ -65,38 +65,30 @@ export function CreateInstructions({ serviceEmail }: CreateInstructionsProps) {
   );
 }
 
-interface TransferInstructionsProps {
+interface CopyInstructionsProps {
   serviceEmail: string;
 }
 
-export function TransferInstructions({
-  serviceEmail,
-}: TransferInstructionsProps) {
+export function CopyInstructions({ serviceEmail }: CopyInstructionsProps) {
   return (
     <div className="mt-3 rounded border-l-4 border-blue-400 bg-blue-50 p-3 text-sm text-contrast/80 dark:border-blue-600 dark:bg-blue-900/20">
       <ol className="list-inside list-decimal space-y-1">
         <li>
-          Open your spreadsheet and request transferring ownership to{" "}
+          Open your spreadsheet and give Editor access to{" "}
           <ServiceAccountEmail email={serviceEmail} />
         </li>
         <li>Paste the spreadsheet URL below.</li>
-        <li>
-          We will accept the request and service account will own the file
-        </li>
+        <li>We will create a copy of your file owned by the service account</li>
         <li>
           You will get a join link to share with respondents, they will get
           access after signing in via SSO.
         </li>
-        <li>
-          If there are any unverified users, you will need to run cleanup to
-          remove them. You will need to re-join using the join link afterwards.
-        </li>
+        <li>Your original file remains unchanged and under your control.</li>
       </ol>
       <div className="mt-3 rounded border-l-4 border-yellow-400 bg-yellow-50 p-3 dark:border-yellow-600 dark:bg-yellow-900/20">
         <p className="text-sm text-contrast/80">
-          💡 Spreadsheet must be owned by the service account so only it can add
-          editors. Otherwise, anyone can add editors and you lose control over
-          who has access to the spreadsheet.
+          💡 The protected copy is owned by the service account so only it can
+          add editors. This ensures you have full control over who has access.
         </p>
       </div>
     </div>

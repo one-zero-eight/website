@@ -1,8 +1,8 @@
 import { MODE_LABELS } from "./consts";
 
 interface ModeToggleProps {
-  mode: "create" | "transfer";
-  onChange: (mode: "create" | "transfer") => void;
+  mode: "create" | "copy";
+  onChange: (mode: "create" | "copy") => void;
 }
 
 export function ModeToggle({ mode, onChange }: ModeToggleProps) {
@@ -21,14 +21,14 @@ export function ModeToggle({ mode, onChange }: ModeToggleProps) {
       </button>
       <button
         type="button"
-        onClick={() => onChange("transfer")}
+        onClick={() => onChange("copy")}
         className={`flex-1 rounded px-4 py-2 text-sm font-medium transition-colors ${
-          mode === "transfer"
+          mode === "copy"
             ? "bg-brand-violet text-white"
             : "text-contrast/70 hover:bg-primary/5"
         }`}
       >
-        {MODE_LABELS.transfer}
+        {MODE_LABELS.copy}
       </button>
     </div>
   );
