@@ -3,8 +3,8 @@ import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton.tsx";
 import UserMenu from "@/components/layout/UserMenu.tsx";
-import { items } from "@/lib/links/menu-links.tsx";
-import { Link, LinkOptions } from "@tanstack/react-router";
+import { ExternalLink, items, LocalLink } from "@/lib/links/menu-links.tsx";
+import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 
 export function MorePage() {
@@ -49,26 +49,9 @@ export function MorePage() {
               className="my-1 h-0.5 w-full shrink-0 rounded-full bg-gray-500/20"
             />
           ) : // Hide Forms item for non-staff users
-          item.type === "local" &&
-            item.title === "Forms" &&
-            !me?.innopolis_sso?.is_staff ? null : item.type === "local" ? (
-            <MenuLink
-              key={index}
-              title={item.title}
-              badge={item.badge}
-              icon={item.icon}
-              to={item.to}
-            />
-          ) : (
-            <MenuLink
-              key={index}
-              title={item.title}
-              badge={item.badge}
-              icon={item.icon}
-              to={item.link}
-              external={true}
-            />
-          ),
+          !(item.staff_only && !me?.innopolis_sso?.is_staff) ? (
+            <MenuLink key={index} {...item} />
+          ) : null,
         )}
 
       <LeaveFeedbackButton />
@@ -76,40 +59,49 @@ export function MorePage() {
   );
 }
 
-function MenuLink({
-  icon,
-  title,
-  badge,
-  external,
-  ...props
-}: LinkOptions & {
-  icon: React.ReactNode;
-  title: string;
-  badge?: React.ReactNode;
-  external?: boolean;
-}) {
-  return (
-    <Link
-      className={clsx(
-        "flex w-full select-none rounded-xl py-2 text-inactive hover:bg-gray-500/10",
-        "[&.is-active]:text-brand-violet",
-        "px-4 text-4xl",
-      )}
-      activeProps={{ className: "is-active" }}
-      {...props}
-    >
+function MenuLink({ icon, title, badge, ...props }: LocalLink | ExternalLink) {
+  const children = (
+    <>
       {icon}
       <div className="[.is-active_&]:selected ml-4 flex w-fit items-center whitespace-nowrap text-lg font-semibold text-inactive">
         {title}
       </div>
-      {(!!external || !!badge) && (
+      {(props.type === "external" || !!badge) && (
         <div className="flex w-min grow items-center">
-          {external && (
+          {props.type === "external" && (
             <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-base" />
           )}
           {badge}
         </div>
       )}
-    </Link>
+    </>
   );
+
+  if (props.type === "external") {
+    return (
+      <a
+        className={clsx(
+          "flex w-full select-none rounded-xl py-2 text-inactive hover:bg-gray-500/10",
+          "px-4 text-4xl",
+        )}
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  } else if (props.type === "local") {
+    return (
+      <Link
+        className={clsx(
+          "flex w-full select-none rounded-xl py-2 text-inactive hover:bg-gray-500/10",
+          "[&.is-active]:text-brand-violet",
+          "px-4 text-4xl",
+        )}
+        activeProps={{ className: "is-active" }}
+        {...props}
+      >
+        {children}
+      </Link>
+    );
+  }
 }

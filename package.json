@@ -40,7 +40,7 @@
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.15",
     "@tanstack/react-query": "^5.56.2",
-    "@tanstack/react-router": "^1.58.3",
+    "@tanstack/react-router": "^1.133.32",
     "@tanstack/router-devtools": "^1.58.3",
     "@tanstack/router-plugin": "^1.58.4",
     "@types/mdx": "^2.0.13",

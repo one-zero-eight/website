@@ -1,8 +1,8 @@
 import { useMe } from "@/api/accounts/user.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
-import { items } from "@/lib/links/menu-links.tsx";
-import { Link, LinkOptions } from "@tanstack/react-router";
+import { ExternalLink, items, LocalLink } from "@/lib/links/menu-links.tsx";
+import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useLocalStorage } from "usehooks-ts";
 import Logo from "../icons/Logo";
@@ -48,34 +48,15 @@ export default function Sidebar() {
               className="my-1 h-0.5 w-full shrink-0 rounded-full bg-gray-500/20"
             />
           ) : // Hide Forms item for non-staff users
-          item.type === "local" &&
-            item.title === "Forms" &&
-            !me?.innopolis_sso?.is_staff ? null : item.type === "local" ? (
-            <SidebarLink
-              key={index}
-              title={item.title}
-              badge={item.badge}
-              icon={item.icon}
-              to={item.to}
-              isMinimized={isMinimized}
-            />
-          ) : (
-            <SidebarLink
-              key={index}
-              title={item.title}
-              badge={item.badge}
-              icon={item.icon}
-              to={item.link}
-              isMinimized={isMinimized}
-              external={true}
-            />
-          ),
+          !(item.staff_only && !me?.innopolis_sso?.is_staff) ? (
+            <SidebarLink key={index} isMinimized={isMinimized} {...item} />
+          ) : null,
         )}
 
         <div className="flex grow"></div>
 
         {/* Leave feedback button */}
-        <LeaveFeedbackButton />
+        <LeaveFeedbackButton isMinimized={isMinimized} />
 
         {/* Social links */}
         <div
@@ -114,42 +95,57 @@ function SidebarLink({
   icon,
   title,
   badge,
-  external,
   isMinimized,
   ...props
-}: LinkOptions & {
-  icon: React.ReactNode;
-  title: string;
-  badge?: React.ReactNode;
-  external?: boolean;
+}: (LocalLink | ExternalLink) & {
   isMinimized: boolean;
 }) {
-  return (
-    <Link
-      className={clsx(
-        // "flex w-full select-none rounded-xl py-1 text-inactive hover:bg-gray-500/10",
-        "py-0.3 flex w-full select-none rounded-xl text-inactive hover:bg-gray-500/10",
-        "[&.is-active]:text-brand-violet",
-        !isMinimized ? "px-2 text-4xl" : "justify-center px-1 text-3xl",
-      )}
-      activeProps={{ className: "is-active" }}
-      target={external ? "_blank" : undefined}
-      {...props}
-    >
+  const children = (
+    <>
       {icon}
       {!isMinimized && (
         <div className="[.is-active_&]:selected ml-4 flex w-fit items-center whitespace-nowrap text-lg font-semibold text-inactive">
           {title}
         </div>
       )}
-      {!isMinimized && (!!external || !!badge) && (
+      {!isMinimized && (props.type === "external" || !!badge) && (
         <div className="flex w-min grow items-center">
-          {external && (
+          {props.type === "external" && (
             <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-base" />
           )}
           {badge}
         </div>
       )}
-    </Link>
+    </>
   );
+
+  if (props.type === "external") {
+    return (
+      <a
+        className={clsx(
+          "py-0.3 flex w-full select-none rounded-xl text-inactive hover:bg-gray-500/10",
+          !isMinimized ? "px-2 text-4xl" : "justify-center px-1 text-3xl",
+        )}
+        target="_blank"
+        rel="nofollow noreferrer"
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  } else if (props.type === "local") {
+    return (
+      <Link
+        className={clsx(
+          "py-0.3 flex w-full select-none rounded-xl text-inactive hover:bg-gray-500/10",
+          "[&.is-active]:text-brand-violet",
+          !isMinimized ? "px-2 text-4xl" : "justify-center px-1 text-3xl",
+        )}
+        activeProps={{ className: "is-active" }}
+        {...props}
+      >
+        {children}
+      </Link>
+    );
+  }
 }

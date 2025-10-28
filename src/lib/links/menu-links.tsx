@@ -1,23 +1,25 @@
-import { LinkOptions } from "@tanstack/react-router";
+import { ValidateLinkOptions } from "@tanstack/react-router";
 
 export type LocalLink = {
   type: "local";
   title: string;
   icon: React.ReactNode;
   badge?: React.ReactNode;
-} & Pick<LinkOptions, "to">;
+} & ValidateLinkOptions;
+
 export type ExternalLink = {
   type: "external";
   title: string;
-  link: string;
   icon: React.ReactNode;
   badge?: React.ReactNode;
+  href: string;
 };
 export type SeparatorItem = {
   type: "separator";
 };
 export type ItemType = (LocalLink | ExternalLink | SeparatorItem) & {
   hideOnMore?: boolean;
+  staff_only?: boolean;
 };
 
 export const items: ItemType[] = [
@@ -163,6 +165,7 @@ export const items: ItemType[] = [
     title: "Forms",
     to: "/forms",
     icon: <span className="icon-[material-symbols--description-outline]" />,
+    staff_only: true,
     badge: (
       <span className="ml-2 rounded-full bg-yellow-500 px-2 py-1 text-xs font-semibold text-white">
         STAFF
@@ -173,19 +176,19 @@ export const items: ItemType[] = [
   {
     type: "external",
     title: "Moodle",
-    link: "https://moodle.innopolis.university",
+    href: "https://moodle.innopolis.university",
     icon: <span className="icon-[material-symbols--school-outline-rounded]" />,
   },
   {
     type: "external",
     title: "Baam",
-    link: "https://baam.tatar/s",
+    href: "https://baam.tatar/s",
     icon: <span className="icon-[material-symbols--qr-code-rounded]" />,
   },
   {
     type: "external",
     title: "My University",
-    link: "https://my.innopolis.university",
+    href: "https://my.innopolis.university",
     icon: <span className="icon-[material-symbols--account-circle-outline]" />,
   },
 ];
