@@ -10,27 +10,28 @@ type SearchParams = {
 };
 
 export const Route = createFileRoute("/_with_menu/search/")({
+  component: RouteComponent,
   validateSearch: (search: Record<string, unknown>): SearchParams => {
     return {
       q: (search.q as string | undefined) ?? "",
     };
   },
-
-  component: function PageComponent() {
-    const { q } = Route.useSearch();
-    return (
-      <Suspense>
-        <Helmet>
-          <title>Search</title>
-          <meta
-            name="description"
-            content="Search anything at Innopolis University."
-          />
-        </Helmet>
-
-        <TopbarWithToggleGroup currentTabText={q} />
-        <SearchPage searchQuery={q ?? ""} />
-      </Suspense>
-    );
-  },
 });
+
+function RouteComponent() {
+  const { q } = Route.useSearch();
+  return (
+    <Suspense>
+      <Helmet>
+        <title>Search</title>
+        <meta
+          name="description"
+          content="Search anything at Innopolis University."
+        />
+      </Helmet>
+
+      <TopbarWithToggleGroup currentTabText={q} />
+      <SearchPage searchQuery={q ?? ""} />
+    </Suspense>
+  );
+}

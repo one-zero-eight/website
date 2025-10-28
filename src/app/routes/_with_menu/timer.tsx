@@ -1,10 +1,14 @@
-import TimerPage from "@/components/timer/TimerPage.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
+import TimerPage from "@/components/timer/TimerPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/timer")({
-  component: () => (
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  return (
     <>
       <Helmet>
         <title>Timer</title>
@@ -17,5 +21,5 @@ export const Route = createFileRoute("/_with_menu/timer")({
       <Topbar title="Timer" />
       <TimerPage />
     </>
-  ),
-});
+  );
+}

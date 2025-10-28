@@ -4,10 +4,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/catalogue/")({
-  component: CatalogueLayout,
+  component: RouteComponent,
 });
 
-function CatalogueLayout() {
+function RouteComponent() {
   return (
     <>
       <Helmet>
@@ -17,6 +17,7 @@ function CatalogueLayout() {
           content="All course materials of previous years"
         />
       </Helmet>
+
       <Topbar title="Catalogue" />
       <CataloguePage />
     </>

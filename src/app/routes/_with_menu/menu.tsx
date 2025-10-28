@@ -3,7 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/menu")({
-  component: () => (
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  return (
     <>
       <Helmet>
         <title>Menu</title>
@@ -12,5 +16,5 @@ export const Route = createFileRoute("/_with_menu/menu")({
 
       <MorePage />
     </>
-  ),
-});
+  );
+}

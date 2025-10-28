@@ -4,7 +4,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/printers")({
-  component: () => (
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  return (
     <>
       <Helmet>
         <title>Inno Print Bot</title>
@@ -17,5 +21,5 @@ export const Route = createFileRoute("/_with_menu/printers")({
       <Topbar title="Inno Print Bot" />
       <PrintersPage />
     </>
-  ),
-});
+  );
+}

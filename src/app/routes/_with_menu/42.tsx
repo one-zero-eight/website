@@ -4,7 +4,11 @@ import Confetti from "react-confetti-boom";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/42")({
-  component: () => (
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  return (
     <>
       <Helmet>
         <title>Club Fest</title>
@@ -47,5 +51,5 @@ export const Route = createFileRoute("/_with_menu/42")({
         </div>
       </div>
     </>
-  ),
-});
+  );
+}

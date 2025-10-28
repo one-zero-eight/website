@@ -19,22 +19,24 @@ export const Route = createFileRoute("/_with_menu/maps")({
     };
   },
 
-  component: function RouteComponent() {
-    const { scene, area, q } = Route.useSearch();
-    return (
-      <>
-        <Helmet>
-          <title>Maps</title>
-          <meta
-            name="description"
-            content="View plans of Innopolis University."
-          />
-        </Helmet>
-
-        <Topbar title="Maps" hideOnMobile />
-        <MapsPageTabs />
-        <MapsPage sceneId={scene} areaId={area} q={q} />
-      </>
-    );
-  },
+  component: RouteComponent,
 });
+
+function RouteComponent() {
+  const { scene, area, q } = Route.useSearch();
+  return (
+    <>
+      <Helmet>
+        <title>Maps</title>
+        <meta
+          name="description"
+          content="View plans of Innopolis University."
+        />
+      </Helmet>
+
+      <Topbar title="Maps" hideOnMobile />
+      <MapsPageTabs />
+      <MapsPage sceneId={scene} areaId={area} q={q} />
+    </>
+  );
+}

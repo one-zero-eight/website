@@ -4,7 +4,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/sport")({
-  component: () => (
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  return (
     <>
       <Helmet>
         <title>Sport bot</title>
@@ -17,5 +21,5 @@ export const Route = createFileRoute("/_with_menu/sport")({
       <Topbar title="Sport" />
       <SportPage />
     </>
-  ),
-});
+  );
+}

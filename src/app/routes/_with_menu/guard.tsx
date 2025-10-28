@@ -4,16 +4,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/guard")({
-  component: function GuardRoute() {
-    return (
-      <>
-        <Helmet>
-          <title>Guard</title>
-        </Helmet>
-
-        <Topbar title="Guard" />
-        <GuardPage />
-      </>
-    );
-  },
+  component: RouteComponent,
 });
+
+function RouteComponent() {
+  return (
+    <>
+      <Helmet>
+        <title>Guard</title>
+      </Helmet>
+
+      <Topbar title="Guard" />
+      <GuardPage />
+    </>
+  );
+}

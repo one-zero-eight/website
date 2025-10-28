@@ -9,21 +9,7 @@ type RoomBookingSearch = {
 };
 
 export const Route = createFileRoute("/_with_menu/room-booking/")({
-  component: () => (
-    <>
-      <Helmet>
-        <title>Room booking</title>
-        <meta
-          name="description"
-          content="Book auditoriums and meeting rooms in Innopolis University."
-        />
-      </Helmet>
-
-      <Topbar title="Room booking" hideOnMobile />
-      <BookingPageTabs />
-      <RoomBookingPage />
-    </>
-  ),
+  component: RouteComponent,
   validateSearch: (search): RoomBookingSearch => {
     const unix =
       typeof search.d === "number"
@@ -37,3 +23,21 @@ export const Route = createFileRoute("/_with_menu/room-booking/")({
     return {};
   },
 });
+
+function RouteComponent() {
+  return (
+    <>
+      <Helmet>
+        <title>Room booking</title>
+        <meta
+          name="description"
+          content="Book auditoriums and meeting rooms in Innopolis University."
+        />
+      </Helmet>
+
+      <Topbar title="Room booking" hideOnMobile />
+      <BookingPageTabs />
+      <RoomBookingPage />
+    </>
+  );
+}

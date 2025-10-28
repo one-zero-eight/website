@@ -9,27 +9,28 @@ type AskParams = {
 };
 
 export const Route = createFileRoute("/_with_menu/search/ask")({
+  component: RouteComponent,
   validateSearch: (ask: Record<string, unknown>): AskParams => {
     return {
       q: (ask.q as string | undefined) ?? "",
     };
   },
-
-  component: function AskPageComponent() {
-    const { q } = Route.useSearch();
-    return (
-      <Suspense>
-        <Helmet>
-          <title>Ask</title>
-          <meta
-            name="description"
-            content="Ask questions or find answers at Innopolis University."
-          />
-        </Helmet>
-
-        <TopbarWithToggleGroup currentTabText={q} />
-        <AskPage askQuery={q ?? ""} />
-      </Suspense>
-    );
-  },
 });
+
+function RouteComponent() {
+  const { q } = Route.useSearch();
+  return (
+    <Suspense>
+      <Helmet>
+        <title>Ask</title>
+        <meta
+          name="description"
+          content="Ask questions or find answers at Innopolis University."
+        />
+      </Helmet>
+
+      <TopbarWithToggleGroup currentTabText={q} />
+      <AskPage askQuery={q ?? ""} />
+    </Suspense>
+  );
+}

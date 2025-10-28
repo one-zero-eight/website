@@ -4,7 +4,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/scholarship")({
-  component: () => (
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  return (
     <>
       <Helmet>
         <title>Scholarship calculator</title>
@@ -20,5 +24,5 @@ export const Route = createFileRoute("/_with_menu/scholarship")({
       <Topbar title="Scholarship" />
       <ScholarshipPage />
     </>
-  ),
-});
+  );
+}

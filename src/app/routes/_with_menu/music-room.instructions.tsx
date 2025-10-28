@@ -5,7 +5,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/music-room/instructions")({
-  component: () => (
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  return (
     <>
       <Helmet>
         <title>Music room</title>
@@ -16,5 +20,5 @@ export const Route = createFileRoute("/_with_menu/music-room/instructions")({
       <MusicRoomPageTabs />
       <MusicRoomInstructions />
     </>
-  ),
-});
+  );
+}

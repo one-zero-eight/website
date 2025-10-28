@@ -6,7 +6,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/workshops/admin")({
-  component: () => (
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  return (
     <>
       <Helmet>
         <title>Workshops</title>
@@ -23,5 +27,5 @@ export const Route = createFileRoute("/_with_menu/workshops/admin")({
         <ToastContainer />
       </ToastProvider>
     </>
-  ),
-});
+  );
+}

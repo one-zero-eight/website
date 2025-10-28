@@ -4,7 +4,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
 export const Route = createFileRoute("/_with_menu/calendar")({
-  component: () => (
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  return (
     <>
       <Helmet>
         <title>Personal calendar</title>
@@ -14,5 +18,5 @@ export const Route = createFileRoute("/_with_menu/calendar")({
       <Topbar title="Calendar" hideOnMobile />
       <CalendarPage />
     </>
-  ),
-});
+  );
+}
