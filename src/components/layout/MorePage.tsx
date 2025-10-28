@@ -34,18 +34,7 @@ export function MorePage() {
             <span className="icon-[uil--telegram-alt] text-3xl text-inactive" />
           </a>
         </Tooltip>
-        <Tooltip content="YouTube">
-          <a
-            href="https://www.youtube.com/@one-zero-eight"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center rounded-xl p-2 hover:bg-secondary"
-          >
-            <span className="icon-[hugeicons--youtube] text-3xl text-inactive" />
-          </a>
-        </Tooltip>
         <div className="flex grow"></div>
-        <LeaveFeedbackButton />
         <SwitchThemeButton />
         <UserMenu isMobile={false} isSidebar={false} />
       </div>
@@ -81,6 +70,8 @@ export function MorePage() {
             />
           ),
         )}
+
+      <LeaveFeedbackButton />
     </div>
   );
 }

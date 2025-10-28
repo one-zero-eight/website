@@ -1,4 +1,3 @@
-import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
 import clsx from "clsx";
@@ -22,7 +21,6 @@ export function Topbar({
       </div>
       <div className="hidden items-center py-2 pr-4 lg:flex">
         <SwitchThemeButton />
-        <LeaveFeedbackButton />
         <UserMenu isMobile={false} isSidebar={false} />
       </div>
     </nav>

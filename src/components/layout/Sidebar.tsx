@@ -1,5 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
+import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import { items } from "@/lib/links/menu-links.tsx";
 import { Link, LinkOptions } from "@tanstack/react-router";
 import clsx from "clsx";
@@ -72,6 +73,10 @@ export default function Sidebar() {
         )}
 
         <div className="flex grow"></div>
+
+        {/* Leave feedback button */}
+        <LeaveFeedbackButton />
+
         {/* Social links */}
         <div
           className={clsx(
@@ -97,16 +102,6 @@ export default function Sidebar() {
               className="flex items-center justify-center rounded-xl p-2 hover:bg-secondary"
             >
               <span className="icon-[uil--telegram-alt] text-3xl text-inactive" />
-            </a>
-          </Tooltip>
-          <Tooltip content="YouTube">
-            <a
-              href="https://www.youtube.com/@one-zero-eight"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center rounded-xl p-2 hover:bg-secondary"
-            >
-              <span className="icon-[hugeicons--youtube] text-3xl text-inactive" />
             </a>
           </Tooltip>
         </div>

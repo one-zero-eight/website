@@ -73,7 +73,7 @@ export function MusicRoomPage() {
             <iframe
               width="704"
               height="396"
-              src="https://www.youtube-nocookie.com/embed/mGfdun8ah3g?si=ObZXOHLvwFbIWUBw"
+              src="https://www.youtube-nocookie.com/embed/mGfdun8ah3g"
               title="How to get to the Innopolis Music room?"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
