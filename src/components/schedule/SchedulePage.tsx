@@ -10,7 +10,6 @@ import {
 } from "@/lib/events/events-view-config";
 import { preprocessText } from "@/lib/utils/searchUtils";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
 import Fuse from "fuse.js";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -119,23 +118,21 @@ export default function SchedulePage({
     <>
       <div className="flex shrink-0 flex-col whitespace-nowrap @3xl/content:flex-row">
         <div className="flex grow flex-row overflow-x-auto whitespace-nowrap">
-          <div className="w-2 shrink-0 border-b-[1px] border-b-secondary-hover @3xl/content:w-1" />
+          <div className="w-2 shrink-0 border-b border-b-secondary-hover @3xl/content:w-1" />
           {Object.values(viewConfig.categories).map((v) => (
             <Link
               key={v.alias}
               to="/schedule/$category"
               params={{ category: v.alias }}
-              className={clsx(
-                "px-2 py-1",
-                v.alias === category
-                  ? "border-b-2 border-b-brand-violet"
-                  : "border-b-[1px] border-b-secondary-hover",
-              )}
+              className="px-2 py-1"
+              activeOptions={{ exact: true, includeSearch: true }}
+              activeProps={{ className: "border-b-2 border-b-brand-violet" }}
+              inactiveProps={{ className: "border-b border-b-secondary-hover" }}
             >
               {v.title}
             </Link>
           ))}
-          <div className="min-w-2 grow border-b-[1px] border-b-secondary-hover" />
+          <div className="min-w-2 grow border-b border-b-secondary-hover" />
         </div>
         {categoryInfo && <SearchBar value={search} onChange={setSearch} />}
       </div>

@@ -1,17 +1,10 @@
-import { $workshops } from "@/api/workshops";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 
-export function WorkshopsTabs() {
-  const { data: workshopsUser } = $workshops.useQuery("get", "/users/me");
-
-  if (workshopsUser?.role !== "admin") {
-    return null; // Do not show tabs if the user is not an admin
-  }
-
+export function MusicRoomPageTabs() {
   return (
     <div className="flex shrink-0 flex-row gap-1 overflow-x-auto whitespace-nowrap border-b-[1px] border-b-secondary-hover px-2">
-      <TabLink to="/workshops">Check in</TabLink>
-      <TabLink to="/workshops/admin">Admin</TabLink>
+      <TabLink to="/music-room">Calendar</TabLink>
+      <TabLink to="/music-room/instructions">Instructions</TabLink>
     </div>
   );
 }
