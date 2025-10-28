@@ -29,7 +29,7 @@ export default function OfflineNotification() {
   if (!isOffline) return null;
 
   return (
-    <div className="fixed left-1/2 top-2 z-50 mx-auto flex -translate-x-1/2 items-center justify-between rounded-lg bg-red-600 shadow-lg">
+    <div className="fixed top-2 left-1/2 z-50 mx-auto flex -translate-x-1/2 items-center justify-between rounded-lg bg-red-600 shadow-lg">
       <p className="pl-3 text-[16px] font-medium text-white">
         No internet connection!
       </p>

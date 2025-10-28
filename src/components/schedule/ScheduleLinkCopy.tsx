@@ -33,10 +33,10 @@ export default function ScheduleLinkCopy({
       <input
         readOnly
         value={url}
-        className="w-full grow rounded-xl bg-secondary p-2"
+        className="bg-secondary w-full grow rounded-xl p-2"
       />
       <button
-        className="w-fit rounded-xl p-2 text-brand-violet hover:bg-secondary"
+        className="text-brand-violet hover:bg-secondary w-fit rounded-xl p-2"
         ref={copyButtonRef}
         onClick={copy}
       >

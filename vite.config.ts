@@ -1,4 +1,5 @@
 import mdx from "@mdx-js/rollup";
+import tailwindcss from "@tailwindcss/vite";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import remarkGfm from "remark-gfm";
 // @ts-expect-error The plugin is not typed
@@ -25,6 +26,9 @@ export default defineConfig({
       quoteStyle: "double",
       semicolons: true,
     }),
+
+    // TailwindCSS support
+    tailwindcss(),
 
     // Support for React and Vue in one project
     veauryVitePlugins({

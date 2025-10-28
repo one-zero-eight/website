@@ -61,14 +61,14 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
     if (isLeaving) {
       return clsx(
         baseStyles,
-        "translate-y-[-100%] opacity-0 sm:translate-y-0 sm:translate-x-full",
+        "-translate-y-full opacity-0 sm:translate-y-0 sm:translate-x-full",
       );
     }
 
     if (isEntering) {
       return clsx(
         baseStyles,
-        "translate-y-[-100%] opacity-0 sm:translate-y-0 sm:translate-x-full",
+        "-translate-y-full opacity-0 sm:translate-y-0 sm:translate-x-full",
       );
     }
 
@@ -91,7 +91,7 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
       case "success":
         return (
           <svg
-            className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500"
+            className="mt-0.5 h-5 w-5 shrink-0 text-green-500"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -105,7 +105,7 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
       case "error":
         return (
           <svg
-            className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500"
+            className="mt-0.5 h-5 w-5 shrink-0 text-red-500"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -119,7 +119,7 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
       case "warning":
         return (
           <svg
-            className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-500"
+            className="mt-0.5 h-5 w-5 shrink-0 text-yellow-500"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -133,7 +133,7 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
       case "info":
         return (
           <svg
-            className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500"
+            className="mt-0.5 h-5 w-5 shrink-0 text-blue-500"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -153,12 +153,12 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
       <div className="min-w-0 flex-1">
         <h4 className="text-sm font-semibold">{toast.title}</h4>
         {toast.message && (
-          <p className="mt-1 text-sm text-contrast/75">{toast.message}</p>
+          <p className="text-contrast/75 mt-1 text-sm">{toast.message}</p>
         )}
       </div>
       <button
         onClick={handleClose}
-        className="ml-2 flex-shrink-0 rounded-lg p-1 text-contrast/50 transition-colors hover:bg-primary-hover/50 hover:text-contrast/75"
+        className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 ml-2 shrink-0 rounded-lg p-1 transition-colors"
         aria-label="Close notification"
       >
         <span className="icon-[material-symbols--close] text-lg" />

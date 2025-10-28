@@ -23,7 +23,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       <div className="flex grow">
         <Sidebar />
 
-        <div className="flex min-h-full grow flex-col items-center justify-center overflow-y-auto @container/content">
+        <div className="@container/content flex min-h-full grow flex-col items-center justify-center overflow-y-auto">
           <h1 className="mb-4 text-4xl font-bold">404 / not found</h1>
           <Link to="/dashboard" className="selected">
             Go to dashboard
@@ -43,9 +43,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
           <div className="flex grow">
             <Sidebar />
 
-            <div className="flex min-h-full grow flex-col items-center justify-center overflow-y-auto @container/content">
+            <div className="@container/content flex min-h-full grow flex-col items-center justify-center overflow-y-auto">
               <h1 className="mb-2 text-4xl font-bold">403 / forbidden</h1>
-              <p className="mb-4 text-contrast/70">
+              <p className="text-contrast/70 mb-4">
                 You don't have permission to access this page.
               </p>
               <Link to="/dashboard" className="selected">

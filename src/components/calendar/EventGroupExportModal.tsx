@@ -54,7 +54,7 @@ export function EventGroupExportModal({
   return (
     <FloatingPortal>
       <FloatingOverlay
-        className="z-10 grid place-items-center bg-black/75 @container/export"
+        className="@container/export z-10 grid place-items-center bg-black/75"
         lockScroll
       >
         <FloatingFocusManager
@@ -68,7 +68,7 @@ export function EventGroupExportModal({
             {...getFloatingProps()}
             className="flex h-fit w-full flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-1/2"
           >
-            <div className="overflow-hidden rounded-2xl bg-floating">
+            <div className="bg-floating overflow-hidden rounded-2xl">
               <div className="flex flex-col p-4">
                 {/* Heading and description */}
                 <div className="mb-2 flex w-full flex-row">
@@ -77,7 +77,7 @@ export function EventGroupExportModal({
                   </div>
                   <button
                     type="button"
-                    className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75"
+                    className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 -mt-2 -mr-2 flex h-12 w-12 items-center justify-center rounded-2xl"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
@@ -88,7 +88,7 @@ export function EventGroupExportModal({
                   and it will be updated on schedule changes.
                 </div>
                 {/* Export steps */}
-                <ul className="mt-4 list-decimal pl-5 text-contrast/75">
+                <ul className="text-contrast/75 mt-4 list-decimal pl-5">
                   <li>
                     Copy the link.
                     <ScheduleLinkCopy

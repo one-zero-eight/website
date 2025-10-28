@@ -27,7 +27,7 @@ export function ToastContainer() {
 
   return (
     <FloatingPortal>
-      <div className="pointer-events-none fixed left-1/2 top-4 z-50 w-full max-w-sm -translate-x-1/2 space-y-3 overflow-hidden px-4 sm:left-auto sm:right-4 sm:top-4 sm:translate-x-0 sm:px-0">
+      <div className="pointer-events-none fixed top-4 left-1/2 z-50 w-full max-w-sm -translate-x-1/2 space-y-3 overflow-hidden px-4 sm:top-4 sm:right-4 sm:left-auto sm:translate-x-0 sm:px-0">
         {toastsToShow.map((toast) => (
           <div key={toast.id} className="pointer-events-auto">
             <ToastItem toast={toast} onClose={hideToast} />

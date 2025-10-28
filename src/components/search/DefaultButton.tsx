@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 type DefaultButtonProps = {
   content: string;
   onClick: () => void;
@@ -15,7 +17,10 @@ export const DefaultButton = ({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-10 items-center gap-2 rounded-lg bg-brand-violet px-4 py-2 text-sm font-medium text-white transition-colors ${className}`}
+      className={clsx(
+        "bg-brand-violet flex h-10 items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
+        className,
+      )}
     >
       {content}
     </button>

@@ -67,14 +67,14 @@ const SearchControls = ({
           autoComplete="off"
           spellCheck={false}
           disabled={isPending}
-          className="h-12 w-full resize-none rounded-xl border-2 border-brand-violet/20 bg-pagebg p-4 pr-12 text-base caret-brand-violet outline-none transition-all duration-200 focus:border-brand-violet disabled:opacity-50 dark:text-white"
+          className="border-brand-violet/20 bg-pagebg caret-brand-violet focus:border-brand-violet h-12 w-full resize-none rounded-xl border-2 p-4 pr-12 text-base outline-hidden transition-all duration-200 disabled:opacity-50 dark:text-white"
           placeholder="Search courses..."
         />
-        <span className="icon-[material-symbols--search-rounded] absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-contrast/50" />
+        <span className="icon-[material-symbols--search-rounded] text-contrast/50 absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2" />
       </div>
       <button
         disabled={isPending || isSearching}
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-violet px-6 text-base font-medium text-white shadow-lg transition-all duration-200 hover:bg-[#6600CC] hover:shadow-xl disabled:opacity-50 sm:w-auto"
+        className="bg-brand-violet flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 text-base font-medium text-white shadow-lg transition-all duration-200 hover:bg-[#6600CC] hover:shadow-xl disabled:opacity-50 sm:w-auto"
       >
         {isPending || isSearching ? (
           <span className="icon-[material-symbols--sync] h-5 w-5 animate-spin" />
@@ -207,9 +207,9 @@ const CourseCard = ({
   };
 
   return (
-    <div className="mb-3 rounded-xl border border-secondary-hover bg-floating transition-all duration-200 hover:border-brand-violet/30">
+    <div className="border-secondary-hover bg-floating hover:border-brand-violet/30 mb-3 rounded-xl border transition-all duration-200">
       <div
-        className="flex cursor-pointer items-center gap-4 rounded-xl border-[1px] border-transparent p-4 transition-all duration-200 hover:bg-secondary-hover"
+        className="hover:bg-secondary-hover flex cursor-pointer items-center gap-4 rounded-xl border border-transparent p-4 transition-all duration-200"
         onClick={() => onSelect()}
         onKeyDown={handleKeyDown}
         tabIndex={0}
@@ -217,12 +217,12 @@ const CourseCard = ({
         aria-expanded={isExpanded}
         aria-label={`${isExpanded ? "Collapse" : "Expand"} course ${course.engTitle || course.originalTitle}`}
       >
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           {isLoading ? (
-            <span className="icon-[material-symbols--sync] animate-spin text-3xl text-brand-violet" />
+            <span className="icon-[material-symbols--sync] text-brand-violet animate-spin text-3xl" />
           ) : (
             <span
-              className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-3xl text-brand-violet transition-all duration-200`}
+              className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-brand-violet text-3xl transition-all duration-200`}
             />
           )}
         </div>
@@ -231,7 +231,7 @@ const CourseCard = ({
             {course.engTitle || course.originalTitle}
           </h3>
           {course.rusTitle && (
-            <p className="truncate text-sm text-contrast/75">
+            <p className="text-contrast/75 truncate text-sm">
               {course.rusTitle}
             </p>
           )}
@@ -241,15 +241,15 @@ const CourseCard = ({
         />
       </div>
       {isExpanded && courseData && (
-        <div className="rounded-b-xl border-t border-secondary-hover bg-pagebg/50 p-4">
+        <div className="border-secondary-hover bg-pagebg/50 rounded-b-xl border-t p-4">
           <div className="space-y-2">
             {courseData.map((source, index) => (
               <div
                 onClick={() => setPreviewSource(source)}
                 key={index}
-                className="flex cursor-pointer gap-3 rounded-lg border-b border-secondary-hover p-3 transition-all duration-200 hover:bg-secondary-hover"
+                className="border-secondary-hover hover:bg-secondary-hover flex cursor-pointer gap-3 rounded-lg border-b p-3 transition-all duration-200"
               >
-                <span className="icon-[material-symbols--description] flex-shrink-0 text-2xl text-brand-violet" />
+                <span className="icon-[material-symbols--description] text-brand-violet shrink-0 text-2xl" />
                 <div className="min-w-0 flex-1 space-y-0">
                   <p className="truncate text-sm font-medium">
                     {source?.display_name || "Untitled"}
@@ -299,9 +299,9 @@ const TrimesterGroup = ({
   };
 
   return (
-    <div className="rounded-xl border border-secondary-hover bg-floating p-4">
+    <div className="border-secondary-hover bg-floating rounded-xl border p-4">
       <div
-        className="flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-all duration-200 focus:bg-secondary-hover focus:outline-none focus:ring-2 focus:ring-brand-violet/50"
+        className="focus:bg-secondary-hover focus:ring-brand-violet/50 flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-all duration-200 focus:ring-2 focus:outline-hidden"
         onClick={() => setIsExpanded(!isExpanded)}
         onKeyDown={handleKeyDown}
         tabIndex={0}
@@ -310,11 +310,11 @@ const TrimesterGroup = ({
         aria-label={`${isExpanded ? "Collapse" : "Expand"} trimester ${trimester}`}
       >
         <span
-          className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-3xl text-brand-violet transition-all duration-200`}
+          className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-brand-violet text-3xl transition-all duration-200`}
         />
         <div className="flex-1">
           <h2 className="text-xl font-semibold sm:text-2xl">{trimester}</h2>
-          <p className="text-sm text-contrast/50">
+          <p className="text-contrast/50 text-sm">
             {courses.length} course{courses.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -344,13 +344,13 @@ const LoadingSkeleton = () => (
     {[1, 2, 3].map((i) => (
       <div
         key={i}
-        className="rounded-xl border border-secondary-hover bg-floating p-4"
+        className="border-secondary-hover bg-floating rounded-xl border p-4"
       >
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 animate-pulse rounded bg-contrast/20" />
+          <div className="bg-contrast/20 h-8 w-8 animate-pulse rounded-sm" />
           <div className="flex-1">
-            <div className="h-6 w-32 animate-pulse rounded bg-contrast/20" />
-            <div className="mt-1 h-4 w-24 animate-pulse rounded bg-contrast/20" />
+            <div className="bg-contrast/20 h-6 w-32 animate-pulse rounded-sm" />
+            <div className="bg-contrast/20 mt-1 h-4 w-24 animate-pulse rounded-sm" />
           </div>
         </div>
       </div>
@@ -439,7 +439,7 @@ export function CataloguePage() {
       {/* Mobile Preview Overlay */}
       {showPreview && previewSource && (
         <div className="fixed inset-0 z-50 bg-black/50 lg:hidden">
-          <div className="absolute inset-4 bottom-4 top-4 overflow-hidden rounded-xl bg-pagebg">
+          <div className="bg-pagebg absolute inset-4 top-4 bottom-4 overflow-hidden rounded-xl">
             <PreviewCard source={previewSource} onClose={handleClosePreview} />
           </div>
         </div>
@@ -464,7 +464,7 @@ export function CataloguePage() {
               />
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-contrast/50">
+            <div className="text-contrast/50 flex flex-col items-center justify-center py-16">
               <span className="icon-[material-symbols--search-off] text-6xl" />
               <p className="mt-4 text-xl font-medium">No courses found</p>
               <p className="text-center text-sm">
@@ -484,8 +484,8 @@ export function CataloguePage() {
               />
             </div>
           ) : (
-            <div className="flex h-[400px] items-center justify-center rounded-xl border-2 border-dashed border-contrast/20">
-              <div className="text-center text-contrast/50">
+            <div className="border-contrast/20 flex h-[400px] items-center justify-center rounded-xl border-2 border-dashed">
+              <div className="text-contrast/50 text-center">
                 <span className="icon-[material-symbols--preview] text-6xl" />
                 <p className="mt-4 text-lg font-medium">Select a course</p>
                 <p className="text-sm">

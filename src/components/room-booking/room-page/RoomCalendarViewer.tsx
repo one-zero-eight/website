@@ -226,7 +226,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
             return <div>{text}</div>;
           } else {
             return (
-              <div className="-mt-6 flex h-12 translate-y-2 items-center justify-end bg-pagebg">
+              <div className="bg-pagebg -mt-6 flex h-12 translate-y-2 items-center justify-end">
                 {text}
               </div>
             );
@@ -238,7 +238,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         // contentHeight={isFullPage ? undefined : "auto"} // Do not add scrollbar on in-page calendars
         eventInteractive={true} // Make event tabbable
         expandRows={true}
-        eventClassNames="cursor-pointer text-sm rounded-md !bg-transparent border-0 overflow-clip"
+        eventClassNames="cursor-pointer text-sm rounded-md! bg-transparent! border-0! overflow-clip"
         eventClick={(info) => {
           info.jsEvent.preventDefault();
           info.jsEvent.stopPropagation();
@@ -341,7 +341,7 @@ function renderEventListMonth({ event }: EventContentArg) {
   return (
     <div className="flex flex-wrap gap-x-1 text-left">
       {event.title}
-      <span className="break-all text-inactive">
+      <span className="text-inactive break-all">
         {event.extendedProps.location}
       </span>
     </div>
@@ -368,23 +368,23 @@ function renderEventTimeGridWeek({
         : "#9A2EFF";
   return (
     <div
-      className="h-full border-l-4 p-1 text-left"
+      className="h-full border-l-4 p-1 text-left backdrop-blur-xs"
       style={{
         borderLeftColor: border,
         backgroundColor: `color-mix(in srgb, ${background} 40%, transparent)`,
-        color: `color-mix(in srgb, ${background} 75%, rgb(var(--color-contrast)))`,
+        color: `color-mix(in srgb, ${background} 75%, var(--color-contrast))`,
       }}
     >
       <span
         className="line-clamp-2 text-sm font-medium"
         style={{
-          color: `color-mix(in srgb, ${background} 60%, rgb(var(--color-contrast)))`,
+          color: `color-mix(in srgb, ${background} 60%, var(--color-contrast))`,
         }}
       >
         {event.title}
       </span>
       {timeText && (
-        <span className="line-clamp-2 text-xs text-opacity-50">
+        <span className="text-opacity-50 line-clamp-2 text-xs">
           {" "}
           {timeText}
         </span>
@@ -413,11 +413,11 @@ function renderEventDayGridMonth({
         className="fc-daygrid-event-dot"
         style={{ borderColor: borderColor || backgroundColor }}
       />
-      <div className="fc-event-title w-full max-w-full text-xs text-contrast">
+      <div className="fc-event-title text-contrast w-full max-w-full text-xs">
         {event.title || <>&nbsp;</>}
       </div>
       {timeText && (
-        <div className="ml-1 hidden w-fit text-right text-xs text-inactive @5xl/content:block">
+        <div className="text-inactive ml-1 hidden w-fit text-right text-xs @5xl/content:block">
           {timeText}
         </div>
       )}
@@ -431,7 +431,7 @@ function renderDayHeader({ date }: DayHeaderContentArg) {
   return (
     <>
       {moment(date).format("ddd")}{" "}
-      <div className="inline-flex w-fit items-center justify-center rounded-md [.fc-day-today_&]:bg-red-500 [.fc-day-today_&]:px-1 [.fc-day-today_&]:text-white">
+      <div className="inline-flex w-fit items-center justify-center rounded-md in-[.fc-day-today]:bg-red-500 in-[.fc-day-today]:px-1 in-[.fc-day-today]:text-white">
         {moment(date).format("D")}
       </div>
     </>

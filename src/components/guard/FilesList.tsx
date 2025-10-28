@@ -54,10 +54,10 @@ interface FileItemProps {
 
 function FileItem({ file, onShowDetails }: FileItemProps) {
   return (
-    <div className="flex items-center justify-between rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3">
+    <div className="border-contrast/20 bg-primary/5 flex items-center justify-between rounded-lg border-2 px-4 py-3">
       <div className="min-w-0">
         <div className="truncate font-medium">{file.title || "Untitled"}</div>
-        <div className="flex items-center gap-2 truncate text-sm text-contrast/60">
+        <div className="text-contrast/60 flex items-center gap-2 truncate text-sm">
           {file.user_role}, {file.sso_joins_count}{" "}
           {file.sso_joins_count === 1 ? "join" : "joins"}, created at{" "}
           {formatDate(file.created_at)}
@@ -66,7 +66,7 @@ function FileItem({ file, onShowDetails }: FileItemProps) {
       <div className="ml-4 flex shrink-0 items-center gap-2">
         <button
           onClick={() => onShowDetails(file.slug)}
-          className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:border-contrast/40"
+          className="border-contrast/20 hover:border-contrast/40 rounded-lg border-2 px-3 py-2 text-sm font-medium"
         >
           Show more
         </button>

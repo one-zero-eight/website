@@ -70,7 +70,7 @@ export function FileDetails({
             currentTitle={file?.title || "Untitled"}
             onSave={onUpdateTitle}
           />
-          <p className="text-sm font-normal text-contrast/60">
+          <p className="text-contrast/60 text-sm font-normal">
             {file?.user_role}, created at{" "}
             {file?.created_at ? formatDate(file.created_at) : "—"}
           </p>
@@ -78,7 +78,7 @@ export function FileDetails({
         <div className="ml-4 flex shrink-0 items-center gap-2">
           <button
             onClick={onBack}
-            className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:border-contrast/40"
+            className="border-contrast/20 hover:border-contrast/40 rounded-lg border-2 px-3 py-2 text-sm font-medium"
           >
             Back to files
           </button>
@@ -94,7 +94,7 @@ export function FileDetails({
             window.location.href = buildSheetsUrl(file.file_id);
           }}
           disabled={!file?.file_id}
-          className="rounded-lg border-2 border-contrast/20 px-3 py-2 text-sm font-medium hover:border-contrast/40 disabled:cursor-not-allowed disabled:opacity-50"
+          className="border-contrast/20 hover:border-contrast/40 rounded-lg border-2 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
         >
           Open spreadsheet
         </button>
@@ -114,7 +114,7 @@ export function FileDetails({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search by gmail or innomail"
-          className="w-full rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3 outline-none transition-colors focus:border-contrast/40 focus:bg-primary/10"
+          className="border-contrast/20 bg-primary/5 focus:border-contrast/40 focus:bg-primary/10 w-full rounded-lg border-2 px-4 py-3 outline-hidden transition-colors"
         />
       </div>
 

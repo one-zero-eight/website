@@ -45,13 +45,13 @@ interface BannedItemProps {
 
 function BannedItem({ banned, onUnban }: BannedItemProps) {
   return (
-    <div className="flex items-center justify-between rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3">
+    <div className="border-contrast/20 bg-primary/5 flex items-center justify-between rounded-lg border-2 px-4 py-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Email email={banned.gmail} />
           <Email email={banned.innomail} />
         </div>
-        <div className="text-xs text-contrast/50">
+        <div className="text-contrast/50 text-xs">
           banned at {formatDate(banned.banned_at)}
         </div>
       </div>

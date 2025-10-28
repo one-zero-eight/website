@@ -14,32 +14,32 @@ export function MusicRoomPage() {
           <div className="flex flex-col gap-4">
             <a
               href="https://t.me/InnoMusicRoomBot"
-              className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
+              className="group bg-primary hover:bg-secondary flex flex-row gap-4 rounded-2xl px-4 py-6"
             >
               <div className="w-12">
-                <span className="icon-[mdi--robot-excited-outline] text-5xl text-brand-violet" />
+                <span className="icon-[mdi--robot-excited-outline] text-brand-violet text-5xl" />
               </div>
               <div className="flex flex-col gap-2">
-                <p className="text-2xl font-semibold text-contrast">
+                <p className="text-contrast text-2xl font-semibold">
                   Telegram bot
                 </p>
-                <p className="text-lg text-contrast/75">
+                <p className="text-contrast/75 text-lg">
                   Register in Telegram bot to book timeslots.
                 </p>
               </div>
             </a>
             <Link
               to="/music-room/instructions"
-              className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
+              className="group bg-primary hover:bg-secondary flex flex-row gap-4 rounded-2xl px-4 py-6"
             >
               <div className="w-12">
-                <span className="icon-[material-symbols--quick-reference-outline-rounded] text-5xl text-brand-violet" />
+                <span className="icon-[material-symbols--quick-reference-outline-rounded] text-brand-violet text-5xl" />
               </div>
               <div className="flex flex-col gap-2">
-                <p className="text-2xl font-semibold text-contrast">
+                <p className="text-contrast text-2xl font-semibold">
                   Instructions
                 </p>
-                <p className="text-lg text-contrast/75">
+                <p className="text-contrast/75 text-lg">
                   Read rules and guides on how to access the Music room. Every
                   visitor should accept these conditions.
                 </p>
@@ -53,23 +53,23 @@ export function MusicRoomPage() {
                 const url = atob(encodedURL);
                 window.open(url, "_blank");
               }}
-              className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 text-left hover:bg-secondary"
+              className="group bg-primary hover:bg-secondary flex flex-row gap-4 rounded-2xl px-4 py-6 text-left"
             >
               <div className="w-12">
-                <span className="icon-[ic--baseline-telegram] text-5xl text-brand-violet" />
+                <span className="icon-[ic--baseline-telegram] text-brand-violet text-5xl" />
               </div>
               <div className="flex flex-col gap-2">
-                <p className="text-2xl font-semibold text-contrast">
+                <p className="text-contrast text-2xl font-semibold">
                   Telegram chat
                 </p>
-                <p className="text-lg text-contrast/75">
+                <p className="text-contrast/75 text-lg">
                   Join telegram chat to receive latest news about Music room and
                   ask questions.
                 </p>
               </div>
             </button>
           </div>
-          <div className="flex w-full flex-row items-center justify-center rounded-2xl bg-primary p-4">
+          <div className="bg-primary flex w-full flex-row items-center justify-center rounded-2xl p-4">
             <iframe
               width="704"
               height="396"

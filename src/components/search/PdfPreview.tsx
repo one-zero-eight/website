@@ -116,7 +116,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
         )}
       </Document>
 
-      <div className="mb-4 mt-2 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
+      <div className="mt-2 mb-4 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
         {file !== undefined && (
           <div className="flex flex-row items-stretch gap-4">
             <PreviewBottomButton
@@ -128,7 +128,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
             />
 
             {error === null && (
-              <div className="bg-base-100 flex flex-row items-center rounded-lg dark:bg-primary-hover">
+              <div className="bg-base-100 dark:bg-primary-hover flex flex-row items-center rounded-lg">
                 <button
                   className="px-4"
                   onClick={goToPrevPage}

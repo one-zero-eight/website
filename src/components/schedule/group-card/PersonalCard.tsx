@@ -22,14 +22,14 @@ export function PersonalCard({
   const navigate = useNavigate();
   return (
     <div
-      className="flex min-h-fit min-w-fit max-w-full basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl bg-primary p-4 hover:bg-primary-hover"
+      className="bg-primary hover:bg-primary-hover flex min-h-fit max-w-full min-w-fit basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl p-4"
       onClick={() => pageUrl && navigate({ to: pageUrl })}
     >
       <div className="flex flex-col gap-0.5">
         <p className="text-xl font-medium">{name}</p>
         <p className="text-inactive">{description}</p>
       </div>
-      <div className="flex select-none flex-row place-items-center">
+      <div className="flex flex-row place-items-center select-none">
         {canHide && <HideButtonPersonal target={targetType} />}
         {buttons}
       </div>

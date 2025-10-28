@@ -1,14 +1,16 @@
+@reference "../../app/styles.css";
+
 :root {
   --fc-neutral-bg-color: rgba(149, 52, 244, 0.2);
-  --fc-page-bg-color: theme("colors.pagebg");
-  --fc-border-color: theme("colors.inactive/0.5");
-  --fc-list-event-hover-bg-color: theme("colors.primary.hover");
-  --fc-event-bg-color: theme("colors.brand.violet");
-  --fc-event-border-color: theme("colors.brand.violet");
-  --fc-button-bg-color: theme("colors.primary.DEFAULT");
-  --fc-button-hover-bg-color: theme("colors.primary.hover");
-  --fc-button-active-bg-color: theme("colors.primary.hover");
-  --fc-button-text-color: theme("colors.contrast");
+  --fc-page-bg-color: var(--color-pagebg);
+  --fc-border-color: rgba(var(--color-inactive-rgb) / 0.5);
+  --fc-list-event-hover-bg-color: var(--color-primary-hover);
+  --fc-event-bg-color: var(--color-brand-violet);
+  --fc-event-border-color: var(--color-brand-violet);
+  --fc-button-bg-color: var(--color-primary);
+  --fc-button-hover-bg-color: var(--color-primary-hover);
+  --fc-button-active-bg-color: var(--color-primary-hover);
+  --fc-button-text-color: var(--color-contrast);
 }
 
 .fc {
@@ -32,7 +34,7 @@
     }
 
     .fc-button {
-      @apply m-0 text-nowrap rounded-xl border-0 text-base outline-0;
+      @apply m-0 rounded-xl border-0 text-base text-nowrap outline-0;
 
       &:focus-visible {
         @apply border-0 outline-0;
@@ -44,7 +46,7 @@
     }
 
     .fc-toolbar-chunk div:has(.fc-toolbar-title) {
-      @apply flex items-center justify-center gap-1 rounded-xl border-0 bg-primary outline-0;
+      @apply bg-primary flex items-center justify-center gap-1 rounded-xl border-0 outline-0;
     }
   }
 
@@ -73,7 +75,7 @@
 
   .fc-day-today {
     .fc-col-header-cell-cushion {
-      @apply font-medium text-contrast;
+      @apply text-contrast font-medium;
     }
   }
 
@@ -174,7 +176,7 @@
 
 .calendar-loading .fc-view-harness::before {
   /* Loading state */
-  @apply absolute left-0 right-0 top-0 h-[2px] bg-white;
+  @apply absolute top-0 right-0 left-0 h-[2px] bg-white;
   content: "";
   animation: loading 1.5s infinite linear;
 }

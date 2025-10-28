@@ -15,14 +15,14 @@ export function CountdownWidget() {
   const secondsLeft = Math.max(0, Math.floor((deadlineMs - nowMs) / 1000)) % 60;
 
   return (
-    <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-4">
-      <span className="icon-[twemoji--christmas-tree] hidden w-12 shrink-0 text-5xl text-brand-violet sm:block" />
+    <div className="group bg-primary flex flex-row gap-4 rounded-2xl px-4 py-4">
+      <span className="icon-[twemoji--christmas-tree] text-brand-violet hidden w-12 shrink-0 text-5xl sm:block" />
       <div className="flex flex-col">
-        <div className="flex text-lg font-semibold text-contrast">
-          <span className="icon-[twemoji--christmas-tree] mr-2 shrink-0 text-3xl text-brand-violet sm:hidden" />
+        <div className="text-contrast flex text-lg font-semibold">
+          <span className="icon-[twemoji--christmas-tree] text-brand-violet mr-2 shrink-0 text-3xl sm:hidden" />
           <span>New Year countdown</span>
         </div>
-        <div className="line-clamp-1 break-all text-contrast/75">
+        <div className="text-contrast/75 line-clamp-1 break-all">
           {daysLeft} days, {hoursLeft} hours, {minutesLeft} minutes,{" "}
           {secondsLeft} seconds
         </div>

@@ -74,7 +74,7 @@ export default function SearchField({
           <input
             autoComplete="off"
             spellCheck={false}
-            className="inset-0 h-10 resize-none rounded-l-lg border-2 border-r-0 border-brand-violet bg-pagebg pl-3 text-base caret-brand-violet outline-none dark:text-white sm:rounded-lg sm:border-r-2"
+            className="border-brand-violet bg-pagebg caret-brand-violet inset-0 h-10 resize-none rounded-l-lg border-2 border-r-0 pl-3 text-base outline-hidden sm:rounded-lg sm:border-r-2 dark:text-white"
             placeholder="Enter query..."
             onChange={(e) => setText(e.target.value)}
             value={text}

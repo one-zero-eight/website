@@ -12,11 +12,11 @@ export function Topbar({
   return (
     <nav
       className={clsx(
-        "w-full flex-row items-center justify-between border-b-[1px] border-b-secondary-hover",
+        "border-b-secondary-hover w-full flex-row items-center justify-between border-b",
         hideOnMobile ? "hidden lg:flex" : "flex",
       )}
     >
-      <div className="flex-grow px-4 py-2">
+      <div className="grow px-4 py-2">
         <h1 className="mr-2 text-3xl font-medium">{title}</h1>
       </div>
       <div className="hidden items-center py-2 pr-4 lg:flex">

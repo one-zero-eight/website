@@ -14,20 +14,20 @@ export function AccountWidget() {
 
   return (
     <div className="flex max-w-full flex-row gap-4">
-      <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full bg-primary text-contrast/50">
+      <div className="bg-primary text-contrast/50 flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full">
         {me.telegram?.photo_url ? (
           <img
             src={me.telegram.photo_url}
             alt="Your avatar"
-            className="rounded-full border-2 border-contrast/50"
+            className="border-contrast/50 rounded-full border-2"
           />
         ) : (
           <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-5xl @xl/account:text-6xl" />
         )}
       </div>
       <div className="flex flex-col justify-center overflow-x-hidden">
-        <p className="break-words text-xl">{me.innopolis_sso?.name}</p>
-        <p className="overflow-hidden overflow-ellipsis text-sm text-contrast/75">
+        <p className="text-xl wrap-break-word">{me.innopolis_sso?.name}</p>
+        <p className="text-contrast/75 overflow-hidden text-sm text-ellipsis">
           {me.innopolis_sso?.email}
           <span className="text-sm">{roles && ` (${roles})`}</span>
         </p>

@@ -29,7 +29,7 @@ export const items: ItemType[] = [
     to: "/search",
     icon: <span className="icon-[material-symbols--search]" />,
     badge: (
-      <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
+      <span className="bg-brand-violet ml-2 rounded-full px-2 py-1 text-xs font-semibold text-white">
         NEW
       </span>
     ),

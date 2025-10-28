@@ -26,7 +26,7 @@ export function BookingsListPage() {
     // No bookings
     return (
       <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
-        <h2 className="text-2xl text-inactive">You have no bookings</h2>
+        <h2 className="text-inactive text-2xl">You have no bookings</h2>
       </div>
     );
   }
@@ -37,7 +37,7 @@ export function BookingsListPage() {
         <React.Fragment key={v.id}>
           <BookingCard booking={v} />
           {i < bookings.length - 1 && (
-            <div className="h-[1px] bg-secondary-hover" />
+            <div className="bg-secondary-hover h-px" />
           )}
         </React.Fragment>
       ))}
@@ -82,7 +82,7 @@ export function BookingCard({
 
   return (
     <>
-      <div className="group flex flex-row rounded-lg border-[1px] border-primary-hover bg-primary px-4 py-2">
+      <div className="group border-primary-hover bg-primary flex flex-row rounded-lg border px-4 py-2">
         <div className="flex grow flex-col">
           <h2 className="text-gray-900 dark:text-gray-100">{booking.title}</h2>
           <p className="text-base text-gray-600 dark:text-gray-400">
@@ -111,7 +111,7 @@ export function BookingCard({
             <Link
               to="/room-booking"
               search={{ d: new Date(booking.start).getTime() }}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-contrast/50 hover:bg-secondary-hover"
+              className="text-contrast/50 hover:bg-secondary-hover flex h-8 w-8 items-center justify-center rounded-md"
             >
               <span className="icon-[tabler--list-search] text-2xl" />
             </Link>
@@ -120,13 +120,13 @@ export function BookingCard({
           <Tooltip content="Delete booking">
             <button
               type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-md border-[1px] border-red-400 bg-red-200 text-red-600 hover:bg-red-300 dark:border-red-600 dark:bg-red-800 dark:text-red-400 dark:hover:bg-red-700"
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-red-400 bg-red-200 text-red-600 hover:bg-red-300 dark:border-red-600 dark:bg-red-800 dark:text-red-400 dark:hover:bg-red-700"
               onClick={() => setConfirmDialogOpen(true)}
             >
               {!isPending ? (
                 <span className="icon-[material-symbols--close-rounded] text-2xl" />
               ) : (
-                <span className="icon-[mdi--loading] animate-spin text-2xl text-contrast" />
+                <span className="icon-[mdi--loading] text-contrast animate-spin text-2xl" />
               )}
             </button>
           </Tooltip>

@@ -21,22 +21,22 @@ export function ScholarshipPage() {
           department.
         </p>
         <p>For the next semesters &mdash; using the following formula:</p>
-        <ScholarshipFormula className="my-4 w-full fill-contrast stroke-none" />
+        <ScholarshipFormula className="fill-contrast my-4 w-full stroke-none" />
 
         <p>
-          <ScholarshipS className="-mt-1 inline fill-contrast" /> &mdash;
+          <ScholarshipS className="fill-contrast -mt-1 inline" /> &mdash;
           scholarship amount
         </p>
         <p>
-          <ScholarshipBmin className="-mt-1 inline fill-contrast" /> &mdash;
+          <ScholarshipBmin className="fill-contrast -mt-1 inline" /> &mdash;
           minimum scholarship amount (3,000₽)
         </p>
         <p>
-          <ScholarshipBmax className="-mt-1 inline fill-contrast" /> &mdash;
+          <ScholarshipBmax className="fill-contrast -mt-1 inline" /> &mdash;
           maximum scholarship amount (10,000₽ or 20,000₽ for masters)
         </p>
         <p>
-          <ScholarshipGPA className="inline fill-contrast" /> &mdash;
+          <ScholarshipGPA className="fill-contrast inline" /> &mdash;
           student&apos;s average grade for the last semester
         </p>
 

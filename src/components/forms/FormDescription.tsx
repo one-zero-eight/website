@@ -1,6 +1,6 @@
 export function FormDescription() {
   return (
-    <div className="mt-6 text-center text-sm text-contrast/60">
+    <div className="text-contrast/60 mt-6 text-center text-sm">
       <p>
         This will create a link that automatically fills in the respondent's
         email address when they open the form.

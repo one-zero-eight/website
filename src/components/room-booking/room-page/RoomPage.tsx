@@ -111,7 +111,7 @@ export function RoomPage({ id }: { id: string }) {
         {/* Two-column layout on large screens */}
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
           {/* Room details column */}
-          <div className="flex min-h-full flex-grow flex-col gap-3 lg:flex-1">
+          <div className="flex min-h-full grow flex-col gap-3 lg:flex-1">
             <h1 className="text-3xl font-semibold">{room.title}</h1>
 
             {room.access_level && (

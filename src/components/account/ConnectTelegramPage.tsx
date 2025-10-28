@@ -44,10 +44,10 @@ export function ConnectTelegramPage() {
   if (!me) {
     return (
       <>
-        <h1 className="break-words text-center text-2xl font-medium">
+        <h1 className="text-center text-2xl font-medium wrap-break-word">
           Sign in to get access
         </h1>
-        <p className="text-center text-contrast/75">
+        <p className="text-contrast/75 text-center">
           Use your Innopolis account
           <br />
           to access InNoHassle services.
@@ -62,12 +62,12 @@ export function ConnectTelegramPage() {
   if (!me.telegram) {
     return (
       <>
-        <h1 className="break-words text-center text-2xl font-medium">
+        <h1 className="text-center text-2xl font-medium wrap-break-word">
           Connect your Telegram
         </h1>
         <div className="flex flex-col justify-center overflow-x-hidden text-center">
-          <p className="break-words text-xl">{me.innopolis_sso?.name}</p>
-          <p className="overflow-ellipsis text-contrast/75">
+          <p className="text-xl wrap-break-word">{me.innopolis_sso?.name}</p>
+          <p className="text-contrast/75 text-ellipsis">
             {me.innopolis_sso?.email}
           </p>
         </div>
@@ -84,20 +84,22 @@ export function ConnectTelegramPage() {
 
   return (
     <>
-      <h1 className="break-words text-center text-2xl font-medium">Success!</h1>
+      <h1 className="text-center text-2xl font-medium wrap-break-word">
+        Success!
+      </h1>
       <div className="flex flex-col justify-center overflow-x-hidden text-center">
-        <p className="break-words text-xl">{me.innopolis_sso?.name}</p>
-        <p className="overflow-ellipsis text-contrast/75">
+        <p className="text-xl wrap-break-word">{me.innopolis_sso?.name}</p>
+        <p className="text-contrast/75 text-ellipsis">
           {me.innopolis_sso?.email}
         </p>
-        <p className="overflow-ellipsis text-contrast/75">
+        <p className="text-contrast/75 text-ellipsis">
           @{me.telegram.username}
         </p>
       </div>
       <div className="flex items-center justify-center">
         <button
           type="button"
-          className="flex h-14 w-fit items-center justify-center gap-4 rounded-2xl border-2 border-brand-violet bg-pagebg px-6 py-2 text-xl font-medium hover:bg-primary-hover"
+          className="border-brand-violet bg-pagebg hover:bg-primary-hover flex h-14 w-fit items-center justify-center gap-4 rounded-2xl border-2 px-6 py-2 text-xl font-medium"
           onClick={() => {
             const searchParams = new URLSearchParams(searchStr);
             const bot = searchParams.get("bot");

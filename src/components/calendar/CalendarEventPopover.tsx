@@ -85,7 +85,7 @@ export default function CalendarEventPopover({
               ref={refs.setFloating}
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
-              className="z-10 flex max-w-md flex-col gap-2 rounded-2xl bg-primary p-4 text-sm text-contrast drop-shadow-md"
+              className="bg-primary text-contrast z-10 flex max-w-md flex-col gap-2 rounded-2xl p-4 text-sm drop-shadow-md"
             >
               <div className="flex flex-row gap-2">
                 <div className="w-6 p-1">
@@ -94,7 +94,7 @@ export default function CalendarEventPopover({
                     style={{ backgroundColor: event.backgroundColor }}
                   ></div>
                 </div>
-                <div className="text-bold flex whitespace-pre-wrap text-xl [overflow-wrap:anywhere]">
+                <div className="text-bold flex text-xl wrap-anywhere whitespace-pre-wrap">
                   {event.title}
                 </div>
               </div>
@@ -102,7 +102,7 @@ export default function CalendarEventPopover({
                 <div className="w-6">
                   <span className="icon-[material-symbols--today-outline] text-2xl" />
                 </div>
-                <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
                   {!event.allDay
                     ? moment(event.startStr).format("dddd, D MMMM; HH:mm—") +
                       moment(event.endStr).format("HH:mm")
@@ -129,7 +129,7 @@ export default function CalendarEventPopover({
                               q: location,
                             }}
                             target="_blank"
-                            className="flex w-full whitespace-pre-wrap py-1 underline underline-offset-2 [overflow-wrap:anywhere]"
+                            className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap underline underline-offset-2"
                           >
                             {location}
                           </Link>
@@ -140,7 +140,7 @@ export default function CalendarEventPopover({
                       ) : (
                         <span
                           key={index}
-                          className="flex w-full whitespace-pre-wrap py-1"
+                          className="flex w-full py-1 whitespace-pre-wrap"
                         >
                           {location.concat(
                             index !== locations.length - 1 ? " / " : "",
@@ -156,7 +156,7 @@ export default function CalendarEventPopover({
                   <div className="w-6">
                     <span className="icon-[material-symbols--notes] text-2xl" />
                   </div>
-                  <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                  <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
                     {event.extendedProps.description}
                   </p>
                 </div>
@@ -166,7 +166,7 @@ export default function CalendarEventPopover({
                   <div className="w-6">
                     <span className="icon-[material-symbols--update] text-2xl" />
                   </div>
-                  <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+                  <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
                     Calendar updated at:{" "}
                     {moment(event.extendedProps.updatedAt).format(
                       "DD.MM HH:mm",
@@ -182,7 +182,7 @@ export default function CalendarEventPopover({
                   <a
                     href={event.extendedProps.sourceLink}
                     target="_blank"
-                    className="flex w-full whitespace-pre-wrap py-1 underline underline-offset-2 [overflow-wrap:anywhere]"
+                    className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap underline underline-offset-2"
                   >
                     Go to source
                   </a>

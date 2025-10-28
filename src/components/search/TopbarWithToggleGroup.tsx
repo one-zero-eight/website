@@ -13,11 +13,11 @@ export function TopbarWithToggleGroup({
   return (
     <nav
       className={clsx(
-        "w-full flex-row items-center justify-between border-b-[1px] border-b-secondary-hover",
+        "border-b-secondary-hover w-full flex-row items-center justify-between border-b",
         hideOnMobile ? "hidden lg:flex" : "flex",
       )}
     >
-      <div className="flex-grow justify-center px-4 md:justify-between">
+      <div className="grow justify-center px-4 md:justify-between">
         <ToggleGroup currentTabText={currentTabText}></ToggleGroup>
       </div>
       <div className="hidden items-center py-2 pr-4 lg:flex">

@@ -42,7 +42,7 @@
 
     <!-- Inject main styles to index.html -->
     <style>
-      @import "/src/app/styles.css";
+      @import "./src/app/styles.css";
     </style>
 
     <!-- The app entrypoint -->
@@ -56,11 +56,11 @@
     </noscript>
 
     <!-- Main app container -->
-    <div id="app" class="h-full font-rubik text-contrast">
+    <div id="app" class="font-rubik text-contrast h-full">
       <!-- Show loading state. App will replace this after rendering -->
       <div class="flex h-full w-full items-center justify-center">
         <span
-          class="icon-[mdi--loading] animate-spin text-2xl text-contrast"
+          class="icon-[mdi--loading] text-contrast animate-spin text-2xl"
         ></span>
       </div>
     </div>

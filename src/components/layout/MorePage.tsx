@@ -19,9 +19,9 @@ export function MorePage() {
             href="https://github.com/one-zero-eight"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center rounded-xl p-2 hover:bg-secondary"
+            className="hover:bg-secondary flex items-center justify-center rounded-xl p-2"
           >
-            <span className="icon-[mdi--github] text-3xl text-inactive" />
+            <span className="icon-[mdi--github] text-inactive text-3xl" />
           </a>
         </Tooltip>
         <Tooltip content="Telegram">
@@ -29,9 +29,9 @@ export function MorePage() {
             href="https://t.me/one_zero_eight"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center rounded-xl p-2 hover:bg-secondary"
+            className="hover:bg-secondary flex items-center justify-center rounded-xl p-2"
           >
-            <span className="icon-[uil--telegram-alt] text-3xl text-inactive" />
+            <span className="icon-[uil--telegram-alt] text-inactive text-3xl" />
           </a>
         </Tooltip>
         <div className="flex grow"></div>
@@ -63,7 +63,7 @@ function MenuLink({ icon, title, badge, ...props }: LocalLink | ExternalLink) {
   const children = (
     <>
       {icon}
-      <div className="[.is-active_&]:selected ml-4 flex w-fit items-center whitespace-nowrap text-lg font-semibold text-inactive">
+      <div className="in-[.is-active]:selected text-inactive ml-4 flex w-fit items-center text-lg font-semibold whitespace-nowrap">
         {title}
       </div>
       {(props.type === "external" || !!badge) && (
@@ -81,7 +81,7 @@ function MenuLink({ icon, title, badge, ...props }: LocalLink | ExternalLink) {
     return (
       <a
         className={clsx(
-          "flex w-full select-none rounded-xl py-2 text-inactive hover:bg-gray-500/10",
+          "text-inactive flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
           "px-4 text-4xl",
         )}
         {...props}
@@ -93,7 +93,7 @@ function MenuLink({ icon, title, badge, ...props }: LocalLink | ExternalLink) {
     return (
       <Link
         className={clsx(
-          "flex w-full select-none rounded-xl py-2 text-inactive hover:bg-gray-500/10",
+          "text-inactive flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
           "[&.is-active]:text-brand-violet",
           "px-4 text-4xl",
         )}

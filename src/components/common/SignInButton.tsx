@@ -18,7 +18,7 @@ export const SignInButton = forwardRef(function SignInButton_(
       ref={ref}
       type="button"
       className={clsx(
-        "flex h-14 w-fit items-center justify-center gap-4 rounded-2xl border-2 border-brand-violet bg-pagebg px-6 py-2 text-xl font-medium hover:bg-primary-hover",
+        "border-brand-violet bg-pagebg hover:bg-primary-hover flex h-14 w-fit items-center justify-center gap-4 rounded-2xl border-2 px-6 py-2 text-xl font-medium",
         className,
       )}
       onClick={(e) => {
@@ -26,7 +26,7 @@ export const SignInButton = forwardRef(function SignInButton_(
         onClick?.(e);
       }}
     >
-      <span className="icon-[material-symbols--login] -ml-2 text-4xl text-contrast" />
+      <span className="icon-[material-symbols--login] text-contrast -ml-2 text-4xl" />
       Sign in
     </button>
   );
@@ -40,13 +40,13 @@ export function SignInButtonIcon({
     <Tooltip content="Sign in">
       <button
         type="button"
-        className="flex items-center justify-center rounded-xl p-2 hover:bg-secondary"
+        className="hover:bg-secondary flex items-center justify-center rounded-xl p-2"
         onClick={(e) => {
           navigateToSignIn(signInRedirect);
           onClick?.(e);
         }}
       >
-        <span className="icon-[material-symbols--login-rounded] -ml-2 text-3xl text-brand-violet" />
+        <span className="icon-[material-symbols--login-rounded] text-brand-violet -ml-2 text-3xl" />
       </button>
     </Tooltip>
   );

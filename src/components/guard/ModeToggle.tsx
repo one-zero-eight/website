@@ -7,7 +7,7 @@ interface ModeToggleProps {
 
 export function ModeToggle({ mode, onChange }: ModeToggleProps) {
   return (
-    <div className="flex gap-2 rounded-lg border-2 border-contrast/20 p-1">
+    <div className="border-contrast/20 flex gap-2 rounded-lg border-2 p-1">
       <button
         type="button"
         onClick={() => onChange("create")}

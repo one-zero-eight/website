@@ -49,7 +49,7 @@ export function RoomMapPreview({ roomId }: { roomId: string }) {
     return (
       <div className="border-border bg-muted/30 flex min-h-64 items-center justify-center rounded-lg border">
         <div className="text-center">
-          <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="border-primary mx-auto h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
           <p className="text-muted-foreground mt-2 text-sm">Loading map...</p>
         </div>
       </div>
@@ -70,7 +70,7 @@ export function RoomMapPreview({ roomId }: { roomId: string }) {
   }
 
   return (
-    <div className="border-border bg-background relative min-h-64 overflow-hidden rounded-lg border shadow-sm">
+    <div className="border-border bg-background relative min-h-64 overflow-hidden rounded-lg border shadow-xs">
       <MapView
         scene={sceneWithRoom}
         highlightAreas={[roomArea]}
@@ -82,7 +82,7 @@ export function RoomMapPreview({ roomId }: { roomId: string }) {
           scene: sceneWithRoom.scene_id,
           area: roomArea.svg_polygon_id ?? undefined,
         }}
-        className="absolute bottom-2 right-2 flex h-fit rounded-xl bg-primary/50 px-2 py-2 hover:bg-primary/75"
+        className="bg-primary/50 hover:bg-primary/75 absolute right-2 bottom-2 flex h-fit rounded-xl px-2 py-2"
       >
         <span className="icon-[material-symbols--jump-to-element-rounded] text-2xl" />
       </Link>

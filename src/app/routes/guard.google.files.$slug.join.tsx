@@ -83,11 +83,11 @@ function RouteComponent() {
       <Helmet>
         <title>Join InNoHassle Guard File</title>
       </Helmet>
-      <div className="w-full max-w-xl rounded-xl bg-floating p-10 shadow-lg">
+      <div className="bg-floating w-full max-w-xl rounded-xl p-10 shadow-lg">
         <h1 className="mb-2 text-center text-3xl font-bold">
           Join InNoHassle Guard File
         </h1>
-        <p className="mb-8 text-center text-sm text-contrast/70">
+        <p className="text-contrast/70 mb-8 text-center text-sm">
           Enter your Gmail address to get access to the Google Spreadsheet
         </p>
 
@@ -96,7 +96,7 @@ function RouteComponent() {
             <div className="mb-5">
               <label
                 htmlFor="gmail"
-                className="mb-1 block font-medium text-contrast/80"
+                className="text-contrast/80 mb-1 block font-medium"
               >
                 Gmail Address:
               </label>
@@ -108,7 +108,7 @@ function RouteComponent() {
                 value={gmail}
                 onChange={(e) => setGmail(e.target.value)}
                 placeholder="your.email@gmail.com"
-                className="w-full rounded-lg border-2 border-contrast/20 bg-primary/5 px-3 py-3 text-base outline-none transition-colors focus:border-brand-violet focus:bg-primary/10"
+                className="border-contrast/20 bg-primary/5 focus:border-brand-violet focus:bg-primary/10 w-full rounded-lg border-2 px-3 py-3 text-base outline-hidden transition-colors"
                 disabled={isPending}
               />
             </div>
@@ -116,7 +116,7 @@ function RouteComponent() {
             <button
               type="submit"
               disabled={isPending || !gmail.trim()}
-              className="w-full rounded-lg bg-brand-violet py-4 text-base font-medium text-white transition-colors hover:bg-[#6600CC] disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-brand-violet w-full rounded-lg py-4 text-base font-medium text-white transition-colors hover:bg-[#6600CC] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPending ? "Adding you to the file..." : "Join File"}
             </button>
@@ -124,7 +124,7 @@ function RouteComponent() {
         ) : null}
 
         {isPending && (
-          <div className="mt-5 text-center text-brand-violet">
+          <div className="text-brand-violet mt-5 text-center">
             <div className="mb-2 inline-block">
               <span className="icon-[mdi--loading] animate-spin text-5xl" />
             </div>

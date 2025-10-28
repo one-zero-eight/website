@@ -26,7 +26,7 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
     <Link
       to="/schedule/event-groups/$alias"
       params={{ alias: group.alias }}
-      className="flex min-h-fit min-w-fit max-w-full basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl bg-primary p-4 hover:bg-primary-hover"
+      className="bg-primary hover:bg-primary-hover flex min-h-fit max-w-full min-w-fit basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl p-4"
     >
       <div className="flex flex-col gap-0.5">
         <p className="text-xl font-medium">{group.name}</p>
@@ -45,12 +45,12 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
             );
           })}
         {outdated && (
-          <p className="mt-1 w-fit rounded-xl border border-dashed border-red-500 px-2 py-1 text-sm text-red-500 blur-0">
+          <p className="blur-0 mt-1 w-fit rounded-xl border border-dashed border-red-500 px-2 py-1 text-sm text-red-500">
             Outdated
           </p>
         )}
       </div>
-      <div className="flex select-none flex-row place-items-center">
+      <div className="flex flex-row place-items-center select-none">
         {canHide && <HideButton groupId={group.id} />}
         <FavoriteButton groupId={group.id} />
       </div>

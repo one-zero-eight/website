@@ -106,7 +106,7 @@ export default function SchedulePage({
         </p>
         <button
           onClick={refetch}
-          className="w-fit rounded-md text-brand-violet"
+          className="text-brand-violet w-fit rounded-md"
         >
           Retry
         </button>
@@ -118,7 +118,7 @@ export default function SchedulePage({
     <>
       <div className="flex shrink-0 flex-col whitespace-nowrap @3xl/content:flex-row">
         <div className="flex grow flex-row overflow-x-auto whitespace-nowrap">
-          <div className="w-2 shrink-0 border-b border-b-secondary-hover @3xl/content:w-1" />
+          <div className="border-b-secondary-hover w-2 shrink-0 border-b @3xl/content:w-1" />
           {Object.values(viewConfig.categories).map((v) => (
             <Link
               key={v.alias}
@@ -132,7 +132,7 @@ export default function SchedulePage({
               {v.title}
             </Link>
           ))}
-          <div className="min-w-2 grow border-b border-b-secondary-hover" />
+          <div className="border-b-secondary-hover min-w-2 grow border-b" />
         </div>
         {categoryInfo && <SearchBar value={search} onChange={setSearch} />}
       </div>
@@ -152,7 +152,7 @@ export default function SchedulePage({
               <React.Fragment key={tagName}>
                 <div className="my-4 flex w-full flex-wrap justify-between">
                   <div className="text-3xl font-medium">{tagName}</div>
-                  <div className="flex items-center text-inactive">
+                  <div className="text-inactive flex items-center">
                     {groups[tagName].length} groups
                   </div>
                 </div>

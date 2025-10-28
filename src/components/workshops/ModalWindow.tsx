@@ -41,7 +41,7 @@ export function ModalWindow({
   return (
     <FloatingPortal>
       <FloatingOverlay
-        className="z-10 grid place-items-center bg-black/75 @container/modal"
+        className="@container/modal z-10 grid place-items-center bg-black/75"
         lockScroll
       >
         <FloatingFocusManager context={context} modal>
@@ -49,22 +49,22 @@ export function ModalWindow({
             ref={refs.setFloating}
             style={transitionStyles}
             {...getFloatingProps()}
-            className="flex h-fit w-full max-w-xl flex-col p-4 outline-none"
+            className="flex h-fit w-full max-w-xl flex-col p-4 outline-hidden"
           >
-            <div className="overflow-hidden rounded-2xl bg-floating">
+            <div className="bg-floating overflow-hidden rounded-2xl">
               <div
                 className={`flex min-w-0 flex-col p-4 @2xl/modal:p-8 ${className}`}
               >
                 {/* Heading and close button */}
                 <div className="mb-0 flex w-full flex-row">
                   {title && (
-                    <div className="grow items-center overflow-hidden break-words pr-2 text-2xl font-semibold">
+                    <div className="grow items-center overflow-hidden pr-2 text-2xl font-semibold wrap-break-word">
                       {title}
                     </div>
                   )}
                   <button
                     type="button"
-                    className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75"
+                    className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 -mt-2 -mr-2 flex h-12 w-12 items-center justify-center rounded-2xl"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />

@@ -20,19 +20,19 @@ export function CategoryCard({
       key={slug}
       to="/schedule/$category"
       params={{ category: slug }}
-      className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-6 hover:bg-secondary"
+      className="group bg-primary hover:bg-secondary flex flex-row gap-4 rounded-2xl px-4 py-6"
     >
-      <div className="w-12 text-brand-violet">{icon}</div>
+      <div className="text-brand-violet w-12">{icon}</div>
       <div className="flex flex-col gap-2">
-        <p className="text-2xl font-semibold text-contrast">
+        <p className="text-contrast text-2xl font-semibold">
           {title}
           {outdated && (
-            <span className="ml-2 w-fit rounded-xl border border-dashed border-red-500 px-2 py-1 text-sm text-red-500 blur-0">
+            <span className="blur-0 ml-2 w-fit rounded-xl border border-dashed border-red-500 px-2 py-1 text-sm text-red-500">
               Outdated
             </span>
           )}
         </p>
-        <p className="text-lg text-contrast/75">{shortDescription}</p>
+        <p className="text-contrast/75 text-lg">{shortDescription}</p>
       </div>
     </Link>
   );

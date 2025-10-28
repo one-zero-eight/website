@@ -12,12 +12,12 @@ export function LeaveFeedbackButton({
           href="https://forms.gle/2vMmu4vSoVShvbMw6"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-xl p-2 text-inactive underline-offset-4 hover:text-contrast/50 hover:underline"
+          className="text-inactive hover:text-contrast/50 flex items-center justify-center gap-2 rounded-xl p-2 underline-offset-4 hover:underline"
         >
           {!isMinimized ? (
             <span>Leave feedback</span>
           ) : (
-            <span className="icon-[material-symbols--maps-ugc-outline-rounded] text-3xl text-inactive" />
+            <span className="icon-[material-symbols--maps-ugc-outline-rounded] text-inactive text-3xl" />
           )}
         </a>
       </Tooltip>

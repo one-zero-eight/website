@@ -66,7 +66,7 @@ export default function HideButtonPersonal({ target }: { target: Type }) {
           e.preventDefault();
           switchHideFavorite?.();
         }}
-        className="flex h-12 w-12 items-center justify-center rounded-2xl text-4xl hover:bg-secondary-hover"
+        className="hover:bg-secondary-hover flex h-12 w-12 items-center justify-center rounded-2xl text-4xl"
       >
         {isHidden ? (
           <span className="icon-[material-symbols--visibility-off-outline] text-contrast/50" />

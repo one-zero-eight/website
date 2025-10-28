@@ -28,24 +28,24 @@ export function MapsPageTabs() {
     <div className="flex shrink-0 flex-col whitespace-nowrap @3xl/content:flex-row">
       <form
         onSubmit={onSubmit}
-        className="flex items-center border-b-[1px] border-b-secondary-hover px-2 pb-[1px] focus-within:border-b-2 focus-within:border-b-brand-violet focus-within:pb-0"
+        className="border-b-secondary-hover focus-within:border-b-brand-violet flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0"
       >
         <input
           ref={inputRef}
           placeholder="Search any place"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="min-w-0 grow bg-transparent px-2 py-1 outline-none"
+          className="min-w-0 grow bg-transparent px-2 py-1 outline-hidden"
         />
         <button
           type="submit"
           tabIndex={-1} // Do not allow to focus on this button
-          className="icon-[material-symbols--search-rounded] shrink-0 text-2xl text-secondary-hover"
+          className="icon-[material-symbols--search-rounded] text-secondary-hover shrink-0 text-2xl"
         />
       </form>
 
       <div className="flex grow flex-row overflow-x-auto whitespace-nowrap">
-        <div className="w-2 shrink-0 border-b-[1px] border-b-secondary-hover @3xl/content:w-1" />
+        <div className="border-b-secondary-hover w-2 shrink-0 border-b @3xl/content:w-1" />
         {scenes?.map((scene, i) => (
           <Link
             key={scene.scene_id}
@@ -54,14 +54,14 @@ export function MapsPageTabs() {
             className={clsx(
               "px-2 py-1",
               scene.scene_id === sceneId || (sceneId === undefined && i === 0)
-                ? "border-b-2 border-b-brand-violet"
-                : "border-b-[1px] border-b-secondary-hover",
+                ? "border-b-brand-violet border-b-2"
+                : "border-b-secondary-hover border-b",
             )}
           >
             {scene.title}
           </Link>
         ))}
-        <div className="min-w-2 grow border-b-[1px] border-b-secondary-hover" />
+        <div className="border-b-secondary-hover min-w-2 grow border-b" />
       </div>
     </div>
   );

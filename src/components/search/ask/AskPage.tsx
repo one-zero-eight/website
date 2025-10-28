@@ -78,12 +78,12 @@ export function AskPage({ askQuery }: { askQuery: string }) {
       )}
 
       {isLoading ? (
-        <div className="flex self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
+        <div className="border-inactive bg-primary text-contrast flex self-start rounded-lg border! px-4 py-2">
           <span>- Thinking</span>
           <AnimatedDots></AnimatedDots>
         </div>
       ) : error ? (
-        <div className="flex flex-col gap-2 self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
+        <div className="border-inactive bg-primary text-contrast flex flex-col gap-2 self-start rounded-lg border! px-4 py-2">
           <span>- Sorry, I can't help you with this question.</span>
         </div>
       ) : null}
@@ -100,7 +100,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
               </a>
               <div
                 key={i}
-                className="mb-4 self-start rounded-lg rounded-tl-none bg-primary px-4 py-2 text-white"
+                className="bg-primary mb-4 self-start rounded-lg rounded-tl-none px-4 py-2 text-white"
               >
                 {msg.content}
               </div>

@@ -10,7 +10,7 @@ export default function MoodleUnknownPreview({
 }: MoodleUnknownPreviewProps) {
   return (
     <>
-      <div className="mb-4 mt-2 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
+      <div className="mt-2 mb-4 flex flex-wrap justify-center gap-4 gap-y-4 md:flex-row">
         <PreviewBottomButton
           icon={<span className="icon-[material-symbols--open-in-new]" />}
           text="To source"

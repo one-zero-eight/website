@@ -39,7 +39,7 @@ export function SignInModal({
   return (
     <FloatingPortal>
       <FloatingOverlay
-        className="z-10 grid place-items-center bg-black/75 @container/modal"
+        className="@container/modal z-10 grid place-items-center bg-black/75"
         lockScroll
         /* Disallow to propagate the click events */
         onClick={(e) => e.stopPropagation()}
@@ -51,7 +51,7 @@ export function SignInModal({
             {...getFloatingProps()}
             className="flex p-4"
           >
-            <div className="h-fit max-w-2xl overflow-hidden rounded-2xl bg-floating">
+            <div className="bg-floating h-fit max-w-2xl overflow-hidden rounded-2xl">
               <div className="flex flex-col p-4 @lg/modal:p-8">
                 <div className="mb-2 flex w-full flex-row">
                   <div className="grow items-center text-3xl font-semibold">
@@ -59,13 +59,13 @@ export function SignInModal({
                   </div>
                   <button
                     type="button"
-                    className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 @lg/modal:-mr-6 @lg/modal:-mt-6"
+                    className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 -mt-2 -mr-2 flex h-12 w-12 items-center justify-center rounded-2xl @lg/modal:-mt-6 @lg/modal:-mr-6"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
                   </button>
                 </div>
-                <div className="mb-4 text-contrast/75">
+                <div className="text-contrast/75 mb-4">
                   Use your Innopolis account to access all features of this
                   service.
                 </div>

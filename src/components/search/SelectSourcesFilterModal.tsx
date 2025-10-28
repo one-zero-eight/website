@@ -25,7 +25,7 @@ const SelectSourcesFilterModal = ({
   if (!open) return null;
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-gray-400 bg-floating p-4 text-black shadow-xl dark:text-white">
+    <div className="bg-floating flex flex-col gap-4 rounded-xl border border-gray-400 p-4 text-black shadow-xl dark:text-white">
       {Object.entries(filters).map(([group, values]) => (
         <div key={group}>
           <div className="flex flex-col gap-2 pr-1 md:gap-1">

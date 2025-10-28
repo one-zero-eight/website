@@ -174,34 +174,34 @@ export function BookingModal({
   const end = newSlot?.end ?? detailsBooking?.endsAt;
 
   const BookingLocation = (
-    <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">
+    <div className="text-contrast/75 flex flex-row items-center gap-2 text-xl">
       <div className="flex h-fit w-6">
         <span className="icon-[material-symbols--location-on-outline] text-2xl" />
       </div>
-      <p className="flex w-full items-center whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+      <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
         {room?.title}
       </p>
     </div>
   );
 
   const BookingDate = (
-    <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">
+    <div className="text-contrast/75 flex flex-row items-center gap-2 text-xl">
       <div className="flex h-fit w-6">
         <span className="icon-[material-symbols--today-outline] text-2xl" />
       </div>
-      <p className="flex w-full items-center whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+      <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
         {`${start?.toLocaleString("en-US", { day: "2-digit", month: "long" })}, ${start?.toLocaleString("en-US", { weekday: "long" })}`}
       </p>
     </div>
   );
 
   const BookingTime = (
-    <div className="flex flex-row items-center gap-2 text-xl text-contrast/75">
+    <div className="text-contrast/75 flex flex-row items-center gap-2 text-xl">
       <div className="flex h-fit w-6">
         <span className="icon-[material-symbols--schedule-outline] text-2xl" />
       </div>
       {start && end && (
-        <p className="flex w-full items-center whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+        <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
           {`${clockTime(start)} – ${clockTime(end)} (${durationFormatted(msBetween(start, end))})`}
         </p>
       )}
@@ -229,7 +229,7 @@ export function BookingModal({
     <div className="flex flex-row gap-2">
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary px-4 py-2 text-lg font-medium hover:bg-primary-hover dark:bg-primary-hover dark:hover:bg-primary"
+        className="bg-primary hover:bg-primary-hover dark:bg-primary-hover dark:hover:bg-primary flex w-full items-center justify-center gap-4 rounded-2xl px-4 py-2 text-lg font-medium"
         onClick={() => onOpenChange(false)}
       >
         Cancel
@@ -241,7 +241,7 @@ export function BookingModal({
       >
         Confirm
         {isPending && (
-          <span className="icon-[mdi--loading] animate-spin text-2xl text-contrast" />
+          <span className="icon-[mdi--loading] text-contrast animate-spin text-2xl" />
         )}
       </button>
     </div>
@@ -261,7 +261,7 @@ export function BookingModal({
   return (
     <FloatingPortal>
       <FloatingOverlay
-        className="z-10 grid place-items-center bg-black/75 @container/modal"
+        className="@container/modal z-10 grid place-items-center bg-black/75"
         lockScroll
       >
         <FloatingFocusManager
@@ -273,9 +273,9 @@ export function BookingModal({
             ref={refs.setFloating}
             style={transitionStyles}
             {...getFloatingProps()}
-            className="flex h-fit w-full max-w-lg flex-col p-4 outline-none"
+            className="flex h-fit w-full max-w-lg flex-col p-4 outline-hidden"
           >
-            <div className="overflow-hidden rounded-2xl bg-floating">
+            <div className="bg-floating overflow-hidden rounded-2xl">
               <div className="flex flex-col p-4 @2xl/modal:p-8">
                 {/* Heading and description */}
                 <div className="mb-4 flex w-full flex-row">
@@ -284,7 +284,7 @@ export function BookingModal({
                   </div>
                   <button
                     type="button"
-                    className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 @lg/export:-mr-6 @lg/export:-mt-6"
+                    className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 -mt-2 -mr-2 flex h-12 w-12 items-center justify-center rounded-2xl @lg/export:-mt-6 @lg/export:-mr-6"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
@@ -310,7 +310,7 @@ export function BookingModal({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Enter title..."
-                        className="w-full grow rounded-xl bg-secondary px-4 py-2 text-xl outline-none focus:ring-2 focus:ring-brand-violet"
+                        className="bg-secondary focus:ring-brand-violet w-full grow rounded-xl px-4 py-2 text-xl outline-hidden focus:ring-2"
                       />
 
                       {BookingLocation}
@@ -325,8 +325,8 @@ export function BookingModal({
                   </form>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    <div className="flex flex-row gap-2 text-xl text-contrast/75">
-                      <p className="flex w-full items-center whitespace-pre-wrap py-1 font-semibold [overflow-wrap:anywhere]">
+                    <div className="text-contrast/75 flex flex-row gap-2 text-xl">
+                      <p className="flex w-full items-center py-1 font-semibold wrap-anywhere whitespace-pre-wrap">
                         {sanitizeTitle(detailsBooking?.title)}
                       </p>
                     </div>

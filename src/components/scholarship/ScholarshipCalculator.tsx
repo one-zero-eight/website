@@ -196,26 +196,26 @@ export default function ScholarshipCalculator() {
           onChange={(e) => onMarksChange(e.target.value, course)}
           autoComplete="off"
           spellCheck={false}
-          className="inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 border-brand-violet bg-pagebg p-3 font-handwritten text-transparent caret-brand-violet outline-none"
+          className="border-brand-violet bg-pagebg font-handwritten caret-brand-violet inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 p-3 text-transparent outline-hidden"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
           rows={1}
           maxLength={50}
         />
         <div
-          className="pointer-events-none absolute inset-0 flex w-full max-w-full flex-wrap border-2 border-transparent p-3 font-handwritten"
+          className="font-handwritten pointer-events-none absolute inset-0 flex w-full max-w-full flex-wrap border-2 border-transparent p-3"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
         >
           {marks.map((v, i) => (
             <Fragment key={i}>
               <span style={{ color: MARK_COLORS[v] }}>{v}</span>
-              <span className="-ml-3 mr-3 w-0 text-[#414141]">|</span>
+              <span className="mr-3 -ml-3 w-0 text-[#414141]">|</span>
             </Fragment>
           ))}
         </div>
         {marks.length !== 0 && (
           <button
             onClick={() => onMarksChange("", course)}
-            className="absolute -right-1 -top-1 h-7 w-7 rounded-2xl bg-pagebg p-2 align-middle text-lg text-brand-violet"
+            className="bg-pagebg text-brand-violet absolute -top-1 -right-1 h-7 w-7 rounded-2xl p-2 align-middle text-lg"
             style={{ lineHeight: 0 }}
           >
             X
@@ -224,11 +224,11 @@ export default function ScholarshipCalculator() {
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
         <div className="text-xl font-medium">Course:</div>
-        <div className="flex w-56 flex-row overflow-clip rounded-2xl border-2 border-brand-violet bg-pagebg">
+        <div className="border-brand-violet bg-pagebg flex w-56 flex-row overflow-clip rounded-2xl border-2">
           <button
             onClick={() => onMarksChange(marks.join(""), "B25")}
             className={clsx(
-              "w-full rounded-l-2xl p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
+              "font-handwritten hover:bg-brand-violet/20 w-full rounded-l-2xl p-2 text-center text-lg transition-colors",
               course === "B25"
                 ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
@@ -239,7 +239,7 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B24")}
             className={clsx(
-              "w-full p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
+              "font-handwritten hover:bg-brand-violet/20 w-full p-2 text-center text-lg transition-colors",
               course === "B24"
                 ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
@@ -250,7 +250,7 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B23")}
             className={clsx(
-              "w-full rounded-r-2xl p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
+              "font-handwritten hover:bg-brand-violet/20 w-full rounded-r-2xl p-2 text-center text-lg transition-colors",
               course === "B23"
                 ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
@@ -261,7 +261,7 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "M25")}
             className={clsx(
-              "w-full rounded-r-2xl p-2 text-center font-handwritten text-lg transition-colors hover:bg-brand-violet/20",
+              "font-handwritten hover:bg-brand-violet/20 w-full rounded-r-2xl p-2 text-center text-lg transition-colors",
               course === "M25"
                 ? "bg-brand-violet/10 text-brand-violet"
                 : "bg-transparent text-gray-500",
@@ -283,7 +283,7 @@ export default function ScholarshipCalculator() {
           autoComplete="off"
           spellCheck={false}
           className={clsx(
-            "w-56 rounded-2xl border-2 bg-pagebg p-2 text-center font-handwritten outline-none",
+            "bg-pagebg font-handwritten w-56 rounded-2xl border-2 p-2 text-center outline-hidden",
             !errorGPA ? "border-brand-violet" : "border-red-500",
           )}
           style={{
@@ -303,7 +303,7 @@ export default function ScholarshipCalculator() {
           autoComplete="off"
           spellCheck={false}
           className={clsx(
-            "rubles-input w-56 rounded-2xl border-2 bg-pagebg p-2 text-center font-handwritten outline-none",
+            "rubles-input bg-pagebg font-handwritten w-56 rounded-2xl border-2 p-2 text-center outline-hidden",
             !errorScholarship ? "border-brand-violet" : "border-red-500",
           )}
           style={{

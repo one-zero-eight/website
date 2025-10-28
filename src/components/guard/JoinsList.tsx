@@ -41,13 +41,13 @@ interface JoinItemProps {
 
 function JoinItem({ join, onBan }: JoinItemProps) {
   return (
-    <div className="flex items-center justify-between rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-3">
+    <div className="border-contrast/20 bg-primary/5 flex items-center justify-between rounded-lg border-2 px-4 py-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Email email={join.gmail} />
           <Email email={join.innomail} />
         </div>
-        <div className="text-xs text-contrast/50">
+        <div className="text-contrast/50 text-xs">
           joined at {formatDate(join.joined_at)}
         </div>
       </div>

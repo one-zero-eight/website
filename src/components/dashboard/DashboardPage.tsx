@@ -37,7 +37,7 @@ export function DashboardPage() {
 
       <Link
         to="/calendar"
-        className="flex w-fit items-center font-medium text-brand-violet hover:underline"
+        className="text-brand-violet flex w-fit items-center font-medium hover:underline"
       >
         <span className="icon-[material-symbols--arrow-forward] mr-1 text-xl" />
         Go to calendar

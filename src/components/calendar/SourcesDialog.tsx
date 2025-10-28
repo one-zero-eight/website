@@ -46,7 +46,7 @@ export function SourcesDialog({
   return (
     <FloatingPortal>
       <FloatingOverlay
-        className="z-10 grid place-items-center bg-black/75 @container/export"
+        className="@container/export z-10 grid place-items-center bg-black/75"
         lockScroll
       >
         <FloatingFocusManager context={context} modal>
@@ -56,7 +56,7 @@ export function SourcesDialog({
             {...getFloatingProps()}
             className="flex h-fit w-full flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-1/2"
           >
-            <div className="overflow-hidden rounded-2xl bg-floating">
+            <div className="bg-floating overflow-hidden rounded-2xl">
               <div className="flex flex-col p-4">
                 {/* Heading and description */}
                 <div className="mb-2 flex w-full flex-row">
@@ -65,7 +65,7 @@ export function SourcesDialog({
                   </div>
                   <button
                     type="button"
-                    className="-mr-2 -mt-2 flex h-12 w-12 items-center justify-center rounded-2xl text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75"
+                    className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 -mt-2 -mr-2 flex h-12 w-12 items-center justify-center rounded-2xl"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
@@ -73,7 +73,7 @@ export function SourcesDialog({
                 </div>
 
                 {/* Content */}
-                <div className="flex flex-col justify-between gap-4 @container/sections @6xl/content:flex-row @6xl/content:gap-8">
+                <div className="@container/sections flex flex-col justify-between gap-4 @6xl/content:flex-row @6xl/content:gap-8">
                   <div className="grid grid-cols-1 justify-stretch gap-4 @lg/sections:grid-cols-2 @6xl/sections:grid-cols-3">
                     {predefined?.event_groups.map((v) => (
                       <GroupCardById key={v} groupId={v} canHide={true} />
@@ -119,7 +119,7 @@ export function SourcesDialog({
                       name={
                         <span className="flex items-center">
                           Moodle
-                          <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
+                          <span className="bg-brand-violet ml-2 rounded-full px-2 py-1 text-xs font-semibold text-white">
                             NEW
                           </span>
                         </span>
@@ -138,7 +138,7 @@ export function SourcesDialog({
                     />
                   </div>
 
-                  <p className="mb-4 text-lg text-contrast/75">
+                  <p className="text-contrast/75 mb-4 text-lg">
                     Add favorite calendars using star button.
                     <br />
                     <Link

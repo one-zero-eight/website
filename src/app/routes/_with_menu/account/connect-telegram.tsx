@@ -24,7 +24,7 @@ function RouteComponent() {
 
       <Topbar title="My account" />
       <div className="flex w-full flex-row justify-center">
-        <div className="m-4 flex w-full max-w-md flex-col gap-4 rounded-2xl bg-primary px-4 py-6 @container/account">
+        <div className="bg-primary @container/account m-4 flex w-full max-w-md flex-col gap-4 rounded-2xl px-4 py-6">
           <img
             src="/favicon.svg"
             alt="InNoHassle logo"

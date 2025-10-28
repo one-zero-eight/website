@@ -22,7 +22,7 @@ export default function LinkIconButton({
             window.open(href, "_blank");
           }
         }}
-        className="-mr-2 flex h-12 w-12 items-center justify-center rounded-2xl text-4xl text-contrast/50 hover:bg-secondary-hover hover:text-contrast/75"
+        className="text-contrast/50 hover:bg-secondary-hover hover:text-contrast/75 -mr-2 flex h-12 w-12 items-center justify-center rounded-2xl text-4xl"
       >
         {icon}
       </button>

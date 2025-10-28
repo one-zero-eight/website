@@ -162,7 +162,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
       >
         {mode === "create" && (
           <div className="flex flex-col gap-2">
-            <label htmlFor="title" className="font-medium text-contrast/80">
+            <label htmlFor="title" className="text-contrast/80 font-medium">
               Title:
             </label>
             <input
@@ -174,7 +174,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
                 if (error) setError("");
               }}
               placeholder="e.g., CSE electives"
-              className="w-full rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-2 outline-none transition-colors focus:border-primary focus:bg-primary/10"
+              className="border-contrast/20 bg-primary/5 focus:border-primary focus:bg-primary/10 w-full rounded-lg border-2 px-4 py-2 outline-hidden transition-colors"
             />
           </div>
         )}
@@ -183,7 +183,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
           <div className="flex flex-col gap-2">
             <label
               htmlFor="spreadsheet_id"
-              className="font-medium text-contrast/80"
+              className="text-contrast/80 font-medium"
             >
               Spreadsheet URL:
             </label>
@@ -197,13 +197,13 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
               }}
               onBlur={handleBlur}
               placeholder="https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
-              className="w-full rounded-lg border-2 border-contrast/20 bg-primary/5 px-4 py-2 outline-none transition-colors focus:border-primary focus:bg-primary/10"
+              className="border-contrast/20 bg-primary/5 focus:border-primary focus:bg-primary/10 w-full rounded-lg border-2 px-4 py-2 outline-hidden transition-colors"
             />
           </div>
         )}
 
         <div className="flex flex-col gap-2">
-          <label className="font-medium text-contrast/80">
+          <label className="text-contrast/80 font-medium">
             Respondent Role:
           </label>
           <div className="flex gap-2">
@@ -233,7 +233,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
         </div>
 
         {error && (
-          <div className="rounded border-2 border-red-400 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-600 dark:bg-red-900/20 dark:text-red-200">
+          <div className="rounded-sm border-2 border-red-400 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-600 dark:bg-red-900/20 dark:text-red-200">
             {error}
           </div>
         )}
@@ -244,7 +244,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
             isSubmitting ||
             (mode === "create" ? !title.trim() : !spreadsheetId.trim())
           }
-          className="rounded-lg bg-brand-violet px-4 py-3 font-medium text-white transition-colors hover:bg-[#6600CC] disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-brand-violet rounded-lg px-4 py-3 font-medium text-white transition-colors hover:bg-[#6600CC] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting
             ? mode === "create"

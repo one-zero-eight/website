@@ -1,10 +1,33 @@
-@import "@fontsource-variable/rubik";
-@import "@fontsource/fuzzy-bubbles";
-@import "@fontsource/roboto";
+@import "@fontsource-variable/rubik" layer(base);
+@import "@fontsource/fuzzy-bubbles" layer(base);
+@import "@fontsource/roboto" layer(base);
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "@iconify/tailwind4";
+
+/* Detect dark theme by class */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-rubik: "Rubik Variable", sans-serif;
+  --font-handwritten: "Fuzzy Bubbles", sans-serif;
+
+  --breakpoint-4xl: 2048px;
+  --breakpoint-xxl: 1550px;
+
+  --color-pagebg: rgb(var(--color-pagebg-rgb));
+  --color-floating: rgb(var(--color-floating-rgb));
+  --color-primary: rgb(var(--color-primary-rgb));
+  --color-primary-hover: rgb(var(--color-primary-hover-rgb));
+  --color-secondary: rgb(var(--color-secondary-rgb));
+  --color-secondary-hover: rgb(var(--color-secondary-hover-rgb));
+  --color-inactive: rgb(var(--color-inactive-rgb));
+  --color-contrast: rgb(var(--color-contrast-rgb));
+  --color-brand-violet: rgb(var(--color-brand-violet-rgb));
+  --color-brand-gradient-start: rgb(var(--color-brand-gradient-start-rgb));
+  --color-brand-gradient-end: rgb(var(--color-brand-gradient-end-rgb));
+}
 
 @layer base {
   :root {
@@ -12,39 +35,70 @@
     color-scheme: light;
     accent-color: var(--color-brand-violet);
 
-    --color-brand-violet: 151 71 255; /* #9747FF */
-    --color-brand-gradient-start: 154 46 255; /* #9A2EFF */
-    --color-brand-gradient-end: 209 35 162; /* #D1233E */
+    --color-brand-violet-rgb: 151 71 255; /* #9747FF */
+    --color-brand-gradient-start-rgb: 154 46 255; /* #9A2EFF */
+    --color-brand-gradient-end-rgb: 209 35 162; /* #D1233E */
 
-    --color-pagebg: 255 255 255; /* #FFFFFF */
-    --color-primary: 235 237 239; /* #EBEDEF */
-    --color-primary-hover: 223 225 229; /* #DFE1E5 */
-    --color-floating: 242 243 245; /* #F2F3F5 */
-    --color-secondary: 227 229 232; /* #E3E5E8 */
-    --color-secondary-hover: 210 212 216; /* #D2D4D8 */
-    --color-inactive: 138 138 138; /* #8A8A8A */
-    --color-contrast: 0 0 0; /* #000000 */
+    --color-pagebg-rgb: 255 255 255; /* #FFFFFF */
+    --color-primary-rgb: 235 237 239; /* #EBEDEF */
+    --color-primary-hover-rgb: 223 225 229; /* #DFE1E5 */
+    --color-floating-rgb: 242 243 245; /* #F2F3F5 */
+    --color-secondary-rgb: 227 229 232; /* #E3E5E8 */
+    --color-secondary-hover-rgb: 210 212 216; /* #D2D4D8 */
+    --color-inactive-rgb: 138 138 138; /* #8A8A8A */
+    --color-contrast-rgb: 0 0 0; /* #000000 */
   }
   :root[class~="dark"] {
     color-scheme: dark;
-    --color-pagebg: 11 11 11; /* #0B0B0B */
-    --color-primary: 38 38 38; /* #262626 */
-    --color-primary-hover: 28 28 28; /* #1C1C1C */
-    --color-floating: 27 27 27; /* #1B1B1B */
-    --color-secondary: 34 34 34; /* #222222 */
-    --color-secondary-hover: 55 55 55; /* #373737 */
-    --color-inactive: 105 105 105; /* #696969 */
-    --color-contrast: 255 255 255; /* #FFFFFF */
+    --color-pagebg-rgb: 11 11 11; /* #0B0B0B */
+    --color-primary-rgb: 38 38 38; /* #262626 */
+    --color-primary-hover-rgb: 28 28 28; /* #1C1C1C */
+    --color-floating-rgb: 27 27 27; /* #1B1B1B */
+    --color-secondary-rgb: 34 34 34; /* #222222 */
+    --color-secondary-hover-rgb: 55 55 55; /* #373737 */
+    --color-inactive-rgb: 105 105 105; /* #696969 */
+    --color-contrast-rgb: 255 255 255; /* #FFFFFF */
   }
+
+  /*
+    The default border color has changed to `currentcolor` in Tailwind CSS v4,
+    so we've added these compatibility styles to make sure everything still
+    looks the same as it did with Tailwind CSS v3.
+
+    If we ever want to remove these styles, we need to add an explicit border
+    color utility to any element that depends on these defaults.
+  */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer; /* Show pointer on buttons */
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400); /* Make input placeholder gray */
+  }
+}
+
+@utility selected {
+  @apply from-brand-gradient-start to-brand-gradient-end bg-linear-to-r bg-clip-text text-transparent;
 }
 
 @layer components {
-  .selected {
-    @apply bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end bg-clip-text text-transparent;
+  .prose-quoteless blockquote p:first-of-type::before,
+  .prose-quoteless blockquote p:first-of-type::after {
+    content: none !important;
   }
-}
 
-.rubles-input {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='48px' width='224px'><text x='196' y='27' fill='gray' font-size='18px' font-family='sans-serif'>₽</text></svg>");
-  background-repeat: no-repeat;
+  .rubles-input {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='48px' width='224px'><text x='196' y='27' fill='gray' font-size='18px' font-family='sans-serif'>₽</text></svg>");
+    background-repeat: no-repeat;
+  }
 }

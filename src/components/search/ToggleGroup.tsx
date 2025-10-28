@@ -6,7 +6,7 @@ const ToggleGroup = ({
   currentTabText: string | undefined;
 }) => {
   return (
-    <div className="bg-page-bg inline-flex text-black dark:text-white lg:pt-[5px]">
+    <div className="bg-page-bg inline-flex text-black lg:pt-[5px] dark:text-white">
       <Link
         to="/search"
         search={{ q: currentTabText || undefined }}
@@ -14,7 +14,7 @@ const ToggleGroup = ({
         activeOptions={{ exact: true, includeSearch: false }}
         activeProps={{ className: "border-b-2 border-brand-violet" }}
       >
-        <span className="pb-2 pt-4 lg:pt-6">Search</span>
+        <span className="pt-4 pb-2 lg:pt-6">Search</span>
       </Link>
       <Link
         to="/search/ask"
@@ -23,7 +23,7 @@ const ToggleGroup = ({
         activeOptions={{ exact: true, includeSearch: false }}
         activeProps={{ className: "border-b-2 border-brand-violet" }}
       >
-        <span className="pb-2 pt-4 lg:pt-6">Ask</span>
+        <span className="pt-4 pb-2 lg:pt-6">Ask</span>
       </Link>
     </div>
   );

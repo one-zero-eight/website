@@ -50,7 +50,7 @@ function RouteComponent() {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
         <h2 className="mb-2 text-2xl font-bold">Invalid Link</h2>
-        <p className="text-lg text-contrast/70">
+        <p className="text-contrast/70 text-lg">
           The form parameter is missing or invalid.
         </p>
       </div>
@@ -71,10 +71,10 @@ function RouteComponent() {
         <title>Redirecting to the form</title>
       </Helmet>
       <div className="mb-6">
-        <span className="icon-[mdi--loading] animate-spin text-6xl text-brand-violet" />
+        <span className="icon-[mdi--loading] text-brand-violet animate-spin text-6xl" />
       </div>
       <h2 className="mb-2 text-2xl font-bold">Redirecting...</h2>
-      <p className="mb-4 text-lg text-contrast/70">
+      <p className="text-contrast/70 mb-4 text-lg">
         Just a moment, we're redirecting you to the form...
       </p>
     </div>

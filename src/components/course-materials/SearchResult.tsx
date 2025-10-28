@@ -15,7 +15,7 @@ export default function SearchResult({
       onClick={() => select()}
       tabIndex={0}
       className={clsx(
-        "flex cursor-pointer flex-col rounded-lg !border bg-floating p-4 hover:bg-primary-hover",
+        "bg-floating hover:bg-primary-hover flex cursor-pointer flex-col rounded-lg border! p-4",
         isSelected
           ? "border-brand-violet drop-shadow-[0_0_4px_#9747FF]"
           : "border-gray-400",
@@ -30,7 +30,7 @@ export default function SearchResult({
       ) : response.source.type === "telegram" ? (
         <span className="icon-[uil--telegram-alt] text-3xl text-[#27A7E7]" />
       ) : null}
-      <p className="text-xs font-semibold dark:text-white md:text-2xl">
+      <p className="text-xs font-semibold md:text-2xl dark:text-white">
         {response.source.display_name}
       </p>
       <a

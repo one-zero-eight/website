@@ -86,7 +86,7 @@ export default function SearchResult({
       onClick={handleClick}
       tabIndex={0}
       className={clsx(
-        "relative grid cursor-pointer grid-cols-[2rem_1fr_auto] items-start gap-4 rounded-lg !border bg-floating p-4",
+        "bg-floating relative grid cursor-pointer grid-cols-[2rem_1fr_auto] items-start gap-4 rounded-lg border! p-4",
         isSelected
           ? "border-brand-violet drop-shadow-[0_0_4px_#9747FF]"
           : "border-gray-400",
@@ -95,7 +95,7 @@ export default function SearchResult({
       <div className="flex items-start justify-center">{getIcon()}</div>
 
       <div className="flex flex-col gap-2 overflow-hidden">
-        <p className="truncate text-xs font-semibold dark:text-white md:text-2xl">
+        <p className="truncate text-xs font-semibold md:text-2xl dark:text-white">
           {response.source.display_name}
         </p>
         <div>

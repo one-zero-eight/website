@@ -18,12 +18,12 @@ export function RoomsList() {
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="animate-pulse rounded-lg border-[1px] border-primary-hover bg-primary px-4 py-2"
+            className="border-primary-hover bg-primary animate-pulse rounded-lg border px-4 py-2"
           >
-            <div className="bg-muted mb-2 h-6 w-3/4 rounded"></div>
+            <div className="bg-muted mb-2 h-6 w-3/4 rounded-sm"></div>
             <div className="space-y-1">
-              <div className="bg-muted h-4 w-1/2 rounded"></div>
-              <div className="bg-muted h-4 w-1/3 rounded"></div>
+              <div className="bg-muted h-4 w-1/2 rounded-sm"></div>
+              <div className="bg-muted h-4 w-1/3 rounded-sm"></div>
             </div>
           </div>
         ))}
@@ -34,7 +34,7 @@ export function RoomsList() {
   if (!rooms || rooms.length === 0) {
     return (
       <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
-        <h2 className="text-2xl text-inactive">No rooms available</h2>
+        <h2 className="text-inactive text-2xl">No rooms available</h2>
       </div>
     );
   }
@@ -46,7 +46,7 @@ export function RoomsList() {
           <Link
             to="/room-booking/rooms/$room"
             params={{ room: room.id }}
-            className="group flex flex-row rounded-lg border-[1px] border-primary-hover bg-primary px-4 py-2 transition-colors hover:bg-primary-hover"
+            className="group border-primary-hover bg-primary hover:bg-primary-hover flex flex-row rounded-lg border px-4 py-2 transition-colors"
           >
             <div className="flex grow flex-col">
               <h2 className="mb-3 text-gray-900 dark:text-gray-100">
@@ -109,9 +109,7 @@ export function RoomsList() {
               <span className="icon-[material-symbols--arrow-forward-ios] text-2xl text-gray-400 dark:text-gray-600" />
             </div>
           </Link>
-          {i < rooms.length - 1 && (
-            <div className="h-[1px] bg-secondary-hover" />
-          )}
+          {i < rooms.length - 1 && <div className="bg-secondary-hover h-px" />}
         </React.Fragment>
       ))}
     </div>

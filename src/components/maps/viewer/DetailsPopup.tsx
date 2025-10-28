@@ -90,10 +90,10 @@ export function DetailsPopup({
           ref={refs.setFloating}
           style={{ ...floatingStyles, ...transitionStyles }}
           {...getFloatingProps()}
-          className="z-10 flex max-w-md flex-col gap-2 rounded-2xl bg-primary p-4 text-sm text-contrast drop-shadow-md"
+          className="bg-primary text-contrast z-10 flex max-w-md flex-col gap-2 rounded-2xl p-4 text-sm drop-shadow-md"
         >
           <div className="flex flex-row justify-between gap-2">
-            <div className="text-bold flex whitespace-pre-wrap text-xl [overflow-wrap:anywhere]">
+            <div className="text-bold flex text-xl wrap-anywhere whitespace-pre-wrap">
               <span className="font-medium">{area.title}</span>
             </div>
 
@@ -104,7 +104,7 @@ export function DetailsPopup({
               <div className="w-6">
                 <span className="icon-[material-symbols--notes] text-2xl" />
               </div>
-              <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+              <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
                 {area.description}
               </p>
             </div>
@@ -114,7 +114,7 @@ export function DetailsPopup({
               <div className="w-6">
                 <span className="icon-[material-symbols--user-attributes-rounded] text-2xl" />
               </div>
-              <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+              <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
                 {/* Show only English names */}
                 {area.people.filter((v) => /^[A-Za-z -]+$/.test(v)).join(",\n")}
               </p>
@@ -151,7 +151,7 @@ function RoomBookingDetails({ roomId }: { roomId: string }) {
           <div className="w-6">
             <span className="icon-[material-symbols--event-seat-outline-rounded] text-2xl" />
           </div>
-          <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+          <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
             Capacity: {room.capacity} people
           </p>
         </div>
@@ -164,7 +164,7 @@ function RoomBookingDetails({ roomId }: { roomId: string }) {
           >
             <span className="icon-[material-symbols--lock-open-circle-outline] text-2xl" />
           </div>
-          <p className="flex w-full whitespace-pre-wrap py-1 [overflow-wrap:anywhere]">
+          <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
             Access level: {room.access_level}
           </p>
         </div>
@@ -176,7 +176,7 @@ function RoomBookingDetails({ roomId }: { roomId: string }) {
         <Link
           to="/room-booking/rooms/$room"
           params={{ room: roomId }}
-          className="flex w-full whitespace-pre-wrap py-1 underline underline-offset-2 [overflow-wrap:anywhere]"
+          className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap underline underline-offset-2"
         >
           Book this room
         </Link>
@@ -223,7 +223,7 @@ function ShareButton({
       <button
         type="button"
         className={clsx(
-          "flex items-center justify-center rounded-full hover:bg-secondary-hover",
+          "hover:bg-secondary-hover flex items-center justify-center rounded-full",
           copied && "text-green-700 dark:text-green-500",
         )}
         onClick={() => copy()}

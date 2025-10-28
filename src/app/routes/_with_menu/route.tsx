@@ -11,7 +11,7 @@ function RouteComponent() {
     <div className="flex h-full flex-col">
       <div className="flex grow overflow-y-hidden">
         <Sidebar />
-        <div className="flex min-h-full grow flex-col overflow-y-auto @container/content">
+        <div className="@container/content flex min-h-full grow flex-col overflow-y-auto">
           <Outlet />
         </div>
       </div>

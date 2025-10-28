@@ -65,7 +65,7 @@ export function ActPage({ actQuery }: { actQuery: string }) {
       />
       <span>AI Assistant:</span>
       {isLoading || isFetching ? (
-        <div className="flex self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
+        <div className="border-inactive bg-primary text-contrast flex self-start rounded-lg border! px-4 py-2">
           <span>- Executing</span>
           <AnimatedDots></AnimatedDots>
         </div>
@@ -76,7 +76,7 @@ export function ActPage({ actQuery }: { actQuery: string }) {
           </div>
         </div>
       ) : error ? (
-        <div className="flex flex-col gap-2 self-start rounded-lg !border border-inactive bg-primary px-4 py-2 text-contrast">
+        <div className="border-inactive bg-primary text-contrast flex flex-col gap-2 self-start rounded-lg border! px-4 py-2">
           <span>- Sorry, I can't help you with this question.</span>
         </div>
       ) : (

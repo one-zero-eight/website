@@ -108,7 +108,7 @@ export function CheckInButton({ workshopId }: { workshopId: string }) {
     return (
       <p
         className={clsx(
-          "w-fit transform rounded-2xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] text-center font-medium leading-normal text-[#ff6b6b] backdrop-blur-[8px] dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)]",
+          "w-fit transform rounded-2xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] text-center leading-normal font-medium text-[#ff6b6b] backdrop-blur-sm dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)]",
           "px-1 py-1 text-[10px] sm:bottom-3 sm:px-2 sm:py-1.5 sm:text-sm",
         )}
       >
@@ -123,7 +123,7 @@ export function CheckInButton({ workshopId }: { workshopId: string }) {
         type="button"
         onClick={handleCheckOut}
         disabled={isCheckOutPending}
-        className="flex w-fit cursor-pointer items-center justify-center rounded-2xl border border-[#ff6b6b]/20 bg-primary/80 px-2 py-1 text-[#ff6b6b] hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252] disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-primary/80 flex w-fit cursor-pointer items-center justify-center rounded-2xl border border-[#ff6b6b]/20 px-2 py-1 text-[#ff6b6b] hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252] disabled:cursor-not-allowed disabled:opacity-50"
         title="Check out"
       >
         <span className="text-xs font-medium sm:text-sm">Check out</span>
@@ -136,7 +136,7 @@ export function CheckInButton({ workshopId }: { workshopId: string }) {
       type="button"
       disabled={signedPeople >= workshop.capacity || isCheckInPending}
       onClick={handleCheckIn}
-      className="flex w-fit cursor-pointer items-center justify-center rounded-2xl border border-green-700/30 bg-primary/80 px-2 py-1 text-green-700 hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#bcdfbc]/20 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/40 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa]"
+      className="bg-primary/80 flex w-fit cursor-pointer items-center justify-center rounded-2xl border border-green-700/30 px-2 py-1 text-green-700 hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#bcdfbc]/20 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/40 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa]"
       title="Check in"
     >
       <span className="text-xs font-medium sm:text-sm">Check in</span>

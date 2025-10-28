@@ -32,7 +32,7 @@ export function SportsWidget() {
   if (!hasSportProfile || !hours || !semesters) {
     if (!widgetShown) return null;
     return (
-      <div className="group flex min-h-32 animate-pulse flex-row gap-4 rounded-2xl bg-primary px-4 py-6" />
+      <div className="group bg-primary flex min-h-32 animate-pulse flex-row gap-4 rounded-2xl px-4 py-6" />
     );
   }
 
@@ -54,11 +54,11 @@ export function SportsWidget() {
   );
 
   return (
-    <div className="group flex flex-row gap-4 rounded-2xl bg-primary px-4 py-4">
-      <span className="icon-[material-symbols--exercise-outline] hidden w-12 shrink-0 text-5xl text-brand-violet sm:block" />
+    <div className="group bg-primary flex flex-row gap-4 rounded-2xl px-4 py-4">
+      <span className="icon-[material-symbols--exercise-outline] text-brand-violet hidden w-12 shrink-0 text-5xl sm:block" />
       <div className="flex flex-col">
-        <p className="flex items-center text-lg font-semibold text-contrast">
-          <span className="icon-[material-symbols--exercise-outline] mr-2 shrink-0 text-3xl text-brand-violet sm:hidden" />
+        <p className="text-contrast flex items-center text-lg font-semibold">
+          <span className="icon-[material-symbols--exercise-outline] text-brand-violet mr-2 shrink-0 text-3xl sm:hidden" />
           <span>
             Sports:{" "}
             <span className="font-normal">
@@ -78,7 +78,7 @@ export function SportsWidget() {
         </p>
         <a
           href="https://t.me/IUSportBot"
-          className="w-fit text-contrast/75 hover:underline"
+          className="text-contrast/75 w-fit hover:underline"
         >
           Check in for sports in the{" "}
           <span className="text-brand-violet">Sports bot</span>

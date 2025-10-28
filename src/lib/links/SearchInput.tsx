@@ -25,7 +25,7 @@ export const SearchInput: React.FC<
         autoComplete="off"
         spellCheck={false}
         readOnly={readOnly} // Will be reset to false after mounting
-        className="inset-0 h-10 w-full resize-none rounded-lg border border-brand-violet bg-pagebg p-3 text-base caret-brand-violet outline-none dark:text-white"
+        className="border-brand-violet bg-pagebg caret-brand-violet inset-0 h-10 w-full resize-none rounded-lg border p-3 text-base outline-hidden dark:text-white"
         placeholder="Search services..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
@@ -34,9 +34,9 @@ export const SearchInput: React.FC<
         <button
           type="button"
           onClick={() => setSearchQuery("")}
-          className="absolute right-2 top-1/2 flex -translate-y-1/2 transform items-center"
+          className="absolute top-1/2 right-2 flex -translate-y-1/2 transform items-center"
         >
-          <span className="icon-[material-symbols--close] text-xl text-brand-violet" />
+          <span className="icon-[material-symbols--close] text-brand-violet text-xl" />
         </button>
       )}
     </div>

@@ -91,7 +91,7 @@ export function GuardPage() {
       <div className="w-full max-w-2xl self-center">
         <SetupContainer serviceEmail={serviceEmail} />
 
-        <hr className="my-6 border-contrast/20" />
+        <hr className="border-contrast/20 my-6" />
 
         {selectedSlug ? (
           <FileDetails
@@ -111,7 +111,7 @@ export function GuardPage() {
             {isLoadingFiles ? (
               <div className="text-contrast/70">Loading...</div>
             ) : filesError ? (
-              <div className="rounded border-2 border-red-400 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-600 dark:bg-red-900/20 dark:text-red-200">
+              <div className="rounded-sm border-2 border-red-400 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-600 dark:bg-red-900/20 dark:text-red-200">
                 Error loading files:{" "}
                 {(filesError as any)?.message || "Unknown error"}
               </div>

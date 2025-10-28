@@ -6,17 +6,17 @@ export default function SearchBar({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex items-center border-b-[1px] border-b-secondary-hover px-2 pb-[1px] focus-within:border-b-2 focus-within:border-b-brand-violet focus-within:pb-0">
+    <div className="border-b-secondary-hover focus-within:border-b-brand-violet flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">
       <input
         placeholder="Find the group..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="min-w-0 grow bg-transparent px-2 py-1 outline-none"
+        className="min-w-0 grow bg-transparent px-2 py-1 outline-hidden"
       />
       <button
         type="submit"
         tabIndex={-1} // Do not allow to focus on this button
-        className="icon-[material-symbols--search-rounded] shrink-0 text-2xl text-secondary-hover"
+        className="icon-[material-symbols--search-rounded] text-secondary-hover shrink-0 text-2xl"
       />
     </div>
   );

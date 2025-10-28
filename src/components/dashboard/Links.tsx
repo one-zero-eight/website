@@ -86,15 +86,15 @@ const Links = () => {
   return (
     <div>
       <div className="flex flex-col gap-4 pb-4 lg:flex-row">
-        <h3 className="text-2xl font-medium sm:text-3xl lg:flex-[4] xxl:flex-none">
+        <h3 className="xxl:flex-none text-2xl font-medium sm:text-3xl lg:flex-4">
           All University Services
         </h3>
-        <div className="grid items-center gap-4 md:grid-cols-2 md:gap-6 lg:flex lg:flex-1 xxl:grid xxl:flex-auto xxl:grid-cols-2">
+        <div className="xxl:grid xxl:flex-auto xxl:grid-cols-2 grid items-center gap-4 md:grid-cols-2 md:gap-6 lg:flex lg:flex-1">
           <CustomSelect
             options={groups}
             selectedValue={activeGroup}
             onChange={setActiveGroup}
-            className="sm:block lg:hidden xxl:block"
+            className="xxl:block sm:block lg:hidden"
           />
           <SearchInput
             onKeyDown={handleKeyDown}
@@ -106,8 +106,8 @@ const Links = () => {
 
       <div className="flex min-h-[500px] flex-row-reverse items-start gap-6">
         {/* Category List */}
-        <div className="hidden flex-1 lg:block xxl:hidden">
-          <h3 className="text-lg font-semibold text-contrast">Filter</h3>
+        <div className="xxl:hidden hidden flex-1 lg:block">
+          <h3 className="text-contrast text-lg font-semibold">Filter</h3>
           <div>
             {groups.map(({ value }) => (
               <button
@@ -117,7 +117,7 @@ const Links = () => {
                 className={clsx(
                   "block p-2",
                   activeGroup === value
-                    ? "font-bold text-brand-violet"
+                    ? "text-brand-violet font-bold"
                     : "text-contrast/75",
                 )}
               >
@@ -128,7 +128,7 @@ const Links = () => {
         </div>
 
         {filteredResources.length > 0 ? (
-          <div className="grid flex-[4] grid-cols-1 gap-5 lg:grid-cols-3 xxl:grid-cols-2">
+          <div className="xxl:grid-cols-2 grid flex-4 grid-cols-1 gap-5 lg:grid-cols-3">
             {filteredResources.map((resource, index) => (
               <a
                 onClick={() => {
@@ -147,25 +147,25 @@ const Links = () => {
                 rel="nofollow noreferrer"
                 key={index}
                 className={clsx(
-                  "resource-item flex min-h-[100px] flex-row gap-4 rounded-2xl bg-primary px-4 py-4 transition-all ease-in-out hover:bg-primary-hover",
+                  "resource-item bg-primary hover:bg-primary-hover flex min-h-[100px] flex-row gap-4 rounded-2xl px-4 py-4 transition-all ease-in-out",
                   visibleItems.includes(index) ? "visible" : "",
                   activeIndex === index && searchQuery
-                    ? "ring ring-brand-violet"
+                    ? "ring-brand-violet ring-3"
                     : "",
                 )}
               >
                 <span
                   className={clsx(
                     resource.icon,
-                    "hidden w-8 shrink-0 text-3xl text-brand-violet sm:block",
+                    "text-brand-violet hidden w-8 shrink-0 text-3xl sm:block",
                   )}
                 />
                 <div>
-                  <p className="flex text-lg font-semibold text-contrast">
+                  <p className="text-contrast flex text-lg font-semibold">
                     <span
                       className={clsx(
                         resource.icon,
-                        "mr-2 mt-1 shrink-0 text-xl text-brand-violet sm:hidden",
+                        "text-brand-violet mt-1 mr-2 shrink-0 text-xl sm:hidden",
                       )}
                     />
                     <span>
@@ -173,7 +173,7 @@ const Links = () => {
                       {resource.title && `: ${resource.title}`}
                     </span>
                   </p>
-                  <p className="text-sm text-contrast/75">
+                  <p className="text-contrast/75 text-sm">
                     {resource.description}
                   </p>
                 </div>
@@ -181,7 +181,7 @@ const Links = () => {
             ))}
           </div>
         ) : (
-          <p className="flex-[4] text-lg text-contrast">No results found.</p>
+          <p className="text-contrast flex-4 text-lg">No results found.</p>
         )}
       </div>
     </div>
