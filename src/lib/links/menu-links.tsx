@@ -77,8 +77,8 @@ export const items: ItemType[] = [
       type: "local",
       title: "Catalogue",
       badge: (
-        <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-          NEW
+        <span className="ml-2 rounded-full bg-gray-500 px-2 py-1 text-xs font-semibold text-white">
+          DEV
         </span>
       ),
       to: "/catalogue",
@@ -96,8 +96,8 @@ export const items: ItemType[] = [
       type: "local",
       title: "Timer",
       badge: (
-        <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-          NEW
+        <span className="ml-2 rounded-full bg-gray-500 px-2 py-1 text-xs font-semibold text-white">
+          DEV
         </span>
       ),
       to: "/timer",
@@ -148,8 +148,8 @@ export const items: ItemType[] = [
       type: "local",
       title: "Guard",
       badge: (
-        <span className="ml-2 rounded-full bg-brand-violet px-2 py-1 text-xs font-semibold text-white">
-          NEW
+        <span className="ml-2 rounded-full bg-gray-500 px-2 py-1 text-xs font-semibold text-white">
+          DEV
         </span>
       ),
       to: "/guard",
