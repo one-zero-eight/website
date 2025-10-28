@@ -1,11 +1,11 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { $search } from "@/api/search";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import { useNavigate } from "@tanstack/react-router";
-import { ActResult } from "./ActResult";
-import { $search } from "@/api/search";
 import { useEffect, useRef, useState } from "react";
 import AnimatedDots from "../AnimatedDots";
+import { ActResult } from "./ActResult";
 
 export function ActPage({ actQuery }: { actQuery: string }) {
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ export function ActPage({ actQuery }: { actQuery: string }) {
   }, [actQuery]);
 
   const runSearch = (query: string) => {
-    navigate({ to: "/act", search: { q: query } });
+    navigate({ to: "/search/act", search: { q: query } });
     if (query === submittedQuery) {
       refetch();
     } else {
