@@ -19,16 +19,17 @@ const TimerPage = () => {
   const [hours, setHours] = useState<string>("00");
   const [minutes, setMinutes] = useState<string>("00");
   const [seconds, setSeconds] = useState<string>("00");
-
+  const [mode, setMode] = useState<"default" | "fullscreen">("default");
+  const [targetEndTime, setTargetEndTime] = useState<number | null>(null);
   const timerRef = useRef<number>();
   const toastIdCounter = useRef(0);
-  const lastUpdateRef = useRef<number>(Date.now());
   const hoursRef = useRef<HTMLInputElement>(null);
   const minutesRef = useRef<HTMLInputElement>(null);
   const secondsRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
-  const handleTimerComplete = useCallback(() => {
+  const handleTimerComplete = useCallback(async () => {
     setIsRunning(false);
     setIsPaused(false);
     setTime("00:00:00");
@@ -36,13 +37,15 @@ const TimerPage = () => {
     setMinutes("00");
     setSeconds("00");
     setInitialSeconds(0);
+    setTargetEndTime(null);
     setShowTimeUpMessage(true);
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
     localStorage.removeItem("timerState");
 
-    // Play sound
+    await releaseWakeLock();
+
     if (audioRef.current) {
       audioRef.current.play().catch((error) => {
         console.error("Error playing sound:", error);
@@ -59,49 +62,76 @@ const TimerPage = () => {
   }, [isPaused]);
 
   useEffect(() => {
+    if (isRunning && !isPaused) {
+      requestWakeLock();
+    }
+  }, [isRunning, isPaused]);
+
+  useEffect(() => {
+    return () => {
+      releaseWakeLock();
+    };
+  }, []);
+
+  const handleVisibilityChange = useCallback(async () => {
+    if (!document.hidden && isRunning && !isPaused && targetEndTime) {
+      const now = Date.now();
+      const remainingSeconds = Math.max(
+        0,
+        Math.floor((targetEndTime - now) / 1000),
+      );
+      setSecondsLeft(remainingSeconds);
+      formatTime(remainingSeconds);
+
+      if (remainingSeconds === 0) {
+        handleTimerComplete();
+      }
+
+      await requestWakeLock();
+    }
+  }, [isRunning, isPaused, targetEndTime, handleTimerComplete]);
+
+  useEffect(() => {
     const savedState = localStorage.getItem("timerState");
     if (savedState) {
       const {
         title: savedTitle,
-        secondsLeft: savedSeconds,
+        targetEndTime: savedTargetEndTime,
         initialSeconds: savedInitialSeconds = 0,
         isRunning: savedIsRunning,
         isPaused: savedIsPaused,
-        lastUpdate,
+        pausedSecondsLeft,
       } = JSON.parse(savedState);
 
-      let adjustedSeconds = savedSeconds;
-      if (savedIsRunning && !savedIsPaused && lastUpdate) {
-        const timePassed = Math.floor((Date.now() - lastUpdate) / 1000);
-        adjustedSeconds = Math.max(0, savedSeconds - timePassed);
-      }
       setTitle(savedTitle);
-      setSecondsLeft(adjustedSeconds);
       setInitialSeconds(savedInitialSeconds);
       setIsRunning(savedIsRunning);
       setIsPaused(savedIsPaused);
-      formatTime(adjustedSeconds);
+
+      if (savedIsPaused && pausedSecondsLeft !== undefined) {
+        setSecondsLeft(pausedSecondsLeft);
+        formatTime(pausedSecondsLeft);
+        setTargetEndTime(null);
+      } else if (savedIsRunning && savedTargetEndTime) {
+        const now = Date.now();
+        const remainingSeconds = Math.max(
+          0,
+          Math.floor((savedTargetEndTime - now) / 1000),
+        );
+        setSecondsLeft(remainingSeconds);
+        setTargetEndTime(savedTargetEndTime);
+        formatTime(remainingSeconds);
+
+        if (remainingSeconds === 0) {
+          handleTimerComplete();
+        }
+      }
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
-
-  const handleVisibilityChange = useCallback(() => {
-    if (document.hidden) {
-      lastUpdateRef.current = Date.now();
-    } else if (isRunning && !isPaused) {
-      const timePassed = Math.floor(
-        (Date.now() - lastUpdateRef.current) / 1000,
-      );
-      setSecondsLeft((prev) => {
-        const newValue = Math.max(0, prev - timePassed);
-        formatTime(newValue);
-        return newValue;
-      });
-    }
-  }, [isRunning, isPaused]);
+  }, [handleTimerComplete, handleVisibilityChange]);
 
   const showToast = (message: string) => {
     const id = toastIdCounter.current++;
@@ -115,45 +145,80 @@ const TimerPage = () => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
+  const requestWakeLock = async () => {
+    try {
+      if ("wakeLock" in navigator) {
+        wakeLockRef.current = await navigator.wakeLock.request("screen");
+        console.log("Wake Lock acquired");
+      }
+    } catch (err) {
+      console.error("Failed to acquire wake lock:", err);
+    }
+  };
+
+  const releaseWakeLock = async () => {
+    if (wakeLockRef.current) {
+      try {
+        await wakeLockRef.current.release();
+        wakeLockRef.current = null;
+        console.log("Wake Lock released");
+      } catch (err) {
+        console.error("Failed to release wake lock:", err);
+      }
+    }
+  };
+
   const saveState = useCallback(
-    (seconds: number) => {
-      localStorage.setItem(
-        "timerState",
-        JSON.stringify({
-          title,
-          secondsLeft: seconds,
-          initialSeconds,
-          isRunning,
-          isPaused,
-          lastUpdate: Date.now(),
-        }),
-      );
+    (seconds?: number) => {
+      const stateToSave: any = {
+        title,
+        initialSeconds,
+        isRunning,
+        isPaused,
+      };
+
+      if (isPaused && seconds !== undefined) {
+        // When paused, save the current seconds left
+        stateToSave.pausedSecondsLeft = seconds;
+      } else if (targetEndTime) {
+        // When running, save the target end time
+        stateToSave.targetEndTime = targetEndTime;
+      }
+
+      localStorage.setItem("timerState", JSON.stringify(stateToSave));
     },
-    [title, isRunning, isPaused, initialSeconds],
+    [title, isRunning, isPaused, initialSeconds, targetEndTime],
   );
 
   useEffect(() => {
-    if (isRunning && !isPaused) {
-      lastUpdateRef.current = Date.now();
+    if (isRunning && !isPaused && targetEndTime) {
       timerRef.current = window.setInterval(() => {
-        setSecondsLeft((prev) => {
-          if (prev <= 0) {
-            handleTimerComplete();
-            return 0;
-          }
-          const newValue = prev - 1;
-          formatTime(newValue);
-          saveState(newValue);
-          return newValue;
-        });
-      }, 1000);
+        const now = Date.now();
+        const remainingMs = targetEndTime - now;
+        const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+
+        if (remainingMs <= 0) {
+          handleTimerComplete();
+          return;
+        }
+
+        setSecondsLeft(remainingSeconds);
+        formatTime(remainingSeconds);
+
+        if (
+          Math.floor(remainingMs / 1000) !==
+          Math.floor((remainingMs - 100) / 1000)
+        ) {
+          saveState();
+        }
+      }, 100);
     }
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, isPaused, handleTimerComplete, saveState]);
+  }, [isRunning, isPaused, targetEndTime, handleTimerComplete, saveState]);
 
   const formatTime = (totalSeconds: number) => {
     if (isNaN(totalSeconds) || totalSeconds < 0) {
@@ -195,7 +260,7 @@ const TimerPage = () => {
     }
   };
 
-  const handleStart = () => {
+  const handleStart = async () => {
     const totalSeconds =
       parseInt(hours, 10) * 3600 +
       parseInt(minutes, 10) * 60 +
@@ -206,26 +271,39 @@ const TimerPage = () => {
       return;
     }
 
+    const endTime = Date.now() + totalSeconds * 1000;
+
     setIsRunning(true);
     setIsPaused(false);
     setSecondsLeft(totalSeconds);
     setInitialSeconds(totalSeconds);
+    setTargetEndTime(endTime);
     setShowTimeUpMessage(false);
-    saveState(totalSeconds);
+
+    await requestWakeLock();
+
     showToast("The timer started");
   };
 
   const handlePause = () => {
-    setIsPaused(!isPaused);
-    saveState(secondsLeft);
-    showToast(isPaused ? "The timer resumed" : "The timer stopped");
+    if (isPaused) {
+      const newEndTime = Date.now() + secondsLeft * 1000;
+      setTargetEndTime(newEndTime);
+      setIsPaused(false);
+      showToast("The timer resumed");
+    } else {
+      setTargetEndTime(null);
+      setIsPaused(true);
+      saveState(secondsLeft);
+      showToast("The timer stopped");
+    }
   };
 
   const handleStop = () => {
     setShowStopDialog(true);
   };
 
-  const confirmStop = () => {
+  const confirmStop = async () => {
     setIsRunning(false);
     setIsPaused(false);
     setTime("00:00:00");
@@ -234,8 +312,12 @@ const TimerPage = () => {
     setSeconds("00");
     setSecondsLeft(0);
     setInitialSeconds(0);
+    setTargetEndTime(null);
     setShowStopDialog(false);
     localStorage.removeItem("timerState");
+
+    await releaseWakeLock();
+
     showToast("The timer stopped");
   };
 
@@ -354,9 +436,7 @@ const TimerPage = () => {
   };
 
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Select all text when first focused
     const input = e.target;
-    // Use setTimeout to ensure it happens after any other events
     setTimeout(() => {
       input.select();
     }, 0);
@@ -370,19 +450,7 @@ const TimerPage = () => {
     const numValue = value === "" ? 0 : parseInt(value, 10);
 
     if (type === "H") {
-      const values = numValue.toLocaleString().slice(-2);
-      if (Number(values) > 23) {
-        setHours(`0${values[1]}`);
-        setTime(`0${values[1]}:${minutes}:${seconds}`);
-        setSecondsLeft(
-          parseInt(values[1], 10) * 3600 +
-            parseInt(minutes, 10) * 60 +
-            parseInt(seconds, 10),
-        );
-        minutesRef.current?.focus();
-        return;
-      }
-      const formatted = values.toString().padStart(2, "0");
+      const formatted = numValue.toString().padStart(2, "0");
 
       setHours(formatted);
       setTime(`${formatted}:${minutes}:${seconds}`);
@@ -392,7 +460,6 @@ const TimerPage = () => {
           parseInt(seconds, 10),
       );
 
-      // Auto-focus next field when user enters 2 digits
       if (value.length >= 2) {
         minutesRef.current?.focus();
         setTimeout(() => minutesRef.current?.select(), 0);
@@ -463,15 +530,24 @@ const TimerPage = () => {
   };
 
   const addTimeToRunningTimer = (minutesToAdd: number) => {
-    if (!isRunning) return; // Only work when timer is running
+    if (!isRunning || !targetEndTime) return; // Only work when timer is running
 
-    const newSecondsLeft = secondsLeft + minutesToAdd * 60;
+    const millisecondsToAdd = minutesToAdd * 60 * 1000;
+    const newTargetEndTime = targetEndTime + millisecondsToAdd;
     const newInitialSeconds = initialSeconds + minutesToAdd * 60;
 
-    setSecondsLeft(newSecondsLeft);
+    setTargetEndTime(newTargetEndTime);
     setInitialSeconds(newInitialSeconds);
-    formatTime(newSecondsLeft);
-    saveState(newSecondsLeft);
+
+    // Immediately update the display
+    const now = Date.now();
+    const remainingSeconds = Math.max(
+      0,
+      Math.ceil((newTargetEndTime - now) / 1000),
+    );
+    setSecondsLeft(remainingSeconds);
+    formatTime(remainingSeconds);
+
     showToast(
       `Added ${minutesToAdd} minute${minutesToAdd > 1 ? "s" : ""} to timer`,
     );
@@ -486,15 +562,25 @@ const TimerPage = () => {
     }
   };
 
+  const switchFullscreen = () => {
+    const timerContainer = document.getElementById("timer-container");
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      setMode("default");
+    } else {
+      timerContainer?.requestFullscreen();
+      setMode("fullscreen");
+    }
+  };
   return (
-    <div className="timer-container">
+    <div className="timer-container bg-pagebg" id="timer-container">
       <div className="mb-6 flex flex-col items-center gap-4 p-4 md:mb-12">
         <input
           type="text"
           placeholder="Timer title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="timer-title w-full max-w-[800px] rounded-lg border-none bg-transparent px-4 py-2 text-center text-xl font-bold outline-hidden transition-colors duration-300 focus:bg-gray-100 sm:text-2xl md:text-3xl lg:text-[42px]"
+          className="timer-title w-full max-w-[800px] rounded-lg border-none bg-transparent px-4 py-2 text-center text-xl font-bold transition-colors duration-300 outline-none focus:bg-gray-100 sm:text-2xl md:text-3xl lg:text-[42px]"
         />
       </div>
 
@@ -523,7 +609,7 @@ const TimerPage = () => {
             onClick={() => setPresetTime(1, 30)}
             className="border-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
           >
-            1:30 hours
+            1.5 hours
           </button>
           <button
             onClick={() => setPresetTime(2, 0)}
@@ -536,7 +622,7 @@ const TimerPage = () => {
 
       <div className="timer-content">
         <div className="wc">
-          <div className="text-brand-violet flex w-full max-w-[90vw] shrink-0 items-center justify-center gap-1 text-5xl sm:gap-2 sm:text-6xl md:w-[800px] md:text-7xl lg:text-[150px]">
+          <div className="text-brand-violet flex w-full max-w-[90vw] flex-shrink-0 items-center justify-center gap-1 text-5xl sm:gap-2 sm:text-6xl md:w-[800px] md:text-7xl lg:text-[150px]">
             <input
               ref={hoursRef}
               type="text"
@@ -547,7 +633,7 @@ const TimerPage = () => {
               onFocus={handleInputFocus}
               onBlur={handleTimeBlur}
               disabled={isRunning}
-              className="w-auto min-w-0 bg-transparent p-0 text-center text-5xl outline-hidden sm:text-6xl md:text-7xl lg:text-[160px]"
+              className="w-auto min-w-0 bg-transparent p-0 text-center text-5xl outline-none sm:text-6xl md:text-7xl lg:text-[160px]"
             />{" "}
             <span> : </span>
             <input
@@ -560,7 +646,7 @@ const TimerPage = () => {
               onFocus={handleInputFocus}
               onBlur={handleTimeBlur}
               disabled={isRunning}
-              className="w-auto min-w-0 bg-transparent p-0 text-center text-5xl outline-hidden sm:text-6xl md:text-7xl lg:text-[160px]"
+              className="w-auto min-w-0 bg-transparent p-0 text-center text-5xl outline-none sm:text-6xl md:text-7xl lg:text-[160px]"
             />
             <span> : </span>
             <input
@@ -573,7 +659,7 @@ const TimerPage = () => {
               onFocus={handleInputFocus}
               onBlur={handleTimeBlur}
               disabled={isRunning}
-              className="w-auto min-w-0 bg-transparent p-0 text-center text-5xl outline-hidden sm:text-6xl md:text-7xl lg:text-[160px]"
+              className="w-auto min-w-0 bg-transparent p-0 text-center text-5xl outline-none sm:text-6xl md:text-7xl lg:text-[160px]"
             />
           </div>
 
@@ -633,6 +719,14 @@ const TimerPage = () => {
                 </button>
               </>
             )}
+            <button
+              className={`timer-button ${mode === "fullscreen" ? "stop-button" : "start-button"}`}
+              onClick={() => {
+                switchFullscreen();
+              }}
+            >
+              {mode === "fullscreen" ? "Exit Full Screen" : "Full Screen"}
+            </button>
           </div>
 
           {/* Add Time Buttons - Show when timer is running */}
@@ -714,7 +808,7 @@ const TimerPage = () => {
       {/* Time's Up Message */}
       {showTimeUpMessage && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           onClick={dismissTimeUpMessage}
         >
           <div
