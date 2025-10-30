@@ -1,4 +1,5 @@
 import { queryClient } from "@/app/query-client.ts";
+import { useEffect, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 const TOKEN_KEY = "accessToken";
@@ -25,13 +26,37 @@ export function useMyAccessToken() {
   return useLocalStorage<string | null>(TOKEN_KEY, null);
 }
 
-export function isAccessTokenExpired(accessToken: string | null) {
-  if (!accessToken) return true;
+export function getExpirationDate(accessToken: string | null) {
+  if (!accessToken) return null;
   try {
     const payload = JSON.parse(atob(accessToken.split(".")[1]));
-    if (!payload.exp || typeof payload.exp !== "number") return true;
-    return new Date(payload.exp * 1000) < new Date();
+    if (!payload.exp || typeof payload.exp !== "number") return null;
+    return new Date(payload.exp * 1000);
   } catch {
-    return true;
+    return null;
   }
+}
+
+export function useIsMyAccessTokenExpired() {
+  const [token, _] = useMyAccessToken();
+  const [isExpired, setIsExpired] = useState(false);
+
+  useEffect(() => {
+    // Evaluate expiration immediately
+    const exp = getExpirationDate(token);
+    const now = new Date();
+    setIsExpired(exp ? exp <= now : true);
+
+    if (exp && exp > now) {
+      // Set a timer to update expiration status when the token expires
+      const timer = setTimeout(() => {
+        const newExp = getExpirationDate(token);
+        const newNow = new Date();
+        setIsExpired(newExp ? newExp <= newNow : true);
+      }, exp.getTime() - now.getTime());
+      return () => clearTimeout(timer);
+    }
+  }, [token]);
+
+  return isExpired;
 }

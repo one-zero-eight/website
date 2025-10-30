@@ -6,7 +6,7 @@ import {
 } from "@/api/accounts/sign-in.ts";
 import {
   invalidateMyAccessToken,
-  isAccessTokenExpired,
+  useIsMyAccessTokenExpired,
   useMyAccessToken,
 } from "@/api/helpers/access-token.ts";
 import {
@@ -19,7 +19,7 @@ import { useLocalStorage } from "usehooks-ts";
 
 export function AuthManager({ children }: PropsWithChildren) {
   const [token, setToken] = useMyAccessToken();
-  const isTokenExpired = isAccessTokenExpired(token);
+  const isTokenExpired = useIsMyAccessTokenExpired();
   const queryClient = useQueryClient();
   const { refetch: refetchMyToken } = $accounts.useQuery(
     "get",
