@@ -1,7 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
-import { ExternalLink, items, LocalLink } from "@/lib/links/menu-links.tsx";
+import { items, ItemType } from "@/lib/links/menu-links.tsx";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useLocalStorage } from "usehooks-ts";
@@ -97,7 +97,7 @@ function SidebarLink({
   badge,
   isMinimized,
   ...props
-}: (LocalLink | ExternalLink) & {
+}: ItemType & {
   isMinimized: boolean;
 }) {
   const children = (
@@ -128,12 +128,13 @@ function SidebarLink({
         )}
         target="_blank"
         rel="nofollow noreferrer"
-        {...props}
+        href={props.href}
       >
         {children}
       </a>
     );
   } else if (props.type === "local") {
+    const { staff_only, hideOnMore, type, ...linkProps } = props;
     return (
       <Link
         className={clsx(
@@ -142,7 +143,7 @@ function SidebarLink({
           !isMinimized ? "px-2 text-4xl" : "justify-center px-1 text-3xl",
         )}
         activeProps={{ className: "is-active" }}
-        {...props}
+        {...linkProps}
       >
         {children}
       </Link>

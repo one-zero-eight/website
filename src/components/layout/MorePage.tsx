@@ -3,7 +3,7 @@ import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton.tsx";
 import UserMenu from "@/components/layout/UserMenu.tsx";
-import { ExternalLink, items, LocalLink } from "@/lib/links/menu-links.tsx";
+import { items, ItemType } from "@/lib/links/menu-links.tsx";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 
@@ -59,7 +59,7 @@ export function MorePage() {
   );
 }
 
-function MenuLink({ icon, title, badge, ...props }: LocalLink | ExternalLink) {
+function MenuLink({ icon, title, badge, ...props }: ItemType) {
   const children = (
     <>
       {icon}
@@ -84,12 +84,13 @@ function MenuLink({ icon, title, badge, ...props }: LocalLink | ExternalLink) {
           "text-inactive flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
           "px-4 text-4xl",
         )}
-        {...props}
+        href={props.href}
       >
         {children}
       </a>
     );
   } else if (props.type === "local") {
+    const { staff_only, hideOnMore, type, ...linkProps } = props;
     return (
       <Link
         className={clsx(
@@ -98,7 +99,7 @@ function MenuLink({ icon, title, badge, ...props }: LocalLink | ExternalLink) {
           "px-4 text-4xl",
         )}
         activeProps={{ className: "is-active" }}
-        {...props}
+        {...linkProps}
       >
         {children}
       </Link>
