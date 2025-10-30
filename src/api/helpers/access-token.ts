@@ -37,23 +37,28 @@ export function getExpirationDate(accessToken: string | null) {
   }
 }
 
+export function checkIsTokenExpired(accessToken: string | null, now: Date) {
+  const exp = getExpirationDate(accessToken);
+  return exp ? exp <= now : null;
+}
+
 export function useIsMyAccessTokenExpired() {
   const [token, _] = useMyAccessToken();
-  const [isExpired, setIsExpired] = useState(false);
+  const [isExpired, setIsExpired] = useState<boolean | null>(null);
 
   useEffect(() => {
     // Evaluate expiration immediately
-    const exp = getExpirationDate(token);
-    const now = new Date();
-    setIsExpired(exp ? exp <= now : true);
+    const res = checkIsTokenExpired(token, new Date());
+    setIsExpired(res);
 
-    if (exp && exp > now) {
+    if (res === false) {
       // Set a timer to update expiration status when the token expires
-      const timer = setTimeout(() => {
-        const newExp = getExpirationDate(token);
-        const newNow = new Date();
-        setIsExpired(newExp ? newExp <= newNow : true);
-      }, exp.getTime() - now.getTime());
+      const timer = setTimeout(
+        () => {
+          setIsExpired(checkIsTokenExpired(token, new Date()));
+        },
+        getExpirationDate(token)!.getTime() - Date.now(),
+      );
       return () => clearTimeout(timer);
     }
   }, [token]);

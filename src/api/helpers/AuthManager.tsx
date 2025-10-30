@@ -5,6 +5,7 @@ import {
   shouldAutoSignIn,
 } from "@/api/accounts/sign-in.ts";
 import {
+  checkIsTokenExpired,
   invalidateMyAccessToken,
   useIsMyAccessTokenExpired,
   useMyAccessToken,
@@ -59,8 +60,7 @@ export function AuthManager({ children }: PropsWithChildren) {
 
   useEffect(() => {
     // Invalidate token if it's expired
-    if (token && isTokenExpired) {
-      console.log("Access token expired, invalidating...");
+    if (token && isTokenExpired && checkIsTokenExpired(token, new Date())) {
       invalidateMyAccessToken();
     }
   }, [isTokenExpired, token]);
