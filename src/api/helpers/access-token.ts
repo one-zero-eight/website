@@ -24,3 +24,14 @@ export function invalidateMyAccessToken() {
 export function useMyAccessToken() {
   return useLocalStorage<string | null>(TOKEN_KEY, null);
 }
+
+export function isAccessTokenExpired(accessToken: string | null) {
+  if (!accessToken) return true;
+  try {
+    const payload = JSON.parse(atob(accessToken.split(".")[1]));
+    if (!payload.exp || typeof payload.exp !== "number") return true;
+    return new Date(payload.exp * 1000) < new Date();
+  } catch {
+    return true;
+  }
+}

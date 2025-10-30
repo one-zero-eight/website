@@ -6,6 +6,7 @@ import {
 } from "@/api/accounts/sign-in.ts";
 import {
   invalidateMyAccessToken,
+  isAccessTokenExpired,
   useMyAccessToken,
 } from "@/api/helpers/access-token.ts";
 import {
@@ -18,6 +19,7 @@ import { useLocalStorage } from "usehooks-ts";
 
 export function AuthManager({ children }: PropsWithChildren) {
   const [token, setToken] = useMyAccessToken();
+  const isTokenExpired = isAccessTokenExpired(token);
   const queryClient = useQueryClient();
   const { refetch: refetchMyToken } = $accounts.useQuery(
     "get",
@@ -56,8 +58,17 @@ export function AuthManager({ children }: PropsWithChildren) {
   }, [me, isPending, setStoredMe]);
 
   useEffect(() => {
+    // Invalidate token if it's expired
+    if (token && isTokenExpired) {
+      console.log("Access token expired, invalidating...");
+      invalidateMyAccessToken();
+    }
+  }, [isTokenExpired, token]);
+
+  useEffect(() => {
     // If the user doesn't have personal access token for services, we should fetch it
     if (!token && me) {
+      console.log("Fetching new access token for the user...");
       refetchMyToken().then((result) => {
         if (result.isSuccess) {
           setToken(result.data.access_token);
