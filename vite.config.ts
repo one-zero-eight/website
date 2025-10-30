@@ -1,6 +1,6 @@
 import mdx from "@mdx-js/rollup";
 import tailwindcss from "@tailwindcss/vite";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import remarkGfm from "remark-gfm";
 // @ts-expect-error The plugin is not typed
 import veauryVitePlugins from "veaury/vite/esm/index.mjs";
@@ -20,7 +20,7 @@ export default defineConfig({
     }),
 
     // Enable routing via TanStack Router
-    TanStackRouterVite({
+    tanstackRouter({
       routesDirectory: "src/app/routes",
       generatedRouteTree: "src/app/route-tree.gen.ts",
       quoteStyle: "double",
@@ -63,6 +63,12 @@ export default defineConfig({
     // Minify the index.html
     ViteMinifyPlugin({}),
   ],
+
+  server: {
+    hmr: {
+      host: "local.innohassle.ru",
+    }
+  },
 
   css: {
     preprocessorOptions: {
