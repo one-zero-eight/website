@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./timerstyles.css";
+import {
+  CONTROL_BUTTON_CLASS,
+  ADD_TIME_BUTTON_CLASS,
+  PRESET_BUTTON_CLASS,
+  PRESET_TIME_OPTIONS,
+  ADD_TIME_OPTIONS,
+} from "./constants";
 
 interface Toast {
   id: number;
@@ -50,16 +57,66 @@ const TimerPage = () => {
       audioRef.current.play().catch((error) => {
         console.error("Error playing sound:", error);
       });
+      setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+      }, 10000);
     }
 
     showToast("Time is up!");
   }, []);
 
+  const formatTime = useCallback((totalSeconds: number) => {
+    if (isNaN(totalSeconds) || totalSeconds < 0) {
+      setTime("00:00:00");
+      setHours("00");
+      setMinutes("00");
+      setSeconds("00");
+      return;
+    }
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+
+    const formattedHours = h.toString().padStart(2, "0");
+    const formattedMinutes = m.toString().padStart(2, "0");
+    const formattedSeconds = s.toString().padStart(2, "0");
+
+    setHours(formattedHours);
+    setMinutes(formattedMinutes);
+    setSeconds(formattedSeconds);
+    setTime(`${formattedHours}:${formattedMinutes}:${formattedSeconds}`);
+  }, []);
+
+  const saveState = useCallback(
+    (seconds?: number) => {
+      const stateToSave: any = {
+        title,
+        initialSeconds,
+        isRunning,
+        isPaused,
+      };
+
+      if (isPaused && seconds !== undefined) {
+        // When paused, save the current seconds left
+        stateToSave.pausedSecondsLeft = seconds;
+      } else if (targetEndTime) {
+        // When running, save the target end time
+        stateToSave.targetEndTime = targetEndTime;
+      }
+
+      localStorage.setItem("timerState", JSON.stringify(stateToSave));
+    },
+    [title, isRunning, isPaused, initialSeconds, targetEndTime],
+  );
+
   useEffect(() => {
     if (isRunning) {
       saveState(secondsLeft);
     }
-  }, [isPaused]);
+  }, [isRunning, isPaused, secondsLeft, saveState]);
 
   useEffect(() => {
     if (isRunning && !isPaused) {
@@ -70,6 +127,21 @@ const TimerPage = () => {
   useEffect(() => {
     return () => {
       releaseWakeLock();
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement) {
+        setMode("fullscreen");
+      } else {
+        setMode("default");
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
 
@@ -89,7 +161,7 @@ const TimerPage = () => {
 
       await requestWakeLock();
     }
-  }, [isRunning, isPaused, targetEndTime, handleTimerComplete]);
+  }, [isRunning, isPaused, targetEndTime, handleTimerComplete, formatTime]);
 
   useEffect(() => {
     const savedState = localStorage.getItem("timerState");
@@ -131,7 +203,7 @@ const TimerPage = () => {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [handleTimerComplete, handleVisibilityChange]);
+  }, [handleTimerComplete, handleVisibilityChange, formatTime]);
 
   const showToast = (message: string) => {
     const id = toastIdCounter.current++;
@@ -168,30 +240,19 @@ const TimerPage = () => {
     }
   };
 
-  const saveState = useCallback(
-    (seconds?: number) => {
-      const stateToSave: any = {
-        title,
-        initialSeconds,
-        isRunning,
-        isPaused,
-      };
-
-      if (isPaused && seconds !== undefined) {
-        // When paused, save the current seconds left
-        stateToSave.pausedSecondsLeft = seconds;
-      } else if (targetEndTime) {
-        // When running, save the target end time
-        stateToSave.targetEndTime = targetEndTime;
-      }
-
-      localStorage.setItem("timerState", JSON.stringify(stateToSave));
-    },
-    [title, isRunning, isPaused, initialSeconds, targetEndTime],
-  );
-
   useEffect(() => {
     if (isRunning && !isPaused && targetEndTime) {
+      // Immediately update the display when the interval starts to prevent flicker
+      const now = Date.now();
+      const initialRemainingMs = targetEndTime - now;
+      const initialRemainingSeconds = Math.max(
+        0,
+        Math.ceil(initialRemainingMs / 1000),
+      );
+
+      setSecondsLeft(initialRemainingSeconds);
+      formatTime(initialRemainingSeconds);
+
       timerRef.current = window.setInterval(() => {
         const now = Date.now();
         const remainingMs = targetEndTime - now;
@@ -218,29 +279,14 @@ const TimerPage = () => {
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, isPaused, targetEndTime, handleTimerComplete, saveState]);
-
-  const formatTime = (totalSeconds: number) => {
-    if (isNaN(totalSeconds) || totalSeconds < 0) {
-      setTime("00:00:00");
-      setHours("00");
-      setMinutes("00");
-      setSeconds("00");
-      return;
-    }
-    const h = Math.floor(totalSeconds / 3600);
-    const m = Math.floor((totalSeconds % 3600) / 60);
-    const s = totalSeconds % 60;
-
-    const formattedHours = h.toString().padStart(2, "0");
-    const formattedMinutes = m.toString().padStart(2, "0");
-    const formattedSeconds = s.toString().padStart(2, "0");
-
-    setHours(formattedHours);
-    setMinutes(formattedMinutes);
-    setSeconds(formattedSeconds);
-    setTime(`${formattedHours}:${formattedMinutes}:${formattedSeconds}`);
-  };
+  }, [
+    isRunning,
+    isPaused,
+    targetEndTime,
+    handleTimerComplete,
+    saveState,
+    formatTime,
+  ]);
 
   const handleTimeBlur = () => {
     const parts = time.split(":");
@@ -287,11 +333,15 @@ const TimerPage = () => {
 
   const handlePause = () => {
     if (isPaused) {
+      // Resuming the timer
       const newEndTime = Date.now() + secondsLeft * 1000;
+
       setTargetEndTime(newEndTime);
       setIsPaused(false);
+
       showToast("The timer resumed");
     } else {
+      // Pausing the timer
       setTargetEndTime(null);
       setIsPaused(true);
       saveState(secondsLeft);
@@ -530,23 +580,53 @@ const TimerPage = () => {
   };
 
   const addTimeToRunningTimer = (minutesToAdd: number) => {
-    if (!isRunning || !targetEndTime) return; // Only work when timer is running
+    if (!isRunning) return; // Only work when timer is running (including paused state)
 
-    const millisecondsToAdd = minutesToAdd * 60 * 1000;
-    const newTargetEndTime = targetEndTime + millisecondsToAdd;
-    const newInitialSeconds = initialSeconds + minutesToAdd * 60;
+    const secondsToAdd = minutesToAdd * 60;
+    const newInitialSeconds = initialSeconds + secondsToAdd;
 
-    setTargetEndTime(newTargetEndTime);
     setInitialSeconds(newInitialSeconds);
 
-    // Immediately update the display
-    const now = Date.now();
-    const remainingSeconds = Math.max(
-      0,
-      Math.ceil((newTargetEndTime - now) / 1000),
-    );
-    setSecondsLeft(remainingSeconds);
-    formatTime(remainingSeconds);
+    if (isPaused) {
+      // Timer is paused - update seconds left and display directly
+      const newSecondsLeft = secondsLeft + secondsToAdd;
+      setSecondsLeft(newSecondsLeft);
+      formatTime(newSecondsLeft);
+
+      // Save to localStorage with new paused time
+      const stateToSave = {
+        title,
+        initialSeconds: newInitialSeconds,
+        isRunning: true,
+        isPaused: true,
+        pausedSecondsLeft: newSecondsLeft,
+      };
+      localStorage.setItem("timerState", JSON.stringify(stateToSave));
+    } else if (targetEndTime) {
+      // Timer is actively running - update the target end time
+      const millisecondsToAdd = minutesToAdd * 60 * 1000;
+      const newTargetEndTime = targetEndTime + millisecondsToAdd;
+      setTargetEndTime(newTargetEndTime);
+
+      // Immediately update the display
+      const now = Date.now();
+      const remainingSeconds = Math.max(
+        0,
+        Math.ceil((newTargetEndTime - now) / 1000),
+      );
+      setSecondsLeft(remainingSeconds);
+      formatTime(remainingSeconds);
+
+      // Save to localStorage with new target end time
+      const stateToSave = {
+        title,
+        initialSeconds: newInitialSeconds,
+        isRunning: true,
+        isPaused: false,
+        targetEndTime: newTargetEndTime,
+      };
+      localStorage.setItem("timerState", JSON.stringify(stateToSave));
+    }
 
     showToast(
       `Added ${minutesToAdd} minute${minutesToAdd > 1 ? "s" : ""} to timer`,
@@ -566,14 +646,24 @@ const TimerPage = () => {
     const timerContainer = document.getElementById("timer-container");
     if (document.fullscreenElement) {
       document.exitFullscreen();
-      setMode("default");
     } else {
       timerContainer?.requestFullscreen();
-      setMode("fullscreen");
     }
   };
   return (
-    <div className="timer-container bg-pagebg" id="timer-container">
+    <div className="timer-container bg-pagebg relative" id="timer-container">
+      <button
+        className="bg-primary hover:bg-primary-hover text-contrast absolute right-4 bottom-4 flex h-12 w-12 items-center justify-center rounded-2xl text-3xl transition-all"
+        onClick={() => {
+          switchFullscreen();
+        }}
+      >
+        {mode === "fullscreen" ? (
+          <span className="icon-[material-symbols--fullscreen-exit]" />
+        ) : (
+          <span className="icon-[material-symbols--fullscreen]" />
+        )}
+      </button>
       <div className="mb-6 flex flex-col items-center gap-4 p-4 md:mb-12">
         <input
           type="text"
@@ -587,42 +677,21 @@ const TimerPage = () => {
       {/* Quick Timer Presets */}
       {!isRunning && (
         <div className="mb-6 flex flex-wrap justify-center gap-2 px-4 sm:gap-3 md:mb-8 md:gap-4 md:px-8">
-          <button
-            onClick={() => setPresetTime(0, 30)}
-            className="border-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
-          >
-            30 mins
-          </button>
-          <button
-            onClick={() => setPresetTime(0, 45)}
-            className="border-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
-          >
-            45 mins
-          </button>
-          <button
-            onClick={() => setPresetTime(1, 0)}
-            className="border-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
-          >
-            1 hour
-          </button>
-          <button
-            onClick={() => setPresetTime(1, 30)}
-            className="border-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
-          >
-            1.5 hours
-          </button>
-          <button
-            onClick={() => setPresetTime(2, 0)}
-            className="border-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition-all duration-300 hover:text-white sm:px-6 sm:py-2.5 sm:text-base md:rounded-xl md:px-8 md:py-3 md:text-lg"
-          >
-            2 hours
-          </button>
+          {PRESET_TIME_OPTIONS.map((preset) => (
+            <button
+              key={preset.label}
+              onClick={() => setPresetTime(preset.hours, preset.minutes)}
+              className={PRESET_BUTTON_CLASS}
+            >
+              {preset.label}
+            </button>
+          ))}
         </div>
       )}
 
       <div className="timer-content">
         <div className="wc">
-          <div className="text-brand-violet flex w-full max-w-[90vw] flex-shrink-0 items-center justify-center gap-1 text-5xl sm:gap-2 sm:text-6xl md:w-[800px] md:text-7xl lg:text-[150px]">
+          <div className="text-brand-violet flex w-full max-w-[90vw] shrink-0 items-center justify-center gap-1 text-5xl sm:gap-2 sm:text-6xl md:w-[800px] md:text-7xl lg:text-[150px]">
             <input
               ref={hoursRef}
               type="text"
@@ -670,103 +739,41 @@ const TimerPage = () => {
                 <div
                   className="bg-brand-violet h-full rounded-[25px] shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-linear"
                   style={{
-                    width: `${((initialSeconds - secondsLeft) / initialSeconds) * 100}%`,
+                    width: `${(secondsLeft / initialSeconds) * 100}%`,
                   }}
                 />
-              </div>
-              <div className="mt-4 flex justify-center text-lg font-semibold sm:text-xl md:mt-6 md:text-2xl lg:text-[32px]">
-                <span className="color-contrast">
-                  Time passed:{" "}
-                  <strong className="text-brand-violet">
-                    {Math.floor((initialSeconds - secondsLeft) / 60)}:
-                    {String((initialSeconds - secondsLeft) % 60).padStart(
-                      2,
-                      "0",
-                    )}
-                  </strong>
-                </span>
-              </div>
-              <div className="text-brand-violet mt-2 text-center text-2xl font-bold sm:text-3xl md:mt-4 md:text-4xl lg:text-5xl">
-                {Math.round(
-                  ((initialSeconds - secondsLeft) / initialSeconds) * 100,
-                )}
-                %
               </div>
             </div>
           )}
 
           <div className="timer-controls">
             {!isRunning ? (
-              <button
-                onClick={handleStart}
-                className="timer-button start-button"
-              >
+              <button onClick={handleStart} className={CONTROL_BUTTON_CLASS}>
+                <span className="icon-[material-symbols--play-arrow] text-2xl sm:text-3xl" />
                 Start
               </button>
             ) : (
               <>
-                <button
-                  onClick={handlePause}
-                  className="timer-button pause-button"
-                >
-                  {isPaused ? "Resume" : "Pause"}
+                <button onClick={handlePause} className={CONTROL_BUTTON_CLASS}>
+                  {isPaused ? (
+                    <>
+                      <span className="icon-[material-symbols--play-arrow] text-2xl sm:text-3xl" />
+                      Resume
+                    </>
+                  ) : (
+                    <>
+                      <span className="icon-[material-symbols--pause] text-2xl sm:text-3xl" />
+                      Pause
+                    </>
+                  )}
                 </button>
-                <button
-                  onClick={handleStop}
-                  className="timer-button stop-button"
-                >
+                <button onClick={handleStop} className={CONTROL_BUTTON_CLASS}>
+                  <span className="icon-[material-symbols--stop] text-2xl sm:text-3xl" />
                   Stop
                 </button>
               </>
             )}
-            <button
-              className={`timer-button ${mode === "fullscreen" ? "stop-button" : "start-button"}`}
-              onClick={() => {
-                switchFullscreen();
-              }}
-            >
-              {mode === "fullscreen" ? "Exit Full Screen" : "Full Screen"}
-            </button>
           </div>
-
-          {/* Add Time Buttons - Show when timer is running */}
-          {isRunning && (
-            <div className="mt-4 flex flex-wrap justify-center gap-2 px-4 sm:gap-3 md:mt-8">
-              <span className="mr-1 w-full self-center text-center text-sm font-semibold text-gray-600 sm:mr-2 sm:w-auto sm:text-base md:text-lg">
-                Add time:
-              </span>
-              <button
-                onClick={() => addTimeToRunningTimer(5)}
-                className="border-brand-violet text-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-white px-3 py-1.5 text-sm font-semibold transition-all duration-300 hover:text-white sm:px-4 sm:py-2 sm:text-base md:px-5"
-              >
-                +5 min
-              </button>
-              <button
-                onClick={() => addTimeToRunningTimer(10)}
-                className="border-brand-violet text-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-white px-3 py-1.5 text-sm font-semibold transition-all duration-300 hover:text-white sm:px-4 sm:py-2 sm:text-base md:px-5"
-              >
-                +10 min
-              </button>
-              <button
-                onClick={() => addTimeToRunningTimer(15)}
-                className="border-brand-violet text-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-white px-3 py-1.5 text-sm font-semibold transition-all duration-300 hover:text-white sm:px-4 sm:py-2 sm:text-base md:px-5"
-              >
-                +15 min
-              </button>
-              <button
-                onClick={() => addTimeToRunningTimer(20)}
-                className="border-brand-violet text-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-white px-3 py-1.5 text-sm font-semibold transition-all duration-300 hover:text-white sm:px-4 sm:py-2 sm:text-base md:px-5"
-              >
-                +20 min
-              </button>
-              <button
-                onClick={() => addTimeToRunningTimer(30)}
-                className="border-brand-violet text-brand-violet hover:bg-brand-violet cursor-pointer rounded-lg border-2 bg-white px-3 py-1.5 text-sm font-semibold transition-all duration-300 hover:text-white sm:px-4 sm:py-2 sm:text-base md:px-5"
-              >
-                +30 min
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -833,6 +840,24 @@ const TimerPage = () => {
               OK
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Add Time Buttons - Show when timer is running */}
+      {isRunning && (
+        <div className="mb-6 flex flex-wrap justify-center gap-2 px-4 sm:gap-3 md:mb-8">
+          <span className="mr-1 w-full self-center text-center text-sm font-semibold text-gray-600 sm:mr-2 sm:w-auto sm:text-base md:text-lg">
+            Add time:
+          </span>
+          {ADD_TIME_OPTIONS.map((minutes) => (
+            <button
+              key={minutes}
+              onClick={() => addTimeToRunningTimer(minutes)}
+              className={ADD_TIME_BUTTON_CLASS}
+            >
+              +{minutes} min
+            </button>
+          ))}
         </div>
       )}
 
