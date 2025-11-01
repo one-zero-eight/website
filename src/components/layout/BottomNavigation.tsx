@@ -1,9 +1,29 @@
 import { Link, LinkOptions } from "@tanstack/react-router";
-import { PropsWithChildren, ReactElement } from "react";
+import React, { PropsWithChildren, ReactElement } from "react";
 
 export function BottomNavigation() {
+  const [isPWA, setIsPWA] = React.useState<boolean>(false);
+
+  // Adjust for phone's bottom navigation if installed as PWA
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+
+    const handleMediaQueryChange = (e: MediaQueryListEvent) => {
+      setIsPWA(e.matches);
+    };
+
+    setIsPWA(mediaQuery.matches);
+
+    mediaQuery.addEventListener("change", handleMediaQueryChange);
+    return () => {
+      mediaQuery.removeEventListener("change", handleMediaQueryChange);
+    };
+  }, []);
+
   return (
-    <nav className="bg-floating flex h-12 w-full shrink-0 overflow-hidden lg:hidden">
+    <nav
+      className={`bg-floating flex ${isPWA ? "px-6 pt-1 pb-6" : "h-12"} w-full shrink-0 overflow-hidden lg:hidden`}
+    >
       <BottomNavigationLink
         to="/dashboard"
         title="Dashboard"
