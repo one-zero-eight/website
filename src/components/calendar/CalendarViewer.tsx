@@ -269,6 +269,13 @@ export default function CalendarViewer({
         weekNumberCalculation={(d) =>
           calculateWeek(academicCalendarRef.current, d)
         } // Display academic week numbers
+        weekNumberContent={(arg) => {
+          return (
+            <span className="whitespace-pre-wrap sm:whitespace-normal">
+              {arg.text.replace(" ", "\n")}
+            </span>
+          );
+        }}
         height={isFullPage ? "100%" : undefined} // Full height
         contentHeight={isFullPage ? undefined : "auto"} // Do not add scrollbar on in-page calendars
         eventInteractive={true} // Make event tabbable
