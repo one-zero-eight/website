@@ -13,7 +13,7 @@ export function PwaWidget() {
   return (
     <div className="group bg-primary flex flex-row gap-4 rounded-2xl px-4 py-4">
       <span className="icon-[material-symbols--install-mobile-outline-rounded] text-brand-violet hidden w-12 shrink-0 text-5xl sm:block" />
-      <div className="flex flex-col">
+      <div className="flex grow flex-col">
         <div className="text-contrast flex text-lg font-semibold">
           <span className="icon-[material-symbols--install-mobile-outline-rounded] text-brand-violet mr-2 shrink-0 text-3xl sm:hidden" />
           <span>Install as PWA</span>
@@ -32,7 +32,7 @@ export function PwaWidget() {
       </div>
       <button
         type="button"
-        className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 -mt-4 -mr-4 flex h-12 w-12 items-center justify-center rounded-2xl"
+        className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 -mt-4 -mr-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
         onClick={() => setWidgetShown(false)}
       >
         <span className="icon-[material-symbols--close] text-xl" />
