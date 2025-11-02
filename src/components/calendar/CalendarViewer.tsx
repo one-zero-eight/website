@@ -463,9 +463,10 @@ function renderDayHeader({ date }: DayHeaderContentArg) {
   return (
     <>
       {moment(date).format("ddd")}{" "}
-      <div className="inline-flex w-fit items-center justify-center rounded-md in-[.fc-day-today]:bg-red-500 in-[.fc-day-today]:px-1 in-[.fc-day-today]:text-white">
+      <span className="whitespace-pre-wrap sm:hidden">{"\n"}</span>
+      <span className="inline-flex w-fit items-center justify-center rounded-md in-[.fc-day-today]:bg-red-500 in-[.fc-day-today]:px-1 in-[.fc-day-today]:text-white">
         {moment(date).format("D")}
-      </div>
+      </span>
     </>
   );
 }
