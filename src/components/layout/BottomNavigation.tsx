@@ -1,4 +1,5 @@
 import { Link, LinkOptions } from "@tanstack/react-router";
+import clsx from "clsx";
 import React, { PropsWithChildren, ReactElement } from "react";
 
 export function BottomNavigation() {
@@ -24,7 +25,10 @@ export function BottomNavigation() {
 
   return (
     <nav
-      className={`bg-floating flex ${isPWA ? "px-6 pt-1 pb-6" : "h-12"} w-full shrink-0 overflow-hidden lg:hidden`}
+      className={clsx(
+        "bg-floating flex w-full shrink-0 overflow-hidden lg:hidden",
+        isPWA ? "px-6 pt-1 pb-6" : "h-12",
+      )}
     >
       <BottomNavigationLink
         to="/dashboard"
