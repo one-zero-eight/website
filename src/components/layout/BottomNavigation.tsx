@@ -4,15 +4,17 @@ import React, { PropsWithChildren, ReactElement } from "react";
 export function BottomNavigation() {
   const [isPWA, setIsPWA] = React.useState<boolean>(false);
 
-  // Adjust for phone's bottom navigation if installed as PWA
+  // Adjust for iPhone's bottom navigation if installed as PWA
   React.useEffect(() => {
+    const iosCheck = () => /iPad|iPhone|iPod/.test(navigator.userAgent);
+
     const mediaQuery = window.matchMedia("(display-mode: standalone)");
 
     const handleMediaQueryChange = (e: MediaQueryListEvent) => {
-      setIsPWA(e.matches);
+      setIsPWA(e.matches && iosCheck());
     };
 
-    setIsPWA(mediaQuery.matches);
+    setIsPWA(mediaQuery.matches && iosCheck());
 
     mediaQuery.addEventListener("change", handleMediaQueryChange);
     return () => {
