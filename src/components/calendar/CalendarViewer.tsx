@@ -108,6 +108,14 @@ export default function CalendarViewer({
           }
         }}
         eventDataTransform={(input) => {
+          if (
+            input.end === null &&
+            typeof input.start === "string" &&
+            input.start.length === 10
+          ) {
+            return input; // It is an all-day event, no need to transform
+          }
+
           // Dates have Europe/Moscow timezone,
           // but the sources don't set timezones,
           // so the local zone is set
