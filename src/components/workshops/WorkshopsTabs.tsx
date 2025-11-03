@@ -10,8 +10,8 @@ export function WorkshopsTabs() {
 
   return (
     <div className="border-b-secondary-hover flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
-      <TabLink to="/workshops">Check in</TabLink>
-      <TabLink to="/workshops/admin">Admin</TabLink>
+      <TabLink to="/events">Check in</TabLink>
+      <TabLink to="/events/admin">Admin</TabLink>
     </div>
   );
 }

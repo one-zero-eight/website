@@ -32,7 +32,7 @@ export function WorkshopsAdminPage() {
   const { data: workshopsUser } = $workshops.useQuery("get", "/users/me");
   useEffect(() => {
     if (workshopsUser && workshopsUser.role !== "admin") {
-      navigate({ to: "/workshops" });
+      navigate({ to: "/events" });
     }
   }, [workshopsUser, navigate]);
 

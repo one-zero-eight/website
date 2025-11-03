@@ -5,7 +5,7 @@ import { WorkshopsTabs } from "@/components/workshops/WorkshopsTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
-export const Route = createFileRoute("/_with_menu/workshops/")({
+export const Route = createFileRoute("/_with_menu/events/")({
   component: RouteComponent,
 });
 

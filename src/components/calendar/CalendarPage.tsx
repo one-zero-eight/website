@@ -111,7 +111,7 @@ function getCalendarsToShow(
   toShow.push({
     url: getMyWorkshopsLink(),
     color: "seagreen",
-    sourceLink: "https://innohassle.ru/workshops",
+    sourceLink: "https://innohassle.ru/events",
     updatedAt: new Date().toISOString(),
   });
 

@@ -71,7 +71,7 @@ export const items: ItemType[] = [
   {
     type: "local",
     title: "Workshops",
-    to: "/workshops",
+    to: "/events",
     icon: <span className="icon-[material-symbols--construction-rounded]" />,
   },
   ...((import.meta.env.VITE_PRODUCTION && []) || [
