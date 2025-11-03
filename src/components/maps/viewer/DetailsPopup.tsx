@@ -135,7 +135,9 @@ export function DetailsPopup({
 }
 
 function RoomBookingDetails({ roomId }: { roomId: string }) {
-  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
+  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
+    params: { query: { include_red: true } },
+  });
   const room = rooms?.find((r) => r.id === roomId);
 
   const accessLevelColors: Record<RoomAccess_level, string> = {

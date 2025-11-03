@@ -11,7 +11,9 @@ import { Helmet } from "react-helmet-async";
 import { useCopyToClipboard } from "usehooks-ts";
 
 export function RoomPage({ id }: { id: string }) {
-  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
+  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
+    params: { query: { include_red: true } },
+  });
   const room = rooms?.find((r) => r.id === id);
   const [_, _copy] = useCopyToClipboard();
   const [copied, setCopied] = useState(false);
