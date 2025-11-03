@@ -137,40 +137,9 @@
     @apply shadow-none;
   }
 
-  /* Mobile-friendly selection styles */
+  /* Selection styles */
   .fc-highlight {
-    background: rgba(149, 52, 244, 0.2) !important;
-    border: 2px solid rgba(149, 52, 244, 0.6) !important;
-  }
-
-  /* Ensure touch targets are large enough */
-  .fc-timegrid-slot {
-    min-height: 40px;
-  }
-
-  /* Mobile selection feedback */
-  @media (max-width: 768px) {
-    .fc-highlight {
-      background: rgba(149, 52, 244, 0.3) !important;
-      border: 3px solid rgba(149, 52, 244, 0.8) !important;
-    }
-
-    .fc-timegrid-slot {
-      min-height: 50px;
-    }
-
-    /* Make buttons more touch-friendly on mobile */
-    .fc-button {
-      min-height: 44px;
-      min-width: 44px;
-    }
-
-    /* Improve touch targets for time slots */
-    .fc-timegrid-slot-label {
-      min-height: 44px;
-      display: flex;
-      align-items: center;
-    }
+    @apply bg-brand-violet;
   }
 }
 
