@@ -210,9 +210,7 @@ export function RoomPage({ id }: { id: string }) {
         </div>
       </div>
 
-      <div className="p-4">
-        <RoomCalendar roomId={room.id} />
-      </div>
+      <RoomCalendar roomId={room.id} />
     </>
   );
 }
