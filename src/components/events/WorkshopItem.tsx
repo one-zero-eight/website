@@ -1,11 +1,12 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
-import { CheckInButton } from "@/components/workshops/CheckInButton.tsx";
+import { CheckInButton } from "@/components/events/CheckInButton.tsx";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import React from "react";
 import { formatTime, parseTime } from "./date-utils.ts";
 import { getSignedPeopleCount, isWorkshopActive } from "./workshop-utils.ts";
 
+// TODO: GET RID OF THIS, FETCH FROM DB
 export const recommendedWorkshops = [
   "37ef8aed-d973-44eb-8485-f54d62f54755",
   "158748f7-e215-48e6-af69-f36301c43a8b",
@@ -23,7 +24,7 @@ export function WorkshopItem({
   edit,
 }: {
   workshop: workshopsTypes.SchemaWorkshop;
-  edit?: (workshop: workshopsTypes.SchemaWorkshop) => void;
+  edit?: ((workshop: workshopsTypes.SchemaWorkshop) => void) | null;
   openDescription: () => void;
 }) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
@@ -43,7 +44,7 @@ export function WorkshopItem({
   return (
     <div
       className={clsx(
-        "bg-primary relative w-full cursor-pointer rounded-2xl border p-4 shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-in-out",
+        "bg-primary relative flex w-full cursor-pointer flex-col justify-between rounded-2xl border p-4 shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-in-out",
         isWorkshopActive(workshop)
           ? "hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]"
           : "border-brand-violet/15",
@@ -61,7 +62,8 @@ export function WorkshopItem({
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      {/* Time & Availability */}
+      <div className="justify-betwee flex items-center">
         {workshop.dtstart && workshop.dtend && (
           <p
             className={clsx(
@@ -89,34 +91,37 @@ export function WorkshopItem({
           )}
         </p>
       </div>
-      <h3
-        className={clsx(
-          "text-contrast my-0.5 mb-1 overflow-hidden text-sm leading-[1.2] font-semibold wrap-break-word sm:my-1.5 sm:mb-2 sm:text-lg sm:leading-[1.3]",
-          !isWorkshopActive(workshop) && "opacity-50",
-        )}
-      >
-        {workshop.name}
-      </h3>
-      {workshop.place && (
-        <div
+
+      <div>
+        <h3
           className={clsx(
-            "my-1 sm:my-2",
+            "text-contrast my-0.5 overflow-hidden text-sm leading-[1.2] font-semibold wrap-break-word sm:my-1.5 sm:text-lg sm:leading-[1.3]",
             !isWorkshopActive(workshop) && "opacity-50",
           )}
         >
-          <p className="text-contrast/80 m-0 text-xs sm:text-base">
-            <strong>Room:</strong>{" "}
-            <Link
-              to="/maps"
-              search={{ q: workshop.place }}
-              className="text-brand-violet hover:text-brand-violet/80 relative cursor-pointer underline"
-              title="Click to view on map"
-            >
-              {workshop.place}
-            </Link>
-          </p>
-        </div>
-      )}
+          {workshop.name}
+        </h3>
+        {workshop.place && (
+          <div
+            className={clsx(
+              "my-1 sm:my-2",
+              !isWorkshopActive(workshop) && "opacity-50",
+            )}
+          >
+            <p className="text-contrast/80 m-0 text-xs sm:text-base">
+              <strong>Room:</strong>{" "}
+              <Link
+                to="/maps"
+                search={{ q: workshop.place }}
+                className="text-brand-violet hover:text-brand-violet/80 relative cursor-pointer underline"
+                title="Click to view on map"
+              >
+                {workshop.place}
+              </Link>
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Показываем кнопки управления только для администраторов */}
       {edit && (
@@ -133,8 +138,8 @@ export function WorkshopItem({
         </button>
       )}
 
-      <div className="flex justify-center">
-        <CheckInButton workshopId={workshop.id} />
+      <div className="flex items-center justify-center">
+        <CheckInButton workshopId={workshop.id} className="max-w-fit" />
       </div>
     </div>
   );

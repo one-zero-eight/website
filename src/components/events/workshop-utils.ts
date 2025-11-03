@@ -3,7 +3,7 @@
  */
 
 import { workshopsTypes } from "@/api/workshops";
-import { recommendedWorkshops } from "@/components/workshops/WorkshopItem.tsx";
+import { recommendedWorkshops } from "@/components/events/WorkshopItem.tsx";
 import { getDate, isWorkshopPast, parseTime } from "./date-utils.ts";
 
 /**

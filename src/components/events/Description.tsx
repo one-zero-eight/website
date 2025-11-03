@@ -1,5 +1,5 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
-import { CheckInButton } from "@/components/workshops/CheckInButton.tsx";
+import { CheckInButton } from "@/components/events/CheckInButton.tsx";
 import { Link } from "@tanstack/react-router";
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";

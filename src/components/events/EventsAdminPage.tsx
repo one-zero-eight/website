@@ -1,15 +1,16 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
-import { PostForm } from "@/components/workshops/PostForm.tsx";
+import { PostForm } from "@/components/events/PostForm.tsx";
+import { groupWorkshopsByDate } from "@/components/events/workshop-utils.ts";
 import {
-  groupWorkshopsByDate,
-  sortWorkshops,
-} from "@/components/workshops/workshop-utils.ts";
-import { WorkshopItem } from "@/components/workshops/WorkshopItem.tsx";
+  EventForDate,
+  EventForDateType,
+} from "@/components/events/EventForDate.tsx";
 import { useNavigate } from "@tanstack/react-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ModalWindow } from "./ModalWindow.tsx";
+import AddEventButton from "./AddEventButton.tsx";
 
 /**
  * Главная страница модуля воркшопов
@@ -17,7 +18,7 @@ import { ModalWindow } from "./ModalWindow.tsx";
  * - modalOpen: показывать ли модалку создания/редактирования
  * - modalWorkshop: воркшоп для редактирования (null = создание нового)
  */
-export function WorkshopsAdminPage() {
+export function EventsAdminPage() {
   const navigate = useNavigate();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -46,11 +47,22 @@ export function WorkshopsAdminPage() {
   }
 
   if (workshopsUser?.role !== "admin") {
-    return <></>;
+    return null;
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full select-none">
+      <div className="flex w-full flex-wrap items-center gap-4 px-4 py-2">
+        Create new event:
+        <AddEventButton
+          onClick={() => {
+            setModalDate(null);
+            setModalOpen(true);
+          }}
+        >
+          Create event
+        </AddEventButton>
+      </div>
       <div className="col-span-full w-full px-4 text-left text-xl">
         <button
           onClick={() => setShowPreviousDates((v) => !v)}
@@ -67,11 +79,12 @@ export function WorkshopsAdminPage() {
             Object.keys(groups)
               .sort()
               .map((tagName) => (
-                <WorkshopsForDate
+                <EventForDate
                   key={tagName}
                   isoDate={tagName}
                   workshops={groups[tagName]}
                   showPreviousDates={showPreviousDates}
+                  eventForDateType={EventForDateType.ADMIN}
                   onAddWorkshop={(date) => {
                     setModalDate(date);
                     setModalOpen(true);
@@ -89,21 +102,6 @@ export function WorkshopsAdminPage() {
           )}
         </div>
       )}
-
-      <div className="flex w-full flex-wrap gap-4 px-4 py-2">
-        <button
-          type="button"
-          className="bg-brand-violet hover:bg-brand-violet/80 flex cursor-pointer items-center gap-1 rounded-2xl border-none py-1 pr-4 pl-2 text-sm font-medium text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out"
-          title="Add new workshop"
-          onClick={() => {
-            setModalDate(null);
-            setModalOpen(true);
-          }}
-        >
-          <span className="icon-[material-symbols--add] shrink-0 text-xl" />
-          Add workshop
-        </button>
-      </div>
 
       {/* Модальное окно для создания/редактирования воркшопа */}
       <ModalWindow
@@ -126,89 +124,5 @@ export function WorkshopsAdminPage() {
         />
       </ModalWindow>
     </div>
-  );
-}
-
-function WorkshopsForDate({
-  isoDate,
-  workshops,
-  showPreviousDates,
-  onAddWorkshop,
-  onEditWorkshop,
-}: {
-  isoDate: string;
-  workshops: workshopsTypes.SchemaWorkshop[];
-  showPreviousDates: boolean;
-  onAddWorkshop: (date: string) => void;
-  onEditWorkshop: (workshop: workshopsTypes.SchemaWorkshop) => void;
-}) {
-  const date = useMemo(() => new Date(isoDate), [isoDate]);
-
-  const startOfDay = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
-
-  const isPreviousDate = date < startOfDay;
-
-  const [shouldShow, setShouldShow] = useState(!isPreviousDate);
-
-  if (isPreviousDate && !showPreviousDates) {
-    return null;
-  }
-
-  return (
-    <React.Fragment>
-      <div className="my-1 flex w-full flex-col items-start">
-        <div className="flex w-full flex-wrap gap-4">
-          <div className="text-2xl font-medium sm:text-3xl">
-            {date.toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </div>
-          <button
-            type="button"
-            className="bg-brand-violet hover:bg-brand-violet/80 flex cursor-pointer items-center gap-1 rounded-2xl border-none py-1 pr-4 pl-2 text-sm font-medium text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out"
-            title="Add new workshop"
-            onClick={() => onAddWorkshop(isoDate)}
-          >
-            <span className="icon-[material-symbols--add] shrink-0 text-xl" />
-            Add workshop
-          </button>
-        </div>
-        {shouldShow ? (
-          <>
-            {workshops.length > 0 ? (
-              <div className="mt-4 mb-1 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
-                {sortWorkshops(workshops).map((workshop) => (
-                  <WorkshopItem
-                    key={workshop.id}
-                    workshop={workshop}
-                    edit={() => onEditWorkshop(workshop)}
-                    openDescription={() => onEditWorkshop(workshop)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="col-span-full w-full text-left text-xl">
-                <h2 className="text-gray-500">No workshops yet!</h2>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="col-span-full w-full text-left text-xl">
-            <button
-              onClick={() => setShouldShow(true)}
-              className="text-brand-violet hover:text-brand-violet/80 mt-2 text-sm transition-colors duration-200"
-            >
-              Show workshops
-            </button>
-          </div>
-        )}
-      </div>
-    </React.Fragment>
   );
 }

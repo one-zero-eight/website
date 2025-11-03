@@ -4,11 +4,17 @@ import {
   getInactiveStatusText,
   getSignedPeopleCount,
   isWorkshopActive,
-} from "@/components/workshops/workshop-utils.ts";
+} from "@/components/events/workshop-utils.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 
-export function CheckInButton({ workshopId }: { workshopId: string }) {
+export function CheckInButton({
+  workshopId,
+  className,
+}: {
+  workshopId: string;
+  className?: string | undefined | null;
+}) {
   const queryClient = useQueryClient();
   const { showError, showSuccess } = useToast();
 
@@ -42,13 +48,13 @@ export function CheckInButton({ workshopId }: { workshopId: string }) {
       onSuccess: () => {
         showSuccess(
           "Check-in Successful",
-          "You have successfully checked-in for this workshop.",
+          "You have successfully checked-in for this event.",
         );
       },
       onError: () => {
         showError(
           "Check-in Failed",
-          "Failed to check in. Please try again. Probably you have overlapping workshops",
+          "Failed to check in. Please try again. Probably you have overlapping events",
         );
       },
     });
@@ -76,7 +82,7 @@ export function CheckInButton({ workshopId }: { workshopId: string }) {
       onSuccess: () => {
         showSuccess(
           "Check-out Successful",
-          "You have successfully checked-out from this workshop.",
+          "You have successfully checked-out from this event.",
         );
       },
       onError: () => {
@@ -106,40 +112,42 @@ export function CheckInButton({ workshopId }: { workshopId: string }) {
 
   if (!isWorkshopActive(workshop)) {
     return (
-      <p
-        className={clsx(
-          "w-fit transform rounded-2xl border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.15)] text-center leading-normal font-medium text-[#ff6b6b] backdrop-blur-sm dark:border-[rgba(255,107,107,0.3)] dark:bg-[rgba(255,107,107,0.15)]",
-          "px-1 py-1 text-[10px] sm:bottom-3 sm:px-2 sm:py-1.5 sm:text-sm",
-        )}
-      >
+      <p className="dark:text-rose-80 w-fit transform rounded-lg border border-rose-600 bg-rose-700/10 px-4 py-2 text-center leading-normal font-medium text-rose-600 backdrop-blur-sm dark:border-rose-800">
         {getInactiveStatusText(workshop)}
       </p>
     );
   }
 
-  if (checkedIn) {
+  if (signedPeople >= workshop.capacity) {
     return (
-      <button
-        type="button"
-        onClick={handleCheckOut}
-        disabled={isCheckOutPending}
-        className="bg-primary/80 flex w-fit cursor-pointer items-center justify-center rounded-2xl border border-[#ff6b6b]/20 px-2 py-1 text-[#ff6b6b] hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252] disabled:cursor-not-allowed disabled:opacity-50"
-        title="Check out"
+      <span
+        className={clsx(
+          "w-full rounded-lg border border-rose-800 bg-rose-700/10 px-4 py-2 text-rose-700",
+          className,
+        )}
       >
-        <span className="text-xs font-medium sm:text-sm">Check out</span>
-      </button>
+        No empty places
+      </span>
     );
   }
 
   return (
     <button
       type="button"
-      disabled={signedPeople >= workshop.capacity || isCheckInPending}
-      onClick={handleCheckIn}
-      className="bg-primary/80 flex w-fit cursor-pointer items-center justify-center rounded-2xl border border-green-700/30 px-2 py-1 text-green-700 hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#bcdfbc]/20 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/40 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa]"
-      title="Check in"
+      disabled={checkedIn ? isCheckOutPending : isCheckInPending}
+      onClick={checkedIn ? handleCheckOut : handleCheckIn}
+      className={clsx(
+        "bg-primary/80 flex w-full cursor-pointer items-center justify-center rounded-lg border px-4 py-2 disabled:cursor-not-allowed disabled:opacity-50",
+        checkedIn
+          ? "border-[#ff6b6b]/20 text-[#ff6b6b] hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
+          : "border-green-700/30 text-green-700 hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 dark:border-[#bcdfbc]/20 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/40 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa]",
+        className,
+      )}
+      title={checkedIn ? "Check out" : "Check in"}
     >
-      <span className="text-xs font-medium sm:text-sm">Check in</span>
+      <span className="text-xs font-medium sm:text-sm">
+        {checkedIn ? "Check out" : "Check in"}
+      </span>
     </button>
   );
 }
