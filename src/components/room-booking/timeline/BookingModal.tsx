@@ -73,7 +73,10 @@ function bookingWarningForSlot({ room, start, end }: Slot) {
 
 function sanitizeTitle(title: string | undefined): string {
   if (!title) return "";
-  const sanitized = title.replace("Students Booking Service", "").trim();
+  const sanitized = title
+    .replace("Students Booking Service", "")
+    .replace("FW:", "")
+    .trim();
   if (sanitized) {
     return sanitized;
   } else {

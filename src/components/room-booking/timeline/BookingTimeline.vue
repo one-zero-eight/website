@@ -1193,7 +1193,10 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
                   @click="handleBookingClick"
                 >
                   <span>{{
-                    booking.title.replace("Students Booking Service", "").trim()
+                    booking.title
+                      .replace("Students Booking Service", "")
+                      .replace("FW:", "")
+                      .trim()
                   }}</span>
                 </div>
               </div>
