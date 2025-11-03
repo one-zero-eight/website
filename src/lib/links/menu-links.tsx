@@ -87,19 +87,6 @@ export const items: ItemType[] = [
       icon: <span className="icon-[material-symbols--diversity-1-rounded]" />,
     },
   ]),
-  ...((import.meta.env.VITE_PRODUCTION && []) || [
-    {
-      type: "local",
-      title: "Catalogue",
-      badge: (
-        <span className="ml-2 rounded-full bg-gray-500 px-2 py-1 text-xs font-semibold text-white">
-          DEV
-        </span>
-      ),
-      to: "/catalogue",
-      icon: <span className="icon-[material-symbols--book-5-rounded]" />,
-    },
-  ]),
   {
     type: "local",
     title: "Schedule",
