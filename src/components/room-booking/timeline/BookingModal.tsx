@@ -176,16 +176,20 @@ export function BookingModal({
   const start = newSlot?.start ?? detailsBooking?.startsAt;
   const end = newSlot?.end ?? detailsBooking?.endsAt;
 
-  const BookingLocation = (
+  const BookingLocation = room ? (
     <div className="text-contrast/75 flex flex-row items-center gap-2 text-xl">
       <div className="flex h-fit w-6">
         <span className="icon-[material-symbols--location-on-outline] text-2xl" />
       </div>
-      <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
+      <Link
+        to="/room-booking/rooms/$room"
+        params={{ room: room?.id }}
+        className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap hover:underline"
+      >
         {room?.title}
-      </p>
+      </Link>
     </div>
-  );
+  ) : undefined;
 
   const BookingDate = (
     <div className="text-contrast/75 flex flex-row items-center gap-2 text-xl">
