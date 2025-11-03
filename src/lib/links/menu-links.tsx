@@ -68,12 +68,19 @@ export const items: ItemType[] = [
     hideOnMore: true,
   },
   { type: "separator", hideOnMore: true },
-  {
-    type: "local",
-    title: "Workshops",
-    to: "/events",
-    icon: <span className="icon-[material-symbols--construction-rounded]" />,
-  },
+  ...((import.meta.env.VITE_PRODUCTION && []) || [
+    {
+      type: "local",
+      title: "Events",
+      to: "/events",
+      badge: (
+        <span className="ml-2 rounded-full bg-gray-500 px-2 py-1 text-xs font-semibold text-white">
+          DEV
+        </span>
+      ),
+      icon: <span className="icon-[material-symbols--campaign-rounded]" />,
+    },
+  ]),
   ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
