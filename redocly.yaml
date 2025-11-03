@@ -39,6 +39,11 @@ apis:
     x-openapi-ts:
       output: ./src/api/guard/types.ts
       #  --root-types --enum
+  clubs:
+    root: https://api.innohassle.ru/clubs/staging-v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/clubs/types.ts
+      #  --root-types --enum
   sport:
     root: https://sport.innopolis.university/api/openapi.json
     x-openapi-ts:
