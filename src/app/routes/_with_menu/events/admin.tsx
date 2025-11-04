@@ -1,7 +1,7 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { ToastContainer, ToastProvider } from "@/components/toast";
-import { WorkshopsAdminPage } from "@/components/workshops/WorkshopsAdminPage.tsx";
-import { WorkshopsTabs } from "@/components/workshops/WorkshopsTabs.tsx";
+import { EventsAdminPage } from "@/components/events/EventsAdminPage";
+import { EventsTabs } from "@/components/events/EventsTabs";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
 
@@ -13,17 +13,14 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>Workshops</title>
-        <meta
-          name="description"
-          content="Check in to bootcamp workshops here."
-        />
+        <title>Events</title>
+        <meta name="description" content="Check in to events here." />
       </Helmet>
 
-      <Topbar title="Workshops" />
-      <WorkshopsTabs />
+      <Topbar title="Events" />
+      <EventsTabs />
       <ToastProvider>
-        <WorkshopsAdminPage />
+        <EventsAdminPage />
         <ToastContainer />
       </ToastProvider>
     </>

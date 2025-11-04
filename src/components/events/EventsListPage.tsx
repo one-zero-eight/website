@@ -2,14 +2,11 @@ import { useMe } from "@/api/accounts/user.ts";
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { ConnectTelegramPage } from "@/components/account/ConnectTelegramPage.tsx";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
-import {
-  groupWorkshopsByDate,
-  sortWorkshops,
-} from "@/components/workshops/workshop-utils.ts";
-import { WorkshopItem } from "@/components/workshops/WorkshopItem.tsx";
-import React, { useMemo, useState } from "react";
+import { groupWorkshopsByDate } from "@/components/events/workshop-utils.ts";
+import { useState } from "react";
 import { Description } from "./Description.tsx";
 import { ModalWindow } from "./ModalWindow.tsx";
+import { EventForDate } from "./EventForDate.tsx";
 
 /**
  * Страница со списком воркшопов для студентов.
@@ -17,12 +14,12 @@ import { ModalWindow } from "./ModalWindow.tsx";
  * - modalOpen: показывать ли модалку с подробным описанием
  * - modalWorkshop: выбранный воркшоп для просмотра
  */
-export function WorkshopsListPage() {
+export function EventsListPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalWorkshop, setModalWorkshop] =
     useState<workshopsTypes.SchemaWorkshop | null>(null);
 
-  const [showPreviousDates, setShowPreviousDates] = useState(false);
+  const [showPreviousDates, setShowPreviousDates] = useState(true); // TODO: Change to false later.
 
   const { data: workshops } = $workshops.useQuery("get", "/workshops/");
 
@@ -66,7 +63,7 @@ export function WorkshopsListPage() {
             Object.keys(groups)
               .sort()
               .map((tagName) => (
-                <WorkshopsForDate
+                <EventForDate
                   key={tagName}
                   isoDate={tagName}
                   workshops={groups[tagName]}
@@ -94,76 +91,5 @@ export function WorkshopsListPage() {
         {modalWorkshop && <Description workshop={modalWorkshop} />}
       </ModalWindow>
     </div>
-  );
-}
-
-function WorkshopsForDate({
-  isoDate,
-  workshops,
-  onSelect,
-  showPreviousDates,
-}: {
-  isoDate: string;
-  workshops: workshopsTypes.SchemaWorkshop[];
-  onSelect: (workshop: workshopsTypes.SchemaWorkshop) => void;
-  showPreviousDates: boolean;
-}) {
-  const date = useMemo(() => new Date(isoDate), [isoDate]);
-
-  const startOfDay = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
-
-  const isPreviousDate = date < startOfDay;
-
-  const [shouldShow, setShouldShow] = useState(!isPreviousDate);
-
-  if (isPreviousDate && !showPreviousDates) {
-    return null;
-  }
-  return (
-    <React.Fragment>
-      <div className="my-1 flex w-full flex-wrap justify-between">
-        <div className="text-2xl font-medium sm:text-3xl">
-          {date.toLocaleDateString("en-US", {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}
-        </div>
-        {shouldShow ? (
-          <>
-            {workshops.length > 0 ? (
-              <div className="mt-4 mb-1 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
-                {sortWorkshops(workshops)
-                  .filter((workshop) => workshop.is_active)
-                  .map((workshop) => (
-                    <WorkshopItem
-                      key={workshop.id}
-                      workshop={workshop}
-                      openDescription={() => onSelect(workshop)}
-                    />
-                  ))}
-              </div>
-            ) : (
-              <div className="col-span-full w-full text-left text-xl">
-                <h2 className="text-gray-500">No workshops yet!</h2>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="col-span-full w-full text-left text-xl">
-            <button
-              onClick={() => setShouldShow(true)}
-              className="text-primary hover:text-primary/80 mt-2 text-sm transition-colors duration-200"
-            >
-              Show workshops
-            </button>
-          </div>
-        )}
-      </div>
-    </React.Fragment>
   );
 }

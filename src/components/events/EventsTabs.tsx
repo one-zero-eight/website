@@ -1,7 +1,7 @@
 import { $workshops } from "@/api/workshops";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 
-export function WorkshopsTabs() {
+export function EventsTabs() {
   const { data: workshopsUser } = $workshops.useQuery("get", "/users/me");
 
   if (workshopsUser?.role !== "admin") {
