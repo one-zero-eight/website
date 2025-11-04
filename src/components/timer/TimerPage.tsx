@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import "./timerstyles.css";
 import {
   CONTROL_BUTTON_CLASS,
   ADD_TIME_BUTTON_CLASS,
@@ -35,6 +34,8 @@ const TimerPage = () => {
   const secondsRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  const hasAdjustedTimerRef = useRef<boolean>(false);
+  const titleTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleTimerComplete = useCallback(async () => {
     setIsRunning(false);
@@ -46,6 +47,7 @@ const TimerPage = () => {
     setInitialSeconds(0);
     setTargetEndTime(null);
     setShowTimeUpMessage(true);
+    hasAdjustedTimerRef.current = false; // Reset the adjustment flag
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
@@ -144,6 +146,18 @@ const TimerPage = () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
+
+  // Auto-resize textarea when title changes or on mount
+  useEffect(() => {
+    const textarea = titleTextareaRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = "auto";
+      // Set to scrollHeight or max 300px
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 60), 300);
+      textarea.style.height = `${newHeight}px`;
+    }
+  }, [title]);
 
   const handleVisibilityChange = useCallback(async () => {
     if (!document.hidden && isRunning && !isPaused && targetEndTime) {
@@ -244,7 +258,24 @@ const TimerPage = () => {
     if (isRunning && !isPaused && targetEndTime) {
       // Immediately update the display when the interval starts to prevent flicker
       const now = Date.now();
-      const initialRemainingMs = targetEndTime - now;
+      const remainingMs = targetEndTime - now;
+      let adjustedTargetEndTime = targetEndTime;
+
+      // If we've lost more than 200ms from the intended duration due to state update delays,
+      // recalculate the end time to ensure the full timer duration runs.
+      // Only do this once per timer session using the ref.
+      const expectedRemainingMs = initialSeconds * 1000;
+      const timeLost = expectedRemainingMs - remainingMs;
+
+      if (timeLost > 200 && !hasAdjustedTimerRef.current) {
+        adjustedTargetEndTime = now + initialSeconds * 1000;
+        hasAdjustedTimerRef.current = true;
+        // Update the state for localStorage persistence
+        setTargetEndTime(adjustedTargetEndTime);
+        return; // Exit early and let the effect re-run with the new targetEndTime
+      }
+
+      const initialRemainingMs = adjustedTargetEndTime - now;
       const initialRemainingSeconds = Math.max(
         0,
         Math.ceil(initialRemainingMs / 1000),
@@ -255,7 +286,7 @@ const TimerPage = () => {
 
       timerRef.current = window.setInterval(() => {
         const now = Date.now();
-        const remainingMs = targetEndTime - now;
+        const remainingMs = adjustedTargetEndTime - now;
         const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
 
         if (remainingMs <= 0) {
@@ -283,6 +314,7 @@ const TimerPage = () => {
     isRunning,
     isPaused,
     targetEndTime,
+    initialSeconds,
     handleTimerComplete,
     saveState,
     formatTime,
@@ -293,7 +325,7 @@ const TimerPage = () => {
     if (parts.length === 3) {
       const [hours = "0", minutes = "0", seconds = "0"] = parts;
 
-      const h = Math.max(0, parseInt(hours, 10) || 0);
+      const h = Math.min(99, Math.max(0, parseInt(hours, 10) || 0)); // Cap at 99
       const m = Math.min(59, Math.max(0, parseInt(minutes, 10) || 0));
       const s = Math.min(59, Math.max(0, parseInt(seconds, 10) || 0));
 
@@ -319,6 +351,7 @@ const TimerPage = () => {
 
     const endTime = Date.now() + totalSeconds * 1000;
 
+    hasAdjustedTimerRef.current = false; // Reset the adjustment flag for new timer
     setIsRunning(true);
     setIsPaused(false);
     setSecondsLeft(totalSeconds);
@@ -364,6 +397,7 @@ const TimerPage = () => {
     setInitialSeconds(0);
     setTargetEndTime(null);
     setShowStopDialog(false);
+    hasAdjustedTimerRef.current = false; // Reset the adjustment flag
     localStorage.removeItem("timerState");
 
     await releaseWakeLock();
@@ -500,8 +534,8 @@ const TimerPage = () => {
     const numValue = value === "" ? 0 : parseInt(value, 10);
 
     if (type === "H") {
-      const formatted = numValue.toString().padStart(2, "0");
-
+      const clampedValue = Math.min(99, numValue); // Cap at 99
+      const formatted = clampedValue.toString().padStart(2, "0");
       setHours(formatted);
       setTime(`${formatted}:${minutes}:${seconds}`);
       setSecondsLeft(
@@ -651,9 +685,12 @@ const TimerPage = () => {
     }
   };
   return (
-    <div className="timer-container bg-pagebg relative" id="timer-container">
+    <div
+      className="bg-pagebg relative flex grow flex-col items-center p-4 md:p-8"
+      id="timer-container"
+    >
       <button
-        className="bg-primary hover:bg-primary-hover text-contrast absolute right-4 bottom-4 flex h-12 w-12 items-center justify-center rounded-2xl text-3xl transition-all"
+        className="bg-primary hover:bg-primary-hover text-contrast absolute top-4 right-4 flex h-12 w-12 items-center justify-center rounded-2xl text-3xl transition-all"
         onClick={() => {
           switchFullscreen();
         }}
@@ -664,32 +701,50 @@ const TimerPage = () => {
           <span className="icon-[material-symbols--fullscreen]" />
         )}
       </button>
-      <div className="mb-6 flex flex-col items-center gap-4 p-4 md:mb-12">
-        <input
-          type="text"
+      <div className="mb-6 flex w-full flex-col items-center gap-4 p-4 md:mb-12">
+        <textarea
+          ref={titleTextareaRef}
           placeholder="Timer title..."
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="timer-title w-full max-w-[800px] rounded-lg border-none bg-transparent px-4 py-2 text-center text-xl font-bold transition-colors duration-300 outline-none focus:bg-gray-100 sm:text-2xl md:text-3xl lg:text-[42px]"
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setTitle(e.target.value)
+          }
+          onInput={(e: React.FormEvent<HTMLTextAreaElement>) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = "auto";
+            const newHeight = Math.min(Math.max(target.scrollHeight, 60), 300);
+            target.style.height = `${newHeight}px`;
+          }}
+          rows={1}
+          className="w-full max-w-[900px] resize-none overflow-hidden rounded-2xl border-none bg-transparent px-6 py-3 text-center text-2xl leading-tight font-bold transition-all duration-300 outline-none placeholder:text-gray-400 focus:bg-gray-100/50 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
+          style={{
+            minHeight: "60px",
+            maxHeight: "300px",
+          }}
         />
       </div>
 
       {/* Quick Timer Presets */}
       {!isRunning && (
-        <div className="mb-6 flex flex-wrap justify-center gap-2 px-4 sm:gap-3 md:mb-8 md:gap-4 md:px-8">
-          {PRESET_TIME_OPTIONS.map((preset) => (
-            <button
-              key={preset.label}
-              onClick={() => setPresetTime(preset.hours, preset.minutes)}
-              className={PRESET_BUTTON_CLASS}
-            >
-              {preset.label}
-            </button>
-          ))}
+        <div className="mb-6 flex flex-col items-center gap-2 px-4 sm:gap-3 md:mb-8 md:gap-4 md:px-8">
+          <span className="text-contrast mr-1 w-full self-center text-center text-sm font-semibold sm:mr-2 sm:w-auto sm:text-base md:text-lg">
+            Quick Presets:{" "}
+          </span>
+          <div className="flex flex-wrap justify-center gap-2">
+            {PRESET_TIME_OPTIONS.map((preset) => (
+              <button
+                key={preset.label}
+                onClick={() => setPresetTime(preset.hours, preset.minutes)}
+                className={PRESET_BUTTON_CLASS}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      <div className="timer-content">
+      <div className="flex w-full grow items-center justify-center">
         <div className="wc">
           <div className="text-brand-violet flex w-full max-w-[90vw] shrink-0 items-center justify-center gap-1 text-5xl sm:gap-2 sm:text-6xl md:w-[800px] md:text-7xl lg:text-[150px]">
             <input
@@ -746,7 +801,7 @@ const TimerPage = () => {
             </div>
           )}
 
-          <div className="timer-controls">
+          <div className="m-[1.5rem_0_2rem] flex w-full flex-wrap justify-center gap-3 p-[0_1rem] sm:m-[2rem_0_2.5rem] sm:gap-4 md:m-[2rem_0_3rem] md:gap-6 md:p-0">
             {!isRunning ? (
               <button onClick={handleStart} className={CONTROL_BUTTON_CLASS}>
                 <span className="icon-[material-symbols--play-arrow] text-2xl sm:text-3xl" />
@@ -779,31 +834,36 @@ const TimerPage = () => {
 
       {showStopDialog && (
         <div
-          className="dialog-overlay"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowStopDialog(false);
             }
           }}
         >
-          <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
-            <div className="dialog-header">
-              <h3 className="dialog-title">Stop Timer</h3>
-              <p className="dialog-description">
+          <div
+            className="w-[90%] max-w-[32rem] rounded-xl border border-purple-500 bg-white p-5 text-gray-900 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3),0_10px_10px_-5px_rgba(0,0,0,0.2)] transition-all duration-300 sm:rounded-2xl sm:p-8 dark:bg-gray-900 dark:text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 sm:mb-6">
+              <h3 className="mb-2 text-xl font-semibold sm:mb-3 sm:text-2xl">
+                Stop Timer
+              </h3>
+              <p className="text-sm text-gray-400 sm:text-base">
                 Are you sure you want to stop the timer? This action cannot be
                 undone.
               </p>
             </div>
-            <div className="dialog-footer">
+            <div className="mt-6 flex flex-wrap justify-end gap-3 sm:mt-8 sm:gap-4">
               <button
                 onClick={() => setShowStopDialog(false)}
-                className="dialog-button dialog-cancel"
+                className="min-w-[100px] cursor-pointer rounded-3xl border border-black/10 bg-slate-100 px-5 py-2.5 text-sm font-medium text-gray-900 transition-all duration-300 hover:bg-black/5 sm:min-w-[120px] sm:px-6 sm:py-3 sm:text-base dark:border-white/20 dark:bg-gray-900 dark:text-white dark:hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmStop}
-                className="dialog-button dialog-confirm"
+                className="min-w-[100px] cursor-pointer rounded-3xl border-none bg-red-500 px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-red-600 sm:min-w-[120px] sm:px-6 sm:py-3 sm:text-base"
               >
                 Stop Timer
               </button>
@@ -845,27 +905,29 @@ const TimerPage = () => {
 
       {/* Add Time Buttons - Show when timer is running */}
       {isRunning && (
-        <div className="mb-6 flex flex-wrap justify-center gap-2 px-4 sm:gap-3 md:mb-8">
-          <span className="mr-1 w-full self-center text-center text-sm font-semibold text-gray-600 sm:mr-2 sm:w-auto sm:text-base md:text-lg">
-            Add time:
+        <div className="mb-6 flex flex-col items-center gap-2 px-4 sm:gap-3 md:mb-8">
+          <span className="text-contrast mr-1 w-full self-center text-center text-sm font-semibold sm:mr-2 sm:w-auto sm:text-base md:text-lg">
+            More time:
           </span>
-          {ADD_TIME_OPTIONS.map((minutes) => (
-            <button
-              key={minutes}
-              onClick={() => addTimeToRunningTimer(minutes)}
-              className={ADD_TIME_BUTTON_CLASS}
-            >
-              +{minutes} min
-            </button>
-          ))}
+          <div className="flex flex-wrap justify-center gap-2">
+            {ADD_TIME_OPTIONS.map((minutes) => (
+              <button
+                key={minutes}
+                onClick={() => addTimeToRunningTimer(minutes)}
+                className={ADD_TIME_BUTTON_CLASS}
+              >
+                +{minutes} min
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      <div className="toast-container">
+      <div className="fixed right-4 bottom-4 left-4 z-50 flex flex-col items-center gap-3 sm:right-6 sm:bottom-6 sm:left-auto sm:items-end">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="toast"
+            className="w-full max-w-[min(350px,90vw)] min-w-[min(250px,80vw)] cursor-pointer rounded-3xl border border-purple-500 bg-white p-3 pr-5 text-center text-sm text-gray-900 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.2),0_2px_4px_-1px_rgba(0,0,0,0.1)] transition-[transform_0.2s_ease,opacity_0.2s_ease] hover:opacity-80 sm:w-auto sm:max-w-[min(400px,90vw)] sm:min-w-[min(300px,80vw)] sm:p-4 sm:pr-6 sm:text-left sm:text-base sm:hover:translate-x-[-5px] dark:bg-gray-900 dark:text-white"
             onClick={() => removeToast(toast.id)}
           >
             {toast.message}
