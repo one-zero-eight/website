@@ -2,7 +2,7 @@ import { Topbar } from "@/components/layout/Topbar.tsx";
 import { MapsPage } from "@/components/maps/MapsPage.tsx";
 import { MapsPageTabs } from "@/components/maps/MapsPageTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "@dr.pogodin/react-helmet";
 
 export const Route = createFileRoute("/_with_menu/maps")({
   validateSearch: (

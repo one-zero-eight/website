@@ -67,7 +67,7 @@ export default defineConfig({
   server: {
     hmr: {
       host: "local.innohassle.ru",
-    }
+    },
   },
 
   css: {

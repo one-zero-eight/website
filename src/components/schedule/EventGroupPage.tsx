@@ -6,7 +6,7 @@ import ExportButton from "@/components/schedule/ExportButton.tsx";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton.tsx";
 import { getICSLink } from "@/lib/events/links.ts";
 import { useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "@dr.pogodin/react-helmet";
 import { useWindowSize } from "usehooks-ts";
 
 export function EventGroupPage({ alias }: { alias: string }) {

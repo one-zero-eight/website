@@ -7,7 +7,7 @@ import {
   Outlet,
   useLocation,
 } from "@tanstack/react-router";
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "@dr.pogodin/react-helmet";
 
 interface RouterContext {
   isAuthenticated: boolean;

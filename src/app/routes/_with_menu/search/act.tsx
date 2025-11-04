@@ -2,7 +2,7 @@ import { ActPage } from "@/components/search/act/ActPage";
 import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "@dr.pogodin/react-helmet";
 
 type ActParams = {
   q?: string;

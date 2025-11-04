@@ -1,7 +1,7 @@
 import { mapsTypes } from "@/api/maps";
 import { useMapImage } from "@/api/maps/map-image.ts";
 import { DetailsPopup } from "@/components/maps/viewer/DetailsPopup.tsx";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useEventListener } from "usehooks-ts";
 
 export const MapViewer = memo(function MapViewer({
@@ -22,6 +22,7 @@ export const MapViewer = memo(function MapViewer({
   });
 
   const { data: mapSvg } = useMapImage(scene.svg_file);
+  const mapSvgData = mapSvg?.data;
   const [popupArea, setPopupArea] = useState<mapsTypes.SchemaArea>();
   const [popupIsOpen, setPopupIsOpen] = useState(false);
   const [popupElement, setPopupElement] = useState<Element | null>(null);
@@ -339,6 +340,18 @@ export const MapViewer = memo(function MapViewer({
     }
   }, [scene, highlightAreas, mapSvg?.data]);
 
+  const svgDiv = useMemo(
+    () =>
+      mapSvgData ? (
+        <div
+          ref={imageRef}
+          dangerouslySetInnerHTML={{ __html: mapSvgData }}
+          className="h-full w-full [&>svg]:h-full! [&>svg]:w-full!"
+        />
+      ) : null,
+    [mapSvgData],
+  );
+
   return (
     <div
       ref={containerRef}
@@ -376,13 +389,7 @@ export const MapViewer = memo(function MapViewer({
         }
         `}
       </style>
-      {mapSvg?.data && (
-        <div
-          ref={imageRef}
-          dangerouslySetInnerHTML={{ __html: mapSvg.data }}
-          className="h-full w-full [&>svg]:h-full! [&>svg]:w-full!"
-        />
-      )}
+      {svgDiv}
       {!disablePopup && (
         <DetailsPopup
           elementRef={popupElement}

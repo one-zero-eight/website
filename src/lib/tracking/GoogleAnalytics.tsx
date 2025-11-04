@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "@dr.pogodin/react-helmet";
 
 export const ga_id =
   import.meta.env.VITE_TRACKER_GA !== undefined &&

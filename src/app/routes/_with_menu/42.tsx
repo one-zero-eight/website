@@ -1,7 +1,7 @@
 import { Topbar } from "@/components/layout/Topbar";
 import { createFileRoute } from "@tanstack/react-router";
 import Confetti from "react-confetti-boom";
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "@dr.pogodin/react-helmet";
 
 export const Route = createFileRoute("/_with_menu/42")({
   component: RouteComponent,

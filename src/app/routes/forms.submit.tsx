@@ -2,7 +2,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "@dr.pogodin/react-helmet";
 
 export type FormSubmitParams = {
   form: string | undefined;

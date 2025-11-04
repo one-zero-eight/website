@@ -7,7 +7,7 @@ import { RoomCalendar } from "@/components/room-booking/room-page/RoomCalendar.t
 import { RoomMapPreview } from "@/components/room-booking/room-page/RoomMapPreview.tsx";
 import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "@dr.pogodin/react-helmet";
 import { useCopyToClipboard } from "usehooks-ts";
 
 export function RoomPage({ id }: { id: string }) {

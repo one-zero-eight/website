@@ -3,7 +3,7 @@ import { ToastContainer, ToastProvider } from "@/components/toast";
 import { WorkshopsAdminPage } from "@/components/workshops/WorkshopsAdminPage.tsx";
 import { WorkshopsTabs } from "@/components/workshops/WorkshopsTabs.tsx";
 import { createFileRoute } from "@tanstack/react-router";
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "@dr.pogodin/react-helmet";
 
 export const Route = createFileRoute("/_with_menu/events/admin")({
   component: RouteComponent,

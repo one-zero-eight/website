@@ -3,7 +3,7 @@ import { $guard } from "@/api/guard";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "@dr.pogodin/react-helmet";
 
 const GMAIL_STORAGE_KEY = "guard_saved_gmail";
 
