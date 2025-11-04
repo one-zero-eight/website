@@ -46,10 +46,10 @@ import { Route as With_menuClubsAdminRouteImport } from "./routes/_with_menu/clu
 import { Route as With_menuAccountTokenRouteImport } from "./routes/_with_menu/account/token";
 import { Route as With_menuAccountConnectTelegramRouteImport } from "./routes/_with_menu/account/connect-telegram";
 import { Route as With_menuRoomBookingRoomsIndexRouteImport } from "./routes/_with_menu/room-booking/rooms.index";
-import { Route as With_menuClubsIdIndexRouteImport } from "./routes/_with_menu/clubs/$id.index";
+import { Route as With_menuClubsSlugIndexRouteImport } from "./routes/_with_menu/clubs/$slug.index";
 import { Route as With_menuScheduleEventGroupsAliasRouteImport } from "./routes/_with_menu/schedule/event-groups.$alias";
 import { Route as With_menuRoomBookingRoomsRoomRouteImport } from "./routes/_with_menu/room-booking/rooms.$room";
-import { Route as With_menuClubsIdEditRouteImport } from "./routes/_with_menu/clubs/$id.edit";
+import { Route as With_menuClubsSlugEditRouteImport } from "./routes/_with_menu/clubs/$slug.edit";
 import { Route as GuardGoogleFilesSlugJoinRouteImport } from "./routes/guard.google.files.$slug.join";
 
 const With_menuRouteRoute = With_menuRouteRouteImport.update({
@@ -243,9 +243,9 @@ const With_menuRoomBookingRoomsIndexRoute =
     path: "/room-booking/rooms/",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
-const With_menuClubsIdIndexRoute = With_menuClubsIdIndexRouteImport.update({
-  id: "/clubs/$id/",
-  path: "/clubs/$id/",
+const With_menuClubsSlugIndexRoute = With_menuClubsSlugIndexRouteImport.update({
+  id: "/clubs/$slug/",
+  path: "/clubs/$slug/",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menuScheduleEventGroupsAliasRoute =
@@ -260,9 +260,9 @@ const With_menuRoomBookingRoomsRoomRoute =
     path: "/room-booking/rooms/$room",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
-const With_menuClubsIdEditRoute = With_menuClubsIdEditRouteImport.update({
-  id: "/clubs/$id/edit",
-  path: "/clubs/$id/edit",
+const With_menuClubsSlugEditRoute = With_menuClubsSlugEditRouteImport.update({
+  id: "/clubs/$slug/edit",
+  path: "/clubs/$slug/edit",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const GuardGoogleFilesSlugJoinRoute =
@@ -308,10 +308,10 @@ export interface FileRoutesByFullPath {
   "/room-booking": typeof With_menuRoomBookingIndexRoute;
   "/schedule": typeof With_menuScheduleIndexRoute;
   "/search": typeof With_menuSearchIndexRoute;
-  "/clubs/$id/edit": typeof With_menuClubsIdEditRoute;
+  "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
-  "/clubs/$id": typeof With_menuClubsIdIndexRoute;
+  "/clubs/$slug": typeof With_menuClubsSlugIndexRoute;
   "/room-booking/rooms": typeof With_menuRoomBookingRoomsIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
@@ -351,10 +351,10 @@ export interface FileRoutesByTo {
   "/room-booking": typeof With_menuRoomBookingIndexRoute;
   "/schedule": typeof With_menuScheduleIndexRoute;
   "/search": typeof With_menuSearchIndexRoute;
-  "/clubs/$id/edit": typeof With_menuClubsIdEditRoute;
+  "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
-  "/clubs/$id": typeof With_menuClubsIdIndexRoute;
+  "/clubs/$slug": typeof With_menuClubsSlugIndexRoute;
   "/room-booking/rooms": typeof With_menuRoomBookingRoomsIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
@@ -396,10 +396,10 @@ export interface FileRoutesById {
   "/_with_menu/room-booking/": typeof With_menuRoomBookingIndexRoute;
   "/_with_menu/schedule/": typeof With_menuScheduleIndexRoute;
   "/_with_menu/search/": typeof With_menuSearchIndexRoute;
-  "/_with_menu/clubs/$id/edit": typeof With_menuClubsIdEditRoute;
+  "/_with_menu/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/_with_menu/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/_with_menu/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
-  "/_with_menu/clubs/$id/": typeof With_menuClubsIdIndexRoute;
+  "/_with_menu/clubs/$slug/": typeof With_menuClubsSlugIndexRoute;
   "/_with_menu/room-booking/rooms/": typeof With_menuRoomBookingRoomsIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
@@ -441,10 +441,10 @@ export interface FileRouteTypes {
     | "/room-booking"
     | "/schedule"
     | "/search"
-    | "/clubs/$id/edit"
+    | "/clubs/$slug/edit"
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
-    | "/clubs/$id"
+    | "/clubs/$slug"
     | "/room-booking/rooms"
     | "/guard/google/files/$slug/join";
   fileRoutesByTo: FileRoutesByTo;
@@ -484,10 +484,10 @@ export interface FileRouteTypes {
     | "/room-booking"
     | "/schedule"
     | "/search"
-    | "/clubs/$id/edit"
+    | "/clubs/$slug/edit"
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
-    | "/clubs/$id"
+    | "/clubs/$slug"
     | "/room-booking/rooms"
     | "/guard/google/files/$slug/join";
   id:
@@ -528,10 +528,10 @@ export interface FileRouteTypes {
     | "/_with_menu/room-booking/"
     | "/_with_menu/schedule/"
     | "/_with_menu/search/"
-    | "/_with_menu/clubs/$id/edit"
+    | "/_with_menu/clubs/$slug/edit"
     | "/_with_menu/room-booking/rooms/$room"
     | "/_with_menu/schedule/event-groups/$alias"
-    | "/_with_menu/clubs/$id/"
+    | "/_with_menu/clubs/$slug/"
     | "/_with_menu/room-booking/rooms/"
     | "/guard/google/files/$slug/join";
   fileRoutesById: FileRoutesById;
@@ -804,11 +804,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuRoomBookingRoomsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/clubs/$id/": {
-      id: "/_with_menu/clubs/$id/";
-      path: "/clubs/$id";
-      fullPath: "/clubs/$id";
-      preLoaderRoute: typeof With_menuClubsIdIndexRouteImport;
+    "/_with_menu/clubs/$slug/": {
+      id: "/_with_menu/clubs/$slug/";
+      path: "/clubs/$slug";
+      fullPath: "/clubs/$slug";
+      preLoaderRoute: typeof With_menuClubsSlugIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/schedule/event-groups/$alias": {
@@ -825,11 +825,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuRoomBookingRoomsRoomRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/clubs/$id/edit": {
-      id: "/_with_menu/clubs/$id/edit";
-      path: "/clubs/$id/edit";
-      fullPath: "/clubs/$id/edit";
-      preLoaderRoute: typeof With_menuClubsIdEditRouteImport;
+    "/_with_menu/clubs/$slug/edit": {
+      id: "/_with_menu/clubs/$slug/edit";
+      path: "/clubs/$slug/edit";
+      fullPath: "/clubs/$slug/edit";
+      preLoaderRoute: typeof With_menuClubsSlugEditRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/guard/google/files/$slug/join": {
@@ -876,10 +876,10 @@ interface With_menuRouteRouteChildren {
   With_menuRoomBookingIndexRoute: typeof With_menuRoomBookingIndexRoute;
   With_menuScheduleIndexRoute: typeof With_menuScheduleIndexRoute;
   With_menuSearchIndexRoute: typeof With_menuSearchIndexRoute;
-  With_menuClubsIdEditRoute: typeof With_menuClubsIdEditRoute;
+  With_menuClubsSlugEditRoute: typeof With_menuClubsSlugEditRoute;
   With_menuRoomBookingRoomsRoomRoute: typeof With_menuRoomBookingRoomsRoomRoute;
   With_menuScheduleEventGroupsAliasRoute: typeof With_menuScheduleEventGroupsAliasRoute;
-  With_menuClubsIdIndexRoute: typeof With_menuClubsIdIndexRoute;
+  With_menuClubsSlugIndexRoute: typeof With_menuClubsSlugIndexRoute;
   With_menuRoomBookingRoomsIndexRoute: typeof With_menuRoomBookingRoomsIndexRoute;
 }
 
@@ -917,11 +917,11 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuRoomBookingIndexRoute: With_menuRoomBookingIndexRoute,
   With_menuScheduleIndexRoute: With_menuScheduleIndexRoute,
   With_menuSearchIndexRoute: With_menuSearchIndexRoute,
-  With_menuClubsIdEditRoute: With_menuClubsIdEditRoute,
+  With_menuClubsSlugEditRoute: With_menuClubsSlugEditRoute,
   With_menuRoomBookingRoomsRoomRoute: With_menuRoomBookingRoomsRoomRoute,
   With_menuScheduleEventGroupsAliasRoute:
     With_menuScheduleEventGroupsAliasRoute,
-  With_menuClubsIdIndexRoute: With_menuClubsIdIndexRoute,
+  With_menuClubsSlugIndexRoute: With_menuClubsSlugIndexRoute,
   With_menuRoomBookingRoomsIndexRoute: With_menuRoomBookingRoomsIndexRoute,
 };
 

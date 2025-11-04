@@ -1,15 +1,15 @@
-import { EditClubPage } from "@/components/clubs/EditClubPage.tsx";
+import { ClubPage } from "@/components/clubs/ClubPage.tsx";
 import { ClubsTabs } from "@/components/clubs/ClubsTabs.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 
-export const Route = createFileRoute("/_with_menu/clubs/$id/edit")({
+export const Route = createFileRoute("/_with_menu/clubs/$slug/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { id } = Route.useParams();
+  const { slug } = Route.useParams();
 
   return (
     <>
@@ -20,7 +20,7 @@ function RouteComponent() {
 
       <Topbar title="Clubs" />
       <ClubsTabs />
-      <EditClubPage clubId={id} />
+      <ClubPage clubSlug={slug} />
     </>
   );
 }

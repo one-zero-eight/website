@@ -1,23 +1,25 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
+import { getLogoURLById } from "@/api/clubs/links.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { getClubTypeLabel } from "./utils";
 
-export function EditClubPage({ clubId }: { clubId: string }) {
+export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: club, isPending: clubPending } = $clubs.useQuery(
     "get",
-    "/clubs/{id}",
+    "/clubs/by-slug/{slug}",
     {
-      params: { path: { id: clubId } },
+      params: { path: { slug: clubSlug } },
     },
   );
 
   // Form state
+  const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
@@ -34,6 +36,7 @@ export function EditClubPage({ clubId }: { clubId: string }) {
   // Initialize form with club data
   useEffect(() => {
     if (club) {
+      setSlug(club.slug);
       setTitle(club.title);
       setShortDescription(club.short_description);
       setDescription(club.description);
@@ -47,18 +50,18 @@ export function EditClubPage({ clubId }: { clubId: string }) {
 
   const { mutate: updateClub, isPending: isUpdating } = $clubs.useMutation(
     "post",
-    "/clubs/{id}",
+    "/clubs/by-slug/{slug}",
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: $clubs.queryOptions("get", "/clubs/{id}", {
-            params: { path: { id: clubId } },
+          queryKey: $clubs.queryOptions("get", "/clubs/by-slug/{slug}", {
+            params: { path: { slug: clubSlug } },
           }).queryKey,
         });
         queryClient.invalidateQueries({
           queryKey: $clubs.queryOptions("get", "/clubs/").queryKey,
         });
-        navigate({ to: "/clubs/$id", params: { id: clubId } });
+        navigate({ to: "/clubs/$slug", params: { slug: clubSlug } });
       },
       onError: (error) => {
         console.error("Failed to update club:", error);
@@ -69,12 +72,12 @@ export function EditClubPage({ clubId }: { clubId: string }) {
 
   const { mutate: uploadLogo, isPending: isUploadingLogo } = $clubs.useMutation(
     "post",
-    "/clubs/{id}/logo",
+    "/clubs/by-id/{id}/logo",
     {
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: $clubs.queryOptions("get", "/clubs/{id}", {
-            params: { path: { id: clubId } },
+          queryKey: $clubs.queryOptions("get", "/clubs/by-slug/{slug}", {
+            params: { path: { slug: clubSlug } },
           }).queryKey,
         });
         queryClient.invalidateQueries({
@@ -95,6 +98,7 @@ export function EditClubPage({ clubId }: { clubId: string }) {
     e.preventDefault();
 
     const updateData: clubsTypes.SchemaUpdateClub = {
+      slug,
       title,
       short_description: shortDescription,
       description,
@@ -106,7 +110,7 @@ export function EditClubPage({ clubId }: { clubId: string }) {
     };
 
     updateClub({
-      params: { path: { id: clubId } },
+      params: { path: { slug: clubSlug } },
       body: updateData,
     });
   };
@@ -149,22 +153,15 @@ export function EditClubPage({ clubId }: { clubId: string }) {
   };
 
   const handleUploadLogo = () => {
-    if (!logoFile) return;
+    if (!logoFile || !club) return;
 
     const formData = new FormData();
     formData.append("logo_file", logoFile);
 
     uploadLogo({
-      params: { path: { id: clubId } },
+      params: { path: { id: club.id } },
       body: formData as any,
     });
-  };
-
-  const getLogoUrl = () => {
-    if (club?.logo_file_id) {
-      return `${import.meta.env.VITE_CLUBS_API_URL}/clubs/${clubId}/logo`;
-    }
-    return null;
   };
 
   if (clubPending) {
@@ -203,9 +200,9 @@ export function EditClubPage({ clubId }: { clubId: string }) {
               Current Logo
             </h3>
             <div className="bg-primary border-secondary flex items-center justify-center rounded-lg border p-4">
-              {getLogoUrl() ? (
+              {getLogoURLById(club.id) ? (
                 <img
-                  src={getLogoUrl()!}
+                  src={getLogoURLById(club.id)}
                   alt="Current club logo"
                   className="max-h-48 max-w-full rounded-lg object-contain"
                 />
@@ -516,7 +513,7 @@ export function EditClubPage({ clubId }: { clubId: string }) {
             <button
               type="button"
               onClick={() =>
-                navigate({ to: "/clubs/$id", params: { id: clubId } })
+                navigate({ to: "/clubs/$slug", params: { slug: clubSlug } })
               }
               className="border-secondary text-contrast hover:bg-primary rounded-lg border px-6 py-2 transition-colors"
             >

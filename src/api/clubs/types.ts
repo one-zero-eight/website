@@ -28,7 +28,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/clubs/{id}": {
+  "/clubs/by-id/{id}": {
     parameters: {
       query?: never;
       header?: never;
@@ -39,24 +39,48 @@ export interface paths {
      * Get Club Info
      * @description Get club info.
      */
-    get: operations["get_club_info_clubs__id__get"];
+    get: operations["get_club_info_clubs_by_id__id__get"];
     put?: never;
     /**
      * Edit Club Info
      * @description Edit a club info.
      */
-    post: operations["edit_club_info_clubs__id__post"];
+    post: operations["edit_club_info_clubs_by_id__id__post"];
     /**
      * Delete Club
      * @description Delete a club.
      */
-    delete: operations["delete_club_clubs__id__delete"];
+    delete: operations["delete_club_clubs_by_id__id__delete"];
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/clubs/{id}/logo": {
+  "/clubs/by-slug/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Club Info
+     * @description Get club info.
+     */
+    get: operations["get_club_info_clubs_by_slug__slug__get"];
+    put?: never;
+    /**
+     * Edit Club Info
+     * @description Edit a club info.
+     */
+    post: operations["edit_club_info_clubs_by_slug__slug__post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/clubs/by-id/{id}/logo": {
     parameters: {
       query?: never;
       header?: never;
@@ -67,33 +91,13 @@ export interface paths {
      * Get Club Logo
      * @description Get club info.
      */
-    get: operations["get_club_logo_clubs__id__logo_get"];
+    get: operations["get_club_logo_clubs_by_id__id__logo_get"];
     put?: never;
     /**
      * Set Club Logo
      * @description Set a club logo picture.
      */
-    post: operations["set_club_logo_clubs__id__logo_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/clubs/{id}/leader": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get Club Leader
-     * @description Get club leader info.
-     */
-    get: operations["get_club_leader_clubs__id__leader_get"];
-    put?: never;
-    post?: never;
+    post: operations["set_club_logo_clubs_by_id__id__logo_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -140,12 +144,72 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/leaders/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get All Leaders
+     * @description Get all club leaders.
+     */
+    get: operations["get_all_leaders_leaders__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/leaders/by-club-id/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Club Leader
+     * @description Get club leader info.
+     */
+    get: operations["get_club_leader_leaders_by_club_id__id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/leaders/by-club-slug/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Club Leader
+     * @description Get club leader info.
+     */
+    get: operations["get_club_leader_leaders_by_club_slug__slug__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** Body_set_club_logo_clubs__id__logo_post */
-    Body_set_club_logo_clubs__id__logo_post: {
+    /** Body_set_club_logo_clubs_by_id__id__logo_post */
+    Body_set_club_logo_clubs_by_id__id__logo_post: {
       /**
        * Logo File
        * Format: binary
@@ -166,6 +230,11 @@ export interface components {
        * @default true
        */
       is_active: boolean;
+      /**
+       * Slug
+       * @description Alias for using in URL and identification
+       */
+      slug: string;
       /**
        * Title
        * @description Title of the club
@@ -217,6 +286,11 @@ export interface components {
        * @default true
        */
       is_active: boolean;
+      /**
+       * Slug
+       * @description Alias for using in URL and identification
+       */
+      slug: string;
       /**
        * Title
        * @description Title of the club
@@ -310,6 +384,11 @@ export interface components {
        */
       is_active: boolean;
       /**
+       * Slug
+       * @description Alias for using in URL and identification
+       */
+      slug: string;
+      /**
        * Title
        * @description Title of the club
        */
@@ -386,8 +465,8 @@ export interface components {
   headers: never;
   pathItems: never;
 }
-export type SchemaBodySetClubLogoClubsIdLogoPost =
-  components["schemas"]["Body_set_club_logo_clubs__id__logo_post"];
+export type SchemaBodySetClubLogoClubsByIdIdLogoPost =
+  components["schemas"]["Body_set_club_logo_clubs_by_id__id__logo_post"];
 export type SchemaClub = components["schemas"]["Club"];
 export type SchemaCreateClub = components["schemas"]["CreateClub"];
 export type SchemaHttpValidationError =
@@ -467,12 +546,12 @@ export interface operations {
       };
     };
   };
-  get_club_info_clubs__id__get: {
+  get_club_info_clubs_by_id__id__get: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        id: components["schemas"]["PydanticObjectId"];
       };
       cookie?: never;
     };
@@ -505,7 +584,7 @@ export interface operations {
       };
     };
   };
-  edit_club_info_clubs__id__post: {
+  edit_club_info_clubs_by_id__id__post: {
     parameters: {
       query?: never;
       header?: never;
@@ -554,7 +633,7 @@ export interface operations {
       };
     };
   };
-  delete_club_clubs__id__delete: {
+  delete_club_clubs_by_id__id__delete: {
     parameters: {
       query?: never;
       header?: never;
@@ -599,12 +678,12 @@ export interface operations {
       };
     };
   };
-  get_club_logo_clubs__id__logo_get: {
+  get_club_info_clubs_by_slug__slug__get: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        slug: string;
       };
       cookie?: never;
     };
@@ -637,22 +716,22 @@ export interface operations {
       };
     };
   };
-  set_club_logo_clubs__id__logo_post: {
+  edit_club_info_clubs_by_slug__slug__post: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        id: components["schemas"]["PydanticObjectId"];
+        slug: string;
       };
       cookie?: never;
     };
     requestBody: {
       content: {
-        "multipart/form-data": components["schemas"]["Body_set_club_logo_clubs__id__logo_post"];
+        "application/json": components["schemas"]["UpdateClub"];
       };
     };
     responses: {
-      /** @description Changed club logo successfully */
+      /** @description Changed club info successfully */
       200: {
         headers: {
           [name: string]: unknown;
@@ -661,7 +740,7 @@ export interface operations {
           "application/json": components["schemas"]["Club"];
         };
       };
-      /** @description Only admin can change club logo */
+      /** @description Only admin can change club info */
       403: {
         headers: {
           [name: string]: unknown;
@@ -686,7 +765,45 @@ export interface operations {
       };
     };
   };
-  get_club_leader_clubs__id__leader_get: {
+  get_club_logo_clubs_by_id__id__logo_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Club info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Club not found or no logo available */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  set_club_logo_clubs_by_id__id__logo_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -695,16 +812,34 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_set_club_logo_clubs_by_id__id__logo_post"];
+      };
+    };
     responses: {
-      /** @description Club leader info */
+      /** @description Changed club logo successfully */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Leader"] | null;
+          "application/json": components["schemas"]["Club"];
         };
+      };
+      /** @description Invalid content type */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only admin can change club logo */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Club not found */
       404: {
@@ -773,6 +908,102 @@ export interface operations {
         content?: never;
       };
       /** @description User not found in InNoHassle Accounts */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_all_leaders_leaders__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Info about all club leaders */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Leader"][];
+        };
+      };
+    };
+  };
+  get_club_leader_leaders_by_club_id__id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Club leader info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Leader"] | null;
+        };
+      };
+      /** @description Club not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_club_leader_leaders_by_club_slug__slug__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Club leader info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Leader"] | null;
+        };
+      };
+      /** @description Club not found */
       404: {
         headers: {
           [name: string]: unknown;

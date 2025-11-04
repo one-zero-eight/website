@@ -1,6 +1,8 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
+import { getLogoURLById } from "@/api/clubs/links.ts";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
+import { useMemo } from "react";
 import {
   getClubTypeLabel,
   getClubTypeColor,
@@ -9,17 +11,20 @@ import {
 } from "./utils";
 
 export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
-  const { data: clubLeader } = $clubs.useQuery("get", "/clubs/{id}/leader", {
-    params: { path: { id: club.id } },
-  });
+  const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
+  const clubLeader = useMemo(
+    () =>
+      clubLeaders?.find((v) => v.innohassle_id === club.leader_innohassle_id),
+    [clubLeaders, club.leader_innohassle_id],
+  );
 
   return (
     <div className="bg-floating border-secondary overflow-hidden rounded-lg border">
-      <Link to="/clubs/$id" params={{ id: club.id }} className="block">
+      <Link to="/clubs/$slug" params={{ slug: club.slug }} className="block">
         <div className="flex items-center gap-4 p-4">
           <div className="flex h-48 w-48 shrink-0 items-center justify-center overflow-hidden rounded-lg">
             <img
-              src={`${import.meta.env.VITE_CLUBS_API_URL}/clubs/${club.id}/logo`}
+              src={getLogoURLById(club.id)}
               alt={`${club.title} logo`}
               className="size-full object-cover"
               onError={(e) => {
@@ -65,8 +70,8 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
 
             <div className="flex shrink-0 flex-wrap gap-2">
               <Link
-                to="/clubs/$id"
-                params={{ id: club.id }}
+                to="/clubs/$slug"
+                params={{ slug: club.slug }}
                 className="bg-primary hover:bg-primary-hover text-contrast inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
               >
                 <span className="icon-[mdi--arrow-right] size-4" />

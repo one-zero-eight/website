@@ -1,4 +1,5 @@
 import { $clubs } from "@/api/clubs";
+import { getLogoURLById } from "@/api/clubs/links.ts";
 import clsx from "clsx";
 import {
   getClubTypeLabel,
@@ -32,17 +33,21 @@ const mockEvents = [
   },
 ];
 
-export function ClubPage({ clubId }: { clubId: string }) {
+export function ClubPage({ clubSlug }: { clubSlug: string }) {
   const { data: club, isPending: clubPending } = $clubs.useQuery(
     "get",
-    "/clubs/{id}",
+    "/clubs/by-slug/{slug}",
     {
-      params: { path: { id: clubId } },
+      params: { path: { slug: clubSlug } },
     },
   );
-  const { data: clubLeader } = $clubs.useQuery("get", "/clubs/{id}/leader", {
-    params: { path: { id: clubId } },
-  });
+  const { data: clubLeader } = $clubs.useQuery(
+    "get",
+    "/leaders/by-club-slug/{slug}",
+    {
+      params: { path: { slug: clubSlug } },
+    },
+  );
 
   if (clubPending) {
     return (
@@ -67,7 +72,7 @@ export function ClubPage({ clubId }: { clubId: string }) {
         <div className="from-brand-gradient-start to-brand-gradient-end flex items-center justify-center bg-linear-to-br p-8">
           <div className="relative size-48 shrink-0 overflow-hidden rounded-lg">
             <img
-              src={`${import.meta.env.VITE_CLUBS_API_URL}/clubs/${clubId}/logo`}
+              src={getLogoURLById(club.id)}
               alt={`${club.title} logo`}
               className="size-full object-contain"
               onError={(e) => {
