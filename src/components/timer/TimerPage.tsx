@@ -147,24 +147,12 @@ const TimerPage = () => {
     };
   }, []);
 
-  // Auto-resize textarea when title changes or on mount
-  useEffect(() => {
-    const textarea = titleTextareaRef.current;
-    if (textarea) {
-      // Reset height to auto to get the correct scrollHeight
-      textarea.style.height = "auto";
-      // Set to scrollHeight or max 300px
-      const newHeight = Math.min(Math.max(textarea.scrollHeight, 60), 300);
-      textarea.style.height = `${newHeight}px`;
-    }
-  }, [title]);
-
   const handleVisibilityChange = useCallback(async () => {
     if (!document.hidden && isRunning && !isPaused && targetEndTime) {
       const now = Date.now();
       const remainingSeconds = Math.max(
         0,
-        Math.floor((targetEndTime - now) / 1000),
+        Math.round((targetEndTime - now) / 1000),
       );
       setSecondsLeft(remainingSeconds);
       formatTime(remainingSeconds);
@@ -180,37 +168,49 @@ const TimerPage = () => {
   useEffect(() => {
     const savedState = localStorage.getItem("timerState");
     if (savedState) {
-      const {
-        title: savedTitle,
-        targetEndTime: savedTargetEndTime,
-        initialSeconds: savedInitialSeconds = 0,
-        isRunning: savedIsRunning,
-        isPaused: savedIsPaused,
-        pausedSecondsLeft,
-      } = JSON.parse(savedState);
+      try {
+        const {
+          title: savedTitle,
+          targetEndTime: savedTargetEndTime,
+          initialSeconds: savedInitialSeconds = 0,
+          isRunning: savedIsRunning,
+          isPaused: savedIsPaused,
+          pausedSecondsLeft,
+        } = JSON.parse(savedState);
 
-      setTitle(savedTitle);
-      setInitialSeconds(savedInitialSeconds);
-      setIsRunning(savedIsRunning);
-      setIsPaused(savedIsPaused);
+        setTitle(savedTitle || "");
+        setInitialSeconds(savedInitialSeconds);
 
-      if (savedIsPaused && pausedSecondsLeft !== undefined) {
-        setSecondsLeft(pausedSecondsLeft);
-        formatTime(pausedSecondsLeft);
-        setTargetEndTime(null);
-      } else if (savedIsRunning && savedTargetEndTime) {
-        const now = Date.now();
-        const remainingSeconds = Math.max(
-          0,
-          Math.floor((savedTargetEndTime - now) / 1000),
-        );
-        setSecondsLeft(remainingSeconds);
-        setTargetEndTime(savedTargetEndTime);
-        formatTime(remainingSeconds);
+        if (savedIsPaused && pausedSecondsLeft !== undefined) {
+          // Timer is paused - restore the paused time
+          setSecondsLeft(pausedSecondsLeft);
+          formatTime(pausedSecondsLeft);
+          setTargetEndTime(null);
+          setIsRunning(true);
+          setIsPaused(true);
+        } else if (savedIsRunning && savedTargetEndTime) {
+          // Timer is running - calculate remaining time based on target end time
+          const now = Date.now();
+          const remainingSeconds = Math.max(
+            0,
+            Math.round((savedTargetEndTime - now) / 1000),
+          );
 
-        if (remainingSeconds === 0) {
-          handleTimerComplete();
+          if (remainingSeconds === 0) {
+            // Timer has completed while page was closed
+            handleTimerComplete();
+          } else {
+            // Timer is still running - restore it
+            setSecondsLeft(remainingSeconds);
+            formatTime(remainingSeconds);
+            setTargetEndTime(savedTargetEndTime);
+            setIsRunning(true);
+            setIsPaused(false);
+          }
         }
+      } catch (error) {
+        console.error("Failed to restore timer state:", error);
+        localStorage.removeItem("timerState");
       }
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -261,13 +261,21 @@ const TimerPage = () => {
       const remainingMs = targetEndTime - now;
       let adjustedTargetEndTime = targetEndTime;
 
-      // If we've lost more than 200ms from the intended duration due to state update delays,
-      // recalculate the end time to ensure the full timer duration runs.
-      // Only do this once per timer session using the ref.
+      // Only do the timing adjustment check if this is a newly started timer (not restored from localStorage)
+      // We check if the remaining time is very close to the initial seconds, which means it's a fresh timer start
       const expectedRemainingMs = initialSeconds * 1000;
       const timeLost = expectedRemainingMs - remainingMs;
+      const isNewlyStartedTimer = Math.abs(timeLost) < 5000; // Within 5 seconds means it's a fresh start
 
-      if (timeLost > 200 && !hasAdjustedTimerRef.current) {
+      // If we've lost more than 200ms from the intended duration due to state update delays,
+      // recalculate the end time to ensure the full timer duration runs.
+      // Only do this once per timer session and only for newly started timers (not restored ones)
+      if (
+        timeLost > 200 &&
+        timeLost < 5000 &&
+        !hasAdjustedTimerRef.current &&
+        isNewlyStartedTimer
+      ) {
         adjustedTargetEndTime = now + initialSeconds * 1000;
         hasAdjustedTimerRef.current = true;
         // Update the state for localStorage persistence
@@ -278,7 +286,7 @@ const TimerPage = () => {
       const initialRemainingMs = adjustedTargetEndTime - now;
       const initialRemainingSeconds = Math.max(
         0,
-        Math.ceil(initialRemainingMs / 1000),
+        Math.round(initialRemainingMs / 1000),
       );
 
       setSecondsLeft(initialRemainingSeconds);
@@ -287,7 +295,7 @@ const TimerPage = () => {
       timerRef.current = window.setInterval(() => {
         const now = Date.now();
         const remainingMs = adjustedTargetEndTime - now;
-        const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+        const remainingSeconds = Math.max(0, Math.round(remainingMs / 1000));
 
         if (remainingMs <= 0) {
           handleTimerComplete();
@@ -646,7 +654,7 @@ const TimerPage = () => {
       const now = Date.now();
       const remainingSeconds = Math.max(
         0,
-        Math.ceil((newTargetEndTime - now) / 1000),
+        Math.round((newTargetEndTime - now) / 1000),
       );
       setSecondsLeft(remainingSeconds);
       formatTime(remainingSeconds);
@@ -712,14 +720,13 @@ const TimerPage = () => {
           onInput={(e: React.FormEvent<HTMLTextAreaElement>) => {
             const target = e.target as HTMLTextAreaElement;
             target.style.height = "auto";
-            const newHeight = Math.min(Math.max(target.scrollHeight, 60), 300);
+            const newHeight = Math.max(target.scrollHeight, 60);
             target.style.height = `${newHeight}px`;
           }}
           rows={1}
-          className="w-full max-w-[900px] resize-none overflow-hidden rounded-2xl border-none bg-transparent px-6 py-3 text-center text-2xl leading-tight font-bold transition-all duration-300 outline-none placeholder:text-gray-400 focus:bg-gray-100/50 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
+          className="w-full max-w-[900px] resize-none overflow-hidden rounded-2xl border-none bg-transparent px-6 py-3 text-center text-2xl leading-tight font-bold transition-all duration-300 outline-none placeholder:text-gray-400 focus:bg-gray-100/50 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl dark:focus:bg-gray-900/50"
           style={{
             minHeight: "60px",
-            maxHeight: "300px",
           }}
         />
       </div>
@@ -888,11 +895,6 @@ const TimerPage = () => {
             <h2 className="text-brand-violet mb-3 text-3xl font-bold sm:text-4xl md:mb-4 md:text-5xl lg:text-6xl">
               Time's Up!
             </h2>
-            {title && (
-              <p className="mb-4 text-lg font-semibold text-gray-700 sm:text-xl md:mb-8 md:text-2xl lg:text-3xl">
-                {title}
-              </p>
-            )}
             <button
               onClick={dismissTimeUpMessage}
               className="border-brand-violet bg-brand-violet mt-2 cursor-pointer rounded-lg border-2 px-6 py-2 text-base font-bold text-white transition-all duration-300 hover:bg-purple-700 hover:shadow-xl sm:px-8 sm:py-3 sm:text-lg md:mt-4 md:rounded-xl md:px-12 md:py-4 md:text-xl lg:text-2xl"
