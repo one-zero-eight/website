@@ -27,7 +27,7 @@ const TimerPage = () => {
   const [seconds, setSeconds] = useState<string>("00");
   const [mode, setMode] = useState<"default" | "fullscreen">("default");
   const [targetEndTime, setTargetEndTime] = useState<number | null>(null);
-  const timerRef = useRef<number>();
+  const timerRef = useRef<number>(0);
   const toastIdCounter = useRef(0);
   const hoursRef = useRef<HTMLInputElement>(null);
   const minutesRef = useRef<HTMLInputElement>(null);
