@@ -78,9 +78,14 @@ const TimerPage = () => {
       setSeconds("00");
       return;
     }
-    const h = Math.floor(totalSeconds / 3600);
-    const m = Math.floor((totalSeconds % 3600) / 60);
-    const s = totalSeconds % 60;
+
+    // Cap at 99:59:59
+    const MAX_SECONDS = 99 * 3600 + 59 * 60 + 59;
+    const cappedSeconds = Math.min(totalSeconds, MAX_SECONDS);
+
+    const h = Math.floor(cappedSeconds / 3600);
+    const m = Math.floor((cappedSeconds % 3600) / 60);
+    const s = cappedSeconds % 60;
 
     const formattedHours = h.toString().padStart(2, "0");
     const formattedMinutes = m.toString().padStart(2, "0");
@@ -624,14 +629,21 @@ const TimerPage = () => {
   const addTimeToRunningTimer = (minutesToAdd: number) => {
     if (!isRunning) return; // Only work when timer is running (including paused state)
 
+    const MAX_SECONDS = 99 * 3600 + 59 * 60 + 59; // 99:59:59 in seconds
     const secondsToAdd = minutesToAdd * 60;
-    const newInitialSeconds = initialSeconds + secondsToAdd;
-
-    setInitialSeconds(newInitialSeconds);
 
     if (isPaused) {
       // Timer is paused - update seconds left and display directly
-      const newSecondsLeft = secondsLeft + secondsToAdd;
+      const newSecondsLeft = Math.min(secondsLeft + secondsToAdd, MAX_SECONDS);
+      const actualSecondsAdded = newSecondsLeft - secondsLeft;
+
+      if (actualSecondsAdded === 0) {
+        showToast("Timer is already at maximum (99:59:59)");
+        return;
+      }
+
+      const newInitialSeconds = initialSeconds + actualSecondsAdded;
+      setInitialSeconds(newInitialSeconds);
       setSecondsLeft(newSecondsLeft);
       formatTime(newSecondsLeft);
 
@@ -644,14 +656,41 @@ const TimerPage = () => {
         pausedSecondsLeft: newSecondsLeft,
       };
       localStorage.setItem("timerState", JSON.stringify(stateToSave));
+
+      if (newSecondsLeft >= MAX_SECONDS) {
+        showToast("Timer set to maximum (99:59:59)");
+      } else {
+        showToast(
+          `Added ${Math.round(actualSecondsAdded / 60)} minute${Math.round(actualSecondsAdded / 60) > 1 ? "s" : ""} to timer`,
+        );
+      }
     } else if (targetEndTime) {
-      // Timer is actively running - update the target end time
-      const millisecondsToAdd = minutesToAdd * 60 * 1000;
+      // Timer is actively running - calculate current remaining time and add
+      const now = Date.now();
+      const currentRemainingSeconds = Math.max(
+        0,
+        Math.round((targetEndTime - now) / 1000),
+      );
+
+      const newSecondsLeft = Math.min(
+        currentRemainingSeconds + secondsToAdd,
+        MAX_SECONDS,
+      );
+      const actualSecondsAdded = newSecondsLeft - currentRemainingSeconds;
+
+      if (actualSecondsAdded === 0) {
+        showToast("Timer is already at maximum (99:59:59)");
+        return;
+      }
+
+      const millisecondsToAdd = actualSecondsAdded * 1000;
       const newTargetEndTime = targetEndTime + millisecondsToAdd;
+      const newInitialSeconds = initialSeconds + actualSecondsAdded;
+
+      setInitialSeconds(newInitialSeconds);
       setTargetEndTime(newTargetEndTime);
 
       // Immediately update the display
-      const now = Date.now();
       const remainingSeconds = Math.max(
         0,
         Math.round((newTargetEndTime - now) / 1000),
@@ -668,11 +707,15 @@ const TimerPage = () => {
         targetEndTime: newTargetEndTime,
       };
       localStorage.setItem("timerState", JSON.stringify(stateToSave));
-    }
 
-    showToast(
-      `Added ${minutesToAdd} minute${minutesToAdd > 1 ? "s" : ""} to timer`,
-    );
+      if (newSecondsLeft >= MAX_SECONDS) {
+        showToast("Timer set to maximum (99:59:59)");
+      } else {
+        showToast(
+          `Added ${Math.round(actualSecondsAdded / 60)} minute${Math.round(actualSecondsAdded / 60) > 1 ? "s" : ""} to timer`,
+        );
+      }
+    }
   };
 
   const dismissTimeUpMessage = () => {
