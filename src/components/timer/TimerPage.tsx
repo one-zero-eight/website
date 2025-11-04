@@ -694,11 +694,11 @@ const TimerPage = () => {
   };
   return (
     <div
-      className="bg-pagebg relative flex grow flex-col items-center p-4 md:p-8"
+      className="bg-base-100 relative flex grow flex-col items-center p-4 md:p-8"
       id="timer-container"
     >
       <button
-        className="bg-primary hover:bg-primary-hover text-contrast absolute top-4 right-4 flex h-12 w-12 items-center justify-center rounded-2xl text-3xl transition-all"
+        className="bg-inh-primary hover:bg-inh-primary-hover text-base-content rounded-box absolute top-4 right-4 flex h-12 w-12 items-center justify-center text-3xl transition-all"
         onClick={() => {
           switchFullscreen();
         }}
@@ -724,7 +724,7 @@ const TimerPage = () => {
             target.style.height = `${newHeight}px`;
           }}
           rows={1}
-          className="w-full max-w-[900px] resize-none overflow-hidden rounded-2xl border-none bg-transparent px-6 py-3 text-center text-2xl leading-tight font-bold transition-all duration-300 outline-none placeholder:text-gray-400 focus:bg-gray-100/50 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl dark:focus:bg-gray-900/50"
+          className="rounded-box w-full max-w-[900px] resize-none overflow-hidden border-none bg-transparent px-6 py-3 text-center text-2xl leading-tight font-bold transition-all duration-300 outline-none placeholder:text-gray-400 focus:bg-gray-100/50 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl dark:focus:bg-gray-900/50"
           style={{
             minHeight: "60px",
           }}
@@ -734,7 +734,7 @@ const TimerPage = () => {
       {/* Quick Timer Presets */}
       {!isRunning && (
         <div className="mb-6 flex flex-col items-center gap-2 px-4 sm:gap-3 md:mb-8 md:gap-4 md:px-8">
-          <span className="text-contrast mr-1 w-full self-center text-center text-sm font-semibold sm:mr-2 sm:w-auto sm:text-base md:text-lg">
+          <span className="text-base-content mr-1 w-full self-center text-center text-sm font-semibold sm:mr-2 sm:w-auto sm:text-base md:text-lg">
             Quick Presets:{" "}
           </span>
           <div className="flex flex-wrap justify-center gap-2">
@@ -753,7 +753,7 @@ const TimerPage = () => {
 
       <div className="flex w-full grow items-center justify-center">
         <div className="wc">
-          <div className="text-brand-violet flex w-full max-w-[90vw] shrink-0 items-center justify-center gap-1 text-5xl sm:gap-2 sm:text-6xl md:w-[800px] md:text-7xl lg:text-[150px]">
+          <div className="text-primary flex w-full max-w-[90vw] shrink-0 items-center justify-center gap-1 text-5xl sm:gap-2 sm:text-6xl md:w-[800px] md:text-7xl lg:text-[150px]">
             <input
               ref={hoursRef}
               type="text"
@@ -799,7 +799,7 @@ const TimerPage = () => {
             <div className="mx-auto my-6 w-full max-w-[90vw] px-4 sm:my-8 md:my-12 md:max-w-[900px] md:px-8">
               <div className="relative h-6 w-full overflow-hidden rounded-[25px] bg-gray-300 shadow-[0_4px_15px_rgba(0,0,0,0.15)] sm:h-8 md:h-10">
                 <div
-                  className="bg-brand-violet h-full rounded-[25px] shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-linear"
+                  className="bg-primary h-full rounded-[25px] shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-linear"
                   style={{
                     width: `${(secondsLeft / initialSeconds) * 100}%`,
                   }}
@@ -849,7 +849,7 @@ const TimerPage = () => {
           }}
         >
           <div
-            className="w-[90%] max-w-[32rem] rounded-xl border border-purple-500 bg-white p-5 text-gray-900 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3),0_10px_10px_-5px_rgba(0,0,0,0.2)] transition-all duration-300 sm:rounded-2xl sm:p-8 dark:bg-gray-900 dark:text-white"
+            className="sm:rounded-box w-[90%] max-w-[32rem] rounded-xl border border-purple-500 bg-white p-5 text-gray-900 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3),0_10px_10px_-5px_rgba(0,0,0,0.2)] transition-all duration-300 sm:p-8 dark:bg-gray-900 dark:text-white"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 sm:mb-6">
@@ -886,18 +886,18 @@ const TimerPage = () => {
           onClick={dismissTimeUpMessage}
         >
           <div
-            className="animate-in fade-in zoom-in relative mx-4 w-full max-w-2xl rounded-2xl bg-white p-6 text-center shadow-2xl duration-300 sm:rounded-3xl sm:p-8 md:p-12"
+            className="animate-in fade-in zoom-in rounded-box relative mx-4 w-full max-w-2xl bg-white p-6 text-center shadow-2xl duration-300 sm:rounded-3xl sm:p-8 md:p-12"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 text-5xl sm:mb-6 sm:text-6xl md:text-7xl lg:text-8xl">
               ⏰
             </div>
-            <h2 className="text-brand-violet mb-3 text-3xl font-bold sm:text-4xl md:mb-4 md:text-5xl lg:text-6xl">
+            <h2 className="text-primary mb-3 text-3xl font-bold sm:text-4xl md:mb-4 md:text-5xl lg:text-6xl">
               Time's Up!
             </h2>
             <button
               onClick={dismissTimeUpMessage}
-              className="border-brand-violet bg-brand-violet mt-2 cursor-pointer rounded-lg border-2 px-6 py-2 text-base font-bold text-white transition-all duration-300 hover:bg-purple-700 hover:shadow-xl sm:px-8 sm:py-3 sm:text-lg md:mt-4 md:rounded-xl md:px-12 md:py-4 md:text-xl lg:text-2xl"
+              className="border-primary bg-primary rounded-field mt-2 cursor-pointer border-2 px-6 py-2 text-base font-bold text-white transition-all duration-300 hover:bg-purple-700 hover:shadow-xl sm:px-8 sm:py-3 sm:text-lg md:mt-4 md:rounded-xl md:px-12 md:py-4 md:text-xl lg:text-2xl"
             >
               OK
             </button>
@@ -908,7 +908,7 @@ const TimerPage = () => {
       {/* Add Time Buttons - Show when timer is running */}
       {isRunning && (
         <div className="mb-6 flex flex-col items-center gap-2 px-4 sm:gap-3 md:mb-8">
-          <span className="text-contrast mr-1 w-full self-center text-center text-sm font-semibold sm:mr-2 sm:w-auto sm:text-base md:text-lg">
+          <span className="text-base-content mr-1 w-full self-center text-center text-sm font-semibold sm:mr-2 sm:w-auto sm:text-base md:text-lg">
             More time:
           </span>
           <div className="flex flex-wrap justify-center gap-2">

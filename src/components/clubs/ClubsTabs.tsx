@@ -5,7 +5,7 @@ export function ClubsTabs() {
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
 
   return (
-    <div className="border-b-secondary-hover flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
+    <div className="border-b-inh-secondary-hover flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
       <TabLink to="/clubs">List</TabLink>
       <TabLink to="/clubs/new">Create new</TabLink>
       {clubsUser?.role === "admin" && (
@@ -20,7 +20,7 @@ function TabLink(props: ValidateLinkOptions) {
     <Link
       className="px-2 py-1"
       activeOptions={{ exact: true, includeSearch: true }}
-      activeProps={{ className: "border-b-2 border-b-brand-violet" }}
+      activeProps={{ className: "border-b-2 border-b-primary" }}
       {...props}
     />
   );

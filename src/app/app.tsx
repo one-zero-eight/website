@@ -42,6 +42,7 @@ function ThemeChanger() {
   });
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
+    document.documentElement.dataset.theme = isDarkMode ? "dark" : "light";
   }, [isDarkMode]);
   return null;
 }

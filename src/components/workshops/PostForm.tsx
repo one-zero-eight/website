@@ -475,7 +475,7 @@ export function PostForm({
         {!initialWorkshop && (
           <button
             type="button"
-            className="rounded-lg border border-red-400 bg-red-200 px-3 py-1 text-xs font-medium text-red-900 hover:bg-red-300 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
+            className="rounded-field border border-red-400 bg-red-200 px-3 py-1 text-xs font-medium text-red-900 hover:bg-red-300 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
             onClick={handleClearForm}
           >
             Clear Form
@@ -483,7 +483,7 @@ export function PostForm({
         )}
       </div>
       <input
-        className="my-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-hidden transition-all duration-300 focus:border-violet-400 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] dark:border-white/30 dark:bg-white/10 dark:text-white dark:focus:border-violet-400/60"
+        className="rounded-field my-2 w-full border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-hidden transition-all duration-300 focus:border-violet-400 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] dark:border-white/30 dark:bg-white/10 dark:text-white dark:focus:border-violet-400/60"
         value={workshop.name}
         onChange={handleTitleChange}
         type="text"
@@ -498,7 +498,7 @@ export function PostForm({
         Description
       </label>
       <textarea
-        className="font-inherit my-2 max-h-[200px] min-h-[120px] w-full resize-none overflow-y-auto rounded-lg border border-gray-300 bg-white px-[15px] py-[10px] text-sm text-gray-900 outline-hidden transition-all duration-300 ease-in-out placeholder:text-gray-400 focus:border-violet-400 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] dark:border-white/30 dark:bg-white/10 dark:text-white dark:focus:border-violet-400/60"
+        className="font-inherit rounded-field my-2 max-h-[200px] min-h-[120px] w-full resize-none overflow-y-auto border border-gray-300 bg-white px-[15px] py-[10px] text-sm text-gray-900 outline-hidden transition-all duration-300 ease-in-out placeholder:text-gray-400 focus:border-violet-400 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] dark:border-white/30 dark:bg-white/10 dark:text-white dark:focus:border-violet-400/60"
         value={workshop.description}
         onChange={(e) =>
           setWorkshop({ ...workshop, description: e.target.value })
@@ -580,7 +580,7 @@ export function PostForm({
         {initialWorkshop && (
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-red-400 bg-red-200 px-4 py-2 text-lg font-medium text-red-900 hover:bg-red-300 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
+            className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-red-400 bg-red-200 px-4 py-2 text-lg font-medium text-red-900 hover:bg-red-300 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
             onClick={handleRemoveWorkshop}
           >
             DELETE
@@ -588,14 +588,14 @@ export function PostForm({
         )}
         <button
           type="button"
-          className="dark:bg-primary-hover dark:hover:bg-primary flex w-full items-center justify-center gap-4 rounded-2xl bg-gray-200 px-4 py-2 text-lg font-medium text-gray-800 hover:bg-gray-300 dark:text-white"
+          className="dark:bg-inh-primary-hover dark:hover:bg-inh-primary rounded-box flex w-full items-center justify-center gap-4 bg-gray-200 px-4 py-2 text-lg font-medium text-gray-800 hover:bg-gray-300 dark:text-white"
           onClick={() => onClose && onClose()}
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
+          className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
         >
           {initialWorkshop ? "UPDATE" : "ADD"}
         </button>

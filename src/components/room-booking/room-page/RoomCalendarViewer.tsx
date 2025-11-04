@@ -226,7 +226,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
             return <div>{text}</div>;
           } else {
             return (
-              <div className="bg-pagebg -mt-6 flex h-12 translate-y-2 items-center justify-end">
+              <div className="bg-base-100 -mt-6 flex h-12 translate-y-2 items-center justify-end">
                 {text}
               </div>
             );
@@ -341,7 +341,7 @@ function renderEventListMonth({ event }: EventContentArg) {
   return (
     <div className="flex flex-wrap gap-x-1 text-left">
       {event.title}
-      <span className="text-inactive break-all">
+      <span className="text-inh-inactive break-all">
         {event.extendedProps.location}
       </span>
     </div>
@@ -372,13 +372,13 @@ function renderEventTimeGridWeek({
       style={{
         borderLeftColor: border,
         backgroundColor: `color-mix(in srgb, ${background} 40%, transparent)`,
-        color: `color-mix(in srgb, ${background} 75%, var(--color-contrast))`,
+        color: `color-mix(in srgb, ${background} 75%, var(--color-base-content))`,
       }}
     >
       <span
         className="line-clamp-2 text-sm font-medium"
         style={{
-          color: `color-mix(in srgb, ${background} 60%, var(--color-contrast))`,
+          color: `color-mix(in srgb, ${background} 60%, var(--color-base-content))`,
         }}
       >
         {event.title}
@@ -413,11 +413,11 @@ function renderEventDayGridMonth({
         className="fc-daygrid-event-dot"
         style={{ borderColor: borderColor || backgroundColor }}
       />
-      <div className="fc-event-title text-contrast w-full max-w-full text-xs">
+      <div className="fc-event-title text-base-content w-full max-w-full text-xs">
         {event.title || <>&nbsp;</>}
       </div>
       {timeText && (
-        <div className="text-inactive ml-1 hidden w-fit text-right text-xs @5xl/content:block">
+        <div className="text-inh-inactive ml-1 hidden w-fit text-right text-xs @5xl/content:block">
           {timeText}
         </div>
       )}

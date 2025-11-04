@@ -15,9 +15,9 @@ export default function SearchResult({
       onClick={() => select()}
       tabIndex={0}
       className={clsx(
-        "bg-floating hover:bg-primary-hover flex cursor-pointer flex-col rounded-lg border! p-4",
+        "bg-base-200 hover:bg-inh-primary-hover rounded-field flex cursor-pointer flex-col border! p-4",
         isSelected
-          ? "border-brand-violet drop-shadow-[0_0_4px_#9747FF]"
+          ? "border-primary drop-shadow-[0_0_4px_#9747FF]"
           : "border-gray-400",
       )}
     >

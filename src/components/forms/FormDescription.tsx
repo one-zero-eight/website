@@ -1,6 +1,6 @@
 export function FormDescription() {
   return (
-    <div className="text-contrast/60 mt-6 text-center text-sm">
+    <div className="text-base-content/60 mt-6 text-center text-sm">
       <p>
         This will create a link that automatically fills in the respondent's
         email address when they open the form.
@@ -11,7 +11,7 @@ export function FormDescription() {
           href="https://forms.yandex.ru/admin/"
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-brand-violet-dark text-brand-violet underline"
+          className="hover:text-primary-dark text-primary underline"
         >
           Yandex Forms
         </a>{" "}
@@ -20,7 +20,7 @@ export function FormDescription() {
           href="https://disk.yandex.ru/i/syqHpBbQ4AfTMw"
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-brand-violet-dark text-brand-violet underline"
+          className="hover:text-primary-dark text-primary underline"
         >
           here
         </a>

@@ -18,7 +18,7 @@ export function RoomsList() {
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="border-primary-hover bg-primary animate-pulse rounded-lg border px-4 py-2"
+            className="border-inh-primary-hover bg-inh-primary rounded-field animate-pulse border px-4 py-2"
           >
             <div className="bg-muted mb-2 h-6 w-3/4 rounded-sm"></div>
             <div className="space-y-1">
@@ -34,7 +34,7 @@ export function RoomsList() {
   if (!rooms || rooms.length === 0) {
     return (
       <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
-        <h2 className="text-inactive text-2xl">No rooms available</h2>
+        <h2 className="text-inh-inactive text-2xl">No rooms available</h2>
       </div>
     );
   }
@@ -46,7 +46,7 @@ export function RoomsList() {
           <Link
             to="/room-booking/rooms/$room"
             params={{ room: room.id }}
-            className="group border-primary-hover bg-primary hover:bg-primary-hover flex flex-row rounded-lg border px-4 py-2 transition-colors"
+            className="group border-inh-primary-hover bg-inh-primary hover:bg-inh-primary-hover rounded-field flex flex-row border px-4 py-2 transition-colors"
           >
             <div className="flex grow flex-col">
               <h2 className="mb-3 text-gray-900 dark:text-gray-100">
@@ -109,7 +109,9 @@ export function RoomsList() {
               <span className="icon-[material-symbols--arrow-forward-ios] text-2xl text-gray-400 dark:text-gray-600" />
             </div>
           </Link>
-          {i < rooms.length - 1 && <div className="bg-secondary-hover h-px" />}
+          {i < rooms.length - 1 && (
+            <div className="bg-inh-secondary-hover h-px" />
+          )}
         </React.Fragment>
       ))}
     </div>

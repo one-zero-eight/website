@@ -53,19 +53,19 @@ export function EditTitleButton({
           }}
           autoFocus
           disabled={isPending}
-          className="border-contrast/20 bg-primary/5 focus:border-brand-violet flex-1 rounded-sm border-2 px-2 py-1 text-base outline-hidden transition-colors disabled:opacity-50"
+          className="border-base-content/20 bg-inh-primary/5 focus:border-primary flex-1 rounded-sm border-2 px-2 py-1 text-base outline-hidden transition-colors disabled:opacity-50"
         />
         <button
           onClick={handleSave}
           disabled={isPending || !title.trim()}
-          className="rounded-lg border-2 border-green-500 px-2 py-1 text-sm font-medium text-green-500 hover:bg-green-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-field border-2 border-green-500 px-2 py-1 text-sm font-medium text-green-500 hover:bg-green-500/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? "..." : "✓"}
         </button>
         <button
           onClick={handleCancel}
           disabled={isPending}
-          className="border-contrast/20 hover:border-contrast/40 rounded-lg border-2 px-2 py-1 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+          className="border-base-content/20 hover:border-base-content/40 rounded-field border-2 px-2 py-1 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
         >
           ✕
         </button>
@@ -78,7 +78,7 @@ export function EditTitleButton({
       <h3 className="truncate text-lg">{currentTitle || "Untitled"}</h3>
       <button
         onClick={() => setIsEditing(true)}
-        className="text-contrast/60 hover:bg-primary/10 hover:text-contrast rounded-sm px-2 py-1 text-sm"
+        className="text-base-content/60 hover:bg-inh-primary/10 hover:text-base-content rounded-sm px-2 py-1 text-sm"
         title="Edit title"
       >
         <span className="icon-[material-symbols--edit] text-base" />

@@ -20,7 +20,7 @@ const processTextNode = (text: string): (string | React.JSX.Element)[] => {
       const url = urlMatch[0];
       result.push(
         <a
-          className="text-brand-violet hover:text-brand-violet/80 break-all"
+          className="text-primary hover:text-primary/80 break-all"
           href={url}
           target="_blank"
           rel="noopener noreferrer"
@@ -41,7 +41,7 @@ const processTextNode = (text: string): (string | React.JSX.Element)[] => {
       const username = tgMatch[0];
       result.push(
         <a
-          className="text-brand-violet hover:text-brand-violet/80 break-all"
+          className="text-primary hover:text-primary/80 break-all"
           href={`https://t.me/${username.slice(1)}`}
           target="_blank"
           rel="noopener noreferrer"
@@ -100,7 +100,7 @@ export function MarkdownWithCustomLinks({ children }: { children: string }) {
         // Стилизация ссылок в markdown
         a: ({ href, children }) => (
           <a
-            className="text-brand-violet hover:text-brand-violet/80 break-all"
+            className="text-primary hover:text-primary/80 break-all"
             href={href}
             target="_blank"
             rel="noopener noreferrer"
@@ -152,7 +152,7 @@ export function Description({
   }
 
   return (
-    <div className="text-contrast flex flex-col">
+    <div className="text-base-content flex flex-col">
       <div className="flex max-h-[60vh] overflow-y-auto">
         <div className="prose dark:prose-invert">
           <MarkdownWithCustomLinks>
@@ -160,7 +160,7 @@ export function Description({
           </MarkdownWithCustomLinks>
         </div>
       </div>
-      <div className="text-contrast/75 flex flex-row items-center gap-2 text-xl">
+      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
         <div className="flex h-fit w-6">
           <span className="icon-[material-symbols--location-on-outline] text-2xl" />
         </div>
@@ -168,14 +168,14 @@ export function Description({
           <Link
             to="/maps"
             search={{ q: workshop.place || "" }}
-            className="text-brand-violet hover:text-brand-violet/80 relative z-5 cursor-pointer underline"
+            className="text-primary hover:text-primary/80 relative z-5 cursor-pointer underline"
             title="Click to view on map"
           >
             {workshop.place}
           </Link>
         </p>
       </div>
-      <div className="text-contrast/75 flex flex-row items-center gap-2 text-xl">
+      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
         <div className="flex h-fit w-6">
           <span className="icon-[material-symbols--today-outline] text-2xl" />
         </div>
@@ -183,7 +183,7 @@ export function Description({
           {formatDate(getDate(workshop.dtstart))}
         </p>
       </div>
-      <div className="text-contrast/75 flex flex-row items-center gap-2 text-xl">
+      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
         <div className="flex h-fit w-6">
           <span className="icon-[material-symbols--schedule-outline] text-2xl" />
         </div>
@@ -198,7 +198,7 @@ export function Description({
 
       {/* Секция с участниками */}
       <div className="mt-4">
-        <div className="text-contrast/75 mb-3 flex flex-row items-center gap-2 text-xl">
+        <div className="text-base-content/75 mb-3 flex flex-row items-center gap-2 text-xl">
           <div className="flex h-fit w-6">
             <span className="icon-[material-symbols--group-outline] text-2xl" />
           </div>
@@ -207,16 +207,16 @@ export function Description({
 
         {participantsIsPending ? (
           <div className="flex items-center justify-center py-4">
-            <div className="border-brand-violet h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"></div>
+            <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"></div>
           </div>
         ) : participants && participants.length > 0 ? (
           <div className="space-y-2">
             {visibleParticipants.map((participant) => (
               <div
                 key={participant.innohassle_id}
-                className="text-contrast/80 text-base whitespace-pre-wrap"
+                className="text-base-content/80 text-base whitespace-pre-wrap"
               >
-                <span className="text-brand-violet select-none">• </span>
+                <span className="text-primary select-none">• </span>
                 <span className="font-mono">
                   {participant.email.split("@")[0]}
                 </span>
@@ -228,7 +228,7 @@ export function Description({
                     href={`https://t.me/${participant.telegram_username}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-brand-violet hover:text-brand-violet/80"
+                    className="text-primary hover:text-primary/80"
                   >
                     @{participant.telegram_username}
                   </a>
@@ -239,7 +239,7 @@ export function Description({
             {hiddenCount > 0 && !showAllParticipants && (
               <button
                 onClick={() => setShowAllParticipants(true)}
-                className="text-brand-violet hover:text-brand-violet/80 mt-2 text-sm transition-colors duration-200"
+                className="text-primary hover:text-primary/80 mt-2 text-sm transition-colors duration-200"
               >
                 and {hiddenCount} more participants
               </button>
@@ -248,14 +248,14 @@ export function Description({
             {showAllParticipants && participants.length > displayLimit && (
               <button
                 onClick={() => setShowAllParticipants(false)}
-                className="text-brand-violet hover:text-brand-violet/80 mt-2 text-sm transition-colors duration-200"
+                className="text-primary hover:text-primary/80 mt-2 text-sm transition-colors duration-200"
               >
                 Hide
               </button>
             )}
           </div>
         ) : (
-          <p className="text-contrast/60 text-base">
+          <p className="text-base-content/60 text-base">
             No one has checked in yet!
           </p>
         )}

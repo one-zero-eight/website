@@ -43,13 +43,13 @@ export function WorkshopItem({
   return (
     <div
       className={clsx(
-        "bg-primary relative w-full cursor-pointer rounded-2xl border p-4 shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-in-out",
+        "bg-inh-primary rounded-box relative w-full cursor-pointer border p-4 shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-in-out",
         isWorkshopActive(workshop)
           ? "hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]"
-          : "border-brand-violet/15",
+          : "border-primary/15",
         checkedIn
           ? "border-green-700/60 bg-linear-to-br from-green-600/20 to-green-700/10 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] dark:border-green-500/60 dark:from-green-500/10 dark:to-green-500/5"
-          : "border-brand-violet/40",
+          : "border-primary/40",
       )}
       onClick={handleContentClick}
     >
@@ -65,7 +65,7 @@ export function WorkshopItem({
         {workshop.dtstart && workshop.dtend && (
           <p
             className={clsx(
-              "text-brand-violet flex items-center justify-start text-xs font-medium sm:text-[15px]",
+              "text-primary flex items-center justify-start text-xs font-medium sm:text-[15px]",
               !isWorkshopActive(workshop) && "opacity-50",
             )}
           >
@@ -75,7 +75,7 @@ export function WorkshopItem({
         )}
         <p
           className={clsx(
-            "text-brand-violet flex items-center justify-end text-xs font-medium sm:text-[15px]",
+            "text-primary flex items-center justify-end text-xs font-medium sm:text-[15px]",
             !isWorkshopActive(workshop) && "opacity-50",
           )}
         >
@@ -91,7 +91,7 @@ export function WorkshopItem({
       </div>
       <h3
         className={clsx(
-          "text-contrast my-0.5 mb-1 overflow-hidden text-sm leading-[1.2] font-semibold wrap-break-word sm:my-1.5 sm:mb-2 sm:text-lg sm:leading-[1.3]",
+          "text-base-content my-0.5 mb-1 overflow-hidden text-sm leading-[1.2] font-semibold wrap-break-word sm:my-1.5 sm:mb-2 sm:text-lg sm:leading-[1.3]",
           !isWorkshopActive(workshop) && "opacity-50",
         )}
       >
@@ -104,12 +104,12 @@ export function WorkshopItem({
             !isWorkshopActive(workshop) && "opacity-50",
           )}
         >
-          <p className="text-contrast/80 m-0 text-xs sm:text-base">
+          <p className="text-base-content/80 m-0 text-xs sm:text-base">
             <strong>Room:</strong>{" "}
             <Link
               to="/maps"
               search={{ q: workshop.place }}
-              className="text-brand-violet hover:text-brand-violet/80 relative cursor-pointer underline"
+              className="text-primary hover:text-primary/80 relative cursor-pointer underline"
               title="Click to view on map"
             >
               {workshop.place}
@@ -126,7 +126,7 @@ export function WorkshopItem({
             e.stopPropagation();
             edit(workshop);
           }}
-          className="border-brand-violet/20 bg-primary/80 text-brand-violet hover:border-brand-violet/40 hover:bg-brand-violet/20 hover:text-brand-violet/80 absolute right-1.5 bottom-1.5 flex cursor-pointer items-center justify-center rounded-md border p-1.5 backdrop-blur-md transition-all duration-300 ease-in-out hover:scale-110 sm:right-3 sm:bottom-3 sm:rounded-xl sm:p-2.5"
+          className="border-primary/20 bg-inh-primary/80 text-primary hover:border-primary/40 hover:bg-primary/20 hover:text-primary/80 absolute right-1.5 bottom-1.5 flex cursor-pointer items-center justify-center rounded-md border p-1.5 backdrop-blur-md transition-all duration-300 ease-in-out hover:scale-110 sm:right-3 sm:bottom-3 sm:rounded-xl sm:p-2.5"
           title="Edit workshop"
         >
           <span className="icon-[mynaui--pencil] text-base sm:text-xl" />

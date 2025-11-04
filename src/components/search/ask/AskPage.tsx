@@ -78,12 +78,12 @@ export function AskPage({ askQuery }: { askQuery: string }) {
       )}
 
       {isLoading ? (
-        <div className="border-inactive bg-primary text-contrast flex self-start rounded-lg border! px-4 py-2">
+        <div className="border-inh-inactive bg-inh-primary text-base-content rounded-field flex self-start border! px-4 py-2">
           <span>- Thinking</span>
           <AnimatedDots></AnimatedDots>
         </div>
       ) : error ? (
-        <div className="border-inactive bg-primary text-contrast flex flex-col gap-2 self-start rounded-lg border! px-4 py-2">
+        <div className="border-inh-inactive bg-inh-primary text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
           <span>- Sorry, I can't help you with this question.</span>
         </div>
       ) : null}
@@ -93,14 +93,14 @@ export function AskPage({ askQuery }: { askQuery: string }) {
           msg.role === "user" ? (
             <div className="flex max-w-[80%] flex-col gap-1 self-start">
               <a
-                className="text-inactive"
+                className="text-inh-inactive"
                 href="https://search.innohassle.ru/dashboard"
               >
                 {me.innopolis_sso?.name?.split(" ")[0]}
               </a>
               <div
                 key={i}
-                className="bg-primary mb-4 self-start rounded-lg rounded-tl-none px-4 py-2 text-white"
+                className="bg-inh-primary rounded-field mb-4 self-start rounded-tl-none px-4 py-2 text-white"
               >
                 {msg.content}
               </div>

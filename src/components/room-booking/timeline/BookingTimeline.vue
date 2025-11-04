@@ -1309,7 +1309,7 @@ $button-height: 50px;
   --c-skeleton-bg: #{colors.$gray-300};
 }
 
-:global(.dark) {
+:global([data-theme="dark"]) {
   .root {
     --c-bg-items: #{colors.$gray-950};
     --c-bg-sheet: #{colors.$gray-900};
@@ -1574,7 +1574,7 @@ $button-height: 50px;
     background: var(--c-bg-items);
     color: var(--c-text);
 
-    :global(.dark) & {
+    :global([data-theme="dark"]) & {
       border: 1px solid var(--c-borders);
     }
   }

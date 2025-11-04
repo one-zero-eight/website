@@ -19,7 +19,7 @@ export function FilesSection({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search by title or paste full join link or slug"
-          className="border-contrast/20 bg-primary/5 focus:border-contrast/40 focus:bg-primary/10 w-full rounded-lg border-2 px-4 py-3 outline-hidden transition-colors"
+          className="border-base-content/20 bg-inh-primary/5 focus:border-base-content/40 focus:bg-inh-primary/10 rounded-field w-full border-2 px-4 py-3 outline-hidden transition-colors"
         />
       </div>
 

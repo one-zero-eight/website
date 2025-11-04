@@ -24,7 +24,7 @@ export function CopyLinkButton({
     }
   };
 
-  const baseClasses = "rounded-lg font-medium transition-all";
+  const baseClasses = "rounded-field font-medium transition-all";
   const sizeClasses = {
     sm: "px-2.5 py-1.5 text-xs",
     md: "px-3.5 py-2.5 text-sm",
@@ -33,10 +33,10 @@ export function CopyLinkButton({
   const variantClasses = {
     primary: copied
       ? "bg-green-500 text-white"
-      : "bg-brand-violet text-white hover:bg-[#6600CC]",
+      : "bg-primary text-white hover:bg-[#6600CC]",
     secondary: copied
       ? "bg-green-500 text-white"
-      : "border-2 border-contrast/20 hover:border-contrast/40",
+      : "border-2 border-base-content/20 hover:border-base-content/40",
   };
 
   return (

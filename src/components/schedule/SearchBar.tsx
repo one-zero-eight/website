@@ -6,7 +6,7 @@ export default function SearchBar({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="border-b-secondary-hover focus-within:border-b-brand-violet flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">
+    <div className="border-b-inh-secondary-hover focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">
       <input
         placeholder="Find the group..."
         value={value}
@@ -16,7 +16,7 @@ export default function SearchBar({
       <button
         type="submit"
         tabIndex={-1} // Do not allow to focus on this button
-        className="icon-[material-symbols--search-rounded] text-secondary-hover shrink-0 text-2xl"
+        className="icon-[material-symbols--search-rounded] text-inh-secondary-hover shrink-0 text-2xl"
       />
     </div>
   );

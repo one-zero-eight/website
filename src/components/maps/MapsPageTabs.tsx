@@ -28,7 +28,7 @@ export function MapsPageTabs() {
     <div className="flex shrink-0 flex-col whitespace-nowrap @3xl/content:flex-row">
       <form
         onSubmit={onSubmit}
-        className="border-b-secondary-hover focus-within:border-b-brand-violet flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0"
+        className="border-b-inh-secondary-hover focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0"
       >
         <input
           ref={inputRef}
@@ -40,12 +40,12 @@ export function MapsPageTabs() {
         <button
           type="submit"
           tabIndex={-1} // Do not allow to focus on this button
-          className="icon-[material-symbols--search-rounded] text-secondary-hover shrink-0 text-2xl"
+          className="icon-[material-symbols--search-rounded] text-inh-secondary-hover shrink-0 text-2xl"
         />
       </form>
 
       <div className="flex grow flex-row overflow-x-auto whitespace-nowrap">
-        <div className="border-b-secondary-hover w-2 shrink-0 border-b @3xl/content:w-1" />
+        <div className="border-b-inh-secondary-hover w-2 shrink-0 border-b @3xl/content:w-1" />
         {scenes?.map((scene, i) => (
           <Link
             key={scene.scene_id}
@@ -54,14 +54,14 @@ export function MapsPageTabs() {
             className={clsx(
               "px-2 py-1",
               scene.scene_id === sceneId || (sceneId === undefined && i === 0)
-                ? "border-b-brand-violet border-b-2"
-                : "border-b-secondary-hover border-b",
+                ? "border-b-primary border-b-2"
+                : "border-b-inh-secondary-hover border-b",
             )}
           >
             {scene.title}
           </Link>
         ))}
-        <div className="border-b-secondary-hover min-w-2 grow border-b" />
+        <div className="border-b-inh-secondary-hover min-w-2 grow border-b" />
       </div>
     </div>
   );

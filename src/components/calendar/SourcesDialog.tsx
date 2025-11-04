@@ -56,7 +56,7 @@ export function SourcesDialog({
             {...getFloatingProps()}
             className="flex h-fit w-full flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-1/2"
           >
-            <div className="bg-floating overflow-hidden rounded-2xl">
+            <div className="bg-base-200 rounded-box overflow-hidden">
               <div className="flex flex-col p-4">
                 {/* Heading and description */}
                 <div className="mb-2 flex w-full flex-row">
@@ -65,7 +65,7 @@ export function SourcesDialog({
                   </div>
                   <button
                     type="button"
-                    className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 -mt-2 -mr-2 flex h-12 w-12 items-center justify-center rounded-2xl"
+                    className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
@@ -119,7 +119,7 @@ export function SourcesDialog({
                       name={
                         <span className="flex items-center">
                           Moodle
-                          <span className="bg-brand-violet ml-2 rounded-full px-2 py-1 text-xs font-semibold text-white">
+                          <span className="bg-primary ml-2 rounded-full px-2 py-1 text-xs font-semibold text-white">
                             NEW
                           </span>
                         </span>
@@ -138,7 +138,7 @@ export function SourcesDialog({
                     />
                   </div>
 
-                  <p className="text-contrast/75 mb-4 text-lg">
+                  <p className="text-base-content/75 mb-4 text-lg">
                     Add favorite calendars using star button.
                     <br />
                     <Link

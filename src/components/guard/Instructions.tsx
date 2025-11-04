@@ -25,7 +25,7 @@ export function ServiceAccountEmail({ email }: ServiceAccountEmailProps) {
       className={`inline-block cursor-pointer rounded px-2 py-0.5 font-mono text-xs transition-colors ${
         copied
           ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-          : "bg-contrast/10 hover:bg-contrast/20"
+          : "bg-base-content/10 hover:bg-base-content/20"
       }`}
       title="Click to copy"
     >
@@ -40,7 +40,7 @@ interface CreateInstructionsProps {
 
 export function CreateInstructions({ serviceEmail }: CreateInstructionsProps) {
   return (
-    <div className="text-contrast/80 mt-3 rounded-sm border-l-4 border-blue-400 bg-blue-50 p-3 text-sm dark:border-blue-600 dark:bg-blue-900/20">
+    <div className="text-base-content/80 mt-3 rounded-sm border-l-4 border-blue-400 bg-blue-50 p-3 text-sm dark:border-blue-600 dark:bg-blue-900/20">
       <ol className="list-inside list-decimal space-y-1">
         <li>
           We will create a new Google Spreadsheet using the title you provide.
@@ -55,7 +55,7 @@ export function CreateInstructions({ serviceEmail }: CreateInstructionsProps) {
         </li>
       </ol>
       <div className="mt-3 rounded-sm border-l-4 border-yellow-400 bg-yellow-50 p-3 dark:border-yellow-600 dark:bg-yellow-900/20">
-        <p className="text-contrast/80 text-sm">
+        <p className="text-base-content/80 text-sm">
           💡 Spreadsheet must be owned by the service account so only it can add
           editors. Otherwise, anyone can add editors and you lose control over
           who has access to the spreadsheet.
@@ -71,7 +71,7 @@ interface CopyInstructionsProps {
 
 export function CopyInstructions({ serviceEmail }: CopyInstructionsProps) {
   return (
-    <div className="text-contrast/80 mt-3 rounded-sm border-l-4 border-blue-400 bg-blue-50 p-3 text-sm dark:border-blue-600 dark:bg-blue-900/20">
+    <div className="text-base-content/80 mt-3 rounded-sm border-l-4 border-blue-400 bg-blue-50 p-3 text-sm dark:border-blue-600 dark:bg-blue-900/20">
       <ol className="list-inside list-decimal space-y-1">
         <li>
           Open your spreadsheet and give Editor access to{" "}
@@ -86,7 +86,7 @@ export function CopyInstructions({ serviceEmail }: CopyInstructionsProps) {
         <li>Your original file remains unchanged and under your control.</li>
       </ol>
       <div className="mt-3 rounded-sm border-l-4 border-yellow-400 bg-yellow-50 p-3 dark:border-yellow-600 dark:bg-yellow-900/20">
-        <p className="text-contrast/80 text-sm">
+        <p className="text-base-content/80 text-sm">
           💡 The protected copy is owned by the service account so only it can
           add editors. This ensures you have full control over who has access.
         </p>

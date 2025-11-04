@@ -8,7 +8,7 @@ export function ClubsListPage() {
   if (isPending) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inactive text-lg">Loading clubs...</div>
+        <div className="text-inh-inactive text-lg">Loading clubs...</div>
       </div>
     );
   }
@@ -16,7 +16,7 @@ export function ClubsListPage() {
   if (!clubs || clubs.length === 0) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inactive text-lg">No clubs found</div>
+        <div className="text-inh-inactive text-lg">No clubs found</div>
       </div>
     );
   }
@@ -26,7 +26,7 @@ export function ClubsListPage() {
       <div className="flex flex-col gap-6">
         {clubTypesOrder.map((type) => (
           <div key={type}>
-            <h2 className="text-contrast mb-4 text-xl font-semibold">
+            <h2 className="text-base-content mb-4 text-xl font-semibold">
               {getClubTypeLabel(type)}
             </h2>
             <div className="flex flex-col gap-6">

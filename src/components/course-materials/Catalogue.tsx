@@ -67,14 +67,14 @@ const SearchControls = ({
           autoComplete="off"
           spellCheck={false}
           disabled={isPending}
-          className="border-brand-violet/20 bg-pagebg caret-brand-violet focus:border-brand-violet h-12 w-full resize-none rounded-xl border-2 p-4 pr-12 text-base outline-hidden transition-all duration-200 disabled:opacity-50 dark:text-white"
+          className="border-primary/20 bg-base-100 caret-primary focus:border-primary h-12 w-full resize-none rounded-xl border-2 p-4 pr-12 text-base outline-hidden transition-all duration-200 disabled:opacity-50 dark:text-white"
           placeholder="Search courses..."
         />
-        <span className="icon-[material-symbols--search-rounded] text-contrast/50 absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2" />
+        <span className="icon-[material-symbols--search-rounded] text-base-content/50 absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2" />
       </div>
       <button
         disabled={isPending || isSearching}
-        className="bg-brand-violet flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 text-base font-medium text-white shadow-lg transition-all duration-200 hover:bg-[#6600CC] hover:shadow-xl disabled:opacity-50 sm:w-auto"
+        className="bg-primary flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 text-base font-medium text-white shadow-lg transition-all duration-200 hover:bg-[#6600CC] hover:shadow-xl disabled:opacity-50 sm:w-auto"
       >
         {isPending || isSearching ? (
           <span className="icon-[material-symbols--sync] h-5 w-5 animate-spin" />
@@ -207,9 +207,9 @@ const CourseCard = ({
   };
 
   return (
-    <div className="border-secondary-hover bg-floating hover:border-brand-violet/30 mb-3 rounded-xl border transition-all duration-200">
+    <div className="border-inh-secondary-hover bg-base-200 hover:border-primary/30 mb-3 rounded-xl border transition-all duration-200">
       <div
-        className="hover:bg-secondary-hover flex cursor-pointer items-center gap-4 rounded-xl border border-transparent p-4 transition-all duration-200"
+        className="hover:bg-inh-secondary-hover flex cursor-pointer items-center gap-4 rounded-xl border border-transparent p-4 transition-all duration-200"
         onClick={() => onSelect()}
         onKeyDown={handleKeyDown}
         tabIndex={0}
@@ -219,10 +219,10 @@ const CourseCard = ({
       >
         <div className="shrink-0">
           {isLoading ? (
-            <span className="icon-[material-symbols--sync] text-brand-violet animate-spin text-3xl" />
+            <span className="icon-[material-symbols--sync] text-primary animate-spin text-3xl" />
           ) : (
             <span
-              className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-brand-violet text-3xl transition-all duration-200`}
+              className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-primary text-3xl transition-all duration-200`}
             />
           )}
         </div>
@@ -231,25 +231,25 @@ const CourseCard = ({
             {course.engTitle || course.originalTitle}
           </h3>
           {course.rusTitle && (
-            <p className="text-contrast/75 truncate text-sm">
+            <p className="text-base-content/75 truncate text-sm">
               {course.rusTitle}
             </p>
           )}
         </div>
         <span
-          className={`icon-[material-symbols--chevron-${isExpanded ? "down" : "right"}] text-contrast/50 transition-transform duration-200`}
+          className={`icon-[material-symbols--chevron-${isExpanded ? "down" : "right"}] text-base-content/50 transition-transform duration-200`}
         />
       </div>
       {isExpanded && courseData && (
-        <div className="border-secondary-hover bg-pagebg/50 rounded-b-xl border-t p-4">
+        <div className="border-inh-secondary-hover bg-base-100/50 rounded-b-xl border-t p-4">
           <div className="space-y-2">
             {courseData.map((source, index) => (
               <div
                 onClick={() => setPreviewSource(source)}
                 key={index}
-                className="border-secondary-hover hover:bg-secondary-hover flex cursor-pointer gap-3 rounded-lg border-b p-3 transition-all duration-200"
+                className="border-inh-secondary-hover hover:bg-inh-secondary-hover rounded-field flex cursor-pointer gap-3 border-b p-3 transition-all duration-200"
               >
-                <span className="icon-[material-symbols--description] text-brand-violet shrink-0 text-2xl" />
+                <span className="icon-[material-symbols--description] text-primary shrink-0 text-2xl" />
                 <div className="min-w-0 flex-1 space-y-0">
                   <p className="truncate text-sm font-medium">
                     {source?.display_name || "Untitled"}
@@ -299,9 +299,9 @@ const TrimesterGroup = ({
   };
 
   return (
-    <div className="border-secondary-hover bg-floating rounded-xl border p-4">
+    <div className="border-inh-secondary-hover bg-base-200 rounded-xl border p-4">
       <div
-        className="focus:bg-secondary-hover focus:ring-brand-violet/50 flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-all duration-200 focus:ring-2 focus:outline-hidden"
+        className="focus:bg-inh-secondary-hover focus:ring-primary/50 rounded-field flex cursor-pointer items-center gap-3 p-2 transition-all duration-200 focus:ring-2 focus:outline-hidden"
         onClick={() => setIsExpanded(!isExpanded)}
         onKeyDown={handleKeyDown}
         tabIndex={0}
@@ -310,16 +310,16 @@ const TrimesterGroup = ({
         aria-label={`${isExpanded ? "Collapse" : "Expand"} trimester ${trimester}`}
       >
         <span
-          className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-brand-violet text-3xl transition-all duration-200`}
+          className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-primary text-3xl transition-all duration-200`}
         />
         <div className="flex-1">
           <h2 className="text-xl font-semibold sm:text-2xl">{trimester}</h2>
-          <p className="text-contrast/50 text-sm">
+          <p className="text-base-content/50 text-sm">
             {courses.length} course{courses.length !== 1 ? "s" : ""}
           </p>
         </div>
         <span
-          className={`icon-[material-symbols--chevron-${isExpanded ? "down" : "right"}] text-contrast/50 transition-transform duration-200`}
+          className={`icon-[material-symbols--chevron-${isExpanded ? "down" : "right"}] text-base-content/50 transition-transform duration-200`}
         />
       </div>
       {isExpanded && (
@@ -344,13 +344,13 @@ const LoadingSkeleton = () => (
     {[1, 2, 3].map((i) => (
       <div
         key={i}
-        className="border-secondary-hover bg-floating rounded-xl border p-4"
+        className="border-inh-secondary-hover bg-base-200 rounded-xl border p-4"
       >
         <div className="flex items-center gap-3">
-          <div className="bg-contrast/20 h-8 w-8 animate-pulse rounded-sm" />
+          <div className="bg-base-content/20 h-8 w-8 animate-pulse rounded-sm" />
           <div className="flex-1">
-            <div className="bg-contrast/20 h-6 w-32 animate-pulse rounded-sm" />
-            <div className="bg-contrast/20 mt-1 h-4 w-24 animate-pulse rounded-sm" />
+            <div className="bg-base-content/20 h-6 w-32 animate-pulse rounded-sm" />
+            <div className="bg-base-content/20 mt-1 h-4 w-24 animate-pulse rounded-sm" />
           </div>
         </div>
       </div>
@@ -418,7 +418,7 @@ export function CataloguePage() {
         <div className="text-center">
           <span className="icon-[material-symbols--error-outline] text-6xl text-red-500" />
           <p className="mt-4 text-lg font-medium">Failed to load courses</p>
-          <p className="text-contrast/75">Please try again later</p>
+          <p className="text-base-content/75">Please try again later</p>
         </div>
       </div>
     );
@@ -439,7 +439,7 @@ export function CataloguePage() {
       {/* Mobile Preview Overlay */}
       {showPreview && previewSource && (
         <div className="fixed inset-0 z-50 bg-black/50 lg:hidden">
-          <div className="bg-pagebg absolute inset-4 top-4 bottom-4 overflow-hidden rounded-xl">
+          <div className="bg-base-100 absolute inset-4 top-4 bottom-4 overflow-hidden rounded-xl">
             <PreviewCard source={previewSource} onClose={handleClosePreview} />
           </div>
         </div>
@@ -464,7 +464,7 @@ export function CataloguePage() {
               />
             ))
           ) : (
-            <div className="text-contrast/50 flex flex-col items-center justify-center py-16">
+            <div className="text-base-content/50 flex flex-col items-center justify-center py-16">
               <span className="icon-[material-symbols--search-off] text-6xl" />
               <p className="mt-4 text-xl font-medium">No courses found</p>
               <p className="text-center text-sm">
@@ -484,8 +484,8 @@ export function CataloguePage() {
               />
             </div>
           ) : (
-            <div className="border-contrast/20 flex h-[400px] items-center justify-center rounded-xl border-2 border-dashed">
-              <div className="text-contrast/50 text-center">
+            <div className="border-base-content/20 flex h-[400px] items-center justify-center rounded-xl border-2 border-dashed">
+              <div className="text-base-content/50 text-center">
                 <span className="icon-[material-symbols--preview] text-6xl" />
                 <p className="mt-4 text-lg font-medium">Select a course</p>
                 <p className="text-sm">

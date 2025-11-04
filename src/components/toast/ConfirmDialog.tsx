@@ -135,18 +135,18 @@ export function ConfirmDialog({
             {...getFloatingProps()}
             className="flex h-fit w-full max-w-md flex-col p-4 outline-hidden"
           >
-            <div className="bg-floating overflow-hidden rounded-2xl">
+            <div className="bg-base-200 rounded-box overflow-hidden">
               <div className="flex min-w-0 flex-col p-6">
                 {/* Icon and Title */}
                 <div className="mb-4 flex items-center gap-3">
                   {getIcon()}
-                  <h3 className="text-contrast text-lg font-semibold">
+                  <h3 className="text-base-content text-lg font-semibold">
                     {title}
                   </h3>
                 </div>
 
                 {/* Message */}
-                <p className="text-contrast/75 mb-6 leading-relaxed">
+                <p className="text-base-content/75 mb-6 leading-relaxed">
                   {message}
                 </p>
 
@@ -154,14 +154,14 @@ export function ConfirmDialog({
                 <div className="flex justify-end gap-3">
                   <button
                     onClick={onCancel}
-                    className="rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-hidden dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:ring-gray-400"
+                    className="rounded-field border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-hidden dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:ring-gray-400"
                   >
                     {cancelText}
                   </button>
                   <button
                     onClick={onConfirm}
                     className={clsx(
-                      "rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
+                      "rounded-field px-4 py-2 text-sm font-medium text-white transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
                       typeStyles.buttonColor,
                     )}
                   >

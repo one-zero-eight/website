@@ -89,7 +89,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
       >
         {pdfDocument !== null && (
           <div className="flex items-center justify-center">
-            <div className="overflow-hidden rounded-2xl shadow-lg">
+            <div className="rounded-box overflow-hidden shadow-lg">
               <Page
                 noData={
                   <div
@@ -128,7 +128,7 @@ export default function PdfPreview({ source, searchText }: PdfPreviewProps) {
             />
 
             {error === null && (
-              <div className="bg-base-100 dark:bg-primary-hover flex flex-row items-center rounded-lg">
+              <div className="bg-base-100 dark:bg-inh-primary-hover rounded-field flex flex-row items-center">
                 <button
                   className="px-4"
                   onClick={goToPrevPage}

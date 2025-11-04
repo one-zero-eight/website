@@ -19,9 +19,9 @@ export function MorePage() {
             href="https://github.com/one-zero-eight"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:bg-secondary flex items-center justify-center rounded-xl p-2"
+            className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
           >
-            <span className="icon-[mdi--github] text-inactive text-3xl" />
+            <span className="icon-[mdi--github] text-inh-inactive text-3xl" />
           </a>
         </Tooltip>
         <Tooltip content="Telegram">
@@ -29,9 +29,9 @@ export function MorePage() {
             href="https://t.me/one_zero_eight"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:bg-secondary flex items-center justify-center rounded-xl p-2"
+            className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
           >
-            <span className="icon-[uil--telegram-alt] text-inactive text-3xl" />
+            <span className="icon-[uil--telegram-alt] text-inh-inactive text-3xl" />
           </a>
         </Tooltip>
         <div className="flex grow"></div>
@@ -63,7 +63,7 @@ function MenuLink({ icon, title, badge, ...props }: ItemType) {
   const children = (
     <>
       {icon}
-      <div className="in-[.is-active]:selected text-inactive ml-4 flex w-fit items-center text-lg font-semibold whitespace-nowrap">
+      <div className="in-[.is-active]:selected text-inh-inactive ml-4 flex w-fit items-center text-lg font-semibold whitespace-nowrap">
         {title}
       </div>
       {(props.type === "external" || !!badge) && (
@@ -81,7 +81,7 @@ function MenuLink({ icon, title, badge, ...props }: ItemType) {
     return (
       <a
         className={clsx(
-          "text-inactive flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
+          "text-inh-inactive flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
           "px-4 text-4xl",
         )}
         href={props.href}
@@ -94,8 +94,8 @@ function MenuLink({ icon, title, badge, ...props }: ItemType) {
     return (
       <Link
         className={clsx(
-          "text-inactive flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
-          "[&.is-active]:text-brand-violet",
+          "text-inh-inactive flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
+          "[&.is-active]:text-primary",
           "px-4 text-4xl",
         )}
         activeProps={{ className: "is-active" }}

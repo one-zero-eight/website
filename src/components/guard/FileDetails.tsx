@@ -70,7 +70,7 @@ export function FileDetails({
             currentTitle={file?.title || "Untitled"}
             onSave={onUpdateTitle}
           />
-          <p className="text-contrast/60 text-sm font-normal">
+          <p className="text-base-content/60 text-sm font-normal">
             {file?.user_role}, created at{" "}
             {file?.created_at ? formatDate(file.created_at) : "—"}
           </p>
@@ -78,7 +78,7 @@ export function FileDetails({
         <div className="ml-4 flex shrink-0 items-center gap-2">
           <button
             onClick={onBack}
-            className="border-contrast/20 hover:border-contrast/40 rounded-lg border-2 px-3 py-2 text-sm font-medium"
+            className="border-base-content/20 hover:border-base-content/40 rounded-field border-2 px-3 py-2 text-sm font-medium"
           >
             Back to files
           </button>
@@ -94,7 +94,7 @@ export function FileDetails({
             window.location.href = buildSheetsUrl(file.file_id);
           }}
           disabled={!file?.file_id}
-          className="border-contrast/20 hover:border-contrast/40 rounded-lg border-2 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+          className="border-base-content/20 hover:border-base-content/40 rounded-field border-2 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
         >
           Open spreadsheet
         </button>
@@ -102,7 +102,7 @@ export function FileDetails({
         <button
           onClick={handleDelete}
           disabled={isDeleting}
-          className="rounded-lg border-2 border-red-500 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-field border-2 border-red-500 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isDeleting ? "Deleting..." : "Delete"}
         </button>
@@ -114,12 +114,12 @@ export function FileDetails({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search by gmail or innomail"
-          className="border-contrast/20 bg-primary/5 focus:border-contrast/40 focus:bg-primary/10 w-full rounded-lg border-2 px-4 py-3 outline-hidden transition-colors"
+          className="border-base-content/20 bg-inh-primary/5 focus:border-base-content/40 focus:bg-inh-primary/10 rounded-field w-full border-2 px-4 py-3 outline-hidden transition-colors"
         />
       </div>
 
       {isLoading ? (
-        <div className="text-contrast/70">Loading...</div>
+        <div className="text-base-content/70">Loading...</div>
       ) : (
         <>
           <div className="mb-6">

@@ -19,10 +19,10 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
   );
 
   return (
-    <div className="bg-floating border-secondary overflow-hidden rounded-lg border">
+    <div className="bg-base-200 border-inh-secondary rounded-field overflow-hidden border">
       <Link to="/clubs/$slug" params={{ slug: club.slug }} className="block">
         <div className="flex items-center gap-4 p-4">
-          <div className="flex h-48 w-48 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+          <div className="rounded-field flex h-48 w-48 shrink-0 items-center justify-center overflow-hidden">
             <img
               src={getLogoURLById(club.id)}
               alt={`${club.title} logo`}
@@ -40,7 +40,7 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
           <div className="flex grow flex-col justify-between gap-3">
             <div className="flex flex-col gap-3">
               <div className="flex shrink-0 items-start justify-between gap-3">
-                <h3 className="text-contrast text-xl font-semibold">
+                <h3 className="text-base-content text-xl font-semibold">
                   {club.title}
                 </h3>
                 <span
@@ -53,12 +53,12 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
                 </span>
               </div>
 
-              <p className="text-inactive text-base">
+              <p className="text-inh-inactive text-base">
                 {club.short_description}
               </p>
 
               {clubLeader && (
-                <p className="text-inactive text-base">
+                <p className="text-inh-inactive text-base">
                   Leader:{" "}
                   <a href={`https://t.me/${clubLeader.telegram_alias}`}>
                     {clubLeader.name}
@@ -72,7 +72,7 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
               <Link
                 to="/clubs/$slug"
                 params={{ slug: club.slug }}
-                className="bg-primary hover:bg-primary-hover text-contrast inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
+                className="bg-inh-primary hover:bg-inh-primary-hover text-base-content inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
               >
                 <span className="icon-[mdi--arrow-right] size-4" />
                 <span>Details</span>
@@ -83,7 +83,7 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
                   href={link.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-primary hover:bg-primary-hover text-contrast inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
+                  className="bg-inh-primary hover:bg-inh-primary-hover text-base-content inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <span

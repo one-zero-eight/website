@@ -167,7 +167,9 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   if (clubPending) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inactive text-lg">Loading club information...</div>
+        <div className="text-inh-inactive text-lg">
+          Loading club information...
+        </div>
       </div>
     );
   }
@@ -175,39 +177,41 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   if (!club) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inactive text-lg">Club not found</div>
+        <div className="text-inh-inactive text-lg">Club not found</div>
       </div>
     );
   }
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
-      <div className="bg-floating border-secondary mb-6 rounded-lg border p-6">
-        <h1 className="text-contrast mb-2 text-2xl font-bold">Edit Club</h1>
-        <p className="text-inactive text-sm">
+      <div className="bg-base-200 border-inh-secondary rounded-field mb-6 border p-6">
+        <h1 className="text-base-content mb-2 text-2xl font-bold">Edit Club</h1>
+        <p className="text-inh-inactive text-sm">
           Update the club information below
         </p>
       </div>
 
       {/* Logo Upload Section */}
-      <div className="bg-floating border-secondary mb-6 rounded-lg border p-6">
-        <h2 className="text-contrast mb-4 text-xl font-semibold">Club Logo</h2>
+      <div className="bg-base-200 border-inh-secondary rounded-field mb-6 border p-6">
+        <h2 className="text-base-content mb-4 text-xl font-semibold">
+          Club Logo
+        </h2>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Current Logo */}
           <div>
-            <h3 className="text-contrast mb-3 text-sm font-medium">
+            <h3 className="text-base-content mb-3 text-sm font-medium">
               Current Logo
             </h3>
-            <div className="bg-primary border-secondary flex items-center justify-center rounded-lg border p-4">
+            <div className="bg-inh-primary border-inh-secondary rounded-field flex items-center justify-center border p-4">
               {getLogoURLById(club.id) ? (
                 <img
                   src={getLogoURLById(club.id)}
                   alt="Current club logo"
-                  className="max-h-48 max-w-full rounded-lg object-contain"
+                  className="rounded-field max-h-48 max-w-full object-contain"
                 />
               ) : (
-                <div className="text-inactive flex flex-col items-center gap-2 py-8">
+                <div className="text-inh-inactive flex flex-col items-center gap-2 py-8">
                   <span className="icon-[mdi--image-off] size-12" />
                   <span className="text-sm">No logo uploaded</span>
                 </div>
@@ -217,21 +221,21 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
 
           {/* Upload New Logo */}
           <div>
-            <h3 className="text-contrast mb-3 text-sm font-medium">
+            <h3 className="text-base-content mb-3 text-sm font-medium">
               Upload New Logo
             </h3>
             <div className="space-y-3">
               {logoPreview ? (
-                <div className="bg-primary border-secondary flex items-center justify-center rounded-lg border p-4">
+                <div className="bg-inh-primary border-inh-secondary rounded-field flex items-center justify-center border p-4">
                   <img
                     src={logoPreview}
                     alt="Logo preview"
-                    className="max-h-48 max-w-full rounded-lg object-contain"
+                    className="rounded-field max-h-48 max-w-full object-contain"
                   />
                 </div>
               ) : (
-                <div className="bg-primary border-secondary flex items-center justify-center rounded-lg border p-4">
-                  <div className="text-inactive flex flex-col items-center gap-2 py-8">
+                <div className="bg-inh-primary border-inh-secondary rounded-field flex items-center justify-center border p-4">
+                  <div className="text-inh-inactive flex flex-col items-center gap-2 py-8">
                     <span className="icon-[mdi--image-plus] size-12" />
                     <span className="text-sm">Select a file to preview</span>
                   </div>
@@ -242,7 +246,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 type="file"
                 accept="image/*"
                 onChange={handleLogoFileChange}
-                className="text-contrast file:bg-brand-violet hover:file:bg-brand-violet/90 w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:px-4 file:py-2 file:text-white"
+                className="text-base-content file:bg-primary hover:file:bg-primary/90 file:rounded-field w-full text-sm file:mr-4 file:border-0 file:px-4 file:py-2 file:text-white"
               />
 
               <button
@@ -250,10 +254,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 onClick={handleUploadLogo}
                 disabled={!logoFile || isUploadingLogo}
                 className={clsx(
-                  "w-full rounded-lg px-4 py-2 text-white transition-colors",
+                  "rounded-field w-full px-4 py-2 text-white transition-colors",
                   !logoFile || isUploadingLogo
                     ? "cursor-not-allowed bg-gray-400"
-                    : "bg-brand-violet hover:bg-brand-violet/90",
+                    : "bg-primary hover:bg-primary/90",
                 )}
               >
                 {isUploadingLogo ? "Uploading..." : "Upload Logo"}
@@ -266,7 +270,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                     setLogoFile(null);
                     setLogoPreview(null);
                   }}
-                  className="text-inactive hover:text-contrast w-full text-sm transition-colors"
+                  className="text-inh-inactive hover:text-base-content w-full text-sm transition-colors"
                 >
                   Clear selection
                 </button>
@@ -275,15 +279,15 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
           </div>
         </div>
 
-        <p className="text-inactive mt-4 text-sm">
+        <p className="text-inh-inactive mt-4 text-sm">
           Recommended: Square image, at least 400x400px, PNG or JPG format
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
-        <div className="bg-floating border-secondary rounded-lg border p-6">
-          <h2 className="text-contrast mb-4 text-xl font-semibold">
+        <div className="bg-base-200 border-inh-secondary rounded-field border p-6">
+          <h2 className="text-base-content mb-4 text-xl font-semibold">
             Basic Information
           </h2>
 
@@ -296,13 +300,15 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 onChange={(e) => setIsActive(e.target.checked)}
                 className="size-4 rounded border-gray-300"
               />
-              <span className="text-contrast font-medium">Club is active</span>
+              <span className="text-base-content font-medium">
+                Club is active
+              </span>
             </label>
           </div>
 
           {/* Title */}
           <div className="mb-4">
-            <label className="text-contrast mb-2 block font-medium">
+            <label className="text-base-content mb-2 block font-medium">
               Title <span className="text-red-500">*</span>
             </label>
             <input
@@ -310,20 +316,20 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="bg-primary border-secondary text-contrast focus:border-brand-violet focus:ring-brand-violet w-full rounded-lg border px-4 py-2 focus:ring-1 focus:outline-none"
+              className="bg-inh-primary border-inh-secondary text-base-content focus:border-primary focus:ring-primary rounded-field w-full border px-4 py-2 focus:ring-1 focus:outline-none"
             />
           </div>
 
           {/* Type */}
           <div className="mb-4">
-            <label className="text-contrast mb-2 block font-medium">
+            <label className="text-base-content mb-2 block font-medium">
               Type <span className="text-red-500">*</span>
             </label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as clubsTypes.ClubType)}
               required
-              className="bg-primary border-secondary text-contrast focus:border-brand-violet focus:ring-brand-violet w-full rounded-lg border px-4 py-2 focus:ring-1 focus:outline-none"
+              className="bg-inh-primary border-inh-secondary text-base-content focus:border-primary focus:ring-primary rounded-field w-full border px-4 py-2 focus:ring-1 focus:outline-none"
             >
               {Object.values(clubsTypes.ClubType).map((clubType) => (
                 <option key={clubType} value={clubType}>
@@ -335,7 +341,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
 
           {/* Short Description */}
           <div className="mb-4">
-            <label className="text-contrast mb-2 block font-medium">
+            <label className="text-base-content mb-2 block font-medium">
               Short Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -343,14 +349,14 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               onChange={(e) => setShortDescription(e.target.value)}
               required
               rows={2}
-              className="bg-primary border-secondary text-contrast focus:border-brand-violet focus:ring-brand-violet w-full rounded-lg border px-4 py-2 focus:ring-1 focus:outline-none"
+              className="bg-inh-primary border-inh-secondary text-base-content focus:border-primary focus:ring-primary rounded-field w-full border px-4 py-2 focus:ring-1 focus:outline-none"
               placeholder="Brief description for cards"
             />
           </div>
 
           {/* Description */}
           <div className="mb-4">
-            <label className="text-contrast mb-2 block font-medium">
+            <label className="text-base-content mb-2 block font-medium">
               Full Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -358,60 +364,60 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               onChange={(e) => setDescription(e.target.value)}
               required
               rows={8}
-              className="bg-primary border-secondary text-contrast focus:border-brand-violet focus:ring-brand-violet w-full rounded-lg border px-4 py-2 focus:ring-1 focus:outline-none"
+              className="bg-inh-primary border-inh-secondary text-base-content focus:border-primary focus:ring-primary rounded-field w-full border px-4 py-2 focus:ring-1 focus:outline-none"
               placeholder="Detailed description of the club"
             />
           </div>
         </div>
 
         {/* Additional Information */}
-        <div className="bg-floating border-secondary rounded-lg border p-6">
-          <h2 className="text-contrast mb-4 text-xl font-semibold">
+        <div className="bg-base-200 border-inh-secondary rounded-field border p-6">
+          <h2 className="text-base-content mb-4 text-xl font-semibold">
             Additional Information
           </h2>
 
           {/* Leader InnoHassle ID */}
           <div className="mb-4">
-            <label className="text-contrast mb-2 block font-medium">
+            <label className="text-base-content mb-2 block font-medium">
               Leader InnoHassle ID
             </label>
             <input
               type="text"
               value={leaderInnohassleId}
               onChange={(e) => setLeaderInnohassleId(e.target.value)}
-              className="bg-primary border-secondary text-contrast focus:border-brand-violet focus:ring-brand-violet w-full rounded-lg border px-4 py-2 focus:ring-1 focus:outline-none"
+              className="bg-inh-primary border-inh-secondary text-base-content focus:border-primary focus:ring-primary rounded-field w-full border px-4 py-2 focus:ring-1 focus:outline-none"
               placeholder="Optional"
             />
           </div>
 
           {/* Sport ID */}
           <div className="mb-4">
-            <label className="text-contrast mb-2 block font-medium">
+            <label className="text-base-content mb-2 block font-medium">
               Sport ID
             </label>
             <input
               type="text"
               value={sportId}
               onChange={(e) => setSportId(e.target.value)}
-              className="bg-primary border-secondary text-contrast focus:border-brand-violet focus:ring-brand-violet w-full rounded-lg border px-4 py-2 focus:ring-1 focus:outline-none"
+              className="bg-inh-primary border-inh-secondary text-base-content focus:border-primary focus:ring-primary rounded-field w-full border px-4 py-2 focus:ring-1 focus:outline-none"
               placeholder="Only for sport clubs"
             />
-            <p className="text-inactive mt-1 text-sm">
+            <p className="text-inh-inactive mt-1 text-sm">
               ID from InnoSport system (only for sport clubs)
             </p>
           </div>
         </div>
 
         {/* Links */}
-        <div className="bg-floating border-secondary rounded-lg border p-6">
+        <div className="bg-base-200 border-inh-secondary rounded-field border p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-contrast text-xl font-semibold">
+            <h2 className="text-base-content text-xl font-semibold">
               Resources & Links
             </h2>
             <button
               type="button"
               onClick={handleAddLink}
-              className="bg-brand-violet hover:bg-brand-violet/90 flex items-center gap-2 rounded-lg px-4 py-2 text-white transition-colors"
+              className="bg-primary hover:bg-primary/90 rounded-field flex items-center gap-2 px-4 py-2 text-white transition-colors"
             >
               <span className="icon-[mdi--plus] size-5" />
               Add Link
@@ -419,7 +425,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
           </div>
 
           {links.length === 0 ? (
-            <p className="text-inactive text-sm">
+            <p className="text-inh-inactive text-sm">
               No links added yet. Click "Add Link" to add resources.
             </p>
           ) : (
@@ -427,10 +433,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               {links.map((link, index) => (
                 <div
                   key={index}
-                  className="bg-primary border-secondary rounded-lg border p-4"
+                  className="bg-inh-primary border-inh-secondary rounded-field border p-4"
                 >
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="text-contrast font-medium">
+                    <span className="text-base-content font-medium">
                       Link {index + 1}
                     </span>
                     <button
@@ -443,7 +449,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                   </div>
 
                   <div className="mb-3">
-                    <label className="text-contrast mb-1 block text-sm font-medium">
+                    <label className="text-base-content mb-1 block text-sm font-medium">
                       Link Type
                     </label>
                     <select
@@ -455,7 +461,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                           e.target.value as clubsTypes.LinkType,
                         )
                       }
-                      className="bg-primary border-secondary text-contrast focus:border-brand-violet focus:ring-brand-violet w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
+                      className="bg-inh-primary border-inh-secondary text-base-content focus:border-primary focus:ring-primary rounded-field w-full border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
                     >
                       <option value={clubsTypes.LinkType.telegram_channel}>
                         Telegram Channel
@@ -473,7 +479,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                   </div>
 
                   <div className="mb-3">
-                    <label className="text-contrast mb-1 block text-sm font-medium">
+                    <label className="text-base-content mb-1 block text-sm font-medium">
                       URL
                     </label>
                     <input
@@ -482,13 +488,13 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       onChange={(e) =>
                         handleLinkChange(index, "link", e.target.value)
                       }
-                      className="bg-primary border-secondary text-contrast focus:border-brand-violet focus:ring-brand-violet w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
+                      className="bg-inh-primary border-inh-secondary text-base-content focus:border-primary focus:ring-primary rounded-field w-full border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
                       placeholder="https://..."
                     />
                   </div>
 
                   <div>
-                    <label className="text-contrast mb-1 block text-sm font-medium">
+                    <label className="text-base-content mb-1 block text-sm font-medium">
                       Label (Optional)
                     </label>
                     <input
@@ -497,7 +503,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       onChange={(e) =>
                         handleLinkChange(index, "label", e.target.value)
                       }
-                      className="bg-primary border-secondary text-contrast focus:border-brand-violet focus:ring-brand-violet w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
+                      className="bg-inh-primary border-inh-secondary text-base-content focus:border-primary focus:ring-primary rounded-field w-full border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
                       placeholder="Optional custom label"
                     />
                   </div>
@@ -508,14 +514,14 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="bg-floating border-secondary rounded-lg border p-6">
+        <div className="bg-base-200 border-inh-secondary rounded-field border p-6">
           <div className="flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={() =>
                 navigate({ to: "/clubs/$slug", params: { slug: clubSlug } })
               }
-              className="border-secondary text-contrast hover:bg-primary rounded-lg border px-6 py-2 transition-colors"
+              className="border-inh-secondary text-base-content hover:bg-inh-primary rounded-field border px-6 py-2 transition-colors"
             >
               Cancel
             </button>
@@ -523,10 +529,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               type="submit"
               disabled={isUpdating}
               className={clsx(
-                "bg-brand-violet rounded-lg px-6 py-2 text-white transition-colors",
+                "bg-primary rounded-field px-6 py-2 text-white transition-colors",
                 isUpdating
                   ? "cursor-not-allowed opacity-50"
-                  : "hover:bg-brand-violet/90",
+                  : "hover:bg-primary/90",
               )}
             >
               {isUpdating ? "Saving..." : "Save Changes"}

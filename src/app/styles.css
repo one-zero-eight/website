@@ -5,10 +5,84 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @plugin "@iconify/tailwind4";
+@plugin "daisyui";
 
-/* Detect dark theme by class */
-@custom-variant dark (&:where(.dark, .dark *));
+/* Dark theme */
+@plugin "daisyui/theme" {
+  name: "dark";
+  default: true;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: rgb(11 11 11);
+  --color-base-200: rgb(27 27 27);
+  --color-base-300: rgb(34 34 34);
+  --color-base-content: oklch(97.807% 0.029 256.847);
+  --color-primary: rgb(151 71 255);
+  --color-primary-content: oklch(96% 0.018 272.314);
+  --color-secondary: rgb(46 139 87);
+  --color-secondary-content: oklch(90% 0.093 164.15);
+  --color-accent: oklch(74.703% 0.158 39.947);
+  --color-accent-content: oklch(14.94% 0.031 39.947);
+  --color-neutral: oklch(14% 0.005 285.823);
+  --color-neutral-content: oklch(92% 0.004 286.32);
+  --color-info: oklch(78% 0.154 211.53);
+  --color-info-content: oklch(30% 0.056 229.695);
+  --color-success: oklch(79% 0.209 151.711);
+  --color-success-content: oklch(26% 0.065 152.934);
+  --color-warning: oklch(75% 0.183 55.934);
+  --color-warning-content: oklch(26% 0.079 36.259);
+  --color-error: oklch(70% 0.191 22.216);
+  --color-error-content: oklch(25% 0.092 26.042);
+  --radius-selector: 2rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
 
+/* Light theme */
+@plugin "daisyui/theme" {
+  name: "light";
+  default: false;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: rgb(255 255 255);
+  --color-base-200: rgb(242 243 245);
+  --color-base-300: rgb(227 229 232);
+  --color-base-content: oklch(21% 0.006 285.885);
+  --color-primary: rgb(151 71 255);
+  --color-primary-content: oklch(93% 0.034 272.788);
+  --color-secondary: rgb(46 139 87);
+  --color-secondary-content: oklch(90% 0.093 164.15);
+  --color-accent: oklch(74.703% 0.158 39.947);
+  --color-accent-content: oklch(14.94% 0.031 39.947);
+  --color-neutral: oklch(14% 0.005 285.823);
+  --color-neutral-content: oklch(92% 0.004 286.32);
+  --color-info: oklch(91% 0.08 205.041);
+  --color-info-content: oklch(39% 0.07 227.392);
+  --color-success: oklch(92% 0.084 155.995);
+  --color-success-content: oklch(39% 0.095 152.535);
+  --color-warning: oklch(90% 0.076 70.697);
+  --color-warning-content: oklch(40% 0.123 38.172);
+  --color-error: oklch(88% 0.062 18.334);
+  --color-error-content: oklch(39% 0.141 25.723);
+  --radius-selector: 2rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* Detect theme for TailwindCSS "dark:" selector by data-theme="dark" */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* TailwindCSS theme declaration */
 @theme {
   --font-rubik: "Rubik Variable", sans-serif;
   --font-handwritten: "Fuzzy Bubbles", sans-serif;
@@ -16,48 +90,51 @@
   --breakpoint-4xl: 2048px;
   --breakpoint-xxl: 1550px;
 
-  --color-pagebg: rgb(var(--color-pagebg-rgb));
-  --color-floating: rgb(var(--color-floating-rgb));
-  --color-primary: rgb(var(--color-primary-rgb));
-  --color-primary-hover: rgb(var(--color-primary-hover-rgb));
-  --color-secondary: rgb(var(--color-secondary-rgb));
-  --color-secondary-hover: rgb(var(--color-secondary-hover-rgb));
-  --color-inactive: rgb(var(--color-inactive-rgb));
-  --color-contrast: rgb(var(--color-contrast-rgb));
-  --color-brand-violet: rgb(var(--color-brand-violet-rgb));
+  /*
+     After migration to DaisyUI themes:
+
+     pagebg -> base-100
+     floating -> base-200
+     secondary -> base-300
+     contrast -> base-content
+     brand-violet -> primary
+
+     primary -> inh-primary
+     primary-hover -> inh-primary-hover
+     secondary -> inh-secondary
+     secondary-hover -> inh-secondary-hover
+     inactive -> inh-inactive
+   */
+
+  --color-inh-primary: rgb(var(--color-inh-primary-rgb));
+  --color-inh-primary-hover: rgb(var(--color-inh-primary-hover-rgb));
+  --color-inh-secondary: rgb(var(--color-inh-secondary-rgb));
+  --color-inh-secondary-hover: rgb(var(--color-inh-secondary-hover-rgb));
+  --color-inh-inactive: rgb(var(--color-inh-inactive-rgb));
   --color-brand-gradient-start: rgb(var(--color-brand-gradient-start-rgb));
   --color-brand-gradient-end: rgb(var(--color-brand-gradient-end-rgb));
 }
 
 @layer base {
   :root {
-    @apply bg-pagebg;
-    color-scheme: light;
-    accent-color: var(--color-brand-violet);
+    accent-color: var(--color-primary);
+    @apply font-rubik;
 
-    --color-brand-violet-rgb: 151 71 255; /* #9747FF */
     --color-brand-gradient-start-rgb: 154 46 255; /* #9A2EFF */
     --color-brand-gradient-end-rgb: 209 35 162; /* #D1233E */
 
-    --color-pagebg-rgb: 255 255 255; /* #FFFFFF */
-    --color-primary-rgb: 235 237 239; /* #EBEDEF */
-    --color-primary-hover-rgb: 223 225 229; /* #DFE1E5 */
-    --color-floating-rgb: 242 243 245; /* #F2F3F5 */
-    --color-secondary-rgb: 227 229 232; /* #E3E5E8 */
-    --color-secondary-hover-rgb: 210 212 216; /* #D2D4D8 */
-    --color-inactive-rgb: 138 138 138; /* #8A8A8A */
-    --color-contrast-rgb: 0 0 0; /* #000000 */
+    --color-inh-primary-rgb: 235 237 239; /**/
+    --color-inh-primary-hover-rgb: 223 225 229; /* #DFE1E5 */
+    --color-inh-secondary-rgb: 227 229 232; /* #E3E5E8 */
+    --color-inh-secondary-hover-rgb: 210 212 216; /* #D2D4D8 */
+    --color-inh-inactive-rgb: 138 138 138; /* #8A8A8A */
   }
-  :root[class~="dark"] {
-    color-scheme: dark;
-    --color-pagebg-rgb: 11 11 11; /* #0B0B0B */
-    --color-primary-rgb: 38 38 38; /* #262626 */
-    --color-primary-hover-rgb: 28 28 28; /* #1C1C1C */
-    --color-floating-rgb: 27 27 27; /* #1B1B1B */
-    --color-secondary-rgb: 34 34 34; /* #222222 */
-    --color-secondary-hover-rgb: 55 55 55; /* #373737 */
-    --color-inactive-rgb: 105 105 105; /* #696969 */
-    --color-contrast-rgb: 255 255 255; /* #FFFFFF */
+  :root[data-theme="dark"] {
+    --color-inh-primary-rgb: 38 38 38; /**/
+    --color-inh-primary-hover-rgb: 28 28 28; /* #1C1C1C */
+    --color-inh-secondary-rgb: 34 34 34; /* #222222 */
+    --color-inh-secondary-hover-rgb: 55 55 55; /* #373737 */
+    --color-inh-inactive-rgb: 105 105 105; /* #696969 */
   }
 
   /*
@@ -87,18 +164,39 @@
   }
 }
 
+/* Gradient near primary brand color */
 @utility selected {
   @apply from-brand-gradient-start to-brand-gradient-end bg-linear-to-r bg-clip-text text-transparent;
 }
 
 @layer components {
+  /* Remove quotes characters from blockquote in TailwindCSS prose */
   .prose-quoteless blockquote p:first-of-type::before,
   .prose-quoteless blockquote p:first-of-type::after {
     content: none !important;
   }
 
+  /* Add rubles icon for Scholarship calculator */
   .rubles-input {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='48px' width='224px'><text x='196' y='27' fill='gray' font-size='18px' font-family='sans-serif'>₽</text></svg>");
     background-repeat: no-repeat;
+  }
+}
+
+/*
+  Try to optimize DaisyUI Countdown (still requires too much CPU & GPU)
+  Source: https://github.com/saadeghi/daisyui/issues/2404#issuecomment-2097665681
+*/
+@utility countdown {
+  & > * {
+    &:before {
+      transform: translateY(calc(var(--first-digits) * -1em));
+      display: inline-flex;
+      top: unset;
+    }
+    &:after {
+      transform: translateY(calc(var(--value-ones) * -1em));
+      top: unset;
+    }
   }
 }

@@ -147,7 +147,7 @@ export function FormsPage() {
     <div className="flex grow flex-col gap-4 p-4">
       <div className="max-w-2xl self-center">
         <div className="mb-6 text-center">
-          <p className="text-contrast/70 text-lg">
+          <p className="text-base-content/70 text-lg">
             Enter a form URL to generate a link with the respondent's email
             pre-filled
           </p>

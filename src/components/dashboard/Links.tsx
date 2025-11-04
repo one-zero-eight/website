@@ -107,7 +107,7 @@ const Links = () => {
       <div className="flex min-h-[500px] flex-row-reverse items-start gap-6">
         {/* Category List */}
         <div className="xxl:hidden hidden flex-1 lg:block">
-          <h3 className="text-contrast text-lg font-semibold">Filter</h3>
+          <h3 className="text-base-content text-lg font-semibold">Filter</h3>
           <div>
             {groups.map(({ value }) => (
               <button
@@ -117,8 +117,8 @@ const Links = () => {
                 className={clsx(
                   "block p-2",
                   activeGroup === value
-                    ? "text-brand-violet font-bold"
-                    : "text-contrast/75",
+                    ? "text-primary font-bold"
+                    : "text-base-content/75",
                 )}
               >
                 {value}
@@ -147,25 +147,25 @@ const Links = () => {
                 rel="nofollow noreferrer"
                 key={index}
                 className={clsx(
-                  "resource-item bg-primary hover:bg-primary-hover flex min-h-[100px] flex-row gap-4 rounded-2xl px-4 py-4 transition-all ease-in-out",
+                  "resource-item bg-inh-primary hover:bg-inh-primary-hover rounded-box flex min-h-[100px] flex-row gap-4 px-4 py-4 transition-all ease-in-out",
                   visibleItems.includes(index) ? "visible" : "",
                   activeIndex === index && searchQuery
-                    ? "ring-brand-violet ring-3"
+                    ? "ring-primary ring-3"
                     : "",
                 )}
               >
                 <span
                   className={clsx(
                     resource.icon,
-                    "text-brand-violet hidden w-8 shrink-0 text-3xl sm:block",
+                    "text-primary hidden w-8 shrink-0 text-3xl sm:block",
                   )}
                 />
                 <div>
-                  <p className="text-contrast flex text-lg font-semibold">
+                  <p className="text-base-content flex text-lg font-semibold">
                     <span
                       className={clsx(
                         resource.icon,
-                        "text-brand-violet mt-1 mr-2 shrink-0 text-xl sm:hidden",
+                        "text-primary mt-1 mr-2 shrink-0 text-xl sm:hidden",
                       )}
                     />
                     <span>
@@ -173,7 +173,7 @@ const Links = () => {
                       {resource.title && `: ${resource.title}`}
                     </span>
                   </p>
-                  <p className="text-contrast/75 text-sm">
+                  <p className="text-base-content/75 text-sm">
                     {resource.description}
                   </p>
                 </div>
@@ -181,7 +181,7 @@ const Links = () => {
             ))}
           </div>
         ) : (
-          <p className="text-contrast flex-4 text-lg">No results found.</p>
+          <p className="text-base-content flex-4 text-lg">No results found.</p>
         )}
       </div>
     </div>

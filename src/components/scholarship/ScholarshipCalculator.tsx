@@ -196,7 +196,7 @@ export default function ScholarshipCalculator() {
           onChange={(e) => onMarksChange(e.target.value, course)}
           autoComplete="off"
           spellCheck={false}
-          className="border-brand-violet bg-pagebg font-handwritten caret-brand-violet inset-0 w-full resize-none overflow-hidden rounded-2xl border-2 p-3 text-transparent outline-hidden"
+          className="border-primary bg-base-100 font-handwritten caret-primary rounded-box inset-0 w-full resize-none overflow-hidden border-2 p-3 text-transparent outline-hidden"
           style={{ letterSpacing: "1em", lineHeight: "1.5em" }}
           rows={1}
           maxLength={50}
@@ -215,7 +215,7 @@ export default function ScholarshipCalculator() {
         {marks.length !== 0 && (
           <button
             onClick={() => onMarksChange("", course)}
-            className="bg-pagebg text-brand-violet absolute -top-1 -right-1 h-7 w-7 rounded-2xl p-2 align-middle text-lg"
+            className="bg-base-100 text-primary rounded-box absolute -top-1 -right-1 h-7 w-7 p-2 align-middle text-lg"
             style={{ lineHeight: 0 }}
           >
             X
@@ -224,13 +224,13 @@ export default function ScholarshipCalculator() {
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between">
         <div className="text-xl font-medium">Course:</div>
-        <div className="border-brand-violet bg-pagebg flex w-56 flex-row overflow-clip rounded-2xl border-2">
+        <div className="border-primary bg-base-100 rounded-box flex w-56 flex-row overflow-clip border-2">
           <button
             onClick={() => onMarksChange(marks.join(""), "B25")}
             className={clsx(
-              "font-handwritten hover:bg-brand-violet/20 w-full rounded-l-2xl p-2 text-center text-lg transition-colors",
+              "font-handwritten hover:bg-primary/20 w-full rounded-l-2xl p-2 text-center text-lg transition-colors",
               course === "B25"
-                ? "bg-brand-violet/10 text-brand-violet"
+                ? "bg-primary/10 text-primary"
                 : "bg-transparent text-gray-500",
             )}
           >
@@ -239,9 +239,9 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B24")}
             className={clsx(
-              "font-handwritten hover:bg-brand-violet/20 w-full p-2 text-center text-lg transition-colors",
+              "font-handwritten hover:bg-primary/20 w-full p-2 text-center text-lg transition-colors",
               course === "B24"
-                ? "bg-brand-violet/10 text-brand-violet"
+                ? "bg-primary/10 text-primary"
                 : "bg-transparent text-gray-500",
             )}
           >
@@ -250,9 +250,9 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B23")}
             className={clsx(
-              "font-handwritten hover:bg-brand-violet/20 w-full rounded-r-2xl p-2 text-center text-lg transition-colors",
+              "font-handwritten hover:bg-primary/20 w-full rounded-r-2xl p-2 text-center text-lg transition-colors",
               course === "B23"
-                ? "bg-brand-violet/10 text-brand-violet"
+                ? "bg-primary/10 text-primary"
                 : "bg-transparent text-gray-500",
             )}
           >
@@ -261,9 +261,9 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "M25")}
             className={clsx(
-              "font-handwritten hover:bg-brand-violet/20 w-full rounded-r-2xl p-2 text-center text-lg transition-colors",
+              "font-handwritten hover:bg-primary/20 w-full rounded-r-2xl p-2 text-center text-lg transition-colors",
               course === "M25"
-                ? "bg-brand-violet/10 text-brand-violet"
+                ? "bg-primary/10 text-primary"
                 : "bg-transparent text-gray-500",
             )}
           >
@@ -283,8 +283,8 @@ export default function ScholarshipCalculator() {
           autoComplete="off"
           spellCheck={false}
           className={clsx(
-            "bg-pagebg font-handwritten w-56 rounded-2xl border-2 p-2 text-center outline-hidden",
-            !errorGPA ? "border-brand-violet" : "border-red-500",
+            "bg-base-100 font-handwritten rounded-box w-56 border-2 p-2 text-center outline-hidden",
+            !errorGPA ? "border-primary" : "border-red-500",
           )}
           style={{
             color: !errorGPA ? calculateColorGPA(Number(displayGPA)) : "red",
@@ -303,8 +303,8 @@ export default function ScholarshipCalculator() {
           autoComplete="off"
           spellCheck={false}
           className={clsx(
-            "rubles-input bg-pagebg font-handwritten w-56 rounded-2xl border-2 p-2 text-center outline-hidden",
-            !errorScholarship ? "border-brand-violet" : "border-red-500",
+            "rubles-input bg-base-100 font-handwritten rounded-box w-56 border-2 p-2 text-center outline-hidden",
+            !errorScholarship ? "border-primary" : "border-red-500",
           )}
           style={{
             color: !errorScholarship

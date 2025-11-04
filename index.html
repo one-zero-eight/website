@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark h-full [scrollbar-width:none]">
+<html lang="en" class="h-full [scrollbar-width:none]" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -32,17 +32,16 @@
     <!-- Theme changer script -->
     <script type="text/javascript">
       <!-- Run before loading any resources -->
-      document.documentElement.classList.toggle(
-        "dark",
+      const dark =
         localStorage.getItem("theme") === '"dark"' ||
-          (localStorage.getItem("theme") === null &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches),
-      );
+        (localStorage.getItem("theme") === null &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
     </script>
 
     <!-- Inject main styles to index.html -->
     <style>
-      @import "./src/app/styles.css";
+      /*@import "./src/app/styles.css";*/
     </style>
 
     <!-- The app entrypoint -->
@@ -51,17 +50,17 @@
 
   <body class="h-full">
     <!-- Notice in case of disabled JavaScript -->
-    <noscript class="flex w-full justify-center bg-red-700 p-8">
+    <noscript
+      class="bg-error text-error-content flex w-full justify-center p-8 font-medium"
+    >
       You need to enable JavaScript to run this app.
     </noscript>
 
     <!-- Main app container -->
-    <div id="app" class="font-rubik text-contrast h-full">
+    <div id="app" class="h-full">
       <!-- Show loading state. App will replace this after rendering -->
       <div class="flex h-full w-full items-center justify-center">
-        <span
-          class="icon-[mdi--loading] text-contrast animate-spin text-2xl"
-        ></span>
+        <span class="loading loading-spinner loading-xl"></span>
       </div>
     </div>
   </body>

@@ -32,7 +32,7 @@ export function SportsWidget() {
   if (!hasSportProfile || !hours || !semesters) {
     if (!widgetShown) return null;
     return (
-      <div className="group bg-primary flex min-h-32 animate-pulse flex-row gap-4 rounded-2xl px-4 py-6" />
+      <div className="group bg-inh-primary rounded-box flex min-h-32 animate-pulse flex-row gap-4 px-4 py-6" />
     );
   }
 
@@ -54,11 +54,11 @@ export function SportsWidget() {
   );
 
   return (
-    <div className="group bg-primary flex flex-row gap-4 rounded-2xl px-4 py-4">
-      <span className="icon-[material-symbols--exercise-outline] text-brand-violet hidden w-12 shrink-0 text-5xl sm:block" />
+    <div className="group bg-inh-primary rounded-box flex flex-row gap-4 px-4 py-4">
+      <span className="icon-[material-symbols--exercise-outline] text-primary hidden w-12 shrink-0 text-5xl sm:block" />
       <div className="flex flex-col">
-        <p className="text-contrast flex items-center text-lg font-semibold">
-          <span className="icon-[material-symbols--exercise-outline] text-brand-violet mr-2 shrink-0 text-3xl sm:hidden" />
+        <p className="text-base-content flex items-center text-lg font-semibold">
+          <span className="icon-[material-symbols--exercise-outline] text-primary mr-2 shrink-0 text-3xl sm:hidden" />
           <span>
             Sports:{" "}
             <span className="font-normal">
@@ -67,7 +67,7 @@ export function SportsWidget() {
             </span>
           </span>
         </p>
-        <p className="text-contrast/75">
+        <p className="text-base-content/75">
           <span className="font-semibold">Deadline:</span>{" "}
           {deadline.toLocaleDateString("en-US", {
             month: "long",
@@ -78,10 +78,10 @@ export function SportsWidget() {
         </p>
         <a
           href="https://t.me/IUSportBot"
-          className="text-contrast/75 w-fit hover:underline"
+          className="text-base-content/75 w-fit hover:underline"
         >
           Check in for sports in the{" "}
-          <span className="text-brand-violet">Sports bot</span>
+          <span className="text-primary">Sports bot</span>
           <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />
         </a>
       </div>

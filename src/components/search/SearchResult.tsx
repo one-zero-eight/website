@@ -75,9 +75,7 @@ export default function SearchResult({
           />
         );
       default:
-        return (
-          <span className={`icon-[quill--search] ${base} text-brand-violet`} />
-        );
+        return <span className={`icon-[quill--search] ${base} text-primary`} />;
     }
   };
 
@@ -86,9 +84,9 @@ export default function SearchResult({
       onClick={handleClick}
       tabIndex={0}
       className={clsx(
-        "bg-floating relative grid cursor-pointer grid-cols-[2rem_1fr_auto] items-start gap-4 rounded-lg border! p-4",
+        "bg-base-200 rounded-field relative grid cursor-pointer grid-cols-[2rem_1fr_auto] items-start gap-4 border! p-4",
         isSelected
-          ? "border-brand-violet drop-shadow-[0_0_4px_#9747FF]"
+          ? "border-primary drop-shadow-[0_0_4px_#9747FF]"
           : "border-gray-400",
       )}
     >

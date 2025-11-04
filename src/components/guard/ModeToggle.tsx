@@ -7,14 +7,14 @@ interface ModeToggleProps {
 
 export function ModeToggle({ mode, onChange }: ModeToggleProps) {
   return (
-    <div className="border-contrast/20 flex gap-2 rounded-lg border-2 p-1">
+    <div className="border-base-content/20 rounded-field flex gap-2 border-2 p-1">
       <button
         type="button"
         onClick={() => onChange("create")}
         className={`flex-1 rounded px-4 py-2 text-sm font-medium transition-colors ${
           mode === "create"
-            ? "bg-brand-violet text-white"
-            : "text-contrast/70 hover:bg-primary/5"
+            ? "bg-primary text-white"
+            : "text-base-content/70 hover:bg-inh-primary/5"
         }`}
       >
         {MODE_LABELS.create}
@@ -24,8 +24,8 @@ export function ModeToggle({ mode, onChange }: ModeToggleProps) {
         onClick={() => onChange("copy")}
         className={`flex-1 rounded px-4 py-2 text-sm font-medium transition-colors ${
           mode === "copy"
-            ? "bg-brand-violet text-white"
-            : "text-contrast/70 hover:bg-primary/5"
+            ? "bg-primary text-white"
+            : "text-base-content/70 hover:bg-inh-primary/5"
         }`}
       >
         {MODE_LABELS.copy}

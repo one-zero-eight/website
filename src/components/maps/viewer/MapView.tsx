@@ -64,7 +64,7 @@ export function MapView({
         {!disablePopup && (
           <button
             type="button"
-            className="bg-primary/50 hover:bg-primary/75 absolute right-2 bottom-2 flex h-fit rounded-xl px-2 py-2"
+            className="bg-inh-primary/50 hover:bg-inh-primary/75 absolute right-2 bottom-2 flex h-fit rounded-xl px-2 py-2"
             onClick={() => switchFullscreen()}
           >
             <span className="icon-[material-symbols--fullscreen] text-2xl" />

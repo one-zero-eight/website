@@ -54,7 +54,7 @@ export function WorkshopsAdminPage() {
       <div className="col-span-full w-full px-4 text-left text-xl">
         <button
           onClick={() => setShowPreviousDates((v) => !v)}
-          className="text-brand-violet hover:text-brand-violet/80 mt-2 text-sm transition-colors duration-200"
+          className="text-primary hover:text-primary/80 mt-2 text-sm transition-colors duration-200"
         >
           {showPreviousDates ? "Hide previous dates" : "Show previous dates"}
         </button>
@@ -93,7 +93,7 @@ export function WorkshopsAdminPage() {
       <div className="flex w-full flex-wrap gap-4 px-4 py-2">
         <button
           type="button"
-          className="bg-brand-violet hover:bg-brand-violet/80 flex cursor-pointer items-center gap-1 rounded-2xl border-none py-1 pr-4 pl-2 text-sm font-medium text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out"
+          className="bg-primary hover:bg-primary/80 rounded-box flex cursor-pointer items-center gap-1 border-none py-1 pr-4 pl-2 text-sm font-medium text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out"
           title="Add new workshop"
           onClick={() => {
             setModalDate(null);
@@ -171,7 +171,7 @@ function WorkshopsForDate({
           </div>
           <button
             type="button"
-            className="bg-brand-violet hover:bg-brand-violet/80 flex cursor-pointer items-center gap-1 rounded-2xl border-none py-1 pr-4 pl-2 text-sm font-medium text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out"
+            className="bg-primary hover:bg-primary/80 rounded-box flex cursor-pointer items-center gap-1 border-none py-1 pr-4 pl-2 text-sm font-medium text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out"
             title="Add new workshop"
             onClick={() => onAddWorkshop(isoDate)}
           >
@@ -202,7 +202,7 @@ function WorkshopsForDate({
           <div className="col-span-full w-full text-left text-xl">
             <button
               onClick={() => setShouldShow(true)}
-              className="text-brand-violet hover:text-brand-violet/80 mt-2 text-sm transition-colors duration-200"
+              className="text-primary hover:text-primary/80 mt-2 text-sm transition-colors duration-200"
             >
               Show workshops
             </button>

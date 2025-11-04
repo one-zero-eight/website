@@ -37,7 +37,7 @@ export function WorkshopsListPage() {
 
   if (!me.telegram) {
     return (
-      <div className="bg-primary @container/account m-4 flex w-full max-w-md flex-col gap-4 rounded-2xl px-4 py-6">
+      <div className="bg-inh-primary rounded-box @container/account m-4 flex w-full max-w-md flex-col gap-4 px-4 py-6">
         <img
           src="/favicon.svg"
           alt="InNoHassle logo"
@@ -53,7 +53,7 @@ export function WorkshopsListPage() {
       <div className="col-span-full w-full px-4 text-left text-xl">
         <button
           onClick={() => setShowPreviousDates((v) => !v)}
-          className="text-brand-violet hover:text-brand-violet/80 mt-2 text-sm transition-colors duration-200"
+          className="text-primary hover:text-primary/80 mt-2 text-sm transition-colors duration-200"
         >
           {showPreviousDates ? "Hide previous dates" : "Show previous dates"}
         </button>
@@ -157,7 +157,7 @@ function WorkshopsForDate({
           <div className="col-span-full w-full text-left text-xl">
             <button
               onClick={() => setShouldShow(true)}
-              className="text-brand-violet hover:text-brand-violet/80 mt-2 text-sm transition-colors duration-200"
+              className="text-primary hover:text-primary/80 mt-2 text-sm transition-colors duration-200"
             >
               Show workshops
             </button>

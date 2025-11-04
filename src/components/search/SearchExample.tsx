@@ -34,7 +34,7 @@ export function SearchExample({ searchQueries }: SearchExampleProps) {
       Example:{" "}
       <a
         href="#"
-        className="text-brand-violet hover:underline"
+        className="text-primary hover:underline"
         onClick={(e) => {
           e.preventDefault();
           runSearch(example);

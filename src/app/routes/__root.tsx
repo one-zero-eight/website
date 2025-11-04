@@ -45,7 +45,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
             <div className="@container/content flex min-h-full grow flex-col items-center justify-center overflow-y-auto">
               <h1 className="mb-2 text-4xl font-bold">403 / forbidden</h1>
-              <p className="text-contrast/70 mb-4">
+              <p className="text-base-content/70 mb-4">
                 You don't have permission to access this page.
               </p>
               <Link to="/dashboard" className="selected">

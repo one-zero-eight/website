@@ -162,7 +162,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
       >
         {mode === "create" && (
           <div className="flex flex-col gap-2">
-            <label htmlFor="title" className="text-contrast/80 font-medium">
+            <label htmlFor="title" className="text-base-content/80 font-medium">
               Title:
             </label>
             <input
@@ -174,7 +174,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
                 if (error) setError("");
               }}
               placeholder="e.g., CSE electives"
-              className="border-contrast/20 bg-primary/5 focus:border-primary focus:bg-primary/10 w-full rounded-lg border-2 px-4 py-2 outline-hidden transition-colors"
+              className="border-base-content/20 bg-inh-primary/5 focus:border-inh-primary focus:bg-inh-primary/10 rounded-field w-full border-2 px-4 py-2 outline-hidden transition-colors"
             />
           </div>
         )}
@@ -183,7 +183,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
           <div className="flex flex-col gap-2">
             <label
               htmlFor="spreadsheet_id"
-              className="text-contrast/80 font-medium"
+              className="text-base-content/80 font-medium"
             >
               Spreadsheet URL:
             </label>
@@ -197,23 +197,23 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
               }}
               onBlur={handleBlur}
               placeholder="https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
-              className="border-contrast/20 bg-primary/5 focus:border-primary focus:bg-primary/10 w-full rounded-lg border-2 px-4 py-2 outline-hidden transition-colors"
+              className="border-base-content/20 bg-inh-primary/5 focus:border-inh-primary focus:bg-inh-primary/10 rounded-field w-full border-2 px-4 py-2 outline-hidden transition-colors"
             />
           </div>
         )}
 
         <div className="flex flex-col gap-2">
-          <label className="text-contrast/80 font-medium">
+          <label className="text-base-content/80 font-medium">
             Respondent Role:
           </label>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setRespondentRole(FileRole.writer)}
-              className={`rounded-lg border-2 px-3 py-2 text-sm font-medium ${
+              className={`rounded-field border-2 px-3 py-2 text-sm font-medium ${
                 respondentRole === FileRole.writer
-                  ? "border-brand-violet bg-brand-violet/10"
-                  : "border-contrast/20 hover:border-contrast/40"
+                  ? "border-primary bg-primary/10"
+                  : "border-base-content/20 hover:border-base-content/40"
               }`}
             >
               {ROLE_LABELS.writer}
@@ -221,10 +221,10 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
             <button
               type="button"
               onClick={() => setRespondentRole(FileRole.reader)}
-              className={`rounded-lg border-2 px-3 py-2 text-sm font-medium ${
+              className={`rounded-field border-2 px-3 py-2 text-sm font-medium ${
                 respondentRole === FileRole.reader
-                  ? "border-brand-violet bg-brand-violet/10"
-                  : "border-contrast/20 hover:border-contrast/40"
+                  ? "border-primary bg-primary/10"
+                  : "border-base-content/20 hover:border-base-content/40"
               }`}
             >
               {ROLE_LABELS.reader}
@@ -244,7 +244,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
             isSubmitting ||
             (mode === "create" ? !title.trim() : !spreadsheetId.trim())
           }
-          className="bg-brand-violet rounded-lg px-4 py-3 font-medium text-white transition-colors hover:bg-[#6600CC] disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-primary rounded-field px-4 py-3 font-medium text-white transition-colors hover:bg-[#6600CC] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting
             ? mode === "create"

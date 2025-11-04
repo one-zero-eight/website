@@ -10,7 +10,7 @@ export default function PreviewBottomButton({
 } & React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   return (
     <a
-      className="bg-base-100 dark:bg-primary-hover flex flex-wrap items-center justify-center rounded-lg px-4 py-2 md:py-[14px]"
+      className="bg-base-100 dark:bg-inh-primary-hover rounded-field flex flex-wrap items-center justify-center px-4 py-2 md:py-[14px]"
       {...props}
     >
       {icon}

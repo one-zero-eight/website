@@ -12,7 +12,7 @@ export function ActResult({
     <div
       tabIndex={0}
       className={clsx(
-        "bg-floating flex flex-col rounded-lg border! border-gray-400 p-4",
+        "bg-base-200 rounded-field flex flex-col border! border-gray-400 p-4",
       )}
     >
       {answer}

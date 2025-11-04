@@ -54,6 +54,7 @@
     "@vueuse/core": "^11.1.0",
     "bumpp": "^9.5.2",
     "clsx": "^2.1.1",
+    "daisyui": "^5.4.3",
     "double-metaphone": "^2.0.1",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.5",

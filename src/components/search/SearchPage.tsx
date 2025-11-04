@@ -260,7 +260,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
         applyFilters={applyFilters}
       />
       {!(isLoading || isFetching) && searchResult && (
-        <p className="text-contrast py-4 text-xl font-semibold">
+        <p className="text-base-content py-4 text-xl font-semibold">
           {filteredResponses.length > 0
             ? `Results for: ${searchResult.searched_for}`
             : `No matched results for: ${searchResult.searched_for}`}
@@ -268,7 +268,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       )}
       {(isLoading || isFetching) && (
         <>
-          <p className="text-contrast py-4 text-xl font-semibold">
+          <p className="text-base-content py-4 text-xl font-semibold">
             Loading search results...
           </p>
           <div className="flex w-full flex-row gap-6">
@@ -276,11 +276,11 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="group bg-floating flex grid min-h-32 w-full animate-pulse items-start rounded-lg p-4"
+                  className="group bg-base-200 rounded-field flex grid min-h-32 w-full animate-pulse items-start p-4"
                 />
               ))}
             </div>
-            <div className="group md:bg-floating flex hidden animate-pulse md:inline md:h-[375px] md:w-1/2 md:min-w-0 md:basis-1/2 md:justify-stretch md:rounded-lg"></div>
+            <div className="group md:bg-base-200 md:rounded-field flex hidden animate-pulse md:inline md:h-[375px] md:w-1/2 md:min-w-0 md:basis-1/2 md:justify-stretch"></div>
           </div>
         </>
       )}
@@ -327,7 +327,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       )}
       {error && (
         <div>
-          <p className="text-contrast py-4 text-xl font-semibold">
+          <p className="text-base-content py-4 text-xl font-semibold">
             Sorry, something gone wrong.
           </p>
         </div>

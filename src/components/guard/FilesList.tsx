@@ -35,7 +35,7 @@ export function FilesList({ files, search, onShowDetails }: FilesListProps) {
   }, [files, normalizedSearch, searchSlug]);
 
   if (files.length === 0) {
-    return <div className="text-contrast/60">No files found.</div>;
+    return <div className="text-base-content/60">No files found.</div>;
   }
 
   return (
@@ -54,10 +54,10 @@ interface FileItemProps {
 
 function FileItem({ file, onShowDetails }: FileItemProps) {
   return (
-    <div className="border-contrast/20 bg-primary/5 flex items-center justify-between rounded-lg border-2 px-4 py-3">
+    <div className="border-base-content/20 bg-inh-primary/5 rounded-field flex items-center justify-between border-2 px-4 py-3">
       <div className="min-w-0">
         <div className="truncate font-medium">{file.title || "Untitled"}</div>
-        <div className="text-contrast/60 flex items-center gap-2 truncate text-sm">
+        <div className="text-base-content/60 flex items-center gap-2 truncate text-sm">
           {file.user_role}, {file.sso_joins_count}{" "}
           {file.sso_joins_count === 1 ? "join" : "joins"}, created at{" "}
           {formatDate(file.created_at)}
@@ -66,7 +66,7 @@ function FileItem({ file, onShowDetails }: FileItemProps) {
       <div className="ml-4 flex shrink-0 items-center gap-2">
         <button
           onClick={() => onShowDetails(file.slug)}
-          className="border-contrast/20 hover:border-contrast/40 rounded-lg border-2 px-3 py-2 text-sm font-medium"
+          className="border-base-content/20 hover:border-base-content/40 rounded-field border-2 px-3 py-2 text-sm font-medium"
         >
           Show more
         </button>

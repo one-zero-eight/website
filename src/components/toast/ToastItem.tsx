@@ -54,7 +54,7 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
 
   const getToastStyles = () => {
     const baseStyles = [
-      "flex items-start gap-3 p-4 rounded-2xl shadow-lg border-l-4 transition-all duration-300 ease-in-out bg-floating text-contrast",
+      "flex items-start gap-3 p-4 rounded-box shadow-lg border-l-4 transition-all duration-300 ease-in-out bg-base-200 text-base-content",
       "transform-gpu",
     ];
 
@@ -153,12 +153,12 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
       <div className="min-w-0 flex-1">
         <h4 className="text-sm font-semibold">{toast.title}</h4>
         {toast.message && (
-          <p className="text-contrast/75 mt-1 text-sm">{toast.message}</p>
+          <p className="text-base-content/75 mt-1 text-sm">{toast.message}</p>
         )}
       </div>
       <button
         onClick={handleClose}
-        className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 ml-2 shrink-0 rounded-lg p-1 transition-colors"
+        className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-field ml-2 shrink-0 p-1 transition-colors"
         aria-label="Close notification"
       >
         <span className="icon-[material-symbols--close] text-lg" />

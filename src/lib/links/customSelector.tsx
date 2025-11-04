@@ -68,7 +68,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   return (
     <div className={clsx(className, "relative")}>
       <div
-        className="border-brand-violet flex w-full cursor-pointer items-center justify-between rounded-md border p-2"
+        className="border-primary flex w-full cursor-pointer items-center justify-between rounded-md border p-2"
         ref={refs.setReference}
         {...getReferenceProps({
           tabIndex: 0,
@@ -82,7 +82,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             "Select..."}
         </span>
         <svg
-          className={`text-brand-violet h-5 w-5 transition-transform ${
+          className={`text-primary h-5 w-5 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
           fill="none"
@@ -109,7 +109,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 left: x ?? 0,
                 width: (refs.reference.current as HTMLElement)?.offsetWidth,
               }}
-              className="border-brand-violet bg-primary z-10 mt-1 rounded-md border shadow-lg"
+              className="border-primary bg-inh-primary z-10 mt-1 rounded-md border shadow-lg"
               {...getFloatingProps()}
             >
               {options.map((option, index) => {
@@ -123,8 +123,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                     tabIndex={index === activeIndex ? 0 : -1}
                     aria-selected={index === activeIndex}
                     className={clsx(
-                      "hover:bg-secondary cursor-pointer rounded-md px-4 py-2",
-                      activeIndex === index && "bg-secondary",
+                      "hover:bg-inh-secondary cursor-pointer rounded-md px-4 py-2",
+                      activeIndex === index && "bg-inh-secondary",
                     )}
                     {...getItemProps({
                       onClick: () => handleSelect(option.value, index),

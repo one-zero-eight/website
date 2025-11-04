@@ -17,26 +17,26 @@ export function AcademicCalendarWidget() {
   if (!academicCalendar) {
     if (!widgetShown) return null;
     return (
-      <div className="group bg-primary flex min-h-32 animate-pulse flex-row gap-4 rounded-2xl px-4 py-6" />
+      <div className="group bg-inh-primary rounded-box flex min-h-32 animate-pulse flex-row gap-4 px-4 py-6" />
     );
   }
 
   return (
-    <div className="group bg-primary flex flex-row gap-4 rounded-2xl px-4 py-4">
-      <span className="icon-[ph--books] text-brand-violet hidden w-12 shrink-0 text-5xl sm:block" />
+    <div className="group bg-inh-primary rounded-box flex flex-row gap-4 px-4 py-4">
+      <span className="icon-[ph--books] text-primary hidden w-12 shrink-0 text-5xl sm:block" />
       <div className="flex flex-col">
-        <div className="text-contrast flex text-lg font-semibold">
-          <span className="icon-[ph--books] text-brand-violet mr-2 shrink-0 text-3xl sm:hidden" />
+        <div className="text-base-content flex text-lg font-semibold">
+          <span className="icon-[ph--books] text-primary mr-2 shrink-0 text-3xl sm:hidden" />
           <academicCalendar.Title />
         </div>
-        <div className="text-contrast/75 whitespace-pre-wrap">
+        <div className="text-base-content/75 whitespace-pre-wrap">
           <academicCalendar.Details />
         </div>
         <a
           href="https://eduwiki.innopolis.university/index.php/AcademicCalendar"
-          className="text-contrast/75 w-fit text-sm hover:underline"
+          className="text-base-content/75 w-fit text-sm hover:underline"
         >
-          *based on <span className="text-brand-violet">Eduwiki</span>
+          *based on <span className="text-primary">Eduwiki</span>
           <span className="icon-[material-symbols--open-in-new-rounded] ml-1 text-xs" />
         </a>
       </div>

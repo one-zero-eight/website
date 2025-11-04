@@ -62,9 +62,9 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
         <button
           ref={refs.setReference}
           {...getReferenceProps()}
-          className="hover:bg-secondary flex items-center justify-center rounded-xl p-2"
+          className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
         >
-          <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-inactive text-3xl" />
+          <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-inh-inactive text-3xl" />
         </button>
       </Tooltip>
 
@@ -76,7 +76,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
               className={clsx(
-                "border-primary/50 bg-floating absolute z-10 w-fit rounded-2xl border-2 p-4",
+                "border-inh-primary/50 bg-base-200 rounded-box absolute z-10 w-fit border-2 p-4",
                 isMobile
                   ? "top-[18p] left-0"
                   : isSidebar
@@ -85,12 +85,12 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               )}
             >
               <div className="flex flex-row justify-center gap-6 sm:justify-normal">
-                <div className="bg-primary text-contrast/50 flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full">
+                <div className="bg-inh-primary text-base-content/50 flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full">
                   {me.telegram?.photo_url ? (
                     <img
                       src={me.telegram.photo_url}
                       alt="Your avatar"
-                      className="border-contrast/50 rounded-full border-2"
+                      className="border-base-content/50 rounded-full border-2"
                     />
                   ) : (
                     <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-5xl" />
@@ -98,17 +98,17 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                 </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex h-20 flex-col justify-center">
-                    <p className="text-contrast text-xl">
+                    <p className="text-base-content text-xl">
                       {me?.innopolis_sso?.name}{" "}
                     </p>
-                    <p className="text-contrast/75 text-sm">
+                    <p className="text-base-content/75 text-sm">
                       {me?.innopolis_sso?.email}
                     </p>
                   </div>
                   <Link
                     to="/dashboard"
                     onClick={() => setIsOpen(false)}
-                    className="bg-primary text-contrast/75 hover:bg-secondary-hover flex w-full flex-row items-center justify-center gap-2 rounded-2xl px-6 py-2 text-center whitespace-nowrap"
+                    className="bg-inh-primary text-base-content/75 hover:bg-inh-secondary-hover rounded-box flex w-full flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
                   >
                     <span className="icon-[material-symbols--account-circle] text-2xl" />
                     My dashboard
@@ -119,7 +119,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                       navigateToSignOut();
                       setIsOpen(false);
                     }}
-                    className="bg-primary text-contrast/75 hover:bg-secondary-hover flex w-full cursor-pointer flex-row items-center justify-center gap-2 rounded-2xl px-6 py-2 text-center whitespace-nowrap"
+                    className="bg-inh-primary text-base-content/75 hover:bg-inh-secondary-hover rounded-box flex w-full cursor-pointer flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
                   >
                     <span className="icon-[material-symbols--logout] text-2xl" />
                     Sign out

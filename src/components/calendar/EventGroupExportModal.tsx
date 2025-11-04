@@ -68,7 +68,7 @@ export function EventGroupExportModal({
             {...getFloatingProps()}
             className="flex h-fit w-full flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-1/2"
           >
-            <div className="bg-floating overflow-hidden rounded-2xl">
+            <div className="bg-base-200 rounded-box overflow-hidden">
               <div className="flex flex-col p-4">
                 {/* Heading and description */}
                 <div className="mb-2 flex w-full flex-row">
@@ -77,18 +77,18 @@ export function EventGroupExportModal({
                   </div>
                   <button
                     type="button"
-                    className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 -mt-2 -mr-2 flex h-12 w-12 items-center justify-center rounded-2xl"
+                    className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
                   </button>
                 </div>
-                <div className="text-contrast/75">
+                <div className="text-base-content/75">
                   You can add the schedule to your favorite calendar application
                   and it will be updated on schedule changes.
                 </div>
                 {/* Export steps */}
-                <ul className="text-contrast/75 mt-4 list-decimal pl-5">
+                <ul className="text-base-content/75 mt-4 list-decimal pl-5">
                   <li>
                     Copy the link.
                     <ScheduleLinkCopy
@@ -103,11 +103,11 @@ export function EventGroupExportModal({
                       href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
                       target="_blank"
                     >
-                      <span className="icon-[material-symbols--link] text-contrast/50" />
+                      <span className="icon-[material-symbols--link] text-base-content/50" />
                       Google Calendar
                     </a>
                     <a className="ml-4 flex w-fit flex-row items-center gap-x-2">
-                      <span className="icon-[material-symbols--help-outline] text-contrast/50" />
+                      <span className="icon-[material-symbols--help-outline] text-base-content/50" />
                       Other applications: find in settings
                     </a>
                   </li>

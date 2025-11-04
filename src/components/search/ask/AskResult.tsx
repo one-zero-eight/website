@@ -24,7 +24,7 @@ export function AskResult({
     <div
       tabIndex={0}
       className={clsx(
-        "border-inactive bg-primary text-contrast flex flex-col gap-2 self-start rounded-lg border! px-4 py-2",
+        "border-inh-inactive bg-inh-primary text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2",
       )}
     >
       {!hasError ? (
@@ -36,7 +36,7 @@ export function AskResult({
                 href={href ?? "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-brand-violet hover:underline"
+                className="text-primary hover:underline"
               >
                 {"link"}
               </a>
@@ -63,7 +63,7 @@ export function AskResult({
             return (
               <span key={link || i}>
                 <a
-                  className="text-brand-violet hover:underline"
+                  className="text-primary hover:underline"
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"

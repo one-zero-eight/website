@@ -26,7 +26,7 @@ export function BottomNavigation() {
   return (
     <nav
       className={clsx(
-        "bg-floating flex w-full shrink-0 overflow-hidden lg:hidden",
+        "bg-base-200 flex w-full shrink-0 overflow-hidden lg:hidden",
         isPWA ? "px-6 pt-1 pb-6" : "h-12",
       )}
     >
@@ -77,7 +77,7 @@ function BottomNavigationLink({
   return (
     <Link
       {...props}
-      className="text-inactive [&.is-active]:text-brand-violet flex grow basis-0 flex-col items-center justify-center text-2xl select-none"
+      className="text-inh-inactive [&.is-active]:text-primary flex grow basis-0 flex-col items-center justify-center text-2xl select-none"
       activeProps={{ className: "is-active" }}
     >
       {icon}

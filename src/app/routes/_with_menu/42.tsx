@@ -21,7 +21,7 @@ function RouteComponent() {
           colors={["#A855F7", "#EC4899", "#F59E0B", "#22C55E"]}
           particleCount={100}
         />{" "}
-        <div className="overflow-hidden rounded-2xl">
+        <div className="rounded-box overflow-hidden">
           <div className="flex flex-col p-2 sm:p-6">
             <div className="mb-3 flex w-full shrink-0 flex-row items-center gap-2 sm:gap-3">
               <div className="grid h-8 w-8 min-w-8 place-items-center rounded-xl bg-linear-to-br from-violet-600 to-fuchsia-600 text-lg sm:h-10 sm:w-10 sm:min-w-10 sm:text-2xl">
@@ -33,10 +33,10 @@ function RouteComponent() {
               </div>
             </div>
 
-            <div className="md:text-md text-contrast/80 mb-2 sm:text-sm lg:text-lg">
+            <div className="md:text-md text-base-content/80 mb-2 sm:text-sm lg:text-lg">
               Amazing discovery! You've found the exclusive Ryan Gosling
               resource link. And the correct answer is{" "}
-              <span className="text-brand-violet">108</span>, not 42.
+              <span className="text-primary">108</span>, not 42.
             </div>
 
             <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-black/10">

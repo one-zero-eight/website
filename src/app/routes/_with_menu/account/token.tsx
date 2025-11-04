@@ -24,7 +24,7 @@ function RouteComponent() {
 
       <Topbar title="My account" />
       <div className="flex w-full flex-row justify-center">
-        <div className="bg-primary @container/account m-4 flex w-full max-w-md flex-col gap-4 rounded-2xl px-4 py-6">
+        <div className="bg-inh-primary rounded-box @container/account m-4 flex w-full max-w-md flex-col gap-4 px-4 py-6">
           <MyTokenPage />
         </div>
       </div>

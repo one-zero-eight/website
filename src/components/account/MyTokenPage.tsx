@@ -41,7 +41,7 @@ export function MyTokenPage() {
         <h1 className="text-center text-2xl font-medium wrap-break-word">
           Sign in to get access
         </h1>
-        <p className="text-contrast/75 text-center">
+        <p className="text-base-content/75 text-center">
           Use your Innopolis account
           <br />
           to access InNoHassle services.
@@ -56,10 +56,10 @@ export function MyTokenPage() {
   return (
     <>
       <h1 className="text-2xl font-medium wrap-break-word">Access token</h1>
-      <p className="text-contrast/75">
+      <p className="text-base-content/75">
         This token gives an application full access to your account.
       </p>
-      <p className="text-contrast/75">
+      <p className="text-base-content/75">
         Use only for development. Do not send it to untrusted people or
         applications!
       </p>
@@ -68,10 +68,10 @@ export function MyTokenPage() {
           <input
             readOnly
             value={accessToken}
-            className="border-inactive bg-secondary w-full grow rounded-xl border p-2"
+            className="border-inh-inactive bg-inh-secondary w-full grow rounded-xl border p-2"
           />
           <button
-            className="text-brand-violet hover:bg-secondary w-fit rounded-xl p-2"
+            className="text-primary hover:bg-inh-secondary w-fit rounded-xl p-2"
             onClick={copy}
           >
             {copied ? "Copied!" : "Copy"}
@@ -79,7 +79,7 @@ export function MyTokenPage() {
         </div>
       </div>
       {tokenExp && (
-        <p className="text-contrast/75">
+        <p className="text-base-content/75">
           Expires at:{" "}
           {tokenExp.toLocaleDateString("ru-RU", {
             year: "numeric",

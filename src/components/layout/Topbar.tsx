@@ -12,7 +12,7 @@ export function Topbar({
   return (
     <nav
       className={clsx(
-        "border-b-secondary-hover w-full flex-row items-center justify-between border-b",
+        "border-b-inh-secondary-hover w-full flex-row items-center justify-between border-b",
         hideOnMobile ? "hidden lg:flex" : "flex",
       )}
     >

@@ -52,7 +52,9 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
   if (clubPending) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inactive text-lg">Loading club information...</div>
+        <div className="text-inh-inactive text-lg">
+          Loading club information...
+        </div>
       </div>
     );
   }
@@ -60,7 +62,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
   if (!club) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inactive text-lg">Club not found</div>
+        <div className="text-inh-inactive text-lg">Club not found</div>
       </div>
     );
   }
@@ -68,9 +70,9 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       {/* Header Section */}
-      <div className="bg-floating border-secondary mb-6 overflow-hidden rounded-lg border">
+      <div className="bg-base-200 border-inh-secondary rounded-field mb-6 overflow-hidden border">
         <div className="from-brand-gradient-start to-brand-gradient-end flex items-center justify-center bg-linear-to-br p-8">
-          <div className="relative size-48 shrink-0 overflow-hidden rounded-lg">
+          <div className="rounded-field relative size-48 shrink-0 overflow-hidden">
             <img
               src={getLogoURLById(club.id)}
               alt={`${club.title} logo`}
@@ -88,7 +90,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
         <div className="p-6">
           <div className="mb-3 flex items-start justify-between">
             <div>
-              <h1 className="text-contrast mb-2 text-3xl font-bold">
+              <h1 className="text-base-content mb-2 text-3xl font-bold">
                 {club.title}
               </h1>
               <span
@@ -106,7 +108,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
               </span>
             )}
           </div>
-          <p className="text-contrast/80 mt-4 leading-relaxed">
+          <p className="text-base-content/80 mt-4 leading-relaxed">
             {club.short_description}
           </p>
         </div>
@@ -117,19 +119,19 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
         <div className="space-y-6 lg:col-span-2">
           {/* Description Section */}
           {club.description && (
-            <div className="bg-floating border-secondary rounded-lg border p-6">
-              <h2 className="text-contrast mb-4 text-xl font-semibold">
+            <div className="bg-base-200 border-inh-secondary rounded-field border p-6">
+              <h2 className="text-base-content mb-4 text-xl font-semibold">
                 About
               </h2>
-              <p className="text-contrast/70 leading-relaxed whitespace-pre-wrap">
+              <p className="text-base-content/70 leading-relaxed whitespace-pre-wrap">
                 {club.description}
               </p>
             </div>
           )}
 
           {/* Upcoming Events Section */}
-          <div className="bg-floating border-secondary rounded-lg border p-6">
-            <h2 className="text-contrast mb-4 flex items-center gap-2 text-xl font-semibold">
+          <div className="bg-base-200 border-inh-secondary rounded-field border p-6">
+            <h2 className="text-base-content mb-4 flex items-center gap-2 text-xl font-semibold">
               <span className="icon-[mdi--calendar] size-6" />
               Upcoming Events
             </h2>
@@ -137,12 +139,12 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
               {mockEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="border-secondary hover:bg-primary rounded-lg border p-4 transition-colors"
+                  className="border-inh-secondary hover:bg-inh-primary rounded-field border p-4 transition-colors"
                 >
-                  <h3 className="text-contrast mb-2 font-semibold">
+                  <h3 className="text-base-content mb-2 font-semibold">
                     {event.title}
                   </h3>
-                  <div className="text-inactive space-y-1 text-sm">
+                  <div className="text-inh-inactive space-y-1 text-sm">
                     <div className="flex items-center gap-2">
                       <span className="icon-[mdi--calendar] size-4" />
                       <span>
@@ -169,8 +171,8 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
         <div className="space-y-6 lg:col-span-1">
           {/* Links Section */}
           {club.links && club.links.length > 0 && (
-            <div className="bg-floating border-secondary rounded-lg border p-6">
-              <h2 className="text-contrast mb-4 text-xl font-semibold">
+            <div className="bg-base-200 border-inh-secondary rounded-field border p-6">
+              <h2 className="text-base-content mb-4 text-xl font-semibold">
                 Resources & Links
               </h2>
               <div className="space-y-3">
@@ -180,19 +182,19 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                     href={link.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-primary hover:bg-primary-hover flex items-center gap-3 rounded-lg p-3 transition-colors"
+                    className="bg-inh-primary hover:bg-inh-primary-hover rounded-field flex items-center gap-3 p-3 transition-colors"
                   >
                     <span
                       className={clsx(
-                        "text-contrast",
+                        "text-base-content",
                         getLinkIconClass(link.type),
                         "size-5",
                       )}
                     />
-                    <span className="text-contrast font-medium">
+                    <span className="text-base-content font-medium">
                       {link.label ? link.label : getLinkLabel(link.type)}
                     </span>
-                    <span className="icon-[mdi--open-in-new] text-inactive ml-auto size-4" />
+                    <span className="icon-[mdi--open-in-new] text-inh-inactive ml-auto size-4" />
                   </a>
                 ))}
               </div>
@@ -201,18 +203,18 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
 
           {/* Leader Section */}
           {clubLeader && (
-            <div className="bg-floating border-secondary rounded-lg border p-6">
-              <h2 className="text-contrast mb-4 flex items-center gap-2 text-xl font-semibold">
+            <div className="bg-base-200 border-inh-secondary rounded-field border p-6">
+              <h2 className="text-base-content mb-4 flex items-center gap-2 text-xl font-semibold">
                 <span className="icon-[mdi--account] size-6" />
                 Club Leader
               </h2>
               <div className="space-y-3">
                 {clubLeader.name && (
                   <div className="flex items-start gap-3">
-                    <span className="icon-[mdi--account] text-inactive mt-0.5 size-5" />
+                    <span className="icon-[mdi--account] text-inh-inactive mt-0.5 size-5" />
                     <div>
-                      <div className="text-inactive text-sm">Name</div>
-                      <div className="text-contrast font-medium">
+                      <div className="text-inh-inactive text-sm">Name</div>
+                      <div className="text-base-content font-medium">
                         {clubLeader.name}
                       </div>
                     </div>
@@ -220,14 +222,14 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                 )}
                 {clubLeader.telegram_alias && (
                   <div className="flex items-start gap-3">
-                    <span className="icon-[mdi--telegram] text-inactive mt-0.5 size-5" />
+                    <span className="icon-[mdi--telegram] text-inh-inactive mt-0.5 size-5" />
                     <div>
-                      <div className="text-inactive text-sm">Telegram</div>
+                      <div className="text-inh-inactive text-sm">Telegram</div>
                       <a
                         href={`https://t.me/${clubLeader.telegram_alias}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-brand-violet hover:underline"
+                        className="text-primary hover:underline"
                       >
                         @{clubLeader.telegram_alias}
                       </a>

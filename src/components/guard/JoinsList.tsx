@@ -22,7 +22,7 @@ export function JoinsList({ joins, search, onBan }: JoinsListProps) {
   );
 
   if (!joins || joins.length === 0) {
-    return <div className="text-contrast/60">No joins yet.</div>;
+    return <div className="text-base-content/60">No joins yet.</div>;
   }
 
   return (
@@ -41,13 +41,13 @@ interface JoinItemProps {
 
 function JoinItem({ join, onBan }: JoinItemProps) {
   return (
-    <div className="border-contrast/20 bg-primary/5 flex items-center justify-between rounded-lg border-2 px-4 py-3">
+    <div className="border-base-content/20 bg-inh-primary/5 rounded-field flex items-center justify-between border-2 px-4 py-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Email email={join.gmail} />
           <Email email={join.innomail} />
         </div>
-        <div className="text-contrast/50 text-xs">
+        <div className="text-base-content/50 text-xs">
           joined at {formatDate(join.joined_at)}
         </div>
       </div>
@@ -60,7 +60,7 @@ function Email({ email }: { email: string }) {
   return (
     <span>
       {email.split("@")[0]}
-      <span className="text-contrast/50">@{email.split("@")[1]}</span>
+      <span className="text-base-content/50">@{email.split("@")[1]}</span>
     </span>
   );
 }
@@ -82,7 +82,7 @@ function BanButton({ onClick }: { onClick: () => Promise<void> }) {
     <button
       onClick={handleClick}
       disabled={pending}
-      className="ml-4 shrink-0 rounded-lg border-2 border-red-500 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+      className="rounded-field ml-4 shrink-0 border-2 border-red-500 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
       title="Ban user"
     >
       {pending ? "Banning..." : "Ban"}

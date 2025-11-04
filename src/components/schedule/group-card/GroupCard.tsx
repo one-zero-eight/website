@@ -26,7 +26,7 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
     <Link
       to="/schedule/event-groups/$alias"
       params={{ alias: group.alias }}
-      className="bg-primary hover:bg-primary-hover flex min-h-fit max-w-full min-w-fit basis-72 cursor-pointer flex-row items-center justify-between rounded-2xl p-4"
+      className="bg-inh-primary hover:bg-inh-primary-hover rounded-box flex min-h-fit max-w-full min-w-fit basis-72 cursor-pointer flex-row items-center justify-between p-4"
     >
       <div className="flex flex-col gap-0.5">
         <p className="text-xl font-medium">{group.name}</p>
@@ -37,7 +37,7 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
             return (
               <Fragment key={v}>
                 {tags.map((tag) => (
-                  <p key={tag.id} className="text-inactive">
+                  <p key={tag.id} className="text-inh-inactive">
                     {tag.name}
                   </p>
                 ))}

@@ -17,7 +17,7 @@ export default function Sidebar() {
   return (
     <aside
       className={clsx(
-        "bg-floating sticky top-0 hidden h-full shrink-0 overflow-x-hidden overflow-y-auto py-4 lg:flex",
+        "bg-base-200 sticky top-0 hidden h-full shrink-0 overflow-x-hidden overflow-y-auto py-4 lg:flex",
         !isMinimized ? "px-4" : "px-1",
       )}
     >
@@ -25,10 +25,10 @@ export default function Sidebar() {
       <button
         type="button"
         onClick={() => setMinimized((v) => !v)}
-        className="hover:bg-secondary absolute top-0 right-0 flex rounded-xl p-0.5"
+        className="hover:bg-inh-secondary absolute top-0 right-0 flex rounded-xl p-0.5"
       >
         <span
-          className="icon-[material-symbols--chevron-left-rounded] text-inactive text-2xl"
+          className="icon-[material-symbols--chevron-left-rounded] text-inh-inactive text-2xl"
           style={{
             transform: isMinimized ? "rotate(180deg)" : "rotate(0deg)",
           }}
@@ -70,9 +70,9 @@ export default function Sidebar() {
               href="https://github.com/one-zero-eight"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:bg-secondary flex items-center justify-center rounded-xl p-2"
+              className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
             >
-              <span className="icon-[mdi--github] text-inactive text-3xl" />
+              <span className="icon-[mdi--github] text-inh-inactive text-3xl" />
             </a>
           </Tooltip>
           <Tooltip content="Telegram">
@@ -80,9 +80,9 @@ export default function Sidebar() {
               href="https://t.me/one_zero_eight"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:bg-secondary flex items-center justify-center rounded-xl p-2"
+              className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
             >
-              <span className="icon-[uil--telegram-alt] text-inactive text-3xl" />
+              <span className="icon-[uil--telegram-alt] text-inh-inactive text-3xl" />
             </a>
           </Tooltip>
         </div>
@@ -104,7 +104,7 @@ function SidebarLink({
     <>
       {icon}
       {!isMinimized && (
-        <div className="in-[.is-active]:selected text-inactive ml-4 flex w-fit items-center text-lg font-semibold whitespace-nowrap">
+        <div className="in-[.is-active]:selected text-inh-inactive ml-4 flex w-fit items-center text-lg font-semibold whitespace-nowrap">
           {title}
         </div>
       )}
@@ -123,7 +123,7 @@ function SidebarLink({
     return (
       <a
         className={clsx(
-          "py-0.3 text-inactive flex w-full rounded-xl select-none hover:bg-gray-500/10",
+          "py-0.3 text-inh-inactive flex w-full rounded-xl select-none hover:bg-gray-500/10",
           !isMinimized ? "px-2 text-4xl" : "justify-center px-1 text-3xl",
         )}
         target="_blank"
@@ -138,8 +138,8 @@ function SidebarLink({
     return (
       <Link
         className={clsx(
-          "py-0.3 text-inactive flex w-full rounded-xl select-none hover:bg-gray-500/10",
-          "[&.is-active]:text-brand-violet",
+          "py-0.3 text-inh-inactive flex w-full rounded-xl select-none hover:bg-gray-500/10",
+          "[&.is-active]:text-primary",
           !isMinimized ? "px-2 text-4xl" : "justify-center px-1 text-3xl",
         )}
         activeProps={{ className: "is-active" }}

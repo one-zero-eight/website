@@ -91,7 +91,7 @@ export function GuardPage() {
       <div className="w-full max-w-2xl self-center">
         <SetupContainer serviceEmail={serviceEmail} />
 
-        <hr className="border-contrast/20 my-6" />
+        <hr className="border-base-content/20 my-6" />
 
         {selectedSlug ? (
           <FileDetails
@@ -109,7 +109,7 @@ export function GuardPage() {
         ) : (
           <FilesSection search={filesSearch} onSearchChange={setFilesSearch}>
             {isLoadingFiles ? (
-              <div className="text-contrast/70">Loading...</div>
+              <div className="text-base-content/70">Loading...</div>
             ) : filesError ? (
               <div className="rounded-sm border-2 border-red-400 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-600 dark:bg-red-900/20 dark:text-red-200">
                 Error loading files:{" "}
@@ -122,7 +122,7 @@ export function GuardPage() {
                 onShowDetails={handleShowDetails}
               />
             ) : (
-              <div className="text-contrast/60">No files found.</div>
+              <div className="text-base-content/60">No files found.</div>
             )}
           </FilesSection>
         )}

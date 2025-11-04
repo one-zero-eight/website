@@ -12,7 +12,7 @@ const ToggleGroup = ({
         search={{ q: currentTabText || undefined }}
         className="flex w-[90px] justify-center bg-transparent px-4 font-medium transition-colors hover:bg-[#e6e6e6] dark:hover:bg-[#1e1e1e]"
         activeOptions={{ exact: true, includeSearch: false }}
-        activeProps={{ className: "border-b-2 border-brand-violet" }}
+        activeProps={{ className: "border-b-2 border-primary" }}
       >
         <span className="pt-4 pb-2 lg:pt-6">Search</span>
       </Link>
@@ -21,7 +21,7 @@ const ToggleGroup = ({
         search={{ q: currentTabText || undefined }}
         className="flex w-[90px] justify-center bg-transparent px-4 font-medium transition-colors hover:bg-[#e6e6e6] dark:hover:bg-[#1e1e1e]"
         activeOptions={{ exact: true, includeSearch: false }}
-        activeProps={{ className: "border-b-2 border-brand-violet" }}
+        activeProps={{ className: "border-b-2 border-primary" }}
       >
         <span className="pt-4 pb-2 lg:pt-6">Ask</span>
       </Link>

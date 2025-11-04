@@ -51,7 +51,7 @@ export function ModalWindow({
             {...getFloatingProps()}
             className="flex h-fit w-full max-w-xl flex-col p-4 outline-hidden"
           >
-            <div className="bg-floating overflow-hidden rounded-2xl">
+            <div className="bg-base-200 rounded-box overflow-hidden">
               <div
                 className={`flex min-w-0 flex-col p-4 @2xl/modal:p-8 ${className}`}
               >
@@ -64,7 +64,7 @@ export function ModalWindow({
                   )}
                   <button
                     type="button"
-                    className="text-contrast/50 hover:bg-primary-hover/50 hover:text-contrast/75 -mt-2 -mr-2 flex h-12 w-12 items-center justify-center rounded-2xl"
+                    className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />

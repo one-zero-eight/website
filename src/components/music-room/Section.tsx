@@ -6,7 +6,7 @@ export function Section({
 }: PropsWithChildren<HTMLAttributes<HTMLDivElement>>) {
   return (
     <div
-      className="prose prose-quoteless bg-primary dark:prose-invert prose-img:rounded-2xl mx-4 max-w-none rounded-2xl px-4 py-6"
+      className="prose prose-quoteless bg-inh-primary dark:prose-invert prose-img:rounded-box rounded-box mx-4 max-w-none px-4 py-6"
       {...props}
     >
       {children}

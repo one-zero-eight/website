@@ -47,7 +47,7 @@ export default function IframePreviewCard({
   return (
     <div
       className={clsx(
-        "border-secondary-hover bg-floating flex h-fit max-h-full w-full min-w-0 flex-col gap-2 rounded-lg border p-4",
+        "border-inh-secondary-hover bg-base-200 rounded-field flex h-fit max-h-full w-full min-w-0 flex-col gap-2 border p-4",
         "fixed static inset-8 top-8 z-8 md:sticky md:inset-0 md:top-4",
       )}
     >
