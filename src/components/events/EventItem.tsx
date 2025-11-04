@@ -1,6 +1,6 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { CheckInButton } from "@/components/events/CheckInButton.tsx";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import React from "react";
 import { formatTime, parseTime } from "./date-utils.ts";
@@ -18,33 +18,32 @@ export const recommendedWorkshops = [
   "6016fb2d-cb9b-438b-8819-80c82a78a3be",
 ];
 
-export function EventItem({
-  workshop,
-  openDescription,
-  edit,
-}: {
+export interface EventItemProps {
   workshop: workshopsTypes.SchemaWorkshop;
   edit?: ((workshop: workshopsTypes.SchemaWorkshop) => void) | null;
-  openDescription: () => void;
-}) {
+}
+
+export function EventItem({ workshop, edit }: EventItemProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
+
+  const navigate = useNavigate();
 
   const checkedIn = !!myCheckins?.some((w) => w.id === workshop.id);
   const signedPeople = getSignedPeopleCount(workshop);
   const isRecommended = recommendedWorkshops.includes(workshop.id);
 
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Проверяем, что клик был не по кнопкам и не по ссылке на комнату
+    // Check, that click was perform directly on an item, not on buttons, links, etc.
     const target = e.target as HTMLElement;
     if (!target.closest("button") && !target.closest("a")) {
-      openDescription();
+      navigate({ to: "/events/$slug", params: { slug: workshop.id } });
     }
   };
 
   return (
     <div
       className={clsx(
-        "bg-pagebg relative flex w-full cursor-pointer flex-col justify-between rounded-2xl border p-4 shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-in-out",
+        "bg-pagebg relative flex w-full cursor-pointer flex-col justify-between rounded-2xl border p-4 shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-in-out select-none",
         isWorkshopActive(workshop)
           ? "hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]"
           : "border-primary/15",

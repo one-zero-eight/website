@@ -19,7 +19,7 @@ export function EventsTabs() {
   }
 
   return (
-    <div role="tablist" className="tabs tabs-border">
+    <div role="tablist" className="tabs tabs-box mx-4 mt-4">
       {eventsTabs.map((tab, index) => (
         <Link
           to={tab.link}

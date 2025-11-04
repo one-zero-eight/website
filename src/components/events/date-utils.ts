@@ -30,15 +30,24 @@ export const formatTime = (timeString: string): string => {
   return timeString;
 };
 
+export const isDatesEqual = (dateStringA: string, dateStringB: string) => {
+  const da = new Date(dateStringA);
+  const db = new Date(dateStringB);
+  return da.getDate() === db.getDate() && da.getMonth() === db.getMonth();
+};
+
 /**
  * Форматирует дату в локальный формат (русский)
  * @param dateString - Дата в формате YYYY-MM-DD
- * @returns Дата в формате DD.MM.YYYY
+ * @returns Дата в формате Month, day
  */
 export const formatDate = (dateString: string): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
-  return date.toLocaleDateString("ru-RU");
+  return date.toLocaleString("en", {
+    month: "short",
+    day: "numeric",
+  });
 };
 
 /**

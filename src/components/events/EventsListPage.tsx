@@ -4,7 +4,7 @@ import { ConnectTelegramPage } from "@/components/account/ConnectTelegramPage.ts
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { groupWorkshopsByDate } from "@/components/events/event-utils.ts";
 import { useState } from "react";
-import { Description } from "./Description.tsx";
+import { Description } from "./EventPage/Description.tsx";
 import { ModalWindow } from "./ModalWindow.tsx";
 import { EventForDate } from "./EventForDate.tsx";
 
@@ -61,7 +61,7 @@ export function EventsListPage() {
             {/* Условное отображение: либо список воркшопов, либо плейсхолдер */}
             {groups && Object.keys(groups).length > 0 ? (
               Object.keys(groups)
-                .sort()
+                .sort((a: string, b: string) => b.localeCompare(a))
                 .map((tagName) => (
                   <EventForDate
                     key={tagName}

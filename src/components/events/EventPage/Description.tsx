@@ -1,10 +1,8 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { CheckInButton } from "@/components/events/CheckInButton.tsx";
-import { Link } from "@tanstack/react-router";
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { formatDate, formatTime, getDate, parseTime } from "./date-utils.ts";
 
 const processTextNode = (text: string): (string | React.JSX.Element)[] => {
   const result: (string | React.JSX.Element)[] = [];
@@ -159,37 +157,6 @@ export function Description({
             {workshop.description || ""}
           </MarkdownWithCustomLinks>
         </div>
-      </div>
-      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
-        <div className="flex h-fit w-6">
-          <span className="icon-[material-symbols--location-on-outline] text-2xl" />
-        </div>
-        <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
-          <Link
-            to="/maps"
-            search={{ q: workshop.place || "" }}
-            className="text-primary hover:text-primary/80 relative z-5 cursor-pointer underline"
-            title="Click to view on map"
-          >
-            {workshop.place}
-          </Link>
-        </p>
-      </div>
-      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
-        <div className="flex h-fit w-6">
-          <span className="icon-[material-symbols--today-outline] text-2xl" />
-        </div>
-        <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
-          {formatDate(getDate(workshop.dtstart))}
-        </p>
-      </div>
-      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
-        <div className="flex h-fit w-6">
-          <span className="icon-[material-symbols--schedule-outline] text-2xl" />
-        </div>
-        {formatTime(parseTime(workshop.dtstart)) +
-          "-" +
-          formatTime(parseTime(workshop.dtend))}
       </div>
 
       <div className="mt-2">

@@ -76,7 +76,7 @@ export function EventsAdminPage() {
         <div className="collapse-content">
           {workshops && groups && Object.keys(groups).length > 0 ? (
             Object.keys(groups)
-              .sort()
+              .sort((a: string, b: string) => b.localeCompare(a))
               .map((tagName) => (
                 <EventForDate
                   key={tagName}
