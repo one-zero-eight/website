@@ -4,7 +4,7 @@ import {
   getInactiveStatusText,
   getSignedPeopleCount,
   isWorkshopActive,
-} from "@/components/events/workshop-utils.ts";
+} from "@/components/events/event-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 

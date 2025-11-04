@@ -1,5 +1,15 @@
 import { $workshops } from "@/api/workshops";
-import { Link, ValidateLinkOptions } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+
+type EventsTab = {
+  link: string;
+  title: string;
+};
+
+const eventsTabs: EventsTab[] = [
+  { link: "/events", title: "Check In" },
+  { link: "/events/admin", title: "Admin" },
+];
 
 export function EventsTabs() {
   const { data: workshopsUser } = $workshops.useQuery("get", "/users/me");
@@ -9,20 +19,18 @@ export function EventsTabs() {
   }
 
   return (
-    <div className="border-b-inh-secondary-hover flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
-      <TabLink to="/events">Check in</TabLink>
-      <TabLink to="/events/admin">Admin</TabLink>
+    <div role="tablist" className="tabs tabs-border">
+      {eventsTabs.map((tab, index) => (
+        <Link
+          to={tab.link}
+          className="tab"
+          key={index}
+          activeOptions={{ exact: true, includeSearch: true }}
+          activeProps={{ className: "tab-active" }}
+        >
+          {tab.title}
+        </Link>
+      ))}
     </div>
-  );
-}
-
-function TabLink(props: ValidateLinkOptions) {
-  return (
-    <Link
-      className="px-2 py-1"
-      activeOptions={{ exact: true, includeSearch: true }}
-      activeProps={{ className: "border-b-2 border-b-primary" }}
-      {...props}
-    />
   );
 }

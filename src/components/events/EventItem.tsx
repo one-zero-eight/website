@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import React from "react";
 import { formatTime, parseTime } from "./date-utils.ts";
-import { getSignedPeopleCount, isWorkshopActive } from "./workshop-utils.ts";
+import { getSignedPeopleCount, isWorkshopActive } from "./event-utils.ts";
 
 // TODO: GET RID OF THIS, FETCH FROM DB
 export const recommendedWorkshops = [
@@ -18,7 +18,7 @@ export const recommendedWorkshops = [
   "6016fb2d-cb9b-438b-8819-80c82a78a3be",
 ];
 
-export function WorkshopItem({
+export function EventItem({
   workshop,
   openDescription,
   edit,
@@ -44,7 +44,7 @@ export function WorkshopItem({
   return (
     <div
       className={clsx(
-        "bg-primary relative flex w-full cursor-pointer flex-col justify-between rounded-2xl border p-4 shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-in-out",
+        "bg-pagebg relative flex w-full cursor-pointer flex-col justify-between rounded-2xl border p-4 shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-in-out",
         isWorkshopActive(workshop)
           ? "hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]"
           : "border-primary/15",
@@ -63,9 +63,9 @@ export function WorkshopItem({
       )}
 
       {/* Time & Availability */}
-      <div className="justify-betwee flex items-center">
+      <div className="flex items-center justify-between">
         {workshop.dtstart && workshop.dtend && (
-          <p
+          <span
             className={clsx(
               "text-primary flex items-center justify-start text-xs font-medium sm:text-[15px]",
               !isWorkshopActive(workshop) && "opacity-50",
@@ -73,9 +73,9 @@ export function WorkshopItem({
           >
             {formatTime(parseTime(workshop.dtstart))} -{" "}
             {formatTime(parseTime(workshop.dtend))}
-          </p>
+          </span>
         )}
-        <p
+        <span
           className={clsx(
             "text-primary flex items-center justify-end text-xs font-medium sm:text-[15px]",
             !isWorkshopActive(workshop) && "opacity-50",
@@ -89,13 +89,13 @@ export function WorkshopItem({
           {workshop.capacity === 500 && (
             <span className="icon-[mdi--infinity] mt-0.5"></span>
           )}
-        </p>
+        </span>
       </div>
 
       <div>
         <h3
           className={clsx(
-            "text-contrast my-0.5 overflow-hidden text-sm leading-[1.2] font-semibold wrap-break-word sm:my-1.5 sm:text-lg sm:leading-[1.3]",
+            "text-contrast my-0.5 overflow-hidden text-center text-sm leading-[1.2] font-semibold wrap-break-word sm:my-1.5 sm:text-lg sm:leading-[1.3]",
             !isWorkshopActive(workshop) && "opacity-50",
           )}
         >
@@ -104,7 +104,7 @@ export function WorkshopItem({
         {workshop.place && (
           <div
             className={clsx(
-              "my-1 sm:my-2",
+              "my-1 text-center sm:my-2",
               !isWorkshopActive(workshop) && "opacity-50",
             )}
           >
@@ -113,7 +113,7 @@ export function WorkshopItem({
               <Link
                 to="/maps"
                 search={{ q: workshop.place }}
-                className="text-brand-violet hover:text-brand-violet/80 relative cursor-pointer underline"
+                className="text-primary hover:text-primary/80 relative cursor-pointer underline"
                 title="Click to view on map"
               >
                 {workshop.place}

@@ -46,7 +46,7 @@ export function DateTimePlacePicker({
             type="text"
             value={room}
             onChange={(e) => onRoomChange(e.target.value)}
-            className="rounded-field w-full border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-hidden transition-all duration-300 focus:border-violet-400 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] dark:border-white/30 dark:bg-white/10 dark:text-white dark:focus:border-violet-400/60"
+            className="input"
             placeholder="Room"
           />
         </div>
@@ -61,7 +61,7 @@ export function DateTimePlacePicker({
               value={isPlacesDisabled ? "" : maxPlaces}
               onChange={(e) => onMaxPlacesChange(Number(e.target.value))}
               disabled={isPlacesDisabled}
-              className="rounded-field w-full border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-hidden transition-all duration-300 focus:border-violet-400 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] dark:border-white/30 dark:bg-white/10 dark:text-white dark:focus:border-violet-400/60"
+              className="input"
               placeholder={isPlacesDisabled ? "" : "limit"}
             />
             {isPlacesDisabled && (

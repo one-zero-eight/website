@@ -6,8 +6,7 @@ export default function AddEventButton({
   children,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement>) {
-  const base =
-    "bg-brand-violet hover:bg-brand-violet/80 flex w-full cursor-pointer items-center justify-center gap-0.5 rounded-lg border-none px-2 py-3 text-sm font-medium text-white shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors duration-200 ease-in-out md:w-fit md:py-2";
+  const base = "btn btn-primary gap-1.5";
 
   return (
     <button
@@ -16,7 +15,7 @@ export default function AddEventButton({
       title="Add new workshop"
       {...props}
     >
-      <span className="icon-[material-symbols--add] shrink-0 text-xl" />
+      <span className="icon-[fa--plus] shrink-0 text-xs" />
       {children}
     </button>
   );

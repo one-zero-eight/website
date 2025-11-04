@@ -1,8 +1,9 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useToast } from "../toast";
 import { DateTimePlacePicker } from "./DateTimePlacePicker.tsx";
+import clsx from "clsx";
 
 // Интерфейс для состояния формы
 interface WorkshopFormState {
@@ -39,27 +40,61 @@ export function PostForm({
 }) {
   const queryClient = useQueryClient();
 
+  const storageKey = initialWorkshop ? null : "workshop-form-draft";
+
   /*
    * Состояние формы воркшопа
    * Если initialWorkshop не передан, используются значения по умолчанию
    */
-  const [workshop, setWorkshop] = useState<WorkshopFormState>({
-    name: initialWorkshop?.name || "",
-    description: initialWorkshop?.description || "",
-    dtstart: initialWorkshop?.dtstart || "",
-    dtend: initialWorkshop?.dtend || "",
-    place: initialWorkshop?.place || "",
-    capacity: initialWorkshop?.capacity || 500,
-    remain_places: initialWorkshop?.remain_places || 0,
-    is_active: initialWorkshop?.is_active ?? true,
-    is_registrable: initialWorkshop?.is_registrable ?? false,
-    // UI поля
-    date: "",
-    startTime: "",
-    endTime: "",
-    room: initialWorkshop?.place || "",
-    maxPlaces: initialWorkshop?.capacity || 500,
-    remainPlaces: initialWorkshop?.remain_places,
+  const [workshop, setWorkshop] = useState<WorkshopFormState>(() => {
+    const base = {
+      name: "",
+      description: "",
+      dtstart: "",
+      dtend: "",
+      place: "",
+      capacity: 500,
+      remain_places: 500,
+      is_active: true,
+      is_registrable: false,
+      date: "",
+      startTime: "",
+      endTime: "",
+      room: "",
+      maxPlaces: 500,
+      remainPlaces: undefined,
+    };
+
+    if (initialWorkshop) {
+      const dtstartDate = new Date(initialWorkshop.dtstart);
+      const dtendDate = new Date(initialWorkshop.dtend);
+      return {
+        ...base,
+        ...initialWorkshop,
+        date: dtstartDate.toISOString().split("T")[0],
+        startTime: dtstartDate.toTimeString().slice(0, 5),
+        endTime: dtendDate.toTimeString().slice(0, 5),
+        room: initialWorkshop.place || "",
+        maxPlaces: initialWorkshop.capacity || 500,
+        remainPlaces: initialWorkshop.remain_places,
+      };
+    }
+
+    if (initialDate) {
+      return {
+        ...base,
+        date: initialDate,
+        startTime: "18:00",
+        endTime: "20:00",
+      };
+    }
+
+    const savedData = storageKey ? localStorage.getItem(storageKey) : null;
+    if (savedData) {
+      return { ...base, ...JSON.parse(savedData) };
+    }
+
+    return base;
   });
 
   const [errors, setErrors] = useState<{
@@ -69,8 +104,6 @@ export function PostForm({
     endTime?: string;
     time?: string;
   }>({});
-
-  const storageKey = initialWorkshop ? null : "workshop-form-draft";
 
   const { showSuccess, showError, showConfirm } = useToast();
 
@@ -230,87 +263,6 @@ export function PostForm({
     );
   };
 
-  // Загружаем сохраненные данные при монтировании компонента (только для создания)
-  useEffect(() => {
-    if (!storageKey) return;
-
-    const savedData = localStorage.getItem(storageKey);
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      setWorkshop((v) => ({
-        ...parsedData,
-        date: v.date,
-        startTime: v.startTime,
-        endTime: v.endTime,
-        dtstart: v.dtstart,
-        dtend: v.dtend,
-      }));
-    }
-  }, [storageKey]);
-
-  // Инициализируем UI поля из API данных при редактировании
-  useEffect(() => {
-    if (!initialWorkshop && !initialDate) return;
-
-    // Парсим дату и время из API полей
-    let date = "";
-    let startTime = "";
-    let endTime = "";
-
-    if (initialWorkshop?.dtstart || initialDate) {
-      const dtstartDate = new Date(
-        initialWorkshop?.dtstart || `${initialDate}T18:00:00+03:00`,
-      );
-      date = dtstartDate.toISOString().split("T")[0];
-      startTime = dtstartDate.toTimeString().slice(0, 5);
-    }
-
-    if (initialWorkshop?.dtend || initialDate) {
-      const dtendDate = new Date(
-        initialWorkshop?.dtend || `${initialDate}T20:00:00+03:00`,
-      );
-      endTime = dtendDate.toTimeString().slice(0, 5);
-    }
-
-    setWorkshop((prev) => ({
-      ...prev,
-      name: initialWorkshop?.name || "",
-      description: initialWorkshop?.description || "",
-      dtstart: initialWorkshop?.dtstart || `${initialDate}T18:00:00+03:00`,
-      dtend: initialWorkshop?.dtend || `${initialDate}T20:00:00+03:00`,
-      place: initialWorkshop?.place || "",
-      capacity: initialWorkshop?.capacity || 500,
-      remain_places: initialWorkshop?.remain_places || 500,
-      is_active: initialWorkshop?.is_active ?? true,
-      is_registrable: initialWorkshop?.is_registrable ?? false,
-      // UI поля
-      date,
-      startTime,
-      endTime,
-      room: initialWorkshop?.place || "",
-      maxPlaces: initialWorkshop?.capacity || 500,
-      remainPlaces: initialWorkshop?.remain_places,
-    }));
-  }, [initialDate, initialWorkshop]);
-
-  // Сохраняем данные в localStorage при изменении формы (только для создания)
-  useEffect(() => {
-    if (!storageKey) return;
-
-    // Сохраняем только если есть хотя бы одно заполненное поле
-    const hasContent =
-      workshop.name ||
-      workshop.description ||
-      workshop.dtstart ||
-      workshop.dtend ||
-      workshop.place ||
-      workshop.capacity > 0;
-
-    if (hasContent) {
-      localStorage.setItem(storageKey, JSON.stringify(workshop));
-    }
-  }, [workshop, storageKey]);
-
   // Функция для очистки сохраненных данных
   const clearSavedData = () => {
     if (storageKey) {
@@ -428,6 +380,7 @@ export function PostForm({
       is_active: workshop.is_active,
     };
   };
+
   const isUnlimited = workshop.maxPlaces === 500;
 
   const handleUnlimitedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -439,32 +392,32 @@ export function PostForm({
     });
   };
 
-  const handleClearForm = () => {
-    // Очищаем все поля формы
-    setWorkshop({
-      name: "",
-      description: "",
-      dtstart: "",
-      dtend: "",
-      place: "",
-      capacity: 500,
-      remain_places: 500,
-      is_active: true,
-      is_registrable: false,
-      date: "",
-      startTime: "",
-      endTime: "",
-      room: "",
-      maxPlaces: 500,
-      remainPlaces: undefined,
-    });
+  // const handleClearForm = () => {
+  //   // Очищаем все поля формы
+  //   setWorkshop({
+  //     name: "",
+  //     description: "",
+  //     dtstart: "",
+  //     dtend: "",
+  //     place: "",
+  //     capacity: 500,
+  //     remain_places: 500,
+  //     is_active: true,
+  //     is_registrable: false,
+  //     date: "",
+  //     startTime: "",
+  //     endTime: "",
+  //     room: "",
+  //     maxPlaces: 500,
+  //     remainPlaces: undefined,
+  //   });
 
-    // Очищаем все ошибки
-    setErrors({});
+  //   // Очищаем все ошибки
+  //   setErrors({});
 
-    // Очищаем сохраненные данные в localStorage
-    clearSavedData();
-  };
+  //   // Очищаем сохраненные данные в localStorage
+  //   clearSavedData();
+  // };
 
   return (
     <form onSubmit={onSubmit}>
@@ -472,18 +425,9 @@ export function PostForm({
         <label className="text-xs font-medium tracking-wider text-gray-800 uppercase dark:text-white">
           Title <span className="text-red-500">*</span>
         </label>
-        {!initialWorkshop && (
-          <button
-            type="button"
-            className="rounded-field border border-red-400 bg-red-200 px-3 py-1 text-xs font-medium text-red-900 hover:bg-red-300 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
-            onClick={handleClearForm}
-          >
-            Clear Form
-          </button>
-        )}
       </div>
       <input
-        className="rounded-field my-2 w-full border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-hidden transition-all duration-300 focus:border-violet-400 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] dark:border-white/30 dark:bg-white/10 dark:text-white dark:focus:border-violet-400/60"
+        className="input w-full"
         value={workshop.name}
         onChange={handleTitleChange}
         type="text"
@@ -498,7 +442,7 @@ export function PostForm({
         Description
       </label>
       <textarea
-        className="font-inherit rounded-field my-2 max-h-[200px] min-h-[120px] w-full resize-none overflow-y-auto border border-gray-300 bg-white px-[15px] py-[10px] text-sm text-gray-900 outline-hidden transition-all duration-300 ease-in-out placeholder:text-gray-400 focus:border-violet-400 focus:shadow-[0_0_5px_rgba(122,122,210,0.3)] dark:border-white/30 dark:bg-white/10 dark:text-white dark:focus:border-violet-400/60"
+        className="textarea w-full resize-none"
         value={workshop.description}
         onChange={(e) =>
           setWorkshop({ ...workshop, description: e.target.value })
@@ -542,8 +486,8 @@ export function PostForm({
           {errors.time}
         </p>
       )}
-      <div className="my-4 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+      <div className="my-4 flex items-center justify-between gap-2 select-none">
+        <label className="label" htmlFor="isActive">
           <input
             type="checkbox"
             id="isActive"
@@ -551,36 +495,31 @@ export function PostForm({
             onChange={(e) =>
               setWorkshop({ ...workshop, is_active: e.target.checked })
             }
-            className="w-auto"
+            className="checkbox rounded-md"
           />
-          <label
-            htmlFor="isActive"
-            className="m-0 text-xs font-medium tracking-wider text-gray-800 uppercase dark:text-white"
-          >
-            Active Workshop
-          </label>{" "}
-        </div>
-        <div className="flex items-center gap-2">
+          Active Workshop
+        </label>
+        <label className="label" htmlFor="isUnlimited">
           <input
             type="checkbox"
             id="isUnlimited"
+            className="checkbox rounded-md"
             checked={isUnlimited}
             onChange={handleUnlimitedChange}
-            className="w-auto"
           />
-          <label
-            htmlFor="isUnlimited"
-            className="m-0 text-xs font-medium tracking-wider text-gray-800 uppercase dark:text-white"
-          >
-            Unlimited Places
-          </label>
-        </div>
+          Unlimited Places
+        </label>
       </div>
-      <div className="flex flex-row gap-2">
+      <div
+        className={clsx(
+          "grid gap-2",
+          initialWorkshop ? "grid-cols-3" : "grid-cols-2",
+        )}
+      >
         {initialWorkshop && (
           <button
             type="button"
-            className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-red-400 bg-red-200 px-4 py-2 text-lg font-medium text-red-900 hover:bg-red-300 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
+            className="btn btn-error"
             onClick={handleRemoveWorkshop}
           >
             DELETE
@@ -588,16 +527,13 @@ export function PostForm({
         )}
         <button
           type="button"
-          className="dark:bg-inh-primary-hover dark:hover:bg-inh-primary rounded-box flex w-full items-center justify-center gap-4 bg-gray-200 px-4 py-2 text-lg font-medium text-gray-800 hover:bg-gray-300 dark:text-white"
+          className="btn btn-outline"
           onClick={() => onClose && onClose()}
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
-        >
-          {initialWorkshop ? "UPDATE" : "ADD"}
+        <button type="submit" className="btn btn-primary">
+          {initialWorkshop ? "Update" : "Add"}
         </button>
       </div>
     </form>

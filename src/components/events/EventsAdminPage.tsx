@@ -2,7 +2,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { PostForm } from "@/components/events/PostForm.tsx";
-import { groupWorkshopsByDate } from "@/components/events/workshop-utils.ts";
+import { groupWorkshopsByDate } from "@/components/events/event-utils.ts";
 import {
   EventForDate,
   EventForDateType,
@@ -51,7 +51,7 @@ export function EventsAdminPage() {
   }
 
   return (
-    <div className="w-full select-none">
+    <>
       <div className="flex w-full flex-wrap items-center gap-4 px-4 py-2">
         Create new event:
         <AddEventButton
@@ -59,23 +59,22 @@ export function EventsAdminPage() {
             setModalDate(null);
             setModalOpen(true);
           }}
+          className="w-full md:max-w-fit"
         >
           Create event
         </AddEventButton>
       </div>
-      <div className="col-span-full w-full px-4 text-left text-xl">
-        <button
-          onClick={() => setShowPreviousDates((v) => !v)}
-          className="text-primary hover:text-primary/80 mt-2 text-sm transition-colors duration-200"
-        >
+
+      <div className="collapse-arrow collapse">
+        <input
+          type="checkbox"
+          onClick={() => setShowPreviousDates(!showPreviousDates)}
+        />
+        <div className="collapse-title ps-11 text-left after:start-5 after:end-auto">
           {showPreviousDates ? "Hide previous dates" : "Show previous dates"}
-        </button>
-      </div>
-      {/* Основной компонент со списком воркшопов */}
-      {workshops && (
-        <div className="flex flex-col gap-2 px-4 text-center">
-          {/* Условное отображение: либо список воркшопов, либо плейсхолдер */}
-          {groups && Object.keys(groups).length > 0 ? (
+        </div>
+        <div className="collapse-content">
+          {workshops && groups && Object.keys(groups).length > 0 ? (
             Object.keys(groups)
               .sort()
               .map((tagName) => (
@@ -101,7 +100,7 @@ export function EventsAdminPage() {
             </div>
           )}
         </div>
-      )}
+      </div>
 
       {/* Модальное окно для создания/редактирования воркшопа */}
       <ModalWindow
@@ -123,6 +122,6 @@ export function EventsAdminPage() {
           }}
         />
       </ModalWindow>
-    </div>
+    </>
   );
 }

@@ -2,7 +2,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { ConnectTelegramPage } from "@/components/account/ConnectTelegramPage.tsx";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
-import { groupWorkshopsByDate } from "@/components/events/workshop-utils.ts";
+import { groupWorkshopsByDate } from "@/components/events/event-utils.ts";
 import { useState } from "react";
 import { Description } from "./Description.tsx";
 import { ModalWindow } from "./ModalWindow.tsx";
@@ -19,7 +19,7 @@ export function EventsListPage() {
   const [modalWorkshop, setModalWorkshop] =
     useState<workshopsTypes.SchemaWorkshop | null>(null);
 
-  const [showPreviousDates, setShowPreviousDates] = useState(true); // TODO: Change to false later.
+  const [showPreviousDates, setShowPreviousDates] = useState(false);
 
   const { data: workshops } = $workshops.useQuery("get", "/workshops/");
 
@@ -46,41 +46,42 @@ export function EventsListPage() {
   }
 
   return (
-    <div className="w-full">
-      <div className="col-span-full w-full px-4 text-left text-xl">
-        <button
-          onClick={() => setShowPreviousDates((v) => !v)}
-          className="text-primary hover:text-primary/80 mt-2 text-sm transition-colors duration-200"
-        >
+    <>
+      <div className="collapse-arrow collapse">
+        <input
+          type="checkbox"
+          onClick={() => setShowPreviousDates(!showPreviousDates)}
+        />
+        <div className="collapse-title ps-11 text-left after:start-5 after:end-auto">
           {showPreviousDates ? "Hide previous dates" : "Show previous dates"}
-        </button>
-      </div>
-      {/* Основной компонент со списком воркшопов */}
-      {workshops && (
-        <div className="flex flex-col gap-2 px-4 text-center">
-          {/* Условное отображение: либо список воркшопов, либо плейсхолдер */}
-          {groups && Object.keys(groups).length > 0 ? (
-            Object.keys(groups)
-              .sort()
-              .map((tagName) => (
-                <EventForDate
-                  key={tagName}
-                  isoDate={tagName}
-                  workshops={groups[tagName]}
-                  showPreviousDates={showPreviousDates}
-                  onSelect={(workshop) => {
-                    setModalWorkshop(workshop);
-                    setModalOpen(true);
-                  }}
-                />
-              ))
-          ) : (
-            <div className="col-span-full w-full text-center text-xl">
-              <h2 className="text-gray-500">No workshops yet!</h2>
-            </div>
-          )}
         </div>
-      )}
+        {/* Основной компонент со списком воркшопов */}
+        {workshops && (
+          <div className="collapse-content">
+            {/* Условное отображение: либо список воркшопов, либо плейсхолдер */}
+            {groups && Object.keys(groups).length > 0 ? (
+              Object.keys(groups)
+                .sort()
+                .map((tagName) => (
+                  <EventForDate
+                    key={tagName}
+                    isoDate={tagName}
+                    workshops={groups[tagName]}
+                    showPreviousDates={showPreviousDates}
+                    onSelect={(workshop) => {
+                      setModalWorkshop(workshop);
+                      setModalOpen(true);
+                    }}
+                  />
+                ))
+            ) : (
+              <div className="col-span-full w-full text-center text-xl">
+                <h2 className="text-gray-500">No workshops yet!</h2>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Модальное окно с подробным описанием воркшопа */}
       <ModalWindow
@@ -90,6 +91,6 @@ export function EventsListPage() {
       >
         {modalWorkshop && <Description workshop={modalWorkshop} />}
       </ModalWindow>
-    </div>
+    </>
   );
 }
