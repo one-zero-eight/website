@@ -25,7 +25,13 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
       </figure>
       <div className="card-body">
         <div className="flex shrink-0 flex-col items-start gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-          <h3 className="card-title">{club.title}</h3>
+          <Link
+            to="/clubs/$slug"
+            params={{ slug: club.slug }}
+            className="card-title link link-hover"
+          >
+            {club.title}
+          </Link>
           <span
             className={clsx(
               "shrink-0 rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap",

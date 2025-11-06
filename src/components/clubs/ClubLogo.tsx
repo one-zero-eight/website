@@ -19,7 +19,7 @@ export function ClubLogo({
       <img
         src={clubId !== null ? getLogoURLById(clubId) : undefined}
         alt="Club logo"
-        className="bg-base-200 absolute inset-0 size-full object-cover"
+        className="bg-base-200 absolute inset-0 size-full object-contain"
         loading="lazy"
         onError={(e) => (e.currentTarget.style.display = "none")}
       />

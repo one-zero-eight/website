@@ -35,6 +35,7 @@ const mockEvents = [
 ];
 
 export function ClubPage({ clubSlug }: { clubSlug: string }) {
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const { data: club, isPending: clubPending } = $clubs.useQuery(
     "get",
     "/clubs/by-slug/{slug}",
@@ -78,13 +79,15 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
             className="absolute inset-0 bg-repeat"
           />
           <ClubLogo clubId={club.id} className="size-48" />
-          <Link
-            to="/clubs/$slug/edit"
-            params={{ slug: clubSlug }}
-            className="btn btn-square btn-ghost btn-primary btn-lg absolute top-0 right-0"
-          >
-            <span className="icon-[mynaui--pencil]" />
-          </Link>
+          {clubsUser?.role === "admin" && (
+            <Link
+              to="/clubs/$slug/edit"
+              params={{ slug: clubSlug }}
+              className="btn btn-square btn-ghost btn-primary btn-lg absolute top-0 right-0"
+            >
+              <span className="icon-[mynaui--pencil]" />
+            </Link>
+          )}
         </div>
         <div className="card-body">
           <div className="flex justify-between">
