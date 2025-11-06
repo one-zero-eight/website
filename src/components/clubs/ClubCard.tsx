@@ -1,5 +1,5 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
-import { getLogoURLById } from "@/api/clubs/links.ts";
+import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useMemo } from "react";
@@ -19,81 +19,73 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
   );
 
   return (
-    <div className="bg-base-200 border-inh-secondary rounded-field overflow-hidden border">
-      <Link to="/clubs/$slug" params={{ slug: club.slug }} className="block">
-        <div className="flex items-center gap-4 p-4">
-          <div className="rounded-field relative flex h-48 w-48 shrink-0 items-center justify-center overflow-hidden">
-            <span className="icon-[mdi--account-group] absolute size-12 text-white" />
-            <img
-              src={getLogoURLById(club.id)}
-              alt={`${club.title} logo`}
-              className="bg-base-200 absolute inset-0 size-full object-cover"
-              loading="lazy"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
-          </div>
-
-          <div className="flex grow flex-col justify-between gap-3">
-            <div className="flex flex-col gap-3">
-              <div className="flex shrink-0 items-start justify-between gap-3">
-                <h3 className="text-base-content text-xl font-semibold">
-                  {club.title}
-                </h3>
-                <span
-                  className={clsx(
-                    "shrink-0 rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap",
-                    getClubTypeColor(club.type),
-                  )}
-                >
-                  {getClubTypeLabel(club.type)}
-                </span>
-              </div>
-
-              <p className="text-inh-inactive text-base">
-                {club.short_description}
-              </p>
-
-              {clubLeader && (
-                <p className="text-inh-inactive text-base">
-                  Leader:{" "}
-                  <a href={`https://t.me/${clubLeader.telegram_alias}`}>
-                    {clubLeader.name}
-                  </a>
-                </p>
-              )}
-            </div>
-            <div className="grow" />
-
-            <div className="flex shrink-0 flex-wrap gap-2">
-              <Link
-                to="/clubs/$slug"
-                params={{ slug: club.slug }}
-                className="bg-inh-primary hover:bg-inh-primary-hover text-base-content inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
-              >
-                <span className="icon-[mdi--arrow-right] size-4" />
-                <span>Details</span>
-              </Link>
-              {club.links.map((link, index) => (
-                <a
-                  key={index}
-                  href={link.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-inh-primary hover:bg-inh-primary-hover text-base-content inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <span
-                    className={clsx(getLinkIconClass(link.type), "size-4")}
-                  />
-                  <span>{getLinkLabel(link.type)}</span>
-                </a>
-              ))}
-            </div>
-          </div>
+    <div className="card card-border md:card-side">
+      <figure className="shrink-0 items-start p-6 pb-0 md:pr-0 md:pb-6">
+        <ClubLogo clubId={club.id} className="size-48" />
+      </figure>
+      <div className="card-body">
+        <div className="flex shrink-0 flex-col items-start gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+          <h3 className="card-title">{club.title}</h3>
+          <span
+            className={clsx(
+              "shrink-0 rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap",
+              getClubTypeColor(club.type),
+            )}
+          >
+            {getClubTypeLabel(club.type)}
+          </span>
         </div>
-      </Link>
+
+        <p className="text-base-content/50 text-sm md:text-base">
+          {club.short_description}
+        </p>
+
+        {clubLeader && (
+          <p className="text-base-content/50 text-sm md:text-base">
+            Leader:{" "}
+            <a
+              href={
+                clubLeader.telegram_alias
+                  ? `https://t.me/${clubLeader.telegram_alias}`
+                  : undefined
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="link link-hover"
+            >
+              {clubLeader.name}
+            </a>
+          </p>
+        )}
+
+        <div className="grow" />
+
+        <div className="card-actions">
+          <Link
+            to="/clubs/$slug"
+            params={{ slug: club.slug }}
+            className="btn btn-primary btn-soft"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="icon-[mdi--arrow-right] size-4" />
+            <span>Details</span>
+          </Link>
+          {club.links.map((link, index) => (
+            <a
+              key={index}
+              href={link.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-soft"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className={clsx(getLinkIconClass(link.type), "size-4")} />
+              <span>{getLinkLabel(link.type)}</span>
+            </a>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
