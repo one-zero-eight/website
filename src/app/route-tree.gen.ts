@@ -42,6 +42,7 @@ import { Route as With_menuRoomBookingListRouteImport } from "./routes/_with_men
 import { Route as With_menuMusicRoomInstructionsRouteImport } from "./routes/_with_menu/music-room.instructions";
 import { Route as With_menuEventsAdminRouteImport } from "./routes/_with_menu/events/admin";
 import { Route as With_menuClubsNewRouteImport } from "./routes/_with_menu/clubs/new";
+import { Route as With_menuClubsLeagueRouteImport } from "./routes/_with_menu/clubs/league";
 import { Route as With_menuClubsAdminRouteImport } from "./routes/_with_menu/clubs/admin";
 import { Route as With_menuAccountTokenRouteImport } from "./routes/_with_menu/account/token";
 import { Route as With_menuAccountConnectTelegramRouteImport } from "./routes/_with_menu/account/connect-telegram";
@@ -222,6 +223,11 @@ const With_menuClubsNewRoute = With_menuClubsNewRouteImport.update({
   path: "/clubs/new",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuClubsLeagueRoute = With_menuClubsLeagueRouteImport.update({
+  id: "/clubs/league",
+  path: "/clubs/league",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuClubsAdminRoute = With_menuClubsAdminRouteImport.update({
   id: "/clubs/admin",
   path: "/clubs/admin",
@@ -299,6 +305,7 @@ export interface FileRoutesByFullPath {
   "/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/account/token": typeof With_menuAccountTokenRoute;
   "/clubs/admin": typeof With_menuClubsAdminRoute;
+  "/clubs/league": typeof With_menuClubsLeagueRoute;
   "/clubs/new": typeof With_menuClubsNewRoute;
   "/events/admin": typeof With_menuEventsAdminRoute;
   "/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
@@ -343,6 +350,7 @@ export interface FileRoutesByTo {
   "/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/account/token": typeof With_menuAccountTokenRoute;
   "/clubs/admin": typeof With_menuClubsAdminRoute;
+  "/clubs/league": typeof With_menuClubsLeagueRoute;
   "/clubs/new": typeof With_menuClubsNewRoute;
   "/events/admin": typeof With_menuEventsAdminRoute;
   "/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
@@ -389,6 +397,7 @@ export interface FileRoutesById {
   "/_with_menu/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/_with_menu/account/token": typeof With_menuAccountTokenRoute;
   "/_with_menu/clubs/admin": typeof With_menuClubsAdminRoute;
+  "/_with_menu/clubs/league": typeof With_menuClubsLeagueRoute;
   "/_with_menu/clubs/new": typeof With_menuClubsNewRoute;
   "/_with_menu/events/admin": typeof With_menuEventsAdminRoute;
   "/_with_menu/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
@@ -435,6 +444,7 @@ export interface FileRouteTypes {
     | "/account/connect-telegram"
     | "/account/token"
     | "/clubs/admin"
+    | "/clubs/league"
     | "/clubs/new"
     | "/events/admin"
     | "/music-room/instructions"
@@ -479,6 +489,7 @@ export interface FileRouteTypes {
     | "/account/connect-telegram"
     | "/account/token"
     | "/clubs/admin"
+    | "/clubs/league"
     | "/clubs/new"
     | "/events/admin"
     | "/music-room/instructions"
@@ -524,6 +535,7 @@ export interface FileRouteTypes {
     | "/_with_menu/account/connect-telegram"
     | "/_with_menu/account/token"
     | "/_with_menu/clubs/admin"
+    | "/_with_menu/clubs/league"
     | "/_with_menu/clubs/new"
     | "/_with_menu/events/admin"
     | "/_with_menu/music-room/instructions"
@@ -789,6 +801,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuClubsNewRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/clubs/league": {
+      id: "/_with_menu/clubs/league";
+      path: "/clubs/league";
+      fullPath: "/clubs/league";
+      preLoaderRoute: typeof With_menuClubsLeagueRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/clubs/admin": {
       id: "/_with_menu/clubs/admin";
       path: "/clubs/admin";
@@ -880,6 +899,7 @@ interface With_menuRouteRouteChildren {
   With_menuAccountConnectTelegramRoute: typeof With_menuAccountConnectTelegramRoute;
   With_menuAccountTokenRoute: typeof With_menuAccountTokenRoute;
   With_menuClubsAdminRoute: typeof With_menuClubsAdminRoute;
+  With_menuClubsLeagueRoute: typeof With_menuClubsLeagueRoute;
   With_menuClubsNewRoute: typeof With_menuClubsNewRoute;
   With_menuEventsAdminRoute: typeof With_menuEventsAdminRoute;
   With_menuMusicRoomInstructionsRoute: typeof With_menuMusicRoomInstructionsRoute;
@@ -922,6 +942,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuAccountConnectTelegramRoute: With_menuAccountConnectTelegramRoute,
   With_menuAccountTokenRoute: With_menuAccountTokenRoute,
   With_menuClubsAdminRoute: With_menuClubsAdminRoute,
+  With_menuClubsLeagueRoute: With_menuClubsLeagueRoute,
   With_menuClubsNewRoute: With_menuClubsNewRoute,
   With_menuEventsAdminRoute: With_menuEventsAdminRoute,
   With_menuMusicRoomInstructionsRoute: With_menuMusicRoomInstructionsRoute,

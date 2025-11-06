@@ -15,7 +15,7 @@ function RouteComponent() {
         <meta name="description" content="List of Innopolis student clubs." />
       </Helmet>
 
-      <Topbar title="Clubs" />
+      <Topbar title="Student Clubs" />
       <ClubsTabs />
     </>
   );

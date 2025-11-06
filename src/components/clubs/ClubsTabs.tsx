@@ -8,6 +8,7 @@ export function ClubsTabs() {
     <div className="border-b-inh-secondary-hover flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
       <TabLink to="/clubs">List</TabLink>
       <TabLink to="/clubs/new">Create new</TabLink>
+      <TabLink to="/clubs/league">Club league</TabLink>
       {clubsUser?.role === "admin" && (
         <TabLink to="/clubs/admin">Admin</TabLink>
       )}
