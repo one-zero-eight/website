@@ -15,7 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 const Links = () => {
   const [activeGroup, setActiveGroup] = useState("All");
   const [visibleItems, setVisibleItems] = useState<number[]>([]);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | number>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
 

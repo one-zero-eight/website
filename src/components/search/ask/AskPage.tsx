@@ -41,15 +41,12 @@ export function AskPage({ askQuery }: { askQuery: string }) {
   );
 
   useEffect(() => {
-    if (result && submittedQuery) {
+    if (result) {
       setMessages((prev) => [...prev, { role: "assistant", response: result }]);
       setSubmittedQuery(null);
-
-      if (result.chat_id && !chatId) {
-        setChatId(result.chat_id);
-      }
+      setChatId(result.chat_id);
     }
-  }, [result]);
+  }, [result, submittedQuery]);
 
   const runSearch = (query: string) => {
     setMessages((prev) => [...prev, { role: "user", content: query }]);

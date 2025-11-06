@@ -8,7 +8,7 @@ export default function SearchResult({
   isMobile,
   select,
 }: {
-  response: searchTypes.SchemaSearchResponse;
+  response: searchTypes.SchemaSearchResponseOutput;
   isSelected: boolean;
   isMobile: boolean;
   select: () => void;

@@ -44,7 +44,7 @@ export default function SchedulePage({
     if (!data?.event_groups) return null;
 
     // Extend index to include alternative spellings
-    const extendedEventGroups = data.event_groups.map((group) => ({
+    const extendedEventGroups = data?.event_groups.map((group) => ({
       ...group,
       searchKeys: preprocessText(group.name ?? ""), // Store multiple search representations
     }));

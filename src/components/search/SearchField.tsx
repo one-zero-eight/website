@@ -23,7 +23,7 @@ const contentMap: Record<PageType, string> = {
   act: "Act",
 };
 
-const iconsMap: Record<Option, JSX.Element> = {
+const iconsMap: Record<Option, React.JSX.Element> = {
   search: <SearchIcon />,
   ask: <AskIcon />,
   act: <ActIcon />,

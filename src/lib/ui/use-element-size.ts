@@ -1,6 +1,6 @@
 import { RefObject, useCallback, useEffect, useState } from "react";
 
-export function useElementWidth(myRef: RefObject<HTMLElement>) {
+export function useElementWidth(myRef: RefObject<HTMLElement | null>) {
   const [width, setWidth] = useState(0);
 
   const handleResize = useCallback(() => {
@@ -22,7 +22,7 @@ export function useElementWidth(myRef: RefObject<HTMLElement>) {
   return width;
 }
 
-export function useElementHeight(myRef: RefObject<HTMLElement>) {
+export function useElementHeight(myRef: RefObject<HTMLElement | null>) {
   const [height, setHeight] = useState(0);
 
   const handleResize = useCallback(() => {

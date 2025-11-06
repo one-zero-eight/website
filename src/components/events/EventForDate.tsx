@@ -26,7 +26,6 @@ export function EventForDate({
   eventForDateType = EventForDateType.USER,
   onAddWorkshop,
   onEditWorkshop,
-  onSelect,
 }: EventForDateProps) {
   const date = useMemo(() => new Date(isoDate), [isoDate]);
 
@@ -81,11 +80,6 @@ export function EventForDate({
                     eventForDateType === EventForDateType.ADMIN
                       ? () => (onEditWorkshop ? onEditWorkshop(workshop) : null)
                       : null
-                  }
-                  openDescription={
-                    eventForDateType === EventForDateType.ADMIN
-                      ? () => (onEditWorkshop ? onEditWorkshop(workshop) : null)
-                      : () => (onSelect ? onSelect(workshop) : null)
                   }
                 />
               ))}

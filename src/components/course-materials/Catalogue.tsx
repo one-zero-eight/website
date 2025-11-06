@@ -156,9 +156,9 @@ const CourseCard = ({
   setPreviewSource,
   preview,
 }: CourseCardProps & {
-  preview: searchTypes.SchemaSearchResponse["source"] | undefined;
+  preview: searchTypes.SchemaSearchResponseOutput["source"] | undefined;
   setPreviewSource: (
-    source: searchTypes.SchemaSearchResponse["source"],
+    source: searchTypes.SchemaSearchResponseOutput["source"],
   ) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -254,7 +254,7 @@ const CourseCard = ({
                   <p className="truncate text-sm font-medium">
                     {source?.display_name || "Untitled"}
                   </p>
-                  {source?.link && (
+                  {"link" in source && source?.link && (
                     <a
                       href={source.link}
                       className="inline-block truncate text-xs text-gray-500 hover:text-blue-500"
@@ -283,10 +283,10 @@ const TrimesterGroup = ({
   preview,
 }: {
   trimester: string;
-  preview: searchTypes.SchemaSearchResponse["source"] | undefined;
+  preview: searchTypes.SchemaSearchResponseOutput["source"] | undefined;
   courses: ParsedCourse[];
   setPreviewSource: (
-    source: searchTypes.SchemaSearchResponse["source"],
+    source: searchTypes.SchemaSearchResponseOutput["source"],
   ) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -364,7 +364,7 @@ export function CataloguePage() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [previewSource, setPreviewSource] =
-    useState<searchTypes.SchemaSearchResponse["source"]>();
+    useState<searchTypes.SchemaSearchResponseOutput["source"]>();
   const [showPreview, setShowPreview] = useState(false);
 
   const { coursesGroup, categories, isPending, error } = useCourseData();
@@ -406,7 +406,7 @@ export function CataloguePage() {
 
   // Handle preview open
   const handleOpenPreview = (
-    source: searchTypes.SchemaSearchResponse["source"],
+    source: searchTypes.SchemaSearchResponseOutput["source"],
   ) => {
     setPreviewSource(source);
     setShowPreview(true);

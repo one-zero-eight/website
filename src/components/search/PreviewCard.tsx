@@ -11,7 +11,7 @@ const PdfPreview = lazy(() =>
 );
 
 export declare type PreviewCardProps = {
-  source: searchTypes.SchemaSearchResponse["source"];
+  source: searchTypes.SchemaSearchResponseOutput["source"];
   onClose: () => void;
 };
 

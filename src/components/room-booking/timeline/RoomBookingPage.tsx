@@ -5,7 +5,7 @@ import { BookingModal } from "@/components/room-booking/timeline/BookingModal.ts
 import { T } from "@/lib/utils/dates.ts";
 import { getRouteApi } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import type { Booking, ScrollToOptions, Slot } from "./BookingTimeline.vue";
+import type { Booking, ScrollToOptions, Slot } from "./types.ts";
 
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),

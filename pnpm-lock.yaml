@@ -165,8 +165,8 @@ importers:
         specifier: ^0.0.15
         version: 0.0.15
       pdfjs-dist:
-        specifier: 5.4.394
-        version: 5.4.394
+        specifier: '*'
+        version: 5.4.296
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
@@ -3675,10 +3675,6 @@ packages:
 
   pdfjs-dist@5.4.296:
     resolution: {integrity: sha512-DlOzet0HO7OEnmUmB6wWGJrrdvbyJKftI1bhMitK7O2N8W2gc757yyYBbINy9IDafXAV9wmKr9t7xsTaNKRG5Q==}
-    engines: {node: '>=20.16.0 || >=22.3.0'}
-
-  pdfjs-dist@5.4.394:
-    resolution: {integrity: sha512-9ariAYGqUJzx+V/1W4jHyiyCep6IZALmDzoaTLZ6VNu8q9LWi1/ukhzHgE2Xsx96AZi0mbZuK4/ttIbqSbLypg==}
     engines: {node: '>=20.16.0 || >=22.3.0'}
 
   pend@1.2.0:
@@ -8943,10 +8939,6 @@ snapshots:
   pathe@2.0.3: {}
 
   pdfjs-dist@5.4.296:
-    optionalDependencies:
-      '@napi-rs/canvas': 0.1.81
-
-  pdfjs-dist@5.4.394:
     optionalDependencies:
       '@napi-rs/canvas': 0.1.81
 

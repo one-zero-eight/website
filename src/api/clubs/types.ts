@@ -64,16 +64,16 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Club Info
+     * Get Club Info By Slug
      * @description Get club info.
      */
-    get: operations["get_club_info_clubs_by_slug__slug__get"];
+    get: operations["get_club_info_by_slug_clubs_by_slug__slug__get"];
     put?: never;
     /**
-     * Edit Club Info
+     * Edit Club Info By Slug
      * @description Edit a club info.
      */
-    post: operations["edit_club_info_clubs_by_slug__slug__post"];
+    post: operations["edit_club_info_by_slug_clubs_by_slug__slug__post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -172,10 +172,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Club Leader
+     * Get Club Leader By Id
      * @description Get club leader info.
      */
-    get: operations["get_club_leader_leaders_by_club_id__id__get"];
+    get: operations["get_club_leader_by_id_leaders_by_club_id__id__get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -192,10 +192,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Club Leader
+     * Get Club Leader By Slug
      * @description Get club leader info.
      */
-    get: operations["get_club_leader_leaders_by_club_slug__slug__get"];
+    get: operations["get_club_leader_by_slug_leaders_by_club_slug__slug__get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -678,7 +678,7 @@ export interface operations {
       };
     };
   };
-  get_club_info_clubs_by_slug__slug__get: {
+  get_club_info_by_slug_clubs_by_slug__slug__get: {
     parameters: {
       query?: never;
       header?: never;
@@ -716,7 +716,7 @@ export interface operations {
       };
     };
   };
-  edit_club_info_clubs_by_slug__slug__post: {
+  edit_club_info_by_slug_clubs_by_slug__slug__post: {
     parameters: {
       query?: never;
       header?: never;
@@ -945,7 +945,7 @@ export interface operations {
       };
     };
   };
-  get_club_leader_leaders_by_club_id__id__get: {
+  get_club_leader_by_id_leaders_by_club_id__id__get: {
     parameters: {
       query?: never;
       header?: never;
@@ -983,7 +983,7 @@ export interface operations {
       };
     };
   };
-  get_club_leader_leaders_by_club_slug__slug__get: {
+  get_club_leader_by_slug_leaders_by_club_slug__slug__get: {
     parameters: {
       query?: never;
       header?: never;

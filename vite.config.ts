@@ -70,14 +70,6 @@ export default defineConfig({
     },
   },
 
-  css: {
-    preprocessorOptions: {
-      scss: {
-        api: "modern-compiler",
-      },
-    },
-  },
-
   define: {
     // Inject the app version variable
     __VERSION__: JSON.stringify(version),

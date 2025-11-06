@@ -259,6 +259,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/get_user": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get User */
+    get: operations["users_get_user"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/set_status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Set User Status */
+    post: operations["users_set_user_status"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -268,13 +302,13 @@ export interface components {
       /**
        * Time Start
        * Format: date-time
-       * @example 2025-07-16T20:18:00
+       * @example 2025-10-28T04:44:00
        */
       time_start: string;
       /**
        * Time End
        * Format: date-time
-       * @example 2025-07-16T21:18:00
+       * @example 2025-10-28T05:44:00
        */
       time_end: string;
     };
@@ -348,7 +382,6 @@ export type SchemaCreateBooking = components["schemas"]["CreateBooking"];
 export type SchemaFillUserProfile = components["schemas"]["FillUserProfile"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
-export type SchemaUserStatus = components["schemas"]["UserStatus"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type SchemaViewBooking = components["schemas"]["ViewBooking"];
 export type SchemaViewUser = components["schemas"]["ViewUser"];
@@ -555,7 +588,7 @@ export interface operations {
   bookings_form_schedule: {
     parameters: {
       query?: {
-        /** @example 2025-07-14 */
+        /** @example 2025-10-27 */
         start_of_week?: string | null;
         from_user_id?: number | null;
       };
@@ -703,7 +736,7 @@ export interface operations {
       query?: {
         /**
          * @description Date for which to get remaining hours (iso format). Default: server-side today
-         * @example 2025-07-16
+         * @example 2025-10-28
          */
         date?: string | null;
       };
@@ -738,7 +771,7 @@ export interface operations {
       query?: {
         /**
          * @description Date for which to get remaining hours (iso format). Default: server-side today
-         * @example 2025-07-16
+         * @example 2025-10-28
          */
         date?: string | null;
       };
@@ -773,6 +806,7 @@ export interface operations {
       query?: {
         telegram_id?: number | null;
         email?: string | null;
+        alias?: string | null;
       };
       header?: never;
       path?: never;
@@ -800,6 +834,74 @@ export interface operations {
       };
     };
   };
+  users_get_user: {
+    parameters: {
+      query?: {
+        telegram_id?: number | null;
+        email?: string | null;
+        alias?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ViewUser"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  users_set_user_status: {
+    parameters: {
+      query: {
+        status: components["schemas"]["UserStatus"];
+        telegram_id?: number | null;
+        email?: string | null;
+        alias?: string | null;
+        as_bot?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
 }
 export enum UserStatus {
   banned = "banned",
@@ -807,4 +909,5 @@ export enum UserStatus {
   middle = "middle",
   senior = "senior",
   lord = "lord",
+  admin = "admin",
 }

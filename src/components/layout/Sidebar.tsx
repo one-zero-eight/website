@@ -1,7 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
-import { items, ItemType } from "@/components/layout/menu-links.tsx";
+import { items, LinkItemType } from "@/components/layout/menu-links.tsx";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useLocalStorage } from "usehooks-ts";
@@ -97,7 +97,7 @@ function SidebarLink({
   badge,
   isMinimized,
   ...props
-}: ItemType & {
+}: LinkItemType & {
   isMinimized: boolean;
 }) {
   const children = (
@@ -134,6 +134,7 @@ function SidebarLink({
       </a>
     );
   } else if (props.type === "local") {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { staff_only, hideOnMore, type, ...linkProps } = props;
     return (
       <Link

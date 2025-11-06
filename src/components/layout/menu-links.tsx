@@ -21,6 +21,10 @@ export type ItemType = (LocalLink | ExternalLink | SeparatorItem) & {
   hideOnMore?: boolean;
   staff_only?: boolean;
 };
+export type LinkItemType = (LocalLink | ExternalLink) & {
+  hideOnMore?: boolean;
+  staff_only?: boolean;
+};
 
 export const items: ItemType[] = [
   {

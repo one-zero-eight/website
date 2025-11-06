@@ -1,3 +1,4 @@
+import { useWakeLock } from "@/components/timer/utils.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CONTROL_BUTTON_CLASS,
@@ -33,9 +34,21 @@ const TimerPage = () => {
   const minutesRef = useRef<HTMLInputElement>(null);
   const secondsRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  const wakeLock = useWakeLock();
   const hasAdjustedTimerRef = useRef<boolean>(false);
   const titleTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const showToast = (message: string) => {
+    const id = toastIdCounter.current++;
+    setToasts((prev) => [...prev, { id, message }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 3000);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
 
   const handleTimerComplete = useCallback(async () => {
     setIsRunning(false);
@@ -53,7 +66,7 @@ const TimerPage = () => {
     }
     localStorage.removeItem("timerState");
 
-    await releaseWakeLock();
+    await wakeLock.release();
 
     if (audioRef.current) {
       audioRef.current.play().catch((error) => {
@@ -68,7 +81,7 @@ const TimerPage = () => {
     }
 
     showToast("Time is up!");
-  }, []);
+  }, [wakeLock]);
 
   const formatTime = useCallback((totalSeconds: number) => {
     if (isNaN(totalSeconds) || totalSeconds < 0) {
@@ -127,15 +140,16 @@ const TimerPage = () => {
 
   useEffect(() => {
     if (isRunning && !isPaused) {
-      requestWakeLock();
+      wakeLock.request();
     }
-  }, [isRunning, isPaused]);
+  }, [isRunning, isPaused, wakeLock]);
 
   useEffect(() => {
     return () => {
-      releaseWakeLock();
+      // Release wakelock on component unmount
+      wakeLock.release();
     };
-  }, []);
+  }, [wakeLock]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -166,9 +180,16 @@ const TimerPage = () => {
         handleTimerComplete();
       }
 
-      await requestWakeLock();
+      wakeLock.request();
     }
-  }, [isRunning, isPaused, targetEndTime, handleTimerComplete, formatTime]);
+  }, [
+    isRunning,
+    isPaused,
+    targetEndTime,
+    handleTimerComplete,
+    formatTime,
+    wakeLock,
+  ]);
 
   useEffect(() => {
     const savedState = localStorage.getItem("timerState");
@@ -223,41 +244,6 @@ const TimerPage = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [handleTimerComplete, handleVisibilityChange, formatTime]);
-
-  const showToast = (message: string) => {
-    const id = toastIdCounter.current++;
-    setToasts((prev) => [...prev, { id, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, 3000);
-  };
-
-  const removeToast = (id: number) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  };
-
-  const requestWakeLock = async () => {
-    try {
-      if ("wakeLock" in navigator) {
-        wakeLockRef.current = await navigator.wakeLock.request("screen");
-        console.log("Wake Lock acquired");
-      }
-    } catch (err) {
-      console.error("Failed to acquire wake lock:", err);
-    }
-  };
-
-  const releaseWakeLock = async () => {
-    if (wakeLockRef.current) {
-      try {
-        await wakeLockRef.current.release();
-        wakeLockRef.current = null;
-        console.log("Wake Lock released");
-      } catch (err) {
-        console.error("Failed to release wake lock:", err);
-      }
-    }
-  };
 
   useEffect(() => {
     if (isRunning && !isPaused && targetEndTime) {
@@ -372,7 +358,7 @@ const TimerPage = () => {
     setTargetEndTime(endTime);
     setShowTimeUpMessage(false);
 
-    await requestWakeLock();
+    await wakeLock.request();
 
     showToast("The timer started");
   };
@@ -413,7 +399,7 @@ const TimerPage = () => {
     hasAdjustedTimerRef.current = false; // Reset the adjustment flag
     localStorage.removeItem("timerState");
 
-    await releaseWakeLock();
+    wakeLock.release();
 
     showToast("The timer stopped");
   };
