@@ -1,4 +1,4 @@
-import { useMyAcademicCalendar } from "@/lib/events/academic-calendar.tsx";
+import { useMyAcademicCalendar } from "@/components/dashboard/academic-calendar.tsx";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 

@@ -2,7 +2,7 @@ import { $events } from "@/api/events";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton.tsx";
 import { PersonalCard } from "@/components/schedule/group-card/PersonalCard.tsx";
-import { useMyMusicRoom } from "@/lib/events/event-group.ts";
+import { useMyMusicRoom } from "@/api/events/event-group.ts";
 import {
   FloatingFocusManager,
   FloatingOverlay,

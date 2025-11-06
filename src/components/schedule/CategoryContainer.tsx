@@ -1,5 +1,5 @@
 import { CategoryCard } from "@/components/schedule/CategoryCard";
-import { viewConfig } from "@/lib/events/events-view-config";
+import { viewConfig } from "@/components/schedule/view-config.ts";
 
 const categoriesIcons: {
   [key: string]: React.ReactNode;

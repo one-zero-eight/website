@@ -1,5 +1,5 @@
 import Tooltip from "@/components/common/Tooltip";
-import { useEventGroup } from "@/lib/events/event-group";
+import { useEventGroup } from "@/api/events/event-group.ts";
 
 export default function HideButton({ groupId }: { groupId: number }) {
   const { isHidden, switchHideFavorite } = useEventGroup(groupId);

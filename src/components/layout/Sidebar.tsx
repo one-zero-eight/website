@@ -1,7 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
-import { items, ItemType } from "@/lib/links/menu-links.tsx";
+import { items, ItemType } from "@/components/layout/menu-links.tsx";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useLocalStorage } from "usehooks-ts";

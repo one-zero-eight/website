@@ -1,8 +1,11 @@
 import { eventsTypes } from "@/api/events";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
 import HideButton from "@/components/schedule/group-card/HideButton";
-import { getAllTagsByType, getFirstTagByType } from "@/lib/events/event-group";
-import { viewConfig } from "@/lib/events/events-view-config";
+import {
+  getAllTagsByType,
+  getFirstTagByType,
+} from "@/api/events/event-group.ts";
+import { viewConfig } from "@/components/schedule/view-config.ts";
 import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 

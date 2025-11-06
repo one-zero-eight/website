@@ -17,7 +17,7 @@
     "gen:api": "pnpm exec openapi-typescript --root-types --enum",
     "release": "bumpp package.json",
     "update-deps": "taze minor -wIrl",
-    "test:ndcg": "vite-node src/lib/links/searchUtils.test.ts"
+    "test:ndcg": "vite-node src/components/dashboard/links/searchUtils.test.ts"
   },
   "dependencies": {
     "@dr.pogodin/react-helmet": "^3.0.4",

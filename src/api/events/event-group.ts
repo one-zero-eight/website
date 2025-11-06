@@ -1,4 +1,4 @@
-import { $events, eventsTypes } from "@/api/events";
+import { $events, eventsTypes } from "@/api/events/index.ts";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function useEventGroup(group_id: number) {

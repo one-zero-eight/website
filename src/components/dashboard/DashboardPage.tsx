@@ -7,7 +7,7 @@ import { CountdownWidget } from "@/components/dashboard/CountdownWidget.tsx";
 import { PwaWidget } from "@/components/dashboard/PwaWidget.tsx";
 import { SportsWidget } from "@/components/dashboard/SportsWidget.tsx";
 import { Link } from "@tanstack/react-router";
-import Links from "./Links";
+import Links from "./links/Links.tsx";
 
 export function DashboardPage() {
   const { me } = useMe();

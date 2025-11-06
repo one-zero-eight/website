@@ -1,14 +1,14 @@
-import { groups } from "@/lib/links/constants";
-import CustomSelect from "@/lib/links/customSelector";
+import { groups } from "@/components/dashboard/links/constants.ts";
+import CustomSelect from "@/components/dashboard/links/CustomSelect.tsx";
 import {
   globalFrequencies,
   resourcesList,
-} from "@/lib/links/resources-list.ts";
-import { SearchInput } from "@/lib/links/SearchInput";
+} from "@/components/dashboard/links/resources-list.ts";
+import { SearchInput } from "@/components/dashboard/links/SearchInput.tsx";
 import {
   createFuseInstance,
   getFilteredResources,
-} from "@/lib/links/searchUtils";
+} from "@/components/dashboard/links/searchUtils.ts";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 

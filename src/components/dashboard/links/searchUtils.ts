@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import { Resource } from "./types";
+import { Resource } from "./types.ts";
 
 // Ranking weights for RRF calculation
 const FUSE_WEIGHT = 5;

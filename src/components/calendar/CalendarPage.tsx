@@ -9,7 +9,7 @@ import {
   getMyMusicRoomLink,
   getMySportLink,
   getMyWorkshopsLink,
-} from "@/lib/events/links.ts";
+} from "@/api/events/links.ts";
 import { useRef } from "react";
 
 export function CalendarPage() {

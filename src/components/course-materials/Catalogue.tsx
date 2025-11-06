@@ -1,6 +1,6 @@
 import { $search, searchTypes } from "@/api/search";
 import { useEffect, useMemo, useState } from "react";
-import CustomSelect from "../../lib/links/customSelector.tsx";
+import CustomSelect from "@/components/dashboard/links/CustomSelect.tsx";
 import PreviewCard from "../search/PreviewCard.tsx";
 
 // Types

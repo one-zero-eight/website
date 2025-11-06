@@ -4,13 +4,15 @@ import {
   calculateGPAFromScholarship,
   calculateMarksFromGPA,
   calculateScholarship,
+} from "./calculate.ts";
+import {
   Courses,
   FORMULA_B_MAX_MAPPING,
   FORMULA_B_MIN,
   Mark,
   MARK_COLORS,
   MARK_MAPPING,
-} from "@/lib/scholarship";
+} from "./consts.ts";
 import clsx from "clsx";
 import { createRef, Fragment, useEffect, useState } from "react";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
