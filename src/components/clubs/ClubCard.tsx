@@ -22,19 +22,17 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
     <div className="bg-base-200 border-inh-secondary rounded-field overflow-hidden border">
       <Link to="/clubs/$slug" params={{ slug: club.slug }} className="block">
         <div className="flex items-center gap-4 p-4">
-          <div className="rounded-field flex h-48 w-48 shrink-0 items-center justify-center overflow-hidden">
+          <div className="rounded-field relative flex h-48 w-48 shrink-0 items-center justify-center overflow-hidden">
+            <span className="icon-[mdi--account-group] absolute size-12 text-white" />
             <img
               src={getLogoURLById(club.id)}
               alt={`${club.title} logo`}
-              className="size-full object-cover"
+              className="bg-base-200 absolute inset-0 size-full object-cover"
+              loading="lazy"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
-                const fallback = e.currentTarget
-                  .nextElementSibling as HTMLElement;
-                if (fallback) fallback.style.display = "block";
               }}
             />
-            <span className="icon-[mdi--account-group] hidden size-12 text-white" />
           </div>
 
           <div className="flex grow flex-col justify-between gap-3">
