@@ -1,3 +1,4 @@
+import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { GuardPage } from "@/components/guard/GuardPage.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
@@ -15,7 +16,9 @@ function RouteComponent() {
       </Helmet>
 
       <Topbar title="Guard" />
-      <GuardPage />
+      <RequireAuth>
+        <GuardPage />
+      </RequireAuth>
     </>
   );
 }

@@ -1,6 +1,4 @@
-import { useMe } from "@/api/accounts/user.ts";
 import { $workshops, workshopsTypes } from "@/api/workshops";
-import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { PostForm } from "@/components/events/PostForm.tsx";
 import { groupWorkshopsByDate } from "@/components/events/event-utils.ts";
 import {
@@ -39,12 +37,6 @@ export function EventsAdminPage() {
 
   // Группируем воркшопы по датам для удобного отображения
   const groups = workshops ? groupWorkshopsByDate(workshops) : undefined;
-
-  const { me } = useMe();
-
-  if (!me) {
-    return <AuthWall />;
-  }
 
   if (workshopsUser?.role !== "admin") {
     return null;

@@ -60,7 +60,7 @@ function RouteComponent() {
   if (!me) {
     return (
       <div className="flex h-full items-center justify-center">
-        <AuthWall signInRedirect={`/forms/submit?form=${form}`} />
+        <AuthWall />
       </div>
     );
   }

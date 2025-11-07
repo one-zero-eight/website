@@ -1,6 +1,4 @@
-import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
-import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
 import { getRouteApi } from "@tanstack/react-router";
@@ -43,8 +41,6 @@ export function RoomBookingPage() {
     }
   }, [timelineLoaded, search.d]);
 
-  const { me } = useMe();
-
   const [startDate] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
   const [endDate] = useState(new Date(startDate.getTime() + 7 * T.Day));
 
@@ -67,10 +63,6 @@ export function RoomBookingPage() {
     );
   const { data: myBookings, isPending: isMyBookingsPending } =
     $roomBooking.useQuery("get", "/bookings/my");
-
-  if (!me) {
-    return <AuthWall />;
-  }
 
   return (
     <>

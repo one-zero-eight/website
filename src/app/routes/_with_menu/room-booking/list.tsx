@@ -1,3 +1,4 @@
+import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
 import { BookingsListPage } from "@/components/room-booking/bookings-list/BookingsListPage.tsx";
@@ -21,7 +22,9 @@ function RouteComponent() {
 
       <Topbar title="Room booking" hideOnMobile />
       <BookingPageTabs />
-      <BookingsListPage />
+      <RequireAuth>
+        <BookingsListPage />
+      </RequireAuth>
     </>
   );
 }

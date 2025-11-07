@@ -53,7 +53,7 @@ export function ConnectTelegramPage() {
           to access InNoHassle services.
         </p>
         <div className="flex items-center justify-center">
-          <SignInButton signInRedirect="" />
+          <SignInButton />
         </div>
       </>
     );

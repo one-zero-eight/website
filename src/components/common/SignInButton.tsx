@@ -6,11 +6,10 @@ import { forwardRef } from "react";
 export type SignInButtonProps = {
   className?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  signInRedirect?: string;
 };
 
 export const SignInButton = forwardRef(function SignInButton_(
-  { onClick, className, signInRedirect }: SignInButtonProps,
+  { onClick, className }: SignInButtonProps,
   ref: React.Ref<HTMLButtonElement>,
 ) {
   return (
@@ -22,7 +21,7 @@ export const SignInButton = forwardRef(function SignInButton_(
         className,
       )}
       onClick={(e) => {
-        navigateToSignIn(signInRedirect);
+        navigateToSignIn();
         onClick?.(e);
       }}
     >
@@ -32,17 +31,14 @@ export const SignInButton = forwardRef(function SignInButton_(
   );
 });
 
-export function SignInButtonIcon({
-  onClick,
-  signInRedirect,
-}: SignInButtonProps) {
+export function SignInButtonIcon({ onClick }: SignInButtonProps) {
   return (
     <Tooltip content="Sign in">
       <button
         type="button"
         className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
         onClick={(e) => {
-          navigateToSignIn(signInRedirect);
+          navigateToSignIn();
           onClick?.(e);
         }}
       >

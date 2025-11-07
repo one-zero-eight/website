@@ -1,7 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { ConnectTelegramPage } from "@/components/account/ConnectTelegramPage.tsx";
-import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { groupWorkshopsByDate } from "@/components/events/event-utils.ts";
 import { useState } from "react";
 import { Description } from "./EventPage/Description.tsx";
@@ -28,11 +27,7 @@ export function EventsListPage() {
 
   const { me } = useMe();
 
-  if (!me) {
-    return <AuthWall />;
-  }
-
-  if (!me.telegram) {
+  if (!me?.telegram) {
     return (
       <div className="bg-inh-primary rounded-box @container/account m-4 flex w-full max-w-md flex-col gap-4 px-4 py-6">
         <img

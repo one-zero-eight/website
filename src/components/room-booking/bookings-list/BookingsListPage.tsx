@@ -1,6 +1,4 @@
-import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
-import { AuthWall } from "@/components/common/AuthWall.tsx";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { DeleteBookingModal } from "@/components/room-booking/bookings-list/DeleteBookingModal.tsx";
 import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
@@ -10,12 +8,7 @@ import clsx from "clsx";
 import React, { useMemo, useState } from "react";
 
 export function BookingsListPage() {
-  const { me } = useMe();
   const { data: bookings } = $roomBooking.useQuery("get", "/bookings/my");
-
-  if (!me) {
-    return <AuthWall />;
-  }
 
   if (bookings === undefined) {
     // Loading...

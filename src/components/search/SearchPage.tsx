@@ -1,6 +1,4 @@
-import { useMe } from "@/api/accounts/user.ts";
 import { $search, searchTypes } from "@/api/search";
-import { AuthWall } from "@/components/common/AuthWall.tsx";
 import PreviewCard from "@/components/search/PreviewCard.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
@@ -15,7 +13,6 @@ import IframePreviewCard from "./IframePreviewCard";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const navigate = useNavigate();
-  const { me } = useMe();
 
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
   const didInit = useRef<boolean>(false);
@@ -162,10 +159,6 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
       setSubmittedQuery(query);
     }
   };
-
-  if (!me) {
-    return <AuthWall />;
-  }
 
   return (
     <div className="flex grow flex-col gap-2 p-4">

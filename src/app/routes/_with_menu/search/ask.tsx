@@ -1,3 +1,4 @@
+import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { AskPage } from "@/components/search/ask/AskPage";
 import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
 import { createFileRoute } from "@tanstack/react-router";
@@ -30,7 +31,9 @@ function RouteComponent() {
       </Helmet>
 
       <TopbarWithToggleGroup currentTabText={q} />
-      <AskPage askQuery={q ?? ""} />
+      <RequireAuth>
+        <AskPage askQuery={q ?? ""} />
+      </RequireAuth>
     </Suspense>
   );
 }
