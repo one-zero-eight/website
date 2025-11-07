@@ -1,3 +1,4 @@
+import { ClubLeaguePage } from "@/components/clubs/ClubLeaguePage.tsx";
 import { ClubsTabs } from "@/components/clubs/ClubsTabs.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
@@ -17,6 +18,7 @@ function RouteComponent() {
 
       <Topbar title="Student Clubs" />
       <ClubsTabs />
+      <ClubLeaguePage />
     </>
   );
 }
