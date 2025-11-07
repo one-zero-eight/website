@@ -14,7 +14,9 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
   const clubLeader = useMemo(
     () =>
-      clubLeaders?.find((v) => v.innohassle_id === club.leader_innohassle_id),
+      club.leader_innohassle_id
+        ? clubLeaders?.[club.leader_innohassle_id]
+        : undefined,
     [clubLeaders, club.leader_innohassle_id],
   );
 
@@ -32,12 +34,7 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
           >
             {club.title}
           </Link>
-          <span
-            className={clsx(
-              "shrink-0 rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap",
-              getClubTypeColor(club.type),
-            )}
-          >
+          <span className={clsx("badge", getClubTypeColor(club.type))}>
             {getClubTypeLabel(club.type)}
           </span>
         </div>

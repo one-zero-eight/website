@@ -740,6 +740,13 @@ export interface operations {
           "application/json": components["schemas"]["Club"];
         };
       };
+      /** @description Slug already exists */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Only admin can change club info */
       403: {
         headers: {
@@ -940,7 +947,9 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Leader"][];
+          "application/json": {
+            [key: string]: components["schemas"]["Leader"];
+          };
         };
       };
     };

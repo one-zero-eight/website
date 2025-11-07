@@ -70,7 +70,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-4">
+    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-4">
       {/* Header Section */}
       <div className="card card-border">
         <div className="relative flex items-center justify-center p-8">
@@ -109,14 +109,18 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
         {/* Main Content */}
         <div className="order-2 space-y-6 lg:order-1 lg:col-span-2">
           {/* Description Section */}
-          {club.description && (
-            <div className="card card-border">
-              <div className="card-body">
-                <h2 className="card-title">About</h2>
+          <div className="card card-border">
+            <div className="card-body">
+              <h2 className="card-title">About</h2>
+              {club.description ? (
                 <p className="text-base-content/50">{club.description}</p>
-              </div>
+              ) : (
+                <p className="text-base-content/50 italic">
+                  No detailed description yet.
+                </p>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Upcoming Events Section */}
           <div className="card card-border">
@@ -193,13 +197,13 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
           )}
 
           {/* Leader Section */}
-          {clubLeader && (
-            <div className="card card-border">
-              <div className="card-body">
-                <h2 className="card-title">
-                  <span className="icon-[mdi--account] size-6" />
-                  Club Leader
-                </h2>
+          <div className="card card-border">
+            <div className="card-body">
+              <h2 className="card-title">
+                <span className="icon-[mdi--account] size-6" />
+                Club Leader
+              </h2>
+              {clubLeader ? (
                 <div className="space-y-3">
                   {clubLeader.name && (
                     <div className="flex items-start gap-3">
@@ -231,9 +235,13 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                     </div>
                   )}
                 </div>
-              </div>
+              ) : (
+                <p className="text-base-content/50 italic">
+                  No leader information available.
+                </p>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

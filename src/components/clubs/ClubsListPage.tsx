@@ -24,7 +24,7 @@ export function ClubsListPage() {
         club.title.toLowerCase().includes(search.toLowerCase()) ||
         club.short_description.toLowerCase().includes(search.toLowerCase()) ||
         club.description.toLowerCase().includes(search.toLowerCase());
-      return matchesType && matchesSearch;
+      return club.is_active && matchesType && matchesSearch;
     });
   }, [clubs, search, selectedTypes]);
 
