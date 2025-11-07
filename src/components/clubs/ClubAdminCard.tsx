@@ -54,7 +54,7 @@ export function ClubAdminCard({ club }: { club: clubsTypes.SchemaClub }) {
           {club.short_description}
         </p>
 
-        <div className="flex items-center gap-2">
+        <div className="card-actions">
           <Link
             to="/clubs/$slug/edit"
             params={{ slug: club.slug }}
