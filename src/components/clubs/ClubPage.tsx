@@ -9,31 +9,6 @@ import {
   getLinkLabel,
 } from "./constants.ts";
 
-// Mock events data
-const mockEvents = [
-  {
-    id: "1",
-    title: "Weekly Club Meeting",
-    date: "2025-11-10",
-    time: "18:00",
-    location: "Room 301",
-  },
-  {
-    id: "2",
-    title: "Workshop: Introduction to React",
-    date: "2025-11-15",
-    time: "16:00",
-    location: "Room 205",
-  },
-  {
-    id: "3",
-    title: "Club Social Event",
-    date: "2025-11-20",
-    time: "19:00",
-    location: "Student Lounge",
-  },
-];
-
 export function ClubPage({ clubSlug }: { clubSlug: string }) {
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const { data: club, isPending: clubPending } = $clubs.useQuery(
@@ -111,7 +86,10 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
           {/* Description Section */}
           <div className="card card-border">
             <div className="card-body">
-              <h2 className="card-title">About</h2>
+              <h2 className="card-title">
+                <span className="icon-[material-symbols--article-outline-rounded] size-6" />
+                About
+              </h2>
               {club.description ? (
                 <p className="text-base-content/50">{club.description}</p>
               ) : (
@@ -129,33 +107,8 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                 <span className="icon-[mdi--calendar] size-6" />
                 Upcoming Events
               </h2>
-              <div className="mt-4 space-y-4">
-                {mockEvents.map((event) => (
-                  <div key={event.id} className="card card-border">
-                    <div className="card-body p-4">
-                      <h3 className="text-base-content mb-2 font-semibold">
-                        {event.title}
-                      </h3>
-                      <div className="text-base-content/50 space-y-1 text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="icon-[mdi--calendar] size-4" />
-                          <span>
-                            {new Date(event.date).toLocaleDateString("en-US", {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                            })}{" "}
-                            at {event.time}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="icon-[mdi--map-marker] size-4" />
-                          <span>{event.location}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="space-y-4">
+                <p className="text-base-content/50 italic">No events yet.</p>
               </div>
             </div>
           </div>
@@ -235,13 +188,16 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                     </div>
                   )}
                   {!clubLeader.telegram_alias &&
-                    clubsUser?.role === "admin" && (
+                    (clubsUser?.role === "admin" ||
+                      clubsUser?.leader_in_clubs?.some(
+                        (v) => v.id === club.id,
+                      )) && (
                       /* Ask leader to connect telegram */
                       <div className="alert alert-warning items-start">
                         <span className="icon-[mdi--alert] size-4" />
                         <span>
-                          Please ask the club leader to connect their Telegram
-                          account on InNoHassle using the{" "}
+                          The club leader should connect their Telegram account
+                          to InNoHassle using the{" "}
                           <a
                             href="https://innohassle.ru/account/connect-telegram"
                             target="_blank"
