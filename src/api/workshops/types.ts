@@ -106,7 +106,8 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /** Get Workshop */
+    get: operations["get_workshop_workshops__workshop_id__get"];
     /** Update Workshop */
     put: operations["update_workshop_workshops__workshop_id__put"];
     post?: never;
@@ -175,12 +176,26 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** Badge */
+    Badge: {
+      /** Title */
+      title: string;
+      /** Color */
+      color: string;
+    };
     /** CreateWorkshop */
     CreateWorkshop: {
-      /** Name */
-      name: string;
-      /** Description */
-      description?: string | null;
+      /** English Name */
+      english_name: string;
+      /** Russian Name */
+      russian_name: string;
+      /** English Description */
+      english_description?: string | null;
+      /** Russian Description */
+      russian_description?: string | null;
+      language: components["schemas"]["WorkshopLanguage"];
+      /** Host */
+      host: string;
       /**
        * Dtstart
        * Format: date-time
@@ -191,10 +206,16 @@ export interface components {
        * Format: date-time
        */
       dtend: string;
+      /** Check In Opens */
+      check_in_opens?: string | null;
       /** Place */
       place?: string | null;
       /** Capacity */
       capacity?: number | null;
+      /** Is Draft */
+      is_draft?: boolean | null;
+      /** Badges */
+      badges?: components["schemas"]["Badge"][];
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -203,20 +224,33 @@ export interface components {
     };
     /** UpdateWorkshop */
     UpdateWorkshop: {
-      /** Name */
-      name?: string | null;
-      /** Description */
-      description?: string | null;
+      /** English Name */
+      english_name?: string | null;
+      /** Russian Name */
+      russian_name?: string | null;
+      /** English Description */
+      english_description?: string | null;
+      /** Russian Description */
+      russian_description?: string | null;
+      language?: components["schemas"]["WorkshopLanguage"] | null;
+      /** Host */
+      host?: string | null;
       /** Dtstart */
       dtstart?: string | null;
       /** Dtend */
       dtend?: string | null;
+      /** Check In Opens */
+      check_in_opens: string | null;
       /** Place */
       place?: string | null;
       /** Capacity */
       capacity?: number | null;
+      /** Badges */
+      badges?: components["schemas"]["Badge"][] | null;
       /** Is Active */
       is_active?: boolean | null;
+      /** Is Draft */
+      is_draft?: boolean | null;
     };
     /** User */
     User: {
@@ -261,10 +295,17 @@ export interface components {
     Workshop: {
       /** Id */
       id: string;
-      /** Name */
-      name: string;
-      /** Description */
-      description: string | null;
+      /** English Name */
+      english_name: string;
+      /** Russian Name */
+      russian_name: string;
+      /** English Description */
+      english_description: string | null;
+      /** Russian Description */
+      russian_description: string | null;
+      language: components["schemas"]["WorkshopLanguage"];
+      /** Host */
+      host: string;
       /**
        * Dtstart
        * Format: date-time
@@ -275,6 +316,11 @@ export interface components {
        * Format: date-time
        */
       dtend: string;
+      /**
+       * Check In Opens
+       * Format: date-time
+       */
+      check_in_opens: string;
       /** Place */
       place: string | null;
       /**
@@ -282,11 +328,20 @@ export interface components {
        * @default 1000000
        */
       capacity: number;
+      /** Badges */
+      badges: {
+        [key: string]: string;
+      }[];
       /**
        * Is Active
        * @default true
        */
       is_active: boolean;
+      /**
+       * Is Draft
+       * @default false
+       */
+      is_draft: boolean;
       /**
        * Created At
        * Format: date-time
@@ -301,6 +356,11 @@ export interface components {
        */
       readonly is_registrable: boolean;
     };
+    /**
+     * WorkshopLanguage
+     * @enum {string}
+     */
+    WorkshopLanguage: WorkshopLanguage;
   };
   responses: never;
   parameters: never;
@@ -308,12 +368,12 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaBadge = components["schemas"]["Badge"];
 export type SchemaCreateWorkshop = components["schemas"]["CreateWorkshop"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaUpdateWorkshop = components["schemas"]["UpdateWorkshop"];
 export type SchemaUser = components["schemas"]["User"];
-export type SchemaUserRole = components["schemas"]["UserRole"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type SchemaViewUserScheme = components["schemas"]["ViewUserScheme"];
 export type SchemaWorkshop = components["schemas"]["Workshop"];
@@ -533,6 +593,51 @@ export interface operations {
       };
       /** @description Not authorized (admin required) */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_workshop_workshops__workshop_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workshop_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Workshop retrieved successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Workshop"] | null;
+        };
+      };
+      /** @description Not authenticated */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Workshop not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -810,4 +915,9 @@ export interface operations {
 export enum UserRole {
   admin = "admin",
   user = "user",
+}
+export enum WorkshopLanguage {
+  english = "english",
+  russian = "russian",
+  both = "both",
 }
