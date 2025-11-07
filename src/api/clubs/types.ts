@@ -425,6 +425,8 @@ export interface components {
        * @description ID of sport type in InnoSport system (None if the club is not sport)
        */
       sport_id?: string | null;
+      /** New Leader Email */
+      new_leader_email?: string | null;
     };
     /**
      * UserRole

@@ -187,11 +187,13 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
           };
         }
         // Navigate to new slug if it changed, otherwise stay on current slug
-        navigate({ to: "/clubs/$slug", params: { slug } });
+        navigate({ to: "/clubs/$slug", params: { slug }, ignoreBlocker: true });
       },
       onError: (error) => {
         console.error("Failed to update club:", error);
-        alert("Failed to update club. Please try again.");
+        alert(
+          `Failed to update club: ${error?.detail || "Unknown error"}. Please try again.`,
+        );
       },
     },
   );
@@ -233,8 +235,11 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       type,
       sport_id: isSport ? sportId || null : null,
       links: links.length > 0 ? links : undefined,
-      // TODO: leader from email
     };
+    console.log(showChangeLeader, leaderEmail, clubLeader?.email);
+    if (showChangeLeader && leaderEmail && leaderEmail !== clubLeader?.email) {
+      updateData.new_leader_email = leaderEmail;
+    }
 
     updateClub({
       params: { path: { slug: clubSlug } },
