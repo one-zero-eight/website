@@ -2,7 +2,13 @@ import { $clubs, clubsTypes } from "@/api/clubs";
 import { useMemo, useState } from "react";
 import { ClubCard } from "./ClubCard";
 import { ClubsSidebar } from "./ClubsSidebar";
-import { clubTypesOrder, getClubTypeLabel } from "./utils";
+import {
+  clubTypeDescription,
+  clubTypeIcon,
+  clubTypesOrder,
+  getClubTypeLabel,
+} from "./utils";
+import clsx from "clsx";
 
 export function ClubsListPage() {
   const { data: clubs, isPending } = $clubs.useQuery("get", "/clubs/");
@@ -89,10 +95,25 @@ export function ClubsListPage() {
         <div className="flex grow flex-col gap-6">
           {Object.entries(groupedClubs).map(([type, clubsOfType]) => (
             <div key={type}>
-              <h2 className="text-base-content mb-4 text-xl font-semibold">
-                {getClubTypeLabel(type as clubsTypes.ClubType)}
-              </h2>
-              <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-2">
+                <span
+                  className={clsx(
+                    clubTypeIcon[type as clubsTypes.ClubType],
+                    "text-primary text-3xl",
+                  )}
+                />
+                <h2 className="text-base-content text-xl font-semibold">
+                  {getClubTypeLabel(type as clubsTypes.ClubType)}
+                </h2>
+                <div className="grow" />
+                <span className="text-base-content/50 text-sm">
+                  {clubsOfType.length} clubs
+                </span>
+              </div>
+              <span className="text-base-content/50">
+                {clubTypeDescription[type as clubsTypes.ClubType]}
+              </span>
+              <div className="mt-4 flex flex-col gap-6">
                 {clubsOfType.map((club) => (
                   <ClubCard key={club.id} club={club} />
                 ))}
