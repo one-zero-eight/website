@@ -1,5 +1,5 @@
 import { clubsTypes } from "@/api/clubs";
-import { clubTypesOrder, getClubTypeLabel } from "./utils";
+import { clubTypesOrder, getClubTypeLabel } from "./constants.ts";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 

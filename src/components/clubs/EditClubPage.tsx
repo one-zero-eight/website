@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useBlocker, useNavigate } from "@tanstack/react-router";
-import { getClubTypeLabel } from "./utils";
+import { getClubTypeLabel } from "./constants.ts";
 
 export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const navigate = useNavigate();

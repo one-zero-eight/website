@@ -7,7 +7,7 @@ import {
   getClubTypeColor,
   getLinkIconClass,
   getLinkLabel,
-} from "./utils";
+} from "./constants.ts";
 
 // Mock events data
 const mockEvents = [

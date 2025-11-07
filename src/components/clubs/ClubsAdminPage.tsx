@@ -1,4 +1,8 @@
 import { $clubs } from "@/api/clubs";
+import {
+  createFuseInstance,
+  searchClubs,
+} from "@/components/clubs/searchUtils.ts";
 import { useMemo, useState } from "react";
 import { AddClubDialog } from "./AddClubDialog";
 import { ClubAdminCard } from "./ClubAdminCard";
@@ -6,21 +10,25 @@ import { ClubAdminCard } from "./ClubAdminCard";
 export function ClubsAdminPage() {
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const { data: clubs, isPending } = $clubs.useQuery("get", "/clubs/");
+  const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
   const [search, setSearch] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
+
+  const fuse = useMemo(
+    () => clubs && clubLeaders && createFuseInstance(clubs, clubLeaders),
+    [clubs, clubLeaders],
+  );
 
   const filteredClubs = useMemo(() => {
     if (!clubs) return [];
 
-    return clubs.filter((club) => {
-      return (
-        search === "" ||
-        club.title.toLowerCase().includes(search.toLowerCase()) ||
-        club.slug.toLowerCase().includes(search.toLowerCase()) ||
-        club.short_description.toLowerCase().includes(search.toLowerCase())
-      );
-    });
-  }, [clubs, search]);
+    let foundClubs = clubs;
+    if (search && fuse) {
+      foundClubs = searchClubs(fuse, search);
+    }
+
+    return foundClubs;
+  }, [clubs, fuse, search]);
 
   if (clubsUser?.role !== "admin") {
     return null;

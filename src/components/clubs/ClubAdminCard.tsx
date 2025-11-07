@@ -8,7 +8,7 @@ import {
   getClubTypeColor,
   getLinkIconClass,
   getLinkLabel,
-} from "./utils";
+} from "./constants.ts";
 
 export function ClubAdminCard({ club }: { club: clubsTypes.SchemaClub }) {
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");

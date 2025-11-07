@@ -2,15 +2,15 @@ import { $clubs, clubsTypes } from "@/api/clubs";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   getClubTypeLabel,
   getClubTypeColor,
   getLinkIconClass,
   getLinkLabel,
-} from "./utils";
+} from "./constants.ts";
 
-export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
+function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
   const clubLeader = useMemo(
     () =>
@@ -34,7 +34,7 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
           >
             {club.title}
           </Link>
-          <span className={clsx("badge", getClubTypeColor(club.type))}>
+          <span className={clsx("badge shrink-0", getClubTypeColor(club.type))}>
             {getClubTypeLabel(club.type)}
           </span>
         </div>
@@ -92,3 +92,8 @@ export function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
     </div>
   );
 }
+
+const MemoizedClubCard = React.memo(ClubCard, (prevProps, nextProps) => {
+  return prevProps.club.id === nextProps.club.id;
+});
+export { MemoizedClubCard as ClubCard };

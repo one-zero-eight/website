@@ -1,4 +1,9 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
+import {
+  createFuseInstance,
+  searchClubs,
+} from "@/components/clubs/searchUtils.ts";
+import clsx from "clsx";
 import { useMemo, useState } from "react";
 import { ClubCard } from "./ClubCard";
 import { ClubsSidebar } from "./ClubsSidebar";
@@ -7,32 +12,54 @@ import {
   clubTypeIcon,
   clubTypesOrder,
   getClubTypeLabel,
-} from "./utils";
-import clsx from "clsx";
+} from "./constants.ts";
 
 export function ClubsListPage() {
-  const { data: clubs, isPending } = $clubs.useQuery("get", "/clubs/");
-  const { data: _clubLeaders } = $clubs.useQuery("get", "/leaders/");
+  const { data: clubs, isPending } = $clubs.useQuery(
+    "get",
+    "/clubs/",
+    {},
+    {
+      select: (data) => {
+        // Make one-zero-eight first, then BDSM, then other clubs
+        const sorted = data.slice();
+        sorted.sort((a, b) => {
+          if (a.slug === "one-zero-eight") return -1;
+          if (b.slug === "one-zero-eight") return 1;
+          if (a.slug === "boosting-development-in-science-and-math") return -1;
+          if (b.slug === "boosting-development-in-science-and-math") return 1;
+          return 0;
+        });
+        return sorted;
+      },
+    },
+  );
+  const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
   const [search, setSearch] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<Set<clubsTypes.ClubType>>(
     new Set(),
   );
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const filteredAndSortedClubs = useMemo(() => {
+  const fuse = useMemo(
+    () => clubs && clubLeaders && createFuseInstance(clubs, clubLeaders),
+    [clubs, clubLeaders],
+  );
+
+  const filteredClubs = useMemo(() => {
     if (!clubs) return [];
 
-    return clubs.filter((club) => {
-      const matchesType =
-        selectedTypes.has(club.type) || selectedTypes.size === 0;
-      const matchesSearch =
-        search === "" ||
-        club.title.toLowerCase().includes(search.toLowerCase()) ||
-        club.short_description.toLowerCase().includes(search.toLowerCase()) ||
-        club.description.toLowerCase().includes(search.toLowerCase());
-      return club.is_active && matchesType && matchesSearch;
-    });
-  }, [clubs, search, selectedTypes]);
+    let foundClubs = clubs;
+    if (search && fuse) {
+      foundClubs = searchClubs(fuse, search);
+    }
+
+    return foundClubs.filter(
+      (club) =>
+        club.is_active &&
+        (selectedTypes.has(club.type) || selectedTypes.size === 0),
+    );
+  }, [clubs, fuse, search, selectedTypes]);
 
   const handleTypeToggle = (type: clubsTypes.ClubType) => {
     setSelectedTypes((prev) => {
@@ -64,15 +91,13 @@ export function ClubsListPage() {
 
   const groupedClubs = clubTypesOrder.reduce(
     (acc, type) => {
-      const clubsOfType = filteredAndSortedClubs.filter(
-        (club) => club.type === type,
-      );
+      const clubsOfType = filteredClubs.filter((club) => club.type === type);
       if (clubsOfType.length > 0) {
         acc[type] = clubsOfType;
       }
       return acc;
     },
-    {} as Record<clubsTypes.ClubType, typeof filteredAndSortedClubs>,
+    {} as Record<clubsTypes.ClubType, typeof filteredClubs>,
   );
 
   return (
@@ -82,12 +107,12 @@ export function ClubsListPage() {
         setSearch={setSearch}
         selectedTypes={selectedTypes}
         onTypeToggle={handleTypeToggle}
-        totalCount={filteredAndSortedClubs.length}
+        totalCount={filteredClubs.length}
         mobileFiltersOpen={mobileFiltersOpen}
         setMobileFiltersOpen={setMobileFiltersOpen}
       />
 
-      {filteredAndSortedClubs.length === 0 ? (
+      {filteredClubs.length === 0 ? (
         <div className="flex min-h-[400px] grow items-center justify-center">
           <div className="text-inh-inactive text-lg">No clubs found</div>
         </div>
