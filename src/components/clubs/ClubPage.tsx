@@ -234,6 +234,26 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                       </div>
                     </div>
                   )}
+                  {!clubLeader.telegram_alias &&
+                    clubsUser?.role === "admin" && (
+                      /* Ask leader to connect telegram */
+                      <div className="alert alert-warning items-start">
+                        <span className="icon-[mdi--alert] size-4" />
+                        <span>
+                          Please ask the club leader to connect their Telegram
+                          account on InNoHassle using the{" "}
+                          <a
+                            href="https://innohassle.ru/account/connect-telegram"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link link-primary"
+                          >
+                            link
+                          </a>
+                          .
+                        </span>
+                      </div>
+                    )}
                 </div>
               ) : (
                 <p className="text-base-content/50 italic">
