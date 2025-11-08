@@ -45,7 +45,11 @@ export const eventName = (workshop: workshopsTypes.SchemaWorkshop): string => {
 export const isWorkshopActive = (
   workshop: workshopsTypes.SchemaWorkshop,
 ): boolean => {
-  return workshop.is_active && workshop.is_registrable;
+  return (
+    workshop.is_active &&
+    workshop.is_registrable &&
+    new Date(workshop.check_in_opens).getTime() < Date.now()
+  );
 };
 
 /**
@@ -65,8 +69,12 @@ export const getInactiveStatusText = (
     return "Hidden by admin";
   }
 
+  if (new Date(workshop.check_in_opens).getTime() > Date.now()) {
+    return `Check in opens ${workshop.check_in_opens.split("T")[0]}`;
+  }
+
   if (!workshop.is_registrable) {
-    return "Can check in only 24 hours before";
+    return "Already checked in";
   } else {
     // isActive false или оба false просто Inactive
     return "Inactive";
