@@ -7,6 +7,37 @@ import { recommendedWorkshops } from "@/components/events/EventItem.tsx";
 import { getDate, isWorkshopPast, parseTime } from "./date-utils.ts";
 
 /**
+ * Returns formateted language of a workshop e.g. "EN/RU"
+ * @param workshop workshop object
+ * @returns formated language string
+ */
+export const eventLangauage = (
+  workshop: workshopsTypes.SchemaWorkshop,
+): string => {
+  switch (workshop.language) {
+    case "english":
+      return "EN";
+    case "russian":
+      return "RU";
+    case "both":
+      return "EN/RU";
+    default:
+      return "Unknown";
+  }
+};
+
+export const eventName = (workshop: workshopsTypes.SchemaWorkshop): string => {
+  switch (workshop.language) {
+    case "english":
+      return workshop.english_name;
+    case "russian":
+      return workshop.russian_name;
+    default:
+      return "Unknown";
+  }
+};
+
+/**
  * Проверяет, активен ли воркшоп
  * @param workshop - Объект воркшопа
  * @returns true если воркшоп активен и доступен для регистрации

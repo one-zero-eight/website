@@ -1,4 +1,4 @@
-import EventPage from "@/components/events/EventPage";
+import EventPage from "@/components/events/EventPage/EventPage";
 import { EventsTabs } from "@/components/events/EventsTabs";
 import { Topbar } from "@/components/layout/Topbar";
 import { ToastProvider } from "@/components/toast";

@@ -7,23 +7,21 @@ import {
 } from "@/components/events/event-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
+import { SchemaWorkshop } from "@/api/workshops/types";
 
-export function CheckInButton({
-  workshopId,
-  className,
-}: {
-  workshopId: string;
+export interface CheckInButtonProps {
+  event: SchemaWorkshop;
   className?: string | undefined | null;
-}) {
+}
+
+export function CheckInButton({ event, className }: CheckInButtonProps) {
   const queryClient = useQueryClient();
   const { showError, showSuccess } = useToast();
 
-  const { data: workshops } = $workshops.useQuery("get", "/workshops/");
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
 
-  const workshop = workshops?.find((w) => w.id === workshopId);
-  const checkedIn = !!myCheckins?.some((w) => w.id === workshopId);
-  const signedPeople = (workshop && getSignedPeopleCount(workshop)) || 0;
+  const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
+  const signedPeople = (event && getSignedPeopleCount(event)) || 0;
 
   const { mutate: checkIn, isPending: isCheckInPending } =
     $workshops.useMutation("post", "/workshops/{workshop_id}/checkin", {
@@ -36,7 +34,7 @@ export function CheckInButton({
             "get",
             "/workshops/{workshop_id}/checkins",
             {
-              params: { path: { workshop_id: workshopId } },
+              params: { path: { workshop_id: event.id } },
             },
           ).queryKey,
         });
@@ -70,7 +68,7 @@ export function CheckInButton({
             "get",
             "/workshops/{workshop_id}/checkins",
             {
-              params: { path: { workshop_id: workshopId } },
+              params: { path: { workshop_id: event.id } },
             },
           ).queryKey,
         });
@@ -94,7 +92,7 @@ export function CheckInButton({
     e.stopPropagation();
     if (isCheckInPending) return;
     checkIn({
-      params: { path: { workshop_id: workshopId } },
+      params: { path: { workshop_id: event.id } },
     });
   };
 
@@ -102,30 +100,39 @@ export function CheckInButton({
     e.stopPropagation();
     if (isCheckOutPending) return;
     checkOut({
-      params: { path: { workshop_id: workshopId } },
+      params: { path: { workshop_id: event.id } },
     });
   };
 
-  if (!workshop) {
+  if (!event) {
     return null;
   }
 
-  if (!isWorkshopActive(workshop)) {
+  if (!isWorkshopActive(event)) {
     return (
-      <p className="dark:text-rose-80 w-fit transform rounded-lg border border-rose-600 bg-rose-700/10 px-4 py-2 text-center leading-normal font-medium text-rose-600 backdrop-blur-sm dark:border-rose-800">
-        {getInactiveStatusText(workshop)}
+      <p className={clsx("btn btn-disabled", className)}>
+        {getInactiveStatusText(event)}
       </p>
     );
   }
 
-  if (signedPeople >= workshop.capacity) {
+  if (checkedIn) {
     return (
-      <span
-        className={clsx(
-          "w-full rounded-lg border border-rose-800 bg-rose-700/10 px-4 py-2 text-rose-700",
-          className,
-        )}
+      <button
+        type="button"
+        disabled={isCheckOutPending}
+        onClick={handleCheckOut}
+        className={clsx("btn btn-error", className)}
+        title={"Check out"}
       >
+        Check out
+      </button>
+    );
+  }
+
+  if (signedPeople >= event.capacity) {
+    return (
+      <span className={clsx("btn btn-disabled", className)}>
         No empty places
       </span>
     );
@@ -134,20 +141,12 @@ export function CheckInButton({
   return (
     <button
       type="button"
-      disabled={checkedIn ? isCheckOutPending : isCheckInPending}
-      onClick={checkedIn ? handleCheckOut : handleCheckIn}
-      className={clsx(
-        "bg-primary/80 flex w-full cursor-pointer items-center justify-center rounded-lg border px-4 py-2 disabled:cursor-not-allowed disabled:opacity-50",
-        checkedIn
-          ? "border-[#ff6b6b]/20 text-[#ff6b6b] hover:border-[#ff5252]/40 hover:bg-[rgba(255,107,107,0.2)] hover:text-[#ff5252]"
-          : "border-green-700/30 text-green-700 hover:border-green-600/50 hover:bg-green-600/20 hover:text-green-600 dark:border-[#bcdfbc]/20 dark:text-[#bcdfbc] dark:hover:border-[#aad6aa]/40 dark:hover:bg-[rgba(167,202,167,0.2)] dark:hover:text-[#aad6aa]",
-        className,
-      )}
-      title={checkedIn ? "Check out" : "Check in"}
+      disabled={isCheckInPending}
+      onClick={handleCheckIn}
+      className={clsx("btn btn-success", className)}
+      title={"Check in"}
     >
-      <span className="text-xs font-medium sm:text-sm">
-        {checkedIn ? "Check out" : "Check in"}
-      </span>
+      Check in
     </button>
   );
 }

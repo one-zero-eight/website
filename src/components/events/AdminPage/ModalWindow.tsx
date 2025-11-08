@@ -46,14 +46,15 @@ export function ModalWindow({
       >
         <FloatingFocusManager context={context} modal>
           <div
+            // eslint-disable-next-line react-hooks/refs
             ref={refs.setFloating}
             style={transitionStyles}
             {...getFloatingProps()}
-            className="flex h-fit w-full max-w-xl flex-col p-4 outline-hidden"
+            className="flex h-fit w-full max-w-xl flex-col outline-hidden"
           >
             <div className="bg-base-200 rounded-box overflow-hidden">
               <div
-                className={`flex min-w-0 flex-col p-4 @2xl/modal:p-8 ${className}`}
+                className={`flex min-w-0 flex-col gap-2 p-5 @2xl/modal:p-6 ${className}`}
               >
                 {/* Heading and close button */}
                 <div className="mb-0 flex w-full flex-row">
@@ -64,10 +65,10 @@ export function ModalWindow({
                   )}
                   <button
                     type="button"
-                    className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center"
+                    className="text-base-content/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-10 w-10 items-center justify-center outline-white dark:outline-black"
                     onClick={() => onOpenChange(false)}
                   >
-                    <span className="icon-[material-symbols--close] text-4xl" />
+                    <span className="icon-[material-symbols--close] text-2xl" />
                   </button>
                 </div>
 

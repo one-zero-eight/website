@@ -1,7 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
-import { PostForm } from "@/components/events/PostForm.tsx";
 import { groupWorkshopsByDate } from "@/components/events/event-utils.ts";
 import {
   EventForDate,
@@ -10,7 +9,8 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ModalWindow } from "./ModalWindow.tsx";
-import AddEventButton from "./AddEventButton.tsx";
+import AddEventButton from "../AddEventButton.tsx";
+import { CreationForm } from "./EventCreationModal/CreationForm.tsx";
 
 /**
  * Главная страница модуля воркшопов
@@ -73,7 +73,7 @@ export function EventsAdminPage() {
         <div className="collapse-title ps-11 text-left after:start-5 after:end-auto">
           {showPreviousDates ? "Hide previous dates" : "Show previous dates"}
         </div>
-        <div className="collapse-content">
+        <div className="collapse-content h-full">
           {workshops && groups && Object.keys(groups).length > 0 ? (
             Object.keys(groups)
               .sort((a: string, b: string) => b.localeCompare(a))
@@ -109,12 +109,11 @@ export function EventsAdminPage() {
           setModalOpen(false);
           setModalWorkshop(null);
         }}
-        title={modalWorkshop ? "Edit workshop" : "Create workshop"}
+        title={modalWorkshop ? "Edit Event" : "Create Event"}
       >
-        {/* Форма создания/редактирования воркшопа
-            При редактировании передаются данные существующего воркшопа */}
-        <PostForm
-          initialWorkshop={modalWorkshop ?? undefined}
+        {/* Форма создания/редактирования воркшопа. При редактировании передаются данные существующего воркшопа */}
+        <CreationForm
+          initialEvent={modalWorkshop ?? undefined}
           initialDate={modalDate ?? undefined}
           onClose={() => {
             setModalOpen(false);

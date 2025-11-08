@@ -81,3 +81,7 @@ export const isWorkshopPast = (dtstart: string): boolean => {
 
   return workshopDate < now;
 };
+
+export const getWeekdayName = (date: string) => {
+  return new Date(date).toLocaleString("en", { weekday: "short" });
+};

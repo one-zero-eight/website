@@ -1,10 +1,10 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
-import { CheckInButton } from "@/components/events/CheckInButton.tsx";
 import { Link, useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import React from "react";
 import { formatTime, parseTime } from "./date-utils.ts";
 import { getSignedPeopleCount, isWorkshopActive } from "./event-utils.ts";
+import { MAX_CAPACITY } from "./AdminPage/EventCreationModal/DateTimePlaceToggles.tsx";
 
 // TODO: GET RID OF THIS, FETCH FROM DB
 export const recommendedWorkshops = [
@@ -81,11 +81,11 @@ export function EventItem({ workshop, edit }: EventItemProps) {
           )}
         >
           {workshop.capacity >= 0
-            ? workshop.capacity === 500
+            ? workshop.capacity === MAX_CAPACITY
               ? signedPeople + "/"
               : signedPeople + "/" + workshop.capacity
             : "No limit on number of people"}
-          {workshop.capacity === 500 && (
+          {workshop.capacity === MAX_CAPACITY && (
             <span className="icon-[mdi--infinity] mt-0.5"></span>
           )}
         </span>
@@ -98,7 +98,7 @@ export function EventItem({ workshop, edit }: EventItemProps) {
             !isWorkshopActive(workshop) && "opacity-50",
           )}
         >
-          {workshop.name}
+          {workshop.english_name || workshop.russian_name}
         </h3>
         {workshop.place && (
           <div
@@ -136,10 +136,6 @@ export function EventItem({ workshop, edit }: EventItemProps) {
           <span className="icon-[mynaui--pencil] text-base sm:text-xl" />
         </button>
       )}
-
-      <div className="flex items-center justify-center">
-        <CheckInButton workshopId={workshop.id} className="max-w-fit" />
-      </div>
     </div>
   );
 }

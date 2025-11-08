@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 /**
  * Object containing all adges, that can be assigned to an event.
- * Badges: recommended, iu, music, sports, art, it, education, creativity, society, buisness, games
+ * Badges: recommended, iu, music, sports, art, it, education, 319, society, buisness, games
  */
 export const eventBadges: Record<string, ReactElement> = {
   recommended: (
@@ -45,9 +45,11 @@ export const eventBadges: Record<string, ReactElement> = {
       Education
     </div>
   ),
-  creativity: (
-    <div className={`badge badge-soft [--badge-color:var(--color-violet-500)]`}>
-      Creativity
+  319: (
+    <div
+      className={`badge badge-soft [--badge-color:var(--color-emerald-500)]`}
+    >
+      319
     </div>
   ),
   society: (
