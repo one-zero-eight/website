@@ -4,7 +4,6 @@ import { DeleteBookingModal } from "@/components/room-booking/bookings-list/Dele
 import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
 import React, { useMemo, useState } from "react";
 
 export function BookingsListPage() {
@@ -94,12 +93,7 @@ export function BookingCard({
             </span>
           </p>
         </div>
-        <div
-          className={clsx(
-            "flex flex-row items-center gap-2 group-hover:visible",
-            isPending ? "visible" : "invisible",
-          )}
-        >
+        <div className="flex flex-row items-center gap-2">
           <Tooltip content="Show on timeline">
             <Link
               to="/room-booking"
