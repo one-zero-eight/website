@@ -1,7 +1,7 @@
 import chalk from "chalk";
-import { globalFrequencies, resourcesList } from "./resources-list";
-import { createFuseInstance, getFilteredResources } from "./searchUtils";
-import { Resource } from "./types";
+import { globalFrequencies, resourcesList } from "./resources-list.ts";
+import { createFuseInstance, getFilteredResources } from "./searchUtils.ts";
+import { Resource } from "./types.ts";
 
 // Use all resources for testing
 const testResources = resourcesList;

@@ -1,6 +1,4 @@
-import { useMe } from "@/api/accounts/user.ts";
 import { $search, searchTypes } from "@/api/search";
-import { AuthWall } from "@/components/common/AuthWall.tsx";
 import PreviewCard from "@/components/search/PreviewCard.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import SearchResult from "@/components/search/SearchResult.tsx";
@@ -15,13 +13,12 @@ import IframePreviewCard from "./IframePreviewCard";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const navigate = useNavigate();
-  const { me } = useMe();
 
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
   const didInit = useRef<boolean>(false);
 
   const [previewSource, setPreviewSource] =
-    useState<searchTypes.SchemaSearchResponse["source"]>();
+    useState<searchTypes.SchemaSearchResponseOutput["source"]>();
 
   const initialFiltersState = {
     fileType: {
@@ -58,86 +55,6 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     }));
   };
 
-  const buildQueryFilters = (
-    selected: Record<string, Record<string, boolean>>,
-  ) => {
-    const response_types: PathsSearchSearchGetParametersQueryResponse_types[] =
-      [];
-    const sources: (InfoSources | Resources)[] = [];
-    const query_categories: string[] = [];
-
-    if (!selected.fileType.pdf && !selected.fileType.link_to_source) {
-      response_types.push(
-        PathsSearchSearchGetParametersQueryResponse_types.pdf,
-      );
-      response_types.push(
-        PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
-      );
-    }
-
-    const allSourcesSelected =
-      selected.source.campuslife &&
-      selected.source.eduwiki &&
-      selected.source.hotel &&
-      selected.source.moodle &&
-      selected.source.maps &&
-      selected.source.residents &&
-      selected.source.myuni &&
-      selected.source.innohassle &&
-      selected.source.ithelp &&
-      selected.source.psychologist &&
-      selected.source.academic_calendar;
-
-    if (!allSourcesSelected) {
-      if (selected.source.campuslife) sources.push(InfoSources.campuslife);
-      if (selected.source.eduwiki) sources.push(InfoSources.eduwiki);
-      if (selected.source.hotel) sources.push(InfoSources.hotel);
-      if (selected.source.moodle) sources.push(InfoSources.moodle);
-      if (selected.source.maps) sources.push(InfoSources.maps);
-      if (selected.source.residents) sources.push(InfoSources.residents);
-      if (selected.source.innohassle) sources.push(Resources.innohassle);
-      if (selected.source.myuni) sources.push(Resources.myuni);
-      if (selected.source.ithelp) sources.push(Resources.ithelp);
-      if (selected.source.academic_calendar)
-        sources.push(Resources.academic_calendar);
-      if (selected.source.psychologist) sources.push(Resources.psychologist);
-    }
-    Object.entries(selectedFilters).forEach(([group, values]) => {
-      const selectedValues = Object.entries(values)
-        .filter(([, checked]) => checked)
-        .map(([value]) => value);
-
-      if (group === "fileType") {
-        selectedValues.forEach((value) => {
-          if (value === "pdf")
-            response_types.push(
-              PathsSearchSearchGetParametersQueryResponse_types.pdf,
-            );
-          if (value === "link_to_source")
-            response_types.push(
-              PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
-            );
-        });
-      } else if (group === "source") {
-        selectedValues.forEach((value) => {
-          if (value === "campuslife") sources.push(InfoSources.campuslife);
-          if (value === "eduwiki") sources.push(InfoSources.eduwiki);
-          if (value === "hotel") sources.push(InfoSources.hotel);
-          if (value === "moodle") sources.push(InfoSources.moodle);
-          if (value === "maps") sources.push(InfoSources.maps);
-          if (value === "residents") sources.push(InfoSources.residents);
-          if (value === "innohassle") sources.push(Resources.innohassle);
-          if (value === "myuni") sources.push(Resources.myuni);
-          if (value === "ithelp") sources.push(Resources.ithelp);
-          if (value === "academic_calendar")
-            sources.push(Resources.academic_calendar);
-          if (value === "psychologist") sources.push(Resources.psychologist);
-        });
-      }
-    });
-    return { response_types, sources, query_categories };
-  };
-
   const isMobile =
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 767px)").matches;
@@ -146,10 +63,6 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     () => buildQueryFilters(appliedFilters),
     [appliedFilters],
   );
-
-  const applyFilters = () => {
-    setAppliedFilters(selectedFilters);
-  };
 
   const {
     data: searchResult,
@@ -216,9 +129,10 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   useEffect(() => {
     const first = filteredResponses[0];
     if (first && previewSource === undefined && !isMobile) {
-      // Reset preview source when search result changes and it has an appropeiate type for preview
+      // Reset preview source when search result changes and it has an appropriate type for preview
       setPreviewSource(first.source);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchResult]);
 
   useEffect(() => {
@@ -226,6 +140,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     if (filteredResponses.length === 0 && previewSource) {
       setPreviewSource(undefined);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredResponses]);
 
   useEffect(() => {
@@ -245,10 +160,6 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     }
   };
 
-  if (!me) {
-    return <AuthWall />;
-  }
-
   return (
     <div className="flex grow flex-col gap-2 p-4">
       <SearchField
@@ -257,7 +168,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
         currentQuery={searchQuery}
         selectedFilters={selectedFilters}
         checks={checks}
-        applyFilters={applyFilters}
+        applyFilters={() => setAppliedFilters(selectedFilters)}
       />
       {!(isLoading || isFetching) && searchResult && (
         <p className="text-base-content py-4 text-xl font-semibold">
@@ -335,3 +246,81 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
     </div>
   );
 }
+
+const buildQueryFilters = (
+  selected: Record<string, Record<string, boolean>>,
+) => {
+  const response_types: PathsSearchSearchGetParametersQueryResponse_types[] =
+    [];
+  const sources: (InfoSources | Resources)[] = [];
+  const query_categories: string[] = [];
+
+  if (!selected.fileType.pdf && !selected.fileType.link_to_source) {
+    response_types.push(PathsSearchSearchGetParametersQueryResponse_types.pdf);
+    response_types.push(
+      PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
+    );
+  }
+
+  const allSourcesSelected =
+    selected.source.campuslife &&
+    selected.source.eduwiki &&
+    selected.source.hotel &&
+    selected.source.moodle &&
+    selected.source.maps &&
+    selected.source.residents &&
+    selected.source.myuni &&
+    selected.source.innohassle &&
+    selected.source.ithelp &&
+    selected.source.psychologist &&
+    selected.source.academic_calendar;
+
+  if (!allSourcesSelected) {
+    if (selected.source.campuslife) sources.push(InfoSources.campuslife);
+    if (selected.source.eduwiki) sources.push(InfoSources.eduwiki);
+    if (selected.source.hotel) sources.push(InfoSources.hotel);
+    if (selected.source.moodle) sources.push(InfoSources.moodle);
+    if (selected.source.maps) sources.push(InfoSources.maps);
+    if (selected.source.residents) sources.push(InfoSources.residents);
+    if (selected.source.innohassle) sources.push(Resources.innohassle);
+    if (selected.source.myuni) sources.push(Resources.myuni);
+    if (selected.source.ithelp) sources.push(Resources.ithelp);
+    if (selected.source.academic_calendar)
+      sources.push(Resources.academic_calendar);
+    if (selected.source.psychologist) sources.push(Resources.psychologist);
+  }
+  Object.entries(selected).forEach(([group, values]) => {
+    const selectedValues = Object.entries(values)
+      .filter(([, checked]) => checked)
+      .map(([value]) => value);
+
+    if (group === "fileType") {
+      selectedValues.forEach((value) => {
+        if (value === "pdf")
+          response_types.push(
+            PathsSearchSearchGetParametersQueryResponse_types.pdf,
+          );
+        if (value === "link_to_source")
+          response_types.push(
+            PathsSearchSearchGetParametersQueryResponse_types.link_to_source,
+          );
+      });
+    } else if (group === "source") {
+      selectedValues.forEach((value) => {
+        if (value === "campuslife") sources.push(InfoSources.campuslife);
+        if (value === "eduwiki") sources.push(InfoSources.eduwiki);
+        if (value === "hotel") sources.push(InfoSources.hotel);
+        if (value === "moodle") sources.push(InfoSources.moodle);
+        if (value === "maps") sources.push(InfoSources.maps);
+        if (value === "residents") sources.push(InfoSources.residents);
+        if (value === "innohassle") sources.push(Resources.innohassle);
+        if (value === "myuni") sources.push(Resources.myuni);
+        if (value === "ithelp") sources.push(Resources.ithelp);
+        if (value === "academic_calendar")
+          sources.push(Resources.academic_calendar);
+        if (value === "psychologist") sources.push(Resources.psychologist);
+      });
+    }
+  });
+  return { response_types, sources, query_categories };
+};

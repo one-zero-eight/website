@@ -1,7 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { SignInModal } from "@/components/account/SignInModal.tsx";
 import Tooltip from "@/components/common/Tooltip";
-import { useEventGroup } from "@/lib/events/event-group";
+import { useEventGroup } from "@/api/events/event-group.ts";
 import { useState } from "react";
 
 export default function FavoriteButton({ groupId }: { groupId: number }) {

@@ -1,6 +1,4 @@
-import { useMe } from "@/api/accounts/user.ts";
 import { $search } from "@/api/search";
-import { AuthWall } from "@/components/common/AuthWall.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -9,7 +7,6 @@ import { ActResult } from "./ActResult";
 
 export function ActPage({ actQuery }: { actQuery: string }) {
   const navigate = useNavigate();
-  const { me } = useMe();
 
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
   const didInit = useRef(false);
@@ -51,10 +48,6 @@ export function ActPage({ actQuery }: { actQuery: string }) {
       setSubmittedQuery(query);
     }
   };
-
-  if (!me) {
-    return <AuthWall />;
-  }
 
   return (
     <div className="flex grow flex-col gap-4 p-4">

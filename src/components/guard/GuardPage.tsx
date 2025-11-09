@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { useMe } from "@/api/accounts/user.ts";
-import { AuthWall } from "@/components/common/AuthWall.tsx";
 import {
   useServiceAccountEmail,
   useGuardFiles,
@@ -13,7 +11,6 @@ import { FilesList } from "./FilesList";
 import { FileDetails } from "./FileDetails";
 
 export function GuardPage() {
-  const { me } = useMe();
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [filesSearch, setFilesSearch] = useState("");
   const [detailsSearch, setDetailsSearch] = useState("");
@@ -81,10 +78,6 @@ export function GuardPage() {
 
     mutations.invalidateFile(selectedSlug);
   };
-
-  if (!me) {
-    return <AuthWall />;
-  }
 
   return (
     <div className="flex grow flex-col gap-4 p-4">

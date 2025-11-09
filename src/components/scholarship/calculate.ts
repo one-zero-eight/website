@@ -1,4 +1,8 @@
-import { Mark, MARK_COLORS, MARK_VALUES } from "@/lib/scholarship/consts";
+import {
+  Mark,
+  MARK_COLORS,
+  MARK_VALUES,
+} from "@/components/scholarship/consts.ts";
 
 /**
  * Get hex color between two mark colors.

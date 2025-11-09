@@ -18,7 +18,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Booking, Slot } from "./BookingTimeline.vue";
+import type { Booking, Slot } from "./types.ts";
 
 function bookingWarningForSlot({ room, start, end }: Slot) {
   const diffMs = msBetween(start, end);

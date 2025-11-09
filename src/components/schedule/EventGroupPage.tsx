@@ -4,7 +4,7 @@ import { EventGroupExportModal } from "@/components/calendar/EventGroupExportMod
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton.tsx";
-import { getICSLink } from "@/lib/events/links.ts";
+import { getICSLink } from "@/api/events/links.ts";
 import { useState } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useWindowSize } from "usehooks-ts";

@@ -7,6 +7,24 @@ export const clubTypesOrder: clubsTypes.ClubType[] = [
   clubsTypes.ClubType.art,
 ];
 
+export const clubTypeDescription: Record<clubsTypes.ClubType, string> = {
+  [clubsTypes.ClubType.tech]:
+    "Clubs focused on technology, programming, engineering, robotics, and other technical disciplines.",
+  [clubsTypes.ClubType.sport]:
+    "Clubs centered around physical activities, sports, and fitness. Can give sport hours for trainings if accredited on InnoSport.",
+  [clubsTypes.ClubType.hobby]:
+    "Clubs focused on hobbies, special interests, and community activities that don't fit other categories.",
+  [clubsTypes.ClubType.art]:
+    "Clubs dedicated to artistic expression, cultural activities, and creative pursuits.",
+};
+
+export const clubTypeIcon: Record<clubsTypes.ClubType, string> = {
+  [clubsTypes.ClubType.tech]: "icon-[material-symbols--code]",
+  [clubsTypes.ClubType.sport]: "icon-[material-symbols--sports-soccer]",
+  [clubsTypes.ClubType.hobby]: "icon-[material-symbols--interests-outline]",
+  [clubsTypes.ClubType.art]: "icon-[material-symbols--palette-outline]",
+};
+
 export function getClubTypeLabel(type: clubsTypes.ClubType): string {
   switch (type) {
     case "tech":

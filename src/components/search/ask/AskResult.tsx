@@ -17,7 +17,7 @@ export function AskResult({
       index === self.findIndex((s) => s.source.type === item.source.type),
   );
 
-  const getSourceLink = (s: searchTypes.SchemaSearchResponse) =>
+  const getSourceLink = (s: searchTypes.SchemaSearchResponseOutput) =>
     "link" in s.source ? s.source.link : "url" in s.source ? s.source.url : "";
 
   return (

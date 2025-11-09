@@ -64,16 +64,16 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Club Info
+     * Get Club Info By Slug
      * @description Get club info.
      */
-    get: operations["get_club_info_clubs_by_slug__slug__get"];
+    get: operations["get_club_info_by_slug_clubs_by_slug__slug__get"];
     put?: never;
     /**
-     * Edit Club Info
+     * Edit Club Info By Slug
      * @description Edit a club info.
      */
-    post: operations["edit_club_info_clubs_by_slug__slug__post"];
+    post: operations["edit_club_info_by_slug_clubs_by_slug__slug__post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -172,10 +172,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Club Leader
+     * Get Club Leader By Id
      * @description Get club leader info.
      */
-    get: operations["get_club_leader_leaders_by_club_id__id__get"];
+    get: operations["get_club_leader_by_id_leaders_by_club_id__id__get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -192,10 +192,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Club Leader
+     * Get Club Leader By Slug
      * @description Get club leader info.
      */
-    get: operations["get_club_leader_leaders_by_club_slug__slug__get"];
+    get: operations["get_club_leader_by_slug_leaders_by_club_slug__slug__get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -425,6 +425,8 @@ export interface components {
        * @description ID of sport type in InnoSport system (None if the club is not sport)
        */
       sport_id?: string | null;
+      /** New Leader Email */
+      new_leader_email?: string | null;
     };
     /**
      * UserRole
@@ -678,7 +680,7 @@ export interface operations {
       };
     };
   };
-  get_club_info_clubs_by_slug__slug__get: {
+  get_club_info_by_slug_clubs_by_slug__slug__get: {
     parameters: {
       query?: never;
       header?: never;
@@ -716,7 +718,7 @@ export interface operations {
       };
     };
   };
-  edit_club_info_clubs_by_slug__slug__post: {
+  edit_club_info_by_slug_clubs_by_slug__slug__post: {
     parameters: {
       query?: never;
       header?: never;
@@ -739,6 +741,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Club"];
         };
+      };
+      /** @description Slug already exists */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Only admin can change club info */
       403: {
@@ -940,12 +949,14 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Leader"][];
+          "application/json": {
+            [key: string]: components["schemas"]["Leader"];
+          };
         };
       };
     };
   };
-  get_club_leader_leaders_by_club_id__id__get: {
+  get_club_leader_by_id_leaders_by_club_id__id__get: {
     parameters: {
       query?: never;
       header?: never;
@@ -983,7 +994,7 @@ export interface operations {
       };
     };
   };
-  get_club_leader_leaders_by_club_slug__slug__get: {
+  get_club_leader_by_slug_leaders_by_club_slug__slug__get: {
     parameters: {
       query?: never;
       header?: never;

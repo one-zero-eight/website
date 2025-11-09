@@ -1,7 +1,7 @@
 import { $events } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import ScheduleLinkCopy from "@/components/schedule/ScheduleLinkCopy.tsx";
-import { getICSLink } from "@/lib/events/links.ts";
+import { getICSLink } from "@/api/events/links.ts";
 import {
   FloatingFocusManager,
   FloatingOverlay,

@@ -24,5 +24,8 @@ jobs:
       - name: Linting
         run: pnpm run lint
 
+      - name: Type checking
+        run: pnpm run typecheck
+
       - name: Formatting
         run: pnpm run prettier:check

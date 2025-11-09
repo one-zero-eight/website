@@ -28,5 +28,8 @@ export default tseslint.config({
         caughtErrorsIgnorePattern: "^_",
       },
     ],
+    "react-hooks/set-state-in-effect": "off",
+    "react-hooks/purity": "off",
+    "react-hooks/refs": "off", // floating-ui refs give too much false positives
   },
 });

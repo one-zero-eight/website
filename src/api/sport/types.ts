@@ -189,13 +189,15 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** @description Enroll student
+    /**
+     * @description Enroll student
      *
      *     error codes:
      *     2 - Group you chosen is full
      *     3 - You have too much secondary groups
      *     4 - You can't enroll to a group you have already enrolled to
-     *     6 - Enroll with insufficient medical group */
+     *     6 - Enroll with insufficient medical group
+     */
     post: operations["enrollment_enroll_create"];
     delete?: never;
     options?: never;
@@ -212,10 +214,12 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** @description Unenroll student
+    /**
+     * @description Unenroll student
      *
      *     Error codes:
-     *     5 - Can't unenroll from primary group */
+     *     5 - Can't unenroll from primary group
+     */
     post: operations["enrollment_unenroll_create"];
     delete?: never;
     options?: never;
@@ -232,10 +236,12 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** @description Unenroll student
+    /**
+     * @description Unenroll student
      *
      *     Error codes:
-     *     5 - Can't unenroll from primary group */
+     *     5 - Can't unenroll from primary group
+     */
     post: operations["enrollment_unenroll_by_trainer_create"];
     delete?: never;
     options?: never;
@@ -720,6 +726,13 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /**
+     * @description * `-1` - both
+     *     * `1` - students
+     *     * `2` - college
+     * @enum {integer}
+     */
+    AllowedEducationLevelEnum: AllowedEducationLevelEnum;
     Attendance: {
       hours: number;
       training_id: number;
@@ -911,6 +924,14 @@ export interface components {
       semester: components["schemas"]["Semester"];
       teachers: components["schemas"]["NewTrainer"][];
       accredited: boolean;
+      /**
+       * @description Is the training for college, higher education students, or both?
+       *
+       *     * `-1` - both
+       *     * `1` - students
+       *     * `2` - college
+       */
+      allowed_education_level?: components["schemas"]["AllowedEducationLevelEnum"];
     };
     NewSport: {
       readonly id: number;
@@ -1153,7 +1174,6 @@ export type SchemaTrainingGrades = components["schemas"]["TrainingGrades"];
 export type SchemaTrainingHour = components["schemas"]["TrainingHour"];
 export type SchemaUnenrollStudentRequest =
   components["schemas"]["UnenrollStudentRequest"];
-export type SchemaWeekdayEnum = components["schemas"]["WeekdayEnum"];
 export type SchemaTrainingHistory404 =
   components["schemas"]["training_history404"];
 export type $defs = Record<string, never>;
@@ -2448,6 +2468,11 @@ export interface operations {
       };
     };
   };
+}
+export enum AllowedEducationLevelEnum {
+  ValueMinus1 = -1,
+  Value1 = 1,
+  Value2 = 2,
 }
 export enum WeekdayEnum {
   Value0 = 0,

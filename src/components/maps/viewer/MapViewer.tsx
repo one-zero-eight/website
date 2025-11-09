@@ -92,7 +92,7 @@ export const MapViewer = memo(function MapViewer({
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
     },
-    containerRef,
+    containerRef as React.RefObject<HTMLDivElement>,
   );
 
   // Support zooming using mouse wheel
@@ -119,7 +119,7 @@ export const MapViewer = memo(function MapViewer({
         mouseY - (mouseY - options.current.offsetY) * zoomRatio;
       updateImage();
     },
-    containerRef,
+    containerRef as React.RefObject<HTMLDivElement>,
     { passive: false }, // Prevent page scrolling
   );
 
@@ -146,7 +146,7 @@ export const MapViewer = memo(function MapViewer({
       window.addEventListener("touchmove", onTouchMove);
       window.addEventListener("touchend", onTouchEnd);
     },
-    containerRef,
+    containerRef as React.RefObject<HTMLDivElement>,
     { passive: false }, // Prevent page scrolling
   );
 
@@ -204,7 +204,7 @@ export const MapViewer = memo(function MapViewer({
       window.addEventListener("touchmove", onTouchMove);
       window.addEventListener("touchend", onTouchEnd);
     },
-    containerRef,
+    containerRef as React.RefObject<HTMLDivElement>,
     { passive: false }, // Prevent page scrolling
   );
 
@@ -236,7 +236,7 @@ export const MapViewer = memo(function MapViewer({
       };
       window.addEventListener("mouseup", onMouseUp);
     },
-    containerRef,
+    containerRef as React.RefObject<HTMLDivElement>,
   );
 
   // Detect area clicks using touches
@@ -272,7 +272,7 @@ export const MapViewer = memo(function MapViewer({
       };
       window.addEventListener("touchend", onTouchEnd);
     },
-    containerRef,
+    containerRef as React.RefObject<HTMLDivElement>,
   );
 
   // Center to the highlighted areas when they change

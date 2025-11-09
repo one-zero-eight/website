@@ -19,7 +19,7 @@ import clsx from "clsx";
 import moment from "moment/moment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@/components/calendar/styles-calendar.css";
-import type { Slot } from "../timeline/BookingTimeline.vue";
+import type { Slot } from "../timeline/types.ts";
 
 export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const [popoverInfo, setPopoverInfo] = useState({

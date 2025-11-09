@@ -3,11 +3,11 @@ import { CategoryContainer } from "@/components/schedule/CategoryContainer.tsx";
 import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 import SearchBar from "@/components/schedule/SearchBar";
 import { GroupCardTagSkeleton } from "@/components/schedule/skeletons/GroupCardTagSkeleton";
-import { getFirstTagByType } from "@/lib/events/event-group";
+import { getFirstTagByType } from "@/api/events/event-group.ts";
 import {
   getCategoryInfoBySlug,
   viewConfig,
-} from "@/lib/events/events-view-config";
+} from "@/components/schedule/view-config.ts";
 import { preprocessText } from "@/lib/utils/searchUtils";
 import { Link } from "@tanstack/react-router";
 import Fuse from "fuse.js";
@@ -44,7 +44,7 @@ export default function SchedulePage({
     if (!data?.event_groups) return null;
 
     // Extend index to include alternative spellings
-    const extendedEventGroups = data.event_groups.map((group) => ({
+    const extendedEventGroups = data?.event_groups.map((group) => ({
       ...group,
       searchKeys: preprocessText(group.name ?? ""), // Store multiple search representations
     }));

@@ -4,6 +4,8 @@ import { App } from "./app.tsx";
 import { registerServiceWorker } from "./register-sw.ts";
 import { getRouter } from "./router.ts";
 
+import "./styles.css";
+
 // Init service worker
 registerServiceWorker();
 

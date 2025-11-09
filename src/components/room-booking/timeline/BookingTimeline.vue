@@ -9,6 +9,7 @@ import {
 import { useMediaQuery, useNow } from "@vueuse/core";
 import type { MaybeRef } from "vue";
 import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
+import type { Booking, Room, ScrollToOptions, Slot } from "./types.ts";
 
 /* ========================================================================== */
 /* ================================ Options ================================= */
@@ -71,24 +72,6 @@ const HOURS_TIMES = Array.from({ length: 24 })
 /* ========================================================================== */
 /* ================================= Types ================================== */
 /* ========================================================================== */
-
-export type Room = roomBookingTypes.SchemaRoom & {
-  /** Index of the room in the list of all rooms on the timeline. */
-  idx: number;
-};
-
-export type Booking = Omit<roomBookingTypes.SchemaBooking, "start" | "end"> & {
-  id: string;
-  startsAt: Date;
-  endsAt: Date;
-  myBookingId: number | undefined;
-};
-
-export type Slot = {
-  room: Room;
-  start: Date;
-  end: Date;
-};
 
 type Position = {
   room: Room;
@@ -957,17 +940,6 @@ function handleBookingClick(event: MouseEvent) {
 /* ========================================================================== */
 /* =============================== Scrolling ================================ */
 /* ========================================================================== */
-
-export type ScrollToOptions = {
-  /** Date to scroll to. */
-  to: Date;
-  /** Behavior of scroll. */
-  behavior?: "smooth" | "instant";
-  /** Position where the target date should be aligned. */
-  position?: "left" | "center" | "right";
-  /** Offset to shift the target position by. */
-  offsetMs?: number;
-};
 
 function scrollTo(options: ScrollToOptions) {
   const el = scrollerEl.value;

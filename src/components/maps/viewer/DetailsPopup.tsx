@@ -2,7 +2,7 @@ import { mapsTypes } from "@/api/maps";
 import { $roomBooking } from "@/api/room-booking";
 import { RoomAccess_level } from "@/api/room-booking/types.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
-import { getMapAreaUrl } from "@/lib/maps/links.ts";
+import { getMapAreaUrl } from "@/components/maps/links.ts";
 import {
   arrow,
   autoUpdate,

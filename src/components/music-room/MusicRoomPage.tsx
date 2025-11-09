@@ -1,7 +1,7 @@
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { MusicRoomExportModal } from "@/components/calendar/MusicRoomExportModal.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
-import { getMusicRoomLink, getMyMusicRoomLink } from "@/lib/events/links.ts";
+import { getMusicRoomLink, getMyMusicRoomLink } from "@/api/events/links.ts";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 

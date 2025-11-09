@@ -1,5 +1,4 @@
 import { useMe } from "@/api/accounts/user.ts";
-import { AuthWall } from "@/components/common/AuthWall.tsx";
 import SearchField from "@/components/search/SearchField.tsx";
 import { AskResult } from "./AskResult";
 import { $search, searchTypes } from "@/api/search";
@@ -41,25 +40,18 @@ export function AskPage({ askQuery }: { askQuery: string }) {
   );
 
   useEffect(() => {
-    if (result && submittedQuery) {
+    if (result) {
       setMessages((prev) => [...prev, { role: "assistant", response: result }]);
       setSubmittedQuery(null);
-
-      if (result.chat_id && !chatId) {
-        setChatId(result.chat_id);
-      }
+      setChatId(result.chat_id);
     }
-  }, [result]);
+  }, [result, submittedQuery]);
 
   const runSearch = (query: string) => {
     setMessages((prev) => [...prev, { role: "user", content: query }]);
     setSubmittedQuery(query);
     setInputQuery("");
   };
-
-  if (!me) {
-    return <AuthWall />;
-  }
 
   return (
     <div className="flex grow flex-col gap-4 p-4">
@@ -92,11 +84,8 @@ export function AskPage({ askQuery }: { askQuery: string }) {
         {messages.map((msg, i) =>
           msg.role === "user" ? (
             <div className="flex max-w-[80%] flex-col gap-1 self-start">
-              <a
-                className="text-inh-inactive"
-                href="https://search.innohassle.ru/dashboard"
-              >
-                {me.innopolis_sso?.name?.split(" ")[0]}
+              <a className="text-inh-inactive" href="/dashboard">
+                {me?.innopolis_sso?.name?.split(" ")[0]}
               </a>
               <div
                 key={i}

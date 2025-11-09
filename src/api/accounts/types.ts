@@ -4,74 +4,6 @@
  */
 
 export interface paths {
-  "/providers/innopolis/login": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Innopolis Login Or Register */
-    get: operations["providers_innopolis_login_or_register"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/providers/innopolis/callback": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Innopolis Callback */
-    get: operations["providers_innopolis_callback"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/providers/telegram/connect": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Telegram Connect */
-    post: operations["providers_telegram_connect"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/providers/telegram/login": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Telegram Login */
-    post: operations["providers_telegram_login"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/users/me": {
     parameters: {
       query?: never;
@@ -83,7 +15,7 @@ export interface paths {
      * Get Me
      * @description Get current user info if authenticated
      */
-    get: operations["users_get_me"];
+    get: operations["get_me_users_me_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -103,7 +35,7 @@ export interface paths {
      * Get User By Telegram Id
      * @description Get user by telegram id
      */
-    get: operations["users_get_user_by_telegram_id"];
+    get: operations["get_user_by_telegram_id_users_by_telegram_id__telegram_id__get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -123,7 +55,7 @@ export interface paths {
      * Get User By Id
      * @description Get user by id
      */
-    get: operations["users_get_user_by_id"];
+    get: operations["get_user_by_id_users_by_id__user_id__get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -143,7 +75,92 @@ export interface paths {
      * Get User By Innomail
      * @description Get user by email
      */
-    get: operations["users_get_user_by_innomail"];
+    get: operations["get_user_by_innomail_users_by_innomail__email__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/providers/innopolis/login": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Innopolis Login Or Register */
+    get: operations["innopolis_login_or_register_providers_innopolis_login_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/providers/innopolis/callback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Innopolis Callback */
+    get: operations["innopolis_callback_providers_innopolis_callback_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/providers/telegram/connect": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Telegram Connect */
+    post: operations["telegram_connect_providers_telegram_connect_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/providers/telegram/login": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Telegram Login */
+    post: operations["telegram_login_providers_telegram_login_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/logout": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Logout */
+    get: operations["logout_logout_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -163,7 +180,7 @@ export interface paths {
      * Get Jwks
      * @description Get jwks for jwt
      */
-    get: operations["tokens_get_jwks"];
+    get: operations["get_jwks__well_known_jwks_json_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -181,69 +198,9 @@ export interface paths {
     };
     /**
      * Generate My Token
-     * @description Generate access token for current user with user id in `uid` field
+     * @description Generate access token for current user with user id in `uid` field and other info if present, expires in 1 day
      */
-    get: operations["tokens_generate_my_token"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/tokens/generate-access-token": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Generate Token
-     * @description Generate access token with some sub in `sub` field
-     */
-    get: operations["tokens_generate_token"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/tokens/generate-service-token": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Generate Service Token
-     * @description Generate access token for access users-related endpoints (/users/*).
-     */
-    get: operations["tokens_generate_service_token"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/tokens/generate-sport-token": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Generate Sport Token
-     * @description Generate access token for access https://sport.innopolis.university/api/swagger/
-     */
-    get: operations["tokens_generate_sport_token"];
+    get: operations["generate_my_token_tokens_generate_my_token_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -261,9 +218,9 @@ export interface paths {
     };
     /**
      * Generate My Sport Token
-     * @description Generate access token for current user for access https://sport.innopolis.university/api/swagger/
+     * @description Generate access token for current user for access [https://sport.innopolis.university/api/swagger/](https://sport.innopolis.university/api/swagger/), expires in 1 day
      */
-    get: operations["tokens_generate_my_sport_token"];
+    get: operations["generate_my_sport_token_tokens_generate_my_sport_token_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -272,15 +229,58 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/logout": {
+  "/tokens/generate-service-token": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Logout */
-    get: operations["logout"];
+    /**
+     * Generate Service Token
+     * @description Generate access token for access users-related endpoints (/users/*), expires in 90 days
+     */
+    get: operations["generate_service_token_tokens_generate_service_token_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/tokens/generate-sport-token": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Generate Sport Token
+     * @description Generate access token for access [https://sport.innopolis.university/api/swagger/](https://sport.innopolis.university/api/swagger/) on behalf of provided user, will have aud="sport", expires in 1 day
+     */
+    get: operations["generate_sport_token_tokens_generate_sport_token_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/tokens/generate-access-token": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Generate Token
+     * @description Generate arbitrary access token with some sub in `sub` field (f.e. parser), expires in 90 days, only for admins
+     */
+    get: operations["generate_token_tokens_generate_access_token_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -303,6 +303,8 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /** @example 5eb7cf5a86d9755df3a6c593 */
+    PydanticObjectId: string;
     /** TelegramLoginResponse */
     TelegramLoginResponse: {
       /** Need To Connect */
@@ -333,14 +335,12 @@ export interface components {
     /** User */
     User: {
       /**
-       * Id
        * Format: objectid
        * @description MongoDB document ObjectID
-       * @default None
        * @example 5eb7cf5a86d9755df3a6c593
        */
       id: string;
-      innopolis_sso: components["schemas"]["UserInfoFromSSO"] | null;
+      innopolis_sso: components["schemas"]["UserInfoFromSSO-Output"] | null;
       telegram: components["schemas"]["TelegramWidgetData"] | null;
       /**
        * Innohassle Admin
@@ -349,7 +349,34 @@ export interface components {
       innohassle_admin: boolean;
     };
     /** UserInfoFromSSO */
-    UserInfoFromSSO: {
+    "UserInfoFromSSO-Input": {
+      /** Email */
+      email: string;
+      /** Name */
+      name?: string | null;
+      /** Access Token */
+      access_token?: string | null;
+      /** Refresh Token */
+      refresh_token?: string | null;
+      /** Expires At */
+      expires_at?: string | null;
+      /** Issued At */
+      issued_at?: string | null;
+      /**
+       * Is Student
+       * @default false
+       */
+      is_student: boolean;
+      /**
+       * Is Staff
+       * @default false
+       */
+      is_staff: boolean;
+      /** Group */
+      group?: string | null;
+    };
+    /** UserInfoFromSSO */
+    "UserInfoFromSSO-Output": {
       /** Email */
       email: string;
       /** Name */
@@ -385,20 +412,185 @@ export interface components {
   headers: never;
   pathItems: never;
 }
-export type SchemaAvailableScopes = components["schemas"]["AvailableScopes"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaTelegramLoginResponse =
   components["schemas"]["TelegramLoginResponse"];
 export type SchemaTelegramWidgetData =
   components["schemas"]["TelegramWidgetData"];
 export type SchemaTokenData = components["schemas"]["TokenData"];
 export type SchemaUser = components["schemas"]["User"];
-export type SchemaUserInfoFromSso = components["schemas"]["UserInfoFromSSO"];
+export type SchemaUserInfoFromSsoInput =
+  components["schemas"]["UserInfoFromSSO-Input"];
+export type SchemaUserInfoFromSsoOutput =
+  components["schemas"]["UserInfoFromSSO-Output"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
-  providers_innopolis_login_or_register: {
+  get_me_users_me_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current user info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["User"];
+        };
+      };
+      /** @description User does not have a session cookie or `uid` in the session */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_user_by_telegram_id_users_by_telegram_id__telegram_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        telegram_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description User info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["User"];
+        };
+      };
+      /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object with such properties not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_user_by_id_users_by_id__user_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        user_id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description User info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["User"];
+        };
+      };
+      /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object with such properties not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_user_by_innomail_users_by_innomail__email__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        email: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description User info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["User"];
+        };
+      };
+      /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object with such properties not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  innopolis_login_or_register_providers_innopolis_login_get: {
     parameters: {
       query: {
         redirect_uri: string;
@@ -430,7 +622,7 @@ export interface operations {
       };
     };
   };
-  providers_innopolis_callback: {
+  innopolis_callback_providers_innopolis_callback_get: {
     parameters: {
       query?: never;
       header?: never;
@@ -450,7 +642,7 @@ export interface operations {
       };
     };
   };
-  providers_telegram_connect: {
+  telegram_connect_providers_telegram_connect_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -497,7 +689,7 @@ export interface operations {
       };
     };
   };
-  providers_telegram_login: {
+  telegram_login_providers_telegram_login_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -544,62 +736,35 @@ export interface operations {
       };
     };
   };
-  users_get_me: {
+  logout_logout_get: {
     parameters: {
-      query?: never;
+      query: {
+        redirect_uri: string;
+      };
       header?: never;
       path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description Current user info */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["User"];
+          "application/json": unknown;
         };
       };
-      /** @description User does not have a session cookie or `uid` in the session */
-      401: {
+      /** @description Redirect to the specified URL */
+      302: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-    };
-  };
-  users_get_user_by_telegram_id: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        telegram_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description User info */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["User"];
-        };
-      };
-      /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Object with such properties not found */
-      404: {
+      /** @description Invalid redirect_uri URL */
+      400: {
         headers: {
           [name: string]: unknown;
         };
@@ -616,97 +781,7 @@ export interface operations {
       };
     };
   };
-  users_get_user_by_id: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        user_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description User info */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["User"];
-        };
-      };
-      /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Object with such properties not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  users_get_user_by_innomail: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        email: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description User info */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["User"];
-        };
-      };
-      /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Object with such properties not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  tokens_get_jwks: {
+  get_jwks__well_known_jwks_json_get: {
     parameters: {
       query?: never;
       header?: never;
@@ -726,7 +801,7 @@ export interface operations {
       };
     };
   };
-  tokens_generate_my_token: {
+  generate_my_token_tokens_generate_my_token_get: {
     parameters: {
       query?: never;
       header?: never;
@@ -753,13 +828,9 @@ export interface operations {
       };
     };
   };
-  tokens_generate_token: {
+  generate_my_sport_token_tokens_generate_my_sport_token_get: {
     parameters: {
-      query: {
-        sub: string;
-        /** @description Space delimited list of scopes */
-        scope?: string | null;
-      };
+      query?: never;
       header?: never;
       path?: never;
       cookie?: never;
@@ -782,25 +853,9 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Not enough permissions */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
   };
-  tokens_generate_service_token: {
+  generate_service_token_tokens_generate_service_token_get: {
     parameters: {
       query: {
         /** @description Some string that will be in `sub` field of JWT token. Actually, it may be anything. */
@@ -850,11 +905,11 @@ export interface operations {
       };
     };
   };
-  tokens_generate_sport_token: {
+  generate_sport_token_tokens_generate_sport_token_get: {
     parameters: {
       query?: {
         telegram_id?: number | null;
-        innohassle_id?: string | null;
+        innohassle_id?: components["schemas"]["PydanticObjectId"] | null;
         email?: string | null;
       };
       header?: never;
@@ -897,9 +952,13 @@ export interface operations {
       };
     };
   };
-  tokens_generate_my_sport_token: {
+  generate_token_tokens_generate_access_token_get: {
     parameters: {
-      query?: never;
+      query: {
+        sub: string;
+        /** @description Space delimited list of scopes */
+        scope?: string | null;
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -922,37 +981,8 @@ export interface operations {
         };
         content?: never;
       };
-    };
-  };
-  logout: {
-    parameters: {
-      query: {
-        redirect_uri: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Redirect to the specified URL */
-      302: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Invalid redirect_uri URL */
-      400: {
+      /** @description Not enough permissions */
+      403: {
         headers: {
           [name: string]: unknown;
         };

@@ -52,7 +52,7 @@ export function AuthManager({ children }: PropsWithChildren) {
         invalidateMyAccessToken();
         invalidateMySportAccessToken();
         if (shouldAutoSignIn()) {
-          navigateToSignIn(window.location.href, "none");
+          navigateToSignIn("", "none");
         }
       }
     }

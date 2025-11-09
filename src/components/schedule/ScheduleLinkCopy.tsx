@@ -1,4 +1,4 @@
-import { ymEvent } from "@/lib/tracking/YandexMetrika";
+import { ymEvent } from "@/app/tracking/YandexMetrika";
 import React, { useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 

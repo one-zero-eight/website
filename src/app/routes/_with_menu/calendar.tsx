@@ -1,4 +1,5 @@
 import { CalendarPage } from "@/components/calendar/CalendarPage.tsx";
+import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
@@ -16,7 +17,9 @@ function RouteComponent() {
       </Helmet>
 
       <Topbar title="Calendar" hideOnMobile />
-      <CalendarPage />
+      <RequireAuth>
+        <CalendarPage />
+      </RequireAuth>
     </>
   );
 }

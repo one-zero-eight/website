@@ -1,5 +1,5 @@
 import { useMe } from "@/api/accounts/user.ts";
-import { ymUserParams } from "@/lib/tracking/YandexMetrika";
+import { ymUserParams } from "@/app/tracking/YandexMetrika.tsx";
 import { useEffect } from "react";
 
 export function UserInfoTracker() {

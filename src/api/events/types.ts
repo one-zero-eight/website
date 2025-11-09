@@ -815,7 +815,10 @@ export interface components {
     };
     /** BootcampParserConfig */
     BootcampParserConfig: {
-      /** When */
+      /**
+       * When
+       * @example 2024.08
+       */
       when: string;
       /** General Events */
       general_events: components["schemas"]["Entry"][];
@@ -893,7 +896,13 @@ export interface components {
       location?: string | null;
       /** Location Ru */
       location_ru?: string | null;
-      /** When */
+      /**
+       * When
+       * @example [
+       *       "1 10:00-12:00",
+       *       "2-6 10:00-12:00"
+       *     ]
+       */
       when: string[];
       /**
        * Buddy
@@ -1069,7 +1078,9 @@ export interface components {
       /** Name */
       name?: string | null;
       /** Satellite */
-      satellite?: Record<string, never> | null;
+      satellite?: {
+        [key: string]: unknown;
+      } | null;
     };
     /**
      * ViewUser

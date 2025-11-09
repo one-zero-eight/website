@@ -3,7 +3,7 @@ import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton.tsx";
 import UserMenu from "@/components/layout/UserMenu.tsx";
-import { items, ItemType } from "@/lib/links/menu-links.tsx";
+import { items, LinkItemType } from "@/components/layout/menu-links.tsx";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 
@@ -59,7 +59,7 @@ export function MorePage() {
   );
 }
 
-function MenuLink({ icon, title, badge, ...props }: ItemType) {
+function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
   const children = (
     <>
       {icon}
@@ -90,6 +90,7 @@ function MenuLink({ icon, title, badge, ...props }: ItemType) {
       </a>
     );
   } else if (props.type === "local") {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { staff_only, hideOnMore, type, ...linkProps } = props;
     return (
       <Link

@@ -1,5 +1,5 @@
 export function navigateToSignIn(
-  redirectTo: string = "/dashboard",
+  redirectTo: string = "",
   prompt?: "none" | undefined,
 ) {
   // Build the sign-in URL

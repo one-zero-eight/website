@@ -72,7 +72,7 @@ function RouteComponent() {
           <title>Sign In - Join InNoHassle Guard File</title>
         </Helmet>
         <div className="flex h-full items-center justify-center">
-          <AuthWall signInRedirect={`/guard/google/files/${slug}/join`} />
+          <AuthWall />
         </div>
       </>
     );

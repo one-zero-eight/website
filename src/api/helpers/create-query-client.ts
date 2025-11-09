@@ -12,9 +12,6 @@ import {
   useQuery,
   type UseQueryOptions,
   type UseQueryResult,
-  useSuspenseQuery,
-  type UseSuspenseQueryOptions,
-  type UseSuspenseQueryResult,
 } from "@tanstack/react-query";
 import type {
   Client as FetchClient,
@@ -95,32 +92,6 @@ export type UseQueryMethod<
     : [InitWithUnknowns<Init>, Options?, QueryClient?]
 ) => UseQueryResult<Response["data"], Response["error"]>;
 
-export type UseSuspenseQueryMethod<
-  Prefix extends string,
-  Paths extends Record<string, Record<HttpMethod, {}>>,
-  Media extends MediaType,
-> = <
-  Method extends HttpMethod,
-  Path extends PathsWithMethod<Paths, Method>,
-  Init extends MaybeOptionalInit<Paths[Path], Method>,
-  Response extends Required<FetchResponse<Paths[Path][Method], Init, Media>>, // note: Required is used to avoid repeating NonNullable in UseQuery types
-  Options extends Omit<
-    UseSuspenseQueryOptions<
-      Response["data"],
-      Response["error"],
-      Response["data"],
-      QueryKey<Prefix, Paths, Method, Path>
-    >,
-    "queryKey" | "queryFn"
-  >,
->(
-  method: Method,
-  url: Path,
-  ...[init, options, queryClient]: RequiredKeysOf<Init> extends never
-    ? [InitWithUnknowns<Init>?, Options?, QueryClient?]
-    : [InitWithUnknowns<Init>, Options?, QueryClient?]
-) => UseSuspenseQueryResult<Response["data"], Response["error"]>;
-
 export type UseMutationMethod<
   Paths extends Record<string, Record<HttpMethod, {}>>,
   Media extends MediaType,
@@ -147,7 +118,6 @@ export interface OpenapiQueryClient<
 > {
   queryOptions: QueryOptionsFunction<Prefix, Paths, Media>;
   useQuery: UseQueryMethod<Prefix, Paths, Media>;
-  useSuspenseQuery: UseSuspenseQueryMethod<Prefix, Paths, Media>;
   useMutation: UseMutationMethod<Paths, Media>;
 }
 
@@ -194,16 +164,6 @@ export default function createClient<
     queryOptions,
     useQuery: (method, path, ...[init, options, queryClient]) =>
       useQuery(
-        queryOptions(
-          method,
-          path,
-          init as InitWithUnknowns<typeof init>,
-          options,
-        ),
-        queryClient,
-      ),
-    useSuspenseQuery: (method, path, ...[init, options, queryClient]) =>
-      useSuspenseQuery(
         queryOptions(
           method,
           path,

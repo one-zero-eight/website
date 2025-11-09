@@ -10,14 +10,15 @@
     "preview": "vite build && vite preview --port 3000 --host 0.0.0.0",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "prettify": "prettier --write .",
+    "typecheck": "tsc --build --noEmit",
+    "prettify": "prettier --write --list-different .",
     "prettier:check": "prettier --ignore-unknown --check .",
     "lint-staged": "lint-staged",
     "prepare": "husky",
     "gen:api": "pnpm exec openapi-typescript --root-types --enum",
     "release": "bumpp package.json",
     "update-deps": "taze minor -wIrl",
-    "test:ndcg": "vite-node src/lib/links/searchUtils.test.ts"
+    "test:ndcg": "vite-node src/components/dashboard/links/searchUtils.test.ts"
   },
   "dependencies": {
     "@dr.pogodin/react-helmet": "^3.0.4",
@@ -72,7 +73,7 @@
     "openapi-fetch": "^0.15.0",
     "openapi-typescript": "^7.10.1",
     "openapi-typescript-helpers": "^0.0.15",
-    "pdfjs-dist": "5.4.394",
+    "pdfjs-dist": "*",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",

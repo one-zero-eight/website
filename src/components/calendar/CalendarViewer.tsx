@@ -4,7 +4,7 @@ import { SourcesDialog } from "@/components/calendar/SourcesDialog.tsx";
 import {
   AcademicCalendar,
   useMyAcademicCalendar,
-} from "@/lib/events/academic-calendar.tsx";
+} from "@/components/dashboard/academic-calendar.tsx";
 import {
   DayHeaderContentArg,
   EventApi,

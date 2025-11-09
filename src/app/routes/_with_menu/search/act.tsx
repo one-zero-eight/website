@@ -1,3 +1,4 @@
+import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { ActPage } from "@/components/search/act/ActPage";
 import { TopbarWithToggleGroup } from "@/components/search/TopbarWithToggleGroup";
 import { createFileRoute } from "@tanstack/react-router";
@@ -30,7 +31,9 @@ function RouteComponent() {
       </Helmet>
 
       <TopbarWithToggleGroup currentTabText={q ?? ""} />
-      <ActPage actQuery={q ?? ""} />
+      <RequireAuth>
+        <ActPage actQuery={q ?? ""} />
+      </RequireAuth>
     </Suspense>
   );
 }

@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { useTernaryDarkMode } from "usehooks-ts";
 
 export declare type TelegramPreviewProps = {
-  source: searchTypes.SchemaTelegramSource;
+  source: searchTypes.SchemaTelegramSourceOutput;
 };
 
 export default function TelegramPreview({ source }: TelegramPreviewProps) {

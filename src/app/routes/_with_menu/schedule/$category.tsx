@@ -1,6 +1,6 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import SchedulePage from "@/components/schedule/SchedulePage.tsx";
-import { getCategoryInfoBySlug } from "@/lib/events/events-view-config.ts";
+import { getCategoryInfoBySlug } from "@/components/schedule/view-config.ts";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
 
