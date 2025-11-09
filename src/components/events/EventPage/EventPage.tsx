@@ -58,8 +58,8 @@ export default function EventPage({ eventSlug }: EventPageProps) {
       <div className="flex h-full flex-col items-center justify-center gap-3">
         <span className="text-xl font-semibold">404 - Event not found</span>
         <button className="btn btn-outline btn-sm" onClick={handleNavigateBack}>
-          <span className="icon-[solar--arrow-left-linear] text-xl"></span>Go
-          back
+          <span className="icon-[solar--arrow-left-linear] text-xl" />
+          Go back
         </button>
       </div>
     );
@@ -75,7 +75,7 @@ export default function EventPage({ eventSlug }: EventPageProps) {
           pageLanguage={language}
           setPageLanguage={setLanguage}
         />
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <div className="col-span-1 md:col-span-2">
             <Description event={event} pageLanguage={language} />
           </div>
