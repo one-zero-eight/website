@@ -64,6 +64,8 @@ export default function EventPage({ eventSlug }: EventPageProps) {
       </div>
     );
 
+  console.log(event);
+
   return (
     <>
       <div className="mb-[90px] px-4 md:mb-0 md:px-8 md:pt-4 lg:px-48 lg:pt-8">

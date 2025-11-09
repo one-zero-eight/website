@@ -15,8 +15,6 @@ export interface EventTitleProps {
   className?: string;
 }
 
-const badges = ["recommended", "education", "319"];
-
 export default function EventTitle({
   event,
   pageLanguage,
@@ -109,9 +107,15 @@ export default function EventTitle({
         )}
         <div className="mb-0.5 flex items-end justify-between">
           <div className="flex flex-wrap gap-2">
-            {badges.map((badge) => (
-              <div key={badge}>{eventBadges[badge]}</div>
-            ))}
+            {event.badges.length !== 0 ? (
+              event.badges.map((badge) => (
+                <div key={badge.title}>{eventBadges[badge.title]}</div>
+              ))
+            ) : (
+              <span className="ml-2 font-semibold text-neutral-600">
+                No Tags
+              </span>
+            )}
           </div>
           {event.language === "both" && (
             <div className={clsx("tabs tabs-box hidden rounded-full md:flex")}>

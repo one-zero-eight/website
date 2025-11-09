@@ -2,6 +2,7 @@ import { ChangeEvent, useState } from "react";
 import { EventFormErrors, EventFormState } from "./CreationForm";
 import clsx from "clsx";
 import { WorkshopLanguage } from "@/api/workshops/types";
+import TagsSelector from "./TagsSelector";
 
 export interface NameDescriptionProps {
   eventForm: EventFormState;
@@ -134,6 +135,8 @@ export default function NameDescription({
             : errors.host}
         </label>
       </fieldset>
+
+      <TagsSelector event={eventForm} setEventForm={setEventForm} />
     </div>
   );
 }

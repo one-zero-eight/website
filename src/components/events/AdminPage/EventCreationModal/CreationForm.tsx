@@ -2,7 +2,7 @@ import { $workshops, workshopsTypes } from "@/api/workshops";
 import { useState } from "react";
 import NameDescription from "./NameDescription.tsx";
 import { useToast } from "@/components/toast/index.ts";
-import { WorkshopLanguage } from "@/api/workshops/types.ts";
+import { SchemaBadge, WorkshopLanguage } from "@/api/workshops/types.ts";
 import { DateTimePlaceToggles, MAX_CAPACITY } from "./DateTimePlaceToggles.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -81,6 +81,8 @@ export function CreationForm({
         place: initialEvent.place || "",
         capacity: initialEvent.capacity || MAX_CAPACITY,
         remain_places: initialEvent.remain_places,
+        check_in_date: initialEvent.check_in_opens.split("T")[0],
+        check_in_opens: initialEvent.check_in_opens.split("T")[1].slice(0, 5),
       };
     }
 
@@ -144,7 +146,7 @@ export function CreationForm({
       capacity: eventForm.capacity || MAX_CAPACITY,
       is_draft: false,
       is_active: true,
-      badges: [],
+      badges: eventForm.badges as SchemaBadge[],
     };
   };
 

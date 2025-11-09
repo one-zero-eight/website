@@ -150,7 +150,7 @@ export function DateTimePlaceToggles({
       <div>
         <input
           type="datetime-local"
-          className="input"
+          className="input w-full"
           value={eventForm.check_in_date + "T" + eventForm.check_in_opens}
           onChange={handleCheckIn}
         />
