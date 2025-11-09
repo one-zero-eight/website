@@ -1,8 +1,8 @@
 import { SchemaBadge } from "@/api/workshops/types";
-import { eventBadges } from "../../EventBadges";
 import { EventFormState } from "./CreationForm";
+import { eventBadges } from "../EventBadges";
 
-export const MAX_BADGES_AMOUT = 4;
+export const MAX_BADGES_AMOUT = 3;
 
 export interface TagsSelectorProps {
   eventForm: EventFormState;
@@ -54,8 +54,12 @@ export default function TagsSelector({
         {eventForm.badges.length !== 0 ? (
           Object.entries(eventBadges)
             .filter(([value]) => hasBadgeWithTitle(value))
-            .map(([value, badge]) => (
-              <span className="cursor-pointer" onClick={() => removeTag(value)}>
+            .map(([value, badge], index) => (
+              <span
+                className="cursor-pointer"
+                key={index}
+                onClick={() => removeTag(value)}
+              >
                 {badge}
               </span>
             ))

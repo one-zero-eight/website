@@ -2,16 +2,19 @@ import { SchemaWorkshop } from "@/api/workshops/types";
 import { eventBadges } from "../EventBadges";
 import { formatDate, formatTime, parseTime } from "../date-utils";
 import { Link } from "@tanstack/react-router";
-import { eventLangauage } from "../event-utils";
+import { getSignedPeopleCount } from "../event-utils";
 import clsx from "clsx";
 import { useCopyToClipboard } from "usehooks-ts";
 import { useState } from "react";
 import { CheckInButton } from "../CheckInButton";
+import { LanguageBadge } from "../LanguageBadge";
+import { MAX_CAPACITY } from "../EventCreationModal/DateTimePlaceToggles";
 
 export interface EventTitleProps {
   event: SchemaWorkshop;
   pageLanguage: string | null;
   setPageLanguage: (v: string | null) => void;
+  openModal: ((v: boolean) => void) | null;
   className?: string;
 }
 
@@ -19,6 +22,7 @@ export default function EventTitle({
   event,
   pageLanguage,
   setPageLanguage,
+  openModal,
   className,
 }: EventTitleProps) {
   const [_, _copy] = useCopyToClipboard();
@@ -64,9 +68,11 @@ export default function EventTitle({
     else return event.russian_name;
   };
 
+  const signedPeople = getSignedPeopleCount(event);
+
   return (
     <div className={clsx("card card-border", className)}>
-      <div className="bg-primary mb-4 flex items-start justify-between rounded-t-xl p-4 pb-16 lg:pb-36">
+      <div className="mb-4 flex items-start justify-between rounded-t-(--radius-box) bg-[url('/pattern.svg')] bg-size-[640px] bg-repeat p-4 pb-16 md:pb-32 lg:pb-36">
         <div className="flex gap-2">
           <Link to="/events" className="btn btn-circle">
             <span className="icon-[line-md--arrow-left] text-2xl" />
@@ -80,10 +86,15 @@ export default function EventTitle({
               )}
             />
           </span>
+          {openModal && (
+            <span className="btn btn-circle" onClick={() => openModal(true)}>
+              <span className="icon-[mage--pen] text-lg" />
+            </span>
+          )}
         </div>
-        <LanguageBadge workshop={event} className="inline-flex md:hidden" />
+        <LanguageBadge event={event} className="inline-flex md:hidden" />
       </div>
-      <div className="card-body md:p-[var(--card-p, 1.5rem);] p-3">
+      <div className="card-body md:p-[var(--card-p, 1.5rem);] p-3 pt-0 md:pt-3">
         {event.language === "both" && (
           <div
             className={clsx("tabs tabs-box mb-1 flex flex-nowrap md:hidden")}
@@ -138,7 +149,7 @@ export default function EventTitle({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <LanguageBadge workshop={event} className="hidden md:inline-flex" />
+          <LanguageBadge event={event} className="hidden md:inline-flex" />
           <h1 className="font-rubik text-justify text-2xl font-semibold">
             {getEventName()}
           </h1>
@@ -168,29 +179,22 @@ export default function EventTitle({
               {formatTime(parseTime(event.dtend))}
             </span>
           </div>
+          <div className="flex items-center gap-1">
+            <span className="text-primary icon-[famicons--people] text-2xl" />
+            <span className="flex items-center text-neutral-400">
+              {event.capacity === MAX_CAPACITY
+                ? signedPeople + "/"
+                : signedPeople + "/" + event.capacity}
+              {event.capacity === MAX_CAPACITY && (
+                <span className="icon-[fa7-solid--infinity]" />
+              )}
+            </span>
+          </div>
         </div>
         <div className="hidden justify-end md:flex">
           <CheckInButton event={event} className="btn-wide" />
         </div>
       </div>
-    </div>
-  );
-}
-
-interface LanguageBadgeProps {
-  workshop: SchemaWorkshop;
-  className?: string;
-}
-
-function LanguageBadge({ workshop, className }: LanguageBadgeProps) {
-  return (
-    <div
-      className={clsx(
-        "badge badge-soft rounded-lg font-bold [--badge-color:var(--color-emerald-500)]",
-        className,
-      )}
-    >
-      {eventLangauage(workshop)}
     </div>
   );
 }

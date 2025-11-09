@@ -28,7 +28,7 @@ export function ModalWindow({
   const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
 
   // Event listeners to change the open state
-  const dismiss = useDismiss(context, { outsidePressEvent: "mousedown" });
+  const dismiss = useDismiss(context, { outsidePress: false });
   // Role props for screen readers
   const role = useRole(context);
 
@@ -46,7 +46,6 @@ export function ModalWindow({
       >
         <FloatingFocusManager context={context} modal>
           <div
-            // eslint-disable-next-line react-hooks/refs
             ref={refs.setFloating}
             style={transitionStyles}
             {...getFloatingProps()}

@@ -2,12 +2,11 @@ import { $workshops } from "@/api/workshops";
 import { Description } from "./Description";
 import { useNavigate } from "@tanstack/react-router";
 import EventTitle from "./EventTitle";
-import { useMe } from "@/api/accounts/user";
-import { AuthWall } from "@/components/common/AuthWall";
-import { ConnectTelegramPage } from "@/components/account/ConnectTelegramPage";
 import MobileMenu from "./MobileMenu";
 import Participants from "./Participants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ModalWindow } from "../EventCreationModal/ModalWindow";
+import { CreationForm } from "../EventCreationModal/CreationForm";
 
 export interface EventPageProps {
   eventSlug: string;
@@ -15,26 +14,16 @@ export interface EventPageProps {
 
 export default function EventPage({ eventSlug }: EventPageProps) {
   const navigate = useNavigate();
-  const { me } = useMe();
 
   const [language, setLanguage] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  if (!me) {
-    return <AuthWall />;
-  }
-
-  if (!me.telegram) {
-    return (
-      <div className="mb-10 flex h-full flex-col items-center justify-center gap-4 p-15">
-        <img
-          src="/favicon.svg"
-          alt="InNoHassle logo"
-          className="h-24 w-24 self-center"
-        />
-        <ConnectTelegramPage />
-      </div>
-    );
-  }
+  const { data: eventUser } = $workshops.useQuery("get", "/users/me");
+  useEffect(() => {
+    if (eventUser && eventUser.role !== "admin") {
+      navigate({ to: "/events" });
+    }
+  }, [eventUser, navigate]);
 
   const { data: event, isLoading } = $workshops.useQuery(
     "get",
@@ -66,9 +55,10 @@ export default function EventPage({ eventSlug }: EventPageProps) {
 
   return (
     <>
-      <div className="mb-[90px] px-4 md:mb-0 md:px-8 md:pt-4 lg:px-48 lg:pt-8">
+      <div className="mb-[90px] px-4 md:mb-0 md:px-8 md:py-4 lg:px-48 lg:py-8">
         <EventTitle
           event={event}
+          openModal={eventUser?.role === "admin" ? setModalOpen : null}
           className="my-4"
           pageLanguage={language}
           setPageLanguage={setLanguage}
@@ -81,6 +71,25 @@ export default function EventPage({ eventSlug }: EventPageProps) {
         </div>
       </div>
       <MobileMenu event={event} />
+
+      {/* Модальное окно для создания/редактирования воркшопа */}
+      {eventUser?.role === "admin" && (
+        <ModalWindow
+          open={modalOpen}
+          onOpenChange={() => {
+            setModalOpen(false);
+          }}
+          title={"Edit Event"}
+        >
+          {/* Форма создания/редактирования воркшопа. При редактировании передаются данные существующего воркшопа */}
+          <CreationForm
+            initialEvent={event}
+            onClose={() => {
+              setModalOpen(false);
+            }}
+          />
+        </ModalWindow>
+      )}
     </>
   );
 }

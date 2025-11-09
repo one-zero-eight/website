@@ -47,6 +47,7 @@ export const isWorkshopActive = (
   return (
     workshop.is_active &&
     workshop.is_registrable &&
+    !isWorkshopPast(workshop.dtstart) &&
     new Date(workshop.check_in_opens).getTime() < Date.now() &&
     !workshop.is_draft
   );
@@ -91,10 +92,10 @@ export const getInactiveStatusText = (
  * @returns Количество записанных участников
  */
 export const getSignedPeopleCount = (
-  workshop: workshopsTypes.SchemaWorkshop,
+  event: workshopsTypes.SchemaWorkshop,
 ): number => {
-  if (workshop.remain_places !== undefined && workshop.capacity > 0) {
-    return Math.max(0, workshop.capacity - workshop.remain_places);
+  if (event.remain_places !== undefined && event.capacity > 0) {
+    return Math.max(0, event.capacity - event.remain_places);
   }
   return 0;
 };

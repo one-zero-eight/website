@@ -38,8 +38,8 @@ export function DateTimePlaceToggles({
   };
 
   return (
-    <div className="my-2 flex flex-col gap-4">
-      <fieldset className="fieldset flex items-center justify-between gap-2 rounded-lg border border-neutral-100 p-2 pt-0">
+    <div className="my-2 flex w-full flex-col flex-nowrap gap-4">
+      <fieldset className="fieldset grid grid-cols-1 justify-between gap-2 rounded-lg border border-neutral-100 p-2 pt-0 md:grid-cols-2">
         <legend className="fieldset-legend">Capacity options</legend>
         <input
           type="text"
@@ -147,11 +147,11 @@ export function DateTimePlaceToggles({
         <p className="text-sm text-red-500 dark:text-red-400">{errors.etime}</p>
       )}
 
-      <fieldset className="fieldset flex items-center justify-between gap-2 rounded-lg border border-neutral-100 p-2 pt-0">
+      <fieldset className="fieldset grid grid-cols-1 gap-2 rounded-lg border border-neutral-100 p-2 pt-0 md:grid-cols-2">
         <legend className="fieldset-legend">Check In Opens</legend>
         <input
           type="datetime-local"
-          className="input w-full"
+          className="input"
           value={eventForm.check_in_date + "T" + eventForm.check_in_opens}
           onChange={handleCheckIn}
           disabled={eventForm.check_in_on_open}
@@ -172,7 +172,7 @@ export function DateTimePlaceToggles({
         </label>
       </fieldset>
 
-      <fieldset className="fieldset flex flex-col gap-2">
+      <fieldset className="fieldset flex flex-col flex-wrap gap-2">
         <legend className="fieldset-legend">Additional Options</legend>
         <label className="label mr-2 text-black dark:text-white">
           <input
@@ -193,6 +193,7 @@ export function DateTimePlaceToggles({
             type="checkbox"
             className="toggle"
             checked={eventForm.is_active}
+            disabled={eventForm.is_draft}
             onChange={() =>
               setEventForm({
                 ...eventForm,

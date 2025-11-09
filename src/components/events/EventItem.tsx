@@ -1,131 +1,128 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import React from "react";
-import { formatTime, parseTime } from "./date-utils.ts";
-import { getSignedPeopleCount, isWorkshopActive } from "./event-utils.ts";
-import { MAX_CAPACITY } from "./AdminPage/EventCreationModal/DateTimePlaceToggles.tsx";
+import { formatDate, formatTime, parseTime } from "./date-utils.ts";
+import {
+  getInactiveStatusText,
+  getSignedPeopleCount,
+  isWorkshopActive,
+} from "./event-utils.ts";
+import { eventBadges } from "./EventBadges.tsx";
+import { LanguageBadge } from "./LanguageBadge.tsx";
+import { MAX_CAPACITY } from "./EventCreationModal/DateTimePlaceToggles.tsx";
 
 export interface EventItemProps {
-  workshop: workshopsTypes.SchemaWorkshop;
+  event: workshopsTypes.SchemaWorkshop;
   edit?: ((workshop: workshopsTypes.SchemaWorkshop) => void) | null;
+  className?: string;
 }
 
-export function EventItem({ workshop, edit }: EventItemProps) {
+export function EventItem({ event, edit, className }: EventItemProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
 
   const navigate = useNavigate();
 
-  const checkedIn = !!myCheckins?.some((w) => w.id === workshop.id);
-  const signedPeople = getSignedPeopleCount(workshop);
-  const isRecommended = workshop.badges.some(
+  const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
+  const signedPeople = getSignedPeopleCount(event);
+  const isRecommended = event.badges.some(
     (badge) => badge.title === "recommended",
   );
 
-  const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Check, that click was perform directly on an item, not on buttons, links, etc.
-    const target = e.target as HTMLElement;
-    if (!target.closest("button") && !target.closest("a")) {
-      navigate({ to: "/events/$slug", params: { slug: workshop.id } });
-    }
+  const handleContentClick = () => {
+    navigate({ to: "/events/$slug", params: { slug: event.id } });
   };
 
   return (
-    <div
-      className={clsx(
-        "bg-pagebg relative flex w-full cursor-pointer flex-col justify-between rounded-2xl border p-4 shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-all duration-300 ease-in-out select-none",
-        isWorkshopActive(workshop)
-          ? "hover:shadow-[0_8px_24px_rgba(120,0,255,0.3)]"
-          : "border-primary/15",
-        checkedIn
-          ? "border-green-700/60 bg-linear-to-br from-green-600/20 to-green-700/10 shadow-[0_4px_16px_rgba(76,175,80,0.1)] hover:shadow-[0_8px_24px_rgba(76,175,80,0.4)] dark:border-green-500/60 dark:from-green-500/10 dark:to-green-500/5"
-          : "border-primary/40",
-      )}
-      onClick={handleContentClick}
-    >
+    <div className="indicator w-full">
       {/* Recommended Badge */}
       {isRecommended && (
-        <div className="absolute -top-2 -right-2 z-10 flex items-center justify-center rounded-full bg-linear-to-r from-amber-400 to-orange-500 px-3 py-1 text-xs font-semibold text-white shadow-lg">
-          <span className="icon-[mdi--star] mr-1 text-xs" />
-          Recommended
+        <div className="indicator-item translate-x-1/12 -translate-y-1/2">
+          {eventBadges["recommended"]}
         </div>
       )}
 
-      {/* Time & Availability */}
-      <div className="flex items-center justify-between">
-        {workshop.dtstart && workshop.dtend && (
-          <span
-            className={clsx(
-              "text-primary flex items-center justify-start text-xs font-medium sm:text-[15px]",
-              !isWorkshopActive(workshop) && "opacity-50",
-            )}
-          >
-            {formatTime(parseTime(workshop.dtstart))} -{" "}
-            {formatTime(parseTime(workshop.dtend))}
-          </span>
+      {/* Card */}
+      <div
+        className={clsx(
+          "card card-border min-w-full",
+          checkedIn && "card-dash border-emerald-900",
+          !isWorkshopActive(event) && "card-dash border-rose-950",
+          className,
         )}
-        <span
-          className={clsx(
-            "text-primary flex items-center justify-end text-xs font-medium sm:text-[15px]",
-            !isWorkshopActive(workshop) && "opacity-50",
+      >
+        <div className="flex items-center justify-between rounded-t-(--radius-box) bg-[url('/pattern.svg')] bg-size-[640px] bg-repeat p-4 pb-20">
+          <LanguageBadge event={event} className="inline-flex md:hidden" />
+          {!isWorkshopActive(event) && (
+            <div
+              className={`badge badge-soft rounded-lg [--badge-color:var(--color-rose-500)]`}
+            >
+              {getInactiveStatusText(event)}
+            </div>
           )}
-        >
-          {workshop.capacity >= 0
-            ? workshop.capacity === MAX_CAPACITY
-              ? signedPeople + "/"
-              : signedPeople + "/" + workshop.capacity
-            : "No limit on number of people"}
-          {workshop.capacity === MAX_CAPACITY && (
-            <span className="icon-[mdi--infinity] mt-0.5"></span>
-          )}
-        </span>
-      </div>
-
-      <div>
-        <h3
-          className={clsx(
-            "text-contrast my-0.5 overflow-hidden text-center text-sm leading-[1.2] font-semibold wrap-break-word sm:my-1.5 sm:text-lg sm:leading-[1.3]",
-            !isWorkshopActive(workshop) && "opacity-50",
-          )}
-        >
-          {workshop.english_name || workshop.russian_name}
-        </h3>
-        {workshop.place && (
-          <div
-            className={clsx(
-              "my-1 text-center sm:my-2",
-              !isWorkshopActive(workshop) && "opacity-50",
-            )}
-          >
-            <p className="text-contrast/80 m-0 text-xs sm:text-base">
-              <strong>Room:</strong>{" "}
-              <Link
-                to="/maps"
-                search={{ q: workshop.place }}
-                className="text-primary hover:text-primary/80 relative cursor-pointer underline"
-                title="Click to view on map"
-              >
-                {workshop.place}
-              </Link>
-            </p>
+        </div>
+        <div className="card-body flex-col justify-between p-4 md:p-6">
+          <div className="flex flex-col gap-2">
+            <h2 className="card-title">
+              <LanguageBadge
+                event={event}
+                className="hidden self-start md:inline-flex"
+              />
+              {event.english_name || event.russian_name}
+            </h2>
+            {event.badges.length !== 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {event.badges
+                  .filter((badge) => !(badge.title == "recommended"))
+                  .map((badge) => (
+                    <div key={badge.title}>{eventBadges[badge.title]}</div>
+                  ))}
+              </div>
+            ) : null}
           </div>
-        )}
+          <div className="card-actions items-center justify-between gap-2">
+            <div className="flex gap-2">
+              <div className="flex items-center gap-1">
+                <span className="text-primary icon-[famicons--people] text-xl" />
+                <span className="flex items-center text-neutral-400">
+                  {event.capacity === MAX_CAPACITY
+                    ? signedPeople + "/"
+                    : signedPeople + "/" + event.capacity}
+                  {event.capacity === MAX_CAPACITY && (
+                    <span className="icon-[fa7-solid--infinity]" />
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
+                <span className="text-neutral-400">
+                  {`${formatDate(event.dtstart)} at ${formatTime(parseTime(event.dtstart))}`}
+                </span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {edit && (
+                <button
+                  className="btn btn-outline btn-square btn-sm border"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    edit(event);
+                  }}
+                >
+                  <span className="icon-[mage--pen] text-lg" />
+                </button>
+              )}
+              <button
+                className="btn btn-primary btn-soft btn-sm flex items-center gap-1"
+                onClick={handleContentClick}
+              >
+                View Event
+                <span className="icon-[lucide--move-right] text-xl" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* Показываем кнопки управления только для администраторов */}
-      {edit && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            edit(workshop);
-          }}
-          className="border-primary/20 bg-inh-primary/80 text-primary hover:border-primary/40 hover:bg-primary/20 hover:text-primary/80 absolute right-1.5 bottom-1.5 flex cursor-pointer items-center justify-center rounded-md border p-1.5 backdrop-blur-md transition-all duration-300 ease-in-out hover:scale-110 sm:right-3 sm:bottom-3 sm:rounded-xl sm:p-2.5"
-          title="Edit workshop"
-        >
-          <span className="icon-[mynaui--pencil] text-base sm:text-xl" />
-        </button>
-      )}
     </div>
   );
 }

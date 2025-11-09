@@ -74,7 +74,7 @@ export function EventForDate({
               {sortWorkshops(workshops).map((workshop) => (
                 <EventItem
                   key={workshop.id}
-                  workshop={workshop}
+                  event={workshop}
                   edit={
                     eventForDateType === EventForDateType.ADMIN
                       ? () => (onEditWorkshop ? onEditWorkshop(workshop) : null)

@@ -1,5 +1,4 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
-// import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { groupWorkshopsByDate } from "@/components/events/event-utils.ts";
 import {
   EventForDate,
@@ -7,9 +6,9 @@ import {
 } from "@/components/events/EventForDate.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ModalWindow } from "./ModalWindow.tsx";
 import AddEventButton from "../AddEventButton.tsx";
-import { CreationForm } from "./EventCreationModal/CreationForm.tsx";
+import { CreationForm } from "../EventCreationModal/CreationForm.tsx";
+import { ModalWindow } from "../EventCreationModal/ModalWindow.tsx";
 
 /**
  * Главная страница модуля воркшопов
@@ -70,9 +69,9 @@ export function EventsAdminPage() {
           {workshops && groups && Object.keys(groups).length > 0 ? (
             Object.keys(groups)
               .sort((a: string, b: string) => b.localeCompare(a))
-              .map((tagName) => (
+              .map((tagName, index) => (
                 <EventForDate
-                  key={tagName}
+                  key={index}
                   isoDate={tagName}
                   workshops={groups[tagName]}
                   showPreviousDates={showPreviousDates}

@@ -1,7 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $workshops } from "@/api/workshops";
 import { ConnectTelegramPage } from "@/components/account/ConnectTelegramPage.tsx";
-// import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { EventItem } from "./EventItem.tsx";
 
 /**
@@ -31,13 +30,13 @@ export function EventsListPage() {
   return (
     <>
       {workshops && (
-        <div className="flex flex-col gap-4 p-4">
+        <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
           {workshops ? (
             workshops
               .filter((workshop) => !workshop.is_draft || !workshop.is_active)
               .sort((a, b) => b.created_at.localeCompare(a.created_at))
               .map((workshop, index) => (
-                <EventItem key={index} workshop={workshop} />
+                <EventItem key={index} event={workshop} />
               ))
           ) : (
             <div className="col-span-full w-full text-center text-xl">

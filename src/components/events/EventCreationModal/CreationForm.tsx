@@ -133,9 +133,16 @@ export function CreationForm({
     const pad = (n: number) => n.toString().padStart(2, "0");
     const endDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
+    const dtstart = `${eventForm.date}T${eventForm.dtstart}:00+03:00`;
+    const dtend = `${endDate}T${eventForm.dtend}:00+03:00`;
+    console.log(dtend);
+
     // Handle check in openning time
     let check_in_opens = `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
-    if (eventForm.check_in_on_open) check_in_opens = new Date().toISOString();
+    if (eventForm.check_in_on_open) {
+      if (initialEvent?.check_in_opens) check_in_opens = initialEvent.dtstart;
+      else check_in_opens = new Date().toISOString();
+    }
 
     return {
       english_name: eventForm.english_name,
@@ -144,8 +151,8 @@ export function CreationForm({
       russian_description: eventForm.russian_description,
       language: eventForm.language,
       host: eventForm.host,
-      dtstart: `${eventForm.date}T${eventForm.dtstart}:00+03:00`,
-      dtend: `${endDate}T${eventForm.dtend}:00+03:00`,
+      dtstart,
+      dtend,
       check_in_opens,
       place: eventForm.place?.trim() || "TBA",
       capacity: eventForm.capacity || MAX_CAPACITY,
