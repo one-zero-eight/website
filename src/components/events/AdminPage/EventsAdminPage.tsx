@@ -21,7 +21,7 @@ import { CreationForm } from "./EventCreationModal/CreationForm.tsx";
 export function EventsAdminPage() {
   const navigate = useNavigate();
 
-  const [modalOpen, setModalOpen] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
   const [modalWorkshop, setModalWorkshop] =
     useState<workshopsTypes.SchemaWorkshop | null>(null);
   const [modalDate, setModalDate] = useState<string | null>(null);

@@ -11,12 +11,10 @@ import clsx from "clsx";
 const MAX_STAGE_FORM_INDEX = 1;
 
 export interface EventFormState
-  extends Omit<
-    workshopsTypes.SchemaWorkshop,
-    "id" | "created_at" | "is_active"
-  > {
+  extends Omit<workshopsTypes.SchemaWorkshop, "id" | "created_at"> {
   date: string;
   check_in_date: string;
+  check_in_on_open: boolean;
 }
 
 export interface PostFormProps {
@@ -51,7 +49,9 @@ const baseEventFormState: EventFormState = {
   dtend: "",
   check_in_opens: "",
   check_in_date: "",
-  is_draft: true,
+  check_in_on_open: true,
+  is_draft: false,
+  is_active: true,
 };
 
 /**
@@ -83,6 +83,7 @@ export function CreationForm({
         remain_places: initialEvent.remain_places,
         check_in_date: initialEvent.check_in_opens.split("T")[0],
         check_in_opens: initialEvent.check_in_opens.split("T")[1].slice(0, 5),
+        check_in_on_open: false,
       };
     }
 
@@ -132,6 +133,10 @@ export function CreationForm({
     const pad = (n: number) => n.toString().padStart(2, "0");
     const endDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
+    // Handle check in openning time
+    let check_in_opens = `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
+    if (eventForm.check_in_on_open) check_in_opens = new Date().toISOString();
+
     return {
       english_name: eventForm.english_name,
       russian_name: eventForm.russian_name,
@@ -141,12 +146,11 @@ export function CreationForm({
       host: eventForm.host,
       dtstart: `${eventForm.date}T${eventForm.dtstart}:00+03:00`,
       dtend: `${endDate}T${eventForm.dtend}:00+03:00`,
-      check_in_opens: `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`,
+      check_in_opens,
       place: eventForm.place?.trim() || "TBA",
       capacity: eventForm.capacity || MAX_CAPACITY,
-      is_draft: false,
-      is_active: true,
       badges: eventForm.badges as SchemaBadge[],
+      is_draft: eventForm.is_draft,
     };
   };
 

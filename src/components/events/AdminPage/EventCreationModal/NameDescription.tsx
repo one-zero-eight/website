@@ -136,7 +136,7 @@ export default function NameDescription({
         </label>
       </fieldset>
 
-      <TagsSelector event={eventForm} setEventForm={setEventForm} />
+      <TagsSelector eventForm={eventForm} setEventForm={setEventForm} />
     </div>
   );
 }

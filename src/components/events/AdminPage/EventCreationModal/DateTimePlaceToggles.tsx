@@ -147,14 +147,62 @@ export function DateTimePlaceToggles({
         <p className="text-sm text-red-500 dark:text-red-400">{errors.etime}</p>
       )}
 
-      <div>
+      <fieldset className="fieldset flex items-center justify-between gap-2 rounded-lg border border-neutral-100 p-2 pt-0">
+        <legend className="fieldset-legend">Check In Opens</legend>
         <input
           type="datetime-local"
           className="input w-full"
           value={eventForm.check_in_date + "T" + eventForm.check_in_opens}
           onChange={handleCheckIn}
+          disabled={eventForm.check_in_on_open}
         />
-      </div>
+        <label className="label mr-2 text-black dark:text-white">
+          <input
+            type="checkbox"
+            className="toggle"
+            checked={eventForm.check_in_on_open}
+            onChange={() =>
+              setEventForm({
+                ...eventForm,
+                check_in_on_open: !eventForm.check_in_on_open,
+              })
+            }
+          />
+          Open check-in on create
+        </label>
+      </fieldset>
+
+      <fieldset className="fieldset flex flex-col gap-2">
+        <legend className="fieldset-legend">Additional Options</legend>
+        <label className="label mr-2 text-black dark:text-white">
+          <input
+            type="checkbox"
+            className="toggle"
+            checked={eventForm.is_draft}
+            onChange={() =>
+              setEventForm({
+                ...eventForm,
+                is_draft: !eventForm.is_draft,
+              })
+            }
+          />
+          Save as draft
+        </label>
+        <label className="label mr-2 text-black dark:text-white">
+          <input
+            type="checkbox"
+            className="toggle"
+            checked={eventForm.is_active}
+            onChange={() =>
+              setEventForm({
+                ...eventForm,
+                is_active: !eventForm.is_active,
+              })
+            }
+          />
+          Is Active (visible by users)
+        </label>
+      </fieldset>
     </div>
   );
 }

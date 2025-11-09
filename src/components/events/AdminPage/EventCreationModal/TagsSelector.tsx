@@ -2,51 +2,56 @@ import { SchemaBadge } from "@/api/workshops/types";
 import { eventBadges } from "../../EventBadges";
 import { EventFormState } from "./CreationForm";
 
-interface TagsSelectorProps {
-  event: EventFormState;
+export const MAX_BADGES_AMOUT = 4;
+
+export interface TagsSelectorProps {
+  eventForm: EventFormState;
   setEventForm: (v: EventFormState) => void;
 }
 
+/**
+ * Tag Selector component for admin creation form
+ */
 export default function TagsSelector({
-  event,
+  eventForm,
   setEventForm,
 }: TagsSelectorProps) {
   const addTag = (tag: string) => {
-    if (event.badges.length === 3) return;
+    if (eventForm.badges.length === MAX_BADGES_AMOUT) return;
 
     const newBadges: SchemaBadge[] = [
-      ...(event.badges as SchemaBadge[]),
-      { title: tag, color: "#FFFFFF" },
+      ...(eventForm.badges as SchemaBadge[]),
+      { title: tag, color: "#FFFFFF" }, // Color doesnt matter, all badges are linked with their names
     ];
 
     setEventForm({
-      ...event,
+      ...eventForm,
       badges: newBadges,
     });
   };
 
   const removeTag = (tag: string) => {
     const newBadges: SchemaBadge[] = [
-      ...(event.badges as SchemaBadge[]).filter((t) => t.title !== tag),
+      ...(eventForm.badges as SchemaBadge[]).filter((t) => t.title !== tag),
     ];
 
     setEventForm({
-      ...event,
+      ...eventForm,
       badges: newBadges,
     });
   };
 
   const hasBadgeWithTitle = (value: string): boolean => {
-    return event.badges.some((badge) => badge.title === value);
+    return eventForm.badges.some((badge) => badge.title === value);
   };
 
   return (
     <fieldset className="fieldset flex flex-col gap-2">
       <legend className="fieldset-legend text-xs">
-        Tags ({event.badges.length}/3):
+        Tags ({eventForm.badges.length}/{MAX_BADGES_AMOUT}):
       </legend>
-      <div className="input w-full cursor-default">
-        {event.badges.length !== 0 ? (
+      <div className="input w-full cursor-default select-none">
+        {eventForm.badges.length !== 0 ? (
           Object.entries(eventBadges)
             .filter(([value]) => hasBadgeWithTitle(value))
             .map(([value, badge]) => (

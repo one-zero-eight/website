@@ -3,7 +3,6 @@
  */
 
 import { workshopsTypes } from "@/api/workshops";
-import { recommendedWorkshops } from "@/components/events/EventItem.tsx";
 import { getDate, isWorkshopPast, parseTime } from "./date-utils.ts";
 
 /**
@@ -48,7 +47,8 @@ export const isWorkshopActive = (
   return (
     workshop.is_active &&
     workshop.is_registrable &&
-    new Date(workshop.check_in_opens).getTime() < Date.now()
+    new Date(workshop.check_in_opens).getTime() < Date.now() &&
+    !workshop.is_draft
   );
 };
 
@@ -67,6 +67,10 @@ export const getInactiveStatusText = (
 
   if (!workshop.is_active) {
     return "Hidden by admin";
+  }
+
+  if (workshop.is_draft) {
+    return "Draft check in is unavailable";
   }
 
   if (new Date(workshop.check_in_opens).getTime() > Date.now()) {
@@ -125,12 +129,6 @@ export const sortWorkshops = <T extends workshopsTypes.SchemaWorkshop>(
   workshops: T[],
 ): T[] => {
   return workshops.sort((a, b) => {
-    const isRecommendedA = recommendedWorkshops.indexOf(a.id);
-    const isRecommendedB = recommendedWorkshops.indexOf(b.id);
-    if (isRecommendedB !== isRecommendedA) {
-      return isRecommendedA > isRecommendedB ? -1 : 1; // Сначала рекомендованные
-    }
-
     const [hoursA, minutesA] = parseTime(a.dtstart).split(":").map(Number);
     const [hoursB, minutesB] = parseTime(b.dtstart).split(":").map(Number);
     const result = hoursA * 60 + minutesA - (hoursB * 60 + minutesB);

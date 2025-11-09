@@ -6,18 +6,6 @@ import { formatTime, parseTime } from "./date-utils.ts";
 import { getSignedPeopleCount, isWorkshopActive } from "./event-utils.ts";
 import { MAX_CAPACITY } from "./AdminPage/EventCreationModal/DateTimePlaceToggles.tsx";
 
-// TODO: GET RID OF THIS, FETCH FROM DB
-export const recommendedWorkshops = [
-  "37ef8aed-d973-44eb-8485-f54d62f54755",
-  "158748f7-e215-48e6-af69-f36301c43a8b",
-  "397f5a06-561c-4d4e-8087-a4ff8b592ef6",
-  "e69d602f-4834-4b95-a803-d1e5c5808112",
-  "0ecb5deb-b82b-4ccc-b39d-a59084a9e3b8",
-  "877d5259-4819-4ef9-90ab-a2004bd061b0",
-  "04d48270-05ec-4c00-ad76-8363046b924f",
-  "6016fb2d-cb9b-438b-8819-80c82a78a3be",
-];
-
 export interface EventItemProps {
   workshop: workshopsTypes.SchemaWorkshop;
   edit?: ((workshop: workshopsTypes.SchemaWorkshop) => void) | null;
@@ -30,7 +18,9 @@ export function EventItem({ workshop, edit }: EventItemProps) {
 
   const checkedIn = !!myCheckins?.some((w) => w.id === workshop.id);
   const signedPeople = getSignedPeopleCount(workshop);
-  const isRecommended = recommendedWorkshops.includes(workshop.id);
+  const isRecommended = workshop.badges.some(
+    (badge) => badge.title === "recommended",
+  );
 
   const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Check, that click was perform directly on an item, not on buttons, links, etc.

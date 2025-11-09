@@ -38,6 +38,7 @@ export function EventsListPage() {
         <div className="flex flex-col gap-4 p-4">
           {workshops ? (
             workshops
+              .filter((workshop) => !workshop.is_draft || !workshop.is_active)
               .sort((a, b) => b.created_at.localeCompare(a.created_at))
               .map((workshop, index) => (
                 <EventItem key={index} workshop={workshop} />
