@@ -9,12 +9,28 @@ type Message =
   | { role: "user"; content: string }
   | { role: "assistant"; response: searchTypes.SchemaAskResponses };
 
+const DEFAULT_GREETING: searchTypes.SchemaAskResponses = {
+  query: "",
+  answer: `👋 Hi! I'm an AI assistant from one-zero-eight.
+I can help you find information about Innopolis University — studies, campus life, sport, and much more. Just ask your question in Russian or English!
+
+Example requests:
+- What sports clubs are there at the university?
+- Give me the academic calendar, please.`,
+  chat_id: null,
+  ask_query_id: null,
+  search_responses: [],
+  messages: [],
+};
+
 export function AskPage({ askQuery }: { askQuery: string }) {
   const { me } = useMe();
 
   const [inputQuery, setInputQuery] = useState(askQuery);
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    { role: "assistant", response: DEFAULT_GREETING },
+  ]);
 
   const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
 
@@ -61,13 +77,6 @@ export function AskPage({ askQuery }: { askQuery: string }) {
         setCurrentQuery={setInputQuery}
         pageType="ask"
       />
-
-      {messages.length === 0 && !isLoading && !error && (
-        <div className="flex flex-col gap-4">
-          <span>AI Assistant:</span>
-          <span>- Ask me anything!</span>
-        </div>
-      )}
 
       {isLoading ? (
         <div className="border-inh-inactive bg-inh-primary text-base-content rounded-field flex self-start border! px-4 py-2">

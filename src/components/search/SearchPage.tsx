@@ -170,6 +170,17 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
         checks={checks}
         applyFilters={() => setAppliedFilters(selectedFilters)}
       />
+      {!searchResult && !(isLoading || isFetching) && !error && (
+        <div className="flex grow items-center justify-center">
+          <div className="text-inh-inactive flex flex-col items-center gap-4 text-center">
+            <h1 className="text-4xl font-bold">Search Innopolis University</h1>
+            <p className="max-w-2xl text-lg">
+              Find information about courses, professors, events, clubs,
+              accommodation, services, and everything related to IU
+            </p>
+          </div>
+        </div>
+      )}
       {!(isLoading || isFetching) && searchResult && (
         <p className="text-base-content py-4 text-xl font-semibold">
           {filteredResponses.length > 0
@@ -183,7 +194,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
             Loading search results...
           </p>
           <div className="flex w-full flex-row gap-6">
-            <div className="flex flex-col gap-4 md:w-1/2">
+            <div className="flex w-full flex-col gap-4 md:w-1/2">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}

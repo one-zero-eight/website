@@ -53,7 +53,11 @@ export default function SearchField({
   }, [currentQuery]);
 
   const handleSearch = () => {
-    runSearch(text);
+    const trimmedText = text.trim();
+    if (!trimmedText) {
+      return;
+    }
+    runSearch(trimmedText);
     if (setCurrentQuery && pageType === "ask") {
       setCurrentQuery("");
       setText("");
@@ -102,6 +106,7 @@ export default function SearchField({
           onClick={handleSearch}
           icon={iconsMap[pageType]}
           border
+          disabled={!text.trim()}
         />
         {selectedFilters && checks && applyFilters && (
           <div className="hidden md:inline">
