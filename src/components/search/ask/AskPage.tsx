@@ -89,7 +89,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
         </div>
       ) : null}
 
-      <div className="mt-4 flex flex-col-reverse gap-6">
+      <div className="mt-4 flex max-w-5xl flex-col-reverse gap-6">
         {messages.map((msg, i) =>
           msg.role === "user" ? (
             <div className="flex max-w-[80%] flex-col gap-1 self-start">
@@ -98,7 +98,7 @@ export function AskPage({ askQuery }: { askQuery: string }) {
               </a>
               <div
                 key={i}
-                className="bg-inh-primary rounded-field mb-4 self-start rounded-tl-none px-4 py-2 text-white"
+                className="bg-inh-primary text-base-content rounded-field mb-4 self-start rounded-tl-none px-4 py-2"
               >
                 {msg.content}
               </div>
