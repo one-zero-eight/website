@@ -18,7 +18,7 @@ function RouteComponent() {
         />
       </Helmet>
 
-      <Topbar title="Timer" />
+      <Topbar title="Countdown Timer" />
       <TimerPage />
     </>
   );
