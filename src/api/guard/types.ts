@@ -196,6 +196,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/google/files/{slug}/joins/{user_id}/role": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Update User Role
+     * @description Update individual user role in the file.
+     */
+    put: operations["update_user_role_google_files__slug__joins__user_id__role_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/google/files/{slug}/role": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Update Default Role
+     * @description Update default role for the file and update all existing user roles.
+     */
+    put: operations["update_default_role_google_files__slug__role_put"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -219,10 +259,12 @@ export interface components {
       /** File Id */
       file_id: string;
       /**
-       * User Role
+       * Default Role
        * @enum {string}
        */
-      user_role: CopyFileRequestUser_role;
+      default_role: CopyFileRequestDefault_role;
+      /** Owner Gmail */
+      owner_gmail: string;
     };
     /** CopyFileResponse */
     CopyFileResponse: {
@@ -236,10 +278,10 @@ export interface components {
       /** Title */
       title: string;
       /**
-       * User Role
+       * Default Role
        * @enum {string}
        */
-      user_role: CopyFileResponseUser_role;
+      default_role: CopyFileResponseDefault_role;
       /** Join Link */
       join_link: string;
     };
@@ -253,10 +295,12 @@ export interface components {
       /** Title */
       title: string;
       /**
-       * User Role
+       * Default Role
        * @enum {string}
        */
-      user_role: CreateFileRequestUser_role;
+      default_role: CreateFileRequestDefault_role;
+      /** Owner Gmail */
+      owner_gmail: string;
     };
     /** CreateFileResponse */
     CreateFileResponse: {
@@ -270,10 +314,10 @@ export interface components {
       /** Title */
       title: string;
       /**
-       * User Role
+       * Default Role
        * @enum {string}
        */
-      user_role: CreateFileResponseUser_role;
+      default_role: CreateFileResponseDefault_role;
       /** Join Link */
       join_link: string;
     };
@@ -286,10 +330,10 @@ export interface components {
     GoogleFile: {
       author_id: components["schemas"]["PydanticObjectId"];
       /**
-       * User Role
+       * Default Role
        * @enum {string}
        */
-      user_role: GoogleFileUser_role;
+      default_role: GoogleFileDefault_role;
       /** Slug */
       slug: string;
       /** File Id */
@@ -301,6 +345,10 @@ export interface components {
       file_type: GoogleFileFile_type;
       /** Title */
       title: string;
+      /** Owner Gmail */
+      owner_gmail: string;
+      /** Owner Permission Id */
+      owner_permission_id: string;
       /** Expire At */
       expire_at?: string | null;
       /** Sso Joins */
@@ -337,6 +385,11 @@ export interface components {
       gmail: string;
       /** Innomail */
       innomail: string;
+      /**
+       * Role
+       * @enum {string}
+       */
+      role: GoogleFileSSOJoinInfoRole;
       /**
        * Joined At
        * Format: date-time
@@ -379,6 +432,19 @@ export interface components {
       /** Message */
       message: string;
     };
+    /** UpdateDefaultRoleRequest */
+    UpdateDefaultRoleRequest: {
+      /**
+       * Role
+       * @enum {string}
+       */
+      role: UpdateDefaultRoleRequestRole;
+    };
+    /** UpdateDefaultRoleResponse */
+    UpdateDefaultRoleResponse: {
+      /** Message */
+      message: string;
+    };
     /** UpdateFileRequest */
     UpdateFileRequest: {
       /** Title */
@@ -390,6 +456,19 @@ export interface components {
       file_id: string;
       /** Title */
       title: string;
+      /** Message */
+      message: string;
+    };
+    /** UpdateUserRoleRequest */
+    UpdateUserRoleRequest: {
+      /**
+       * Role
+       * @enum {string}
+       */
+      role: UpdateUserRoleRequestRole;
+    };
+    /** UpdateUserRoleResponse */
+    UpdateUserRoleResponse: {
       /** Message */
       message: string;
     };
@@ -436,10 +515,18 @@ export type SchemaServiceAccountEmailResponse =
   components["schemas"]["ServiceAccountEmailResponse"];
 export type SchemaUnbanUserResponse =
   components["schemas"]["UnbanUserResponse"];
+export type SchemaUpdateDefaultRoleRequest =
+  components["schemas"]["UpdateDefaultRoleRequest"];
+export type SchemaUpdateDefaultRoleResponse =
+  components["schemas"]["UpdateDefaultRoleResponse"];
 export type SchemaUpdateFileRequest =
   components["schemas"]["UpdateFileRequest"];
 export type SchemaUpdateFileResponse =
   components["schemas"]["UpdateFileResponse"];
+export type SchemaUpdateUserRoleRequest =
+  components["schemas"]["UpdateUserRoleRequest"];
+export type SchemaUpdateUserRoleResponse =
+  components["schemas"]["UpdateUserRoleResponse"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
@@ -897,8 +984,100 @@ export interface operations {
       };
     };
   };
+  update_user_role_google_files__slug__joins__user_id__role_put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+        user_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateUserRoleRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UpdateUserRoleResponse"];
+        };
+      };
+      /** @description User with user_id {user_id} not found in joins */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  update_default_role_google_files__slug__role_put: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateDefaultRoleRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UpdateDefaultRoleResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
 }
-export enum CopyFileRequestUser_role {
+export enum CopyFileRequestDefault_role {
   writer = "writer",
   reader = "reader",
 }
@@ -906,7 +1085,7 @@ export enum CopyFileResponseFile_type {
   spreadsheet = "spreadsheet",
   document = "document",
 }
-export enum CopyFileResponseUser_role {
+export enum CopyFileResponseDefault_role {
   writer = "writer",
   reader = "reader",
 }
@@ -914,7 +1093,7 @@ export enum CreateFileRequestFile_type {
   spreadsheet = "spreadsheet",
   document = "document",
 }
-export enum CreateFileRequestUser_role {
+export enum CreateFileRequestDefault_role {
   writer = "writer",
   reader = "reader",
 }
@@ -922,15 +1101,27 @@ export enum CreateFileResponseFile_type {
   spreadsheet = "spreadsheet",
   document = "document",
 }
-export enum CreateFileResponseUser_role {
+export enum CreateFileResponseDefault_role {
   writer = "writer",
   reader = "reader",
 }
-export enum GoogleFileUser_role {
+export enum GoogleFileDefault_role {
   writer = "writer",
   reader = "reader",
 }
 export enum GoogleFileFile_type {
   spreadsheet = "spreadsheet",
   document = "document",
+}
+export enum GoogleFileSSOJoinInfoRole {
+  writer = "writer",
+  reader = "reader",
+}
+export enum UpdateDefaultRoleRequestRole {
+  writer = "writer",
+  reader = "reader",
+}
+export enum UpdateUserRoleRequestRole {
+  writer = "writer",
+  reader = "reader",
 }

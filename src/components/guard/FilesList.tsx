@@ -7,7 +7,7 @@ type FileItem = {
   title: string;
   created_at: string;
   sso_joins_count: number;
-  user_role: string;
+  default_role: string;
 };
 
 interface FilesListProps {
@@ -58,7 +58,7 @@ function FileItem({ file, onShowDetails }: FileItemProps) {
       <div className="min-w-0">
         <div className="truncate font-medium">{file.title || "Untitled"}</div>
         <div className="text-base-content/60 flex items-center gap-2 truncate text-sm">
-          {file.user_role}, {file.sso_joins_count}{" "}
+          {file.default_role}, {file.sso_joins_count}{" "}
           {file.sso_joins_count === 1 ? "join" : "joins"}, created at{" "}
           {formatDate(file.created_at)}
         </div>

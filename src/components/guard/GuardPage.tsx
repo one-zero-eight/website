@@ -79,6 +79,29 @@ export function GuardPage() {
     mutations.invalidateFile(selectedSlug);
   };
 
+  const handleUpdateDefaultRole = async (role: string) => {
+    if (!selectedSlug) return;
+
+    await mutations.updateDefaultRole.mutateAsync({
+      params: { path: { slug: selectedSlug } },
+      body: { role: role as any },
+    });
+
+    mutations.invalidateFile(selectedSlug);
+    mutations.invalidateFiles();
+  };
+
+  const handleUpdateUserRole = async (userId: string, role: string) => {
+    if (!selectedSlug) return;
+
+    await mutations.updateUserRole.mutateAsync({
+      params: { path: { slug: selectedSlug, user_id: userId } },
+      body: { role: role as any },
+    });
+
+    mutations.invalidateFile(selectedSlug);
+  };
+
   return (
     <div className="flex grow flex-col gap-4 p-4">
       <div className="w-full max-w-2xl self-center">
@@ -98,6 +121,8 @@ export function GuardPage() {
             onUpdateTitle={handleUpdateTitle}
             onBan={handleBan}
             onUnban={handleUnban}
+            onUpdateDefaultRole={handleUpdateDefaultRole}
+            onUpdateUserRole={handleUpdateUserRole}
           />
         ) : (
           <FilesSection search={filesSearch} onSearchChange={setFilesSearch}>

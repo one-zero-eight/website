@@ -91,6 +91,14 @@ export function useGuardMutations() {
     "delete",
     "/google/files/{slug}/bans/{user_id}",
   );
+  const updateDefaultRoleMutation = $guard.useMutation(
+    "put",
+    "/google/files/{slug}/role",
+  );
+  const updateUserRoleMutation = $guard.useMutation(
+    "put",
+    "/google/files/{slug}/joins/{user_id}/role",
+  );
 
   return {
     createFile: {
@@ -128,6 +136,16 @@ export function useGuardMutations() {
       mutateAsync: unbanUserMutation.mutateAsync,
       isPending: unbanUserMutation.isPending,
     },
+    updateDefaultRole: {
+      mutate: updateDefaultRoleMutation.mutate,
+      mutateAsync: updateDefaultRoleMutation.mutateAsync,
+      isPending: updateDefaultRoleMutation.isPending,
+    },
+    updateUserRole: {
+      mutate: updateUserRoleMutation.mutate,
+      mutateAsync: updateUserRoleMutation.mutateAsync,
+      isPending: updateUserRoleMutation.isPending,
+    },
     invalidateFiles: () =>
       queryClient.invalidateQueries({ queryKey: guardQueryKeys.files() }),
     invalidateFile: (slug: string) =>
@@ -138,8 +156,8 @@ export function useGuardMutations() {
 /**
  * Type helpers
  */
-export type FileRole = guardTypes.CreateFileRequestUser_role;
+export type FileRole = guardTypes.CreateFileRequestDefault_role;
 export type FileType = guardTypes.CreateFileRequestFile_type;
 
-export const FileRole = guardTypes.CreateFileRequestUser_role;
+export const FileRole = guardTypes.CreateFileRequestDefault_role;
 export const FileType = guardTypes.CreateFileRequestFile_type;

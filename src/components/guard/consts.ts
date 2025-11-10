@@ -20,7 +20,7 @@ export const MESSAGES = {
   unbanConfirm: "Are you sure you want to unban this user?",
   cleanupRecommended:
     "Cleanup recommended: unverified users have access to this file.",
-  noAccess: "Нет доступа к документу",
+  noAccess: "No access to the document",
 } as const;
 
 export const MAX_LIST_HEIGHT = "max-h-[400px]";
