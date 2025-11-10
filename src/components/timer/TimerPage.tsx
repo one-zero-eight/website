@@ -707,6 +707,7 @@ const TimerPage = () => {
           onChange={(e) => setTitle(e.target.value)}
           onInput={(e) => updateTextAreaHeight(e.target as HTMLTextAreaElement)}
           rows={1}
+          spellCheck={false}
           className="rounded-box w-full max-w-[900px] resize-none overflow-hidden border-none bg-transparent px-6 py-3 text-center text-2xl leading-tight font-bold transition-all duration-300 outline-none placeholder:text-gray-400 focus:bg-gray-100/50 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl dark:focus:bg-gray-900/50"
         />
       </div>
