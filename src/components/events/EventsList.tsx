@@ -169,7 +169,7 @@ export function SearchMenu({
       };
 
       updatedLanguages[WorkshopLanguage.both] =
-        updatedLanguages.english && updatedLanguages.russian;
+        updatedLanguages.english || updatedLanguages.russian;
 
       return {
         ...prev,
