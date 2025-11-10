@@ -43,13 +43,9 @@ export function CopyLinkButton({
     <button
       onClick={handleCopy}
       className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]}`}
-      title="Copy link"
+      title="Copy join link"
     >
-      {copied ? (
-        MESSAGES.copySuccess
-      ) : (
-        <span className="icon-[material-symbols--content-copy] text-xl" />
-      )}
+      {copied ? MESSAGES.copySuccess : "Join link"}
     </button>
   );
 }

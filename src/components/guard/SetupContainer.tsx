@@ -59,7 +59,8 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
           body: {
             file_type: guardTypes.CreateFileRequestFile_type.spreadsheet,
             title: title.trim(),
-            user_role: respondentRole,
+            default_role: respondentRole,
+            owner_gmail: "",
           },
         },
         {
@@ -68,7 +69,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
               title: data.title,
               fileId: data.file_id,
               fileType: "spreadsheet",
-              roleDisplay: data.user_role,
+              roleDisplay: data.default_role,
               joinLink: data.join_link,
             });
             setTitle("");
@@ -102,14 +103,15 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
 
     const copyRole =
       respondentRole === FileRole.writer
-        ? guardTypes.CopyFileRequestUser_role.writer
-        : guardTypes.CopyFileRequestUser_role.reader;
+        ? guardTypes.CopyFileRequestDefault_role.writer
+        : guardTypes.CopyFileRequestDefault_role.reader;
 
     mutations.copyFile.mutate(
       {
         body: {
           file_id: extractedId,
-          user_role: copyRole,
+          default_role: copyRole,
+          owner_gmail: "",
         },
       },
       {
@@ -118,7 +120,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
             title: data.title,
             fileId: data.file_id,
             fileType: data.file_type,
-            roleDisplay: data.user_role,
+            roleDisplay: data.default_role,
             joinLink: data.join_link,
           });
           setSpreadsheetId("");

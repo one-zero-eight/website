@@ -5,17 +5,19 @@ import { JoinsList } from "./JoinsList";
 import { BannedList } from "./BannedList";
 import { EditTitleButton } from "./EditTitleButton";
 import { MESSAGES } from "./consts";
+import { FileRole } from "./hooks";
 
 type FileDetailsData = {
   title: string;
   file_id: string;
-  user_role: string;
+  default_role: string;
   created_at: string;
   sso_joins: Array<{
     user_id: string;
     gmail: string;
     innomail: string;
     joined_at: string;
+    role: string;
   }>;
   sso_banned: Array<{
     user_id: string;
@@ -36,6 +38,8 @@ interface FileDetailsProps {
   onUpdateTitle: (newTitle: string) => Promise<void>;
   onBan: (userId: string) => Promise<void>;
   onUnban: (userId: string) => Promise<void>;
+  onUpdateDefaultRole: (role: string) => Promise<void>;
+  onUpdateUserRole: (userId: string, role: string) => Promise<void>;
 }
 
 export function FileDetails({
@@ -49,8 +53,11 @@ export function FileDetails({
   onUpdateTitle,
   onBan,
   onUnban,
+  onUpdateDefaultRole,
+  onUpdateUserRole,
 }: FileDetailsProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm(MESSAGES.deleteConfirm)) return;
@@ -59,6 +66,24 @@ export function FileDetails({
       await onDelete();
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleUpdateDefaultRole = async (newRole: FileRole) => {
+    if (!file) return;
+
+    const affectedCount = file.sso_joins?.length || 0;
+    const roleLabel = newRole === FileRole.writer ? "Writer" : "Reader";
+
+    const message = `Update all roles to ${roleLabel}?\n\nThis will update the default role to ${roleLabel} and change permissions for ${affectedCount} user${affectedCount === 1 ? "" : "s"}. Are you sure?`;
+
+    if (!confirm(message)) return;
+
+    setIsUpdatingRole(true);
+    try {
+      await onUpdateDefaultRole(newRole);
+    } finally {
+      setIsUpdatingRole(false);
     }
   };
 
@@ -71,8 +96,7 @@ export function FileDetails({
             onSave={onUpdateTitle}
           />
           <p className="text-base-content/60 text-sm font-normal">
-            {file?.user_role}, created at{" "}
-            {file?.created_at ? formatDate(file.created_at) : "—"}
+            created at {file?.created_at ? formatDate(file.created_at) : "—"}
           </p>
         </div>
         <div className="ml-4 flex shrink-0 items-center gap-2">
@@ -85,7 +109,7 @@ export function FileDetails({
         </div>
       </div>
 
-      <div className="mb-4 flex items-center gap-2">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <CopyLinkButton text={buildJoinLink(slug)} variant="primary" />
 
         <button
@@ -108,6 +132,47 @@ export function FileDetails({
         </button>
       </div>
 
+      {file && (
+        <div className="mb-4 flex items-center gap-2">
+          <h4 className="text-base-content/60 text-base">
+            Default Role:{" "}
+            <span className="text-base-content font-medium">
+              {file?.default_role}
+            </span>
+          </h4>
+          <div>
+            <button
+              onClick={() =>
+                handleUpdateDefaultRole(
+                  file.default_role === FileRole.writer
+                    ? FileRole.reader
+                    : FileRole.writer,
+                )
+              }
+              disabled={isUpdatingRole}
+              className={`border-base-content/20 hover:border-base-content/40 rounded-field border-2 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50`}
+              title={`Update all roles to ${file.default_role === FileRole.writer ? "Reader" : "Writer"}`}
+            >
+              {isUpdatingRole
+                ? "Updating..."
+                : `Update all roles to ${file.default_role === FileRole.writer ? "Reader" : "Writer"}`}
+            </button>
+            {/* <button
+              onClick={() => handleUpdateDefaultRole(FileRole.reader)}
+              disabled={isUpdatingRole || file.default_role === FileRole.reader}
+              className={`rounded-field border-2 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
+                file.default_role === FileRole.reader
+                  ? "border-base-content/20 bg-base-content/10 text-base-content/60"
+                  : "border-primary bg-primary/10 text-primary hover:bg-primary/20"
+              }`}
+              title="Update all roles to Reader"
+            >
+              {isUpdatingRole ? "Updating..." : "Set all to Reader"}
+            </button> */}
+          </div>
+        </div>
+      )}
+
       <div className="mb-4">
         <input
           type="text"
@@ -128,6 +193,7 @@ export function FileDetails({
               joins={file?.sso_joins || []}
               search={search}
               onBan={onBan}
+              onUpdateRole={onUpdateUserRole}
             />
           </div>
 
