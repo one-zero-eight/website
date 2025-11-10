@@ -149,7 +149,10 @@ export default function EventTitle({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <LanguageBadge event={event} className="hidden md:inline-flex" />
+          <LanguageBadge
+            event={event}
+            className="hidden self-start md:inline-flex"
+          />
           <h1 className="font-rubik text-justify text-2xl font-semibold">
             {getEventName()}
           </h1>

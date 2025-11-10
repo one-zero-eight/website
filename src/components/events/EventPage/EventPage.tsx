@@ -56,7 +56,7 @@ export default function EventPage({ eventSlug }: EventPageProps) {
           <div className="col-span-1 md:col-span-2">
             <Description event={event} pageLanguage={language} />
           </div>
-          <Participants event={event} />
+          <Participants event={event} hide={!eventUser} />
         </div>
       </div>
       <MobileMenu event={event} />

@@ -7,7 +7,7 @@ type EventsTab = {
 };
 
 const eventsTabs: EventsTab[] = [
-  { link: "/events", title: "Check In" },
+  { link: "/events", title: "List" },
   { link: "/events/admin", title: "Admin" },
 ];
 

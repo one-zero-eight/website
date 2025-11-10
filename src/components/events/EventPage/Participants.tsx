@@ -5,10 +5,15 @@ import { useState, useMemo } from "react";
 
 export interface ParticipantsProps {
   event: SchemaWorkshop;
+  hide: boolean;
   className?: string;
 }
 
-export default function Participants({ event, className }: ParticipantsProps) {
+export default function Participants({
+  event,
+  hide,
+  className,
+}: ParticipantsProps) {
   const [showAll, setShowAll] = useState(false);
   const displayLimit = 5;
 
@@ -44,7 +49,13 @@ export default function Participants({ event, className }: ParticipantsProps) {
       )}
 
       {/* Participants card */}
-      <div className={clsx("card card-border", className)}>
+      <div
+        className={clsx(
+          "card card-border",
+          hide ? "hidden" : "flex",
+          className,
+        )}
+      >
         <div className="card-body">
           <h3 className="card-title flex items-center gap-2 text-xl">
             <span className="icon-[material-symbols--group-outline]" />

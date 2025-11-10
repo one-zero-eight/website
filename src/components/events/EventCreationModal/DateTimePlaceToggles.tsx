@@ -201,7 +201,7 @@ export function DateTimePlaceToggles({
               })
             }
           />
-          Is Active (visible by users)
+          Is Visible
         </label>
       </fieldset>
     </div>

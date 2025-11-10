@@ -45,13 +45,22 @@ export function EventItem({ event, edit, className }: EventItemProps) {
       >
         <div className="flex items-center justify-between rounded-t-(--radius-box) bg-[url('/pattern.svg')] bg-size-[640px] bg-repeat p-4 pb-20">
           <LanguageBadge event={event} className="inline-flex md:hidden" />
-          {!isWorkshopActive(event) && (
-            <div
-              className={`badge badge-soft rounded-lg ${!event.is_draft ? "[--badge-color:var(--color-rose-500)]" : "[--badge-color:var(--color-slate-400)]"}`}
-            >
-              {(event.is_draft && "DRAFT") || getInactiveStatusText(event)}
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {!isWorkshopActive(event) && (
+              <div
+                className={`badge badge-soft rounded-lg ${!event.is_draft ? "[--badge-color:var(--color-rose-500)]" : "[--badge-color:var(--color-slate-400)]"}`}
+              >
+                {(event.is_draft && "DRAFT") || getInactiveStatusText(event)}
+              </div>
+            )}
+            {!event.is_draft && !event.is_active && (
+              <div
+                className={`badge badge-soft "[--badge-color:var(--color-slate-400)]" rounded-lg`}
+              >
+                Invisible
+              </div>
+            )}
+          </div>
         </div>
         <div className="card-body flex-col justify-between p-4 md:p-6">
           <div className="flex flex-col gap-2">

@@ -144,7 +144,7 @@ export function CreationForm({
     // Handle check in openning time
     let check_in_opens = `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
     if (eventForm.check_in_on_open) {
-      if (initialEvent?.check_in_opens) check_in_opens = initialEvent.dtstart;
+      if (initialEvent) check_in_opens = initialEvent.dtstart;
       else check_in_opens = new Date().toISOString();
     }
 
@@ -162,6 +162,7 @@ export function CreationForm({
       capacity: eventForm.capacity || MAX_CAPACITY,
       badges: eventForm.badges as SchemaBadge[],
       is_draft: eventForm.is_draft,
+      is_active: eventForm.is_active,
     };
   };
 

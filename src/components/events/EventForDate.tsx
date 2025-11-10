@@ -24,14 +24,20 @@ export function EventForDate({
 
   const filteredEvents = useMemo(
     () =>
-      (eventListType === EventListType.USER
-        ? events.filter((event) => !event.is_draft)
-        : events
-      ).sort((a, b) => Number(b.is_active) - Number(a.is_active)),
+      eventListType === EventListType.USER
+        ? events.filter((event) => !event.is_draft && event.is_active)
+        : events,
     [events, eventListType],
   );
 
   if (filteredEvents.length === 0) return null;
+
+  // if (filteredEvents.length === 0)
+  //   return (
+  //     <div className="col-span-full py-10 text-center text-xl">
+  //       <h2 className="text-gray-500">No events found!</h2>
+  //     </div>
+  //   );
 
   const formattedDate = date.toLocaleDateString("en-US", {
     weekday: "short",
