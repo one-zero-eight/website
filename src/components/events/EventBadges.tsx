@@ -6,64 +6,78 @@ import { ReactElement } from "react";
  */
 export const eventBadges: Record<string, ReactElement> = {
   recommended: (
-    <div className="badge badge-soft badge-warning gap-1">
+    <div className="badge dark:badge-soft badge-warning gap-1">
       <span className="icon-[lets-icons--star-fill] size-4"></span>
       Recommended
     </div>
   ),
   iu: (
     <div
-      className={`badge badge-soft [--badge-color:var(--color-emerald-500)]`}
+      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
     >
       IU
     </div>
   ),
   music: (
     <div
-      className={`badge badge-soft [--badge-color:var(--color-fuchsia-500)]`}
+      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
     >
       Music
     </div>
   ),
   sports: (
-    <div className={`badge badge-soft [--badge-color:var(--color-blue-500)]`}>
+    <div
+      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
+    >
       Sports
     </div>
   ),
   art: (
-    <div className={`badge badge-soft [--badge-color:var(--color-rose-500)]`}>
+    <div
+      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
+    >
       Art
     </div>
   ),
   it: (
-    <div className={`badge badge-soft [--badge-color:var(--color-indigo-500)]`}>
+    <div
+      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
+    >
       IT
     </div>
   ),
   education: (
-    <div className={`badge badge-soft [--badge-color:var(--color-yellow-500)]`}>
+    <div
+      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
+    >
       Education
     </div>
   ),
   319: (
     <div
-      className={`badge badge-soft [--badge-color:var(--color-emerald-500)]`}
+      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
     >
       319
     </div>
   ),
   society: (
-    <div className={`badge badge-soft [--badge-color:var(--color-teal-500)]`}>
+    <div
+      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
+    >
       Society
     </div>
   ),
   buisness: (
-    <div className={`badge badge-soft [--badge-color:var(--color-slate-400)]`}>
+    <div
+      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
+    >
       Buisness
     </div>
   ),
   games: (
-    <div className={`badge badge-soft [--badge-color:var(--color-cyan-500)]`}>
+    <div
+      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
+    >
       Games
     </div>
   ),

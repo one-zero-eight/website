@@ -1,11 +1,11 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
-import React from "react";
 import { formatDate, formatTime, parseTime } from "./date-utils.ts";
 import {
   getInactiveStatusText,
   getSignedPeopleCount,
+  isEventRecommended,
   isWorkshopActive,
 } from "./event-utils.ts";
 import { eventBadges } from "./EventBadges.tsx";
@@ -25,9 +25,6 @@ export function EventItem({ event, edit, className }: EventItemProps) {
 
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
   const signedPeople = getSignedPeopleCount(event);
-  const isRecommended = event.badges.some(
-    (badge) => badge.title === "recommended",
-  );
 
   const handleContentClick = () => {
     navigate({ to: "/events/$slug", params: { slug: event.id } });
@@ -36,7 +33,7 @@ export function EventItem({ event, edit, className }: EventItemProps) {
   return (
     <div className="indicator w-full">
       {/* Recommended Badge */}
-      {isRecommended && (
+      {isEventRecommended(event) && (
         <div className="indicator-item translate-x-1/12 -translate-y-1/2">
           {eventBadges["recommended"]}
         </div>
@@ -46,8 +43,9 @@ export function EventItem({ event, edit, className }: EventItemProps) {
       <div
         className={clsx(
           "card card-border min-w-full",
-          checkedIn && "card-dash border-emerald-900",
-          !isWorkshopActive(event) && "card-dash border-rose-950",
+          checkedIn && "card-dash border-emerald-700 dark:border-emerald-900",
+          !isWorkshopActive(event) &&
+            "card-dash border-rose-700 dark:border-rose-950",
           className,
         )}
       >
@@ -80,7 +78,7 @@ export function EventItem({ event, edit, className }: EventItemProps) {
               </div>
             ) : null}
           </div>
-          <div className="card-actions items-center justify-between gap-2">
+          <div className="card-actions flex-col gap-2">
             <div className="flex gap-2">
               <div className="flex items-center gap-1">
                 <span className="text-primary icon-[famicons--people] text-xl" />
@@ -100,7 +98,7 @@ export function EventItem({ event, edit, className }: EventItemProps) {
                 </span>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 self-end">
               {edit && (
                 <button
                   className="btn btn-outline btn-square btn-sm border"
@@ -109,7 +107,7 @@ export function EventItem({ event, edit, className }: EventItemProps) {
                     edit(event);
                   }}
                 >
-                  <span className="icon-[mage--pen] text-lg" />
+                  <span className="icon-[qlementine-icons--pen-12]" />
                 </button>
               )}
               <button

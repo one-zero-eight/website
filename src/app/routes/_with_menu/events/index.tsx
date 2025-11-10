@@ -1,4 +1,3 @@
-import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { ToastContainer, ToastProvider } from "@/components/toast";
 import { EventsListPage } from "@/components/events/EventsListPage";
@@ -21,9 +20,7 @@ function RouteComponent() {
       <Topbar title="Events" hideOnMobile={true} />
       <EventsTabs />
       <ToastProvider>
-        <RequireAuth>
-          <EventsListPage />
-        </RequireAuth>
+        <EventsListPage />
         <ToastContainer />
       </ToastProvider>
     </>

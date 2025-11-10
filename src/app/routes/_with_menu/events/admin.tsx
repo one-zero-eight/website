@@ -1,7 +1,7 @@
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { ToastContainer, ToastProvider } from "@/components/toast";
-import { EventsAdminPage } from "@/components/events/AdminPage/EventsAdminPage";
+import { EventsAdminPage } from "@/components/events/EventsAdminPage";
 import { EventsTabs } from "@/components/events/EventsTabs";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";

@@ -63,16 +63,16 @@ export default function Participants({ event, className }: ParticipantsProps) {
           ) : (
             <>
               {/* Participants list */}
-              <div className="mt-2 space-y-2">
+              <div className="mt-2 space-y-2 overflow-scroll">
                 {visibleParticipants.map((p) => (
                   <div
                     key={p.innohassle_id}
-                    className="text-base-content/80 flex flex-col gap-1 text-base md:table-row md:gap-0"
+                    className="text-base-content/80 flex flex-col gap-1 text-base md:table-row md:flex-wrap md:gap-0"
                   >
                     {/* Name cell */}
                     {p.name && (
                       <div
-                        className="truncate whitespace-nowrap md:table-cell md:pr-4"
+                        className="whitespace-wrap truncate md:table-cell md:pr-4"
                         title={p.name}
                       >
                         {p.name}

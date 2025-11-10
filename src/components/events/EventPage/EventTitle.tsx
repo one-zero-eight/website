@@ -88,7 +88,7 @@ export default function EventTitle({
           </span>
           {openModal && (
             <span className="btn btn-circle" onClick={() => openModal(true)}>
-              <span className="icon-[mage--pen] text-lg" />
+              <span className="icon-[qlementine-icons--pen-12] text-lg" />
             </span>
           )}
         </div>

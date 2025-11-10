@@ -3,7 +3,8 @@
  */
 
 import { workshopsTypes } from "@/api/workshops";
-import { getDate, isWorkshopPast, parseTime } from "./date-utils.ts";
+import { getDate, isWorkshopPast } from "./date-utils.ts";
+import { SchemaBadge, SchemaWorkshop } from "@/api/workshops/types.ts";
 
 /**
  * Returns formateted language of a workshop e.g. "EN/RU"
@@ -100,43 +101,46 @@ export const getSignedPeopleCount = (
   return 0;
 };
 
-/**
- * Группирует воркшопы по дате
- * @param workshops - Массив воркшопов
- * @returns Объект с воркшопами, сгруппированными по датам
- */
-export const groupWorkshopsByDate = <T extends workshopsTypes.SchemaWorkshop>(
-  workshops: T[],
-): Record<string, T[]> => {
-  const groups: Record<string, T[]> = {};
+export const hasBadges = (event: SchemaWorkshop, badges: SchemaBadge[]) => {
+  if (!badges.length) return true; // no filter means all pass
 
-  workshops.forEach((workshop) => {
-    const dateTag = getDate(workshop.dtstart);
-    if (!groups[dateTag]) {
-      groups[dateTag] = [];
-    }
-    groups[dateTag].push(workshop);
-  });
+  return badges.every((badge) =>
+    event.badges.some(
+      (evBadge) =>
+        evBadge.title === badge.title && evBadge.color === badge.color,
+    ),
+  );
+};
 
-  return groups;
+export const isEventRecommended = (event: SchemaWorkshop) => {
+  return event.badges.some((badge) => badge.title === "recommended");
 };
 
 /**
- * Сортирует воркшопы
- * @param workshops - Массив воркшопов
- * @returns Отсортированный массив воркшопов
+ * Group events by dates and then sorts by recommendation
+ * @param events - events array
+ * @returns Объект с воркшопами, сгруппированными по датам
  */
-export const sortWorkshops = <T extends workshopsTypes.SchemaWorkshop>(
-  workshops: T[],
-): T[] => {
-  return workshops.sort((a, b) => {
-    const [hoursA, minutesA] = parseTime(a.dtstart).split(":").map(Number);
-    const [hoursB, minutesB] = parseTime(b.dtstart).split(":").map(Number);
-    const result = hoursA * 60 + minutesA - (hoursB * 60 + minutesB);
-    if (result !== 0) {
-      return result; // Сначала ранние
-    }
+export const groupEvents = <T extends workshopsTypes.SchemaWorkshop>(
+  events: T[],
+): Record<string, T[]> => {
+  const groups: Record<string, T[]> = {};
 
-    return a.id.localeCompare(b.id); // Сначала по ID
+  // Group
+  events.forEach((event) => {
+    const dateTag = getDate(event.dtstart);
+    if (!groups[dateTag]) {
+      groups[dateTag] = [];
+    }
+    groups[dateTag].push(event);
   });
+
+  // Sort by recommendation
+  Object.entries(groups).forEach(([_, events]) => {
+    events.sort((a, b) =>
+      isEventRecommended(a) && !isEventRecommended(b) ? -1 : 1,
+    );
+  });
+
+  return groups;
 };

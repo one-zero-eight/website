@@ -6,16 +6,20 @@ import { SchemaBadge, WorkshopLanguage } from "@/api/workshops/types.ts";
 import { DateTimePlaceToggles, MAX_CAPACITY } from "./DateTimePlaceToggles.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
+import { GenericBadgeFormScheme } from "./TagsSelector.tsx";
 
-// Max stage, amount of pages -1
+// Max stage = (amount of pages - 1)
 const MAX_STAGE_FORM_INDEX = 1;
 
-export interface EventFormState
-  extends Omit<workshopsTypes.SchemaWorkshop, "id" | "created_at"> {
-  date: string;
-  check_in_date: string;
-  check_in_on_open: boolean;
-}
+export type EventFormState = Omit<
+  workshopsTypes.SchemaWorkshop,
+  "id" | "created_at" | "badges"
+> &
+  GenericBadgeFormScheme & {
+    date: string;
+    check_in_date: string;
+    check_in_on_open: boolean;
+  };
 
 export interface PostFormProps {
   initialEvent?: workshopsTypes.SchemaWorkshop;
