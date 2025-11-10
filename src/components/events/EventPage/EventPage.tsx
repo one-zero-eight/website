@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import EventTitle from "./EventTitle";
 import MobileMenu from "./MobileMenu";
 import Participants from "./Participants";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ModalWindow } from "../EventCreationModal/ModalWindow";
 import { CreationForm } from "../EventCreationModal/CreationForm";
 
@@ -19,11 +19,6 @@ export default function EventPage({ eventSlug }: EventPageProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
   const { data: eventUser } = $workshops.useQuery("get", "/users/me");
-  useEffect(() => {
-    if (eventUser && eventUser.role !== "admin") {
-      navigate({ to: "/events" });
-    }
-  }, [eventUser, navigate]);
 
   const { data: event, isLoading } = $workshops.useQuery(
     "get",

@@ -75,7 +75,7 @@ export function EventForDate({
         </div>
       ) : (
         <div className="col-span-full w-full text-left text-xl">
-          <h2 className="text-gray-500">No workshops yet!</h2>
+          <h2 className="text-gray-500">No events yet!</h2>
         </div>
       )}
     </>

@@ -93,7 +93,7 @@ export function EventsList({
           )
         ) : (
           <div className="col-span-full mt-10 text-center text-xl">
-            <h2 className="text-gray-500">No events yet!</h2>
+            <h2 className="text-gray-500">No events found!</h2>
           </div>
         )}
       </div>

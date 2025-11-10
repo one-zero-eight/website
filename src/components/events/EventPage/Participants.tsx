@@ -63,33 +63,28 @@ export default function Participants({ event, className }: ParticipantsProps) {
           ) : (
             <>
               {/* Participants list */}
-              <div className="mt-2 space-y-2 overflow-scroll">
+              <div className="mt-2 space-y-2">
                 {visibleParticipants.map((p) => (
                   <div
                     key={p.innohassle_id}
-                    className="text-base-content/80 flex flex-col gap-1 text-base md:table-row md:flex-wrap md:gap-0"
+                    className="text-base-content/80 flex flex-col md:grid md:@max-[220px]/content:grid-cols-2 md:@min-[100px]/content:grid-cols-1"
                   >
-                    {/* Name cell */}
-                    {p.name && (
-                      <div
-                        className="whitespace-wrap truncate md:table-cell md:pr-4"
-                        title={p.name}
-                      >
-                        {p.name}
-                      </div>
-                    )}
+                    <div className="min-w-0">
+                      {p.name && (
+                        <div className="truncate" title={p.name}>
+                          {p.name}
+                        </div>
+                      )}
+                    </div>
 
-                    {/* Telegram username cell */}
                     {p.telegram_username && (
-                      <div
-                        className="truncate md:table-cell"
-                        title={`@${p.telegram_username}`}
-                      >
+                      <div className="">
                         <a
                           href={`https://t.me/${p.telegram_username}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary hover:text-primary/80"
+                          title={`@${p.telegram_username}`}
                         >
                           @{p.telegram_username}
                         </a>
