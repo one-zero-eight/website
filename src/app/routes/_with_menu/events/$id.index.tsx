@@ -5,22 +5,23 @@ import { ToastProvider } from "@/components/toast";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_with_menu/events/$slug/")({
+export const Route = createFileRoute("/_with_menu/events/$id/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { slug } = Route.useParams();
+  const { id } = Route.useParams();
   return (
     <>
       <Helmet>
-        <title>Event {slug}</title>
-        <meta name="description" content={`${slug} event in Innopolis!`} />
+        <title>Event details</title>
+        <meta name="description" content="Event in Innopolis!" />
       </Helmet>
+
       <Topbar title="Event details" hideOnMobile={true} />
       <EventsTabs />
       <ToastProvider>
-        <EventPage eventSlug={slug} />
+        <EventPage eventId={id} />
       </ToastProvider>
     </>
   );

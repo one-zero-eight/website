@@ -114,8 +114,8 @@ export function EventItem({ event, edit, className }: EventItemProps) {
                 </button>
               )}
               <Link
-                to="/events/$slug"
-                params={{ slug: event.id }}
+                to="/events/$id"
+                params={{ id: event.id }}
                 className="btn btn-primary btn-soft btn-sm flex items-center gap-1"
               >
                 View Event

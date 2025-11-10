@@ -9,10 +9,10 @@ import { ModalWindow } from "../EventCreationModal/ModalWindow";
 import { CreationForm } from "../EventCreationModal/CreationForm";
 
 export interface EventPageProps {
-  eventSlug: string;
+  eventId: string;
 }
 
-export default function EventPage({ eventSlug }: EventPageProps) {
+export default function EventPage({ eventId }: EventPageProps) {
   const [language, setLanguage] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -21,7 +21,7 @@ export default function EventPage({ eventSlug }: EventPageProps) {
   const { data: event, isLoading } = $workshops.useQuery(
     "get",
     "/workshops/{workshop_id}",
-    { params: { path: { workshop_id: eventSlug } } },
+    { params: { path: { workshop_id: eventId } } },
   );
 
   if (isLoading)

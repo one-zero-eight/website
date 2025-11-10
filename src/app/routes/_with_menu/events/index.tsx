@@ -17,7 +17,7 @@ function RouteComponent() {
         <meta name="description" content="Check in to events here." />
       </Helmet>
 
-      <Topbar title="Events" hideOnMobile={true} />
+      <Topbar title="University Events" hideOnMobile={true} />
       <EventsTabs />
       <ToastProvider>
         <EventsListPage />
