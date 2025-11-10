@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { groupEvents, hasBadges } from "./event-utils";
 import { EventForDate, ItemsList } from "./EventForDate";
 import TagsSelector, {
@@ -152,7 +152,7 @@ export function EventsList({
 
 export interface SearchMenuProps {
   searchForm: SearchFormState;
-  setSearchForm: (v: SearchFormState) => void;
+  setSearchForm: Dispatch<SetStateAction<SearchFormState>>;
   showSearch?: boolean;
 }
 
@@ -161,6 +161,23 @@ export function SearchMenu({
   setSearchForm,
   showSearch = true,
 }: SearchMenuProps) {
+  const handleChangeLanguage = (language: WorkshopLanguage) => {
+    setSearchForm((prev) => {
+      const updatedLanguages = {
+        ...prev.selectedLanguages,
+        [language]: !prev.selectedLanguages[language],
+      };
+
+      updatedLanguages[WorkshopLanguage.both] =
+        updatedLanguages.english && updatedLanguages.russian;
+
+      return {
+        ...prev,
+        selectedLanguages: updatedLanguages,
+      };
+    });
+  };
+
   return (
     <>
       <div className="card-body">
@@ -181,26 +198,20 @@ export function SearchMenu({
             Languages:
           </h3>
           <div className="flex flex-col gap-2">
-            {Object.values(WorkshopLanguage).map((language, index) => (
-              <label className="label" key={index}>
-                <input
-                  type="checkbox"
-                  className="checkbox rounded-lg"
-                  checked={searchForm.selectedLanguages[language]}
-                  onChange={() =>
-                    setSearchForm({
-                      ...searchForm,
-                      selectedLanguages: {
-                        ...searchForm.selectedLanguages,
-                        [language]: !searchForm.selectedLanguages[language],
-                      },
-                    })
-                  }
-                />
-                {language.charAt(0).toUpperCase() +
-                  language.slice(1, language.length)}
-              </label>
-            ))}
+            {[WorkshopLanguage.english, WorkshopLanguage.russian].map(
+              (language, index) => (
+                <label className="label" key={index}>
+                  <input
+                    type="checkbox"
+                    className="checkbox rounded-lg"
+                    checked={searchForm.selectedLanguages[language]}
+                    onChange={() => handleChangeLanguage(language)}
+                  />
+                  {language.charAt(0).toUpperCase() +
+                    language.slice(1, language.length)}
+                </label>
+              ),
+            )}
           </div>
           <div className="divider" />
           <label className="label">
