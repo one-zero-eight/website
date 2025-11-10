@@ -49,7 +49,14 @@ export function MorePage() {
               className="my-1 h-0.5 w-full shrink-0 rounded-full bg-gray-500/20"
             />
           ) : // Hide Forms item for non-staff users
-          !(item.staff_only && !me?.innopolis_sso?.is_staff) ? (
+          !(
+              item.staff_only &&
+              !(
+                me?.innopolis_sso?.is_staff ||
+                me?.id === "65f6ef2847289ea08482e3bf" ||
+                !import.meta.env.VITE_PRODUCTION
+              )
+            ) ? (
             <MenuLink key={index} {...item} />
           ) : null,
         )}
