@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { eventBadges } from "./EventBadges.tsx";
 import { SchemaWorkshop, WorkshopLanguage } from "@/api/workshops/types.ts";
 import { createFuse, searchFuse } from "./search-utils.ts";
+import { EventItem } from "./EventItem.tsx";
 
 export type SearchFormState = GenericBadgeFormScheme & {
   search?: string;
@@ -38,40 +39,58 @@ export function EventsList({
 
   const fuse = useMemo(() => events && createFuse(events), [events]);
 
-  const filteredGroupedEvents = useMemo(() => {
-    if (!events) return {};
+  const filteredEvents = useMemo(() => {
+    if (!events) return [];
 
     let foundEvents: SchemaWorkshop[] = events;
     if (searchForm.search && fuse) {
       foundEvents = searchFuse(fuse, searchForm.search);
     }
 
-    return groupEvents(
-      foundEvents.filter(
-        (event) =>
-          searchForm.selectedLanguages[event.language] &&
-          hasBadges(event, searchForm.badges),
-      ),
+    return foundEvents.filter(
+      (event) =>
+        searchForm.selectedLanguages[event.language] &&
+        hasBadges(event, searchForm.badges),
     );
   }, [events, fuse, searchForm]);
+
+  const groupedEvents = useMemo(() => {
+    if (!filteredEvents) return {};
+    return groupEvents(filteredEvents);
+  }, [filteredEvents]);
 
   return (
     <div className="grid grid-cols-1 gap-4 px-4 xl:grid-cols-3 2xl:grid-cols-4">
       <div className="order-2 col-span-full w-full xl:order-0 xl:col-span-2 2xl:col-span-3">
-        {events &&
-        filteredGroupedEvents &&
-        Object.keys(filteredGroupedEvents).length > 0 ? (
-          Object.keys(filteredGroupedEvents)
-            .sort((a: string, b: string) => b.localeCompare(a))
-            .map((tagName, index) => (
-              <EventForDate
-                key={index}
-                isoDate={tagName}
-                events={filteredGroupedEvents[tagName]}
-                eventForDateType={eventForDateType}
-                {...props}
-              />
-            ))
+        {events && groupedEvents ? (
+          !searchForm.search && Object.keys(groupedEvents).length > 0 ? (
+            Object.keys(groupedEvents)
+              .sort((a: string, b: string) => b.localeCompare(a))
+              .map((tagName, index) => (
+                <EventForDate
+                  key={index}
+                  isoDate={tagName}
+                  events={groupedEvents[tagName]}
+                  eventForDateType={eventForDateType}
+                  {...props}
+                />
+              ))
+          ) : (
+            <div className="my-4 grid w-full grid-cols-1 gap-5 @lg/content:grid-cols-1 @5xl/content:grid-cols-2 @7xl/content:grid-cols-3">
+              {filteredEvents.map((event: SchemaWorkshop) => (
+                <EventItem
+                  key={event.id}
+                  event={event}
+                  edit={
+                    eventForDateType === EventForDateType.ADMIN
+                      ? () =>
+                          props.onEditEvent ? props.onEditEvent(event) : null
+                      : null
+                  }
+                />
+              ))}
+            </div>
+          )
         ) : (
           <div className="col-span-full mt-10 text-center text-xl">
             <h2 className="text-gray-500">No events yet!</h2>
