@@ -44,7 +44,7 @@ export default function EventPage({ eventId }: EventPageProps) {
 
   return (
     <>
-      <div className="mb-[90px] px-4 md:mb-0 md:px-8 md:py-4 lg:px-48 lg:py-8">
+      <div className="mx-auto mb-[90px] w-full max-w-[1200px] px-4 md:mb-4">
         <EventTitle
           event={event}
           openModal={eventUser?.role === "admin" ? setModalOpen : null}

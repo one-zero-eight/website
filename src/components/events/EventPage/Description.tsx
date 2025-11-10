@@ -151,7 +151,7 @@ export function Description({
           <span className="icon-[fluent--text-description-16-filled]" />
           Description
         </span>
-        <div className="flex max-h-[60vh] overflow-y-auto">
+        <div className="flex">
           <div className="prose dark:prose-invert text-justify">
             <MarkdownWithCustomLinks>
               {getEventDescription() || "## No Description"}
