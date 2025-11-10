@@ -17,7 +17,7 @@ type TimelineRef = {
 
 const routeApi = getRouteApi("/_with_menu/room-booking/");
 
-export function RoomBookingPage() {
+export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
   const search = routeApi.useSearch();
   const [modalOpen, setModalOpen] = useState(false);
   const [newBookingSlot, setNewBookingSlot] = useState<Slot>();
@@ -44,9 +44,11 @@ export function RoomBookingPage() {
   const [startDate] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
   const [endDate] = useState(new Date(startDate.getTime() + 7 * T.Day));
 
+  const includeRedObject = showRed ? { include_red: true } : {};
   const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
     "get",
     "/rooms/",
+    { params: { query: { ...includeRedObject } } },
   );
   const { data: bookings, isPending: isBookingsPending } =
     $roomBooking.useQuery(
@@ -54,7 +56,11 @@ export function RoomBookingPage() {
       "/bookings/",
       {
         params: {
-          query: { start: startDate.toISOString(), end: endDate.toISOString() },
+          query: {
+            start: startDate.toISOString(),
+            end: endDate.toISOString(),
+            ...includeRedObject,
+          },
         },
       },
       {
