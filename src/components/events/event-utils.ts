@@ -43,14 +43,14 @@ export const eventName = (workshop: workshopsTypes.SchemaWorkshop): string => {
  * @returns true если воркшоп активен и доступен для регистрации
  */
 export const isWorkshopActive = (
-  workshop: workshopsTypes.SchemaWorkshop,
+  event: workshopsTypes.SchemaWorkshop,
 ): boolean => {
   return (
-    workshop.is_active &&
-    workshop.is_registrable &&
-    !isWorkshopPast(workshop.dtstart) &&
-    new Date(workshop.check_in_opens).getTime() < Date.now() &&
-    !workshop.is_draft
+    event.is_active &&
+    event.is_registrable &&
+    !isWorkshopPast(event.dtstart) &&
+    new Date(event.check_in_opens).getTime() < Date.now() &&
+    !event.is_draft
   );
 };
 
@@ -137,9 +137,11 @@ export const groupEvents = <T extends workshopsTypes.SchemaWorkshop>(
 
   // Sort by recommendation
   Object.entries(groups).forEach(([_, events]) => {
-    events.sort((a, b) =>
-      isEventRecommended(a) && !isEventRecommended(b) ? -1 : 1,
-    );
+    events
+      .sort((a, b) => a.dtstart.localeCompare(b.dtstart))
+      .sort((a, b) =>
+        isEventRecommended(a) && !isEventRecommended(b) ? -1 : 1,
+      );
   });
 
   return groups;

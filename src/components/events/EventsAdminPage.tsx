@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import AddEventButton from "./AddEventButton.tsx";
 import { CreationForm } from "./EventCreationModal/CreationForm.tsx";
 import { ModalWindow } from "./EventCreationModal/ModalWindow.tsx";
-import { EventsList } from "./EventsList.tsx";
-import { EventForDateType } from "./EventForDate.tsx";
+import { EventListType, EventsList } from "./EventsList.tsx";
 
 /**
  * Главная страница модуля воркшопов
@@ -51,7 +50,7 @@ export function EventsAdminPage() {
 
       <EventsList
         events={events}
-        eventForDateType={EventForDateType.ADMIN}
+        eventListType={EventListType.ADMIN}
         onAddEvent={(date) => {
           setModalDate(date);
           setModalOpen(true);

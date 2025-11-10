@@ -1,6 +1,6 @@
 import { $workshops } from "@/api/workshops";
 import { Description } from "./Description";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import EventTitle from "./EventTitle";
 import MobileMenu from "./MobileMenu";
 import Participants from "./Participants";
@@ -13,8 +13,6 @@ export interface EventPageProps {
 }
 
 export default function EventPage({ eventSlug }: EventPageProps) {
-  const navigate = useNavigate();
-
   const [language, setLanguage] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -25,10 +23,6 @@ export default function EventPage({ eventSlug }: EventPageProps) {
     "/workshops/{workshop_id}",
     { params: { path: { workshop_id: eventSlug } } },
   );
-
-  const handleNavigateBack = () => {
-    navigate({ to: "/events" });
-  };
 
   if (isLoading)
     return (
@@ -41,10 +35,10 @@ export default function EventPage({ eventSlug }: EventPageProps) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3">
         <span className="text-xl font-semibold">404 - Event not found</span>
-        <button className="btn btn-outline btn-sm" onClick={handleNavigateBack}>
+        <Link className="btn btn-outline btn-sm" to="/events">
           <span className="icon-[solar--arrow-left-linear] text-xl" />
           Go back
-        </button>
+        </Link>
       </div>
     );
 

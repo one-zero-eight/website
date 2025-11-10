@@ -1,83 +1,107 @@
-import { useMemo, useState } from "react";
 import AddEventButton from "./AddEventButton";
 import { EventItem } from "./EventItem";
 import { SchemaWorkshop } from "@/api/workshops/types";
-
-export enum EventForDateType {
-  USER,
-  ADMIN,
-}
+import { EventListType } from "./EventsList";
+import clsx from "clsx";
+import { useMemo } from "react";
 
 export interface EventForDateProps {
   isoDate: string;
   events: SchemaWorkshop[];
-  eventForDateType?: EventForDateType;
+  eventListType?: EventListType;
   onAddEvent?: (date: string) => void;
-  onEditEvent?: (workshop: SchemaWorkshop) => void;
+  onEditEvent?: (event: SchemaWorkshop) => void;
 }
 
 export function EventForDate({
   isoDate,
   events,
-  eventForDateType = EventForDateType.USER,
+  eventListType = EventListType.USER,
   onAddEvent,
   onEditEvent,
 }: EventForDateProps) {
-  const date = useMemo(() => new Date(isoDate), [isoDate]);
+  const date = new Date(isoDate);
 
-  const startOfDay = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
+  const filteredEvents = useMemo(
+    () =>
+      (eventListType === EventListType.USER
+        ? events.filter((event) => !event.is_draft)
+        : events
+      ).sort((a, b) => Number(b.is_active) - Number(a.is_active)),
+    [events, eventListType],
+  );
 
-  const isPreviousDate = date < startOfDay;
+  if (filteredEvents.length === 0) return null;
 
-  const [shouldShow, setShouldShow] = useState<boolean>(!isPreviousDate);
+  const formattedDate = date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "long",
+    day: "numeric",
+  });
+
+  const showAddButton = eventListType === EventListType.ADMIN && onAddEvent;
 
   return (
-    <>
-      <div className="flex w-full flex-nowrap justify-between select-none">
-        <div
-          className="flex w-full cursor-pointer flex-col items-center gap-2"
-          onClick={() => setShouldShow(!shouldShow)}
-        >
-          <div className="divider divider-start text-2xl font-medium sm:text-3xl">
-            {eventForDateType === EventForDateType.ADMIN && (
-              <AddEventButton
-                onClick={() => (onAddEvent ? onAddEvent(isoDate) : null)}
-                className="btn-sm z-20"
-              >
-                Add
-              </AddEventButton>
-            )}
-            {date.toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "long",
-              day: "numeric",
-            })}
-          </div>
-        </div>
+    <div className="flex flex-col gap-2">
+      <div className="divider divider-start text-2xl font-medium sm:text-3xl">
+        {showAddButton && (
+          <AddEventButton
+            onClick={() => onAddEvent?.(isoDate)}
+            className="btn-sm z-20"
+          >
+            Add
+          </AddEventButton>
+        )}
+        {formattedDate}
       </div>
-      {events.length > 0 ? (
-        <div className="my-4 grid w-full grid-cols-1 gap-5 @lg/content:grid-cols-1 @5xl/content:grid-cols-2 @7xl/content:grid-cols-3">
-          {events.map((event: SchemaWorkshop) => (
-            <EventItem
-              key={event.id}
-              event={event}
-              edit={
-                eventForDateType === EventForDateType.ADMIN
-                  ? () => (onEditEvent ? onEditEvent(event) : null)
-                  : null
-              }
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="col-span-full w-full text-left text-xl">
-          <h2 className="text-gray-500">No events yet!</h2>
-        </div>
+
+      <ItemsList
+        events={filteredEvents}
+        eventListType={eventListType}
+        onEditEvent={onEditEvent}
+      />
+    </div>
+  );
+}
+
+export interface ItemsListProps {
+  events: SchemaWorkshop[];
+  eventListType?: EventListType;
+  onEditEvent?: (event: SchemaWorkshop) => void;
+  className?: string;
+}
+
+export function ItemsList({
+  events,
+  eventListType,
+  onEditEvent,
+  className,
+}: ItemsListProps) {
+  if (events.length === 0)
+    return (
+      <div className="col-span-full w-full pt-10 text-center text-xl">
+        <h2 className="text-gray-200">No events found!</h2>
+      </div>
+    );
+
+  return (
+    <div
+      className={clsx(
+        "my-4 grid w-full grid-cols-1 gap-5 @lg/content:grid-cols-1 @5xl/content:grid-cols-2 @7xl/content:grid-cols-3",
+        className,
       )}
-    </>
+    >
+      {events.map((event) => (
+        <EventItem
+          key={event.id}
+          event={event}
+          edit={
+            eventListType === EventListType.ADMIN && onEditEvent
+              ? () => onEditEvent(event)
+              : undefined
+          }
+        />
+      ))}
+    </div>
   );
 }

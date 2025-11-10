@@ -1,5 +1,5 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { formatDate, formatTime, parseTime } from "./date-utils.ts";
 import {
@@ -21,14 +21,8 @@ export interface EventItemProps {
 export function EventItem({ event, edit, className }: EventItemProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
 
-  const navigate = useNavigate();
-
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
   const signedPeople = getSignedPeopleCount(event);
-
-  const handleContentClick = () => {
-    navigate({ to: "/events/$slug", params: { slug: event.id } });
-  };
 
   return (
     <div className="indicator w-full">
@@ -53,9 +47,9 @@ export function EventItem({ event, edit, className }: EventItemProps) {
           <LanguageBadge event={event} className="inline-flex md:hidden" />
           {!isWorkshopActive(event) && (
             <div
-              className={`badge badge-soft rounded-lg [--badge-color:var(--color-rose-500)]`}
+              className={`badge badge-soft rounded-lg ${!event.is_draft ? "[--badge-color:var(--color-rose-500)]" : "[--badge-color:var(--color-slate-400)]"}`}
             >
-              {getInactiveStatusText(event)}
+              {(event.is_draft && "DRAFT") || getInactiveStatusText(event)}
             </div>
           )}
         </div>
@@ -110,13 +104,14 @@ export function EventItem({ event, edit, className }: EventItemProps) {
                   <span className="icon-[qlementine-icons--pen-12]" />
                 </button>
               )}
-              <button
+              <Link
+                to="/events/$slug"
+                params={{ slug: event.id }}
                 className="btn btn-primary btn-soft btn-sm flex items-center gap-1"
-                onClick={handleContentClick}
               >
                 View Event
                 <span className="icon-[lucide--move-right] text-xl" />
-              </button>
+              </Link>
             </div>
           </div>
         </div>

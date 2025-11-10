@@ -1,30 +1,36 @@
-import { groupEvents, hasBadges } from "./event-utils.ts";
-import { EventForDate, EventForDateType } from "./EventForDate.tsx";
+import { useMemo, useState } from "react";
+import { groupEvents, hasBadges } from "./event-utils";
+import { EventForDate, ItemsList } from "./EventForDate";
 import TagsSelector, {
   GenericBadgeFormScheme,
-} from "./EventCreationModal/TagsSelector.tsx";
-import { useMemo, useState } from "react";
-import { eventBadges } from "./EventBadges.tsx";
-import { SchemaWorkshop, WorkshopLanguage } from "@/api/workshops/types.ts";
-import { createFuse, searchFuse } from "./search-utils.ts";
-import { EventItem } from "./EventItem.tsx";
+} from "./EventCreationModal/TagsSelector";
+import { eventBadges } from "./EventBadges";
+import { SchemaWorkshop, WorkshopLanguage } from "@/api/workshops/types";
+import { createFuse, searchFuse } from "./search-utils";
+
+export enum EventListType {
+  USER,
+  ADMIN,
+}
 
 export type SearchFormState = GenericBadgeFormScheme & {
   search?: string;
   selectedLanguages: Record<WorkshopLanguage, boolean>;
+  showPreviousEvents: boolean;
 };
 
 export interface EventsListProps {
-  events: SchemaWorkshop[] | null | undefined;
-  eventForDateType?: EventForDateType;
+  events?: SchemaWorkshop[];
+  eventListType?: EventListType;
   onAddEvent?: (date: string) => void;
   onEditEvent?: (workshop: SchemaWorkshop) => void;
 }
 
 export function EventsList({
-  events,
-  eventForDateType = EventForDateType.USER,
-  ...props
+  events = [],
+  eventListType = EventListType.USER,
+  onAddEvent,
+  onEditEvent,
 }: EventsListProps) {
   const [searchForm, setSearchForm] = useState<SearchFormState>({
     badges: [],
@@ -33,86 +39,93 @@ export function EventsList({
       russian: true,
       both: true,
     },
+    showPreviousEvents: false,
   });
-
   const [showSearch, setShowSearch] = useState(false);
 
-  const fuse = useMemo(() => events && createFuse(events), [events]);
+  const fuse = useMemo(
+    () => (events.length ? createFuse(events) : null),
+    [events],
+  );
 
   const filteredEvents = useMemo(() => {
-    if (!events) return [];
+    if (!events.length) return [];
 
-    let foundEvents: SchemaWorkshop[] = events;
+    let result = events;
+
     if (searchForm.search && fuse) {
-      foundEvents = searchFuse(fuse, searchForm.search);
+      result = searchFuse(fuse, searchForm.search);
     }
 
-    return foundEvents.filter(
+    if (!searchForm.showPreviousEvents) {
+      result = result.filter((event) => new Date(event.dtstart) >= new Date());
+    }
+
+    return result.filter(
       (event) =>
         searchForm.selectedLanguages[event.language] &&
         hasBadges(event, searchForm.badges),
     );
   }, [events, fuse, searchForm]);
 
-  const groupedEvents = useMemo(() => {
-    if (!filteredEvents) return {};
-    return groupEvents(filteredEvents);
-  }, [filteredEvents]);
+  const groupedEvents = useMemo(
+    () => groupEvents(filteredEvents),
+    [filteredEvents],
+  );
+
+  const hasEvents = events.length > 0;
+  const isGroupedView =
+    !searchForm.search && Object.keys(groupedEvents).length > 0;
 
   return (
     <div className="grid grid-cols-1 gap-4 px-4 xl:grid-cols-3 2xl:grid-cols-4">
+      {/* Event List Section */}
       <div className="order-2 col-span-full w-full xl:order-0 xl:col-span-2 2xl:col-span-3">
-        {events && groupedEvents ? (
-          !searchForm.search && Object.keys(groupedEvents).length > 0 ? (
+        {hasEvents ? (
+          isGroupedView ? (
             Object.keys(groupedEvents)
-              .sort((a: string, b: string) => b.localeCompare(a))
-              .map((tagName, index) => (
+              .sort((a, b) => b.localeCompare(a))
+              .map((isoDate) => (
                 <EventForDate
-                  key={index}
-                  isoDate={tagName}
-                  events={groupedEvents[tagName]}
-                  eventForDateType={eventForDateType}
-                  {...props}
+                  key={isoDate}
+                  isoDate={isoDate}
+                  events={groupedEvents[isoDate]}
+                  eventListType={eventListType}
+                  onAddEvent={onAddEvent}
+                  onEditEvent={onEditEvent}
                 />
               ))
           ) : (
-            <div className="my-4 grid w-full grid-cols-1 gap-5 @lg/content:grid-cols-1 @5xl/content:grid-cols-2 @7xl/content:grid-cols-3">
-              {filteredEvents.map((event: SchemaWorkshop) => (
-                <EventItem
-                  key={event.id}
-                  event={event}
-                  edit={
-                    eventForDateType === EventForDateType.ADMIN
-                      ? () =>
-                          props.onEditEvent ? props.onEditEvent(event) : null
-                      : null
-                  }
-                />
-              ))}
-            </div>
+            <ItemsList
+              events={filteredEvents}
+              onEditEvent={onEditEvent}
+              eventListType={eventListType}
+            />
           )
         ) : (
-          <div className="col-span-full mt-10 text-center text-xl">
+          <div className="col-span-full py-10 text-center text-xl">
             <h2 className="text-gray-500">No events found!</h2>
           </div>
         )}
       </div>
+
+      {/* Sidebar Filters */}
       <div className="mt-4 xl:col-span-1 xl:p-4">
+        {/* Mobile Filter Toggle */}
         <div className="flex flex-col gap-3 xl:hidden">
           <div className="bg-base-300 flex items-center justify-between rounded-xl p-2">
             <h2 className="text-md ml-2 font-semibold">
-              Events ({events?.length})
+              Events ({events.length})
             </h2>
-            <div className="flex items-center gap-2">
-              <button
-                className="btn btn-sm"
-                onClick={() => setShowSearch(!showSearch)}
-              >
-                <span className="icon-[material-symbols--filter-list]" />
-                Filters
-              </button>
-            </div>
+            <button
+              className="btn btn-sm flex items-center gap-2"
+              onClick={() => setShowSearch((prev) => !prev)}
+            >
+              <span className="icon-[material-symbols--filter-list]" />
+              Filters
+            </button>
           </div>
+
           {showSearch && (
             <div className="bg-base-300 rounded-xl">
               <SearchMenu
@@ -122,6 +135,8 @@ export function EventsList({
             </div>
           )}
         </div>
+
+        {/* Desktop Sidebar */}
         <div className="card bg-base-200 sticky top-8 mr-1 hidden xl:flex">
           <SearchMenu searchForm={searchForm} setSearchForm={setSearchForm} />
         </div>
@@ -155,6 +170,7 @@ export function SearchMenu({
           setForm={(v) => setSearchForm(v)}
           maxBadgesAmount={Object.keys(eventBadges).length}
         />
+        <div className="divider" />
         <div className="flex flex-col gap-2">
           <h3 className="text-base-content text-xs font-semibold">
             Languages:
@@ -181,6 +197,21 @@ export function SearchMenu({
               </label>
             ))}
           </div>
+          <div className="divider" />
+          <label className="label">
+            <input
+              type="checkbox"
+              className="toggle"
+              checked={searchForm.showPreviousEvents}
+              onChange={() =>
+                setSearchForm({
+                  ...searchForm,
+                  showPreviousEvents: !searchForm.showPreviousEvents,
+                })
+              }
+            />
+            Show previous events
+          </label>
         </div>
       </div>
     </>
