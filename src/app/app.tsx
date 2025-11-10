@@ -5,6 +5,7 @@ import { queryClient } from "@/app/query-client.ts";
 import { GoogleAnalytics } from "@/app/tracking/GoogleAnalytics.tsx";
 import { UserInfoTracker } from "@/app/tracking/UserInfoTracker.tsx";
 import { YandexMetrika } from "@/app/tracking/YandexMetrika.tsx";
+import { ToastContainer, ToastProvider } from "@/components/toast";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Register, RouterProvider } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -15,7 +16,10 @@ export function App({ router }: { router: Register["router"] }) {
   return (
     <QueryClientProvider client={queryClient}>
       <PwaPromptProvider>
-        <AppRouter router={router} />
+        <ToastProvider>
+          <AppRouter router={router} />
+          <ToastContainer />
+        </ToastProvider>
       </PwaPromptProvider>
 
       <YandexMetrika />

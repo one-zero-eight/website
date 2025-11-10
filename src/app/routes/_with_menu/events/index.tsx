@@ -1,5 +1,4 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import { ToastContainer, ToastProvider } from "@/components/toast";
 import { EventsListPage } from "@/components/events/EventsListPage";
 import { EventsTabs } from "@/components/events/EventsTabs";
 import { createFileRoute } from "@tanstack/react-router";
@@ -19,10 +18,7 @@ function RouteComponent() {
 
       <Topbar title="University Events" hideOnMobile={true} />
       <EventsTabs />
-      <ToastProvider>
-        <EventsListPage />
-        <ToastContainer />
-      </ToastProvider>
+      <EventsListPage />
     </>
   );
 }

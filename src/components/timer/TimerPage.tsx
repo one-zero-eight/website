@@ -1,4 +1,5 @@
 import { useWakeLock } from "@/components/timer/utils.ts";
+import { useToast } from "@/components/toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CONTROL_BUTTON_CLASS,
@@ -7,11 +8,6 @@ import {
   PRESET_TIME_OPTIONS,
   ADD_TIME_OPTIONS,
 } from "./constants";
-
-interface Toast {
-  id: number;
-  message: string;
-}
 
 const TimerPage = () => {
   const [title, setTitle] = useState<string>("");
@@ -22,14 +18,12 @@ const TimerPage = () => {
   const [showTimeUpMessage, setShowTimeUpMessage] = useState<boolean>(false);
   const [secondsLeft, setSecondsLeft] = useState<number>(0);
   const [initialSeconds, setInitialSeconds] = useState<number>(0);
-  const [toasts, setToasts] = useState<Toast[]>([]);
   const [hours, setHours] = useState<string>("00");
   const [minutes, setMinutes] = useState<string>("00");
   const [seconds, setSeconds] = useState<string>("00");
   const [mode, setMode] = useState<"default" | "fullscreen">("default");
   const [targetEndTime, setTargetEndTime] = useState<number | null>(null);
   const timerRef = useRef<number>(0);
-  const toastIdCounter = useRef(0);
   const hoursRef = useRef<HTMLInputElement>(null);
   const minutesRef = useRef<HTMLInputElement>(null);
   const secondsRef = useRef<HTMLInputElement>(null);
@@ -37,18 +31,7 @@ const TimerPage = () => {
   const wakeLock = useWakeLock();
   const hasAdjustedTimerRef = useRef<boolean>(false);
   const titleTextareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const showToast = (message: string) => {
-    const id = toastIdCounter.current++;
-    setToasts((prev) => [...prev, { id, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, 3000);
-  };
-
-  const removeToast = (id: number) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  };
+  const { showInfo, showSuccess, showError, showWarning } = useToast();
 
   const handleTimerComplete = useCallback(async () => {
     setIsRunning(false);
@@ -80,7 +63,7 @@ const TimerPage = () => {
       }, 10000);
     }
 
-    showToast("Time is up!");
+    showSuccess("Time is up!");
   }, [wakeLock]);
 
   const formatTime = useCallback((totalSeconds: number) => {
@@ -344,7 +327,7 @@ const TimerPage = () => {
       parseInt(seconds, 10);
 
     if (totalSeconds === 0) {
-      showToast("Error: set the right time");
+      showError("Cannot set the timer to 0 seconds");
       return;
     }
 
@@ -360,7 +343,7 @@ const TimerPage = () => {
 
     await wakeLock.request();
 
-    showToast("The timer started");
+    showSuccess("The timer started");
   };
 
   const handlePause = () => {
@@ -371,13 +354,13 @@ const TimerPage = () => {
       setTargetEndTime(newEndTime);
       setIsPaused(false);
 
-      showToast("The timer resumed");
+      showInfo("The timer resumed");
     } else {
       // Pausing the timer
       setTargetEndTime(null);
       setIsPaused(true);
       saveState(secondsLeft);
-      showToast("The timer stopped");
+      showInfo("The timer paused");
     }
   };
 
@@ -401,7 +384,7 @@ const TimerPage = () => {
 
     wakeLock.release();
 
-    showToast("The timer stopped");
+    showInfo("The timer stopped");
   };
 
   const handleKeyDown = (
@@ -624,7 +607,7 @@ const TimerPage = () => {
       const actualSecondsAdded = newSecondsLeft - secondsLeft;
 
       if (actualSecondsAdded === 0) {
-        showToast("Timer is already at maximum (99:59:59)");
+        showWarning("Timer is already at maximum (99:59:59)");
         return;
       }
 
@@ -644,9 +627,9 @@ const TimerPage = () => {
       localStorage.setItem("timerState", JSON.stringify(stateToSave));
 
       if (newSecondsLeft >= MAX_SECONDS) {
-        showToast("Timer set to maximum (99:59:59)");
+        showWarning("Timer set to maximum (99:59:59)");
       } else {
-        showToast(
+        showSuccess(
           `Added ${Math.round(actualSecondsAdded / 60)} minute${Math.round(actualSecondsAdded / 60) > 1 ? "s" : ""} to timer`,
         );
       }
@@ -665,7 +648,7 @@ const TimerPage = () => {
       const actualSecondsAdded = newSecondsLeft - currentRemainingSeconds;
 
       if (actualSecondsAdded === 0) {
-        showToast("Timer is already at maximum (99:59:59)");
+        showWarning("Timer is already at maximum (99:59:59)");
         return;
       }
 
@@ -695,9 +678,9 @@ const TimerPage = () => {
       localStorage.setItem("timerState", JSON.stringify(stateToSave));
 
       if (newSecondsLeft >= MAX_SECONDS) {
-        showToast("Timer set to maximum (99:59:59)");
+        showWarning("Timer set to maximum (99:59:59)");
       } else {
-        showToast(
+        showSuccess(
           `Added ${Math.round(actualSecondsAdded / 60)} minute${Math.round(actualSecondsAdded / 60) > 1 ? "s" : ""} to timer`,
         );
       }
@@ -953,18 +936,6 @@ const TimerPage = () => {
           </div>
         </div>
       )}
-
-      <div className="fixed right-4 bottom-4 left-4 z-50 flex flex-col items-center gap-3 sm:right-6 sm:bottom-6 sm:left-auto sm:items-end">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className="w-full max-w-[min(350px,90vw)] min-w-[min(250px,80vw)] cursor-pointer rounded-3xl border border-purple-500 bg-white p-3 pr-5 text-center text-sm text-gray-900 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.2),0_2px_4px_-1px_rgba(0,0,0,0.1)] transition-[transform_0.2s_ease,opacity_0.2s_ease] hover:opacity-80 sm:w-auto sm:max-w-[min(400px,90vw)] sm:min-w-[min(300px,80vw)] sm:p-4 sm:pr-6 sm:text-left sm:text-base sm:hover:translate-x-[-5px] dark:bg-gray-900 dark:text-white"
-            onClick={() => removeToast(toast.id)}
-          >
-            {toast.message}
-          </div>
-        ))}
-      </div>
 
       {/* Hidden audio element for timer completion sound */}
       <audio ref={audioRef} src="/sound_timer.wav" preload="auto" loop />
