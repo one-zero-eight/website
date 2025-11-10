@@ -1,4 +1,4 @@
-import { useWakeLock } from "@/components/timer/utils.ts";
+import { useFullscreen, useWakeLock } from "@/components/timer/utils.ts";
 import { useToast } from "@/components/toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -21,8 +21,8 @@ const TimerPage = () => {
   const [hours, setHours] = useState<string>("00");
   const [minutes, setMinutes] = useState<string>("00");
   const [seconds, setSeconds] = useState<string>("00");
-  const [mode, setMode] = useState<"default" | "fullscreen">("default");
   const [targetEndTime, setTargetEndTime] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number>(0);
   const hoursRef = useRef<HTMLInputElement>(null);
   const minutesRef = useRef<HTMLInputElement>(null);
@@ -30,8 +30,8 @@ const TimerPage = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const wakeLock = useWakeLock();
   const hasAdjustedTimerRef = useRef<boolean>(false);
-  const titleTextareaRef = useRef<HTMLTextAreaElement>(null);
   const { showInfo, showSuccess, showError, showWarning } = useToast();
+  const isFullscreen = useFullscreen();
 
   const handleTimerComplete = useCallback(async () => {
     setIsRunning(false);
@@ -133,21 +133,6 @@ const TimerPage = () => {
       wakeLock.release();
     };
   }, [wakeLock]);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      if (document.fullscreenElement) {
-        setMode("fullscreen");
-      } else {
-        setMode("default");
-      }
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
 
   const handleVisibilityChange = useCallback(async () => {
     if (!document.hidden && isRunning && !isPaused && targetEndTime) {
@@ -697,25 +682,22 @@ const TimerPage = () => {
   };
 
   const switchFullscreen = () => {
-    const timerContainer = document.getElementById("timer-container");
     if (document.fullscreenElement) {
-      document.exitFullscreen();
+      document.exitFullscreen?.();
     } else {
-      timerContainer?.requestFullscreen();
+      containerRef.current?.requestFullscreen?.();
     }
   };
   return (
     <div
+      ref={containerRef}
       className="bg-base-100 relative flex grow flex-col items-center p-4 md:p-8"
-      id="timer-container"
     >
       <button
         className="bg-inh-primary hover:bg-inh-primary-hover text-base-content rounded-box absolute top-4 right-4 flex h-12 w-12 items-center justify-center text-3xl transition-all"
-        onClick={() => {
-          switchFullscreen();
-        }}
+        onClick={() => switchFullscreen()}
       >
-        {mode === "fullscreen" ? (
+        {isFullscreen ? (
           <span className="icon-[material-symbols--fullscreen-exit]" />
         ) : (
           <span className="icon-[material-symbols--fullscreen]" />
@@ -723,13 +705,10 @@ const TimerPage = () => {
       </button>
       <div className="mb-6 flex w-full flex-col items-center gap-4 p-4 md:mb-12">
         <textarea
-          ref={titleTextareaRef}
           placeholder="Timer title..."
           value={title}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setTitle(e.target.value)
-          }
-          onInput={(e: React.FormEvent<HTMLTextAreaElement>) => {
+          onChange={(e) => setTitle(e.target.value)}
+          onInput={(e) => {
             const target = e.target as HTMLTextAreaElement;
             target.style.height = "auto";
             const newHeight = Math.max(target.scrollHeight, 60);

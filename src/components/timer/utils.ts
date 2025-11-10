@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useEventListener } from "usehooks-ts";
 
 export function useWakeLock() {
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -34,4 +35,19 @@ export function useWakeLock() {
     }),
     [release, request],
   );
+}
+
+export function useFullscreen() {
+  const [isFullScreen, setIsFullScreen] = useState(
+    !!document.fullscreenElement,
+  );
+  const documentRef = useRef<Document>(document);
+
+  useEventListener(
+    "fullscreenchange",
+    () => setIsFullScreen(!!document.fullscreenElement),
+    documentRef,
+  );
+
+  return isFullScreen;
 }
