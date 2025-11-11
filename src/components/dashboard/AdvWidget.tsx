@@ -1,4 +1,5 @@
 export function AdvWidget() {
+  return null;
   return (
     <div
       className="group bg-inh-primary rounded-box flex flex-row gap-4 border border-transparent px-4 py-4"
