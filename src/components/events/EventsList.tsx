@@ -57,15 +57,32 @@ export function EventsList({
       result = searchFuse(fuse, searchForm.search);
     }
 
-    if (!searchForm.showPreviousEvents) {
-      result = result.filter((event) => new Date(event.dtstart) >= new Date());
-    }
-
-    return result.filter(
+    result = result.filter(
       (event) =>
         searchForm.selectedLanguages[event.language] &&
         hasBadges(event, searchForm.badges),
     );
+
+    const now = new Date();
+    const upcomingEvents = result.filter(
+      (event) => new Date(event.dtstart) >= now,
+    );
+    const pastEvents = result.filter((event) => new Date(event.dtstart) < now);
+
+    upcomingEvents.sort(
+      (a, b) => new Date(a.dtstart).getTime() - new Date(b.dtstart).getTime(),
+    ); // ascending (closest first)
+    pastEvents.sort(
+      (a, b) => new Date(b.dtstart).getTime() - new Date(a.dtstart).getTime(),
+    ); // descending (newest past first)
+
+    if (searchForm.showPreviousEvents) {
+      result = [...upcomingEvents, ...pastEvents];
+    } else {
+      result = upcomingEvents;
+    }
+
+    return result;
   }, [events, fuse, searchForm]);
 
   const groupedEvents = useMemo(
@@ -88,9 +105,31 @@ export function EventsList({
       <div className="order-2 col-span-full mt-5 w-full xl:order-0 xl:col-span-2 2xl:col-span-3">
         {hasEvents && userFiltered.length !== 0 ? (
           isGroupedView ? (
-            Object.keys(groupedEvents)
-              .sort((a, b) => b.localeCompare(a))
-              .map((isoDate) => (
+            (() => {
+              const now = new Date();
+
+              // Split keys into upcoming & past groups
+              const upcomingDates = Object.keys(groupedEvents).filter(
+                (date) => new Date(date) >= now,
+              );
+              const pastDates = Object.keys(groupedEvents).filter(
+                (date) => new Date(date) < now,
+              );
+
+              // Sort them properly
+              upcomingDates.sort(
+                (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+              );
+              pastDates.sort(
+                (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+              );
+
+              // Combine according to toggle
+              const orderedDates = searchForm.showPreviousEvents
+                ? [...upcomingDates, ...pastDates]
+                : upcomingDates;
+
+              return orderedDates.map((isoDate) => (
                 <EventForDate
                   key={isoDate}
                   isoDate={isoDate}
@@ -99,7 +138,8 @@ export function EventsList({
                   onAddEvent={onAddEvent}
                   onEditEvent={onEditEvent}
                 />
-              ))
+              ));
+            })()
           ) : (
             <ItemsList
               events={filteredEvents}

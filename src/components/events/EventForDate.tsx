@@ -32,13 +32,6 @@ export function EventForDate({
 
   if (filteredEvents.length === 0) return null;
 
-  // if (filteredEvents.length === 0)
-  //   return (
-  //     <div className="col-span-full py-10 text-center text-xl">
-  //       <h2 className="text-gray-500">No events found!</h2>
-  //     </div>
-  //   );
-
   const formattedDate = date.toLocaleDateString("en-US", {
     weekday: "short",
     month: "long",
