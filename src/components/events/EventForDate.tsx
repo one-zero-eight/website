@@ -46,7 +46,7 @@ export function EventForDate({
         {showAddButton && (
           <AddEventButton
             onClick={() => onAddEvent?.(isoDate)}
-            className="btn-sm z-20"
+            className="btn-sm"
           >
             Add
           </AddEventButton>

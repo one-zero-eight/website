@@ -102,7 +102,7 @@ export function EventsList({
   return (
     <div className="grid grid-cols-1 gap-4 px-4 xl:grid-cols-3 2xl:grid-cols-4">
       {/* Event List Section */}
-      <div className="order-2 col-span-full mt-5 w-full xl:order-0 xl:col-span-2 2xl:col-span-3">
+      <div className="order-2 col-span-full w-full xl:order-0 xl:col-span-2 xl:mt-5 2xl:col-span-3">
         {hasEvents && userFiltered.length !== 0 ? (
           isGroupedView ? (
             (() => {

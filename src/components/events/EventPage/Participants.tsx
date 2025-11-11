@@ -75,8 +75,8 @@ export default function Participants({
             <>
               {/* Participants list */}
               <div className="mt-2 space-y-2">
-                {visibleParticipants.map((p) => (
-                  <div className="flex items-center gap-2">
+                {visibleParticipants.map((p, index) => (
+                  <div className="flex items-center gap-2" key={index}>
                     <span className="icon-[tabler--point-filled]" />
                     <div
                       key={p.innohassle_id}

@@ -122,7 +122,7 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
         type="button"
         disabled={isCheckOutPending}
         onClick={handleCheckOut}
-        className={clsx("btn btn-error", className)}
+        className={clsx("btn dark:btn-soft btn-error", className)}
         title={"Check out"}
       >
         Check out
@@ -143,7 +143,7 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
       type="button"
       disabled={isCheckInPending}
       onClick={handleCheckIn}
-      className={clsx("btn btn-success", className)}
+      className={clsx("btn dark:btn-soft btn-success", className)}
       title={"Check in"}
     >
       Check in

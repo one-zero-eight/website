@@ -35,8 +35,8 @@ export function EventsAdminPage() {
 
   return (
     <>
-      <div className="flex w-full flex-wrap items-center gap-4 px-4 py-2">
-        Create new event:
+      <div className="mt-3 flex w-full flex-wrap items-center gap-4 px-4 py-2">
+        <span className="hidden md:block">Create new event:</span>
         <AddEventButton
           onClick={() => {
             setModalDate(null);
