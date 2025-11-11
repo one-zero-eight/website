@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { guardTypes } from "@/api/guard";
 import { useGuardMutations, FileRole } from "./hooks";
-import { extractSpreadsheetId } from "./utils";
+import { extractSpreadsheetId, loadGmail, saveGmail } from "./utils";
 import { ModeToggle } from "./ModeToggle";
 import { CreateInstructions, CopyInstructions } from "./Instructions";
 import { SetupResult } from "./SetupResult";
@@ -15,6 +15,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
   const [mode, setMode] = useState<"create" | "copy">(DEFAULT_MODE);
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [title, setTitle] = useState("");
+  const [gmail, setGmail] = useState("");
   const [respondentRole, setRespondentRole] = useState<FileRole>(
     FileRole.writer,
   );
@@ -28,6 +29,14 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
   } | null>(null);
 
   const mutations = useGuardMutations();
+
+  // Load gmail from localStorage on mount
+  useEffect(() => {
+    const savedGmail = loadGmail();
+    if (savedGmail) {
+      setGmail(savedGmail);
+    }
+  }, []);
 
   const validateSpreadsheetId = (input: string): string => {
     if (!input.trim()) return "";
@@ -48,11 +57,26 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
   const handleSubmit = async () => {
     setError("");
 
+    if (!gmail.trim()) {
+      setError("Gmail is required");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(gmail.trim())) {
+      setError("Please enter a valid Gmail address");
+      return;
+    }
+
     if (mode === "create") {
       if (!title.trim()) {
         setError("Title is required");
         return;
       }
+
+      // Save gmail to localStorage
+      saveGmail(gmail.trim());
 
       mutations.createFile.mutate(
         {
@@ -60,7 +84,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
             file_type: guardTypes.CreateFileRequestFile_type.spreadsheet,
             title: title.trim(),
             default_role: respondentRole,
-            owner_gmail: "",
+            owner_gmail: gmail.trim(),
           },
         },
         {
@@ -106,12 +130,15 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
         ? guardTypes.CopyFileRequestDefault_role.writer
         : guardTypes.CopyFileRequestDefault_role.reader;
 
+    // Save gmail to localStorage
+    saveGmail(gmail.trim());
+
     mutations.copyFile.mutate(
       {
         body: {
           file_id: extractedId,
           default_role: copyRole,
-          owner_gmail: "",
+          owner_gmail: gmail.trim(),
         },
       },
       {
@@ -205,6 +232,23 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
         )}
 
         <div className="flex flex-col gap-2">
+          <label htmlFor="gmail" className="text-base-content/80 font-medium">
+            Owner Gmail:
+          </label>
+          <input
+            type="email"
+            id="gmail"
+            value={gmail}
+            onChange={(e) => {
+              setGmail(e.target.value);
+              if (error) setError("");
+            }}
+            placeholder="your.email@gmail.com"
+            className="border-base-content/20 bg-inh-primary/5 focus:border-inh-primary focus:bg-inh-primary/10 rounded-field w-full border-2 px-4 py-2 outline-hidden transition-colors"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
           <label className="text-base-content/80 font-medium">
             Respondent Role:
           </label>
@@ -244,6 +288,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
           type="submit"
           disabled={
             isSubmitting ||
+            !gmail.trim() ||
             (mode === "create" ? !title.trim() : !spreadsheetId.trim())
           }
           className="bg-primary rounded-field px-4 py-3 font-medium text-white transition-colors hover:bg-[#6600CC] disabled:cursor-not-allowed disabled:opacity-50"
