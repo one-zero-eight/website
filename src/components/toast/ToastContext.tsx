@@ -1,6 +1,6 @@
 import {
   createContext,
-  ReactNode,
+  PropsWithChildren,
   useCallback,
   useContext,
   useState,
@@ -10,27 +10,23 @@ import { ConfirmOptions, Toast, ToastContextType } from "./types.ts";
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
+const generateId = () => {
+  return `toast-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+};
+
 interface ConfirmState {
   isOpen: boolean;
   options: ConfirmOptions | null;
   resolve: ((value: boolean) => void) | null;
 }
 
-interface ToastProviderProps {
-  children: ReactNode;
-}
-
-export function ToastProvider({ children }: ToastProviderProps) {
+export function ToastProvider({ children }: PropsWithChildren) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [confirmState, setConfirmState] = useState<ConfirmState>({
     isOpen: false,
     options: null,
     resolve: null,
   });
-
-  const generateId = () => {
-    return `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  };
 
   const showToast = useCallback((toast: Omit<Toast, "id">) => {
     const id = generateId();
