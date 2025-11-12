@@ -1,13 +1,23 @@
 import { $workshops } from "@/api/workshops";
 import { SchemaWorkshop } from "@/api/workshops/types";
+import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useState, useMemo } from "react";
+import { EventLink } from "../EventCreationModal/CreationForm";
 
 export interface ParticipantsProps {
   event: SchemaWorkshop;
   hide: boolean;
   className?: string;
 }
+
+// const links = [
+//   { title: "Telegram", url: "" },
+//   { title: "My University", url: "" },
+//   { title: "Yandex form", url: "" },
+// ];
+
+const links: EventLink[] = [];
 
 export default function Participants({
   event,
@@ -44,6 +54,32 @@ export default function Participants({
               <span>Event Host</span>
             </h3>
             <p className="prose dark:prose-invert">{event.host}</p>
+          </div>
+        </div>
+      )}
+
+      {links.length > 0 && (
+        <div className="card card-border">
+          <div className="card-body">
+            <h3 className="card-title flex items-center gap-2 text-xl">
+              {/* <span className="icon-[humbleicons--link]" /> */}
+              <span className="icon-[ic--round-link]" />
+              <span>Links</span>
+            </h3>
+            <div className="flex flex-col gap-2">
+              {links.map((link, index) => (
+                <div className="flex gap-2" key={index}>
+                  <Link
+                    to={link.url}
+                    className="text-primary underline"
+                    target="blank"
+                  >
+                    {link.title}
+                  </Link>
+                  <span className="icon-[mingcute--external-link-line] prose dark:prose-invert" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

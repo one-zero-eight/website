@@ -7,9 +7,16 @@ import { DateTimePlaceToggles, MAX_CAPACITY } from "./DateTimePlaceToggles.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { GenericBadgeFormScheme } from "./TagsSelector.tsx";
+import AdditionalInfo from "./AdditionalInfo.tsx";
 
 // Max stage = (amount of pages - 1)
-const MAX_STAGE_FORM_INDEX = 1;
+const MAX_STAGE_FORM_INDEX = 2;
+
+export type EventLink = {
+  id: number;
+  title: string;
+  url: string;
+};
 
 export type EventFormState = Omit<
   workshopsTypes.SchemaWorkshop,
@@ -19,6 +26,7 @@ export type EventFormState = Omit<
     date: string;
     check_in_date: string;
     check_in_on_open: boolean;
+    links: EventLink[];
   };
 
 export interface PostFormProps {
@@ -33,6 +41,7 @@ export interface EventFormErrors {
   date?: string | null;
   stime?: string | null;
   etime?: string | null;
+  links?: string | null;
 }
 
 // Base (Empty) state for event creation form
@@ -56,6 +65,7 @@ const baseEventFormState: EventFormState = {
   check_in_on_open: true,
   is_draft: false,
   is_active: true,
+  links: [],
 };
 
 /**
@@ -118,6 +128,7 @@ export function CreationForm({
     date: null,
     stime: null,
     etime: null,
+    links: null,
   });
 
   const clearSavedData = () => {
@@ -139,7 +150,6 @@ export function CreationForm({
 
     const dtstart = `${eventForm.date}T${eventForm.dtstart}:00+03:00`;
     const dtend = `${endDate}T${eventForm.dtend}:00+03:00`;
-    console.log(dtend);
 
     // Handle check in openning time
     let check_in_opens = `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
@@ -319,6 +329,35 @@ export function CreationForm({
     return Object.keys(newErrors).length === 0;
   };
 
+  const validateLinks = () => {
+    const newErrors = {} as EventFormErrors;
+
+    eventForm.links.forEach((link) => {
+      if (!link.title.trim()) {
+        newErrors.links = "Title for link shouldn't be empty";
+        showError("Validation Error", "Title for link shouldn't be empty");
+        return;
+      }
+
+      if (!link.url.trim()) {
+        newErrors.links = "URL for link shouldn't be empty";
+        showError("Validation Error", "URL for link shouldn't be empty");
+        return;
+      }
+
+      // const urlValidationRegex =
+      //   /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/;
+      // if (!urlValidationRegex.test(link.url)) {
+      //   newErrors.links = "URL should be valid";
+      //   showError("Validation Error", "URL should be valid");
+      //   return;
+      // }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const validateDateTimePlaceToggles = () => {
     const newErrors = {} as EventFormErrors;
 
@@ -367,6 +406,14 @@ export function CreationForm({
         );
       case 1:
         return (
+          <AdditionalInfo
+            errors={errors}
+            eventForm={eventForm}
+            setEventForm={setEentForm}
+          />
+        );
+      case 2:
+        return (
           <DateTimePlaceToggles
             eventForm={eventForm}
             setEventForm={setEentForm}
@@ -379,13 +426,23 @@ export function CreationForm({
   };
 
   const handleNextButton = () => {
-    if (formStage != MAX_STAGE_FORM_INDEX) {
-      if (validateNameDescription()) nextStage();
-    } else {
-      if (!validateDateTimePlaceToggles()) return;
+    switch (formStage) {
+      case 0:
+        if (validateNameDescription()) nextStage();
+        break;
 
-      if (initialEvent) handleUpdateEvent();
-      else handleCreateEvent();
+      case 1:
+        if (validateLinks()) nextStage();
+        break;
+
+      case 2:
+        if (!validateDateTimePlaceToggles()) return;
+        if (initialEvent) handleUpdateEvent();
+        else handleCreateEvent();
+        break;
+
+      default:
+        break;
     }
   };
 
@@ -427,7 +484,11 @@ export function CreationForm({
             Delete
           </button>
           <button className="btn btn-primary" onClick={handleNextButton}>
-            {formStage == 0 ? "Next" : initialEvent ? "Update" : "Create"}
+            {formStage !== MAX_STAGE_FORM_INDEX
+              ? `Next (${formStage + 1}/${MAX_STAGE_FORM_INDEX + 1})`
+              : initialEvent
+                ? "Update"
+                : "Create"}
           </button>
         </div>
       </div>
