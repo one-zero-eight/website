@@ -172,7 +172,6 @@ export function CreationForm({
       capacity: eventForm.capacity || MAX_CAPACITY,
       badges: eventForm.badges as SchemaBadge[],
       is_draft: eventForm.is_draft,
-      is_active: eventForm.is_active,
     };
   };
 

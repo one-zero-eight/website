@@ -188,21 +188,6 @@ export function DateTimePlaceToggles({
           />
           Save as draft
         </label>
-        <label className="label mr-2 text-black dark:text-white">
-          <input
-            type="checkbox"
-            className="toggle"
-            checked={eventForm.is_active}
-            disabled={eventForm.is_draft}
-            onChange={() =>
-              setEventForm({
-                ...eventForm,
-                is_active: !eventForm.is_active,
-              })
-            }
-          />
-          Is Visible
-        </label>
       </fieldset>
     </div>
   );

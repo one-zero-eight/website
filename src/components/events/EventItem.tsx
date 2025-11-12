@@ -53,13 +53,6 @@ export function EventItem({ event, edit, className }: EventItemProps) {
                 {(event.is_draft && "DRAFT") || getInactiveStatusText(event)}
               </div>
             )}
-            {!event.is_draft && !event.is_active && (
-              <div
-                className={`badge badge-soft "[--badge-color:var(--color-slate-400)]" rounded-lg`}
-              >
-                Invisible
-              </div>
-            )}
           </div>
         </div>
         <div className="card-body flex-col justify-between p-4 md:p-6">
@@ -81,29 +74,35 @@ export function EventItem({ event, edit, className }: EventItemProps) {
               </div>
             ) : null}
           </div>
-          <div className="card-actions flex-col gap-2">
-            <div className="flex gap-2">
-              <div className="flex items-center gap-1">
-                <span className="text-primary icon-[famicons--people] text-xl" />
-                <span className="flex items-center text-neutral-200">
-                  {event.capacity === MAX_CAPACITY
-                    ? signedPeople + "/"
-                    : signedPeople + "/" + event.capacity}
-                  {event.capacity === MAX_CAPACITY && (
-                    <span className="icon-[fa7-solid--infinity]" />
-                  )}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
-                <span className="flex items-end gap-1 text-neutral-200">
-                  <span>{formatDate(event.dtstart)}</span>
-                  <span className="text-neutral-400">at</span>
-                  <span>{formatTime(parseTime(event.dtstart))}</span>
-                </span>
-              </div>
+          <div className="flex gap-2">
+            <div className="flex items-center gap-1">
+              <span className="text-primary icon-[famicons--people] text-xl" />
+              <span className="flex items-center text-neutral-200">
+                {event.capacity === MAX_CAPACITY
+                  ? signedPeople + "/"
+                  : signedPeople + "/" + event.capacity}
+                {event.capacity === MAX_CAPACITY && (
+                  <span className="icon-[fa7-solid--infinity]" />
+                )}
+              </span>
             </div>
-            <div className="flex gap-2 self-end">
+            <div className="flex items-center gap-1">
+              <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
+              <span className="flex items-end gap-1 text-neutral-200">
+                <span>{formatDate(event.dtstart)}</span>
+                <span className="text-neutral-400">at</span>
+                <span>{formatTime(parseTime(event.dtstart))}</span>
+              </span>
+            </div>
+          </div>
+          <div className="flex w-full items-center justify-between gap-2">
+            <div className="flex flex-1 items-center gap-1 overflow-hidden text-neutral-500">
+              <span>Host:</span>
+              <span className="truncate text-neutral-400 dark:text-white">
+                {event.host}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
               {edit && (
                 <button
                   className="btn btn-square btn-sm border"
