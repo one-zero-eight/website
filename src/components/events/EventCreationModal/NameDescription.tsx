@@ -28,8 +28,6 @@ export default function NameDescription({
   const updateLanguage = (e: ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
 
-    if (eventForm.language !== value && value !== "both") setCurrentTab(value);
-
     setEventForm({
       ...eventForm,
       language: value as WorkshopLanguage,
@@ -49,13 +47,7 @@ export default function NameDescription({
       </label>
       {/* Name & Description */}
       <div>
-        <div
-          role="tablist"
-          className={clsx(
-            "tabs tabs-box mb-2 flex-nowrap",
-            eventForm.language !== "both" ? "hidden" : "flex",
-          )}
-        >
+        <div role="tablist" className={clsx("tabs tabs-box mb-2 flex-nowrap")}>
           <span
             role="tab"
             onClick={() => setCurrentTab("english")}

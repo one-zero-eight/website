@@ -128,25 +128,23 @@ export default function EventTitle({
               </span>
             )}
           </div>
-          {event.language === "both" && (
-            <div className={clsx("tabs tabs-box hidden rounded-full md:flex")}>
-              <input
-                type="radio"
-                name="language_tabs"
-                className="tab h-auto rounded-full py-1"
-                aria-label="English"
-                onClick={() => setPageLanguage("english")}
-                defaultChecked
-              />
-              <input
-                type="radio"
-                name="language_tabs"
-                className="tab h-auto rounded-full py-1"
-                onClick={() => setPageLanguage("russian")}
-                aria-label="Russian"
-              />
-            </div>
-          )}
+          <div className={clsx("tabs tabs-box hidden rounded-full md:flex")}>
+            <input
+              type="radio"
+              name="language_tabs"
+              className="tab h-auto rounded-full py-1"
+              aria-label="English"
+              onClick={() => setPageLanguage("english")}
+              defaultChecked
+            />
+            <input
+              type="radio"
+              name="language_tabs"
+              className="tab h-auto rounded-full py-1"
+              onClick={() => setPageLanguage("russian")}
+              aria-label="Russian"
+            />
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <LanguageBadge
