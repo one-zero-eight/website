@@ -7,6 +7,8 @@ import TagsSelector, {
 import { eventBadges } from "./EventBadges";
 import { SchemaWorkshop, WorkshopLanguage } from "@/api/workshops/types";
 import { createFuse, searchFuse } from "./search-utils";
+import { $workshops } from "@/api/workshops";
+import { MAX_CAPACITY } from "./EventCreationModal/DateTimePlaceToggles";
 
 export enum EventListType {
   USER,
@@ -17,6 +19,8 @@ export type SearchFormState = GenericBadgeFormScheme & {
   search?: string;
   selectedLanguages: Record<WorkshopLanguage, boolean>;
   showPreviousEvents: boolean;
+  onlyCheckIns: boolean;
+  participantsNumber: number;
 };
 
 export interface EventsListProps {
@@ -32,6 +36,8 @@ export function EventsList({
   onAddEvent,
   onEditEvent,
 }: EventsListProps) {
+  const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
+
   const [searchForm, setSearchForm] = useState<SearchFormState>({
     badges: [],
     selectedLanguages: {
@@ -40,8 +46,13 @@ export function EventsList({
       both: true,
     },
     showPreviousEvents: false,
+    onlyCheckIns: false,
+    participantsNumber: MAX_CAPACITY,
   });
   const [showSearch, setShowSearch] = useState(false);
+
+  const isCheckedIn = (eventId: string) =>
+    !!myCheckins?.some((w) => w.id === eventId);
 
   const fuse = useMemo(
     () => (events.length ? createFuse(events) : null),
@@ -82,8 +93,16 @@ export function EventsList({
       result = upcomingEvents;
     }
 
+    if (searchForm.onlyCheckIns) {
+      result = result.filter((event) => isCheckedIn(event.id));
+    }
+
+    result = result.filter(
+      (event) => event.capacity <= searchForm.participantsNumber,
+    );
+
     return result;
-  }, [events, fuse, searchForm]);
+  }, [events, fuse, searchForm, isCheckedIn]);
 
   const groupedEvents = useMemo(
     () => groupEvents(filteredEvents),
@@ -258,6 +277,20 @@ export function SearchMenu({
             <input
               type="checkbox"
               className="toggle"
+              checked={searchForm.onlyCheckIns}
+              onChange={() =>
+                setSearchForm({
+                  ...searchForm,
+                  onlyCheckIns: !searchForm.onlyCheckIns,
+                })
+              }
+            />
+            Show my check-ins
+          </label>
+          <label className="label">
+            <input
+              type="checkbox"
+              className="toggle"
               checked={searchForm.showPreviousEvents}
               onChange={() =>
                 setSearchForm({
@@ -268,6 +301,43 @@ export function SearchMenu({
             />
             Show previous events
           </label>
+          <div className="divider" />
+          <div className="flex flex-col gap-2">
+            <span className="text-base-content text-xs font-semibold">
+              Filter by capacity:
+            </span>
+            <div className="flex w-full items-start gap-3">
+              <span className="input input-sm w-15 cursor-default items-center justify-center">
+                {searchForm.participantsNumber === MAX_CAPACITY ? (
+                  <span className="icon-[fa7-solid--infinity]" />
+                ) : (
+                  searchForm.participantsNumber
+                )}
+              </span>
+              <div className="mt-1 w-full max-w-xs">
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={searchForm.participantsNumber}
+                  className="range"
+                  onChange={(e) =>
+                    setSearchForm({
+                      ...searchForm,
+                      participantsNumber:
+                        Number(e.target.value) === 100
+                          ? MAX_CAPACITY
+                          : Number(e.target.value),
+                    })
+                  }
+                />
+                <div className="mt-2 flex justify-between px-2.5 text-xs">
+                  <span>0</span>
+                  <span>100+</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>
