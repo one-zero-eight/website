@@ -9,6 +9,9 @@ import { SchemaWorkshop, WorkshopLanguage } from "@/api/workshops/types";
 import { createFuse, searchFuse } from "./search-utils";
 import { $workshops } from "@/api/workshops";
 import { MAX_CAPACITY } from "./EventCreationModal/DateTimePlaceToggles";
+import { formatDate, formatTime, parseTime } from "./date-utils";
+import { LanguageBadge } from "./LanguageBadge";
+import { Link } from "@tanstack/react-router";
 
 export enum EventListType {
   USER,
@@ -122,55 +125,93 @@ export function EventsList({
     <div className="grid grid-cols-1 gap-4 px-4 xl:grid-cols-3 2xl:grid-cols-4">
       {/* Event List Section */}
       <div className="order-2 col-span-full w-full xl:order-0 xl:col-span-2 xl:mt-5 2xl:col-span-3">
-        {hasEvents && userFiltered.length !== 0 ? (
-          isGroupedView ? (
-            (() => {
-              const now = new Date();
-
-              // Split keys into upcoming & past groups
-              const upcomingDates = Object.keys(groupedEvents).filter(
-                (date) => new Date(date) >= now,
-              );
-              const pastDates = Object.keys(groupedEvents).filter(
-                (date) => new Date(date) < now,
-              );
-
-              // Sort them properly
-              upcomingDates.sort(
-                (a, b) => new Date(a).getTime() - new Date(b).getTime(),
-              );
-              pastDates.sort(
-                (a, b) => new Date(b).getTime() - new Date(a).getTime(),
-              );
-
-              // Combine according to toggle
-              const orderedDates = searchForm.showPreviousEvents
-                ? [...upcomingDates, ...pastDates]
-                : upcomingDates;
-
-              return orderedDates.map((isoDate) => (
-                <EventForDate
-                  key={isoDate}
-                  isoDate={isoDate}
-                  events={groupedEvents[isoDate]}
-                  eventListType={eventListType}
-                  onAddEvent={onAddEvent}
-                  onEditEvent={onEditEvent}
-                />
-              ));
-            })()
-          ) : (
-            <ItemsList
-              events={filteredEvents}
-              onEditEvent={onEditEvent}
-              eventListType={eventListType}
-            />
-          )
-        ) : (
-          <div className="col-span-full py-10 text-center text-xl">
-            <h2 className="text-gray-500">No events found!</h2>
+        {myCheckins && (
+          <div>
+            <h2 className="mb-2 text-xl font-semibold">My Check-ins:</h2>
+            <div className="mb-5 flex flex-nowrap gap-2 overflow-x-scroll">
+              {myCheckins
+                .sort(
+                  (a, b) =>
+                    new Date(a.dtstart).getTime() -
+                    new Date(b.dtstart).getTime(),
+                )
+                .map((event) => (
+                  <div className="card card-border text-nowrap" key={event.id}>
+                    <div className="card-body flex flex-row items-center gap-4 rounded-4xl p-2">
+                      <div className="bg-base-300 flex aspect-square flex-col gap-0.5 rounded-xl p-3 text-center">
+                        <span>{formatDate(event.dtstart)}</span>
+                        <span>{formatTime(parseTime(event.dtstart))}</span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="truncate font-semibold text-nowrap">
+                          {event.english_name}
+                        </span>
+                        <LanguageBadge event={event} />
+                      </div>
+                      <Link
+                        to={`/events/$id`}
+                        params={{ id: event.id }}
+                        className="btn btn-square mr-3"
+                      >
+                        <span className="icon-[lucide--move-right]" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+            </div>
           </div>
         )}
+        <div className="w-full">
+          {hasEvents && userFiltered.length !== 0 ? (
+            isGroupedView ? (
+              (() => {
+                const now = new Date();
+
+                // Split keys into upcoming & past groups
+                const upcomingDates = Object.keys(groupedEvents).filter(
+                  (date) => new Date(date) >= now,
+                );
+                const pastDates = Object.keys(groupedEvents).filter(
+                  (date) => new Date(date) < now,
+                );
+
+                // Sort them properly
+                upcomingDates.sort(
+                  (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+                );
+                pastDates.sort(
+                  (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+                );
+
+                // Combine according to toggle
+                const orderedDates = searchForm.showPreviousEvents
+                  ? [...upcomingDates, ...pastDates]
+                  : upcomingDates;
+
+                return orderedDates.map((isoDate) => (
+                  <EventForDate
+                    key={isoDate}
+                    isoDate={isoDate}
+                    events={groupedEvents[isoDate]}
+                    eventListType={eventListType}
+                    onAddEvent={onAddEvent}
+                    onEditEvent={onEditEvent}
+                  />
+                ));
+              })()
+            ) : (
+              <ItemsList
+                events={filteredEvents}
+                onEditEvent={onEditEvent}
+                eventListType={eventListType}
+              />
+            )
+          ) : (
+            <div className="col-span-full py-10 text-center text-xl">
+              <h2 className="text-gray-500">No events found!</h2>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Sidebar Filters */}
