@@ -133,13 +133,13 @@ export function FileDetails({
       </div>
 
       {file && (
-        <div className="mb-4 flex items-center gap-2">
-          <h4 className="text-base-content/60 text-base">
+        <div className="mb-4 flex flex-col gap-2">
+          <p className="text-base-content/60 text-base">
             Default Role:{" "}
             <span className="text-base-content font-medium">
               {file?.default_role}
             </span>
-          </h4>
+          </p>
           <div>
             <button
               onClick={() =>
@@ -157,18 +157,6 @@ export function FileDetails({
                 ? "Updating..."
                 : `Update all roles to ${file.default_role === FileRole.writer ? "Reader" : "Writer"}`}
             </button>
-            {/* <button
-              onClick={() => handleUpdateDefaultRole(FileRole.reader)}
-              disabled={isUpdatingRole || file.default_role === FileRole.reader}
-              className={`rounded-field border-2 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
-                file.default_role === FileRole.reader
-                  ? "border-base-content/20 bg-base-content/10 text-base-content/60"
-                  : "border-primary bg-primary/10 text-primary hover:bg-primary/20"
-              }`}
-              title="Update all roles to Reader"
-            >
-              {isUpdatingRole ? "Updating..." : "Set all to Reader"}
-            </button> */}
           </div>
         </div>
       )}
