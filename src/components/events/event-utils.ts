@@ -4,7 +4,79 @@
 
 import { workshopsTypes } from "@/api/workshops";
 import { getDate, isWorkshopPast } from "./date-utils.ts";
-import { SchemaBadge, SchemaWorkshop } from "@/api/workshops/types.ts";
+import {
+  SchemaBadge,
+  SchemaWorkshop,
+  WorkshopLanguage,
+} from "@/api/workshops/types.ts";
+import { MAX_CAPACITY } from "./EventEditPage/DateTime.tsx";
+import { GenericBadgeFormScheme } from "./EventEditPage/TagsSelector.tsx";
+
+export const emptyEvent = (
+  title: string,
+): Pick<
+  SchemaWorkshop,
+  | "english_name"
+  | "russian_name"
+  | "language"
+  | "host"
+  | "dtstart"
+  | "dtend"
+  | "is_draft"
+  | "capacity"
+> => {
+  return {
+    english_name: title,
+    russian_name: title,
+    language: WorkshopLanguage.both,
+    host: "None",
+    dtstart: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+    dtend: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    is_draft: true,
+    capacity: MAX_CAPACITY,
+  };
+};
+
+export type EventLink = {
+  id: number;
+  title: string;
+  url: string;
+};
+
+export type EventFormState = Omit<
+  SchemaWorkshop,
+  "id" | "created_at" | "badges"
+> &
+  GenericBadgeFormScheme & {
+    date: string;
+    check_in_date: string;
+    check_in_on_open: boolean;
+    links: EventLink[];
+  };
+
+// Base (Empty) state for event creation form
+export const baseEventFormState: EventFormState = {
+  english_name: "",
+  english_description: "",
+  russian_name: "",
+  russian_description: "",
+  badges: [],
+  language: WorkshopLanguage.both,
+  host: "",
+  capacity: 1000,
+  remain_places: 1000,
+  is_registrable: false,
+  place: "",
+  date: "",
+  dtstart: "",
+  dtend: "",
+  check_in_opens: "",
+  check_in_date: "",
+  check_in_on_open: true,
+  is_draft: false,
+  is_active: true,
+  links: [],
+};
 
 /**
  * Returns formateted language of a workshop e.g. "EN/RU"

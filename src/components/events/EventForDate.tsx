@@ -10,7 +10,6 @@ export interface EventForDateProps {
   events: SchemaWorkshop[];
   eventListType?: EventListType;
   onAddEvent?: (date: string) => void;
-  onEditEvent?: (event: SchemaWorkshop) => void;
 }
 
 export function EventForDate({
@@ -18,7 +17,6 @@ export function EventForDate({
   events,
   eventListType = EventListType.USER,
   onAddEvent,
-  onEditEvent,
 }: EventForDateProps) {
   const date = new Date(isoDate);
 
@@ -54,11 +52,7 @@ export function EventForDate({
         {formattedDate}
       </div>
 
-      <ItemsList
-        events={filteredEvents}
-        eventListType={eventListType}
-        onEditEvent={onEditEvent}
-      />
+      <ItemsList events={filteredEvents} eventListType={eventListType} />
     </div>
   );
 }
@@ -66,14 +60,12 @@ export function EventForDate({
 export interface ItemsListProps {
   events: SchemaWorkshop[];
   eventListType?: EventListType;
-  onEditEvent?: (event: SchemaWorkshop) => void;
   className?: string;
 }
 
 export function ItemsList({
   events,
   eventListType,
-  onEditEvent,
   className,
 }: ItemsListProps) {
   if (events.length === 0)
@@ -94,11 +86,7 @@ export function ItemsList({
         <EventItem
           key={event.id}
           event={event}
-          edit={
-            eventListType === EventListType.ADMIN && onEditEvent
-              ? () => onEditEvent(event)
-              : undefined
-          }
+          isEditable={eventListType === EventListType.ADMIN}
         />
       ))}
     </div>

@@ -8,6 +8,7 @@ export interface NameDescriptionProps {
   eventForm: EventFormState;
   setEventForm: (v: EventFormState) => void;
   errors: EventFormErrors;
+  className?: string;
 }
 
 /**
@@ -20,6 +21,7 @@ export default function NameDescription({
   eventForm,
   setEventForm,
   errors,
+  className,
 }: NameDescriptionProps) {
   const [currentTab, setCurrentTab] = useState<string>(
     eventForm.language !== "both" ? eventForm.language : "english",
@@ -35,7 +37,7 @@ export default function NameDescription({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className={clsx("flex flex-col gap-3", className)}>
       {/* Language Select */}
       <label className="select w-full">
         <span className="label">Language</span>
@@ -108,7 +110,9 @@ export default function NameDescription({
       </div>
       {/* Host */}
       <fieldset className="fieldset">
-        <legend className="fieldset-legend">Host:</legend>
+        <legend className="fieldset-legend">
+          Host: <span className="text-red-500">*</span>
+        </legend>
         <input
           type="text"
           className={clsx("input w-full", errors.host && "input-error")}
@@ -158,7 +162,10 @@ function TabContent({
 }: TabContentProps) {
   return (
     <div className={clsx(className)}>
-      <label className="floating-label">
+      <fieldset>
+        <legend className="fieldset-legend">
+          Title: <span className="text-red-500">*</span>
+        </legend>
         <input
           className={clsx("input w-full", nameError && "input-error")}
           value={nameValue}
@@ -167,8 +174,7 @@ function TabContent({
           maxLength={255}
           placeholder={`${language} Title`}
         />
-        <span>{language} Title</span>
-      </label>
+      </fieldset>
 
       {nameError && (
         <p className="mt-1 text-sm text-red-500 dark:text-red-400">

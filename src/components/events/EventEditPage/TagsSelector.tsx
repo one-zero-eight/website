@@ -61,12 +61,17 @@ export default function TagsSelector<T extends GenericBadgeFormScheme>({
     return badges.some((badge: SchemaBadge) => badge.title === value);
   };
 
+  const showSuggestions = !maxBadgesAmount
+    ? Object.keys(eventBadges).filter((b) => !badges.some((a) => a.title === b))
+        .length !== 0
+    : badges.length !== maxBadgesAmount;
+
   return (
     <fieldset className="fieldset flex flex-col gap-2">
       <legend className="fieldset-legend text-xs">
         Tags ({badges.length}/{maxBadgesAmount || MAX_BADGES_AMOUT}):
       </legend>
-      <div className="input h-auto w-full cursor-default flex-wrap py-3 select-none">
+      <div className="input h-auto w-full cursor-default flex-wrap p-2 select-none">
         {badges.length !== 0 ? (
           Object.entries(eventBadges)
             .filter(([value]) => hasBadgeWithTitle(value))
@@ -84,20 +89,22 @@ export default function TagsSelector<T extends GenericBadgeFormScheme>({
           <span className="text-neutral-600">No Tags</span>
         )}
       </div>
-      <div className="input flex h-auto w-full cursor-default flex-wrap py-3 select-none">
-        {Object.entries(eventBadges)
-          .filter(([value]) => !hasBadgeWithTitle(value))
-          .sort((a, _) => (a[0] === "recommended" ? -1 : 1))
-          .map(([value, badge], index) => (
-            <span
-              key={index}
-              onClick={() => addTag(value)}
-              className="cursor-pointer"
-            >
-              {badge}
-            </span>
-          ))}
-      </div>
+      {showSuggestions && (
+        <div className="input flex h-auto w-full cursor-default flex-wrap p-2 select-none">
+          {Object.entries(eventBadges)
+            .filter(([value]) => !hasBadgeWithTitle(value))
+            .sort((a, _) => (a[0] === "recommended" ? -1 : 1))
+            .map(([value, badge], index) => (
+              <span
+                key={index}
+                onClick={() => addTag(value)}
+                className="cursor-pointer"
+              >
+                {badge}
+              </span>
+            ))}
+        </div>
+      )}
     </fieldset>
   );
 }

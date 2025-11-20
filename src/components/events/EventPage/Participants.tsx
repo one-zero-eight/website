@@ -3,19 +3,13 @@ import { SchemaWorkshop } from "@/api/workshops/types";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useState, useMemo } from "react";
-import { EventLink } from "../EventCreationModal/CreationForm";
+import { EventLink } from "../EventEditPage/CreationForm";
 
 export interface ParticipantsProps {
   event: SchemaWorkshop;
   hide: boolean;
   className?: string;
 }
-
-// const links = [
-//   { title: "Telegram", url: "" },
-//   { title: "My University", url: "" },
-//   { title: "Yandex form", url: "" },
-// ];
 
 const links: EventLink[] = [];
 

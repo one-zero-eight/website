@@ -3,12 +3,12 @@ import { groupEvents, hasBadges } from "./event-utils";
 import { EventForDate, ItemsList } from "./EventForDate";
 import TagsSelector, {
   GenericBadgeFormScheme,
-} from "./EventCreationModal/TagsSelector";
+} from "./EventEditPage/TagsSelector";
 import { eventBadges } from "./EventBadges";
 import { SchemaWorkshop, WorkshopLanguage } from "@/api/workshops/types";
 import { createFuse, searchFuse } from "./search-utils";
 import { $workshops } from "@/api/workshops";
-import { MAX_CAPACITY } from "./EventCreationModal/DateTimePlaceToggles";
+import { MAX_CAPACITY } from "./EventEditPage/DateTime";
 import { formatDate, formatTime, parseTime } from "./date-utils";
 import { LanguageBadge } from "./LanguageBadge";
 import { Link } from "@tanstack/react-router";
@@ -30,14 +30,12 @@ export interface EventsListProps {
   events?: SchemaWorkshop[];
   eventListType?: EventListType;
   onAddEvent?: (date: string) => void;
-  onEditEvent?: (workshop: SchemaWorkshop) => void;
 }
 
 export function EventsList({
   events = [],
   eventListType = EventListType.USER,
   onAddEvent,
-  onEditEvent,
 }: EventsListProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
 
@@ -195,14 +193,12 @@ export function EventsList({
                     events={groupedEvents[isoDate]}
                     eventListType={eventListType}
                     onAddEvent={onAddEvent}
-                    onEditEvent={onEditEvent}
                   />
                 ));
               })()
             ) : (
               <ItemsList
                 events={filteredEvents}
-                onEditEvent={onEditEvent}
                 eventListType={eventListType}
               />
             )

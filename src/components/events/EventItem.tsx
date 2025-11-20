@@ -10,15 +10,15 @@ import {
 } from "./event-utils.ts";
 import { eventBadges } from "./EventBadges.tsx";
 import { LanguageBadge } from "./LanguageBadge.tsx";
-import { MAX_CAPACITY } from "./EventCreationModal/DateTimePlaceToggles.tsx";
+import { MAX_CAPACITY } from "./EventEditPage/DateTime.tsx";
 
 export interface EventItemProps {
   event: workshopsTypes.SchemaWorkshop;
-  edit?: ((workshop: workshopsTypes.SchemaWorkshop) => void) | null;
+  isEditable: boolean;
   className?: string;
 }
 
-export function EventItem({ event, edit, className }: EventItemProps) {
+export function EventItem({ event, isEditable, className }: EventItemProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
 
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
@@ -103,16 +103,14 @@ export function EventItem({ event, edit, className }: EventItemProps) {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              {edit && (
-                <button
+              {isEditable && (
+                <Link
+                  to="/events/$id/edit"
+                  params={{ id: event.id }}
                   className="btn btn-square btn-sm border"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    edit(event);
-                  }}
                 >
                   <span className="icon-[qlementine-icons--pen-12]" />
-                </button>
+                </Link>
               )}
               <Link
                 to="/events/$id"

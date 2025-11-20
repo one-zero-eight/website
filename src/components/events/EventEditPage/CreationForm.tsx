@@ -1,16 +1,14 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
-import { useState } from "react";
-import NameDescription from "./NameDescription.tsx";
+import { ChangeEvent, useState } from "react";
 import { useToast } from "@/components/toast/index.ts";
-import { SchemaBadge, WorkshopLanguage } from "@/api/workshops/types.ts";
-import { DateTimePlaceToggles, MAX_CAPACITY } from "./DateTimePlaceToggles.tsx";
+import { SchemaBadge } from "@/api/workshops/types.ts";
+import { DateTime, MAX_CAPACITY } from "./DateTime.tsx";
 import { useQueryClient } from "@tanstack/react-query";
-import clsx from "clsx";
 import { GenericBadgeFormScheme } from "./TagsSelector.tsx";
 import AdditionalInfo from "./AdditionalInfo.tsx";
-
-// Max stage = (amount of pages - 1)
-const MAX_STAGE_FORM_INDEX = 2;
+import { Link, useNavigate } from "@tanstack/react-router";
+import { baseEventFormState } from "../event-utils.ts";
+import NameDescription from "./NameDescription.tsx";
 
 export type EventLink = {
   id: number;
@@ -44,30 +42,6 @@ export interface EventFormErrors {
   links?: string | null;
 }
 
-// Base (Empty) state for event creation form
-const baseEventFormState: EventFormState = {
-  english_name: "",
-  english_description: "",
-  russian_name: "",
-  russian_description: "",
-  badges: [],
-  language: WorkshopLanguage.both,
-  host: "",
-  capacity: 1000,
-  remain_places: 1000,
-  is_registrable: false,
-  place: "",
-  date: "",
-  dtstart: "",
-  dtend: "",
-  check_in_opens: "",
-  check_in_date: "",
-  check_in_on_open: true,
-  is_draft: false,
-  is_active: true,
-  links: [],
-};
-
 /**
  * Form for creatig a new event or edit existing
  * @param initialDate - undefined or ISO date if we want to add an event to a specific date
@@ -78,10 +52,11 @@ export function CreationForm({
   initialDate,
   onClose,
 }: PostFormProps) {
+  const redirect = useNavigate();
   const queryClient = useQueryClient();
   const storageKey = initialEvent ? null : "workshop-form-draft";
 
-  const [eventForm, setEentForm] = useState<EventFormState>(() => {
+  const [eventForm, setEventForm] = useState<EventFormState>(() => {
     if (initialEvent) {
       const dtstartDate = new Date(initialEvent.dtstart);
       const dtendDate = new Date(initialEvent.dtend);
@@ -117,8 +92,6 @@ export function CreationForm({
 
     return baseEventFormState;
   });
-
-  const [formStage, setFormStage] = useState<number>(0);
 
   const { showSuccess, showError, showConfirm } = useToast();
 
@@ -202,7 +175,7 @@ export function CreationForm({
             `Event "${apiData.english_name || apiData.russian_name}" has been successfully created.`,
           );
           clearSavedData();
-          setEentForm(baseEventFormState);
+          setEventForm(baseEventFormState);
           setErrors({});
           if (onClose) {
             onClose();
@@ -266,6 +239,7 @@ export function CreationForm({
           queryKey: $workshops.queryOptions("get", "/workshops/").queryKey,
         });
         onClose?.();
+        throw redirect({ to: "/events" });
       },
     },
   );
@@ -379,116 +353,209 @@ export function CreationForm({
     return Object.keys(newErrors).length === 0;
   };
 
-  // ================== Form Stages ==================
-
-  const nextStage = () => {
-    if (formStage < MAX_STAGE_FORM_INDEX) {
-      setFormStage(() => formStage + 1);
-    }
-  };
-
-  const previousStage = () => {
-    if (formStage > 0) {
-      setFormStage(() => formStage - 1);
-    }
-  };
-
-  const handleRenderFormStage = () => {
-    switch (formStage) {
-      case 0:
-        return (
-          <NameDescription
-            eventForm={eventForm}
-            setEventForm={setEentForm}
-            errors={errors}
-          />
-        );
-      case 1:
-        return (
-          <AdditionalInfo
-            errors={errors}
-            eventForm={eventForm}
-            setEventForm={setEentForm}
-          />
-        );
-      case 2:
-        return (
-          <DateTimePlaceToggles
-            eventForm={eventForm}
-            setEventForm={setEentForm}
-            errors={errors}
-          />
-        );
-      default:
-        return null;
-    }
+  // ================== Helpers ==================
+  const handleCheckIn = (e: ChangeEvent<HTMLInputElement>) => {
+    const [date, time] = e.target.value.split("T");
+    setEventForm({ ...eventForm, check_in_date: date, check_in_opens: time });
   };
 
   const handleNextButton = () => {
-    switch (formStage) {
-      case 0:
-        if (validateNameDescription()) nextStage();
-        break;
-
-      case 1:
-        if (validateLinks()) nextStage();
-        break;
-
-      case 2:
-        if (!validateDateTimePlaceToggles()) return;
-        if (initialEvent) handleUpdateEvent();
-        else handleCreateEvent();
-        break;
-
-      default:
-        break;
+    if (
+      validateNameDescription() &&
+      validateLinks() &&
+      validateDateTimePlaceToggles()
+    ) {
+      if (initialEvent) handleUpdateEvent();
+      else handleCreateEvent();
     }
   };
 
-  const handlePreviousButton = () => {
-    if (formStage == 0 && onClose) {
-      onClose();
-      return;
-    }
+  const isUnlimited = eventForm.capacity === MAX_CAPACITY;
 
-    previousStage();
+  const handleUnlimitedChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const isUnlimited = e.target.checked;
+    setEventForm({
+      ...eventForm,
+      capacity: isUnlimited ? MAX_CAPACITY : 0,
+      remain_places: isUnlimited ? MAX_CAPACITY : -1,
+    });
   };
 
   return (
-    <div>
-      <div className="flex flex-col gap-2">
-        {handleRenderFormStage()}
-
-        {/* Buttons */}
-        <div
-          className={clsx(
-            "grid gap-2",
-            initialEvent ? "grid-cols-3" : "grid-cols-2",
-          )}
-        >
-          <button
-            type="button"
-            className="btn btn-outline"
-            onClick={handlePreviousButton}
-          >
-            {formStage == 0 ? "Cancel" : "Go back"}
-          </button>
-          <button
-            className={clsx(
-              "btn btn-error btn-outline",
-              initialEvent ? "inline-flex" : "hidden",
+    <div className="mx-auto max-w-5xl space-y-4 px-4 py-4">
+      <div className="card card-border xl:min-w-3xl">
+        <div className="card-body flex flex-row items-center justify-between">
+          <h2 className="font-semibold md:text-xl xl:text-2xl">Edit event</h2>
+          <div className="flex gap-2">
+            {initialEvent ? (
+              <Link
+                to="/events/$id"
+                params={{ id: initialEvent.id }}
+                type="button"
+                className="btn btn-ghost"
+              >
+                <span className="icon-[mdi--arrow-left] size-5" />
+                Back to event
+              </Link>
+            ) : (
+              <Link to="/events" type="button" className="btn btn-ghost">
+                <span className="icon-[mdi--arrow-left] size-5" />
+                Back to list
+              </Link>
             )}
-            onClick={handleRemoveEvent}
+            <button
+              onClick={handleRemoveEvent}
+              className="btn btn-square btn-ghost btn-error"
+            >
+              <span className="icon-[solar--trash-bin-2-bold] text-lg" />
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="card card-border">
+        <div className="card-body">
+          <h2 className="card-title mb-2">
+            <span className="icon-[ix--pen]"></span>Name & Description
+          </h2>
+          <NameDescription
+            errors={errors}
+            eventForm={eventForm}
+            setEventForm={setEventForm}
+          />
+        </div>
+      </div>
+      <div className="card card-border">
+        <div className="card-body">
+          <h2 className="card-title">
+            <span className="icon-[mdi--calendar-outline]"></span>Date & Time
+          </h2>
+          <DateTime
+            eventForm={eventForm}
+            setEventForm={setEventForm}
+            errors={errors}
+          />
+        </div>
+      </div>
+      <div className="card card-border">
+        <div className="card-body">
+          <h2 className="card-title mb-2">
+            <span className="icon-[mdi--people] size-5"></span> Place &
+            Check-ins
+          </h2>
+          <label className="label mr-2 text-black dark:text-white">
+            <input
+              type="checkbox"
+              className="toggle"
+              checked={eventForm.check_in_on_open}
+              onChange={() =>
+                setEventForm({
+                  ...eventForm,
+                  check_in_on_open: !eventForm.check_in_on_open,
+                })
+              }
+            />
+            Open check-in on create
+          </label>
+          {!eventForm.check_in_on_open && (
+            <div>
+              <label className="mr-2">Check-in time:</label>
+              <input
+                type="datetime-local"
+                className="input"
+                value={
+                  initialEvent
+                    ? eventForm.check_in_date + "T" + eventForm.check_in_opens
+                    : ""
+                }
+                onChange={handleCheckIn}
+                disabled={eventForm.check_in_on_open}
+              />
+            </div>
+          )}
+          <div className="divider my-1" />
+          <label
+            className="label mr-2 text-black dark:text-white"
+            htmlFor="isUnlimited"
           >
-            Delete
-          </button>
-          <button className="btn btn-primary" onClick={handleNextButton}>
-            {formStage !== MAX_STAGE_FORM_INDEX
-              ? `Next (${formStage + 1}/${MAX_STAGE_FORM_INDEX + 1})`
-              : initialEvent
-                ? "Update"
-                : "Create"}
-          </button>
+            <input
+              type="checkbox"
+              id="isUnlimited"
+              className="toggle"
+              checked={isUnlimited}
+              onChange={handleUnlimitedChange}
+            />
+            Unlimited Places
+          </label>
+          {!isUnlimited && (
+            <div>
+              <label className="mr-2">Event places:</label>
+              <input
+                type="text"
+                value={isUnlimited ? "Unlimited" : eventForm.capacity}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const num = Number(val);
+                  if (!Number.isNaN(num)) {
+                    setEventForm({ ...eventForm, capacity: num });
+                  }
+                }}
+                onBlur={(e) => {
+                  const num = Number(e.target.value);
+                  const fixed = Math.min(Math.max(num, 0), MAX_CAPACITY);
+                  setEventForm({ ...eventForm, capacity: fixed });
+                }}
+                disabled={isUnlimited}
+                className="input"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="card card-border">
+        <AdditionalInfo
+          errors={errors}
+          eventForm={eventForm}
+          setEventForm={setEventForm}
+          className="card-body"
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="card card-border">
+        <div className="card-body flex flex-row items-center justify-between gap-2">
+          <label className="label mr-2 gap-3 text-black dark:text-white">
+            <input
+              type="checkbox"
+              className="checkbox rounded-md"
+              checked={eventForm.is_draft}
+              onChange={() =>
+                setEventForm({
+                  ...eventForm,
+                  is_draft: !eventForm.is_draft,
+                })
+              }
+            />
+            Save as draft
+          </label>
+          <div className="flex items-center gap-2">
+            {initialEvent ? (
+              <Link
+                to="/events/$id"
+                params={{ id: initialEvent.id }}
+                type="button"
+                className="btn btn-ghost"
+              >
+                Cancel
+              </Link>
+            ) : (
+              <Link to="/events" type="button" className="btn btn-ghost">
+                Cancel
+              </Link>
+            )}
+            <button className="btn btn-primary" onClick={handleNextButton}>
+              {initialEvent ? "Update" : "Create"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

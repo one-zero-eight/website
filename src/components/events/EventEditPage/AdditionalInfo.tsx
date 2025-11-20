@@ -4,12 +4,14 @@ export interface AdditionalInfoProps {
   eventForm: EventFormState;
   setEventForm: (v: EventFormState) => void;
   errors: EventFormErrors;
+  className?: string;
 }
 
 export default function AdditionalInfo({
   eventForm,
   setEventForm,
   errors,
+  className,
 }: AdditionalInfoProps) {
   const addLink = () => {
     setEventForm({
@@ -29,14 +31,13 @@ export default function AdditionalInfo({
   };
 
   return (
-    <div>
+    <div className={className}>
       <ul className="list rounded-box gap-2 shadow-md">
         <div className="flex items-center justify-between p-2 pb-1 tracking-wide">
           <h2 className="flex items-center gap-1 text-lg font-semibold">
-            Links
-            <span className="text-neutral-400">(optional)</span>:
+            <span className="icon-[ic--round-link] size-6"></span>Links
           </h2>
-          <button className="btn btn-outline border" onClick={addLink}>
+          <button className="btn btn-primary" onClick={addLink}>
             <span className="icon-[fluent--link-add-16-filled] text-xl" />
             Add Link
           </button>

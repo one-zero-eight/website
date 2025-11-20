@@ -5,8 +5,8 @@ import EventTitle from "./EventTitle";
 import MobileMenu from "./MobileMenu";
 import Participants from "./Participants";
 import { useState } from "react";
-import { ModalWindow } from "../EventCreationModal/ModalWindow";
-import { CreationForm } from "../EventCreationModal/CreationForm";
+import { ModalWindow } from "../CreationModal/ModalWindow";
+import { CreationForm } from "../EventEditPage/CreationForm";
 
 export interface EventPageProps {
   eventId: string;

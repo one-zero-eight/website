@@ -8,7 +8,7 @@ import { useCopyToClipboard } from "usehooks-ts";
 import { useState } from "react";
 import { CheckInButton } from "../CheckInButton";
 import { LanguageBadge } from "../LanguageBadge";
-import { MAX_CAPACITY } from "../EventCreationModal/DateTimePlaceToggles";
+import { MAX_CAPACITY } from "../EventEditPage/DateTime";
 
 export interface EventTitleProps {
   event: SchemaWorkshop;
@@ -87,9 +87,13 @@ export default function EventTitle({
             />
           </span>
           {openModal && (
-            <span className="btn btn-circle" onClick={() => openModal(true)}>
+            <Link
+              className="btn btn-circle"
+              to="/events/$id/edit"
+              params={{ id: event.id }}
+            >
               <span className="icon-[qlementine-icons--pen-12] text-lg" />
-            </span>
+            </Link>
           )}
         </div>
         <LanguageBadge event={event} className="inline-flex md:hidden" />
@@ -156,17 +160,19 @@ export default function EventTitle({
           </h1>
         </div>
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
-          <div className="flex items-center gap-1">
-            <span className="text-primary icon-[ic--baseline-place] text-2xl" />
-            <Link
-              to="/maps"
-              search={{ q: event.place || "" }}
-              className="cursor-pointer text-neutral-400 underline hover:text-neutral-700"
-              title="Click to view on map"
-            >
-              {event.place}
-            </Link>
-          </div>
+          {event.place && (
+            <div className="flex items-center gap-1">
+              <span className="text-primary icon-[ic--baseline-place] text-2xl" />
+              <Link
+                to="/maps"
+                search={{ q: event.place || "" }}
+                className="cursor-pointer text-neutral-400 underline hover:text-neutral-700"
+                title="Click to view on map"
+              >
+                {event.place}
+              </Link>
+            </div>
+          )}
           <div className="flex items-center gap-1">
             <span className="text-primary icon-[mingcute--calendar-fill] text-2xl" />
             <span className="text-neutral-400">
