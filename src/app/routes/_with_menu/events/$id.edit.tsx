@@ -3,7 +3,8 @@ import { CreationForm } from "@/components/events/EventEditPage/CreationForm";
 import { EventsTabs } from "@/components/events/EventsTabs";
 import { Topbar } from "@/components/layout/Topbar";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_with_menu/events/$id/edit")({
   component: RouteComponent,
@@ -31,11 +32,24 @@ interface EditPageProps {
 }
 
 export default function EditPage({ id }: EditPageProps) {
+  const navigate = useNavigate();
   const { data: event, isLoading } = $workshops.useQuery(
     "get",
     "/workshops/{workshop_id}",
     { params: { path: { workshop_id: id } } },
   );
+
+  const { data: eventsUser } = $workshops.useQuery("get", "/users/me");
+
+  useEffect(() => {
+    if (eventsUser && eventsUser.role !== "admin") {
+      navigate({ to: "/events" });
+    }
+  }, [eventsUser, navigate]);
+
+  if (eventsUser?.role !== "admin") {
+    return null;
+  }
 
   if (isLoading)
     return (

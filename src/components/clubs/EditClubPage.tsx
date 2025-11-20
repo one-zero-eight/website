@@ -222,6 +222,18 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     },
   );
 
+  const { data: eventsUser } = $clubs.useQuery("get", "/users/me");
+
+  useEffect(() => {
+    if (eventsUser && eventsUser.role !== "admin") {
+      navigate({ to: "/clubs" });
+    }
+  }, [eventsUser, navigate]);
+
+  if (eventsUser?.role !== "admin") {
+    return null;
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
