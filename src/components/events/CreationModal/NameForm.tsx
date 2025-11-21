@@ -22,7 +22,7 @@ export default function NameForm({ onClose }: NameFormProps) {
         });
       },
       onSuccess: ({ id }) => {
-        throw redirect({ to: "/events/$id", params: { id } });
+        throw redirect({ to: "/events/$id/edit", params: { id } });
       },
     },
   );

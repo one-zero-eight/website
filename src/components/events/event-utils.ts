@@ -76,6 +76,7 @@ export const baseEventFormState: EventFormState = {
   is_draft: false,
   is_active: true,
   links: [],
+  image_file_id: null,
 };
 
 /**
@@ -98,7 +99,7 @@ export const eventLangauage = (
   }
 };
 
-export const eventName = (workshop: workshopsTypes.SchemaWorkshop): string => {
+export const eventName = (workshop: SchemaWorkshop): string => {
   switch (workshop.language) {
     case "english":
       return workshop.english_name;
@@ -114,44 +115,53 @@ export const eventName = (workshop: workshopsTypes.SchemaWorkshop): string => {
  * @param workshop - Объект воркшопа
  * @returns true если воркшоп активен и доступен для регистрации
  */
-export const isWorkshopActive = (
-  event: workshopsTypes.SchemaWorkshop,
-): boolean => {
+export const isWorkshopActive = (event: SchemaWorkshop): boolean => {
+  if (!event.dtstart || !event.check_in_opens) {
+    console.error("Event is incomplete");
+    return true;
+  }
+
   return (
     event.is_active &&
     event.is_registrable &&
     !isWorkshopPast(event.dtstart) &&
     new Date(event.check_in_opens).getTime() < Date.now() &&
-    !event.is_draft
+    !event.is_draft &&
+    !event.capacity
   );
 };
 
 /**
  * Получает текст статуса неактивности воркшопа
- * @param workshop - Объект воркшопа
+ * @param event - Объект воркшопа
  * @returns Текст статуса для отображения
  */
 export const getInactiveStatusText = (
-  workshop: workshopsTypes.SchemaWorkshop,
+  event: workshopsTypes.SchemaWorkshop,
 ): string => {
+  if (!event.dtstart || !event.check_in_opens) {
+    console.error("Event is incomplete");
+    return "Incomplete";
+  }
+
   // Проверяем, прошел ли воркшоп
-  if (isWorkshopPast(workshop.dtstart)) {
+  if (isWorkshopPast(event.dtstart)) {
     return "Outdated";
   }
 
-  if (!workshop.is_active) {
+  if (!event.is_active) {
     return "Hidden by admin";
   }
 
-  if (workshop.is_draft) {
+  if (event.is_draft) {
     return "Draft check in is unavailable";
   }
 
-  if (new Date(workshop.check_in_opens).getTime() > Date.now()) {
-    return `Check in opens ${workshop.check_in_opens.split("T")[0]}`;
+  if (new Date(event.check_in_opens).getTime() > Date.now()) {
+    return `Check in opens ${event.check_in_opens.split("T")[0]}`;
   }
 
-  if (!workshop.is_registrable) {
+  if (!event.is_registrable) {
     return "Already checked in";
   } else {
     // isActive false или оба false просто Inactive
@@ -167,6 +177,11 @@ export const getInactiveStatusText = (
 export const getSignedPeopleCount = (
   event: workshopsTypes.SchemaWorkshop,
 ): number => {
+  if (!event.capacity) {
+    console.error("Event is incomplete");
+    return 0;
+  }
+
   if (event.remain_places !== undefined && event.capacity > 0) {
     return Math.max(0, event.capacity - event.remain_places);
   }
@@ -199,18 +214,23 @@ export const groupEvents = <T extends workshopsTypes.SchemaWorkshop>(
   const groups: Record<string, T[]> = {};
 
   // Group
-  events.forEach((event) => {
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
+    if (!event.dtstart || !event.check_in_opens) {
+      continue;
+    }
+
     const dateTag = getDate(event.dtstart);
     if (!groups[dateTag]) {
       groups[dateTag] = [];
     }
     groups[dateTag].push(event);
-  });
+  }
 
   // Sort by recommendation
   Object.entries(groups).forEach(([_, events]) => {
     events
-      .sort((a, b) => a.dtstart.localeCompare(b.dtstart))
+      .sort((a, b) => (a.dtstart || "").localeCompare(b.dtstart || ""))
       .sort((a, b) =>
         isEventRecommended(a) && !isEventRecommended(b) ? -1 : 1,
       );

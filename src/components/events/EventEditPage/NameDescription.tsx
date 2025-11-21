@@ -23,9 +23,7 @@ export default function NameDescription({
   errors,
   className,
 }: NameDescriptionProps) {
-  const [currentTab, setCurrentTab] = useState<string>(
-    eventForm.language !== "both" ? eventForm.language : "english",
-  );
+  const [currentTab, setCurrentTab] = useState<string>("english");
 
   const updateLanguage = (e: ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -41,7 +39,7 @@ export default function NameDescription({
       {/* Language Select */}
       <label className="select w-full">
         <span className="label">Language</span>
-        <select value={eventForm.language} onChange={updateLanguage}>
+        <select value={eventForm.language || ""} onChange={updateLanguage}>
           <option value="english">English</option>
           <option value="russian">Russian</option>
           <option value="both">Russian & English</option>
@@ -117,7 +115,7 @@ export default function NameDescription({
           type="text"
           className={clsx("input w-full", errors.host && "input-error")}
           placeholder="Host"
-          value={eventForm.host}
+          value={eventForm.host || ""}
           onChange={(e) => setEventForm({ ...eventForm, host: e.target.value })}
           maxLength={255}
         />

@@ -172,6 +172,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/workshops/{workshop_id}/image": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Event Image */
+    get: operations["get_event_image_workshops__workshop_id__image_get"];
+    put?: never;
+    /** Set Event Image */
+    post: operations["set_event_image_workshops__workshop_id__image_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -183,6 +201,14 @@ export interface components {
       /** Color */
       color: string;
     };
+    /** Body_set_event_image_workshops__workshop_id__image_post */
+    Body_set_event_image_workshops__workshop_id__image_post: {
+      /**
+       * Image File
+       * Format: binary
+       */
+      image_file: string;
+    };
     /** CreateWorkshop */
     CreateWorkshop: {
       /** English Name */
@@ -193,34 +219,40 @@ export interface components {
       english_description?: string | null;
       /** Russian Description */
       russian_description?: string | null;
-      language: components["schemas"]["WorkshopLanguage"];
+      language?: components["schemas"]["WorkshopLanguage"] | null;
       /** Host */
-      host: string;
-      /**
-       * Dtstart
-       * Format: date-time
-       */
-      dtstart: string;
-      /**
-       * Dtend
-       * Format: date-time
-       */
-      dtend: string;
+      host?: string | null;
+      /** Dtstart */
+      dtstart?: string | null;
+      /** Dtend */
+      dtend?: string | null;
       /** Check In Opens */
       check_in_opens?: string | null;
       /** Place */
       place?: string | null;
       /** Capacity */
       capacity?: number | null;
-      /** Is Draft */
-      is_draft?: boolean | null;
+      /**
+       * Is Draft
+       * @default false
+       */
+      is_draft: boolean;
       /** Badges */
       badges?: components["schemas"]["Badge"][];
+      /** Links */
+      links?: components["schemas"]["Link"][];
     };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
+    };
+    /** Link */
+    Link: {
+      /** Title */
+      title: string;
+      /** Url */
+      url: string;
     };
     /** UpdateWorkshop */
     UpdateWorkshop: {
@@ -240,13 +272,15 @@ export interface components {
       /** Dtend */
       dtend?: string | null;
       /** Check In Opens */
-      check_in_opens: string | null;
+      check_in_opens?: string | null;
       /** Place */
       place?: string | null;
       /** Capacity */
       capacity?: number | null;
       /** Badges */
       badges?: components["schemas"]["Badge"][] | null;
+      /** Links */
+      links?: components["schemas"]["Link"][] | null;
       /** Is Active */
       is_active?: boolean | null;
       /** Is Draft */
@@ -303,33 +337,25 @@ export interface components {
       english_description: string | null;
       /** Russian Description */
       russian_description: string | null;
-      language: components["schemas"]["WorkshopLanguage"];
+      language: components["schemas"]["WorkshopLanguage"] | null;
       /** Host */
-      host: string;
-      /**
-       * Dtstart
-       * Format: date-time
-       */
-      dtstart: string;
-      /**
-       * Dtend
-       * Format: date-time
-       */
-      dtend: string;
-      /**
-       * Check In Opens
-       * Format: date-time
-       */
-      check_in_opens: string;
+      host: string | null;
+      /** Dtstart */
+      dtstart: string | null;
+      /** Dtend */
+      dtend: string | null;
+      /** Check In Opens */
+      check_in_opens: string | null;
       /** Place */
       place: string | null;
-      /**
-       * Capacity
-       * @default 1000000
-       */
-      capacity: number;
+      /** Capacity */
+      capacity: number | null;
       /** Badges */
       badges: {
+        [key: string]: string;
+      }[];
+      /** Links */
+      links: {
         [key: string]: string;
       }[];
       /**
@@ -342,6 +368,8 @@ export interface components {
        * @default false
        */
       is_draft: boolean;
+      /** Image File Id */
+      image_file_id: string | null;
       /**
        * Created At
        * Format: date-time
@@ -352,7 +380,8 @@ export interface components {
       /**
        * Is Registrable
        * @description Marks whether users can register to the workshop.
-       *     ~~Can be register only within 1 day before the workshop~~, and cannot be register after the workshop.
+       *     Can register after check-in opens dt, and cannot register after the workshop.
+       *     Cannot register to drafts.
        */
       readonly is_registrable: boolean;
     };
@@ -369,9 +398,12 @@ export interface components {
   pathItems: never;
 }
 export type SchemaBadge = components["schemas"]["Badge"];
+export type SchemaBodySetEventImageWorkshopsWorkshopIdImagePost =
+  components["schemas"]["Body_set_event_image_workshops__workshop_id__image_post"];
 export type SchemaCreateWorkshop = components["schemas"]["CreateWorkshop"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaLink = components["schemas"]["Link"];
 export type SchemaUpdateWorkshop = components["schemas"]["UpdateWorkshop"];
 export type SchemaUser = components["schemas"]["User"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
@@ -537,13 +569,6 @@ export interface operations {
           "application/json": components["schemas"]["Workshop"][];
         };
       };
-      /** @description Not authenticated */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -628,13 +653,6 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Workshop"] | null;
         };
-      };
-      /** @description Not authenticated */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
       };
       /** @description Workshop not found */
       404: {
@@ -894,6 +912,107 @@ export interface operations {
         content?: never;
       };
       /** @description Workshop not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_event_image_workshops__workshop_id__image_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workshop_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Redirect to the event image */
+      307: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Event not found or no logo available */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  set_event_image_workshops__workshop_id__image_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workshop_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_set_event_image_workshops__workshop_id__image_post"];
+      };
+    };
+    responses: {
+      /** @description Changed event image successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Workshop"];
+        };
+      };
+      /** @description Invalid content type */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only admin can change event image */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Event not found */
       404: {
         headers: {
           [name: string]: unknown;

@@ -1,4 +1,4 @@
-import { EventFormErrors, EventFormState } from "./CreationForm";
+import { EventFormErrors, EventFormState, EventLink } from "./CreationForm";
 
 export interface AdditionalInfoProps {
   eventForm: EventFormState;
@@ -14,19 +14,25 @@ export default function AdditionalInfo({
   className,
 }: AdditionalInfoProps) {
   const addLink = () => {
+    const newLinks: EventLink[] = [
+      ...(eventForm.links as EventLink[]),
+      { id: eventForm.links.length, title: "", url: "" }, // Color doesnt matter, all badges are linked with their names
+    ];
+
     setEventForm({
       ...eventForm,
-      links: [
-        ...eventForm.links,
-        { id: eventForm.links.length - 1, title: "", url: "" },
-      ],
+      links: newLinks,
     });
   };
 
   const removeLink = (id: number) => {
+    const newLinks: EventLink[] = [
+      ...(eventForm.links as EventLink[]).filter((t) => t.id !== id),
+    ];
+
     setEventForm({
       ...eventForm,
-      links: eventForm.links.filter((link) => link.id !== id),
+      links: newLinks,
     });
   };
 
@@ -88,7 +94,7 @@ export default function AdditionalInfo({
             </label>
             <button
               className="btn btn-sm btn-square btn-ghost btn-error"
-              onClick={() => removeLink(link.id)}
+              onClick={() => removeLink(index)}
             >
               <span className="icon-[solar--trash-bin-2-bold] text-lg" />
             </button>

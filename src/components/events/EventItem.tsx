@@ -20,6 +20,11 @@ export interface EventItemProps {
 
 export function EventItem({ event, isEditable, className }: EventItemProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
+  const { data: imageUrl } = $workshops.useQuery(
+    "get",
+    "/workshops/{workshop_id}/image",
+    { params: { path: { workshop_id: event.id } } },
+  );
 
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
   const signedPeople = getSignedPeopleCount(event);
@@ -43,7 +48,12 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
           className,
         )}
       >
-        <div className="flex items-center justify-between rounded-t-(--radius-box) bg-[url('/pattern.svg')] bg-size-[640px] bg-repeat p-4 pb-20">
+        <div
+          className={`flex items-center justify-between rounded-t-(--radius-box) bg-size-[640px] bg-repeat p-4 pb-20`}
+          style={{
+            backgroundImage: `url("${!imageUrl ? "/pattern.svg" : imageUrl}")`,
+          }}
+        >
           <LanguageBadge event={event} className="inline-flex md:hidden" />
           <div className="flex items-center gap-2">
             {!isWorkshopActive(event) && (
@@ -89,9 +99,9 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
             <div className="flex items-center gap-1">
               <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
               <span className="flex items-end gap-1 text-neutral-200">
-                <span>{formatDate(event.dtstart)}</span>
+                <span>{formatDate(event.dtstart || "")}</span>
                 <span className="text-neutral-400">at</span>
-                <span>{formatTime(parseTime(event.dtstart))}</span>
+                <span>{formatTime(parseTime(event.dtstart || ""))}</span>
               </span>
             </div>
           </div>

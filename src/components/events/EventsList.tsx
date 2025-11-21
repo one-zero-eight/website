@@ -71,21 +71,30 @@ export function EventsList({
 
     result = result.filter(
       (event) =>
+        event.language &&
+        event.dtstart &&
+        event.capacity &&
         searchForm.selectedLanguages[event.language] &&
         hasBadges(event, searchForm.badges),
     );
 
     const now = new Date();
     const upcomingEvents = result.filter(
-      (event) => new Date(event.dtstart) >= now,
+      (event) => new Date(event.dtstart || "") >= now,
     );
-    const pastEvents = result.filter((event) => new Date(event.dtstart) < now);
+    const pastEvents = result.filter(
+      (event) => new Date(event.dtstart || "") < now,
+    );
 
     upcomingEvents.sort(
-      (a, b) => new Date(a.dtstart).getTime() - new Date(b.dtstart).getTime(),
+      (a, b) =>
+        new Date(a.dtstart || "").getTime() -
+        new Date(b.dtstart || "").getTime(),
     ); // ascending (closest first)
     pastEvents.sort(
-      (a, b) => new Date(b.dtstart).getTime() - new Date(a.dtstart).getTime(),
+      (a, b) =>
+        new Date(b.dtstart || "").getTime() -
+        new Date(a.dtstart || "").getTime(),
     ); // descending (newest past first)
 
     if (searchForm.showPreviousEvents) {
@@ -99,7 +108,7 @@ export function EventsList({
     }
 
     result = result.filter(
-      (event) => event.capacity <= searchForm.participantsNumber,
+      (event) => (event.capacity || 0) <= searchForm.participantsNumber,
     );
 
     return result;
@@ -130,15 +139,17 @@ export function EventsList({
               {myCheckins
                 .sort(
                   (a, b) =>
-                    new Date(a.dtstart).getTime() -
-                    new Date(b.dtstart).getTime(),
+                    new Date(a.dtstart || "").getTime() -
+                    new Date(b.dtstart || "").getTime(),
                 )
                 .map((event) => (
                   <div className="card card-border text-nowrap" key={event.id}>
                     <div className="card-body flex flex-row items-center gap-4 rounded-4xl p-2">
                       <div className="bg-base-300 flex aspect-square flex-col gap-0.5 rounded-xl p-3 text-center">
-                        <span>{formatDate(event.dtstart)}</span>
-                        <span>{formatTime(parseTime(event.dtstart))}</span>
+                        <span>{formatDate(event.dtstart || "")}</span>
+                        <span>
+                          {formatTime(parseTime(event.dtstart || ""))}
+                        </span>
                       </div>
                       <div className="flex flex-col gap-0.5">
                         <span className="truncate font-semibold text-nowrap">

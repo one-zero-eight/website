@@ -176,14 +176,14 @@ export default function EventTitle({
           <div className="flex items-center gap-1">
             <span className="text-primary icon-[mingcute--calendar-fill] text-2xl" />
             <span className="text-neutral-400">
-              {formatDate(event.dtstart)}
+              {formatDate(event.dtstart || "")}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-primary icon-[iconamoon--clock-fill] text-2xl" />
             <span className="text-neutral-400">
-              {formatTime(parseTime(event.dtstart))}-
-              {formatTime(parseTime(event.dtend))}
+              {formatTime(parseTime(event.dtstart || ""))}-
+              {formatTime(parseTime(event.dtend || ""))}
             </span>
           </div>
           <div className="flex items-center gap-1">

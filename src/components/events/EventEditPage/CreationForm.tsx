@@ -1,7 +1,7 @@
 import { $workshops, workshopsTypes } from "@/api/workshops";
 import { ChangeEvent, useState } from "react";
 import { useToast } from "@/components/toast/index.ts";
-import { SchemaBadge } from "@/api/workshops/types.ts";
+import { SchemaBadge, SchemaLink } from "@/api/workshops/types.ts";
 import { DateTime, MAX_CAPACITY } from "./DateTime.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import { GenericBadgeFormScheme } from "./TagsSelector.tsx";
@@ -10,15 +10,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { baseEventFormState } from "../event-utils.ts";
 import NameDescription from "./NameDescription.tsx";
 
-export type EventLink = {
+export interface EventLink extends SchemaLink {
   id: number;
-  title: string;
-  url: string;
-};
+}
 
 export type EventFormState = Omit<
   workshopsTypes.SchemaWorkshop,
-  "id" | "created_at" | "badges"
+  "id" | "created_at" | "badges" | "links"
 > &
   GenericBadgeFormScheme & {
     date: string;
@@ -58,8 +56,13 @@ export function CreationForm({
 
   const [eventForm, setEventForm] = useState<EventFormState>(() => {
     if (initialEvent) {
-      const dtstartDate = new Date(initialEvent.dtstart);
-      const dtendDate = new Date(initialEvent.dtend);
+      const dtstartDate = new Date(initialEvent.dtstart || "");
+      const dtendDate = new Date(initialEvent.dtend || "");
+
+      const links: EventLink[] = [];
+      initialEvent.links.forEach((link, index) =>
+        links.push({ title: link?.title || "", url: link?.url, id: index }),
+      );
 
       return {
         ...baseEventFormState,
@@ -70,9 +73,14 @@ export function CreationForm({
         place: initialEvent.place || "",
         capacity: initialEvent.capacity || MAX_CAPACITY,
         remain_places: initialEvent.remain_places,
-        check_in_date: initialEvent.check_in_opens.split("T")[0],
-        check_in_opens: initialEvent.check_in_opens.split("T")[1].slice(0, 5),
+        check_in_date: initialEvent.check_in_opens
+          ? initialEvent.check_in_opens.split("T")[0]
+          : "",
+        check_in_opens: initialEvent.check_in_opens
+          ? initialEvent.check_in_opens.split("T")[1].slice(0, 5)
+          : "",
         check_in_on_open: false,
+        links: links,
       };
     }
 
@@ -113,6 +121,11 @@ export function CreationForm({
   // ================== API ==================
 
   const buildApiData = () => {
+    if (!eventForm.dtend || !eventForm.dtstart) {
+      validateDateTimePlaceToggles();
+      return;
+    }
+
     const [hour, minutes] = eventForm.dtend.split(":").map(Number);
     const date = new Date(eventForm.date);
 
@@ -127,9 +140,19 @@ export function CreationForm({
     // Handle check in openning time
     let check_in_opens = `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
     if (eventForm.check_in_on_open) {
-      if (initialEvent) check_in_opens = initialEvent.dtstart;
-      else check_in_opens = new Date().toISOString();
+      if (initialEvent) {
+        if (!initialEvent.dtstart) {
+          validateDateTimePlaceToggles();
+          return;
+        }
+        check_in_opens = initialEvent.dtstart;
+      } else check_in_opens = new Date().toISOString();
     }
+
+    const links: SchemaLink[] = [];
+    eventForm.links.forEach((link) =>
+      links.push({ title: link.title, url: link.url }),
+    );
 
     return {
       english_name: eventForm.english_name,
@@ -145,6 +168,7 @@ export function CreationForm({
       capacity: eventForm.capacity || MAX_CAPACITY,
       badges: eventForm.badges as SchemaBadge[],
       is_draft: eventForm.is_draft,
+      links: links,
     };
   };
 
@@ -162,6 +186,8 @@ export function CreationForm({
 
   const handleCreateEvent = () => {
     const apiData = buildApiData();
+    if (!apiData) return; // Add Error Handling
+
     createEvent(
       {
         body: {
@@ -207,6 +233,8 @@ export function CreationForm({
     if (!initialEvent) return;
 
     const apiData = buildApiData();
+    if (!apiData) return; //Add Error Handling
+
     updateEvent(
       {
         params: { path: { workshop_id: initialEvent.id } },
@@ -293,7 +321,7 @@ export function CreationForm({
       showError("Validation Error", "Russian title is required");
     }
 
-    if (!eventForm.host.trim()) {
+    if (!(eventForm.host || "").trim()) {
       newErrors.host = "Host is required";
       showError("Validation Error", "Host is required");
     }
@@ -317,14 +345,6 @@ export function CreationForm({
         showError("Validation Error", "URL for link shouldn't be empty");
         return;
       }
-
-      // const urlValidationRegex =
-      //   /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/;
-      // if (!urlValidationRegex.test(link.url)) {
-      //   newErrors.links = "URL should be valid";
-      //   showError("Validation Error", "URL should be valid");
-      //   return;
-      // }
     });
 
     setErrors(newErrors);
@@ -354,6 +374,7 @@ export function CreationForm({
   };
 
   // ================== Helpers ==================
+
   const handleCheckIn = (e: ChangeEvent<HTMLInputElement>) => {
     const [date, time] = e.target.value.split("T");
     setEventForm({ ...eventForm, check_in_date: date, check_in_opens: time });
@@ -367,6 +388,11 @@ export function CreationForm({
     ) {
       if (initialEvent) handleUpdateEvent();
       else handleCreateEvent();
+      redirect({
+        to: "/events/$id",
+        params: { id: initialEvent?.id || "" },
+        reloadDocument: true,
+      });
     }
   };
 
@@ -424,6 +450,7 @@ export function CreationForm({
           />
         </div>
       </div>
+
       <div className="card card-border">
         <div className="card-body">
           <h2 className="card-title">
@@ -491,7 +518,7 @@ export function CreationForm({
               <label className="mr-2">Event places:</label>
               <input
                 type="text"
-                value={isUnlimited ? "Unlimited" : eventForm.capacity}
+                value={isUnlimited ? "Unlimited" : eventForm.capacity || 1000}
                 onChange={(e) => {
                   const val = e.target.value;
                   const num = Number(val);
@@ -553,7 +580,7 @@ export function CreationForm({
               </Link>
             )}
             <button className="btn btn-primary" onClick={handleNextButton}>
-              {initialEvent ? "Update" : "Create"}
+              Save
             </button>
           </div>
         </div>

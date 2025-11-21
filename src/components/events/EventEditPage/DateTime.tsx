@@ -69,7 +69,7 @@ export function DateTime({
           </label>
           <input
             type="time"
-            value={eventForm.dtstart}
+            value={eventForm.dtstart || ""}
             onChange={(e) =>
               setEventForm({ ...eventForm, dtstart: e.target.value })
             }
@@ -83,7 +83,7 @@ export function DateTime({
           </label>
           <input
             type="time"
-            value={eventForm.dtend}
+            value={eventForm.dtend || ""}
             onChange={(e) =>
               setEventForm({ ...eventForm, dtend: e.target.value })
             }
