@@ -39,7 +39,7 @@ export default function AdditionalInfo({
   return (
     <div className={className}>
       <ul className="list rounded-box gap-2 shadow-md">
-        <div className="flex items-center justify-between p-2 pb-1 tracking-wide">
+        <div className="flex items-center justify-between tracking-wide">
           <h2 className="flex items-center gap-1 text-lg font-semibold">
             <span className="icon-[ic--round-link] size-6"></span>Links
           </h2>

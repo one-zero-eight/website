@@ -126,8 +126,7 @@ export const isWorkshopActive = (event: SchemaWorkshop): boolean => {
     event.is_registrable &&
     !isWorkshopPast(event.dtstart) &&
     new Date(event.check_in_opens).getTime() < Date.now() &&
-    !event.is_draft &&
-    !event.capacity
+    !event.is_draft
   );
 };
 

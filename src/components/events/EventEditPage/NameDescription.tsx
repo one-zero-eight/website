@@ -37,14 +37,21 @@ export default function NameDescription({
   return (
     <div className={clsx("flex flex-col gap-3", className)}>
       {/* Language Select */}
-      <label className="select w-full">
-        <span className="label">Language</span>
-        <select value={eventForm.language || ""} onChange={updateLanguage}>
+      <fieldset className="fieldset">
+        <legend className="fieldset-legend">
+          Language of the event: <span className="text-red-500">*</span>
+        </legend>
+        <select
+          value={eventForm.language || ""}
+          onChange={updateLanguage}
+          className="select w-full"
+        >
           <option value="english">English</option>
           <option value="russian">Russian</option>
           <option value="both">Russian & English</option>
         </select>
-      </label>
+      </fieldset>
+      <div className="divider my-0.5" />
       {/* Name & Description */}
       <div>
         <div role="tablist" className={clsx("tabs tabs-box mb-2 flex-nowrap")}>
@@ -106,6 +113,7 @@ export default function NameDescription({
           Description supports markdown
         </span>
       </div>
+      <div className="divider my-0.5" />
       {/* Host */}
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
@@ -160,7 +168,7 @@ function TabContent({
 }: TabContentProps) {
   return (
     <div className={clsx(className)}>
-      <fieldset>
+      <fieldset className="fieldset">
         <legend className="fieldset-legend">
           Title: <span className="text-red-500">*</span>
         </legend>

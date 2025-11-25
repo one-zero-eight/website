@@ -8,8 +8,12 @@ import { eventBadges } from "./EventBadges";
 import { SchemaWorkshop, WorkshopLanguage } from "@/api/workshops/types";
 import { createFuse, searchFuse } from "./search-utils";
 import { $workshops } from "@/api/workshops";
-import { MAX_CAPACITY } from "./EventEditPage/DateTime";
-import { formatDate, formatTime, parseTime } from "./date-utils";
+import {
+  formatDate,
+  formatTime,
+  isWorkshopPast,
+  parseTime,
+} from "./date-utils";
 import { LanguageBadge } from "./LanguageBadge";
 import { Link } from "@tanstack/react-router";
 
@@ -23,7 +27,7 @@ export type SearchFormState = GenericBadgeFormScheme & {
   selectedLanguages: Record<WorkshopLanguage, boolean>;
   showPreviousEvents: boolean;
   onlyCheckIns: boolean;
-  participantsNumber: number;
+  hasPlaces: boolean;
 };
 
 export interface EventsListProps {
@@ -48,7 +52,7 @@ export function EventsList({
     },
     showPreviousEvents: false,
     onlyCheckIns: false,
-    participantsNumber: MAX_CAPACITY,
+    hasPlaces: false,
   });
   const [showSearch, setShowSearch] = useState(false);
 
@@ -107,9 +111,9 @@ export function EventsList({
       result = result.filter((event) => isCheckedIn(event.id));
     }
 
-    result = result.filter(
-      (event) => (event.capacity || 0) <= searchForm.participantsNumber,
-    );
+    if (searchForm.hasPlaces) {
+      result = result.filter((event) => event.remain_places > 0);
+    }
 
     return result;
   }, [events, fuse, searchForm, isCheckedIn]);
@@ -131,31 +135,39 @@ export function EventsList({
   return (
     <div className="grid grid-cols-1 gap-4 px-4 xl:grid-cols-3 2xl:grid-cols-4">
       {/* Event List Section */}
-      <div className="order-2 col-span-full w-full xl:order-0 xl:col-span-2 xl:mt-5 2xl:col-span-3">
-        {myCheckins && (
+      <div
+        className={`order-2 col-span-full w-full xl:order-0 xl:col-span-2 xl:mt-5 2xl:col-span-3`}
+      >
+        {myCheckins && eventListType === EventListType.USER && (
           <div>
             <h2 className="mb-2 text-xl font-semibold">My Check-ins:</h2>
-            <div className="mb-5 flex flex-nowrap gap-2 overflow-x-scroll">
+            <div className="mb-5 flex flex-nowrap gap-2 overflow-x-auto">
               {myCheckins
                 .sort(
                   (a, b) =>
                     new Date(a.dtstart || "").getTime() -
                     new Date(b.dtstart || "").getTime(),
                 )
+                .filter((e) => !isWorkshopPast(e.dtstart || ""))
                 .map((event) => (
-                  <div className="card card-border text-nowrap" key={event.id}>
-                    <div className="card-body flex flex-row items-center gap-4 rounded-4xl p-2">
-                      <div className="bg-base-300 flex aspect-square flex-col gap-0.5 rounded-xl p-3 text-center">
-                        <span>{formatDate(event.dtstart || "")}</span>
-                        <span>
-                          {formatTime(parseTime(event.dtstart || ""))}
-                        </span>
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="truncate font-semibold text-nowrap">
-                          {event.english_name}
-                        </span>
-                        <LanguageBadge event={event} />
+                  <div
+                    className="card card-border max-w-[320px] min-w-[320px] text-nowrap"
+                    key={event.id}
+                  >
+                    <div className="card-body flex flex-row items-center justify-between gap-4 rounded-4xl p-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <div className="bg-base-300 flex aspect-square flex-col gap-0.5 rounded-xl p-3 text-center">
+                          <span>{formatDate(event.dtstart || "")}</span>
+                          <span>
+                            {formatTime(parseTime(event.dtstart || ""))}
+                          </span>
+                        </div>
+                        <div className="flex min-w-0 flex-col gap-0.5">
+                          <span className="truncate font-semibold text-nowrap">
+                            {event.english_name || event.russian_name}
+                          </span>
+                          <LanguageBadge event={event} />
+                        </div>
                       </div>
                       <Link
                         to={`/events/$id`}
@@ -172,47 +184,60 @@ export function EventsList({
         )}
         <div className="w-full">
           {hasEvents && userFiltered.length !== 0 ? (
-            isGroupedView ? (
-              (() => {
-                const now = new Date();
+            <div className="w-full">
+              {isGroupedView ? (
+                (() => {
+                  const now = new Date();
 
-                // Split keys into upcoming & past groups
-                const upcomingDates = Object.keys(groupedEvents).filter(
-                  (date) => new Date(date) >= now,
-                );
-                const pastDates = Object.keys(groupedEvents).filter(
-                  (date) => new Date(date) < now,
-                );
+                  // Split keys into upcoming & past groups
+                  const upcomingDates = Object.keys(groupedEvents).filter(
+                    (date) => new Date(date) >= now,
+                  );
+                  const pastDates = Object.keys(groupedEvents).filter(
+                    (date) => new Date(date) < now,
+                  );
 
-                // Sort them properly
-                upcomingDates.sort(
-                  (a, b) => new Date(a).getTime() - new Date(b).getTime(),
-                );
-                pastDates.sort(
-                  (a, b) => new Date(b).getTime() - new Date(a).getTime(),
-                );
+                  // Sort them properly
+                  upcomingDates.sort(
+                    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+                  );
+                  pastDates.sort(
+                    (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+                  );
 
-                // Combine according to toggle
-                const orderedDates = searchForm.showPreviousEvents
-                  ? [...upcomingDates, ...pastDates]
-                  : upcomingDates;
+                  // Combine according to toggle
+                  const orderedDates = searchForm.showPreviousEvents
+                    ? [...upcomingDates, ...pastDates]
+                    : upcomingDates;
 
-                return orderedDates.map((isoDate) => (
-                  <EventForDate
-                    key={isoDate}
-                    isoDate={isoDate}
-                    events={groupedEvents[isoDate]}
-                    eventListType={eventListType}
-                    onAddEvent={onAddEvent}
-                  />
-                ));
-              })()
-            ) : (
-              <ItemsList
-                events={filteredEvents}
-                eventListType={eventListType}
-              />
-            )
+                  return orderedDates.map((isoDate) => (
+                    <EventForDate
+                      key={isoDate}
+                      isoDate={isoDate}
+                      events={groupedEvents[isoDate]}
+                      eventListType={eventListType}
+                      onAddEvent={onAddEvent}
+                    />
+                  ));
+                })()
+              ) : (
+                <ItemsList
+                  events={filteredEvents}
+                  eventListType={eventListType}
+                />
+              )}
+              <span
+                className={`text-primary mt-2 cursor-pointer text-center underline select-none ${searchForm.showPreviousEvents && "hidden"}`}
+                onClick={() =>
+                  setSearchForm({
+                    ...searchForm,
+                    showPreviousEvents: !searchForm.showPreviousEvents,
+                  })
+                }
+              >
+                Show previous events
+              </span>
+            </div>
           ) : (
             <div className="col-span-full py-10 text-center text-xl">
               <h2 className="text-gray-500">No events found!</h2>
@@ -350,42 +375,20 @@ export function SearchMenu({
             Show previous events
           </label>
           <div className="divider" />
-          <div className="flex flex-col gap-2">
-            <span className="text-base-content text-xs font-semibold">
-              Filter by capacity:
-            </span>
-            <div className="flex w-full items-start gap-3">
-              <span className="input input-sm w-15 cursor-default items-center justify-center">
-                {searchForm.participantsNumber === MAX_CAPACITY ? (
-                  <span className="icon-[fa7-solid--infinity]" />
-                ) : (
-                  searchForm.participantsNumber
-                )}
-              </span>
-              <div className="mt-1 w-full max-w-xs">
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={searchForm.participantsNumber}
-                  className="range"
-                  onChange={(e) =>
-                    setSearchForm({
-                      ...searchForm,
-                      participantsNumber:
-                        Number(e.target.value) === 100
-                          ? MAX_CAPACITY
-                          : Number(e.target.value),
-                    })
-                  }
-                />
-                <div className="mt-2 flex justify-between px-2.5 text-xs">
-                  <span>0</span>
-                  <span>100+</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <label className="label">
+            <input
+              type="checkbox"
+              className="toggle"
+              checked={searchForm.hasPlaces}
+              onChange={() =>
+                setSearchForm({
+                  ...searchForm,
+                  hasPlaces: !searchForm.hasPlaces,
+                })
+              }
+            />
+            Has places
+          </label>
         </div>
       </div>
     </>

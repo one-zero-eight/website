@@ -481,11 +481,11 @@ export function CreationForm({
                 })
               }
             />
-            Open check-in on create
+            Always open
           </label>
           {!eventForm.check_in_on_open && (
             <div>
-              <label className="mr-2">Check-in time:</label>
+              <label className="mr-2">Open check-in at:</label>
               <input
                 type="datetime-local"
                 className="input"
@@ -518,7 +518,7 @@ export function CreationForm({
               <label className="mr-2">Event places:</label>
               <input
                 type="text"
-                value={isUnlimited ? "Unlimited" : eventForm.capacity || 1000}
+                value={isUnlimited ? "Unlimited" : eventForm.capacity || ""}
                 onChange={(e) => {
                   const val = e.target.value;
                   const num = Number(val);
@@ -549,40 +549,45 @@ export function CreationForm({
 
       {/* Buttons */}
       <div className="card card-border">
-        <div className="card-body flex flex-row items-center justify-between gap-2">
-          <label className="label mr-2 gap-3 text-black dark:text-white">
-            <input
-              type="checkbox"
-              className="checkbox rounded-md"
-              checked={eventForm.is_draft}
-              onChange={() =>
-                setEventForm({
-                  ...eventForm,
-                  is_draft: !eventForm.is_draft,
-                })
-              }
-            />
-            Save as draft
-          </label>
-          <div className="flex items-center gap-2">
-            {initialEvent ? (
-              <Link
-                to="/events/$id"
-                params={{ id: initialEvent.id }}
-                type="button"
-                className="btn btn-ghost"
-              >
-                Cancel
-              </Link>
-            ) : (
-              <Link to="/events" type="button" className="btn btn-ghost">
-                Cancel
-              </Link>
-            )}
-            <button className="btn btn-primary" onClick={handleNextButton}>
-              Save
-            </button>
+        <div className="card-body">
+          <div className="flex flex-row items-center justify-between gap-2">
+            <label className="label mr-2 gap-3 text-black dark:text-white">
+              <input
+                type="checkbox"
+                className="checkbox rounded-md"
+                checked={eventForm.is_draft}
+                onChange={() =>
+                  setEventForm({
+                    ...eventForm,
+                    is_draft: !eventForm.is_draft,
+                  })
+                }
+              />
+              <span className="text-wrap">Save as draft</span>
+            </label>
+            <div className="flex items-center gap-2">
+              {initialEvent ? (
+                <Link
+                  to="/events/$id"
+                  params={{ id: initialEvent.id }}
+                  type="button"
+                  className="btn btn-ghost"
+                >
+                  Cancel
+                </Link>
+              ) : (
+                <Link to="/events" type="button" className="btn btn-ghost">
+                  Cancel
+                </Link>
+              )}
+              <button className="btn btn-primary" onClick={handleNextButton}>
+                Save
+              </button>
+            </div>
           </div>
+          <span className="text-neutral-500">
+            (Draft will be hidden to others)
+          </span>
         </div>
       </div>
     </div>
