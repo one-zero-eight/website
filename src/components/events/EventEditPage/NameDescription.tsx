@@ -1,8 +1,9 @@
 import { ChangeEvent, useState } from "react";
-import { EventFormErrors, EventFormState } from "./CreationForm";
+import { EventFormErrors } from "./CreationForm";
 import clsx from "clsx";
 import { WorkshopLanguage } from "@/api/workshops/types";
 import TagsSelector from "./TagsSelector";
+import { EventFormState } from "../event-utils";
 
 export interface NameDescriptionProps {
   eventForm: EventFormState;

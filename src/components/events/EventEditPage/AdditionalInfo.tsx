@@ -1,4 +1,5 @@
-import { EventFormErrors, EventFormState, EventLink } from "./CreationForm";
+import { EventFormState } from "../event-utils";
+import { EventFormErrors, EventLink } from "./CreationForm";
 
 export interface AdditionalInfoProps {
   eventForm: EventFormState;

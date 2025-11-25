@@ -2,7 +2,7 @@ import { SchemaWorkshop } from "@/api/workshops/types";
 import { eventBadges } from "../EventBadges";
 import { formatDate, formatTime, parseTime } from "../date-utils";
 import { Link } from "@tanstack/react-router";
-import { getSignedPeopleCount } from "../event-utils";
+import { getSignedPeopleCount, imageLink } from "../event-utils";
 import clsx from "clsx";
 import { useCopyToClipboard } from "usehooks-ts";
 import { useState } from "react";
@@ -72,7 +72,14 @@ export default function EventTitle({
 
   return (
     <div className={clsx("card card-border", className)}>
-      <div className="mb-4 flex items-start justify-between rounded-t-(--radius-box) bg-[url('/pattern.svg')] bg-size-[640px] bg-repeat p-4 pb-16 md:pb-32 lg:pb-36">
+      <div
+        className="mb-4 flex items-start justify-between rounded-t-(--radius-box) bg-cover bg-center bg-repeat p-4 pb-16 md:pb-32 lg:pb-36"
+        // bg-size-[640px]
+        style={{
+          // backgroundImage: `url("${!imageLink ? "/pattern.svg" : imageLink}")`,
+          backgroundImage: `url(${imageLink(event.id)})`,
+        }}
+      >
         <div className="flex gap-2">
           <Link to="/events" className="btn btn-circle">
             <span className="icon-[line-md--arrow-left] text-2xl" />

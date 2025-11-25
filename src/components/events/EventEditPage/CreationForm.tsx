@@ -1,32 +1,25 @@
-import { $workshops, workshopsTypes } from "@/api/workshops";
+import { $workshops } from "@/api/workshops";
 import { ChangeEvent, useState } from "react";
 import { useToast } from "@/components/toast/index.ts";
-import { SchemaBadge, SchemaLink } from "@/api/workshops/types.ts";
+import {
+  SchemaBadge,
+  SchemaLink,
+  SchemaWorkshop,
+} from "@/api/workshops/types.ts";
 import { DateTime, MAX_CAPACITY } from "./DateTime.tsx";
 import { useQueryClient } from "@tanstack/react-query";
-import { GenericBadgeFormScheme } from "./TagsSelector.tsx";
 import AdditionalInfo from "./AdditionalInfo.tsx";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { baseEventFormState } from "../event-utils.ts";
+import { baseEventFormState, EventFormState } from "../event-utils.ts";
 import NameDescription from "./NameDescription.tsx";
+import ImageUpload from "./ImageUpload.tsx";
 
 export interface EventLink extends SchemaLink {
   id: number;
 }
 
-export type EventFormState = Omit<
-  workshopsTypes.SchemaWorkshop,
-  "id" | "created_at" | "badges" | "links"
-> &
-  GenericBadgeFormScheme & {
-    date: string;
-    check_in_date: string;
-    check_in_on_open: boolean;
-    links: EventLink[];
-  };
-
 export interface PostFormProps {
-  initialEvent?: workshopsTypes.SchemaWorkshop;
+  initialEvent?: SchemaWorkshop;
   initialDate?: string;
   onClose?: () => void;
 }
@@ -100,6 +93,8 @@ export function CreationForm({
 
     return baseEventFormState;
   });
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const { showSuccess, showError, showConfirm } = useToast();
 
@@ -306,6 +301,51 @@ export function CreationForm({
     );
   };
 
+  const { mutate: uploadLogo, isPending: isUploadingLogo } =
+    $workshops.useMutation("post", "/workshops/{workshop_id}/image", {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: $workshops.queryOptions("get", "/workshops/{workshop_id}", {
+            params: { path: { workshop_id: initialEvent?.id || "" } },
+          }).queryKey,
+        });
+        queryClient.invalidateQueries({
+          queryKey: $workshops.queryOptions("get", "/workshops/").queryKey,
+        });
+        setEventForm({ ...eventForm, file: null });
+        setLogoPreview(null);
+        alert("Logo uploaded successfully!");
+      },
+      onError: (error) => {
+        console.error("Failed to upload logo:", error);
+        alert("Failed to upload logo. Please try again.");
+      },
+    });
+
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEventForm({ ...eventForm, file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUploadLogo = () => {
+    if (!eventForm.file || !initialEvent) return;
+
+    const formData = new FormData();
+    formData.append("image_file", eventForm.file);
+
+    uploadLogo({
+      params: { path: { workshop_id: initialEvent.id } },
+      body: formData as any,
+    });
+  };
+
   // ================== Validations ==================
 
   const validateNameDescription = () => {
@@ -447,6 +487,25 @@ export function CreationForm({
             errors={errors}
             eventForm={eventForm}
             setEventForm={setEventForm}
+          />
+        </div>
+      </div>
+
+      <div className="card card-border">
+        <div className="card-body">
+          <h2 className="card-title mb-2">
+            <span className="icon-[mdi--image]" />
+            Logo
+          </h2>
+          <ImageUpload
+            errors={errors}
+            form={eventForm}
+            setForm={setEventForm}
+            handleUploadLogo={handleUploadLogo}
+            handleLogoFileChange={handleLogoFileChange}
+            isUploadingLogo={isUploadingLogo}
+            logoPreview={logoPreview}
+            setLogoPreview={setLogoPreview}
           />
         </div>
       </div>

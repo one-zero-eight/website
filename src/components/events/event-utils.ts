@@ -44,14 +44,15 @@ export type EventLink = {
 };
 
 export type EventFormState = Omit<
-  SchemaWorkshop,
-  "id" | "created_at" | "badges"
+  workshopsTypes.SchemaWorkshop,
+  "id" | "created_at" | "badges" | "links"
 > &
   GenericBadgeFormScheme & {
     date: string;
     check_in_date: string;
     check_in_on_open: boolean;
     links: EventLink[];
+    file: File | null;
   };
 
 // Base (Empty) state for event creation form
@@ -77,6 +78,7 @@ export const baseEventFormState: EventFormState = {
   is_active: true,
   links: [],
   image_file_id: null,
+  file: null,
 };
 
 /**
@@ -98,6 +100,10 @@ export const eventLangauage = (
       return "Unknown";
   }
 };
+
+export function imageLink(eventId: string) {
+  return `${import.meta.env.VITE_WORKSHOPS_API_URL}/workshops/${eventId}/image`;
+}
 
 export const eventName = (workshop: SchemaWorkshop): string => {
   switch (workshop.language) {

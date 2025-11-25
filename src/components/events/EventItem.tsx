@@ -5,6 +5,7 @@ import { formatDate, formatTime, parseTime } from "./date-utils.ts";
 import {
   getInactiveStatusText,
   getSignedPeopleCount,
+  imageLink,
   isEventRecommended,
   isWorkshopActive,
 } from "./event-utils.ts";
@@ -20,11 +21,6 @@ export interface EventItemProps {
 
 export function EventItem({ event, isEditable, className }: EventItemProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
-  const { data: imageUrl } = $workshops.useQuery(
-    "get",
-    "/workshops/{workshop_id}/image",
-    { params: { path: { workshop_id: event.id } } },
-  );
 
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
   const signedPeople = getSignedPeopleCount(event);
@@ -49,9 +45,10 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
         )}
       >
         <div
-          className={`flex items-center justify-between rounded-t-(--radius-box) bg-size-[640px] bg-repeat p-4 pb-20`}
+          className={`flex items-center justify-between rounded-t-(--radius-box) bg-size-[640px] bg-center bg-repeat p-4 pb-20`}
           style={{
-            backgroundImage: `url("${!imageUrl ? "/pattern.svg" : imageUrl}")`,
+            // backgroundImage: `url("${!imageLink ? "/pattern.svg" : imageLink}")`,
+            backgroundImage: `url(${imageLink(event.id)})`,
           }}
         >
           <LanguageBadge event={event} className="inline-flex md:hidden" />
