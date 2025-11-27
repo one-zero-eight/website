@@ -13,6 +13,12 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { baseEventFormState, EventFormState } from "../event-utils.ts";
 import NameDescription from "./NameDescription.tsx";
 import ImageUpload from "./ImageUpload.tsx";
+import { SchemaUserWithClubs } from "@/api/clubs/types.ts";
+
+export enum EventCreationType {
+  DEFAULT,
+  CLUB_LEADER,
+}
 
 export interface EventLink extends SchemaLink {
   id: number;
@@ -21,6 +27,8 @@ export interface EventLink extends SchemaLink {
 export interface PostFormProps {
   initialEvent?: SchemaWorkshop;
   initialDate?: string;
+  clubUser: SchemaUserWithClubs | null | undefined;
+  isAdmin?: boolean;
   onClose?: () => void;
 }
 
@@ -41,6 +49,8 @@ export interface EventFormErrors {
 export function CreationForm({
   initialEvent,
   initialDate,
+  clubUser,
+  isAdmin = false,
   onClose,
 }: PostFormProps) {
   const redirect = useNavigate();
@@ -201,6 +211,11 @@ export function CreationForm({
           if (onClose) {
             onClose();
           }
+          redirect({
+            to: "/events/$id",
+            params: { id: initialEvent?.id || "" },
+            reloadDocument: true,
+          });
         },
         onError: () => {
           showError(
@@ -242,6 +257,11 @@ export function CreationForm({
             `Event "${apiData.english_name || apiData.russian_name}" has been successfully updated.`,
           );
           onClose?.();
+          redirect({
+            to: "/events/$id",
+            params: { id: initialEvent?.id || "" },
+            reloadDocument: true,
+          });
         },
         onError: () => {
           showError(
@@ -428,11 +448,6 @@ export function CreationForm({
     ) {
       if (initialEvent) handleUpdateEvent();
       else handleCreateEvent();
-      redirect({
-        to: "/events/$id",
-        params: { id: initialEvent?.id || "" },
-        reloadDocument: true,
-      });
     }
   };
 
@@ -485,6 +500,8 @@ export function CreationForm({
           </h2>
           <NameDescription
             errors={errors}
+            isAdmin={isAdmin}
+            clubs={clubUser ? clubUser.leader_in_clubs : []}
             eventForm={eventForm}
             setEventForm={setEventForm}
           />

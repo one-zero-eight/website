@@ -14,15 +14,15 @@ export interface EventTitleProps {
   event: SchemaWorkshop;
   pageLanguage: string | null;
   setPageLanguage: (v: string | null) => void;
-  openModal: ((v: boolean) => void) | null;
+  isAdmin: boolean;
   className?: string;
 }
 
 export default function EventTitle({
   event,
   pageLanguage,
+  isAdmin,
   setPageLanguage,
-  openModal,
   className,
 }: EventTitleProps) {
   const [_, _copy] = useCopyToClipboard();
@@ -91,7 +91,7 @@ export default function EventTitle({
               )}
             />
           </span>
-          {openModal && (
+          {isAdmin && (
             <Link
               className="btn btn-circle"
               to="/events/$id/edit"

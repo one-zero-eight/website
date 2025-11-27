@@ -4,10 +4,14 @@ import clsx from "clsx";
 import { WorkshopLanguage } from "@/api/workshops/types";
 import TagsSelector from "./TagsSelector";
 import { EventFormState } from "../event-utils";
+import { SchemaClub } from "@/api/clubs/types";
+import { $clubs } from "@/api/clubs";
 
 export interface NameDescriptionProps {
   eventForm: EventFormState;
   setEventForm: (v: EventFormState) => void;
+  clubs: SchemaClub[];
+  isAdmin?: boolean;
   errors: EventFormErrors;
   className?: string;
 }
@@ -22,9 +26,14 @@ export default function NameDescription({
   eventForm,
   setEventForm,
   errors,
+  clubs,
+  isAdmin = false,
   className,
 }: NameDescriptionProps) {
   const [currentTab, setCurrentTab] = useState<string>("english");
+  const [isClubSelect, setIsClubSelect] = useState<boolean>(true);
+
+  const { data: clubList } = $clubs.useQuery("get", "/clubs/");
 
   const updateLanguage = (e: ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -120,14 +129,68 @@ export default function NameDescription({
         <legend className="fieldset-legend">
           Host: <span className="text-red-500">*</span>
         </legend>
-        <input
-          type="text"
-          className={clsx("input w-full", errors.host && "input-error")}
-          placeholder="Host"
-          value={eventForm.host || ""}
-          onChange={(e) => setEventForm({ ...eventForm, host: e.target.value })}
-          maxLength={255}
-        />
+        {clubs.length > 0 && !isAdmin && (
+          <select
+            className="select"
+            value={eventForm.host?.split(":")[1] || "Pick a club"}
+            onChange={(e) => {
+              const clubHost = `club:${e.target.value}`;
+              setEventForm({ ...eventForm, host: clubHost });
+            }}
+          >
+            <option value="Pick a club" disabled>
+              Pick a club
+            </option>
+            {clubs.map((club) => (
+              <option key={club.id} value={club.id}>
+                {club.title}
+              </option>
+            ))}
+          </select>
+        )}
+        {isAdmin && (
+          <div className="flex flex-col gap-2">
+            <label className="label">
+              <input
+                type="checkbox"
+                checked={isClubSelect}
+                onChange={(e) => setIsClubSelect(e.target.checked)}
+                className="toggle"
+              />
+              Select from clubs
+            </label>
+            {isClubSelect ? (
+              <select
+                className="select w-full"
+                value={eventForm.host?.split(":")[1] || "Pick a club"}
+                onChange={(e) => {
+                  const clubHost = `club:${e.target.value}`;
+                  setEventForm({ ...eventForm, host: clubHost });
+                }}
+              >
+                <option value="Pick a club" disabled>
+                  Pick a club
+                </option>
+                {clubList?.map((club) => (
+                  <option key={club.id} value={club.id}>
+                    {club.title}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                className={clsx("input w-full", errors.host && "input-error")}
+                placeholder="Host"
+                value={eventForm.host || ""}
+                onChange={(e) =>
+                  setEventForm({ ...eventForm, host: e.target.value })
+                }
+                maxLength={255}
+              />
+            )}
+          </div>
+        )}
         <label
           className={clsx(
             !errors.host ? "label" : "text-sm text-red-500 dark:text-red-400",

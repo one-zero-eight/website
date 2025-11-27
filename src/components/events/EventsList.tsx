@@ -16,10 +16,12 @@ import {
 } from "./date-utils";
 import { LanguageBadge } from "./LanguageBadge";
 import { Link } from "@tanstack/react-router";
+import { SchemaUserWithClubs } from "@/api/clubs/types";
 
 export enum EventListType {
   USER,
   ADMIN,
+  CLUB_LEADER,
 }
 
 export type SearchFormState = GenericBadgeFormScheme & {
@@ -33,6 +35,7 @@ export type SearchFormState = GenericBadgeFormScheme & {
 export interface EventsListProps {
   events?: SchemaWorkshop[];
   eventListType?: EventListType;
+  clubUser?: SchemaUserWithClubs;
   onAddEvent?: (date: string) => void;
 }
 

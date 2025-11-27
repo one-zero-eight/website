@@ -1,4 +1,5 @@
-import { $workshops } from "@/api/workshops";
+import { $clubs } from "@/api/clubs";
+import { $workshops, workshopsTypes } from "@/api/workshops";
 import { CreationForm } from "@/components/events/EventEditPage/CreationForm";
 import { EventsTabs } from "@/components/events/EventsTabs";
 import { Topbar } from "@/components/layout/Topbar";
@@ -40,14 +41,35 @@ export default function EditPage({ id }: EditPageProps) {
   );
 
   const { data: eventsUser } = $workshops.useQuery("get", "/users/me");
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
 
   useEffect(() => {
-    if (eventsUser && eventsUser.role !== "admin") {
+    if (
+      eventsUser &&
+      eventsUser.role === ("user" as workshopsTypes.UserRole) &&
+      clubsUser &&
+      clubsUser.leader_in_clubs.length === 0
+    ) {
       navigate({ to: "/events" });
     }
-  }, [eventsUser, navigate]);
 
-  if (eventsUser?.role !== "admin") {
+    if (
+      event?.host?.includes("club:") &&
+      eventsUser &&
+      eventsUser.role === ("user" as workshopsTypes.UserRole) &&
+      clubsUser &&
+      clubsUser.leader_in_clubs.length !== 0
+    ) {
+      if (
+        !clubsUser?.leader_in_clubs.some(
+          (c) => c.leader_innohassle_id === event?.host?.split(":")[1],
+        )
+      )
+        navigate({ to: "/events" });
+    }
+  }, [eventsUser, clubsUser, navigate, event]);
+
+  if (eventsUser?.role !== "admin" && clubsUser?.leader_in_clubs.length === 0) {
     return null;
   }
 
@@ -69,5 +91,11 @@ export default function EditPage({ id }: EditPageProps) {
       </div>
     );
 
-  return <CreationForm initialEvent={event} />;
+  return (
+    <CreationForm
+      clubUser={clubsUser?.leader_in_clubs.length !== 0 ? clubsUser : null}
+      isAdmin={eventsUser && eventsUser.role === "admin"}
+      initialEvent={event}
+    />
+  );
 }

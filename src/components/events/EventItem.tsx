@@ -12,6 +12,7 @@ import {
 import { eventBadges } from "./EventBadges.tsx";
 import { LanguageBadge } from "./LanguageBadge.tsx";
 import { MAX_CAPACITY } from "./EventEditPage/DateTime.tsx";
+import { $clubs } from "@/api/clubs/index.ts";
 
 export interface EventItemProps {
   event: workshopsTypes.SchemaWorkshop;
@@ -21,6 +22,14 @@ export interface EventItemProps {
 
 export function EventItem({ event, isEditable, className }: EventItemProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
+
+  const clubId = event.host?.includes("club:")
+    ? event.host?.split(":")[1]
+    : null;
+
+  const { data: clubHost } = $clubs.useQuery("get", "/clubs/by-id/{id}", {
+    params: { path: { id: clubId || "" } },
+  });
 
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
   const signedPeople = getSignedPeopleCount(event);
@@ -105,7 +114,9 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
             <div className="flex flex-1 items-center gap-1 overflow-hidden text-neutral-500">
               <span>Host:</span>
               <span className="truncate text-neutral-400 dark:text-white">
-                {event.host}
+                {event.host?.includes("club:") && clubHost
+                  ? clubHost.title
+                  : event.host}
               </span>
             </div>
             <div className="flex items-center gap-2">

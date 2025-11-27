@@ -5,6 +5,7 @@ import AddEventButton from "./AddEventButton.tsx";
 import { ModalWindow } from "./CreationModal/ModalWindow.tsx";
 import { EventListType, EventsList } from "./EventsList.tsx";
 import NameForm from "./CreationModal/NameForm.tsx";
+import { $clubs } from "@/api/clubs/index.ts";
 
 /**
  * Главная страница модуля воркшопов
@@ -20,14 +21,20 @@ export function EventsAdminPage() {
 
   const { data: events } = $workshops.useQuery("get", "/workshops/");
   const { data: eventsUser } = $workshops.useQuery("get", "/users/me");
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
 
   useEffect(() => {
-    if (eventsUser && eventsUser.role !== "admin") {
+    if (
+      eventsUser &&
+      eventsUser.role !== "admin" &&
+      clubsUser &&
+      clubsUser.leader_in_clubs.length === 0
+    ) {
       navigate({ to: "/events" });
     }
-  }, [eventsUser, navigate]);
+  }, [eventsUser, clubsUser, navigate]);
 
-  if (eventsUser?.role !== "admin") {
+  if (eventsUser?.role !== "admin" && clubsUser?.leader_in_clubs.length === 0) {
     return null;
   }
 
@@ -48,7 +55,12 @@ export function EventsAdminPage() {
 
       <EventsList
         events={events}
-        eventListType={EventListType.ADMIN}
+        eventListType={
+          clubsUser?.leader_in_clubs.length === 0
+            ? EventListType.ADMIN
+            : EventListType.CLUB_LEADER
+        }
+        clubUser={clubsUser}
         onAddEvent={(date) => {
           setModalDate(date);
           setModalOpen(true);
