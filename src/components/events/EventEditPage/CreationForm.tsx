@@ -211,7 +211,7 @@ export function CreationForm({
           if (onClose) {
             onClose();
           }
-          redirect({
+          throw redirect({
             to: "/events/$id",
             params: { id: initialEvent?.id || "" },
             reloadDocument: true,
@@ -257,7 +257,7 @@ export function CreationForm({
             `Event "${apiData.english_name || apiData.russian_name}" has been successfully updated.`,
           );
           onClose?.();
-          redirect({
+          throw redirect({
             to: "/events/$id",
             params: { id: initialEvent?.id || "" },
             reloadDocument: true,

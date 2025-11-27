@@ -26,7 +26,7 @@ export default function TagsSelector<T extends GenericBadgeFormScheme>({
 }: TagsSelectorProps<T>) {
   const badges = useMemo(() => {
     if (tagsToExlude.length > 0) {
-      return form.badges.filter((b) => tagsToExlude.includes(b.title));
+      return form.badges.filter((b) => !tagsToExlude.includes(b.title));
     }
 
     return form.badges;
@@ -75,6 +75,7 @@ export default function TagsSelector<T extends GenericBadgeFormScheme>({
         {badges.length !== 0 ? (
           Object.entries(eventBadges)
             .filter(([value]) => hasBadgeWithTitle(value))
+            .filter(([value]) => !tagsToExlude.includes(value))
             .sort((a, _) => (a[0] === "recommended" ? -1 : 1))
             .map(([value, badge], index) => (
               <span
@@ -93,6 +94,7 @@ export default function TagsSelector<T extends GenericBadgeFormScheme>({
         <div className="input flex h-auto w-full cursor-default flex-wrap p-2 select-none">
           {Object.entries(eventBadges)
             .filter(([value]) => !hasBadgeWithTitle(value))
+            .filter(([value]) => !tagsToExlude.includes(value))
             .sort((a, _) => (a[0] === "recommended" ? -1 : 1))
             .map(([value, badge], index) => (
               <span

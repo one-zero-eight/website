@@ -202,7 +202,11 @@ export default function NameDescription({
         </label>
       </fieldset>
 
-      <TagsSelector<EventFormState> form={eventForm} setForm={setEventForm} />
+      <TagsSelector<EventFormState>
+        tagsToExlude={!isAdmin ? ["recommended"] : []}
+        form={eventForm}
+        setForm={setEventForm}
+      />
     </div>
   );
 }
