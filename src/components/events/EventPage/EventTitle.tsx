@@ -73,11 +73,9 @@ export default function EventTitle({
   return (
     <div className={clsx("card card-border", className)}>
       <div
-        className="mb-4 flex items-start justify-between rounded-t-(--radius-box) bg-cover bg-center bg-repeat p-4 pb-16 md:pb-32 lg:pb-36"
-        // bg-size-[640px]
+        className={`mb-4 flex items-start justify-between rounded-t-(--radius-box) bg-cover bg-center bg-repeat p-4 pb-18 md:pb-48 lg:pb-64 ${event.image_file_id ? "bg-contain bg-no-repeat" : "bg-size-[640px]"}`}
         style={{
-          // backgroundImage: `url("${!imageLink ? "/pattern.svg" : imageLink}")`,
-          backgroundImage: `url(${imageLink(event.id)})`,
+          backgroundImage: `url("${event.image_file_id ? imageLink(event.id) : "/pattern.svg"}")`,
         }}
       >
         <div className="flex gap-2">

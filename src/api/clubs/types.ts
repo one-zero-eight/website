@@ -785,7 +785,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Club info */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
@@ -793,6 +793,13 @@ export interface operations {
         content: {
           "application/json": unknown;
         };
+      };
+      /** @description Redirect to the club logo */
+      307: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Club not found or no logo available */
       404: {
@@ -950,7 +957,7 @@ export interface operations {
         };
         content: {
           "application/json": {
-            [key: string]: components["schemas"]["Leader"];
+            [key: string]: components["schemas"]["Leader"] | null;
           };
         };
       };

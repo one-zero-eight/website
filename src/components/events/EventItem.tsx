@@ -45,10 +45,9 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
         )}
       >
         <div
-          className={`flex items-center justify-between rounded-t-(--radius-box) bg-size-[640px] bg-center bg-repeat p-4 pb-20`}
+          className={`flex items-center justify-between rounded-t-(--radius-box) bg-size-[640px] bg-center bg-repeat p-4 pb-34`}
           style={{
-            // backgroundImage: `url("${!imageLink ? "/pattern.svg" : imageLink}")`,
-            backgroundImage: `url(${imageLink(event.id)})`,
+            backgroundImage: `url("${event.image_file_id ? imageLink(event.id) : "/pattern.svg"}")`,
           }}
         >
           <LanguageBadge event={event} className="inline-flex md:hidden" />
