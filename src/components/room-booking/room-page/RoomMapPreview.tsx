@@ -47,7 +47,7 @@ export function RoomMapPreview({ roomId }: { roomId: string }) {
 
   if (isLoading) {
     return (
-      <div className="border-border bg-muted/30 rounded-field flex min-h-64 items-center justify-center border">
+      <div className="border-border bg-muted/30 rounded-field flex min-h-64 w-full items-center justify-center border">
         <div className="text-center">
           <div className="border-inh-primary mx-auto h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
           <p className="text-muted-foreground mt-2 text-sm">Loading map...</p>
@@ -58,7 +58,7 @@ export function RoomMapPreview({ roomId }: { roomId: string }) {
 
   if (!sceneWithRoom || !roomArea) {
     return (
-      <div className="border-border bg-muted/30 rounded-field flex min-h-64 items-center justify-center border">
+      <div className="border-border bg-muted/30 rounded-field flex min-h-64 w-full items-center justify-center border">
         <div className="text-center">
           <span className="text-muted-foreground icon-[material-symbols--map-outline] text-2xl" />
           <p className="text-muted-foreground mt-2 text-sm">
@@ -70,7 +70,7 @@ export function RoomMapPreview({ roomId }: { roomId: string }) {
   }
 
   return (
-    <div className="border-border bg-background rounded-field relative min-h-64 overflow-hidden border shadow-xs">
+    <div className="border-border bg-background rounded-field relative min-h-64 w-full overflow-hidden border shadow-xs">
       <MapView
         scene={sceneWithRoom}
         highlightAreas={[roomArea]}
