@@ -273,17 +273,17 @@ export function ClubLeaguePage() {
         </h2>
         <p className="text-base-content/50 mb-4">
           If you need any assistance, advice, or resources to maintain and
-          develop your club, contact our Student Clubs Advisor:
+          develop your club, contact our Student Clubs Manager:
         </p>
         <div className="text-base-content">
-          <p className="text-lg font-semibold">Evgeniia Dyuzhakova</p>
+          <p className="text-lg font-semibold">Timofey Konovalov</p>
           <a
-            href="https://t.me/dyuzhakovajane"
+            href="https://t.me/T_Konovalov"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary inline-flex items-center gap-1 text-lg hover:underline"
           >
-            @dyuzhakovajane
+            @T_Konovalov
           </a>
         </div>
       </div>
