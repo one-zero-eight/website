@@ -18,11 +18,11 @@ function RouteComponent() {
     "/img/108bows.webp",
     "/img/108forest.webp",
     "/img/garage.webp",
+    "/img/hellowin1.webp",
     "/img/hackaton.webp",
     "/img/artem-hellowin.webp",
     "/img/ruslan-gosling.webp",
     "/img/slippers.webp",
-    "/img/hellowin1.webp",
     "/img/hellowin2.webp",
   ];
 
