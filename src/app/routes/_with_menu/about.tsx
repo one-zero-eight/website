@@ -14,16 +14,16 @@ function RouteComponent() {
   } = useGitHubMembers();
 
   const carouselImages: string[] = [
-    "/img/clubfest.jpeg",
-    "/img/108bows.jpg",
-    "/img/108forest.jpg",
-    "/img/garage.jpg",
-    "/img/hackaton.jpg",
-    "/img/artem-hellowin.jpg",
-    "/img/ruslan-gosling.jpg",
-    "/img/slippers.jpg",
-    "/img/hellowin1.jpg",
-    "/img/hellowin2.jpg",
+    "/img/clubfest.webp",
+    "/img/108bows.webp",
+    "/img/108forest.webp",
+    "/img/garage.webp",
+    "/img/hackaton.webp",
+    "/img/artem-hellowin.webp",
+    "/img/ruslan-gosling.webp",
+    "/img/slippers.webp",
+    "/img/hellowin1.webp",
+    "/img/hellowin2.webp",
   ];
 
   const mainSections = [
