@@ -25,6 +25,7 @@ import { Route as With_menuExtensionRouteImport } from "./routes/_with_menu/exte
 import { Route as With_menuDormsRouteImport } from "./routes/_with_menu/dorms";
 import { Route as With_menuDashboardRouteImport } from "./routes/_with_menu/dashboard";
 import { Route as With_menuCalendarRouteImport } from "./routes/_with_menu/calendar";
+import { Route as With_menuAboutRouteImport } from "./routes/_with_menu/about";
 import { Route as With_menu42RouteImport } from "./routes/_with_menu/42";
 import { Route as With_menuSearchIndexRouteImport } from "./routes/_with_menu/search/index";
 import { Route as With_menuScheduleIndexRouteImport } from "./routes/_with_menu/schedule/index";
@@ -131,6 +132,11 @@ const With_menuDashboardRoute = With_menuDashboardRouteImport.update({
 const With_menuCalendarRoute = With_menuCalendarRouteImport.update({
   id: "/calendar",
   path: "/calendar",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
+const With_menuAboutRoute = With_menuAboutRouteImport.update({
+  id: "/about",
+  path: "/about",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menu42Route = With_menu42RouteImport.update({
@@ -287,6 +293,7 @@ const GuardGoogleFilesSlugJoinRoute =
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/42": typeof With_menu42Route;
+  "/about": typeof With_menuAboutRoute;
   "/calendar": typeof With_menuCalendarRoute;
   "/dashboard": typeof With_menuDashboardRoute;
   "/dorms": typeof With_menuDormsRoute;
@@ -332,6 +339,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/42": typeof With_menu42Route;
+  "/about": typeof With_menuAboutRoute;
   "/calendar": typeof With_menuCalendarRoute;
   "/dashboard": typeof With_menuDashboardRoute;
   "/dorms": typeof With_menuDormsRoute;
@@ -379,6 +387,7 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/_with_menu": typeof With_menuRouteRouteWithChildren;
   "/_with_menu/42": typeof With_menu42Route;
+  "/_with_menu/about": typeof With_menuAboutRoute;
   "/_with_menu/calendar": typeof With_menuCalendarRoute;
   "/_with_menu/dashboard": typeof With_menuDashboardRoute;
   "/_with_menu/dorms": typeof With_menuDormsRoute;
@@ -426,6 +435,7 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/42"
+    | "/about"
     | "/calendar"
     | "/dashboard"
     | "/dorms"
@@ -471,6 +481,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | "/42"
+    | "/about"
     | "/calendar"
     | "/dashboard"
     | "/dorms"
@@ -517,6 +528,7 @@ export interface FileRouteTypes {
     | "/"
     | "/_with_menu"
     | "/_with_menu/42"
+    | "/_with_menu/about"
     | "/_with_menu/calendar"
     | "/_with_menu/dashboard"
     | "/_with_menu/dorms"
@@ -679,6 +691,13 @@ declare module "@tanstack/react-router" {
       path: "/calendar";
       fullPath: "/calendar";
       preLoaderRoute: typeof With_menuCalendarRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/about": {
+      id: "/_with_menu/about";
+      path: "/about";
+      fullPath: "/about";
+      preLoaderRoute: typeof With_menuAboutRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/42": {
@@ -882,6 +901,7 @@ declare module "@tanstack/react-router" {
 
 interface With_menuRouteRouteChildren {
   With_menu42Route: typeof With_menu42Route;
+  With_menuAboutRoute: typeof With_menuAboutRoute;
   With_menuCalendarRoute: typeof With_menuCalendarRoute;
   With_menuDashboardRoute: typeof With_menuDashboardRoute;
   With_menuDormsRoute: typeof With_menuDormsRoute;
@@ -925,6 +945,7 @@ interface With_menuRouteRouteChildren {
 
 const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menu42Route: With_menu42Route,
+  With_menuAboutRoute: With_menuAboutRoute,
   With_menuCalendarRoute: With_menuCalendarRoute,
   With_menuDashboardRoute: With_menuDashboardRoute,
   With_menuDormsRoute: With_menuDormsRoute,
