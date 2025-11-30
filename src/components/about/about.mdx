@@ -1,0 +1,84 @@
+import { TeamMembers } from "./TeamMembers.tsx";
+import { SectionHeader } from "./SectionHeader.tsx";
+import { ResourceCard } from "@/components/about/cards/ResourceCard.tsx";
+
+<SectionHeader
+  id="intro"
+  title="Who we are?"
+  className="mb-6 text-start text-black dark:text-white"
+/>
+
+**_one-zero-eight_** — is a community of Innopolis University students passionate about technology. We care about education we get, tools we use and place we live in. Our mission is to create the perfect environment for student life.
+
+<SectionHeader
+  id="team"
+  title="Team"
+  className="mb-6 text-start text-black dark:text-white"
+/>
+
+The core of one-zero-eight and the main resource is our team:
+
+<TeamMembers />
+
+<SectionHeader
+  id="projects"
+  title="Projects"
+  className="mb-6 text-start text-black dark:text-white"
+/>
+
+We improve life at Innopolis University creating our projects, which solve our users' daily issues.
+
+**InNoHassle** - our flagman project, the ecosystem that combines university services in one website providing convenience both for students and university staff.
+
+You can check all released and developing projects in our <a href="https://github.com/one-zero-eight" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">GitHub main page</a>.
+
+<SectionHeader
+  id="feedback"
+  title="Feedback"
+  className="mb-6 text-start text-black dark:text-white"
+/>
+
+Have an issue with the service? Send us the alert of a trouble in the Google Form: <a href="https://forms.gle/2vMmu4vSoVShvbMw6" className="text-primary underline italic hover:underline">leave a feedback or report issue</a>. Leaving your feedback, improvements suggestions are also welcome in the form.
+
+<div className="mt-6 flex w-full justify-center">
+  <ResourceCard
+    title="Feedback Report"
+    icon="icon-[mdi--message-alert-outline]"
+    link="https://forms.gle/2vMmu4vSoVShvbMw6"
+    color="text-purple-500"
+    className="w-30 delay-300"
+  />
+</div>
+
+<SectionHeader
+  id="join"
+  title="Join us"
+  className="mb-6 text-start text-black dark:text-white"
+/>
+
+Want to become a part of the projects? Make a contribution or be a new member of our community? Follow us on GitHub, Telegram and <a href="https://t.me/one_zero_eight_bot">fill out the form in the bot to join us!</a>
+
+<div className="mt-6 flex w-full flex-wrap justify-center gap-2">
+  <ResourceCard
+    title="Telegram Channel"
+    icon="icon-[uil--telegram-alt]"
+    link="https://t.me/one_zero_eight"
+    className="w-30 delay-400"
+  />
+
+<ResourceCard
+  title="Join Us!"
+  icon="icon-[mdi--robot-excited-outline]"
+  link="https://t.me/one_zero_eight_bot"
+  color="text-green-500"
+  className="delay-600"
+/>
+
+  <ResourceCard
+    title="GitHub"
+    icon="icon-[mdi--github]"
+    link="https://github.com/one-zero-eight"
+    color="text-gray-800 dark:text-white"
+    className="delay-700"
+  />
+</div>
