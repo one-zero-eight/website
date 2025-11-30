@@ -18,7 +18,7 @@ function RouteComponent() {
     "/img/108bows.webp",
     "/img/108forest.webp",
     "/img/garage.webp",
-    "/img/hellowin1.webp",
+
     "/img/hackaton.webp",
     "/img/artem-hellowin.webp",
     "/img/ruslan-gosling.webp",
@@ -153,7 +153,7 @@ function RouteComponent() {
               href={member.html_url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`animate-in slide-in-from-bottom-4 bg-primary dark:bg-base-200 flex flex-col items-center rounded-lg p-3 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md delay-${100 + index * 50}`}
+              className={`animate-in slide-in-from-bottom-4 dark:bg-base-200 flex flex-col items-center rounded-lg bg-gray-200 p-3 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md delay-${100 + index * 50}`}
             >
               <img
                 src={member.avatar_url}
