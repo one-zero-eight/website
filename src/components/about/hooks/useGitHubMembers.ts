@@ -22,8 +22,7 @@ export const useGitHubMembers = () => {
         throw new Error(`GitHub API error: ${response.status}`);
       }
 
-      const members = await response.json();
-      return members;
+      return await response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 минут
     refetchOnWindowFocus: false,
