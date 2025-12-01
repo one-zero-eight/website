@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useState } from "react";
 
 interface SectionHeaderProps {
   id: string;
@@ -7,6 +8,17 @@ interface SectionHeaderProps {
 }
 
 export const SectionHeader = ({ id, title, className }: SectionHeaderProps) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const url = `${window.location.origin}${window.location.pathname}#${id}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    window.location.hash = id;
+  };
+
   return (
     <h2
       id={id}
@@ -23,10 +35,18 @@ export const SectionHeader = ({ id, title, className }: SectionHeaderProps) => {
       </a>
       <a
         href={`#${id}`}
-        className="text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+        onClick={handleCopy}
+        className="cursor-pointer text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
         aria-label={`Link to ${title}`}
       >
-        <span className="icon-[mdi--link-variant] text-xl" />
+        <span
+          className={clsx(
+            "text-xl",
+            copied
+              ? "icon-[mdi--check] text-green-500"
+              : "icon-[mdi--link-variant]",
+          )}
+        />
       </a>
     </h2>
   );
