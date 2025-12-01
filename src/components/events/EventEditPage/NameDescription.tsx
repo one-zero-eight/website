@@ -1,13 +1,19 @@
 import { ChangeEvent, useState } from "react";
-import { EventFormErrors, EventFormState } from "./CreationForm";
+import { EventFormErrors } from "./CreationForm";
 import clsx from "clsx";
 import { WorkshopLanguage } from "@/api/workshops/types";
 import TagsSelector from "./TagsSelector";
+import { EventFormState } from "../event-utils";
+import { SchemaClub } from "@/api/clubs/types";
+import { $clubs } from "@/api/clubs";
 
 export interface NameDescriptionProps {
   eventForm: EventFormState;
   setEventForm: (v: EventFormState) => void;
+  clubs: SchemaClub[];
+  isAdmin?: boolean;
   errors: EventFormErrors;
+  className?: string;
 }
 
 /**
@@ -20,15 +26,17 @@ export default function NameDescription({
   eventForm,
   setEventForm,
   errors,
+  clubs,
+  isAdmin = false,
+  className,
 }: NameDescriptionProps) {
-  const [currentTab, setCurrentTab] = useState<string>(
-    eventForm.language !== "both" ? eventForm.language : "english",
-  );
+  const [currentTab, setCurrentTab] = useState<string>("english");
+  const [isClubSelect, setIsClubSelect] = useState<boolean>(true);
+
+  const { data: clubList } = $clubs.useQuery("get", "/clubs/");
 
   const updateLanguage = (e: ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-
-    if (eventForm.language !== value && value !== "both") setCurrentTab(value);
 
     setEventForm({
       ...eventForm,
@@ -37,25 +45,26 @@ export default function NameDescription({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className={clsx("flex flex-col gap-3", className)}>
       {/* Language Select */}
-      <label className="select w-full">
-        <span className="label">Language</span>
-        <select value={eventForm.language} onChange={updateLanguage}>
+      <fieldset className="fieldset">
+        <legend className="fieldset-legend">
+          Language of the event: <span className="text-red-500">*</span>
+        </legend>
+        <select
+          value={eventForm.language || ""}
+          onChange={updateLanguage}
+          className="select w-full"
+        >
           <option value="english">English</option>
           <option value="russian">Russian</option>
           <option value="both">Russian & English</option>
         </select>
-      </label>
+      </fieldset>
+      <div className="divider my-0.5" />
       {/* Name & Description */}
       <div>
-        <div
-          role="tablist"
-          className={clsx(
-            "tabs tabs-box mb-2 flex-nowrap",
-            eventForm.language !== "both" ? "hidden" : "flex",
-          )}
-        >
+        <div role="tablist" className={clsx("tabs tabs-box mb-2 flex-nowrap")}>
           <span
             role="tab"
             onClick={() => setCurrentTab("english")}
@@ -114,17 +123,74 @@ export default function NameDescription({
           Description supports markdown
         </span>
       </div>
+      <div className="divider my-0.5" />
       {/* Host */}
       <fieldset className="fieldset">
-        <legend className="fieldset-legend">Host:</legend>
-        <input
-          type="text"
-          className={clsx("input w-full", errors.host && "input-error")}
-          placeholder="Host"
-          value={eventForm.host}
-          onChange={(e) => setEventForm({ ...eventForm, host: e.target.value })}
-          maxLength={255}
-        />
+        <legend className="fieldset-legend">
+          Host: <span className="text-red-500">*</span>
+        </legend>
+        {clubs.length > 0 && !isAdmin && (
+          <select
+            className="select"
+            value={eventForm.host?.split(":")[1] || "Pick a club"}
+            onChange={(e) => {
+              const clubHost = `club:${e.target.value}`;
+              setEventForm({ ...eventForm, host: clubHost });
+            }}
+          >
+            <option value="Pick a club" disabled>
+              Pick a club
+            </option>
+            {clubs.map((club) => (
+              <option key={club.id} value={club.id}>
+                {club.title}
+              </option>
+            ))}
+          </select>
+        )}
+        {isAdmin && (
+          <div className="flex flex-col gap-2">
+            <label className="label">
+              <input
+                type="checkbox"
+                checked={isClubSelect}
+                onChange={(e) => setIsClubSelect(e.target.checked)}
+                className="toggle"
+              />
+              Select from clubs
+            </label>
+            {isClubSelect ? (
+              <select
+                className="select w-full"
+                value={eventForm.host?.split(":")[1] || "Pick a club"}
+                onChange={(e) => {
+                  const clubHost = `club:${e.target.value}`;
+                  setEventForm({ ...eventForm, host: clubHost });
+                }}
+              >
+                <option value="Pick a club" disabled>
+                  Pick a club
+                </option>
+                {clubList?.map((club) => (
+                  <option key={club.id} value={club.id}>
+                    {club.title}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                className={clsx("input w-full", errors.host && "input-error")}
+                placeholder="Host"
+                value={eventForm.host || ""}
+                onChange={(e) =>
+                  setEventForm({ ...eventForm, host: e.target.value })
+                }
+                maxLength={255}
+              />
+            )}
+          </div>
+        )}
         <label
           className={clsx(
             !errors.host ? "label" : "text-sm text-red-500 dark:text-red-400",
@@ -136,7 +202,11 @@ export default function NameDescription({
         </label>
       </fieldset>
 
-      <TagsSelector<EventFormState> form={eventForm} setForm={setEventForm} />
+      <TagsSelector<EventFormState>
+        tagsToExlude={!isAdmin ? ["recommended"] : []}
+        form={eventForm}
+        setForm={setEventForm}
+      />
     </div>
   );
 }
@@ -166,7 +236,10 @@ function TabContent({
 }: TabContentProps) {
   return (
     <div className={clsx(className)}>
-      <label className="floating-label">
+      <fieldset className="fieldset">
+        <legend className="fieldset-legend">
+          Title: <span className="text-red-500">*</span>
+        </legend>
         <input
           className={clsx("input w-full", nameError && "input-error")}
           value={nameValue}
@@ -175,8 +248,7 @@ function TabContent({
           maxLength={255}
           placeholder={`${language} Title`}
         />
-        <span>{language} Title</span>
-      </label>
+      </fieldset>
 
       {nameError && (
         <p className="mt-1 text-sm text-red-500 dark:text-red-400">

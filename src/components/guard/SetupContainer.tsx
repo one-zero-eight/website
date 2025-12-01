@@ -5,7 +5,8 @@ import { extractSpreadsheetId, loadGmail, saveGmail } from "./utils";
 import { ModeToggle } from "./ModeToggle";
 import { CreateInstructions, CopyInstructions } from "./Instructions";
 import { SetupResult } from "./SetupResult";
-import { ROLE_LABELS, DEFAULT_MODE } from "./consts";
+import { DEFAULT_MODE } from "./consts";
+import { RolesSwitch } from "./JoinsList";
 
 interface SetupContainerProps {
   serviceEmail: string;
@@ -24,6 +25,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
     title: string;
     fileId: string;
     fileType: string;
+    guardingMethod: string;
     roleDisplay: string;
     joinLink: string;
   } | null>(null);
@@ -93,6 +95,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
               title: data.title,
               fileId: data.file_id,
               fileType: "spreadsheet",
+              guardingMethod: mode,
               roleDisplay: data.default_role,
               joinLink: data.join_link,
             });
@@ -147,6 +150,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
             title: data.title,
             fileId: data.file_id,
             fileType: data.file_type,
+            guardingMethod: mode,
             roleDisplay: data.default_role,
             joinLink: data.join_link,
           });
@@ -225,7 +229,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
                 if (error) setError("");
               }}
               onBlur={handleBlur}
-              placeholder="https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+              placeholder="https://docs.google.com/spreadsheets/d/1gqfGNkl_nLI5vXc5br8-J__33kj8Kr3fI2xqrMBK2JA"
               className="border-base-content/20 bg-inh-primary/5 focus:border-inh-primary focus:bg-inh-primary/10 rounded-field w-full border-2 px-4 py-2 outline-hidden transition-colors"
             />
           </div>
@@ -250,9 +254,13 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
 
         <div className="flex flex-col gap-2">
           <label className="text-base-content/80 font-medium">
-            Respondent Role:
+            Default Role:
           </label>
-          <div className="flex gap-2">
+          <RolesSwitch
+            currentRole={respondentRole}
+            onSwitch={setRespondentRole}
+          ></RolesSwitch>
+          {/* <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setRespondentRole(FileRole.writer)}
@@ -275,7 +283,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
             >
               {ROLE_LABELS.reader}
             </button>
-          </div>
+          </div> */}
         </div>
 
         {error && (

@@ -2,27 +2,27 @@ import { SchemaWorkshop } from "@/api/workshops/types";
 import { eventBadges } from "../EventBadges";
 import { formatDate, formatTime, parseTime } from "../date-utils";
 import { Link } from "@tanstack/react-router";
-import { getSignedPeopleCount } from "../event-utils";
+import { getSignedPeopleCount, imageLink } from "../event-utils";
 import clsx from "clsx";
 import { useCopyToClipboard } from "usehooks-ts";
 import { useState } from "react";
 import { CheckInButton } from "../CheckInButton";
 import { LanguageBadge } from "../LanguageBadge";
-import { MAX_CAPACITY } from "../EventCreationModal/DateTimePlaceToggles";
+import { MAX_CAPACITY } from "../EventEditPage/DateTime";
 
 export interface EventTitleProps {
   event: SchemaWorkshop;
   pageLanguage: string | null;
   setPageLanguage: (v: string | null) => void;
-  openModal: ((v: boolean) => void) | null;
+  isAdmin: boolean;
   className?: string;
 }
 
 export default function EventTitle({
   event,
   pageLanguage,
+  isAdmin,
   setPageLanguage,
-  openModal,
   className,
 }: EventTitleProps) {
   const [_, _copy] = useCopyToClipboard();
@@ -72,7 +72,12 @@ export default function EventTitle({
 
   return (
     <div className={clsx("card card-border", className)}>
-      <div className="mb-4 flex items-start justify-between rounded-t-(--radius-box) bg-[url('/pattern.svg')] bg-size-[640px] bg-repeat p-4 pb-16 md:pb-32 lg:pb-36">
+      <div
+        className={`mb-4 flex items-start justify-between rounded-t-(--radius-box) bg-cover bg-center bg-repeat p-4 pb-18 md:pb-48 lg:pb-64 ${event.image_file_id ? "bg-contain bg-no-repeat" : "bg-size-[640px]"}`}
+        style={{
+          backgroundImage: `url("${event.image_file_id ? imageLink(event.id) : "/pattern.svg"}")`,
+        }}
+      >
         <div className="flex gap-2">
           <Link to="/events" className="btn btn-circle">
             <span className="icon-[line-md--arrow-left] text-2xl" />
@@ -86,10 +91,14 @@ export default function EventTitle({
               )}
             />
           </span>
-          {openModal && (
-            <span className="btn btn-circle" onClick={() => openModal(true)}>
+          {isAdmin && (
+            <Link
+              className="btn btn-circle"
+              to="/events/$id/edit"
+              params={{ id: event.id }}
+            >
               <span className="icon-[qlementine-icons--pen-12] text-lg" />
-            </span>
+            </Link>
           )}
         </div>
         <LanguageBadge event={event} className="inline-flex md:hidden" />
@@ -128,25 +137,23 @@ export default function EventTitle({
               </span>
             )}
           </div>
-          {event.language === "both" && (
-            <div className={clsx("tabs tabs-box hidden rounded-full md:flex")}>
-              <input
-                type="radio"
-                name="language_tabs"
-                className="tab h-auto rounded-full py-1"
-                aria-label="English"
-                onClick={() => setPageLanguage("english")}
-                defaultChecked
-              />
-              <input
-                type="radio"
-                name="language_tabs"
-                className="tab h-auto rounded-full py-1"
-                onClick={() => setPageLanguage("russian")}
-                aria-label="Russian"
-              />
-            </div>
-          )}
+          <div className={clsx("tabs tabs-box hidden rounded-full md:flex")}>
+            <input
+              type="radio"
+              name="language_tabs"
+              className="tab h-auto rounded-full py-1"
+              aria-label="English"
+              onClick={() => setPageLanguage("english")}
+              defaultChecked
+            />
+            <input
+              type="radio"
+              name="language_tabs"
+              className="tab h-auto rounded-full py-1"
+              onClick={() => setPageLanguage("russian")}
+              aria-label="Russian"
+            />
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <LanguageBadge
@@ -158,28 +165,30 @@ export default function EventTitle({
           </h1>
         </div>
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
-          <div className="flex items-center gap-1">
-            <span className="text-primary icon-[ic--baseline-place] text-2xl" />
-            <Link
-              to="/maps"
-              search={{ q: event.place || "" }}
-              className="cursor-pointer text-neutral-400 underline hover:text-neutral-700"
-              title="Click to view on map"
-            >
-              {event.place}
-            </Link>
-          </div>
+          {event.place && (
+            <div className="flex items-center gap-1">
+              <span className="text-primary icon-[ic--baseline-place] text-2xl" />
+              <Link
+                to="/maps"
+                search={{ q: event.place || "" }}
+                className="cursor-pointer text-neutral-400 underline hover:text-neutral-700"
+                title="Click to view on map"
+              >
+                {event.place}
+              </Link>
+            </div>
+          )}
           <div className="flex items-center gap-1">
             <span className="text-primary icon-[mingcute--calendar-fill] text-2xl" />
             <span className="text-neutral-400">
-              {formatDate(event.dtstart)}
+              {formatDate(event.dtstart || "")}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-primary icon-[iconamoon--clock-fill] text-2xl" />
             <span className="text-neutral-400">
-              {formatTime(parseTime(event.dtstart))}-
-              {formatTime(parseTime(event.dtend))}
+              {formatTime(parseTime(event.dtstart || ""))}-
+              {formatTime(parseTime(event.dtend || ""))}
             </span>
           </div>
           <div className="flex items-center gap-1">

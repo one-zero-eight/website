@@ -1,10 +1,11 @@
-import { $workshops, workshopsTypes } from "@/api/workshops";
+import { $workshops } from "@/api/workshops";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import AddEventButton from "./AddEventButton.tsx";
-import { CreationForm } from "./EventCreationModal/CreationForm.tsx";
-import { ModalWindow } from "./EventCreationModal/ModalWindow.tsx";
+import { ModalWindow } from "./CreationModal/ModalWindow.tsx";
 import { EventListType, EventsList } from "./EventsList.tsx";
+import NameForm from "./CreationModal/NameForm.tsx";
+import { $clubs } from "@/api/clubs/index.ts";
 
 /**
  * Главная страница модуля воркшопов
@@ -16,20 +17,24 @@ export function EventsAdminPage() {
   const navigate = useNavigate();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalWorkshop, setModalWorkshop] =
-    useState<workshopsTypes.SchemaWorkshop | null>(null);
-  const [modalDate, setModalDate] = useState<string | null>(null);
+  const [_, setModalDate] = useState<string | null>(null);
 
   const { data: events } = $workshops.useQuery("get", "/workshops/");
   const { data: eventsUser } = $workshops.useQuery("get", "/users/me");
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
 
   useEffect(() => {
-    if (eventsUser && eventsUser.role !== "admin") {
+    if (
+      eventsUser &&
+      eventsUser.role !== "admin" &&
+      clubsUser &&
+      clubsUser.leader_in_clubs.length === 0
+    ) {
       navigate({ to: "/events" });
     }
-  }, [eventsUser, navigate]);
+  }, [eventsUser, clubsUser, navigate]);
 
-  if (eventsUser?.role !== "admin") {
+  if (eventsUser?.role !== "admin" && clubsUser?.leader_in_clubs.length === 0) {
     return null;
   }
 
@@ -50,13 +55,14 @@ export function EventsAdminPage() {
 
       <EventsList
         events={events}
-        eventListType={EventListType.ADMIN}
+        eventListType={
+          clubsUser?.leader_in_clubs.length === 0
+            ? EventListType.ADMIN
+            : EventListType.CLUB_LEADER
+        }
+        clubUser={clubsUser}
         onAddEvent={(date) => {
           setModalDate(date);
-          setModalOpen(true);
-        }}
-        onEditEvent={(event) => {
-          setModalWorkshop(event);
           setModalOpen(true);
         }}
       />
@@ -66,17 +72,12 @@ export function EventsAdminPage() {
         open={modalOpen}
         onOpenChange={() => {
           setModalOpen(false);
-          setModalWorkshop(null);
         }}
-        title={modalWorkshop ? "Edit Event" : "Create Event"}
+        title="Create Event"
       >
-        {/* Форма создания/редактирования воркшопа. При редактировании передаются данные существующего воркшопа */}
-        <CreationForm
-          initialEvent={modalWorkshop ?? undefined}
-          initialDate={modalDate ?? undefined}
+        <NameForm
           onClose={() => {
             setModalOpen(false);
-            setModalWorkshop(null);
           }}
         />
       </ModalWindow>

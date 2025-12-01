@@ -152,7 +152,7 @@ export function Description({
           Description
         </span>
         <div className="flex">
-          <div className="prose dark:prose-invert text-justify">
+          <div className="prose dark:prose-invert">
             <MarkdownWithCustomLinks>
               {getEventDescription() || "## No Description"}
             </MarkdownWithCustomLinks>

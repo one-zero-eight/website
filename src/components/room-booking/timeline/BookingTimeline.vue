@@ -57,7 +57,7 @@ const MAX_BOOKING_DURATION = 3 * T.Hour;
 
 const NEW_BOOKING_BOX_ID = "new-booking-box";
 
-const PLACEHOLDER_ROOMS = Array.from({ length: 15 }).fill(
+const PLACEHOLDER_ROOMS = Array.from({ length: 19 }).fill(
   "placeholder",
 ) as "placeholder"[];
 

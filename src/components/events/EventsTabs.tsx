@@ -1,3 +1,4 @@
+import { $clubs } from "@/api/clubs";
 import { $workshops } from "@/api/workshops";
 import { Link } from "@tanstack/react-router";
 
@@ -13,9 +14,13 @@ const eventsTabs: EventsTab[] = [
 
 export function EventsTabs() {
   const { data: workshopsUser } = $workshops.useQuery("get", "/users/me");
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
 
-  if (workshopsUser?.role !== "admin") {
-    return null; // Do not show admin tab if the user is not an admin
+  if (
+    workshopsUser?.role !== "admin" &&
+    clubsUser?.leader_in_clubs.length === 0
+  ) {
+    return null; // Do not show admin tab if the user is not an admin and if not club leader
   }
 
   return (

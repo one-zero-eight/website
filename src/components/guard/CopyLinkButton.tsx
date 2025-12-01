@@ -45,7 +45,7 @@ export function CopyLinkButton({
       className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]}`}
       title="Copy join link"
     >
-      {copied ? MESSAGES.copySuccess : "Join link"}
+      {copied ? MESSAGES.copySuccess : "Copy Join link"}
     </button>
   );
 }

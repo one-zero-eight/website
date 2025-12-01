@@ -5,8 +5,7 @@ import EventTitle from "./EventTitle";
 import MobileMenu from "./MobileMenu";
 import Participants from "./Participants";
 import { useState } from "react";
-import { ModalWindow } from "../EventCreationModal/ModalWindow";
-import { CreationForm } from "../EventCreationModal/CreationForm";
+import { $clubs } from "@/api/clubs";
 
 export interface EventPageProps {
   eventId: string;
@@ -14,9 +13,9 @@ export interface EventPageProps {
 
 export default function EventPage({ eventId }: EventPageProps) {
   const [language, setLanguage] = useState<string | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
 
   const { data: eventUser } = $workshops.useQuery("get", "/users/me");
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
 
   const { data: event, isLoading } = $workshops.useQuery(
     "get",
@@ -47,7 +46,10 @@ export default function EventPage({ eventId }: EventPageProps) {
       <div className="mx-auto mb-[90px] w-full max-w-[1200px] px-4 md:mb-4">
         <EventTitle
           event={event}
-          openModal={eventUser?.role === "admin" ? setModalOpen : null}
+          isAdmin={
+            eventUser?.role === "admin" ||
+            clubsUser?.leader_in_clubs.length !== 0
+          }
           className="my-4"
           pageLanguage={language}
           setPageLanguage={setLanguage}
@@ -60,25 +62,6 @@ export default function EventPage({ eventId }: EventPageProps) {
         </div>
       </div>
       <MobileMenu event={event} />
-
-      {/* Модальное окно для создания/редактирования воркшопа */}
-      {eventUser?.role === "admin" && (
-        <ModalWindow
-          open={modalOpen}
-          onOpenChange={() => {
-            setModalOpen(false);
-          }}
-          title={"Edit Event"}
-        >
-          {/* Форма создания/редактирования воркшопа. При редактировании передаются данные существующего воркшопа */}
-          <CreationForm
-            initialEvent={event}
-            onClose={() => {
-              setModalOpen(false);
-            }}
-          />
-        </ModalWindow>
-      )}
     </>
   );
 }

@@ -130,7 +130,7 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
     );
   }
 
-  if (signedPeople >= event.capacity) {
+  if (signedPeople >= (event.capacity || 0)) {
     return (
       <span className={clsx("btn btn-disabled", className)}>
         No empty places

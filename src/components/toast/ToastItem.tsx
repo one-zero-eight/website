@@ -1,13 +1,35 @@
 import clsx from "clsx";
 import { useCallback, useEffect, useState } from "react";
-import { Toast as ToastType } from "./types.ts";
+import { Toast, ToastType } from "./types.ts";
 
-interface ToastItemProps {
-  toast: ToastType;
+const toastBorders: Record<ToastType, string> = {
+  success: "border-green-500",
+  error: "border-red-500",
+  warning: "border-yellow-500",
+  info: "border-blue-500",
+};
+
+const toastColors: Record<ToastType, string> = {
+  success: "text-green-500",
+  error: "text-red-500",
+  warning: "text-yellow-500",
+  info: "text-blue-500",
+};
+
+const toastIcons: Record<ToastType, string> = {
+  success: "icon-[material-symbols--check-circle-outline]",
+  error: "icon-[material-symbols--error-outline]",
+  warning: "icon-[material-symbols--warning-outline]",
+  info: "icon-[material-symbols--info-outline]",
+};
+
+export function ToastItem({
+  toast,
+  onClose,
+}: {
+  toast: Toast;
   onClose: (id: string) => void;
-}
-
-export function ToastItem({ toast, onClose }: ToastItemProps) {
+}) {
   const [isLeaving, setIsLeaving] = useState(false);
   const [isEntering, setIsEntering] = useState(true);
 
@@ -52,113 +74,32 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
     }
   }, [toast.duration, handleClose]);
 
-  const getToastStyles = () => {
-    const baseStyles = [
-      "flex items-start gap-3 p-4 rounded-box shadow-lg border-l-4 transition-all duration-300 ease-in-out bg-base-200 text-base-content",
-      "transform-gpu",
-    ];
-
-    if (isLeaving) {
-      return clsx(
-        baseStyles,
-        "-translate-y-full opacity-0 sm:translate-y-0 sm:translate-x-full",
-      );
-    }
-
-    if (isEntering) {
-      return clsx(
-        baseStyles,
-        "-translate-y-full opacity-0 sm:translate-y-0 sm:translate-x-full",
-      );
-    }
-
-    switch (toast.type) {
-      case "success":
-        return clsx(baseStyles, "border-green-500");
-      case "error":
-        return clsx(baseStyles, "border-red-500");
-      case "warning":
-        return clsx(baseStyles, "border-yellow-500");
-      case "info":
-        return clsx(baseStyles, "border-blue-500");
-      default:
-        return clsx(baseStyles, "border-gray-500");
-    }
-  };
-
-  const getIcon = () => {
-    switch (toast.type) {
-      case "success":
-        return (
-          <svg
-            className="mt-0.5 h-5 w-5 shrink-0 text-green-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
-      case "error":
-        return (
-          <svg
-            className="mt-0.5 h-5 w-5 shrink-0 text-red-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
-      case "warning":
-        return (
-          <svg
-            className="mt-0.5 h-5 w-5 shrink-0 text-yellow-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
-      case "info":
-        return (
-          <svg
-            className="mt-0.5 h-5 w-5 shrink-0 text-blue-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
-    }
-  };
-
   return (
-    <div className={getToastStyles()}>
-      {getIcon()}
-      <div className="min-w-0 flex-1">
-        <h4 className="text-sm font-semibold">{toast.title}</h4>
-        {toast.message && (
-          <p className="text-base-content/75 mt-1 text-sm">{toast.message}</p>
+    <div
+      className={clsx(
+        "alert transition-all duration-300 ease-in-out",
+        "transform-gpu",
+        isLeaving &&
+          "-translate-y-full opacity-0 sm:translate-x-full sm:translate-y-0",
+        isEntering &&
+          "-translate-y-full opacity-0 sm:translate-x-full sm:translate-y-0",
+        toastBorders[toast.type],
+      )}
+    >
+      <span
+        className={clsx(
+          "text-2xl",
+          toastColors[toast.type],
+          clsx(toastIcons[toast.type]),
         )}
+      />
+      <div className="">
+        <h4 className="font-bold">{toast.title}</h4>
+        {toast.message && <p className="text-xs">{toast.message}</p>}
       </div>
       <button
         onClick={handleClose}
-        className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-field ml-2 shrink-0 p-1 transition-colors"
+        className="btn btn-square btn-sm"
         aria-label="Close notification"
       >
         <span className="icon-[material-symbols--close] text-lg" />

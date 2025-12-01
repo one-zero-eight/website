@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { formatDate, filterByFields } from "./utils";
+import { filterByFields } from "./utils";
 import { MESSAGES } from "./consts";
 import { FileRole } from "./hooks";
 
@@ -59,9 +59,9 @@ function JoinItem({ join, onBan, onUpdateRole }: JoinItemProps) {
       <div className="flex min-w-0 flex-col">
         <Email email={join.gmail} />
         <Email email={join.innomail} />
-        <p className="text-base-content/50 text-xs">
+        {/* <p className="text-base-content/50 text-xs">
           joined at {formatDate(join.joined_at)}
-        </p>
+        </p> */}
       </div>
       <div className="ml-4 flex shrink-0 items-center gap-2">
         <RolesSwitch
@@ -83,7 +83,7 @@ function Email({ email }: { email: string }) {
   );
 }
 
-function RolesSwitch({
+export function RolesSwitch({
   currentRole,
   onSwitch,
 }: {
@@ -105,7 +105,7 @@ function RolesSwitch({
 
   return (
     <button
-      className={`rounded-field bg-base-content/10 flex p-1 text-sm font-medium ${
+      className={`border-base-content/20 bg-inh-primary/5 flex w-fit rounded-lg border-2 p-1 text-sm font-medium ${
         pending ? "cursor-not-allowed opacity-50" : "cursor-pointer opacity-100"
       }`}
       title={`Switch to ${isWriter ? "Reader" : "Writer"}`}
@@ -114,7 +114,7 @@ function RolesSwitch({
       type="button"
     >
       <span
-        className={`rounded-field border-2 px-2 py-1 transition-colors ${
+        className={`rounded-sm border-2 px-1.5 py-0.5 transition-colors ${
           isWriter
             ? "border-primary bg-primary/20 text-primary font-semibold"
             : "text-base-content/70 border-transparent"
@@ -123,7 +123,7 @@ function RolesSwitch({
         Writer
       </span>
       <span
-        className={`rounded-field ml-1 border-2 px-2 py-1 transition-colors ${
+        className={`ml-1 rounded-sm border-2 px-1.5 py-0.5 transition-colors ${
           !isWriter
             ? "border-primary bg-primary/20 text-primary font-semibold"
             : "text-base-content/70 border-transparent"

@@ -1,28 +1,17 @@
 import { FloatingPortal } from "@floating-ui/react";
-import { useEffect, useState } from "react";
+import { useMediaQuery } from "usehooks-ts";
 import { useToast } from "./ToastContext.tsx";
 import { ToastItem } from "./ToastItem.tsx";
 
 export function ToastContainer() {
   const { toasts, hideToast } = useToast();
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkIsMobile();
-    window.addEventListener("resize", checkIsMobile);
-
-    return () => window.removeEventListener("resize", checkIsMobile);
-  }, []);
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
   if (toasts.length === 0) {
     return null;
   }
 
-  // На мобильных устройствах показываем только один toast (последний)
+  // Show only one toast on mobile (the most recent)
   const toastsToShow = isMobile ? toasts.slice(-1) : toasts;
 
   return (

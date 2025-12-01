@@ -1,5 +1,7 @@
+import { $clubs } from "@/api/clubs";
 import { $workshops } from "@/api/workshops";
 import { SchemaWorkshop } from "@/api/workshops/types";
+import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useState, useMemo } from "react";
 
@@ -25,6 +27,14 @@ export default function Participants({
     },
   );
 
+  const clubId = event.host?.includes("club:")
+    ? event.host?.split(":")[1]
+    : null;
+
+  const { data: clubHost } = $clubs.useQuery("get", "/clubs/by-id/{id}", {
+    params: { path: { id: clubId || "" } },
+  });
+
   // Memoized derived values
   const visibleParticipants = useMemo(
     () => (showAll ? participants : participants.slice(0, displayLimit)),
@@ -43,7 +53,46 @@ export default function Participants({
               <span className="icon-[sidekickicons--crown-20-solid]" />
               <span>Event Host</span>
             </h3>
-            <p className="prose dark:prose-invert">{event.host}</p>
+            <p className="prose dark:prose-invert">
+              {event.host?.includes("club:") && clubHost ? (
+                <Link
+                  to="/clubs/$slug"
+                  params={{ slug: clubHost?.slug || "" }}
+                  className="text-primary hover:text-primary/80 cursor-pointer underline"
+                  title="Click to view on map"
+                >
+                  {clubHost.title}
+                </Link>
+              ) : (
+                event.host
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {event.links.length > 0 && (
+        <div className="card card-border">
+          <div className="card-body">
+            <h3 className="card-title flex items-center gap-2 text-xl">
+              {/* <span className="icon-[humbleicons--link]" /> */}
+              <span className="icon-[ic--round-link]" />
+              <span>Links</span>
+            </h3>
+            <div className="flex flex-col gap-2">
+              {event.links.map((link, index) => (
+                <div className="flex gap-2" key={index}>
+                  <Link
+                    to={link.url}
+                    className="text-primary underline"
+                    target="blank"
+                  >
+                    {link.title}
+                  </Link>
+                  <span className="icon-[mingcute--external-link-line] prose dark:prose-invert" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

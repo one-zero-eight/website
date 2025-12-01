@@ -5,21 +5,31 @@ import { formatDate, formatTime, parseTime } from "./date-utils.ts";
 import {
   getInactiveStatusText,
   getSignedPeopleCount,
+  imageLink,
   isEventRecommended,
   isWorkshopActive,
 } from "./event-utils.ts";
 import { eventBadges } from "./EventBadges.tsx";
 import { LanguageBadge } from "./LanguageBadge.tsx";
-import { MAX_CAPACITY } from "./EventCreationModal/DateTimePlaceToggles.tsx";
+import { MAX_CAPACITY } from "./EventEditPage/DateTime.tsx";
+import { $clubs } from "@/api/clubs/index.ts";
 
 export interface EventItemProps {
   event: workshopsTypes.SchemaWorkshop;
-  edit?: ((workshop: workshopsTypes.SchemaWorkshop) => void) | null;
+  isEditable: boolean;
   className?: string;
 }
 
-export function EventItem({ event, edit, className }: EventItemProps) {
+export function EventItem({ event, isEditable, className }: EventItemProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
+
+  const clubId = event.host?.includes("club:")
+    ? event.host?.split(":")[1]
+    : null;
+
+  const { data: clubHost } = $clubs.useQuery("get", "/clubs/by-id/{id}", {
+    params: { path: { id: clubId || "" } },
+  });
 
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
   const signedPeople = getSignedPeopleCount(event);
@@ -43,7 +53,12 @@ export function EventItem({ event, edit, className }: EventItemProps) {
           className,
         )}
       >
-        <div className="flex items-center justify-between rounded-t-(--radius-box) bg-[url('/pattern.svg')] bg-size-[640px] bg-repeat p-4 pb-20">
+        <div
+          className={`flex items-center justify-between rounded-t-(--radius-box) bg-size-[640px] bg-center bg-repeat p-4 pb-34`}
+          style={{
+            backgroundImage: `url("${event.image_file_id ? imageLink(event.id) : "/pattern.svg"}")`,
+          }}
+        >
           <LanguageBadge event={event} className="inline-flex md:hidden" />
           <div className="flex items-center gap-2">
             {!isWorkshopActive(event) && (
@@ -51,13 +66,6 @@ export function EventItem({ event, edit, className }: EventItemProps) {
                 className={`badge badge-soft rounded-lg ${!event.is_draft ? "[--badge-color:var(--color-rose-500)]" : "[--badge-color:var(--color-slate-400)]"}`}
               >
                 {(event.is_draft && "DRAFT") || getInactiveStatusText(event)}
-              </div>
-            )}
-            {!event.is_draft && !event.is_active && (
-              <div
-                className={`badge badge-soft "[--badge-color:var(--color-slate-400)]" rounded-lg`}
-              >
-                Invisible
               </div>
             )}
           </div>
@@ -81,39 +89,45 @@ export function EventItem({ event, edit, className }: EventItemProps) {
               </div>
             ) : null}
           </div>
-          <div className="card-actions flex-col gap-2">
-            <div className="flex gap-2">
-              <div className="flex items-center gap-1">
-                <span className="text-primary icon-[famicons--people] text-xl" />
-                <span className="flex items-center text-neutral-200">
-                  {event.capacity === MAX_CAPACITY
-                    ? signedPeople + "/"
-                    : signedPeople + "/" + event.capacity}
-                  {event.capacity === MAX_CAPACITY && (
-                    <span className="icon-[fa7-solid--infinity]" />
-                  )}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
-                <span className="flex items-end gap-1 text-neutral-200">
-                  <span>{formatDate(event.dtstart)}</span>
-                  <span className="text-neutral-400">at</span>
-                  <span>{formatTime(parseTime(event.dtstart))}</span>
-                </span>
-              </div>
+          <div className="flex gap-2">
+            <div className="flex items-center gap-1">
+              <span className="text-primary icon-[famicons--people] text-xl" />
+              <span className="flex items-center text-neutral-200">
+                {event.capacity === MAX_CAPACITY
+                  ? signedPeople + "/"
+                  : signedPeople + "/" + event.capacity}
+                {event.capacity === MAX_CAPACITY && (
+                  <span className="icon-[fa7-solid--infinity]" />
+                )}
+              </span>
             </div>
-            <div className="flex gap-2 self-end">
-              {edit && (
-                <button
+            <div className="flex items-center gap-1">
+              <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
+              <span className="flex items-end gap-1 text-neutral-200">
+                <span>{formatDate(event.dtstart || "")}</span>
+                <span className="text-neutral-400">at</span>
+                <span>{formatTime(parseTime(event.dtstart || ""))}</span>
+              </span>
+            </div>
+          </div>
+          <div className="flex w-full items-center justify-between gap-2">
+            <div className="flex flex-1 items-center gap-1 overflow-hidden text-neutral-500">
+              <span>Host:</span>
+              <span className="truncate text-neutral-400 dark:text-white">
+                {event.host?.includes("club:") && clubHost
+                  ? clubHost.title
+                  : event.host}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {isEditable && (
+                <Link
+                  to="/events/$id/edit"
+                  params={{ id: event.id }}
                   className="btn btn-square btn-sm border"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    edit(event);
-                  }}
                 >
                   <span className="icon-[qlementine-icons--pen-12]" />
-                </button>
+                </Link>
               )}
               <Link
                 to="/events/$id"

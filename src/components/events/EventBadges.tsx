@@ -11,41 +11,6 @@ export const eventBadges: Record<string, ReactElement> = {
       Recommended
     </div>
   ),
-  iu: (
-    <div
-      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
-    >
-      IU
-    </div>
-  ),
-  music: (
-    <div
-      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
-    >
-      Music
-    </div>
-  ),
-  sports: (
-    <div
-      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
-    >
-      Sports
-    </div>
-  ),
-  art: (
-    <div
-      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
-    >
-      Art
-    </div>
-  ),
-  it: (
-    <div
-      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
-    >
-      IT
-    </div>
-  ),
   education: (
     <div
       className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
@@ -60,25 +25,11 @@ export const eventBadges: Record<string, ReactElement> = {
       319
     </div>
   ),
-  society: (
+  student_activity: (
     <div
       className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
     >
-      Society
-    </div>
-  ),
-  buisness: (
-    <div
-      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
-    >
-      Buisness
-    </div>
-  ),
-  games: (
-    <div
-      className={`badge badge-soft [--badge-color:var(--color-neutral-500)]`}
-    >
-      Games
+      Student Activity
     </div>
   ),
 };
