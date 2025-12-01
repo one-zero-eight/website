@@ -105,40 +105,40 @@ export const ContactsSection = () => {
   const ruslan = members?.find((m) => m.telegram === "dantetemplar");
   const artem = members?.find((m) => m.telegram === "ArtemSBulgakov");
 
-  if (!members) return null;
-
   return (
     <section className="mt-16 mb-12">
       <SectionHeader
         id="contacts"
         title="Contacts"
-        className="mb-8 justify-center text-black dark:text-white"
+        className="mb-8 justify-center text-center text-black dark:text-white"
       />
 
       <div className="flex flex-col items-center gap-8 px-4">
         {/* Leaders */}
-        <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
-          {anna && (
-            <ContactCard member={anna} title="Leader" className="delay-0" />
-          )}
+        {members && (
+          <div className="flex flex-wrap items-center justify-center gap-8">
+            {anna && (
+              <ContactCard member={anna} title="Leader" className="delay-0" />
+            )}
 
-          <div className="flex gap-8">
-            {ruslan && (
-              <ContactCard
-                member={ruslan}
-                title="Tech Leader"
-                className="delay-100"
-              />
-            )}
-            {artem && (
-              <ContactCard
-                member={artem}
-                title="Tech Leader"
-                className="delay-200"
-              />
-            )}
+            <div className="flex gap-8">
+              {ruslan && (
+                <ContactCard
+                  member={ruslan}
+                  title="Tech Leader"
+                  className="delay-100"
+                />
+              )}
+              {artem && (
+                <ContactCard
+                  member={artem}
+                  title="Tech Leader"
+                  className="delay-200"
+                />
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Resources */}
         <div className="flex flex-wrap justify-center gap-6">
