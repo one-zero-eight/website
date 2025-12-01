@@ -1,6 +1,7 @@
 // referred to @evermake: https://github.com/evermake/108-website/blob/main/src/pages/about.vue
 import { TeamMembers } from "./TeamMembers.tsx";
 import { useCarouselImages } from "./hooks/useCarouselImages.ts";
+import { ContactsSection } from "./ContactsSection.tsx";
 
 export function AboutPage() {
   const carouselImages = useCarouselImages();
@@ -143,6 +144,8 @@ export function AboutPage() {
             </ul>
           </article>
         </section>
+
+        <ContactsSection />
       </div>
     </div>
   );

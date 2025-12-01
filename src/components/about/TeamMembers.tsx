@@ -1,67 +1,6 @@
 import { useState } from "react";
-import { useTeamMembers, type TeamMember } from "./hooks/useTeamMembers";
-
-const getInitials = (fullName: string) => {
-  const words = fullName.split(" ");
-  if (words.length >= 2) {
-    return words[0].charAt(0).toUpperCase() + words[1].charAt(0).toUpperCase();
-  }
-  return fullName.charAt(0).toUpperCase();
-};
-
-const getRandomColor = (name: string) => {
-  const colors = [
-    "bg-red-500",
-    "bg-blue-500",
-    "bg-green-500",
-    "bg-yellow-500",
-    "bg-purple-500",
-    "bg-pink-500",
-    "bg-indigo-500",
-    "bg-teal-500",
-    "bg-orange-500",
-    "bg-cyan-500",
-    "bg-lime-500",
-    "bg-emerald-500",
-    "bg-violet-500",
-    "bg-fuchsia-500",
-    "bg-rose-500",
-    "bg-sky-500",
-  ];
-
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  return colors[Math.abs(hash) % colors.length];
-};
-
-const Avatar = ({ member }: { member: TeamMember }) => {
-  const [imageError, setImageError] = useState(false);
-
-  if (member.avatar && !imageError) {
-    return (
-      <img
-        src={member.avatar}
-        alt={member.fullName}
-        className="h-10 w-10 rounded-full object-cover"
-        onError={() => setImageError(true)}
-        loading="lazy"
-      />
-    );
-  }
-
-  return (
-    <div
-      className={`flex h-10 w-10 items-center justify-center rounded-full text-white ${getRandomColor(member.fullName)}`}
-    >
-      <span className="text-xs font-semibold">
-        {getInitials(member.fullName)}
-      </span>
-    </div>
-  );
-};
+import { useTeamMembers } from "./hooks/useTeamMembers";
+import { MemberAvatar } from "./MemberAvatar";
 
 export const TeamMembers = () => {
   const {
@@ -135,7 +74,7 @@ export const TeamMembers = () => {
                 <div
                   className={`transition-all duration-300 ${hoveredIndex === index ? "mb-2 scale-110" : "mb-2"}`}
                 >
-                  <Avatar member={member} />
+                  <MemberAvatar member={member} />
                 </div>
                 <div className="px-1 text-center">
                   <h3
