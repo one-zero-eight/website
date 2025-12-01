@@ -1,5 +1,6 @@
-import { MemberAvatar } from "./MemberAvatar";
+import { MemberAvatar } from "./cards/MemberAvatar.tsx";
 import { useTeamMembers, type TeamMember } from "./hooks/useTeamMembers";
+import { SectionHeader } from "./SectionHeader";
 
 interface ContactCardProps {
   member: TeamMember;
@@ -88,7 +89,7 @@ const ResourceCard = ({
           <span
             className={`${icon} text-4xl ${color} transition-transform duration-300 group-hover:scale-110`}
           />
-          <h3 className="px-2 text-center text-xs font-medium text-gray-900 dark:text-gray-100">
+          <h3 className="px-2 text-center text-base font-medium text-gray-900 dark:text-gray-100">
             {title}
           </h3>
         </div>
@@ -108,9 +109,11 @@ export const ContactsSection = () => {
 
   return (
     <section className="mt-16 mb-12">
-      <h2 className="mb-8 text-center text-2xl font-semibold text-black dark:text-white">
-        Contacts
-      </h2>
+      <SectionHeader
+        id="contacts"
+        title="Contacts"
+        className="mb-8 justify-center text-black dark:text-white"
+      />
 
       <div className="flex flex-col items-center gap-8 px-4">
         {/* Leaders */}

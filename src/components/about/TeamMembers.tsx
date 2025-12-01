@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTeamMembers } from "./hooks/useTeamMembers";
-import { MemberAvatar } from "./MemberAvatar";
+import { MemberAvatar } from "./cards/MemberAvatar.tsx";
 
-export const TeamMembers = () => {
+export function TeamMembers() {
   const {
     data: teamMembers,
     isLoading: isLoadingMembers,
@@ -122,4 +122,4 @@ export const TeamMembers = () => {
       </div>
     </div>
   );
-};
+}
