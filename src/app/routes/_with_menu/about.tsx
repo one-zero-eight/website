@@ -53,21 +53,9 @@ function RouteComponent() {
   const joinSection = {
     title: "Want to join?",
     intro: "Here is what we can offer you:",
-    negativePoints: [
-      {
-        title: "No money",
-        description:
-          "We have no sponsors and by spending most of our time on study and university projects for free we don't earn much.",
-      },
-      {
-        title: "No expert advice",
-        description:
-          "We are students just like you with nearly the same amount of experience and knowledge.",
-      },
-    ],
-    positiveIntro:
+    points:
       "But why work for free? Because there are reasons besides money, which are more important to us:",
-    positivePoints: [
+    pointsList: [
       {
         title: "Team",
         description:
@@ -152,26 +140,12 @@ function RouteComponent() {
               {joinSection.intro}
             </p>
 
-            <div className="ml-4 space-y-4">
-              {joinSection.negativePoints.map((point, index) => (
-                <div
-                  key={`negative-${index}`}
-                  className={`animate-in slide-in-from-bottom-4 duration-700 delay-${600 + index * 100}`}
-                >
-                  <h3 className="mb-2 font-semibold text-black dark:text-white">
-                    {point.title}
-                  </h3>
-                  <p>{point.description}</p>
-                </div>
-              ))}
-            </div>
-
             <p className="animate-in slide-in-from-bottom-4 delay-800 duration-700">
-              {joinSection.positiveIntro}
+              {joinSection.points}
             </p>
 
             <ul className="ml-4 space-y-4">
-              {joinSection.positivePoints.map((point, index) => (
+              {joinSection.pointsList.map((point, index) => (
                 <li
                   key={`positive-${index}`}
                   className={`animate-in slide-in-from-bottom-4 duration-700 delay-${900 + index * 100}`}
