@@ -1,18 +1,13 @@
 // referred to @evermake: https://github.com/evermake/108-website/blob/main/src/pages/about.vue
 import { createFileRoute } from "@tanstack/react-router";
-import { useGitHubMembers } from "@/components/about/useGitHubMembers.ts";
+import { TelegramMembers } from "@/components/about/TelegramMembers";
+import { GitHubMembers } from "@/components/about/GitHubMembers";
 
 export const Route = createFileRoute("/_with_menu/about")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const {
-    data: githubMembers,
-    isLoading: isLoadingMembers,
-    error: membersError,
-  } = useGitHubMembers();
-
   const carouselImages: string[] = [
     "/img/clubfest.webp",
     "/img/108bows.webp",
@@ -96,81 +91,6 @@ function RouteComponent() {
     ],
   };
 
-  const GitHubMembers = () => {
-    if (isLoadingMembers) {
-      return (
-        <div className="dark:bg-base-200 mt-8 rounded-lg bg-gray-100 p-4">
-          <h3 className="mb-4 text-center text-lg font-semibold text-black dark:text-white">
-            Our GitHub Contributors
-          </h3>
-          <div className="flex items-center gap-4">
-            <div className="flex animate-pulse gap-4">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-12 w-12 rounded-full"></div>
-              ))}
-            </div>
-            <span className="text-gray-500 dark:text-gray-400">Loading...</span>
-          </div>
-        </div>
-      );
-    }
-
-    if (membersError) {
-      return (
-        <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-          <h3 className="mb-2 text-center text-lg font-semibold text-black dark:text-white">
-            Our GitHub Contributors
-          </h3>
-          <p className="text-red-600 dark:text-red-400">
-            {/* Unable to load GitHub members. Please try again later. */}
-          </p>
-        </div>
-      );
-    }
-
-    if (!githubMembers || githubMembers.length === 0) {
-      return (
-        <div className="dark:bg-base-100 mt-8 rounded-lg bg-gray-100 p-4">
-          <h3 className="mb-2 text-center text-lg font-semibold text-black dark:text-white">
-            Our GitHub Contributors
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            No public members found.
-          </p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="mt-8 rounded-lg p-4">
-        <h3 className="mb-4 text-center text-lg font-semibold text-black dark:text-white">
-          Our GitHub Contributors
-        </h3>
-        <div className="flex flex-wrap justify-center gap-4">
-          {githubMembers.map((member, index) => (
-            <a
-              key={member.id}
-              href={member.html_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`animate-in slide-in-from-bottom-4 dark:bg-base-200 flex flex-col items-center rounded-lg bg-gray-200 p-3 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md delay-${100 + index * 50}`}
-            >
-              <img
-                src={member.avatar_url}
-                alt={member.login}
-                className="mb-2 h-12 w-12 rounded-full border-2 border-gray-200 dark:border-gray-600"
-                loading="lazy"
-              />
-              <span className="text-center text-sm font-medium text-gray-900 dark:text-gray-100">
-                {member.login}
-              </span>
-            </a>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="relative min-h-screen">
       <div className="absolute inset-0 z-[-1] h-full w-full bg-[url(/108-bg-pattern-black.svg)] mask-[radial-gradient(closest-side,rgba(0,0,0,0.4)_0%,rgba(0,0,0,0)_100%)] bg-repeat mask-size-[100%_600px] mask-position-[0_-350px] mask-no-repeat md:mask-size-[100%_500px] md:mask-[100px_-250px] dark:bg-[url(/108-bg-pattern-white.svg)]" />
@@ -185,11 +105,11 @@ function RouteComponent() {
           {mainSections.map((section, sectionIndex) => (
             <section key={section.id}>
               <h2
-                className={`mb-6 text-2xl font-semibold ${section.titleColor}`}
+                className={`mb-6 text-center text-2xl font-semibold ${section.titleColor}`}
               >
                 {section.title}
               </h2>
-              <div className="space-y-4 text-base leading-relaxed text-gray-700 sm:text-lg dark:text-gray-300">
+              <article className="space-y-4 text-center text-base leading-relaxed text-gray-700 sm:text-lg dark:text-gray-300">
                 {section.paragraphs.map((paragraph, paragraphIndex) => (
                   <p
                     key={paragraphIndex}
@@ -197,8 +117,13 @@ function RouteComponent() {
                     dangerouslySetInnerHTML={{ __html: paragraph }}
                   />
                 ))}
-              </div>
-              {section.id === "team" && <GitHubMembers />}
+              </article>
+              {section.id === "team" && (
+                <>
+                  <GitHubMembers />
+                  <TelegramMembers />
+                </>
+              )}
             </section>
           ))}
         </div>
@@ -219,10 +144,10 @@ function RouteComponent() {
       </section>
       <div className="relative z-10 mx-auto max-w-4xl px-6 py-12">
         <section>
-          <h2 className="mb-6 text-2xl font-semibold text-black dark:text-white">
+          <h2 className="mb-6 text-center text-2xl font-semibold text-black dark:text-white">
             {joinSection.title}
           </h2>
-          <div className="space-y-6 text-base leading-relaxed text-gray-700 sm:text-lg dark:text-gray-300">
+          <article className="space-y-6 text-center text-base leading-relaxed text-gray-700 sm:text-lg dark:text-gray-300">
             <p className="animate-in slide-in-from-bottom-4 delay-500 duration-700">
               {joinSection.intro}
             </p>
@@ -258,7 +183,7 @@ function RouteComponent() {
                 </li>
               ))}
             </ul>
-          </div>
+          </article>
         </section>
       </div>
     </div>
