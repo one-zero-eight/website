@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { type TeamMember } from "./hooks/useTeamMembers";
+import { type TeamMember } from "../hooks/useTeamMembers.ts";
 
-export const getInitials = (fullName: string) => {
+export function getInitials(fullName: string) {
   const words = fullName.split(" ");
   if (words.length >= 2) {
     return words[0].charAt(0).toUpperCase() + words[1].charAt(0).toUpperCase();
   }
   return fullName.charAt(0).toUpperCase();
-};
+}
 
 export const getRandomColor = (name: string) => {
   const colors = [

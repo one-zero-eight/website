@@ -2,6 +2,7 @@
 import { TeamMembers } from "./TeamMembers.tsx";
 import { useCarouselImages } from "./hooks/useCarouselImages.ts";
 import { ContactsSection } from "./ContactsSection.tsx";
+import { SectionHeader } from "./SectionHeader.tsx";
 
 export function AboutPage() {
   const carouselImages = useCarouselImages();
@@ -10,7 +11,7 @@ export function AboutPage() {
     {
       id: "what-is-it",
       title: "What is it?",
-      titleColor: "text-white",
+      titleColor: "text-black dark:text-white",
       paragraphs: [
         '<strong className="text-black dark:text-white">one-zero-eight</strong> (or just <strong className="text-black dark:text-white">108</strong>) — is a community of Innopolis University students passionate about technology. Our mission is to create the perfect environment for student life at our university.',
         "Currently, we face many hassles and see the gaps in our daily life. Have you experienced the long page loads? Have you ever had difficulty finding the right information? Do you really find the interfaces convenient and attractive? Do you have an interesting idea but think no one will ever implement it? We felt all of this.",
@@ -77,11 +78,11 @@ export function AboutPage() {
         <div className="space-y-12">
           {mainSections.map((section, sectionIndex) => (
             <section key={section.id}>
-              <h2
-                className={`mb-6 text-start text-2xl font-semibold ${section.titleColor}`}
-              >
-                {section.title}
-              </h2>
+              <SectionHeader
+                id={section.id}
+                title={section.title}
+                className={`mb-6 text-start ${section.titleColor}`}
+              />
               <article className="space-y-4 text-start text-base leading-relaxed text-gray-700 sm:text-lg dark:text-gray-300">
                 {section.paragraphs.map((paragraph, paragraphIndex) => (
                   <p
@@ -117,9 +118,11 @@ export function AboutPage() {
       </section>
       <div className="relative z-10 mx-auto max-w-4xl px-6 py-12">
         <section>
-          <h2 className="mb-6 text-start text-2xl font-semibold text-black dark:text-white">
-            {joinSection.title}
-          </h2>
+          <SectionHeader
+            id="join"
+            title={joinSection.title}
+            className="mb-6 text-start text-black dark:text-white"
+          />
           <article className="space-y-6 text-start text-base leading-relaxed text-gray-700 sm:text-lg dark:text-gray-300">
             <p className="animate-in slide-in-from-bottom-4 delay-500 duration-700">
               {joinSection.intro}
