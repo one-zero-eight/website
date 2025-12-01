@@ -1,19 +1,9 @@
 // referred to @evermake: https://github.com/evermake/108-website/blob/main/src/pages/about.vue
 import { TeamMembers } from "./TeamMembers.tsx";
+import { useCarouselImages } from "./hooks/useCarouselImages.ts";
 
 export function AboutPage() {
-  const carouselImages: string[] = [
-    "/img/clubfest.webp",
-    "/img/108bows.webp",
-    "/img/108forest.webp",
-    "/img/garage.webp",
-
-    "/img/hackaton.webp",
-    "/img/artem-hellowin.webp",
-    "/img/ruslan-gosling.webp",
-    "/img/slippers.webp",
-    "/img/hellowin2.webp",
-  ];
+  const carouselImages = useCarouselImages();
 
   const mainSections = [
     {
@@ -119,6 +109,7 @@ export function AboutPage() {
               alt={`Community photo ${index + 1}`}
               className="h-[200px] w-auto min-w-[200px] flex-none rounded object-cover opacity-60 transition-opacity duration-300 hover:opacity-100 lg:h-[300px] lg:min-w-[300px]"
               loading="lazy"
+              onError={(e) => (e.currentTarget.style.display = "none")}
             />
           ))}
         </div>
