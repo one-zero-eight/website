@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTeamMembers } from "./hooks/useTeamMembers";
 import { MemberAvatar } from "./cards/MemberAvatar.tsx";
 
@@ -8,6 +8,16 @@ export function TeamMembers() {
     isLoading: isLoadingMembers,
     error: membersError,
   } = useTeamMembers();
+
+  const shuffledMembers = useMemo(() => {
+    if (!teamMembers) return [];
+    const shuffled = [...teamMembers];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [teamMembers]);
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -39,7 +49,7 @@ export function TeamMembers() {
     );
   }
 
-  if (!teamMembers || teamMembers.length === 0) {
+  if (!shuffledMembers || shuffledMembers.length === 0) {
     return (
       <div className="mt-8 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
         <p className="text-gray-500 dark:text-gray-400">
@@ -52,7 +62,7 @@ export function TeamMembers() {
   return (
     <div className="relative mt-8 overflow-visible rounded-lg p-4">
       <div className="flex min-h-[200px] flex-wrap justify-center gap-4">
-        {teamMembers.map((member, index) => (
+        {shuffledMembers.map((member, index) => (
           <div
             key={`${member.fullName}-${index}`}
             className={`animate-in slide-in-from-bottom-4 relative h-[110px] w-[110px] delay-${100 + index * 50}`}
