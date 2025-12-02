@@ -36,13 +36,11 @@ export interface EventsListProps {
   events?: SchemaWorkshop[];
   eventListType?: EventListType;
   clubUser?: SchemaUserWithClubs;
-  onAddEvent?: (date: string) => void;
 }
 
 export function EventsList({
   events = [],
   eventListType = EventListType.USER,
-  onAddEvent,
 }: EventsListProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
 
@@ -153,34 +151,7 @@ export function EventsList({
                 )
                 .filter((e) => !isWorkshopPast(e.dtstart || ""))
                 .map((event) => (
-                  <div
-                    className="card card-border max-w-[320px] min-w-[320px] text-nowrap"
-                    key={event.id}
-                  >
-                    <div className="card-body flex flex-row items-center justify-between gap-4 rounded-4xl p-2">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <div className="bg-base-300 flex aspect-square flex-col gap-0.5 rounded-xl p-3 text-center">
-                          <span>{formatDate(event.dtstart || "")}</span>
-                          <span>
-                            {formatTime(parseTime(event.dtstart || ""))}
-                          </span>
-                        </div>
-                        <div className="flex min-w-0 flex-col gap-0.5">
-                          <span className="truncate font-semibold text-nowrap">
-                            {event.english_name || event.russian_name}
-                          </span>
-                          <LanguageBadge event={event} />
-                        </div>
-                      </div>
-                      <Link
-                        to={`/events/$id`}
-                        params={{ id: event.id }}
-                        className="btn btn-square mr-3"
-                      >
-                        <span className="icon-[lucide--move-right]" />
-                      </Link>
-                    </div>
-                  </div>
+                  <CheckIn event={event} />
                 ))}
             </div>
           </div>
@@ -219,7 +190,6 @@ export function EventsList({
                       isoDate={isoDate}
                       events={groupedEvents[isoDate]}
                       eventListType={eventListType}
-                      onAddEvent={onAddEvent}
                     />
                   ));
                 })()
@@ -418,6 +388,41 @@ export function SearchBar({ searchForm, setSearchForm }: SearchBarProps) {
         className="min-w-0 grow bg-transparent px-2 py-1 outline-hidden"
       />
       <span className="icon-[material-symbols--search-rounded] text-inh-secondary-hover shrink-0 text-2xl" />
+    </div>
+  );
+}
+
+export interface CheckInProps {
+  event: SchemaWorkshop;
+}
+
+export function CheckIn({ event }: CheckInProps) {
+  return (
+    <div
+      className="card card-border max-w-[320px] min-w-[320px] text-nowrap"
+      key={event.id}
+    >
+      <div className="card-body flex flex-row items-center justify-between gap-4 rounded-4xl p-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="bg-base-300 flex min-h-[66px] min-w-[66px] flex-col rounded-xl p-3 text-center">
+            <span>{formatDate(event.dtstart || "")}</span>
+            <span>{formatTime(parseTime(event.dtstart || ""))}</span>
+          </div>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <span className="truncate font-semibold text-nowrap">
+              {event.english_name || event.russian_name}
+            </span>
+            <LanguageBadge event={event} />
+          </div>
+        </div>
+        <Link
+          to={`/events/$id`}
+          params={{ id: event.id }}
+          className="btn btn-square mr-3"
+        >
+          <span className="icon-[lucide--move-right]" />
+        </Link>
+      </div>
     </div>
   );
 }

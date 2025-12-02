@@ -1,4 +1,3 @@
-import AddEventButton from "./AddEventButton";
 import { EventItem } from "./EventItem";
 import { SchemaWorkshop } from "@/api/workshops/types";
 import { EventListType } from "./EventsList";
@@ -9,14 +8,12 @@ export interface EventForDateProps {
   isoDate: string;
   events: SchemaWorkshop[];
   eventListType?: EventListType;
-  onAddEvent?: (date: string) => void;
 }
 
 export function EventForDate({
   isoDate,
   events,
   eventListType = EventListType.USER,
-  onAddEvent,
 }: EventForDateProps) {
   const date = new Date(isoDate);
 
@@ -36,19 +33,9 @@ export function EventForDate({
     day: "numeric",
   });
 
-  const showAddButton = eventListType === EventListType.ADMIN && onAddEvent;
-
   return (
     <div className="flex flex-col gap-2">
       <div className="divider divider-start text-2xl font-medium sm:text-3xl">
-        {showAddButton && (
-          <AddEventButton
-            onClick={() => onAddEvent?.(isoDate)}
-            className="btn-sm"
-          >
-            Add
-          </AddEventButton>
-        )}
         {formattedDate}
       </div>
 
