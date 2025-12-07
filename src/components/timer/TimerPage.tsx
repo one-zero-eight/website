@@ -686,7 +686,7 @@ const TimerPage = () => {
   return (
     <div
       ref={containerRef}
-      className="bg-base-100 relative flex grow flex-col items-center p-4 md:p-8"
+      className="relative flex grow flex-col items-center p-4 md:p-8"
     >
       <button
         type="button"
