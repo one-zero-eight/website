@@ -3,6 +3,7 @@ import { useToast } from "@/components/toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useEventListener } from "usehooks-ts";
 import { PRESET_TIME_OPTIONS, ADD_TIME_OPTIONS } from "./constants";
+import clsx from "clsx";
 
 const TimerPage = () => {
   const [title, setTitle] = useState<string>("");
@@ -686,7 +687,10 @@ const TimerPage = () => {
   return (
     <div
       ref={containerRef}
-      className="relative flex grow flex-col items-center p-4 md:p-8"
+      className={clsx(
+        "relative flex grow flex-col items-center p-4 md:p-8",
+        isFullscreen && "bg-base-100",
+      )}
     >
       <button
         type="button"
