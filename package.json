@@ -84,6 +84,7 @@
     "react-markdown": "^10.1.0",
     "react-number-format": "^5.4.4",
     "react-pdf": "^10.2.0",
+    "react-snowfall": "^2.4.0",
     "remark-gfm": "^4.0.1",
     "sass-embedded": "^1.93.3",
     "tailwindcss": "^4.1.16",

@@ -381,7 +381,11 @@ export function CreationForm({
       showError("Validation Error", "Russian title is required");
     }
 
-    if (!(eventForm.host || "").trim()) {
+    if (
+      eventForm.host === "Pick a club" ||
+      eventForm.host === "None" ||
+      !(eventForm.host || "").trim()
+    ) {
       newErrors.host = "Host is required";
       showError("Validation Error", "Host is required");
     }
@@ -427,6 +431,27 @@ export function CreationForm({
     if (!eventForm.dtend) {
       newErrors.etime = "End time required";
       showError("Validation Error", "End time required");
+    }
+
+    if (eventForm.dtstart && eventForm.dtend) {
+      const startDateTime = new Date(`${eventForm.date}T${eventForm.dtstart}`);
+      const endDateTime = new Date(`${eventForm.date}T${eventForm.dtend}`);
+
+      if (endDateTime <= startDateTime) {
+        newErrors.etime = "End time must be after start time";
+        showError("Validation Error", "End time must be after start time");
+      }
+    }
+
+    if (!initialEvent && eventForm.date) {
+      const eventDateTime = new Date(
+        `${eventForm.date}T${eventForm.dtstart ?? "00:00"}`,
+      );
+      const now = new Date();
+      if (eventDateTime < now) {
+        newErrors.date = "Date/time cannot be in the past";
+        showError("Validation Error", "Date/time cannot be in the past");
+      }
     }
 
     setErrors(newErrors);

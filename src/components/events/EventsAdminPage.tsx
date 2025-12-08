@@ -61,10 +61,6 @@ export function EventsAdminPage() {
             : EventListType.CLUB_LEADER
         }
         clubUser={clubsUser}
-        onAddEvent={(date) => {
-          setModalDate(date);
-          setModalOpen(true);
-        }}
       />
 
       {/* Модальное окно для создания/редактирования воркшопа */}

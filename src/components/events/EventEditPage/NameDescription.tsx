@@ -182,7 +182,7 @@ export default function NameDescription({
                 type="text"
                 className={clsx("input w-full", errors.host && "input-error")}
                 placeholder="Host"
-                value={eventForm.host || ""}
+                value={eventForm.host === "None" ? "" : eventForm.host || ""}
                 onChange={(e) =>
                   setEventForm({ ...eventForm, host: e.target.value })
                 }
