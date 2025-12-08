@@ -48,7 +48,7 @@ export function ScholarshipPage() {
         <p>
           + <i>6,000₽</i> &mdash; if you win a competition for a{" "}
           <a
-            href="https://my.university.innopolis.ru/profile/student-achievements"
+            href="https://my.innopolis.university/education/higher-scholarship"
             target="_blank"
             className="italic underline"
           >
@@ -80,7 +80,7 @@ export function ScholarshipPage() {
         <p>
           See more information about scholarships in{" "}
           <a
-            href="http://campuslife.innopolis.ru/handbook2023#scholarship"
+            href="https://campuslife.innopolis.ru/handbook2023#scholarship"
             target="_blank"
             className="italic underline"
           >
