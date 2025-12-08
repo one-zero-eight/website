@@ -108,6 +108,15 @@ export const resourcesList: ResourceType[] = [
     frequency: 0,
   },
   {
+    url: "https://my.innopolis.university/psychologist",
+    resource: "My University",
+    title: "Psychologist",
+    description: "Book an appointment with a psychologist.",
+    icon: "icon-[material-symbols--psychology-outline]",
+    category: "Support",
+    frequency: 113,
+  },
+  {
     url: "https://my.university.innopolis.ru/profile/personal-form/index?tab=scholarship",
     resource: "Legacy My University",
     title: "Scholarship",
@@ -320,17 +329,17 @@ export const resourcesList: ResourceType[] = [
 
   // > Campus life >
   {
-    url: "http://campuslife.innopolis.ru/",
+    url: "https://campuslife.innopolis.ru/",
     resource: "Campus life",
     title: null,
     description:
-      "Learn about student clubs, opportunities, events, and read the student handbook.",
+      "Read the student handbook, learn about opportunities and events.",
     icon: "icon-[material-symbols--groups-outline]",
     category: "Extracurricular",
     frequency: 17,
   },
   {
-    url: "http://campuslife.innopolis.ru/handbook2023#scholarship",
+    url: "https://campuslife.innopolis.ru/handbook2023#scholarship",
     resource: "Campus life",
     title: "Scholarship",
     description: "Read the official scholarship rules and regulations.",
@@ -339,16 +348,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 43,
   },
   {
-    url: "http://campuslife.innopolis.ru/clubs",
-    resource: "Campus life",
-    title: "Clubs",
-    description: "Explore and join student clubs and organizations on campus.",
-    icon: "icon-[material-symbols--diversity-3]",
-    category: "Extracurricular",
-    frequency: 17,
-  },
-  {
-    url: "http://campuslife.innopolis.ru/handbook2023",
+    url: "https://campuslife.innopolis.ru/handbook2023",
     resource: "Campus life",
     title: "Handbook",
     description:
@@ -409,16 +409,6 @@ export const resourcesList: ResourceType[] = [
   // < Technical <
 
   // > Miscellaneous >
-  {
-    url: "https://psychologist.innopolis.university/appointment/new",
-    resource: "Psychologist",
-    title: null,
-    description:
-      "Book an appointment with a psychologist by using this service.",
-    icon: "icon-[material-symbols--psychology-outline]",
-    category: "Support",
-    frequency: 113,
-  },
   {
     url: "https://portal.university.innopolis.ru/reading_hall/",
     resource: "Bitrix",
