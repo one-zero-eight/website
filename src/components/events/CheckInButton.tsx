@@ -144,9 +144,9 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
       disabled={isCheckInPending}
       onClick={handleCheckIn}
       className={clsx("btn dark:btn-soft btn-success", className)}
-      title={"Check in"}
+      title={"Add to calendar"}
     >
-      Check in
+      Add to calendar
     </button>
   );
 }

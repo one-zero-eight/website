@@ -171,7 +171,7 @@ export default function EventTitle({
               <Link
                 to="/maps"
                 search={{ q: event.place || "" }}
-                className="cursor-pointer text-neutral-400 underline hover:text-neutral-700"
+                className="cursor-pointer text-neutral-600 underline hover:text-neutral-700 dark:text-neutral-400"
                 title="Click to view on map"
               >
                 {event.place}
@@ -180,20 +180,20 @@ export default function EventTitle({
           )}
           <div className="flex items-center gap-1">
             <span className="text-primary icon-[mingcute--calendar-fill] text-2xl" />
-            <span className="text-neutral-400">
+            <span className="text-neutral-500 dark:text-neutral-400">
               {formatDate(event.dtstart || "")}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-primary icon-[iconamoon--clock-fill] text-2xl" />
-            <span className="text-neutral-400">
+            <span className="text-neutral-500 dark:text-neutral-400">
               {formatTime(parseTime(event.dtstart || ""))}-
               {formatTime(parseTime(event.dtend || ""))}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-primary icon-[famicons--people] text-2xl" />
-            <span className="flex items-center text-neutral-400">
+            <span className="flex items-center text-neutral-500 dark:text-neutral-400">
               {event.capacity === MAX_CAPACITY
                 ? signedPeople + "/"
                 : signedPeople + "/" + event.capacity}
