@@ -92,7 +92,7 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
           <div className="flex gap-2">
             <div className="flex items-center gap-1">
               <span className="text-primary icon-[famicons--people] text-xl" />
-              <span className="flex items-center text-neutral-200">
+              <span className="flex items-center text-neutral-500 dark:text-neutral-200">
                 {event.capacity === MAX_CAPACITY
                   ? signedPeople + "/"
                   : signedPeople + "/" + event.capacity}
@@ -103,7 +103,7 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
             </div>
             <div className="flex items-center gap-1">
               <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
-              <span className="flex items-end gap-1 text-neutral-200">
+              <span className="flex items-end gap-1 text-neutral-500 dark:text-neutral-200">
                 <span>{formatDate(event.dtstart || "")}</span>
                 <span className="text-neutral-400">at</span>
                 <span>{formatTime(parseTime(event.dtstart || ""))}</span>

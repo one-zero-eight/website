@@ -150,8 +150,8 @@ export function EventsList({
                     new Date(b.dtstart || "").getTime(),
                 )
                 .filter((e) => !isWorkshopPast(e.dtstart || ""))
-                .map((event) => (
-                  <CheckIn event={event} />
+                .map((event, i) => (
+                  <CheckIn event={event} key={i} />
                 ))}
             </div>
           </div>
@@ -399,12 +399,12 @@ export interface CheckInProps {
 export function CheckIn({ event }: CheckInProps) {
   return (
     <div
-      className="card card-border max-w-[320px] min-w-[320px] text-nowrap"
+      className="card card-border z-50 max-w-[320px] min-w-[320px] text-nowrap"
       key={event.id}
     >
       <div className="card-body flex flex-row items-center justify-between gap-4 rounded-4xl p-2">
         <div className="flex min-w-0 items-center gap-2">
-          <div className="bg-base-300 flex min-h-[66px] min-w-[66px] flex-col rounded-xl p-3 text-center">
+          <div className="bg-base-200 flex min-h-[66px] min-w-[66px] flex-col rounded-xl p-3 text-center">
             <span>{formatDate(event.dtstart || "")}</span>
             <span>{formatTime(parseTime(event.dtstart || ""))}</span>
           </div>
