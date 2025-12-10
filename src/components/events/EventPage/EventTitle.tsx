@@ -1,4 +1,4 @@
-import { SchemaWorkshop } from "@/api/workshops/types";
+import { CheckInType, SchemaWorkshop } from "@/api/workshops/types";
 import { eventBadges } from "../EventBadges";
 import { formatDate, formatTime, parseTime } from "../date-utils";
 import { Link } from "@tanstack/react-router";
@@ -73,12 +73,18 @@ export default function EventTitle({
   return (
     <div className={clsx("card card-border", className)}>
       <div
-        className={`mb-4 flex items-start justify-between rounded-t-(--radius-box) bg-cover bg-center bg-repeat p-4 pb-18 md:pb-48 lg:pb-64 ${event.image_file_id ? "bg-contain bg-no-repeat" : "bg-size-[640px]"}`}
-        style={{
-          backgroundImage: `url("${event.image_file_id ? imageLink(event.id) : "/pattern.svg"}")`,
-        }}
+        className={`relative mb-4 flex ${event.image_file_id ? "h-[350px] lg:h-[300px]" : "h-[110px]"} w-full items-start justify-between rounded-t-(--radius-box) bg-[url("/pattern.svg")] bg-size-[640px] bg-center bg-repeat`}
       >
-        <div className="flex gap-2">
+        {event.image_file_id && (
+          <div className="absolute top-1/2 left-1/2 aspect-square h-[250px] -translate-x-1/2 -translate-y-2/5 overflow-hidden lg:h-[210px]">
+            <img
+              src={imageLink(event.id)}
+              alt={event.english_name + " logo"}
+              className="h-full rounded-lg"
+            />
+          </div>
+        )}
+        <div className="m-4 flex gap-2">
           <Link to="/events" className="btn btn-circle">
             <span className="icon-[line-md--arrow-left] text-2xl" />
           </Link>
@@ -101,7 +107,7 @@ export default function EventTitle({
             </Link>
           )}
         </div>
-        <LanguageBadge event={event} className="inline-flex md:hidden" />
+        <LanguageBadge event={event} className="m-4 inline-flex md:hidden" />
       </div>
       <div className="card-body md:p-[var(--card-p, 1.5rem);] p-3 pt-0 md:pt-3">
         {event.language === "both" && (
@@ -191,17 +197,19 @@ export default function EventTitle({
               {formatTime(parseTime(event.dtend || ""))}
             </span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-primary icon-[famicons--people] text-2xl" />
-            <span className="flex items-center text-neutral-500 dark:text-neutral-400">
-              {event.capacity === MAX_CAPACITY
-                ? signedPeople + "/"
-                : signedPeople + "/" + event.capacity}
-              {event.capacity === MAX_CAPACITY && (
-                <span className="icon-[fa7-solid--infinity]" />
-              )}
-            </span>
-          </div>
+          {event.check_in_type === CheckInType.on_innohassle && (
+            <div className="flex items-center gap-1">
+              <span className="text-primary icon-[famicons--people] text-2xl" />
+              <span className="flex items-center text-neutral-500 dark:text-neutral-400">
+                {event.capacity === MAX_CAPACITY
+                  ? signedPeople + "/"
+                  : signedPeople + "/" + event.capacity}
+                {event.capacity === MAX_CAPACITY && (
+                  <span className="icon-[fa7-solid--infinity]" />
+                )}
+              </span>
+            </div>
+          )}
         </div>
         <div className="hidden justify-end md:flex">
           <CheckInButton event={event} className="btn-wide" />
