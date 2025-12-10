@@ -56,10 +56,10 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
         )}
       >
         <div
-          className={`relative flex ${event.image_file_id ? "h-[200px]" : "h-[110px]"} items-start justify-between rounded-t-(--radius-box) bg-[url("/pattern.svg")] bg-size-[640px] bg-center bg-repeat p-4`}
+          className={`relative flex ${event.image_file_id ? "h-[220px]" : "h-[110px]"} items-start justify-between rounded-t-(--radius-box) bg-[url("/pattern.svg")] bg-size-[640px] bg-center bg-repeat`}
         >
           {event.image_file_id && (
-            <div className="absolute aspect-square h-[180px] w-[180px] translate-x-1/2 overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 aspect-square h-[180px] w-[180px] -translate-x-1/2 -translate-y-1/2 overflow-hidden">
               <img
                 src={imageLink(event.id)}
                 alt={event.english_name + " logo"}
@@ -67,8 +67,8 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
               />
             </div>
           )}
-          <LanguageBadge event={event} className="inline-flex md:hidden" />
-          <div className="flex items-center gap-2">
+          <LanguageBadge event={event} className="m-4 inline-flex md:hidden" />
+          <div className="m-4 flex items-center gap-2">
             {!isWorkshopActive(event) && (
               <div
                 className={`badge badge-soft rounded-lg ${!event.is_draft ? "[--badge-color:var(--color-rose-500)]" : "[--badge-color:var(--color-slate-400)]"}`}
