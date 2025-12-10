@@ -7,7 +7,8 @@ import {
 } from "@/components/events/event-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { SchemaWorkshop } from "@/api/workshops/types";
+import { CheckInType, SchemaWorkshop } from "@/api/workshops/types";
+import { Link } from "@tanstack/react-router";
 
 export interface CheckInButtonProps {
   event: SchemaWorkshop;
@@ -116,6 +117,63 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
     );
   }
 
+  if (event.check_in_type === CheckInType.by_link) {
+    if (!event.check_in_link) {
+      return (
+        <span className={clsx("btn btn-disabled", className)}>
+          Check-in link not available
+        </span>
+      );
+    }
+    return (
+      <Link
+        to={event.check_in_link!}
+        target="_blank"
+        className={clsx("btn dark:btn-soft btn-success", className)}
+        title={"Check in"}
+      >
+        Check in
+        <span className="icon-[material-symbols--open-in-new-rounded] text-base" />
+      </Link>
+    );
+  }
+
+  if (event.check_in_type === CheckInType.no_check_in) {
+    if (checkedIn) {
+      return (
+        <button
+          type="button"
+          disabled={isCheckOutPending}
+          onClick={handleCheckOut}
+          className={clsx("btn dark:btn-soft btn-error", className)}
+          title={"Check out"}
+        >
+          Check out
+        </button>
+      );
+    }
+
+    if (signedPeople >= (event.capacity || 0)) {
+      return (
+        <span className={clsx("btn btn-disabled", className)}>
+          No empty places
+        </span>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        disabled={isCheckInPending}
+        onClick={handleCheckIn}
+        className={clsx("btn dark:btn-soft btn-success", className)}
+        title={"Add to calendar"}
+      >
+        Add to calendar
+      </button>
+    );
+  }
+
   if (checkedIn) {
     return (
       <button
@@ -144,9 +202,9 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
       disabled={isCheckInPending}
       onClick={handleCheckIn}
       className={clsx("btn dark:btn-soft btn-success", className)}
-      title={"Add to calendar"}
+      title={"Check in"}
     >
-      Add to calendar
+      Check in
     </button>
   );
 }

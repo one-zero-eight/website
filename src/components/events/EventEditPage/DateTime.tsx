@@ -1,4 +1,5 @@
-import { EventFormErrors, EventFormState } from "./CreationForm";
+import { EventFormState } from "../event-utils";
+import { EventFormErrors } from "./CreationForm";
 import clsx from "clsx";
 
 // Max capacity of the event, even if it set to unlimited capcaity

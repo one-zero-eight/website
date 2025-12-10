@@ -5,6 +5,7 @@
 import { workshopsTypes } from "@/api/workshops";
 import { getDate, isWorkshopPast } from "./date-utils.ts";
 import {
+  CheckInType,
   SchemaBadge,
   SchemaWorkshop,
   WorkshopLanguage,
@@ -24,6 +25,7 @@ export const emptyEvent = (
   | "dtend"
   | "is_draft"
   | "capacity"
+  | "check_in_type"
 > => {
   return {
     english_name: title,
@@ -34,6 +36,7 @@ export const emptyEvent = (
     dtend: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
     is_draft: true,
     capacity: MAX_CAPACITY,
+    check_in_type: CheckInType.no_check_in,
   };
 };
 
@@ -79,6 +82,8 @@ export const baseEventFormState: EventFormState = {
   links: [],
   image_file_id: null,
   file: null,
+  check_in_type: CheckInType.on_innohassle,
+  check_in_link: null,
 };
 
 /**
