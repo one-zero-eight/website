@@ -6,6 +6,7 @@ import MobileMenu from "./MobileMenu";
 import Participants from "./Participants";
 import { useState } from "react";
 import { $clubs } from "@/api/clubs";
+import { CheckInType } from "@/api/workshops/types";
 
 export interface EventPageProps {
   eventId: string;
@@ -58,7 +59,12 @@ export default function EventPage({ eventId }: EventPageProps) {
           <div className="col-span-1 md:col-span-2">
             <Description event={event} pageLanguage={language} />
           </div>
-          <Participants event={event} hide={!eventUser} />
+          <Participants
+            event={event}
+            hide={
+              !eventUser || event.check_in_type !== CheckInType.on_innohassle
+            }
+          />
         </div>
       </div>
       <MobileMenu event={event} />

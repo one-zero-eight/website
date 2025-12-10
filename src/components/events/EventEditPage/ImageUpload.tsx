@@ -35,7 +35,7 @@ export default function ImageUpload({
             <div className="flex items-center justify-center">
               <img
                 src={logoPreview}
-                alt="Logo preview"
+                alt="Image preview"
                 className="rounded-field max-h-48 max-w-full object-contain"
               />
             </div>
@@ -64,7 +64,7 @@ export default function ImageUpload({
               (!form.file || isUploadingLogo) && "btn-disabled",
             )}
           >
-            {isUploadingLogo ? "Uploading..." : "Upload Logo"}
+            {isUploadingLogo ? "Uploading..." : "Upload Image"}
           </button>
 
           {form.file && (

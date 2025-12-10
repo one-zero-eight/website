@@ -13,6 +13,7 @@ import { eventBadges } from "./EventBadges.tsx";
 import { LanguageBadge } from "./LanguageBadge.tsx";
 import { MAX_CAPACITY } from "./EventEditPage/DateTime.tsx";
 import { $clubs } from "@/api/clubs/index.ts";
+import { CheckInType } from "@/api/workshops/types.ts";
 
 export interface EventItemProps {
   event: workshopsTypes.SchemaWorkshop;
@@ -97,17 +98,30 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
             ) : null}
           </div>
           <div className="flex gap-2">
-            <div className="flex items-center gap-1">
-              <span className="text-primary icon-[famicons--people] text-xl" />
-              <span className="flex items-center text-neutral-500 dark:text-neutral-200">
-                {event.capacity === MAX_CAPACITY
-                  ? signedPeople + "/"
-                  : signedPeople + "/" + event.capacity}
-                {event.capacity === MAX_CAPACITY && (
-                  <span className="icon-[fa7-solid--infinity]" />
+            {event.check_in_type === CheckInType.on_innohassle ? (
+              <div className="flex items-center gap-1">
+                <span className="text-primary icon-[famicons--people] text-xl" />
+                <span className="flex items-center text-neutral-500 dark:text-neutral-200">
+                  {event.capacity === MAX_CAPACITY
+                    ? signedPeople + "/"
+                    : signedPeople + "/" + event.capacity}
+                  {event.capacity === MAX_CAPACITY && (
+                    <span className="icon-[fa7-solid--infinity]" />
+                  )}
+                </span>
+              </div>
+            ) : (
+              <>
+                {event.place && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-primary icon-[mdi--map-marker] text-xl" />
+                    <span className="flex items-center text-neutral-500 dark:text-neutral-200">
+                      {event.place}
+                    </span>
+                  </div>
                 )}
-              </span>
-            </div>
+              </>
+            )}
             <div className="flex items-center gap-1">
               <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
               <span className="flex items-end gap-1 text-neutral-500 dark:text-neutral-200">
