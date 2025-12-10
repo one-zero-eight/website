@@ -126,15 +126,26 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
       );
     }
     return (
-      <Link
-        to={event.check_in_link!}
-        target="_blank"
-        className={clsx("btn dark:btn-soft btn-success", className)}
-        title={"Check in"}
-      >
-        Check in
-        <span className="icon-[material-symbols--open-in-new-rounded] text-base" />
-      </Link>
+      <div className={`flex items-center justify-end gap-2 ${className}`}>
+        <Link
+          to={event.check_in_link!}
+          target="_blank"
+          className={clsx("btn dark:btn-soft btn-success px-8")}
+          title={"Check in"}
+        >
+          Check in
+          <span className="icon-[material-symbols--open-in-new-rounded] text-base" />
+        </Link>
+        <button
+          type="button"
+          disabled={isCheckInPending}
+          onClick={handleCheckIn}
+          className={clsx("btn dark:btn-soft btn-square w-fit p-2")}
+          title={"Add to calendar"}
+        >
+          <span className="icon-[mingcute--calendar-add-fill] size-5 text-base" />
+        </button>
+      </div>
     );
   }
 
