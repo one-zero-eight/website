@@ -33,6 +33,7 @@ export default function Participants({
 
   const { data: clubHost } = $clubs.useQuery("get", "/clubs/by-id/{id}", {
     params: { path: { id: clubId || "" } },
+    enabled: !!clubId,
   });
 
   // Memoized derived values

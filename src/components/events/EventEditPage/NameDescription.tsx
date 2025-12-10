@@ -31,7 +31,9 @@ export default function NameDescription({
   className,
 }: NameDescriptionProps) {
   const [currentTab, setCurrentTab] = useState<string>("english");
-  const [isClubSelect, setIsClubSelect] = useState<boolean>(true);
+  const [isClubSelect, setIsClubSelect] = useState<boolean>(
+    !!eventForm.host?.includes("club:"),
+  );
 
   const { data: clubList } = $clubs.useQuery("get", "/clubs/");
 

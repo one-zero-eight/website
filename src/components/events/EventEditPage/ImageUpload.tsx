@@ -28,7 +28,7 @@ export default function ImageUpload({
     <div className={clsx(className)}>
       <div>
         <h3 className="text-base-content mb-3 text-sm font-medium">
-          Upload new logo
+          Upload new image
         </h3>
         <div className="space-y-3">
           {logoPreview ? (

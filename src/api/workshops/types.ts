@@ -184,7 +184,8 @@ export interface paths {
     put?: never;
     /** Set Event Image */
     post: operations["set_event_image_workshops__workshop_id__image_post"];
-    delete?: never;
+    /** Delete Event Image */
+    delete: operations["delete_event_image_workshops__workshop_id__image_delete"];
     options?: never;
     head?: never;
     patch?: never;
@@ -209,6 +210,11 @@ export interface components {
        */
       image_file: string;
     };
+    /**
+     * CheckInType
+     * @enum {string}
+     */
+    CheckInType: CheckInType;
     /** CreateWorkshop */
     CreateWorkshop: {
       /** English Name */
@@ -241,6 +247,10 @@ export interface components {
       badges?: components["schemas"]["Badge"][];
       /** Links */
       links?: components["schemas"]["Link"][];
+      /** @default on_innohassle */
+      check_in_type: components["schemas"]["CheckInType"];
+      /** Check In Link */
+      check_in_link?: string | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -281,6 +291,9 @@ export interface components {
       badges?: components["schemas"]["Badge"][] | null;
       /** Links */
       links?: components["schemas"]["Link"][] | null;
+      check_in_type?: components["schemas"]["CheckInType"] | null;
+      /** Check In Link */
+      check_in_link?: string | null;
       /** Is Active */
       is_active?: boolean | null;
       /** Is Draft */
@@ -358,6 +371,10 @@ export interface components {
       links: {
         [key: string]: string;
       }[];
+      /** @default on_innohassle */
+      check_in_type: components["schemas"]["CheckInType"];
+      /** Check In Link */
+      check_in_link: string | null;
       /**
        * Is Active
        * @default true
@@ -1030,6 +1047,63 @@ export interface operations {
       };
     };
   };
+  delete_event_image_workshops__workshop_id__image_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workshop_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Deleted event image successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only admin can change event image */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Event not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+}
+export enum CheckInType {
+  no_check_in = "no_check_in",
+  on_innohassle = "on_innohassle",
+  by_link = "by_link",
 }
 export enum UserRole {
   admin = "admin",

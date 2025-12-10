@@ -14,6 +14,8 @@ import { baseEventFormState, EventFormState } from "../event-utils.ts";
 import NameDescription from "./NameDescription.tsx";
 import ImageUpload from "./ImageUpload.tsx";
 import { SchemaUserWithClubs } from "@/api/clubs/types.ts";
+import { CheckInType } from "@/api/workshops/types.ts";
+import clsx from "clsx";
 
 export enum EventCreationType {
   DEFAULT,
@@ -39,6 +41,7 @@ export interface EventFormErrors {
   stime?: string | null;
   etime?: string | null;
   links?: string | null;
+  checkInLinkError?: string | null;
 }
 
 /**
@@ -115,6 +118,7 @@ export function CreationForm({
     stime: null,
     etime: null,
     links: null,
+    checkInLinkError: null,
   });
 
   const clearSavedData = () => {
@@ -131,10 +135,12 @@ export function CreationForm({
       return;
     }
 
-    const [hour, minutes] = eventForm.dtend.split(":").map(Number);
     const date = new Date(eventForm.date);
 
-    if (hour === 0 && minutes === 0) date.setDate(date.getDate() + 1);
+    // If dtend is less than dtstart, consider dtend as next day
+    if (eventForm.dtend < eventForm.dtstart) {
+      date.setDate(date.getDate() + 1);
+    }
 
     const pad = (n: number) => n.toString().padStart(2, "0");
     const endDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
@@ -174,6 +180,11 @@ export function CreationForm({
       badges: eventForm.badges as SchemaBadge[],
       is_draft: eventForm.is_draft,
       links: links,
+      check_in_type: eventForm.check_in_type,
+      check_in_link:
+        eventForm.check_in_type === CheckInType.by_link
+          ? eventForm.check_in_link
+          : null,
     };
   };
 
@@ -418,6 +429,14 @@ export function CreationForm({
   const validateDateTimePlaceToggles = () => {
     const newErrors = {} as EventFormErrors;
 
+    if (
+      eventForm.check_in_type === CheckInType.by_link &&
+      !eventForm.check_in_link?.trim()
+    ) {
+      newErrors.checkInLinkError = "Check-in link is required";
+      showError("Validation Error", "Check-in link is required");
+    }
+
     if (!eventForm.date) {
       newErrors.date = "Date is required";
       showError("Validation Error", "Date is required");
@@ -431,16 +450,6 @@ export function CreationForm({
     if (!eventForm.dtend) {
       newErrors.etime = "End time required";
       showError("Validation Error", "End time required");
-    }
-
-    if (eventForm.dtstart && eventForm.dtend) {
-      const startDateTime = new Date(`${eventForm.date}T${eventForm.dtstart}`);
-      const endDateTime = new Date(`${eventForm.date}T${eventForm.dtend}`);
-
-      if (endDateTime <= startDateTime) {
-        newErrors.etime = "End time must be after start time";
-        showError("Validation Error", "End time must be after start time");
-      }
     }
 
     if (!initialEvent && eventForm.date) {
@@ -537,7 +546,7 @@ export function CreationForm({
         <div className="card-body">
           <h2 className="card-title mb-2">
             <span className="icon-[mdi--image]" />
-            Logo
+            Image
           </h2>
           <ImageUpload
             errors={errors}
@@ -554,22 +563,61 @@ export function CreationForm({
 
       <div className="card card-border">
         <div className="card-body">
-          <h2 className="card-title">
-            <span className="icon-[mdi--calendar-outline]"></span>Date & Time
+          <h2 className="card-title mb-1">
+            <span className="icon-[mdi--people] size-5"></span>
+            Check-ins & Place
           </h2>
-          <DateTime
-            eventForm={eventForm}
-            setEventForm={setEventForm}
-            errors={errors}
-          />
-        </div>
-      </div>
-      <div className="card card-border">
-        <div className="card-body">
-          <h2 className="card-title mb-2">
-            <span className="icon-[mdi--people] size-5"></span> Place &
-            Check-ins
-          </h2>
+          <fieldset className="fieldset mb-2">
+            <legend className="fieldset-legend">
+              Check-in type: <span className="text-red-500">*</span>
+            </legend>
+            <select
+              value={eventForm.check_in_type || ""}
+              onChange={(e) =>
+                setEventForm({
+                  ...eventForm,
+                  check_in_type: e.target.value as CheckInType,
+                })
+              }
+              className="select w-full"
+            >
+              <option value={CheckInType.no_check_in}>No check-in</option>
+              <option value={CheckInType.on_innohassle}>On innohassle</option>
+              <option value={CheckInType.by_link}>By link</option>
+            </select>
+            <label className="label">
+              <ul className="ml-3 list-disc">
+                <li>No check-in: User just adds to calendar</li>
+                <li>On innohassle: User check-ins using innohassle system</li>
+                <li>By link: Redirects user to specified link</li>
+              </ul>
+            </label>
+          </fieldset>
+          <fieldset
+            className={`fieldset mb-3 ${eventForm.check_in_type !== CheckInType.by_link ? "hidden" : ""}`}
+          >
+            <legend className="fieldset-legend">
+              Check-in Link: <span className="text-red-500">*</span>
+            </legend>
+            <input
+              className={clsx(
+                "input w-full",
+                errors.checkInLinkError && "input-error",
+              )}
+              value={eventForm.check_in_link || ""}
+              onChange={(e) =>
+                setEventForm({ ...eventForm, check_in_link: e.target.value })
+              }
+              type="text"
+              maxLength={255}
+              placeholder="Redirect link"
+            />
+          </fieldset>
+          {errors.checkInLinkError && (
+            <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+              {errors.checkInLinkError}
+            </p>
+          )}
           <label className="label mr-2 text-black dark:text-white">
             <input
               type="checkbox"
@@ -639,6 +687,20 @@ export function CreationForm({
           )}
         </div>
       </div>
+
+      <div className="card card-border">
+        <div className="card-body">
+          <h2 className="card-title">
+            <span className="icon-[mdi--calendar-outline]"></span>Date & Time
+          </h2>
+          <DateTime
+            eventForm={eventForm}
+            setEventForm={setEventForm}
+            errors={errors}
+          />
+        </div>
+      </div>
+
       <div className="card card-border">
         <AdditionalInfo
           errors={errors}
