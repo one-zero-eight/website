@@ -135,6 +135,13 @@ export function CreationForm({
       return;
     }
 
+    if (eventForm.check_in_type === CheckInType.by_link) {
+      setEventForm({
+        ...eventForm,
+        check_in_on_open: true,
+      });
+    }
+
     const date = new Date(eventForm.date);
 
     // If dtend is less than dtstart, consider dtend as next day
@@ -618,35 +625,41 @@ export function CreationForm({
               {errors.checkInLinkError}
             </p>
           )}
-          <label className="label mr-2 text-black dark:text-white">
-            <input
-              type="checkbox"
-              className="toggle"
-              checked={eventForm.check_in_on_open}
-              onChange={() =>
-                setEventForm({
-                  ...eventForm,
-                  check_in_on_open: !eventForm.check_in_on_open,
-                })
-              }
-            />
-            Always open
-          </label>
-          {!eventForm.check_in_on_open && (
-            <div>
-              <label className="mr-2">Open check-in at:</label>
-              <input
-                type="datetime-local"
-                className="input"
-                value={
-                  initialEvent
-                    ? eventForm.check_in_date + "T" + eventForm.check_in_opens
-                    : ""
-                }
-                onChange={handleCheckIn}
-                disabled={eventForm.check_in_on_open}
-              />
-            </div>
+          {eventForm.check_in_type !== CheckInType.by_link && (
+            <>
+              <label className="label mr-2 text-black dark:text-white">
+                <input
+                  type="checkbox"
+                  className="toggle"
+                  checked={eventForm.check_in_on_open}
+                  onChange={() =>
+                    setEventForm({
+                      ...eventForm,
+                      check_in_on_open: !eventForm.check_in_on_open,
+                    })
+                  }
+                />
+                Always open
+              </label>
+              {!eventForm.check_in_on_open && (
+                <div>
+                  <label className="mr-2">Open check-in at:</label>
+                  <input
+                    type="datetime-local"
+                    className="input"
+                    value={
+                      initialEvent
+                        ? eventForm.check_in_date +
+                          "T" +
+                          eventForm.check_in_opens
+                        : ""
+                    }
+                    onChange={handleCheckIn}
+                    disabled={eventForm.check_in_on_open}
+                  />
+                </div>
+              )}
+            </>
           )}
           <div className="divider my-1" />
           <label
