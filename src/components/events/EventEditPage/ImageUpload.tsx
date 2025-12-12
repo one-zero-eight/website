@@ -1,6 +1,5 @@
 import clsx from "clsx";
-import { EventFormErrors } from "./CreationForm";
-import { EventFormState } from "../event-utils";
+import { EventFormErrors, EventFormState } from "../types";
 
 interface ImageUploadProps {
   form: EventFormState;

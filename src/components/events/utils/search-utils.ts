@@ -2,6 +2,11 @@ import { SchemaWorkshop } from "@/api/workshops/types";
 import { preprocessText } from "@/lib/utils/searchUtils";
 import Fuse from "fuse.js";
 
+/**
+ * Creates a Fuse.js search instance configured for event search
+ * @param events - Array of events to create search index for
+ * @returns Configured Fuse.js search instance
+ */
 export const createFuse = (events: SchemaWorkshop[]) => {
   const fuse = new Fuse(events, {
     keys: [
@@ -19,6 +24,12 @@ export const createFuse = (events: SchemaWorkshop[]) => {
   return fuse;
 };
 
+/**
+ * Performs a fuzzy search on events and returns unique results
+ * @param fuse - Fuse.js search instance
+ * @param search - Search query string
+ * @returns Array of unique matching events
+ */
 export const searchFuse = (fuse: Fuse<SchemaWorkshop>, search: string) => {
   if (!search) return [];
 

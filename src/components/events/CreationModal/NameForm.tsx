@@ -1,7 +1,7 @@
 import { $workshops } from "@/api/workshops";
 import { queryClient } from "@/app/query-client";
 import { useRef } from "react";
-import { emptyEvent } from "../event-utils";
+import { emptyEvent } from "../utils";
 import { useNavigate } from "@tanstack/react-router";
 
 export interface NameFormProps {

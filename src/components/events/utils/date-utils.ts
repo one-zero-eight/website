@@ -1,15 +1,16 @@
 /**
- * Утилиты для работы с датами и временем
+ * Extracts the date part (YYYY-MM-DD) from an ISO datetime string
+ * @param dt - ISO datetime string
+ * @returns Date string in YYYY-MM-DD format
  */
-
 export const getDate = (dt: string) => {
   return dt.split("T")[0];
 };
 
 /**
- * Парсит время из ISO строки в формат HH:mm
- * @param isoString - ISO строка с датой и временем
- * @returns Время в формате HH:mm
+ * Extracts time in HH:mm format from an ISO datetime string
+ * @param isoString - ISO datetime string
+ * @returns Time string in HH:mm format
  */
 export const parseTime = (isoString: string): string => {
   try {
@@ -21,15 +22,21 @@ export const parseTime = (isoString: string): string => {
 };
 
 /**
- * Форматирует время в читаемый формат
- * @param timeString - Время в формате HH:mm
- * @returns Отформатированное время
+ * Formats a time string (currently returns as-is)
+ * @param timeString - Time string to format
+ * @returns Formatted time string (or empty string if input is empty)
  */
 export const formatTime = (timeString: string): string => {
   if (!timeString) return "";
   return timeString;
 };
 
+/**
+ * Checks if two date strings represent the same day
+ * @param dateStringA - First date string
+ * @param dateStringB - Second date string
+ * @returns True if both dates are on the same day
+ */
 export const isDatesEqual = (dateStringA: string, dateStringB: string) => {
   const da = new Date(dateStringA);
   const db = new Date(dateStringB);
@@ -37,9 +44,9 @@ export const isDatesEqual = (dateStringA: string, dateStringB: string) => {
 };
 
 /**
- * Форматирует дату в локальный формат (русский)
- * @param dateString - Дата в формате YYYY-MM-DD
- * @returns Дата в формате Month, day
+ * Formats a date string to "Month, day" format (e.g., "Jan, 15")
+ * @param dateString - Date string to format
+ * @returns Formatted date string (or empty string if input is empty)
  */
 export const formatDate = (dateString: string): string => {
   if (!dateString) return "";
@@ -51,9 +58,9 @@ export const formatDate = (dateString: string): string => {
 };
 
 /**
- * Получает название дня недели по номеру
- * @param dayNumber - Номер дня недели (1-7, где 1 = понедельник)
- * @returns Название дня недели
+ * Returns the day name for a day number (1-7, where 1 is Monday)
+ * @param dayNumber - Day number (1-7)
+ * @returns Day name string or "Unknown"
  */
 export const getDayName = (dayNumber: number): string => {
   const days = {
@@ -69,9 +76,9 @@ export const getDayName = (dayNumber: number): string => {
 };
 
 /**
- * Проверяет, прошла ли дата и время воркшопа
- * @param dtstart - Дата воркшопа в формате ISO
- * @returns true если воркшоп уже прошел
+ * Checks if an event's start date has passed
+ * @param dtstart - Event start date string
+ * @returns True if the event date has passed
  */
 export const isWorkshopPast = (dtstart: string): boolean => {
   if (!dtstart) return false;
@@ -82,6 +89,11 @@ export const isWorkshopPast = (dtstart: string): boolean => {
   return workshopDate < now;
 };
 
+/**
+ * Returns the abbreviated weekday name for a date string
+ * @param date - Date string
+ * @returns Abbreviated weekday name (e.g., "Mon", "Tue")
+ */
 export const getWeekdayName = (date: string) => {
   return new Date(date).toLocaleString("en", { weekday: "short" });
 };

@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 
 /**
  * Object containing all adges, that can be assigned to an event.
- * Badges: recommended, iu, music, sports, art, it, education, 319, society, buisness, games
+ * Badges: recommended, education, 319, student activity
  */
 export const eventBadges: Record<string, ReactElement> = {
   recommended: (
