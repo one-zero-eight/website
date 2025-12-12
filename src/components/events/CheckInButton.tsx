@@ -126,25 +126,37 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
       );
     }
     return (
-      <div className={`flex items-center justify-end gap-2 ${className}`}>
+      <div className={`grid w-full grid-cols-2 gap-2 text-nowrap ${className}`}>
         <Link
           to={event.check_in_link!}
           target="_blank"
-          className={clsx("btn dark:btn-soft btn-success px-8")}
+          className={clsx("btn dark:btn-soft btn-success w-full px-8")}
           title={"Check in"}
         >
           Check in
-          <span className="icon-[material-symbols--open-in-new-rounded] text-base" />
+          <span className="icon-[material-symbols--open-in-new-rounded] min-h-[14px] min-w-[14px]" />
         </Link>
-        <button
-          type="button"
-          disabled={isCheckInPending}
-          onClick={handleCheckIn}
-          className={clsx("btn dark:btn-soft btn-square w-fit p-2")}
-          title={"Add to calendar"}
-        >
-          <span className="icon-[mingcute--calendar-add-fill] size-5 text-base" />
-        </button>
+        {checkedIn ? (
+          <button
+            type="button"
+            disabled={isCheckOutPending}
+            onClick={handleCheckOut}
+            className={clsx("btn dark:btn-soft btn-error w-full px-4")}
+            title={"Remove from calendar"}
+          >
+            Remove from calendar
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={isCheckInPending}
+            onClick={handleCheckIn}
+            className={clsx("btn dark:btn-soft btn-success w-full px-4")}
+            title={"Add to calendar"}
+          >
+            Add to calendar
+          </button>
+        )}
       </div>
     );
   }
@@ -159,7 +171,7 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
           className={clsx("btn dark:btn-soft btn-error", className)}
           title={"Check out"}
         >
-          Check out
+          Remove from calendar
         </button>
       );
     }
