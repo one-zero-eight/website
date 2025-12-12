@@ -4,16 +4,12 @@ import {
   getInactiveStatusText,
   getSignedPeopleCount,
   isWorkshopActive,
-} from "@/components/events/event-utils";
+} from "./utils";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { CheckInType, SchemaWorkshop } from "@/api/workshops/types";
+import { CheckInType } from "@/api/workshops/types";
 import { Link } from "@tanstack/react-router";
-
-export interface CheckInButtonProps {
-  event: SchemaWorkshop;
-  className?: string | undefined | null;
-}
+import { CheckInButtonProps } from "./types";
 
 export function CheckInButton({ event, className }: CheckInButtonProps) {
   const queryClient = useQueryClient();
@@ -176,7 +172,7 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
       );
     }
 
-    if (signedPeople >= (event.capacity || 0)) {
+    if (event.capacity && signedPeople >= event.capacity) {
       return (
         <span className={clsx("btn btn-disabled", className)}>
           No empty places
@@ -211,7 +207,7 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
     );
   }
 
-  if (signedPeople >= (event.capacity || 0)) {
+  if (event.capacity && signedPeople >= event.capacity) {
     return (
       <span className={clsx("btn btn-disabled", className)}>
         No empty places

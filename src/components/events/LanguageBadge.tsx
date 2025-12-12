@@ -1,11 +1,6 @@
-import { SchemaWorkshop } from "@/api/workshops/types";
 import clsx from "clsx";
-import { eventLangauage } from "./event-utils";
-
-export interface LanguageBadgeProps {
-  event: SchemaWorkshop;
-  className?: string;
-}
+import { eventLanguage } from "./utils";
+import { LanguageBadgeProps } from "./types";
 
 export function LanguageBadge({ event, className }: LanguageBadgeProps) {
   return (
@@ -15,7 +10,7 @@ export function LanguageBadge({ event, className }: LanguageBadgeProps) {
         className,
       )}
     >
-      {eventLangauage(event)}
+      {eventLanguage(event)}
     </div>
   );
 }

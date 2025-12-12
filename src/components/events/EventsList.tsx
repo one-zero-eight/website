@@ -1,42 +1,23 @@
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
-import { groupEvents, hasBadges } from "./event-utils";
+import { useMemo, useState } from "react";
+import { groupEvents, hasBadges } from "./utils";
 import { EventForDate, ItemsList } from "./EventForDate";
-import TagsSelector, {
-  GenericBadgeFormScheme,
-} from "./EventEditPage/TagsSelector";
+
 import { eventBadges } from "./EventBadges";
 import { SchemaWorkshop, WorkshopLanguage } from "@/api/workshops/types";
-import { createFuse, searchFuse } from "./search-utils";
+import { createFuse, searchFuse } from "./utils";
 import { $workshops } from "@/api/workshops";
-import {
-  formatDate,
-  formatTime,
-  isWorkshopPast,
-  parseTime,
-} from "./date-utils";
+import { formatDate, formatTime, isWorkshopPast, parseTime } from "./utils";
 import { LanguageBadge } from "./LanguageBadge";
 import { Link } from "@tanstack/react-router";
-import { SchemaUserWithClubs } from "@/api/clubs/types";
-
-export enum EventListType {
-  USER,
-  ADMIN,
-  CLUB_LEADER,
-}
-
-export type SearchFormState = GenericBadgeFormScheme & {
-  search?: string;
-  selectedLanguages: Record<WorkshopLanguage, boolean>;
-  showPreviousEvents: boolean;
-  onlyCheckIns: boolean;
-  hasPlaces: boolean;
-};
-
-export interface EventsListProps {
-  events?: SchemaWorkshop[];
-  eventListType?: EventListType;
-  clubUser?: SchemaUserWithClubs;
-}
+import {
+  EventListType,
+  EventsListProps,
+  SearchFormState,
+  SearchMenuProps,
+  SearchBarProps,
+  CheckInProps,
+} from "./types";
+import TagsSelector from "./EventEditPage/TagsSelector";
 
 export function EventsList({
   events = [],
@@ -160,56 +141,30 @@ export function EventsList({
           {hasEvents && userFiltered.length !== 0 ? (
             <div className="w-full">
               {isGroupedView ? (
-                (() => {
-                  const now = new Date();
-
-                  // Split keys into upcoming & past groups
-                  const upcomingDates = Object.keys(groupedEvents).filter(
-                    (date) => new Date(date) >= now,
-                  );
-                  const pastDates = Object.keys(groupedEvents).filter(
-                    (date) => new Date(date) < now,
-                  );
-
-                  // Sort them properly
-                  upcomingDates.sort(
-                    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
-                  );
-                  pastDates.sort(
-                    (a, b) => new Date(b).getTime() - new Date(a).getTime(),
-                  );
-
-                  // Combine according to toggle
-                  const orderedDates = searchForm.showPreviousEvents
-                    ? [...upcomingDates, ...pastDates]
-                    : upcomingDates;
-
-                  return orderedDates.map((isoDate) => (
-                    <EventForDate
-                      key={isoDate}
-                      isoDate={isoDate}
-                      events={groupedEvents[isoDate]}
-                      eventListType={eventListType}
-                    />
-                  ));
-                })()
+                <GroupedEventsView
+                  groupedEvents={groupedEvents}
+                  showPreviousEvents={searchForm.showPreviousEvents}
+                  eventListType={eventListType}
+                />
               ) : (
                 <ItemsList
                   events={filteredEvents}
                   eventListType={eventListType}
                 />
               )}
-              <span
-                className={`text-primary mt-2 cursor-pointer text-center underline select-none ${searchForm.showPreviousEvents && "hidden"}`}
-                onClick={() =>
-                  setSearchForm({
-                    ...searchForm,
-                    showPreviousEvents: !searchForm.showPreviousEvents,
-                  })
-                }
-              >
-                Show previous events
-              </span>
+              {!searchForm.showPreviousEvents && (
+                <span
+                  className="text-primary mt-2 cursor-pointer text-center underline select-none"
+                  onClick={() =>
+                    setSearchForm({
+                      ...searchForm,
+                      showPreviousEvents: true,
+                    })
+                  }
+                >
+                  Show previous events
+                </span>
+              )}
             </div>
           ) : (
             <div className="col-span-full py-10 text-center text-xl">
@@ -255,12 +210,6 @@ export function EventsList({
   );
 }
 
-export interface SearchMenuProps {
-  searchForm: SearchFormState;
-  setSearchForm: Dispatch<SetStateAction<SearchFormState>>;
-  showSearch?: boolean;
-}
-
 export function SearchMenu({
   searchForm,
   setSearchForm,
@@ -304,16 +253,15 @@ export function SearchMenu({
           </h3>
           <div className="flex flex-col gap-2">
             {[WorkshopLanguage.english, WorkshopLanguage.russian].map(
-              (language, index) => (
-                <label className="label" key={index}>
+              (language) => (
+                <label className="label" key={language}>
                   <input
                     type="checkbox"
                     className="checkbox rounded-lg"
                     checked={searchForm.selectedLanguages[language]}
                     onChange={() => handleChangeLanguage(language)}
                   />
-                  {language.charAt(0).toUpperCase() +
-                    language.slice(1, language.length)}
+                  {language.charAt(0).toUpperCase() + language.slice(1)}
                 </label>
               ),
             )}
@@ -368,9 +316,45 @@ export function SearchMenu({
   );
 }
 
-export interface SearchBarProps {
-  searchForm: SearchFormState;
-  setSearchForm: (v: SearchFormState) => void;
+interface GroupedEventsViewProps {
+  groupedEvents: Record<string, SchemaWorkshop[]>;
+  showPreviousEvents: boolean;
+  eventListType?: EventListType;
+}
+
+function GroupedEventsView({
+  groupedEvents,
+  showPreviousEvents,
+  eventListType,
+}: GroupedEventsViewProps) {
+  const now = new Date();
+
+  const upcomingDates = Object.keys(groupedEvents).filter(
+    (date) => new Date(date) >= now,
+  );
+  const pastDates = Object.keys(groupedEvents).filter(
+    (date) => new Date(date) < now,
+  );
+
+  upcomingDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+  pastDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+  const orderedDates = showPreviousEvents
+    ? [...upcomingDates, ...pastDates]
+    : upcomingDates;
+
+  return (
+    <>
+      {orderedDates.map((isoDate) => (
+        <EventForDate
+          key={isoDate}
+          isoDate={isoDate}
+          events={groupedEvents[isoDate]}
+          eventListType={eventListType}
+        />
+      ))}
+    </>
+  );
 }
 
 export function SearchBar({ searchForm, setSearchForm }: SearchBarProps) {
@@ -390,10 +374,6 @@ export function SearchBar({ searchForm, setSearchForm }: SearchBarProps) {
       <span className="icon-[material-symbols--search-rounded] text-inh-secondary-hover shrink-0 text-2xl" />
     </div>
   );
-}
-
-export interface CheckInProps {
-  event: SchemaWorkshop;
 }
 
 export function CheckIn({ event }: CheckInProps) {

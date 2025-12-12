@@ -1,9 +1,5 @@
-import { EventFormState } from "../event-utils";
-import { EventFormErrors } from "./CreationForm";
+import { EventFormState, EventFormErrors } from "../types";
 import clsx from "clsx";
-
-// Max capacity of the event, even if it set to unlimited capcaity
-export const MAX_CAPACITY = 1000;
 
 export interface DateTimeProps {
   eventForm: EventFormState;

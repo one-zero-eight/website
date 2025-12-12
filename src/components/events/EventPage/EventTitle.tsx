@@ -1,14 +1,19 @@
 import { CheckInType, SchemaWorkshop } from "@/api/workshops/types";
 import { eventBadges } from "../EventBadges";
-import { formatDate, formatTime, parseTime } from "../date-utils";
+import {
+  formatDate,
+  formatTime,
+  parseTime,
+  getSignedPeopleCount,
+  imageLink,
+} from "../utils";
 import { Link } from "@tanstack/react-router";
-import { getSignedPeopleCount, imageLink } from "../event-utils";
 import clsx from "clsx";
 import { useCopyToClipboard } from "usehooks-ts";
 import { useState } from "react";
 import { CheckInButton } from "../CheckInButton";
 import { LanguageBadge } from "../LanguageBadge";
-import { MAX_CAPACITY } from "../EventEditPage/DateTime";
+import { MAX_CAPACITY } from "../constants";
 
 export interface EventTitleProps {
   event: SchemaWorkshop;
@@ -76,12 +81,14 @@ export default function EventTitle({
         className={`relative mb-4 flex ${event.image_file_id ? "h-[350px] lg:h-[300px]" : "h-[110px]"} w-full items-start justify-between rounded-t-(--radius-box) bg-[url("/pattern.svg")] bg-size-[640px] bg-center bg-repeat`}
       >
         {event.image_file_id && (
-          <div className="absolute top-1/2 left-1/2 aspect-square h-[250px] -translate-x-1/2 -translate-y-2/5 overflow-hidden lg:h-[210px]">
-            <img
-              src={imageLink(event.id)}
-              alt={event.english_name + " logo"}
-              className="h-full rounded-lg"
-            />
+          <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center">
+            <div className="flex aspect-square h-[250px] items-center justify-center overflow-hidden lg:h-[210px]">
+              <img
+                src={imageLink(event.id)}
+                alt={event.english_name + " logo"}
+                className="h-full rounded-lg"
+              />
+            </div>
           </div>
         )}
         <div className="m-4 flex gap-2">

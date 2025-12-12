@@ -3,21 +3,15 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import AddEventButton from "./AddEventButton.tsx";
 import { ModalWindow } from "./CreationModal/ModalWindow.tsx";
-import { EventListType, EventsList } from "./EventsList.tsx";
+import { EventsList } from "./EventsList.tsx";
+import { EventListType } from "./types/index.ts";
 import NameForm from "./CreationModal/NameForm.tsx";
 import { $clubs } from "@/api/clubs/index.ts";
 
-/**
- * Главная страница модуля воркшопов
- * Состояние:
- * - modalOpen: показывать ли модалку создания/редактирования
- * - modalWorkshop: воркшоп для редактирования (null = создание нового)
- */
 export function EventsAdminPage() {
   const navigate = useNavigate();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [_, setModalDate] = useState<string | null>(null);
 
   const { data: events } = $workshops.useQuery("get", "/workshops/");
   const { data: eventsUser } = $workshops.useQuery("get", "/users/me");
@@ -43,10 +37,7 @@ export function EventsAdminPage() {
       <div className="mt-3 flex w-full flex-wrap items-center gap-4 px-4 py-2">
         <span className="hidden md:block">Create new event:</span>
         <AddEventButton
-          onClick={() => {
-            setModalDate(null);
-            setModalOpen(true);
-          }}
+          onClick={() => setModalOpen(true)}
           className="w-full md:max-w-fit"
         >
           Create event
@@ -63,7 +54,6 @@ export function EventsAdminPage() {
         clubUser={clubsUser}
       />
 
-      {/* Модальное окно для создания/редактирования воркшопа */}
       <ModalWindow
         open={modalOpen}
         onOpenChange={() => {

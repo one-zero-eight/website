@@ -3,9 +3,9 @@ import { EventFormErrors } from "./CreationForm";
 import clsx from "clsx";
 import { WorkshopLanguage } from "@/api/workshops/types";
 import TagsSelector from "./TagsSelector";
-import { EventFormState } from "../event-utils";
 import { SchemaClub } from "@/api/clubs/types";
 import { $clubs } from "@/api/clubs";
+import { EventFormState } from "../types";
 
 export interface NameDescriptionProps {
   eventForm: EventFormState;

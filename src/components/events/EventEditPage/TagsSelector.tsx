@@ -2,7 +2,9 @@ import { SchemaBadge } from "@/api/workshops/types";
 import { eventBadges } from "../EventBadges";
 import { useMemo } from "react";
 
-export const MAX_BADGES_AMOUT = 3;
+import { MAX_BADGES_AMOUNT } from "../constants";
+
+export const MAX_BADGES_AMOUT = MAX_BADGES_AMOUNT;
 
 export interface GenericBadgeFormScheme {
   badges: SchemaBadge[];

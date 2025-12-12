@@ -1,14 +1,7 @@
 import { EventItem } from "./EventItem";
-import { SchemaWorkshop } from "@/api/workshops/types";
-import { EventListType } from "./EventsList";
 import clsx from "clsx";
 import { useMemo } from "react";
-
-export interface EventForDateProps {
-  isoDate: string;
-  events: SchemaWorkshop[];
-  eventListType?: EventListType;
-}
+import { EventForDateProps, EventListType, ItemsListProps } from "./types";
 
 export function EventForDate({
   isoDate,
@@ -44,23 +37,18 @@ export function EventForDate({
   );
 }
 
-export interface ItemsListProps {
-  events: SchemaWorkshop[];
-  eventListType?: EventListType;
-  className?: string;
-}
-
 export function ItemsList({
   events,
   eventListType,
   className,
 }: ItemsListProps) {
-  if (events.length === 0)
+  if (events.length === 0) {
     return (
       <div className="col-span-full w-full pt-10 text-center text-xl">
         <h2 className="text-gray-200">No events found!</h2>
       </div>
     );
+  }
 
   return (
     <div

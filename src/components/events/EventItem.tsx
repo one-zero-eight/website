@@ -1,31 +1,28 @@
-import { $workshops, workshopsTypes } from "@/api/workshops";
+import { $workshops } from "@/api/workshops";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import { formatDate, formatTime, parseTime } from "./date-utils.ts";
 import {
+  formatDate,
+  formatTime,
+  parseTime,
   getInactiveStatusText,
   getSignedPeopleCount,
   imageLink,
   isEventRecommended,
   isWorkshopActive,
-} from "./event-utils.ts";
+} from "./utils";
 import { eventBadges } from "./EventBadges.tsx";
 import { LanguageBadge } from "./LanguageBadge.tsx";
-import { MAX_CAPACITY } from "./EventEditPage/DateTime.tsx";
+import { MAX_CAPACITY } from "./constants.ts";
 import { $clubs } from "@/api/clubs/index.ts";
 import { CheckInType } from "@/api/workshops/types.ts";
-
-export interface EventItemProps {
-  event: workshopsTypes.SchemaWorkshop;
-  isEditable: boolean;
-  className?: string;
-}
+import { EventItemProps } from "./types";
 
 export function EventItem({ event, isEditable, className }: EventItemProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
 
   const clubId = event.host?.includes("club:")
-    ? event.host?.split(":")[1]
+    ? event.host.split(":")[1]
     : null;
 
   const { data: clubHost } = $clubs.useQuery("get", "/clubs/by-id/{id}", {
@@ -59,16 +56,21 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
           className={`relative flex ${event.image_file_id ? "h-[220px]" : "h-[110px]"} items-start justify-between rounded-t-(--radius-box) bg-[url("/pattern.svg")] bg-size-[640px] bg-center bg-repeat`}
         >
           {event.image_file_id && (
-            <div className="absolute top-1/2 left-1/2 aspect-square h-[180px] w-[180px] -translate-x-1/2 -translate-y-1/2 overflow-hidden">
-              <img
-                src={imageLink(event.id)}
-                alt={event.english_name + " logo"}
-                className="h-full rounded-lg"
-              />
+            <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center">
+              <div className="flex h-[180px] w-[180px] items-center justify-center overflow-hidden">
+                <img
+                  src={imageLink(event.id)}
+                  alt={event.english_name + " logo"}
+                  className="h-full rounded-lg"
+                />
+              </div>
             </div>
           )}
-          <LanguageBadge event={event} className="m-4 inline-flex md:hidden" />
-          <div className="m-4 flex items-center gap-2">
+          <LanguageBadge
+            event={event}
+            className="z-10 m-4 inline-flex md:hidden"
+          />
+          <div className="z-10 m-4 flex items-center gap-2">
             {!isWorkshopActive(event) && (
               <div
                 className={`badge badge-soft rounded-lg ${!event.is_draft ? "[--badge-color:var(--color-rose-500)]" : "[--badge-color:var(--color-slate-400)]"}`}
@@ -87,15 +89,15 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
               />
               {event.english_name || event.russian_name}
             </h2>
-            {event.badges.length !== 0 ? (
+            {event.badges.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {event.badges
-                  .filter((badge) => !(badge.title == "recommended"))
+                  .filter((badge) => badge.title !== "recommended")
                   .map((badge) => (
                     <div key={badge.title}>{eventBadges[badge.title]}</div>
                   ))}
               </div>
-            ) : null}
+            )}
           </div>
           <div className="flex gap-2">
             {event.check_in_type === CheckInType.on_innohassle ? (
@@ -137,7 +139,7 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
               <span className="truncate text-neutral-400 dark:text-white">
                 {event.host?.includes("club:") && clubHost
                   ? clubHost.title
-                  : event.host}
+                  : event.host || "Unknown"}
               </span>
             </div>
             <div className="flex items-center gap-2">

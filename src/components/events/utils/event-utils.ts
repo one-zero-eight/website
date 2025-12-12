@@ -1,18 +1,19 @@
-/**
- * Утилиты для работы с воркшопами
- */
-
 import { workshopsTypes } from "@/api/workshops";
-import { getDate, isWorkshopPast } from "./date-utils.ts";
+import { getDate, isWorkshopPast } from "./date-utils";
 import {
   CheckInType,
   SchemaBadge,
   SchemaWorkshop,
   WorkshopLanguage,
-} from "@/api/workshops/types.ts";
-import { MAX_CAPACITY } from "./EventEditPage/DateTime.tsx";
-import { GenericBadgeFormScheme } from "./EventEditPage/TagsSelector.tsx";
+} from "@/api/workshops/types";
+import { MAX_CAPACITY, HOST_NONE } from "../constants";
+import { EventFormState } from "../types";
 
+/**
+ * Creates an empty event object with default values
+ * @param title - The title for the event
+ * @returns Partial event object with default values
+ */
 export const emptyEvent = (
   title: string,
 ): Pick<
@@ -27,38 +28,22 @@ export const emptyEvent = (
   | "capacity"
   | "check_in_type"
 > => {
+  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const dayAfter = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+
   return {
     english_name: title,
     russian_name: title,
     language: WorkshopLanguage.both,
-    host: "None",
-    dtstart: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-    dtend: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    host: HOST_NONE,
+    dtstart: tomorrow.toISOString(),
+    dtend: dayAfter.toISOString(),
     is_draft: true,
     capacity: MAX_CAPACITY,
     check_in_type: CheckInType.no_check_in,
   };
 };
 
-export type EventLink = {
-  id: number;
-  title: string;
-  url: string;
-};
-
-export type EventFormState = Omit<
-  workshopsTypes.SchemaWorkshop,
-  "id" | "created_at" | "badges" | "links"
-> &
-  GenericBadgeFormScheme & {
-    date: string;
-    check_in_date: string;
-    check_in_on_open: boolean;
-    links: EventLink[];
-    file: File | null;
-  };
-
-// Base (Empty) state for event creation form
 export const baseEventFormState: EventFormState = {
   english_name: "",
   english_description: "",
@@ -66,7 +51,7 @@ export const baseEventFormState: EventFormState = {
   russian_description: "",
   badges: [],
   language: WorkshopLanguage.both,
-  host: "",
+  host: HOST_NONE,
   capacity: 1000,
   remain_places: 1000,
   is_registrable: false,
@@ -87,11 +72,11 @@ export const baseEventFormState: EventFormState = {
 };
 
 /**
- * Returns formateted language of a workshop e.g. "EN/RU"
- * @param workshop workshop object
- * @returns formated language string
+ * Returns formatted language code for an event (EN, RU, or EN/RU)
+ * @param workshop - The event/workshop object
+ * @returns Formatted language string (EN, RU, EN/RU, or Unknown)
  */
-export const eventLangauage = (
+export const eventLanguage = (
   workshop: workshopsTypes.SchemaWorkshop,
 ): string => {
   switch (workshop.language) {
@@ -106,10 +91,20 @@ export const eventLangauage = (
   }
 };
 
+/**
+ * Generates the image URL for an event
+ * @param eventId - The event ID
+ * @returns The image URL string
+ */
 export function imageLink(eventId: string) {
   return `${import.meta.env.VITE_WORKSHOPS_API_URL}/workshops/${eventId}/image`;
 }
 
+/**
+ * Returns the event name based on its language setting
+ * @param workshop - The event/workshop object
+ * @returns The event name string or "Unknown"
+ */
 export const eventName = (workshop: SchemaWorkshop): string => {
   switch (workshop.language) {
     case "english":
@@ -122,9 +117,9 @@ export const eventName = (workshop: SchemaWorkshop): string => {
 };
 
 /**
- * Проверяет, активен ли воркшоп
- * @param workshop - Объект воркшопа
- * @returns true если воркшоп активен и доступен для регистрации
+ * Checks if an event is active and available for registration
+ * @param event - The event object to check
+ * @returns True if the event is active and available for registration
  */
 export const isWorkshopActive = (event: SchemaWorkshop): boolean => {
   if (!event.dtstart || !event.check_in_opens) {
@@ -142,9 +137,9 @@ export const isWorkshopActive = (event: SchemaWorkshop): boolean => {
 };
 
 /**
- * Получает текст статуса неактивности воркшопа
- * @param event - Объект воркшопа
- * @returns Текст статуса для отображения
+ * Returns the status text explaining why an event is inactive
+ * @param event - The event object
+ * @returns Status text string explaining the inactive state
  */
 export const getInactiveStatusText = (
   event: workshopsTypes.SchemaWorkshop,
@@ -154,7 +149,6 @@ export const getInactiveStatusText = (
     return "Incomplete";
   }
 
-  // Проверяем, прошел ли воркшоп
   if (isWorkshopPast(event.dtstart)) {
     return "Outdated";
   }
@@ -174,15 +168,14 @@ export const getInactiveStatusText = (
   if (!event.is_registrable) {
     return "Already checked in";
   } else {
-    // isActive false или оба false просто Inactive
     return "Inactive";
   }
 };
 
 /**
- * Подсчитывает количество записанных людей на воркшоп
- * @param workshop - Объект воркшопа
- * @returns Количество записанных участников
+ * Calculates the number of people signed up for an event
+ * @param event - The event object
+ * @returns Number of signed-up participants
  */
 export const getSignedPeopleCount = (
   event: workshopsTypes.SchemaWorkshop,
@@ -198,8 +191,14 @@ export const getSignedPeopleCount = (
   return 0;
 };
 
+/**
+ * Checks if an event has all the specified badges
+ * @param event - The event object to check
+ * @param badges - Array of badges to check for
+ * @returns True if the event has all specified badges (or if badges array is empty)
+ */
 export const hasBadges = (event: SchemaWorkshop, badges: SchemaBadge[]) => {
-  if (!badges.length) return true; // no filter means all pass
+  if (!badges.length) return true;
 
   return badges.every((badge) =>
     event.badges.some(
@@ -209,21 +208,25 @@ export const hasBadges = (event: SchemaWorkshop, badges: SchemaBadge[]) => {
   );
 };
 
+/**
+ * Checks if an event has the recommended badge
+ * @param event - The event object to check
+ * @returns True if the event has the recommended badge
+ */
 export const isEventRecommended = (event: SchemaWorkshop) => {
   return event.badges.some((badge) => badge.title === "recommended");
 };
 
 /**
- * Group events by dates and then sorts by recommendation
- * @param events - events array
- * @returns Объект с воркшопами, сгруппированными по датам
+ * Groups events by date and sorts them by recommendation status
+ * @param events - Array of events to group
+ * @returns Object with dates as keys and arrays of events as values
  */
 export const groupEvents = <T extends workshopsTypes.SchemaWorkshop>(
   events: T[],
 ): Record<string, T[]> => {
   const groups: Record<string, T[]> = {};
 
-  // Group
   for (let i = 0; i < events.length; i++) {
     const event = events[i];
     if (!event.dtstart || !event.check_in_opens) {
@@ -237,7 +240,6 @@ export const groupEvents = <T extends workshopsTypes.SchemaWorkshop>(
     groups[dateTag].push(event);
   }
 
-  // Sort by recommendation
   Object.entries(groups).forEach(([_, events]) => {
     events
       .sort((a, b) => (a.dtstart || "").localeCompare(b.dtstart || ""))

@@ -1,5 +1,4 @@
-import { EventFormState } from "../event-utils";
-import { EventFormErrors, EventLink } from "./CreationForm";
+import { EventFormErrors, EventFormState, EventLink } from "../types";
 
 export interface AdditionalInfoProps {
   eventForm: EventFormState;
@@ -17,7 +16,7 @@ export default function AdditionalInfo({
   const addLink = () => {
     const newLinks: EventLink[] = [
       ...(eventForm.links as EventLink[]),
-      { id: eventForm.links.length, title: "", url: "" }, // Color doesnt matter, all badges are linked with their names
+      { id: eventForm.links.length, title: "", url: "" },
     ];
 
     setEventForm({
@@ -52,7 +51,7 @@ export default function AdditionalInfo({
         {eventForm.links.map((link, index) => (
           <li
             className="list-row flex flex-col border md:flex-row md:items-center md:border-transparent"
-            key={index}
+            key={link.id}
           >
             <span className="hidden text-lg font-semibold text-nowrap md:block">
               {index + 1}.
@@ -63,11 +62,11 @@ export default function AdditionalInfo({
                 type="text"
                 placeholder="e.g. Chat, Form"
                 className="input input-md w-full"
-                value={eventForm.links[eventForm.links.indexOf(link)].title}
+                value={link.title}
                 onChange={(e) =>
                   setEventForm({
                     ...eventForm,
-                    links: eventForm.links.with(eventForm.links.indexOf(link), {
+                    links: eventForm.links.with(index, {
                       ...link,
                       title: e.target.value,
                     }),
@@ -81,11 +80,11 @@ export default function AdditionalInfo({
                 type="url"
                 placeholder="e.g. https://t.me/handle"
                 className="input input-md w-full"
-                value={eventForm.links[eventForm.links.indexOf(link)].url}
+                value={link.url}
                 onChange={(e) =>
                   setEventForm({
                     ...eventForm,
-                    links: eventForm.links.with(eventForm.links.indexOf(link), {
+                    links: eventForm.links.with(index, {
                       ...link,
                       url: e.target.value,
                     }),
@@ -95,7 +94,7 @@ export default function AdditionalInfo({
             </label>
             <button
               className="btn btn-sm btn-square btn-ghost btn-error"
-              onClick={() => removeLink(index)}
+              onClick={() => removeLink(link.id)}
             >
               <span className="icon-[solar--trash-bin-2-bold] text-lg" />
             </button>

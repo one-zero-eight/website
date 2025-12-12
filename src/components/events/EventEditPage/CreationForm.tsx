@@ -1,48 +1,23 @@
 import { $workshops } from "@/api/workshops";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useToast } from "@/components/toast/index.ts";
-import {
-  SchemaBadge,
-  SchemaLink,
-  SchemaWorkshop,
-} from "@/api/workshops/types.ts";
-import { DateTime, MAX_CAPACITY } from "./DateTime.tsx";
+import { SchemaBadge, SchemaLink } from "@/api/workshops/types.ts";
+import { DateTime } from "./DateTime.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import AdditionalInfo from "./AdditionalInfo.tsx";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { baseEventFormState, EventFormState } from "../event-utils.ts";
+import { baseEventFormState } from "../utils";
+import {
+  CreationFormProps,
+  EventFormErrors,
+  EventFormState,
+  EventLink,
+} from "../types";
+import { MAX_CAPACITY, HOST_NONE, HOST_PICK_CLUB } from "../constants.ts";
 import NameDescription from "./NameDescription.tsx";
 import ImageUpload from "./ImageUpload.tsx";
-import { SchemaUserWithClubs } from "@/api/clubs/types.ts";
 import { CheckInType } from "@/api/workshops/types.ts";
 import clsx from "clsx";
-
-export enum EventCreationType {
-  DEFAULT,
-  CLUB_LEADER,
-}
-
-export interface EventLink extends SchemaLink {
-  id: number;
-}
-
-export interface PostFormProps {
-  initialEvent?: SchemaWorkshop;
-  initialDate?: string;
-  clubUser: SchemaUserWithClubs | null | undefined;
-  isAdmin?: boolean;
-  onClose?: () => void;
-}
-
-export interface EventFormErrors {
-  name?: string | null;
-  host?: string | null;
-  date?: string | null;
-  stime?: string | null;
-  etime?: string | null;
-  links?: string | null;
-  checkInLinkError?: string | null;
-}
 
 /**
  * Form for creatig a new event or edit existing
@@ -55,7 +30,7 @@ export function CreationForm({
   clubUser,
   isAdmin = false,
   onClose,
-}: PostFormProps) {
+}: CreationFormProps) {
   const redirect = useNavigate();
   const queryClient = useQueryClient();
   const storageKey = initialEvent ? null : "workshop-form-draft";
@@ -135,10 +110,8 @@ export function CreationForm({
     }
   };
 
-  // Ensure capacity is set to unlimited for No check-in and By link
-  // And ensure always open is set for No check-in
   useEffect(() => {
-    setEventForm((prevForm) => {
+    setEventForm((prevForm: EventFormState) => {
       const shouldBeUnlimited =
         prevForm.check_in_type === CheckInType.no_check_in ||
         prevForm.check_in_type === CheckInType.by_link;
@@ -146,7 +119,7 @@ export function CreationForm({
         prevForm.check_in_type === CheckInType.no_check_in;
 
       let needsUpdate = false;
-      const updates: any = {};
+      const updates: Partial<EventFormState> = {};
 
       if (shouldBeUnlimited && prevForm.capacity !== MAX_CAPACITY) {
         updates.capacity = MAX_CAPACITY;
@@ -187,7 +160,7 @@ export function CreationForm({
       date.setDate(date.getDate() + 1);
     }
 
-    const pad = (n: number) => n.toString().padStart(2, "0");
+    const pad = (n: number): string => n.toString().padStart(2, "0");
     const endDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
     const dtstart = `${eventForm.date}T${eventForm.dtstart}:00+03:00`;
@@ -196,12 +169,11 @@ export function CreationForm({
     // Handle check in openning time
     let check_in_opens = `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
     if (eventForm.check_in_on_open) {
-      // When always open is enabled, set check_in_opens to current time (time of creation)
       check_in_opens = new Date().toISOString();
     }
 
     const links: SchemaLink[] = [];
-    eventForm.links.forEach((link) =>
+    eventForm.links.forEach((link: EventLink) =>
       links.push({ title: link.title, url: link.url }),
     );
 
@@ -245,7 +217,10 @@ export function CreationForm({
 
   const handleCreateEvent = () => {
     const apiData = buildApiData();
-    if (!apiData) return; // Add Error Handling
+    if (!apiData) {
+      showError("Validation Error", "Please fill in all required fields.");
+      return;
+    }
 
     createEvent(
       {
@@ -255,16 +230,15 @@ export function CreationForm({
       },
       {
         onSuccess: () => {
+          const eventName = apiData.english_name || apiData.russian_name;
           showSuccess(
             "Event Created",
-            `Event "${apiData.english_name || apiData.russian_name}" has been successfully created.`,
+            `Event "${eventName}" has been successfully created.`,
           );
           clearSavedData();
           setEventForm(baseEventFormState);
           setErrors({});
-          if (onClose) {
-            onClose();
-          }
+          onClose?.();
           throw redirect({
             to: "/events/$id",
             params: { id: initialEvent?.id || "" },
@@ -297,7 +271,10 @@ export function CreationForm({
     if (!initialEvent) return;
 
     const apiData = buildApiData();
-    if (!apiData) return; //Add Error Handling
+    if (!apiData) {
+      showError("Validation Error", "Please fill in all required fields.");
+      return;
+    }
 
     updateEvent(
       {
@@ -306,14 +283,15 @@ export function CreationForm({
       },
       {
         onSuccess: () => {
+          const eventName = apiData.english_name || apiData.russian_name;
           showSuccess(
             "Event Updated",
-            `Event "${apiData.english_name || apiData.russian_name}" has been successfully updated.`,
+            `Event "${eventName}" has been successfully updated.`,
           );
           onClose?.();
           throw redirect({
             to: "/events/$id",
-            params: { id: initialEvent?.id || "" },
+            params: { id: initialEvent.id },
             reloadDocument: true,
           });
         },
@@ -344,9 +322,10 @@ export function CreationForm({
   const handleRemoveEvent = async () => {
     if (!initialEvent) return;
 
+    const eventName = initialEvent.english_name || initialEvent.russian_name;
     const confirmed = await showConfirm({
-      title: "Delete Workshop",
-      message: `Are you sure you want to delete the workshop "${initialEvent.english_name || initialEvent.russian_name}"?\n\nThis action cannot be undone.`,
+      title: "Delete Event",
+      message: `Are you sure you want to delete the event "${eventName}"?\n\nThis action cannot be undone.`,
       confirmText: "Delete",
       cancelText: "Cancel",
       type: "error",
@@ -360,9 +339,11 @@ export function CreationForm({
       { params: { path: { workshop_id: initialEvent.id } } },
       {
         onSuccess: () => {
+          const eventName =
+            initialEvent.english_name || initialEvent.russian_name;
           showSuccess(
             "Event Deleted",
-            `Event "${initialEvent.english_name || initialEvent.russian_name}" has been successfully deleted.`,
+            `Event "${eventName}" has been successfully deleted.`,
           );
         },
         onError: () => {
@@ -388,11 +369,11 @@ export function CreationForm({
         });
         setEventForm({ ...eventForm, file: null });
         setLogoPreview(null);
-        alert("Logo uploaded successfully!");
+        showSuccess("Logo Uploaded", "Logo uploaded successfully!");
       },
       onError: (error) => {
         console.error("Failed to upload logo:", error);
-        alert("Failed to upload logo. Please try again.");
+        showError("Upload Failed", "Failed to upload logo. Please try again.");
       },
     });
 
@@ -416,28 +397,29 @@ export function CreationForm({
 
     uploadLogo({
       params: { path: { workshop_id: initialEvent.id } },
-      body: formData as any,
+      // @ts-expect-error - FormData type mismatch with API
+      body: formData,
     });
   };
 
   // ================== Validations ==================
 
   const validateNameDescription = () => {
-    const newErrors = {} as EventFormErrors;
+    const newErrors: EventFormErrors = {};
 
-    if (!eventForm.english_name.trim() && eventForm.language != "russian") {
+    if (!eventForm.english_name.trim() && eventForm.language !== "russian") {
       newErrors.name = "Title is required";
       showError("Validation Error", "English title is required");
     }
 
-    if (!eventForm.russian_name.trim() && eventForm.language != "english") {
+    if (!eventForm.russian_name.trim() && eventForm.language !== "english") {
       newErrors.name = "Title is required";
       showError("Validation Error", "Russian title is required");
     }
 
     if (
-      eventForm.host === "Pick a club" ||
-      eventForm.host === "None" ||
+      eventForm.host === HOST_PICK_CLUB ||
+      eventForm.host === HOST_NONE ||
       !(eventForm.host || "").trim()
     ) {
       newErrors.host = "Host is required";
@@ -449,9 +431,9 @@ export function CreationForm({
   };
 
   const validateLinks = () => {
-    const newErrors = {} as EventFormErrors;
+    const newErrors: EventFormErrors = {};
 
-    eventForm.links.forEach((link) => {
+    eventForm.links.forEach((link: EventLink) => {
       if (!link.title.trim()) {
         newErrors.links = "Title for link shouldn't be empty";
         showError("Validation Error", "Title for link shouldn't be empty");
@@ -470,7 +452,7 @@ export function CreationForm({
   };
 
   const validateDateTimePlaceToggles = () => {
-    const newErrors = {} as EventFormErrors;
+    const newErrors: EventFormErrors = {};
 
     if (
       eventForm.check_in_type === CheckInType.by_link &&
@@ -698,10 +680,10 @@ export function CreationForm({
                       type="datetime-local"
                       className="input"
                       value={
-                        initialEvent
-                          ? eventForm.check_in_date +
-                            "T" +
-                            eventForm.check_in_opens
+                        initialEvent &&
+                        eventForm.check_in_date &&
+                        eventForm.check_in_opens
+                          ? `${eventForm.check_in_date}T${eventForm.check_in_opens}`
                           : ""
                       }
                       onChange={handleCheckIn}
@@ -823,3 +805,4 @@ export function CreationForm({
     </div>
   );
 }
+export type { EventFormErrors };
