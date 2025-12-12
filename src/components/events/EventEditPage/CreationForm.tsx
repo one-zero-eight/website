@@ -1,5 +1,5 @@
 import { $workshops } from "@/api/workshops";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useToast } from "@/components/toast/index.ts";
 import {
   SchemaBadge,
@@ -70,6 +70,12 @@ export function CreationForm({
         links.push({ title: link?.title || "", url: link?.url, id: index }),
       );
 
+      const shouldBeUnlimited =
+        initialEvent.check_in_type === CheckInType.no_check_in ||
+        initialEvent.check_in_type === CheckInType.by_link;
+      const shouldBeAlwaysOpen =
+        initialEvent.check_in_type === CheckInType.no_check_in;
+
       return {
         ...baseEventFormState,
         ...initialEvent,
@@ -77,7 +83,9 @@ export function CreationForm({
         dtstart: dtstartDate.toTimeString().slice(0, 5),
         dtend: dtendDate.toTimeString().slice(0, 5),
         place: initialEvent.place || "",
-        capacity: initialEvent.capacity || MAX_CAPACITY,
+        capacity: shouldBeUnlimited
+          ? MAX_CAPACITY
+          : initialEvent.capacity || MAX_CAPACITY,
         remain_places: initialEvent.remain_places,
         check_in_date: initialEvent.check_in_opens
           ? initialEvent.check_in_opens.split("T")[0]
@@ -85,7 +93,7 @@ export function CreationForm({
         check_in_opens: initialEvent.check_in_opens
           ? initialEvent.check_in_opens.split("T")[1].slice(0, 5)
           : "",
-        check_in_on_open: false,
+        check_in_on_open: shouldBeAlwaysOpen ? true : false,
         links: links,
       };
     }
@@ -127,6 +135,36 @@ export function CreationForm({
     }
   };
 
+  // Ensure capacity is set to unlimited for No check-in and By link
+  // And ensure always open is set for No check-in
+  useEffect(() => {
+    setEventForm((prevForm) => {
+      const shouldBeUnlimited =
+        prevForm.check_in_type === CheckInType.no_check_in ||
+        prevForm.check_in_type === CheckInType.by_link;
+      const shouldBeAlwaysOpen =
+        prevForm.check_in_type === CheckInType.no_check_in;
+
+      let needsUpdate = false;
+      const updates: any = {};
+
+      if (shouldBeUnlimited && prevForm.capacity !== MAX_CAPACITY) {
+        updates.capacity = MAX_CAPACITY;
+        needsUpdate = true;
+      }
+
+      if (shouldBeAlwaysOpen && !prevForm.check_in_on_open) {
+        updates.check_in_on_open = true;
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        return { ...prevForm, ...updates };
+      }
+      return prevForm;
+    });
+  }, [eventForm.check_in_type]);
+
   // ================== API ==================
 
   const buildApiData = () => {
@@ -144,8 +182,8 @@ export function CreationForm({
 
     const date = new Date(eventForm.date);
 
-    // If dtend is less than dtstart, consider dtend as next day
-    if (eventForm.dtend < eventForm.dtstart) {
+    // If dtend is less than or equal to dtstart, consider dtend as next day
+    if (eventForm.dtend <= eventForm.dtstart) {
       date.setDate(date.getDate() + 1);
     }
 
@@ -158,13 +196,8 @@ export function CreationForm({
     // Handle check in openning time
     let check_in_opens = `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
     if (eventForm.check_in_on_open) {
-      if (initialEvent) {
-        if (!initialEvent.dtstart) {
-          validateDateTimePlaceToggles();
-          return;
-        }
-        check_in_opens = initialEvent.dtstart;
-      } else check_in_opens = new Date().toISOString();
+      // When always open is enabled, set check_in_opens to current time (time of creation)
+      check_in_opens = new Date().toISOString();
     }
 
     const links: SchemaLink[] = [];
@@ -183,7 +216,10 @@ export function CreationForm({
       dtend,
       check_in_opens,
       place: eventForm.place?.trim() || "TBA",
-      capacity: eventForm.capacity || MAX_CAPACITY,
+      capacity:
+        eventForm.check_in_type === CheckInType.on_innohassle
+          ? eventForm.capacity || MAX_CAPACITY
+          : MAX_CAPACITY,
       badges: eventForm.badges as SchemaBadge[],
       is_draft: eventForm.is_draft,
       links: links,
@@ -580,12 +616,25 @@ export function CreationForm({
             </legend>
             <select
               value={eventForm.check_in_type || ""}
-              onChange={(e) =>
+              onChange={(e) => {
+                const newCheckInType = e.target.value as CheckInType;
+                const shouldBeUnlimited =
+                  newCheckInType === CheckInType.no_check_in ||
+                  newCheckInType === CheckInType.by_link;
+
                 setEventForm({
                   ...eventForm,
-                  check_in_type: e.target.value as CheckInType,
-                })
-              }
+                  check_in_type: newCheckInType,
+                  // Auto-set unlimited places for No check-in and By link
+                  ...(shouldBeUnlimited && {
+                    capacity: MAX_CAPACITY,
+                  }),
+                  // Auto-set always open for No check-in
+                  ...(newCheckInType === CheckInType.no_check_in && {
+                    check_in_on_open: true,
+                  }),
+                });
+              }}
               className="select w-full"
             >
               <option value={CheckInType.no_check_in}>No check-in</option>
@@ -625,78 +674,83 @@ export function CreationForm({
               {errors.checkInLinkError}
             </p>
           )}
-          {eventForm.check_in_type !== CheckInType.by_link && (
+          {eventForm.check_in_type !== CheckInType.by_link &&
+            eventForm.check_in_type !== CheckInType.no_check_in && (
+              <>
+                <label className="label mr-2 text-black dark:text-white">
+                  <input
+                    type="checkbox"
+                    className="toggle"
+                    checked={eventForm.check_in_on_open}
+                    onChange={() =>
+                      setEventForm({
+                        ...eventForm,
+                        check_in_on_open: !eventForm.check_in_on_open,
+                      })
+                    }
+                  />
+                  Always open
+                </label>
+                {!eventForm.check_in_on_open && (
+                  <div>
+                    <label className="mr-2">Open check-in at:</label>
+                    <input
+                      type="datetime-local"
+                      className="input"
+                      value={
+                        initialEvent
+                          ? eventForm.check_in_date +
+                            "T" +
+                            eventForm.check_in_opens
+                          : ""
+                      }
+                      onChange={handleCheckIn}
+                      disabled={eventForm.check_in_on_open}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          {eventForm.check_in_type === CheckInType.on_innohassle && (
             <>
-              <label className="label mr-2 text-black dark:text-white">
+              <div className="divider my-1" />
+              <label
+                className="label mr-2 text-black dark:text-white"
+                htmlFor="isUnlimited"
+              >
                 <input
                   type="checkbox"
+                  id="isUnlimited"
                   className="toggle"
-                  checked={eventForm.check_in_on_open}
-                  onChange={() =>
-                    setEventForm({
-                      ...eventForm,
-                      check_in_on_open: !eventForm.check_in_on_open,
-                    })
-                  }
+                  checked={isUnlimited}
+                  onChange={handleUnlimitedChange}
                 />
-                Always open
+                Unlimited Places
               </label>
-              {!eventForm.check_in_on_open && (
+              {!isUnlimited && (
                 <div>
-                  <label className="mr-2">Open check-in at:</label>
+                  <label className="mr-2">Event places:</label>
                   <input
-                    type="datetime-local"
+                    type="text"
+                    value={isUnlimited ? "Unlimited" : eventForm.capacity || ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const num = Number(val);
+                      if (!Number.isNaN(num)) {
+                        setEventForm({ ...eventForm, capacity: num });
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const num = Number(e.target.value);
+                      const fixed = Math.min(Math.max(num, 0), MAX_CAPACITY);
+                      setEventForm({ ...eventForm, capacity: fixed });
+                    }}
+                    disabled={isUnlimited}
                     className="input"
-                    value={
-                      initialEvent
-                        ? eventForm.check_in_date +
-                          "T" +
-                          eventForm.check_in_opens
-                        : ""
-                    }
-                    onChange={handleCheckIn}
-                    disabled={eventForm.check_in_on_open}
                   />
                 </div>
               )}
             </>
-          )}
-          <div className="divider my-1" />
-          <label
-            className="label mr-2 text-black dark:text-white"
-            htmlFor="isUnlimited"
-          >
-            <input
-              type="checkbox"
-              id="isUnlimited"
-              className="toggle"
-              checked={isUnlimited}
-              onChange={handleUnlimitedChange}
-            />
-            Unlimited Places
-          </label>
-          {!isUnlimited && (
-            <div>
-              <label className="mr-2">Event places:</label>
-              <input
-                type="text"
-                value={isUnlimited ? "Unlimited" : eventForm.capacity || ""}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  const num = Number(val);
-                  if (!Number.isNaN(num)) {
-                    setEventForm({ ...eventForm, capacity: num });
-                  }
-                }}
-                onBlur={(e) => {
-                  const num = Number(e.target.value);
-                  const fixed = Math.min(Math.max(num, 0), MAX_CAPACITY);
-                  setEventForm({ ...eventForm, capacity: fixed });
-                }}
-                disabled={isUnlimited}
-                className="input"
-              />
-            </div>
           )}
         </div>
       </div>

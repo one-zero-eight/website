@@ -212,7 +212,14 @@ export default function EventTitle({
           )}
         </div>
         <div className="hidden justify-end md:flex">
-          <CheckInButton event={event} className="btn-wide" />
+          <CheckInButton
+            event={event}
+            className={
+              event.check_in_type === CheckInType.by_link
+                ? "max-w-2/5"
+                : "btn-wide"
+            }
+          />
         </div>
       </div>
     </div>
