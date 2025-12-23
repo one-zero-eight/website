@@ -10,6 +10,37 @@ import { MAX_CAPACITY, HOST_NONE } from "../constants";
 import { EventFormState } from "../types";
 
 /**
+ * Parse club host string to array of club IDs
+ * @param host Host string in format "club:<id>" or "club:<id1>;club:<id2>"
+ * @returns Array of club IDs
+ */
+export function parseClubHost(host: string | null | undefined): string[] {
+  if (!host || !host.includes("club:")) {
+    return [];
+  }
+  return host
+    .split(";")
+    .filter((part) => part.startsWith("club:"))
+    .map((part) => part.split(":")[1])
+    .filter((id) => id);
+}
+
+/**
+ * Format array of club IDs to host string
+ * @param clubIds Array of club IDs
+ * @returns Host string in format "club:<id>" or "club:<id1>;club:<id2>"
+ */
+export function formatClubHost(clubIds: string[]): string {
+  if (clubIds.length === 0) {
+    return "";
+  }
+  if (clubIds.length === 1) {
+    return `club:${clubIds[0]}`;
+  }
+  return clubIds.map((id) => `club:${id}`).join(";");
+}
+
+/**
  * Creates an empty event object with default values
  * @param title - The title for the event
  * @returns Partial event object with default values
