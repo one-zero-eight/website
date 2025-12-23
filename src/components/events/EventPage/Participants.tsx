@@ -4,6 +4,7 @@ import { SchemaWorkshop } from "@/api/workshops/types";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useState, useMemo } from "react";
+import { parseClubHost } from "../utils";
 
 export interface ParticipantsProps {
   event: SchemaWorkshop;
@@ -27,13 +28,11 @@ export default function Participants({
     },
   );
 
-  const clubId = event.host?.includes("club:")
-    ? event.host?.split(":")[1]
-    : null;
+  const clubIds = useMemo(() => parseClubHost(event.host), [event.host]);
+  const isClubHost = clubIds.length > 0;
 
-  const { data: clubHost } = $clubs.useQuery("get", "/clubs/by-id/{id}", {
-    params: { path: { id: clubId || "" } },
-    enabled: !!clubId,
+  const { data: clubsList = [] } = $clubs.useQuery("get", "/clubs/", {
+    enabled: isClubHost,
   });
 
   // Memoized derived values
@@ -54,20 +53,30 @@ export default function Participants({
               <span className="icon-[sidekickicons--crown-20-solid]" />
               <span>Event Host</span>
             </h3>
-            <p className="prose dark:prose-invert">
-              {event.host?.includes("club:") && clubHost ? (
-                <Link
-                  to="/clubs/$slug"
-                  params={{ slug: clubHost?.slug || "" }}
-                  className="text-primary hover:text-primary/80 cursor-pointer underline"
-                  title="Click to view on map"
-                >
-                  {clubHost.title}
-                </Link>
+            <div className="prose dark:prose-invert">
+              {isClubHost ? (
+                <div className="flex flex-col gap-1">
+                  {clubIds.map((id) => {
+                    const club = clubsList.find((c) => c.id === id);
+                    return club ? (
+                      <Link
+                        key={id}
+                        to="/clubs/$slug"
+                        params={{ slug: club.slug || "" }}
+                        className="text-primary hover:text-primary/80 cursor-pointer underline"
+                        title="Click to view on map"
+                      >
+                        {club.title}
+                      </Link>
+                    ) : (
+                      <span key={id}>{`club:${id}`}</span>
+                    );
+                  })}
+                </div>
               ) : (
-                event.host
+                <p>{event.host}</p>
               )}
-            </p>
+            </div>
           </div>
         </div>
       )}

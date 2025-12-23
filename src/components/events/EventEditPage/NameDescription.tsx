@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { EventFormErrors } from "./CreationForm";
 import clsx from "clsx";
 import { WorkshopLanguage } from "@/api/workshops/types";
@@ -6,6 +6,7 @@ import TagsSelector from "./TagsSelector";
 import { SchemaClub } from "@/api/clubs/types";
 import { $clubs } from "@/api/clubs";
 import { EventFormState } from "../types";
+import { formatClubHost, parseClubHost } from "../utils";
 
 export interface NameDescriptionProps {
   eventForm: EventFormState;
@@ -34,8 +35,35 @@ export default function NameDescription({
   const [isClubSelect, setIsClubSelect] = useState<boolean>(
     !!eventForm.host?.includes("club:"),
   );
+  const [selectedClubIds, setSelectedClubIds] = useState<string[]>(() => {
+    const parsed = parseClubHost(eventForm.host);
+    return parsed.length > 0 ? parsed : [""];
+  });
+  const prevHostRef = useRef<string | null | undefined>(eventForm.host);
+  const isInternalUpdateRef = useRef(false);
 
   const { data: clubList } = $clubs.useQuery("get", "/clubs/");
+
+  useEffect(() => {
+    if (
+      isClubSelect &&
+      !isInternalUpdateRef.current &&
+      prevHostRef.current !== eventForm.host
+    ) {
+      const parsed = parseClubHost(eventForm.host);
+      setSelectedClubIds(parsed.length > 0 ? parsed : [""]);
+    }
+    prevHostRef.current = eventForm.host;
+    isInternalUpdateRef.current = false;
+  }, [eventForm.host, isClubSelect]);
+
+  const updateClubHost = (newIds: string[]) => {
+    setSelectedClubIds(newIds);
+    const filteredIds = newIds.filter((id) => id);
+    const hostValue = formatClubHost(filteredIds);
+    isInternalUpdateRef.current = true;
+    setEventForm({ ...eventForm, host: hostValue || "" });
+  };
 
   const updateLanguage = (e: ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -156,29 +184,69 @@ export default function NameDescription({
               <input
                 type="checkbox"
                 checked={isClubSelect}
-                onChange={(e) => setIsClubSelect(e.target.checked)}
+                onChange={(e) => {
+                  setIsClubSelect(e.target.checked);
+                  if (!e.target.checked) {
+                    setSelectedClubIds([]);
+                  } else {
+                    // Re-parse host when toggling checkbox back on
+                    const parsed = parseClubHost(eventForm.host);
+                    setSelectedClubIds(parsed.length > 0 ? parsed : [""]);
+                  }
+                }}
                 className="toggle"
               />
               Select from clubs
             </label>
             {isClubSelect ? (
-              <select
-                className="select w-full"
-                value={eventForm.host?.split(":")[1] || "Pick a club"}
-                onChange={(e) => {
-                  const clubHost = `club:${e.target.value}`;
-                  setEventForm({ ...eventForm, host: clubHost });
-                }}
-              >
-                <option value="Pick a club" disabled>
-                  Pick a club
-                </option>
-                {clubList?.map((club) => (
-                  <option key={club.id} value={club.id}>
-                    {club.title}
-                  </option>
+              <div className="flex flex-col gap-2">
+                {selectedClubIds.map((clubId, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <select
+                      className="select flex-1"
+                      value={clubId || "Pick a club"}
+                      onChange={(e) => {
+                        const newIds = [...selectedClubIds];
+                        newIds[index] = e.target.value;
+                        updateClubHost(newIds);
+                      }}
+                    >
+                      <option value="Pick a club" disabled>
+                        Pick a club
+                      </option>
+                      {clubList?.map((club) => (
+                        <option key={club.id} value={club.id}>
+                          {club.title}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedClubIds.length > 1 && (
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-square"
+                        onClick={() => {
+                          const newIds = selectedClubIds.filter(
+                            (_, i) => i !== index,
+                          );
+                          updateClubHost(newIds.length > 0 ? newIds : [""]);
+                        }}
+                        aria-label="Remove club"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
                 ))}
-              </select>
+                <button
+                  type="button"
+                  className="btn btn-sm self-start"
+                  onClick={() => {
+                    updateClubHost([...selectedClubIds, ""]);
+                  }}
+                >
+                  + Add another club
+                </button>
+              </div>
             ) : (
               <input
                 type="text"

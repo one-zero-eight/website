@@ -1,6 +1,7 @@
 import { $workshops } from "@/api/workshops";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
+import { useMemo } from "react";
 import {
   formatDate,
   formatTime,
@@ -10,6 +11,7 @@ import {
   imageLink,
   isEventRecommended,
   isWorkshopActive,
+  parseClubHost,
 } from "./utils";
 import { eventBadges } from "./EventBadges.tsx";
 import { LanguageBadge } from "./LanguageBadge.tsx";
@@ -21,13 +23,11 @@ import { EventItemProps } from "./types";
 export function EventItem({ event, isEditable, className }: EventItemProps) {
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
 
-  const clubId = event.host?.includes("club:")
-    ? event.host.split(":")[1]
-    : null;
+  const clubIds = useMemo(() => parseClubHost(event.host), [event.host]);
+  const isClubHost = clubIds.length > 0;
 
-  const { data: clubHost } = $clubs.useQuery("get", "/clubs/by-id/{id}", {
-    params: { path: { id: clubId || "" } },
-    enabled: !!clubId,
+  const { data: clubsList = [] } = $clubs.useQuery("get", "/clubs/", {
+    enabled: isClubHost,
   });
 
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
@@ -135,12 +135,29 @@ export function EventItem({ event, isEditable, className }: EventItemProps) {
           </div>
           <div className="flex w-full items-center justify-between gap-2">
             <div className="flex flex-1 items-center gap-1 overflow-hidden text-neutral-500">
-              <span>Host:</span>
-              <span className="truncate text-neutral-400 dark:text-white">
-                {event.host?.includes("club:") && clubHost
-                  ? clubHost.title
-                  : event.host || "Unknown"}
+              <span className={clubIds.length > 1 ? "hidden" : "block"}>
+                Host:
               </span>
+              {isClubHost ? (
+                <div className="flex items-center gap-2 truncate text-neutral-400 dark:text-white">
+                  <span className="truncate">
+                    {(() => {
+                      const primaryId = clubIds[0];
+                      const club = clubsList.find((c) => c.id === primaryId);
+                      return club ? club.title : `club:${primaryId}`;
+                    })()}
+                  </span>
+                  {clubIds.length > 1 && (
+                    <span className="badge badge-soft badge-sm shrink-0">
+                      + {clubIds.length - 1}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <span className="truncate text-neutral-400 dark:text-white">
+                  {event.host || "Unknown"}
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               {isEditable && (
