@@ -1,7 +1,7 @@
 interface ResourceCardProps {
   title: string;
   icon: string;
-  link: string;
+  link?: string;
   color?: string;
   className?: string;
 }
@@ -25,7 +25,7 @@ export function ResourceCard({
           <span
             className={`${icon} text-4xl ${color} transition-transform duration-300 group-hover:scale-110`}
           />
-          <h3 className="px-2 text-center text-xs font-medium text-gray-900 dark:text-gray-100">
+          <h3 className="px-2 text-center font-medium text-gray-900 dark:text-gray-100">
             {title}
           </h3>
         </div>
