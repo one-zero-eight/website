@@ -1,21 +1,18 @@
 // referred to @evermake: https://github.com/evermake/108-website/blob/main/src/pages/about.vue
 import { TeamMembers } from "./TeamMembers.tsx";
-import { useCarouselImages } from "./hooks/useCarouselImages.ts";
 import { ContactsSection } from "./ContactsSection.tsx";
 import { SectionHeader } from "./SectionHeader.tsx";
+import { CarouselImage } from "./CarouselImage.tsx";
+import { ResourceCard } from "./cards/ResourceCard.tsx";
 
 export function AboutPage() {
-  const carouselImages = useCarouselImages();
-
   const mainSections = [
     {
-      id: "what-is-it",
-      title: "What is it?",
+      id: "intro",
+      title: "Who we are?",
       titleColor: "text-black dark:text-white",
       paragraphs: [
-        '<strong className="text-black dark:text-white">one-zero-eight</strong> (or just <strong className="text-black dark:text-white">108</strong>) — is a community of Innopolis University students passionate about technology. Our mission is to create the perfect environment for student life at our university.',
-        "Currently, we face many hassles and see the gaps in our daily life. Have you experienced the long page loads? Have you ever had difficulty finding the right information? Do you really find the interfaces convenient and attractive? Do you have an interesting idea but think no one will ever implement it? We felt all of this.",
-        'Who is going to fix this and make the word "innovative" not just an advertising slogan? Unfortunately, we don\'t know. Maybe, it is us?',
+        '<strong className="text-black dark:text-white"><i>one-zero-eight</i></strong> (or just <strong className="text-black dark:text-white">108</strong>) — is a community of enthusiastic individuals with a common mission — make life at Innopolis University better. We aim to improve our skills and networking, create projects, and just enjoy the process.',
       ],
     },
     {
@@ -38,15 +35,7 @@ export function AboutPage() {
 
   const joinSection = {
     title: "Want to join?",
-    intro: "Here is what we can offer you:",
-    points:
-      "But why work for free? Because there are reasons besides money, which are more important to us:",
     pointsList: [
-      {
-        title: "Team",
-        description:
-          "It's impossible to make a huge difference alone. Working together, we get mutual support and can achieve more ambitious results.",
-      },
       {
         title: "Freedom",
         description:
@@ -75,6 +64,8 @@ export function AboutPage() {
           <span className="italic">one-zero-eight</span> community!
         </h1>
 
+        <ContactsSection />
+
         <div className="space-y-12">
           {mainSections.map((section, sectionIndex) => (
             <section key={section.id}>
@@ -102,20 +93,6 @@ export function AboutPage() {
         </div>
       </div>
 
-      <section className="relative my-8 h-[200px] lg:my-10 lg:h-[300px]">
-        <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500 absolute inset-0 flex h-[200px] items-stretch justify-start gap-2 overflow-x-auto overflow-y-hidden px-2 lg:h-[300px]">
-          {carouselImages.map((image, index) => (
-            <img
-              key={`first-${index}`}
-              src={image}
-              alt={`Community photo ${index + 1}`}
-              className="h-[200px] w-auto min-w-[200px] flex-none rounded object-cover opacity-60 transition-opacity duration-300 hover:opacity-100 lg:h-[300px] lg:min-w-[300px]"
-              loading="lazy"
-              onError={(e) => (e.currentTarget.style.display = "none")}
-            />
-          ))}
-        </div>
-      </section>
       <div className="relative z-10 mx-auto max-w-4xl px-6 py-12">
         <section>
           <SectionHeader
@@ -124,15 +101,55 @@ export function AboutPage() {
             className="mb-6 text-start text-black dark:text-white"
           />
           <article className="space-y-6 text-start text-base leading-relaxed text-gray-700 sm:text-lg dark:text-gray-300">
-            <p className="animate-in slide-in-from-bottom-4 delay-500 duration-700">
-              {joinSection.intro}
+            <h3 className="mb-2 font-semibold text-black dark:text-white">
+              Departaments
+            </h3>
+
+            <li className="marker:text-primary ml-4">
+              There are four departments in one-zero-eight:
+            </li>
+
+            <div className="flex flex-wrap justify-center gap-6">
+              <ResourceCard
+                title="Tech"
+                icon="icon-[uil--brackets-curly]"
+                className="text-base"
+                color="text-primary"
+              />
+
+              <ResourceCard
+                title="Design"
+                icon="icon-[mdi--palette-outline]"
+                className="text-base"
+                color="text-primary"
+              />
+
+              <ResourceCard
+                title="Media"
+                icon="icon-[mdi--bullhorn-outline]"
+                className="text-base"
+                color="text-primary"
+              />
+
+              <ResourceCard
+                title="Managment"
+                icon="icon-[mdi--account-group-outline]"
+                className="text-base"
+                color="text-primary"
+              />
+            </div>
+
+            <p className="ml-10">
+              ...read more about us in our{" "}
+              <a
+                className="underline transition-all hover:font-bold"
+                href="https://t.me/one_zero_eight/10"
+              >
+                presentation
+              </a>
             </p>
 
-            <p className="animate-in slide-in-from-bottom-4 delay-800 duration-700">
-              {joinSection.points}
-            </p>
-
-            <ul className="ml-4 space-y-4">
+            <ul className="marker:text-primary ml-4 list-disc space-y-4">
               {joinSection.pointsList.map((point, index) => (
                 <li
                   key={`positive-${index}`}
@@ -148,7 +165,7 @@ export function AboutPage() {
           </article>
         </section>
 
-        <ContactsSection />
+        <CarouselImage />
       </div>
     </div>
   );
