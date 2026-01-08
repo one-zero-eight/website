@@ -46,25 +46,20 @@ export const MemberAvatar = ({
 }) => {
   const [imageError, setImageError] = useState(false);
 
-  if (member.avatar && !imageError) {
-    return (
-      <img
-        src={member.avatar}
-        alt={member.fullName}
-        className={`${className} rounded-full object-cover`}
-        onError={() => setImageError(true)}
-        loading="lazy"
-      />
-    );
-  }
-
   return (
     <div
-      className={`flex ${className} items-center justify-center rounded-full text-white ${getRandomColor(member.fullName)}`}
+      className={`relative flex ${className} items-center justify-center overflow-hidden rounded-full font-semibold text-white ${getRandomColor(member.fullName)}`}
     >
-      <span className="text-xs font-semibold">
-        {getInitials(member.fullName)}
-      </span>
+      <span className="text-xs">{getInitials(member.fullName)}</span>
+      {member.avatar && !imageError && (
+        <img
+          src={member.avatar}
+          alt={""}
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={() => setImageError(true)}
+          loading="lazy"
+        />
+      )}
     </div>
   );
 };

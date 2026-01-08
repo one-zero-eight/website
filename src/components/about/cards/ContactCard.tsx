@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { TeamMember } from "../hooks/useTeamMembers.ts";
 import { MemberAvatar } from "./MemberAvatar.tsx";
 
@@ -12,13 +13,29 @@ export function ContactCard({
   title,
   className = "",
 }: ContactCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div
-      className={`animate-in zoom-in-50 relative h-[130px] w-[130px] transition-transform duration-500 hover:scale-105 ${className}`}
+      className={`animate-in zoom-in-50 relative h-[130px] w-[130px] transition-transform duration-500 ${className}`}
+      style={{
+        zIndex: isHovered ? 50 : 1,
+        transition: `z-index 0s linear ${isHovered ? "0s" : "0.3s"}`,
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="dark:bg-base-200 dark:border-primary border-primary absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 bg-white py-3 shadow-xl transition-all duration-300 ease-in-out dark:border">
+      <div
+        className={`dark:bg-base-200 dark:border-base-100 absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 border-gray-200 bg-white shadow-sm transition-all duration-300 ease-in-out dark:border ${
+          isHovered
+            ? "dark:border-primary border-primary border-2 py-3 shadow-xl dark:border"
+            : "py-2 hover:shadow-md"
+        }`}
+      >
         <div className="flex w-full flex-col items-center justify-center">
-          <div className="mb-1 scale-110 transition-all duration-300">
+          <div
+            className={`mb-1 transition-all duration-300 ${isHovered ? "scale-110" : ""}`}
+          >
             <MemberAvatar member={member} className="h-10 w-10" />
           </div>
           <div className="px-1 text-center">
@@ -31,7 +48,9 @@ export function ContactCard({
           </div>
         </div>
 
-        <div className="mt-2 grid w-full grid-rows-[1fr] px-2 opacity-100 transition-all duration-500 ease-in-out">
+        <div
+          className={`grid w-full px-2 transition-all duration-500 ease-in-out ${isHovered ? "mt-2 grid-rows-[1fr] opacity-100" : "mt-0 grid-rows-[0fr] opacity-0"}`}
+        >
           <div className="overflow-hidden">
             <div className="flex justify-center gap-2">
               {member.github && (
