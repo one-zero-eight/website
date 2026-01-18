@@ -34,11 +34,14 @@ const countdownEventTemplates: CountdownEventTemplate[] = [
   {
     dateTemplate: "2026-02-06T19:00+03:00",
     name: (
-      <span className="flex flex-row items-center gap-2">
-        <span>Introduction to</span>
-        <Logo108 className="size-8" />
-        <span>countdown</span>
-      </span>
+      <>
+        <span className="block sm:hidden">Introduction to 108 countdown</span>
+        <span className="hidden flex-row items-center gap-2 sm:flex">
+          <span>Introduction to</span>
+          <Logo108 className="size-8" />
+          <span>countdown</span>
+        </span>
+      </>
     ),
     iconClass: "icon-[twemoji--purple-heart]",
   },
@@ -127,9 +130,9 @@ export function CountdownWidget() {
           <span
             className={`${nextEvent.iconClass} text-primary mr-2 shrink-0 text-3xl sm:hidden`}
           />
-          <span>{nextEvent.name}</span>
+          <span className="text-base sm:text-lg">{nextEvent.name}</span>
         </div>
-        <div className="text-base-content/75 line-clamp-1 break-all">
+        <div className="text-base-content/75 mt-1 line-clamp-1 text-sm break-all sm:text-base">
           {formatCountdownTimeLeft(deltaTimeSeconds)}
         </div>
       </div>
