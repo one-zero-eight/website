@@ -142,6 +142,7 @@ function buildNonDateProps(
       description: iCalEvent.description,
       calendarURLs: [meta.url],
       sourceLink:
+        iCalEvent.component.getFirstProperty("x-wr-link")?.getFirstValue() ||
         iCalExpander.component.getFirstProperty("x-wr-link")?.getFirstValue() ||
         meta.sourceLink,
       updatedAt: meta.eventGroup?.updated_at || meta.updatedAt,
