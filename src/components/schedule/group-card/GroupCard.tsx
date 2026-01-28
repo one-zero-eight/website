@@ -32,7 +32,7 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
       className="bg-inh-primary hover:bg-inh-primary-hover rounded-box flex min-h-fit max-w-full min-w-fit basis-72 cursor-pointer flex-row items-center justify-between p-4"
     >
       <div className="flex flex-col gap-0.5">
-        <p className="text-xl font-medium">{group.name}</p>
+        <p className="text-xl font-medium wrap-anywhere">{group.name}</p>
         {tagsToDisplay.length > 0 &&
           tagsToDisplay.map((v) => {
             const tags = getAllTagsByType(group, v);
