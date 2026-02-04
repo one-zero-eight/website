@@ -30,6 +30,10 @@ export function getMyWorkshopsLink() {
   return `${EVENTS_API_URL}/users/me/workshops.ics`;
 }
 
+export function getMyRoomBookingsLink() {
+  return `${EVENTS_API_URL}/users/me/room-bookings.ics`;
+}
+
 export function getPersonalLink(resourcePath: string, accessKey: string) {
   return `${EVENTS_API_URL}${resourcePath}?access_key=${accessKey}`;
 }

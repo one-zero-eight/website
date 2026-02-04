@@ -5,6 +5,7 @@ import {
   getICSLink,
   getMyMoodleLink,
   getMyMusicRoomLink,
+  getMyRoomBookingsLink,
   getMySportLink,
   getMyWorkshopsLink,
 } from "@/api/events/links.ts";
@@ -104,6 +105,13 @@ function getCalendarsToShow(
     url: getMyWorkshopsLink(),
     color: "seagreen",
     sourceLink: "https://innohassle.ru/events",
+    updatedAt: new Date().toISOString(),
+  });
+
+  toShow.push({
+    url: getMyRoomBookingsLink(),
+    color: "seagreen",
+    sourceLink: "https://innohassle.ru/room-booking",
     updatedAt: new Date().toISOString(),
   });
 
