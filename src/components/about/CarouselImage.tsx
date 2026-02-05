@@ -11,7 +11,7 @@ export function CarouselImage() {
             key={`first-${index}`}
             src={image}
             alt={`Community photo ${index + 1}`}
-            className="h-[200px] w-auto min-w-[200px] flex-none rounded object-cover opacity-60 transition-opacity duration-300 hover:opacity-100 lg:h-[300px] lg:min-w-[300px]"
+            className="h-[200px] w-auto min-w-[200px] flex-none rounded object-cover duration-300 lg:h-[300px] lg:min-w-[300px]"
             loading="lazy"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />

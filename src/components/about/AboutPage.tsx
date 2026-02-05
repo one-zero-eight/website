@@ -1,9 +1,8 @@
 // referred to @evermake: https://github.com/evermake/108-website/blob/main/src/pages/about.vue
 import { TeamMembers } from "./TeamMembers.tsx";
-import { ContactsSection } from "./ContactsSection.tsx";
 import { SectionHeader } from "./SectionHeader.tsx";
 import { CarouselImage } from "./CarouselImage.tsx";
-import { ResourceCard } from "./cards/ResourceCard.tsx";
+import { ResourceCard } from "@/components/about/cards/ResourceCard.tsx";
 
 export function AboutPage() {
   const mainSections = [
@@ -12,15 +11,7 @@ export function AboutPage() {
       title: "Who we are?",
       titleColor: "text-black dark:text-white",
       paragraphs: [
-        '<strong className="text-black dark:text-white"><i>one-zero-eight</i></strong> (or just <strong className="text-black dark:text-white">108</strong>) — is a community of enthusiastic individuals with a common mission — make life at Innopolis University better. We aim to improve our skills and networking, create projects, and just enjoy the process.',
-      ],
-    },
-    {
-      id: "what-is-innohassle",
-      title: "What is InNoHassle?",
-      titleColor: "text-black dark:text-white",
-      paragraphs: [
-        '<strong className="text-black dark:text-white">InNoHassle</strong> (Innopolis without hassles) — is our primary project with a goal to combine all university services into one smart, convenient, performant, and beautiful ecosystem.',
+        '<strong class="text-black dark:text-white"><i>one-zero-eight</i></strong> — is a community of Innopolis University students passionate about technology. We care about education we get, tools we use and place we live in. Our mission is to create the perfect environment for student life.',
       ],
     },
     {
@@ -28,31 +19,36 @@ export function AboutPage() {
       title: "Team",
       titleColor: "text-black dark:text-white",
       paragraphs: [
-        "We are a big team of students from all over the world who are developing and maintaining university services together by enthusiasm and the desire to make our student life more enjoyable.",
+        "The core of one-zero-eight and the main resource is our team:",
+      ],
+    },
+    {
+      id: "projects",
+      title: "Projects",
+      titleColor: "text-black dark:text-white",
+      paragraphs: [
+        "We improve life at Innopolis University creating our projects, which solve our users' daily issues. Here are some of them that you can use now:",
+        `<strong>InNoHassle</strong> - our flagman project, the ecosystem that combines university services in one website providing convenience both for students and university staff. Explore all available features:`,
+        `You can check all released and developing projects in our <a href="https://github.com/one-zero-eight" class="text-primary hover:underline" target="_blank" rel="noopener noreferrer">GitHub main page</a>.`,
+      ],
+    },
+    {
+      id: "feedback",
+      title: "Feedback",
+      titleColor: "text-black dark:text-white",
+      paragraphs: [
+        `Have an issue with the service? Send us the alert of a trouble in the Google Form: <a href="https://docs.google.com/forms/d/e/1FAIpQLSc5049bPYh7VIu44vbaroN3B6XprsuZV17WtagNYbfXzvW9JQ/viewform?usp=send_form" class="text-primary underline italic hover:underline">leave a feedback or report issue</a>. Leaving your feedback, improvements suggestions are also welcome in the form.`,
+      ],
+    },
+    {
+      id: "join",
+      title: "Join us",
+      titleColor: "text-black dark:text-white",
+      paragraphs: [
+        `Want to become a part of the projects? Make a contribution or be a new member of our community? Follow us on GitHub, Telegram and <a href="https://t.me/one_zero_eight_bot" >fill out the form in the bot to join us!</a>`,
       ],
     },
   ];
-
-  const joinSection = {
-    title: "Want to join?",
-    pointsList: [
-      {
-        title: "Freedom",
-        description:
-          "We can use any frameworks and technologies to implement our ideas, we have no NDA, we have flexible work schedule and other things that tech companies cannot afford.",
-      },
-      {
-        title: "Experience",
-        description:
-          "University courses give us good theoretical knowledge, but in order to grow as a software engineer it's crucial to gain real world experience and to write A LOT of code. This is exactly what we do: we create projects that are actually used by people, unlike your pet projects.",
-      },
-      {
-        title: "Fun 🎉",
-        description:
-          "Probably, the most important part of our work — is having fun! We are young, we are 3 minutes away from each other, we have the university open 24/7 — that's why we often watch movies and eat pizza, play board games and do sports, discuss different things, participate in hackathons, brainstorm and implement interesting ideas at 4 a.m.",
-      },
-    ],
-  };
 
   return (
     <div className="relative grow">
@@ -64,9 +60,7 @@ export function AboutPage() {
           <span className="italic">one-zero-eight</span> community!
         </h1>
 
-        <ContactsSection />
-
-        <div className="space-y-12">
+        <div className="space-y-10">
           {mainSections.map((section, sectionIndex) => (
             <section key={section.id}>
               <SectionHeader
@@ -88,85 +82,48 @@ export function AboutPage() {
                   <TeamMembers />
                 </>
               )}
+              {section.id === "feedback" && (
+                <div className="mt-6 flex w-full justify-center">
+                  <ResourceCard
+                    title="Feedback Report"
+                    icon="icon-[mdi--message-alert-outline]"
+                    link="https://forms.gle/2vMmu4vSoVShvbMw6"
+                    color="text-purple-500"
+                    className="w-30 delay-300"
+                  />
+                </div>
+              )}
+              {section.id === "join" && (
+                <div className="mt-6 flex w-full flex-wrap justify-center gap-2">
+                  <ResourceCard
+                    title="Telegram Channel"
+                    icon="icon-[uil--telegram-alt]"
+                    link="https://t.me/one_zero_eight"
+                    className="w-30 delay-400"
+                  />
+
+                  <ResourceCard
+                    title="Join Us!"
+                    icon="icon-[mdi--robot-excited-outline]"
+                    link="https://t.me/one_zero_eight_bot"
+                    color="text-green-500"
+                    className="delay-600"
+                  />
+
+                  <ResourceCard
+                    title="GitHub"
+                    icon="icon-[mdi--github]"
+                    link="https://github.com/one-zero-eight"
+                    color="text-gray-800 dark:text-white"
+                    className="delay-700"
+                  />
+                </div>
+              )}
             </section>
           ))}
         </div>
       </div>
-
-      <div className="relative z-10 mx-auto max-w-4xl px-6 py-12">
-        <section>
-          <SectionHeader
-            id="join"
-            title={joinSection.title}
-            className="mb-6 text-start text-black dark:text-white"
-          />
-          <article className="space-y-6 text-start text-base leading-relaxed text-gray-700 sm:text-lg dark:text-gray-300">
-            <h3 className="mb-2 font-semibold text-black dark:text-white">
-              Departaments
-            </h3>
-
-            <li className="marker:text-primary ml-4">
-              There are four departments in one-zero-eight:
-            </li>
-
-            <div className="flex flex-wrap justify-center gap-6">
-              <ResourceCard
-                title="Tech"
-                icon="icon-[uil--brackets-curly]"
-                className="text-base"
-                color="text-primary"
-              />
-
-              <ResourceCard
-                title="Design"
-                icon="icon-[mdi--palette-outline]"
-                className="text-base"
-                color="text-primary"
-              />
-
-              <ResourceCard
-                title="Media"
-                icon="icon-[mdi--bullhorn-outline]"
-                className="text-base"
-                color="text-primary"
-              />
-
-              <ResourceCard
-                title="Managment"
-                icon="icon-[mdi--account-group-outline]"
-                className="text-base"
-                color="text-primary"
-              />
-            </div>
-
-            <p className="ml-10">
-              ...read more about us in our{" "}
-              <a
-                className="underline transition-all hover:font-bold"
-                href="https://t.me/one_zero_eight/10"
-              >
-                presentation
-              </a>
-            </p>
-
-            <ul className="marker:text-primary ml-4 list-disc space-y-4">
-              {joinSection.pointsList.map((point, index) => (
-                <li
-                  key={`positive-${index}`}
-                  className={`animate-in slide-in-from-bottom-4 duration-700 delay-${900 + index * 100}`}
-                >
-                  <h3 className="mb-2 font-semibold text-black dark:text-white">
-                    {point.title}
-                  </h3>
-                  <p>{point.description}</p>
-                </li>
-              ))}
-            </ul>
-          </article>
-        </section>
-
-        <CarouselImage />
-      </div>
+      <CarouselImage />
     </div>
   );
 }
