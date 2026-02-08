@@ -18,16 +18,16 @@ type CountdownEvent = CountdownEventTemplate & {
  * Format for dates is `YYYY-MM-DDTHH:MM:SS+TZ` (ISO 8601), but you can
  * use `*` instead of year to create an annual event.
  *
- * E.g. *-01-01+03:00 is a convenient declaration for a New Year in Moscow timezone.
+ * E.g. *-01-01T00:00:00+03:00 is a convenient declaration for a New Year in Moscow timezone.
  */
 const countdownEventTemplates: CountdownEventTemplate[] = [
   {
-    dateTemplate: "*-01-01+03:00",
+    dateTemplate: "*-01-01T00:00:00+03:00",
     name: "New Year countdown",
     iconClass: "icon-[twemoji--christmas-tree]",
   },
   {
-    dateTemplate: "*-06-01+03:00",
+    dateTemplate: "*-06-01T00:00:00+03:00",
     name: "Summer countdown",
     iconClass: "icon-[twemoji--sun]",
   },
