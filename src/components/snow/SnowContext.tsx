@@ -12,7 +12,7 @@ export const SnowVisibilityProvider = ({
 }) => {
   const [isSnowVisible, setSnowVisible] = useLocalStorage<boolean>(
     "snow",
-    false,
+    true,
   );
 
   const toggleSnowVisibility = () => setSnowVisible((prev) => !prev);
