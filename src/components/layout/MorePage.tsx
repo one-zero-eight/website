@@ -6,6 +6,7 @@ import UserMenu from "@/components/layout/UserMenu.tsx";
 import { items, LinkItemType } from "@/components/layout/menu-links.tsx";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
+import ToggleSnowButton from "./ToggleSnowButton";
 
 export function MorePage() {
   const { me } = useMe();
@@ -35,6 +36,7 @@ export function MorePage() {
           </a>
         </Tooltip>
         <div className="flex grow"></div>
+        <ToggleSnowButton />
         <SwitchThemeButton />
         <UserMenu isMobile={false} isSidebar={false} />
       </div>
