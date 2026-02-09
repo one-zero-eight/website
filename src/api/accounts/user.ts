@@ -2,7 +2,7 @@ import { $accounts, accountsTypes } from "@/api/accounts";
 import { useLocalStorage } from "usehooks-ts";
 
 export function useMe() {
-  const [storedMe] = useLocalStorage<accountsTypes.SchemaUser | null>(
+  const [storedMe] = useLocalStorage<accountsTypes.SchemaViewUser | null>(
     "user",
     null,
   );

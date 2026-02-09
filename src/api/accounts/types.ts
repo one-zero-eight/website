@@ -24,6 +24,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/suggest-user-on-typing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Hint On Type
+     * @description Suggest user on typing, for example when invite to event.
+     */
+    get: operations["get_hint_on_type_users_suggest_user_on_typing_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/by-telegram-id/{telegram_id}": {
     parameters: {
       query?: never;
@@ -44,6 +64,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/by-id/get-bulk": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Get Bulk Users By Id
+     * @description Get user by id
+     */
+    post: operations["get_bulk_users_by_id_users_by_id_get_bulk_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/by-id/{user_id}": {
     parameters: {
       query?: never;
@@ -58,6 +98,26 @@ export interface paths {
     get: operations["get_user_by_id_users_by_id__user_id__get"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/by-innomail/get-bulk": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Get Bulk Users By Innomail
+     * @description Get users by email
+     */
+    post: operations["get_bulk_users_by_innomail_users_by_innomail_get_bulk_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -303,12 +363,71 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /** InnopolisInfo */
+    InnopolisInfo: {
+      /** Email */
+      email: string;
+      /** Name */
+      name?: string | null;
+      /**
+       * Is Student
+       * @default false
+       */
+      is_student: boolean;
+      /**
+       * Is Staff
+       * @default false
+       */
+      is_staff: boolean;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
+    /** TelegramInfo */
+    TelegramInfo: {
+      /** Id */
+      id: number;
+      /** First Name */
+      first_name: string;
+      /** Last Name */
+      last_name?: string | null;
+      /** Username */
+      username?: string | null;
+      /** Photo Url */
+      photo_url?: string | null;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+    };
     /** TelegramLoginResponse */
     TelegramLoginResponse: {
       /** Need To Connect */
       need_to_connect: boolean;
+    };
+    /** TelegramUpdateData */
+    TelegramUpdateData: {
+      /** Id */
+      id: number;
+      /** Updated At */
+      updated_at: number;
+      /** Success */
+      success: boolean;
+      /** Status Code */
+      status_code: number;
+      /** Error Message */
+      error_message?: string | null;
+      /** Username */
+      username?: string | null;
+      /** First Name */
+      first_name?: string | null;
+      /** Last Name */
+      last_name?: string | null;
     };
     /** TelegramWidgetData */
     TelegramWidgetData: {
@@ -332,24 +451,8 @@ export interface components {
       /** Access Token */
       access_token: string;
     };
-    /** User */
-    User: {
-      /**
-       * Format: objectid
-       * @description MongoDB document ObjectID
-       * @example 5eb7cf5a86d9755df3a6c593
-       */
-      id: string;
-      innopolis_sso: components["schemas"]["UserInfoFromSSO-Output"] | null;
-      telegram: components["schemas"]["TelegramWidgetData"] | null;
-      /**
-       * Innohassle Admin
-       * @default false
-       */
-      innohassle_admin: boolean;
-    };
     /** UserInfoFromSSO */
-    "UserInfoFromSSO-Input": {
+    UserInfoFromSSO: {
       /** Email */
       email: string;
       /** Name */
@@ -375,27 +478,6 @@ export interface components {
       /** Group */
       group?: string | null;
     };
-    /** UserInfoFromSSO */
-    "UserInfoFromSSO-Output": {
-      /** Email */
-      email: string;
-      /** Name */
-      name?: string | null;
-      /** Issued At */
-      issued_at?: string | null;
-      /**
-       * Is Student
-       * @default false
-       */
-      is_student: boolean;
-      /**
-       * Is Staff
-       * @default false
-       */
-      is_staff: boolean;
-      /** Group */
-      group?: string | null;
-    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -404,6 +486,28 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+    };
+    /** ViewUser */
+    ViewUser: {
+      id: components["schemas"]["PydanticObjectId"];
+      innopolis_info?: components["schemas"]["InnopolisInfo"] | null;
+      telegram_info?: components["schemas"]["TelegramInfo"] | null;
+      telegram_update_data?: components["schemas"]["TelegramUpdateData"] | null;
+      /**
+       * Innohassle Admin
+       * @default false
+       */
+      innohassle_admin: boolean;
+      /**
+       * @deprecated
+       * @description Deprecated field, use `innopolis_info` instead, dont trust data from `innopolis_sso`
+       */
+      innopolis_sso?: components["schemas"]["UserInfoFromSSO"] | null;
+      /**
+       * @deprecated
+       * @description Deprecated field, use `telegram_info` instead
+       */
+      telegram?: components["schemas"]["TelegramWidgetData"] | null;
     };
   };
   responses: never;
@@ -414,18 +518,19 @@ export interface components {
 }
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaInnopolisInfo = components["schemas"]["InnopolisInfo"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
+export type SchemaTelegramInfo = components["schemas"]["TelegramInfo"];
 export type SchemaTelegramLoginResponse =
   components["schemas"]["TelegramLoginResponse"];
+export type SchemaTelegramUpdateData =
+  components["schemas"]["TelegramUpdateData"];
 export type SchemaTelegramWidgetData =
   components["schemas"]["TelegramWidgetData"];
 export type SchemaTokenData = components["schemas"]["TokenData"];
-export type SchemaUser = components["schemas"]["User"];
-export type SchemaUserInfoFromSsoInput =
-  components["schemas"]["UserInfoFromSSO-Input"];
-export type SchemaUserInfoFromSsoOutput =
-  components["schemas"]["UserInfoFromSSO-Output"];
+export type SchemaUserInfoFromSso = components["schemas"]["UserInfoFromSSO"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
+export type SchemaViewUser = components["schemas"]["ViewUser"];
 export type $defs = Record<string, never>;
 export interface operations {
   get_me_users_me_get: {
@@ -443,7 +548,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["User"];
+          "application/json": components["schemas"]["ViewUser"];
         };
       };
       /** @description User does not have a session cookie or `uid` in the session */
@@ -452,6 +557,44 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  get_hint_on_type_users_suggest_user_on_typing_get: {
+    parameters: {
+      query: {
+        query: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Hint on type */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ViewUser"][];
+        };
+      };
+      /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
     };
   };
@@ -472,11 +615,67 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["User"];
+          "application/json": components["schemas"]["ViewUser"];
         };
       };
       /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object with such properties not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_bulk_users_by_id_users_by_id_get_bulk_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PydanticObjectId"][];
+      };
+    };
+    responses: {
+      /** @description Mapping [user_id -> user or None] */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: components["schemas"]["ViewUser"] | null;
+          };
+        };
+      };
+      /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not enough permissions */
+      403: {
         headers: {
           [name: string]: unknown;
         };
@@ -517,11 +716,67 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["User"];
+          "application/json": components["schemas"]["ViewUser"];
         };
       };
       /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object with such properties not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_bulk_users_by_innomail_users_by_innomail_get_bulk_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": string[];
+      };
+    };
+    responses: {
+      /** @description Mapping [email -> user or None] */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: components["schemas"]["ViewUser"] | null;
+          };
+        };
+      };
+      /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not enough permissions */
+      403: {
         headers: {
           [name: string]: unknown;
         };
@@ -562,7 +817,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["User"];
+          "application/json": components["schemas"]["ViewUser"];
         };
       };
       /** @description No credentials provided OR Not enough permissions (scopes) OR Could not validate credentials */

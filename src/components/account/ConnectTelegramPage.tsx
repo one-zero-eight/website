@@ -15,15 +15,20 @@ export function ConnectTelegramPage() {
   const { searchStr } = useLocation({
     select: ({ searchStr }) => ({ searchStr }),
   });
+  const searchParams = new URLSearchParams(searchStr);
+  const reconnect = searchParams.get("reconnect") === "true";
 
   const { mutate: connectTelegram } = $accounts.useMutation(
     "post",
     "/providers/telegram/connect",
     {
       onSuccess: () => {
-        return queryClient.invalidateQueries({
+        queryClient.invalidateQueries({
           queryKey: $accounts.queryOptions("get", "/users/me").queryKey,
         });
+        const newSearchParams = Object.fromEntries(searchParams.entries());
+        delete newSearchParams["reconnect"];
+        navigate({ to: "/account/connect-telegram", search: newSearchParams });
       },
     },
   );
@@ -59,12 +64,30 @@ export function ConnectTelegramPage() {
     );
   }
 
-  if (!me.telegram) {
+  if (!me.telegram || reconnect) {
     return (
       <>
         <h1 className="text-center text-2xl font-medium wrap-break-word">
-          Connect your Telegram
+          {reconnect ? "Reconnect " : "Connect "} your Telegram
         </h1>
+        {reconnect && (
+          <div className="text-base-content/60 flex flex-col items-start font-light">
+            <div className="px-3">
+              We cannot synchronize your profile without your approval consent.
+            </div>
+            <div className="flex px-3 py-2 text-base">
+              <span className="icon-[mdi--tick-outline] my-0.5 mr-2 shrink-0 text-xl text-green-500" />
+              <div>
+                Allow <span className="text-primary">InNoHassle</span> to
+                message you on Telegram.
+              </div>
+            </div>
+            <div className="flex px-3 py-2 text-base">
+              <span className="icon-[mdi--close-outline] my-0.5 mr-2 shrink-0 text-xl text-red-500" />
+              Do not block the bot.
+            </div>
+          </div>
+        )}
         <div className="flex flex-col justify-center overflow-x-hidden text-center">
           <p className="text-xl wrap-break-word">{me.innopolis_sso?.name}</p>
           <p className="text-base-content/75 text-ellipsis">

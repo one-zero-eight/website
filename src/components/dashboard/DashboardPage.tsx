@@ -6,6 +6,7 @@ import { AdvWidget } from "@/components/dashboard/AdvWidget.tsx";
 import { CountdownWidget } from "@/components/dashboard/CountdownWidget.tsx";
 import { PwaWidget } from "@/components/dashboard/PwaWidget.tsx";
 import { SportsWidget } from "@/components/dashboard/SportsWidget.tsx";
+import { TelegramReconnectWidget } from "@/components/dashboard/TelegramReconnectWidget.tsx";
 import { Link } from "@tanstack/react-router";
 import Links from "./links/Links.tsx";
 
@@ -28,6 +29,7 @@ export function DashboardPage() {
     <div className="flex flex-col gap-4 px-4 py-4">
       <AccountWidget />
       <div className="grid gap-4 @4xl/content:grid-cols-2 @7xl/content:grid-cols-3">
+        <TelegramReconnectWidget />
         <AcademicCalendarWidget />
         <SportsWidget />
         <CountdownWidget />
