@@ -78,7 +78,7 @@ export default function AdditionalInfo({
               <span>Link Url</span>
               <input
                 type="url"
-                placeholder="e.g. https://t.me/handle"
+                placeholder="e.g. https://example.com or @tg_handle"
                 className="input input-md w-full"
                 value={link.url}
                 onChange={(e) =>

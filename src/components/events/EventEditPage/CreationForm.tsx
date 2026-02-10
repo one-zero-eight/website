@@ -13,6 +13,7 @@ import {
   EventFormState,
   EventLink,
 } from "../types";
+import { normalizeLink } from "@/components/events/utils/event-utils";
 import { MAX_CAPACITY, HOST_NONE, HOST_PICK_CLUB } from "../constants.ts";
 import NameDescription from "./NameDescription.tsx";
 import ImageUpload from "./ImageUpload.tsx";
@@ -194,7 +195,9 @@ export function CreationForm({
           : MAX_CAPACITY,
       badges: eventForm.badges as SchemaBadge[],
       is_draft: eventForm.is_draft,
-      links: links,
+      links: links.map((link) => {
+        return { title: link.title, url: normalizeLink(link.url) };
+      }),
       check_in_type: eventForm.check_in_type,
       check_in_link:
         eventForm.check_in_type === CheckInType.by_link

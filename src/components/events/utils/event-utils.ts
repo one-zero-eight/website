@@ -281,3 +281,25 @@ export const groupEvents = <T extends workshopsTypes.SchemaWorkshop>(
 
   return groups;
 };
+
+/**
+ * Creates correct links based on input. Adds protocol if missing.
+ * Converts @ usernames to telegram links.
+ * @param link raw link string (URL or @username)
+ * @returns normalized URL
+ */
+export const normalizeLink = (link: string): string => {
+  const trimmed = link.trim();
+  if (!trimmed) return link;
+
+  if (trimmed.startsWith("@")) {
+    const username = trimmed.slice(1).trim();
+    return username ? `https://t.me/${username}` : link;
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  return `https://${trimmed}`;
+};
