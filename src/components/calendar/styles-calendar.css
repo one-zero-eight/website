@@ -91,7 +91,7 @@
       font-variant-ligatures: none;
       &:before {
         content: "<span></span>";
-        @apply icon-[material-symbols--settings-outline] text-xl;
+        @apply icon-[material-symbols--settings-outline] text-2xl;
       }
     }
   }
