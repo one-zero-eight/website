@@ -6,15 +6,18 @@ import ToggleSnowButton from "./ToggleSnowButton";
 export function Topbar({
   title,
   hideOnMobile = false,
+  hideBorder = false,
 }: {
   title: string;
   hideOnMobile?: boolean;
+  hideBorder?: boolean;
 }) {
   return (
     <nav
       className={clsx(
-        "border-b-inh-secondary-hover w-full flex-row items-center justify-between border-b",
+        "w-full flex-row items-center justify-between",
         hideOnMobile ? "hidden lg:flex" : "flex",
+        hideBorder ? "" : "border-b-inh-secondary-hover border-b",
       )}
     >
       <div className="grow px-4 py-2">
