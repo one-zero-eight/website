@@ -183,7 +183,7 @@ export default function CalendarViewer({
         headerToolbar={{
           // Buttons in header
           left: isFullPage
-            ? "prev,title,next today sources"
+            ? "prev,title,next today config"
             : "prev,title,next today",
           center: undefined,
           right: "timeGrid3 timeGridWeek dayGridMonth listMonth",
@@ -196,8 +196,8 @@ export default function CalendarViewer({
           dayGridMonth: "Month",
         }}
         customButtons={{
-          sources: {
-            text: "Sources",
+          config: {
+            text: `${initialView === "listMonth" ? "" : "Config & Export"}`,
             click() {
               setSourcesDialogOpen(true);
             },
@@ -205,8 +205,10 @@ export default function CalendarViewer({
         }}
         titleFormat={(arg) => {
           if (arg.date.year === new Date().getFullYear()) {
-            // Show only month if current year
-            return moment(arg.date).format("MMMM");
+            // Show only month if current year, show short month name if width is small
+            return moment(arg.date).format(
+              initialView === "listMonth" ? "MMM" : "MMMM",
+            );
           } else {
             // Show month and year otherwise
             return moment(arg.date).format("MMMM YYYY");
