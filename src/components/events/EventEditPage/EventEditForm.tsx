@@ -6,32 +6,35 @@ import { DateTime } from "./DateTime.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import AdditionalInfo from "./AdditionalInfo.tsx";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { baseEventFormState } from "../utils";
+import { baseEventFormState } from "../utils/index.ts";
 import {
-  CreationFormProps,
+  EventEditFormProps,
   EventFormErrors,
   EventFormState,
   EventLink,
-} from "../types";
-import { normalizeLink } from "@/components/events/utils/event-utils";
-import { MAX_CAPACITY, HOST_NONE, HOST_PICK_CLUB } from "../constants.ts";
+} from "../types/index.ts";
+import {
+  normalizeHostForForm,
+  normalizeLink,
+} from "@/components/events/utils/event-utils";
+import { MAX_CAPACITY } from "../constants.ts";
 import NameDescription from "./NameDescription.tsx";
 import ImageUpload from "./ImageUpload.tsx";
 import { CheckInType } from "@/api/workshops/types.ts";
 import clsx from "clsx";
 
 /**
- * Form for creatig a new event or edit existing
- * @param initialDate - undefined or ISO date if we want to add an event to a specific date
- * @param initialEvent - if we want to edit workshop we should pass an evnent object
+ * Form for creating a new event or editing an existing one.
+ * Only admins and event owners (club in hosts) should be able to visit this page.
  */
-export function CreationForm({
+export function EventEditForm({
   initialEvent,
   initialDate,
   clubUser,
   isAdmin = false,
+  clubsList,
   onClose,
-}: CreationFormProps) {
+}: EventEditFormProps) {
   const redirect = useNavigate();
   const queryClient = useQueryClient();
   const storageKey = initialEvent ? null : "workshop-form-draft";
@@ -55,6 +58,7 @@ export function CreationForm({
       return {
         ...baseEventFormState,
         ...initialEvent,
+        host: normalizeHostForForm(initialEvent.host),
         date: dtstartDate.toISOString().split("T")[0],
         dtstart: dtstartDate.toTimeString().slice(0, 5),
         dtend: dtendDate.toTimeString().slice(0, 5),
@@ -85,7 +89,11 @@ export function CreationForm({
 
     const savedData = storageKey ? localStorage.getItem(storageKey) : null;
     if (savedData) {
-      return { ...baseEventFormState, ...JSON.parse(savedData) };
+      const parsed = JSON.parse(savedData);
+      const host = Array.isArray(parsed.host)
+        ? normalizeHostForForm(parsed.host)
+        : [];
+      return { ...baseEventFormState, ...parsed, host };
     }
 
     return baseEventFormState;
@@ -161,18 +169,18 @@ export function CreationForm({
       date.setDate(date.getDate() + 1);
     }
 
+    // Handle time and dates
     const pad = (n: number): string => n.toString().padStart(2, "0");
     const endDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
     const dtstart = `${eventForm.date}T${eventForm.dtstart}:00+03:00`;
     const dtend = `${endDate}T${eventForm.dtend}:00+03:00`;
 
-    // Handle check in openning time
-    let check_in_opens = `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
-    if (eventForm.check_in_on_open) {
-      check_in_opens = new Date().toISOString();
-    }
+    const check_in_opens = eventForm.check_in_on_open
+      ? dtstart
+      : `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
 
+    // Handle links
     const links: SchemaLink[] = [];
     eventForm.links.forEach((link: EventLink) =>
       links.push({ title: link.title, url: link.url }),
@@ -420,11 +428,7 @@ export function CreationForm({
       showError("Validation Error", "Russian title is required");
     }
 
-    if (
-      eventForm.host === HOST_PICK_CLUB ||
-      eventForm.host === HOST_NONE ||
-      !(eventForm.host || "").trim()
-    ) {
+    if (!eventForm.host?.length) {
       newErrors.host = "Host is required";
       showError("Validation Error", "Host is required");
     }
@@ -564,6 +568,7 @@ export function CreationForm({
             errors={errors}
             isAdmin={isAdmin}
             clubs={clubUser ? clubUser.leader_in_clubs : []}
+            clubList={clubsList}
             eventForm={eventForm}
             setEventForm={setEventForm}
           />
@@ -808,4 +813,3 @@ export function CreationForm({
     </div>
   );
 }
-export type { EventFormErrors };

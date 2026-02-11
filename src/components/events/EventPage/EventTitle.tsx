@@ -19,15 +19,17 @@ export interface EventTitleProps {
   event: SchemaWorkshop;
   pageLanguage: string | null;
   setPageLanguage: (v: string | null) => void;
-  isAdmin: boolean;
+  canEdit: boolean;
+  myCheckins?: SchemaWorkshop[];
   className?: string;
 }
 
 export default function EventTitle({
   event,
   pageLanguage,
-  isAdmin,
+  canEdit,
   setPageLanguage,
+  myCheckins,
   className,
 }: EventTitleProps) {
   const [_, _copy] = useCopyToClipboard();
@@ -104,7 +106,7 @@ export default function EventTitle({
               )}
             />
           </span>
-          {isAdmin && (
+          {canEdit && (
             <Link
               className="btn btn-circle"
               to="/events/$id/edit"
@@ -221,6 +223,7 @@ export default function EventTitle({
         <div className="hidden justify-end md:flex">
           <CheckInButton
             event={event}
+            myCheckins={myCheckins}
             className={
               event.check_in_type === CheckInType.by_link
                 ? "max-w-2/5"

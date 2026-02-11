@@ -1,20 +1,22 @@
 import { $clubs } from "@/api/clubs";
 import { $workshops } from "@/api/workshops";
-import { SchemaWorkshop } from "@/api/workshops/types";
+import { HostType, SchemaWorkshop } from "@/api/workshops/types";
+import type { SchemaClub } from "@/api/clubs/types";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useState, useMemo } from "react";
-import { parseClubHost } from "../utils";
 
 export interface ParticipantsProps {
   event: SchemaWorkshop;
   hide: boolean;
+  clubsList?: SchemaClub[];
   className?: string;
 }
 
 export default function Participants({
   event,
   hide,
+  clubsList: clubsListProp,
   className,
 }: ParticipantsProps) {
   const [showAll, setShowAll] = useState(false);
@@ -28,12 +30,15 @@ export default function Participants({
     },
   );
 
-  const clubIds = useMemo(() => parseClubHost(event.host), [event.host]);
-  const isClubHost = clubIds.length > 0;
+  const hosts = event.host ?? [];
+  const hasClubHost = hosts.some(
+    (h) => h?.host_type === HostType.club || h?.host_type === "club",
+  );
 
-  const { data: clubsList = [] } = $clubs.useQuery("get", "/clubs/", {
-    enabled: isClubHost,
+  const { data: clubsListData = [] } = $clubs.useQuery("get", "/clubs/", {
+    enabled: hasClubHost && !clubsListProp,
   });
+  const clubsList = clubsListProp ?? clubsListData;
 
   // Memoized derived values
   const visibleParticipants = useMemo(
@@ -46,7 +51,7 @@ export default function Participants({
   return (
     <div className="flex flex-col gap-3">
       {/* Host card */}
-      {event.host && (
+      {hosts.length > 0 && (
         <div className="card card-border">
           <div className="card-body">
             <h3 className="card-title flex items-center gap-2 text-xl">
@@ -54,13 +59,16 @@ export default function Participants({
               <span>Event Host</span>
             </h3>
             <div className="prose dark:prose-invert">
-              {isClubHost ? (
-                <div className="flex flex-col gap-1">
-                  {clubIds.map((id) => {
-                    const club = clubsList.find((c) => c.id === id);
+              <div className="flex flex-col gap-1">
+                {hosts.map((h, index) => {
+                  const isClub =
+                    h?.host_type === HostType.club || h?.host_type === "club";
+                  const displayName = h?.name ?? "Unknown";
+                  if (isClub) {
+                    const club = clubsList.find((c) => c.id === displayName);
                     return club ? (
                       <Link
-                        key={id}
+                        key={`${displayName}-${index}`}
                         to="/clubs/$slug"
                         params={{ slug: club.slug || "" }}
                         className="text-primary hover:text-primary/80 cursor-pointer underline"
@@ -69,13 +77,16 @@ export default function Participants({
                         {club.title}
                       </Link>
                     ) : (
-                      <span key={id}>{`club:${id}`}</span>
+                      <span key={`${displayName}-${index}`}>
+                        {`club:${displayName}`}
+                      </span>
                     );
-                  })}
-                </div>
-              ) : (
-                <p>{event.host}</p>
-              )}
+                  }
+                  return (
+                    <span key={`${displayName}-${index}`}>{displayName}</span>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

@@ -1,17 +1,18 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { EventFormErrors } from "./CreationForm";
+import { EventFormErrors } from "../types";
 import clsx from "clsx";
-import { WorkshopLanguage } from "@/api/workshops/types";
+import { HostType, WorkshopLanguage } from "@/api/workshops/types";
 import TagsSelector from "./TagsSelector";
 import { SchemaClub } from "@/api/clubs/types";
 import { $clubs } from "@/api/clubs";
 import { EventFormState } from "../types";
-import { formatClubHost, parseClubHost } from "../utils";
 
 export interface NameDescriptionProps {
   eventForm: EventFormState;
   setEventForm: (v: EventFormState) => void;
   clubs: SchemaClub[];
+  /** When provided, avoids duplicate fetch for full club list (from EditPage). */
+  clubList?: SchemaClub[];
   isAdmin?: boolean;
   errors: EventFormErrors;
   className?: string;
@@ -28,41 +29,56 @@ export default function NameDescription({
   setEventForm,
   errors,
   clubs,
+  clubList: clubListProp,
   isAdmin = false,
   className,
 }: NameDescriptionProps) {
+  const hostArray = eventForm.host ?? [];
+  const isClub = (h: (typeof hostArray)[0]) =>
+    h?.host_type === HostType.club || String(h?.host_type) === "club";
+  const clubHostIds = hostArray.filter(isClub).map((h) => h?.name ?? "");
+
   const [currentTab, setCurrentTab] = useState<string>("english");
   const [isClubSelect, setIsClubSelect] = useState<boolean>(
-    !!eventForm.host?.includes("club:"),
+    () => clubHostIds.length > 0,
   );
-  const [selectedClubIds, setSelectedClubIds] = useState<string[]>(() => {
-    const parsed = parseClubHost(eventForm.host);
-    return parsed.length > 0 ? parsed : [""];
-  });
-  const prevHostRef = useRef<string | null | undefined>(eventForm.host);
+  const [selectedClubIds, setSelectedClubIds] = useState<string[]>(() =>
+    clubHostIds.length > 0 ? clubHostIds : [""],
+  );
+  const prevHostRef = useRef(eventForm.host ?? []);
   const isInternalUpdateRef = useRef(false);
 
-  const { data: clubList } = $clubs.useQuery("get", "/clubs/");
+  const { data: clubListData } = $clubs.useQuery("get", "/clubs/", {
+    enabled: !clubListProp,
+  });
+  const clubList = clubListProp ?? clubListData;
 
   useEffect(() => {
+    const host = eventForm.host ?? [];
     if (
       isClubSelect &&
       !isInternalUpdateRef.current &&
-      prevHostRef.current !== eventForm.host
+      prevHostRef.current !== host
     ) {
-      const parsed = parseClubHost(eventForm.host);
-      setSelectedClubIds(parsed.length > 0 ? parsed : [""]);
+      const ids = host
+        .filter(
+          (h) =>
+            h?.host_type === HostType.club || String(h?.host_type) === "club",
+        )
+        .map((h) => h?.name ?? "");
+      setSelectedClubIds(ids.length > 0 ? ids : [""]);
     }
-    prevHostRef.current = eventForm.host;
+    prevHostRef.current = host;
     isInternalUpdateRef.current = false;
   }, [eventForm.host, isClubSelect]);
 
   const updateClubHost = (newIds: string[]) => {
     setSelectedClubIds(newIds);
-    const filteredIds = newIds.filter((id) => id);
-    const hostValue = formatClubHost(filteredIds);
+    const host: EventFormState["host"] = newIds
+      .filter((id) => id)
+      .map((id) => ({ host_type: HostType.club, name: id }));
     isInternalUpdateRef.current = true;
-    setEventForm({ ...eventForm, host: hostValue || "" });
+    setEventForm({ ...eventForm, host });
   };
 
   const updateLanguage = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -162,10 +178,15 @@ export default function NameDescription({
         {clubs.length > 0 && !isAdmin && (
           <select
             className="select"
-            value={eventForm.host?.split(":")[1] || "Pick a club"}
+            value={clubHostIds[0] || "Pick a club"}
             onChange={(e) => {
-              const clubHost = `club:${e.target.value}`;
-              setEventForm({ ...eventForm, host: clubHost });
+              const clubId = e.target.value;
+              setEventForm({
+                ...eventForm,
+                host: clubId
+                  ? [{ host_type: HostType.club, name: clubId }]
+                  : [],
+              });
             }}
           >
             <option value="Pick a club" disabled>
@@ -178,7 +199,7 @@ export default function NameDescription({
             ))}
           </select>
         )}
-        {isAdmin && (
+        {isAdmin === true && (
           <div className="flex flex-col gap-2">
             <label className="label">
               <input
@@ -189,9 +210,10 @@ export default function NameDescription({
                   if (!e.target.checked) {
                     setSelectedClubIds([]);
                   } else {
-                    // Re-parse host when toggling checkbox back on
-                    const parsed = parseClubHost(eventForm.host);
-                    setSelectedClubIds(parsed.length > 0 ? parsed : [""]);
+                    const ids = hostArray
+                      .filter(isClub)
+                      .map((h) => h?.name ?? "");
+                    setSelectedClubIds(ids.length > 0 ? ids : [""]);
                   }
                 }}
                 className="toggle"
@@ -252,10 +274,22 @@ export default function NameDescription({
                 type="text"
                 className={clsx("input w-full", errors.host && "input-error")}
                 placeholder="Host"
-                value={eventForm.host === "None" ? "" : eventForm.host || ""}
-                onChange={(e) =>
-                  setEventForm({ ...eventForm, host: e.target.value })
+                value={
+                  hostArray.find(
+                    (h) =>
+                      h?.host_type === HostType.other ||
+                      String(h?.host_type) === "other",
+                  )?.name ?? ""
                 }
+                onChange={(e) => {
+                  const value = e.target.value.trim();
+                  setEventForm({
+                    ...eventForm,
+                    host: value
+                      ? [{ host_type: HostType.other, name: value }]
+                      : [],
+                  });
+                }}
                 maxLength={255}
               />
             )}

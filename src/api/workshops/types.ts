@@ -227,7 +227,7 @@ export interface components {
       russian_description?: string | null;
       language?: components["schemas"]["WorkshopLanguage"] | null;
       /** Host */
-      host?: string | null;
+      host?: components["schemas"]["Host"][] | null;
       /** Dtstart */
       dtstart?: string | null;
       /** Dtend */
@@ -257,6 +257,17 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /** Host */
+    Host: {
+      host_type: components["schemas"]["HostType"];
+      /** Name */
+      name: string;
+    };
+    /**
+     * HostType
+     * @enum {string}
+     */
+    HostType: HostType;
     /** Link */
     Link: {
       /** Title */
@@ -276,7 +287,7 @@ export interface components {
       russian_description?: string | null;
       language?: components["schemas"]["WorkshopLanguage"] | null;
       /** Host */
-      host?: string | null;
+      host?: components["schemas"]["Host"][] | null;
       /** Dtstart */
       dtstart?: string | null;
       /** Dtend */
@@ -352,7 +363,9 @@ export interface components {
       russian_description: string | null;
       language: components["schemas"]["WorkshopLanguage"] | null;
       /** Host */
-      host: string | null;
+      host: {
+        [key: string]: string;
+      }[];
       /** Dtstart */
       dtstart: string | null;
       /** Dtend */
@@ -420,6 +433,7 @@ export type SchemaBodySetEventImageWorkshopsWorkshopIdImagePost =
 export type SchemaCreateWorkshop = components["schemas"]["CreateWorkshop"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaHost = components["schemas"]["Host"];
 export type SchemaLink = components["schemas"]["Link"];
 export type SchemaUpdateWorkshop = components["schemas"]["UpdateWorkshop"];
 export type SchemaUser = components["schemas"]["User"];
@@ -1104,6 +1118,10 @@ export enum CheckInType {
   no_check_in = "no_check_in",
   on_innohassle = "on_innohassle",
   by_link = "by_link",
+}
+export enum HostType {
+  club = "club",
+  other = "other",
 }
 export enum UserRole {
   admin = "admin",

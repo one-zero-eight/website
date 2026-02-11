@@ -1,21 +1,30 @@
 import { EventItem } from "./EventItem";
 import clsx from "clsx";
 import { useMemo } from "react";
-import { EventForDateProps, EventListType, ItemsListProps } from "./types";
+import {
+  DEFAULT_EVENT_LIST_OPTIONS,
+  EventForDateProps,
+  ItemsListProps,
+} from "./types";
+import { HostType } from "@/api/workshops/types";
+import type { SchemaWorkshop } from "@/api/workshops/types";
 
 export function EventForDate({
   isoDate,
   events,
-  eventListType = EventListType.USER,
+  options: optionsProp,
+  myCheckins,
+  clubsList,
 }: EventForDateProps) {
+  const options = { ...DEFAULT_EVENT_LIST_OPTIONS, ...optionsProp };
   const date = new Date(isoDate);
 
   const filteredEvents = useMemo(
     () =>
-      eventListType === EventListType.USER
+      options.filterDraftsAndInactive
         ? events.filter((event) => !event.is_draft && event.is_active)
         : events,
-    [events, eventListType],
+    [events, options.filterDraftsAndInactive],
   );
 
   if (filteredEvents.length === 0) return null;
@@ -32,16 +41,45 @@ export function EventForDate({
         {formattedDate}
       </div>
 
-      <ItemsList events={filteredEvents} eventListType={eventListType} />
+      <ItemsList
+        events={filteredEvents}
+        options={options}
+        myCheckins={myCheckins}
+        clubsList={clubsList}
+      />
     </div>
+  );
+}
+
+function isEventEditableForUser(
+  event: SchemaWorkshop,
+  isEditable: boolean,
+  editableClubIds: string[],
+): boolean {
+  if (isEditable) return true;
+  if (editableClubIds.length === 0) return false;
+  const host = event.host ?? [];
+  return host.some(
+    (h) =>
+      (h?.host_type === HostType.club || String(h?.host_type) === "club") &&
+      h?.name &&
+      editableClubIds.includes(h.name),
   );
 }
 
 export function ItemsList({
   events,
-  eventListType,
+  options: optionsProp,
+  myCheckins,
+  clubsList,
   className,
 }: ItemsListProps) {
+  const options = {
+    ...DEFAULT_EVENT_LIST_OPTIONS,
+    ...optionsProp,
+    editableClubIds: optionsProp?.editableClubIds ?? [],
+  };
+
   if (events.length === 0) {
     return (
       <div className="col-span-full w-full pt-10 text-center text-xl">
@@ -61,7 +99,13 @@ export function ItemsList({
         <EventItem
           key={event.id}
           event={event}
-          isEditable={eventListType === EventListType.ADMIN}
+          isEditable={isEventEditableForUser(
+            event,
+            options.isEditable,
+            options.editableClubIds,
+          )}
+          myCheckins={myCheckins}
+          clubsList={clubsList}
         />
       ))}
     </div>
