@@ -14,10 +14,14 @@ export function DeleteBookingModal({
   open,
   onOpenChange,
   onConfirm,
+  isPending,
+  error,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
+  isPending: boolean;
+  error: string | null;
 }) {
   const { context, refs } = useFloating({ open, onOpenChange });
 
@@ -55,7 +59,7 @@ export function DeleteBookingModal({
                 {/* Heading and description */}
                 <div className="mb-4 flex w-full flex-row">
                   <div className="grow items-center text-3xl font-semibold">
-                    Confirm deletion
+                    Booking deletion
                   </div>
                   <button
                     type="button"
@@ -67,28 +71,45 @@ export function DeleteBookingModal({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <div className="text-base-content/75 flex flex-row gap-2 text-xl">
-                    <p className="flex w-full items-center py-1 font-semibold wrap-anywhere whitespace-pre-wrap">
-                      Are you sure you want to delete this booking?
-                    </p>
-                  </div>
-
-                  <div className="flex flex-row gap-2">
-                    <button
-                      type="button"
-                      className="bg-inh-primary hover:bg-inh-primary-hover dark:bg-inh-primary-hover dark:hover:bg-inh-primary rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
-                      onClick={() => onOpenChange(false)}
-                    >
-                      Back
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-red-400 bg-red-200 px-4 py-2 text-lg font-medium text-red-900 hover:bg-red-300 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
-                      onClick={() => onConfirm()}
-                    >
-                      Delete
-                    </button>
-                  </div>
+                  {isPending ? (
+                    <div className="flex flex-row gap-2">
+                      <span className="icon-[mdi--loading] text-base-content animate-spin text-4xl" />
+                      <span className="text-base-content/75 flex w-full items-center py-1 text-xl font-semibold wrap-anywhere whitespace-pre-wrap">
+                        Deleting...
+                      </span>
+                    </div>
+                  ) : error ? (
+                    <div className="flex flex-row gap-2">
+                      <span className="icon-[material-symbols--error] text-base-content text-4xl" />
+                      <span className="text-base-content/75 flex w-full items-center py-1 text-xl font-semibold wrap-anywhere whitespace-pre-wrap">
+                        {error}
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-base-content/75 flex flex-row gap-2 text-xl">
+                        <p className="flex w-full items-center py-1 font-semibold wrap-anywhere whitespace-pre-wrap">
+                          Are you sure you want to delete this booking?
+                        </p>
+                      </div>
+                      <div className="flex flex-row gap-2">
+                        <button
+                          type="button"
+                          className="bg-inh-primary hover:bg-inh-primary-hover dark:bg-inh-primary-hover dark:hover:bg-inh-primary rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
+                          onClick={() => onOpenChange(false)}
+                        >
+                          Back
+                        </button>
+                        <button
+                          type="button"
+                          className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-red-400 bg-red-200 px-4 py-2 text-lg font-medium text-red-900 hover:bg-red-300 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
+                          onClick={() => onConfirm()}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

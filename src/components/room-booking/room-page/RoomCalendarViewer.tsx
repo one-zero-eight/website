@@ -19,7 +19,8 @@ import clsx from "clsx";
 import moment from "moment/moment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@/components/calendar/styles-calendar.css";
-import type { Slot } from "../timeline/types.ts";
+import { type Booking, type Slot } from "../timeline/types.ts";
+import { getTimeRangeForWeek } from "../utils.ts";
 
 export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const [popoverInfo, setPopoverInfo] = useState({
@@ -30,6 +31,9 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<Slot | undefined>(undefined);
+  const [selectedBookingDetails, setSelectedBookingDetails] = useState<
+    Booking | undefined
+  >(undefined);
 
   const setIsOpenCallback = useCallback(
     (opened: boolean) =>
@@ -43,8 +47,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     [setPopoverInfo],
   );
 
-  const startDate = useMemo(() => new Date(Date.now() - 7 * T.Day), []);
-  const endDate = useMemo(() => new Date(Date.now() + 7 * T.Day), []); // 7 days from now
+  const { startDate, endDate } = getTimeRangeForWeek();
   const { data: bookings } = $roomBooking.useQuery(
     "get",
     "/room/{id}/bookings",
@@ -60,7 +63,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       },
     },
     {
-      // refetchInterval: 5 * T.Min,
+      refetchInterval: 5 * T.Min,
     },
   );
 
@@ -88,6 +91,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       };
 
       setSelectedSlot(slot);
+      setSelectedBookingDetails(undefined);
       setBookingModalOpen(true);
     },
     [room],
@@ -97,6 +101,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     setBookingModalOpen(open);
     if (!open) {
       setSelectedSlot(undefined);
+      setSelectedBookingDetails(undefined);
       // Clear the FullCalendar selection
       const calendarApi = calendarRef.current?.getApi();
       if (calendarApi) {
@@ -330,8 +335,13 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       )}
       <BookingModal
         newSlot={selectedSlot}
+        detailsBooking={selectedBookingDetails}
         open={bookingModalOpen}
         onOpenChange={handleModalClose}
+        onBookingCreated={(data) => {
+          setSelectedSlot(undefined);
+          setSelectedBookingDetails(data);
+        }}
       />
     </div>
   );

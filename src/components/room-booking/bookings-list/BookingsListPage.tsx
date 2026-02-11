@@ -5,6 +5,7 @@ import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import React, { useMemo, useState } from "react";
+import { getTimeRangeForWeek } from "../utils";
 
 export function BookingsListPage() {
   const { data: bookings } = $roomBooking.useQuery("get", "/bookings/my");
@@ -26,7 +27,7 @@ export function BookingsListPage() {
   return (
     <div className="flex w-full max-w-lg flex-col gap-4 self-center p-4">
       {bookings.map((v, i) => (
-        <React.Fragment key={v.id}>
+        <React.Fragment key={v.room_id}>
           <BookingCard booking={v} />
           {i < bookings.length - 1 && (
             <div className="bg-inh-secondary-hover h-px" />
@@ -40,32 +41,67 @@ export function BookingsListPage() {
 export function BookingCard({
   booking,
 }: {
-  booking: roomBookingTypes.SchemaMyUniBooking;
+  booking: roomBookingTypes.SchemaBooking;
 }) {
   const queryClient = useQueryClient();
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
   const room = rooms?.find((v) => v.id === booking.room_id);
 
+  const [error, setError] = useState<string | null>(null);
+
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
+  const { startDate, endDate } = getTimeRangeForWeek();
   const { mutate: deleteBookingMutate, isPending } = $roomBooking.useMutation(
     "delete",
-    "/bookings/{booking_id}",
+    "/bookings/{outlook_booking_id}",
     {
-      onSettled() {
-        queryClient.invalidateQueries({
-          queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
-        });
-        queryClient.invalidateQueries({
-          // All /bookings/ queries, with any params
-          queryKey: ["roomBooking", "get", "/bookings/"],
-        });
+      onSuccess: () => {
+        setConfirmDialogOpen(false);
+        queryClient.setQueryData(
+          $roomBooking.queryOptions("get", "/bookings/my").queryKey,
+          (old: roomBookingTypes.SchemaBooking[] | undefined) =>
+            old?.filter((b) => b.id !== booking.id) ?? [],
+        );
+
+        queryClient.setQueryData(
+          $roomBooking.queryOptions("get", "/bookings/", {
+            params: {
+              query: {
+                start: startDate.toISOString(),
+                end: endDate.toISOString(),
+              },
+            },
+          }).queryKey,
+          (old: roomBookingTypes.SchemaBooking[] | undefined) =>
+            old?.filter((b) => b.id !== booking.id) ?? [],
+        );
+
+        queryClient.setQueryData(
+          $roomBooking.queryOptions("get", "/room/{id}/bookings", {
+            params: {
+              path: { id: booking.room_id },
+              query: {
+                start: startDate.toISOString(),
+                end: endDate.toISOString(),
+              },
+            },
+          }).queryKey,
+          (old: roomBookingTypes.SchemaBooking[] | undefined) =>
+            old?.filter((b) => b.id !== booking.id) ?? [],
+        );
+      },
+      onError: (error) => {
+        console.log(error);
+        setError("Failed to delete booking");
       },
     },
   );
   const deleteBooking = () => {
     deleteBookingMutate({
-      params: { path: { booking_id: booking.id } },
+      params: {
+        path: { outlook_booking_id: booking.outlook_booking_id ?? "" },
+      },
     });
   };
 
@@ -110,11 +146,7 @@ export function BookingCard({
               className="flex h-8 w-8 items-center justify-center rounded-md border border-red-400 bg-red-200 text-red-600 hover:bg-red-300 dark:border-red-600 dark:bg-red-800 dark:text-red-400 dark:hover:bg-red-700"
               onClick={() => setConfirmDialogOpen(true)}
             >
-              {!isPending ? (
-                <span className="icon-[material-symbols--close-rounded] text-2xl" />
-              ) : (
-                <span className="icon-[mdi--loading] text-base-content animate-spin text-2xl" />
-              )}
+              <span className="icon-[material-symbols--close-rounded] text-2xl" />
             </button>
           </Tooltip>
         </div>
@@ -124,8 +156,9 @@ export function BookingCard({
         onOpenChange={setConfirmDialogOpen}
         onConfirm={() => {
           deleteBooking();
-          setConfirmDialogOpen(false);
         }}
+        isPending={isPending}
+        error={error}
       />
     </>
   );

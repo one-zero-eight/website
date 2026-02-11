@@ -25,8 +25,8 @@ const props = defineProps<{
   bookings: roomBookingTypes.SchemaBooking[] | undefined;
   isBookingsPending: boolean;
 
-  myBookings: roomBookingTypes.SchemaMyUniBooking[] | undefined;
-  isMyBookingsPending: boolean;
+  // myBookings: roomBookingTypes.SchemaMyUniBooking[] | undefined;
+  // isMyBookingsPending: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -173,29 +173,29 @@ const actualRooms = computed(
 );
 const roomsLoading = computed(() => props.isRoomsPending);
 
-// TODO: remove this, when backend will return booking UIDs.
-let bookingIdCounter = 0;
+// ~~TODO~~: remove this, when backend will return booking UIDs.
+// let bookingIdCounter = 0;
 
 const actualBookings = computed<Map<Booking["id"], Booking>>(() => {
   const map = new Map<Booking["id"], Booking>();
 
   for (const booking of props.bookings ?? []) {
-    const myBooking = props.myBookings?.find(
-      (myBooking) =>
-        myBooking.room_id === booking.room_id &&
-        myBooking.start === booking.start &&
-        myBooking.end === booking.end,
-    );
-    const mappedBooking: Booking = {
-      ...booking,
-      id: (++bookingIdCounter).toString(),
-      startsAt: new Date(booking.start),
-      endsAt: new Date(booking.end),
-      myBookingId: myBooking?.id,
-      title: myBooking?.title ?? booking.title,
-    };
+    // const myBooking = props.myBookings?.find(
+    //   (myBooking) =>
+    //     myBooking.room_id === booking.room_id &&
+    //     myBooking.start === booking.start &&
+    //     myBooking.end === booking.end,
+    // );
+    // const mappedBooking: Booking = {
+    //   ...booking,
+    //   // id: (++bookingIdCounter).toString(),
+    //   startsAt: new Date(booking.start),
+    //   endsAt: new Date(booking.end),
+    //   // myBookingId: myBooking?.id,
+    //   // title: myBooking?.title ?? booking.title,
+    // };
 
-    map.set(mappedBooking.id, mappedBooking);
+    map.set(booking.id, booking);
   }
 
   return map;
@@ -1107,7 +1107,7 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
               actualRooms,
               bookingsLoading,
               actualBookingsByRoomSorted,
-              myBookings,
+              // myBookings,
               compactModeEnabled,
             ]"
             :class="$style.body"
@@ -1139,7 +1139,7 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
                 :class="{
                   [$style.booking]: true,
                   [$style.myBooking]:
-                    typeof booking !== 'string' && !!booking.myBookingId,
+                    typeof booking !== 'string' && booking.isMine,
                   [$style.placeholder]: booking === 'placeholder',
                 }"
                 :style="

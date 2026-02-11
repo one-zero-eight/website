@@ -113,6 +113,25 @@
   --color-inh-inactive: rgb(var(--color-inh-inactive-rgb));
   --color-brand-gradient-start: rgb(var(--color-brand-gradient-start-rgb));
   --color-brand-gradient-end: rgb(var(--color-brand-gradient-end-rgb));
+
+  --animate-booking-fake-progress: fake-progress 50s linear;
+  @keyframes fake-progress {
+    from {
+      width: 0%;
+    }
+    5% {
+      width: 40%;
+    }
+    20% {
+      width: 80%;
+    }
+    40% {
+      width: 95%;
+    }
+    to {
+      width: 100%;
+    }
+  }
 }
 
 @layer base {

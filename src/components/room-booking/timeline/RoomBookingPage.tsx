@@ -3,7 +3,14 @@ import { BookingModal } from "@/components/room-booking/timeline/BookingModal.ts
 import { T } from "@/lib/utils/dates.ts";
 import { getRouteApi } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import type { Booking, ScrollToOptions, Slot } from "./types.ts";
+import {
+  schemaToBooking,
+  type Booking,
+  type ScrollToOptions,
+  type Slot,
+} from "./types.ts";
+import { useMe } from "@/api/accounts/user.ts";
+import { getTimeRangeForWeek } from "../utils.ts";
 
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),
@@ -41,8 +48,7 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
     }
   }, [timelineLoaded, search.d]);
 
-  const [startDate] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
-  const [endDate] = useState(new Date(startDate.getTime() + 7 * T.Day));
+  const { startDate, endDate } = getTimeRangeForWeek();
 
   const includeRedObject = showRed ? { include_red: true } : {};
   const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
@@ -50,7 +56,7 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
     "/rooms/",
     { params: { query: { ...includeRedObject } } },
   );
-  const { data: bookings, isPending: isBookingsPending } =
+  const { data: rawBookings, isPending: isBookingsPending } =
     $roomBooking.useQuery(
       "get",
       "/bookings/",
@@ -67,8 +73,14 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
         refetchInterval: 5 * T.Min,
       },
     );
-  const { data: myBookings, isPending: isMyBookingsPending } =
-    $roomBooking.useQuery("get", "/bookings/my");
+
+  const { me } = useMe();
+
+  const bookings = rawBookings?.map((schema) =>
+    schemaToBooking(schema, me?.innopolis_info?.email),
+  );
+  // const { data: myBookings, isPending: isMyBookingsPending } =
+  //   $roomBooking.useQuery("get", "/bookings/my");
 
   return (
     <>
@@ -82,8 +94,8 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
             isRoomsPending={isRoomsPending}
             bookings={bookings}
             isBookingsPending={isBookingsPending}
-            myBookings={myBookings}
-            isMyBookingsPending={isMyBookingsPending}
+            /* myBookings={myBookings} */
+            /* isMyBookingsPending={isMyBookingsPending} */
             onBook={(newBooking: Slot) => {
               setNewBookingSlot(newBooking);
               setBookingDetails(undefined);
@@ -103,6 +115,12 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
         detailsBooking={bookingDetails}
         open={modalOpen}
         onOpenChange={setModalOpen}
+        onBookingCreated={(data) => {
+          console.log("booking created", data);
+
+          setNewBookingSlot(undefined);
+          setBookingDetails(data);
+        }}
       />
     </>
   );

@@ -1,4 +1,4 @@
-import { $roomBooking } from "@/api/room-booking";
+import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
 import {
   clockTime,
   durationFormatted,
@@ -18,7 +18,10 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Booking, Slot } from "./types.ts";
+import { schemaToBooking, type Booking, type Slot } from "./types.ts";
+import { useMe } from "@/api/accounts/user.ts";
+import { BookingStatus } from "@/api/room-booking/types.ts";
+import { getTimeRangeForWeek } from "../utils.ts";
 
 function bookingWarningForSlot({ room, start, end }: Slot) {
   const diffMs = msBetween(start, end);
@@ -89,11 +92,13 @@ export function BookingModal({
   detailsBooking,
   open,
   onOpenChange,
+  onBookingCreated,
 }: {
   newSlot?: Slot;
   detailsBooking?: Booking;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onBookingCreated?: (data: Booking) => void;
 }) {
   const { context, refs } = useFloating({ open, onOpenChange });
   // Transition effect
@@ -105,6 +110,8 @@ export function BookingModal({
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
   const queryClient = useQueryClient();
+  const { startDate, endDate } = getTimeRangeForWeek();
+  const { me } = useMe();
 
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
   const {
@@ -132,53 +139,157 @@ export function BookingModal({
 
     mutate(
       {
-        params: {
-          query: {
-            room_id: newSlot.room.id,
-            title: title,
-            start: newSlot.start.toISOString(),
-            end: newSlot.end.toISOString(),
-          },
+        body: {
+          room_id: newSlot.room.id,
+          title: title,
+          start: newSlot.start.toISOString(),
+          end: newSlot.end.toISOString(),
+          participant_emails: [],
         },
       },
       {
-        onSuccess: () => {
+        onSuccess: (data: roomBookingTypes.SchemaBooking) => {
+          console.log("booking created", data);
+
+          queryClient.setQueryData(
+            $roomBooking.queryOptions("get", "/bookings/", {
+              params: {
+                query: {
+                  start: startDate.toISOString(),
+                  end: endDate.toISOString(),
+                },
+              },
+            }).queryKey,
+            (old: roomBookingTypes.SchemaBooking[] | undefined) => [
+              ...(old ?? []),
+              data,
+            ],
+          );
+
+          queryClient.setQueryData(
+            $roomBooking.queryOptions("get", "/room/{id}/bookings", {
+              params: {
+                path: { id: newSlot.room.id },
+                query: {
+                  start: startDate.toISOString(),
+                  end: endDate.toISOString(),
+                },
+              },
+            }).queryKey,
+            (old: roomBookingTypes.SchemaBooking[] | undefined) => [
+              ...(old ?? []),
+              data,
+            ],
+          );
+
+          queryClient.setQueryData(
+            $roomBooking.queryOptions("get", "/bookings/my").queryKey,
+            (old: roomBookingTypes.SchemaBooking[] | undefined) => [
+              ...(old ?? []),
+              data,
+            ],
+          );
+
           setTitle("");
           reset();
-          onOpenChange(false);
-
-          queryClient.invalidateQueries({
-            queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
-          });
-
-          // Refetch bookings after some time
-          setTimeout(() => {
-            queryClient.invalidateQueries({
-              // All /bookings/ queries, with any params
-              queryKey: ["roomBooking", "get", "/bookings/"],
-            });
-            queryClient.invalidateQueries({
-              // All /room/{id}/bookings queries, with any params
-              queryKey: ["roomBooking", "get", "/room/{id}/bookings"],
-            });
-          }, 3000);
+          onBookingCreated?.(schemaToBooking(data, me?.innopolis_info?.email));
         },
       },
     );
-  }, [newSlot, title, mutate, reset, queryClient, onOpenChange]);
+  }, [
+    newSlot,
+    title,
+    mutate,
+    reset,
+    queryClient,
+    onBookingCreated,
+    endDate,
+    me?.innopolis_info?.email,
+  ]);
 
   if (!isMounted) {
     return null;
   }
 
-  const room =
-    newSlot?.room ?? rooms?.find((room) => room.id === detailsBooking?.room_id);
+  const getRoomById = (roomId: string | undefined) => {
+    return roomId ? rooms?.find((room) => room.id === roomId) : undefined;
+  };
+
+  const room = newSlot?.room ?? getRoomById(detailsBooking?.room_id);
   const start = newSlot?.start ?? detailsBooking?.startsAt;
   const end = newSlot?.end ?? detailsBooking?.endsAt;
 
-  const BookingLocation = room ? (
-    <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
-      <div className="flex h-fit w-6">
+  const outlookBookingId = detailsBooking?.outlook_booking_id;
+  const attendees = detailsBooking?.attendees;
+  const isAttending = attendees?.some(
+    (attendee) => attendee.email === me?.innopolis_info?.email,
+  );
+  const outlookBookingRooms = attendees
+    ?.map((attendee) => {
+      return {
+        room: getRoomById(attendee.assosiated_room_id ?? undefined),
+        attendee: attendee,
+      };
+    })
+    .filter((room) => room.room !== undefined);
+  const outlookBookingAttendees = attendees?.filter(
+    (attendee) => attendee.assosiated_room_id === null,
+  );
+
+  const roomStatus = (status: BookingStatus) => {
+    const baseClass = "rounded-full px-2 py-1 text-center text-sm font-bold";
+    switch (status) {
+      case BookingStatus.Accept:
+        return (
+          <span className={`${baseClass} bg-green-500/20 text-green-500`}>
+            Accepted
+          </span>
+        );
+      case BookingStatus.Tentative:
+        return (
+          <span className={`${baseClass} bg-yellow-500/20 text-yellow-500`}>
+            Tentative
+          </span>
+        );
+      case BookingStatus.Decline:
+        return (
+          <span className={`${baseClass} bg-red-500/20 text-red-500`}>
+            Declined
+          </span>
+        );
+      case BookingStatus.Unknown:
+        return (
+          <span className={`${baseClass} bg-gray-500/20 text-gray-500`}>
+            Unknown
+          </span>
+        );
+    }
+  };
+
+  const BookingLocation = outlookBookingRooms ? (
+    outlookBookingRooms.map((room) => (
+      <div className="text-base-content/75 flex flex-row items-start gap-2 text-xl">
+        <div className="mt-1.5 flex h-fit w-6">
+          <span className="icon-[material-symbols--location-on-outline] text-2xl" />
+        </div>
+        <div
+          className="flex flex-row items-center gap-2"
+          key={room.attendee.email}
+        >
+          <Link
+            to="/room-booking/rooms/$room"
+            params={{ room: room.room?.id ?? "" }}
+            className="flex items-center py-1 wrap-anywhere whitespace-pre-wrap hover:underline"
+          >
+            {room.room?.title}
+          </Link>
+          {roomStatus(room.attendee.status ?? BookingStatus.Unknown)}
+        </div>
+      </div>
+    ))
+  ) : room ? (
+    <div className="text-base-content/75 flex flex-row items-start gap-2 text-xl">
+      <div className="mt-1.5 flex h-fit w-6">
         <span className="icon-[material-symbols--location-on-outline] text-2xl" />
       </div>
       <Link
@@ -215,6 +326,19 @@ export function BookingModal({
     </div>
   );
 
+  const Attendees = outlookBookingAttendees?.map((attendee) => (
+    <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+      <div className="flex h-fit w-6">
+        <span className="icon-[material-symbols--person-outline-rounded] text-2xl" />
+      </div>
+      <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
+        <span className="text-md" key={attendee.email}>
+          {attendee.email}
+        </span>
+      </div>
+    </div>
+  ));
+
   const warningText = newSlot ? bookingWarningForSlot(newSlot) : null;
   const NewBookingWarning = warningText && (
     <div className="alert alert-warning text-base">
@@ -232,7 +356,16 @@ export function BookingModal({
     </div>
   );
 
-  const NewBookingButtons = (
+  const NewBookingButtons = isPending ? (
+    <>
+      <p className="text-base-content/75 text-lg">Creating new booking...</p>
+      <div className="flex items-center justify-center">
+        <div className="bg-base-100 h-4 w-full overflow-hidden rounded-xl">
+          <div className="animate-booking-fake-progress bg-primary h-full"></div>
+        </div>
+      </div>
+    </>
+  ) : (
     <div className="flex flex-row gap-2">
       <button
         type="button"
@@ -247,15 +380,12 @@ export function BookingModal({
         disabled={isPending}
       >
         Confirm
-        {isPending && (
-          <span className="icon-[mdi--loading] text-base-content animate-spin text-2xl" />
-        )}
       </button>
     </div>
   );
 
   const MyBookingButtons = (
-    <div className="flex flex-row gap-2">
+    <div className="mt-4 flex flex-row gap-2">
       <Link
         to="/room-booking/list"
         className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
@@ -323,6 +453,7 @@ export function BookingModal({
                       {BookingLocation}
                       {BookingDate}
                       {BookingTime}
+                      {attendees && Attendees}
 
                       {NewBookingWarning}
                       {NewBookingError}
@@ -341,7 +472,9 @@ export function BookingModal({
                     {BookingLocation}
                     {BookingDate}
                     {BookingTime}
-                    {detailsBooking?.myBookingId && MyBookingButtons}
+                    {attendees && Attendees}
+
+                    {outlookBookingId && isAttending && MyBookingButtons}
                   </div>
                 )}
               </div>
