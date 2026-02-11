@@ -72,7 +72,7 @@ export function EventItem({
         >
           {event.image_file_id && (
             <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center">
-              <div className="flex h-[180px] w-[180px] items-center justify-center overflow-hidden">
+              <div className="flex h-[160px] items-center justify-center overflow-hidden">
                 <img
                   src={imageLink(event.id)}
                   alt={event.english_name + " logo"}

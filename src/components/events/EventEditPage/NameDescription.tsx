@@ -222,43 +222,50 @@ export default function NameDescription({
             </label>
             {isClubSelect ? (
               <div className="flex flex-col gap-2">
-                {selectedClubIds.map((clubId, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <select
-                      className="select flex-1"
-                      value={clubId || "Pick a club"}
-                      onChange={(e) => {
-                        const newIds = [...selectedClubIds];
-                        newIds[index] = e.target.value;
-                        updateClubHost(newIds);
-                      }}
-                    >
-                      <option value="Pick a club" disabled>
-                        Pick a club
-                      </option>
-                      {clubList?.map((club) => (
-                        <option key={club.id} value={club.id}>
-                          {club.title}
-                        </option>
-                      ))}
-                    </select>
-                    {selectedClubIds.length > 1 && (
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-square"
-                        onClick={() => {
-                          const newIds = selectedClubIds.filter(
-                            (_, i) => i !== index,
-                          );
-                          updateClubHost(newIds.length > 0 ? newIds : [""]);
+                {selectedClubIds.map((clubId, index) => {
+                  const alreadySelected = selectedClubIds.filter(Boolean);
+                  const availableClubs = clubList?.filter(
+                    (club) =>
+                      !alreadySelected.includes(club.id) || club.id === clubId,
+                  );
+                  return (
+                    <div key={index} className="flex items-center gap-2">
+                      <select
+                        className="select flex-1"
+                        value={clubId || "Pick a club"}
+                        onChange={(e) => {
+                          const newIds = [...selectedClubIds];
+                          newIds[index] = e.target.value;
+                          updateClubHost(newIds);
                         }}
-                        aria-label="Remove club"
                       >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                ))}
+                        <option value="Pick a club" disabled>
+                          Pick a club
+                        </option>
+                        {availableClubs?.map((club) => (
+                          <option key={club.id} value={club.id}>
+                            {club.title}
+                          </option>
+                        ))}
+                      </select>
+                      {selectedClubIds.length > 1 && (
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-square"
+                          onClick={() => {
+                            const newIds = selectedClubIds.filter(
+                              (_, i) => i !== index,
+                            );
+                            updateClubHost(newIds.length > 0 ? newIds : [""]);
+                          }}
+                          aria-label="Remove club"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
                 <button
                   type="button"
                   className="btn btn-sm self-start"
@@ -308,6 +315,7 @@ export default function NameDescription({
 
       <TagsSelector<EventFormState>
         tagsToExlude={!isAdmin ? ["recommended"] : []}
+        lockBadges={!isAdmin ? ["recommended"] : []}
         form={eventForm}
         setForm={setEventForm}
       />

@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { EventFormErrors, EventFormState } from "../types";
+import { useRef } from "react";
 
 interface ImageUploadProps {
   form: EventFormState;
@@ -11,18 +12,22 @@ interface ImageUploadProps {
   className?: string;
   logoPreview: string | null;
   setLogoPreview: (v: string | null) => void;
+  deleteImage: () => void;
+  /** True when the event already has an image on the server (show Delete only then). */
+  hasUploadedImage: boolean;
 }
 
 export default function ImageUpload({
   form,
   className,
   isUploadingLogo,
-  setForm,
   handleLogoFileChange,
   handleUploadLogo,
-  setLogoPreview,
+  deleteImage,
   logoPreview,
+  hasUploadedImage,
 }: ImageUploadProps) {
+  const filePickRef = useRef<HTMLInputElement>(null);
   return (
     <div className={clsx(className)}>
       <div>
@@ -30,7 +35,7 @@ export default function ImageUpload({
           Upload new image
         </h3>
         <div className="space-y-3">
-          {logoPreview ? (
+          {logoPreview && hasUploadedImage ? (
             <div className="flex items-center justify-center">
               <img
                 src={logoPreview}
@@ -47,12 +52,27 @@ export default function ImageUpload({
             </div>
           )}
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleLogoFileChange}
-            className="text-base-content file:bg-primary hover:file:bg-primary/90 file:rounded-field w-full text-sm file:mr-4 file:border-0 file:px-4 file:py-2 file:text-white"
-          />
+          <div className="flex items-center justify-between">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleLogoFileChange}
+              ref={filePickRef}
+              className="text-base-content file:bg-primary hover:file:bg-primary/90 file:rounded-field w-full text-sm file:mr-4 file:border-0 file:px-4 file:py-2 file:text-white"
+            />
+            {hasUploadedImage && (
+              <button
+                type="button"
+                onClick={() => {
+                  deleteImage();
+                  if (filePickRef.current) filePickRef.current.value = "";
+                }}
+                className="btn btn-error dark:btn-soft"
+              >
+                Delete Image
+              </button>
+            )}
+          </div>
 
           <button
             type="button"
@@ -65,19 +85,6 @@ export default function ImageUpload({
           >
             {isUploadingLogo ? "Uploading..." : "Upload Image"}
           </button>
-
-          {form.file && (
-            <button
-              type="button"
-              onClick={() => {
-                setForm({ ...form, file: null });
-                setLogoPreview(null);
-              }}
-              className="btn btn-ghost btn-sm w-full"
-            >
-              Clear selection
-            </button>
-          )}
         </div>
       </div>
     </div>

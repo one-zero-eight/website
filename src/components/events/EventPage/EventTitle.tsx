@@ -84,7 +84,7 @@ export default function EventTitle({
       >
         {event.image_file_id && (
           <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center">
-            <div className="flex aspect-square h-[250px] items-center justify-center overflow-hidden lg:h-[210px]">
+            <div className="flex h-[250px] items-center justify-center overflow-hidden lg:h-[210px]">
               <img
                 src={imageLink(event.id)}
                 alt={event.english_name + " logo"}

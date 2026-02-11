@@ -6,7 +6,7 @@ import { DateTime } from "./DateTime.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import AdditionalInfo from "./AdditionalInfo.tsx";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { baseEventFormState } from "../utils/index.ts";
+import { baseEventFormState, isWorkshopPast } from "../utils/index.ts";
 import {
   EventEditFormProps,
   EventFormErrors,
@@ -14,6 +14,7 @@ import {
   EventLink,
 } from "../types/index.ts";
 import {
+  imageLink,
   normalizeHostForForm,
   normalizeLink,
 } from "@/components/events/utils/event-utils";
@@ -99,7 +100,15 @@ export function EventEditForm({
     return baseEventFormState;
   });
 
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoPreview, setImagePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialEvent?.image_file_id) {
+      setImagePreview(imageLink(initialEvent.id));
+    } else {
+      setImagePreview(null);
+    }
+  }, [initialEvent?.id, initialEvent?.image_file_id]);
 
   const { showSuccess, showError, showConfirm } = useToast();
 
@@ -177,7 +186,7 @@ export function EventEditForm({
     const dtend = `${endDate}T${eventForm.dtend}:00+03:00`;
 
     const check_in_opens = eventForm.check_in_on_open
-      ? dtstart
+      ? new Date().toISOString()
       : `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
 
     // Handle links
@@ -367,7 +376,9 @@ export function EventEditForm({
     );
   };
 
-  const { mutate: uploadLogo, isPending: isUploadingLogo } =
+  // ================== Event Image ==================
+
+  const { mutate: uploadImage, isPending: isUploadingLogo } =
     $workshops.useMutation("post", "/workshops/{workshop_id}/image", {
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -379,37 +390,60 @@ export function EventEditForm({
           queryKey: $workshops.queryOptions("get", "/workshops/").queryKey,
         });
         setEventForm({ ...eventForm, file: null });
-        setLogoPreview(null);
-        showSuccess("Logo Uploaded", "Logo uploaded successfully!");
+        setImagePreview(null);
+        showSuccess("Image Uploaded", "Image uploaded successfully!");
       },
       onError: (error) => {
-        console.error("Failed to upload logo:", error);
-        showError("Upload Failed", "Failed to upload logo. Please try again.");
+        console.error("Failed to upload image:", error);
+        showError("Upload Failed", "Failed to upload image. Please try again.");
       },
     });
 
-  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setEventForm({ ...eventForm, file });
+      setEventForm((prev) => ({ ...prev, file }));
       const reader = new FileReader();
       reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleUploadLogo = () => {
+  const handleUploadImage = () => {
     if (!eventForm.file || !initialEvent) return;
 
     const formData = new FormData();
     formData.append("image_file", eventForm.file);
 
-    uploadLogo({
+    uploadImage({
       params: { path: { workshop_id: initialEvent.id } },
       // @ts-expect-error - FormData type mismatch with API
       body: formData,
+    });
+  };
+
+  const { mutate: deleteImage } = $workshops.useMutation(
+    "delete",
+    "/workshops/{workshop_id}/image",
+    {
+      onSuccess: () => {
+        setImagePreview(null);
+        queryClient.invalidateQueries({
+          queryKey: $workshops.queryOptions("get", "/workshops/{workshop_id}", {
+            params: { path: { workshop_id: initialEvent?.id || "" } },
+          }).queryKey,
+        });
+      },
+    },
+  );
+
+  const handleDeleteImage = () => {
+    if (!initialEvent) return;
+
+    deleteImage({
+      params: { path: { workshop_id: initialEvent.id } },
     });
   };
 
@@ -585,11 +619,13 @@ export function EventEditForm({
             errors={errors}
             form={eventForm}
             setForm={setEventForm}
-            handleUploadLogo={handleUploadLogo}
-            handleLogoFileChange={handleLogoFileChange}
+            handleUploadLogo={handleUploadImage}
+            handleLogoFileChange={handleImageFileChange}
             isUploadingLogo={isUploadingLogo}
             logoPreview={logoPreview}
-            setLogoPreview={setLogoPreview}
+            setLogoPreview={setImagePreview}
+            deleteImage={handleDeleteImage}
+            hasUploadedImage={!!initialEvent?.image_file_id}
           />
         </div>
       </div>
@@ -664,8 +700,9 @@ export function EventEditForm({
               {errors.checkInLinkError}
             </p>
           )}
-          {eventForm.check_in_type !== CheckInType.by_link &&
-            eventForm.check_in_type !== CheckInType.no_check_in && (
+          {eventForm.check_in_type === CheckInType.on_innohassle &&
+            initialEvent &&
+            !isWorkshopPast(initialEvent.dtstart ?? "") && (
               <>
                 <label className="label mr-2 text-black dark:text-white">
                   <input
