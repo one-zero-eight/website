@@ -5,7 +5,6 @@ import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import React, { useMemo, useState } from "react";
-import { getTimeRangeForWeek } from "../utils";
 
 export function BookingsListPage() {
   const { data: bookings } = $roomBooking.useQuery("get", "/bookings/my");
@@ -51,45 +50,20 @@ export function BookingCard({
 
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
-  const { startDate, endDate } = getTimeRangeForWeek();
   const { mutate: deleteBookingMutate, isPending } = $roomBooking.useMutation(
     "delete",
     "/bookings/{outlook_booking_id}",
     {
+      onSettled() {
+        queryClient.invalidateQueries({
+          queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["roomBooking", "get", "/bookings/"],
+        });
+      },
       onSuccess: () => {
         setConfirmDialogOpen(false);
-        queryClient.setQueryData(
-          $roomBooking.queryOptions("get", "/bookings/my").queryKey,
-          (old: roomBookingTypes.SchemaBooking[] | undefined) =>
-            old?.filter((b) => b.id !== booking.id) ?? [],
-        );
-
-        queryClient.setQueryData(
-          $roomBooking.queryOptions("get", "/bookings/", {
-            params: {
-              query: {
-                start: startDate.toISOString(),
-                end: endDate.toISOString(),
-              },
-            },
-          }).queryKey,
-          (old: roomBookingTypes.SchemaBooking[] | undefined) =>
-            old?.filter((b) => b.id !== booking.id) ?? [],
-        );
-
-        queryClient.setQueryData(
-          $roomBooking.queryOptions("get", "/room/{id}/bookings", {
-            params: {
-              path: { id: booking.room_id },
-              query: {
-                start: startDate.toISOString(),
-                end: endDate.toISOString(),
-              },
-            },
-          }).queryKey,
-          (old: roomBookingTypes.SchemaBooking[] | undefined) =>
-            old?.filter((b) => b.id !== booking.id) ?? [],
-        );
       },
       onError: (error) => {
         console.log(error);
@@ -97,6 +71,7 @@ export function BookingCard({
       },
     },
   );
+
   const deleteBooking = () => {
     deleteBookingMutate({
       params: {

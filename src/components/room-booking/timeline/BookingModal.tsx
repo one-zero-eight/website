@@ -21,7 +21,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { schemaToBooking, type Booking, type Slot } from "./types.ts";
 import { useMe } from "@/api/accounts/user.ts";
 import { BookingStatus } from "@/api/room-booking/types.ts";
-import { getTimeRangeForWeek } from "../utils.ts";
 
 function bookingWarningForSlot({ room, start, end }: Slot) {
   const diffMs = msBetween(start, end);
@@ -110,7 +109,6 @@ export function BookingModal({
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
   const queryClient = useQueryClient();
-  const { startDate, endDate } = getTimeRangeForWeek();
   const { me } = useMe();
 
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
@@ -151,44 +149,15 @@ export function BookingModal({
         onSuccess: (data: roomBookingTypes.SchemaBooking) => {
           console.log("booking created", data);
 
-          queryClient.setQueryData(
-            $roomBooking.queryOptions("get", "/bookings/", {
-              params: {
-                query: {
-                  start: startDate.toISOString(),
-                  end: endDate.toISOString(),
-                },
-              },
-            }).queryKey,
-            (old: roomBookingTypes.SchemaBooking[] | undefined) => [
-              ...(old ?? []),
-              data,
-            ],
-          );
-
-          queryClient.setQueryData(
-            $roomBooking.queryOptions("get", "/room/{id}/bookings", {
-              params: {
-                path: { id: newSlot.room.id },
-                query: {
-                  start: startDate.toISOString(),
-                  end: endDate.toISOString(),
-                },
-              },
-            }).queryKey,
-            (old: roomBookingTypes.SchemaBooking[] | undefined) => [
-              ...(old ?? []),
-              data,
-            ],
-          );
-
-          queryClient.setQueryData(
-            $roomBooking.queryOptions("get", "/bookings/my").queryKey,
-            (old: roomBookingTypes.SchemaBooking[] | undefined) => [
-              ...(old ?? []),
-              data,
-            ],
-          );
+          queryClient.invalidateQueries({
+            queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["roomBooking", "get", "/bookings/"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["roomBooking", "get", "/room/{id}/bookings"],
+          });
 
           setTitle("");
           reset();
@@ -203,7 +172,6 @@ export function BookingModal({
     reset,
     queryClient,
     onBookingCreated,
-    endDate,
     me?.innopolis_info?.email,
   ]);
 
