@@ -12,7 +12,7 @@ export default function MobileMenu({ event, myCheckins }: MobileMenuProps) {
       <CheckInButton
         event={event}
         myCheckins={myCheckins}
-        className="max-w-full [&>div]:justify-center"
+        className="min-w-full [&>div]:justify-center"
       />
     </div>
   );

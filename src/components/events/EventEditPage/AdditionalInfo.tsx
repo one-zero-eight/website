@@ -38,66 +38,70 @@ export default function AdditionalInfo({
 
   return (
     <div className={className}>
-      <ul className="list rounded-box gap-2 shadow-md">
-        <div className="flex items-center justify-between tracking-wide">
-          <h2 className="flex items-center gap-1 text-lg font-semibold">
-            <span className="icon-[ic--round-link] size-6"></span>Links
-          </h2>
-          <button className="btn btn-primary" onClick={addLink}>
-            <span className="icon-[fluent--link-add-16-filled] text-xl" />
-            Add Link
-          </button>
-        </div>
+      <div className="flex items-center justify-between tracking-wide">
+        <h2 className="flex items-center gap-1 text-lg font-semibold">
+          <span className="icon-[ic--round-link] size-6"></span>Links
+        </h2>
+        <button className="btn btn-primary" onClick={addLink}>
+          <span className="icon-[fluent--link-add-16-filled] text-xl" />
+          Add Link
+        </button>
+      </div>
+      <ul className="rounded-box mt-3 flex flex-col gap-3 shadow-md">
         {eventForm.links.map((link, index) => (
           <li
-            className="list-row flex flex-col border md:flex-row md:items-center md:border-transparent"
+            className="border-base-300 flex flex-col gap-3 border-b-2 pb-3 md:flex-row md:items-center"
             key={link.id}
           >
-            <span className="hidden text-lg font-semibold text-nowrap md:block">
-              {index + 1}.
-            </span>
-            <label className="floating-label">
-              <span>Link Label</span>
-              <input
-                type="text"
-                placeholder="e.g. Chat, Form"
-                className="input input-md w-full"
-                value={link.title}
-                onChange={(e) =>
-                  setEventForm({
-                    ...eventForm,
-                    links: eventForm.links.with(index, {
-                      ...link,
-                      title: e.target.value,
-                    }),
-                  })
-                }
-              />
-            </label>
-            <label className="floating-label">
-              <span>Link Url</span>
-              <input
-                type="url"
-                placeholder="e.g. https://example.com or @tg_handle"
-                className="input input-md w-full"
-                value={link.url}
-                onChange={(e) =>
-                  setEventForm({
-                    ...eventForm,
-                    links: eventForm.links.with(index, {
-                      ...link,
-                      url: e.target.value,
-                    }),
-                  })
-                }
-              />
-            </label>
-            <button
-              className="btn btn-sm btn-square btn-ghost btn-error"
-              onClick={() => removeLink(link.id)}
-            >
-              <span className="icon-[solar--trash-bin-2-bold] text-lg" />
-            </button>
+            <div className="flex items-center gap-4">
+              <span className="text-lg font-semibold text-nowrap">
+                {index + 1}.
+              </span>
+              <label className="floating-label w-full">
+                <span>Link Label</span>
+                <input
+                  type="text"
+                  placeholder="e.g. Chat, Form"
+                  className="input input-md w-full"
+                  value={link.title}
+                  onChange={(e) =>
+                    setEventForm({
+                      ...eventForm,
+                      links: eventForm.links.with(index, {
+                        ...link,
+                        title: e.target.value,
+                      }),
+                    })
+                  }
+                />
+              </label>
+            </div>
+            <div className="flex items-center gap-4 md:w-full">
+              <label className="floating-label w-full">
+                <span>Link Url</span>
+                <input
+                  type="url"
+                  placeholder="e.g. https://example.com or @tg_handle"
+                  className="input input-md w-full"
+                  value={link.url}
+                  onChange={(e) =>
+                    setEventForm({
+                      ...eventForm,
+                      links: eventForm.links.with(index, {
+                        ...link,
+                        url: e.target.value,
+                      }),
+                    })
+                  }
+                />
+              </label>
+              <button
+                className="btn btn-sm btn-square dark:btn-soft btn-error size-10"
+                onClick={() => removeLink(link.id)}
+              >
+                <span className="icon-[solar--trash-bin-2-bold] text-xl" />
+              </button>
+            </div>
           </li>
         ))}
       </ul>

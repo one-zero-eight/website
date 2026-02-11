@@ -93,7 +93,7 @@ export default function EventTitle({
             </div>
           </div>
         )}
-        <div className="m-4 flex gap-2">
+        <div className="z-10 m-4 flex gap-2">
           <Link to="/events" className="btn btn-circle">
             <span className="icon-[line-md--arrow-left] text-2xl" />
           </Link>
