@@ -172,10 +172,16 @@ export function BookingModal({
   const [end, setEnd] = useState<Date | undefined>(
     newSlot?.end || detailsBooking?.endsAt,
   );
+
   useEffect(() => {
-    setStart(start ? start : newSlot?.start || detailsBooking?.startsAt);
-    setEnd(end ? end : newSlot?.end || detailsBooking?.endsAt);
-  }, [newSlot, detailsBooking, start, end]);
+    if (open) {
+      setStart(start ? start : newSlot?.start || detailsBooking?.startsAt);
+      setEnd(end ? end : newSlot?.end || detailsBooking?.endsAt);
+    } else {
+      setStart(newSlot?.start || detailsBooking?.startsAt);
+      setEnd(newSlot?.end || detailsBooking?.endsAt);
+    }
+  }, [newSlot, detailsBooking, start, end, open]);
 
   const deleteBooking = useCallback(() => {
     if (!detailsBooking) return;
