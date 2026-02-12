@@ -71,7 +71,7 @@ export const baseEventFormState: EventFormState = {
   russian_description: "",
   badges: [],
   language: WorkshopLanguage.both,
-  host: [],
+  hosts: [],
   capacity: 1000,
   remain_places: 1000,
   is_registrable: false,

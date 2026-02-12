@@ -1,3 +1,4 @@
+import type { UUID } from "crypto";
 import { EventFormErrors, EventFormState, EventLink } from "../types";
 
 export interface AdditionalInfoProps {
@@ -16,7 +17,7 @@ export default function AdditionalInfo({
   const addLink = () => {
     const newLinks: EventLink[] = [
       ...(eventForm.links as EventLink[]),
-      { id: eventForm.links.length, title: "", url: "" },
+      { id: globalThis.crypto.randomUUID(), title: "", url: "" },
     ];
 
     setEventForm({
@@ -25,7 +26,7 @@ export default function AdditionalInfo({
     });
   };
 
-  const removeLink = (id: number) => {
+  const removeLink = (id: UUID) => {
     const newLinks: EventLink[] = [
       ...(eventForm.links as EventLink[]).filter((t) => t.id !== id),
     ];

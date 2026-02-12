@@ -1,11 +1,12 @@
 import { workshopsTypes } from "@/api/workshops";
 import {
-  SchemaHost,
+  HostType,
   SchemaWorkshop,
   WorkshopLanguage,
 } from "@/api/workshops/types";
 import { SchemaClub, SchemaUserWithClubs } from "@/api/clubs/types";
 import { GenericBadgeFormScheme } from "../EventEditPage/TagsSelector";
+import type { UUID } from "crypto";
 
 export enum EventCreationType {
   DEFAULT,
@@ -40,9 +41,15 @@ export const DEFAULT_EVENT_LIST_OPTIONS: Required<
 };
 
 export type EventLink = {
-  id: number;
+  id: UUID;
   title: string;
   url: string;
+};
+
+export type EventHostSelection = {
+  id: UUID;
+  type: HostType;
+  name: string;
 };
 
 export type EventFormState = Omit<
@@ -50,7 +57,7 @@ export type EventFormState = Omit<
   "id" | "created_at" | "badges" | "links" | "host"
 > &
   GenericBadgeFormScheme & {
-    host: SchemaHost[];
+    hosts: EventHostSelection[];
     date: string;
     check_in_date: string;
     check_in_on_open: boolean;

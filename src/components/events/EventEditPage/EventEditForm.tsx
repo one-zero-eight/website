@@ -11,6 +11,7 @@ import {
   EventEditFormProps,
   EventFormErrors,
   EventFormState,
+  EventHostSelection,
   EventLink,
 } from "../types/index.ts";
 import {
@@ -46,8 +47,12 @@ export function EventEditForm({
       const dtendDate = new Date(initialEvent.dtend || "");
 
       const links: EventLink[] = [];
-      initialEvent.links.forEach((link, index) =>
-        links.push({ title: link?.title || "", url: link?.url, id: index }),
+      initialEvent.links.forEach((link) =>
+        links.push({
+          title: link?.title || "",
+          url: link?.url,
+          id: globalThis.crypto.randomUUID(),
+        }),
       );
 
       const shouldBeUnlimited =
@@ -56,10 +61,16 @@ export function EventEditForm({
       const shouldBeAlwaysOpen =
         initialEvent.check_in_type === CheckInType.no_check_in;
 
+      const normalizedHosts = normalizeHostForForm(initialEvent.host);
+      const hosts: EventHostSelection[] = normalizedHosts.map((h) => ({
+        id: globalThis.crypto.randomUUID() as EventHostSelection["id"],
+        type: h.host_type,
+        name: h.name,
+      }));
       return {
         ...baseEventFormState,
         ...initialEvent,
-        host: normalizeHostForForm(initialEvent.host),
+        hosts,
         date: dtstartDate.toISOString().split("T")[0],
         dtstart: dtstartDate.toTimeString().slice(0, 5),
         dtend: dtendDate.toTimeString().slice(0, 5),
@@ -91,10 +102,15 @@ export function EventEditForm({
     const savedData = storageKey ? localStorage.getItem(storageKey) : null;
     if (savedData) {
       const parsed = JSON.parse(savedData);
-      const host = Array.isArray(parsed.host)
+      const rawHosts = Array.isArray(parsed.host)
         ? normalizeHostForForm(parsed.host)
         : [];
-      return { ...baseEventFormState, ...parsed, host };
+      const hosts: EventHostSelection[] = rawHosts.map((h) => ({
+        id: globalThis.crypto.randomUUID() as EventHostSelection["id"],
+        type: h.host_type,
+        name: h.name,
+      }));
+      return { ...baseEventFormState, ...parsed, hosts };
     }
 
     return baseEventFormState;
@@ -201,7 +217,9 @@ export function EventEditForm({
       english_description: eventForm.english_description,
       russian_description: eventForm.russian_description,
       language: eventForm.language,
-      host: eventForm.host,
+      host: eventForm.hosts.map((host) => {
+        return { host_type: host.type, name: host.name };
+      }),
       dtstart,
       dtend,
       check_in_opens,
@@ -462,9 +480,14 @@ export function EventEditForm({
       showError("Validation Error", "Russian title is required");
     }
 
-    if (!eventForm.host?.length) {
+    if (!eventForm.hosts?.length) {
       newErrors.host = "Host is required";
       showError("Validation Error", "Host is required");
+    }
+
+    if (!eventForm.hosts.some((h) => (h.name ?? "").trim())) {
+      newErrors.host = "Host name is required";
+      showError("Validation Error", "Host name is required");
     }
 
     setErrors(newErrors);
