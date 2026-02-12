@@ -52,13 +52,13 @@ const targetTypes: Record<
   [TargetForExport.sport]: {
     href: "https://t.me/IUSportBot",
     iconClassName:
-      "icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70",
+      "icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70 mb-1",
     tooltip: "Open Telegram bot",
   },
   [TargetForExport.music_room]: {
     href: "https://t.me/InnoMusicRoomBot",
     iconClassName:
-      "icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70",
+      "icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70 mb-1",
     tooltip: "Open Telegram bot",
   },
   [TargetForExport.moodle]: {
@@ -70,13 +70,13 @@ const targetTypes: Record<
   [TargetForExport.room_bookings]: {
     href: "/room-booking",
     iconClassName:
-      "icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70",
+      "icon-[material-symbols--door-open-outline-rounded] text-[#F0B132] dark:text-[#F0B132]/70",
     tooltip: "Navigate to room booking page",
   },
   [TargetForExport.workshops]: {
-    href: "https://t.me/InnoMusicRoomBot",
+    href: "/events",
     iconClassName:
-      "icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70",
+      "icon-[material-symbols--campaign-rounded] text-[#F0B132] dark:text-[#F0B132]/70",
     tooltip: "Open Telegram bot",
   },
 };
