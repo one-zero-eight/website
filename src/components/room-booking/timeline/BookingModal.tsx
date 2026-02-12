@@ -17,12 +17,30 @@ import {
 } from "@floating-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { JSX, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { schemaToBooking, type Booking, type Slot } from "./types.ts";
 import { useMe } from "@/api/accounts/user.ts";
 import { BookingStatus } from "@/api/room-booking/types.ts";
 
-function bookingWarningForSlot({ room, start, end }: Slot) {
+function bookingWarningForSlot({
+  room_restrict_daytime,
+  start,
+  end,
+}: {
+  room_restrict_daytime: boolean;
+  start: Date;
+  end: Date;
+}) {
+  const currentTime = new Date();
+
+  if (start < currentTime || end < currentTime) {
+    return "Booking cannot be in the past.";
+  }
+
+  if (Math.abs(msBetween(start, currentTime)) > 14 * T.Day) {
+    return "Booking cannot be more than two weeks in the future.";
+  }
+
   const diffMs = msBetween(start, end);
 
   if (diffMs < 0) {
@@ -34,7 +52,7 @@ function bookingWarningForSlot({ room, start, end }: Slot) {
   }
 
   // TODO: Refactor this check to take timezones into account.
-  if (room.restrict_daytime) {
+  if (room_restrict_daytime) {
     // Should not cover Monday-Friday 08:00-19:00.
     // Assume that duration is <= 3 hours (checked above).
 
@@ -113,20 +131,78 @@ export function BookingModal({
 
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
   const {
-    mutate,
-    isPending,
+    mutate: mutateCreateBooking,
+    isPending: isBookingCreationPending,
     error: creationError,
-    reset,
+    reset: resetCreateBooking,
   } = $roomBooking.useMutation("post", "/bookings/");
+
+  const {
+    mutate: mutateUpdateBooking,
+    isPending: isBookingUpdatePending,
+    error: updateError,
+    reset: resetUpdateBooking,
+  } = $roomBooking.useMutation("patch", "/bookings/{outlook_booking_id}");
+
+  const {
+    mutate: mutateDeleteBooking,
+    isPending: isBookingDeletionPending,
+    error: deletionError,
+    reset: resetDeleteBooking,
+  } = $roomBooking.useMutation("delete", "/bookings/{outlook_booking_id}");
 
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState("");
 
   useEffect(() => {
-    setTitle("");
-    reset();
-  }, [newSlot, reset]);
+    if (newSlot) {
+      setTitle("");
+      resetCreateBooking();
+    } else if (detailsBooking) {
+      setTitle(sanitizeTitle(detailsBooking.title));
+    }
+  }, [newSlot, detailsBooking, resetCreateBooking]);
+
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const [start, setStart] = useState<Date | undefined>(
+    newSlot?.start || detailsBooking?.startsAt,
+  );
+  const [end, setEnd] = useState<Date | undefined>(
+    newSlot?.end || detailsBooking?.endsAt,
+  );
+  useEffect(() => {
+    setStart(start ? start : newSlot?.start || detailsBooking?.startsAt);
+    setEnd(end ? end : newSlot?.end || detailsBooking?.endsAt);
+  }, [newSlot, detailsBooking, start, end]);
+
+  const deleteBooking = useCallback(() => {
+    if (!detailsBooking) return;
+
+    mutateDeleteBooking(
+      {
+        params: {
+          path: { outlook_booking_id: detailsBooking.outlook_booking_id ?? "" },
+        },
+      },
+      {
+        onSuccess: () => {
+          resetDeleteBooking();
+          onOpenChange(false);
+          queryClient.invalidateQueries({
+            queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["roomBooking", "get", "/bookings/"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["roomBooking", "get", "/room/{id}/bookings"],
+          });
+        },
+      },
+    );
+  }, [detailsBooking, mutateDeleteBooking]);
 
   const submitBooking = useCallback(() => {
     if (!newSlot) return;
@@ -135,20 +211,18 @@ export function BookingModal({
       return;
     }
 
-    mutate(
+    mutateCreateBooking(
       {
         body: {
           room_id: newSlot.room.id,
           title: title,
-          start: newSlot.start.toISOString(),
-          end: newSlot.end.toISOString(),
+          start: start?.toISOString() ?? newSlot.start.toISOString(),
+          end: end?.toISOString() ?? newSlot.end.toISOString(),
           participant_emails: [],
         },
       },
       {
         onSuccess: (data: roomBookingTypes.SchemaBooking) => {
-          console.log("booking created", data);
-
           queryClient.invalidateQueries({
             queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
           });
@@ -160,7 +234,7 @@ export function BookingModal({
           });
 
           setTitle("");
-          reset();
+          resetCreateBooking();
           onBookingCreated?.(schemaToBooking(data, me?.innopolis_info?.email));
         },
       },
@@ -168,24 +242,71 @@ export function BookingModal({
   }, [
     newSlot,
     title,
-    mutate,
-    reset,
+    mutateCreateBooking,
+    resetCreateBooking,
     queryClient,
     onBookingCreated,
     me?.innopolis_info?.email,
   ]);
 
-  if (!isMounted) {
-    return null;
-  }
+  const updateBooking = useCallback(() => {
+    if (!detailsBooking) return;
+
+    mutateUpdateBooking(
+      {
+        params: {
+          path: { outlook_booking_id: detailsBooking.outlook_booking_id ?? "" },
+        },
+        body: {
+          title: title,
+          start: start?.toISOString() ?? detailsBooking.startsAt.toISOString(),
+          end: end?.toISOString() ?? detailsBooking.endsAt.toISOString(),
+        },
+      },
+      {
+        onSuccess: (data) => {
+          queryClient.invalidateQueries({
+            queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["roomBooking", "get", "/bookings/"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["roomBooking", "get", "/room/{id}/bookings"],
+          });
+
+          resetUpdateBooking();
+          setIsEditing(false);
+          onBookingCreated?.(
+            schemaToBooking(
+              data as roomBookingTypes.SchemaBooking,
+              me?.innopolis_info?.email,
+            ),
+          );
+        },
+      },
+    );
+  }, [detailsBooking, title, mutateUpdateBooking, start, end]);
 
   const getRoomById = (roomId: string | undefined) => {
     return roomId ? rooms?.find((room) => room.id === roomId) : undefined;
   };
 
+  const warningText = useMemo<JSX.Element | string | null>(() => {
+    const room = newSlot?.room ?? getRoomById(detailsBooking?.room_id);
+    if (!room || !start || !end) return null;
+    return bookingWarningForSlot({
+      room_restrict_daytime: room.restrict_daytime,
+      start,
+      end,
+    });
+  }, [newSlot, detailsBooking?.room_id, start, end]);
+
+  if (!isMounted) {
+    return null;
+  }
+
   const room = newSlot?.room ?? getRoomById(detailsBooking?.room_id);
-  const start = newSlot?.start ?? detailsBooking?.startsAt;
-  const end = newSlot?.end ?? detailsBooking?.endsAt;
 
   const outlookBookingId = detailsBooking?.outlook_booking_id;
   const attendees = detailsBooking?.attendees;
@@ -234,7 +355,7 @@ export function BookingModal({
     }
   };
 
-  const BookingLocation = outlookBookingRooms ? (
+  const BookingRooms = outlookBookingRooms ? (
     outlookBookingRooms.map((room) => (
       <div className="text-base-content/75 flex flex-row items-start gap-2 text-xl">
         <div className="mt-1.5 flex h-fit w-6">
@@ -270,6 +391,46 @@ export function BookingModal({
     </div>
   ) : undefined;
 
+  const timezoneOffset = new Date().getTimezoneOffset();
+  const toLocalTimeString = (date: Date) => {
+    const localDate = new Date(date.getTime() - timezoneOffset * T.Min);
+    const localDateString = localDate.toISOString().replace("Z", "");
+    return localDateString;
+  };
+  const fromLocalTimeString = (localDateString: string) => {
+    const date = new Date(
+      new Date(localDateString + "Z").getTime() + timezoneOffset * T.Min,
+    );
+    return date;
+  };
+
+  const BookingDateTime = (
+    <div className="my-2">
+      <label htmlFor="start" className="text-base-content/75 text-lg">
+        Start
+      </label>
+      <input
+        id="start"
+        type="datetime-local"
+        name="party-date"
+        value={start ? toLocalTimeString(start) : ""}
+        onChange={(e) => setStart(fromLocalTimeString(e.target.value))}
+        className="bg-inh-secondary focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-xl outline-hidden focus:ring-2"
+      />
+      <label htmlFor="end" className="text-base-content/75 text-lg">
+        End
+      </label>
+      <input
+        id="end"
+        type="datetime-local"
+        name="party-date"
+        value={end ? toLocalTimeString(end) : ""}
+        onChange={(e) => setEnd(fromLocalTimeString(e.target.value))}
+        className="bg-inh-secondary focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-xl outline-hidden focus:ring-2"
+      />
+    </div>
+  );
+
   const BookingDate = (
     <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
       <div className="flex h-fit w-6">
@@ -300,14 +461,13 @@ export function BookingModal({
         <span className="icon-[material-symbols--person-outline-rounded] text-2xl" />
       </div>
       <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
-        <span className="text-md" key={attendee.email}>
-          {attendee.email}
+        <span className="text-xl" key={attendee.email}>
+          {attendee.email.replace("@innopolis.university", "")}
         </span>
       </div>
     </div>
   ));
 
-  const warningText = newSlot ? bookingWarningForSlot(newSlot) : null;
   const NewBookingWarning = warningText && (
     <div className="alert alert-warning text-base">
       <span>{warningText}</span>
@@ -324,7 +484,29 @@ export function BookingModal({
     </div>
   );
 
-  const NewBookingButtons = isPending ? (
+  const UpdateBookingError = updateError && (
+    <div className="alert alert-error text-base">
+      <span>
+        {updateError.detail?.toString() ||
+          updateError.toString() ||
+          "unknown error"}
+        .
+      </span>
+    </div>
+  );
+
+  const DeleteBookingError = deletionError && (
+    <div className="alert alert-error text-base">
+      <span>
+        {deletionError.detail?.toString() ||
+          deletionError.toString() ||
+          "unknown error"}
+        .
+      </span>
+    </div>
+  );
+
+  const NewBookingButtons = isBookingCreationPending ? (
     <>
       <p className="text-base-content/75 text-lg">Creating new booking...</p>
       <div className="flex items-center justify-center">
@@ -344,23 +526,59 @@ export function BookingModal({
       </button>
       <button
         type="submit"
-        className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
-        disabled={isPending}
+        className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 disabled:pointer-events-none disabled:opacity-80 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
+        disabled={!!warningText || isBookingCreationPending}
       >
         Confirm
       </button>
     </div>
   );
 
-  const MyBookingButtons = (
-    <div className="mt-4 flex flex-row gap-2">
-      <Link
-        to="/room-booking/list"
-        className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
+  const MyBookingButtons = isBookingUpdatePending ? (
+    <>
+      <p className="text-base-content/75 text-lg">Updating booking...</p>
+      <div className="flex items-center justify-center">
+        <div className="bg-base-100 h-4 w-full overflow-hidden rounded-xl">
+          <div className="animate-booking-fake-progress bg-primary h-full"></div>
+        </div>
+      </div>
+    </>
+  ) : isEditing ? (
+    <div className="flex flex-row gap-2">
+      <button
+        type="button"
+        className="bg-inh-primary hover:bg-inh-primary-hover dark:bg-inh-primary-hover dark:hover:bg-inh-primary rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
+        onClick={() => setIsEditing(false)}
       >
-        Manage my booking
-      </Link>
+        Cancel
+      </button>
+      <button
+        type="submit"
+        className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 disabled:pointer-events-none disabled:opacity-80 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
+        disabled={!!warningText || isBookingUpdatePending}
+      >
+        Confirm
+      </button>
     </div>
+  ) : isBookingDeletionPending ? (
+    <>
+      <p className="text-base-content/75 text-lg">Deleting booking...</p>
+      <div className="flex items-center justify-center">
+        <div className="bg-base-100 h-4 w-full overflow-hidden rounded-xl">
+          <div className="animate-booking-fake-progress-fast bg-primary h-full"></div>
+        </div>
+      </div>
+    </>
+  ) : (
+    <>
+      <button
+        type="button"
+        className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-red-400 bg-red-200 px-4 py-2 text-lg font-medium text-red-900 hover:bg-red-300 disabled:pointer-events-none disabled:opacity-80 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
+        onClick={() => deleteBooking()}
+      >
+        Delete
+      </button>
+    </>
   );
 
   return (
@@ -418,9 +636,10 @@ export function BookingModal({
                         className="bg-inh-secondary focus:ring-primary w-full grow rounded-xl px-4 py-2 text-xl outline-hidden focus:ring-2"
                       />
 
-                      {BookingLocation}
+                      {BookingRooms}
                       {BookingDate}
                       {BookingTime}
+                      {BookingDateTime}
                       {attendees && Attendees}
 
                       {NewBookingWarning}
@@ -430,20 +649,58 @@ export function BookingModal({
                     </div>
                   </form>
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    <div className="text-base-content/75 flex flex-row gap-2 text-xl">
-                      <p className="flex w-full items-center py-1 font-semibold wrap-anywhere whitespace-pre-wrap">
-                        {sanitizeTitle(detailsBooking?.title)}
-                      </p>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      updateBooking();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        updateBooking();
+                      }
+                    }}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="text-base-content/75 flex flex-row gap-2 text-xl">
+                        {isEditing ? (
+                          <input
+                            ref={titleInputRef}
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="Enter title..."
+                            className="bg-inh-secondary focus:ring-primary w-full grow rounded-xl px-4 py-2 text-xl outline-hidden focus:ring-2"
+                          />
+                        ) : (
+                          <>
+                            <p className="text-base-content/75 flex flex-row gap-2 text-xl text-wrap">
+                              {sanitizeTitle(detailsBooking?.title)}
+                            </p>
+                            <button
+                              type="button"
+                              className="text-base-content/75 hover:text-base-content/100 flex items-center justify-center"
+                              onClick={() => setIsEditing(true)}
+                            >
+                              <span className="icon-[material-symbols--edit-outline] text-2xl" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+
+                      {BookingRooms}
+                      {BookingDate}
+                      {BookingTime}
+                      {attendees && Attendees}
+                      {isEditing && BookingDateTime}
+                      {isEditing && NewBookingWarning}
+                      {UpdateBookingError}
+                      {DeleteBookingError}
+
+                      <div className="mt-2">
+                        {outlookBookingId && isAttending && MyBookingButtons}
+                      </div>
                     </div>
-
-                    {BookingLocation}
-                    {BookingDate}
-                    {BookingTime}
-                    {attendees && Attendees}
-
-                    {outlookBookingId && isAttending && MyBookingButtons}
-                  </div>
+                  </form>
                 )}
               </div>
             </div>
