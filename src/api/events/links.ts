@@ -3,7 +3,7 @@ export const EVENTS_API_URL = import.meta.env.VITE_EVENTS_API_URL!;
 export function getICSLink(
   groupAlias: string,
   userId: number | undefined,
-  exportType: string = "web",
+  exportType: string | "web" | "url" = "web",
 ) {
   return `${EVENTS_API_URL}/${groupAlias}.ics?user_id=${
     userId || 0

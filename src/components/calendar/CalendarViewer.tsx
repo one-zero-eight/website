@@ -1,6 +1,6 @@
 import { eventsTypes } from "@/api/events";
 import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
-import { SourcesDialog } from "@/components/calendar/SourcesDialog.tsx";
+import { ConfigCalendarDialog } from "@/components/calendar/ConfigCalendarDialog.tsx";
 import {
   AcademicCalendar,
   useMyAcademicCalendar,
@@ -197,7 +197,7 @@ export default function CalendarViewer({
         }}
         customButtons={{
           config: {
-            text: `${initialView === "listMonth" ? "" : "Config & Export"}`,
+            text: `${initialView === "listMonth" ? " " : "Config & Export"}`,
             click() {
               setSourcesDialogOpen(true);
             },
@@ -378,7 +378,7 @@ export default function CalendarViewer({
           eventElement={popoverInfo.eventElement}
         />
       )}
-      <SourcesDialog
+      <ConfigCalendarDialog
         open={sourcesDialogOpen}
         onOpenChange={setSourcesDialogOpen}
       />

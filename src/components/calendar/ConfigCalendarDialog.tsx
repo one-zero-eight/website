@@ -1,6 +1,5 @@
 import { $events } from "@/api/events";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
-import LinkIconButton from "@/components/schedule/group-card/LinkIconButton.tsx";
 import { PersonalCard } from "@/components/schedule/group-card/PersonalCard.tsx";
 import { useMyMusicRoom } from "@/api/events/event-group.ts";
 import {
@@ -14,9 +13,11 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import { Link } from "@tanstack/react-router";
-import { PathsUsersMeTargetHidePostParametersPathTarget as Type } from "@/api/events/types.ts";
+import { TargetForExport } from "@/api/events/types.ts";
+import { useState } from "react";
+import { ExportModal } from "@/components/calendar/ExportModal.tsx";
 
-export function SourcesDialog({
+export function ConfigCalendarDialog({
   open,
   onOpenChange,
 }: {
@@ -25,6 +26,7 @@ export function SourcesDialog({
 }) {
   const { data: eventsUser } = $events.useQuery("get", "/users/me");
   const { data: predefined } = $events.useQuery("get", "/users/me/predefined");
+
   const { isSuccess: musicRoomIsSuccess } = useMyMusicRoom();
 
   const { context, refs } = useFloating({ open, onOpenChange });
@@ -36,7 +38,10 @@ export function SourcesDialog({
   const dismiss = useDismiss(context, { outsidePressEvent: "mousedown" });
   // Role props for screen readers
   const role = useRole(context);
-
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [targetForExport, setTargetForExport] = useState<
+    number | TargetForExport | null
+  >(null);
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
   if (!isMounted) {
@@ -61,7 +66,7 @@ export function SourcesDialog({
                 {/* Heading and description */}
                 <div className="mb-2 flex w-full flex-row">
                   <div className="grow items-center text-3xl font-semibold">
-                    Calendar sources
+                    Config & Export
                   </div>
                   <button
                     type="button"
@@ -74,67 +79,70 @@ export function SourcesDialog({
 
                 {/* Content */}
                 <div className="@container/sections flex flex-col justify-between gap-4 @6xl/content:flex-row @6xl/content:gap-8">
-                  <div className="grid grid-cols-1 justify-stretch gap-4 @lg/sections:grid-cols-2 @6xl/sections:grid-cols-3">
+                  <div className="grid grid-cols-1 justify-stretch gap-4 @6xl/sections:grid-cols-2">
                     {predefined?.event_groups.map((v) => (
-                      <GroupCardById key={v} groupId={v} canHide={true} />
+                      <GroupCardById
+                        key={v}
+                        groupId={v}
+                        canHide={true}
+                        exportButtonOnClick={() => {
+                          setTargetForExport(v);
+                          setExportModalOpen(true);
+                        }}
+                      />
                     ))}
 
                     {eventsUser?.favorite_event_groups?.map((v) => (
-                      <GroupCardById key={v} groupId={v} canHide={true} />
+                      <GroupCardById
+                        key={v}
+                        groupId={v}
+                        canHide={true}
+                        exportButtonOnClick={() => {
+                          setTargetForExport(v);
+                          setExportModalOpen(true);
+                        }}
+                      />
                     ))}
 
                     <PersonalCard
                       name="Sport"
-                      description="Your sport schedule"
+                      description="Your sport checkins"
                       pageUrl="/sport"
-                      targetType={Type.sports}
-                      buttons={
-                        <LinkIconButton
-                          href="https://t.me/IUSportBot"
-                          icon={
-                            <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
-                          }
-                          tooltip="Open Telegram bot"
-                        />
-                      }
+                      targetType={TargetForExport.sport}
+                      exportButtonOnClick={() => {
+                        setTargetForExport(TargetForExport.sport);
+                        setExportModalOpen(true);
+                      }}
                     />
                     {musicRoomIsSuccess && (
                       <PersonalCard
                         name="Music room"
-                        description="Your room bookings"
+                        description="Your music room bookings"
                         pageUrl="/music-room"
-                        targetType={Type.music_room}
-                        buttons={
-                          <LinkIconButton
-                            href="https://t.me/InnoMusicRoomBot"
-                            icon={
-                              <span className="icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
-                            }
-                            tooltip="Open Telegram bot"
-                          />
-                        }
+                        targetType={TargetForExport.music_room}
+                        exportButtonOnClick={() => {
+                          setTargetForExport(TargetForExport.music_room);
+                          setExportModalOpen(true);
+                        }}
                       />
                     )}
                     <PersonalCard
-                      name={
-                        <span className="flex items-center">
-                          Moodle
-                          <span className="bg-primary ml-2 rounded-full px-2 py-1 text-xs font-semibold text-white">
-                            NEW
-                          </span>
-                        </span>
-                      }
+                      name="Moodle"
                       description="Your Moodle deadlines"
-                      targetType={Type.moodle}
-                      buttons={
-                        <LinkIconButton
-                          href="/extension"
-                          icon={
-                            <span className="icon-[material-symbols--extension-outline] text-[#F0B132] dark:text-[#F0B132]/70" />
-                          }
-                          tooltip="Install the browser extension to sync Moodle calendar"
-                        />
-                      }
+                      targetType={TargetForExport.moodle}
+                      exportButtonOnClick={() => {
+                        setTargetForExport(TargetForExport.moodle);
+                        setExportModalOpen(true);
+                      }}
+                    />
+                    <PersonalCard
+                      name="Room booking"
+                      description="Your room bookings"
+                      targetType={TargetForExport.room_bookings}
+                      exportButtonOnClick={() => {
+                        setTargetForExport(TargetForExport.room_bookings);
+                        setExportModalOpen(true);
+                      }}
                     />
                   </div>
 
@@ -151,6 +159,12 @@ export function SourcesDialog({
                 </div>
               </div>
             </div>
+            <ExportModal
+              eventGroupOrTarget={targetForExport}
+              open={exportModalOpen}
+              onOpenChange={setExportModalOpen}
+              aboveModal
+            />
           </div>
         </FloatingFocusManager>
       </FloatingOverlay>
