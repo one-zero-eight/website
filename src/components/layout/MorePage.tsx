@@ -22,7 +22,7 @@ export function MorePage() {
             rel="noopener noreferrer"
             className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
           >
-            <span className="icon-[mdi--github] text-inh-inactive text-3xl" />
+            <span className="icon-[mdi--github] text-base-content/70 text-3xl" />
           </a>
         </Tooltip>
         <Tooltip content="Telegram">
@@ -32,7 +32,7 @@ export function MorePage() {
             rel="noopener noreferrer"
             className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
           >
-            <span className="icon-[uil--telegram-alt] text-inh-inactive text-3xl" />
+            <span className="icon-[uil--telegram-alt] text-base-content/70 text-3xl" />
           </a>
         </Tooltip>
         <div className="flex grow"></div>
@@ -63,7 +63,7 @@ export function MorePage() {
           ) : null,
         )}
 
-      <LeaveFeedbackButton />
+      <LeaveFeedbackButton isMorePage={true} />
     </div>
   );
 }
@@ -72,7 +72,7 @@ function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
   const children = (
     <>
       {icon}
-      <div className="in-[.is-active]:selected text-inh-inactive ml-4 flex w-fit items-center text-lg font-semibold whitespace-nowrap">
+      <div className="in-[.is-active]:selected text-base-content/70 ml-2 flex w-fit items-center text-base font-normal whitespace-nowrap">
         {title}
       </div>
       {(props.type === "external" || !!badge) && (
@@ -90,8 +90,8 @@ function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
     return (
       <a
         className={clsx(
-          "text-inh-inactive flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
-          "px-4 text-4xl",
+          "text-base-content/70 flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
+          "px-4 text-2xl",
         )}
         href={props.href}
       >
@@ -104,9 +104,9 @@ function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
     return (
       <Link
         className={clsx(
-          "text-inh-inactive flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
+          "text-base-content/70 flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
           "[&.is-active]:text-primary",
-          "px-4 text-4xl",
+          "px-4 text-2xl",
         )}
         activeProps={{ className: "is-active" }}
         {...linkProps}

@@ -77,7 +77,7 @@ function BottomNavigationLink({
   return (
     <Link
       {...props}
-      className="text-inh-inactive [&.is-active]:text-primary flex grow basis-0 flex-col items-center justify-center text-2xl select-none"
+      className="text-base-content/70 [&.is-active]:text-primary flex grow basis-0 flex-col items-center justify-center text-2xl select-none"
       activeProps={{ className: "is-active" }}
     >
       {icon}
