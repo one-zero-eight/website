@@ -155,6 +155,22 @@ export function BookingModal({
 
   const [title, setTitle] = useState("");
 
+  const alreadyStarted = useMemo(() => {
+    return (
+      detailsBooking &&
+      detailsBooking.startsAt &&
+      detailsBooking.startsAt < new Date()
+    );
+  }, [detailsBooking]);
+
+  const canFinish = useMemo(() => {
+    return (
+      alreadyStarted &&
+      detailsBooking &&
+      detailsBooking.endsAt.getTime() > new Date().getTime() + 6 * T.Min
+    );
+  }, [detailsBooking]);
+
   useEffect(() => {
     if (newSlot) {
       setTitle("");
@@ -174,14 +190,14 @@ export function BookingModal({
   );
 
   useEffect(() => {
-    if (open) {
-      setStart(start ? start : newSlot?.start || detailsBooking?.startsAt);
-      setEnd(end ? end : newSlot?.end || detailsBooking?.endsAt);
-    } else {
+    if (!open || !(isEditing || !!newSlot)) {
       setStart(newSlot?.start || detailsBooking?.startsAt);
       setEnd(newSlot?.end || detailsBooking?.endsAt);
+    } else {
+      setStart(start ? start : newSlot?.start || detailsBooking?.startsAt);
+      setEnd(end ? end : newSlot?.end || detailsBooking?.endsAt);
     }
-  }, [newSlot, detailsBooking, start, end, open]);
+  }, [newSlot, detailsBooking, start, end, open, isEditing]);
 
   const deleteBooking = useCallback(() => {
     if (!detailsBooking) return;
@@ -293,6 +309,44 @@ export function BookingModal({
       },
     );
   }, [detailsBooking, title, mutateUpdateBooking, start, end]);
+
+  const finishBooking = useCallback(() => {
+    if (!detailsBooking) return;
+    mutateUpdateBooking(
+      {
+        params: {
+          path: { outlook_booking_id: detailsBooking.outlook_booking_id ?? "" },
+        },
+        body: {
+          title: title,
+          start: detailsBooking.startsAt.toISOString(),
+          end: new Date(new Date().getTime() + T.Min * 5).toISOString(),
+        },
+      },
+      {
+        onSuccess: (data) => {
+          queryClient.invalidateQueries({
+            queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["roomBooking", "get", "/bookings/"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["roomBooking", "get", "/room/{id}/bookings"],
+          });
+
+          resetUpdateBooking();
+          setIsEditing(false);
+          onBookingCreated?.(
+            schemaToBooking(
+              data as roomBookingTypes.SchemaBooking,
+              me?.innopolis_info?.email,
+            ),
+          );
+        },
+      },
+    );
+  }, [detailsBooking, mutateUpdateBooking]);
 
   const getRoomById = (roomId: string | undefined) => {
     return roomId ? rooms?.find((room) => room.id === roomId) : undefined;
@@ -575,8 +629,24 @@ export function BookingModal({
         </div>
       </div>
     </>
-  ) : (
+  ) : isBookingUpdatePending ? (
     <>
+      <p className="text-base-content/75 text-lg">Halting booking...</p>
+      <div className="flex items-center justify-center">
+        <div className="bg-base-100 h-4 w-full overflow-hidden rounded-xl">
+          <div className="animate-booking-fake-progress-fast bg-primary h-full"></div>
+        </div>
+      </div>
+    </>
+  ) : !alreadyStarted ? (
+    <>
+      <button
+        type="button"
+        className="rounded-box mb-2 flex w-full items-center justify-center gap-2 border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 disabled:pointer-events-none disabled:opacity-80 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
+        onClick={() => setIsEditing(true)}
+      >
+        Edit
+      </button>
       <button
         type="button"
         className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-red-400 bg-red-200 px-4 py-2 text-lg font-medium text-red-900 hover:bg-red-300 disabled:pointer-events-none disabled:opacity-80 dark:border-red-600 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-950"
@@ -585,6 +655,18 @@ export function BookingModal({
         Delete
       </button>
     </>
+  ) : canFinish ? (
+    <>
+      <button
+        type="button"
+        className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-yellow-400 bg-yellow-200 px-4 py-2 text-lg font-medium text-yellow-900 hover:bg-yellow-300 disabled:pointer-events-none disabled:opacity-80 dark:border-yellow-600 dark:bg-yellow-900 dark:text-yellow-300 dark:hover:bg-yellow-950"
+        onClick={() => finishBooking()}
+      >
+        Finish now
+      </button>
+    </>
+  ) : (
+    <></>
   );
 
   return (
@@ -682,13 +764,6 @@ export function BookingModal({
                             <p className="text-base-content/75 flex flex-row gap-2 text-xl text-wrap">
                               {sanitizeTitle(detailsBooking?.title)}
                             </p>
-                            <button
-                              type="button"
-                              className="text-base-content/75 hover:text-base-content/100 flex items-center justify-center"
-                              onClick={() => setIsEditing(true)}
-                            >
-                              <span className="icon-[material-symbols--edit-outline] text-2xl" />
-                            </button>
                           </>
                         )}
                       </div>
