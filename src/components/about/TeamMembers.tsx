@@ -9,6 +9,8 @@ export function TeamMembers() {
     error: membersError,
   } = useTeamMembers();
 
+  const leaders = ["Anna Belyakova", "Ruslan Bel'kov", "Artem Bulgakov"];
+
   const shuffledMembers = useMemo(() => {
     if (!teamMembers) return [];
     const shuffled = [...teamMembers];
@@ -92,6 +94,12 @@ export function TeamMembers() {
                   >
                     {member.fullName}
                   </h3>
+                  {hoveredIndex === index &&
+                    leaders.includes(member.fullName) && (
+                      <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
+                        leader
+                      </span>
+                    )}
                 </div>
               </div>
 
