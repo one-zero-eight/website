@@ -1,6 +1,7 @@
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
 import clsx from "clsx";
+import AboutPageButton from "./AboutPageButton";
 
 export function Topbar({
   title,
@@ -20,6 +21,7 @@ export function Topbar({
         <h1 className="mr-2 text-3xl font-medium">{title}</h1>
       </div>
       <div className="hidden items-center py-2 pr-4 lg:flex">
+        <AboutPageButton />
         <SwitchThemeButton />
         <UserMenu isMobile={false} isSidebar={false} />
       </div>

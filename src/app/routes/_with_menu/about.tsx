@@ -9,10 +9,11 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>whoami: one-zero-eight</title>
+        <title>About one-zero-eight</title>
         <meta
           name="description"
-          content="about InNoHassle and one-zero-eight team"
+          content="one-zero-eight team is the community of
+           students of Innopolis University passionate about technology"
         />
       </Helmet>
 
