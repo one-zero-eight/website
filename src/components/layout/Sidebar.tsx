@@ -66,6 +66,26 @@ export default function Sidebar() {
 
         <div className="flex grow"></div>
 
+        {/* About page button */}
+        <Link
+          to="/about"
+          className={clsx(
+            "text-base-content/70 mb-1 flex w-full items-center justify-center rounded-xl select-none hover:bg-gray-500/10",
+            "[&.is-active]:text-primary",
+          )}
+          activeProps={{ className: "is-active" }}
+        >
+          <span
+            className={clsx(
+              "flex items-center gap-1.5 font-medium",
+              isMinimized ? "text-[10px]" : "text-base",
+            )}
+          >
+            {/*About <Logo108 className={isMinimized ? "h-3" : "h-3.5"} />*/}
+            About 108
+          </span>
+        </Link>
+
         {/* Leave feedback button */}
         <LeaveFeedbackButton isMinimized={isMinimized} />
 
