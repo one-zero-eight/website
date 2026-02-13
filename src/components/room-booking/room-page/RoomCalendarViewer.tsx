@@ -1,6 +1,8 @@
 import { $roomBooking } from "@/api/room-booking";
-import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
-import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
+import {
+  BookingModal,
+  sanitizeBookingTitle,
+} from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
 import {
   DateSelectArg,
@@ -19,33 +21,16 @@ import clsx from "clsx";
 import moment from "moment/moment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@/components/calendar/styles-calendar.css";
-import { type Booking, type Slot } from "../timeline/types.ts";
+import { type Booking, schemaToBooking, type Slot } from "../timeline/types.ts";
 import { getTimeRangeForWeek } from "../utils.ts";
 
 export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
-  const [popoverInfo, setPopoverInfo] = useState({
-    opened: false,
-    event: undefined as EventApi | undefined,
-    eventElement: undefined as HTMLElement | undefined,
-  });
   const [isLoading, setIsLoading] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<Slot | undefined>(undefined);
   const [selectedBookingDetails, setSelectedBookingDetails] = useState<
     Booking | undefined
   >(undefined);
-
-  const setIsOpenCallback = useCallback(
-    (opened: boolean) =>
-      setPopoverInfo((prev) => {
-        if (opened) {
-          return { ...prev, opened };
-        } else {
-          return { opened, event: undefined, eventElement: undefined };
-        }
-      }),
-    [setPopoverInfo],
-  );
 
   const { startDate, endDate } = getTimeRangeForWeek();
   const { data: bookings } = $roomBooking.useQuery(
@@ -67,7 +52,9 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     },
   );
 
-  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
+  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
+    params: { query: { include_red: true } },
+  });
   const room = rooms?.find((r) => r.id === roomId);
 
   const [calendarView, setCalendarView] = useState("timeGridWeek");
@@ -247,12 +234,11 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         eventClick={(info) => {
           info.jsEvent.preventDefault();
           info.jsEvent.stopPropagation();
-          // We should check prev value via argument because 'eventElement' may be outdated in current closure
-          setPopoverInfo((prev) => ({
-            event: info.event,
-            eventElement: info.el,
-            opened: !(prev.opened && prev.eventElement === info.el),
-          }));
+          const booking = info.event.extendedProps.booking;
+          if (!booking) return;
+          setSelectedSlot(undefined);
+          setSelectedBookingDetails(schemaToBooking(booking));
+          setBookingModalOpen(true);
         }}
         // slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
@@ -286,10 +272,13 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
 
       const prevEvents: EventApi[] = calendarApi.getEvents();
       const eventsToGet: EventInput[] = bookings.map((booking) => ({
-        title: booking.title,
+        title: sanitizeBookingTitle(booking.title),
         start: booking.start,
         end: booking.end,
-        color: "cyan",
+        color: booking.related_to_me ? "seagreen" : undefined,
+        extendedProps: {
+          booking: booking,
+        },
       }));
 
       // Remove old sources that are not in the list
@@ -325,14 +314,6 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   return (
     <div className={clsx("overflow-clip", isLoading && "calendar-loading")}>
       {calendarComponent}
-      {popoverInfo.event && popoverInfo.eventElement && (
-        <CalendarEventPopover
-          event={popoverInfo.event}
-          isOpen={popoverInfo.opened}
-          setIsOpen={setIsOpenCallback}
-          eventElement={popoverInfo.eventElement}
-        />
-      )}
       <BookingModal
         newSlot={selectedSlot}
         detailsBooking={selectedBookingDetails}
