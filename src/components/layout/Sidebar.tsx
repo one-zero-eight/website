@@ -70,8 +70,7 @@ export default function Sidebar() {
         <Link
           to="/about"
           className={clsx(
-            "text-base-content/70 mb-1 flex w-full items-center justify-center rounded-xl select-none hover:bg-gray-500/10",
-            "[&.is-active]:selected",
+            "text-base-content/70 flex w-full items-center justify-center rounded-xl py-0.5 select-none hover:bg-gray-500/10",
           )}
           activeProps={{ className: "is-active" }}
         >
@@ -79,6 +78,7 @@ export default function Sidebar() {
             className={clsx(
               "flex items-center gap-1.5 font-medium",
               isMinimized ? "text-[10px]" : "text-base",
+              "in-[.is-active]:selected",
             )}
           >
             About 108
