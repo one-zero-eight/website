@@ -2,10 +2,10 @@ export function AdvWidget() {
   return null;
   return (
     <div
-      className="group bg-inh-primary rounded-box flex flex-row gap-4 border border-transparent px-4 py-4"
+      className="group bg-base-200 rounded-box flex flex-row gap-4 border border-transparent px-4 py-4"
       style={{
         backgroundImage:
-          "linear-gradient(var(--color-inh-primary), var(--color-inh-primary)), linear-gradient(45deg, var(--color-brand-gradient-start), var(--color-brand-gradient-end))",
+          "linear-gradient(var(--color-base-200), var(--color-base-200)), linear-gradient(45deg, var(--color-brand-gradient-start), var(--color-brand-gradient-end))",
         backgroundOrigin: "border-box",
         backgroundClip: "padding-box, border-box",
       }}
