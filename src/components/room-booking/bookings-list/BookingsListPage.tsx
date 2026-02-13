@@ -19,14 +19,14 @@ export function BookingsListPage() {
     </div>
   ) : status === "error" ? (
     <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
-      <h2 className="text-inh-inactive text-2xl">Error loading bookings</h2>
+      <h2 className="text-base-content/70 text-2xl">Error loading bookings</h2>
       <p className="text-base-content/75 text-lg">
         {error?.detail?.toString() || "Most probably Outlook API is down"}
       </p>
     </div>
   ) : bookings.length === 0 ? (
     <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
-      <h2 className="text-inh-inactive text-2xl">You have no bookings</h2>
+      <h2 className="text-base-content/70 text-2xl">You have no bookings</h2>
     </div>
   ) : (
     <div className="flex w-full max-w-lg flex-col gap-4 self-center p-4">
