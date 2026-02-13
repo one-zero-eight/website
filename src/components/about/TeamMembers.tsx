@@ -62,12 +62,12 @@ export function TeamMembers() {
   }
 
   return (
-    <div className="relative mt-8 overflow-visible rounded-lg p-4">
-      <div className="flex min-h-[200px] flex-wrap justify-center gap-4">
+    <div className="relative mt-8 overflow-visible rounded-lg p-1 sm:p-4">
+      <div className="flex min-h-[200px] flex-wrap justify-center gap-1 sm:gap-4">
         {shuffledMembers.map((member, index) => (
           <div
             key={`${member.fullName}-${index}`}
-            className={`animate-in slide-in-from-bottom-4 relative h-[110px] w-[110px] delay-${100 + index * 50}`}
+            className={`animate-in slide-in-from-bottom-4 relative h-[120px] w-[29%] max-w-[110px] min-w-[90px] sm:h-[110px] sm:w-[110px] delay-${100 + index * 50}`}
             style={{
               zIndex: hoveredIndex === index ? 50 : 1,
               transition: `z-index 0s linear ${hoveredIndex === index ? "0s" : "0.3s"}`,
@@ -94,12 +94,11 @@ export function TeamMembers() {
                   >
                     {member.fullName}
                   </h3>
-                  {hoveredIndex === index &&
-                    leaders.includes(member.fullName) && (
-                      <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
-                        leader
-                      </span>
-                    )}
+                  {leaders.includes(member.fullName) && (
+                    <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
+                      leader
+                    </span>
+                  )}
                 </div>
               </div>
 

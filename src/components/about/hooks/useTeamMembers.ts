@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import membersConfig from "@/config/members.json";
+import membersConfig from "@/components/about/members.json";
 
 export interface TeamMember {
   fullName: string;
