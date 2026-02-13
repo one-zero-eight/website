@@ -14,7 +14,7 @@ export function AccountWidget() {
 
   return (
     <div className="flex max-w-full flex-row gap-4">
-      <div className="bg-inh-primary text-base-content/50 flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full">
+      <div className="bg-base-200 text-base-content/50 flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full">
         {me.telegram?.photo_url ? (
           <img
             src={me.telegram.photo_url}

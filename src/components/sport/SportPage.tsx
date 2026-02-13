@@ -1,8 +1,9 @@
 import { Calendar } from "@/components/calendar/Calendar.tsx";
-import { SportExportModal } from "@/components/calendar/SportExportModal.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
 import { getMySportLink } from "@/api/events/links.ts";
 import { useState } from "react";
+import { ExportModal } from "@/components/calendar/ExportModal.tsx";
+import { TargetForExport } from "@/api/events/types.ts";
 
 export function SportPage() {
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -68,7 +69,8 @@ export function SportPage() {
         initialView="timeGridWeek"
         viewId="music-room"
       />
-      <SportExportModal
+      <ExportModal
+        eventGroupOrTarget={TargetForExport.sport}
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
       />

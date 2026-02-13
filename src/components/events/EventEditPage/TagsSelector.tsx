@@ -1,7 +1,5 @@
 import { SchemaBadge } from "@/api/workshops/types";
 import { eventBadges } from "../EventBadges";
-import { useMemo } from "react";
-
 import { MAX_BADGES_AMOUNT } from "../constants";
 
 export const MAX_BADGES_AMOUT = MAX_BADGES_AMOUNT;
@@ -14,6 +12,7 @@ export interface TagsSelectorProps<T extends GenericBadgeFormScheme> {
   form: T;
   maxBadgesAmount?: number;
   tagsToExlude?: string[];
+  lockBadges?: string[];
   setForm: (v: T) => void;
 }
 
@@ -24,15 +23,10 @@ export default function TagsSelector<T extends GenericBadgeFormScheme>({
   form,
   setForm,
   tagsToExlude = [],
+  lockBadges = [],
   maxBadgesAmount,
 }: TagsSelectorProps<T>) {
-  const badges = useMemo(() => {
-    if (tagsToExlude.length > 0) {
-      return form.badges.filter((b) => !tagsToExlude.includes(b.title));
-    }
-
-    return form.badges;
-  }, [tagsToExlude, form]);
+  const badges = form.badges;
 
   const addTag = (tag: string) => {
     if (badges.length === (maxBadgesAmount || MAX_BADGES_AMOUT)) return;
@@ -49,6 +43,10 @@ export default function TagsSelector<T extends GenericBadgeFormScheme>({
   };
 
   const removeTag = (tag: string) => {
+    if (lockBadges.includes(tag)) {
+      return;
+    }
+
     const newBadges: SchemaBadge[] = [
       ...(badges as SchemaBadge[]).filter((t) => t.title !== tag),
     ];
@@ -77,7 +75,6 @@ export default function TagsSelector<T extends GenericBadgeFormScheme>({
         {badges.length !== 0 ? (
           Object.entries(eventBadges)
             .filter(([value]) => hasBadgeWithTitle(value))
-            .filter(([value]) => !tagsToExlude.includes(value))
             .sort((a, _) => (a[0] === "recommended" ? -1 : 1))
             .map(([value, badge], index) => (
               <span
@@ -92,23 +89,27 @@ export default function TagsSelector<T extends GenericBadgeFormScheme>({
           <span className="text-neutral-600">No Tags</span>
         )}
       </div>
-      {showSuggestions && (
-        <div className="input flex h-auto w-full cursor-default flex-wrap p-2 select-none">
-          {Object.entries(eventBadges)
+      {showSuggestions &&
+        (() => {
+          const suggestions = Object.entries(eventBadges)
             .filter(([value]) => !hasBadgeWithTitle(value))
             .filter(([value]) => !tagsToExlude.includes(value))
-            .sort((a, _) => (a[0] === "recommended" ? -1 : 1))
-            .map(([value, badge], index) => (
-              <span
-                key={index}
-                onClick={() => addTag(value)}
-                className="cursor-pointer"
-              >
-                {badge}
-              </span>
-            ))}
-        </div>
-      )}
+            .sort((a, _) => (a[0] === "recommended" ? -1 : 1));
+          if (suggestions.length === 0) return null;
+          return (
+            <div className="input flex h-auto w-full cursor-default flex-wrap p-2 select-none">
+              {suggestions.map(([value, badge], index) => (
+                <span
+                  key={index}
+                  onClick={() => addTag(value)}
+                  className="cursor-pointer"
+                >
+                  {badge}
+                </span>
+              ))}
+            </div>
+          );
+        })()}
     </fieldset>
   );
 }

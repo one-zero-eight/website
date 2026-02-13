@@ -1,15 +1,24 @@
 import type { roomBookingTypes } from "@/api/room-booking";
 
+export function schemaToBooking(
+  schema: roomBookingTypes.SchemaBooking,
+): Booking {
+  const { start, end, ...rest } = schema;
+  return {
+    ...rest,
+    startsAt: new Date(start),
+    endsAt: new Date(end),
+  };
+}
+
 export type Room = roomBookingTypes.SchemaRoom & {
   /** Index of the room in the list of all rooms on the timeline. */
   idx: number;
 };
 
 export type Booking = Omit<roomBookingTypes.SchemaBooking, "start" | "end"> & {
-  id: string;
   startsAt: Date;
   endsAt: Date;
-  myBookingId: number | undefined;
 };
 
 export type Slot = {

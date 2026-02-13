@@ -27,26 +27,72 @@
   }
 
   .fc-header-toolbar.fc-toolbar {
-    @apply mb-0 gap-y-2 overflow-x-auto;
+    @apply mb-0 gap-x-0.5 gap-y-2 overflow-x-auto px-1;
 
-    .fc-toolbar-chunk {
-      @apply flex items-center justify-center gap-1;
+    /* Shadow on the right side of a toolbar visible on the right when we can scroll to right */
+    @media (max-width: 450px) {
+      mask-image: linear-gradient(to left, transparent 0, black 24px);
+      -webkit-mask-image: -webkit-linear-gradient(
+        to left,
+        transparent 0,
+        black 24px
+      );
     }
 
     .fc-button {
-      @apply m-0 rounded-xl border-0 text-base text-nowrap outline-0;
-
+      @apply m-0 rounded-xl border-0 text-base text-nowrap;
+      /* Make consistent size when focus */
+      &:focus:not(:focus-visible) {
+        @apply shadow-none outline-none;
+      }
       &:focus-visible {
-        @apply border-0 outline-0;
+        @apply shadow-none outline-1 -outline-offset-1;
       }
     }
 
-    .fc-toolbar-title {
-      @apply m-0 inline min-w-[85px] text-center text-base;
+    .fc-toolbar-chunk {
+      @apply flex items-center justify-center gap-1;
+
+      /* Month title container with < > buttons */
+      div:has(.fc-toolbar-title) {
+        @apply bg-inh-primary flex items-center justify-center gap-0.5 rounded-xl border-0 py-0 outline-0;
+      }
+      .fc-toolbar-title {
+        @apply m-0 inline w-fit text-center text-base;
+      }
+      /* < > buttons */
+      .fc-next-button,
+      .fc-prev-button {
+        @apply px-2.5;
+      }
+      .fc-icon-chevron-left,
+      .fc-icon-chevron-right {
+        @apply my-1 flex items-center text-base;
+      }
+
+      /* Merge "3 days", "Week", "Month", "List" in one toggle */
+      &:has(.fc-listMonth-button) {
+        @apply gap-0;
+        button {
+          @apply rounded-none;
+        }
+        :first-child {
+          @apply rounded-l-xl;
+        }
+        :last-child {
+          @apply rounded-r-xl;
+        }
+      }
     }
 
-    .fc-toolbar-chunk div:has(.fc-toolbar-title) {
-      @apply bg-inh-primary flex items-center justify-center gap-1 rounded-xl border-0 outline-0;
+    /* Config button with icon */
+    .fc-config-button {
+      @apply flex items-center justify-center gap-1;
+      font-variant-ligatures: none;
+      &:before {
+        content: "<span></span>";
+        @apply icon-[material-symbols--settings-outline] my-[2px] text-xl;
+      }
     }
   }
 

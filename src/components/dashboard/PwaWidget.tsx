@@ -11,7 +11,7 @@ export function PwaWidget() {
   if (!widgetShown) return null;
 
   return (
-    <div className="group bg-inh-primary rounded-box flex flex-row gap-4 px-4 py-4">
+    <div className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-4">
       <span className="icon-[material-symbols--install-mobile-outline-rounded] text-primary hidden w-12 shrink-0 text-5xl sm:block" />
       <div className="flex grow flex-col">
         <div className="text-base-content flex text-lg font-semibold">
@@ -32,7 +32,7 @@ export function PwaWidget() {
       </div>
       <button
         type="button"
-        className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-box -mt-4 -mr-4 flex h-12 w-12 shrink-0 items-center justify-center"
+        className="text-base-content/50 hover:bg-base-200-hover/50 hover:text-base-content/75 rounded-box -mt-4 -mr-4 flex h-12 w-12 shrink-0 items-center justify-center"
         onClick={() => setWidgetShown(false)}
       >
         <span className="icon-[material-symbols--close] text-xl" />

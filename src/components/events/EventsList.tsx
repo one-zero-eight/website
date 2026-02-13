@@ -3,27 +3,36 @@ import { groupEvents, hasBadges } from "./utils";
 import { EventForDate, ItemsList } from "./EventForDate";
 
 import { eventBadges } from "./EventBadges";
-import { SchemaWorkshop, WorkshopLanguage } from "@/api/workshops/types";
+import {
+  HostType,
+  SchemaWorkshop,
+  WorkshopLanguage,
+} from "@/api/workshops/types";
 import { createFuse, searchFuse } from "./utils";
+import { $clubs } from "@/api/clubs/index.ts";
 import { $workshops } from "@/api/workshops";
 import { formatDate, formatTime, isWorkshopPast, parseTime } from "./utils";
 import { LanguageBadge } from "./LanguageBadge";
 import { Link } from "@tanstack/react-router";
 import {
-  EventListType,
+  DEFAULT_EVENT_LIST_OPTIONS,
+  EventListOptions,
   EventsListProps,
   SearchFormState,
   SearchMenuProps,
   SearchBarProps,
   CheckInProps,
 } from "./types";
+import type { SchemaClub } from "@/api/clubs/types";
 import TagsSelector from "./EventEditPage/TagsSelector";
 
 export function EventsList({
   events = [],
-  eventListType = EventListType.USER,
+  options: optionsProp,
 }: EventsListProps) {
+  const options = { ...DEFAULT_EVENT_LIST_OPTIONS, ...optionsProp };
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
+  const { data: clubsList = [] } = $clubs.useQuery("get", "/clubs/");
 
   const [searchForm, setSearchForm] = useState<SearchFormState>({
     badges: [],
@@ -32,14 +41,16 @@ export function EventsList({
       russian: true,
       both: true,
     },
-    showPreviousEvents: false,
+    showPreviousEvents: options.showPreviousEvents,
     onlyCheckIns: false,
     hasPlaces: false,
   });
   const [showSearch, setShowSearch] = useState(false);
 
-  const isCheckedIn = (eventId: string) =>
-    !!myCheckins?.some((w) => w.id === eventId);
+  const isCheckedIn = useMemo(
+    () => (eventId: string) => !!myCheckins?.some((w) => w.id === eventId),
+    [myCheckins],
+  );
 
   const fuse = useMemo(
     () => (events.length ? createFuse(events) : null),
@@ -100,17 +111,41 @@ export function EventsList({
     return result;
   }, [events, fuse, searchForm, isCheckedIn]);
 
+  const displayEvents = useMemo(() => {
+    if (
+      !options.onlyShowDraftsFromEditableClubs ||
+      (options.editableClubIds?.length ?? 0) === 0
+    ) {
+      return filteredEvents;
+    }
+    const clubIds = options.editableClubIds ?? [];
+    return filteredEvents.filter((event) => {
+      if (!event.is_draft) return true;
+      const host = event.host ?? [];
+      return host.some(
+        (h) =>
+          (h?.host_type === HostType.club || String(h?.host_type) === "club") &&
+          h?.name &&
+          clubIds.includes(h.name),
+      );
+    });
+  }, [
+    filteredEvents,
+    options.onlyShowDraftsFromEditableClubs,
+    options.editableClubIds,
+  ]);
+
   const groupedEvents = useMemo(
-    () => groupEvents(filteredEvents),
-    [filteredEvents],
+    () => groupEvents(displayEvents),
+    [displayEvents],
   );
 
   const userFiltered = useMemo(
-    () => filteredEvents.filter((event) => !event.is_draft && event.is_active),
-    [filteredEvents],
+    () => displayEvents.filter((event) => !event.is_draft && event.is_active),
+    [displayEvents],
   );
 
-  const hasEvents = filteredEvents.length > 0;
+  const hasEvents = displayEvents.length > 0;
   const isGroupedView =
     !searchForm.search && Object.keys(groupedEvents).length > 0;
 
@@ -120,7 +155,7 @@ export function EventsList({
       <div
         className={`order-2 col-span-full w-full xl:order-0 xl:col-span-2 xl:mt-5 2xl:col-span-3`}
       >
-        {myCheckins && eventListType === EventListType.USER && (
+        {myCheckins && options.showMyCheckins && (
           <div>
             <h2 className="mb-2 text-xl font-semibold">My Check-ins:</h2>
             <div className="mb-5 flex flex-nowrap gap-2 overflow-x-auto">
@@ -144,12 +179,16 @@ export function EventsList({
                 <GroupedEventsView
                   groupedEvents={groupedEvents}
                   showPreviousEvents={searchForm.showPreviousEvents}
-                  eventListType={eventListType}
+                  options={options}
+                  myCheckins={myCheckins}
+                  clubsList={clubsList}
                 />
               ) : (
                 <ItemsList
-                  events={filteredEvents}
-                  eventListType={eventListType}
+                  events={displayEvents}
+                  options={options}
+                  myCheckins={myCheckins}
+                  clubsList={clubsList}
                 />
               )}
               {!searchForm.showPreviousEvents && (
@@ -319,13 +358,17 @@ export function SearchMenu({
 interface GroupedEventsViewProps {
   groupedEvents: Record<string, SchemaWorkshop[]>;
   showPreviousEvents: boolean;
-  eventListType?: EventListType;
+  options: EventListOptions;
+  myCheckins?: SchemaWorkshop[];
+  clubsList?: SchemaClub[];
 }
 
 function GroupedEventsView({
   groupedEvents,
   showPreviousEvents,
-  eventListType,
+  options,
+  myCheckins,
+  clubsList,
 }: GroupedEventsViewProps) {
   const now = new Date();
 
@@ -350,7 +393,9 @@ function GroupedEventsView({
           key={isoDate}
           isoDate={isoDate}
           events={groupedEvents[isoDate]}
-          eventListType={eventListType}
+          options={options}
+          myCheckins={myCheckins}
+          clubsList={clubsList}
         />
       ))}
     </>

@@ -73,7 +73,7 @@ export const items: ItemType[] = [
       title: "Events",
       to: "/events",
       badge: (
-        <span className="ml-2 rounded-full bg-gray-500 px-2 py-1 text-xs font-semibold text-white">
+        <span className="ml-2 rounded-full bg-gray-500 px-2 py-0.5 text-xs font-medium text-white">
           DEV
         </span>
       ),
@@ -141,7 +141,7 @@ export const items: ItemType[] = [
     type: "local",
     title: "Guard",
     badge: (
-      <span className="bg-primary ml-2 rounded-full px-2 py-1 text-xs font-semibold text-white">
+      <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
         NEW
       </span>
     ),
@@ -157,7 +157,7 @@ export const items: ItemType[] = [
     icon: <span className="icon-[material-symbols--description-outline]" />,
     staff_only: true,
     badge: (
-      <span className="ml-2 rounded-full bg-yellow-500 px-2 py-1 text-xs font-semibold text-white">
+      <span className="ml-2 rounded-full bg-yellow-500 px-2 py-0.5 text-xs font-medium text-black">
         STAFF
       </span>
     ),

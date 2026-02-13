@@ -1,6 +1,6 @@
 import { $events } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
-import { EventGroupExportModal } from "@/components/calendar/EventGroupExportModal.tsx";
+import { ExportModal } from "@/components/calendar/ExportModal.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton.tsx";
@@ -78,8 +78,8 @@ export function EventGroupPage({ alias }: { alias: string }) {
         }
         viewId="page"
       />
-      <EventGroupExportModal
-        alias={group?.alias ?? ""}
+      <ExportModal
+        eventGroupOrTarget={group.id}
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
       />

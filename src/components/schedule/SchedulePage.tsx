@@ -12,6 +12,8 @@ import { preprocessText } from "@/lib/utils/searchUtils";
 import { Link } from "@tanstack/react-router";
 import Fuse from "fuse.js";
 import React, { useEffect, useMemo, useState } from "react";
+import { ExportModal } from "@/components/calendar/ExportModal.tsx";
+import { TargetForExport } from "@/api/events/types.ts";
 
 export default function SchedulePage({
   category,
@@ -96,6 +98,11 @@ export default function SchedulePage({
       {} as { [key: string]: eventsTypes.SchemaViewEventGroup[] },
     );
 
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [targetForExport, setTargetForExport] = useState<
+    number | TargetForExport | null
+  >(null);
+
   if (error) {
     return (
       <div className="flex flex-col justify-center gap-2 p-4">
@@ -158,11 +165,23 @@ export default function SchedulePage({
 
                 <div className="mb-4 grid w-full grid-cols-1 gap-4 @lg/content:grid-cols-2 @4xl/content:grid-cols-3 @5xl/content:grid-cols-4">
                   {groups[tagName].map((group) => (
-                    <GroupCard key={group.path} group={group} />
+                    <GroupCard
+                      key={group.path}
+                      group={group}
+                      exportButtonOnClick={() => {
+                        setTargetForExport(group.id);
+                        setExportModalOpen(true);
+                      }}
+                    />
                   ))}
                 </div>
               </React.Fragment>
             ))}
+          <ExportModal
+            eventGroupOrTarget={targetForExport}
+            open={exportModalOpen}
+            onOpenChange={setExportModalOpen}
+          />
         </div>
       ) : (
         <div className="flex flex-col gap-2 px-4">No groups found</div>

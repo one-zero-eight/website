@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Snowfall from "react-snowfall";
+import { useSnowVisibility } from "./SnowContext";
 
 const snowfallLayers = [
   { color: "#b7fbff", opacity: 0.5, angleDeg: 37, radius: 3, count: 40 },
@@ -37,8 +38,8 @@ const toRgba = (hex: string, opacity: number) => {
 
 const angleDegToWind = (deg: number) => Math.tan((deg * Math.PI) / 180);
 const fixedRange = (value: number): [number, number] => [value, value];
-
 const SnowfallComponent = () => {
+  const { isSnowVisible } = useSnowVisibility();
   const [viewport, setViewport] = useState(getViewportSize);
 
   useEffect(() => {
@@ -58,6 +59,8 @@ const SnowfallComponent = () => {
     }),
     [viewport.height, viewport.width],
   );
+
+  if (!isSnowVisible) return null;
 
   return (
     <>

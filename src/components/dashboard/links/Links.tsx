@@ -147,7 +147,7 @@ const Links = () => {
                 rel="nofollow noreferrer"
                 key={index}
                 className={clsx(
-                  "resource-item bg-inh-primary hover:bg-inh-primary-hover rounded-box flex min-h-[100px] flex-row gap-4 px-4 py-4 transition-all ease-in-out",
+                  "resource-item bg-base-200 hover:bg-base-300 rounded-box flex min-h-[100px] flex-row gap-4 px-4 py-4 transition-all ease-in-out",
                   visibleItems.includes(index) ? "visible" : "",
                   activeIndex === index && searchQuery
                     ? "ring-primary ring-3"

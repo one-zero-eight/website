@@ -3,6 +3,7 @@ import { useToast } from "@/components/toast";
 import {
   getInactiveStatusText,
   getSignedPeopleCount,
+  isEventCurrentlyGoing,
   isWorkshopActive,
 } from "./utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,11 +12,22 @@ import { CheckInType } from "@/api/workshops/types";
 import { Link } from "@tanstack/react-router";
 import { CheckInButtonProps } from "./types";
 
-export function CheckInButton({ event, className }: CheckInButtonProps) {
+export function CheckInButton({
+  event,
+  myCheckins: myCheckinsProp,
+  className,
+}: CheckInButtonProps) {
   const queryClient = useQueryClient();
   const { showError, showSuccess } = useToast();
 
-  const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
+  const { data: myCheckinsData } = $workshops.useQuery(
+    "get",
+    "/users/my_checkins",
+    {
+      enabled: !myCheckinsProp,
+    },
+  );
+  const myCheckins = myCheckinsProp ?? myCheckinsData;
 
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
   const signedPeople = (event && getSignedPeopleCount(event)) || 0;
@@ -105,6 +117,19 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
     return null;
   }
 
+  if (isEventCurrentlyGoing(event)) {
+    return (
+      <span
+        className={clsx(
+          "btn btn-warning dark:btn-soft pointer-events-none",
+          className,
+        )}
+      >
+        Currently going
+      </span>
+    );
+  }
+
   if (!isWorkshopActive(event)) {
     return (
       <p className={clsx("btn btn-disabled", className)}>
@@ -122,7 +147,9 @@ export function CheckInButton({ event, className }: CheckInButtonProps) {
       );
     }
     return (
-      <div className={`grid w-full grid-cols-2 gap-2 text-nowrap ${className}`}>
+      <div
+        className={clsx("grid w-full grid-cols-2 gap-2 text-nowrap", className)}
+      >
         <Link
           to={event.check_in_link!}
           target="_blank"

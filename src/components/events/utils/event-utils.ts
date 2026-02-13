@@ -3,41 +3,29 @@ import { getDate, isWorkshopPast } from "./date-utils";
 import {
   CheckInType,
   SchemaBadge,
+  SchemaCreateWorkshop,
+  SchemaHost,
   SchemaWorkshop,
   WorkshopLanguage,
+  HostType,
 } from "@/api/workshops/types";
-import { MAX_CAPACITY, HOST_NONE } from "../constants";
+import { MAX_CAPACITY } from "../constants";
 import { EventFormState } from "../types";
 
 /**
- * Parse club host string to array of club IDs
- * @param host Host string in format "club:<id>" or "club:<id1>;club:<id2>"
- * @returns Array of club IDs
+ * Normalize host from API/storage (loosely typed) into SchemaHost[].
+ * Use only when hydrating form state from initialEvent or saved draft.
  */
-export function parseClubHost(host: string | null | undefined): string[] {
-  if (!host || !host.includes("club:")) {
-    return [];
-  }
+export function normalizeHostForForm(
+  host: { [key: string]: string }[] | null | undefined,
+): SchemaHost[] {
+  if (host == null || !Array.isArray(host)) return [];
   return host
-    .split(";")
-    .filter((part) => part.startsWith("club:"))
-    .map((part) => part.split(":")[1])
-    .filter((id) => id);
-}
-
-/**
- * Format array of club IDs to host string
- * @param clubIds Array of club IDs
- * @returns Host string in format "club:<id>" or "club:<id1>;club:<id2>"
- */
-export function formatClubHost(clubIds: string[]): string {
-  if (clubIds.length === 0) {
-    return "";
-  }
-  if (clubIds.length === 1) {
-    return `club:${clubIds[0]}`;
-  }
-  return clubIds.map((id) => `club:${id}`).join(";");
+    .map((h) => ({
+      host_type: (h.host_type ?? h.type ?? HostType.other) as HostType,
+      name: String(h.name ?? h.id ?? "").trim(),
+    }))
+    .filter((h) => h.name) as SchemaHost[];
 }
 
 /**
@@ -47,8 +35,9 @@ export function formatClubHost(clubIds: string[]): string {
  */
 export const emptyEvent = (
   title: string,
+  hosts: { type: HostType; name: string }[],
 ): Pick<
-  SchemaWorkshop,
+  SchemaCreateWorkshop,
   | "english_name"
   | "russian_name"
   | "language"
@@ -66,7 +55,7 @@ export const emptyEvent = (
     english_name: title,
     russian_name: title,
     language: WorkshopLanguage.both,
-    host: HOST_NONE,
+    host: hosts.map(({ type, name }) => ({ host_type: type, name })),
     dtstart: tomorrow.toISOString(),
     dtend: dayAfter.toISOString(),
     is_draft: true,
@@ -82,7 +71,7 @@ export const baseEventFormState: EventFormState = {
   russian_description: "",
   badges: [],
   language: WorkshopLanguage.both,
-  host: HOST_NONE,
+  host: [],
   capacity: 1000,
   remain_places: 1000,
   is_registrable: false,
@@ -165,6 +154,17 @@ export const isWorkshopActive = (event: SchemaWorkshop): boolean => {
     new Date(event.check_in_opens).getTime() < Date.now() &&
     !event.is_draft
   );
+};
+
+/**
+ * True when the event has started (dtstart <= now) but not ended (now < dtend).
+ */
+export const isEventCurrentlyGoing = (event: SchemaWorkshop): boolean => {
+  if (!event.dtstart) return false;
+  const now = Date.now();
+  if (new Date(event.dtstart).getTime() > now) return false;
+  if (!event.dtend) return true;
+  return new Date(event.dtend).getTime() > now;
 };
 
 /**
@@ -280,4 +280,26 @@ export const groupEvents = <T extends workshopsTypes.SchemaWorkshop>(
   });
 
   return groups;
+};
+
+/**
+ * Creates correct links based on input. Adds protocol if missing.
+ * Converts @ usernames to telegram links.
+ * @param link raw link string (URL or @username)
+ * @returns normalized URL
+ */
+export const normalizeLink = (link: string): string => {
+  const trimmed = link.trim();
+  if (!trimmed) return link;
+
+  if (trimmed.startsWith("@")) {
+    const username = trimmed.slice(1).trim();
+    return username ? `https://t.me/${username}` : link;
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  return `https://${trimmed}`;
 };

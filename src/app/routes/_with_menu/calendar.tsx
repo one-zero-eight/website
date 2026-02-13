@@ -16,7 +16,7 @@ function RouteComponent() {
         <meta name="description" content="View your personal calendar." />
       </Helmet>
 
-      <Topbar title="Calendar" hideOnMobile />
+      <Topbar title="Calendar" hideOnMobile hideBorder />
       <RequireAuth>
         <CalendarPage />
       </RequireAuth>

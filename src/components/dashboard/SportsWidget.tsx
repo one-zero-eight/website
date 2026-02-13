@@ -32,7 +32,7 @@ export function SportsWidget() {
   if (!hasSportProfile || !hours || !semesters) {
     if (!widgetShown) return null;
     return (
-      <div className="group bg-inh-primary rounded-box flex min-h-32 animate-pulse flex-row gap-4 px-4 py-6" />
+      <div className="group bg-base-200 rounded-box flex min-h-32 animate-pulse flex-row gap-4 px-4 py-6" />
     );
   }
 
@@ -54,7 +54,7 @@ export function SportsWidget() {
   );
 
   return (
-    <div className="group bg-inh-primary rounded-box flex flex-row gap-4 px-4 py-4">
+    <div className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-4">
       <span className="icon-[material-symbols--exercise-outline] text-primary hidden w-12 shrink-0 text-5xl sm:block" />
       <div className="flex flex-col">
         <p className="text-base-content flex items-center text-lg font-semibold">

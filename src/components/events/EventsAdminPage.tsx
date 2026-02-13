@@ -4,18 +4,16 @@ import { useEffect, useState } from "react";
 import AddEventButton from "./AddEventButton.tsx";
 import { ModalWindow } from "./CreationModal/ModalWindow.tsx";
 import { EventsList } from "./EventsList.tsx";
-import { EventListType } from "./types/index.ts";
 import NameForm from "./CreationModal/NameForm.tsx";
-import { $clubs } from "@/api/clubs/index.ts";
+import { useEventsAuth } from "./hooks";
+import { EventListOptions } from "./types/index.ts";
 
 export function EventsAdminPage() {
   const navigate = useNavigate();
-
   const [modalOpen, setModalOpen] = useState(false);
+  const { eventsUser, clubsUser } = useEventsAuth();
 
   const { data: events } = $workshops.useQuery("get", "/workshops/");
-  const { data: eventsUser } = $workshops.useQuery("get", "/users/me");
-  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
 
   useEffect(() => {
     if (
@@ -32,6 +30,17 @@ export function EventsAdminPage() {
     return null;
   }
 
+  const isAdmin = eventsUser?.role === "admin";
+  const leaderClubIds = clubsUser?.leader_in_clubs.map((c) => c.id) ?? [];
+  const eventListSettings: EventListOptions = {
+    showMyCheckins: false,
+    showPreviousEvents: true,
+    filterDraftsAndInactive: false,
+    isEditable: isAdmin,
+    editableClubIds: leaderClubIds,
+    onlyShowDraftsFromEditableClubs: !isAdmin && leaderClubIds.length > 0,
+  };
+
   return (
     <>
       <div className="mt-3 flex w-full flex-wrap items-center gap-4 px-4 py-2">
@@ -46,11 +55,7 @@ export function EventsAdminPage() {
 
       <EventsList
         events={events}
-        eventListType={
-          clubsUser?.leader_in_clubs.length === 0
-            ? EventListType.ADMIN
-            : EventListType.CLUB_LEADER
-        }
+        options={eventListSettings}
         clubUser={clubsUser}
       />
 
@@ -62,6 +67,8 @@ export function EventsAdminPage() {
         title="Create Event"
       >
         <NameForm
+          eventsUser={eventsUser}
+          clubsUser={clubsUser}
           onClose={() => {
             setModalOpen(false);
           }}

@@ -19,15 +19,17 @@ export interface EventTitleProps {
   event: SchemaWorkshop;
   pageLanguage: string | null;
   setPageLanguage: (v: string | null) => void;
-  isAdmin: boolean;
+  canEdit: boolean;
+  myCheckins?: SchemaWorkshop[];
   className?: string;
 }
 
 export default function EventTitle({
   event,
   pageLanguage,
-  isAdmin,
+  canEdit,
   setPageLanguage,
+  myCheckins,
   className,
 }: EventTitleProps) {
   const [_, _copy] = useCopyToClipboard();
@@ -82,7 +84,7 @@ export default function EventTitle({
       >
         {event.image_file_id && (
           <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center">
-            <div className="flex aspect-square h-[250px] items-center justify-center overflow-hidden lg:h-[210px]">
+            <div className="flex h-[250px] items-center justify-center overflow-hidden lg:h-[210px]">
               <img
                 src={imageLink(event.id)}
                 alt={event.english_name + " logo"}
@@ -91,7 +93,7 @@ export default function EventTitle({
             </div>
           </div>
         )}
-        <div className="m-4 flex gap-2">
+        <div className="z-10 m-4 flex gap-2">
           <Link to="/events" className="btn btn-circle">
             <span className="icon-[line-md--arrow-left] text-2xl" />
           </Link>
@@ -104,7 +106,7 @@ export default function EventTitle({
               )}
             />
           </span>
-          {isAdmin && (
+          {canEdit && (
             <Link
               className="btn btn-circle"
               to="/events/$id/edit"
@@ -221,6 +223,7 @@ export default function EventTitle({
         <div className="hidden justify-end md:flex">
           <CheckInButton
             event={event}
+            myCheckins={myCheckins}
             className={
               event.check_in_type === CheckInType.by_link
                 ? "max-w-2/5"

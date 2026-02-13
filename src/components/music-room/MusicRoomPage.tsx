@@ -1,9 +1,10 @@
 import { Calendar } from "@/components/calendar/Calendar.tsx";
-import { MusicRoomExportModal } from "@/components/calendar/MusicRoomExportModal.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
 import { getMusicRoomLink, getMyMusicRoomLink } from "@/api/events/links.ts";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { ExportModal } from "@/components/calendar/ExportModal.tsx";
+import { TargetForExport } from "@/api/events/types.ts";
 
 export function MusicRoomPage() {
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -114,7 +115,8 @@ export function MusicRoomPage() {
         initialView="timeGridWeek"
         viewId="music-room"
       />
-      <MusicRoomExportModal
+      <ExportModal
+        eventGroupOrTarget={TargetForExport.music_room}
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
       />

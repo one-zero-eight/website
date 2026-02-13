@@ -113,6 +113,37 @@
   --color-inh-inactive: rgb(var(--color-inh-inactive-rgb));
   --color-brand-gradient-start: rgb(var(--color-brand-gradient-start-rgb));
   --color-brand-gradient-end: rgb(var(--color-brand-gradient-end-rgb));
+
+  --animate-booking-fake-progress: fake-progress 50s linear;
+  @keyframes fake-progress {
+    from {
+      width: 0%;
+    }
+    5% {
+      width: 40%;
+    }
+    20% {
+      width: 80%;
+    }
+    40% {
+      width: 95%;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  --animate-booking-error: booking-error 40s linear infinite;
+  @keyframes booking-error {
+    0% {
+      transform: rotateX(25deg) translate3d(0, 0vh, 0);
+      opacity: 1;
+    }
+    100% {
+      transform: rotateX(25deg) translate3d(0, -320vh, -1200px);
+      opacity: 0;
+    }
+  }
 }
 
 @layer base {
