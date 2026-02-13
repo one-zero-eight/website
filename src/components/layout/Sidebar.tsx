@@ -71,7 +71,7 @@ export default function Sidebar() {
           to="/about"
           className={clsx(
             "text-base-content/70 mb-1 flex w-full items-center justify-center rounded-xl select-none hover:bg-gray-500/10",
-            "[&.is-active]:text-primary",
+            "[&.is-active]:selected",
           )}
           activeProps={{ className: "is-active" }}
         >
@@ -81,7 +81,6 @@ export default function Sidebar() {
               isMinimized ? "text-[10px]" : "text-base",
             )}
           >
-            {/*About <Logo108 className={isMinimized ? "h-3" : "h-3.5"} />*/}
             About 108
           </span>
         </Link>
