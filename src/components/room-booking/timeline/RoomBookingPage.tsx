@@ -3,13 +3,13 @@ import { BookingModal } from "@/components/room-booking/timeline/BookingModal.ts
 import { T } from "@/lib/utils/dates.ts";
 import { getRouteApi } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { getTimeRangeForWeek } from "../utils.ts";
 import {
-  schemaToBooking,
   type Booking,
+  schemaToBooking,
   type ScrollToOptions,
   type Slot,
 } from "./types.ts";
-import { getTimeRangeForWeek } from "../utils.ts";
 
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),
@@ -108,13 +108,22 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center">
-              <p className="text-base-content/75 text-lg">
-                Error loading bookings
-              </p>
-              <p className="text-base-content/75 text-lg">
-                {bookingsError?.detail?.toString() ||
-                  "Most probably Outlook API is down"}
-              </p>
+              <section className="relative h-screen w-full overflow-hidden text-[#feda4a]">
+                <div className="absolute inset-0 [perspective:1000px]">
+                  <div className="animate-booking-error absolute top-full left-1/2 w-[190vw] -translate-x-1/2 text-center font-bold tracking-wide uppercase [transform-style:preserve-3d]">
+                    <p className="mb-6 text-2xl md:text-4xl">
+                      Error loading bookings
+                    </p>
+                    <h1 className="mb-8 text-4xl leading-tight md:text-7xl">
+                      Most probably Outlook API is down
+                    </h1>
+
+                    <div className="space-y-6 text-lg leading-[1.8] md:text-3xl">
+                      <p>{bookingsError?.detail?.toString()}</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
             </div>
           )}
         </Suspense>
