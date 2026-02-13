@@ -91,7 +91,7 @@ function bookingWarningForSlot({
   return null;
 }
 
-function sanitizeTitle(title: string | undefined): string {
+export function sanitizeBookingTitle(title: string | undefined): string {
   if (!title) return "";
   const sanitized = title
     .replace("Students Booking Service", "")
@@ -129,7 +129,9 @@ export function BookingModal({
   const queryClient = useQueryClient();
   const { me } = useMe();
 
-  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
+  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
+    params: { query: { include_red: true } },
+  });
   const {
     mutate: mutateCreateBooking,
     isPending: isBookingCreationPending,
@@ -176,7 +178,7 @@ export function BookingModal({
       setTitle("");
       resetCreateBooking();
     } else if (detailsBooking) {
-      setTitle(sanitizeTitle(detailsBooking.title));
+      setTitle(sanitizeBookingTitle(detailsBooking.title));
     }
   }, [newSlot, detailsBooking, resetCreateBooking]);
 
@@ -755,7 +757,7 @@ export function BookingModal({
                         ) : (
                           <>
                             <p className="text-base-content/75 flex flex-row gap-2 text-xl text-wrap">
-                              {sanitizeTitle(detailsBooking?.title)}
+                              {sanitizeBookingTitle(detailsBooking?.title)}
                             </p>
                           </>
                         )}

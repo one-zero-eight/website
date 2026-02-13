@@ -42,7 +42,9 @@ export function BookingCard({
 }: {
   booking: roomBookingTypes.SchemaBooking;
 }) {
-  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/");
+  const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
+    params: { query: { include_red: true } },
+  });
   const room = rooms?.find((v) => v.id === booking.room_id);
 
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
