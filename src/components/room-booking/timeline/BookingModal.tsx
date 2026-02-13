@@ -257,7 +257,7 @@ export function BookingModal({
 
           setTitle("");
           resetCreateBooking();
-          onBookingCreated?.(schemaToBooking(data, me?.innopolis_info?.email));
+          onBookingCreated?.(schemaToBooking(data));
         },
       },
     );
@@ -268,7 +268,6 @@ export function BookingModal({
     resetCreateBooking,
     queryClient,
     onBookingCreated,
-    me?.innopolis_info?.email,
   ]);
 
   const updateBooking = useCallback(() => {
@@ -300,10 +299,7 @@ export function BookingModal({
           resetUpdateBooking();
           setIsEditing(false);
           onBookingCreated?.(
-            schemaToBooking(
-              data as roomBookingTypes.SchemaBooking,
-              me?.innopolis_info?.email,
-            ),
+            schemaToBooking(data as roomBookingTypes.SchemaBooking),
           );
         },
       },
@@ -338,10 +334,7 @@ export function BookingModal({
           resetUpdateBooking();
           setIsEditing(false);
           onBookingCreated?.(
-            schemaToBooking(
-              data as roomBookingTypes.SchemaBooking,
-              me?.innopolis_info?.email,
-            ),
+            schemaToBooking(data as roomBookingTypes.SchemaBooking),
           );
         },
       },

@@ -2,14 +2,12 @@ import type { roomBookingTypes } from "@/api/room-booking";
 
 export function schemaToBooking(
   schema: roomBookingTypes.SchemaBooking,
-  email: string | undefined,
 ): Booking {
   const { start, end, ...rest } = schema;
   return {
     ...rest,
     startsAt: new Date(start),
     endsAt: new Date(end),
-    isMine: !!schema.attendees?.find((attendee) => attendee.email === email),
   };
 }
 
@@ -19,7 +17,6 @@ export type Room = roomBookingTypes.SchemaRoom & {
 };
 
 export type Booking = Omit<roomBookingTypes.SchemaBooking, "start" | "end"> & {
-  isMine: boolean;
   startsAt: Date;
   endsAt: Date;
 };

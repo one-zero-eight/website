@@ -1139,7 +1139,7 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
                 :class="{
                   [$style.booking]: true,
                   [$style.myBooking]:
-                    typeof booking !== 'string' && booking.isMine,
+                    typeof booking !== 'string' && booking.related_to_me,
                   [$style.placeholder]: booking === 'placeholder',
                 }"
                 :style="

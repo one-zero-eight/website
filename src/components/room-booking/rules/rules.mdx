@@ -1,29 +1,32 @@
-import { RulesSection } from "./RulesSection.tsx";
+## Booking Rules
 
-<RulesSection id="rules">
+### For Students
 
-# Booking rules
+Students can book _yellow meeting rooms (3.1, 3.5, ...) anytime_ and _yellow lecture rooms (101, 301, 320, ...) during non-working hours_ (08:00-19:00 on weekdays are restricted), up to 3 hours per booking. You can't book other rooms unless you have special permission (108, 107, etc.).
 
-- To book the room, you need to be a student with access to My University portal.
-- You cannot book a room for more than 3 hours.
-- Please, cancel your booking if you cannot come.
+Club leaders and their deputies can book 309A room, contact 319 if you don't have permission yet.
 
-</RulesSection>
+If your plans change, please cancel your booking so others can use the room. Note that booking can be finished even during its time.
 
-<RulesSection id="rules">
+### For Staff
 
-# Lecture rooms
+Staff can book anything and anytime, however be sure that the room accepted your request. Booking of lecture rooms during working hours require admin approval. If you need more than 3 hours or recurring events, please book via Outlook.
 
-- Students cannot book lecture rooms during the working hours.
-- It means that you cannot book on Monday to Friday from 8:00 to 19:00, but you can book them at night and on weekends.
+If your plans change, please cancel your booking so others can use the room. Note that booking can be finished even during its time.
 
-</RulesSection>
+## How to Use?
 
-<RulesSection id="rules">
+1. Go to [/room-booking](https://innohassle.ru/room-booking), login if you are not logged in.
+2. Check for free slots on the timeline.
+3. Select chosen slot by gripping start time and dragging it to the end time.
+4. Fill in the form with proper booking title, double check the room and time, click "Confirm".
+5. Wait until the room accepts or declines your booking.
+6. You can view your bookings in the "My Bookings" section or in the Outlook calendar.
+7. If your plans change, you can cancel your booking by opening "My Bookings" section, clicking on "More" button and clicking "Delete" or "Finish now" buttons. So other users can use the room.
 
-# Clubs room 309A
+### Response status
 
-- Clubs room 309A is available for booking only for club leaders.
-- If you have not received permissions from 319, you will not be able to book this room.
-
-</RulesSection>
+- **Unknown** — Room has not checked yet (or Outlook glitch / room not automated) or admin approval is pending.
+- **Tentative** — Room verified it is free and tentatively accepted the meeting, used for lecture rooms.
+- **Accepted** — Meeting room: room verified it is free and accepted the meeting. Lecture room: admin checked and approved the booking.
+- **Declined** — Room responded that it is busy, or admin rejected the booking.

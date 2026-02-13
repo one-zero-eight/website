@@ -9,7 +9,6 @@ import {
   type ScrollToOptions,
   type Slot,
 } from "./types.ts";
-import { useMe } from "@/api/accounts/user.ts";
 import { getTimeRangeForWeek } from "../utils.ts";
 
 const BookingTimeline = lazy(
@@ -56,58 +55,68 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
     "/rooms/",
     { params: { query: { ...includeRedObject } } },
   );
-  const { data: rawBookings, isPending: isBookingsPending } =
-    $roomBooking.useQuery(
-      "get",
-      "/bookings/",
-      {
-        params: {
-          query: {
-            start: startDate.toISOString(),
-            end: endDate.toISOString(),
-            ...includeRedObject,
-          },
+  const {
+    data: rawBookings,
+    isPending: isBookingsPending,
+    error: bookingsError,
+    status: bookingsStatus,
+  } = $roomBooking.useQuery(
+    "get",
+    "/bookings/",
+    {
+      params: {
+        query: {
+          start: startDate.toISOString(),
+          end: endDate.toISOString(),
+          ...includeRedObject,
         },
       },
-      {
-        refetchInterval: 5 * T.Min,
-      },
-    );
-
-  const { me } = useMe();
-
-  const bookings = rawBookings?.map((schema) =>
-    schemaToBooking(schema, me?.innopolis_info?.email),
+    },
+    {
+      refetchInterval: 5 * T.Min,
+    },
   );
-  // const { data: myBookings, isPending: isMyBookingsPending } =
-  //   $roomBooking.useQuery("get", "/bookings/my");
+
+  const bookings = rawBookings?.map((schema) => schemaToBooking(schema));
 
   return (
     <>
       <div className="grow overflow-hidden">
         <Suspense>
-          <BookingTimeline
-            className="h-full"
-            startDate={startDate}
-            endDate={endDate}
-            rooms={rooms}
-            isRoomsPending={isRoomsPending}
-            bookings={bookings}
-            isBookingsPending={isBookingsPending}
-            /* myBookings={myBookings} */
-            /* isMyBookingsPending={isMyBookingsPending} */
-            onBook={(newBooking: Slot) => {
-              setNewBookingSlot(newBooking);
-              setBookingDetails(undefined);
-              setModalOpen(true);
-            }}
-            onBookingClick={(booking: Booking) => {
-              setBookingDetails(booking);
-              setNewBookingSlot(undefined);
-              setModalOpen(true);
-            }}
-            ref={setTimelineRef}
-          />
+          {bookingsStatus !== "error" ? (
+            <BookingTimeline
+              className={`h-full ${bookingsStatus === "pending" ? "pointer-events-none select-none" : ""}`}
+              startDate={startDate}
+              endDate={endDate}
+              rooms={rooms}
+              isRoomsPending={isRoomsPending}
+              bookings={bookings}
+              isBookingsPending={isBookingsPending}
+              /* myBookings={myBookings} */
+              /* isMyBookingsPending={isMyBookingsPending} */
+              onBook={(newBooking: Slot) => {
+                setNewBookingSlot(newBooking);
+                setBookingDetails(undefined);
+                setModalOpen(true);
+              }}
+              onBookingClick={(booking: Booking) => {
+                setBookingDetails(booking);
+                setNewBookingSlot(undefined);
+                setModalOpen(true);
+              }}
+              ref={setTimelineRef}
+            />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center">
+              <p className="text-base-content/75 text-lg">
+                Error loading bookings
+              </p>
+              <p className="text-base-content/75 text-lg">
+                {bookingsError?.detail?.toString() ||
+                  "Most probably Outlook API is down"}
+              </p>
+            </div>
+          )}
         </Suspense>
       </div>
       <BookingModal

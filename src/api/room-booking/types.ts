@@ -168,6 +168,8 @@ export interface components {
       outlook_booking_id: string | null;
       /** Attendees */
       attendees: components["schemas"]["Attendee"][] | null;
+      /** Related To Me */
+      related_to_me?: boolean | null;
       /**
        * Id
        * @description ID of the booking, computed from room_id, start and end
@@ -391,13 +393,13 @@ export interface operations {
   };
   bookings_bookings: {
     parameters: {
-      query: {
+      query?: {
         room_id?: string | null;
         room_ids?: string[] | null;
-        /** @description Start date */
-        start: string;
-        /** @description End date */
-        end: string;
+        /** @description Start date, if not provided, will be set to 7 days before current date */
+        start?: string | null;
+        /** @description End date, if not provided, will be set to 14 days after current date */
+        end?: string | null;
         /** @description Include red-access rooms bookings when getting all */
         include_red?: boolean;
       };
@@ -439,6 +441,13 @@ export interface operations {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   bookings_create_booking: {
@@ -463,14 +472,21 @@ export interface operations {
           "application/json": components["schemas"]["Booking"];
         };
       };
-      /** @description Unauthorized */
+      /** @description Invalid user */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking */
       403: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Booking not found */
+      /** @description Room not found OR Booking was removed during booking OR Room attendee not found in booking attendees */
       404: {
         headers: {
           [name: string]: unknown;
@@ -486,12 +502,21 @@ export interface operations {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   bookings_my_bookings: {
     parameters: {
       query?: {
+        /** @description Start date, if not provided, will be set to 7 days before current date */
         start?: string | null;
+        /** @description End date, if not provided, will be set to 14 days after current date */
         end?: string | null;
       };
       header?: never;
@@ -516,13 +541,6 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Booking not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -531,6 +549,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -561,7 +586,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Booking not found */
+      /** @description Booking not found OR Room attendee not found in booking attendees */
       404: {
         headers: {
           [name: string]: unknown;
@@ -576,6 +601,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -599,7 +631,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Unauthorized */
+      /** @description You are not the participant of the booking */
       403: {
         headers: {
           [name: string]: unknown;
@@ -621,6 +653,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -645,17 +684,17 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["Booking"];
         };
       };
-      /** @description Unauthorized */
+      /** @description You are not the participant of the booking */
       403: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Booking not found */
+      /** @description Booking not found OR Room attendee not found in booking attendees */
       404: {
         headers: {
           [name: string]: unknown;
@@ -671,13 +710,22 @@ export interface operations {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   bookings_get_user_bookings: {
     parameters: {
-      query: {
-        start: string;
-        end: string;
+      query?: {
+        /** @description Start date, if not provided, will be set to 7 days before current date */
+        start?: string | null;
+        /** @description End date, if not provided, will be set to 14 days after current date */
+        end?: string | null;
       };
       header?: never;
       path: {
@@ -703,7 +751,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Booking not found */
+      /** @description User not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -718,6 +766,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
