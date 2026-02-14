@@ -1,5 +1,6 @@
 import { $roomBooking } from "@/api/room-booking";
 import { RoomAccess_level } from "@/api/room-booking/types";
+import { AccessLevelIcon } from "@/components/room-booking/AccessLevelIcon.tsx";
 import { Link } from "@tanstack/react-router";
 
 export function RoomsList() {
@@ -10,12 +11,6 @@ export function RoomsList() {
       },
     },
   });
-
-  const accessLevelColors: Record<RoomAccess_level, string> = {
-    [RoomAccess_level.yellow]: "#FFD700", // Gold
-    [RoomAccess_level.red]: "#FF4500", // OrangeRed
-    [RoomAccess_level.special]: "#ac72e4", // Violet
-  };
 
   if (!rooms || rooms.length === 0) {
     return (
@@ -40,9 +35,9 @@ export function RoomsList() {
             <div className="space-y-3">
               {room.access_level && (
                 <div className="flex flex-row items-center gap-3">
-                  <span
-                    className="icon-[material-symbols--lock-open-circle-outline] text-3xl"
-                    style={{ color: accessLevelColors[room.access_level] }}
+                  <AccessLevelIcon
+                    accessLevel={room.access_level}
+                    className="text-3xl"
                   />
                   <div className="flex-1">
                     <p className="text-base-content text-sm font-medium">

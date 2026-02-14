@@ -2,6 +2,7 @@ import { $maps } from "@/api/maps";
 import { $roomBooking } from "@/api/room-booking";
 import { RoomAccess_level } from "@/api/room-booking/types";
 import { Topbar } from "@/components/layout/Topbar.tsx";
+import { AccessLevelIcon } from "@/components/room-booking/AccessLevelIcon.tsx";
 import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
 import { RoomCalendar } from "@/components/room-booking/room-page/RoomCalendar.tsx";
 import { RoomMapPreview } from "@/components/room-booking/room-page/RoomMapPreview.tsx";
@@ -93,12 +94,6 @@ export function RoomPage({ id }: { id: string }) {
     return <Topbar title="Room" />;
   }
 
-  const accessLevelColors: Record<RoomAccess_level, string> = {
-    [RoomAccess_level.yellow]: "#FFD700", // Gold
-    [RoomAccess_level.red]: "#FF4500", // OrangeRed
-    [RoomAccess_level.special]: "#ac72e4", // Violet
-  };
-
   return (
     <>
       <Helmet>
@@ -118,9 +113,9 @@ export function RoomPage({ id }: { id: string }) {
 
             {room.access_level && (
               <div className="flex flex-row items-center gap-3">
-                <span
-                  className="icon-[material-symbols--lock-open-circle-outline] text-lg"
-                  style={{ color: accessLevelColors[room.access_level] }}
+                <AccessLevelIcon
+                  accessLevel={room.access_level}
+                  className="text-3xl"
                 />
                 <div className="flex-1">
                   <p className="text-foreground text-sm font-medium">
@@ -139,7 +134,7 @@ export function RoomPage({ id }: { id: string }) {
 
             {room.capacity && (
               <div className="flex flex-row items-center gap-3">
-                <span className="text-foreground icon-[material-symbols--event-seat-outline-rounded] text-lg" />
+                <span className="text-foreground icon-[material-symbols--event-seat-outline-rounded] text-3xl" />
                 <div className="flex-1">
                   <p className="text-foreground text-sm font-medium">
                     Capacity
@@ -153,7 +148,7 @@ export function RoomPage({ id }: { id: string }) {
 
             {room.restrict_daytime && (
               <div className="flex flex-row items-center gap-3">
-                <span className="text-foreground icon-[material-symbols--schedule-outline] text-lg" />
+                <span className="text-foreground icon-[material-symbols--schedule-outline] text-3xl" />
                 <div className="flex-1">
                   <p className="text-foreground text-sm font-medium">
                     Time Restrictions
