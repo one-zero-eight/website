@@ -230,7 +230,7 @@ export function BookingModal({
 
   const submitBooking = useCallback(() => {
     if (!newSlot) return;
-    if (!title) {
+    if (!title.trim()) {
       titleInputRef.current?.focus();
       return;
     }
@@ -239,7 +239,7 @@ export function BookingModal({
       {
         body: {
           room_id: newSlot.room.id,
-          title: title,
+          title: title.trim(),
           start: start?.toISOString() ?? newSlot.start.toISOString(),
           end: end?.toISOString() ?? newSlot.end.toISOString(),
           participant_emails: [],
@@ -281,7 +281,7 @@ export function BookingModal({
           path: { outlook_booking_id: detailsBooking.outlook_booking_id ?? "" },
         },
         body: {
-          title: title,
+          title: title.trim(),
           start: start?.toISOString() ?? detailsBooking.startsAt.toISOString(),
           end: end?.toISOString() ?? detailsBooking.endsAt.toISOString(),
         },
@@ -316,7 +316,7 @@ export function BookingModal({
           path: { outlook_booking_id: detailsBooking.outlook_booking_id ?? "" },
         },
         body: {
-          title: title,
+          title: title.trim(),
           start: detailsBooking.startsAt.toISOString(),
           end: new Date(new Date().getTime() + T.Min * 5).toISOString(),
         },
