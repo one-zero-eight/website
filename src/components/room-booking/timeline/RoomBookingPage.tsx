@@ -1,3 +1,4 @@
+import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
@@ -49,7 +50,10 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
 
   const { startDate, endDate } = getTimeRangeForWeek(0, 7);
 
-  const includeRedObject = showRed ? { include_red: true } : {};
+  const { me } = useMe();
+
+  const includeRedObject =
+    me?.innopolis_info?.is_staff || showRed ? { include_red: true } : {};
   const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
     "get",
     "/rooms/",
