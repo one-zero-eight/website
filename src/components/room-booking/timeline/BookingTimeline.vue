@@ -11,6 +11,7 @@ import type { MaybeRef } from "vue";
 import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
 import type { Booking, Room, ScrollToOptions, Slot } from "./types.ts";
 import { accessLevelColors } from "../AccessLevelIcon.tsx";
+import { sanitizeBookingTitle } from "./BookingModal.tsx";
 
 /* ========================================================================== */
 /* ================================ Options ================================= */
@@ -1173,12 +1174,7 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
                   :data-booking-id="booking.id"
                   @click="handleBookingClick"
                 >
-                  <span>{{
-                    booking.title
-                      .replace("Students Booking Service", "")
-                      .replace("FW:", "")
-                      .trim()
-                  }}</span>
+                  <span>{{ sanitizeBookingTitle(booking.title) }}</span>
                 </div>
               </div>
             </div>
