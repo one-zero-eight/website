@@ -47,7 +47,7 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
     }
   }, [timelineLoaded, search.d]);
 
-  const { startDate, endDate } = getTimeRangeForWeek();
+  const { startDate, endDate } = getTimeRangeForWeek(0, 7);
 
   const includeRedObject = showRed ? { include_red: true } : {};
   const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
