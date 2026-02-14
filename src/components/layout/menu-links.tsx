@@ -140,11 +140,6 @@ export const items: ItemType[] = [
   {
     type: "local",
     title: "Guard",
-    badge: (
-      <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
-        NEW
-      </span>
-    ),
     to: "/guard",
     icon: (
       <span className="icon-[material-symbols--verified-user-outline-rounded]" />
