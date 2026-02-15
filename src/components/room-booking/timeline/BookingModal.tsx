@@ -123,14 +123,10 @@ export function BookingModal({
   );
 
   useEffect(() => {
-    if (!open || !(isEditing || !!newSlot)) {
-      setStart(newSlot?.start || detailsBooking?.startsAt);
-      setEnd(newSlot?.end || detailsBooking?.endsAt);
-    } else {
-      setStart(start ? start : newSlot?.start || detailsBooking?.startsAt);
-      setEnd(end ? end : newSlot?.end || detailsBooking?.endsAt);
-    }
-  }, [newSlot, detailsBooking, start, end, open, isEditing]);
+    if (detailsBooking && isEditing) return;
+    setStart(newSlot?.start || detailsBooking?.startsAt);
+    setEnd(newSlot?.end || detailsBooking?.endsAt);
+  }, [newSlot, detailsBooking, isEditing]);
 
   const deleteBooking = useCallback(() => {
     if (!detailsBooking) return;
@@ -201,6 +197,8 @@ export function BookingModal({
     resetCreateBooking,
     queryClient,
     onBookingCreated,
+    start,
+    end,
   ]);
 
   const updateBooking = useCallback(() => {
