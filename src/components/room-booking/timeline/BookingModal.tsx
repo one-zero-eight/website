@@ -245,7 +245,7 @@ export function BookingModal({
           path: { outlook_booking_id: detailsBooking.outlook_booking_id ?? "" },
         },
         body: {
-          title: title.trim(),
+          title: detailsBooking.title.trim(),
           start: detailsBooking.startsAt.toISOString(),
           end: new Date(new Date().getTime() + T.Min * 5).toISOString(),
         },
