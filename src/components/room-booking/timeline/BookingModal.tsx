@@ -1,6 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
-import { BookingStatus } from "@/api/room-booking/types.ts";
+import { BookingStatus, SchemaAttendee } from "@/api/room-booking/types.ts";
 import {
   clockTime,
   durationFormatted,
@@ -33,6 +33,87 @@ export function sanitizeBookingTitle(title: string | undefined): string {
   } else {
     return title.trim(); // Do not remove "Students Booking Service" if it's the only content
   }
+}
+
+function Attendee({
+  attendee,
+  bookingId,
+}: {
+  attendee: SchemaAttendee;
+  bookingId: string;
+}) {
+  const { data: attendeeDetails } = $roomBooking.useQuery(
+    "get",
+    "/bookings/{outlook_booking_id}/get-attendee-details",
+    {
+      params: {
+        path: { outlook_booking_id: bookingId },
+        query: { user_email: attendee.email },
+      },
+    },
+  );
+
+  return attendeeDetails ? (
+    <>
+      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+        <div className="flex h-fit w-6">
+          <span className="icon-[material-symbols--person-outline-rounded] text-2xl" />
+        </div>
+        <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
+          <span className="text-xl">{attendeeDetails.name}</span>
+        </div>
+      </div>
+
+      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+        <div className="flex h-fit w-6">
+          <span className="text-2xl" />
+        </div>
+        <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
+          <a
+            className="text-xl hover:underline"
+            href={`mailto:${attendee.email}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {attendee.email.replace("@innopolis.university", "")}
+          </a>
+        </div>
+      </div>
+
+      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+        <div className="flex h-fit w-6">
+          <span className="text-2xl" />
+        </div>
+        <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
+          <a
+            className="text-xl hover:underline"
+            href={
+              attendeeDetails.telegram_username
+                ? `https://t.me/${attendeeDetails.telegram_username}`
+                : undefined
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {attendeeDetails.telegram_username
+              ? `@${attendeeDetails.telegram_username}`
+              : "No Telegram alias"}
+          </a>
+        </div>
+      </div>
+    </>
+  ) : (
+    <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+      <div className="flex h-fit w-6">
+        <span className="icon-[material-symbols--person-outline-rounded] text-2xl" />
+      </div>
+      <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
+        <span className="text-xl">
+          {attendee.email.replace("@innopolis.university", "")}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 export function BookingModal({
@@ -447,18 +528,12 @@ export function BookingModal({
     </div>
   );
 
-  const Attendees = outlookBookingAttendees?.map((attendee) => (
-    <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
-      <div className="flex h-fit w-6">
-        <span className="icon-[material-symbols--person-outline-rounded] text-2xl" />
-      </div>
-      <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
-        <span className="text-xl" key={attendee.email}>
-          {attendee.email.replace("@innopolis.university", "")}
-        </span>
-      </div>
-    </div>
-  ));
+  const Attendees =
+    !!outlookBookingId && !!attendees
+      ? outlookBookingAttendees?.map((attendee) => (
+          <Attendee attendee={attendee} bookingId={outlookBookingId} />
+        ))
+      : undefined;
 
   const NewBookingWarning = canBookPending ? (
     <div className="alert alert-info text-base">
