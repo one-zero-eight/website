@@ -7,7 +7,7 @@ export function TelegramReconnectWidget() {
     return null;
 
   return (
-    <div className="group bg-inh-primary rounded-box flex flex-row gap-4 px-4 py-4 shadow-lg">
+    <div className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-4 shadow-lg">
       <span className="icon-[uil--telegram-alt] hidden w-12 shrink-0 animate-pulse text-5xl text-orange-500 sm:block" />
       <div className="flex flex-col">
         <div className="flex items-center text-lg font-semibold text-orange-500">

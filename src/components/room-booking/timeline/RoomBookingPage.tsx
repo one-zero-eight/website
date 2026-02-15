@@ -1,16 +1,17 @@
+import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
+import { RoomAccess_level } from "@/api/room-booking/types.ts";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
 import { getRouteApi } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { getTimeRangeForWeek } from "../utils.ts";
 import {
-  schemaToBooking,
   type Booking,
+  schemaToBooking,
   type ScrollToOptions,
   type Slot,
 } from "./types.ts";
-import { useMe } from "@/api/accounts/user.ts";
-import { getTimeRangeForWeek } from "../utils.ts";
 
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),
@@ -24,7 +25,7 @@ type TimelineRef = {
 
 const routeApi = getRouteApi("/_with_menu/room-booking/");
 
-export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
+export function RoomBookingPage() {
   const search = routeApi.useSearch();
   const [modalOpen, setModalOpen] = useState(false);
   const [newBookingSlot, setNewBookingSlot] = useState<Slot>();
@@ -48,66 +49,104 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
     }
   }, [timelineLoaded, search.d]);
 
-  const { startDate, endDate } = getTimeRangeForWeek();
+  const { startDate, endDate } = getTimeRangeForWeek(0, 7);
 
-  const includeRedObject = showRed ? { include_red: true } : {};
+  const { me } = useMe();
+  const { data: myAccessList } = $roomBooking.useQuery(
+    "get",
+    "/rooms/my-access-list",
+  );
+  const myAccessListRoomIds = myAccessList?.map((room) => room.id) ?? [];
+
   const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
     "get",
     "/rooms/",
-    { params: { query: { ...includeRedObject } } },
+    { params: { query: { include_red: true } } },
   );
-  const { data: rawBookings, isPending: isBookingsPending } =
-    $roomBooking.useQuery(
-      "get",
-      "/bookings/",
-      {
-        params: {
-          query: {
-            start: startDate.toISOString(),
-            end: endDate.toISOString(),
-            ...includeRedObject,
-          },
+
+  const roomsToShow =
+    rooms?.filter(
+      (room) =>
+        // Always show yellow
+        room.access_level === RoomAccess_level.yellow ||
+        // If you are a staff, show red
+        (room.access_level === RoomAccess_level.red &&
+          me?.innopolis_info?.is_staff) ||
+        // Also show rooms you have access to, even if they are red or special-access
+        myAccessListRoomIds.includes(room.id),
+    ) ?? [];
+
+  const {
+    data: rawBookings,
+    isPending: isBookingsPending,
+    error: bookingsError,
+    status: bookingsStatus,
+  } = $roomBooking.useQuery(
+    "get",
+    "/bookings/",
+    {
+      params: {
+        query: {
+          start: startDate.toISOString(),
+          end: endDate.toISOString(),
+          room_ids: roomsToShow.map((room) => room.id),
         },
       },
-      {
-        refetchInterval: 5 * T.Min,
-      },
-    );
-
-  const { me } = useMe();
-
-  const bookings = rawBookings?.map((schema) =>
-    schemaToBooking(schema, me?.innopolis_info?.email),
+    },
+    {
+      refetchInterval: 5 * T.Min,
+    },
   );
-  // const { data: myBookings, isPending: isMyBookingsPending } =
-  //   $roomBooking.useQuery("get", "/bookings/my");
+
+  const bookings = rawBookings?.map((schema) => schemaToBooking(schema));
 
   return (
     <>
       <div className="grow overflow-hidden">
         <Suspense>
-          <BookingTimeline
-            className="h-full"
-            startDate={startDate}
-            endDate={endDate}
-            rooms={rooms}
-            isRoomsPending={isRoomsPending}
-            bookings={bookings}
-            isBookingsPending={isBookingsPending}
-            /* myBookings={myBookings} */
-            /* isMyBookingsPending={isMyBookingsPending} */
-            onBook={(newBooking: Slot) => {
-              setNewBookingSlot(newBooking);
-              setBookingDetails(undefined);
-              setModalOpen(true);
-            }}
-            onBookingClick={(booking: Booking) => {
-              setBookingDetails(booking);
-              setNewBookingSlot(undefined);
-              setModalOpen(true);
-            }}
-            ref={setTimelineRef}
-          />
+          {bookingsStatus !== "error" ? (
+            <BookingTimeline
+              className={`h-full ${bookingsStatus === "pending" ? "pointer-events-none select-none" : ""}`}
+              startDate={startDate}
+              endDate={endDate}
+              rooms={roomsToShow}
+              isRoomsPending={isRoomsPending}
+              bookings={bookings}
+              isBookingsPending={isBookingsPending}
+              /* myBookings={myBookings} */
+              /* isMyBookingsPending={isMyBookingsPending} */
+              onBook={(newBooking: Slot) => {
+                setNewBookingSlot(newBooking);
+                setBookingDetails(undefined);
+                setModalOpen(true);
+              }}
+              onBookingClick={(booking: Booking) => {
+                setBookingDetails(booking);
+                setNewBookingSlot(undefined);
+                setModalOpen(true);
+              }}
+              ref={setTimelineRef}
+            />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center">
+              <section className="relative h-screen w-full overflow-hidden text-[#feda4a]">
+                <div className="absolute inset-0 [perspective:1000px]">
+                  <div className="animate-booking-error absolute top-full left-1/2 w-[190vw] -translate-x-1/2 text-center font-bold tracking-wide uppercase [transform-style:preserve-3d]">
+                    <p className="mb-6 text-2xl md:text-4xl">
+                      Error loading bookings
+                    </p>
+                    <h1 className="mb-8 text-4xl leading-tight md:text-7xl">
+                      Most probably Outlook API is down
+                    </h1>
+
+                    <div className="space-y-6 text-lg leading-[1.8] whitespace-pre-wrap md:text-3xl">
+                      <p>{bookingsError?.detail?.toString()}</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
         </Suspense>
       </div>
       <BookingModal

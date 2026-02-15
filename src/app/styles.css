@@ -132,6 +132,18 @@
       width: 100%;
     }
   }
+
+  --animate-booking-error: booking-error 40s linear infinite;
+  @keyframes booking-error {
+    0% {
+      transform: rotateX(25deg) translate3d(0, 0vh, 0);
+      opacity: 1;
+    }
+    100% {
+      transform: rotateX(25deg) translate3d(0, -320vh, -1200px);
+      opacity: 0;
+    }
+  }
 }
 
 @layer base {

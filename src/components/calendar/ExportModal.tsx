@@ -1,7 +1,6 @@
 import { $events } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import ScheduleLinkCopy from "@/components/schedule/ScheduleLinkCopy.tsx";
-import { getICSLink } from "@/api/events/links.ts";
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -13,20 +12,55 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import { useRef } from "react";
+import { getICSLink, getPersonalLink } from "@/api/events/links.ts";
+import { TargetForExport } from "@/api/events/types.ts";
 
-export function EventGroupExportModal({
-  alias,
+export function ExportModal({
+  eventGroupOrTarget,
   open,
   onOpenChange,
+  aboveModal = false,
 }: {
-  alias: string;
+  eventGroupOrTarget: number | TargetForExport | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  aboveModal?: boolean;
 }) {
+  const isEventGroupModal = typeof eventGroupOrTarget === "number";
+  const isTargetModal = !!(
+    eventGroupOrTarget &&
+    typeof eventGroupOrTarget !== "number" &&
+    Object.values(TargetForExport).includes(eventGroupOrTarget)
+  );
   const { data: eventsUser } = $events.useQuery("get", "/users/me");
-  const { data: group } = $events.useQuery("get", "/event-groups/by-alias", {
-    params: { query: { alias } },
-  });
+  const { data: eventGroup } = $events.useQuery(
+    "get",
+    "/event-groups/{event_group_id}",
+    {
+      params: { path: { event_group_id: Number(eventGroupOrTarget) } },
+    },
+    {
+      enabled: isEventGroupModal,
+    },
+  );
+
+  const { data: scheduleKey } = $events.useQuery(
+    "post",
+    "/users/me/get-schedule-access-key",
+    {
+      params: {
+        query: {
+          resource_path: `/users/${eventsUser?.id}/${eventGroupOrTarget}.ics`,
+        },
+      },
+    },
+    {
+      enabled: isTargetModal,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    },
+  );
 
   const { context, refs } = useFloating({ open, onOpenChange });
 
@@ -42,19 +76,26 @@ export function EventGroupExportModal({
 
   const copyButtonRef = useRef(null);
 
-  if (!isMounted) {
+  if (!isMounted || !eventsUser) {
     return null;
   }
 
-  const calendarURL =
-    group !== undefined
-      ? getICSLink(group.alias, eventsUser?.id, "url")
-      : undefined;
+  let calendarURL = "";
+  if (isEventGroupModal && eventGroup) {
+    calendarURL = getICSLink(eventGroup.alias, eventsUser?.id, "url");
+  }
+
+  if (isTargetModal && scheduleKey) {
+    calendarURL = getPersonalLink(
+      scheduleKey.access_key.resource_path,
+      scheduleKey.access_key.access_key,
+    );
+  }
 
   return (
     <FloatingPortal>
       <FloatingOverlay
-        className="@container/export z-10 grid place-items-center bg-black/75"
+        className={`@container/export z-10 grid place-items-center ${aboveModal ? "bg-black/50" : "bg-black/75"}`}
         lockScroll
       >
         <FloatingFocusManager
@@ -66,14 +107,16 @@ export function EventGroupExportModal({
             ref={refs.setFloating}
             style={transitionStyles}
             {...getFloatingProps()}
-            className="flex h-fit w-full flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-1/2"
+            className="flex h-fit w-full max-w-[100vw] flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-2/3"
           >
             <div className="bg-base-200 rounded-box overflow-hidden">
               <div className="flex flex-col p-4">
                 {/* Heading and description */}
                 <div className="mb-2 flex w-full flex-row">
                   <div className="grow items-center text-3xl font-semibold">
-                    Export to your calendar
+                    {isTargetModal
+                      ? modalText[eventGroupOrTarget].title
+                      : "Export to your calendar"}
                   </div>
                   <button
                     type="button"
@@ -84,8 +127,10 @@ export function EventGroupExportModal({
                   </button>
                 </div>
                 <div className="text-base-content/75">
-                  You can add the schedule to your favorite calendar application
-                  and it will be updated on schedule changes.
+                  {isTargetModal
+                    ? modalText[eventGroupOrTarget].description
+                    : "You can add the schedule to your favorite calendar application\n" +
+                      "                  and it will be updated on schedule changes."}
                 </div>
                 {/* Export steps */}
                 <ul className="text-base-content/75 mt-4 list-decimal pl-5">
@@ -117,7 +162,9 @@ export function EventGroupExportModal({
               {/* Calendar itself */}
               <Calendar
                 urls={
-                  calendarURL ? [{ url: calendarURL, eventGroup: group }] : []
+                  calendarURL
+                    ? [{ url: calendarURL, eventGroup: eventGroup }]
+                    : []
                 }
                 viewId="popup"
               />
@@ -128,3 +175,39 @@ export function EventGroupExportModal({
     </FloatingPortal>
   );
 }
+
+const modalText: Record<
+  TargetForExport,
+  { title: string; description: string }
+> = {
+  [TargetForExport.music_room]: {
+    title: "Export music room bookings",
+    description:
+      "You can add your personal music room schedule to your favorite\n" +
+      "                  calendar application and it will be updated on changes.",
+  },
+  [TargetForExport.sport]: {
+    title: "Export sport trainings",
+    description:
+      "You can add your personal sport trainings schedule to your\n" +
+      "                  favorite calendar application and it will be updated on\n" +
+      "                  changes.",
+  },
+  [TargetForExport.moodle]: {
+    title: "Export Moodle deadlines",
+    description:
+      "You can add deadlines from your Moodle courses to your favorite calendar application and it will be updated on changes.",
+  },
+  [TargetForExport.room_bookings]: {
+    title: "Export room bookings",
+    description:
+      "You can add your room bookings to your favorite\n" +
+      "                  calendar application and it will be updated on changes.",
+  },
+  [TargetForExport.workshops]: {
+    title: "Export to your calendar",
+    description:
+      "You can add the schedule to your favorite calendar application\n" +
+      "                  and it will be updated on schedule changes.",
+  },
+};

@@ -407,6 +407,47 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/me/room-bookings.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Current User Room Bookings
+     * @description Get bookings in ICS format for the room bookings
+     */
+    get: operations["ics_get_current_user_room_bookings"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/{user_id}/room-bookings.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get User Room Bookings
+     * @description Get bookings in ICS format for the room bookings;
+     *     Requires access key for `/users/{user_id}/room-bookings.ics` resource
+     */
+    get: operations["ics_get_user_room_bookings"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/parse/cleaning": {
     parameters: {
       query?: never;
@@ -1012,6 +1053,11 @@ export interface components {
       tags: components["schemas"]["ViewTag"][];
     };
     /**
+     * TargetForExport
+     * @enum {string}
+     */
+    TargetForExport: TargetForExport;
+    /**
      * UpdateEventGroup
      * @description Represents a group instance to be updated.
      */
@@ -1109,6 +1155,10 @@ export interface components {
       sports_hidden: boolean;
       /** Moodle Hidden */
       moodle_hidden: boolean;
+      /** Workshops Hidden */
+      workshops_hidden: boolean;
+      /** Room Bookings Hidden */
+      room_bookings_hidden: boolean;
       /** Moodle Userid */
       moodle_userid?: number | null;
       /** Moodle Calendar Authtoken */
@@ -1680,6 +1730,13 @@ export interface operations {
           "text/calendar": string;
         };
       };
+      /** @description Object not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   ics_get_music_room_user_schedule: {
@@ -1995,6 +2052,13 @@ export interface operations {
           "text/calendar": string;
         };
       };
+      /** @description Music room is not configured */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   ics_get_event_group_ics_by_alias: {
@@ -2023,6 +2087,89 @@ export interface operations {
         };
       };
       /** @description Event group not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Path is not set for this event group, on-the-fly .ics not supported */
+      501: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ics_get_current_user_room_bookings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description ICS file with room bookings */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+          "text/calendar": string;
+        };
+      };
+      /** @description Object not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ics_get_user_room_bookings: {
+    parameters: {
+      query: {
+        access_key: string;
+      };
+      header?: never;
+      path: {
+        user_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description ICS file with room bookings */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+          "text/calendar": string;
+        };
+      };
+      /** @description Access denied, not enough permissions */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -2488,6 +2635,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Object not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -2506,7 +2660,7 @@ export interface operations {
       };
       header?: never;
       path: {
-        target: PathsUsersMeTargetHidePostParametersPathTarget;
+        target: components["schemas"]["TargetForExport"];
       };
       cookie?: never;
     };
@@ -2563,6 +2717,13 @@ export interface operations {
       };
       /** @description Unable to verify credentials OR Credentials not provided */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Calendar with this alias already exists */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -2743,8 +2904,10 @@ export interface operations {
     };
   };
 }
-export enum PathsUsersMeTargetHidePostParametersPathTarget {
+export enum TargetForExport {
   music_room = "music-room",
-  sports = "sports",
+  sport = "sport",
   moodle = "moodle",
+  room_bookings = "room-bookings",
+  workshops = "workshops",
 }

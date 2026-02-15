@@ -11,7 +11,7 @@ export default function HideButton({ groupId }: { groupId: number }) {
           e.preventDefault();
           switchHideFavorite?.();
         }}
-        className="hover:bg-inh-secondary-hover rounded-box flex h-12 w-12 items-center justify-center text-4xl"
+        className="hover:bg-inh-secondary-hover rounded-box flex h-10 w-10 items-center justify-center text-3xl"
       >
         {isHidden ? (
           <span className="icon-[material-symbols--visibility-off-outline] text-base-content/50" />

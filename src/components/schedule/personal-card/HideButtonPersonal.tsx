@@ -1,9 +1,13 @@
 import Tooltip from "@/components/common/Tooltip";
 import { $events, eventsTypes } from "@/api/events";
-import { PathsUsersMeTargetHidePostParametersPathTarget as Type } from "@/api/events/types.ts";
+import { TargetForExport } from "@/api/events/types.ts";
 import { useQueryClient } from "@tanstack/react-query";
 
-export default function HideButtonPersonal({ target }: { target: Type }) {
+export default function HideButtonPersonal({
+  target,
+}: {
+  target: TargetForExport;
+}) {
   const queryClient = useQueryClient();
   const { data: eventsUser } = $events.useQuery("get", "/users/me");
 
@@ -13,12 +17,16 @@ export default function HideButtonPersonal({ target }: { target: Type }) {
     });
 
   let isHidden = false;
-  if (target == Type.sports) {
+  if (target === TargetForExport.sport) {
     isHidden = eventsUser?.sports_hidden ?? false;
-  } else if (target == Type.moodle) {
+  } else if (target === TargetForExport.moodle) {
     isHidden = eventsUser?.moodle_hidden ?? false;
-  } else if (target == Type.music_room) {
+  } else if (target === TargetForExport.music_room) {
     isHidden = eventsUser?.music_room_hidden ?? false;
+  } else if (target === TargetForExport.workshops) {
+    isHidden = eventsUser?.workshops_hidden ?? false;
+  } else if (target === TargetForExport.room_bookings) {
+    isHidden = eventsUser?.room_bookings_hidden ?? false;
   }
 
   const hide = $events.useMutation("post", "/users/me/{target}/hide", {
@@ -34,11 +42,11 @@ export default function HideButtonPersonal({ target }: { target: Type }) {
             music_room_hidden?: boolean;
           } = {};
 
-          if (params.path.target == Type.sports) {
+          if (params.path.target == TargetForExport.sport) {
             patch.sports_hidden = params.query?.hide;
-          } else if (params.path.target == Type.moodle) {
+          } else if (params.path.target == TargetForExport.moodle) {
             patch.moodle_hidden = params.query?.hide;
-          } else if (params.path.target == Type.music_room) {
+          } else if (params.path.target == TargetForExport.music_room) {
             patch.music_room_hidden = params.query?.hide;
           }
 
@@ -66,7 +74,7 @@ export default function HideButtonPersonal({ target }: { target: Type }) {
           e.preventDefault();
           switchHideFavorite?.();
         }}
-        className="hover:bg-inh-secondary-hover rounded-box flex h-12 w-12 items-center justify-center text-4xl"
+        className="hover:bg-inh-secondary-hover rounded-box flex h-10 w-10 items-center justify-center text-3xl"
       >
         {isHidden ? (
           <span className="icon-[material-symbols--visibility-off-outline] text-base-content/50" />

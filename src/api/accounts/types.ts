@@ -380,6 +380,11 @@ export interface components {
        */
       is_staff: boolean;
       /**
+       * Is College
+       * @default false
+       */
+      is_college: boolean;
+      /**
        * Updated At
        * Format: date-time
        */
@@ -475,6 +480,11 @@ export interface components {
        * @default false
        */
       is_staff: boolean;
+      /**
+       * Is College
+       * @default false
+       */
+      is_college: boolean;
       /** Group */
       group?: string | null;
     };

@@ -64,7 +64,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
           {...getReferenceProps()}
           className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
         >
-          <span className="icon-[material-symbols--snowboarding-rounded] text-inh-inactive text-3xl" />
+          <span className="icon-[material-symbols--snowboarding-rounded] text-base-content/70 text-3xl" />
         </button>
       </Tooltip>
 
@@ -86,9 +86,9 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
             >
               <div className="flex flex-row justify-center gap-6 sm:justify-normal">
                 <div className="bg-inh-primary text-base-content/50 flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full">
-                  {me.telegram?.photo_url ? (
+                  {me.telegram_info?.photo_url ? (
                     <img
-                      src={me.telegram.photo_url}
+                      src={me.telegram_info.photo_url}
                       alt="Your avatar"
                       className="border-base-content/50 rounded-full border-2"
                     />
@@ -99,10 +99,17 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                 <div className="flex flex-col gap-2">
                   <div className="flex h-20 flex-col justify-center">
                     <p className="text-base-content text-xl">
-                      {me?.innopolis_sso?.name}{" "}
+                      {me?.innopolis_info?.name}{" "}
                     </p>
                     <p className="text-base-content/75 text-sm">
-                      {me?.innopolis_sso?.email}
+                      {me?.innopolis_info?.email}
+                    </p>
+                    <p className="text-base-content/75 text-sm">
+                      {me.telegram_info && (
+                        <>
+                          @{me.telegram_info?.username || "no Telegram alias"}
+                        </>
+                      )}
                     </p>
                   </div>
                   <Link

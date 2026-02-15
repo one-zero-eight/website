@@ -8,13 +8,19 @@ import {
 import { viewConfig } from "@/components/schedule/view-config.ts";
 import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
+import SimpleExportButton from "@/components/schedule/group-card/SimpleExportButton.tsx";
 
 export type GroupCardProps = {
   group: eventsTypes.SchemaViewEventGroup;
   canHide?: boolean;
+  exportButtonOnClick?: () => void;
 };
 
-export function GroupCard({ group, canHide = false }: GroupCardProps) {
+export function GroupCard({
+  group,
+  canHide = false,
+  exportButtonOnClick,
+}: GroupCardProps) {
   const category = getFirstTagByType(group, "category");
   const tagsToDisplay =
     category && category.alias in viewConfig.categories
@@ -54,6 +60,7 @@ export function GroupCard({ group, canHide = false }: GroupCardProps) {
         )}
       </div>
       <div className="flex flex-row place-items-center select-none">
+        <SimpleExportButton onClick={exportButtonOnClick} />
         {canHide && <HideButton groupId={group.id} />}
         <FavoriteButton groupId={group.id} />
       </div>

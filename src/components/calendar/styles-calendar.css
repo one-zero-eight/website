@@ -27,7 +27,7 @@
   }
 
   .fc-header-toolbar.fc-toolbar {
-    @apply mb-1 gap-x-0.5 gap-y-2 overflow-x-auto px-1;
+    @apply mb-0 gap-x-0.5 gap-y-2 overflow-x-auto px-1;
 
     /* Shadow on the right side of a toolbar visible on the right when we can scroll to right */
     @media (max-width: 450px) {
@@ -91,7 +91,7 @@
       font-variant-ligatures: none;
       &:before {
         content: "<span></span>";
-        @apply icon-[material-symbols--settings-outline] text-2xl;
+        @apply icon-[material-symbols--settings-outline] my-[2px] text-xl;
       }
     }
   }

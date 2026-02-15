@@ -7,7 +7,6 @@ import { Helmet } from "@dr.pogodin/react-helmet";
 
 type RoomBookingSearch = {
   d?: number;
-  showRed?: boolean;
 };
 
 export const Route = createFileRoute("/_with_menu/room-booking/")({
@@ -23,17 +22,11 @@ export const Route = createFileRoute("/_with_menu/room-booking/")({
     if (!Number.isNaN(unix) && unix > Date.UTC(0)) {
       result.d = unix;
     }
-
-    if (search.showRed === "1" || search.showRed === "true") {
-      result.showRed = true;
-    }
-
     return result;
   },
 });
 
 function RouteComponent() {
-  const { showRed } = Route.useSearch();
   return (
     <>
       <Helmet>
@@ -47,7 +40,7 @@ function RouteComponent() {
       <Topbar title="Room booking" hideOnMobile />
       <BookingPageTabs />
       <RequireAuth>
-        <RoomBookingPage showRed={showRed} />
+        <RoomBookingPage />
       </RequireAuth>
     </>
   );

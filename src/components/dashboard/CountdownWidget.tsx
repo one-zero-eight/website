@@ -121,7 +121,7 @@ export function CountdownWidget() {
   const deltaTimeSeconds = (nextEvent.date.getTime() - nowMs) / 1000;
 
   return (
-    <div className="group bg-inh-primary rounded-box flex flex-row gap-4 px-4 py-4">
+    <div className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-4">
       <span
         className={`${nextEvent.iconClass} text-primary hidden w-12 shrink-0 text-5xl sm:block`}
       />

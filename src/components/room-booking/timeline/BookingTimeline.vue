@@ -6,10 +6,12 @@ import {
   msBetween as msBetweenDates,
   T,
 } from "@/lib/utils/dates.ts";
-import { useMediaQuery, useNow } from "@vueuse/core";
+import { useMediaQuery, useNow, useScroll, useElementSize } from "@vueuse/core";
 import type { MaybeRef } from "vue";
 import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
 import type { Booking, Room, ScrollToOptions, Slot } from "./types.ts";
+import { accessLevelColors } from "../AccessLevelIcon.tsx";
+import { sanitizeBookingTitle } from "./BookingModal.tsx";
 
 /* ========================================================================== */
 /* ================================ Options ================================= */
@@ -43,7 +45,7 @@ defineExpose({ scrollTo });
 const COMPACT_VERSION_WIDTH_THRESHOLD = 768;
 
 const SIDEBAR_WIDTH_DEFAULT = 200;
-const SIDEBAR_WIDTH_COMPACT = 65;
+const SIDEBAR_WIDTH_COMPACT = 75;
 
 const PIXELS_PER_MINUTE_DEFAULT = 100 / 30;
 const PIXELS_PER_MINUTE_COMPACT = 85 / 30;
@@ -57,13 +59,10 @@ const MAX_BOOKING_DURATION = 3 * T.Hour;
 
 const NEW_BOOKING_BOX_ID = "new-booking-box";
 
-const PLACEHOLDER_ROOMS = Array.from({ length: 19 }).fill(
-  "placeholder",
-) as "placeholder"[];
-
-const PLACEHOLDER_BOOKINGS = Array.from({ length: 10 }).fill(
-  "placeholder",
-) as "placeholder"[];
+const PLACEHOLDER_ROOMS_DEFAULT_COUNT = 18;
+const PLACEHOLDER_ROOMS = Array.from({
+  length: PLACEHOLDER_ROOMS_DEFAULT_COUNT,
+}).fill("placeholder") as "placeholder"[];
 
 const HOURS_TIMES = Array.from({ length: 24 })
   .fill(null)
@@ -229,7 +228,7 @@ const actualBookingsByRoomSorted = computed(() => {
 
 const now = useNow({ interval: T.Sec });
 const nowRulerCssVars = computed(() => ({
-  "--now-x": px(msToPx(msBetween(timelineStart, now))),
+  "--now-x": px(msToPx(msBetween(timelineStart, now)) - scrollX.value),
 }));
 
 const bookingPositions = computed(() => {
@@ -237,19 +236,11 @@ const bookingPositions = computed(() => {
   const positions = new Map<Booking["id"], BookingPosition>();
 
   for (const bookings of actualBookingsByRoomSorted.value.values()) {
-    let roomLength = 0;
     for (const { id, startsAt, endsAt } of bookings) {
-      // Need to do this sort of calculation due to how the bookings
-      // are rendered on the timeline: they are rendered one-by-one
-      // in a flex container, so the actual position of each booking
-      // depends on previous bookings.
-
+      // Use absolute positioning from timeline start for virtualization support
       const length = msToPx(msBetween(startsAt, endsAt));
-      positions.set(id, {
-        offsetX: msToPx(msBetween(start, startsAt)) - roomLength,
-        length,
-      });
-      roomLength += length;
+      const offsetX = msToPx(msBetween(start, startsAt));
+      positions.set(id, { offsetX, length });
     }
   }
 
@@ -328,6 +319,118 @@ const scrollerEl = ref<HTMLElement | null>(null);
 
 /** Element that is positioned on the interactive area of the timeline. */
 const overlayEl = ref<HTMLElement | null>(null);
+
+// Horizontal virtualization - track scroll position to filter visible bookings
+const HORIZONTAL_OVERSCAN_PX = 500; // Extra pixels to render left/right for smooth scrolling
+
+const { x: scrollX, y: scrollY } = useScroll(scrollerEl);
+const { width: containerWidth, height: containerHeight } =
+  useElementSize(scrollerEl);
+
+// Total width of the timeline content in pixels
+const totalTimelineWidth = computed(() => {
+  const durationMs = msBetween(timelineStart, timelineEnd);
+  return msToPx(durationMs);
+});
+
+// Visible viewport range in pixels (with overscan)
+const visibleRangePx = computed(() => {
+  const left = Math.max(0, scrollX.value - HORIZONTAL_OVERSCAN_PX);
+  const right = Math.min(
+    totalTimelineWidth.value,
+    scrollX.value + containerWidth.value + HORIZONTAL_OVERSCAN_PX,
+  );
+  return { left, right, width: right - left };
+});
+
+const visibleTimeRange = computed(() => {
+  // Calculate visible time range based on horizontal scroll position
+  const { left: viewportLeft, right: viewportRight } = visibleRangePx.value;
+
+  // Convert pixels to time
+  const startMs =
+    timelineStart.value.getTime() +
+    (viewportLeft / pixelsPerMinute.value) * T.Min;
+  const endMs =
+    timelineStart.value.getTime() +
+    (viewportRight / pixelsPerMinute.value) * T.Min;
+
+  return { startMs, endMs };
+});
+
+// Calculate which days are visible in the current viewport
+const visibleDates = computed(() => {
+  const { startMs, endMs } = visibleTimeRange.value;
+  const dates: Date[] = [];
+
+  for (const date of timelineDates.value) {
+    const dayStart = date.getTime();
+    const dayEnd = dayStart + T.Day;
+
+    // Check if this day overlaps with visible range
+    if (dayEnd > startMs && dayStart < endMs) {
+      dates.push(date);
+    }
+  }
+
+  return dates;
+});
+
+// Total height of the body (all room rows)
+const totalBodyHeight = computed(() => {
+  const roomCount = roomsLoading.value
+    ? PLACEHOLDER_ROOMS_DEFAULT_COUNT
+    : actualRooms.value.length;
+  return roomCount * ROW_HEIGHT;
+});
+
+/**
+ * Returns only the bookings that are visible in the current horizontal viewport for a given room.
+ * Uses binary search since bookings are sorted by start time.
+ */
+function getVisibleBookingsForRoom(roomId: Room["id"]): Booking[] {
+  const bookings = actualBookingsByRoomSorted.value.get(roomId);
+  if (!bookings || bookings.length === 0) return [];
+
+  const { startMs, endMs } = visibleTimeRange.value;
+
+  // Use binary search to find the range of visible bookings
+  // Find first booking that ends after viewport left
+  let left = 0;
+  let right = bookings.length - 1;
+
+  while (left < right) {
+    const mid = Math.floor((left + right) / 2);
+    if (bookings[mid].endsAt.getTime() <= startMs) {
+      left = mid + 1;
+    } else {
+      right = mid;
+    }
+  }
+
+  // Check if we found a valid starting point
+  if (left >= bookings.length || bookings[left].startsAt.getTime() >= endMs) {
+    return [];
+  }
+
+  const firstVisibleIdx = left;
+
+  // Find last booking that starts before viewport right
+  right = bookings.length - 1;
+  while (left < right) {
+    const mid = Math.ceil((left + right) / 2);
+    if (bookings[mid].startsAt.getTime() >= endMs) {
+      right = mid - 1;
+    } else {
+      left = mid;
+    }
+  }
+
+  const lastVisibleIdx = right;
+
+  // Return the slice of visible bookings
+  return bookings.slice(firstVisibleIdx, lastVisibleIdx + 1);
+}
 
 function bookingRangeByHoverDate(
   dateMs: number,
@@ -485,20 +588,26 @@ function clientCoordinatesWithinOverlay(x0: number, y0: number): boolean {
 }
 
 function positionByClientCoordinates(x: number, y: number): Position | null {
-  const rect = wrapperEl.value?.getBoundingClientRect();
+  const rect = scrollerEl.value?.getBoundingClientRect();
 
   if (!rect) return null;
 
   const { x: cornerX, y: cornerY } = rect;
-  x -= cornerX + sidebarWidth.value;
-  y -= cornerY + HEADER_HEIGHT;
 
-  const roomIdx = Math.floor(y / ROW_HEIGHT);
+  // Convert client coordinates to position within scroller viewport
+  const viewportX = x - cornerX - sidebarWidth.value;
+  const viewportY = y - cornerY - HEADER_HEIGHT;
+
+  // Account for scroll position to get absolute timeline position
+  const timelineX = viewportX + scrollX.value;
+  const timelineY = viewportY + scrollY.value;
+
+  const roomIdx = Math.floor(timelineY / ROW_HEIGHT);
   const room = actualRooms.value[roomIdx];
   if (!room) return null;
 
   const date = new Date(
-    timelineStart.value.getTime() + (x / pixelsPerMinute.value) * T.Min,
+    timelineStart.value.getTime() + (timelineX / pixelsPerMinute.value) * T.Min,
   );
 
   return { room, date };
@@ -628,7 +737,6 @@ const stateListenerTransitionMap: {
   },
   "mouse-dragging": {
     mousemove: transition4_mousemove,
-    mouseleave: transition3_mouseleave,
     mouseup: (event, state) => {
       event.preventDefault();
       const slot = validSlotByState(state);
@@ -793,11 +901,10 @@ function transition3_mouseleave(_: MouseEvent): InteractionState {
 function transition4_mousemove(
   event: MouseEvent,
   state: InteractionState_<"mouse-dragging">,
-): InteractionState {
+): InteractionState | null {
   const { clientX, clientY } = event;
 
-  if (!clientCoordinatesWithinOverlay(clientX, clientY))
-    return { type: "idle" };
+  if (!clientCoordinatesWithinOverlay(clientX, clientY)) return null;
 
   const pos = positionByClientCoordinates(clientX, clientY);
   if (!pos) return { type: "idle" };
@@ -849,7 +956,7 @@ function handleBoookingConfirm() {
 
 // Register event listeners for the current state.
 watch(
-  [() => interactionState.value.type, wrapperEl],
+  [() => interactionState.value.type, scrollerEl],
   ([newState, el], _, onCleanup) => {
     if (!el) return;
 
@@ -913,13 +1020,17 @@ const newBookingData = computed(() => {
 
   const duration = msBetween(slot.start, slot.end);
 
+  // Calculate position relative to current scroll position (viewport-relative)
+  const absoluteX = msToPx(msBetween(timelineStart, slot.start));
+  const viewportX = absoluteX - scrollX.value;
+
   return {
     duration,
     durationText: durationFormatted(duration),
     startTime: clockTime(slot.start),
     endTime: clockTime(slot.end),
     cssVars: {
-      "--new-x": px(msToPx(msBetween(timelineStart, slot.start))),
+      "--new-x": px(viewportX),
       "--new-y": px(slot.room.idx * ROW_HEIGHT),
       "--new-length": px(msToPx(duration)),
     },
@@ -990,6 +1101,9 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
         '--header-height': px(HEADER_HEIGHT),
         '--row-height': px(ROW_HEIGHT),
         '--ppm': pixelsPerMinute,
+        '--total-width': px(totalTimelineWidth + sidebarWidth),
+        '--body-height': px(totalBodyHeight),
+        '--container-height': px(containerHeight),
       }"
       :data-has-new="newBookingData ? '' : null"
       :data-new-pressed="
@@ -1003,14 +1117,24 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
         <h2 v-show="!compactModeEnabled">Timeline</h2>
       </div>
 
-      <div ref="scrollerEl" :class="$style.scroller">
+      <div
+        ref="scrollerEl"
+        :class="$style.scroller"
+        :style="{
+          '--visible-left': px(visibleRangePx.left),
+          '--visible-width': px(visibleRangePx.width),
+        }"
+      >
         <div ref="wrapperEl" :class="$style.wrapper">
-          <!-- Time rulers background. -->
+          <!-- Spacer to maintain full scrollable width -->
+          <div :class="$style.spacer" />
+
+          <!-- Time rulers background - rendered only for visible area -->
           <svg :class="$style['rulers-svg']" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern
                 id="Rulers"
-                x="0"
+                :x="-(scrollX % (pixelsPerMinute * 60))"
                 y="0"
                 :width="pixelsPerMinute * 60"
                 height="100%"
@@ -1083,11 +1207,16 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
           </div>
 
           <!-- Header of the timeline (dates and hours). -->
-          <div v-memo="[timelineDates]" :class="$style.header">
+          <div :class="$style.header">
             <div
-              v-for="day in timelineDates"
+              v-for="day in visibleDates"
               :key="day.toString()"
               :class="$style['header-item']"
+              :style="{
+                '--day-offset': px(
+                  msToPx(msBetween(timelineStart, day)) - scrollX,
+                ),
+              }"
             >
               <span :class="$style['header-item-day']">
                 {{ dayTitle(day) }}
@@ -1100,78 +1229,95 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
             </div>
           </div>
 
-          <!-- Body of the timeline (rooms and bookings). -->
-          <div
-            v-memo="[
-              roomsLoading,
-              actualRooms,
-              bookingsLoading,
-              actualBookingsByRoomSorted,
-              // myBookings,
-              compactModeEnabled,
-            ]"
-            :class="$style.body"
-          >
+          <!-- Body of the timeline (bookings only). -->
+          <div :class="$style.body">
+            <!-- Bookings layer - only visible bookings rendered -->
             <div
-              v-for="(room, i) in roomsLoading
-                ? PLACEHOLDER_ROOMS
-                : actualRooms"
-              :key="room === 'placeholder' ? i : room.id"
-              :class="$style.row"
+              v-if="!roomsLoading && !bookingsLoading"
+              :class="$style['bookings-layer']"
             >
-              <div
-                :class="{
-                  [$style['row-header']]: true,
-                  [$style.placeholder]: room === 'placeholder',
-                }"
-              >
-                <a v-if="room === 'placeholder'" href="#">xxx</a>
-                <a v-else :href="`/room-booking/rooms/${room.id}`">
-                  {{ compactModeEnabled ? room.short_name : room.title }}
-                </a>
-              </div>
+              <template v-for="room in actualRooms" :key="room.id">
+                <div
+                  v-for="booking in getVisibleBookingsForRoom(room.id)"
+                  :key="booking.id"
+                  :class="{
+                    [$style.booking]: true,
+                    [$style.myBooking]: booking.related_to_me,
+                  }"
+                  :style="{
+                    '--left': px(
+                      (bookingPositions.get(booking.id)?.offsetX ?? 0) -
+                        scrollX,
+                    ),
+                    '--width': px(
+                      bookingPositions.get(booking.id)?.length ?? 0,
+                    ),
+                    '--row-index': room.idx,
+                  }"
+                >
+                  <div
+                    :title="booking.title"
+                    :data-booking-id="booking.id"
+                    @click="handleBookingClick"
+                  >
+                    <span>{{ sanitizeBookingTitle(booking.title) }}</span>
+                  </div>
+                </div>
+              </template>
+            </div>
 
+            <!-- Placeholder bookings for loading state -->
+            <div v-else-if="bookingsLoading" :class="$style['bookings-layer']">
               <div
-                v-for="(booking, j) in room === 'placeholder' || bookingsLoading
-                  ? PLACEHOLDER_BOOKINGS
-                  : actualBookingsByRoomSorted.get(room.id)?.values()"
-                :key="booking === 'placeholder' ? j : booking.id"
+                v-for="i in actualRooms?.length ||
+                PLACEHOLDER_ROOMS_DEFAULT_COUNT"
+                :key="i"
                 :class="{
                   [$style.booking]: true,
-                  [$style.myBooking]:
-                    typeof booking !== 'string' && booking.isMine,
-                  [$style.placeholder]: booking === 'placeholder',
+                  [$style.placeholder]: true,
                 }"
-                :style="
-                  booking === 'placeholder'
-                    ? {}
-                    : {
-                        '--left': px(
-                          bookingPositions.get(booking.id)?.offsetX ?? 0,
-                        ),
-                        '--width': px(
-                          bookingPositions.get(booking.id)?.length ?? 0,
-                        ),
-                      }
-                "
+                :style="{
+                  '--row-index': i - 1,
+                }"
               >
-                <div v-if="booking === 'placeholder'">
+                <div>
                   <span>PLACEHOLDER</span>
                 </div>
-                <div
-                  v-else
-                  :title="booking.title"
-                  :data-booking-id="booking.id"
-                  @click="handleBookingClick"
-                >
-                  <span>{{
-                    booking.title
-                      .replace("Students Booking Service", "")
-                      .replace("FW:", "")
-                      .trim()
-                  }}</span>
-                </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Room headers sidebar - outside scroller, syncs with vertical scroll -->
+      <div :class="$style['room-list']">
+        <div
+          :class="$style['room-list-inner']"
+          :style="{ transform: `translateY(${-scrollY}px)` }"
+        >
+          <div
+            v-for="(room, i) in roomsLoading ? PLACEHOLDER_ROOMS : actualRooms"
+            :key="room === 'placeholder' ? i : room.id"
+            :class="$style.row"
+          >
+            <div
+              :class="{
+                [$style['row-header']]: true,
+                [$style.placeholder]: room === 'placeholder',
+              }"
+            >
+              <a v-if="room === 'placeholder'" href="#">xxx</a>
+              <a v-else :href="`/room-booking/rooms/${room.id}`">
+                <span
+                  class="icon-[material-symbols--lock-open-circle-outline] -mb-0.25 text-sm"
+                  :style="{
+                    color: room.access_level
+                      ? accessLevelColors[room.access_level]
+                      : 'inherit',
+                  }"
+                />
+                {{ compactModeEnabled ? room.short_name : room.title }}
+              </a>
             </div>
           </div>
         </div>
@@ -1356,13 +1502,30 @@ $button-height: 50px;
   overflow: auto;
   overscroll-behavior: none;
   max-height: 100%;
+
+  // Pseudo-element spacer to create scrollable width without affecting layout
+  &::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--total-width);
+    height: 1px;
+    pointer-events: none;
+  }
 }
 
 .wrapper {
-  display: flex;
-  flex-direction: column;
-  width: fit-content;
-  position: relative;
+  position: sticky;
+  left: 0;
+  width: 100%;
+  min-height: calc(var(--header-height) + var(--body-height));
+}
+
+// Remove the spacer div - using pseudo-element instead
+.spacer {
+  display: none;
 }
 
 .header {
@@ -1371,16 +1534,22 @@ $button-height: 50px;
   position: sticky;
   top: 0;
   z-index: 2;
-  display: flex;
-  width: fit-content;
+  display: block;
+  width: calc(100% - var(--sidebar-width));
   height: var(--header-height);
   margin-left: var(--sidebar-width);
   border-bottom: 1px solid var(--c-borders);
+  overflow: hidden; // Clip day items that extend beyond visible area
 
   background: var(--c-bg-items);
   color: var(--c-text-muted);
 
   &-item {
+    position: absolute;
+    left: var(--day-offset);
+    top: 0;
+    height: 100%;
+    width: calc(var(--ppm) * 60px * 24); // One day width
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1414,8 +1583,45 @@ $button-height: 50px;
 
 .body {
   @include text-md;
+  position: relative;
+  height: var(--body-height);
+}
+
+.room-list {
   display: flex;
   flex-direction: column;
+  width: var(--sidebar-width);
+  position: absolute;
+  left: 0;
+  top: var(--header-height);
+  // Use container height (client height of scroller) to avoid covering scrollbar
+  height: calc(var(--container-height) - var(--header-height));
+  z-index: 4; // Above bookings and header
+  background: var(--c-bg-items);
+  overflow: hidden; // Clip rooms that scroll out of view
+}
+
+.room-list-inner {
+  display: flex;
+  flex-direction: column;
+  will-change: transform; // Optimize for transform animations
+}
+
+.bookings-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  // Don't use right: 0 as it would stretch to wrapper width
+  // Bookings are positioned absolutely within this layer
+  width: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+
+  // Allow clicks on individual bookings
+  & > * {
+    pointer-events: auto;
+  }
 }
 
 .row {
@@ -1437,13 +1643,10 @@ $button-height: 50px;
 }
 
 .row-header {
-  position: sticky;
-  left: 0;
-  z-index: 1;
   width: var(--sidebar-width);
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 8px;
   background: var(--c-bg-items);
   color: var(--c-text-muted);
 
@@ -1472,10 +1675,12 @@ $button-height: 50px;
 .rulers-svg {
   display: block;
   position: absolute;
-  top: 0;
+  top: var(--header-height);
   left: var(--sidebar-width);
-  width: 100%;
-  height: 100%;
+  width: calc(100% - var(--sidebar-width));
+  height: var(--body-height);
+  pointer-events: none;
+  z-index: 0;
 
   & pattern rect {
     fill: var(--c-borders);
@@ -1522,7 +1727,7 @@ $button-height: 50px;
 .now-ruler {
   z-index: 1;
   position: absolute;
-  height: 100%;
+  height: calc(var(--header-height) + var(--body-height));
   width: 1px;
   background: var(--c-ruler-now);
   left: calc(var(--sidebar-width) + var(--now-x));
@@ -1532,9 +1737,11 @@ $button-height: 50px;
 .booking {
   @include booking;
 
-  position: relative;
-  left: var(--left);
+  position: absolute;
+  left: calc(var(--sidebar-width) + var(--left));
+  top: calc(var(--row-index) * var(--row-height));
   width: var(--width);
+  height: var(--row-height);
 
   &.myBooking > div {
     border: 1px solid var(--c-textbox-borders-green);
@@ -1567,7 +1774,9 @@ $button-height: 50px;
   }
 
   &.placeholder {
-    flex: 1 0 auto;
+    // Placeholder bookings are positioned using row-index and spread horizontally
+    left: 0;
+    width: var(--visible-width);
 
     & > div {
       padding: 8px;
@@ -1662,7 +1871,7 @@ $button-height: 50px;
   position: absolute;
   top: 0;
   z-index: 1;
-  height: 100%;
+  height: calc(var(--header-height) + var(--body-height));
   width: 1px;
   background: var(--c-ruler-new);
 }

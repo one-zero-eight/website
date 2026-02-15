@@ -1,8 +1,8 @@
 import { mapsTypes } from "@/api/maps";
 import { $roomBooking } from "@/api/room-booking";
-import { RoomAccess_level } from "@/api/room-booking/types.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { getMapAreaUrl } from "@/components/maps/links.ts";
+import { AccessLevelIcon } from "@/components/room-booking/AccessLevelIcon.tsx";
 import {
   arrow,
   autoUpdate,
@@ -140,12 +140,6 @@ function RoomBookingDetails({ roomId }: { roomId: string }) {
   });
   const room = rooms?.find((r) => r.id === roomId);
 
-  const accessLevelColors: Record<RoomAccess_level, string> = {
-    [RoomAccess_level.yellow]: "#FFD700", // Gold
-    [RoomAccess_level.red]: "#FF4500", // OrangeRed
-    [RoomAccess_level.special]: "#ac72e4", // Violet
-  };
-
   return (
     <>
       {room?.capacity && (
@@ -160,11 +154,11 @@ function RoomBookingDetails({ roomId }: { roomId: string }) {
       )}
       {room?.access_level && (
         <div className="flex flex-row gap-2">
-          <div
-            className="w-6"
-            style={{ color: accessLevelColors[room.access_level] || "inherit" }}
-          >
-            <span className="icon-[material-symbols--lock-open-circle-outline] text-2xl" />
+          <div className="w-6">
+            <AccessLevelIcon
+              accessLevel={room.access_level}
+              className="text-2xl"
+            />
           </div>
           <p className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap">
             Access level: {room.access_level}

@@ -14,7 +14,7 @@ export default function ToggleSnowButton() {
         <span
           className={clsx(
             "icon-[lsicon--heavy-snow-outline] flex text-3xl",
-            isSnowVisible ? "text-[#69ddff]" : "text-inh-inactive",
+            isSnowVisible ? "text-[#69ddff]" : "text-base-content/70",
           )}
         />
       </button>
