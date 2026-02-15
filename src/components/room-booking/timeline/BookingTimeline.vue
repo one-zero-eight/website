@@ -737,7 +737,6 @@ const stateListenerTransitionMap: {
   },
   "mouse-dragging": {
     mousemove: transition4_mousemove,
-    mouseleave: transition3_mouseleave,
     mouseup: (event, state) => {
       event.preventDefault();
       const slot = validSlotByState(state);
@@ -902,11 +901,10 @@ function transition3_mouseleave(_: MouseEvent): InteractionState {
 function transition4_mousemove(
   event: MouseEvent,
   state: InteractionState_<"mouse-dragging">,
-): InteractionState {
+): InteractionState | null {
   const { clientX, clientY } = event;
 
-  if (!clientCoordinatesWithinOverlay(clientX, clientY))
-    return { type: "idle" };
+  if (!clientCoordinatesWithinOverlay(clientX, clientY)) return null;
 
   const pos = positionByClientCoordinates(clientX, clientY);
   if (!pos) return { type: "idle" };
