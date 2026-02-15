@@ -55,38 +55,38 @@ function Attendee({
 
   return attendeeDetails ? (
     <>
-      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+      <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
         <div className="flex h-fit w-6">
-          <span className="icon-[material-symbols--person-outline-rounded] text-2xl" />
+          <span className="icon-[material-symbols--person-outline-rounded] text-xl" />
         </div>
         <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
-          <span className="text-xl">{attendeeDetails.name}</span>
+          <span className="text-base">{attendeeDetails.name}</span>
         </div>
       </div>
 
-      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+      <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
         <div className="flex h-fit w-6">
-          <span className="text-2xl" />
+          <span className="text-xl" />
         </div>
         <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
           <a
-            className="text-xl hover:underline"
-            href={`mailto:${attendee.email}`}
+            className="text-base hover:underline"
+            href={`mailto:${attendeeDetails.email}`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            {attendee.email.replace("@innopolis.university", "")}
+            {attendeeDetails.email}
           </a>
         </div>
       </div>
 
-      <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+      <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
         <div className="flex h-fit w-6">
-          <span className="text-2xl" />
+          <span className="text-xl" />
         </div>
         <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
           <a
-            className="text-xl hover:underline"
+            className="text-base hover:underline"
             href={
               attendeeDetails.telegram_username
                 ? `https://t.me/${attendeeDetails.telegram_username}`
@@ -103,14 +103,19 @@ function Attendee({
       </div>
     </>
   ) : (
-    <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+    <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
       <div className="flex h-fit w-6">
-        <span className="icon-[material-symbols--person-outline-rounded] text-2xl" />
+        <span className="icon-[material-symbols--person-outline-rounded] text-xl" />
       </div>
       <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
-        <span className="text-xl">
-          {attendee.email.replace("@innopolis.university", "")}
-        </span>
+        <a
+          className="text-base hover:underline"
+          href={`mailto:${attendee.email}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {attendee.email}
+        </a>
       </div>
     </div>
   );
@@ -430,9 +435,9 @@ export function BookingModal({
 
   const BookingRooms = outlookBookingRooms ? (
     outlookBookingRooms.map((room) => (
-      <div className="text-base-content/75 flex flex-row items-start gap-2 text-xl">
-        <div className="mt-1.5 flex h-fit w-6">
-          <span className="icon-[material-symbols--location-on-outline] text-2xl" />
+      <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
+        <div className="flex h-fit w-6">
+          <span className="icon-[material-symbols--location-on-outline] text-xl" />
         </div>
         <div
           className="flex flex-row items-center gap-2"
@@ -445,14 +450,15 @@ export function BookingModal({
           >
             {room.room?.title}
           </Link>
-          {roomStatus(room.attendee.status ?? BookingStatus.Unknown)}
+          {outlookBookingId &&
+            roomStatus(room.attendee.status ?? BookingStatus.Unknown)}
         </div>
       </div>
     ))
   ) : room ? (
-    <div className="text-base-content/75 flex flex-row items-start gap-2 text-xl">
+    <div className="text-base-content/75 flex flex-row items-start gap-2 text-base">
       <div className="mt-1.5 flex h-fit w-6">
-        <span className="icon-[material-symbols--location-on-outline] text-2xl" />
+        <span className="icon-[material-symbols--location-on-outline] text-xl" />
       </div>
       <Link
         to="/room-booking/rooms/$room"
@@ -478,8 +484,8 @@ export function BookingModal({
   };
 
   const BookingDateTime = (
-    <div className="my-2">
-      <label htmlFor="start" className="text-base-content/75 text-lg">
+    <div className="my-1">
+      <label htmlFor="start" className="text-base-content/75 text-base">
         Start
       </label>
       <input
@@ -488,9 +494,9 @@ export function BookingModal({
         name="party-date"
         value={start ? toLocalTimeString(start) : ""}
         onChange={(e) => setStart(fromLocalTimeString(e.target.value))}
-        className="bg-inh-secondary focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-xl outline-hidden focus:ring-2"
+        className="bg-inh-secondary focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
       />
-      <label htmlFor="end" className="text-base-content/75 text-lg">
+      <label htmlFor="end" className="text-base-content/75 text-base">
         End
       </label>
       <input
@@ -499,15 +505,15 @@ export function BookingModal({
         name="party-date"
         value={end ? toLocalTimeString(end) : ""}
         onChange={(e) => setEnd(fromLocalTimeString(e.target.value))}
-        className="bg-inh-secondary focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-xl outline-hidden focus:ring-2"
+        className="bg-inh-secondary focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
       />
     </div>
   );
 
   const BookingDate = (
-    <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+    <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
       <div className="flex h-fit w-6">
-        <span className="icon-[material-symbols--today-outline] text-2xl" />
+        <span className="icon-[material-symbols--today-outline] text-xl" />
       </div>
       <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
         {`${start?.toLocaleString("en-US", { day: "2-digit", month: "long" })}, ${start?.toLocaleString("en-US", { weekday: "long" })}`}
@@ -516,9 +522,9 @@ export function BookingModal({
   );
 
   const BookingTime = (
-    <div className="text-base-content/75 flex flex-row items-center gap-2 text-xl">
+    <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
       <div className="flex h-fit w-6">
-        <span className="icon-[material-symbols--schedule-outline] text-2xl" />
+        <span className="icon-[material-symbols--schedule-outline] text-xl" />
       </div>
       {start && end && (
         <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
@@ -536,15 +542,15 @@ export function BookingModal({
       : undefined;
 
   const NewBookingWarning = canBookPending ? (
-    <div className="alert alert-info text-base">
+    <div className="alert alert-info px-4 py-2 text-base">
       <span>Checking rules...</span>
     </div>
   ) : !canBookData ? null : canBookData.can_book ? (
-    <div className="alert alert-success text-base">
+    <div className="alert alert-success px-4 py-2 text-base">
       <span>You can book this time slot.</span>
     </div>
   ) : (
-    <div className="alert alert-warning text-base">
+    <div className="alert alert-warning px-4 py-2 text-base">
       <span>{canBookData.reason_why_cannot}</span>
     </div>
   );
@@ -702,10 +708,10 @@ export function BookingModal({
             className="flex h-fit w-full max-w-lg flex-col p-4 outline-hidden"
           >
             <div className="bg-base-200 rounded-box overflow-hidden">
-              <div className="flex flex-col p-4 @2xl/modal:p-8">
+              <div className="flex flex-col p-4">
                 {/* Heading and description */}
-                <div className="mb-4 flex w-full flex-row">
-                  <div className="grow items-center text-3xl font-semibold">
+                <div className="mb-2 flex w-full flex-row items-center">
+                  <div className="grow items-center text-2xl font-semibold">
                     {newSlot ? "New booking" : "Booking details"}
                   </div>
                   <button
@@ -713,7 +719,7 @@ export function BookingModal({
                     className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center @lg/export:-mt-6 @lg/export:-mr-6"
                     onClick={() => onOpenChange(false)}
                   >
-                    <span className="icon-[material-symbols--close] text-4xl" />
+                    <span className="icon-[material-symbols--close] text-2xl" />
                   </button>
                 </div>
 
@@ -736,7 +742,7 @@ export function BookingModal({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Enter title..."
-                        className="bg-inh-secondary focus:ring-primary w-full grow rounded-xl px-4 py-2 text-xl outline-hidden focus:ring-2"
+                        className="bg-inh-secondary focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
                       />
 
                       {BookingRooms}
@@ -765,18 +771,18 @@ export function BookingModal({
                     }}
                   >
                     <div className="flex flex-col gap-2">
-                      <div className="text-base-content/75 flex flex-row gap-2 text-xl">
+                      <div className="text-base-content/75 flex flex-row gap-2">
                         {isEditing ? (
                           <input
                             ref={titleInputRef}
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Enter title..."
-                            className="bg-inh-secondary focus:ring-primary w-full grow rounded-xl px-4 py-2 text-xl outline-hidden focus:ring-2"
+                            className="bg-inh-secondary focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
                           />
                         ) : (
                           <>
-                            <p className="text-base-content/75 flex flex-row gap-2 text-xl text-wrap">
+                            <p className="text-base-content/75 flex flex-row gap-2 text-lg text-wrap">
                               {sanitizeBookingTitle(detailsBooking?.title)}
                             </p>
                           </>
