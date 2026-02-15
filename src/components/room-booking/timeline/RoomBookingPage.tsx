@@ -1,5 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
+import { RoomAccess_level } from "@/api/room-booking/types.ts";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
 import { getRouteApi } from "@tanstack/react-router";
@@ -24,7 +25,7 @@ type TimelineRef = {
 
 const routeApi = getRouteApi("/_with_menu/room-booking/");
 
-export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
+export function RoomBookingPage() {
   const search = routeApi.useSearch();
   const [modalOpen, setModalOpen] = useState(false);
   const [newBookingSlot, setNewBookingSlot] = useState<Slot>();
@@ -51,14 +52,30 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
   const { startDate, endDate } = getTimeRangeForWeek(0, 7);
 
   const { me } = useMe();
+  const { data: myAccessList } = $roomBooking.useQuery(
+    "get",
+    "/rooms/my-access-list",
+  );
+  const myAccessListRoomIds = myAccessList?.map((room) => room.id) ?? [];
 
-  const includeRedObject =
-    me?.innopolis_info?.is_staff || showRed ? { include_red: true } : {};
   const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
     "get",
     "/rooms/",
-    { params: { query: { ...includeRedObject } } },
+    { params: { query: { include_red: true } } },
   );
+
+  const roomsToShow =
+    rooms?.filter(
+      (room) =>
+        // Always show yellow
+        room.access_level === RoomAccess_level.yellow ||
+        // If you are a staff, show red
+        (room.access_level === RoomAccess_level.red &&
+          me?.innopolis_info?.is_staff) ||
+        // Also show rooms you have access to, even if they are red or special-access
+        myAccessListRoomIds.includes(room.id),
+    ) ?? [];
+
   const {
     data: rawBookings,
     isPending: isBookingsPending,
@@ -72,7 +89,7 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
         query: {
           start: startDate.toISOString(),
           end: endDate.toISOString(),
-          ...includeRedObject,
+          room_ids: roomsToShow.map((room) => room.id),
         },
       },
     },
@@ -92,7 +109,7 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
               className={`h-full ${bookingsStatus === "pending" ? "pointer-events-none select-none" : ""}`}
               startDate={startDate}
               endDate={endDate}
-              rooms={rooms}
+              rooms={roomsToShow}
               isRoomsPending={isRoomsPending}
               bookings={bookings}
               isBookingsPending={isBookingsPending}
@@ -122,7 +139,7 @@ export function RoomBookingPage({ showRed }: { showRed?: boolean }) {
                       Most probably Outlook API is down
                     </h1>
 
-                    <div className="space-y-6 text-lg leading-[1.8] md:text-3xl">
+                    <div className="space-y-6 text-lg leading-[1.8] whitespace-pre-wrap md:text-3xl">
                       <p>{bookingsError?.detail?.toString()}</p>
                     </div>
                   </div>
