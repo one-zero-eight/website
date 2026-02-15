@@ -1,4 +1,6 @@
+import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
+import { BookingStatus } from "@/api/room-booking/types.ts";
 import {
   clockTime,
   durationFormatted,
@@ -17,79 +19,8 @@ import {
 } from "@floating-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { JSX, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { schemaToBooking, type Booking, type Slot } from "./types.ts";
-import { useMe } from "@/api/accounts/user.ts";
-import { BookingStatus } from "@/api/room-booking/types.ts";
-
-function bookingWarningForSlot({
-  room_restrict_daytime,
-  start,
-  end,
-}: {
-  room_restrict_daytime: boolean;
-  start: Date;
-  end: Date;
-}) {
-  const currentTime = new Date();
-
-  if (start < currentTime || end < currentTime) {
-    return "Booking cannot be in the past.";
-  }
-
-  if (Math.abs(msBetween(start, currentTime)) > 14 * T.Day) {
-    return "Booking cannot be more than two weeks in the future.";
-  }
-
-  const diffMs = msBetween(start, end);
-
-  if (diffMs < 0) {
-    return "End time should be after start time.";
-  }
-
-  if (diffMs > 3 * T.Hour) {
-    return "Booking duration should not exceed 3 hours.";
-  }
-
-  // TODO: Refactor this check to take timezones into account.
-  if (room_restrict_daytime) {
-    // Should not cover Monday-Friday 08:00-19:00.
-    // Assume that duration is <= 3 hours (checked above).
-
-    if (start.getDay() === 0 || start.getDay() === 6) {
-      // Check if booking is on weekend
-      return null;
-    }
-
-    const startSecondsFromDayStart =
-      start.getHours() * 3600 + start.getMinutes() * 60 + start.getSeconds();
-    const endSecondsFromDayStart =
-      end.getHours() * 3600 +
-      end.getMinutes() * 60 +
-      end.getSeconds() +
-      (end.getDay() === start.getDay() ? 0 : 24 * 3600);
-
-    if (
-      startSecondsFromDayStart >= 19 * 3600 &&
-      endSecondsFromDayStart <= (24 + 8) * 3600
-    ) {
-      return null;
-    }
-    if (startSecondsFromDayStart >= 0 && endSecondsFromDayStart <= 8 * 3600) {
-      return null;
-    }
-
-    return (
-      <>
-        {"Lecture rooms are only available at night "}
-        <span className="text-nowrap">{"(19:00 – 08:00)"}</span>
-        {" or on weekends."}
-      </>
-    );
-  }
-
-  return null;
-}
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type Booking, schemaToBooking, type Slot } from "./types.ts";
 
 export function sanitizeBookingTitle(title: string | undefined): string {
   if (!title) return "";
@@ -347,21 +278,29 @@ export function BookingModal({
     return roomId ? rooms?.find((room) => room.id === roomId) : undefined;
   };
 
-  const warningText = useMemo<JSX.Element | string | null>(() => {
-    const room = newSlot?.room ?? getRoomById(detailsBooking?.room_id);
-    if (!room || !start || !end) return null;
-    return bookingWarningForSlot({
-      room_restrict_daytime: room.restrict_daytime,
-      start,
-      end,
-    });
-  }, [newSlot, detailsBooking?.room_id, start, end]);
+  const room = newSlot?.room ?? getRoomById(detailsBooking?.room_id);
+
+  const { data: canBookData, isPending: canBookPending } =
+    $roomBooking.useQuery(
+      "get",
+      "/room/{id}/can-book",
+      {
+        params: {
+          path: { id: room?.id ?? "" },
+          query: {
+            start: start?.toISOString() ?? newSlot?.start.toISOString() ?? "",
+            end: end?.toISOString() ?? newSlot?.end.toISOString() ?? "",
+          },
+        },
+      },
+      {
+        enabled: !!room && !!start && !!end,
+      },
+    );
 
   if (!isMounted) {
     return null;
   }
-
-  const room = newSlot?.room ?? getRoomById(detailsBooking?.room_id);
 
   const outlookBookingId = detailsBooking?.outlook_booking_id;
   const attendees = detailsBooking?.attendees;
@@ -523,15 +462,23 @@ export function BookingModal({
     </div>
   ));
 
-  const NewBookingWarning = warningText && (
+  const NewBookingWarning = canBookPending ? (
+    <div className="alert alert-info text-base">
+      <span>Checking rules...</span>
+    </div>
+  ) : !canBookData ? null : canBookData.can_book ? (
+    <div className="alert alert-success text-base">
+      <span>You can book this time slot.</span>
+    </div>
+  ) : (
     <div className="alert alert-warning text-base">
-      <span>{warningText}</span>
+      <span>{canBookData.reason_why_cannot}</span>
     </div>
   );
 
   const errorText =
     newSlot && creationError
-      ? `Booking failed: ${creationError.detail?.toString() || creationError.toString() || "unknown error"}.`
+      ? `Booking failed: ${creationError.detail?.toString() || creationError.toString() || "unknown error"}`
       : null;
   const NewBookingError = errorText && (
     <div className="alert alert-error text-base">
@@ -582,7 +529,7 @@ export function BookingModal({
       <button
         type="submit"
         className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 disabled:pointer-events-none disabled:opacity-80 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
-        disabled={!!warningText || isBookingCreationPending}
+        disabled={isBookingCreationPending}
       >
         Confirm
       </button>
@@ -610,7 +557,7 @@ export function BookingModal({
       <button
         type="submit"
         className="rounded-box flex w-full items-center justify-center gap-2 border-2 border-purple-400 bg-purple-200 px-4 py-2 text-lg font-medium text-purple-900 hover:bg-purple-300 disabled:pointer-events-none disabled:opacity-80 dark:border-purple-600 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-950"
-        disabled={!!warningText || isBookingUpdatePending}
+        disabled={isBookingUpdatePending}
       >
         Confirm
       </button>
