@@ -1559,7 +1559,7 @@ $button-height: 50px;
       padding-top: 6px;
       align-self: flex-start;
       position: sticky;
-      left: var(--sidebar-width);
+      left: 0;
     }
 
     &-hours {
