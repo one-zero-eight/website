@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { $workshops } from "@/api/workshops";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
@@ -5,22 +6,17 @@ import {
   formatDate,
   formatTime,
   parseTime,
-  getInactiveStatusText,
-  getSignedPeopleCount,
   imageLink,
   isEventRecommended,
-  isWorkshopActive,
 } from "./utils";
 import { eventBadges } from "./EventBadges.tsx";
 import { LanguageBadge } from "./LanguageBadge.tsx";
-import { MAX_CAPACITY } from "./constants.ts";
 import { $clubs } from "@/api/clubs/index.ts";
-import { CheckInType, HostType } from "@/api/workshops/types.ts";
 import { EventItemProps } from "./types";
+import { HostType } from "@/api/workshops/types.ts";
 
 export function EventItem({
   event,
-  isEditable,
   myCheckins: myCheckinsProp,
   clubsList: clubsListProp,
   className,
@@ -34,19 +30,20 @@ export function EventItem({
   );
   const myCheckins = myCheckinsProp ?? myCheckinsData;
 
-  const firstHost = event.host[0];
-  const isFirstHostClub =
-    firstHost?.host_type === HostType.club || firstHost?.host_type === "club";
+  const firstThreeClubs = event.host.slice(0, 2);
 
   const { data: clubsListData = [], isPending: clubsLoading } = $clubs.useQuery(
     "get",
     "/clubs/",
-    { enabled: isFirstHostClub && !clubsListProp },
+    {
+      enabled:
+        firstThreeClubs.some((h) => h.host_type === HostType.club) &&
+        !clubsListProp,
+    },
   );
   const clubsList = clubsListProp ?? clubsListData;
 
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
-  const signedPeople = getSignedPeopleCount(event);
 
   return (
     <div className="indicator w-full">
@@ -59,19 +56,19 @@ export function EventItem({
 
       {/* Card */}
       <div
-        className={clsx(
-          "card card-border min-w-full",
-          checkedIn && "card-dash border-emerald-700 dark:border-emerald-900",
-          !isWorkshopActive(event) &&
-            "card-dash border-rose-700 dark:border-rose-950",
-          className,
-        )}
+        className={clsx("card card-border bg-base-100 min-w-full", className)}
       >
-        <div
-          className={`relative flex ${event.image_file_id ? "h-[220px]" : "h-[110px]"} items-start justify-between rounded-t-(--radius-box) bg-[url("/pattern.svg")] bg-size-[640px] bg-center bg-repeat`}
-        >
+        <div className="relative flex h-[220px] grow items-start justify-between overflow-hidden rounded-t-(--radius-box)">
+          <div
+            className={clsx(
+              "absolute inset-0 bg-[url('/topography.svg')] bg-size-[1200px] bg-center bg-repeat",
+              event.image_file_id
+                ? "opacity-20 blur-[2px]"
+                : "opacity-30 blur-[0px]",
+            )}
+          />
           {event.image_file_id && (
-            <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center">
+            <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center select-none">
               <div className="flex h-[160px] items-center justify-center overflow-hidden">
                 <img
                   src={imageLink(event.id)}
@@ -85,109 +82,101 @@ export function EventItem({
             event={event}
             className="z-10 m-4 inline-flex md:hidden"
           />
-          <div className="z-10 m-4 flex items-center gap-2">
-            {!isWorkshopActive(event) && (
-              <div
-                className={`badge badge-soft rounded-lg ${!event.is_draft ? "[--badge-color:var(--color-rose-500)]" : "[--badge-color:var(--color-slate-400)]"}`}
-              >
-                {(event.is_draft && "DRAFT") || getInactiveStatusText(event)}
-              </div>
-            )}
-          </div>
         </div>
-        <div className="card-body flex-col justify-between p-4 md:p-6">
+        <div className="card-body flex-col items-start justify-between gap-2 p-4 pt-2 md:p-6 md:pt-4">
           <div className="flex flex-col gap-2">
-            <h2 className="card-title">
-              <LanguageBadge
-                event={event}
-                className="hidden self-start md:inline-flex"
-              />
-              {event.english_name || event.russian_name}
-            </h2>
-            {event.badges.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {event.badges
-                  .filter((badge) => badge.title !== "recommended")
-                  .map((badge) => (
-                    <div key={badge.title}>{eventBadges[badge.title]}</div>
-                  ))}
+            <p className="card-title block text-left text-xl">
+              <Link
+                to={"/events/$id"}
+                params={{ id: event.id }}
+                className="hover:underline"
+              >
+                {event.english_name || event.russian_name}
+              </Link>
+              <LanguageBadge event={event} className="ml-2" />
+            </p>
+            <div className="flexs flex-col gap-1">
+              <div className="flex gap-2">
+                <div className="flex items-center gap-1">
+                  <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
+                  <span className="flex items-end gap-1 text-neutral-500 dark:text-neutral-200">
+                    <span>{formatDate(event.dtstart || "")}</span>
+                    <span className="text-neutral-400">at</span>
+                    <span>{formatTime(parseTime(event.dtstart || ""))}</span>
+                  </span>
+                </div>
               </div>
-            )}
-          </div>
-          <div className="flex gap-2">
-            {event.check_in_type === CheckInType.on_innohassle ? (
-              <div className="flex items-center gap-1">
-                <span className="text-primary icon-[famicons--people] text-xl" />
-                <span className="flex items-center text-neutral-500 dark:text-neutral-200">
-                  {event.capacity === MAX_CAPACITY
-                    ? signedPeople + "/"
-                    : signedPeople + "/" + event.capacity}
-                  {event.capacity === MAX_CAPACITY && (
-                    <span className="icon-[fa7-solid--infinity]" />
-                  )}
+              <div className="flex max-w-full items-center justify-between gap-2">
+                <span className="flex gap-1 text-neutral-400 dark:text-white">
+                  <span className="icon-[sidekickicons--crown-20-solid] text-primary inline-flex shrink-0 self-start text-xl" />
+                  <span>
+                    {firstThreeClubs.map((host, index) => {
+                      const isLast = index === firstThreeClubs.length - 1;
+                      const hasExtra = event.host.length > 2 && index === 1;
+
+                      const hostName =
+                        host.host_type === HostType.other ? (
+                          <span>{host.name || "Unknown"}</span>
+                        ) : clubsLoading ? (
+                          <span
+                            className="bg-base-content/20 inline-block h-4 max-w-28 min-w-20 animate-pulse rounded align-middle"
+                            aria-hidden
+                          />
+                        ) : (
+                          <span>
+                            {(() => {
+                              const club = clubsList.find(
+                                (c) => c.id === host.name,
+                              );
+                              return club ? club.title : host.name;
+                            })()}
+                          </span>
+                        );
+
+                      return (
+                        <Fragment key={host.name || index}>
+                          {hasExtra ? (
+                            <span className="inline-flex items-baseline whitespace-nowrap">
+                              {hostName}
+                              <span className="badge badge-soft ml-1 inline-flex px-1 align-middle text-xs">
+                                +{event.host.length - 2}
+                              </span>
+                            </span>
+                          ) : (
+                            hostName
+                          )}
+                          {!isLast && <span>, </span>}
+                        </Fragment>
+                      );
+                    })}
+                  </span>
                 </span>
               </div>
-            ) : (
-              <>
-                {event.place && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-primary icon-[mdi--map-marker] text-xl" />
-                    <span className="flex items-center text-neutral-500 dark:text-neutral-200">
-                      {event.place}
-                    </span>
-                  </div>
-                )}
-              </>
-            )}
-            <div className="flex items-center gap-1">
-              <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
-              <span className="flex items-end gap-1 text-neutral-500 dark:text-neutral-200">
-                <span>{formatDate(event.dtstart || "")}</span>
-                <span className="text-neutral-400">at</span>
-                <span>{formatTime(parseTime(event.dtstart || ""))}</span>
-              </span>
             </div>
           </div>
-          <div className="flex w-full items-center justify-between gap-2">
-            <div className="flex flex-1 items-center gap-1 overflow-hidden text-neutral-500">
-              <span className="block">Host:</span>
-              <span className="truncate text-neutral-400 dark:text-white">
-                {!firstHost ? (
-                  "Unknown"
-                ) : isFirstHostClub && clubsLoading ? (
-                  <span
-                    className="bg-base-content/20 inline-block h-4 max-w-28 min-w-20 animate-pulse rounded align-middle"
-                    aria-hidden
-                  />
-                ) : isFirstHostClub ? (
-                  (() => {
-                    const club = clubsList.find((c) => c.id === firstHost.name);
-                    return club ? club.title : firstHost.name;
-                  })()
-                ) : (
-                  firstHost.name || "Unknown"
-                )}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              {isEditable && (
-                <Link
-                  to="/events/$id/edit"
-                  params={{ id: event.id }}
-                  className="btn btn-square btn-sm border"
-                >
-                  <span className="icon-[qlementine-icons--pen-12]" />
-                </Link>
+          <div className="mt-3 flex w-full items-center justify-between gap-2">
+            <div className="flex flex-col gap-1">
+              {event.is_draft && (
+                <span className="flex items-center gap-1 text-slate-300">
+                  <span className="icon-[material-symbols--draft-rounded] text-lg" />
+                  Draft
+                </span>
               )}
-              <Link
-                to="/events/$id"
-                params={{ id: event.id }}
-                className="btn btn-primary btn-soft btn-sm flex items-center gap-1"
-              >
-                View Event
-                <span className="icon-[lucide--move-right] text-xl" />
-              </Link>
+              {checkedIn && (
+                <span className="flex items-center gap-1 text-green-500">
+                  <span className="icon-[lets-icons--check-fill] text-xl" />
+                  Checked in
+                </span>
+              )}
             </div>
+            <Link
+              to="/events/$id"
+              params={{ id: event.id }}
+              className="btn btn-primary btn-soft flex items-center gap-1 text-nowrap"
+            >
+              View Event
+              <span className="icon-[lucide--move-right] text-xl" />
+            </Link>
           </div>
         </div>
       </div>

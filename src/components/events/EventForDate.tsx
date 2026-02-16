@@ -6,8 +6,6 @@ import {
   EventForDateProps,
   ItemsListProps,
 } from "./types";
-import { HostType } from "@/api/workshops/types";
-import type { SchemaWorkshop } from "@/api/workshops/types";
 
 export function EventForDate({
   isoDate,
@@ -43,7 +41,6 @@ export function EventForDate({
 
       <ItemsList
         events={filteredEvents}
-        options={options}
         myCheckins={myCheckins}
         clubsList={clubsList}
       />
@@ -51,35 +48,12 @@ export function EventForDate({
   );
 }
 
-function isEventEditableForUser(
-  event: SchemaWorkshop,
-  isEditable: boolean,
-  editableClubIds: string[],
-): boolean {
-  if (isEditable) return true;
-  if (editableClubIds.length === 0) return false;
-  const host = event.host ?? [];
-  return host.some(
-    (h) =>
-      (h?.host_type === HostType.club || String(h?.host_type) === "club") &&
-      h?.name &&
-      editableClubIds.includes(h.name),
-  );
-}
-
 export function ItemsList({
   events,
-  options: optionsProp,
   myCheckins,
   clubsList,
   className,
 }: ItemsListProps) {
-  const options = {
-    ...DEFAULT_EVENT_LIST_OPTIONS,
-    ...optionsProp,
-    editableClubIds: optionsProp?.editableClubIds ?? [],
-  };
-
   if (events.length === 0) {
     return (
       <div className="col-span-full w-full pt-10 text-center text-xl">
@@ -99,11 +73,6 @@ export function ItemsList({
         <EventItem
           key={event.id}
           event={event}
-          isEditable={isEventEditableForUser(
-            event,
-            options.isEditable,
-            options.editableClubIds,
-          )}
           myCheckins={myCheckins}
           clubsList={clubsList}
         />

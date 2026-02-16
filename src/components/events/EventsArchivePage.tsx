@@ -1,16 +1,12 @@
 import { $workshops } from "@/api/workshops";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import AddEventButton from "./AddEventButton.tsx";
-import { ModalWindow } from "./CreationModal/ModalWindow.tsx";
+import { useEffect } from "react";
 import { EventsList } from "./EventsList.tsx";
-import NameForm from "./CreationModal/NameForm.tsx";
 import { useEventsAuth } from "./hooks";
 import { EventListOptions } from "./types/index.ts";
 
-export function EventsAdminPage() {
+export function EventsArchivePage() {
   const navigate = useNavigate();
-  const [modalOpen, setModalOpen] = useState(false);
   const { eventsUser, clubsUser } = useEventsAuth();
 
   const { data: events } = $workshops.useQuery("get", "/workshops/");
@@ -40,41 +36,14 @@ export function EventsAdminPage() {
     editableClubIds: leaderClubIds,
     onlyShowDraftsFromEditableClubs: !isAdmin && leaderClubIds.length > 0,
     hideShowPreviousToggle: true,
+    onlyPastEvents: true,
   };
 
   return (
-    <>
-      <div className="mt-3 flex w-full flex-wrap items-center gap-4 px-4 py-2">
-        <span className="hidden md:block">Create new event:</span>
-        <AddEventButton
-          onClick={() => setModalOpen(true)}
-          className="w-full md:max-w-fit"
-        >
-          Create event
-        </AddEventButton>
-      </div>
-
-      <EventsList
-        events={events}
-        options={eventListSettings}
-        clubUser={clubsUser}
-      />
-
-      <ModalWindow
-        open={modalOpen}
-        onOpenChange={() => {
-          setModalOpen(false);
-        }}
-        title="Create Event"
-      >
-        <NameForm
-          eventsUser={eventsUser}
-          clubsUser={clubsUser}
-          onClose={() => {
-            setModalOpen(false);
-          }}
-        />
-      </ModalWindow>
-    </>
+    <EventsList
+      events={events}
+      options={eventListSettings}
+      clubUser={clubsUser}
+    />
   );
 }

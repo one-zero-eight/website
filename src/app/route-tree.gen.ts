@@ -40,6 +40,7 @@ import { Route as With_menuScheduleCategoryRouteImport } from "./routes/_with_me
 import { Route as With_menuRoomBookingRulesRouteImport } from "./routes/_with_menu/room-booking/rules";
 import { Route as With_menuRoomBookingListRouteImport } from "./routes/_with_menu/room-booking/list";
 import { Route as With_menuMusicRoomInstructionsRouteImport } from "./routes/_with_menu/music-room.instructions";
+import { Route as With_menuEventsArchiveRouteImport } from "./routes/_with_menu/events/archive";
 import { Route as With_menuEventsAdminRouteImport } from "./routes/_with_menu/events/admin";
 import { Route as With_menuClubsNewRouteImport } from "./routes/_with_menu/clubs/new";
 import { Route as With_menuClubsLeagueRouteImport } from "./routes/_with_menu/clubs/league";
@@ -214,6 +215,11 @@ const With_menuMusicRoomInstructionsRoute =
     path: "/music-room/instructions",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
+const With_menuEventsArchiveRoute = With_menuEventsArchiveRouteImport.update({
+  id: "/events/archive",
+  path: "/events/archive",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuEventsAdminRoute = With_menuEventsAdminRouteImport.update({
   id: "/events/admin",
   path: "/events/admin",
@@ -313,6 +319,7 @@ export interface FileRoutesByFullPath {
   "/clubs/league": typeof With_menuClubsLeagueRoute;
   "/clubs/new": typeof With_menuClubsNewRoute;
   "/events/admin": typeof With_menuEventsAdminRoute;
+  "/events/archive": typeof With_menuEventsArchiveRoute;
   "/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
   "/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
@@ -359,6 +366,7 @@ export interface FileRoutesByTo {
   "/clubs/league": typeof With_menuClubsLeagueRoute;
   "/clubs/new": typeof With_menuClubsNewRoute;
   "/events/admin": typeof With_menuEventsAdminRoute;
+  "/events/archive": typeof With_menuEventsArchiveRoute;
   "/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
   "/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
@@ -407,6 +415,7 @@ export interface FileRoutesById {
   "/_with_menu/clubs/league": typeof With_menuClubsLeagueRoute;
   "/_with_menu/clubs/new": typeof With_menuClubsNewRoute;
   "/_with_menu/events/admin": typeof With_menuEventsAdminRoute;
+  "/_with_menu/events/archive": typeof With_menuEventsArchiveRoute;
   "/_with_menu/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
   "/_with_menu/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/_with_menu/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
@@ -455,6 +464,7 @@ export interface FileRouteTypes {
     | "/clubs/league"
     | "/clubs/new"
     | "/events/admin"
+    | "/events/archive"
     | "/music-room/instructions"
     | "/room-booking/list"
     | "/room-booking/rules"
@@ -501,6 +511,7 @@ export interface FileRouteTypes {
     | "/clubs/league"
     | "/clubs/new"
     | "/events/admin"
+    | "/events/archive"
     | "/music-room/instructions"
     | "/room-booking/list"
     | "/room-booking/rules"
@@ -548,6 +559,7 @@ export interface FileRouteTypes {
     | "/_with_menu/clubs/league"
     | "/_with_menu/clubs/new"
     | "/_with_menu/events/admin"
+    | "/_with_menu/events/archive"
     | "/_with_menu/music-room/instructions"
     | "/_with_menu/room-booking/list"
     | "/_with_menu/room-booking/rules"
@@ -798,6 +810,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuMusicRoomInstructionsRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/events/archive": {
+      id: "/_with_menu/events/archive";
+      path: "/events/archive";
+      fullPath: "/events/archive";
+      preLoaderRoute: typeof With_menuEventsArchiveRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/events/admin": {
       id: "/_with_menu/events/admin";
       path: "/events/admin";
@@ -920,6 +939,7 @@ interface With_menuRouteRouteChildren {
   With_menuClubsLeagueRoute: typeof With_menuClubsLeagueRoute;
   With_menuClubsNewRoute: typeof With_menuClubsNewRoute;
   With_menuEventsAdminRoute: typeof With_menuEventsAdminRoute;
+  With_menuEventsArchiveRoute: typeof With_menuEventsArchiveRoute;
   With_menuMusicRoomInstructionsRoute: typeof With_menuMusicRoomInstructionsRoute;
   With_menuRoomBookingListRoute: typeof With_menuRoomBookingListRoute;
   With_menuRoomBookingRulesRoute: typeof With_menuRoomBookingRulesRoute;
@@ -964,6 +984,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuClubsLeagueRoute: With_menuClubsLeagueRoute,
   With_menuClubsNewRoute: With_menuClubsNewRoute,
   With_menuEventsAdminRoute: With_menuEventsAdminRoute,
+  With_menuEventsArchiveRoute: With_menuEventsArchiveRoute,
   With_menuMusicRoomInstructionsRoute: With_menuMusicRoomInstructionsRoute,
   With_menuRoomBookingListRoute: With_menuRoomBookingListRoute,
   With_menuRoomBookingRulesRoute: With_menuRoomBookingRulesRoute,

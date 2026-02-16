@@ -143,9 +143,17 @@ export default function EventTitle({
         <div className="mb-0.5 flex items-end justify-between">
           <div className="flex flex-wrap gap-2">
             {event.badges.length !== 0 ? (
-              event.badges.map((badge) => (
-                <div key={badge.title}>{eventBadges[badge.title]}</div>
-              ))
+              [...event.badges]
+                .sort((a, b) =>
+                  a.title === "recommended"
+                    ? -1
+                    : b.title === "recommended"
+                      ? 1
+                      : 0,
+                )
+                .map((badge) => (
+                  <div key={badge.title}>{eventBadges[badge.title]}</div>
+                ))
             ) : (
               <span className="ml-2 font-semibold text-neutral-600">
                 No Tags

@@ -27,6 +27,10 @@ export interface EventListOptions {
   editableClubIds?: string[];
   /** When true, only show drafts that are hosted by one of editableClubIds (non-draft events always shown). For club leaders on admin page. */
   onlyShowDraftsFromEditableClubs?: boolean;
+  /** When true, hides the "Show previous events" toggle and inline link (default: false) */
+  hideShowPreviousToggle?: boolean;
+  /** When true, only shows past events (for Archive tab) (default: false) */
+  onlyPastEvents?: boolean;
 }
 
 export const DEFAULT_EVENT_LIST_OPTIONS: Required<
@@ -38,6 +42,8 @@ export const DEFAULT_EVENT_LIST_OPTIONS: Required<
   isEditable: false,
   editableClubIds: [],
   onlyShowDraftsFromEditableClubs: false,
+  hideShowPreviousToggle: false,
+  onlyPastEvents: false,
 };
 
 export type EventLink = {
@@ -102,6 +108,7 @@ export interface SearchMenuProps {
   searchForm: SearchFormState;
   setSearchForm: React.Dispatch<React.SetStateAction<SearchFormState>>;
   showSearch?: boolean;
+  hideShowPreviousToggle?: boolean;
 }
 
 export interface SearchBarProps {
@@ -115,7 +122,6 @@ export interface CheckInProps {
 
 export interface EventItemProps {
   event: workshopsTypes.SchemaWorkshop;
-  isEditable: boolean;
   /** When provided, avoids per-item fetch for check-in state (from EventsList). */
   myCheckins?: SchemaWorkshop[];
   /** When provided, avoids per-item fetch for club names (from EventsList). */
@@ -133,7 +139,6 @@ export interface EventForDateProps {
 
 export interface ItemsListProps {
   events: SchemaWorkshop[];
-  options?: EventListOptions;
   myCheckins?: SchemaWorkshop[];
   clubsList?: SchemaClub[];
   className?: string;

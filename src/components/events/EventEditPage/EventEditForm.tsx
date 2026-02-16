@@ -6,7 +6,7 @@ import { DateTime } from "./DateTime.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import AdditionalInfo from "./AdditionalInfo.tsx";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { baseEventFormState, isWorkshopPast } from "../utils/index.ts";
+import { baseEventFormState } from "../utils/index.ts";
 import {
   EventEditFormProps,
   EventFormErrors,
@@ -117,6 +117,7 @@ export function EventEditForm({
   });
 
   const [logoPreview, setImagePreview] = useState<string | null>(null);
+  const [checkInCloses, setCheckInCloses] = useState("");
 
   useEffect(() => {
     if (initialEvent?.image_file_id) {
@@ -201,7 +202,7 @@ export function EventEditForm({
     const dtstart = `${eventForm.date}T${eventForm.dtstart}:00+03:00`;
     const dtend = `${endDate}T${eventForm.dtend}:00+03:00`;
 
-    const check_in_opens = eventForm.check_in_on_open
+    let check_in_opens: string | null = eventForm.check_in_on_open
       ? new Date().toISOString()
       : `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
 
@@ -210,6 +211,10 @@ export function EventEditForm({
     eventForm.links.forEach((link: EventLink) =>
       links.push({ title: link.title, url: link.url }),
     );
+
+    if (eventForm.check_in_type === CheckInType.no_check_in) {
+      check_in_opens = null;
+    }
 
     return {
       english_name: eventForm.english_name,
@@ -655,6 +660,19 @@ export function EventEditForm({
 
       <div className="card card-border">
         <div className="card-body">
+          <h2 className="card-title">
+            <span className="icon-[mdi--calendar-outline]"></span>Date & Time
+          </h2>
+          <DateTime
+            eventForm={eventForm}
+            setEventForm={setEventForm}
+            errors={errors}
+          />
+        </div>
+      </div>
+
+      <div className="card card-border">
+        <div className="card-body">
           <h2 className="card-title mb-1">
             <span className="icon-[mdi--people] size-5"></span>
             Check-ins & Place
@@ -723,44 +741,50 @@ export function EventEditForm({
               {errors.checkInLinkError}
             </p>
           )}
-          {eventForm.check_in_type === CheckInType.on_innohassle &&
-            initialEvent &&
-            !isWorkshopPast(initialEvent.dtstart ?? "") && (
-              <>
-                <label className="label mr-2 text-black dark:text-white">
-                  <input
-                    type="checkbox"
-                    className="toggle"
-                    checked={eventForm.check_in_on_open}
-                    onChange={() =>
-                      setEventForm({
-                        ...eventForm,
-                        check_in_on_open: !eventForm.check_in_on_open,
-                      })
-                    }
-                  />
-                  Always open
-                </label>
-                {!eventForm.check_in_on_open && (
+          {eventForm.check_in_type === CheckInType.on_innohassle && (
+            <>
+              <label className="label mr-2 text-black dark:text-white">
+                <input
+                  type="checkbox"
+                  className="toggle"
+                  checked={eventForm.check_in_on_open}
+                  onChange={() =>
+                    setEventForm({
+                      ...eventForm,
+                      check_in_on_open: !eventForm.check_in_on_open,
+                    })
+                  }
+                />
+                Always open
+              </label>
+              {!eventForm.check_in_on_open && (
+                <>
                   <div>
                     <label className="mr-2">Open check-in at:</label>
                     <input
                       type="datetime-local"
                       className="input"
                       value={
-                        initialEvent &&
-                        eventForm.check_in_date &&
-                        eventForm.check_in_opens
+                        eventForm.check_in_date && eventForm.check_in_opens
                           ? `${eventForm.check_in_date}T${eventForm.check_in_opens}`
                           : ""
                       }
                       onChange={handleCheckIn}
-                      disabled={eventForm.check_in_on_open}
                     />
                   </div>
-                )}
-              </>
-            )}
+                  <div>
+                    <label className="mr-2">Close check-in at:</label>
+                    <input
+                      type="datetime-local"
+                      className="input"
+                      value={checkInCloses}
+                      onChange={(e) => setCheckInCloses(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+            </>
+          )}
           {eventForm.check_in_type === CheckInType.on_innohassle && (
             <>
               <div className="divider my-1" />
@@ -802,19 +826,6 @@ export function EventEditForm({
               )}
             </>
           )}
-        </div>
-      </div>
-
-      <div className="card card-border">
-        <div className="card-body">
-          <h2 className="card-title">
-            <span className="icon-[mdi--calendar-outline]"></span>Date & Time
-          </h2>
-          <DateTime
-            eventForm={eventForm}
-            setEventForm={setEventForm}
-            errors={errors}
-          />
         </div>
       </div>
 

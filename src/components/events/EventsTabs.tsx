@@ -8,7 +8,8 @@ type EventsTab = {
 
 const eventsTabs: EventsTab[] = [
   { link: "/events", title: "List" },
-  { link: "/events/admin", title: "Manage events" },
+  { link: "/events/admin", title: "Manage" },
+  { link: "/events/archive", title: "Archive" },
 ];
 
 export function EventsTabs() {

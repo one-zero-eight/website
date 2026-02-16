@@ -66,21 +66,22 @@ export function EventsList({
       result = searchFuse(fuse, searchForm.search);
     }
 
-    result = result.filter(
-      (event) =>
-        event.language &&
-        event.dtstart &&
-        event.capacity &&
-        searchForm.selectedLanguages[event.language] &&
-        hasBadges(event, searchForm.badges),
-    );
+    result = result.filter((event) => {
+      if (options.filterDraftsAndInactive) {
+        if (!event.language || !event.dtstart || !event.capacity) return false;
+      }
+      if (event.language && !searchForm.selectedLanguages[event.language])
+        return false;
+      if (!hasBadges(event, searchForm.badges)) return false;
+      return true;
+    });
 
     const now = new Date();
     const upcomingEvents = result.filter(
-      (event) => new Date(event.dtstart || "") >= now,
+      (event) => !event.dtstart || new Date(event.dtstart) >= now,
     );
     const pastEvents = result.filter(
-      (event) => new Date(event.dtstart || "") < now,
+      (event) => event.dtstart && new Date(event.dtstart) < now,
     );
 
     upcomingEvents.sort(
@@ -94,7 +95,9 @@ export function EventsList({
         new Date(a.dtstart || "").getTime(),
     ); // descending (newest past first)
 
-    if (searchForm.showPreviousEvents) {
+    if (options.onlyPastEvents) {
+      result = pastEvents;
+    } else if (searchForm.showPreviousEvents) {
       result = [...upcomingEvents, ...pastEvents];
     } else {
       result = upcomingEvents;
@@ -109,7 +112,14 @@ export function EventsList({
     }
 
     return result;
-  }, [events, fuse, searchForm, isCheckedIn]);
+  }, [
+    events,
+    fuse,
+    searchForm,
+    isCheckedIn,
+    options.onlyPastEvents,
+    options.filterDraftsAndInactive,
+  ]);
 
   const displayEvents = useMemo(() => {
     if (
@@ -173,7 +183,8 @@ export function EventsList({
           </div>
         )}
         <div className="w-full">
-          {hasEvents && userFiltered.length !== 0 ? (
+          {hasEvents &&
+          (!options.filterDraftsAndInactive || userFiltered.length !== 0) ? (
             <div className="w-full">
               {isGroupedView ? (
                 <GroupedEventsView
@@ -186,24 +197,24 @@ export function EventsList({
               ) : (
                 <ItemsList
                   events={displayEvents}
-                  options={options}
                   myCheckins={myCheckins}
                   clubsList={clubsList}
                 />
               )}
-              {!searchForm.showPreviousEvents && (
-                <span
-                  className="text-primary mt-2 cursor-pointer text-center underline select-none"
-                  onClick={() =>
-                    setSearchForm({
-                      ...searchForm,
-                      showPreviousEvents: true,
-                    })
-                  }
-                >
-                  Show previous events
-                </span>
-              )}
+              {!options.hideShowPreviousToggle &&
+                !searchForm.showPreviousEvents && (
+                  <span
+                    className="text-primary mt-2 cursor-pointer text-center underline select-none"
+                    onClick={() =>
+                      setSearchForm({
+                        ...searchForm,
+                        showPreviousEvents: true,
+                      })
+                    }
+                  >
+                    Show previous events
+                  </span>
+                )}
             </div>
           ) : (
             <div className="col-span-full py-10 text-center text-xl">
@@ -235,6 +246,7 @@ export function EventsList({
               <SearchMenu
                 searchForm={searchForm}
                 setSearchForm={setSearchForm}
+                hideShowPreviousToggle={options.hideShowPreviousToggle}
               />
             </div>
           )}
@@ -242,7 +254,11 @@ export function EventsList({
 
         {/* Desktop Sidebar */}
         <div className="card bg-base-200 sticky top-8 mr-1 hidden xl:flex">
-          <SearchMenu searchForm={searchForm} setSearchForm={setSearchForm} />
+          <SearchMenu
+            searchForm={searchForm}
+            setSearchForm={setSearchForm}
+            hideShowPreviousToggle={options.hideShowPreviousToggle}
+          />
         </div>
       </div>
     </div>
@@ -253,6 +269,7 @@ export function SearchMenu({
   searchForm,
   setSearchForm,
   showSearch = true,
+  hideShowPreviousToggle = false,
 }: SearchMenuProps) {
   const handleChangeLanguage = (language: WorkshopLanguage) => {
     setSearchForm((prev) => {
@@ -320,20 +337,22 @@ export function SearchMenu({
             />
             Show my check-ins
           </label>
-          <label className="label">
-            <input
-              type="checkbox"
-              className="toggle"
-              checked={searchForm.showPreviousEvents}
-              onChange={() =>
-                setSearchForm({
-                  ...searchForm,
-                  showPreviousEvents: !searchForm.showPreviousEvents,
-                })
-              }
-            />
-            Show previous events
-          </label>
+          {!hideShowPreviousToggle && (
+            <label className="label">
+              <input
+                type="checkbox"
+                className="toggle"
+                checked={searchForm.showPreviousEvents}
+                onChange={() =>
+                  setSearchForm({
+                    ...searchForm,
+                    showPreviousEvents: !searchForm.showPreviousEvents,
+                  })
+                }
+              />
+              Show previous events
+            </label>
+          )}
           <div className="divider" />
           <label className="label">
             <input
@@ -370,21 +389,27 @@ function GroupedEventsView({
   myCheckins,
   clubsList,
 }: GroupedEventsViewProps) {
-  const now = new Date();
+  const allDates = Object.keys(groupedEvents);
 
-  const upcomingDates = Object.keys(groupedEvents).filter(
-    (date) => new Date(date) >= now,
-  );
-  const pastDates = Object.keys(groupedEvents).filter(
-    (date) => new Date(date) < now,
-  );
-
-  upcomingDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-  pastDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-
-  const orderedDates = showPreviousEvents
-    ? [...upcomingDates, ...pastDates]
-    : upcomingDates;
+  // Events are already filtered to upcoming/past by filteredEvents (using full
+  // datetimes). Avoid re-splitting by date string here since parsing a bare
+  // date like "2026-02-16" yields midnight UTC and misclassifies "today".
+  // Only split when showPreviousEvents is true (need upcoming-first ordering).
+  let orderedDates: string[];
+  if (showPreviousEvents) {
+    const now = new Date();
+    const upcoming = allDates.filter((d) => new Date(d) >= now);
+    const past = allDates.filter((d) => new Date(d) < now);
+    upcoming.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    past.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    orderedDates = [...upcoming, ...past];
+  } else if (options.onlyPastEvents) {
+    allDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    orderedDates = allDates;
+  } else {
+    allDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    orderedDates = allDates;
+  }
 
   return (
     <>
