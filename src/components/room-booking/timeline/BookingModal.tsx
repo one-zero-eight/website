@@ -534,12 +534,14 @@ export function BookingModal({
     </div>
   );
 
-  const Attendees =
-    !!outlookBookingId && !!attendees
-      ? outlookBookingAttendees?.map((attendee) => (
-          <Attendee attendee={attendee} bookingId={outlookBookingId} />
-        ))
-      : undefined;
+  const Attendees = attendees
+    ? outlookBookingAttendees?.map((attendee) => (
+        <Attendee
+          attendee={attendee}
+          bookingId={outlookBookingId ?? detailsBooking?.id ?? "meow"}
+        />
+      ))
+    : undefined;
 
   const NewBookingWarning = canBookPending ? (
     <div className="alert alert-info px-4 py-2 text-base">
