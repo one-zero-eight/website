@@ -90,29 +90,8 @@
   --breakpoint-4xl: 2048px;
   --breakpoint-xxl: 1550px;
 
-  /*
-     After migration to DaisyUI themes:
-
-     pagebg -> base-100
-     floating -> base-200
-     secondary -> base-300
-     contrast -> base-content
-     brand-violet -> primary
-
-     primary -> inh-primary
-     primary-hover -> inh-primary-hover
-     secondary -> inh-secondary
-     secondary-hover -> inh-secondary-hover
-     inactive -> inh-inactive
-   */
-
-  --color-inh-primary: rgb(var(--color-inh-primary-rgb));
-  --color-inh-primary-hover: rgb(var(--color-inh-primary-hover-rgb));
-  --color-inh-secondary: rgb(var(--color-inh-secondary-rgb));
-  --color-inh-secondary-hover: rgb(var(--color-inh-secondary-hover-rgb));
-  --color-inh-inactive: rgb(var(--color-inh-inactive-rgb));
-  --color-brand-gradient-start: rgb(var(--color-brand-gradient-start-rgb));
-  --color-brand-gradient-end: rgb(var(--color-brand-gradient-end-rgb));
+  --color-brand-gradient-start: rgb(154 46 255); /* #9A2EFF */
+  --color-brand-gradient-end: rgb(209 35 162); /* #D1233E */
 
   --animate-booking-fake-progress: fake-progress 50s linear;
   @keyframes fake-progress {
@@ -150,22 +129,6 @@
   :root {
     accent-color: var(--color-primary);
     @apply font-rubik;
-
-    --color-brand-gradient-start-rgb: 154 46 255; /* #9A2EFF */
-    --color-brand-gradient-end-rgb: 209 35 162; /* #D1233E */
-
-    --color-inh-primary-rgb: 235 237 239; /**/
-    --color-inh-primary-hover-rgb: 223 225 229; /* #DFE1E5 */
-    --color-inh-secondary-rgb: 227 229 232; /* #E3E5E8 */
-    --color-inh-secondary-hover-rgb: 210 212 216; /* #D2D4D8 */
-    --color-inh-inactive-rgb: 138 138 138; /* #8A8A8A */
-  }
-  :root[data-theme="dark"] {
-    --color-inh-primary-rgb: 38 38 38; /**/
-    --color-inh-primary-hover-rgb: 28 28 28; /* #1C1C1C */
-    --color-inh-secondary-rgb: 34 34 34; /* #222222 */
-    --color-inh-secondary-hover-rgb: 55 55 55; /* #373737 */
-    --color-inh-inactive-rgb: 105 105 105; /* #696969 */
   }
 
   /*
@@ -200,13 +163,15 @@
   @apply from-brand-gradient-start to-brand-gradient-end bg-linear-to-r bg-clip-text text-transparent;
 }
 
-@layer components {
-  /* Remove quotes characters from blockquote in TailwindCSS prose */
-  .prose-quoteless blockquote p:first-of-type::before,
-  .prose-quoteless blockquote p:first-of-type::after {
+/* Remove quotes characters from blockquote in TailwindCSS prose */
+@utility prose-quoteless {
+  blockquote p:first-of-type::before,
+  blockquote p:first-of-type::after {
     content: none !important;
   }
+}
 
+@layer components {
   /* Add rubles icon for Scholarship calculator */
   .rubles-input {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='48px' width='224px'><text x='196' y='27' fill='gray' font-size='18px' font-family='sans-serif'>₽</text></svg>");
