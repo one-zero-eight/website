@@ -12,6 +12,7 @@ import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
 import type { Booking, Room, ScrollToOptions, Slot } from "./types.ts";
 import { accessLevelColors } from "../AccessLevelIcon.tsx";
 import { sanitizeBookingTitle } from "./BookingModal.tsx";
+import { RoomAccess_level } from "@/api/room-booking/types";
 
 /* ========================================================================== */
 /* ================================ Options ================================= */
@@ -45,7 +46,7 @@ defineExpose({ scrollTo });
 const COMPACT_VERSION_WIDTH_THRESHOLD = 768;
 
 const SIDEBAR_WIDTH_DEFAULT = 200;
-const SIDEBAR_WIDTH_COMPACT = 75;
+const SIDEBAR_WIDTH_COMPACT = 65;
 
 const PIXELS_PER_MINUTE_DEFAULT = 100 / 30;
 const PIXELS_PER_MINUTE_COMPACT = 85 / 30;
@@ -97,6 +98,16 @@ const pixelsPerMinute = computed(() =>
     ? PIXELS_PER_MINUTE_COMPACT
     : PIXELS_PER_MINUTE_DEFAULT,
 );
+
+function accessLevelTooltip(accessLevel?: RoomAccess_level | null) {
+  if (!accessLevel) return undefined;
+
+  return accessLevel === RoomAccess_level.yellow
+    ? "Yellow access level (for students)"
+    : accessLevel === RoomAccess_level.red
+      ? "Red access level (for employees)"
+      : "Special rules apply";
+}
 
 /* ========================================================================== */
 /* =============================== Utilities ================================ */
@@ -1305,17 +1316,20 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
                 [$style['row-header']]: true,
                 [$style.placeholder]: room === 'placeholder',
               }"
+              :style="{
+                '--row-border-color':
+                  room !== 'placeholder' && room.access_level
+                    ? accessLevelColors[room.access_level]
+                    : 'var(--c-borders)',
+              }"
+              :title="
+                room === 'placeholder'
+                  ? undefined
+                  : accessLevelTooltip(room.access_level)
+              "
             >
               <a v-if="room === 'placeholder'" href="#">xxx</a>
               <a v-else :href="`/room-booking/rooms/${room.id}`">
-                <span
-                  class="icon-[material-symbols--lock-open-circle-outline] -mb-0.25 text-sm"
-                  :style="{
-                    color: room.access_level
-                      ? accessLevelColors[room.access_level]
-                      : 'inherit',
-                  }"
-                />
                 {{ compactModeEnabled ? room.short_name : room.title }}
               </a>
             </div>
@@ -1646,13 +1660,23 @@ $button-height: 50px;
   width: var(--sidebar-width);
   display: flex;
   align-items: center;
-  padding: 0 8px;
+  padding: 0 12px;
   background: var(--c-bg-items);
   color: var(--c-text-muted);
 
   border-color: var(--c-borders);
   border-style: solid;
   border-right-width: 1px;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10%;
+    height: 80%;
+    border-left: 2px solid var(--row-border-color, var(--c-borders));
+  }
 
   & > a {
     text-wrap: nowrap;
