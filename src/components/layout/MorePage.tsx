@@ -20,7 +20,7 @@ export function MorePage() {
             href="https://github.com/one-zero-eight"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
+            className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2"
           >
             <span className="icon-[mdi--github] text-base-content/70 text-3xl" />
           </a>
@@ -30,7 +30,7 @@ export function MorePage() {
             href="https://t.me/one_zero_eight"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
+            className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2"
           >
             <span className="icon-[uil--telegram-alt] text-base-content/70 text-3xl" />
           </a>

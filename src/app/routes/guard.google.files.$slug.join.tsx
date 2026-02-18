@@ -108,7 +108,7 @@ function RouteComponent() {
                 value={gmail}
                 onChange={(e) => setGmail(e.target.value)}
                 placeholder="your.email@gmail.com"
-                className="border-base-content/20 bg-inh-primary/5 focus:border-primary focus:bg-inh-primary/10 rounded-field w-full border-2 px-3 py-3 text-base outline-hidden transition-colors"
+                className="border-base-content/20 bg-base-200/5 focus:border-primary focus:bg-base-200/10 rounded-field w-full border-2 px-3 py-3 text-base outline-hidden transition-colors"
                 disabled={isPending}
               />
             </div>

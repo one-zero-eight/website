@@ -23,7 +23,7 @@ export function EventsTabs() {
   }
 
   return (
-    <div className="border-b-inh-secondary-hover flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
+    <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
       {eventsTabs.map((tab, index) => (
         <Link
           to={tab.link}

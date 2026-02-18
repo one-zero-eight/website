@@ -109,7 +109,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 left: x ?? 0,
                 width: (refs.reference.current as HTMLElement)?.offsetWidth,
               }}
-              className="border-primary bg-inh-primary z-10 mt-1 rounded-md border shadow-lg"
+              className="border-primary bg-base-200 z-10 mt-1 rounded-md border shadow-lg"
               {...getFloatingProps()}
             >
               {options.map((option, index) => {
@@ -123,8 +123,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                     tabIndex={index === activeIndex ? 0 : -1}
                     aria-selected={index === activeIndex}
                     className={clsx(
-                      "hover:bg-inh-secondary cursor-pointer rounded-md px-4 py-2",
-                      activeIndex === index && "bg-inh-secondary",
+                      "hover:bg-base-300 cursor-pointer rounded-md px-4 py-2",
+                      activeIndex === index && "bg-base-300",
                     )}
                     {...getItemProps({
                       onClick: () => handleSelect(option.value, index),

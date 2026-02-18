@@ -90,7 +90,7 @@ export function DetailsPopup({
           ref={refs.setFloating}
           style={{ ...floatingStyles, ...transitionStyles }}
           {...getFloatingProps()}
-          className="bg-inh-primary text-base-content rounded-box z-10 flex max-w-md flex-col gap-2 p-4 text-sm drop-shadow-md"
+          className="bg-base-200 text-base-content rounded-box z-10 flex max-w-md flex-col gap-2 p-4 text-sm drop-shadow-md"
         >
           <div className="flex flex-row justify-between gap-2">
             <div className="text-bold flex text-xl wrap-anywhere whitespace-pre-wrap">
@@ -126,7 +126,7 @@ export function DetailsPopup({
           <FloatingArrow
             ref={arrowRef}
             context={context}
-            className="fill-inh-primary"
+            className="fill-base-200"
           />
         </div>
       </FloatingFocusManager>
@@ -219,7 +219,7 @@ function ShareButton({
       <button
         type="button"
         className={clsx(
-          "hover:bg-inh-secondary-hover flex items-center justify-center rounded-full",
+          "hover:bg-base-300 flex items-center justify-center rounded-full",
           copied && "text-green-700 dark:text-green-500",
         )}
         onClick={() => copy()}

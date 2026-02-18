@@ -55,7 +55,7 @@ interface JoinItemProps {
 
 function JoinItem({ join, onBan, onUpdateRole }: JoinItemProps) {
   return (
-    <div className="border-base-content/20 bg-inh-primary/5 rounded-field flex items-center justify-between border-2 px-4 py-3">
+    <div className="border-base-content/20 bg-base-200/5 rounded-field flex items-center justify-between border-2 px-4 py-3">
       <div className="flex min-w-0 flex-col">
         <Email email={join.gmail} />
         <Email email={join.innomail} />
@@ -105,7 +105,7 @@ export function RolesSwitch({
 
   return (
     <button
-      className={`border-base-content/20 bg-inh-primary/5 flex w-fit rounded-lg border-2 p-1 text-sm font-medium ${
+      className={`border-base-content/20 bg-base-200/5 flex w-fit rounded-lg border-2 p-1 text-sm font-medium ${
         pending ? "cursor-not-allowed opacity-50" : "cursor-pointer opacity-100"
       }`}
       title={`Switch to ${isWriter ? "Reader" : "Writer"}`}

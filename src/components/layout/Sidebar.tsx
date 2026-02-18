@@ -19,10 +19,10 @@ export default function Sidebar() {
       <button
         type="button"
         onClick={() => setMinimized((v) => !v)}
-        className="hover:bg-inh-secondary absolute top-0 right-0 flex rounded-xl p-0.5"
+        className="hover:bg-base-300 absolute top-0 right-0 flex rounded-xl p-0.5"
       >
         <span
-          className="icon-[material-symbols--chevron-left-rounded] text-inh-inactive text-2xl"
+          className="icon-[material-symbols--chevron-left-rounded] text-base-content/30 text-2xl"
           style={{
             transform: isMinimized ? "rotate(180deg)" : "rotate(0deg)",
           }}
@@ -78,7 +78,7 @@ export default function Sidebar() {
             href="https://github.com/one-zero-eight"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:bg-inh-secondary flex items-center justify-center rounded-lg p-1.5"
+            className="hover:bg-base300 flex items-center justify-center rounded-lg p-1.5"
           >
             <span className="icon-[mdi--github] text-base-content/70 text-2xl" />
           </a>
@@ -86,7 +86,7 @@ export default function Sidebar() {
             href="https://t.me/one_zero_eight"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:bg-inh-secondary flex items-center justify-center rounded-lg p-1.5"
+            className="hover:bg-base-300 flex items-center justify-center rounded-lg p-1.5"
           >
             <span className="icon-[uil--telegram-alt] text-base-content/70 text-2xl" />
           </a>

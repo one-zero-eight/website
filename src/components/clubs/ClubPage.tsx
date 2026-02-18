@@ -29,7 +29,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
   if (clubPending) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inh-inactive text-lg">
+        <div className="text-base-content/30 text-lg">
           Loading club information...
         </div>
       </div>
@@ -39,7 +39,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
   if (!club) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inh-inactive text-lg">Club not found</div>
+        <div className="text-base-content/30 text-lg">Club not found</div>
       </div>
     );
   }
@@ -140,7 +140,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                         <span className="text-base-content font-medium">
                           {link.label ? link.label : getLinkLabel(link.type)}
                         </span>
-                        <span className="icon-[mdi--open-in-new] text-inh-inactive ml-auto size-4" />
+                        <span className="icon-[mdi--open-in-new] text-base-content/30 ml-auto size-4" />
                       </a>
                     </li>
                   ))}

@@ -85,7 +85,7 @@ export default function CalendarEventPopover({
               ref={refs.setFloating}
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
-              className="bg-inh-primary text-base-content rounded-box z-10 flex max-w-md flex-col gap-2 p-4 text-sm drop-shadow-md"
+              className="bg-base-200 text-base-content rounded-box z-10 flex max-w-md flex-col gap-2 p-4 text-sm drop-shadow-md"
             >
               <div className="flex flex-row gap-2">
                 <div className="w-6 p-1">

@@ -10,7 +10,7 @@ export default function SimpleExportButton({
   return (
     <Tooltip content={tooltip || "Export your schedule"}>
       <button
-        className="hover:bg-inh-secondary-hover rounded-box flex h-10 w-10 items-center justify-center text-3xl"
+        className="hover:bg-base-300-hover rounded-box flex h-10 w-10 items-center justify-center text-3xl"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();

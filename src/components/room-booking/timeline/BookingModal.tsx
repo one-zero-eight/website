@@ -494,7 +494,7 @@ export function BookingModal({
         name="party-date"
         value={start ? toLocalTimeString(start) : ""}
         onChange={(e) => setStart(fromLocalTimeString(e.target.value))}
-        className="bg-inh-secondary focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
+        className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
       />
       <label htmlFor="end" className="text-base-content/75 text-base">
         End
@@ -505,7 +505,7 @@ export function BookingModal({
         name="party-date"
         value={end ? toLocalTimeString(end) : ""}
         onChange={(e) => setEnd(fromLocalTimeString(e.target.value))}
-        className="bg-inh-secondary focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
+        className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
       />
     </div>
   );
@@ -602,7 +602,7 @@ export function BookingModal({
     <div className="flex flex-row gap-2">
       <button
         type="button"
-        className="bg-inh-primary hover:bg-inh-primary-hover dark:bg-inh-primary-hover dark:hover:bg-inh-primary rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
+        className="bg-base-200 hover:bg-base-300 dark:bg-base-300 dark:hover:bg-base-200 rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
         onClick={() => onOpenChange(false)}
       >
         Cancel
@@ -630,7 +630,7 @@ export function BookingModal({
     <div className="flex flex-row gap-2">
       <button
         type="button"
-        className="bg-inh-primary hover:bg-inh-primary-hover dark:bg-inh-primary-hover dark:hover:bg-inh-primary rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
+        className="bg-base-200 hover:bg-base-300 dark:bg-base-300 dark:hover: bg-base-200 rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
         onClick={() => setIsEditing(false)}
       >
         Cancel
@@ -718,7 +718,7 @@ export function BookingModal({
                   </div>
                   <button
                     type="button"
-                    className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center @lg/export:-mt-6 @lg/export:-mr-6"
+                    className="text-base-content/50 hover:bg-base-300/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center @lg/export:-mt-6 @lg/export:-mr-6"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-2xl" />
@@ -744,7 +744,7 @@ export function BookingModal({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Enter title..."
-                        className="bg-inh-secondary focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
+                        className="bg-base-300 focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
                       />
 
                       {BookingRooms}
@@ -780,7 +780,7 @@ export function BookingModal({
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Enter title..."
-                            className="bg-inh-secondary focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
+                            className="bg-base-300 focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
                           />
                         ) : (
                           <>

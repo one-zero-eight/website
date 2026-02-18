@@ -17,7 +17,7 @@ export function Topbar({
       className={clsx(
         "w-full flex-row items-center justify-between",
         hideOnMobile ? "hidden lg:flex" : "flex",
-        hideBorder ? "" : "border-b-inh-secondary-hover border-b",
+        hideBorder ? "" : "border-b-base-300 border-b",
       )}
     >
       <div className="grow px-4 py-2">

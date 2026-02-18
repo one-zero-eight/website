@@ -9,7 +9,7 @@ export default function ToggleSnowButton() {
       <button
         onClick={toggleSnowVisibility}
         type="button"
-        className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
+        className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2"
       >
         <span
           className={clsx(

@@ -68,10 +68,10 @@ export function MyTokenPage() {
           <input
             readOnly
             value={accessToken}
-            className="border-inh-inactive bg-inh-secondary w-full grow rounded-xl border p-2"
+            className="border-base-300 bg-base-300/55 w-full grow rounded-xl border p-2"
           />
           <button
-            className="text-primary hover:bg-inh-secondary w-fit rounded-xl p-2"
+            className="text-primary hover:bg-base-300 w-fit rounded-xl p-2"
             onClick={copy}
           >
             {copied ? "Copied!" : "Copy"}

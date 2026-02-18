@@ -75,7 +75,7 @@ export function BookingCard({
           <Tooltip content="Open details">
             <button
               onClick={() => setBookingModalOpen(true)}
-              className="text-base-content/50 hover:bg-inh-secondary-hover flex h-8 w-8 items-center justify-center rounded-md"
+              className="text-base-content/50 hover:bg-base-300 flex h-8 w-8 items-center justify-center rounded-md"
             >
               <span className="icon-[material-symbols--notes] text-3xl" />
             </button>
@@ -84,7 +84,7 @@ export function BookingCard({
             <Link
               to="/room-booking"
               search={{ d: new Date(booking.start).getTime() }}
-              className="text-base-content/50 hover:bg-inh-secondary-hover flex h-8 w-8 items-center justify-center rounded-md"
+              className="text-base-content/50 hover:bg-base-300 flex h-8 w-8 items-center justify-center rounded-md"
             >
               <span className="icon-[material-symbols--search] text-3xl" />
             </Link>

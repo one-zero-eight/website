@@ -107,7 +107,7 @@ export default function SchedulePage({
     return (
       <div className="flex flex-col justify-center gap-2 p-4">
         <h2 className="text-xl font-bold">Error Loading Schedule</h2>
-        <p className="text-inh-inactive">
+        <p className="text-base-content/30">
           {(error as any).message ||
             "An error occurred while fetching the data. Please try again later."}
         </p>
@@ -122,7 +122,7 @@ export default function SchedulePage({
     <>
       <div className="flex shrink-0 flex-col whitespace-nowrap @3xl/content:flex-row">
         <div className="flex grow flex-row overflow-x-auto whitespace-nowrap">
-          <div className="border-b-inh-secondary-hover w-2 shrink-0 border-b @3xl/content:w-1" />
+          <div className="border-base-300 w-2 shrink-0 border-b @3xl/content:w-1" />
           {Object.values(viewConfig.categories).map((v) => (
             <Link
               key={v.alias}
@@ -132,13 +132,13 @@ export default function SchedulePage({
               activeOptions={{ exact: true, includeSearch: true }}
               activeProps={{ className: "border-b-2 border-b-primary" }}
               inactiveProps={{
-                className: "border-b border-b-inh-secondary-hover",
+                className: "border-b border-base-300",
               }}
             >
               {v.title}
             </Link>
           ))}
-          <div className="border-b-inh-secondary-hover min-w-2 grow border-b" />
+          <div className="border-b-base-300 min-w-2 grow border-b" />
         </div>
         {categoryInfo && <SearchBar value={search} onChange={setSearch} />}
       </div>
@@ -158,7 +158,7 @@ export default function SchedulePage({
               <React.Fragment key={tagName}>
                 <div className="my-4 flex w-full flex-wrap justify-between">
                   <div className="text-3xl font-medium">{tagName}</div>
-                  <div className="text-inh-inactive flex items-center">
+                  <div className="text-base-content/30 flex items-center">
                     {groups[tagName].length} groups
                   </div>
                 </div>

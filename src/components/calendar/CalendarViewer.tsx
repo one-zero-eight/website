@@ -390,7 +390,7 @@ function renderEventListMonth({ event }: EventContentArg) {
   return (
     <div className="flex flex-wrap gap-x-1 text-left">
       {event.title}
-      <span className="text-inh-inactive break-all">
+      <span className="text-base-content/30 break-all">
         {event.extendedProps.location}
       </span>
     </div>
@@ -466,7 +466,7 @@ function renderEventDayGridMonth({
         {event.title || <>&nbsp;</>}
       </div>
       {timeText && (
-        <div className="text-inh-inactive ml-1 hidden w-fit text-right text-xs @5xl/content:block">
+        <div className="text-base-content/30 ml-1 hidden w-fit text-right text-xs @5xl/content:block">
           {timeText}
         </div>
       )}

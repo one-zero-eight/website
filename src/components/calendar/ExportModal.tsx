@@ -120,7 +120,7 @@ export function ExportModal({
                   </div>
                   <button
                     type="button"
-                    className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center"
+                    className="text-base-content/50 hover:bg-base-200/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />

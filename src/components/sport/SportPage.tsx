@@ -14,7 +14,7 @@ export function SportPage() {
           <div className="flex flex-col gap-4">
             <a
               href="https://t.me/IUSportBot"
-              className="group bg-inh-primary hover:bg-inh-secondary rounded-box flex flex-row gap-4 px-4 py-6"
+              className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
             >
               <div className="w-12">
                 <span className="icon-[mdi--robot-excited-outline] text-primary text-5xl" />
@@ -32,7 +32,7 @@ export function SportPage() {
           <div className="flex flex-col gap-4">
             <a
               href="https://sport.innopolis.university"
-              className="group bg-inh-primary hover:bg-inh-secondary rounded-box flex flex-row gap-4 px-4 py-6"
+              className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
             >
               <div className="w-12">
                 <span className="icon-[material-symbols--quick-reference-outline-rounded] text-primary text-5xl" />

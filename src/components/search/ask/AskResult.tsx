@@ -24,7 +24,7 @@ export function AskResult({
     <div
       tabIndex={0}
       className={clsx(
-        "border-inh-inactive bg-inh-primary text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2",
+        "border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2",
       )}
     >
       {!hasError ? (

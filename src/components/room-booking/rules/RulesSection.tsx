@@ -6,7 +6,7 @@ export function RulesSection({
 }: PropsWithChildren<HTMLAttributes<HTMLDivElement>>) {
   return (
     <div
-      className="prose prose-quoteless bg-inh-primary dark:prose-invert prose-img:rounded-box rounded-box max-w-none px-4 py-6"
+      className="prose prose-quoteless bg-base-200 dark:prose-invert prose-img:rounded-box rounded-box max-w-none px-4 py-6"
       {...props}
     >
       {children}

@@ -31,7 +31,7 @@ export function EventGroupPage({ alias }: { alias: string }) {
       <Topbar title="Group" />
       <div
         style={{ backgroundImage: "url(/background-pattern.svg)" }}
-        className="bg-inh-primary min-h-64 bg-repeat p-4"
+        className="bg-base-200 min-h-64 bg-repeat p-4"
       />
       <div className="p-4">
         <div className="mb-4 flex items-start justify-between gap-4">
@@ -49,7 +49,7 @@ export function EventGroupPage({ alias }: { alias: string }) {
           {group.tags?.map((tag) => (
             <div
               key={tag.id}
-              className="bg-inh-secondary rounded-box flex w-fit px-4 py-2"
+              className="bg-base-300 rounded-box flex w-fit px-4 py-2"
             >
               {tag.name}
             </div>

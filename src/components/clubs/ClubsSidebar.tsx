@@ -34,7 +34,7 @@ export function ClubsSidebar({
     <div className="card-body flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h3 className="text-base-content text-sm font-semibold">Search</h3>
-        <div className="border-b-inh-secondary-hover focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">
+        <div className="border-base-300 focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">
           <input
             ref={searchInputRef}
             type="text"
@@ -44,7 +44,7 @@ export function ClubsSidebar({
             readOnly={readOnly}
             className="min-w-0 grow bg-transparent px-2 py-1 outline-hidden"
           />
-          <span className="icon-[material-symbols--search-rounded] text-inh-secondary-hover shrink-0 text-2xl" />
+          <span className="icon-[material-symbols--search-rounded] text-base-300 shrink-0 text-2xl" />
         </div>
       </div>
 
@@ -68,7 +68,7 @@ export function ClubsSidebar({
         </div>
       </div>
 
-      <div className="border-t-inh-secondary-hover border-t pt-4">
+      <div className="border-t-base-300 border-t pt-4">
         <div className="text-base-content/70 text-sm">
           <span className="font-semibold">{totalCount}</span>{" "}
           {totalCount === 1 ? "club" : "clubs"}

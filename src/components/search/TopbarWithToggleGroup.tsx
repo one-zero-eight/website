@@ -14,7 +14,7 @@ export function TopbarWithToggleGroup({
   return (
     <nav
       className={clsx(
-        "border-b-inh-secondary-hover w-full flex-row items-center justify-between border-b",
+        "border-base-300 w-full flex-row items-center justify-between border-b",
         hideOnMobile ? "hidden lg:flex" : "flex",
       )}
     >

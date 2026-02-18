@@ -11,7 +11,7 @@ export default function MoodleUrlPreview({ source }: MoodleUrlPreviewProps) {
       <div className="rounded-box flex h-[400px] w-full items-center justify-center overflow-hidden shadow-lg">
         <a
           href={source.url}
-          className="hover:text-inh-secondary-hover flex flex-row items-center justify-center gap-2"
+          className="hover:text-base-300 flex flex-row items-center justify-center gap-2"
         >
           <p>Go To</p>
           <svg

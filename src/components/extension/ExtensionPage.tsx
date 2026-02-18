@@ -4,7 +4,7 @@ export function ExtensionPage() {
   return (
     <div className="grid grid-cols-1 gap-4 p-4 @xl/content:grid-cols-2">
       <div className="flex flex-col gap-4">
-        <div className="group bg-inh-primary rounded-box flex flex-row gap-4 px-4 py-6">
+        <div className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-6">
           <div className="w-12">
             <span className="icon-[material-symbols--quick-reference-outline-rounded] text-primary text-5xl" />
           </div>
@@ -43,7 +43,7 @@ export function ExtensionPage() {
         <a
           href="https://chromewebstore.google.com/detail/innohassle-tools/cbeffcchbpgcmaphbpnnnjbaighmobmn"
           target="_blank"
-          className="group bg-inh-primary hover:bg-inh-secondary rounded-box flex flex-row gap-4 px-4 py-6"
+          className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
         >
           <div className="w-12">
             <span className="icon-[logos--chrome] text-primary text-5xl" />
@@ -62,7 +62,7 @@ export function ExtensionPage() {
         <a
           href="https://api.innohassle.ru/extension/latest-firefox.xpi"
           target="_blank"
-          className="group bg-inh-primary hover:bg-inh-secondary rounded-box flex flex-row gap-4 px-4 py-6"
+          className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
         >
           <div className="w-12">
             <span className="icon-[logos--firefox] text-primary text-5xl" />
@@ -81,7 +81,7 @@ export function ExtensionPage() {
         <a
           href="https://github.com/one-zero-eight/browser-extension"
           target="_blank"
-          className="group bg-inh-primary hover:bg-inh-secondary rounded-box flex flex-row gap-4 px-4 py-6"
+          className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
         >
           <div className="w-12">
             <span className="icon-[mdi--github] text-base-content text-5xl" />
@@ -98,7 +98,7 @@ export function ExtensionPage() {
           </div>
         </a>
       </div>
-      <div className="bg-inh-primary rounded-box flex w-full flex-row items-center justify-center p-4">
+      <div className="bg-base-200 rounded-box flex w-full flex-row items-center justify-center p-4">
         <img
           src={ExtensionScreenshotPNG}
           alt="extension screenshot"

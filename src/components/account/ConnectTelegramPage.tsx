@@ -122,7 +122,7 @@ export function ConnectTelegramPage() {
       <div className="flex items-center justify-center">
         <button
           type="button"
-          className="border-primary bg-base-100 hover:bg-inh-primary-hover rounded-box flex h-14 w-fit items-center justify-center gap-4 border-2 px-6 py-2 text-xl font-medium"
+          className="border-primary bg-base-100 hover:bg-base-300 rounded-box flex h-14 w-fit items-center justify-center gap-4 border-2 px-6 py-2 text-xl font-medium"
           onClick={() => {
             const searchParams = new URLSearchParams(searchStr);
             const bot = searchParams.get("bot");

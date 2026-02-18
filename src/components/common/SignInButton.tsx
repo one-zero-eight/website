@@ -17,7 +17,7 @@ export const SignInButton = forwardRef(function SignInButton_(
       ref={ref}
       type="button"
       className={clsx(
-        "border-primary bg-base-100 hover:bg-inh-primary-hover rounded-box flex h-14 w-fit items-center justify-center gap-4 border-2 px-6 py-2 text-xl font-medium",
+        "border-primary bg-base-100 hover:bg-base-300 rounded-box flex h-14 w-fit items-center justify-center gap-4 border-2 px-6 py-2 text-xl font-medium",
         className,
       )}
       onClick={(e) => {
@@ -36,7 +36,7 @@ export function SignInButtonIcon({ onClick }: SignInButtonProps) {
     <Tooltip content="Sign in">
       <button
         type="button"
-        className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
+        className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2"
         onClick={(e) => {
           navigateToSignIn();
           onClick?.(e);

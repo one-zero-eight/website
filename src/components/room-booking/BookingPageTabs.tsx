@@ -2,7 +2,7 @@ import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 
 export function BookingPageTabs() {
   return (
-    <div className="border-b-inh-secondary-hover flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
+    <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
       <TabLink to="/room-booking">Timeline</TabLink>
       <TabLink to="/room-booking/list">My bookings</TabLink>
       <TabLink

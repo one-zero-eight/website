@@ -63,7 +63,7 @@ export function DeleteBookingModal({
                   </div>
                   <button
                     type="button"
-                    className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center @lg/export:-mt-6 @lg/export:-mr-6"
+                    className="text-base-content/50 hover:bg-base-300/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center @lg/export:-mt-6 @lg/export:-mr-6"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />
@@ -95,7 +95,7 @@ export function DeleteBookingModal({
                       <div className="flex flex-row gap-2">
                         <button
                           type="button"
-                          className="bg-inh-primary hover:bg-inh-primary-hover dark:bg-inh-primary-hover dark:hover:bg-inh-primary rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
+                          className="bg-base-200 hover:bg-base-300 dark:bg-base-300 dark:hover:bg-base-200 rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
                           onClick={() => onOpenChange(false)}
                         >
                           Back

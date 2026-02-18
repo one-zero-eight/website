@@ -5,7 +5,7 @@ export function ClubsTabs() {
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
 
   return (
-    <div className="border-b-inh-secondary-hover flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
+    <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
       <TabLink to="/clubs">List</TabLink>
       <TabLink to="/clubs/new">Create new</TabLink>
       <TabLink to="/clubs/league">Club league</TabLink>

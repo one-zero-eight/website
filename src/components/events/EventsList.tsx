@@ -429,7 +429,7 @@ function GroupedEventsView({
 
 export function SearchBar({ searchForm, setSearchForm }: SearchBarProps) {
   return (
-    <div className="border-b-inh-secondary-hover focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">
+    <div className="border-base-300 focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">
       <input
         type="text"
         placeholder="Search events..."
@@ -441,7 +441,7 @@ export function SearchBar({ searchForm, setSearchForm }: SearchBarProps) {
         }
         className="min-w-0 grow bg-transparent px-2 py-1 outline-hidden"
       />
-      <span className="icon-[material-symbols--search-rounded] text-inh-secondary-hover shrink-0 text-2xl" />
+      <span className="icon-[material-symbols--search-rounded] text-base-300 shrink-0 text-2xl" />
     </div>
   );
 }

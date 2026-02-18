@@ -76,7 +76,7 @@ export function ClubsListPage() {
   if (isPending) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inh-inactive text-lg">Loading clubs...</div>
+        <div className="text-base-content/30 text-lg">Loading clubs...</div>
       </div>
     );
   }
@@ -84,7 +84,7 @@ export function ClubsListPage() {
   if (!clubs || clubs.length === 0) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inh-inactive text-lg">No clubs found</div>
+        <div className="text-base-content/30 text-lg">No clubs found</div>
       </div>
     );
   }
@@ -114,7 +114,7 @@ export function ClubsListPage() {
 
       {filteredClubs.length === 0 ? (
         <div className="flex min-h-[400px] grow items-center justify-center">
-          <div className="text-inh-inactive text-lg">No clubs found</div>
+          <div className="text-base-content/30 text-lg">No clubs found</div>
         </div>
       ) : (
         <div className="flex grow flex-col gap-6">

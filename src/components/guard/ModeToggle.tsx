@@ -14,10 +14,10 @@ export function ModeToggle({ mode, onChange }: ModeToggleProps) {
         className={`flex-1 rounded px-4 py-2 text-sm font-medium transition-colors ${
           mode === "create"
             ? "bg-primary text-white"
-            : "text-base-content/70 hover:bg-inh-primary/5"
+            : "text-base-content/70 hover:bg-base-200/5"
         }`}
       >
-        {MODE_LABELS.create}
+        {MODE_LABELS.create}ss
       </button>
       <button
         type="button"
@@ -25,7 +25,7 @@ export function ModeToggle({ mode, onChange }: ModeToggleProps) {
         className={`flex-1 rounded px-4 py-2 text-sm font-medium transition-colors ${
           mode === "copy"
             ? "bg-primary text-white"
-            : "text-base-content/70 hover:bg-inh-primary/5"
+            : "text-base-content/70 hover:bg-base-200/5"
         }`}
       >
         {MODE_LABELS.copy}

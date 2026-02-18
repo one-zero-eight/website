@@ -44,8 +44,8 @@ export default function ImageUpload({
               />
             </div>
           ) : (
-            <div className="bg-inh-primary border-inh-secondary rounded-field flex items-center justify-center border p-4">
-              <div className="text-inh-inactive flex flex-col items-center gap-2 py-8">
+            <div className="bg-base-200 border-base-300 rounded-field flex items-center justify-center border p-4">
+              <div className="text-base-content/30 flex flex-col items-center gap-2 py-8">
                 <span className="icon-[mdi--image-plus] size-12" />
                 <span className="text-sm">Select a file to preview</span>
               </div>

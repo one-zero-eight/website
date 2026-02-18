@@ -311,7 +311,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   if (clubPending) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inh-inactive text-lg">
+        <div className="text-base-content/30 text-lg">
           Loading club information...
         </div>
       </div>
@@ -321,7 +321,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   if (!club) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-inh-inactive text-lg">Club not found</div>
+        <div className="text-base-content/30 text-lg">Club not found</div>
       </div>
     );
   }
@@ -386,8 +386,8 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                       />
                     </div>
                   ) : (
-                    <div className="bg-inh-primary border-inh-secondary rounded-field flex items-center justify-center border p-4">
-                      <div className="text-inh-inactive flex flex-col items-center gap-2 py-8">
+                    <div className="bg-base-200 border-base-300 rounded-field flex items-center justify-center border p-4">
+                      <div className="text-base-content/30 flex flex-col items-center gap-2 py-8">
                         <span className="icon-[mdi--image-plus] size-12" />
                         <span className="text-sm">
                           Select a file to preview

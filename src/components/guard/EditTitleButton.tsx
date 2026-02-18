@@ -53,7 +53,7 @@ export function EditTitleButton({
           }}
           autoFocus
           disabled={isPending}
-          className="border-base-content/20 bg-inh-primary/5 focus:border-primary flex-1 rounded-sm border-2 px-2 py-1 text-base outline-hidden transition-colors disabled:opacity-50"
+          className="border-base-content/20 bg-base-200/5 focus:border-primary flex-1 rounded-sm border-2 px-2 py-1 text-base outline-hidden transition-colors disabled:opacity-50"
         />
         <button
           onClick={handleSave}
@@ -78,7 +78,7 @@ export function EditTitleButton({
       <h3 className="truncate text-lg">{currentTitle || "Untitled"}</h3>
       <button
         onClick={() => setIsEditing(true)}
-        className="text-base-content/60 hover:bg-inh-primary/10 hover:text-base-content rounded-sm px-2 py-1 text-sm"
+        className="text-base-content/60 hover:bg-base-200/10 hover:text-base-content rounded-sm px-2 py-1 text-sm"
         title="Edit title"
       >
         <span className="icon-[material-symbols--edit] text-base" />

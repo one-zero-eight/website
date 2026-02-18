@@ -207,7 +207,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
                 if (error) setError("");
               }}
               placeholder="e.g., CSE electives"
-              className="border-base-content/20 bg-inh-primary/5 focus:border-inh-primary focus:bg-inh-primary/10 rounded-field w-full border-2 px-4 py-2 outline-hidden transition-colors"
+              className="border-base-content/20 bg-base-200/5 focus:border-base-200 focus:bg-base-200/10 rounded-field w-full border-2 px-4 py-2 outline-hidden transition-colors"
             />
           </div>
         )}
@@ -230,7 +230,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
               }}
               onBlur={handleBlur}
               placeholder="https://docs.google.com/spreadsheets/d/1gqfGNkl_nLI5vXc5br8-J__33kj8Kr3fI2xqrMBK2JA"
-              className="border-base-content/20 bg-inh-primary/5 focus:border-inh-primary focus:bg-inh-primary/10 rounded-field w-full border-2 px-4 py-2 outline-hidden transition-colors"
+              className="border-base-content/20 bg-base-200/5 focus:border-base-200 focus:bg-base-200/10 rounded-field w-full border-2 px-4 py-2 outline-hidden transition-colors"
             />
           </div>
         )}
@@ -248,7 +248,7 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
               if (error) setError("");
             }}
             placeholder="your.email@gmail.com"
-            className="border-base-content/20 bg-inh-primary/5 focus:border-inh-primary focus:bg-inh-primary/10 rounded-field w-full border-2 px-4 py-2 outline-hidden transition-colors"
+            className="border-base-content/20 bg-base-200/5 focus:border-base-200 focus:bg-base-200/10 rounded-field w-full border-2 px-4 py-2 outline-hidden transition-colors"
           />
         </div>
 

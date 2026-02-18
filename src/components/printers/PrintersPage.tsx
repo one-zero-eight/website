@@ -2,7 +2,7 @@ export function PrintersPage() {
   return (
     <div className="grid grid-cols-1 gap-4 p-4">
       <div className="flex flex-col gap-4">
-        <div className="group bg-inh-primary rounded-box flex flex-row gap-4 px-4 py-6">
+        <div className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-6">
           <div className="w-12">
             <span className="icon-[material-symbols--quick-reference-outline-rounded] text-primary text-5xl" />
           </div>
@@ -42,7 +42,7 @@ export function PrintersPage() {
         <a
           href="https://t.me/InnoPrintBot"
           target="_blank"
-          className="group bg-inh-primary hover:bg-inh-secondary rounded-box flex flex-row gap-4 px-4 py-6"
+          className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
         >
           <div className="w-12">
             <span className="icon-[mdi--robot-excited-outline] text-primary text-5xl" />
@@ -60,7 +60,7 @@ export function PrintersPage() {
         <a
           href="https://t.me/ArtemSBulgakov"
           target="_blank"
-          className="group bg-inh-primary hover:bg-inh-secondary rounded-box flex flex-row gap-4 px-4 py-6"
+          className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
         >
           <div className="w-12">
             <span className="icon-[ic--baseline-telegram] text-primary text-5xl" />

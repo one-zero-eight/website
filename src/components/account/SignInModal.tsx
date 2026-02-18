@@ -59,7 +59,7 @@ export function SignInModal({
                   </div>
                   <button
                     type="button"
-                    className="text-base-content/50 hover:bg-inh-primary-hover/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center @lg/modal:-mt-6 @lg/modal:-mr-6"
+                    className="text-base-content/50 hover:bg-base-300/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center @lg/modal:-mt-6 @lg/modal:-mr-6"
                     onClick={() => onOpenChange(false)}
                   >
                     <span className="icon-[material-symbols--close] text-4xl" />

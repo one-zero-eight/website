@@ -54,7 +54,7 @@ interface FileItemProps {
 
 function FileItem({ file, onShowDetails }: FileItemProps) {
   return (
-    <div className="border-base-content/20 bg-inh-primary/5 rounded-field flex items-center justify-between border-2 px-4 py-3">
+    <div className="border-base-content/20 bg-base-200/5 rounded-field flex items-center justify-between border-2 px-4 py-3">
       <div className="min-w-0">
         <div className="truncate font-medium">{file.title || "Untitled"}</div>
         <div className="text-base-content/60 flex items-center gap-2 truncate text-sm">

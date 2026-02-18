@@ -62,7 +62,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
         <button
           ref={refs.setReference}
           {...getReferenceProps()}
-          className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2"
+          className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2"
         >
           <span className="icon-[material-symbols--snowboarding-rounded] text-base-content/70 text-3xl" />
         </button>
@@ -76,7 +76,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
               className={clsx(
-                "border-inh-primary/50 bg-base-200 rounded-box absolute z-10 w-fit border-2 p-4",
+                "border-base-300/50 bg-base-100 rounded-box absolute z-10 w-fit border-2 p-4",
                 isMobile
                   ? "top-[18p] left-0"
                   : isSidebar
@@ -85,7 +85,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               )}
             >
               <div className="flex flex-row justify-center gap-6 sm:justify-normal">
-                <div className="bg-inh-primary text-base-content/50 flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full">
+                <div className="bg-base-200 text-base-content/50 flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full">
                   {me.telegram_info?.photo_url ? (
                     <img
                       src={me.telegram_info.photo_url}
@@ -115,7 +115,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                   <Link
                     to="/dashboard"
                     onClick={() => setIsOpen(false)}
-                    className="bg-inh-primary text-base-content/75 hover:bg-inh-secondary-hover rounded-box flex w-full flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
+                    className="bg-base-200 text-base-content/75 hover:bg-base-300 rounded-box flex w-full flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
                   >
                     <span className="icon-[material-symbols--account-circle] text-2xl" />
                     My dashboard
@@ -126,7 +126,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                       navigateToSignOut();
                       setIsOpen(false);
                     }}
-                    className="bg-inh-primary text-base-content/75 hover:bg-inh-secondary-hover rounded-box flex w-full cursor-pointer flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
+                    className="bg-base-200 text-base-content/75 hover:bg-base-300 rounded-box flex w-full cursor-pointer flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
                   >
                     <span className="icon-[material-symbols--logout] text-2xl" />
                     Sign out

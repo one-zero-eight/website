@@ -207,9 +207,9 @@ const CourseCard = ({
   };
 
   return (
-    <div className="border-inh-secondary-hover bg-base-200 hover:border-primary/30 mb-3 rounded-xl border transition-all duration-200">
+    <div className="border-base-300 bg-base-200 hover:border-primary/30 mb-3 rounded-xl border transition-all duration-200">
       <div
-        className="hover:bg-inh-secondary-hover flex cursor-pointer items-center gap-4 rounded-xl border border-transparent p-4 transition-all duration-200"
+        className="hover:bg-base-300-hover flex cursor-pointer items-center gap-4 rounded-xl border border-transparent p-4 transition-all duration-200"
         onClick={() => onSelect()}
         onKeyDown={handleKeyDown}
         tabIndex={0}
@@ -241,13 +241,13 @@ const CourseCard = ({
         />
       </div>
       {isExpanded && courseData && (
-        <div className="border-inh-secondary-hover bg-base-100/50 rounded-b-xl border-t p-4">
+        <div className="border-base-300 bg-base-100/50 rounded-b-xl border-t p-4">
           <div className="space-y-2">
             {courseData.map((source, index) => (
               <div
                 onClick={() => setPreviewSource(source)}
                 key={index}
-                className="border-inh-secondary-hover hover:bg-inh-secondary-hover rounded-field flex cursor-pointer gap-3 border-b p-3 transition-all duration-200"
+                className="border-base-300 hover:bg-base-300-hover rounded-field flex cursor-pointer gap-3 border-b p-3 transition-all duration-200"
               >
                 <span className="icon-[material-symbols--description] text-primary shrink-0 text-2xl" />
                 <div className="min-w-0 flex-1 space-y-0">
@@ -299,9 +299,9 @@ const TrimesterGroup = ({
   };
 
   return (
-    <div className="border-inh-secondary-hover bg-base-200 rounded-xl border p-4">
+    <div className="border-base-300 bg-base-200 rounded-xl border p-4">
       <div
-        className="focus:bg-inh-secondary-hover focus:ring-primary/50 rounded-field flex cursor-pointer items-center gap-3 p-2 transition-all duration-200 focus:ring-2 focus:outline-hidden"
+        className="focus:bg-base-300-hover focus:ring-primary/50 rounded-field flex cursor-pointer items-center gap-3 p-2 transition-all duration-200 focus:ring-2 focus:outline-hidden"
         onClick={() => setIsExpanded(!isExpanded)}
         onKeyDown={handleKeyDown}
         tabIndex={0}
@@ -344,7 +344,7 @@ const LoadingSkeleton = () => (
     {[1, 2, 3].map((i) => (
       <div
         key={i}
-        className="border-inh-secondary-hover bg-base-200 rounded-xl border p-4"
+        className="border-base-300 bg-base-200 rounded-xl border p-4"
       >
         <div className="flex items-center gap-3">
           <div className="bg-base-content/20 h-8 w-8 animate-pulse rounded-sm" />
