@@ -13,6 +13,11 @@ import {
   type Slot,
 } from "./types.ts";
 
+// TODO: Remove this
+const IS_MAINTENANCE =
+  Date.now() > new Date("2026-02-19T09:30:00+03:00").getTime() &&
+  Date.now() < new Date("2026-02-19T16:30:00+03:00").getTime();
+
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),
 );
@@ -129,22 +134,29 @@ export function RoomBookingPage() {
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center">
-              <section className="relative h-screen w-full overflow-hidden text-[#feda4a]">
-                <div className="absolute inset-0 [perspective:1000px]">
-                  <div className="animate-booking-error absolute top-full left-1/2 w-[190vw] -translate-x-1/2 text-center font-bold tracking-wide uppercase [transform-style:preserve-3d]">
-                    <p className="mb-6 text-2xl md:text-4xl">
-                      Error loading bookings
-                    </p>
-                    <h1 className="mb-8 text-4xl leading-tight md:text-7xl">
-                      Most probably Outlook API is down
-                    </h1>
+              {IS_MAINTENANCE ? (
+                <h1 className="m-4 text-center text-lg">
+                  Room booking may be unavailable due to scheduled maintenance
+                  work by IT department
+                </h1>
+              ) : (
+                <section className="relative h-screen w-full overflow-hidden text-[#feda4a]">
+                  <div className="absolute inset-0 [perspective:1000px]">
+                    <div className="animate-booking-error absolute top-full left-1/2 w-[190vw] -translate-x-1/2 text-center font-bold tracking-wide uppercase [transform-style:preserve-3d]">
+                      <p className="mb-6 text-2xl md:text-4xl">
+                        Error loading bookings
+                      </p>
+                      <h1 className="mb-8 text-4xl leading-tight md:text-7xl">
+                        Most probably Outlook API is down
+                      </h1>
 
-                    <div className="space-y-6 text-lg leading-[1.8] whitespace-pre-wrap md:text-3xl">
-                      <p>{bookingsError?.detail?.toString()}</p>
+                      <div className="space-y-6 text-lg leading-[1.8] whitespace-pre-wrap md:text-3xl">
+                        <p>{bookingsError?.detail?.toString()}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </section>
+                </section>
+              )}
             </div>
           )}
         </Suspense>
