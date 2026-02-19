@@ -30,7 +30,7 @@ export default function FavoriteButton({ groupId }: { groupId: number }) {
               switchFavorite?.();
             }
           }}
-          className="text-base-content/50 hover:bg-base-300 hover:text-base-content/75 rounded-box -mr-2 flex h-10 w-10 items-center justify-center text-3xl"
+          className="text-base-content/50 hover:bg-base-200 hover:text-base-content/75 rounded-box -mr-2 flex h-10 w-10 items-center justify-center text-3xl"
         >
           {isPredefined ? (
             <span className="icon-[material-symbols--stars-outline] text-[#F0B132] dark:text-[#F0B132]/70" />

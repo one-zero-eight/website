@@ -252,7 +252,7 @@ export default function ScholarshipCalculator() {
           <button
             onClick={() => onMarksChange(marks.join(""), "B23")}
             className={clsx(
-              "font-handwritten hover:bg-primary/20 w-full rounded-r-2xl p-2 text-center text-lg transition-colors",
+              "font-handwritten hover:bg-primary/20 w-full p-2 text-center text-lg transition-colors",
               course === "B23"
                 ? "bg-primary/10 text-primary"
                 : "bg-transparent text-gray-500",

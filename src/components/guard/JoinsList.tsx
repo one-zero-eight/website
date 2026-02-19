@@ -105,7 +105,7 @@ export function RolesSwitch({
 
   return (
     <button
-      className={`border-base-content/20 bg-base-200/5 flex w-fit rounded-lg border-2 p-1 text-sm font-medium ${
+      className={`border-base-content/20 bg-base-200/5 rounded-field flex w-fit border-2 p-1 text-sm font-medium ${
         pending ? "cursor-not-allowed opacity-50" : "cursor-pointer opacity-100"
       }`}
       title={`Switch to ${isWriter ? "Reader" : "Writer"}`}

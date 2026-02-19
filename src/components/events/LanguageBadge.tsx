@@ -6,7 +6,7 @@ export function LanguageBadge({ event, className }: LanguageBadgeProps) {
   return (
     <span
       className={clsx(
-        "badge badge-soft rounded-lg font-bold [--badge-color:var(--color-violet-500)]",
+        "badge badge-soft rounded-field font-bold [--badge-color:var(--color-violet-500)]",
         className,
       )}
     >

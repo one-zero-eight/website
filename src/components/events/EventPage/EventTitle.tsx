@@ -88,7 +88,7 @@ export default function EventTitle({
               <img
                 src={imageLink(event.id)}
                 alt={event.english_name + " logo"}
-                className="h-full rounded-lg"
+                className="rounded-field h-full"
               />
             </div>
           </div>

@@ -109,7 +109,7 @@ export function ExportModal({
             {...getFloatingProps()}
             className="flex h-fit w-full max-w-[100vw] flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-2/3"
           >
-            <div className="bg-base-200 rounded-box overflow-hidden">
+            <div className="bg-base-100 rounded-box border-base-300 overflow-hidden border">
               <div className="flex flex-col p-4">
                 {/* Heading and description */}
                 <div className="mb-2 flex w-full flex-row">

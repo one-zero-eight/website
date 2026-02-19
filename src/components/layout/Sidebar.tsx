@@ -78,7 +78,7 @@ export default function Sidebar() {
             href="https://github.com/one-zero-eight"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:bg-base300 flex items-center justify-center rounded-lg p-1.5"
+            className="hover:bg-base300 rounded-field flex items-center justify-center p-1.5"
           >
             <span className="icon-[mdi--github] text-base-content/70 text-2xl" />
           </a>
@@ -86,7 +86,7 @@ export default function Sidebar() {
             href="https://t.me/one_zero_eight"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:bg-base-300 flex items-center justify-center rounded-lg p-1.5"
+            className="hover:bg-base-300 rounded-field flex items-center justify-center p-1.5"
           >
             <span className="icon-[uil--telegram-alt] text-base-content/70 text-2xl" />
           </a>

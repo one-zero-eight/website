@@ -313,7 +313,7 @@ export function SearchMenu({
                 <label className="label" key={language}>
                   <input
                     type="checkbox"
-                    className="checkbox rounded-lg"
+                    className="checkbox rounded-field"
                     checked={searchForm.selectedLanguages[language]}
                     onChange={() => handleChangeLanguage(language)}
                   />

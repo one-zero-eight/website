@@ -209,7 +209,7 @@ const CourseCard = ({
   return (
     <div className="border-base-300 bg-base-200 hover:border-primary/30 mb-3 rounded-xl border transition-all duration-200">
       <div
-        className="hover:bg-base-300-hover flex cursor-pointer items-center gap-4 rounded-xl border border-transparent p-4 transition-all duration-200"
+        className="hover:bg-base-300 flex cursor-pointer items-center gap-4 rounded-xl border border-transparent p-4 transition-all duration-200"
         onClick={() => onSelect()}
         onKeyDown={handleKeyDown}
         tabIndex={0}
@@ -247,7 +247,7 @@ const CourseCard = ({
               <div
                 onClick={() => setPreviewSource(source)}
                 key={index}
-                className="border-base-300 hover:bg-base-300-hover rounded-field flex cursor-pointer gap-3 border-b p-3 transition-all duration-200"
+                className="border-base-300 hover:bg-base-300 rounded-field flex cursor-pointer gap-3 border-b p-3 transition-all duration-200"
               >
                 <span className="icon-[material-symbols--description] text-primary shrink-0 text-2xl" />
                 <div className="min-w-0 flex-1 space-y-0">
@@ -301,7 +301,7 @@ const TrimesterGroup = ({
   return (
     <div className="border-base-300 bg-base-200 rounded-xl border p-4">
       <div
-        className="focus:bg-base-300-hover focus:ring-primary/50 rounded-field flex cursor-pointer items-center gap-3 p-2 transition-all duration-200 focus:ring-2 focus:outline-hidden"
+        className="focus:bg-base-300 focus:ring-primary/50 rounded-field flex cursor-pointer items-center gap-3 p-2 transition-all duration-200 focus:ring-2 focus:outline-hidden"
         onClick={() => setIsExpanded(!isExpanded)}
         onKeyDown={handleKeyDown}
         tabIndex={0}

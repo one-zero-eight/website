@@ -31,7 +31,7 @@ export function ClubsSidebar({
   }, []);
 
   const sidebarContent = (
-    <div className="card-body flex flex-col gap-6">
+    <div className="card-body bg-base-100 rounded-box flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h3 className="text-base-content text-sm font-semibold">Search</h3>
         <div className="border-base-300 focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">

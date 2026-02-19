@@ -12,7 +12,7 @@ export function ClubLeaguePage() {
       </div>
 
       {/* Aims Section */}
-      <div className="bg-base-200 rounded-lg p-6 md:p-8">
+      <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
           Club League Aims
         </h2>
@@ -41,7 +41,7 @@ export function ClubLeaguePage() {
       </div>
 
       {/* Competition Principles */}
-      <div className="bg-base-200 rounded-lg p-6 md:p-8">
+      <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
           Competition Principles
         </h2>
@@ -84,7 +84,7 @@ export function ClubLeaguePage() {
 
       {/* Calendar & Rules */}
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="bg-base-200 rounded-lg p-6">
+        <div className="bg-base-200 rounded-field p-6">
           <div className="mb-4 flex items-center gap-3">
             <span className="icon-[material-symbols--calendar-month-outline] text-primary text-3xl" />
             <h2 className="text-base-content text-xl font-semibold">
@@ -92,13 +92,13 @@ export function ClubLeaguePage() {
             </h2>
           </div>
           <div className="space-y-3">
-            <div className="bg-base-300 rounded-lg p-4">
+            <div className="bg-base-300 rounded-field p-4">
               <div className="text-primary mb-1 font-semibold">
                 1st Semester
               </div>
               <div className="text-base-content/80">June - November</div>
             </div>
-            <div className="bg-base-300 rounded-lg p-4">
+            <div className="bg-base-300 rounded-field p-4">
               <div className="text-primary mb-1 font-semibold">
                 2nd Semester
               </div>
@@ -107,7 +107,7 @@ export function ClubLeaguePage() {
           </div>
         </div>
 
-        <div className="bg-base-200 rounded-lg p-6">
+        <div className="bg-base-200 rounded-field p-6">
           <div className="mb-4 flex items-center gap-3">
             <span className="icon-[material-symbols--info-outline] text-primary text-3xl" />
             <h2 className="text-base-content text-xl font-semibold">
@@ -139,7 +139,7 @@ export function ClubLeaguePage() {
       </div>
 
       {/* Purchases */}
-      <div className="bg-base-200 rounded-lg p-6 md:p-8">
+      <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
           Club Purchases
         </h2>
@@ -156,7 +156,7 @@ export function ClubLeaguePage() {
               <li>Merch of the club</li>
               <li>Other materials related to the activities of the club</li>
             </ul>
-            <div className="bg-base-300 mt-4 rounded-lg p-4">
+            <div className="bg-base-300 rounded-field mt-4 p-4">
               <p className="text-base-content/90 text-sm">
                 <span className="font-semibold">Example:</span> Badminton club
                 can buy shuttlecocks, but cannot buy a flower pot.
@@ -215,7 +215,7 @@ export function ClubLeaguePage() {
       </div>
 
       {/* Resources Links */}
-      <div className="from-primary/10 to-primary/5 rounded-lg bg-linear-to-br p-6 md:p-8">
+      <div className="from-primary/10 to-primary/5 rounded-field bg-linear-to-br p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
           League Resources
         </h2>
@@ -224,7 +224,7 @@ export function ClubLeaguePage() {
             href="https://docs.google.com/spreadsheets/d/10fx5RQO48bcYtVpVOjONOBqvmnMrc61TYpHgIFfcwJw/edit?gid=2042208352#gid=2042208352"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-base-100 flex flex-col gap-3 rounded-lg p-6 transition-shadow hover:shadow-lg"
+            className="bg-base-100 rounded-field flex flex-col gap-3 p-6 transition-shadow hover:shadow-lg"
           >
             <div className="flex items-center gap-3">
               <span className="icon-[material-symbols--table-chart-outline] text-primary text-3xl" />
@@ -246,7 +246,7 @@ export function ClubLeaguePage() {
             href="https://docs.google.com/spreadsheets/d/1wTeuML4vdrPt1E6L-ZXLEekbz7ozBV9d0c9TpeUxIyg/edit?gid=1956341643#gid=1956341643"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-base-100 flex flex-col gap-3 rounded-lg p-6 transition-shadow hover:shadow-lg"
+            className="bg-base-100 rounded-field flex flex-col gap-3 p-6 transition-shadow hover:shadow-lg"
           >
             <div className="flex items-center gap-3">
               <span className="icon-[material-symbols--leaderboard-outline] text-primary text-3xl" />
@@ -267,7 +267,7 @@ export function ClubLeaguePage() {
       </div>
 
       {/* Contact Section */}
-      <div className="bg-base-200 rounded-lg p-6 text-center md:p-8">
+      <div className="bg-base-200 rounded-field p-6 text-center md:p-8">
         <h2 className="text-base-content mb-4 text-2xl font-semibold">
           Need Help?
         </h2>

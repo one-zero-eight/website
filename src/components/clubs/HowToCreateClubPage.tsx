@@ -13,7 +13,7 @@ export function HowToCreateClubPage() {
       </div>
 
       {/* Benefits Section */}
-      <div className="bg-base-200 rounded-lg p-6 md:p-8">
+      <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
           Why Create a Club?
         </h2>
@@ -62,7 +62,7 @@ export function HowToCreateClubPage() {
       </div>
 
       {/* Club Leader Benefits */}
-      <div className="bg-base-200 rounded-lg p-6 md:p-8">
+      <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
           Club Leader Benefits
         </h2>
@@ -101,7 +101,7 @@ export function HowToCreateClubPage() {
       </div>
 
       {/* Club Types */}
-      <div className="bg-base-200 rounded-lg p-6 md:p-8">
+      <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-6 text-2xl font-semibold">
           Club Types
         </h2>
@@ -138,7 +138,7 @@ export function HowToCreateClubPage() {
       </div>
 
       {/* Timeline Section */}
-      <div className="bg-base-200 rounded-lg p-6 md:p-8">
+      <div className="bg-base-200 rounded-field p-6 md:p-8">
         <h2 className="text-base-content mb-8 text-2xl font-semibold">
           How to Register Your Club
         </h2>
@@ -250,7 +250,7 @@ export function HowToCreateClubPage() {
       </div>
 
       {/* Contact Section */}
-      <div className="bg-base-200 rounded-lg p-6 text-center md:p-8">
+      <div className="bg-base-200 rounded-field p-6 text-center md:p-8">
         <h2 className="text-base-content mb-4 text-2xl font-semibold">
           Need Help?
         </h2>
@@ -326,7 +326,7 @@ function ClubTypeCard({
   examples: string;
 }) {
   return (
-    <div className="bg-base-100 rounded-lg p-5">
+    <div className="bg-base-100 rounded-field p-5">
       <div className="mb-3 flex items-center gap-3">
         <span className={`${icon} text-primary text-3xl`} />
         <h3 className="text-base-content text-lg font-semibold">{title}</h3>

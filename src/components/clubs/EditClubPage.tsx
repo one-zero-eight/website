@@ -565,7 +565,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
 
             {/* Current Leader Info */}
             {clubLeader && (
-              <div className="bg-base-200 mb-4 space-y-3 rounded-lg p-4">
+              <div className="bg-base-200 rounded-field mb-4 space-y-3 p-4">
                 {clubLeader.name && (
                   <div className="flex items-start gap-3">
                     <span className="icon-[mdi--account] text-base-content/50 mt-0.5 size-5" />
@@ -730,7 +730,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
             </div>
 
             {links.length === 0 ? (
-              <div className="border-base-300 flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8">
+              <div className="border-base-300 rounded-field flex flex-col items-center justify-center border-2 border-dashed p-8">
                 <span className="icon-[mdi--link-variant-off] text-base-content/30 mb-2 size-12" />
                 <p className="text-base-content/50 text-sm">
                   No links added yet. Click "Add Link" to add resources.
@@ -741,7 +741,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 {links.map((link, index) => (
                   <div
                     key={index}
-                    className="border-base-300 bg-base-200 hover:border-primary/50 rounded-lg border p-4 transition-colors"
+                    className="border-base-300 bg-base-200 hover:border-primary/50 rounded-field border p-4 transition-colors"
                   >
                     <div className="mb-4 flex items-center justify-between">
                       <div className="flex items-center gap-2">

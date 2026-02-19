@@ -40,7 +40,7 @@ export function MapsPageTabs() {
         <button
           type="submit"
           tabIndex={-1} // Do not allow to focus on this button
-          className="icon-[material-symbols--search-rounded] text-base-300 shrink-0 text-2xl"
+          className="icon-[material-symbols--search-rounded] text-base-content/35 shrink-0 text-2xl"
         />
       </form>
 
