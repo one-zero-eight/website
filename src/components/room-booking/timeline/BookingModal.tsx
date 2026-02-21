@@ -378,7 +378,7 @@ export function BookingModal({
         },
       },
       {
-        enabled: !!room && !!start && !!end,
+        enabled: (!!newSlot || isEditing) && !!room && !!start && !!end,
       },
     );
 
