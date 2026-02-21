@@ -85,14 +85,14 @@ export function BookingCard({
         <div className="flex grow flex-col">
           <h2 className="text-base-content font-medium">{booking.title}</h2>
           <p className="text-base-content/70">{room?.title}</p>
-          <p className="text-base-content/70 flex flex-row gap-2">
+          <p className="text-base-content/70">
             <span>
               {start.toLocaleString("en-US", {
                 day: "numeric",
                 month: "short",
               })}
               , {start.toLocaleString("en-US", { weekday: "short" })}
-            </span>
+            </span>{" "}
             <span>
               {`${clockTime(start)}–${clockTime(end)} (${durationFormatted(msBetween(start, end))})`}
             </span>
