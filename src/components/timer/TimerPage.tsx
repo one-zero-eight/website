@@ -204,7 +204,7 @@ const TimerPage = () => {
             onClick={() => setShowCustomTimeModal(true)}
           >
             <span className="icon-[material-symbols--calendar-today] text-lg" />
-            Pick specific time
+            Until exact time
           </button>
         )}
       </div>

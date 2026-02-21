@@ -15,12 +15,14 @@ export function ModalWindow({
   children,
   className = "",
   title,
+  closeOutsidePress = false,
 }: {
   className?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
   title?: string;
+  closeOutsidePress?: boolean;
 }) {
   const { context, refs } = useFloating({ open, onOpenChange });
 
@@ -28,7 +30,7 @@ export function ModalWindow({
   const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
 
   // Event listeners to change the open state
-  const dismiss = useDismiss(context, { outsidePress: false });
+  const dismiss = useDismiss(context, { outsidePress: closeOutsidePress });
   // Role props for screen readers
   const role = useRole(context);
 
