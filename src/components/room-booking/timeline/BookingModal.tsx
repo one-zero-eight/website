@@ -493,7 +493,9 @@ export function BookingModal({
         type="datetime-local"
         name="party-date"
         value={start ? toLocalTimeString(start) : ""}
-        onChange={(e) => setStart(fromLocalTimeString(e.target.value))}
+        onChange={(e) =>
+          e.target.value && setStart(fromLocalTimeString(e.target.value))
+        }
         className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
       />
       <label htmlFor="end" className="text-base-content/75 text-base">
@@ -504,7 +506,9 @@ export function BookingModal({
         type="datetime-local"
         name="party-date"
         value={end ? toLocalTimeString(end) : ""}
-        onChange={(e) => setEnd(fromLocalTimeString(e.target.value))}
+        onChange={(e) =>
+          e.target.value && setEnd(fromLocalTimeString(e.target.value))
+        }
         className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
       />
     </div>
