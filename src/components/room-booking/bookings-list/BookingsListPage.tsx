@@ -1,6 +1,7 @@
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
+import { useNowMS } from "@/lib/utils/use-now.ts";
 import { Link } from "@tanstack/react-router";
 import React, { useMemo, useState } from "react";
 import { BookingModal } from "../timeline/BookingModal";
@@ -12,6 +13,24 @@ export function BookingsListPage() {
     status,
     error,
   } = $roomBooking.useQuery("get", "/bookings/my");
+
+  const now = useNowMS(true, 30 * 1000);
+  const notFinishedBookings = useMemo(() => {
+    if (!bookings) return [];
+    return bookings
+      .filter((b) => new Date(b.end).getTime() > now)
+      .sort(
+        (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
+      );
+  }, [bookings, now]);
+  const finishedBookings = useMemo(() => {
+    if (!bookings) return [];
+    return bookings
+      .filter((b) => new Date(b.end).getTime() <= now)
+      .sort(
+        (a, b) => new Date(b.start).getTime() - new Date(a.start).getTime(),
+      );
+  }, [bookings, now]);
 
   return status === "pending" ? (
     <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
@@ -30,9 +49,17 @@ export function BookingsListPage() {
     </div>
   ) : (
     <div className="flex w-full max-w-lg flex-col gap-4 self-center p-4">
-      {bookings.map((v) => (
+      {notFinishedBookings.map((v) => (
         <BookingCard booking={v} key={v.id} />
       ))}
+      {finishedBookings.length > 0 && (
+        <>
+          <h2 className="text-base-content/70 text-lg">Finished bookings:</h2>
+          {finishedBookings.map((v) => (
+            <BookingCard booking={v} key={v.id} />
+          ))}
+        </>
+      )}
     </div>
   );
 }
