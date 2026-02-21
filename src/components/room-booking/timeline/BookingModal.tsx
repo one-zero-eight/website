@@ -325,15 +325,17 @@ export function BookingModal({
 
   const finishBooking = useCallback(() => {
     if (!detailsBooking) return;
+    const endTimestamp =
+      Math.floor((new Date().getTime() + T.Min * 5) / 1000) * 1000;
     mutateUpdateBooking(
       {
         params: {
           path: { outlook_booking_id: detailsBooking.outlook_booking_id ?? "" },
         },
         body: {
-          title: detailsBooking.title.trim(),
-          start: detailsBooking.startsAt.toISOString(),
-          end: new Date(new Date().getTime() + T.Min * 5).toISOString(),
+          title: null, // No changes
+          start: null, // No changes
+          end: new Date(endTimestamp).toISOString(),
         },
       },
       {
