@@ -94,6 +94,7 @@
   --color-brand-gradient-end: rgb(209 35 162); /* #D1233E */
 
   --animate-booking-fake-progress: fake-progress 50s linear;
+  --animate-booking-fake-progress-fast: fake-progress 5s linear;
   @keyframes fake-progress {
     from {
       width: 0%;
