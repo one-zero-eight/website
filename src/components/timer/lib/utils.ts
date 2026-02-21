@@ -51,3 +51,48 @@ export function useFullscreen() {
 
   return isFullScreen;
 }
+
+interface UseSaveState {
+  title: string;
+  initialSeconds: number;
+  isRunning: boolean;
+  isPaused: boolean;
+  targetEndTime: number | null;
+}
+export function useSaveState({
+  title,
+  initialSeconds,
+  isRunning,
+  isPaused,
+  targetEndTime,
+}: UseSaveState) {
+  const saveState = useCallback(
+    (seconds?: number) => {
+      const stateToSave: any = {
+        title,
+        initialSeconds,
+        isRunning,
+        isPaused,
+      };
+
+      if (isPaused && seconds !== undefined) {
+        // When paused, save the current seconds left
+        stateToSave.pausedSecondsLeft = seconds;
+      } else if (targetEndTime) {
+        // When running, save the target end time
+        stateToSave.targetEndTime = targetEndTime;
+      }
+
+      localStorage.setItem("timerState", JSON.stringify(stateToSave));
+    },
+    [title, isRunning, isPaused, initialSeconds, targetEndTime],
+  );
+  return { saveState };
+}
+
+export const updateTextAreaHeight = (target?: HTMLTextAreaElement | null) => {
+  if (target) {
+    target.style.height = "auto";
+    target.style.height = `${target.scrollHeight}px`;
+  }
+};

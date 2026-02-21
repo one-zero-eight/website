@@ -49,7 +49,7 @@ export function ModalWindow({
             ref={refs.setFloating}
             style={transitionStyles}
             {...getFloatingProps()}
-            className="flex h-fit w-full max-w-xl flex-col outline-hidden"
+            className="flex h-fit w-full max-w-[90vw] flex-col outline-hidden sm:max-w-xl"
           >
             <div className="bg-base-200 rounded-box overflow-hidden">
               <div
