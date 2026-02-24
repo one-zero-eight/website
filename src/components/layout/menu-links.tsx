@@ -157,6 +157,14 @@ export const items: ItemType[] = [
       </span>
     ),
   },
+  {
+    type: "local",
+    title: "Student Affairs",
+    to: "/student-affairs",
+    icon: (
+      <span className="icon-[material-symbols--live-help-outline-rounded]" />
+    ),
+  },
   { type: "separator" },
   {
     type: "external",
