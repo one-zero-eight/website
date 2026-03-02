@@ -191,7 +191,7 @@
 
 .calendar-loading .fc-view-harness::before {
   /* Loading state */
-  @apply absolute top-0 right-0 left-0 h-[2px] bg-white;
+  @apply absolute top-0 right-0 left-0 z-10 h-[2px] bg-white;
   content: "";
   animation: loading 1.5s infinite linear;
 }

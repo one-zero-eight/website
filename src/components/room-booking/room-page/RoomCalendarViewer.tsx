@@ -25,15 +25,14 @@ import { type Booking, schemaToBooking, type Slot } from "../timeline/types.ts";
 import { getTimeRangeForWeek } from "../utils.ts";
 
 export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
-  const [isLoading, setIsLoading] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<Slot | undefined>(undefined);
   const [selectedBookingDetails, setSelectedBookingDetails] = useState<
     Booking | undefined
   >(undefined);
 
-  const { startDate, endDate } = getTimeRangeForWeek();
-  const { data: bookings } = $roomBooking.useQuery(
+  const [dateRange, setDateRange] = useState(getTimeRangeForWeek());
+  const { data: bookings, isPending } = $roomBooking.useQuery(
     "get",
     "/room/{id}/bookings",
     {
@@ -42,13 +41,15 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           id: roomId,
         },
         query: {
-          start: startDate.toISOString(),
-          end: endDate.toISOString(),
+          start: dateRange.startDate.toISOString(),
+          end: dateRange.endDate.toISOString(),
         },
       },
     },
     {
       refetchInterval: 5 * T.Min,
+      retry: 5,
+      retryDelay: 2 * T.Sec,
     },
   );
 
@@ -244,8 +245,12 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         scrollTime="07:30:00" // Scroll to 7:30am on launch
         scrollTimeReset={false} // Do not reset scroll on date switch
         noEventsContent={() => "No events this month"} // Custom message
-        datesSet={({ view }) => setCalendarView(view.type)}
-        loading={setIsLoading}
+        datesSet={({ view, start, end }) => {
+          setCalendarView(view.type);
+          if (start && end) {
+            setDateRange({ startDate: start, endDate: end });
+          }
+        }}
         selectable={true}
         selectMirror={true}
         selectOverlap={false}
@@ -312,7 +317,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   }, [bookings]);
 
   return (
-    <div className={clsx("overflow-clip", isLoading && "calendar-loading")}>
+    <div className={clsx("overflow-clip", isPending && "calendar-loading")}>
       {calendarComponent}
       <BookingModal
         newSlot={selectedSlot}
