@@ -9,7 +9,7 @@ function AboutPageButton() {
         to="/about"
         className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2 transition-colors"
       >
-        <span className="icon-[material-symbols--info-outline-rounded] text-base-content/70 text-3xl" />
+        <span className="icon-[material-symbols--info-outline-rounded] text-base-content/70 text-2xl" />
       </Link>
     </Tooltip>
   );
