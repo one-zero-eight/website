@@ -2,6 +2,17 @@ import { useMemo, useState } from "react";
 import { useTeamMembers } from "./hooks/useTeamMembers";
 import { MemberAvatar } from "./cards/MemberAvatar.tsx";
 
+const leaders = ["Artem Bulgakov", "Anna Belyakova", "Ruslan Bel'kov"];
+
+const safeDecode = (str: string | undefined): string => {
+  if (!str) return "";
+  try {
+    return atob(str);
+  } catch {
+    return str;
+  }
+};
+
 export function TeamMembers() {
   const {
     data: teamMembers,
@@ -9,16 +20,25 @@ export function TeamMembers() {
     error: membersError,
   } = useTeamMembers();
 
-  const leaders = ["Anna Belyakova", "Ruslan Bel'kov", "Artem Bulgakov"];
-
   const shuffledMembers = useMemo(() => {
     if (!teamMembers) return [];
-    const shuffled = [...teamMembers];
+
+    const leaderMembers = teamMembers
+      .filter((member) => leaders.includes(member.fullName))
+      .sort(
+        (a, b) => leaders.indexOf(a.fullName) - leaders.indexOf(b.fullName),
+      );
+    const nonLeaderMembers = teamMembers.filter(
+      (member) => !leaders.includes(member.fullName),
+    );
+
+    const shuffled = [...nonLeaderMembers];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    return shuffled;
+
+    return [...leaderMembers, ...shuffled];
   }, [teamMembers]);
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -94,11 +114,16 @@ export function TeamMembers() {
                   >
                     {member.fullName}
                   </h3>
-                  {leaders.includes(member.fullName) && (
-                    <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
-                      leader
-                    </span>
-                  )}
+                  {leaders.includes(member.fullName) &&
+                    (member.fullName !== "Anna Belyakova" ? (
+                      <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
+                        tech leader
+                      </span>
+                    ) : (
+                      <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
+                        leader
+                      </span>
+                    ))}
                 </div>
               </div>
 
@@ -109,11 +134,11 @@ export function TeamMembers() {
                   <div className="flex justify-center gap-2">
                     {member.github && (
                       <a
-                        href={`https://github.com/${member.github}`}
+                        href={`https://github.com/${safeDecode(member.github)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
-                        title={`GitHub: @${member.github}`}
+                        title={`GitHub: @${safeDecode(member.github)}`}
                       >
                         <span className="icon-[mdi--github] text-xl text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100" />
                       </a>
@@ -121,11 +146,11 @@ export function TeamMembers() {
 
                     {member.telegram && (
                       <a
-                        href={`https://t.me/${member.telegram}`}
+                        href={`https://t.me/${safeDecode(member.telegram)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
-                        title={`Telegram: @${member.telegram}`}
+                        title={`Telegram: @${safeDecode(member.telegram)}`}
                       >
                         <span className="icon-[mdi--telegram] text-xl text-blue-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
                       </a>
