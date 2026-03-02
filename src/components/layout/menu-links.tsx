@@ -43,6 +43,13 @@ export const items: ItemType[] = [
   },
   {
     type: "local",
+    title: "About 108",
+    to: "/about",
+    icon: <span className="icon-[material-symbols--info-outline-rounded]" />,
+    hideOnMore: true,
+  },
+  {
+    type: "local",
     title: "Calendar",
     to: "/calendar",
     icon: (
