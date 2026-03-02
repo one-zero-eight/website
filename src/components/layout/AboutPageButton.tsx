@@ -7,9 +7,9 @@ function AboutPageButton() {
     <Tooltip content="About us">
       <Link
         to="/about"
-        className="hover:bg-inh-secondary flex items-center justify-center rounded-xl p-2 transition-colors"
+        className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2 transition-colors"
       >
-        <span className="icon-[material-symbols--info-outline-rounded] text-3xl text-[#807e7e]" />
+        <span className="icon-[material-symbols--info-outline-rounded] text-base-content/70 text-3xl" />
       </Link>
     </Tooltip>
   );
