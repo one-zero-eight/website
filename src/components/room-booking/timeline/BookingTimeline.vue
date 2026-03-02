@@ -11,7 +11,7 @@ import type { MaybeRef } from "vue";
 import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
 import type { Booking, Room, ScrollToOptions, Slot } from "./types.ts";
 import { accessLevelColors } from "../AccessLevelIcon.tsx";
-import { sanitizeBookingTitle } from "./BookingModal.tsx";
+import { sanitizeBookingTitle } from "../utils.ts";
 import { RoomAccess_level } from "@/api/room-booking/types";
 
 /* ========================================================================== */

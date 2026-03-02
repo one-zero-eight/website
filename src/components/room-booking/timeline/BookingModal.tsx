@@ -1,6 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
 import { BookingStatus, SchemaAttendee } from "@/api/room-booking/types.ts";
+import { sanitizeBookingTitle } from "@/components/room-booking/utils.ts";
 import {
   clockTime,
   durationFormatted,
@@ -19,21 +20,39 @@ import {
 } from "@floating-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type Booking, schemaToBooking, type Slot } from "./types.ts";
 
-export function sanitizeBookingTitle(title: string | undefined): string {
-  if (!title) return "";
-  const sanitized = title
-    .replace("Students Booking Service", "")
-    .replace("FW:", "")
-    .trim();
-  if (sanitized) {
-    return sanitized;
-  } else {
-    return title.trim(); // Do not remove "Students Booking Service" if it's the only content
+const StatusBadge = ({ status }: { status: BookingStatus }) => {
+  const baseClass = "rounded-full px-2 py-1 text-center text-sm font-bold";
+  switch (status) {
+    case BookingStatus.Accept:
+      return (
+        <span className={clsx(baseClass, "bg-green-500/20 text-green-500")}>
+          Accepted
+        </span>
+      );
+    case BookingStatus.Tentative:
+      return (
+        <span className={clsx(baseClass, "bg-yellow-500/20 text-yellow-500")}>
+          Tentative
+        </span>
+      );
+    case BookingStatus.Decline:
+      return (
+        <span className={clsx(baseClass, "bg-red-500/20 text-red-500")}>
+          Declined
+        </span>
+      );
+    case BookingStatus.Unknown:
+      return (
+        <span className={clsx(baseClass, "bg-gray-500/20 text-gray-500")}>
+          Unknown
+        </span>
+      );
   }
-}
+};
 
 function Attendee({
   attendee,
@@ -59,8 +78,11 @@ function Attendee({
         <div className="flex h-fit w-6">
           <span className="icon-[material-symbols--person-outline-rounded] text-xl" />
         </div>
-        <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
+        <div className="flex w-full flex-row gap-2 wrap-anywhere whitespace-pre-wrap">
           <span className="text-base">{attendeeDetails.name}</span>
+          {attendee.status && attendee.status !== BookingStatus.Unknown && (
+            <StatusBadge status={attendee.status} />
+          )}
         </div>
       </div>
 
@@ -107,7 +129,7 @@ function Attendee({
       <div className="flex h-fit w-6">
         <span className="icon-[material-symbols--person-outline-rounded] text-xl" />
       </div>
-      <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
+      <div className="flex w-full flex-row gap-2 wrap-anywhere whitespace-pre-wrap">
         <a
           className="text-base hover:underline"
           href={`mailto:${attendee.email}`}
@@ -116,6 +138,9 @@ function Attendee({
         >
           {attendee.email}
         </a>
+        {attendee.status && attendee.status !== BookingStatus.Unknown && (
+          <StatusBadge status={attendee.status} />
+        )}
       </div>
     </div>
   );
@@ -149,6 +174,21 @@ export function BookingModal({
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
     params: { query: { include_red: true } },
   });
+
+  const { data: fullBookingDetails } = $roomBooking.useQuery(
+    "get",
+    "/bookings/by-entry-id/{outlook_entry_id}",
+    {
+      params: {
+        path: { outlook_entry_id: detailsBooking?.outlook_entry_id ?? "" },
+        query: { room_id: detailsBooking?.room_id ?? "" },
+      },
+    },
+    {
+      enabled: !!detailsBooking?.outlook_entry_id,
+    },
+  );
+
   const {
     mutate: mutateCreateBooking,
     isPending: isBookingCreationPending,
@@ -188,7 +228,7 @@ export function BookingModal({
       detailsBooking &&
       detailsBooking.endsAt.getTime() > new Date().getTime() + 6 * T.Min
     );
-  }, [detailsBooking]);
+  }, [alreadyStarted, detailsBooking]);
 
   useEffect(() => {
     if (newSlot) {
@@ -389,7 +429,7 @@ export function BookingModal({
   }
 
   const outlookBookingId = detailsBooking?.outlook_booking_id;
-  const attendees = detailsBooking?.attendees;
+  const attendees = fullBookingDetails?.attendees ?? detailsBooking?.attendees;
   const isAttending = attendees?.some(
     (attendee) => attendee.email === me?.innopolis_info?.email,
   );
@@ -404,36 +444,6 @@ export function BookingModal({
   const outlookBookingAttendees = attendees?.filter(
     (attendee) => attendee.assosiated_room_id === null,
   );
-
-  const roomStatus = (status: BookingStatus) => {
-    const baseClass = "rounded-full px-2 py-1 text-center text-sm font-bold";
-    switch (status) {
-      case BookingStatus.Accept:
-        return (
-          <span className={`${baseClass} bg-green-500/20 text-green-500`}>
-            Accepted
-          </span>
-        );
-      case BookingStatus.Tentative:
-        return (
-          <span className={`${baseClass} bg-yellow-500/20 text-yellow-500`}>
-            Tentative
-          </span>
-        );
-      case BookingStatus.Decline:
-        return (
-          <span className={`${baseClass} bg-red-500/20 text-red-500`}>
-            Declined
-          </span>
-        );
-      case BookingStatus.Unknown:
-        return (
-          <span className={`${baseClass} bg-gray-500/20 text-gray-500`}>
-            Unknown
-          </span>
-        );
-    }
-  };
 
   const BookingRooms = outlookBookingRooms ? (
     outlookBookingRooms.map((room) => (
@@ -452,8 +462,11 @@ export function BookingModal({
           >
             {room.room?.title}
           </Link>
-          {outlookBookingId &&
-            roomStatus(room.attendee.status ?? BookingStatus.Unknown)}
+          {outlookBookingId && (
+            <StatusBadge
+              status={room.attendee.status ?? BookingStatus.Unknown}
+            />
+          )}
         </div>
       </div>
     ))

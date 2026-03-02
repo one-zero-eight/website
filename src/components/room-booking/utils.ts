@@ -12,3 +12,16 @@ export const getTimeRangeForWeek = (
 
   return { startDate, endDate };
 };
+
+export function sanitizeBookingTitle(title: string | undefined): string {
+  if (!title) return "";
+  const sanitized = title
+    .replace("Students Booking Service", "")
+    .replace("FW:", "")
+    .trim();
+  if (sanitized) {
+    return sanitized;
+  } else {
+    return title.trim(); // Do not remove "Students Booking Service" if it's the only content
+  }
+}

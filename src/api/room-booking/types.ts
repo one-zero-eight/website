@@ -174,6 +174,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/bookings/by-entry-id/{outlook_entry_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Booking By Entry Id */
+    get: operations["bookings_get_booking_by_entry_id"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/bookings/{outlook_booking_id}": {
     parameters: {
       query?: never;
@@ -269,6 +286,8 @@ export interface components {
       title: string;
       /** Outlook Booking Id */
       outlook_booking_id: string | null;
+      /** Outlook Entry Id */
+      outlook_entry_id: string | null;
       /** Attendees */
       attendees: components["schemas"]["Attendee"][] | null;
       /** Related To Me */
@@ -366,6 +385,10 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
     };
   };
   responses: never;
@@ -505,6 +528,7 @@ export interface operations {
       query: {
         start: string;
         end: string;
+        is_update?: boolean;
       };
       header?: never;
       path: {
@@ -522,6 +546,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["CanBookResponse"];
         };
+      };
+      /** @description Start must be before end */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Invalid user */
       403: {
@@ -571,6 +602,13 @@ export interface operations {
           "application/json": components["schemas"]["Booking"][];
         };
       };
+      /** @description Start must be before end */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Room not found */
       404: {
         headers: {
@@ -615,6 +653,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Booking"][];
         };
+      };
+      /** @description Start must be before end */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Unauthorized */
       403: {
@@ -669,6 +714,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Booking"];
         };
+      };
+      /** @description Start must be before end */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Room declined the booking OR Invalid user */
       403: {
@@ -787,6 +839,60 @@ export interface operations {
         content?: never;
       };
       /** @description Booking not found OR details not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bookings_get_booking_by_entry_id: {
+    parameters: {
+      query: {
+        room_id: string;
+      };
+      header?: never;
+      path: {
+        outlook_entry_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Booking"];
+        };
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking not found OR Room attendee not found in booking attendees */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1002,6 +1108,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Booking"][];
         };
+      };
+      /** @description Start must be before end */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Unauthorized */
       403: {

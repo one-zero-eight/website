@@ -1,8 +1,5 @@
 import { $roomBooking } from "@/api/room-booking";
-import {
-  BookingModal,
-  sanitizeBookingTitle,
-} from "@/components/room-booking/timeline/BookingModal.tsx";
+import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
 import {
   DateSelectArg,
@@ -22,7 +19,7 @@ import moment from "moment/moment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@/components/calendar/styles-calendar.css";
 import { type Booking, schemaToBooking, type Slot } from "../timeline/types.ts";
-import { getTimeRangeForWeek } from "../utils.ts";
+import { getTimeRangeForWeek, sanitizeBookingTitle } from "../utils.ts";
 
 export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
