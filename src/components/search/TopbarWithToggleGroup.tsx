@@ -2,7 +2,6 @@ import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
 import clsx from "clsx";
 import ToggleGroup from "./ToggleGroup";
-import ToggleSnowButton from "../layout/ToggleSnowButton";
 
 export function TopbarWithToggleGroup({
   hideOnMobile = false,
@@ -22,7 +21,7 @@ export function TopbarWithToggleGroup({
         <ToggleGroup currentTabText={currentTabText}></ToggleGroup>
       </div>
       <div className="hidden items-center py-2 pr-4 lg:flex">
-        <ToggleSnowButton />
+        {/* <ToggleSnowButton /> // Disable snow */}
         <SwitchThemeButton />
         <UserMenu isMobile={false} isSidebar={false} />
       </div>

@@ -62,6 +62,8 @@ const SnowfallComponent = () => {
 
   if (!isSnowVisible) return null;
 
+  return null; // Disable snow
+
   return (
     <>
       {snowfallLayers.map((layer, index) => (
