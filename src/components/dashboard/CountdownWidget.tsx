@@ -28,11 +28,6 @@ const countdownEventTemplates: CountdownEventTemplate[] = [
   },
   {
     dateTemplate: "*-06-01T00:00:00+03:00",
-    name: "Telegram ban countdown",
-    iconClass: "icon-[basil--telegram-solid]",
-  },
-  {
-    dateTemplate: "*-06-01T00:00:00+03:00",
     name: "Summer countdown",
     iconClass: "icon-[twemoji--sun]",
   },
