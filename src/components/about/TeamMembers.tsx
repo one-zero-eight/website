@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import clsx from "clsx";
 import { useTeamMembers } from "./hooks/useTeamMembers";
 import { MemberAvatar } from "./cards/MemberAvatar.tsx";
 
@@ -102,21 +103,28 @@ export function TeamMembers() {
             onMouseLeave={() => setHoveredIndex(null)}
           >
             <div
-              className={`dark:bg-base-200 dark:border-base-100 absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 border-gray-200 bg-white shadow-sm transition-all duration-300 ease-in-out dark:border ${
+              className={clsx(
+                "dark:bg-base-200 dark:border-base-100 absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 border-gray-200 bg-white shadow-sm transition-all duration-300 ease-in-out dark:border",
                 hoveredIndex === index
                   ? "dark:border-primary border-primary border-2 py-4 shadow-xl dark:border"
-                  : "py-2 hover:shadow-md"
-              }`}
+                  : "py-2 hover:shadow-md",
+              )}
             >
               <div className="flex w-full flex-col items-center justify-center">
                 <div
-                  className={`transition-all duration-300 ${hoveredIndex === index ? "mb-2 scale-110" : "mb-2"}`}
+                  className={clsx(
+                    "transition-all duration-300",
+                    hoveredIndex === index ? "mb-2 scale-110" : "mb-2",
+                  )}
                 >
                   <MemberAvatar member={member} />
                 </div>
                 <div className="px-1 text-center">
                   <h3
-                    className={`line-clamp-2 font-medium text-gray-900 transition-all duration-300 dark:text-gray-100 ${hoveredIndex === index ? "text-sm" : "text-xs"}`}
+                    className={clsx(
+                      "line-clamp-2 font-medium text-gray-900 transition-all duration-300 dark:text-gray-100",
+                      hoveredIndex === index ? "text-sm" : "text-xs",
+                    )}
                   >
                     {member.fullName}
                   </h3>
@@ -134,7 +142,12 @@ export function TeamMembers() {
               </div>
 
               <div
-                className={`grid w-full px-2 transition-all duration-500 ease-in-out ${hoveredIndex === index ? "mt-3 grid-rows-[1fr] opacity-100" : "mt-0 grid-rows-[0fr] opacity-0"}`}
+                className={clsx(
+                  "grid w-full px-2 transition-all duration-500 ease-in-out",
+                  hoveredIndex === index
+                    ? "mt-3 grid-rows-[1fr] opacity-100"
+                    : "mt-0 grid-rows-[0fr] opacity-0",
+                )}
               >
                 <div className="overflow-hidden">
                   <div className="flex justify-center gap-2">

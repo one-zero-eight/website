@@ -1,4 +1,5 @@
 import { useState } from "react";
+import clsx from "clsx";
 import { TeamMember } from "../hooks/useTeamMembers.ts";
 import { MemberAvatar } from "./MemberAvatar.tsx";
 
@@ -26,15 +27,19 @@ export function ContactCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`dark:bg-base-200 dark:border-base-100 absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 border-gray-200 bg-white shadow-sm transition-all duration-300 ease-in-out dark:border ${
+        className={clsx(
+          "dark:bg-base-200 dark:border-base-100 absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 border-gray-200 bg-white shadow-sm transition-all duration-300 ease-in-out dark:border",
           isHovered
             ? "dark:border-primary border-primary border-2 py-3 shadow-xl dark:border"
-            : "py-2 hover:shadow-md"
-        }`}
+            : "py-2 hover:shadow-md",
+        )}
       >
         <div className="flex w-full flex-col items-center justify-center">
           <div
-            className={`mb-1 transition-all duration-300 ${isHovered ? "scale-110" : ""}`}
+            className={clsx(
+              "mb-1 transition-all duration-300",
+              isHovered && "scale-110",
+            )}
           >
             <MemberAvatar member={member} className="h-10 w-10" />
           </div>
@@ -49,7 +54,12 @@ export function ContactCard({
         </div>
 
         <div
-          className={`grid w-full px-2 transition-all duration-500 ease-in-out ${isHovered ? "mt-2 grid-rows-[1fr] opacity-100" : "mt-0 grid-rows-[0fr] opacity-0"}`}
+          className={clsx(
+            "grid w-full px-2 transition-all duration-500 ease-in-out",
+            isHovered
+              ? "mt-2 grid-rows-[1fr] opacity-100"
+              : "mt-0 grid-rows-[0fr] opacity-0",
+          )}
         >
           <div className="overflow-hidden">
             <div className="flex justify-center gap-2">
