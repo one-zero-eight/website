@@ -58,6 +58,8 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,json,svg,png,woff2}"],
       },
       manifest: false, // Manifest is already in public/manifest.json
+      includeManifestIcons: true,
+      includeAssets: "*"
     }),
 
     // Minify the index.html
