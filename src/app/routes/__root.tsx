@@ -1,13 +1,13 @@
 import { BottomNavigation } from "@/components/layout/BottomNavigation.tsx";
 import OfflineNotification from "@/components/layout/Offline.tsx";
 import Sidebar from "@/components/layout/Sidebar.tsx";
+import { Helmet } from "@dr.pogodin/react-helmet";
 import {
   createRootRouteWithContext,
   Link,
   Outlet,
   useLocation,
 } from "@tanstack/react-router";
-import { Helmet } from "@dr.pogodin/react-helmet";
 
 interface RouterContext {
   isAuthenticated: boolean;
@@ -20,6 +20,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   // 404 page
   notFoundComponent: () => (
     <div className="flex h-full flex-col">
+      <Helmet>
+        <title>404</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
+
       <div className="flex grow">
         <Sidebar />
 
@@ -40,6 +45,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     if (error?.message?.includes("403")) {
       return (
         <div className="flex h-full flex-col">
+          <Helmet>
+            <title>403</title>
+            <meta name="robots" content="noindex" />
+          </Helmet>
+
           <div className="flex grow">
             <Sidebar />
 
