@@ -96,6 +96,7 @@ export function TeamMembers() {
             style={{
               zIndex: hoveredIndex === index ? 50 : 1,
               transition: `z-index 0s linear ${hoveredIndex === index ? "0s" : "0.3s"}`,
+              animationDelay: `${100 + index * 50}ms`,
             }}
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
