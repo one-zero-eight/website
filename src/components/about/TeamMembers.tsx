@@ -7,8 +7,13 @@ const leaders = ["Artem Bulgakov", "Anna Belyakova", "Ruslan Bel'kov"];
 const safeDecode = (str: string | undefined): string => {
   if (!str) return "";
   try {
-    return atob(str);
+    // Декодируем base64 в бинарную строку
+    const binaryStr = atob(str);
+    const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
+    // Декодируем байты как UTF-8
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } catch {
+    // В случае ошибки (невалидный base64) возвращаем исходную строку
     return str;
   }
 };
