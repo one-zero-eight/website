@@ -93,7 +93,7 @@ export function TeamMembers() {
         {shuffledMembers.map((member, index) => (
           <div
             key={`${member.fullName}-${index}`}
-            className={`animate-in slide-in-from-bottom-4 relative h-[120px] w-[29%] max-w-[110px] min-w-[90px] sm:h-[110px] sm:w-[110px] delay-${100 + index * 50}`}
+            className={`animate-in slide-in-from-bottom-4 relative h-[120px] w-[29%] max-w-[110px] min-w-[90px] sm:h-[110px] sm:w-[110px]`}
             style={{
               zIndex: hoveredIndex === index ? 50 : 1,
               transition: `z-index 0s linear ${hoveredIndex === index ? "0s" : "0.3s"}`,
