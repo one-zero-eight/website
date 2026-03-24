@@ -95,6 +95,22 @@ export default function Sidebar() {
           </a>
         </div>
 
+        <div className="items-center place-self-center">
+          <Link
+            to="/about"
+            activeProps={{ className: "is-active" }}
+            className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2 transition-colors"
+          >
+            {isMinimized ? (
+              <span className="icon-[material-symbols--info-outline-rounded] in-[.is-active]:text-primary text-base-content/70 text-2xl" />
+            ) : (
+              <span className="in-[.is-active]:selected in-[.is-active]:text-primary text-base-content/50 flex w-fit items-center text-base font-normal whitespace-nowrap in-[.is-active]:font-medium">
+                About us
+              </span>
+            )}
+          </Link>
+        </div>
+
         {/* Leave feedback button */}
         <LeaveFeedbackButton isMinimized={isMinimized} className="mb-4" />
       </div>
