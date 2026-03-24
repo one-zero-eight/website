@@ -11,6 +11,12 @@ export function CarouselImage() {
 
     const onWheel = (e: WheelEvent) => {
       if (e.deltaY === 0) return;
+
+      const isAtStart = el.scrollLeft <= 0;
+      const isAtEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
+
+      if ((isAtStart && e.deltaY < 0) || (isAtEnd && e.deltaY > 0)) return;
+
       e.preventDefault();
       el.scrollTo({
         left: el.scrollLeft + e.deltaY,
