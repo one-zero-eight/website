@@ -44,7 +44,7 @@ export default function Sidebar() {
           </Link>
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex w-full flex-col">
           {items.map((item, index) =>
             item.type === "separator" ? (
               <div
@@ -55,9 +55,12 @@ export default function Sidebar() {
             !(
                 item.staff_only &&
                 !(
-                  me?.innopolis_sso?.is_staff ||
-                  me?.id === "65f6ef2847289ea08482e3bf" ||
-                  !import.meta.env.VITE_PRODUCTION
+                  // FIXME: remove explicit user id
+                  (
+                    me?.innopolis_sso?.is_staff ||
+                    me?.id === "65f6ef2847289ea08482e3bf" ||
+                    !import.meta.env.VITE_PRODUCTION
+                  )
                 )
               ) ? (
               <SidebarLink key={index} isMinimized={isMinimized} {...item} />
@@ -131,7 +134,7 @@ function SidebarLink({
     return (
       <a
         className={clsx(
-          "text-base-content/50 flex w-full rounded-xl py-0.5 select-none hover:bg-gray-500/10",
+          "text-base-content/50 flex w-full rounded-sm py-0.5 select-none hover:bg-gray-500/10",
           !isMinimized ? "px-2 text-2xl" : "justify-center px-0.5 text-2xl",
         )}
         target="_blank"
@@ -147,7 +150,7 @@ function SidebarLink({
     return (
       <Link
         className={clsx(
-          "text-base-content/50 flex w-full rounded-md py-0.5 select-none hover:bg-gray-500/10",
+          "text-base-content/50 flex w-full rounded-sm py-0.5 select-none hover:bg-gray-500/10",
           "[&.is-active]:text-primary",
           !isMinimized ? "px-2 text-2xl" : "justify-center px-0.5 text-2xl",
         )}
