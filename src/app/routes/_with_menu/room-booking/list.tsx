@@ -13,10 +13,10 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>Room booking</title>
+        <title>My bookings</title>
         <meta
           name="description"
-          content="Book auditoriums and meeting rooms in Innopolis University."
+          content="Manage your room bookings in Innopolis University."
         />
       </Helmet>
 

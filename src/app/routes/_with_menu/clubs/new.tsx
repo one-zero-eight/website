@@ -13,7 +13,10 @@ function RouteComponent() {
     <>
       <Helmet>
         <title>Clubs</title>
-        <meta name="description" content="List of Innopolis student clubs." />
+        <meta
+          name="description"
+          content="Have an idea for a club? Start your own community and make a difference at Innopolis University!"
+        />
       </Helmet>
 
       <Topbar title="Student Clubs" />

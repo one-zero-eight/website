@@ -1,5 +1,6 @@
 import { $clubs } from "@/api/clubs";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
+import { Helmet } from "@dr.pogodin/react-helmet";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import {
@@ -46,6 +47,11 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-4">
+      <Helmet>
+        <title>{club.title}</title>
+        <meta name="description" content={club.short_description} />
+      </Helmet>
+
       {/* Header Section */}
       <div className="card card-border">
         <div className="relative flex items-center justify-center p-8">

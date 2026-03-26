@@ -1,5 +1,6 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
+import { Helmet } from "@dr.pogodin/react-helmet";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -328,6 +329,11 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-4">
+      <Helmet>
+        <title>Edit {club.title}</title>
+        <meta name="description" content={club.short_description} />
+      </Helmet>
+
       {/* Header Section */}
       <div className="card card-border">
         <div className="card-body">
