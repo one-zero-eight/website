@@ -107,7 +107,7 @@ export const items: ItemType[] = [
   { type: "separator" },
   {
     type: "local",
-    title: "Printers",
+    title: "Web print",
     to: "/printers",
     icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
   },
