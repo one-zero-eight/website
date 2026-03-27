@@ -4,7 +4,7 @@ import { DormsPage } from "@/components/dorms/DormsPage";
 import { ExtensionPage } from "@/components/extension/ExtensionPage";
 import { MapsPage } from "@/components/maps/MapsPage";
 import { MusicRoomPage } from "@/components/music-room/MusicRoomPage";
-import { PrintersPage } from "@/components/printers/PrintersPage";
+import { WebPrintPage } from "@/components/web-print/WebPrintPage";
 import SchedulePage from "@/components/schedule/SchedulePage";
 import { ScholarshipPage } from "@/components/scholarship/ScholarshipPage";
 import { SportPage } from "../sport/SportPage";
@@ -29,7 +29,7 @@ export const componentByPath: Record<string, PageEntry> = {
     }),
   },
   "/music-room": { component: MusicRoomPage },
-  "/printers": { component: PrintersPage },
+  "/printers": { component: WebPrintPage },
   "/room-booking": { component: RoomBookingRules },
   "/schedule": {
     component: SchedulePage,
