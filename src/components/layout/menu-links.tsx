@@ -137,7 +137,7 @@ export const items: ItemType[] = [
   // Informational pages about our services on external platforms: bots, extensions, etc.:
   {
     type: "local",
-    title: "Printers",
+    title: "Web print",
     to: "/printers",
     icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
   },
