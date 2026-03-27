@@ -421,24 +421,24 @@ export interface FileRoutesByFullPath {
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
   "/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
-  "/account/": typeof With_menuAccountIndexRoute;
-  "/catalogue/": typeof With_menuCatalogueIndexRoute;
-  "/clubs/": typeof With_menuClubsIndexRoute;
-  "/events/": typeof With_menuEventsIndexRoute;
-  "/music-room/": typeof With_menuMusicRoomIndexRoute;
-  "/room-booking/": typeof With_menuRoomBookingIndexRoute;
-  "/schedule/": typeof With_menuScheduleIndexRoute;
-  "/search/": typeof With_menuSearchIndexRoute;
-  "/student-affairs/": typeof With_menuStudentAffairsIndexRoute;
-  "/when2meet/": typeof With_menuWhen2meetIndexRoute;
-  "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
+  "/account": typeof With_menuAccountIndexRoute;
+  "/catalogue": typeof With_menuCatalogueIndexRoute;
+  "/clubs": typeof With_menuClubsIndexRoute;
+  "/events": typeof With_menuEventsIndexRoute;
+  "/music-room": typeof With_menuMusicRoomIndexRoute;
+  "/room-booking": typeof With_menuRoomBookingIndexRoute;
+  "/schedule": typeof With_menuScheduleIndexRoute;
+  "/search": typeof With_menuSearchIndexRoute;
+  "/student-affairs": typeof With_menuStudentAffairsIndexRoute;
+  "/when2meet": typeof With_menuWhen2meetIndexRoute;
+  "/schedule-assistant/settings": typeof ScheduleAssistantSettingsIndexRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/events/$id/edit": typeof With_menuEventsIdEditRoute;
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
-  "/clubs/$slug/": typeof With_menuClubsSlugIndexRoute;
-  "/events/$id/": typeof With_menuEventsIdIndexRoute;
-  "/room-booking/rooms/": typeof With_menuRoomBookingRoomsIndexRoute;
+  "/clubs/$slug": typeof With_menuClubsSlugIndexRoute;
+  "/events/$id": typeof With_menuEventsIdIndexRoute;
+  "/room-booking/rooms": typeof With_menuRoomBookingRoomsIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
 export interface FileRoutesByTo {
@@ -604,24 +604,24 @@ export interface FileRouteTypes {
     | "/student-affairs/sign-out"
     | "/when2meet/$meetingId"
     | "/schedule-assistant/settings/$settingsTab"
-    | "/account/"
-    | "/catalogue/"
-    | "/clubs/"
-    | "/events/"
-    | "/music-room/"
-    | "/room-booking/"
-    | "/schedule/"
-    | "/search/"
-    | "/student-affairs/"
-    | "/when2meet/"
-    | "/schedule-assistant/settings/"
+    | "/account"
+    | "/catalogue"
+    | "/clubs"
+    | "/events"
+    | "/music-room"
+    | "/room-booking"
+    | "/schedule"
+    | "/search"
+    | "/student-affairs"
+    | "/when2meet"
+    | "/schedule-assistant/settings"
     | "/clubs/$slug/edit"
     | "/events/$id/edit"
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
-    | "/clubs/$slug/"
-    | "/events/$id/"
-    | "/room-booking/rooms/"
+    | "/clubs/$slug"
+    | "/events/$id"
+    | "/room-booking/rooms"
     | "/guard/google/files/$slug/join";
   fileRoutesByTo: FileRoutesByTo;
   to:
@@ -766,7 +766,7 @@ declare module "@tanstack/react-router" {
     "/_with_menu": {
       id: "/_with_menu";
       path: "";
-      fullPath: "/";
+      fullPath: "";
       preLoaderRoute: typeof With_menuRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
@@ -920,77 +920,77 @@ declare module "@tanstack/react-router" {
     "/schedule-assistant/settings/": {
       id: "/schedule-assistant/settings/";
       path: "/settings";
-      fullPath: "/schedule-assistant/settings/";
+      fullPath: "/schedule-assistant/settings";
       preLoaderRoute: typeof ScheduleAssistantSettingsIndexRouteImport;
       parentRoute: typeof ScheduleAssistantRouteRoute;
     };
     "/_with_menu/when2meet/": {
       id: "/_with_menu/when2meet/";
       path: "/when2meet";
-      fullPath: "/when2meet/";
+      fullPath: "/when2meet";
       preLoaderRoute: typeof With_menuWhen2meetIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/student-affairs/": {
       id: "/_with_menu/student-affairs/";
       path: "/student-affairs";
-      fullPath: "/student-affairs/";
+      fullPath: "/student-affairs";
       preLoaderRoute: typeof With_menuStudentAffairsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/search/": {
       id: "/_with_menu/search/";
       path: "/search";
-      fullPath: "/search/";
+      fullPath: "/search";
       preLoaderRoute: typeof With_menuSearchIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/schedule/": {
       id: "/_with_menu/schedule/";
       path: "/schedule";
-      fullPath: "/schedule/";
+      fullPath: "/schedule";
       preLoaderRoute: typeof With_menuScheduleIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/room-booking/": {
       id: "/_with_menu/room-booking/";
       path: "/room-booking";
-      fullPath: "/room-booking/";
+      fullPath: "/room-booking";
       preLoaderRoute: typeof With_menuRoomBookingIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/music-room/": {
       id: "/_with_menu/music-room/";
       path: "/music-room";
-      fullPath: "/music-room/";
+      fullPath: "/music-room";
       preLoaderRoute: typeof With_menuMusicRoomIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/events/": {
       id: "/_with_menu/events/";
       path: "/events";
-      fullPath: "/events/";
+      fullPath: "/events";
       preLoaderRoute: typeof With_menuEventsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/clubs/": {
       id: "/_with_menu/clubs/";
       path: "/clubs";
-      fullPath: "/clubs/";
+      fullPath: "/clubs";
       preLoaderRoute: typeof With_menuClubsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/catalogue/": {
       id: "/_with_menu/catalogue/";
       path: "/catalogue";
-      fullPath: "/catalogue/";
+      fullPath: "/catalogue";
       preLoaderRoute: typeof With_menuCatalogueIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/account/": {
       id: "/_with_menu/account/";
       path: "/account";
-      fullPath: "/account/";
+      fullPath: "/account";
       preLoaderRoute: typeof With_menuAccountIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
@@ -1116,21 +1116,21 @@ declare module "@tanstack/react-router" {
     "/_with_menu/room-booking/rooms/": {
       id: "/_with_menu/room-booking/rooms/";
       path: "/room-booking/rooms";
-      fullPath: "/room-booking/rooms/";
+      fullPath: "/room-booking/rooms";
       preLoaderRoute: typeof With_menuRoomBookingRoomsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/events/$id/": {
       id: "/_with_menu/events/$id/";
       path: "/events/$id";
-      fullPath: "/events/$id/";
+      fullPath: "/events/$id";
       preLoaderRoute: typeof With_menuEventsIdIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/clubs/$slug/": {
       id: "/_with_menu/clubs/$slug/";
       path: "/clubs/$slug";
-      fullPath: "/clubs/$slug/";
+      fullPath: "/clubs/$slug";
       preLoaderRoute: typeof With_menuClubsSlugIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
