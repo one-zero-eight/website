@@ -1,0 +1,105 @@
+/* specific */
+
+.noXOverflowFrame_full {
+  overflow-x: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.doubleScreenContainer {
+  width: 200%;
+  height: inherit;
+  display: flex;
+}
+
+.ordinaryScreen {
+  padding: var(--main-padding);
+  box-sizing: border-box;
+  height: 100%;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+}
+
+.ordinaryScreen__contentSizeRestrictor {
+  width: 100%;
+  height: 100%;
+  max-width: 1400px;
+  max-height: 800px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.headline {
+  display: flex;
+  align-items: center;
+  height: fit-content;
+}
+
+.button {
+  background-color: var(--button-color);
+  padding: var(--button-padding);
+  border-radius: var(--button-rounding);
+  cursor: pointer;
+  transition: background-color 250ms;
+}
+
+.button:hover {
+  background-color: var(--color-primary);
+}
+
+.dropContainer {
+  max-width: 600px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropArea {
+  width: 100%;
+  height: 100%;
+  margin-bottom: var(--main-padding);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-style: solid;
+  border-color: var(--drop-area-color);
+  color: var(--drop-area-color);
+  border-width: var(--drop-area-border-width);
+  border-radius: var(--drop-area-rounding);
+  overflow: hidden;
+}
+
+.backgroundIcon {
+  width: 50%;
+  height: 50%;
+}
+
+@keyframes uploading {
+  from {
+    transform: rotateZ(0deg);
+  }
+  to {
+    transform: rotateZ(360deg);
+  }
+}
+
+.rotationAnimation {
+  animation: uploading 3s linear infinite;
+}
+
+.pdfPreview {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transition: opacity 250ms;
+}
+
+.insensible {
+  opacity: 0;
+  pointer-events: none;
+}
