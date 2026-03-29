@@ -1,0 +1,11 @@
+.leftMargin_8 {
+  margin-left: 8px;
+}
+
+.leftMargin_buttonHorizontalPadding {
+  margin-left: var(--button-horizontal-padding);
+}
+
+.bottomMargin_doubleMainPadding {
+  margin-bottom: calc(var(--main-padding) * 2);
+}

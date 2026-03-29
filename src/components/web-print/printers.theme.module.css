@@ -1,0 +1,30 @@
+.webPrintPage {
+  --button-color: #333539;
+  --drop-area-color: #202123;
+
+  --main-padding: 16px;
+  --button-padding: 4px 14px;
+  --button-horizontal-padding: 14px;
+
+  --drop-area-border-width: 7px;
+
+  --button-rounding: 12px;
+  --drop-area-rounding: 80px;
+}
+
+[data-theme="light"] .webPrintPage {
+  --button-color: #bcc3cd;
+  --drop-area-color: #b8bdc8;
+}
+
+.webPrintPage .dropArea_squared {
+  --drop-area-rounding: 20px;
+}
+
+:global(#fileToBePrinted) {
+  display: none;
+}
+
+.dropArea_squared {
+  position: relative;
+}
