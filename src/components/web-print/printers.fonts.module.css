@@ -1,0 +1,15 @@
+.headFont {
+  font-size: 30px;
+  font-weight: var(--font-weight-medium);
+}
+
+.buttonFont {
+  font-size: 22px;
+  font-weight: var(--font-weight-medium);
+}
+
+.alertFont {
+  font-size: 14px;
+  line-height: 1.429;
+  color: #adb6c4;
+}
