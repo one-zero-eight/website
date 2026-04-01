@@ -7,18 +7,18 @@ export function SportsWidget() {
   const [widgetShown, setWidgetShown] = useLocalStorage("widget-sports", false);
   const { data: profile, isPending: profileIsPending } = $sport.useQuery(
     "get",
-    "/profile/student",
+    "/users/me",
   );
   const hasSportProfile = !!profile;
   const { data: hours } = $sport.useQuery(
     "get",
-    "/attendance/{student_id}/hours",
-    { params: { path: { student_id: Number(profile?.id) } } },
+    "/students/{student_id}/hours-summary",
+    { params: { path: { student_id: Number(profile?.user_id) } } },
     { enabled: !!profile },
   );
-  const { data: semesters } = $sport.useQuery(
+  const { data: currentSemester } = $sport.useQuery(
     "get",
-    "/semester",
+    "/semesters/current",
     {},
     { enabled: !!profile },
   );
@@ -29,23 +29,16 @@ export function SportsWidget() {
     setWidgetShown((v) => (v && profileIsPending) || hasSportProfile);
   }, [setWidgetShown, profileIsPending, hasSportProfile]);
 
-  if (!hasSportProfile || !hours || !semesters) {
+  if (!hasSportProfile || !hours || !currentSemester) {
     if (!widgetShown) return null;
     return (
       <div className="group bg-base-200 rounded-box flex min-h-32 animate-pulse flex-row gap-4 px-4 py-6" />
     );
   }
 
-  const earnedHours =
-    hours.ongoing_semester.hours_not_self +
-    hours.ongoing_semester.hours_self_not_debt +
-    hours.ongoing_semester.hours_self_debt;
-  const semesterHours = hours.ongoing_semester.hours_sem_max;
-  const debtHours = hours.ongoing_semester.debt;
-
-  const currentSemester = semesters.find(
-    (s) => s.id === hours.ongoing_semester.id_sem,
-  );
+  const earnedHours = hours.hours_from_groups + hours.self_sport_hours;
+  const semesterHours = hours.required_hours;
+  const debtHours = hours.debt;
 
   const deadline = new Date(currentSemester?.end || "2025-05-04");
   const daysLeft = Math.max(

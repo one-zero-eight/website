@@ -50,7 +50,7 @@ apis:
       output: ./src/api/student-affairs/types.ts
       #  --root-types --enum
   sport:
-    root: https://sport.innopolis.university/api/openapi.json
+    root: https://stage.sport.innopolis.university/api/v3/openapi.json
     x-openapi-ts:
       output: ./src/api/sport/types.ts
       #  --root-types --enum

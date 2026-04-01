@@ -4,14 +4,18 @@
  */
 
 export interface paths {
-  "/analytics/attendance": {
+  "/users/me": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations["analytics_attendance_retrieve"];
+    /**
+     * Get Me
+     * @description Retrieve current user information.
+     */
+    get: operations["users_get_me"];
     put?: never;
     post?: never;
     delete?: never;
@@ -20,14 +24,18 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/attendance/{group_id}/report": {
+  "/users/{user_id}": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations["attendance_report_retrieve"];
+    /**
+     * Get User By Id
+     * @description Retrieve user information by ID. Only for superuser.
+     */
+    get: operations["users_get_user_by_id"];
     put?: never;
     post?: never;
     delete?: never;
@@ -36,151 +44,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/attendance/{student_id}/better_than": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["attendance_better_than_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/attendance/{student_id}/hours": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["attendance_hours_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/attendance/{student_id}/negative_hours": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["attendance_negative_hours_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/attendance/{training_id}/grades": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["attendance_grades_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/attendance/{training_id}/grades.csv": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["attendance_grades.csv_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/attendance/mark": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["attendance_mark_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/attendance/suggest_student": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["attendance_suggest_student_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/calendar/{sport_id}/schedule": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["calendar_schedule_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/calendar/trainings": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["calendar_trainings_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/enrollment/enroll": {
+  "/users/batch": {
     parameters: {
       query?: never;
       header?: never;
@@ -190,450 +54,48 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * @description Enroll student
-     *
-     *     error codes:
-     *     2 - Group you chosen is full
-     *     3 - You have too much secondary groups
-     *     4 - You can't enroll to a group you have already enrolled to
-     *     6 - Enroll with insufficient medical group
+     * Get Many Users
+     * @description Retrieve user information by ID. Only for superuser.
      */
-    post: operations["enrollment_enroll_create"];
+    post: operations["users_get_many_users"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/enrollment/unenroll": {
+  "/students/{student_id}/semester-history/{semester_id}": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
-    put?: never;
     /**
-     * @description Unenroll student
-     *
-     *     Error codes:
-     *     5 - Can't unenroll from primary group
+     * Get Student Specific Semester History
+     * @description Get student's training history for a specific semester.
      */
-    post: operations["enrollment_unenroll_create"];
+    get: operations["students_get_student_specific_semester_history"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/enrollment/unenroll_by_trainer": {
+  "/students/{student_id}/semester-history": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
-    put?: never;
     /**
-     * @description Unenroll student
-     *
-     *     Error codes:
-     *     5 - Can't unenroll from primary group
+     * Get Student All Semesters History
+     * @description Get student's semester history with attended trainings since enrollment + fitness tests.
      */
-    post: operations["enrollment_unenroll_by_trainer_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/fitnesstest/exercises": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description Get all exercises by `semester_id`. If `semester_id` is not set, returns current semester exercises. */
-    get: operations["fitnesstest_exercises_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/fitnesstest/result": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["fitnesstest_result_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/fitnesstest/sessions": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description Get all sessions by `semester_id`. If `semester_id` is not set, returns all sessions. */
-    get: operations["fitnesstest_sessions_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/fitnesstest/sessions/{session_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["fitnesstest_sessions_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/fitnesstest/suggest_student": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["fitnesstest_suggest_student_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/fitnesstest/upload": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["fitnesstest_upload_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/fitnesstest/upload/{session_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["fitnesstest_upload_create_2"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/group/{group_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["group_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/measurement/get_measurements": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["measurement_get_measurements_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/measurement/get_results": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["measurement_get_results_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/measurement/student_measurement": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["measurement_student_measurement_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/medical_groups/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["medical_groups_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/profile/QR/toggle": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** @description Toggles has_QR status */
-    post: operations["profile_QR_toggle_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/profile/change_gender": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["profile_change_gender_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/profile/history/{semester_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description Get student's trainings per_semester */
-    get: operations["profile_history_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/profile/history/by_date": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["profile_history_by_date_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/profile/history_with_self/{semester_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description Get student's trainings per_semester */
-    get: operations["profile_history_with_self_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/profile/student": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description Get info about current student. */
-    get: operations["profile_student_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/reference/upload": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["reference_upload_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/select_sport": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["select_sport_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/selfsport/strava_parsing": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description Strava link parsing */
-    get: operations["selfsport_strava_parsing_retrieve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/selfsport/types": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["selfsport_types_list"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/selfsport/upload": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** @description One link to Strava required (begins with http(s)://) */
-    post: operations["selfsport_upload_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/semester": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** @description Get semesters. */
-    get: operations["semester_list"];
+    get: operations["students_get_student_all_semesters_history"];
     put?: never;
     post?: never;
     delete?: never;
@@ -649,7 +111,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get: operations["sports_retrieve"];
+    /**
+     * List Sports
+     * @description Retrieve list of all available sports with their groups and schedules.
+     */
+    get: operations["sport_groups_list_sports"];
     put?: never;
     post?: never;
     delete?: never;
@@ -658,14 +124,18 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/training/{training_id}": {
+  "/sport-groups/{group_id}": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations["training_retrieve"];
+    /**
+     * Get Group Info View
+     * @description Retrieve detailed information about a sport group.
+     */
+    get: operations["sport_groups_get_group_info_view"];
     put?: never;
     post?: never;
     delete?: never;
@@ -674,7 +144,27 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/training/{training_id}/cancel_check_in": {
+  "/trainings/{training_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Training Info
+     * @description Retrieve detailed information about a specific training session.
+     */
+    get: operations["trainings_get_training_info"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/trainings/{training_id}/checkin": {
     parameters: {
       query?: never;
       header?: never;
@@ -683,14 +173,330 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations["training_cancel_check_in_create"];
+    /**
+     * Training Checkin
+     * @description Check-in or cancel check-in for a training.
+     */
+    post: operations["trainings_training_checkin"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/training/{training_id}/check_in": {
+  "/users/me/schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Personal Schedule
+     * @description Retrieve personal training schedule for the current user (student or trainer).
+     */
+    get: operations["trainings_schedule_get_personal_schedule"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/sports/{sport_id}/schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Sport Schedule
+     * @description Retrieve training schedule for a specific sport.
+     */
+    get: operations["trainings_schedule_get_sport_schedule"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/trainings/{training_id}/suggest-student": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Suggest Student
+     * @description Suggest students based on search term for attendance marking.
+     */
+    get: operations["trainings_attendance_suggest_student"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/trainings/{training_id}/attendance.csv": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Training Attendance Csv
+     * @description Get training grades as CSV.
+     */
+    get: operations["trainings_attendance_get_training_attendance_csv"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/trainings/{training_id}/attendance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Training Attendance
+     * @description Get student grades for a specific training session.
+     */
+    get: operations["trainings_attendance_get_training_attendance"];
+    put?: never;
+    /**
+     * Mark Training Attendance
+     * @description Mark attendance and assign hours for students in a training session.
+     */
+    post: operations["trainings_attendance_mark_training_attendance"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/students/{student_id}/hours-summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Student Hours Summary
+     * @description Get comprehensive student hours summary.
+     */
+    get: operations["trainings_attendance_get_student_hours_summary"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/students/{student_id}/better-than": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Better Than Info
+     * @description Get student's performance ranking compared to other students.
+     */
+    get: operations["trainings_attendance_get_better_than_info"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/self-sport/types": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Self Sport Types
+     * @description Retrieve list of available self sport activity types.
+     */
+    get: operations["self_sport_get_self_sport_types"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/self-sport/parse-strava": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Parse Self Sport Strava
+     * @description Parse Strava activity information and calculate academic hours.
+     */
+    get: operations["self_sport_parse_self_sport_strava"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/self-sport/reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Self Sport Reports
+     * @description Returns self-sport reports with access rules similar to v2.
+     */
+    get: operations["self_sport_list_self_sport_reports"];
+    put?: never;
+    /**
+     * Create Self Sport Report
+     * @description Create a new self-sport report with the same business rules as v2.
+     */
+    post: operations["self_sport_create_self_sport_report"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/self-sport/reports/{report_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Self Sport Report By Id
+     * @description Get a self-sport report by ID with access control.
+     */
+    get: operations["self_sport_get_self_sport_report_by_id"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/fitness-test/exercises": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Exercises
+     * @description Get all fitness test exercises for a specific semester.
+     */
+    get: operations["fitness_test_get_exercises"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/fitness-test/sessions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Sessions
+     * @description Get all fitness test sessions for a specific semester or all.
+     */
+    get: operations["fitness_test_get_sessions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/fitness-test/sessions/{session_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Fitness Test Session
+     * @description Get grouped fitness test results for a session.
+     */
+    get: operations["fitness_test_get_fitness_test_session"];
+    put?: never;
+    /**
+     * Upload Fitness Test Results
+     * @description Upload or update student fitness test results.
+     */
+    post: operations["fitness_test_upload_fitness_test_results"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/fitness-test/suggest-student": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Suggest Fitness Test Student
+     * @description Suggest students based on a search term for fitness test.
+     */
+    get: operations["fitness_test_suggest_fitness_test_student"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/references/medical-leave": {
     parameters: {
       query?: never;
       header?: never;
@@ -699,21 +505,176 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations["training_check_in_create"];
+    /**
+     * Reference Upload
+     * @description Upload a medical certificate for sick leave. Only one upload per day is allowed.
+     */
+    post: operations["references_reference_upload"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/training_class": {
+  "/references/medical-group": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations["training_class_list"];
+    get?: never;
+    put?: never;
+    /**
+     * Medical Group Upload
+     * @description Upload medical group reference with multiple images.
+     */
+    post: operations["references_medical_group_upload"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/semesters": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Semesters
+     * @description Retrieve all semesters information.
+     */
+    get: operations["semesters_get_semesters"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/semesters/current": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Current Semester Route
+     * @description Retrieve current semester information.
+     */
+    get: operations["semesters_get_current_semester_route"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/semesters/{semester_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Semester By Id
+     * @description Retrieve semester information by ID.
+     */
+    get: operations["semesters_get_semester_by_id"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/training-locations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Training Locations
+     * @description Retrieve list of all training classes.
+     */
+    get: operations["info_list_training_locations"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/medical-groups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Medical Groups
+     * @description Retrieve list of all medical groups.
+     */
+    get: operations["info_list_medical_groups"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/faq": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Faq
+     * @description Returns FAQ as:
+     *     {
+     *       "Category name": {
+     *           "Question 1": "Answer 1",
+     *           "Question 2": "Answer 2"
+     *       },
+     *       ...
+     *     }
+     */
+    get: operations["info_get_faq"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/student-statuses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Student Statuses
+     * @description Retrieve a list of all possible student statuses.
+     */
+    get: operations["info_get_student_statuses"];
     put?: never;
     post?: never;
     delete?: never;
@@ -726,368 +687,624 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /**
-     * @description * `-1` - both
-     *     * `1` - students
-     *     * `2` - college
-     * @enum {integer}
-     */
-    AllowedEducationLevelEnum: AllowedEducationLevelEnum;
-    Attendance: {
-      hours: number;
+    /** AttendanceMarkSchema */
+    AttendanceMarkSchema: {
+      /** Training Id */
       training_id: number;
-      /** Format: date */
-      date: string;
-      training_class: string;
-      group_id: number;
-      group_name: string;
-      trainers_emails: unknown[];
+      /** Students Hours */
+      students_hours: components["schemas"]["GradeSetSchema"][];
     };
-    AttendanceMarkRequest: {
-      training_id: number;
-      students_hours: components["schemas"]["GradeSetRequest"][];
-    };
-    BadGradeReport: {
-      code: number;
-      description: string;
-      negative_marks?: components["schemas"]["BadGradeReportGrade"][];
-      overflow_marks?: components["schemas"]["BadGradeReportGrade"][];
-    };
-    BadGradeReportGrade: {
-      /** Format: email */
+    /** AttendanceStudentGradeSchema */
+    AttendanceStudentGradeSchema: {
+      /** Id */
+      id: number;
+      /** First Name */
+      first_name: string;
+      /** Last Name */
+      last_name: string;
+      /** Email */
       email: string;
+      /** Medical Group */
+      medical_group?: string | null;
+      /** Hours */
       hours: number;
     };
-    BetterThanInfo: {
-      /** Format: double */
+    /** AttendanceSuggestionSchema */
+    AttendanceSuggestionSchema: {
+      /** Id */
+      id: number;
+      /** First Name */
+      first_name: string;
+      /** Last Name */
+      last_name: string;
+      /** Email */
+      email: string;
+      /** Medical Group */
+      medical_group?: string | null;
+    };
+    /** BadGradeReportGradeSchema */
+    BadGradeReportGradeSchema: {
+      /** Email */
+      email: string;
+      /** Hours */
+      hours: number;
+    };
+    /** BadGradeReportSchema */
+    BadGradeReportSchema: {
+      /** Code */
+      code: number;
+      /** Description */
+      description: string;
+      /** Negative Marks */
+      negative_marks?:
+        | components["schemas"]["BadGradeReportGradeSchema"][]
+        | null;
+      /** Overflow Marks */
+      overflow_marks?:
+        | components["schemas"]["BadGradeReportGradeSchema"][]
+        | null;
+    };
+    /** BetterThanInfoSchema */
+    BetterThanInfoSchema: {
+      /** Better Than */
       better_than: number;
     };
-    Calendar: {
-      title: string;
-      /** Format: date-time */
-      start: string;
-      /** Format: date-time */
-      end: string;
-      extendedProps: components["schemas"]["ScheduleExtendedProps"];
-    };
-    EnrollRequest: {
-      group_id: number;
-    };
-    Error: {
-      code: number;
-      detail: string;
-    };
-    FitnessTestDetail: {
-      exercise: string;
-      unit: string | null;
-      value: number | string;
-      score: number;
-      max_score: number;
-    };
-    FitnessTestExercise: {
-      readonly id: number;
-      semester: components["schemas"]["Semester"];
-      name: string;
-      unit: string;
-      select: string[];
-    };
-    FitnessTestResult: {
-      student: components["schemas"]["Student"];
-      value?: number | null;
-    };
-    FitnessTestSession: {
-      readonly id: number;
-      semester: components["schemas"]["Semester"];
-      retake: boolean;
-      /** Format: date-time */
-      date: string;
-      teacher: string;
-    };
-    FitnessTestSessionWithResult: {
-      session: components["schemas"]["FitnessTestSession"];
-      exercises: components["schemas"]["FitnessTestExercise"][];
-      results: {
-        [key: string]: components["schemas"]["FitnessTestResult"][];
-      };
-    };
-    FitnessTestStudentResult: {
-      semester: string;
-      retake: boolean;
-      grade: boolean;
-      total_score: number;
-      details: components["schemas"]["FitnessTestDetail"][];
-    };
-    FitnessTestUpdateEntryRequest: {
-      student_id: number;
-      exercise_id: number;
-      value: string;
-    };
-    FitnessTestUploadRequest: {
-      semester_id: number;
-      retake: boolean;
-      results: components["schemas"]["FitnessTestUpdateEntryRequest"][];
-    };
-    GenderRequest: {
-      student_id: number;
-      gender: number;
-    };
-    GradeReport: {
-      student_id: number;
-      first_name: string;
-      last_name: string;
-      full_name: string;
-      /** Format: email */
-      email: string;
-      hours?: number;
-    };
-    GradeSetRequest: {
-      student_id: number;
-      hours: number;
-    };
-    GroupInfo: {
-      group_id: number;
-      group_name: string;
-      capacity: number;
-      current_load: number;
-      trainer_first_name: string;
-      trainer_last_name: string;
-      trainer_email: string;
-      trainers: components["schemas"]["Trainer"][];
-      is_enrolled: boolean;
-      can_enroll: boolean;
-      schedule: components["schemas"]["Schedule"][];
-    };
-    HasQR: {
-      has_QR: boolean;
-    };
-    HourInfoSemesterChild: {
-      id_sem: number;
-      hours_not_self: number;
-      hours_self_not_debt: number;
-      hours_self_debt: number;
-      hours_sem_max: number;
-      debt: number;
-    };
-    HoursInfo: {
-      last_semesters_hours: components["schemas"]["HourInfoSemesterChild"][];
-      ongoing_semester: components["schemas"]["HourInfoSemesterChild"];
-    };
-    HoursInfoFull: {
-      final_hours: number;
-    };
-    InbuiltError: {
-      readonly detail: string;
-    };
-    LastAttendedDates: {
-      last_attended_dates: components["schemas"]["LastAttendedStat"][];
-    };
-    LastAttendedStat: {
-      student_id: number;
-      first_name: string;
-      last_name: string;
-      full_name: string;
-      /** Format: email */
-      email: string;
-      last_attended: string;
-    };
-    MeasurementPostRequest: {
-      student_id: number;
-      measurement_id: number;
-      value: number;
-    };
-    MeasurementResult: {
-      measurement: string;
-      uint: string;
-      value: number;
-      approved: boolean;
-      /** Format: date */
-      date: string;
-    };
-    MeasurementResults: {
-      semester: string;
-      result: components["schemas"]["MeasurementResult"][];
-    };
-    MedicalGroup: {
-      id: number;
-      name: string;
-      description: string;
-    };
-    MedicalGroups: {
-      medical_groups: components["schemas"]["MedicalGroup"][];
-    };
-    NewGroup: {
-      readonly id: number;
-      name: string;
-      capacity?: number;
-      is_club?: boolean;
-      sport: components["schemas"]["NewSport"];
-      semester: components["schemas"]["Semester"];
-      teachers: components["schemas"]["NewTrainer"][];
-      accredited: boolean;
+    /** Body_references_medical_group_upload */
+    Body_references_medical_group_upload: {
       /**
-       * @description Is the training for college, higher education students, or both?
-       *
-       *     * `-1` - both
-       *     * `1` - students
-       *     * `2` - college
+       * Images
+       * @description Image files to upload
        */
-      allowed_education_level?: components["schemas"]["AllowedEducationLevelEnum"];
+      images: string[];
+      /**
+       * Student Comment
+       * @default
+       */
+      student_comment: string | null;
     };
-    NewSport: {
-      readonly id: number;
-      name: string;
-      description?: string;
-    };
-    NewTrainer: {
-      id: number;
-      first_name: string;
-      last_name: string;
-      email: string;
-    };
-    NewTrainingInfo: {
-      readonly id: number;
-      custom_name?: string | null;
-      group: components["schemas"]["NewGroup"];
-      /** Format: date-time */
-      start: string;
-      /** Format: date-time */
-      end: string;
-      readonly load: number;
-      place: string;
-    };
-    NewTrainingInfoStudent: {
-      training: components["schemas"]["NewTrainingInfo"];
-      can_check_in: boolean;
-      checked_in: boolean;
-      hours?: number | null;
-    };
-    NotFound: {
-      /** @default Not found */
-      readonly detail: string;
-    };
-    ParsedStrava: {
-      training_type: string;
-      pace?: string;
-      speed?: string;
-      distance_km: number;
-      hours: number;
-      approved: boolean;
-    };
-    PostStudentExerciseResult: {
-      /** @default ok */
-      result: string;
-      session_id: number;
-    };
-    ReferenceUploadRequest: {
-      /** Format: binary */
+    /** Body_references_reference_upload */
+    Body_references_reference_upload: {
+      /** Image */
       image: string;
-      /** Format: date */
+      /**
+       * Start
+       * Format: date
+       */
       start: string;
-      /** Format: date */
+      /**
+       * End
+       * Format: date
+       */
       end: string;
+      /** Student Comment */
       student_comment?: string | null;
     };
-    Schedule: {
-      weekday: components["schemas"]["WeekdayEnum"];
-      /** Format: time */
-      start: string;
-      /** Format: time */
-      end: string;
-      training_class?: number | null;
-    };
-    ScheduleExtendedProps: {
+    /** DetailedSportSchema */
+    DetailedSportSchema: {
+      /** Id */
       id: number;
-      group_id: number;
-      training_class: string;
-      current_load: number;
-      capacity: number;
-    };
-    SelfSportReportUploadRequest: {
-      /** Format: uri */
-      link: string;
-      hours: number;
-      training_type: number;
-      student_comment?: string;
-      parsed_data?: unknown;
-    };
-    SelfSportTypes: {
-      /** ID */
-      readonly pk: number;
+      /** Name */
       name: string;
-      application_rule: string;
+      /** Description */
+      description: string;
+      /** Groups */
+      groups: components["schemas"]["ShortSportGroupSchema"][];
     };
-    Semester: {
-      readonly id: number;
-      name: string;
-      /** Format: date */
-      start?: string;
-      /** Format: date */
-      end?: string;
+    FAQResponse: {
+      [key: string]: {
+        [key: string]: string;
+      };
     };
-    Sport: {
+    /** FitnessTestExerciseResultSchema */
+    FitnessTestExerciseResultSchema: {
+      /** Exercise Id */
+      exercise_id: number;
+      /** Exercise Name */
+      exercise_name: string;
+      /** Unit */
+      unit: string | null;
+      /** Value */
+      value: string;
+    };
+    /** FitnessTestExerciseSchema */
+    FitnessTestExerciseSchema: {
+      /** Id */
       id: number;
+      /** Name */
       name: string;
-      special: boolean;
+      /** Unit */
+      unit?: string | null;
+      /** Threshold */
+      threshold?: number | null;
+      /** Select */
+      select?: string[];
     };
-    SportEnrollRequest: {
-      sport_id: number;
+    /** FitnessTestSessionSchema */
+    FitnessTestSessionSchema: {
+      /** Id */
+      id: number;
+      /** Semester Id */
+      semester_id: number;
+      /** Retake */
+      retake: boolean;
+      /**
+       * Date
+       * Format: date-time
+       */
+      date: string;
+      /** Teacher */
+      teacher: string;
     };
-    Sports: {
-      sports: components["schemas"]["Sport"][];
+    /** FitnessTestSessionWithGroupedResultsSchema */
+    FitnessTestSessionWithGroupedResultsSchema: {
+      session: components["schemas"]["FitnessTestSessionSchema"];
+      /** Exercises */
+      exercises: components["schemas"]["FitnessTestExerciseSchema"][];
+      /** Results */
+      results: {
+        [
+          key: string
+        ]: components["schemas"]["FitnessTestStudentGroupedResultSchema"];
+      };
     };
-    Student: {
-      id: string;
-      name: string;
-      /** Format: email */
+    /** FitnessTestStudentExerciseResultSchema */
+    FitnessTestStudentExerciseResultSchema: {
+      /** Exercise Id */
+      exercise_id: number;
+      /** Exercise Name */
+      exercise_name: string;
+      /** Unit */
+      unit: string | null;
+      /** Value */
+      value: string;
+    };
+    /** FitnessTestStudentGroupedResultSchema */
+    FitnessTestStudentGroupedResultSchema: {
+      student: components["schemas"]["FitnessTestStudentInfoSchema"];
+      /** Exercise Results */
+      exercise_results: components["schemas"]["FitnessTestStudentExerciseResultSchema"][];
+    };
+    /** FitnessTestStudentInfoSchema */
+    FitnessTestStudentInfoSchema: {
+      /** User Id */
+      user_id: number;
+      /** Email */
       email: string;
+      /** First Name */
+      first_name: string;
+      /** Last Name */
+      last_name: string;
+    };
+    /** FitnessTestStudentSessionResultSchema */
+    FitnessTestStudentSessionResultSchema: {
+      session: components["schemas"]["FitnessTestSessionSchema"];
+      /** Exercise Results */
+      exercise_results: components["schemas"]["FitnessTestExerciseResultSchema"][];
+    };
+    /** FitnessTestUpdateEntrySchema */
+    FitnessTestUpdateEntrySchema: {
+      /** Student Id */
+      student_id: number;
+      /** Exercise Id */
+      exercise_id: number;
+      /** Value */
+      value: string;
+    };
+    /** FitnessTestUploadSchema */
+    FitnessTestUploadSchema: {
+      /** Semester Id */
+      semester_id: number;
+      /** Retake */
+      retake: boolean;
+      /** Results */
+      results: components["schemas"]["FitnessTestUpdateEntrySchema"][];
+    };
+    /** GradeSetSchema */
+    GradeSetSchema: {
+      /** Student Id */
+      student_id: number;
+      /** Hours */
+      hours: number;
+    };
+    /** HTTPValidationError */
+    HTTPValidationError: {
+      /** Detail */
+      detail?: components["schemas"]["ValidationError"][];
+    };
+    /** MedicalGroupReferenceUploadResponseSchema */
+    MedicalGroupReferenceUploadResponseSchema: {
+      /** Id */
+      id: number;
+      /** Student Id */
+      student_id: number;
+      /** Semester */
+      semester: number;
+      /** Uploaded */
+      uploaded: unknown;
+    };
+    /** MedicalGroupSchema */
+    MedicalGroupSchema: {
+      /** Id */
+      id: number;
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
+    };
+    /** ParsedStravaSchema */
+    ParsedStravaSchema: {
+      /** Distance Km */
+      distance_km: number;
+      /** Type */
+      type?: string | null;
+      /** Pace */
+      pace?: number | null;
+      /** Speed */
+      speed?: number | null;
+      /** Hours */
+      hours: number;
+      /** Approved */
+      approved: boolean;
+    };
+    /** PostStudentExerciseResultSchema */
+    PostStudentExerciseResultSchema: {
+      /**
+       * Result
+       * @default ok
+       */
+      result: string;
+      /** Session Id */
+      session_id: number;
+    };
+    /** ReferenceUploadResponseSchema */
+    ReferenceUploadResponseSchema: {
+      /** Id */
+      id: number;
+      /** Student Id */
+      student_id: number;
+      /** Semester */
+      semester: number;
+      /** Hours */
+      hours: number;
+      /**
+       * Start
+       * Format: date
+       */
+      start: string;
+      /**
+       * End
+       * Format: date
+       */
+      end: string;
+      /** Uploaded */
+      uploaded: unknown;
+      /**
+       * Message
+       * @default Medical certificate uploaded successfully
+       */
+      message: string;
+    };
+    /** SelfSportReportCreateSchema */
+    SelfSportReportCreateSchema: {
+      /**
+       * Link
+       * Format: uri
+       */
+      link: string;
+      /** Training Type */
+      training_type: number;
+      /** Hours */
+      hours: number;
+      /** Student Comment */
+      student_comment?: string | null;
+      /** Parsed Data */
+      parsed_data?: {
+        [key: string]: unknown;
+      } | null;
+    };
+    /** SelfSportReportSchema */
+    SelfSportReportSchema: {
+      /** Id */
+      id: number;
+      /** Student Email */
+      student_email: string;
+      /** Student Name */
+      student_name: string | null;
+      /** Training Type Name */
+      training_type_name?: string | null;
+      /** Hours */
+      hours: number;
+      /**
+       * Uploaded
+       * Format: date-time
+       */
+      uploaded: string;
+      /** Approval */
+      approval: boolean | null;
+      /** Debt */
+      debt: boolean;
+      /** Semester Id */
+      semester_id: number;
+    };
+    /** SelfSportTypeSchema */
+    SelfSportTypeSchema: {
+      /** Id */
+      id: number;
+      /** Name */
+      name: string;
+      /** Application Rule */
+      application_rule?: string | null;
+    };
+    /** SemesterHistorySchema */
+    SemesterHistorySchema: {
+      /** Semester Id */
+      semester_id: number;
+      /** Semester Name */
+      semester_name: string;
+      /** Semester Start */
+      semester_start: unknown;
+      /** Semester End */
+      semester_end: unknown;
+      /** Required Hours */
+      required_hours: number;
+      /** Total Hours */
+      total_hours: number;
+      /** Trainings */
+      trainings: components["schemas"]["TrainingHistorySchema"][];
+      /** Fitness Tests */
+      fitness_tests?:
+        | components["schemas"]["FitnessTestStudentSessionResultSchema"][]
+        | null;
+    };
+    /** SemesterSchema */
+    SemesterSchema: {
+      /** Id */
+      id: number;
+      /** Name */
+      name: string;
+      /**
+       * Start
+       * Format: date
+       */
+      start: string;
+      /**
+       * End
+       * Format: date
+       */
+      end: string;
+      /** Required Hours */
+      required_hours: number;
+    };
+    /** ShortSportGroupSchema */
+    ShortSportGroupSchema: {
+      /** Id */
+      id: number;
+      /** Display Name */
+      display_name: string;
+      /** Group Name */
+      group_name: string | null;
+      /** Capacity */
+      capacity: number;
+      /** Is Accredited */
+      is_accredited: boolean;
+      /** Is Club */
+      is_club: boolean;
+      /** Is Paid */
+      is_paid: boolean;
+      /** Trainers */
+      trainers: components["schemas"]["TrainerSchema"][];
+      /** Allowed Medical Groups */
+      allowed_medical_groups: string[];
+      /** Allowed Education Level */
+      allowed_education_level: number;
+    };
+    /** StudentHoursSummarySchema */
+    StudentHoursSummarySchema: {
+      /** Semester Id */
+      semester_id: number;
+      /** Debt */
+      debt: number;
+      /** Self Sport Hours */
+      self_sport_hours: number;
+      /** Hours From Groups */
+      hours_from_groups: number;
+      /** Required Hours */
+      required_hours: number;
+    };
+    /** StudentInfoSchema */
+    StudentInfoSchema: {
+      /** Student Status */
+      student_status: string;
+      /** Medical Group */
       medical_group: string;
     };
-    Suggestion: {
-      value: string;
-      label: string;
+    /** StudentStatusSchema */
+    StudentStatusSchema: {
+      /** Id */
+      id: number;
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
     };
-    Trainer: {
-      trainer_first_name: string;
-      trainer_last_name: string;
-      trainer_email: string;
+    /** SuggestionSchema */
+    SuggestionSchema: {
+      /** Id */
+      id: number;
+      /** First Name */
+      first_name: string;
+      /** Last Name */
+      last_name: string;
+      /** Email */
+      email: string;
     };
-    TrainingClass: {
-      readonly id: number;
+    /** TrainerInfoSchema */
+    TrainerInfoSchema: {
+      /** Groups */
+      groups: components["schemas"]["api_v3__routers__users__GroupInfoSchema"][];
+    };
+    /** TrainerSchema */
+    TrainerSchema: {
+      /** Id */
+      id: number;
+      /** Email */
+      email: string;
+      /** Full Name */
+      full_name: string;
+    };
+    /** TrainingGradesSchema */
+    TrainingGradesSchema: {
+      /** Group Name */
+      group_name: string;
+      /**
+       * Start
+       * Format: date-time
+       */
+      start: string;
+      /** Academic Duration */
+      academic_duration: number;
+      /** Grades */
+      grades: components["schemas"]["AttendanceStudentGradeSchema"][];
+    };
+    /** TrainingHistorySchema */
+    TrainingHistorySchema: {
+      /** Training Id */
+      training_id: number;
+      /** Date */
+      date: string;
+      /** Time */
+      time: string;
+      /** Hours */
+      hours: number;
+      /** Group Name */
+      group_name?: string | null;
+      /** Sport Name */
+      sport_name?: string | null;
+      /** Training Class */
+      training_class?: string | null;
+      /** Custom Name */
+      custom_name?: string | null;
+    };
+    /** TrainingInfoPersonalSchema */
+    TrainingInfoPersonalSchema: {
+      training: components["schemas"]["TrainingInfoSchema"];
+      /** Checked In */
+      checked_in: boolean;
+      /** Can Check In */
+      can_check_in: boolean;
+      /** Can Grade */
+      can_grade: boolean;
+      /** Can Edit */
+      can_edit: boolean;
+    };
+    /** TrainingInfoSchema */
+    TrainingInfoSchema: {
+      /** Id */
+      id: number;
+      /**
+       * Start
+       * Format: date-time
+       */
+      start: string;
+      /**
+       * End
+       * Format: date-time
+       */
+      end: string;
+      /** Is All Day */
+      is_all_day: boolean;
+      training_location: components["schemas"]["TrainingLocationSchema"] | null;
+      /** Display Name */
+      display_name: string;
+      /** Sport Name */
+      sport_name: string | null;
+      /** Group Name */
+      group_name: string | null;
+      /** Training Custom Name */
+      training_custom_name: string | null;
+      /** Is Accredited */
+      is_accredited: boolean;
+      /** Is Club */
+      is_club: boolean;
+      /** Is Paid */
+      is_paid: boolean;
+      /** Sport Id */
+      sport_id: number | null;
+      /** Group Id */
+      group_id: number;
+      /** Checkins Count */
+      checkins_count: number;
+      /** Max Checkins */
+      max_checkins: number;
+    };
+    /** TrainingLocationSchema */
+    TrainingLocationSchema: {
+      /** Id */
+      id: number;
+      /** Name */
       name: string;
     };
-    TrainingGrades: {
-      group_name: string;
-      /** Format: date-time */
-      start: string;
-      grades: components["schemas"]["GradeReport"][];
-      academic_duration: number;
+    /** UserSchema */
+    UserSchema: {
+      /** User Id */
+      user_id: number;
+      /** Email */
+      email: string;
+      /** Full Name */
+      full_name: string;
+      /** Is Admin */
+      is_admin: boolean;
+      student_info: components["schemas"]["StudentInfoSchema"] | null;
+      trainer_info: components["schemas"]["TrainerInfoSchema"] | null;
     };
-    TrainingHour: {
-      group: string;
-      /** Format: date-time */
-      timestamp: string;
-      hours: number;
+    /** ValidationError */
+    ValidationError: {
+      /** Location */
+      loc: (string | number)[];
+      /** Message */
+      msg: string;
+      /** Error Type */
+      type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
     };
-    UnenrollStudentRequest: {
-      group_id: number;
-      student_id: number;
+    /** GroupInfoSchema */
+    api_v3__routers__groups__GroupInfoSchema: {
+      /** Id */
+      id: number;
+      /** Display Name */
+      display_name: string;
+      /** Sport Name */
+      sport_name: string | null;
+      /** Group Name */
+      group_name: string | null;
+      /** Capacity */
+      capacity: number;
+      /** Is Accredited */
+      is_accredited: boolean;
+      /** Is Club */
+      is_club: boolean;
+      /** Is Paid */
+      is_paid: boolean;
+      /** Sport Id */
+      sport_id: number | null;
+      /** Sport Description */
+      sport_description: string;
+      /** Trainers */
+      trainers: components["schemas"]["TrainerSchema"][];
+      /** Allowed Medical Groups */
+      allowed_medical_groups: string[];
+      /** Allowed Education Level */
+      allowed_education_level: number;
     };
-    /**
-     * @description * `0` - Monday
-     *     * `1` - Tuesday
-     *     * `2` - Wednesday
-     *     * `3` - Thursday
-     *     * `4` - Friday
-     *     * `5` - Saturday
-     *     * `6` - Sunday
-     * @enum {integer}
-     */
-    WeekdayEnum: WeekdayEnum;
-    training_history404: {
-      /** @default 404 */
-      readonly code: string;
-      /** @default Not found */
-      readonly detail: string;
+    /** GroupInfoSchema */
+    api_v3__routers__users__GroupInfoSchema: {
+      /** Id */
+      id: number;
+      /** Display Name */
+      display_name: string;
     };
   };
   responses: never;
@@ -1096,113 +1313,363 @@ export interface components {
   headers: never;
   pathItems: never;
 }
-export type SchemaAttendance = components["schemas"]["Attendance"];
-export type SchemaAttendanceMarkRequest =
-  components["schemas"]["AttendanceMarkRequest"];
-export type SchemaBadGradeReport = components["schemas"]["BadGradeReport"];
-export type SchemaBadGradeReportGrade =
-  components["schemas"]["BadGradeReportGrade"];
-export type SchemaBetterThanInfo = components["schemas"]["BetterThanInfo"];
-export type SchemaCalendar = components["schemas"]["Calendar"];
-export type SchemaEnrollRequest = components["schemas"]["EnrollRequest"];
-export type SchemaError = components["schemas"]["Error"];
-export type SchemaFitnessTestDetail =
-  components["schemas"]["FitnessTestDetail"];
-export type SchemaFitnessTestExercise =
-  components["schemas"]["FitnessTestExercise"];
-export type SchemaFitnessTestResult =
-  components["schemas"]["FitnessTestResult"];
-export type SchemaFitnessTestSession =
-  components["schemas"]["FitnessTestSession"];
-export type SchemaFitnessTestSessionWithResult =
-  components["schemas"]["FitnessTestSessionWithResult"];
-export type SchemaFitnessTestStudentResult =
-  components["schemas"]["FitnessTestStudentResult"];
-export type SchemaFitnessTestUpdateEntryRequest =
-  components["schemas"]["FitnessTestUpdateEntryRequest"];
-export type SchemaFitnessTestUploadRequest =
-  components["schemas"]["FitnessTestUploadRequest"];
-export type SchemaGenderRequest = components["schemas"]["GenderRequest"];
-export type SchemaGradeReport = components["schemas"]["GradeReport"];
-export type SchemaGradeSetRequest = components["schemas"]["GradeSetRequest"];
-export type SchemaGroupInfo = components["schemas"]["GroupInfo"];
-export type SchemaHasQr = components["schemas"]["HasQR"];
-export type SchemaHourInfoSemesterChild =
-  components["schemas"]["HourInfoSemesterChild"];
-export type SchemaHoursInfo = components["schemas"]["HoursInfo"];
-export type SchemaHoursInfoFull = components["schemas"]["HoursInfoFull"];
-export type SchemaInbuiltError = components["schemas"]["InbuiltError"];
-export type SchemaLastAttendedDates =
-  components["schemas"]["LastAttendedDates"];
-export type SchemaLastAttendedStat = components["schemas"]["LastAttendedStat"];
-export type SchemaMeasurementPostRequest =
-  components["schemas"]["MeasurementPostRequest"];
-export type SchemaMeasurementResult =
-  components["schemas"]["MeasurementResult"];
-export type SchemaMeasurementResults =
-  components["schemas"]["MeasurementResults"];
-export type SchemaMedicalGroup = components["schemas"]["MedicalGroup"];
-export type SchemaMedicalGroups = components["schemas"]["MedicalGroups"];
-export type SchemaNewGroup = components["schemas"]["NewGroup"];
-export type SchemaNewSport = components["schemas"]["NewSport"];
-export type SchemaNewTrainer = components["schemas"]["NewTrainer"];
-export type SchemaNewTrainingInfo = components["schemas"]["NewTrainingInfo"];
-export type SchemaNewTrainingInfoStudent =
-  components["schemas"]["NewTrainingInfoStudent"];
-export type SchemaNotFound = components["schemas"]["NotFound"];
-export type SchemaParsedStrava = components["schemas"]["ParsedStrava"];
-export type SchemaPostStudentExerciseResult =
-  components["schemas"]["PostStudentExerciseResult"];
-export type SchemaReferenceUploadRequest =
-  components["schemas"]["ReferenceUploadRequest"];
-export type SchemaSchedule = components["schemas"]["Schedule"];
-export type SchemaScheduleExtendedProps =
-  components["schemas"]["ScheduleExtendedProps"];
-export type SchemaSelfSportReportUploadRequest =
-  components["schemas"]["SelfSportReportUploadRequest"];
-export type SchemaSelfSportTypes = components["schemas"]["SelfSportTypes"];
-export type SchemaSemester = components["schemas"]["Semester"];
-export type SchemaSport = components["schemas"]["Sport"];
-export type SchemaSportEnrollRequest =
-  components["schemas"]["SportEnrollRequest"];
-export type SchemaSports = components["schemas"]["Sports"];
-export type SchemaStudent = components["schemas"]["Student"];
-export type SchemaSuggestion = components["schemas"]["Suggestion"];
-export type SchemaTrainer = components["schemas"]["Trainer"];
-export type SchemaTrainingClass = components["schemas"]["TrainingClass"];
-export type SchemaTrainingGrades = components["schemas"]["TrainingGrades"];
-export type SchemaTrainingHour = components["schemas"]["TrainingHour"];
-export type SchemaUnenrollStudentRequest =
-  components["schemas"]["UnenrollStudentRequest"];
-export type SchemaTrainingHistory404 =
-  components["schemas"]["training_history404"];
+export type SchemaAttendanceMarkSchema =
+  components["schemas"]["AttendanceMarkSchema"];
+export type SchemaAttendanceStudentGradeSchema =
+  components["schemas"]["AttendanceStudentGradeSchema"];
+export type SchemaAttendanceSuggestionSchema =
+  components["schemas"]["AttendanceSuggestionSchema"];
+export type SchemaBadGradeReportGradeSchema =
+  components["schemas"]["BadGradeReportGradeSchema"];
+export type SchemaBadGradeReportSchema =
+  components["schemas"]["BadGradeReportSchema"];
+export type SchemaBetterThanInfoSchema =
+  components["schemas"]["BetterThanInfoSchema"];
+export type SchemaBodyReferencesMedicalGroupUpload =
+  components["schemas"]["Body_references_medical_group_upload"];
+export type SchemaBodyReferencesReferenceUpload =
+  components["schemas"]["Body_references_reference_upload"];
+export type SchemaDetailedSportSchema =
+  components["schemas"]["DetailedSportSchema"];
+export type SchemaFaqResponse = components["schemas"]["FAQResponse"];
+export type SchemaFitnessTestExerciseResultSchema =
+  components["schemas"]["FitnessTestExerciseResultSchema"];
+export type SchemaFitnessTestExerciseSchema =
+  components["schemas"]["FitnessTestExerciseSchema"];
+export type SchemaFitnessTestSessionSchema =
+  components["schemas"]["FitnessTestSessionSchema"];
+export type SchemaFitnessTestSessionWithGroupedResultsSchema =
+  components["schemas"]["FitnessTestSessionWithGroupedResultsSchema"];
+export type SchemaFitnessTestStudentExerciseResultSchema =
+  components["schemas"]["FitnessTestStudentExerciseResultSchema"];
+export type SchemaFitnessTestStudentGroupedResultSchema =
+  components["schemas"]["FitnessTestStudentGroupedResultSchema"];
+export type SchemaFitnessTestStudentInfoSchema =
+  components["schemas"]["FitnessTestStudentInfoSchema"];
+export type SchemaFitnessTestStudentSessionResultSchema =
+  components["schemas"]["FitnessTestStudentSessionResultSchema"];
+export type SchemaFitnessTestUpdateEntrySchema =
+  components["schemas"]["FitnessTestUpdateEntrySchema"];
+export type SchemaFitnessTestUploadSchema =
+  components["schemas"]["FitnessTestUploadSchema"];
+export type SchemaGradeSetSchema = components["schemas"]["GradeSetSchema"];
+export type SchemaHttpValidationError =
+  components["schemas"]["HTTPValidationError"];
+export type SchemaMedicalGroupReferenceUploadResponseSchema =
+  components["schemas"]["MedicalGroupReferenceUploadResponseSchema"];
+export type SchemaMedicalGroupSchema =
+  components["schemas"]["MedicalGroupSchema"];
+export type SchemaParsedStravaSchema =
+  components["schemas"]["ParsedStravaSchema"];
+export type SchemaPostStudentExerciseResultSchema =
+  components["schemas"]["PostStudentExerciseResultSchema"];
+export type SchemaReferenceUploadResponseSchema =
+  components["schemas"]["ReferenceUploadResponseSchema"];
+export type SchemaSelfSportReportCreateSchema =
+  components["schemas"]["SelfSportReportCreateSchema"];
+export type SchemaSelfSportReportSchema =
+  components["schemas"]["SelfSportReportSchema"];
+export type SchemaSelfSportTypeSchema =
+  components["schemas"]["SelfSportTypeSchema"];
+export type SchemaSemesterHistorySchema =
+  components["schemas"]["SemesterHistorySchema"];
+export type SchemaSemesterSchema = components["schemas"]["SemesterSchema"];
+export type SchemaShortSportGroupSchema =
+  components["schemas"]["ShortSportGroupSchema"];
+export type SchemaStudentHoursSummarySchema =
+  components["schemas"]["StudentHoursSummarySchema"];
+export type SchemaStudentInfoSchema =
+  components["schemas"]["StudentInfoSchema"];
+export type SchemaStudentStatusSchema =
+  components["schemas"]["StudentStatusSchema"];
+export type SchemaSuggestionSchema = components["schemas"]["SuggestionSchema"];
+export type SchemaTrainerInfoSchema =
+  components["schemas"]["TrainerInfoSchema"];
+export type SchemaTrainerSchema = components["schemas"]["TrainerSchema"];
+export type SchemaTrainingGradesSchema =
+  components["schemas"]["TrainingGradesSchema"];
+export type SchemaTrainingHistorySchema =
+  components["schemas"]["TrainingHistorySchema"];
+export type SchemaTrainingInfoPersonalSchema =
+  components["schemas"]["TrainingInfoPersonalSchema"];
+export type SchemaTrainingInfoSchema =
+  components["schemas"]["TrainingInfoSchema"];
+export type SchemaTrainingLocationSchema =
+  components["schemas"]["TrainingLocationSchema"];
+export type SchemaUserSchema = components["schemas"]["UserSchema"];
+export type SchemaValidationError = components["schemas"]["ValidationError"];
+export type SchemaApiV3RoutersGroupsGroupInfoSchema =
+  components["schemas"]["api_v3__routers__groups__GroupInfoSchema"];
+export type SchemaApiV3RoutersUsersGroupInfoSchema =
+  components["schemas"]["api_v3__routers__users__GroupInfoSchema"];
 export type $defs = Record<string, never>;
 export interface operations {
-  analytics_attendance_retrieve: {
+  users_get_me: {
     parameters: {
-      query?: {
-        medical_group_id?: number;
-        sport_id?: number;
-      };
+      query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
+      /** @description Get user information */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            [key: string]: number;
-          };
+          "application/json": components["schemas"]["UserSchema"];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  users_get_user_by_id: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        user_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get user information by ID */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UserSchema"];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No such user found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  attendance_report_retrieve: {
+  users_get_many_users: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+    responses: {
+      /** @description Get many user information by ID */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UserSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  students_get_student_specific_semester_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        student_id: number;
+        semester_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get student training history for specific semester */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SemesterHistorySchema"];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Semester not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  students_get_student_all_semesters_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        student_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get student semester history */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SemesterHistorySchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  sport_groups_list_sports: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get available sports with detailed groups information */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DetailedSportSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  sport_groups_get_group_info_view: {
     parameters: {
       query?: never;
       header?: never;
@@ -1213,144 +1680,48 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      /** @description Get sport group information */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["LastAttendedDates"];
+          "application/json": components["schemas"]["api_v3__routers__groups__GroupInfoSchema"];
         };
       };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
       403: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["InbuiltError"];
-        };
+        content?: never;
       };
+      /** @description Group not found */
       404: {
         headers: {
           [name: string]: unknown;
         };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
         content: {
-          "application/json": components["schemas"]["NotFound"];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  attendance_better_than_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        student_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["BetterThanInfo"];
-        };
-      };
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["InbuiltError"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  attendance_hours_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        student_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HoursInfo"];
-        };
-      };
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["InbuiltError"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  attendance_negative_hours_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        student_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HoursInfoFull"];
-        };
-      };
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["InbuiltError"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  attendance_grades_retrieve: {
+  trainings_get_training_info: {
     parameters: {
       query?: never;
       header?: never;
@@ -1361,33 +1732,267 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      /** @description Get training information */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["TrainingGrades"];
+          "application/json": components["schemas"]["TrainingInfoSchema"];
         };
       };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
       403: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["InbuiltError"];
-        };
+        content?: never;
       };
+      /** @description Training not found */
       404: {
         headers: {
           [name: string]: unknown;
         };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
         content: {
-          "application/json": components["schemas"]["NotFound"];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  "attendance_grades.csv_retrieve": {
+  trainings_training_checkin: {
+    parameters: {
+      query: {
+        /** @description True - check in; False - cancel check-in */
+        checkin: boolean;
+        /** @description Student ID if a trainer wants to cancel check in for some student */
+        student_id?: number | null;
+      };
+      header?: never;
+      path: {
+        training_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Check-in or cancel check-in */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Invalid check-in operation */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Training not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  trainings_schedule_get_personal_schedule: {
+    parameters: {
+      query: {
+        /** @description Start datetime */
+        start: string;
+        /** @description End datetime */
+        end: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get personal schedule */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TrainingInfoPersonalSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  trainings_schedule_get_sport_schedule: {
+    parameters: {
+      query: {
+        /** @description Start datetime */
+        start: string;
+        /** @description End datetime */
+        end: string;
+      };
+      header?: never;
+      path: {
+        sport_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get sport schedule */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TrainingInfoSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  trainings_attendance_suggest_student: {
+    parameters: {
+      query: {
+        /** @description Search term */
+        term: string;
+        /** @description Group id of the training */
+        group_id: number;
+      };
+      header?: never;
+      path: {
+        training_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Suggest students for attendance */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AttendanceSuggestionSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Group not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  trainings_attendance_get_training_attendance_csv: {
     parameters: {
       query?: never;
       header?: never;
@@ -1398,478 +2003,262 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      /** @description Get training grades in CSV */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "text/csv": string;
+          "application/json": unknown;
         };
       };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
       403: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["InbuiltError"];
-        };
+        content?: never;
       };
+      /** @description Training not found */
       404: {
         headers: {
           [name: string]: unknown;
         };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
         content: {
-          "application/json": components["schemas"]["NotFound"];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  attendance_mark_create: {
+  trainings_attendance_get_training_attendance: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        training_id: number;
+      };
       cookie?: never;
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AttendanceMarkRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["AttendanceMarkRequest"];
-        "multipart/form-data": components["schemas"]["AttendanceMarkRequest"];
-      };
-    };
+    requestBody?: never;
     responses: {
+      /** @description Get training grades */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["BadGradeReportGrade"][];
+          "application/json": components["schemas"]["TrainingGradesSchema"];
         };
       };
-      400: {
+      /** @description Invalid token */
+      401: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["BadGradeReport"];
-        };
+        content?: never;
       };
+      /** @description Unauthorized */
       403: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["InbuiltError"];
-        };
+        content?: never;
       };
-    };
-  };
-  attendance_suggest_student_list: {
-    parameters: {
-      query: {
-        group_id: number;
-        term: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Suggestion"][];
-        };
-      };
-    };
-  };
-  calendar_schedule_retrieve: {
-    parameters: {
-      query: {
-        end: string;
-        start: string;
-      };
-      header?: never;
-      path: {
-        sport_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Calendar"];
-        };
-      };
-    };
-  };
-  calendar_trainings_retrieve: {
-    parameters: {
-      query: {
-        end: string;
-        start: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Calendar"];
-        };
-      };
-    };
-  };
-  enrollment_enroll_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["EnrollRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["EnrollRequest"];
-        "multipart/form-data": components["schemas"]["EnrollRequest"];
-      };
-    };
-    responses: {
-      /** @description No response body */
-      200: {
+      /** @description Training not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      400: {
+      /** @description Validation Error */
+      422: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Error"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  enrollment_unenroll_create: {
+  trainings_attendance_mark_training_attendance: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        training_id: number;
+      };
       cookie?: never;
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["EnrollRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["EnrollRequest"];
-        "multipart/form-data": components["schemas"]["EnrollRequest"];
+        "application/json": components["schemas"]["AttendanceMarkSchema"];
       };
     };
     responses: {
-      /** @description No response body */
+      /** @description Mark student attendance */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json":
+            | components["schemas"]["BadGradeReportGradeSchema"][]
+            | components["schemas"]["BadGradeReportSchema"];
+        };
+      };
+      /** @description Invalid grades */
+      400: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  enrollment_unenroll_by_trainer_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UnenrollStudentRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["UnenrollStudentRequest"];
-        "multipart/form-data": components["schemas"]["UnenrollStudentRequest"];
-      };
-    };
-    responses: {
-      /** @description No response body */
-      200: {
+      /** @description Invalid token */
+      401: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      400: {
+      /** @description Unauthorized */
+      403: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
+        content?: never;
       };
+      /** @description Training not found */
       404: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
+        content?: never;
       };
-    };
-  };
-  fitnesstest_exercises_list: {
-    parameters: {
-      query?: {
-        semester_id?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
+      /** @description Validation Error */
+      422: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["FitnessTestExercise"][];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  fitnesstest_result_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["FitnessTestStudentResult"][];
-        };
-      };
-    };
-  };
-  fitnesstest_sessions_list: {
-    parameters: {
-      query?: {
-        semester_id?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["FitnessTestSession"][];
-        };
-      };
-    };
-  };
-  fitnesstest_sessions_retrieve: {
+  trainings_attendance_get_student_hours_summary: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        session_id: number;
+        student_id: number;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
+      /** @description Get student hours summary */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["FitnessTestSessionWithResult"];
+          "application/json": components["schemas"]["StudentHoursSummarySchema"];
         };
       };
-    };
-  };
-  fitnesstest_suggest_student_list: {
-    parameters: {
-      query: {
-        term: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
+      /** @description Invalid token */
+      401: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["Suggestion"][];
-        };
+        content?: never;
       };
-    };
-  };
-  fitnesstest_upload_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FitnessTestUploadRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["FitnessTestUploadRequest"];
-        "multipart/form-data": components["schemas"]["FitnessTestUploadRequest"];
-      };
-    };
-    responses: {
-      200: {
+      /** @description Unauthorized */
+      403: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["PostStudentExerciseResult"];
-        };
+        content?: never;
       };
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
-      };
+      /** @description Student not found */
       404: {
         headers: {
           [name: string]: unknown;
         };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
         content: {
-          "application/json": components["schemas"]["NotFound"];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  fitnesstest_upload_create_2: {
+  trainings_attendance_get_better_than_info: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        session_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["FitnessTestUploadRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["FitnessTestUploadRequest"];
-        "multipart/form-data": components["schemas"]["FitnessTestUploadRequest"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["PostStudentExerciseResult"];
-        };
-      };
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  group_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        group_id: number;
+        student_id: number;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
+      /** @description Get student performance ranking */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["GroupInfo"];
+          "application/json": components["schemas"]["BetterThanInfoSchema"];
         };
       };
-      404: {
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["NotFound"];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  measurement_get_measurements_retrieve: {
+  self_sport_get_self_sport_types: {
     parameters: {
       query?: never;
       header?: never;
@@ -1878,131 +2267,24 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      /** @description Get self sport types */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["MeasurementResults"];
+          "application/json": components["schemas"]["SelfSportTypeSchema"][];
         };
       };
-    };
-  };
-  measurement_get_results_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
+      /** @description Invalid token */
+      401: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["MeasurementResults"];
-        };
+        content?: never;
       };
-    };
-  };
-  measurement_student_measurement_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MeasurementPostRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["MeasurementPostRequest"];
-        "multipart/form-data": components["schemas"]["MeasurementPostRequest"];
-      };
-    };
-    responses: {
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  medical_groups_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["MedicalGroups"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  profile_QR_toggle_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HasQR"];
-        };
-      };
-    };
-  };
-  profile_change_gender_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenderRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["GenderRequest"];
-        "multipart/form-data": components["schemas"]["GenderRequest"];
-      };
-    };
-    responses: {
-      /** @description No response body */
-      200: {
+      /** @description Unauthorized */
+      403: {
         headers: {
           [name: string]: unknown;
         };
@@ -2010,188 +2292,10 @@ export interface operations {
       };
     };
   };
-  profile_history_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        semester_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["TrainingHour"][];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["training_history404"];
-        };
-      };
-    };
-  };
-  profile_history_by_date_list: {
+  self_sport_parse_self_sport_strava: {
     parameters: {
       query: {
-        /** @description date in format YYYY-MM-DD */
-        date_end: string;
-        /** @description date in format YYYY-MM-DD */
-        date_start: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Attendance"][];
-        };
-      };
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
-      };
-    };
-  };
-  profile_history_with_self_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        semester_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["TrainingHour"][];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["training_history404"];
-        };
-      };
-    };
-  };
-  profile_student_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Student"];
-        };
-      };
-    };
-  };
-  reference_upload_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": components["schemas"]["ReferenceUploadRequest"];
-      };
-    };
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
-      };
-    };
-  };
-  select_sport_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SportEnrollRequest"];
-        "application/x-www-form-urlencoded": components["schemas"]["SportEnrollRequest"];
-        "multipart/form-data": components["schemas"]["SportEnrollRequest"];
-      };
-    };
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  selfsport_strava_parsing_retrieve: {
-    parameters: {
-      query: {
+        /** @description Strava activity link */
         link: string;
       };
       header?: never;
@@ -2200,52 +2304,103 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      /** @description Parse Strava activity info */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ParsedStrava"];
+          "application/json": components["schemas"]["ParsedStravaSchema"];
         };
       };
+      /** @description Invalid link or request */
       400: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
+        content?: never;
       };
-      429: {
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Error"];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
-  selfsport_types_list: {
+  self_sport_list_self_sport_reports: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Filter by student ID (trainers/admins only, students can only see their own) */
+        student_id?: number | null;
+        /** @description Filter by semester ID; if omitted, all semesters are returned */
+        semester_id?: number | null;
+      };
       header?: never;
       path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
+      /** @description Get self-sport reports */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["SelfSportTypes"][];
+          "application/json": components["schemas"]["SelfSportReportSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  selfsport_upload_create: {
+  self_sport_create_self_sport_report: {
     parameters: {
       query?: never;
       header?: never;
@@ -2254,40 +2409,108 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "multipart/form-data": components["schemas"]["SelfSportReportUploadRequest"];
+        "application/json": components["schemas"]["SelfSportReportCreateSchema"];
       };
     };
     responses: {
-      /** @description No response body */
+      /** @description Upload self sport report */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Invalid request */
+      400: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      400: {
+      /** @description Invalid token */
+      401: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
+        content?: never;
       };
+      /** @description Unauthorized */
       403: {
         headers: {
           [name: string]: unknown;
         };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
         content: {
-          "application/json": components["schemas"]["Error"];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  semester_list: {
+  self_sport_get_self_sport_report_by_id: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        report_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get self-sport report by ID */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SelfSportReportSchema"];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  fitness_test_get_exercises: {
     parameters: {
       query?: {
-        current?: boolean;
-        with_ft_exercises?: boolean;
+        /** @description Semester ID; if omitted, current semester is used if available */
+        semester_id?: number | null;
       };
       header?: never;
       path?: never;
@@ -2295,153 +2518,363 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      /** @description Get fitness test exercises */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Semester"][];
+          "application/json": components["schemas"]["FitnessTestExerciseSchema"][];
         };
       };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  sports_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Sports"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  training_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        training_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NewTrainingInfoStudent"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  training_cancel_check_in_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        training_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
+      /** @description Invalid token */
+      401: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Error"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
-        };
-      };
-    };
-  };
-  training_check_in_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        training_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
+      /** @description Unauthorized */
+      403: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      400: {
+      /** @description Validation Error */
+      422: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Error"];
-        };
-      };
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["NotFound"];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  training_class_list: {
+  fitness_test_get_sessions: {
+    parameters: {
+      query?: {
+        /** @description Semester ID; if omitted, all sessions are returned */
+        semester_id?: number | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get fitness test sessions */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FitnessTestSessionSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  fitness_test_get_fitness_test_session: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get fitness test session results */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FitnessTestSessionWithGroupedResultsSchema"];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No results found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  fitness_test_upload_fitness_test_results: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        session_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["FitnessTestUploadSchema"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PostStudentExerciseResultSchema"];
+        };
+      };
+      /** @description Upload or update student fitness test results */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid data */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  fitness_test_suggest_fitness_test_student: {
+    parameters: {
+      query: {
+        /** @description Search term */
+        term: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Suggest students for fitness test */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SuggestionSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  references_reference_upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_references_reference_upload"];
+      };
+    };
+    responses: {
+      /** @description Upload medical certificate */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReferenceUploadResponseSchema"];
+        };
+      };
+      /** @description Too many uploads per day or invalid data */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  references_medical_group_upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_references_medical_group_upload"];
+      };
+    };
+    responses: {
+      /** @description Upload medical group reference */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MedicalGroupReferenceUploadResponseSchema"];
+        };
+      };
+      /** @description Invalid data */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  semesters_get_semesters: {
     parameters: {
       query?: never;
       header?: never;
@@ -2450,36 +2883,272 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      /** @description Get semesters information */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["TrainingClass"][];
+          "application/json": components["schemas"]["SemesterSchema"][];
         };
       };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No semesters found */
       404: {
         headers: {
           [name: string]: unknown;
         };
+        content?: never;
+      };
+    };
+  };
+  semesters_get_current_semester_route: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get current semester information */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
         content: {
-          "application/json": components["schemas"]["NotFound"];
+          "application/json": components["schemas"]["SemesterSchema"];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  semesters_get_semester_by_id: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        semester_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get semester information via id */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SemesterSchema"];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Semester not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-}
-export enum AllowedEducationLevelEnum {
-  ValueMinus1 = -1,
-  Value1 = 1,
-  Value2 = 2,
-}
-export enum WeekdayEnum {
-  Value0 = 0,
-  Value1 = 1,
-  Value2 = 2,
-  Value3 = 3,
-  Value4 = 4,
-  Value5 = 5,
-  Value6 = 6,
+  info_list_training_locations: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get training locations */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TrainingLocationSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  info_list_medical_groups: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get medical groups */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MedicalGroupSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  info_get_faq: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description FAQ grouped by category */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "General": {
+           *         "What is this?": "This is an FAQ."
+           *       }
+           *     }
+           */
+          "application/json": components["schemas"]["FAQResponse"];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  info_get_student_statuses: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get all student statuses */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StudentStatusSchema"][];
+        };
+      };
+      /** @description Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No student statuses found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
 }
