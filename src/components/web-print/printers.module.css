@@ -103,3 +103,22 @@
   opacity: 0;
   pointer-events: none;
 }
+
+.textGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--text-grid-gap);
+  width: 100%;
+  height: fit-content;
+  padding: var(--main-padding);
+  box-sizing: border-box;
+}
+
+.textGrid__elem {
+  text-align: center;
+  line-height: 3em;
+  background-color: var(--color-secondary);
+  border-radius: var(--text-grid-elem-rounding);
+  color: var(--color-secondary-content);
+  font-weight: var(--font-weight-bold);
+}
