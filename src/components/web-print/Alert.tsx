@@ -1,24 +1,18 @@
 import { ModalWindow } from "@/components/events/CreationModal/ModalWindow";
-import fontStyles from "@/components/web-print/printers.fonts.module.css";
+import { ReactNode } from "react";
 
 export function Alert({
-  text,
+  children,
   isShown,
   onClose,
 }: {
-  text: string | null;
+  children: ReactNode;
   isShown: boolean;
   onClose: () => void;
 }) {
-  const alertParts = text?.split("\n").map((elem, i) => (
-    <p key={i} className={fontStyles.alertFont}>
-      {elem}
-    </p>
-  ));
-
   return (
     <ModalWindow open={isShown} onOpenChange={onClose} title={"Warning"}>
-      {alertParts}
+      {children}
     </ModalWindow>
   );
 }

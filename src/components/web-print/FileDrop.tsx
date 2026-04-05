@@ -1,5 +1,5 @@
 import styles from "@/components/web-print/printers.module.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, JSX } from "react";
 import fontStyles from "@/components/web-print/printers.fonts.module.css";
 import marginStyles from "@/components/web-print/printers.margins.module.css";
 import themeStyles from "@/components/web-print/printers.theme.module.css";
@@ -14,7 +14,7 @@ export function FileDrop({
   isFileProcessing: boolean;
   blobPreviewURL: string | undefined;
 }) {
-  const [alert, setAlert] = useState<string | null>(null);
+  const [alert, setAlert] = useState<JSX.Element | null>(null);
 
   const acceptableFileExtensions =
     ".pdf,.doc,.xls,.docx,.xlsx,.png,.txt,.md,.jpg," + ".jpeg,.bmp,.odt,.ods";
@@ -53,7 +53,14 @@ export function FileDrop({
     ];
     async function fileIsBad(file: File) {
       if (file.size > 20 * 1024 * 1024) {
-        setAlert("Max file size is 20MB");
+        setAlert(
+          <>
+            <p>File is too large!</p>
+            <p>
+              Max file size is <span className="font-bold!">20MB</span>
+            </p>
+          </>,
+        );
         return true;
       }
       const bytes = new Uint8Array(await file.slice(0, 8).arrayBuffer());
@@ -68,8 +75,16 @@ export function FileDrop({
         )
       ) {
         setAlert(
-          `Such file is not supported. Supportable files are\n 
-          ${acceptableFileExtensions.replaceAll(",", "\n")}`,
+          <>
+            <p>Such file is not supported!</p>
+            <div className={`${styles.textGrid} ${themeStyles.webPrintPage}`}>
+              {acceptableFileExtensions.split(",").map((elem, i) => (
+                <p className={styles.textGrid__elem} key={i}>
+                  {elem}
+                </p>
+              ))}
+            </div>
+          </>,
         );
         return true;
       }
@@ -204,10 +219,11 @@ export function FileDrop({
       </div>
 
       <Alert
-        text={alert}
         isShown={alert as unknown as boolean}
         onClose={() => setAlert(null)}
-      ></Alert>
+      >
+        {alert}
+      </Alert>
     </>
   );
 }
