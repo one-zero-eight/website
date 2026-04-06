@@ -1,0 +1,125 @@
+.select {
+  appearance: base-select;
+  border: none;
+  background-color: var(--button-color);
+  padding: var(--select-padding);
+  border-radius: var(--select-rounding);
+  transition: background-color 250ms;
+  cursor: pointer;
+}
+
+.select:hover {
+  background-color: var(--color-primary);
+}
+
+.select::picker(select) {
+  appearance: base-select;
+  border: none;
+  background-color: var(--button-color);
+  padding: var(--select-padding);
+  border-radius: var(--select-rounding);
+  opacity: 0;
+  transition: all 250ms allow-discrete;
+}
+
+.select:open::picker(select) {
+  opacity: 1;
+}
+
+@starting-style {
+  .select:open::picker(select) {
+    opacity: 0;
+  }
+}
+
+.select::picker-icon {
+  margin-right: var(--selectedcontent-icon-margin);
+  transition: rotate 250ms;
+}
+
+@supports (not (appearance: base-select)) {
+  .select {
+    width: auto;
+    padding-right: calc(2 * var(--after-arrow-width));
+    -moz-appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .selectWrapper {
+    width: fit-content;
+    position: relative;
+  }
+
+  .selectWrapper::after {
+    content: "▼";
+    height: 12px;
+    position: absolute;
+    top: calc(50% - 6px);
+    transform: translateY(-50%)
+      translateX(calc(-100% - var(--after-arrow-width) / 2));
+    transition: all 250ms;
+    pointer-events: none;
+  }
+
+  .select:open {
+    background-color: var(--button-color);
+  }
+
+  .selectWrapper:has(.select:open)::after {
+    transform: translateY(50%)
+      translateX(calc(-100% - var(--after-arrow-width) / 2)) rotate(180deg);
+  }
+}
+
+.select:open::picker-icon {
+  rotate: 180deg;
+}
+
+.select option {
+  background: var(--button-color);
+  border: none;
+  transition: 250ms;
+  gap: 0;
+  border-radius: calc(var(--select-rounding) - var(--select-padding) / 2);
+  padding: var(--select-padding) 0;
+}
+
+.select option:checked {
+  font-weight: var(--font-weight-bold);
+}
+
+.select option:hover {
+  background: var(--color-primary);
+  gap: var(--select-padding);
+  padding-left: var(--select-padding);
+}
+
+.option__icon {
+  margin: 0 var(--selectedcontent-icon-margin);
+  transition: margin 250ms;
+}
+
+.option__status {
+  margin: 0 var(--selectedcontent-icon-margin) 0 0;
+  transition: margin 250ms;
+}
+
+.select option:hover .option__icon {
+  margin: 0 var(--select-padding) 0 0;
+}
+
+.select option:hover .option__status {
+  margin: 0 var(--select-padding) 0 calc(-1 * var(--select-padding));
+}
+
+.select option::checkmark {
+  display: none;
+}
+
+.select:open {
+  opacity: 0.5;
+}
+
+.select:open:hover {
+  background-color: var(--button-color);
+}
