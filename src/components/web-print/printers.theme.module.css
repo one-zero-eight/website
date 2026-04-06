@@ -4,14 +4,20 @@
 
   --main-padding: 16px;
   --button-padding: 4px 14px;
+  --select-padding: 6px;
   --button-horizontal-padding: 14px;
   --text-grid-gap: 14px;
+
+  --selectedcontent-icon-margin: 4px;
 
   --drop-area-border-width: 7px;
 
   --button-rounding: 12px;
+  --select-rounding: 8px;
   --text-grid-elem-rounding: 6px;
   --drop-area-rounding: 80px;
+
+  --after-arrow-width: 16px;
 }
 
 [data-theme="light"] .webPrintPage {

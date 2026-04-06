@@ -122,3 +122,10 @@
   color: var(--color-secondary-content);
   font-weight: var(--font-weight-bold);
 }
+
+.configurationBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
