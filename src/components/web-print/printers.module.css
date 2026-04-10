@@ -18,7 +18,6 @@
   height: 100%;
   width: 50%;
   display: flex;
-  justify-content: center;
 }
 
 .ordinaryScreen__contentSizeRestrictor {
@@ -37,6 +36,8 @@
 }
 
 .button {
+  user-select: none;
+  width: fit-content;
   background-color: var(--button-color);
   padding: var(--button-padding);
   border-radius: var(--button-rounding);
@@ -128,4 +129,21 @@
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+}
+
+.configurationBox__scrollPart {
+  height: 60%;
+  overflow-y: auto;
+}
+
+.scrollPart__elem {
+  display: flex;
+  width: 100%;
+  flex-wrap: nowrap;
+  align-items: center;
+  margin-top: var(--form-point-margin);
+}
+
+.scrollPart__elem:first-of-type {
+  margin-top: 0;
 }

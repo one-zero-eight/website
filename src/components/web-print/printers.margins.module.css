@@ -1,5 +1,5 @@
 .leftMargin_8 {
-  margin-left: 8px;
+  margin-left: var(--button-left-margin);
 }
 
 .leftMargin_buttonHorizontalPadding {
