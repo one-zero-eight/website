@@ -9,6 +9,8 @@
   --text-grid-gap: 14px;
 
   --selectedcontent-icon-margin: 4px;
+  --form-point-margin: 10px;
+  --button-left-margin: 8px;
 
   --drop-area-border-width: 7px;
 
@@ -18,6 +20,8 @@
   --drop-area-rounding: 80px;
 
   --after-arrow-width: 16px;
+
+  --button-font-size: 22px;
 }
 
 [data-theme="light"] .webPrintPage {

@@ -1,6 +1,7 @@
 .select {
   appearance: base-select;
   border: none;
+  outline: none;
   background-color: var(--button-color);
   padding: var(--select-padding);
   border-radius: var(--select-rounding);
@@ -15,6 +16,7 @@
 .select::picker(select) {
   appearance: base-select;
   border: none;
+  outline: none;
   background-color: var(--button-color);
   padding: var(--select-padding);
   border-radius: var(--select-rounding);
@@ -35,6 +37,11 @@
 .select::picker-icon {
   margin-right: var(--selectedcontent-icon-margin);
   transition: rotate 250ms;
+}
+
+.selectWrapper {
+  width: fit-content;
+  height: fit-content;
 }
 
 @supports (not (appearance: base-select)) {
@@ -78,6 +85,7 @@
 .select option {
   background: var(--button-color);
   border: none;
+  outline: none;
   transition: 250ms;
   gap: 0;
   border-radius: calc(var(--select-rounding) - var(--select-padding) / 2);
