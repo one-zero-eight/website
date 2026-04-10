@@ -4,7 +4,7 @@
 }
 
 .buttonFont {
-  font-size: 22px;
+  font-size: var(--button-font-size);
   font-weight: var(--font-weight-medium);
 }
 
@@ -12,4 +12,10 @@
   font-size: 14px;
   line-height: 1.429;
   color: #adb6c4;
+}
+
+.formPointFont {
+  font-family: Roboto, sans-serif;
+  font-size: var(--button-font-size);
+  margin-right: var(--form-point-margin);
 }
