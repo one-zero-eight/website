@@ -147,3 +147,32 @@
 .scrollPart__elem:first-of-type {
   margin-top: 0;
 }
+
+.switch {
+  --height: 36px;
+  --point-height: 24px;
+  height: var(--height);
+  width: calc(2 * var(--height));
+  background-color: var(--button-color);
+  border-radius: var(--height);
+  padding: calc((var(--height) - var(--point-height)) / 2);
+  transition: all 250ms;
+  cursor: pointer;
+}
+
+.switch_on {
+  background-color: var(--color-secondary);
+}
+
+.switchPoint {
+  width: var(--point-height);
+  height: var(--point-height);
+  background-color: var(--color-base-content);
+  border-radius: var(--point-height);
+  transition: all 250ms;
+}
+
+.switch_on .switchPoint {
+  background-color: var(--color-secondary-content);
+  transform: translateX(var(--height));
+}
