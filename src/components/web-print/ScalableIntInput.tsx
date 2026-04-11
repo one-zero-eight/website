@@ -25,6 +25,18 @@ export function ScalableIntInput({
 
     if (!input) return;
 
+    function firefoxFieldSizingContent() {
+      if (!CSS.supports("field-sizing: content")) {
+        const probeElement = document.createElement("p");
+        probeElement.textContent = input!.value;
+        probeElement.classList.add(`${inputStyles.inputPadding}`);
+        input!.parentElement!.appendChild(probeElement);
+        input!.style.width = `${probeElement.clientWidth}px`;
+        input!.parentElement!.removeChild(probeElement);
+      }
+    }
+    firefoxFieldSizingContent();
+
     function change(event: Event) {
       const rawValue = parseInt(
         (event.target as HTMLInputElement).value
@@ -36,6 +48,7 @@ export function ScalableIntInput({
         input!.value = value.toString();
       }
       onTyped(value);
+      firefoxFieldSizingContent();
     }
     function inc() {
       const value = Math.max(
@@ -44,6 +57,7 @@ export function ScalableIntInput({
       );
       input!.value = value.toString();
       onTyped(value);
+      firefoxFieldSizingContent();
     }
     function dec() {
       const value = Math.max(
@@ -52,9 +66,11 @@ export function ScalableIntInput({
       );
       input!.value = value.toString();
       onTyped(value);
+      firefoxFieldSizingContent();
     }
 
     input.addEventListener("change", change);
+    input.addEventListener("input", firefoxFieldSizingContent);
     if (plusButton) {
       plusButton.addEventListener("click", inc);
       plusButton.style.height = `${input.clientHeight}px`;
@@ -67,7 +83,10 @@ export function ScalableIntInput({
     }
 
     return () => {
-      if (input) input.removeEventListener("change", change);
+      if (input) {
+        input.removeEventListener("change", change);
+        input.removeEventListener("input", firefoxFieldSizingContent);
+      }
       if (plusButton) plusButton.removeEventListener("click", inc);
       if (minusButton) minusButton.removeEventListener("click", dec);
     };
