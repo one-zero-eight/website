@@ -8,10 +8,8 @@
   appearance: textfield;
 }
 
-@supports (not (field-sizing: content)) {
-  .input {
-    width: 56px;
-  }
+.inputPadding {
+  padding: var(--select-padding) calc(var(--select-padding) * 3);
 }
 
 .input::-webkit-inner-spin-button,
