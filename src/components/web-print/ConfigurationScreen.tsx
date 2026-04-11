@@ -7,13 +7,14 @@ import { IconValueStatusSelect } from "@/components/web-print/IconValueStatusSel
 import marginStyles from "@/components/web-print/printers.margins.module.css";
 import fontStyles from "@/components/web-print/printers.fonts.module.css";
 import { ScalableIntInput } from "@/components/web-print/ScalableIntInput.tsx";
+import { Switch } from "@/components/web-print/Switch.tsx";
 
 export function ConfigurationScreen() {
   const [configurationType, setConfigurationType] = useState<boolean>(true);
   const [preparedDocumentURL, setPreparedDocumentURL] = useState<string>();
   const [_printerCupsName, setPrinterCupsName] = useState<string>("");
   const [_copiesCount, setCopiesCount] = useState<number>(1);
-  const [_sides, _setSides] = useState<boolean>(true);
+  const [sides, setSides] = useState<boolean>(true);
   const [_pages, _setPages] = useState<string | null>(null);
   const [_layout, _setLayout] = useState<
     "1x1" | "2x2" | "3x3" | "4x4" | "1x2" | "2x3"
@@ -81,6 +82,10 @@ export function ConfigurationScreen() {
                 maximum={50}
                 minimum={1}
               />
+            </div>
+            <div className={styles.scrollPart__elem}>
+              <p className={fontStyles.formPointFont}>Printing on both sides</p>
+              <Switch state={sides} onSwitched={setSides} />
             </div>
           </div>
           <button

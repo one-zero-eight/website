@@ -16,6 +16,5 @@
 
 .formPointFont {
   font-family: Roboto, sans-serif;
-  font-size: var(--button-font-size);
   margin-right: var(--form-point-margin);
 }
