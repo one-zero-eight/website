@@ -232,6 +232,25 @@ const actualBookingsByRoomSorted = computed(() => {
 
   return map;
 });
+const actualBookingsByRoomPrefixMaxEnd = computed(() => {
+  const map = new Map<Room["id"], number[]>();
+
+  for (const [roomId, bookings] of actualBookingsByRoomSorted.value.entries()) {
+    const prefixMaxEnd: number[] = [];
+    let maxEnd = Number.NEGATIVE_INFINITY;
+
+    for (const booking of bookings) {
+      const endMs = booking.endsAt.getTime();
+      if (endMs > maxEnd) maxEnd = endMs;
+      prefixMaxEnd.push(maxEnd);
+    }
+
+    map.set(roomId, prefixMaxEnd);
+  }
+  console.log(map);
+
+  return map;
+});
 
 /* ========================================================================== */
 /* ============================= Interactivity ============================== */
@@ -265,9 +284,9 @@ function snappedSafeNow() {
 
 /**
  * Given a time range and room ID, returns a list of all bookings that intersect
- * this range, if any.
+ * this range, if any. Also considers overlapping bookings.
  *
- * Note: booking is not considred intersecting, if it "touches" the range only
+ * Note: booking is not considered intersecting, if it "touches" the range only
  * with 1ms.
  *
  * @param aMs Left boundary of the range.
@@ -281,45 +300,47 @@ function rangeIntersectingBookings(
 ): Booking[] {
   if (aMs > bMs) throw new Error("invalid range limits");
 
-  const bookings = actualBookingsByRoomSorted.value.get(roomId);
-  if (!bookings || bookings.length === 0) return [];
+  const bookingsByStart = actualBookingsByRoomSorted.value.get(roomId);
+  if (!bookingsByStart || bookingsByStart.length === 0) return [];
+  const prefixMaxEnd = actualBookingsByRoomPrefixMaxEnd.value.get(roomId);
+  if (!prefixMaxEnd || prefixMaxEnd.length === 0) return [];
 
-  // 1. Find first booking that ends after range left boundary.
+  // 1) Find first index where startsAt >= bMs.
   let l = 0;
-  let r = bookings.length - 1;
+  let r = bookingsByStart.length;
+
   while (l < r) {
     const m = Math.floor((l + r) / 2);
-    const endMs = bookings[m].endsAt.getTime();
-    if (endMs <= aMs) l = m + 1;
+    const startsMs = bookingsByStart[m].startsAt.getTime();
+    if (startsMs < bMs) l = m + 1;
     else r = m;
   }
 
-  if (l !== r) return [];
+  const rightExclusive = l;
+  if (rightExclusive === 0) return [];
 
-  if (
-    bookings[l].startsAt.getTime() >= bMs ||
-    bookings[l].endsAt.getTime() <= aMs
-  )
-    // First and doesn't intersect.
-    return [];
-
-  const first = l;
-
-  // 2. Find first booking that starts before range right boundary.
-  r = bookings.length - 1;
+  // 2) Find first index where some booking in [0..idx] can intersect by end.
+  l = 0;
+  r = rightExclusive;
   while (l < r) {
-    const m = Math.ceil((l + r) / 2);
-    const startsMs = bookings[m].startsAt.getTime();
-    if (startsMs >= bMs) r = m - 1;
-    else l = m;
+    const m = Math.floor((l + r) / 2);
+    if (prefixMaxEnd[m] <= aMs) l = m + 1;
+    else r = m;
+  }
+  const leftCandidate = l;
+  if (leftCandidate >= rightExclusive) return [];
+
+  // 3) Keep bookings that satisfy both conditions:
+  // startsAt < bMs and endsAt > aMs.
+  const intersecting: Booking[] = [];
+  for (let idx = leftCandidate; idx < rightExclusive; idx += 1) {
+    const booking = bookingsByStart[idx];
+    if (booking.endsAt.getTime() > aMs) {
+      intersecting.push(booking);
+    }
   }
 
-  if (l !== r) return [];
-
-  const last = r;
-
-  // 3. Return slice.
-  return bookings.slice(first, last + 1);
+  return intersecting;
 }
 
 /** Element with unlimited size that holds all elements of the timeline. */
@@ -394,54 +415,6 @@ const totalBodyHeight = computed(() => {
     : actualRooms.value.length;
   return roomCount * ROW_HEIGHT;
 });
-
-/**
- * Returns only the bookings that are visible in the current horizontal viewport for a given room.
- * Uses binary search since bookings are sorted by start time.
- */
-function getVisibleBookingsForRoom(roomId: Room["id"]): Booking[] {
-  const bookings = actualBookingsByRoomSorted.value.get(roomId);
-  if (!bookings || bookings.length === 0) return [];
-
-  const { startMs, endMs } = visibleTimeRange.value;
-
-  // Use binary search to find the range of visible bookings
-  // Find first booking that ends after viewport left
-  let left = 0;
-  let right = bookings.length - 1;
-
-  while (left < right) {
-    const mid = Math.floor((left + right) / 2);
-    if (bookings[mid].endsAt.getTime() <= startMs) {
-      left = mid + 1;
-    } else {
-      right = mid;
-    }
-  }
-
-  // Check if we found a valid starting point
-  if (left >= bookings.length || bookings[left].startsAt.getTime() >= endMs) {
-    return [];
-  }
-
-  const firstVisibleIdx = left;
-
-  // Find last booking that starts before viewport right
-  right = bookings.length - 1;
-  while (left < right) {
-    const mid = Math.ceil((left + right) / 2);
-    if (bookings[mid].startsAt.getTime() >= endMs) {
-      right = mid - 1;
-    } else {
-      left = mid;
-    }
-  }
-
-  const lastVisibleIdx = right;
-
-  // Return the slice of visible bookings
-  return bookings.slice(firstVisibleIdx, lastVisibleIdx + 1);
-}
 
 function bookingRangeByHoverDate(
   dateMs: number,
@@ -1249,7 +1222,11 @@ function scrollToNow(options?: Omit<ScrollToOptions, "to">) {
             >
               <template v-for="room in actualRooms" :key="room.id">
                 <div
-                  v-for="booking in getVisibleBookingsForRoom(room.id)"
+                  v-for="booking in rangeIntersectingBookings(
+                    visibleTimeRange.startMs,
+                    visibleTimeRange.endMs,
+                    room.id,
+                  )"
                   :key="booking.id"
                   :class="{
                     [$style.booking]: true,
