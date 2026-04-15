@@ -2,3 +2,9 @@ User-Agent: *
 Disallow:
 
 Sitemap: https://innohassle.ru/sitemap.xml
+
+# Remove some query parameters for Yandex Search
+User-agent: Yandex
+Clean-param: from
+Clean-param: form /forms/submit
+Clean-param: bot&hash&id&auth_date&first_name&last_name&username&photo_url /account/connect-telegram

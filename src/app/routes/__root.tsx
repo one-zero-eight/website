@@ -74,7 +74,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 function RouteComponent() {
   // Build canonical URL for the current page
   const canonical = useLocation({
-    select: ({ href }) => new URL(href, "https://innohassle.ru").toString(),
+    select: ({ href }) => {
+      const url = new URL(href, "https://innohassle.ru");
+      url.search = ""; // Remove query params
+      return url.toString();
+    },
   });
 
   return (

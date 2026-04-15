@@ -19,7 +19,6 @@ function RouteComponent() {
 
         {/* Do not scan this page */}
         <meta name="robots" content="noindex, follow" />
-        <link rel="canonical" href="https://innohassle.ru/account/token" />
       </Helmet>
 
       <Topbar title="My account" />

@@ -70,6 +70,8 @@ function RouteComponent() {
       <>
         <Helmet>
           <title>Sign In - Join InNoHassle Guard File</title>
+          {/* Do not scan this page */}
+          <meta name="robots" content="noindex, follow" />
         </Helmet>
         <div className="flex h-full items-center justify-center">
           <AuthWall />
@@ -82,6 +84,8 @@ function RouteComponent() {
     <div className="flex grow items-center justify-center p-5">
       <Helmet>
         <title>Join InNoHassle Guard File</title>
+        {/* Do not scan this page */}
+        <meta name="robots" content="noindex, follow" />
       </Helmet>
       <div className="bg-base-200 w-full max-w-xl rounded-xl p-10 shadow-lg">
         <h1 className="mb-2 text-center text-3xl font-bold">

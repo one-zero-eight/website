@@ -49,6 +49,12 @@ function RouteComponent() {
   if (!form) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
+        <Helmet>
+          <title>Redirecting to the form</title>
+          {/* Do not scan this page */}
+          <meta name="robots" content="noindex, follow" />
+        </Helmet>
+
         <h2 className="mb-2 text-2xl font-bold">Invalid Link</h2>
         <p className="text-base-content/70 text-lg">
           The form parameter is missing or invalid.
@@ -60,6 +66,12 @@ function RouteComponent() {
   if (!me) {
     return (
       <div className="flex h-full items-center justify-center">
+        <Helmet>
+          <title>Redirecting to the form</title>
+          {/* Do not scan this page */}
+          <meta name="robots" content="noindex, follow" />
+        </Helmet>
+
         <AuthWall />
       </div>
     );
@@ -69,7 +81,10 @@ function RouteComponent() {
     <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
       <Helmet>
         <title>Redirecting to the form</title>
+        {/* Do not scan this page */}
+        <meta name="robots" content="noindex, follow" />
       </Helmet>
+
       <div className="mb-6">
         <span className="icon-[mdi--loading] text-primary animate-spin text-6xl" />
       </div>

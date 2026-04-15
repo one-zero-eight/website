@@ -16,6 +16,8 @@ function RouteComponent() {
           name="description"
           content="All course materials of previous years"
         />
+        {/* Do not scan this page */}
+        <meta name="robots" content="noindex, follow" />
       </Helmet>
 
       <Topbar title="Catalogue" />
