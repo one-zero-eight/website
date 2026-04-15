@@ -25,7 +25,13 @@ export function FormsPage() {
       const urlObj = new URL(normalized);
 
       // Check if URL is from Yandex Forms
-      const allowedHosts = ["forms.yandex.ru"];
+      const allowedHosts = [
+        "forms.yandex.ru",
+        "forms.yandex.com",
+        "forms.yandex.by",
+        "forms.yandex.kz",
+        "forms.yandex.com.tr",
+      ];
 
       const hostname = urlObj.hostname.toLowerCase();
       const isAllowedHost = allowedHosts.some((host) =>
