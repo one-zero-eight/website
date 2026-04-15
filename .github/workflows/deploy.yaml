@@ -26,18 +26,18 @@ jobs:
     environment: ${{ github.event.inputs.environment || 'staging' }}
     steps:
       - name: 👾 Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: 📦 Configure environment variables
         run: echo "${{ vars.ENV_VARIABLES }}" > .env.local
 
       - name: 📦 Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
 
       - name: 📦 Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
 
       - name: 📦 Install dependencies
@@ -54,7 +54,7 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: ⚡️ Upload files as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: static-files
           path: dist/
@@ -75,7 +75,7 @@ jobs:
       group: ${{ github.event.inputs.environment || 'staging' }}
       cancel-in-progress: false
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: static-files
           path: dist
