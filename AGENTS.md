@@ -21,12 +21,20 @@ The user asks questions about the following coding technologies:
 - TanStack Router
 - TanStack Query and OpenAPI-TypeScript
 - Vite
+- pnpm
 - TypeScript
 - TailwindCSS v4
-- DaisyUI
+- DaisyUI (you could read ./daisyui-llms.txt to get more information about DaisyUI, examples and etc.)
 - Floating UI
 - HTML
 - CSS
+
+Project setup:
+
+- We use pnpm as package manager, project runned via `pnpm run dev --host` command.
+- Local development server is available at https://local.innohassle.ru:3000
+- Lint, check, prettify: `pnpm run lint:fix`, `pnpm run typecheck`, `pnpm run prettify`
+- Generate API types: `pnpm run gen:api`
 
 ### Code Implementation Guidelines
 
