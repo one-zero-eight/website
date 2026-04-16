@@ -31,10 +31,10 @@ The user asks questions about the following coding technologies:
 
 Project setup:
 
-- We use pnpm as package manager, project runned via `pnpm run dev --host` command.
-- Local development server is available at https://local.innohassle.ru:3000
-- Lint, check, prettify: `pnpm run lint:fix`, `pnpm run typecheck`, `pnpm run prettify`
-- Generate API types: `pnpm run gen:api`
+- We use pnpm as package manager, project runned via `pnpm run dev --host` command (most probably it is already running, do not run it again).
+- Local development server is available at https://local.innohassle.ru:3000.
+- Lint, check, prettify: `pnpm run lint:fix`, `pnpm run typecheck`, `pnpm run prettify`.
+- Generate API types: `pnpm run gen:api` (most probably it is already generated, do not run it again).
 
 ### Code Implementation Guidelines
 
@@ -44,19 +44,120 @@ Follow these rules when you write code:
 - Do not use default exports, use named exports instead.
 - Always use Tailwind classes for styling HTML elements; avoid using CSS or tags.
 - Use clsx to combine Tailwind classes.
-- Use descriptive variable and function/const names. Also, event functions should be named with a "handle" prefix, like “handleClick” for onClick and "handleKeyDown" for onKeyDown.
+- Use descriptive variable and function/const names. Also, event functions should be named with a "handle" prefix, like `handleClick` for onClick and `handleKeyDown` for onKeyDown.
 - If the handler just changes state or could be written in one short line, try to inline it instead of creating a function.
-- Use functions instead of consts for components. Define a type inside the function props if separate type is not needed. For example, "export function CustomComponent({ label }: { label: string }) { return ( <div> ... </div> ) }".
-- Use TanStack Router file-based routing (in "src/app/routes" directory)
-- If the file to import is in the same directory, import it like 'import "./myfile"'.
-- If the local import is in some other directory, start the import with '@/' (it is an alias to 'src/') instead of writing '..'.
+- Use functions instead of consts for components. Define a type inside the function props if separate type is not needed. For example, `export function CustomComponent({ label }: { label: string }) { return ( <div> ... </div> ) }`.
+- Use TanStack Router file-based routing (in `src/app/routes` directory)
+- If the file to import is in the same directory, import it like `import "./myfile"`.
+- If the local import is in some other directory, start the import with `@/` (it is an alias to `src/`) instead of writing `..`.
 - If you change the html tag, make sure to place <> correctly, and update closing tags.
 - The components should be adaptive for mobile and desktop.
+- Do not ever write aria attributes, we don't care about accessibility.
+- When data is loading prefer to use skeleton components `className="skeleton"`, when action is in progress use circle spinner `<span className="loading loading-spinner loading-sm" />`.
+
+### Project Layout
+
+```text
+src/
+├── app/
+│   ├── routes/                     # TanStack file-based routing
+│   │   ├── _with_menu/             # routes under menu layout
+│   │   └── ...                     # other route files
+│   └── route-tree.gen.ts           # auto-generated, do not edit
+├── components/
+│   ├── layout/                     # Topbar, menu links, layout UI
+│   ├── common/                     # shared reusable components
+│   ├── maps/                       # Maps service, all UI and logic should be under service folder
+│   │   ├── MapsPage.tsx
+│   │   ├── MapsPageTabs.tsx
+│   │   └── utils.ts
+│   ├── room-booking/               # Room booking service, contains many pages
+│   │   ├── BookingPageTabs.tsx
+│   │   ├── AccessLevelIcon.tsx
+│   │   ├── utils.ts
+│   │   ├── bookings-list/
+│   │   │   ├── BookingsListPage.tsx
+│   │   │   └── DeleteBookingModal.tsx
+│   │   ├── rooms-list/
+│   │   │   └── RoomsList.tsx
+│   │   ├── room-page/
+│   │   │   ├── RoomPage.tsx
+│   │   │   ├── RoomMapPreview.tsx
+│   │   │   ├── RoomCalendar.tsx
+│   │   │   └── RoomCalendarViewer.tsx
+│   │   ├── rules/
+│   │   │   ├── RoomBookingRules.tsx
+│   │   │   └── RulesSection.tsx
+│   │   └── timeline/
+│   │       ├── RoomBookingPage.tsx
+│   │       ├── BookingModal.tsx
+│   │       └── BookingTimeline.tsx
+│   └── ...
+└── api/
+    ├── */types.ts                  # OpenAPI-generated types
+    └── ...                         # service clients/hooks
+```
+
+### How to add a new route
+
+Create a file in `src/app/routes`, then follow the pattern (it is example for maps page):
+
+```ts
+// src/app/routes/_with_menu/maps.$id.tsx
+import { Topbar } from "@/components/layout/Topbar.tsx";
+import { MapsPage } from "@/components/maps/MapsPage.tsx";
+import { MapsPageTabs } from "@/components/maps/MapsPageTabs.tsx";
+import { Helmet } from "@dr.pogodin/react-helmet";
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/_with_menu/maps/$id")({
+  component: RouteComponent,
+  // If you want to use search params, you need to define validateSearch function:
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { q?: string } => {
+    return {
+      q: search.q ? search.q.toString() : undefined,
+    };
+  },
+  // otherwise, omit validateSearch function fully.
+});
+
+function RouteComponent() {
+  const { q } = Route.useSearch();  // if you need search params, get it here and pass to children
+  const { id } = Route.useParams(); // if you need params, get it here and pass to children
+
+  return (
+    <>
+      <Helmet>
+        <title>Maps</title>
+        <meta
+          name="description"
+          content="View plans of Innopolis University."
+        />
+      </Helmet>
+
+      <Topbar title="Maps"/>
+      <MapsPageTabs /> // Only if you need tabs, otherwise omit it.
+      <RequireAuth> // Wrap if user should be authenticated to view this page.
+        <MapsPage q={q} id={id} /> // Component from "src/components/maps/MapsPage.tsx"
+      </RequireAuth>
+    </>
+  );
+}
+```
+
+`src/app/route-tree.gen.ts` is auto-generated; do not edit it manually.
+For navigation, use `<Link to="/maps" params={{ id: 123 }} search={{ q: "test" }}>...</Link>` or `const navigate = useNavigate(); navigate({ to: "/maps",  params: { id: 123 }, search: { q: "test" } })`.
+
+If you create a new service, most probably you need to add it to the sidebar in `src/components/layout/menu-links.tsx` file.
+
+`src/components/clubs/ClubsTabs.tsx` is a good example of tabs component.
 
 ### API calls
 
 We use TanStack Query with OpenAPI-TypeScript to call the API.
-We have several services, you can find types in "src/api/\*/types.ts" files.
+We have several services, you can find types in `src/api/*/types.ts` files. Also do not ever change generated files manually. Do not use `fetch` API, use TanStack Query instead.
 
 Example of GET query:
 
@@ -133,5 +234,19 @@ Do not use accountsFetch, workshopsFetch, use $accounts, $workshops instead.
 
 ### Icons
 
-We use Iconify icons for icons with TailwindCSS plugin.
-Example: <span className="icon-[material-symbols--exercise-outline]" /> or <span className="icon-[material-symbols--exercise-outline] text-primary shrink-0 text-5xl" />
+We use Iconify icons with TailwindCSS plugin:
+
+Examples:
+
+- `<span className="icon-[material-symbols--exercise-outline]" />`
+- `<span className="icon-[mdi--calendars]" />`
+- `<span className="icon-[material-symbols--exercise-outline] text-primary shrink-0 text-5xl" />`
+
+If user asks you to find a suitable icon, use the following instruction:
+
+1. Prefer sets already used in project (`material-symbols`, `mdi`) unless user asks another style.
+   2.1. If better-icons skill is available, use it to search icons (you could do multiple searches).
+   2.2: If not available, you could explore icon sets and search icons using Iconify API (you could run many queries):
+
+- Search: `https://api.iconify.design/search?query=<keyword>&prefix=<prefix>`
+- Icon data: `https://api.iconify.design/<prefix>.json?icons=<name1>,<name2>,...`
