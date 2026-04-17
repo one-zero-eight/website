@@ -8,17 +8,42 @@ import { getICSLink } from "@/api/events/links.ts";
 import { useState } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useWindowSize } from "usehooks-ts";
+import { Link } from "@tanstack/react-router";
 
 export function EventGroupPage({ alias }: { alias: string }) {
   const { data: eventsUser } = $events.useQuery("get", "/users/me");
-  const { data: group } = $events.useQuery("get", "/event-groups/by-alias", {
+  const {
+    data: group,
+    isLoading,
+    isError,
+  } = $events.useQuery("get", "/event-groups/by-alias", {
     params: { query: { alias } },
   });
+
   const { width } = useWindowSize();
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
-  if (!group) {
+  // Still fetching — show a neutral loading state
+  if (isLoading) {
     return <Topbar title="Group" />;
+  }
+
+  // API returned an error (404, 500, etc.) or group simply wasn't found
+  if (isError || !group) {
+    return (
+      <>
+        <Topbar title="Group" />
+        <div className="flex flex-col items-center justify-center gap-4 p-16 text-center">
+          <h1 className="text-4xl font-bold">404</h1>
+          <p className="text-base-content/75 text-lg">
+            Event group <code className="font-mono">"{alias}"</code> not found.
+          </p>
+          <Link to="/schedule" className="btn btn-primary">
+            Back to Schedule
+          </Link>
+        </div>
+      </>
+    );
   }
 
   return (
