@@ -1,11 +1,16 @@
 .input {
   field-sizing: content;
+  max-width: 280px;
   border: none;
   outline: none;
   background-color: var(--button-color);
   padding: var(--select-padding) calc(var(--select-padding) * 3);
   cursor: text;
   appearance: textfield;
+}
+
+.input_rounded {
+  border-radius: var(--select-rounding);
 }
 
 .inputPadding {
@@ -26,4 +31,8 @@
 
 .button_inline + .input + .button_inline {
   border-radius: 0 var(--select-rounding) var(--select-rounding) 0;
+}
+
+.intContainer {
+  display: flex;
 }

@@ -124,6 +124,13 @@
   font-weight: var(--font-weight-bold);
 }
 
+.textBoard {
+  margin: var(--main-padding);
+  padding: var(--main-padding);
+  border-radius: var(--text-grid-elem-rounding);
+  background-color: var(--color-secondary);
+}
+
 .configurationBox {
   display: flex;
   flex-direction: column;
@@ -138,6 +145,7 @@
 
 .scrollPart__elem {
   display: flex;
+  justify-content: space-between;
   width: 100%;
   flex-wrap: nowrap;
   align-items: center;
