@@ -1,19 +1,24 @@
 import inputStyles from "@/components/web-print/printers.input.module.css";
 import styles from "@/components/web-print/printers.module.css";
 import fontStyles from "@/components/web-print/printers.fonts.module.css";
-import { useEffect, useRef } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
+import { Alert } from "@/components/web-print/Alert.tsx";
 
 export function ScalableIntInput({
   defaultValue,
   onTyped,
   maximum,
   minimum,
+  outOfRangeAlert,
 }: {
   defaultValue: number;
   onTyped: (value: number) => void;
   maximum: number;
   minimum: number;
+  outOfRangeAlert: JSX.Element | null;
 }) {
+  const [alert, setAlert] = useState<JSX.Element | null>(null);
+
   const inputReference = useRef<HTMLInputElement | null>(null);
   const plusButtonReference = useRef<HTMLButtonElement | null>(null);
   const minusButtonReference = useRef<HTMLButtonElement | null>(null);
@@ -37,15 +42,12 @@ export function ScalableIntInput({
     }
     firefoxFieldSizingContent();
 
-    function change(event: Event) {
-      const rawValue = parseInt(
-        (event.target as HTMLInputElement).value
-          ? (event.target as HTMLInputElement).value
-          : "0",
-      );
+    function change() {
+      const rawValue = parseInt(input!.value ? input!.value : "0");
       const value = Math.max(minimum, Math.min(maximum, rawValue));
       if (value != rawValue) {
         input!.value = value.toString();
+        setAlert(outOfRangeAlert);
       }
       onTyped(value);
       firefoxFieldSizingContent();
@@ -90,10 +92,10 @@ export function ScalableIntInput({
       if (plusButton) plusButton.removeEventListener("click", inc);
       if (minusButton) minusButton.removeEventListener("click", dec);
     };
-  }, [defaultValue, maximum, minimum, onTyped]);
+  }, [defaultValue, maximum, minimum, onTyped, outOfRangeAlert]);
 
   return (
-    <>
+    <div className={inputStyles.intContainer}>
       <button
         ref={minusButtonReference}
         className={`${styles.button} ${fontStyles.buttonFont} ${inputStyles.button_inline}`}
@@ -114,6 +116,13 @@ export function ScalableIntInput({
       >
         +
       </button>
-    </>
+
+      <Alert
+        isShown={alert as unknown as boolean}
+        onClose={() => setAlert(null)}
+      >
+        {alert}
+      </Alert>
+    </div>
   );
 }
