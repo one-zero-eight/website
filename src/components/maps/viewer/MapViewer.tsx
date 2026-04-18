@@ -3,6 +3,7 @@ import { useMapImage } from "@/api/maps/map-image.ts";
 import { DetailsPopup } from "@/components/maps/viewer/DetailsPopup.tsx";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useEventListener } from "usehooks-ts";
+import { useNavigate } from "@tanstack/react-router";
 
 export const MapViewer = memo(function MapViewer({
   scene,
@@ -13,6 +14,8 @@ export const MapViewer = memo(function MapViewer({
   highlightAreas: mapsTypes.SchemaArea[];
   disablePopup?: boolean;
 }) {
+  const navigate = useNavigate();
+
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const options = useRef({
@@ -227,6 +230,15 @@ export const MapViewer = memo(function MapViewer({
           // Find matching area
           const area = scene.areas.find((a) => a.svg_polygon_id === el?.id);
           if (!el || !area) return;
+
+          // Follow the scene pointer
+          if (area.scene_pointer) {
+            navigate({
+              to: `/maps?&scene=${area.scene_pointer}`,
+              replace: true, // Do not add useless history entries not to break the back button
+            });
+            return;
+          }
 
           // Show popup
           setPopupElement(el);

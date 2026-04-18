@@ -86,6 +86,11 @@ export interface components {
        * @description ID of the room in Room Booking API (if any)
        */
       room_booking_id?: string | null;
+      /**
+       * Scene Pointer
+       * @description Maps scene name with which the area is associated
+       */
+      scene_pointer?: string | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
