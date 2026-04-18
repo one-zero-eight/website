@@ -8,6 +8,7 @@ import marginStyles from "@/components/web-print/printers.margins.module.css";
 import fontStyles from "@/components/web-print/printers.fonts.module.css";
 import { ScalableIntInput } from "@/components/web-print/ScalableIntInput.tsx";
 import { Switch } from "@/components/web-print/Switch.tsx";
+import { ScalablePageRangesInput } from "@/components/web-print/ScalablePageRangesInput.tsx";
 
 export function ConfigurationScreen() {
   const [configurationType, setConfigurationType] = useState<boolean>(true);
@@ -15,7 +16,7 @@ export function ConfigurationScreen() {
   const [_printerCupsName, setPrinterCupsName] = useState<string>("");
   const [_copiesCount, setCopiesCount] = useState<number>(1);
   const [sides, setSides] = useState<boolean>(true);
-  const [_pages, _setPages] = useState<string | null>(null);
+  const [_pages, setPages] = useState<string | null>(null);
   const [_layout, _setLayout] = useState<
     "1x1" | "2x2" | "3x3" | "4x4" | "1x2" | "2x3"
   >("1x1");
@@ -81,11 +82,23 @@ export function ConfigurationScreen() {
                 onTyped={setCopiesCount}
                 maximum={50}
                 minimum={1}
+                outOfRangeAlert={
+                  <p>
+                    You can do not more than{" "}
+                    <span className="font-bold!">50&nbsp;copies</span>
+                    <br />
+                    (and not less than 1)
+                  </p>
+                }
               />
             </div>
             <div className={styles.scrollPart__elem}>
               <p className={fontStyles.formPointFont}>Printing on both sides</p>
               <Switch state={sides} onSwitched={setSides} />
+            </div>
+            <div className={styles.scrollPart__elem}>
+              <p className={fontStyles.formPointFont}>Specific pages</p>
+              <ScalablePageRangesInput onTyped={setPages} />
             </div>
           </div>
           <button
