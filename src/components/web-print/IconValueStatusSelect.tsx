@@ -35,12 +35,11 @@ export function IconValueStatusSelect({
 
   return (
     <div className={selectStyles.selectWrapper}>
-      <select ref={inputReference} className={selectStyles.select}>
-        {names?.map((printerDisplayName, i) => {
-          if (!values) return <></>;
-          else
+      {names ? (
+        <select ref={inputReference} className={selectStyles.select}>
+          {names.map((printerDisplayName, i) => {
             return (
-              <option value={values[i]} key={i}>
+              <option value={values![i]} key={i}>
                 {<span aria-hidden="true">{icons && icons[i]}</span>}
                 {<span>&nbsp;{printerDisplayName}</span>}
                 {statuses ? (
@@ -56,8 +55,13 @@ export function IconValueStatusSelect({
                 )}
               </option>
             );
-        })}
-      </select>
+          })}
+        </select>
+      ) : (
+        <span
+          className={`icon-[material-symbols--progress-activity] ${styles.rotationAnimation}`}
+        ></span>
+      )}
     </div>
   );
 }

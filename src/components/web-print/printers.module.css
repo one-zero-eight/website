@@ -141,6 +141,7 @@
 .configurationBox__scrollPart {
   height: 60%;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .scrollPart__elem {
