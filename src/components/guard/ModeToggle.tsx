@@ -17,7 +17,7 @@ export function ModeToggle({ mode, onChange }: ModeToggleProps) {
             : "text-base-content/70 hover:bg-base-200/5"
         }`}
       >
-        {MODE_LABELS.create}ss
+        {MODE_LABELS.create}
       </button>
       <button
         type="button"

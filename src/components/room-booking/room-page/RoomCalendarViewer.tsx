@@ -8,6 +8,7 @@ import {
   EventContentArg,
   EventInput,
 } from "@fullcalendar/core";
+import type { DateClickArg } from "@fullcalendar/interaction";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
@@ -16,10 +17,54 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import clsx from "clsx";
 import moment from "moment/moment";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import "@/components/calendar/styles-calendar.css";
 import { type Booking, schemaToBooking, type Slot } from "../timeline/types.ts";
 import { getTimeRangeForWeek, sanitizeBookingTitle } from "../utils.ts";
+
+/** Synthetic FullCalendar event id for the mobile two-tap booking preview. */
+const DRAFT_SLOT_EVENT_ID = "room-calendar-draft-slot";
+const DRAFT_SLOT_MS = 30 * 60 * 1000;
+const DRAFT_SLOT_MAX_MS = 3 * 60 * 60 * 1000;
+const MOBILE_TAP_BOOKING_MAX_WIDTH_PX = 767;
+
+type BookingDraft =
+  | { phase: "awaiting_end"; start: Date; end: Date }
+  | { phase: "complete"; start: Date; end: Date };
+
+function useNarrowScreenForTapBooking() {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === "undefined") {
+        return () => {};
+      }
+      const mq = window.matchMedia(
+        `(max-width: ${MOBILE_TAP_BOOKING_MAX_WIDTH_PX}px)`,
+      );
+      mq.addEventListener("change", onStoreChange);
+      return () => mq.removeEventListener("change", onStoreChange);
+    },
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia(`(max-width: ${MOBILE_TAP_BOOKING_MAX_WIDTH_PX}px)`)
+        .matches,
+    () => false,
+  );
+}
+
+function addDraftSlotMs(d: Date) {
+  return new Date(d.getTime() + DRAFT_SLOT_MS);
+}
+
+function clampDraftDurationMs(durationMs: number) {
+  return Math.max(DRAFT_SLOT_MS, Math.min(DRAFT_SLOT_MAX_MS, durationMs));
+}
 
 export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
@@ -56,8 +101,19 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const room = rooms?.find((r) => r.id === roomId);
 
   const [calendarView, setCalendarView] = useState("timeGridWeek");
+  const [bookingDraft, setBookingDraft] = useState<BookingDraft | null>(null);
 
   const calendarRef = useRef<FullCalendar>(null);
+
+  const narrowForTapBooking = useNarrowScreenForTapBooking();
+  const tapTwoStepTimeGrid =
+    narrowForTapBooking && calendarView.startsWith("timeGrid");
+
+  const clearBookingDraft = useCallback(() => {
+    setBookingDraft(null);
+    const api = calendarRef.current?.getApi();
+    api?.getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
+  }, []);
 
   const handleSlotSelect = useCallback(
     (selectInfo: DateSelectArg) => {
@@ -87,16 +143,188 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     if (!open) {
       setSelectedSlot(undefined);
       setSelectedBookingDetails(undefined);
-      // Clear the FullCalendar selection
+      setBookingDraft(null);
       const calendarApi = calendarRef.current?.getApi();
       if (calendarApi) {
         calendarApi.unselect();
+        calendarApi.getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
       }
     }
   }, []);
 
-  const calendarComponent = useMemo(
-    () => (
+  const handleDateClick = useCallback(
+    (arg: DateClickArg) => {
+      if (!narrowForTapBooking) return;
+      if (!arg.view.type.startsWith("timeGrid")) return;
+      if (arg.allDay || !room) return;
+      if (bookingModalOpen) return;
+
+      const clicked = arg.date;
+
+      setBookingDraft((prev) => {
+        if (!prev) {
+          return {
+            phase: "awaiting_end",
+            start: clicked,
+            end: addDraftSlotMs(clicked),
+          };
+        }
+
+        // If the user taps earlier than the current start, treat this as a new start
+        // and reset to "awaiting end" with the default 30-minute preview.
+        if (clicked.getTime() <= prev.start.getTime()) {
+          return {
+            phase: "awaiting_end",
+            start: clicked,
+            end: addDraftSlotMs(clicked),
+          };
+        }
+
+        // The second point is the end boundary of the tapped slot.
+        const nextEnd = addDraftSlotMs(clicked);
+        const durationMs = nextEnd.getTime() - prev.start.getTime();
+        if (durationMs > DRAFT_SLOT_MAX_MS) {
+          return {
+            phase: "awaiting_end",
+            start: clicked,
+            end: addDraftSlotMs(clicked),
+          };
+        }
+
+        const end = new Date(
+          prev.start.getTime() + clampDraftDurationMs(durationMs),
+        );
+
+        return { phase: "complete", start: prev.start, end };
+      });
+    },
+    [narrowForTapBooking, room, bookingModalOpen],
+  );
+
+  const handleDraftBook = useCallback(() => {
+    if (!room || !bookingDraft) return;
+
+    const slot: Slot = {
+      room: {
+        idx: 0,
+        id: room.id,
+        title: room.title,
+        short_name: room.short_name,
+        restrict_daytime: room.restrict_daytime,
+      },
+      start: bookingDraft.start,
+      end: bookingDraft.end,
+    };
+
+    setSelectedSlot(slot);
+    setSelectedBookingDetails(undefined);
+    setBookingModalOpen(true);
+    setBookingDraft(null);
+    calendarRef.current?.getApi().getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
+  }, [room, bookingDraft]);
+
+  useEffect(() => {
+    if (!bookingDraft || !room) return;
+
+    const api = calendarRef.current?.getApi();
+    if (!api) return;
+
+    queueMicrotask(() => {
+      const current = calendarRef.current?.getApi();
+      if (!current) return;
+      current.getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
+      current.addEvent({
+        id: DRAFT_SLOT_EVENT_ID,
+        title: "New booking",
+        start: bookingDraft.start,
+        end: bookingDraft.end,
+        display: "block",
+        extendedProps: { isDraft: true },
+        color: "#9A2EFF",
+      });
+    });
+  }, [bookingDraft, room]);
+
+  useEffect(() => {
+    if (!bookingDraft) return;
+
+    if (!calendarView.startsWith("timeGrid")) {
+      setBookingDraft(null);
+      calendarRef.current?.getApi().getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
+      return;
+    }
+
+    const vs = dateRange.startDate.getTime();
+    const ve = dateRange.endDate.getTime();
+    if (
+      bookingDraft.start.getTime() >= ve ||
+      bookingDraft.end.getTime() <= vs
+    ) {
+      setBookingDraft(null);
+      calendarRef.current?.getApi().getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
+    }
+  }, [calendarView, dateRange, bookingDraft]);
+
+  useEffect(() => {
+    if (!bookings) return;
+
+    const calendarApi = calendarRef.current?.getApi();
+    if (!calendarApi) return;
+
+    // Run in the next tick
+    setTimeout(() => {
+      if (!bookings) return;
+
+      const prevEvents: EventApi[] = calendarApi.getEvents();
+      const eventsToGet: EventInput[] = bookings.map((booking) => ({
+        title: sanitizeBookingTitle(booking.title),
+        start: booking.start,
+        end: booking.end,
+        color: booking.related_to_me ? "seagreen" : undefined,
+        extendedProps: {
+          booking: booking,
+        },
+      }));
+
+      // Remove old sources that are not in the list
+      for (const event of prevEvents) {
+        if (event.id === DRAFT_SLOT_EVENT_ID) continue;
+        // Check if the source is in the list of sources to get
+        const found = eventsToGet.find(
+          (source) =>
+            source.start === event.start &&
+            source.end === event.end &&
+            source.title === event.title,
+        );
+        if (!found) {
+          event.remove();
+        }
+      }
+
+      // Add new sources
+      for (const event of eventsToGet) {
+        // Check if the source is already in the calendar
+        const found = prevEvents.find(
+          (source) =>
+            source.start === event.start &&
+            source.end === event.end &&
+            source.title === event.title,
+        );
+        if (!found) {
+          calendarApi.addEvent(event);
+        }
+      }
+    });
+  }, [bookings]);
+
+  return (
+    <div
+      className={clsx(
+        "relative overflow-clip",
+        isPending && "calendar-loading",
+        bookingDraft && "pb-28",
+      )}
+    >
       <FullCalendar
         ref={calendarRef}
         eventsSet={(events) => {
@@ -129,6 +357,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           interactionPlugin,
         ]}
         initialView={calendarView} // Default view
+        slotDuration="00:30:00"
         eventTimeFormat={{
           // Use 24-hour format
           hour: "2-digit",
@@ -197,7 +426,6 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           },
         }}
         allDayText="" // Remove text in all day row
-        // displayEventEnd={true} // Display end time
         nowIndicator={true} // Display current time as line
         nowIndicatorContent={(arg) => {
           if (
@@ -224,21 +452,27 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         }}
         firstDay={1} // From Monday
         navLinks={false} // Dates are clickable
-        // height={isFullPage ? "100%" : undefined} // Full height
-        // contentHeight={isFullPage ? undefined : "auto"} // Do not add scrollbar on in-page calendars
         eventInteractive={true} // Make event tabbable
         expandRows={true}
-        eventClassNames="cursor-pointer text-sm rounded-md! bg-transparent! border-0! overflow-clip"
+        eventClassNames={(arg) =>
+          clsx(
+            "cursor-pointer text-sm rounded-md! bg-transparent! border-0! overflow-clip",
+            arg.event.extendedProps.isDraft &&
+              "pointer-events-none !cursor-default rounded-md! border border-primary/60! bg-primary/15!",
+          )
+        }
+        dateClick={handleDateClick}
         eventClick={(info) => {
           info.jsEvent.preventDefault();
           info.jsEvent.stopPropagation();
+          if (info.event.extendedProps.isDraft) return;
           const booking = info.event.extendedProps.booking;
           if (!booking) return;
+          clearBookingDraft();
           setSelectedSlot(undefined);
           setSelectedBookingDetails(schemaToBooking(booking));
           setBookingModalOpen(true);
         }}
-        // slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
         scrollTimeReset={false} // Do not reset scroll on date switch
         noEventsContent={() => "No events this month"} // Custom message
@@ -248,8 +482,8 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
             setDateRange({ startDate: start, endDate: end });
           }
         }}
-        selectable={true}
-        selectMirror={true}
+        selectable={!tapTwoStepTimeGrid}
+        selectMirror={!tapTwoStepTimeGrid}
         selectOverlap={false}
         select={handleSlotSelect}
         longPressDelay={500}
@@ -257,65 +491,31 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         unselectAuto={false}
         unselectCancel=".fc-event"
       />
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [handleSlotSelect, handleModalClose],
-  );
-
-  useEffect(() => {
-    if (!bookings) return;
-
-    const calendarApi = calendarRef.current?.getApi();
-    if (!calendarApi) return;
-
-    // Run in the next tick
-    setTimeout(() => {
-      if (!bookings) return;
-
-      const prevEvents: EventApi[] = calendarApi.getEvents();
-      const eventsToGet: EventInput[] = bookings.map((booking) => ({
-        title: sanitizeBookingTitle(booking.title),
-        start: booking.start,
-        end: booking.end,
-        color: booking.related_to_me ? "seagreen" : undefined,
-        extendedProps: {
-          booking: booking,
-        },
-      }));
-
-      // Remove old sources that are not in the list
-      for (const event of prevEvents) {
-        // Check if the source is in the list of sources to get
-        const found = eventsToGet.find(
-          (source) =>
-            source.start === event.start &&
-            source.end === event.end &&
-            source.title === event.title,
-        );
-        if (!found) {
-          event.remove();
-        }
-      }
-
-      // Add new sources
-      for (const event of eventsToGet) {
-        // Check if the source is already in the calendar
-        const found = prevEvents.find(
-          (source) =>
-            source.start === event.start &&
-            source.end === event.end &&
-            source.title === event.title,
-        );
-        if (!found) {
-          calendarApi.addEvent(event);
-        }
-      }
-    });
-  }, [bookings]);
-
-  return (
-    <div className={clsx("overflow-clip", isPending && "calendar-loading")}>
-      {calendarComponent}
+      {bookingDraft && (
+        <div className="bg-base-200/95 border-base-300 fixed right-0 bottom-0 left-0 z-20 border-t px-3 pt-3 shadow-lg backdrop-blur-sm supports-[padding:max(0px)]:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          {bookingDraft.phase === "awaiting_end" && (
+            <p className="text-base-content/80 mb-3 text-center text-sm">
+              Tap the calendar again to choose when your booking ends.
+            </p>
+          )}
+          <div className="flex flex-wrap items-center justify-center gap-2 pb-3">
+            <button
+              type="button"
+              className="btn btn-outline btn-sm min-w-[6rem]"
+              onClick={clearBookingDraft}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm min-w-[6rem]"
+              onClick={handleDraftBook}
+            >
+              Book
+            </button>
+          </div>
+        </div>
+      )}
       <BookingModal
         newSlot={selectedSlot}
         detailsBooking={selectedBookingDetails}
@@ -347,6 +547,17 @@ function renderEventTimeGridWeek({
   backgroundColor,
   timeText,
 }: EventContentArg) {
+  if (event.extendedProps.isDraft) {
+    return (
+      <div className="border-primary text-base-content/90 bg-primary/20 h-full border-l-4 p-1 text-left">
+        <span className="text-sm font-medium">New booking</span>
+        {timeText && (
+          <span className="text-base-content/60 block text-xs">{timeText}</span>
+        )}
+      </div>
+    );
+  }
+
   const border =
     borderColor !== "undefined"
       ? borderColor
