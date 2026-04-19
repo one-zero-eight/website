@@ -10,6 +10,15 @@ import { ScalableIntInput } from "@/components/web-print/ScalableIntInput.tsx";
 import { Switch } from "@/components/web-print/Switch.tsx";
 import { ScalablePageRangesInput } from "@/components/web-print/ScalablePageRangesInput.tsx";
 
+enum Layout {
+  "1x1" = 1,
+  "1x2" = 2,
+  "2x2" = 4,
+  "2x3" = 6,
+  "3x3" = 9,
+  "4x4" = 16,
+}
+
 export function ConfigurationScreen() {
   const [configurationType, setConfigurationType] = useState<boolean>(true);
   const [preparedDocumentURL, setPreparedDocumentURL] = useState<string>();
@@ -17,9 +26,7 @@ export function ConfigurationScreen() {
   const [_copiesCount, setCopiesCount] = useState<number>(1);
   const [sides, setSides] = useState<boolean>(true);
   const [_pages, setPages] = useState<string | null>(null);
-  const [_layout, _setLayout] = useState<
-    "1x1" | "2x2" | "3x3" | "4x4" | "1x2" | "2x3"
-  >("1x1");
+  const [_numberUp, setNumberUp] = useState<Layout>(Layout["1x1"]);
 
   const { data: rawPrinters } = $printers.useQuery(
     "get",
@@ -99,6 +106,25 @@ export function ConfigurationScreen() {
             <div className={styles.scrollPart__elem}>
               <p className={fontStyles.formPointFont}>Specific pages</p>
               <ScalablePageRangesInput onTyped={setPages} />
+            </div>
+            <div className={styles.scrollPart__elem}>
+              <p className={fontStyles.formPointFont}>Layout</p>
+              <IconValueStatusSelect
+                icons={undefined}
+                names={Object.keys(Layout).filter((elem) => elem.includes("x"))}
+                values={Object.keys(Layout).filter(
+                  (elem) => !elem.includes("x"),
+                )}
+                statuses={Object.keys(Layout)
+                  .filter((elem) => elem.includes("x"))
+                  .map(
+                    (elem) =>
+                      `\xa0(${Layout[elem as unknown as number]} ${parseInt(Layout[elem as unknown as number]) > 1 ? "pages" : "page"} per list)`,
+                  )}
+                onSelected={(numberUp: string) => {
+                  setNumberUp(parseInt(numberUp));
+                }}
+              />
             </div>
           </div>
           <button
