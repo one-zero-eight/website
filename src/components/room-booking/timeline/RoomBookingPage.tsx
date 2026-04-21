@@ -100,6 +100,8 @@ export function RoomBookingPage() {
     },
     {
       refetchInterval: 5 * T.Min,
+      retry: 3,
+      retryDelay: 3 * T.Sec,
     },
   );
 
