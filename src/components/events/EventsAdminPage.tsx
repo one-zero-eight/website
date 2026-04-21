@@ -2,7 +2,7 @@ import { $workshops } from "@/api/workshops";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import AddEventButton from "./AddEventButton.tsx";
-import { ModalWindow } from "./CreationModal/ModalWindow.tsx";
+import { Modal } from "../common/Modal.tsx";
 import { EventsList } from "./EventsList.tsx";
 import NameForm from "./CreationModal/NameForm.tsx";
 import { useEventsAuth } from "./hooks";
@@ -60,7 +60,7 @@ export function EventsAdminPage() {
         clubUser={clubsUser}
       />
 
-      <ModalWindow
+      <Modal
         open={modalOpen}
         onOpenChange={() => {
           setModalOpen(false);
@@ -74,7 +74,7 @@ export function EventsAdminPage() {
             setModalOpen(false);
           }}
         />
-      </ModalWindow>
+      </Modal>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { workshopsTypes } from "@/api/workshops";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -145,7 +145,7 @@ export function Description({
   };
 
   return (
-    <div className={clsx("card card-border", className)}>
+    <div className={cn("card card-border", className)}>
       <div className="card-body">
         <span className="flex items-center gap-2 text-xl font-semibold">
           <span className="icon-[fluent--text-description-16-filled]" />

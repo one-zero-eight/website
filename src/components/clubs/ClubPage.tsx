@@ -2,7 +2,7 @@ import { $clubs } from "@/api/clubs";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import {
   getClubTypeLabel,
   getClubTypeColor,
@@ -77,7 +77,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
               <span className="badge badge-error">Inactive</span>
             )}
           </div>
-          <span className={clsx("badge", getClubTypeColor(club.type))}>
+          <span className={cn("badge", getClubTypeColor(club.type))}>
             {getClubTypeLabel(club.type)}
           </span>
           <p className="text-base-content/80 text-base leading-relaxed">
@@ -137,7 +137,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                         className="flex items-center gap-3 p-3"
                       >
                         <span
-                          className={clsx(
+                          className={cn(
                             "text-base-content",
                             getLinkIconClass(link.type),
                             "size-5",

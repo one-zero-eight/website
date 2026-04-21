@@ -2,25 +2,16 @@ import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
 import { BookingStatus, SchemaAttendee } from "@/api/room-booking/types.ts";
 import { sanitizeBookingTitle } from "@/components/room-booking/utils.ts";
+import { Modal } from "@/components/common/Modal.tsx";
 import {
   clockTime,
   durationFormatted,
   msBetween,
   T,
 } from "@/lib/utils/dates.ts";
-import {
-  FloatingFocusManager,
-  FloatingOverlay,
-  FloatingPortal,
-  useDismiss,
-  useFloating,
-  useInteractions,
-  useRole,
-  useTransitionStyles,
-} from "@floating-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type Booking, schemaToBooking, type Slot } from "./types.ts";
 
@@ -29,25 +20,25 @@ const StatusBadge = ({ status }: { status: BookingStatus }) => {
   switch (status) {
     case BookingStatus.Accept:
       return (
-        <span className={clsx(baseClass, "bg-green-500/20 text-green-500")}>
+        <span className={cn(baseClass, "bg-green-500/20 text-green-500")}>
           Accepted
         </span>
       );
     case BookingStatus.Tentative:
       return (
-        <span className={clsx(baseClass, "bg-yellow-500/20 text-yellow-500")}>
+        <span className={cn(baseClass, "bg-yellow-500/20 text-yellow-500")}>
           Tentative
         </span>
       );
     case BookingStatus.Decline:
       return (
-        <span className={clsx(baseClass, "bg-red-500/20 text-red-500")}>
+        <span className={cn(baseClass, "bg-red-500/20 text-red-500")}>
           Declined
         </span>
       );
     case BookingStatus.Unknown:
       return (
-        <span className={clsx(baseClass, "bg-gray-500/20 text-gray-500")}>
+        <span className={cn(baseClass, "bg-gray-500/20 text-gray-500")}>
           Unknown
         </span>
       );
@@ -159,15 +150,6 @@ export function BookingModal({
   onOpenChange: (open: boolean) => void;
   onBookingCreated?: (data: Booking) => void;
 }) {
-  const { context, refs } = useFloating({ open, onOpenChange });
-  // Transition effect
-  const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
-  // Event listeners to change the open state
-  const dismiss = useDismiss(context, { outsidePressEvent: "mousedown" });
-  // Role props for screen readers
-  const role = useRole(context);
-  const { getFloatingProps } = useInteractions([dismiss, role]);
-
   const queryClient = useQueryClient();
   const { me } = useMe();
 
@@ -424,10 +406,6 @@ export function BookingModal({
       },
     );
 
-  if (!isMounted) {
-    return null;
-  }
-
   const outlookBookingId = detailsBooking?.outlook_booking_id;
   const attendees = fullBookingDetails?.attendees ?? detailsBooking?.attendees;
   const isAttending = attendees?.some(
@@ -649,7 +627,7 @@ export function BookingModal({
     <div className="flex flex-row gap-2">
       <button
         type="button"
-        className="bg-base-200 hover:bg-base-300 dark:bg-base-300 dark:hover: bg-base-200 rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
+        className="bg-base-200 hover:bg-base-300 dark:bg-base-300 dark:hover:bg-base-200 rounded-box flex w-full items-center justify-center gap-4 px-4 py-2 text-lg font-medium"
         onClick={() => setIsEditing(false)}
       >
         Cancel
@@ -712,124 +690,89 @@ export function BookingModal({
   );
 
   return (
-    <FloatingPortal>
-      <FloatingOverlay
-        className="@container/modal z-10 grid place-items-center bg-black/75"
-        lockScroll
-      >
-        <FloatingFocusManager
-          context={context}
-          initialFocus={titleInputRef}
-          modal
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={newSlot ? "New booking" : "Booking details"}
+      containerClassName="p-4"
+    >
+      {newSlot ? (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            submitBooking();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              submitBooking();
+            }
+          }}
         >
-          <div
-            ref={refs.setFloating}
-            style={transitionStyles}
-            {...getFloatingProps()}
-            className="flex h-fit w-full max-w-lg flex-col p-4 outline-hidden"
-          >
-            <div className="bg-base-200 rounded-box overflow-hidden">
-              <div className="flex flex-col p-4">
-                {/* Heading and description */}
-                <div className="mb-2 flex w-full flex-row items-center">
-                  <div className="grow items-center text-2xl font-semibold">
-                    {newSlot ? "New booking" : "Booking details"}
-                  </div>
-                  <button
-                    type="button"
-                    className="text-base-content/50 hover:bg-base-300/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center @lg/export:-mt-6 @lg/export:-mr-6"
-                    onClick={() => onOpenChange(false)}
-                  >
-                    <span className="icon-[material-symbols--close] text-2xl" />
-                  </button>
-                </div>
+          <div className="flex flex-col gap-2">
+            <input
+              ref={titleInputRef}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter title..."
+              className="bg-base-300 focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
+            />
 
-                {newSlot ? (
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      submitBooking();
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        submitBooking();
-                      }
-                    }}
-                  >
-                    <div className="flex flex-col gap-2">
-                      <input
-                        ref={titleInputRef}
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Enter title..."
-                        className="bg-base-300 focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
-                      />
+            {BookingRooms}
+            {BookingDate}
+            {BookingTime}
+            {BookingDateTime}
+            {attendees && Attendees}
 
-                      {BookingRooms}
-                      {BookingDate}
-                      {BookingTime}
-                      {BookingDateTime}
-                      {attendees && Attendees}
+            {NewBookingWarning}
+            {NewBookingError}
 
-                      {NewBookingWarning}
-                      {NewBookingError}
-
-                      {NewBookingButtons}
-                    </div>
-                  </form>
-                ) : (
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      updateBooking();
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        updateBooking();
-                      }
-                    }}
-                  >
-                    <div className="flex flex-col gap-2">
-                      <div className="text-base-content/75 flex flex-row gap-2">
-                        {isEditing ? (
-                          <input
-                            ref={titleInputRef}
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Enter title..."
-                            className="bg-base-300 focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
-                          />
-                        ) : (
-                          <>
-                            <p className="text-base-content/75 flex flex-row gap-2 text-lg text-wrap">
-                              {sanitizeBookingTitle(detailsBooking?.title)}
-                            </p>
-                          </>
-                        )}
-                      </div>
-
-                      {BookingRooms}
-                      {BookingDate}
-                      {BookingTime}
-                      {attendees && Attendees}
-                      {isEditing && BookingDateTime}
-                      {isEditing && NewBookingWarning}
-                      {UpdateBookingError}
-                      {DeleteBookingError}
-
-                      <div className="mt-2">
-                        {outlookBookingId && isAttending && MyBookingButtons}
-                      </div>
-                    </div>
-                  </form>
-                )}
-              </div>
-            </div>
+            {NewBookingButtons}
           </div>
-        </FloatingFocusManager>
-      </FloatingOverlay>
-    </FloatingPortal>
+        </form>
+      ) : (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            updateBooking();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              updateBooking();
+            }
+          }}
+        >
+          <div className="flex flex-col gap-2">
+            <div className="text-base-content/75 flex flex-row gap-2">
+              {isEditing ? (
+                <input
+                  ref={titleInputRef}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter title..."
+                  className="bg-base-300 focus:ring-primary w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
+                />
+              ) : (
+                <p className="text-base-content/75 flex flex-row gap-2 text-lg text-wrap">
+                  {sanitizeBookingTitle(detailsBooking?.title)}
+                </p>
+              )}
+            </div>
+
+            {BookingRooms}
+            {BookingDate}
+            {BookingTime}
+            {attendees && Attendees}
+            {isEditing && BookingDateTime}
+            {isEditing && NewBookingWarning}
+            {UpdateBookingError}
+            {DeleteBookingError}
+
+            <div className="mt-2">{outlookBookingId && isAttending && MyBookingButtons}</div>
+          </div>
+        </form>
+      )}
+    </Modal>
   );
 }

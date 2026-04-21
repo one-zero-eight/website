@@ -1,6 +1,6 @@
 import { searchTypes } from "@/api/search";
 import TelegramPreview from "@/components/search/TelegramPreview";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import React, { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import MoodleUnknownPreview from "./MoodleUnknownPreview";
@@ -18,7 +18,7 @@ export declare type PreviewCardProps = {
 export default function PreviewCard({ source, onClose }: PreviewCardProps) {
   return (
     <div
-      className={clsx(
+      className={cn(
         "border-base-300 bg-base-200 rounded-field flex h-fit max-h-full w-full min-w-0 flex-col gap-2 border p-4",
         "static z-10 md:sticky md:top-4",
       )}

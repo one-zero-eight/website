@@ -1,5 +1,5 @@
 import { EventFormState, EventFormErrors } from "../types";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 
 export interface DateTimeProps {
   eventForm: EventFormState;
@@ -22,7 +22,7 @@ export function DateTime({
 }: DateTimeProps) {
   return (
     <div
-      className={clsx("my-2 flex w-full flex-col flex-nowrap gap-4", className)}
+      className={cn("my-2 flex w-full flex-col flex-nowrap gap-4", className)}
     >
       <div className="grid grid-cols-2 gap-3">
         <div className="flex w-full flex-2 flex-col gap-1">

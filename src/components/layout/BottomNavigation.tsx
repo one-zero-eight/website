@@ -1,5 +1,5 @@
 import { Link, LinkOptions } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import React, { PropsWithChildren, ReactElement } from "react";
 
 export function BottomNavigation() {
@@ -25,7 +25,7 @@ export function BottomNavigation() {
 
   return (
     <nav
-      className={clsx(
+      className={cn(
         "bg-base-200 flex w-full shrink-0 overflow-hidden lg:hidden",
         isPWA ? "px-6 pt-1 pb-6" : "h-12",
       )}

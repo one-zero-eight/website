@@ -6,7 +6,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { $clubs } from "@/api/clubs";
 import { HostType, UserRole } from "@/api/workshops/types";
 import type { SchemaUser } from "@/api/workshops/types";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import type { SchemaUserWithClubs } from "@/api/clubs/types";
 
 export interface NameFormProps {
@@ -80,7 +80,7 @@ export default function NameForm({
           Enter event title: <span className="text-red-500">*</span>
         </legend>
         <input
-          className={clsx("input w-full", nameError && "input-error")}
+          className={cn("input w-full", nameError && "input-error")}
           ref={nameRef}
           onChange={(e) =>
             setNameError(!e.target.value.trim() ? nameError : null)

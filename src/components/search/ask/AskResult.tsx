@@ -1,5 +1,5 @@
 import { searchTypes } from "@/api/search";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -23,7 +23,7 @@ export function AskResult({
   return (
     <div
       tabIndex={0}
-      className={clsx(
+      className={cn(
         "border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2",
       )}
     >

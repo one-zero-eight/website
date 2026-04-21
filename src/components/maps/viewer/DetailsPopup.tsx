@@ -19,7 +19,7 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useEffect, useRef, useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 
@@ -218,7 +218,7 @@ function ShareButton({
     >
       <button
         type="button"
-        className={clsx(
+        className={cn(
           "hover:bg-base-300 flex items-center justify-center rounded-full",
           copied && "text-green-700 dark:text-green-500",
         )}

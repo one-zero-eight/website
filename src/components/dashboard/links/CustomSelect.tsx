@@ -12,7 +12,7 @@ import {
   useListNavigation,
   useRole,
 } from "@floating-ui/react";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import React, { useRef, useState } from "react";
 
 interface Option {
@@ -66,7 +66,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   };
 
   return (
-    <div className={clsx(className, "relative")}>
+    <div className={cn(className, "relative")}>
       <div
         className="border-primary flex w-full cursor-pointer items-center justify-between rounded-md border p-2"
         ref={refs.setReference}
@@ -122,7 +122,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                     role="option"
                     tabIndex={index === activeIndex ? 0 : -1}
                     aria-selected={index === activeIndex}
-                    className={clsx(
+                    className={cn(
                       "hover:bg-base-300 cursor-pointer rounded-md px-4 py-2",
                       activeIndex === index && "bg-base-300",
                     )}

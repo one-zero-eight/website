@@ -16,7 +16,7 @@ import listPlugin from "@fullcalendar/list";
 import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import moment from "moment/moment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
@@ -364,7 +364,7 @@ export default function CalendarViewer({
 
   return (
     <div
-      className={clsx(
+      className={cn(
         isFullPage ? "h-full overflow-clip" : "",
         isLoading && "calendar-loading",
       )}
@@ -439,7 +439,7 @@ function renderEventTimeGridWeek({
         </span>
       )}
       <span
-        className={clsx(
+        className={cn(
           "line-clamp-2 text-xs",
           event.allDay && "hidden sm:inline",
         )}

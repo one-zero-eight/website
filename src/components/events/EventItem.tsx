@@ -2,7 +2,7 @@ import { $clubs } from "@/api/clubs/index.ts";
 import { $workshops } from "@/api/workshops";
 import { HostType } from "@/api/workshops/types.ts";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { Fragment } from "react";
 import { eventBadges } from "./EventBadges.tsx";
 import { LanguageBadge } from "./LanguageBadge.tsx";
@@ -56,11 +56,11 @@ export function EventItem({
 
       {/* Card */}
       <div
-        className={clsx("card card-border bg-base-100 min-w-full", className)}
+        className={cn("card card-border bg-base-100 min-w-full", className)}
       >
         <div className="relative flex h-[220px] grow items-start justify-between overflow-hidden rounded-t-(--radius-box)">
           <div
-            className={clsx(
+            className={cn(
               "absolute inset-0 bg-[url('/topography.svg')] bg-size-[1200px] bg-center bg-repeat",
               event.image_file_id
                 ? "opacity-20 blur-[2px]"

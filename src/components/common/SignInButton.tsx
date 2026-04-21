@@ -1,6 +1,6 @@
 import { navigateToSignIn } from "@/api/accounts/sign-in.ts";
 import Tooltip from "@/components/common/Tooltip.tsx";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { forwardRef } from "react";
 
 export type SignInButtonProps = {
@@ -16,7 +16,7 @@ export const SignInButton = forwardRef(function SignInButton_(
     <button
       ref={ref}
       type="button"
-      className={clsx(
+      className={cn(
         "border-primary bg-base-100 hover:bg-base-300 rounded-box flex h-14 w-fit items-center justify-center gap-4 border-2 px-6 py-2 text-xl font-medium",
         className,
       )}

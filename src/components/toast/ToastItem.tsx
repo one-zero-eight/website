@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useCallback, useEffect, useState } from "react";
 import { Toast, ToastType } from "./types.ts";
 
@@ -76,7 +76,7 @@ export function ToastItem({
 
   return (
     <div
-      className={clsx(
+      className={cn(
         "alert transition-all duration-300 ease-in-out",
         "transform-gpu",
         isLeaving &&
@@ -87,10 +87,10 @@ export function ToastItem({
       )}
     >
       <span
-        className={clsx(
+        className={cn(
           "text-2xl",
           toastColors[toast.type],
-          clsx(toastIcons[toast.type]),
+          cn(toastIcons[toast.type]),
         )}
       />
       <div className="">

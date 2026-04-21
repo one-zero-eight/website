@@ -5,7 +5,7 @@ import SwitchThemeButton from "@/components/layout/SwitchThemeButton.tsx";
 import UserMenu from "@/components/layout/UserMenu.tsx";
 import { items, LinkItemType } from "@/components/layout/menu-links.tsx";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 
 export function MorePage() {
   const { me } = useMe();
@@ -88,7 +88,7 @@ function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
   if (props.type === "external") {
     return (
       <a
-        className={clsx(
+        className={cn(
           "text-base-content/70 flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
           "px-4 text-2xl",
         )}
@@ -102,7 +102,7 @@ function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
     const { staff_only, hideOnMore, type, ...linkProps } = props;
     return (
       <Link
-        className={clsx(
+        className={cn(
           "text-base-content/70 flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
           "[&.is-active]:text-primary",
           "px-4 text-2xl",

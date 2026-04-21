@@ -3,7 +3,7 @@ import { CheckInType } from "@/api/workshops/types";
 import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { CheckInButtonProps } from "./types";
 import {
   getInactiveStatusText,
@@ -120,7 +120,7 @@ export function CheckInButton({
   if (isEventCurrentlyGoing(event)) {
     return (
       <span
-        className={clsx(
+        className={cn(
           "btn btn-soft btn-warning pointer-events-none",
           className,
         )}
@@ -132,7 +132,7 @@ export function CheckInButton({
 
   if (!isWorkshopActive(event)) {
     return (
-      <p className={clsx("btn btn-disabled", className)}>
+      <p className={cn("btn btn-disabled", className)}>
         {getInactiveStatusText(event)}
       </p>
     );
@@ -141,19 +141,19 @@ export function CheckInButton({
   if (event.check_in_type === CheckInType.by_link) {
     if (!event.check_in_link) {
       return (
-        <span className={clsx("btn btn-disabled", className)}>
+        <span className={cn("btn btn-disabled", className)}>
           Check-in link not available
         </span>
       );
     }
     return (
       <div
-        className={clsx("grid w-full grid-cols-2 gap-2 text-nowrap", className)}
+        className={cn("grid w-full grid-cols-2 gap-2 text-nowrap", className)}
       >
         <Link
           to={event.check_in_link!}
           target="_blank"
-          className={clsx("btn btn-soft btn-success w-full px-8")}
+          className={cn("btn btn-soft btn-success w-full px-8")}
           title={"Check in"}
         >
           Check in
@@ -164,7 +164,7 @@ export function CheckInButton({
             type="button"
             disabled={isCheckOutPending}
             onClick={handleCheckOut}
-            className={clsx("btn btn-soft btn-error w-full px-4")}
+            className={cn("btn btn-soft btn-error w-full px-4")}
             title={"Remove from calendar"}
           >
             Remove from calendar
@@ -174,7 +174,7 @@ export function CheckInButton({
             type="button"
             disabled={isCheckInPending}
             onClick={handleCheckIn}
-            className={clsx("btn btn-soft btn-success w-full px-4")}
+            className={cn("btn btn-soft btn-success w-full px-4")}
             title={"Add to calendar"}
           >
             Add to calendar
@@ -191,7 +191,7 @@ export function CheckInButton({
           type="button"
           disabled={isCheckOutPending}
           onClick={handleCheckOut}
-          className={clsx("btn btn-soft btn-error", className)}
+          className={cn("btn btn-soft btn-error", className)}
           title={"Check out"}
         >
           Remove from calendar
@@ -201,7 +201,7 @@ export function CheckInButton({
 
     if (event.capacity && signedPeople >= event.capacity) {
       return (
-        <span className={clsx("btn btn-disabled", className)}>
+        <span className={cn("btn btn-disabled", className)}>
           No empty places
         </span>
       );
@@ -212,7 +212,7 @@ export function CheckInButton({
         type="button"
         disabled={isCheckInPending}
         onClick={handleCheckIn}
-        className={clsx("btn btn-soft btn-success", className)}
+        className={cn("btn btn-soft btn-success", className)}
         title={"Add to calendar"}
       >
         Add to calendar
@@ -226,7 +226,7 @@ export function CheckInButton({
         type="button"
         disabled={isCheckOutPending}
         onClick={handleCheckOut}
-        className={clsx("btn btn-soft btn-error", className)}
+        className={cn("btn btn-soft btn-error", className)}
         title={"Check out"}
       >
         Check out
@@ -236,7 +236,7 @@ export function CheckInButton({
 
   if (event.capacity && signedPeople >= event.capacity) {
     return (
-      <span className={clsx("btn btn-disabled", className)}>
+      <span className={cn("btn btn-disabled", className)}>
         No empty places
       </span>
     );
@@ -247,7 +247,7 @@ export function CheckInButton({
       type="button"
       disabled={isCheckInPending}
       onClick={handleCheckIn}
-      className={clsx("btn btn-soft btn-success", className)}
+      className={cn("btn btn-soft btn-success", className)}
       title={"Check in"}
     >
       Check in

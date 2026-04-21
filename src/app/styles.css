@@ -75,8 +75,8 @@
   --font-rubik: "Rubik Variable", sans-serif;
   --font-handwritten: "Fuzzy Bubbles", sans-serif;
 
-  --breakpoint-4xl: 2048px;
-  --breakpoint-xxl: 1550px;
+  --breakpoint-3xl: 112rem;
+  --breakpoint-4xl: 128rem;
 
   --color-brand-gradient-start: rgb(154 46 255); /* #9A2EFF */
   --color-brand-gradient-end: rgb(209 35 162); /* #D1233E */

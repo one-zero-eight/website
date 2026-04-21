@@ -1,6 +1,6 @@
 import { $maps } from "@/api/maps";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useEffect, useRef, useState } from "react";
 
 export function MapsPageTabs() {
@@ -51,7 +51,7 @@ export function MapsPageTabs() {
             key={scene.scene_id}
             to="/maps"
             search={{ scene: scene.scene_id }}
-            className={clsx(
+            className={cn(
               "px-2 py-1",
               scene.scene_id === sceneId || (sceneId === undefined && i === 0)
                 ? "border-b-primary border-b-2"

@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 
 interface FormUrlInputProps {
   formUrl: string;
@@ -41,7 +41,7 @@ export function FormUrlInput({
           onFocus={onFocus}
           onKeyDown={onKeyDown}
           placeholder="https://forms.yandex.ru/example"
-          className={clsx(
+          className={cn(
             "bg-base-100 caret-primary rounded-field inset-0 h-10 w-full resize-none border-2 p-3 pr-12 text-base outline-hidden transition-colors dark:text-white",
             error
               ? "border-red-500 focus:border-red-500"
@@ -55,7 +55,7 @@ export function FormUrlInput({
           title={formUrl.trim() ? "Clear input" : "Paste from clipboard"}
         >
           <span
-            className={clsx(
+            className={cn(
               "h-4 w-4",
               formUrl.trim()
                 ? "icon-[material-symbols--close]"

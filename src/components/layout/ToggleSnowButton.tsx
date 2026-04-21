@@ -1,5 +1,5 @@
 import Tooltip from "@/components/common/Tooltip.tsx";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useSnowVisibility } from "../snow/SnowContext";
 
 export default function ToggleSnowButton() {
@@ -12,7 +12,7 @@ export default function ToggleSnowButton() {
         className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2"
       >
         <span
-          className={clsx(
+          className={cn(
             "icon-[lsicon--heavy-snow-outline] flex text-3xl",
             isSnowVisible ? "text-[#69ddff]" : "text-base-content/70",
           )}

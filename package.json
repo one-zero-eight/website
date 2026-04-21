@@ -88,6 +88,7 @@
     "react-snowfall": "^2.4.0",
     "remark-gfm": "^4.0.1",
     "sass-embedded": "^1.93.3",
+    "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.1.16",
     "taze": "^19.9.0",
     "transliteration": "^2.3.5",

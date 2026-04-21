@@ -3,7 +3,7 @@ import {
   createFuseInstance,
   searchClubs,
 } from "@/components/clubs/searchUtils.ts";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useMemo, useState } from "react";
 import { ClubCard } from "./ClubCard";
 import { ClubsSidebar } from "./ClubsSidebar";
@@ -123,7 +123,7 @@ export function ClubsListPage() {
               <div key={type}>
                 <div className="flex items-center gap-2">
                   <span
-                    className={clsx(
+                    className={cn(
                       clubTypeIcon[type as clubsTypes.ClubType],
                       "text-primary text-3xl",
                     )}

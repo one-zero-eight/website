@@ -9,7 +9,7 @@ import {
   createFuseInstance,
   getFilteredResources,
 } from "@/components/dashboard/links/searchUtils.ts";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const Links = () => {
@@ -86,15 +86,15 @@ const Links = () => {
   return (
     <div>
       <div className="flex flex-col gap-4 pb-4 lg:flex-row">
-        <h3 className="xxl:flex-none text-2xl font-medium sm:text-3xl lg:flex-4">
+        <h3 className="2xl:flex-none text-2xl font-medium sm:text-3xl lg:flex-4">
           All University Services
         </h3>
-        <div className="xxl:grid xxl:flex-auto xxl:grid-cols-2 grid items-center gap-4 md:grid-cols-2 md:gap-6 lg:flex lg:flex-1">
+        <div className="2xl:grid 2xl:flex-auto 2xl:grid-cols-2 grid items-center gap-4 md:grid-cols-2 md:gap-6 lg:flex lg:flex-1">
           <CustomSelect
             options={groups}
             selectedValue={activeGroup}
             onChange={setActiveGroup}
-            className="xxl:block sm:block lg:hidden"
+            className="2xl:block sm:block lg:hidden"
           />
           <SearchInput
             onKeyDown={handleKeyDown}
@@ -106,7 +106,7 @@ const Links = () => {
 
       <div className="flex min-h-[500px] flex-row-reverse items-start gap-6">
         {/* Category List */}
-        <div className="xxl:hidden hidden flex-1 lg:block">
+        <div className="2xl:hidden hidden flex-1 lg:block">
           <h3 className="text-base-content text-lg font-semibold">Filter</h3>
           <div>
             {groups.map(({ value }) => (
@@ -114,7 +114,7 @@ const Links = () => {
                 type="button"
                 key={value}
                 onClick={() => setActiveGroup(value)}
-                className={clsx(
+                className={cn(
                   "block p-2",
                   activeGroup === value
                     ? "text-primary font-bold"
@@ -128,7 +128,7 @@ const Links = () => {
         </div>
 
         {filteredResources.length > 0 ? (
-          <div className="xxl:grid-cols-2 grid flex-4 grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="2xl:grid-cols-2 grid flex-4 grid-cols-1 gap-5 lg:grid-cols-3">
             {filteredResources.map((resource, index) => (
               <a
                 onClick={() => {
@@ -146,7 +146,7 @@ const Links = () => {
                 target="_blank"
                 rel="nofollow noreferrer"
                 key={index}
-                className={clsx(
+                className={cn(
                   "resource-item bg-base-200 hover:bg-base-300 rounded-box flex min-h-[100px] flex-row gap-4 px-4 py-4 transition-all ease-in-out",
                   visibleItems.includes(index) ? "visible" : "",
                   activeIndex === index && searchQuery
@@ -155,7 +155,7 @@ const Links = () => {
                 )}
               >
                 <span
-                  className={clsx(
+                  className={cn(
                     resource.icon,
                     "text-primary hidden w-8 shrink-0 text-3xl sm:block",
                   )}
@@ -163,7 +163,7 @@ const Links = () => {
                 <div>
                   <p className="text-base-content flex text-lg font-semibold">
                     <span
-                      className={clsx(
+                      className={cn(
                         resource.icon,
                         "text-primary mt-1 mr-2 shrink-0 text-xl sm:hidden",
                       )}

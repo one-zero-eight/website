@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { EventFormErrors, EventFormState } from "../types";
 import { useRef } from "react";
 
@@ -29,7 +29,7 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const filePickRef = useRef<HTMLInputElement>(null);
   return (
-    <div className={clsx(className)}>
+    <div className={cn(className)}>
       <div>
         <h3 className="text-base-content mb-3 text-sm font-medium">
           Upload new image
@@ -78,7 +78,7 @@ export default function ImageUpload({
             type="button"
             onClick={handleUploadLogo}
             disabled={!form.file || isUploadingLogo}
-            className={clsx(
+            className={cn(
               "btn btn-primary w-full",
               (!form.file || isUploadingLogo) && "btn-disabled",
             )}

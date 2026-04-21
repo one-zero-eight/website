@@ -13,7 +13,7 @@ import {
   MARK_COLORS,
   MARK_MAPPING,
 } from "./consts.ts";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { createRef, Fragment, useEffect, useState } from "react";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
 
@@ -229,7 +229,7 @@ export default function ScholarshipCalculator() {
         <div className="border-primary bg-base-100 rounded-box flex w-56 flex-row overflow-clip border-2">
           <button
             onClick={() => onMarksChange(marks.join(""), "B25")}
-            className={clsx(
+            className={cn(
               "font-handwritten hover:bg-primary/20 w-full rounded-l-2xl p-2 text-center text-lg transition-colors",
               course === "B25"
                 ? "bg-primary/10 text-primary"
@@ -240,7 +240,7 @@ export default function ScholarshipCalculator() {
           </button>
           <button
             onClick={() => onMarksChange(marks.join(""), "B24")}
-            className={clsx(
+            className={cn(
               "font-handwritten hover:bg-primary/20 w-full p-2 text-center text-lg transition-colors",
               course === "B24"
                 ? "bg-primary/10 text-primary"
@@ -251,7 +251,7 @@ export default function ScholarshipCalculator() {
           </button>
           <button
             onClick={() => onMarksChange(marks.join(""), "B23")}
-            className={clsx(
+            className={cn(
               "font-handwritten hover:bg-primary/20 w-full p-2 text-center text-lg transition-colors",
               course === "B23"
                 ? "bg-primary/10 text-primary"
@@ -262,7 +262,7 @@ export default function ScholarshipCalculator() {
           </button>
           <button
             onClick={() => onMarksChange(marks.join(""), "M25")}
-            className={clsx(
+            className={cn(
               "font-handwritten hover:bg-primary/20 w-full rounded-r-2xl p-2 text-center text-lg transition-colors",
               course === "M25"
                 ? "bg-primary/10 text-primary"
@@ -284,7 +284,7 @@ export default function ScholarshipCalculator() {
           max={5}
           autoComplete="off"
           spellCheck={false}
-          className={clsx(
+          className={cn(
             "bg-base-100 font-handwritten rounded-box w-56 border-2 p-2 text-center outline-hidden",
             !errorGPA ? "border-primary" : "border-red-500",
           )}
@@ -304,7 +304,7 @@ export default function ScholarshipCalculator() {
           min={FORMULA_B_MIN}
           autoComplete="off"
           spellCheck={false}
-          className={clsx(
+          className={cn(
             "rubles-input bg-base-100 font-handwritten rounded-box w-56 border-2 p-2 text-center outline-hidden",
             !errorScholarship ? "border-primary" : "border-red-500",
           )}

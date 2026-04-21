@@ -1,16 +1,7 @@
 import { $events } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
+import { Modal } from "@/components/common/Modal.tsx";
 import ScheduleLinkCopy from "@/components/schedule/ScheduleLinkCopy.tsx";
-import {
-  FloatingFocusManager,
-  FloatingOverlay,
-  FloatingPortal,
-  useDismiss,
-  useFloating,
-  useInteractions,
-  useRole,
-  useTransitionStyles,
-} from "@floating-ui/react";
 import { useRef } from "react";
 import { getICSLink, getPersonalLink } from "@/api/events/links.ts";
 import { TargetForExport } from "@/api/events/types.ts";
@@ -62,23 +53,7 @@ export function ExportModal({
     },
   );
 
-  const { context, refs } = useFloating({ open, onOpenChange });
-
-  // Transition effect
-  const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
-
-  // Event listeners to change the open state
-  const dismiss = useDismiss(context, { outsidePressEvent: "mousedown" });
-  // Role props for screen readers
-  const role = useRole(context);
-
-  const { getFloatingProps } = useInteractions([dismiss, role]);
-
   const copyButtonRef = useRef(null);
-
-  if (!isMounted || !eventsUser) {
-    return null;
-  }
 
   let calendarURL = "";
   if (isEventGroupModal && eventGroup) {
@@ -93,86 +68,49 @@ export function ExportModal({
   }
 
   return (
-    <FloatingPortal>
-      <FloatingOverlay
-        className={`@container/export z-10 grid place-items-center ${aboveModal ? "bg-black/50" : "bg-black/75"}`}
-        lockScroll
-      >
-        <FloatingFocusManager
-          context={context}
-          initialFocus={copyButtonRef}
-          modal
-        >
-          <div
-            ref={refs.setFloating}
-            style={transitionStyles}
-            {...getFloatingProps()}
-            className="flex h-fit w-full max-w-[100vw] flex-col p-4 @2xl/export:w-3/4 @5xl/export:w-2/3"
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={
+        isTargetModal ? modalText[eventGroupOrTarget].title : "Export to your calendar"
+      }
+      overlayClassName={aboveModal ? "bg-black/50" : ""}
+      containerClassName="max-w-full xl:max-w-[75%] bg-base-100"
+    >
+      <div className="text-base-content/75">
+        {isTargetModal
+          ? modalText[eventGroupOrTarget].description
+          : "You can add the schedule to your favorite calendar application and it will be updated on schedule changes."}
+      </div>
+      <ul className="text-base-content/75 list-decimal pb-4 pl-5">
+        <li>
+          Copy the link.
+          <ScheduleLinkCopy url={calendarURL || ""} copyButtonRef={copyButtonRef} />
+        </li>
+        <li>
+          Open your calendar settings to add a calendar by URL.
+          <a
+            className="ml-4 flex w-fit flex-row items-center gap-x-2 underline"
+            href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
+            target="_blank"
           >
-            <div className="bg-base-100 rounded-box border-base-300 overflow-hidden border">
-              <div className="flex flex-col p-4">
-                {/* Heading and description */}
-                <div className="mb-2 flex w-full flex-row">
-                  <div className="grow items-center text-3xl font-semibold">
-                    {isTargetModal
-                      ? modalText[eventGroupOrTarget].title
-                      : "Export to your calendar"}
-                  </div>
-                  <button
-                    type="button"
-                    className="text-base-content/50 hover:bg-base-200/50 hover:text-base-content/75 rounded-box -mt-2 -mr-2 flex h-12 w-12 items-center justify-center"
-                    onClick={() => onOpenChange(false)}
-                  >
-                    <span className="icon-[material-symbols--close] text-4xl" />
-                  </button>
-                </div>
-                <div className="text-base-content/75">
-                  {isTargetModal
-                    ? modalText[eventGroupOrTarget].description
-                    : "You can add the schedule to your favorite calendar application\n" +
-                      "                  and it will be updated on schedule changes."}
-                </div>
-                {/* Export steps */}
-                <ul className="text-base-content/75 mt-4 list-decimal pl-5">
-                  <li>
-                    Copy the link.
-                    <ScheduleLinkCopy
-                      url={calendarURL || ""}
-                      copyButtonRef={copyButtonRef}
-                    />
-                  </li>
-                  <li>
-                    Open your calendar settings to add a calendar by URL.
-                    <a
-                      className="ml-4 flex w-fit flex-row items-center gap-x-2 underline"
-                      href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
-                      target="_blank"
-                    >
-                      <span className="icon-[material-symbols--link] text-base-content/50" />
-                      Google Calendar
-                    </a>
-                    <a className="ml-4 flex w-fit flex-row items-center gap-x-2">
-                      <span className="icon-[material-symbols--help-outline] text-base-content/50" />
-                      Other applications: find in settings
-                    </a>
-                  </li>
-                  <li>Paste the link and click Add.</li>
-                </ul>
-              </div>
-              {/* Calendar itself */}
-              <Calendar
-                urls={
-                  calendarURL
-                    ? [{ url: calendarURL, eventGroup: eventGroup }]
-                    : []
-                }
-                viewId="popup"
-              />
-            </div>
-          </div>
-        </FloatingFocusManager>
-      </FloatingOverlay>
-    </FloatingPortal>
+            <span className="icon-[material-symbols--link] text-base-content/50" />
+            Google Calendar
+          </a>
+          <a className="ml-4 flex w-fit flex-row items-center gap-x-2">
+            <span className="icon-[material-symbols--help-outline] text-base-content/50" />
+            Other applications: find in settings
+          </a>
+        </li>
+        <li>Paste the link and click Add.</li>
+      </ul>
+      <div className="-m-4">
+        <Calendar
+          urls={calendarURL ? [{ url: calendarURL, eventGroup: eventGroup }] : []}
+          viewId="popup"
+        />
+      </div>
+    </Modal>
   );
 }
 

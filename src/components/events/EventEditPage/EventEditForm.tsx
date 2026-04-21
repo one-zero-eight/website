@@ -23,7 +23,7 @@ import { MAX_CAPACITY } from "../constants.ts";
 import NameDescription from "./NameDescription.tsx";
 import ImageUpload from "./ImageUpload.tsx";
 import { CheckInType } from "@/api/workshops/types.ts";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 
 /**
  * Form for creating a new event or editing an existing one.
@@ -723,7 +723,7 @@ export function EventEditForm({
               Check-in Link: <span className="text-red-500">*</span>
             </legend>
             <input
-              className={clsx(
+              className={cn(
                 "input w-full",
                 errors.checkInLinkError && "input-error",
               )}

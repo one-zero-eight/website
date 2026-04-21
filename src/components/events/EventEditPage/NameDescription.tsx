@@ -1,6 +1,6 @@
 import { ChangeEvent, Fragment, useState } from "react";
 import { EventFormErrors } from "../types";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { HostType, WorkshopLanguage } from "@/api/workshops/types";
 import TagsSelector from "./TagsSelector";
 import { SchemaClub } from "@/api/clubs/types";
@@ -89,7 +89,7 @@ export default function NameDescription({
   };
 
   return (
-    <div className={clsx("flex flex-col gap-3", className)}>
+    <div className={cn("flex flex-col gap-3", className)}>
       {/* Language Select */}
       <fieldset className="fieldset">
         <legend className="fieldset-legend text-lg">
@@ -108,11 +108,11 @@ export default function NameDescription({
       <div className="divider my-0.5" />
       {/* Name & Description */}
       <div>
-        <div role="tablist" className={clsx("tabs tabs-box mb-2 flex-nowrap")}>
+        <div role="tablist" className={cn("tabs tabs-box mb-2 flex-nowrap")}>
           <span
             role="tab"
             onClick={() => setCurrentTab("english")}
-            className={clsx(
+            className={cn(
               "tab w-full",
               currentTab === "english" && "tab-active",
             )}
@@ -122,7 +122,7 @@ export default function NameDescription({
           <span
             role="tab"
             onClick={() => setCurrentTab("russian")}
-            className={clsx(
+            className={cn(
               "tab w-full",
               currentTab === "russian" && "tab-active",
             )}
@@ -266,7 +266,7 @@ export default function NameDescription({
                     ) : (
                       <input
                         type="text"
-                        className={clsx(
+                        className={cn(
                           "input w-full min-w-[120px] flex-1",
                           errors.host && "input-error",
                         )}
@@ -302,7 +302,7 @@ export default function NameDescription({
         )}
 
         <label
-          className={clsx(
+          className={cn(
             !errors.host ? "label" : "text-sm text-red-500 dark:text-red-400",
           )}
         >
@@ -346,13 +346,13 @@ function TabContent({
   className,
 }: TabContentProps) {
   return (
-    <div className={clsx(className)}>
+    <div className={cn(className)}>
       <fieldset className="fieldset">
         <legend className="fieldset-legend text-lg">
           Title: <span className="text-red-500">*</span>
         </legend>
         <input
-          className={clsx("input w-full", nameError && "input-error")}
+          className={cn("input w-full", nameError && "input-error")}
           value={nameValue}
           onChange={nameOnChange}
           type="text"

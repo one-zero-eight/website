@@ -2,7 +2,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import { items, LinkItemType } from "@/components/layout/menu-links.tsx";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useLocalStorage } from "usehooks-ts";
 import Logo from "../icons/Logo";
 
@@ -31,7 +31,7 @@ export default function Sidebar() {
 
       {/* Menu items */}
       <div
-        className={clsx(
+        className={cn(
           "flex min-h-full flex-col items-start justify-start",
           !isMinimized ? "px-2" : "px-1",
         )}
@@ -39,7 +39,7 @@ export default function Sidebar() {
         <div className="mb-2.5 flex w-full items-center justify-center border-b border-b-gray-500/20 p-2.5">
           <Link to="/" className="flex place-self-center">
             <Logo
-              className={clsx(!isMinimized ? "mt-2 size-16" : "mt-2 size-10")}
+              className={cn(!isMinimized ? "mt-2 size-16" : "mt-2 size-10")}
             />
           </Link>
         </div>
@@ -72,7 +72,7 @@ export default function Sidebar() {
 
         {/* Social links */}
         <div
-          className={clsx(
+          className={cn(
             "flex place-self-center",
             !isMinimized ? "flex-row gap-2" : "flex-col",
           )}
@@ -133,7 +133,7 @@ function SidebarLink({
   if (props.type === "external") {
     return (
       <a
-        className={clsx(
+        className={cn(
           "text-base-content/50 flex w-full rounded-sm py-0.5 select-none hover:bg-gray-500/10",
           !isMinimized ? "px-2 text-2xl" : "justify-center px-0.5 text-2xl",
         )}
@@ -149,7 +149,7 @@ function SidebarLink({
     const { staff_only, hideOnMore, type, ...linkProps } = props;
     return (
       <Link
-        className={clsx(
+        className={cn(
           "text-base-content/50 flex w-full rounded-sm py-0.5 select-none hover:bg-gray-500/10",
           "[&.is-active]:text-primary",
           !isMinimized ? "px-2 text-2xl" : "justify-center px-0.5 text-2xl",

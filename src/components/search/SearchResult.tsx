@@ -1,5 +1,5 @@
 import { searchTypes } from "@/api/search";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import TruncatableMarkdown from "./TruncatableMarkdown";
 
 export default function SearchResult({
@@ -83,7 +83,7 @@ export default function SearchResult({
     <div
       onClick={handleClick}
       tabIndex={0}
-      className={clsx(
+      className={cn(
         "bg-base-200 rounded-field relative grid cursor-pointer grid-cols-[2rem_1fr_auto] items-start gap-4 border! p-4",
         isSelected
           ? "border-primary drop-shadow-[0_0_4px_#9747FF]"

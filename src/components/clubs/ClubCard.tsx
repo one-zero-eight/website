@@ -1,7 +1,7 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import React, { useMemo } from "react";
 import {
   getClubTypeLabel,
@@ -34,7 +34,7 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
           >
             {club.title}
           </Link>
-          <span className={clsx("badge shrink-0", getClubTypeColor(club.type))}>
+          <span className={cn("badge shrink-0", getClubTypeColor(club.type))}>
             {getClubTypeLabel(club.type)}
           </span>
         </div>
@@ -83,7 +83,7 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
               className="btn btn-soft"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className={clsx(getLinkIconClass(link.type), "size-4")} />
+              <span className={cn(getLinkIconClass(link.type), "size-4")} />
               <span>{getLinkLabel(link.type)}</span>
             </a>
           ))}

@@ -1,5 +1,5 @@
 import { getLogoURLById } from "@/api/clubs/links.ts";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 
 export function ClubLogo({
   clubId,
@@ -10,7 +10,7 @@ export function ClubLogo({
 }) {
   return (
     <div
-      className={clsx(
+      className={cn(
         "rounded-field bg-base-200 relative flex shrink-0 items-center justify-center overflow-hidden",
         className,
       )}

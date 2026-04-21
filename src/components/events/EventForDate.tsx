@@ -1,5 +1,5 @@
 import { EventItem } from "./EventItem";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useMemo } from "react";
 import {
   DEFAULT_EVENT_LIST_OPTIONS,
@@ -64,7 +64,7 @@ export function ItemsList({
 
   return (
     <div
-      className={clsx(
+      className={cn(
         "my-4 grid w-full grid-cols-1 gap-5 @lg/content:grid-cols-1 @5xl/content:grid-cols-2 @7xl/content:grid-cols-3",
         className,
       )}

@@ -8,7 +8,7 @@ import {
   imageLink,
 } from "../utils";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useCopyToClipboard } from "usehooks-ts";
 import { useState } from "react";
 import { CheckInButton } from "../CheckInButton";
@@ -78,7 +78,7 @@ export default function EventTitle({
   const signedPeople = getSignedPeopleCount(event);
 
   return (
-    <div className={clsx("card card-border", className)}>
+    <div className={cn("card card-border", className)}>
       <div
         className={`relative mb-4 flex ${event.image_file_id ? "h-[350px] lg:h-[300px]" : "h-[110px]"} w-full items-start justify-between rounded-t-(--radius-box) bg-[url("/pattern.svg")] bg-size-[640px] bg-center bg-repeat`}
       >
@@ -99,7 +99,7 @@ export default function EventTitle({
           </Link>
           <span className="btn btn-circle" onClick={handleShare}>
             <span
-              className={clsx(
+              className={cn(
                 !copied
                   ? "icon-[bx--link] text-2xl"
                   : "icon-[mi--check] text-2xl",
@@ -121,7 +121,7 @@ export default function EventTitle({
       <div className="card-body md:p-[var(--card-p, 1.5rem);] p-3 pt-0 md:pt-3">
         {event.language === "both" && (
           <div
-            className={clsx("tabs tabs-box mb-1 flex flex-nowrap md:hidden")}
+            className={cn("tabs tabs-box mb-1 flex flex-nowrap md:hidden")}
           >
             <input
               type="radio"
@@ -160,7 +160,7 @@ export default function EventTitle({
               </span>
             )}
           </div>
-          <div className={clsx("tabs tabs-box hidden rounded-full md:flex")}>
+          <div className={cn("tabs tabs-box hidden rounded-full md:flex")}>
             <input
               type="radio"
               name="language_tabs"

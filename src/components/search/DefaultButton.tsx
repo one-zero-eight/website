@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 
 type DefaultButtonProps = {
   content: string;
@@ -17,7 +17,7 @@ export const DefaultButton = ({
     <button
       type="button"
       onClick={onClick}
-      className={clsx(
+      className={cn(
         "bg-primary rounded-field flex h-10 items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors",
         className,
       )}

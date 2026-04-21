@@ -1,6 +1,6 @@
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import ToggleGroup from "./ToggleGroup";
 
 export function TopbarWithToggleGroup({
@@ -12,7 +12,7 @@ export function TopbarWithToggleGroup({
 }) {
   return (
     <nav
-      className={clsx(
+      className={cn(
         "border-base-300 w-full flex-row items-center justify-between border-b",
         hideOnMobile ? "hidden lg:flex" : "flex",
       )}

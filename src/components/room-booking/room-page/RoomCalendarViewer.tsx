@@ -14,7 +14,7 @@ import listPlugin from "@fullcalendar/list";
 import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import moment from "moment/moment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@/components/calendar/styles-calendar.css";
@@ -314,7 +314,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   }, [bookings]);
 
   return (
-    <div className={clsx("overflow-clip", isPending && "calendar-loading")}>
+    <div className={cn("overflow-clip", isPending && "calendar-loading")}>
       {calendarComponent}
       <BookingModal
         newSlot={selectedSlot}
@@ -383,7 +383,7 @@ function renderEventTimeGridWeek({
         </span>
       )}
       <span
-        className={clsx(
+        className={cn(
           "line-clamp-2 text-xs",
           event.allDay && "hidden sm:inline",
         )}

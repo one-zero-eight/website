@@ -1,14 +1,5 @@
-import {
-  FloatingFocusManager,
-  FloatingOverlay,
-  FloatingPortal,
-  useDismiss,
-  useFloating,
-  useInteractions,
-  useRole,
-  useTransitionStyles,
-} from "@floating-ui/react";
-import clsx from "clsx";
+import { Modal } from "@/components/common/Modal.tsx";
+import { cn } from "@/lib/ui/cn";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -31,22 +22,7 @@ export function ConfirmDialog({
   onCancel,
   type = "warning",
 }: ConfirmDialogProps) {
-  const { context, refs } = useFloating({
-    open: isOpen,
-    onOpenChange: () => {},
-  });
-
-  // Transition effect
-  const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
-
-  // Event listeners to change the open state
-  const dismiss = useDismiss(context, { outsidePressEvent: "mousedown" });
-  // Role props for screen readers
-  const role = useRole(context);
-
-  const { getFloatingProps } = useInteractions([dismiss, role]);
-
-  if (!isMounted || !isOpen) {
+  if (!isOpen) {
     return null;
   }
 
@@ -79,7 +55,7 @@ export function ConfirmDialog({
       case "error":
         return (
           <svg
-            className={clsx("h-6 w-6", typeStyles.iconColor)}
+            className={cn("h-6 w-6", typeStyles.iconColor)}
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -93,7 +69,7 @@ export function ConfirmDialog({
       case "info":
         return (
           <svg
-            className={clsx("h-6 w-6", typeStyles.iconColor)}
+            className={cn("h-6 w-6", typeStyles.iconColor)}
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -108,7 +84,7 @@ export function ConfirmDialog({
       default:
         return (
           <svg
-            className={clsx("h-6 w-6", typeStyles.iconColor)}
+            className={cn("h-6 w-6", typeStyles.iconColor)}
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -123,56 +99,38 @@ export function ConfirmDialog({
   };
 
   return (
-    <FloatingPortal>
-      <FloatingOverlay
-        className="z-50 grid place-items-center bg-black/75"
-        lockScroll
-      >
-        <FloatingFocusManager context={context} modal>
-          <div
-            ref={refs.setFloating}
-            style={transitionStyles}
-            {...getFloatingProps()}
-            className="flex h-fit w-full max-w-md flex-col p-4 outline-hidden"
-          >
-            <div className="bg-base-200 rounded-box overflow-hidden">
-              <div className="flex min-w-0 flex-col p-6">
-                {/* Icon and Title */}
-                <div className="mb-4 flex items-center gap-3">
-                  {getIcon()}
-                  <h3 className="text-base-content text-lg font-semibold">
-                    {title}
-                  </h3>
-                </div>
-
-                {/* Message */}
-                <p className="text-base-content/75 mb-6 leading-relaxed">
-                  {message}
-                </p>
-
-                {/* Actions */}
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={onCancel}
-                    className="rounded-field border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-hidden dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:ring-gray-400"
-                  >
-                    {cancelText}
-                  </button>
-                  <button
-                    onClick={onConfirm}
-                    className={clsx(
-                      "rounded-field px-4 py-2 text-sm font-medium text-white transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
-                      typeStyles.buttonColor,
-                    )}
-                  >
-                    {confirmText}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </FloatingFocusManager>
-      </FloatingOverlay>
-    </FloatingPortal>
+    <Modal
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onCancel();
+      }}
+      title={
+        <div className="flex items-center gap-3">
+          {getIcon()}
+          {title}
+        </div>
+      }
+    >
+      <p className="text-base-content/75 mb-6 leading-relaxed">{message}</p>
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-field border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:outline-hidden dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:ring-gray-400"
+        >
+          {cancelText}
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          className={cn(
+            "rounded-field px-4 py-2 text-sm font-medium text-white transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
+            typeStyles.buttonColor,
+          )}
+        >
+          {confirmText}
+        </button>
+      </div>
+    </Modal>
   );
 }

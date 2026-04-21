@@ -1,5 +1,5 @@
 import { searchTypes } from "@/api/search";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
 import { componentByPath, resolvePageByUrl } from "./innohassleRoutes";
 import { MapsPage } from "../maps/MapsPage";
@@ -46,7 +46,7 @@ export default function IframePreviewCard({
 
   return (
     <div
-      className={clsx(
+      className={cn(
         "border-base-300 bg-base-200 rounded-field flex h-fit max-h-full w-full min-w-0 flex-col gap-2 border p-4",
         "fixed static inset-8 top-8 z-8 md:sticky md:inset-0 md:top-4",
       )}

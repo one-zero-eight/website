@@ -1,4 +1,4 @@
-import { ModalWindow } from "@/components/events/CreationModal/ModalWindow";
+import { Modal } from "@/components/common/Modal.tsx";
 import { useEffect, useMemo, useState } from "react";
 
 interface CustomTimeModalProps {
@@ -93,11 +93,10 @@ const CustomTimeModal = ({
   };
 
   return (
-    <ModalWindow
+    <Modal
       open={open}
       title="Select Target Time"
       onOpenChange={onOpenChange}
-      closeOutsidePress={true}
     >
       <div className="flex flex-col gap-2">
         <p className="text-base-content/70 text-sm">
@@ -163,7 +162,7 @@ const CustomTimeModal = ({
           </button>
         </div>
       </div>
-    </ModalWindow>
+    </Modal>
   );
 };
 

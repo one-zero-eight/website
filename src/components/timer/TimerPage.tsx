@@ -6,7 +6,7 @@ import {
 } from "@/components/timer/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useEventListener } from "usehooks-ts";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useTimer } from "./lib/useTimer";
 import { useTimerRestore } from "./lib/useTimerRestore";
 import { useTimerInterval } from "./lib/useTimeInterval";
@@ -165,7 +165,7 @@ const TimerPage = () => {
   return (
     <div
       ref={containerRef}
-      className={clsx(
+      className={cn(
         "relative flex grow flex-col items-center p-4 md:p-8",
         isFullscreen && "bg-base-100",
       )}

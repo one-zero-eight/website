@@ -3,7 +3,7 @@ import type { SchemaClub } from "@/api/clubs/types";
 import { $workshops } from "@/api/workshops";
 import { HostType, SchemaWorkshop } from "@/api/workshops/types";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useMemo, useState } from "react";
 
 export interface ParticipantsProps {
@@ -120,7 +120,7 @@ export default function Participants({
 
       {/* Participants card */}
       <div
-        className={clsx(
+        className={cn(
           "card card-border",
           hide ? "hidden" : "flex",
           className,

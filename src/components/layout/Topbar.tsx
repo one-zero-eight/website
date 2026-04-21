@@ -1,6 +1,6 @@
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton";
 import UserMenu from "@/components/layout/UserMenu";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 
 export function Topbar({
   title,
@@ -13,7 +13,7 @@ export function Topbar({
 }) {
   return (
     <nav
-      className={clsx(
+      className={cn(
         "w-full flex-row items-center justify-between",
         hideOnMobile ? "hidden lg:flex" : "flex",
         hideBorder ? "" : "border-b-base-300 border-b",

@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { ButtonHTMLAttributes } from "react";
 
 export default function AddEventButton({
@@ -11,7 +11,7 @@ export default function AddEventButton({
   return (
     <button
       type="button"
-      className={clsx(base, children && "pr-3", className)}
+      className={cn(base, children && "pr-3", className)}
       title="Add new workshop"
       {...props}
     >

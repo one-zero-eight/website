@@ -2,7 +2,7 @@ import { $clubs, clubsTypes } from "@/api/clubs";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useQueryClient } from "@tanstack/react-query";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useBlocker, useNavigate } from "@tanstack/react-router";
 import { getClubTypeLabel } from "./constants.ts";
@@ -413,7 +413,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                     type="button"
                     onClick={handleUploadLogo}
                     disabled={!logoFile || isUploadingLogo}
-                    className={clsx(
+                    className={cn(
                       "btn btn-primary w-full",
                       (!logoFile || isUploadingLogo) && "btn-disabled",
                     )}
@@ -857,7 +857,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               <button
                 type="submit"
                 disabled={isUpdating}
-                className={clsx(
+                className={cn(
                   "btn btn-primary",
                   isUpdating && "btn-disabled",
                 )}

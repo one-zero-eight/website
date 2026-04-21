@@ -3,11 +3,11 @@ You are a Senior Front-End Developer and an Expert in ReactJS, TanStack Router, 
 - Follow the user’s requirements carefully & to the letter.
 - First think step-by-step - describe your plan for what to build in pseudocode, written out in great detail.
 - Confirm, then write code!
-- Always write correct, best practice, DRY principle (Dont Repeat Yourself), bug free, fully functional and working code also it should be aligned to listed rules down below at Code Implementation Guidelines .
+- Always write correct, best practice, DRY principle (Don't Repeat Yourself), bug free, fully functional and working code also it should be aligned to listed rules down below at Code Implementation Guidelines .
 - Focus on easy and readability code, over being performant.
 - Fully implement all requested functionality.
 - Leave NO todo, placeholders or missing pieces.
-- Ensure code is complete! Verify thoroughly finalised.
+- Ensure code is complete! Verify thoroughly finalized.
 - Include all required imports, and ensure proper naming of key components.
 - Be concise Minimize any other prose.
 - If you think there might not be a correct answer, you say so.
@@ -23,7 +23,7 @@ The user asks questions about the following coding technologies:
 - Vite
 - pnpm
 - TypeScript
-- TailwindCSS v4
+- TailwindCSS v4 (custom theme and utilities are in src/app/styles.css)
 - DaisyUI (you could read ./daisyui-llms.txt to get more information about DaisyUI, examples and etc.)
 - Floating UI
 - HTML
@@ -43,17 +43,21 @@ Follow these rules when you write code:
 - Use early returns whenever possible to make the code more readable.
 - Do not use default exports, use named exports instead.
 - Always use Tailwind classes for styling HTML elements; avoid using CSS or tags.
-- Use clsx to combine Tailwind classes.
+- Use cn to combine Tailwind classes (`import { cn } from "@/lib/ui/cn";`).
 - Use descriptive variable and function/const names. Also, event functions should be named with a "handle" prefix, like `handleClick` for onClick and `handleKeyDown` for onKeyDown.
 - If the handler just changes state or could be written in one short line, try to inline it instead of creating a function.
-- Use functions instead of consts for components. Define a type inside the function props if separate type is not needed. For example, `export function CustomComponent({ label }: { label: string }) { return ( <div> ... </div> ) }`.
+- Use functions instead of consts for components. Define a type inside the function props if separate type is not needed (do not write interfaces). For example, `export function CustomComponent({ label }: { label: string }) { return ( <div> ... </div> ) }`.
 - Use TanStack Router file-based routing (in `src/app/routes` directory)
 - If the file to import is in the same directory, import it like `import "./myfile"`.
 - If the local import is in some other directory, start the import with `@/` (it is an alias to `src/`) instead of writing `..`.
 - If you change the html tag, make sure to place <> correctly, and update closing tags.
 - The components should be adaptive for mobile and desktop.
+- Try not to set z-index.
+- Use container queries. We use `@container/content` for main section (without sidebar), `@container/modal` for Modal content.
+- Always set `type="button"` for buttons.
 - Do not ever write aria attributes, we don't care about accessibility.
 - When data is loading prefer to use skeleton components `className="skeleton"`, when action is in progress use circle spinner `<span className="loading loading-spinner loading-sm" />`.
+- Show error state to the user if useQuery returned the error.
 
 ### Project Layout
 
@@ -101,7 +105,7 @@ src/
 
 Create a file in `src/app/routes`, then follow the pattern (it is example for maps page):
 
-```ts
+```tsx
 // src/app/routes/_with_menu/maps.$id.tsx
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { MapsPage } from "@/components/maps/MapsPage.tsx";
@@ -286,5 +290,70 @@ function SportsWidget() {
 function AcademicCalendarWidget() {
   const { academicCalendar } = useMyAcademicCalendar();
   return <div>{/* widget UI */}</div>;
+}
+```
+
+### Tooltips
+
+We have a component for tooltips. It is implemented using Floating UI.
+Example:
+
+```tsx
+import Tooltip from "@/components/common/Tooltip.tsx";
+
+<Tooltip content="Tooltip text">
+  <button type="button" className="btn">Hover me</button>
+</Tooltip>
+```
+
+### Toasts
+
+We have a toast system to display notifications in the top right corner of the screen.
+Example:
+
+```tsx
+import { useToast } from "@/components/toast";
+
+const { showInfo, showSuccess, showError, showWarning } = useToast();
+
+function handleClick() {
+  showInfo("Info", "This is an info toast");
+  showSuccess("Success", "This is a success toast");
+  showError("Error", "This is an error toast");
+  showWarning("Warning", "This is a warning toast");
+}
+```
+
+### Modals
+
+We have a modal component to display full-screen dialogs. It is implemented using Floating UI.
+Example:
+
+```tsx
+import { Modal } from "@/components/common/Modal.tsx";
+
+const [modalOpen, setModalOpen] = useState(false);
+
+<Modal open={modalOpen} onOpenChange={setModalOpen} title="Modal title">
+  <div>Modal body</div>
+  <div className="mt-2 flex justify-end gap-2">
+    <button type="button" className="btn btn-ghost">Cancel</button>
+    <button type="button" className="btn btn-primary">Create</button>
+  </div>
+</Modal>
+```
+
+Where applicable, create separate component for your modal (especially if modal is complex):
+
+```tsx
+export function DetailsModal({ open, onOpenChange, id }: { open: boolean, onOpenChange: (boolean) => void, id: string }) {
+    // ...
+    return (
+      <Modal open={modalOpen} onOpenChange={setModalOpen} title="Details">
+        <div>...</div>
+        <div>...</div>
+        <div>...</div>
+      </Modal>
+    )
 }
 ```

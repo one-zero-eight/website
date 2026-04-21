@@ -1,5 +1,5 @@
 import { searchTypes } from "@/api/search";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 
 export function ActResult({
   response,
@@ -11,7 +11,7 @@ export function ActResult({
   return (
     <div
       tabIndex={0}
-      className={clsx(
+      className={cn(
         "bg-base-200 rounded-field flex flex-col border! border-gray-400 p-4",
       )}
     >

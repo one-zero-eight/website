@@ -1,5 +1,5 @@
 import { RoomAccess_level } from "@/api/room-booking/types.ts";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 
 export const accessLevelColors: Record<RoomAccess_level, string> = {
   [RoomAccess_level.yellow]: "#FFD700", // Gold
@@ -16,7 +16,7 @@ export function AccessLevelIcon({
 }) {
   return (
     <span
-      className={clsx(
+      className={cn(
         "icon-[material-symbols--lock-open-circle-outline]",
         className,
       )}

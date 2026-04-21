@@ -17,7 +17,7 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 import { Link } from "@tanstack/react-router";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
 
 type UserMenuProps = {
@@ -75,7 +75,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
               ref={refs.setFloating}
               style={{ ...floatingStyles, ...transitionStyles }}
               {...getFloatingProps()}
-              className={clsx(
+              className={cn(
                 "border-base-300/50 bg-base-100 rounded-box absolute z-10 w-fit border-2 p-4",
                 isMobile
                   ? "top-[18p] left-0"

@@ -1,7 +1,7 @@
 import { clubsTypes } from "@/api/clubs";
 import { clubTypesOrder, getClubTypeLabel } from "./constants.ts";
 import { useEffect, useRef, useState } from "react";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 
 export function ClubsSidebar({
   search,
@@ -93,7 +93,7 @@ export function ClubsSidebar({
             className="btn btn-soft btn-sm"
           >
             <span
-              className={clsx(
+              className={cn(
                 "icon-[material-symbols--filter-list] size-4",
                 mobileFiltersOpen && "rotate-180",
               )}
