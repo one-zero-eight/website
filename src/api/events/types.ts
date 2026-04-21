@@ -347,6 +347,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/me/check-calendar-url-to-link": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Check Calendar Url
+     * @description Check if calendar url can be processed by the server
+     */
+    get: operations["ics_check_calendar_url"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/{user_id}/linked/{linked_alias}.ics": {
     parameters: {
       query?: never;
@@ -1084,6 +1104,10 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
     };
     /**
      * ViewEventGroup
@@ -1530,6 +1554,13 @@ export interface operations {
           "application/json": unknown;
         };
       };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Event group not found */
       404: {
         headers: {
@@ -1567,6 +1598,13 @@ export interface operations {
         content: {
           "application/json": number;
         };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -1661,6 +1699,13 @@ export interface operations {
           "text/calendar": string;
         };
       };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   ics_get_user_schedule: {
@@ -1729,6 +1774,13 @@ export interface operations {
           "application/json": unknown;
           "text/calendar": string;
         };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Object not found */
       404: {
@@ -1806,6 +1858,20 @@ export interface operations {
           "text/calendar": string;
         };
       };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   ics_get_sport_user_schedule: {
@@ -1875,6 +1941,20 @@ export interface operations {
           "text/calendar": string;
         };
       };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   ics_get_workshops_user_schedule: {
@@ -1899,6 +1979,20 @@ export interface operations {
           "application/json": unknown;
           "text/calendar": string;
         };
+      };
+      /** @description Access denied, not enough permissions */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -1929,6 +2023,13 @@ export interface operations {
           "application/json": unknown;
           "text/calendar": string;
         };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Access denied, not enough permissions */
       403: {
@@ -1978,6 +2079,52 @@ export interface operations {
       };
       /** @description Object not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  ics_check_calendar_url: {
+    parameters: {
+      query: {
+        calendar_url: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Calendar can be processed by the server */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+          "text/calendar": string;
+        };
+      };
+      /** @description Calendar can't be processed by the server */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
         headers: {
           [name: string]: unknown;
         };
@@ -2129,6 +2276,13 @@ export interface operations {
           "application/json": unknown;
           "text/calendar": string;
         };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Object not found */
       404: {

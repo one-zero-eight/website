@@ -548,6 +548,13 @@ export interface operations {
           "application/json": components["schemas"]["HealthCheckResponse"];
         };
       };
+      /** @description Service unhealthy */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   get_service_account_email_google_service_account_email_get: {
@@ -595,6 +602,13 @@ export interface operations {
           "application/json": components["schemas"]["GoogleFile"][];
         };
       };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Internal Server Error */
       500: {
         headers: {
@@ -625,6 +639,13 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["CreateFileResponse"];
         };
+      };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -673,6 +694,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -711,6 +739,20 @@ export interface operations {
           "application/json": components["schemas"]["GoogleFile"];
         };
       };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -748,6 +790,20 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["DeleteFileResponse"];
         };
+      };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -791,6 +847,20 @@ export interface operations {
           "application/json": components["schemas"]["UpdateFileResponse"];
         };
       };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -833,8 +903,29 @@ export interface operations {
           "application/json": components["schemas"]["JoinFileResponse"];
         };
       };
-      /** @description Gmail {e.gmail} does not exist or is not associated with a Google account */
+      /** @description Gmail {e.gmail} does not exist or is not associated with a Google account OR Gmail {e.gmail} is already used by another user */
       400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Permission denied. You are banned from this file. OR Permission denied. Make sure the service account has access to the file. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found. OR File with slug {e.slug} not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -882,7 +973,14 @@ export interface operations {
           "application/json": components["schemas"]["BanUserResponse"];
         };
       };
-      /** @description User with user_id {request.user_id} not found in joins */
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found OR User with user_id {request.user_id} not found in joins */
       404: {
         headers: {
           [name: string]: unknown;
@@ -928,6 +1026,27 @@ export interface operations {
           "application/json": components["schemas"]["UnbanUserResponse"];
         };
       };
+      /** @description Invalid user_id */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -965,6 +1084,20 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["CleanupResponse"];
         };
+      };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -1009,7 +1142,21 @@ export interface operations {
           "application/json": components["schemas"]["UpdateUserRoleResponse"];
         };
       };
-      /** @description User with user_id {user_id} not found in joins */
+      /** @description User does not have a permission_id OR Invalid user_id */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found OR User with user_id {user_id} not found in joins */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1057,6 +1204,20 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["UpdateDefaultRoleResponse"];
         };
+      };
+      /** @description No credentials provided OR Invalid token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {

@@ -234,6 +234,8 @@ export interface components {
       dtend?: string | null;
       /** Check In Opens */
       check_in_opens?: string | null;
+      /** Check In Closes */
+      check_in_closes?: string | null;
       /** Place */
       place?: string | null;
       /** Capacity */
@@ -294,6 +296,8 @@ export interface components {
       dtend?: string | null;
       /** Check In Opens */
       check_in_opens?: string | null;
+      /** Check In Closes */
+      check_in_closes?: string | null;
       /** Place */
       place?: string | null;
       /** Capacity */
@@ -372,6 +376,8 @@ export interface components {
       dtend: string | null;
       /** Check In Opens */
       check_in_opens: string | null;
+      /** Check In Closes */
+      check_in_closes: string | null;
       /** Place */
       place: string | null;
       /** Capacity */

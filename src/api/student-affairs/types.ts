@@ -4,58 +4,6 @@
  */
 
 export interface paths {
-  "/cases": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List Cases
-     * @description List support cases belonging to the authenticated portal user.
-     */
-    get: operations["list_cases_cases_get"];
-    put?: never;
-    /**
-     * Create Case
-     * @description Create a new support request on behalf of the authenticated portal user.
-     */
-    post: operations["create_case_cases_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/cases/{case_id}/messages": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get Messages
-     * @description Fetch messages for a given case.
-     *     The caller's email must match the case owner — enforced by Omnidesk
-     *     (only cases belonging to user_email are returned by list_cases).
-     */
-    get: operations["get_messages_cases__case_id__messages_get"];
-    put?: never;
-    /**
-     * Send Message
-     * @description Send a message to a case.
-     *     Supports multipart/form-data with one or more file attachments.
-     *     The user_id is resolved from Omnidesk via the caller's email.
-     */
-    post: operations["send_message_cases__case_id__messages_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/sso/generate-link": {
     parameters: {
       query?: never;
@@ -68,26 +16,9 @@ export interface paths {
     /**
      * Generate Signin Link
      * @description Create a link for user authentication.
-     *     https://support.omnidesk.ru/knowledge_base/item/54180?b_from_widget=1%3Fsid%3D2
+     *     https://support.omnidesk.ru/knowledge_base/item/54180
      */
     post: operations["generate_signin_link_sso_generate_link_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/health": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Health */
-    get: operations["health_health_get"];
-    put?: never;
-    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -98,110 +29,10 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** Attachment */
-    Attachment: {
-      /** File Id */
-      file_id: number;
-      /** File Name */
-      file_name: string;
-      /** File Size */
-      file_size: number;
-      /** Mime Type */
-      mime_type: string;
-      /** Url */
-      url: string;
-    };
-    /** Body_send_message_cases__case_id__messages_post */
-    Body_send_message_cases__case_id__messages_post: {
-      /** Content */
-      content: string;
-      /** Content Html */
-      content_html?: string | null;
-      /**
-       * Attachments
-       * @default []
-       */
-      attachments: string[];
-    };
-    /** CaseListResponse */
-    CaseListResponse: {
-      /** Cases */
-      cases: components["schemas"]["CaseSummary"][];
-      /** Total Count */
-      total_count: number;
-    };
-    /** CaseSummary */
-    CaseSummary: {
-      /** Case Id */
-      case_id: number;
-      /** Case Number */
-      case_number: string;
-      /** Subject */
-      subject: string;
-      /** Status */
-      status: string;
-      /** Priority */
-      priority: string;
-      /** Channel */
-      channel: string;
-      /** Created At */
-      created_at: string;
-      /** Updated At */
-      updated_at: string;
-      /** User Id */
-      user_id: number;
-    };
-    /** CreateCaseRequest */
-    CreateCaseRequest: {
-      /** Subject */
-      subject: string;
-      /** Content */
-      content: string;
-      /** Content Html */
-      content_html?: string | null;
-      /** User Full Name */
-      user_full_name?: string | null;
-    };
-    /** CreateCaseResponse */
-    CreateCaseResponse: {
-      case: components["schemas"]["CaseSummary"];
-    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
-    };
-    /** Message */
-    Message: {
-      /** Message Id */
-      message_id: number;
-      /** User Id */
-      user_id: number;
-      /** Staff Id */
-      staff_id: number;
-      /** Content */
-      content: string;
-      /** Content Html */
-      content_html: string;
-      /** Attachments */
-      attachments: components["schemas"]["Attachment"][];
-      /** Note */
-      note: boolean;
-      /** Created At */
-      created_at: string;
-      /** Full Name */
-      full_name?: string | null;
-    };
-    /** MessagesResponse */
-    MessagesResponse: {
-      /** Messages */
-      messages: components["schemas"]["Message"][];
-      /** Total Count */
-      total_count: number;
-    };
-    /** SendMessageResponse */
-    SendMessageResponse: {
-      message: components["schemas"]["Message"];
     };
     /** ValidationError */
     ValidationError: {
@@ -223,162 +54,11 @@ export interface components {
   headers: never;
   pathItems: never;
 }
-export type SchemaAttachment = components["schemas"]["Attachment"];
-export type SchemaBodySendMessageCasesCaseIdMessagesPost =
-  components["schemas"]["Body_send_message_cases__case_id__messages_post"];
-export type SchemaCaseListResponse = components["schemas"]["CaseListResponse"];
-export type SchemaCaseSummary = components["schemas"]["CaseSummary"];
-export type SchemaCreateCaseRequest =
-  components["schemas"]["CreateCaseRequest"];
-export type SchemaCreateCaseResponse =
-  components["schemas"]["CreateCaseResponse"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
-export type SchemaMessage = components["schemas"]["Message"];
-export type SchemaMessagesResponse = components["schemas"]["MessagesResponse"];
-export type SchemaSendMessageResponse =
-  components["schemas"]["SendMessageResponse"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
-  list_cases_cases_get: {
-    parameters: {
-      query?: {
-        page?: number;
-        limit?: number;
-        /** @description open | waiting | closed */
-        status?: string | null;
-        sort?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["CaseListResponse"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  create_case_cases_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateCaseRequest"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["CreateCaseResponse"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  get_messages_cases__case_id__messages_get: {
-    parameters: {
-      query?: {
-        page?: number;
-        limit?: number;
-        order?: string;
-      };
-      header?: never;
-      path: {
-        case_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["MessagesResponse"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  send_message_cases__case_id__messages_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        case_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": components["schemas"]["Body_send_message_cases__case_id__messages_post"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SendMessageResponse"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
   generate_signin_link_sso_generate_link_post: {
     parameters: {
       query?: {
@@ -406,28 +86,6 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  health_health_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            [key: string]: unknown;
-          };
         };
       };
     };

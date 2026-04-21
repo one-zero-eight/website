@@ -893,6 +893,13 @@ export interface operations {
           "application/json": components["schemas"]["UserWithClubs"];
         };
       };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   change_role_users_change_role_post: {
@@ -915,6 +922,13 @@ export interface operations {
         content: {
           "application/json": unknown;
         };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Only superadmins can change role */
       403: {

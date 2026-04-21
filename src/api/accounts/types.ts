@@ -329,6 +329,47 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/tokens/impersonate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Impersonate User
+     * @description Generate a user access token for the provided uid and email (admin only). Token has scope 'me' and expires in 1 day.
+     *     Stores impersonation in session (same signed cookie as login); effective for 4 hours until depersonate.
+     */
+    get: operations["impersonate_user_tokens_impersonate_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/tokens/depersonate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Depersonate User
+     * @description Clear impersonation from session; subsequent requests use the real session user.
+     */
+    get: operations["depersonate_user_tokens_depersonate_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/tokens/generate-access-token": {
     parameters: {
       query?: never;
@@ -1214,6 +1255,79 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
+      };
+    };
+  };
+  impersonate_user_tokens_impersonate_get: {
+    parameters: {
+      query: {
+        /** @description Target user uid to impersonate */
+        uid: string;
+        /** @description Target user email to put in the token */
+        email: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Impersonated user token */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TokenData"];
+        };
+      };
+      /** @description User does not have a session cookie or `uid` in the session */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not enough permissions */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  depersonate_user_tokens_depersonate_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Impersonation cleared */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description User does not have a session cookie or `uid` in the session */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

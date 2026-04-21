@@ -382,6 +382,54 @@ export interface components {
       /** Username */
       username: string;
     };
+    /** ClubsSource */
+    "ClubsSource-Input": {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: ClubsSourceInputType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Clubs"
+       *     ]
+       */
+      breadcrumbs: string[];
+    };
+    /** ClubsSource */
+    "ClubsSource-Output": {
+      /**
+       * Display Name
+       * @default -
+       */
+      display_name: string;
+      /** Url */
+      url: string;
+      /** Preview Text */
+      preview_text: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: ClubsSourceOutputType;
+      /**
+       * Breadcrumbs
+       * @default [
+       *       "Clubs"
+       *     ]
+       */
+      breadcrumbs: string[];
+    };
     /** DBMessageSchema */
     DBMessageSchema: {
       /** Message Id */
@@ -1095,6 +1143,7 @@ export interface components {
         | components["schemas"]["EduwikiSource-Input"]
         | components["schemas"]["CampusLifeSource-Input"]
         | components["schemas"]["HotelSource-Input"]
+        | components["schemas"]["ClubsSource-Input"]
         | components["schemas"]["MapsSource-Input"]
         | components["schemas"]["MoodleFileSource-Input"]
         | components["schemas"]["MoodleUrlSource-Input"]
@@ -1118,6 +1167,7 @@ export interface components {
         | components["schemas"]["EduwikiSource-Output"]
         | components["schemas"]["CampusLifeSource-Output"]
         | components["schemas"]["HotelSource-Output"]
+        | components["schemas"]["ClubsSource-Output"]
         | components["schemas"]["MapsSource-Output"]
         | components["schemas"]["MoodleFileSource-Output"]
         | components["schemas"]["MoodleUrlSource-Output"]
@@ -1259,6 +1309,9 @@ export type SchemaCampusLifeSourceInput =
 export type SchemaCampusLifeSourceOutput =
   components["schemas"]["CampusLifeSource-Output"];
 export type SchemaChat = components["schemas"]["Chat"];
+export type SchemaClubsSourceInput = components["schemas"]["ClubsSource-Input"];
+export type SchemaClubsSourceOutput =
+  components["schemas"]["ClubsSource-Output"];
 export type SchemaDbMessageSchema = components["schemas"]["DBMessageSchema"];
 export type SchemaEduwikiSourceInput =
   components["schemas"]["EduwikiSource-Input"];
@@ -1591,6 +1644,7 @@ export interface operations {
             | components["schemas"]["EduwikiSource-Output"]
             | components["schemas"]["CampusLifeSource-Output"]
             | components["schemas"]["HotelSource-Output"]
+            | components["schemas"]["ClubsSource-Output"]
             | components["schemas"]["MapsSource-Output"]
             | components["schemas"]["MoodleFileSource-Output"]
             | components["schemas"]["MoodleUrlSource-Output"]
@@ -1902,6 +1956,12 @@ export enum CampusLifeSourceInputType {
 export enum CampusLifeSourceOutputType {
   campuslife = "campuslife",
 }
+export enum ClubsSourceInputType {
+  clubs = "clubs",
+}
+export enum ClubsSourceOutputType {
+  clubs = "clubs",
+}
 export enum EduwikiSourceInputType {
   eduwiki = "eduwiki",
 }
@@ -1917,6 +1977,7 @@ export enum HotelSourceOutputType {
 export enum InfoSources {
   moodle = "moodle",
   eduwiki = "eduwiki",
+  clubs = "clubs",
   campuslife = "campuslife",
   hotel = "hotel",
   maps = "maps",

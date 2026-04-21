@@ -690,6 +690,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/training/{training_id}/cancel_check_in/{student_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["training_cancel_check_in_create_2"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/training/{training_id}/check_in": {
     parameters: {
       query?: never;
@@ -849,6 +865,7 @@ export interface components {
       group_name: string;
       capacity: number;
       current_load: number;
+      is_paid: boolean;
       trainer_first_name: string;
       trainer_last_name: string;
       trainer_email: string;
@@ -920,6 +937,7 @@ export interface components {
       name: string;
       capacity?: number;
       is_club?: boolean;
+      is_paid: boolean;
       sport: components["schemas"]["NewSport"];
       semester: components["schemas"]["Semester"];
       teachers: components["schemas"]["NewTrainer"][];
@@ -996,11 +1014,12 @@ export interface components {
       training_class?: number | null;
     };
     ScheduleExtendedProps: {
-      id: number;
+      id?: number;
       group_id: number;
       training_class: string;
-      current_load: number;
-      capacity: number;
+      current_load?: number;
+      capacity?: number;
+      is_paid: boolean;
     };
     SelfSportReportUploadRequest: {
       /** Format: uri */
@@ -2374,6 +2393,43 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
+        training_id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["NotFound"];
+        };
+      };
+    };
+  };
+  training_cancel_check_in_create_2: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        student_id: number;
         training_id: number;
       };
       cookie?: never;
