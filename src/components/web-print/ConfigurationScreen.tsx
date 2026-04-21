@@ -76,8 +76,8 @@ export function ConfigurationScreen() {
                   status.offline
                     ? ", 💀 offline"
                     : status.paper_percentage
-                      ? ", 📃 has paper"
-                      : ", ✂️ no paper",
+                      ? ", 📃\xa0has\xa0paper"
+                      : ", ✂️\xa0no\xa0paper",
                 )}
                 onSelected={setPrinterCupsName}
               />
