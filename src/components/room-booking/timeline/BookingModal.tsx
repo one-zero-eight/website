@@ -79,7 +79,7 @@ function Attendee({
 
       <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
         <div className="flex h-fit w-6">
-          <span className="text-xl" />
+          <span className="icon-[material-symbols--xl] text-xl" />
         </div>
         <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
           <a
@@ -261,7 +261,13 @@ export function BookingModal({
         },
       },
     );
-  }, [detailsBooking, mutateDeleteBooking]);
+  }, [
+    detailsBooking,
+    mutateDeleteBooking,
+    onOpenChange,
+    queryClient,
+    resetDeleteBooking,
+  ]);
 
   const submitBooking = useCallback(() => {
     if (!newSlot) return;
@@ -275,8 +281,8 @@ export function BookingModal({
         body: {
           room_id: newSlot.room.id,
           title: title.trim(),
-          start: start?.toISOString() ?? newSlot.start.toISOString(),
-          end: end?.toISOString() ?? newSlot.end.toISOString(),
+          start: (start ?? newSlot.start).toISOString(),
+          end: (end ?? newSlot.end).toISOString(),
           participant_emails: [],
         },
       },
@@ -319,8 +325,8 @@ export function BookingModal({
         },
         body: {
           title: title.trim(),
-          start: start?.toISOString() ?? detailsBooking.startsAt.toISOString(),
-          end: end?.toISOString() ?? detailsBooking.endsAt.toISOString(),
+          start: (start ?? detailsBooking.startsAt).toISOString(),
+          end: (end ?? detailsBooking.endsAt).toISOString(),
         },
       },
       {
@@ -343,7 +349,16 @@ export function BookingModal({
         },
       },
     );
-  }, [detailsBooking, title, mutateUpdateBooking, start, end]);
+  }, [
+    detailsBooking,
+    title,
+    mutateUpdateBooking,
+    start,
+    end,
+    queryClient,
+    resetUpdateBooking,
+    onBookingCreated,
+  ]);
 
   const finishBooking = useCallback(() => {
     if (!detailsBooking) return;
@@ -380,7 +395,13 @@ export function BookingModal({
         },
       },
     );
-  }, [detailsBooking, mutateUpdateBooking]);
+  }, [
+    detailsBooking,
+    mutateUpdateBooking,
+    queryClient,
+    resetUpdateBooking,
+    onBookingCreated,
+  ]);
 
   const getRoomById = (roomId: string | undefined) => {
     return roomId ? rooms?.find((room) => room.id === roomId) : undefined;
@@ -396,8 +417,8 @@ export function BookingModal({
         params: {
           path: { id: room?.id ?? "" },
           query: {
-            start: start?.toISOString() ?? newSlot?.start.toISOString() ?? "",
-            end: end?.toISOString() ?? newSlot?.end.toISOString() ?? "",
+            start: (start ?? newSlot?.start)?.toISOString() ?? "",
+            end: (end ?? newSlot?.end)?.toISOString() ?? "",
           },
         },
       },
@@ -536,6 +557,7 @@ export function BookingModal({
         <Attendee
           attendee={attendee}
           bookingId={outlookBookingId ?? detailsBooking?.id ?? "meow"}
+          key={attendee.email}
         />
       ))
     : undefined;
