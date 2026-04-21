@@ -21,7 +21,11 @@ export const TimeUpMessage = ({ isOpen, onDismiss }: TimeUpMessageProps) => {
       <h2 className="text-primary mb-3 text-3xl font-bold sm:text-4xl md:mb-4 md:text-5xl lg:text-6xl">
         Time's Up!
       </h2>
-      <button type="button" onClick={onDismiss} className="btn btn-primary btn-lg">
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="btn btn-primary btn-lg"
+      >
         OK
       </button>
     </Modal>

@@ -120,11 +120,7 @@ export default function Participants({
 
       {/* Participants card */}
       <div
-        className={cn(
-          "card card-border",
-          hide ? "hidden" : "flex",
-          className,
-        )}
+        className={cn("card card-border", hide ? "hidden" : "flex", className)}
       >
         <div className="card-body">
           <h3 className="card-title flex items-center gap-2 text-xl">

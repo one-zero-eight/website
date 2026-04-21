@@ -93,11 +93,7 @@ const CustomTimeModal = ({
   };
 
   return (
-    <Modal
-      open={open}
-      title="Select Target Time"
-      onOpenChange={onOpenChange}
-    >
+    <Modal open={open} title="Select Target Time" onOpenChange={onOpenChange}>
       <div className="flex flex-col gap-2">
         <p className="text-base-content/70 text-sm">
           Select a specific date and time in the future. The timer will count

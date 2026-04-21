@@ -236,9 +236,7 @@ export function CheckInButton({
 
   if (event.capacity && signedPeople >= event.capacity) {
     return (
-      <span className={cn("btn btn-disabled", className)}>
-        No empty places
-      </span>
+      <span className={cn("btn btn-disabled", className)}>No empty places</span>
     );
   }
 

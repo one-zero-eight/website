@@ -769,7 +769,9 @@ export function BookingModal({
             {UpdateBookingError}
             {DeleteBookingError}
 
-            <div className="mt-2">{outlookBookingId && isAttending && MyBookingButtons}</div>
+            <div className="mt-2">
+              {outlookBookingId && isAttending && MyBookingButtons}
+            </div>
           </div>
         </form>
       )}

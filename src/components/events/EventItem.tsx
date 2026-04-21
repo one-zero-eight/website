@@ -55,9 +55,7 @@ export function EventItem({
       )}
 
       {/* Card */}
-      <div
-        className={cn("card card-border bg-base-100 min-w-full", className)}
-      >
+      <div className={cn("card card-border bg-base-100 min-w-full", className)}>
         <div className="relative flex h-[220px] grow items-start justify-between overflow-hidden rounded-t-(--radius-box)">
           <div
             className={cn(

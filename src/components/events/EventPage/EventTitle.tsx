@@ -120,9 +120,7 @@ export default function EventTitle({
       </div>
       <div className="card-body md:p-[var(--card-p, 1.5rem);] p-3 pt-0 md:pt-3">
         {event.language === "both" && (
-          <div
-            className={cn("tabs tabs-box mb-1 flex flex-nowrap md:hidden")}
-          >
+          <div className={cn("tabs tabs-box mb-1 flex flex-nowrap md:hidden")}>
             <input
               type="radio"
               name="language_tabs"
