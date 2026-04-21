@@ -56,6 +56,7 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
         globPatterns: ["**/*.{js,css,html,json,svg,png,woff2}"],
+        navigateFallbackDenylist: [/^\/api(?:\/|$)/],
       },
       manifest: false, // Manifest is already in public/manifest.json
       includeManifestIcons: true,
