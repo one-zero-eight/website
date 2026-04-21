@@ -1,3 +1,30 @@
+/**
+ * Docs: menu item badge and DEV flag
+ *
+ * 1) How to add a badge:
+ * - Add `badge` field to a link item in `items`.
+ * - Example:
+ *   badge: (
+ *     <span className="ml-2 rounded-full bg-yellow-500 px-2 py-0.5 text-xs font-medium text-black">
+ *       STAFF
+ *     </span>
+ *   )
+ *
+ * 2) How to add a DEV-only item:
+ *   ...((import.meta.env.VITE_PRODUCTION && []) || [
+ *     {
+ *       type: "local",
+ *       title: "Events",
+ *       to: "/events",
+ *       badge: (
+ *         <span className="ml-2 rounded-full bg-gray-500 px-2 py-0.5 text-xs font-medium text-white">
+ *           DEV
+ *         </span>
+ *       ),
+ *       icon: <span className="icon-[material-symbols--campaign-rounded]" />,
+ *     },
+ *   ]),
+ */
 import { ValidateLinkOptions } from "@tanstack/react-router";
 
 export type LocalLink = {
@@ -27,6 +54,7 @@ export type LinkItemType = (LocalLink | ExternalLink) & {
 };
 
 export const items: ItemType[] = [
+  // Our flagman services:
   {
     type: "local",
     title: "Search",
@@ -67,6 +95,7 @@ export const items: ItemType[] = [
     hideOnMore: true,
   },
   { type: "separator", hideOnMore: true },
+  // On-site services:
   ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
@@ -105,6 +134,7 @@ export const items: ItemType[] = [
     icon: <span className="icon-[material-symbols--credit-card-outline]" />,
   },
   { type: "separator" },
+  // Informational pages about our services on external platforms: bots, extensions, etc.:
   {
     type: "local",
     title: "Printers",
@@ -137,6 +167,7 @@ export const items: ItemType[] = [
     to: "/extension",
     icon: <span className="icon-[material-symbols--extension-outline]" />,
   },
+  // Services for small audience:
   {
     type: "local",
     title: "Guard",
@@ -166,6 +197,7 @@ export const items: ItemType[] = [
     ),
   },
   { type: "separator" },
+  // External services:
   {
     type: "external",
     title: "Moodle",

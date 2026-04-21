@@ -3,7 +3,7 @@ import Tooltip from "@/components/common/Tooltip.tsx";
 import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
 import { useNowMS } from "@/lib/utils/use-now.ts";
 import { Link } from "@tanstack/react-router";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { BookingModal } from "../timeline/BookingModal";
 import { schemaToBooking } from "../timeline/types";
 
@@ -33,8 +33,12 @@ export function BookingsListPage() {
   }, [bookings, now]);
 
   return status === "pending" ? (
-    <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
-      <span className="icon-[mdi--loading] text-base-content animate-spin text-4xl" />
+    <div className="flex w-full max-w-lg flex-col gap-4 self-center p-4">
+      {Array(3)
+        .fill(0)
+        .map((_, index) => (
+          <BookingCardSkeleton key={index} />
+        ))}
     </div>
   ) : status === "error" ? (
     <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
@@ -126,5 +130,21 @@ export function BookingCard({
         }}
       />
     </>
+  );
+}
+
+export function BookingCardSkeleton() {
+  return (
+    <div className="skeleton flex flex-row px-4 py-3">
+      <div className="flex grow flex-col gap-2">
+        <div className="skeleton h-5 w-2/3 rounded-lg" />
+        <div className="skeleton h-4 w-1/2 rounded-lg" />
+        <div className="skeleton h-4 w-5/6 rounded-lg" />
+      </div>
+      <div className="ml-4 flex flex-row items-center gap-2">
+        <div className="skeleton h-8 w-8 rounded-md" />
+        <div className="skeleton h-8 w-8 rounded-md" />
+      </div>
+    </div>
   );
 }

@@ -1,9 +1,9 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $guard } from "@/api/guard";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
+import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Helmet } from "@dr.pogodin/react-helmet";
 
 const GMAIL_STORAGE_KEY = "guard_saved_gmail";
 
@@ -130,7 +130,7 @@ function RouteComponent() {
         {isPending && (
           <div className="text-primary mt-5 text-center">
             <div className="mb-2 inline-block">
-              <span className="icon-[mdi--loading] animate-spin text-5xl" />
+              <span className="loading loading-spinner loading-6xl" />
             </div>
             <p>Adding you to the file...</p>
           </div>

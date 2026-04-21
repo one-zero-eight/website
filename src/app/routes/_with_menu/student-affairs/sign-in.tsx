@@ -1,9 +1,9 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $studentAffairs } from "@/api/student-affairs";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
+import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Helmet } from "@dr.pogodin/react-helmet";
 
 export type FormSubmitParams = {
   return_to?: string | undefined;
@@ -52,8 +52,9 @@ function RouteComponent() {
       <Helmet>
         <title>Redirecting to the Student Affairs Helpdesk</title>
       </Helmet>
+
       <div className="mb-6">
-        <span className="icon-[mdi--loading] text-primary animate-spin text-6xl" />
+        <span className="text-primary loading loading-spinner loading-6xl" />
       </div>
       <h2 className="mb-2 text-2xl font-bold">Redirecting...</h2>
       <p className="text-base-content/70 mb-4 text-lg">

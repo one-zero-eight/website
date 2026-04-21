@@ -1,10 +1,10 @@
 import { $clubs } from "@/api/clubs";
+import type { SchemaClub } from "@/api/clubs/types";
 import { $workshops } from "@/api/workshops";
 import { HostType, SchemaWorkshop } from "@/api/workshops/types";
-import type { SchemaClub } from "@/api/clubs/types";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export interface ParticipantsProps {
   event: SchemaWorkshop;
@@ -134,8 +134,18 @@ export default function Participants({
 
           {/* Loading state */}
           {loading ? (
-            <div className="flex items-center justify-center py-4">
-              <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
+            <div className="mt-2 space-y-2 py-1">
+              {Array(2)
+                .fill(0)
+                .map((_, index) => (
+                  <div className="flex items-center gap-2" key={index}>
+                    <div className="skeleton h-2.5 w-2.5" />
+                    <div className="flex w-full max-w-xs flex-col gap-2">
+                      <div className="skeleton h-4 w-2/3" />
+                      <div className="skeleton h-4 w-1/3" />
+                    </div>
+                  </div>
+                ))}
             </div>
           ) : participants.length === 0 ? (
             <p className="text-base-content/60 text-base">

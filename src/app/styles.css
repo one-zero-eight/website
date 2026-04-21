@@ -19,20 +19,14 @@
   --color-base-content: oklch(97.807% 0.029 256.847);
   --color-primary: rgb(151 71 255);
   --color-primary-content: oklch(96% 0.018 272.314);
-  --color-secondary: rgb(46 139 87);
+  --color-secondary: rgb(
+    46 139 87
+  ); /* Same as used on calendar for my own bookings */
   --color-secondary-content: oklch(90% 0.093 164.15);
   --color-accent: oklch(74.703% 0.158 39.947);
   --color-accent-content: oklch(14.94% 0.031 39.947);
   --color-neutral: oklch(14% 0.005 285.823);
   --color-neutral-content: oklch(92% 0.004 286.32);
-  --color-info: oklch(78% 0.154 211.53);
-  --color-info-content: oklch(30% 0.056 229.695);
-  --color-success: oklch(79% 0.209 151.711);
-  --color-success-content: oklch(26% 0.065 152.934);
-  --color-warning: oklch(75% 0.183 55.934);
-  --color-warning-content: oklch(26% 0.079 36.259);
-  --color-error: oklch(70% 0.191 22.216);
-  --color-error-content: oklch(25% 0.092 26.042);
   --radius-selector: 2rem;
   --radius-field: 0.5rem;
   --radius-box: 1rem;
@@ -55,20 +49,14 @@
   --color-base-content: oklch(21% 0.006 285.885);
   --color-primary: rgb(151 71 255);
   --color-primary-content: oklch(93% 0.034 272.788);
-  --color-secondary: rgb(46 139 87);
+  --color-secondary: rgb(
+    46 139 87
+  ); /* Same as used on calendar for my own bookings */
   --color-secondary-content: oklch(90% 0.093 164.15);
   --color-accent: oklch(74.703% 0.158 39.947);
   --color-accent-content: oklch(14.94% 0.031 39.947);
   --color-neutral: oklch(14% 0.005 285.823);
   --color-neutral-content: oklch(92% 0.004 286.32);
-  --color-info: oklch(91% 0.08 205.041);
-  --color-info-content: oklch(39% 0.07 227.392);
-  --color-success: oklch(92% 0.084 155.995);
-  --color-success-content: oklch(39% 0.095 152.535);
-  --color-warning: oklch(90% 0.076 70.697);
-  --color-warning-content: oklch(40% 0.123 38.172);
-  --color-error: oklch(88% 0.062 18.334);
-  --color-error-content: oklch(39% 0.141 25.723);
   --radius-selector: 2rem;
   --radius-field: 0.5rem;
   --radius-box: 1rem;
@@ -201,4 +189,15 @@
 .cursor-hidden,
 .cursor-hidden * {
   cursor: none !important;
+}
+
+@utility skeleton {
+  @apply bg-base-200 rounded-box animate-pulse;
+  .skeleton {
+    @apply bg-base-300;
+  }
+}
+
+@utility loading-6xl {
+  width: calc(var(--size-selector, 0.25rem /* 4px */) * 16);
 }

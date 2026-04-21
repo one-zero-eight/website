@@ -1,14 +1,14 @@
 import { $search, searchTypes } from "@/api/search";
-import PreviewCard from "@/components/search/PreviewCard.tsx";
-import SearchField from "@/components/search/SearchField.tsx";
-import SearchResult from "@/components/search/SearchResult.tsx";
-import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
 import {
   InfoSources,
   PathsSearchSearchGetParametersQueryResponse_types,
   Resources,
 } from "@/api/search/types";
+import PreviewCard from "@/components/search/PreviewCard.tsx";
+import SearchField from "@/components/search/SearchField.tsx";
+import SearchResult from "@/components/search/SearchResult.tsx";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
 import IframePreviewCard from "./IframePreviewCard";
 
 export function SearchPage({ searchQuery }: { searchQuery: string }) {
@@ -187,11 +187,11 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="group bg-base-200 rounded-field flex grid min-h-32 w-full animate-pulse items-start p-4"
+                  className="group skeleton grid min-h-32 w-full items-start p-4"
                 />
               ))}
             </div>
-            <div className="group md:bg-base-200 md:rounded-field flex hidden animate-pulse md:inline md:h-[375px] md:w-1/2 md:min-w-0 md:basis-1/2 md:justify-stretch"></div>
+            <div className="group skeleton hidden md:inline md:h-[375px] md:w-1/2 md:min-w-0 md:basis-1/2 md:justify-stretch"></div>
           </div>
         </>
       )}

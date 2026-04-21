@@ -18,7 +18,7 @@ export function GenerateButton({
     >
       {isGenerating ? (
         <>
-          <span className="icon-[mdi--loading] h-4 w-4 animate-spin" />
+          <span className="loading loading-spinner loading-xs" />
           Generating...
         </>
       ) : (

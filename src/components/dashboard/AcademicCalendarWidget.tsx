@@ -17,7 +17,7 @@ export function AcademicCalendarWidget() {
   if (!academicCalendar) {
     if (!widgetShown) return null;
     return (
-      <div className="group bg-base-200 rounded-box flex min-h-32 animate-pulse flex-row gap-4 px-4 py-6" />
+      <div className="group skeleton flex min-h-32 flex-row gap-4 px-4 py-6" />
     );
   }
 

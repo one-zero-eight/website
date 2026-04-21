@@ -76,8 +76,7 @@ src/
 │   │   ├── AccessLevelIcon.tsx
 │   │   ├── utils.ts
 │   │   ├── bookings-list/
-│   │   │   ├── BookingsListPage.tsx
-│   │   │   └── DeleteBookingModal.tsx
+│   │   │   └── BookingsListPage.tsx
 │   │   ├── rooms-list/
 │   │   │   └── RoomsList.tsx
 │   │   ├── room-page/
@@ -250,3 +249,42 @@ If user asks you to find a suitable icon, use the following instruction:
 
 - Search: `https://api.iconify.design/search?query=<keyword>&prefix=<prefix>`
 - Icon data: `https://api.iconify.design/<prefix>.json?icons=<name1>,<name2>,...`
+
+## React data fetching
+
+Fetch data in the component that owns the feature logic.
+
+Guidelines:
+
+- If a component is an autonomous feature block, it may own its own `useQuery`.
+- Do not push data fetching into components that are only visual structure.
+- Prefer explicit ownership of data over rigid separation by layer.
+- Avoid scattering unrelated queries across many small components without clear boundaries.
+- Since we use TanStack Query, repeated requests to the same endpoint are deduplicated and cached, so colocated queries usually do not create extra network load.
+
+```tsx
+function DashboardPage() {
+  return (
+    <div className="grid gap-4">
+      <AcademicCalendarWidget />
+      <SportsWidget />
+    </div>
+  );
+}
+
+function SportsWidget() {
+  const { data: profile } = $sport.useQuery("get", "/profile/student");
+  const { data: hours } = $sport.useQuery(
+    "get",
+    "/attendance/{student_id}/hours",
+    { params: { path: { student_id: Number(profile?.id) } } },
+    { enabled: !!profile },
+  );
+  return <div>{/* widget UI */}</div>;
+}
+
+function AcademicCalendarWidget() {
+  const { academicCalendar } = useMyAcademicCalendar();
+  return <div>{/* widget UI */}</div>;
+}
+```

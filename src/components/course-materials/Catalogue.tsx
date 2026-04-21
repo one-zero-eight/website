@@ -1,6 +1,6 @@
 import { $search, searchTypes } from "@/api/search";
-import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "@/components/dashboard/links/CustomSelect.tsx";
+import { useEffect, useMemo, useState } from "react";
 import PreviewCard from "../search/PreviewCard.tsx";
 
 // Types
@@ -77,7 +77,7 @@ const SearchControls = ({
         className="bg-primary flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 text-base font-medium text-white shadow-lg transition-all duration-200 hover:bg-[#6600CC] hover:shadow-xl disabled:opacity-50 sm:w-auto"
       >
         {isPending || isSearching ? (
-          <span className="icon-[material-symbols--sync] h-5 w-5 animate-spin" />
+          <span className="loading loading-spinner loading-xs" />
         ) : (
           <span className="icon-[material-symbols--search-rounded] h-5 w-5" />
         )}
@@ -219,7 +219,7 @@ const CourseCard = ({
       >
         <div className="shrink-0">
           {isLoading ? (
-            <span className="icon-[material-symbols--sync] text-primary animate-spin text-3xl" />
+            <span className="text-primary loading loading-spinner" />
           ) : (
             <span
               className={`${isExpanded ? "icon-[material-symbols--folder-open-rounded]" : "icon-[material-symbols--folder]"} text-primary text-3xl transition-all duration-200`}
@@ -347,10 +347,10 @@ const LoadingSkeleton = () => (
         className="border-base-300 bg-base-200 rounded-xl border p-4"
       >
         <div className="flex items-center gap-3">
-          <div className="bg-base-content/20 h-8 w-8 animate-pulse rounded-sm" />
+          <div className="skeleton h-8 w-8" />
           <div className="flex-1">
-            <div className="bg-base-content/20 h-6 w-32 animate-pulse rounded-sm" />
-            <div className="bg-base-content/20 mt-1 h-4 w-24 animate-pulse rounded-sm" />
+            <div className="skeleton h-6 w-32" />
+            <div className="skeleton mt-1 h-4 w-24" />
           </div>
         </div>
       </div>

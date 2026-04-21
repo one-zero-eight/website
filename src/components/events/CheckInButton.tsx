@@ -1,16 +1,16 @@
 import { $workshops } from "@/api/workshops";
+import { CheckInType } from "@/api/workshops/types";
 import { useToast } from "@/components/toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import clsx from "clsx";
+import { CheckInButtonProps } from "./types";
 import {
   getInactiveStatusText,
   getSignedPeopleCount,
   isEventCurrentlyGoing,
   isWorkshopActive,
 } from "./utils";
-import { useQueryClient } from "@tanstack/react-query";
-import clsx from "clsx";
-import { CheckInType } from "@/api/workshops/types";
-import { Link } from "@tanstack/react-router";
-import { CheckInButtonProps } from "./types";
 
 export function CheckInButton({
   event,
@@ -121,7 +121,7 @@ export function CheckInButton({
     return (
       <span
         className={clsx(
-          "btn btn-warning dark:btn-soft pointer-events-none",
+          "btn btn-soft btn-warning pointer-events-none",
           className,
         )}
       >
@@ -153,7 +153,7 @@ export function CheckInButton({
         <Link
           to={event.check_in_link!}
           target="_blank"
-          className={clsx("btn dark:btn-soft btn-success w-full px-8")}
+          className={clsx("btn btn-soft btn-success w-full px-8")}
           title={"Check in"}
         >
           Check in
@@ -164,7 +164,7 @@ export function CheckInButton({
             type="button"
             disabled={isCheckOutPending}
             onClick={handleCheckOut}
-            className={clsx("btn dark:btn-soft btn-error w-full px-4")}
+            className={clsx("btn btn-soft btn-error w-full px-4")}
             title={"Remove from calendar"}
           >
             Remove from calendar
@@ -174,7 +174,7 @@ export function CheckInButton({
             type="button"
             disabled={isCheckInPending}
             onClick={handleCheckIn}
-            className={clsx("btn dark:btn-soft btn-success w-full px-4")}
+            className={clsx("btn btn-soft btn-success w-full px-4")}
             title={"Add to calendar"}
           >
             Add to calendar
@@ -191,7 +191,7 @@ export function CheckInButton({
           type="button"
           disabled={isCheckOutPending}
           onClick={handleCheckOut}
-          className={clsx("btn dark:btn-soft btn-error", className)}
+          className={clsx("btn btn-soft btn-error", className)}
           title={"Check out"}
         >
           Remove from calendar
@@ -212,7 +212,7 @@ export function CheckInButton({
         type="button"
         disabled={isCheckInPending}
         onClick={handleCheckIn}
-        className={clsx("btn dark:btn-soft btn-success", className)}
+        className={clsx("btn btn-soft btn-success", className)}
         title={"Add to calendar"}
       >
         Add to calendar
@@ -226,7 +226,7 @@ export function CheckInButton({
         type="button"
         disabled={isCheckOutPending}
         onClick={handleCheckOut}
-        className={clsx("btn dark:btn-soft btn-error", className)}
+        className={clsx("btn btn-soft btn-error", className)}
         title={"Check out"}
       >
         Check out
@@ -247,7 +247,7 @@ export function CheckInButton({
       type="button"
       disabled={isCheckInPending}
       onClick={handleCheckIn}
-      className={clsx("btn dark:btn-soft btn-success", className)}
+      className={clsx("btn btn-soft btn-success", className)}
       title={"Check in"}
     >
       Check in

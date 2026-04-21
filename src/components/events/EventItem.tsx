@@ -1,19 +1,19 @@
-import { Fragment } from "react";
+import { $clubs } from "@/api/clubs/index.ts";
 import { $workshops } from "@/api/workshops";
+import { HostType } from "@/api/workshops/types.ts";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
+import { Fragment } from "react";
+import { eventBadges } from "./EventBadges.tsx";
+import { LanguageBadge } from "./LanguageBadge.tsx";
+import { EventItemProps } from "./types";
 import {
   formatDate,
   formatTime,
-  parseTime,
   imageLink,
   isEventRecommended,
+  parseTime,
 } from "./utils";
-import { eventBadges } from "./EventBadges.tsx";
-import { LanguageBadge } from "./LanguageBadge.tsx";
-import { $clubs } from "@/api/clubs/index.ts";
-import { EventItemProps } from "./types";
-import { HostType } from "@/api/workshops/types.ts";
 
 export function EventItem({
   event,
@@ -119,7 +119,7 @@ export function EventItem({
                           <span>{host.name || "Unknown"}</span>
                         ) : clubsLoading ? (
                           <span
-                            className="bg-base-content/20 inline-block h-4 max-w-28 min-w-20 animate-pulse rounded align-middle"
+                            className="skeleton inline-block h-4 max-w-28 min-w-20 align-middle"
                             aria-hidden
                           />
                         ) : (
