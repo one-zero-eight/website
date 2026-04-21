@@ -39,9 +39,7 @@ export function ClubAdminCard({ club }: { club: clubsTypes.SchemaClub }) {
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <span
-              className={cn("badge badge-sm", getClubTypeColor(club.type))}
-            >
+            <span className={cn("badge badge-sm", getClubTypeColor(club.type))}>
               {getClubTypeLabel(club.type)}
             </span>
             {!club.is_active && (

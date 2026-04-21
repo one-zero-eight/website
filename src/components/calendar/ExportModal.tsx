@@ -72,7 +72,9 @@ export function ExportModal({
       open={open}
       onOpenChange={onOpenChange}
       title={
-        isTargetModal ? modalText[eventGroupOrTarget].title : "Export to your calendar"
+        isTargetModal
+          ? modalText[eventGroupOrTarget].title
+          : "Export to your calendar"
       }
       overlayClassName={aboveModal ? "bg-black/50" : ""}
       containerClassName="max-w-full xl:max-w-[75%] bg-base-100"
@@ -85,7 +87,10 @@ export function ExportModal({
       <ul className="text-base-content/75 list-decimal pb-4 pl-5">
         <li>
           Copy the link.
-          <ScheduleLinkCopy url={calendarURL || ""} copyButtonRef={copyButtonRef} />
+          <ScheduleLinkCopy
+            url={calendarURL || ""}
+            copyButtonRef={copyButtonRef}
+          />
         </li>
         <li>
           Open your calendar settings to add a calendar by URL.
@@ -106,7 +111,9 @@ export function ExportModal({
       </ul>
       <div className="-m-4">
         <Calendar
-          urls={calendarURL ? [{ url: calendarURL, eventGroup: eventGroup }] : []}
+          urls={
+            calendarURL ? [{ url: calendarURL, eventGroup: eventGroup }] : []
+          }
           viewId="popup"
         />
       </div>

@@ -59,7 +59,7 @@ export default defineConfig({
       },
       manifest: false, // Manifest is already in public/manifest.json
       includeManifestIcons: true,
-      includeAssets: "*"
+      includeAssets: "*",
     }),
 
     // Minify the index.html

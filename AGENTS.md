@@ -116,9 +116,7 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/_with_menu/maps/$id")({
   component: RouteComponent,
   // If you want to use search params, you need to define validateSearch function:
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { q?: string } => {
+  validateSearch: (search: Record<string, unknown>): { q?: string } => {
     return {
       q: search.q ? search.q.toString() : undefined,
     };
@@ -127,7 +125,7 @@ export const Route = createFileRoute("/_with_menu/maps/$id")({
 });
 
 function RouteComponent() {
-  const { q } = Route.useSearch();  // if you need search params, get it here and pass to children
+  const { q } = Route.useSearch(); // if you need search params, get it here and pass to children
   const { id } = Route.useParams(); // if you need params, get it here and pass to children
 
   return (
@@ -139,11 +137,13 @@ function RouteComponent() {
           content="View plans of Innopolis University."
         />
       </Helmet>
-
-      <Topbar title="Maps"/>
+      <Topbar title="Maps" />
       <MapsPageTabs /> // Only if you need tabs, otherwise omit it.
-      <RequireAuth> // Wrap if user should be authenticated to view this page.
-        <MapsPage q={q} id={id} /> // Component from "src/components/maps/MapsPage.tsx"
+      <RequireAuth>
+        {" "}
+        // Wrap if user should be authenticated to view this page.
+        <MapsPage q={q} id={id} /> // Component from
+        "src/components/maps/MapsPage.tsx"
       </RequireAuth>
     </>
   );
@@ -302,8 +302,10 @@ Example:
 import Tooltip from "@/components/common/Tooltip.tsx";
 
 <Tooltip content="Tooltip text">
-  <button type="button" className="btn">Hover me</button>
-</Tooltip>
+  <button type="button" className="btn">
+    Hover me
+  </button>
+</Tooltip>;
 ```
 
 ### Toasts
@@ -337,23 +339,35 @@ const [modalOpen, setModalOpen] = useState(false);
 <Modal open={modalOpen} onOpenChange={setModalOpen} title="Modal title">
   <div>Modal body</div>
   <div className="mt-2 flex justify-end gap-2">
-    <button type="button" className="btn btn-ghost">Cancel</button>
-    <button type="button" className="btn btn-primary">Create</button>
+    <button type="button" className="btn btn-ghost">
+      Cancel
+    </button>
+    <button type="button" className="btn btn-primary">
+      Create
+    </button>
   </div>
-</Modal>
+</Modal>;
 ```
 
 Where applicable, create separate component for your modal (especially if modal is complex):
 
 ```tsx
-export function DetailsModal({ open, onOpenChange, id }: { open: boolean, onOpenChange: (boolean) => void, id: string }) {
-    // ...
-    return (
-      <Modal open={modalOpen} onOpenChange={setModalOpen} title="Details">
-        <div>...</div>
-        <div>...</div>
-        <div>...</div>
-      </Modal>
-    )
+export function DetailsModal({
+  open,
+  onOpenChange,
+  id,
+}: {
+  open: boolean;
+  onOpenChange: (boolean) => void;
+  id: string;
+}) {
+  // ...
+  return (
+    <Modal open={modalOpen} onOpenChange={setModalOpen} title="Details">
+      <div>...</div>
+      <div>...</div>
+      <div>...</div>
+    </Modal>
+  );
 }
 ```

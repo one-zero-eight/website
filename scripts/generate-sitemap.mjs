@@ -151,7 +151,9 @@ async function main() {
   );
 
   if (excludedPaths.size > 0) {
-    console.log(`Excluded ${excludedPaths.size} path(s): ${[...excludedPaths].join(", ")}`);
+    console.log(
+      `Excluded ${excludedPaths.size} path(s): ${[...excludedPaths].join(", ")}`,
+    );
   }
 }
 

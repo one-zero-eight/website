@@ -143,7 +143,11 @@ export function AddClubDialog({
           >
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary" disabled={isPending}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isPending}
+          >
             {isPending ? (
               <>
                 <span className="loading loading-spinner loading-sm" />
