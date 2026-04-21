@@ -18,8 +18,10 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import clsx from "clsx";
 import moment from "moment/moment";
 import {
+  type PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
+  // useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -34,9 +36,30 @@ const DRAFT_SLOT_MS = 30 * 60 * 1000;
 const DRAFT_SLOT_MAX_MS = 3 * 60 * 60 * 1000;
 const MOBILE_TAP_BOOKING_MAX_WIDTH_PX = 767;
 
+/**
+ * Moscow is UTC+3. FullCalendar 6 with 'Europe/Moscow' returns shifted Date objects
+ * where the 'wall clock' time is represented as UTC.
+ * We subtract 3 hours to get the real UTC timestamp.
+ */
+function fromCalendarDate(d: Date): Date {
+  return new Date(d.getTime() - 3 * 3600 * 1000);
+}
+
+/**
+ * Converts a real UTC timestamp to the shifted 'Calendar Space' (Moscow Wall Clock as UTC).
+ 
+function toCalendarDate(d: Date | number): Date {
+  const ms = typeof d === "number" ? d : d.getTime();
+  return new Date(ms + 3 * 3600 * 1000);
+}
+*/
 type BookingDraft =
-  | { phase: "awaiting_end"; start: Date; end: Date }
-  | { phase: "complete"; start: Date; end: Date };
+  | { phase: "preview"; start: Date; end: Date }
+  | { phase: "dragging"; start: Date; end: Date };
+
+type DraftDragAnchor = "top" | "bottom";
+
+const DRAFT_SLOT_STEP_MS = DRAFT_SLOT_MS;
 
 function useNarrowScreenForTapBooking() {
   return useSyncExternalStore(
@@ -62,8 +85,44 @@ function addDraftSlotMs(d: Date) {
   return new Date(d.getTime() + DRAFT_SLOT_MS);
 }
 
-function clampDraftDurationMs(durationMs: number) {
-  return Math.max(DRAFT_SLOT_MS, Math.min(DRAFT_SLOT_MAX_MS, durationMs));
+function roundToNearestStepMs(ms: number, stepMs: number) {
+  return Math.round(ms / stepMs) * stepMs;
+}
+
+function roundUpToStepMs(ms: number, stepMs: number) {
+  return Math.ceil(ms / stepMs) * stepMs;
+}
+
+function hasBookingsOverlap(
+  startMs: number,
+  endMs: number,
+  bookings:
+    | {
+        start: string;
+        end: string;
+      }[]
+    | undefined,
+) {
+  if (!bookings?.length) return false;
+
+  return bookings.some((booking) => {
+    const bStart = moment(booking.start).valueOf();
+    const bEnd = moment(booking.end).valueOf();
+    // Check for intersection: draft start is before booking end AND draft end is after booking start
+    return startMs < bEnd && endMs > bStart;
+  });
+}
+
+function formatDuration(start: Date, end: Date) {
+  const totalMinutes = Math.max(
+    0,
+    Math.round((end.getTime() - start.getTime()) / 60000),
+  );
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}m`;
 }
 
 export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
@@ -83,8 +142,9 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           id: roomId,
         },
         query: {
-          start: dateRange.startDate.toISOString(),
-          end: dateRange.endDate.toISOString(),
+          // Send real UTC to API
+          start: fromCalendarDate(dateRange.startDate).toISOString(),
+          end: fromCalendarDate(dateRange.endDate).toISOString(),
         },
       },
     },
@@ -100,8 +160,16 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   });
   const room = rooms?.find((r) => r.id === roomId);
 
-  const [calendarView, setCalendarView] = useState("timeGridWeek");
+  const [calendarView, setCalendarView] = useState("timeGrid3");
   const [bookingDraft, setBookingDraft] = useState<BookingDraft | null>(null);
+  const dragStateRef = useRef<{
+    anchor: DraftDragAnchor;
+    pointerId: number;
+    startY: number;
+    initialStartMs: number;
+    initialEndMs: number;
+    slotHeightPx: number;
+  } | null>(null);
 
   const calendarRef = useRef<FullCalendar>(null);
 
@@ -111,6 +179,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
 
   const clearBookingDraft = useCallback(() => {
     setBookingDraft(null);
+    dragStateRef.current = null;
     const api = calendarRef.current?.getApi();
     api?.getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
   }, []);
@@ -127,8 +196,9 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           short_name: room.short_name,
           restrict_daytime: room.restrict_daytime,
         },
-        start: new Date(selectInfo.startStr),
-        end: new Date(selectInfo.endStr),
+        // selectInfo already provides shifted dates, normalize them for the modal
+        start: fromCalendarDate(new Date(selectInfo.startStr)),
+        end: fromCalendarDate(new Date(selectInfo.endStr)),
       };
 
       setSelectedSlot(slot);
@@ -159,50 +229,270 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       if (arg.allDay || !room) return;
       if (bookingModalOpen) return;
 
-      const clicked = arg.date;
+      // clickedMs is in 'Calendar Space' (Moscow Wall Clock as UTC)
+      const clickedMs = roundToNearestStepMs(
+        arg.date.getTime(),
+        DRAFT_SLOT_STEP_MS,
+      );
 
-      setBookingDraft((prev) => {
-        if (!prev) {
-          return {
-            phase: "awaiting_end",
-            start: clicked,
-            end: addDraftSlotMs(clicked),
-          };
-        }
+      // nowMs in 'Calendar Space'
+      const nowMs = Date.now() + 3 * 3600 * 1000;
+      const nowFloorMs = roundUpToStepMs(nowMs, DRAFT_SLOT_STEP_MS);
 
-        // If the user taps earlier than the current start, treat this as a new start
-        // and reset to "awaiting end" with the default 30-minute preview.
-        if (clicked.getTime() <= prev.start.getTime()) {
-          return {
-            phase: "awaiting_end",
-            start: clicked,
-            end: addDraftSlotMs(clicked),
-          };
-        }
+      if (clickedMs < nowFloorMs) return;
 
-        // The second point is the end boundary of the tapped slot.
-        const nextEnd = addDraftSlotMs(clicked);
-        const durationMs = nextEnd.getTime() - prev.start.getTime();
-        if (durationMs > DRAFT_SLOT_MAX_MS) {
-          return {
-            phase: "awaiting_end",
-            start: clicked,
-            end: addDraftSlotMs(clicked),
-          };
-        }
+      // For overlap check, use real UTC
+      const clickedUtcMs = clickedMs - 3 * 3600 * 1000;
+      if (
+        hasBookingsOverlap(clickedUtcMs, clickedUtcMs + DRAFT_SLOT_MS, bookings)
+      ) {
+        return;
+      }
 
-        const end = new Date(
-          prev.start.getTime() + clampDraftDurationMs(durationMs),
-        );
+      const clicked = new Date(clickedMs);
 
-        return { phase: "complete", start: prev.start, end };
+      setBookingDraft((_prev) => {
+        // Re-tapping the grid repositions the preview to a fresh 30-minute slot.
+        return {
+          phase: "preview",
+          start: clicked,
+          end: addDraftSlotMs(clicked),
+        };
       });
     },
-    [narrowForTapBooking, room, bookingModalOpen],
+    [narrowForTapBooking, room, bookingModalOpen, bookings],
   );
+
+  const handleDraftDragStart = useCallback(
+    (anchor: DraftDragAnchor, pointerId: number, clientY: number) => {
+      if (!bookingDraft) return;
+      const slotEl = document.querySelector(
+        ".fc-timegrid-slot",
+      ) as HTMLElement | null;
+      const slotHeightPx = slotEl?.getBoundingClientRect().height || 20;
+
+      dragStateRef.current = {
+        anchor,
+        pointerId,
+        startY: clientY,
+        initialStartMs: bookingDraft.start.getTime(),
+        initialEndMs: bookingDraft.end.getTime(),
+        slotHeightPx: Math.max(1, slotHeightPx),
+      };
+      setBookingDraft({
+        phase: "dragging",
+        start: bookingDraft.start,
+        end: bookingDraft.end,
+      });
+    },
+    [bookingDraft],
+  );
+
+  const handleDraftPointerDown = useCallback(
+    (anchor: DraftDragAnchor, event: ReactPointerEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.currentTarget.setPointerCapture(event.pointerId);
+      handleDraftDragStart(anchor, event.pointerId, event.clientY);
+    },
+    [handleDraftDragStart],
+  );
+
+  const renderTimeGridEvent = useCallback(
+    (arg: EventContentArg) => {
+      if (arg.event.extendedProps.isDraft) {
+        const durationLabel = arg.event.extendedProps.durationLabel as
+          | string
+          | undefined;
+
+        const start = arg.event.start;
+        const end = arg.event.end;
+        const is30m =
+          start && end && end.getTime() - start.getTime() <= DRAFT_SLOT_STEP_MS;
+
+        return (
+          <div
+            className="pointer-events-auto relative flex h-full items-center justify-center rounded-md border px-3 py-2 text-center"
+            style={{ backgroundColor: "#2D0363", borderColor: "#5E15BC" }}
+          >
+            {/* Top and bottom bars aligned with edges */}
+            <div
+              className="absolute top-0 left-1/2 h-1.5 w-1/2 -translate-x-1/2 rounded-b-full"
+              style={{ backgroundColor: "#5E15BC" }}
+            />
+            <div
+              className="absolute bottom-0 left-1/2 h-1.5 w-1/2 -translate-x-1/2 rounded-t-full"
+              style={{ backgroundColor: "#5E15BC" }}
+            />
+
+            <button
+              type="button"
+              data-draft-anchor="top"
+              aria-label="Adjust booking start by dragging top edge"
+              className="absolute top-0 right-0 left-0 z-10 h-1/2 cursor-ns-resize touch-none bg-transparent"
+              style={{ touchAction: "none" }}
+              onPointerDown={(event) => handleDraftPointerDown("top", event)}
+            />
+            <button
+              type="button"
+              data-draft-anchor="bottom"
+              aria-label="Adjust booking end by dragging bottom edge"
+              className="absolute right-0 bottom-0 left-0 z-10 h-1/2 cursor-ns-resize touch-none bg-transparent"
+              style={{ touchAction: "none" }}
+              onPointerDown={(event) => handleDraftPointerDown("bottom", event)}
+            />
+            {!is30m && (
+              <span className="pointer-events-none px-2 text-xs font-semibold text-white">
+                {durationLabel || "30m"}
+              </span>
+            )}
+          </div>
+        );
+      }
+
+      return renderEventTimeGridWeekRegular(arg);
+    },
+    [handleDraftPointerDown],
+  );
+
+  useEffect(() => {
+    function handlePointerMove(event: PointerEvent) {
+      const dragState = dragStateRef.current;
+      if (!dragState) return;
+      if (event.pointerId !== dragState.pointerId) return;
+      if (event.cancelable) event.preventDefault();
+
+      const stepCount = Math.round(
+        (event.clientY - dragState.startY) / dragState.slotHeightPx,
+      );
+      const diffMs = stepCount * DRAFT_SLOT_STEP_MS;
+
+      const nowMs = Date.now() + 3 * 3600 * 1000;
+      const nowFloorMs = roundUpToStepMs(nowMs, DRAFT_SLOT_STEP_MS);
+
+      setBookingDraft((prev) => {
+        if (!prev) return prev;
+
+        // If the initial tile was exactly 30 minutes, allow dragging in either direction to expand.
+        const isInitial30m =
+          dragState.initialEndMs - dragState.initialStartMs ===
+          DRAFT_SLOT_STEP_MS;
+        let effectiveAnchor = dragState.anchor;
+        if (isInitial30m) {
+          if (diffMs < 0) effectiveAnchor = "top";
+          else if (diffMs > 0) effectiveAnchor = "bottom";
+        }
+
+        if (effectiveAnchor === "top") {
+          const tentativeStart = roundToNearestStepMs(
+            dragState.initialStartMs + diffMs,
+            DRAFT_SLOT_STEP_MS,
+          );
+          const minStartLimit = Math.max(
+            nowFloorMs,
+            dragState.initialEndMs - DRAFT_SLOT_MAX_MS,
+          );
+          const maxStartLimit = dragState.initialEndMs - DRAFT_SLOT_MS;
+
+          let nextStart = Math.min(
+            Math.max(tentativeStart, minStartLimit),
+            maxStartLimit,
+          );
+
+          // Clamp by bookings: convert to real UTC for comparison
+          if (bookings) {
+            for (const b of bookings) {
+              const bStart = moment(b.start).valueOf();
+              const bEnd = moment(b.end).valueOf();
+
+              // Shift back to real UTC for overlap check
+              const nextStartUtc = nextStart - 3 * 3600 * 1000;
+              const fixedEndUtc = dragState.initialEndMs - 3 * 3600 * 1000;
+
+              if (nextStartUtc < bEnd && fixedEndUtc > bStart) {
+                // Shift booking end forward to calendar space for clamping
+                nextStart = Math.max(nextStart, bEnd + 3 * 3600 * 1000);
+              }
+            }
+          }
+
+          if (nextStart > maxStartLimit) nextStart = maxStartLimit;
+
+          return {
+            phase: "dragging",
+            start: new Date(nextStart),
+            end: new Date(dragState.initialEndMs),
+          };
+        } else {
+          const tentativeEnd = roundToNearestStepMs(
+            dragState.initialEndMs + diffMs,
+            DRAFT_SLOT_STEP_MS,
+          );
+          const minEndLimit = dragState.initialStartMs + DRAFT_SLOT_MS;
+          const maxEndLimit = dragState.initialStartMs + DRAFT_SLOT_MAX_MS;
+
+          let nextEnd = Math.max(
+            minEndLimit,
+            Math.min(maxEndLimit, tentativeEnd),
+          );
+
+          // Clamp by bookings
+          if (bookings) {
+            for (const b of bookings) {
+              const bStart = moment(b.start).valueOf();
+              const bEnd = moment(b.end).valueOf();
+
+              // Shift back to real UTC
+              const fixedStartUtc = dragState.initialStartMs - 3 * 3600 * 1000;
+              const nextEndUtc = nextEnd - 3 * 3600 * 1000;
+
+              if (fixedStartUtc < bEnd && nextEndUtc > bStart) {
+                // Shift booking start forward to calendar space
+                nextEnd = Math.min(nextEnd, bStart + 3 * 3600 * 1000);
+              }
+            }
+          }
+
+          if (nextEnd < minEndLimit) nextEnd = minEndLimit;
+
+          return {
+            phase: "dragging",
+            start: new Date(dragState.initialStartMs),
+            end: new Date(nextEnd),
+          };
+        }
+      });
+    }
+
+    function handlePointerRelease(event: PointerEvent) {
+      const dragState = dragStateRef.current;
+      if (!dragState) return;
+      if (event.pointerId !== dragState.pointerId) return;
+      dragStateRef.current = null;
+      setBookingDraft((prev) => {
+        if (!prev) return prev;
+        return { phase: "preview", start: prev.start, end: prev.end };
+      });
+    }
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerRelease);
+    window.addEventListener("pointercancel", handlePointerRelease);
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerRelease);
+      window.removeEventListener("pointercancel", handlePointerRelease);
+    };
+  }, [bookings]);
 
   const handleDraftBook = useCallback(() => {
     if (!room || !bookingDraft) return;
+
+    // Normalize to real UTC before sending to modal
+    const start = fromCalendarDate(bookingDraft.start);
+    const end = fromCalendarDate(bookingDraft.end);
+
+    if (start.getTime() < Date.now()) return;
 
     const slot: Slot = {
       room: {
@@ -212,8 +502,8 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         short_name: room.short_name,
         restrict_daytime: room.restrict_daytime,
       },
-      start: bookingDraft.start,
-      end: bookingDraft.end,
+      start,
+      end,
     };
 
     setSelectedSlot(slot);
@@ -223,25 +513,36 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     calendarRef.current?.getApi().getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
   }, [room, bookingDraft]);
 
+  // const draftDurationLabel = useMemo(() => {
+  //   if (!bookingDraft) return "";
+  //   return formatDuration(bookingDraft.start, bookingDraft.end);
+  // }, [bookingDraft]);
+
   useEffect(() => {
     if (!bookingDraft || !room) return;
 
     const api = calendarRef.current?.getApi();
     if (!api) return;
 
-    queueMicrotask(() => {
-      const current = calendarRef.current?.getApi();
-      if (!current) return;
-      current.getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
-      current.addEvent({
-        id: DRAFT_SLOT_EVENT_ID,
-        title: "New booking",
-        start: bookingDraft.start,
-        end: bookingDraft.end,
-        display: "block",
-        extendedProps: { isDraft: true },
-        color: "#9A2EFF",
-      });
+    const durationLabel = formatDuration(bookingDraft.start, bookingDraft.end);
+    const draftEvent = api.getEventById(DRAFT_SLOT_EVENT_ID);
+    if (draftEvent) {
+      draftEvent.setDates(bookingDraft.start, bookingDraft.end);
+      draftEvent.setExtendedProp("durationLabel", durationLabel);
+      return;
+    }
+
+    api.addEvent({
+      id: DRAFT_SLOT_EVENT_ID,
+      title: "New booking",
+      start: bookingDraft.start,
+      end: bookingDraft.end,
+      display: "block",
+      extendedProps: {
+        isDraft: true,
+        durationLabel,
+      },
+      color: "#9A2EFF",
     });
   }, [bookingDraft, room]);
 
@@ -410,14 +711,14 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
             },
           },
           timeGridWeek: {
-            eventContent: renderEventTimeGridWeek,
+            eventContent: renderTimeGridEvent,
             dayHeaderContent: renderDayHeader,
             slotMinHeight: 40,
           },
           timeGrid3: {
             type: "timeGrid",
             dayCount: 3,
-            eventContent: renderEventTimeGridWeek,
+            eventContent: renderTimeGridEvent,
             dayHeaderContent: renderDayHeader,
             slotMinHeight: 40,
           },
@@ -434,10 +735,10 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
             arg.date.getUTCSeconds() === 0
           )
             return null; // It's a line, not a label
-          // Fix timezone
-          const text = moment(Number(arg.date) - 3 * 60 * 60 * 1000).format(
-            "HH:mm",
-          );
+
+          // arg.date is already shifted to Moscow wall clock (represented as UTC).
+          const text = moment.utc(arg.date).format("HH:mm");
+
           const isNearTimeLabel =
             arg.date.getUTCMinutes() < 15 || arg.date.getUTCMinutes() > 45;
           if (!isNearTimeLabel) {
@@ -457,8 +758,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         eventClassNames={(arg) =>
           clsx(
             "cursor-pointer text-sm rounded-md! bg-transparent! border-0! overflow-clip",
-            arg.event.extendedProps.isDraft &&
-              "pointer-events-none !cursor-default rounded-md! border border-primary/60! bg-primary/15!",
+            arg.event.extendedProps.isDraft && "!cursor-default rounded-md!",
           )
         }
         dateClick={handleDateClick}
@@ -493,11 +793,15 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       />
       {bookingDraft && (
         <div className="bg-base-200/95 border-base-300 fixed right-0 bottom-0 left-0 z-20 border-t px-3 pt-3 shadow-lg backdrop-blur-sm supports-[padding:max(0px)]:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          {bookingDraft.phase === "awaiting_end" && (
+          {bookingDraft.phase === "preview" && (
             <p className="text-base-content/80 mb-3 text-center text-sm">
-              Tap the calendar again to choose when your booking ends.
+              Drag tile edges to set start/end time.
             </p>
           )}
+          {/*           
+          <p className="text-base-content/80 mb-3 text-center text-sm">
+            Duration: {draftDurationLabel}
+          </p> */}
           <div className="flex flex-wrap items-center justify-center gap-2 pb-3">
             <button
               type="button"
@@ -541,18 +845,52 @@ function renderEventListMonth({ event }: EventContentArg) {
   );
 }
 
-function renderEventTimeGridWeek({
+function renderEventTimeGridWeekRegular({
   event,
   borderColor,
   backgroundColor,
   timeText,
 }: EventContentArg) {
   if (event.extendedProps.isDraft) {
+    const durationLabel = event.extendedProps.durationLabel as
+      | string
+      | undefined;
+    const start = event.start;
+    const end = event.end;
+    const is30m =
+      start && end && end.getTime() - start.getTime() <= DRAFT_SLOT_STEP_MS;
+
     return (
-      <div className="border-primary text-base-content/90 bg-primary/20 h-full border-l-4 p-1 text-left">
-        <span className="text-sm font-medium">New booking</span>
-        {timeText && (
-          <span className="text-base-content/60 block text-xs">{timeText}</span>
+      <div
+        className="pointer-events-auto relative flex h-full items-center justify-center rounded-md border px-3 py-2 text-center"
+        style={{ backgroundColor: "#2D0363", borderColor: "#5E15BC" }}
+      >
+        {/* Top and bottom bars aligned with edges */}
+        <div
+          className="absolute top-0 left-1/2 h-1.5 w-1/2 -translate-x-1/2 rounded-b-full"
+          style={{ backgroundColor: "#5E15BC" }}
+        />
+        <div
+          className="absolute bottom-0 left-1/2 h-1.5 w-1/2 -translate-x-1/2 rounded-t-full"
+          style={{ backgroundColor: "#5E15BC" }}
+        />
+
+        <button
+          type="button"
+          data-draft-anchor="top"
+          aria-label="Adjust booking start by dragging top edge"
+          className="absolute top-0 right-0 left-0 z-10 h-1/2 cursor-ns-resize touch-none bg-transparent"
+        />
+        <button
+          type="button"
+          data-draft-anchor="bottom"
+          aria-label="Adjust booking end by dragging bottom edge"
+          className="absolute right-0 bottom-0 left-0 z-10 h-1/2 cursor-ns-resize touch-none bg-transparent"
+        />
+        {!is30m && (
+          <span className="pointer-events-none px-2 text-xs font-semibold text-white">
+            {durationLabel || "30m"}
+          </span>
         )}
       </div>
     );
