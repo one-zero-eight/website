@@ -142,6 +142,9 @@
   height: 60%;
   overflow-y: auto;
   overflow-x: hidden;
+  margin: var(--main-padding) 0;
+  padding-right: var(--select-padding);
+  box-sizing: border-box;
 }
 
 .scrollPart__elem {
