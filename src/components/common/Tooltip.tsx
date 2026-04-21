@@ -38,7 +38,7 @@ export default function Tooltip({
   const hover = useHover(context, { move: false });
   const focus = useFocus(context);
   const click = useClick(context, { toggle: false });
-  const dismiss = useDismiss(context);
+  const dismiss = useDismiss(context, { referencePress: true });
   // Role props for screen readers
   const role = useRole(context, { role: "tooltip" });
 
