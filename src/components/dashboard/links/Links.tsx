@@ -86,15 +86,15 @@ const Links = () => {
   return (
     <div>
       <div className="flex flex-col gap-4 pb-4 lg:flex-row">
-        <h3 className="2xl:flex-none text-2xl font-medium sm:text-3xl lg:flex-4">
+        <h3 className="text-2xl font-medium sm:text-3xl lg:flex-4">
           All University Services
         </h3>
-        <div className="2xl:grid 2xl:flex-auto 2xl:grid-cols-2 grid items-center gap-4 md:grid-cols-2 md:gap-6 lg:flex lg:flex-1">
+        <div className="grid items-center gap-4 md:grid-cols-2 md:gap-6 lg:flex lg:flex-1">
           <CustomSelect
             options={groups}
             selectedValue={activeGroup}
             onChange={setActiveGroup}
-            className="2xl:block sm:block lg:hidden"
+            className="sm:block lg:hidden"
           />
           <SearchInput
             onKeyDown={handleKeyDown}
@@ -106,7 +106,7 @@ const Links = () => {
 
       <div className="flex min-h-[500px] flex-row-reverse items-start gap-6">
         {/* Category List */}
-        <div className="2xl:hidden hidden flex-1 lg:block">
+        <div className="hidden flex-1 lg:block">
           <h3 className="text-base-content text-lg font-semibold">Filter</h3>
           <div>
             {groups.map(({ value }) => (
@@ -128,7 +128,7 @@ const Links = () => {
         </div>
 
         {filteredResources.length > 0 ? (
-          <div className="2xl:grid-cols-2 grid flex-4 grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="grid flex-4 grid-cols-1 gap-5 lg:grid-cols-3">
             {filteredResources.map((resource, index) => (
               <a
                 onClick={() => {
