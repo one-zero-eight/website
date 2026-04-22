@@ -2,12 +2,7 @@ import { Helmet } from "@dr.pogodin/react-helmet";
 
 declare global {
   interface Window {
-    ym: ((
-      id: number,
-      method: "reachGoal",
-      target: string,
-      params?: object,
-    ) => void) &
+    ym: ((id: number, method: "reachGoal", target: string) => void) &
       ((
         id: number,
         method: "userParams",
@@ -58,9 +53,9 @@ export function YandexMetrika() {
 }
 
 // https://yandex.ru/support/metrica/ru/general/goal-js-event
-export function ymEvent(target: string, params?: object) {
+export function ymEvent(target: string) {
   if (window !== undefined && window.ym !== undefined && ym_id !== undefined) {
-    window.ym(ym_id, "reachGoal", target, params);
+    window.ym(ym_id, "reachGoal", target);
   }
 }
 
