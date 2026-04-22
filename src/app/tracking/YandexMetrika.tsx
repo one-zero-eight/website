@@ -12,6 +12,11 @@ declare global {
         id: number,
         method: "userParams",
         data: { [key: string | "UserID"]: any },
+      ) => void) &
+      ((
+        id: number,
+        method: "params",
+        data: { [key: string | "UserID"]: any },
       ) => void);
   }
 }
@@ -52,16 +57,23 @@ export function YandexMetrika() {
   );
 }
 
-// https://yandex.ru/support/metrica/general/goal-js-event.html
+// https://yandex.ru/support/metrica/ru/general/goal-js-event
 export function ymEvent(target: string, params?: object) {
   if (window !== undefined && window.ym !== undefined && ym_id !== undefined) {
     window.ym(ym_id, "reachGoal", target, params);
   }
 }
 
-// https://yandex.ru/support/metrica/data/user-params_data.html
+// https://yandex.ru/support/metrica/ru/data/user-params-data
 export function ymUserParams(data: Record<string, any>) {
   if (window !== undefined && window.ym !== undefined && ym_id !== undefined) {
     window.ym(ym_id, "userParams", data);
+  }
+}
+
+// https://yandex.ru/support/metrica/ru/data/visit-params-data
+export function ymVisitParams(data: Record<string, any>) {
+  if (window !== undefined && window.ym !== undefined && ym_id !== undefined) {
+    window.ym(ym_id, "params", data);
   }
 }
