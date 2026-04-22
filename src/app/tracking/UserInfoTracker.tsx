@@ -1,7 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { ymUserParams, ymVisitParams } from "@/app/tracking/YandexMetrika.tsx";
 import { useEffect, useState } from "react";
-import { useTernaryDarkMode } from "usehooks-ts";
+import { useTheme } from "@/lib/ui/use-theme.ts";
 
 type PWADisplayMode =
   | "twa"
@@ -38,11 +38,7 @@ function getPWADisplayMode(): PWADisplayMode {
 export function UserInfoTracker() {
   const { me } = useMe();
 
-  const { isDarkMode } = useTernaryDarkMode({
-    defaultValue: "dark",
-    initializeWithValue: true,
-    localStorageKey: "theme",
-  });
+  const { isDarkMode } = useTheme();
 
   const [pwaDisplayMode, setPwaDisplayMode] =
     useState<PWADisplayMode>("unknown");

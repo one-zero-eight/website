@@ -1,17 +1,13 @@
 import { searchTypes } from "@/api/search";
 import { useEffect, useRef } from "react";
-import { useTernaryDarkMode } from "usehooks-ts";
+import { useTheme } from "@/lib/ui/use-theme.ts";
 
 export declare type TelegramPreviewProps = {
   source: searchTypes.SchemaTelegramSourceOutput;
 };
 
 export default function TelegramPreview({ source }: TelegramPreviewProps) {
-  const { isDarkMode } = useTernaryDarkMode({
-    defaultValue: "dark",
-    initializeWithValue: true,
-    localStorageKey: "theme",
-  });
+  const { isDarkMode } = useTheme();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -1,12 +1,8 @@
 import Tooltip from "@/components/common/Tooltip.tsx";
-import { useTernaryDarkMode } from "usehooks-ts";
+import { useTheme } from "@/lib/ui/use-theme.ts";
 
 export default function SwitchThemeButton() {
-  const { setTernaryDarkMode } = useTernaryDarkMode({
-    defaultValue: "dark",
-    initializeWithValue: true,
-    localStorageKey: "theme",
-  });
+  const { setTernaryDarkMode } = useTheme();
 
   return (
     <Tooltip content="Switch theme">
