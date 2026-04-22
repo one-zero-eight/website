@@ -14,7 +14,7 @@ export default function ScheduleLinkCopy({
   const [timer, setTimer] = useState<any>();
 
   const copy = () => {
-    ymEvent("button-copy", { url: url });
+    ymEvent("button-copy");
     _copy(url).then((ok) => {
       if (timer !== undefined) {
         clearTimeout(timer);

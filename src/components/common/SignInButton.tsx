@@ -17,7 +17,7 @@ export const SignInButton = forwardRef(function SignInButton_(
       ref={ref}
       type="button"
       className={cn(
-        "border-primary bg-base-100 hover:bg-base-300 rounded-box flex h-14 w-fit items-center justify-center gap-4 border-2 px-6 py-2 text-xl font-medium",
+        "btn btn-primary btn-outline btn-lg w-fit gap-2",
         className,
       )}
       onClick={(e) => {
@@ -25,7 +25,7 @@ export const SignInButton = forwardRef(function SignInButton_(
         onClick?.(e);
       }}
     >
-      <span className="icon-[material-symbols--login] text-base-content -ml-2 text-4xl" />
+      <span className="icon-[material-symbols--login] -ml-2 text-3xl" />
       Sign in
     </button>
   );

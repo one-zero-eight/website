@@ -9,7 +9,7 @@ import { ToastContainer, ToastProvider } from "@/components/toast";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Register, RouterProvider } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useTernaryDarkMode } from "usehooks-ts";
+import { useTheme } from "@/lib/ui/use-theme.ts";
 
 // Root app component
 export function App({ router }: { router: Register["router"] }) {
@@ -39,11 +39,7 @@ function AppRouter({ router }: { router: Register["router"] }) {
 
 // Helper to change the theme class in <html> element
 function ThemeChanger() {
-  const { isDarkMode } = useTernaryDarkMode({
-    defaultValue: "dark",
-    initializeWithValue: true,
-    localStorageKey: "theme",
-  });
+  const { isDarkMode } = useTheme();
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
     document.documentElement.dataset.theme = isDarkMode ? "dark" : "light";
