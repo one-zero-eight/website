@@ -21,7 +21,7 @@ export const authMiddleware: Middleware = {
     }
     return request;
   },
-  async onResponse({ response }) {
+  async onResponse({ request, response }) {
     // Check the final URL to ensure we are handling only our API
     if (
       !response.url.startsWith("https://api.innohassle.ru/") &&
@@ -29,7 +29,8 @@ export const authMiddleware: Middleware = {
     )
       return;
 
-    if (response.status === 401) {
+    if (response.status === 401 && request.headers.has("Authorization")) {
+      console.log("[auth] Got 401, invalidating access token");
       invalidateMyAccessToken();
       throw new Error("Unauthorized");
     }
