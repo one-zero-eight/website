@@ -4,9 +4,12 @@ import { T } from "@/lib/utils/dates.ts";
 import {
   DateSelectArg,
   DayHeaderContentArg,
+  DatesSetArg,
   EventApi,
+  EventClickArg,
   EventContentArg,
   EventInput,
+  NowIndicatorContentArg,
 } from "@fullcalendar/core";
 import type { DateClickArg } from "@fullcalendar/interaction";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -15,13 +18,13 @@ import listPlugin from "@fullcalendar/list";
 import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import clsx from "clsx";
 import moment from "moment/moment";
 import {
   type PointerEvent as ReactPointerEvent,
+  memo,
   useCallback,
   useEffect,
-  // useMemo,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -29,6 +32,7 @@ import {
 import "@/components/calendar/styles-calendar.css";
 import { type Booking, schemaToBooking, type Slot } from "../timeline/types.ts";
 import { getTimeRangeForWeek, sanitizeBookingTitle } from "../utils.ts";
+import { cn } from "@/lib/ui/cn.ts";
 
 /** Synthetic FullCalendar event id for the mobile two-tap booking preview. */
 const DRAFT_SLOT_EVENT_ID = "room-calendar-draft-slot";
@@ -82,7 +86,7 @@ function useNarrowScreenForTapBooking() {
 }
 
 function addDraftSlotMs(d: Date) {
-  return new Date(d.getTime() + DRAFT_SLOT_MS);
+  return new Date(d.getTime() + 60 * 60 * 1000);
 }
 
 function roundToNearestStepMs(ms: number, stepMs: number) {
@@ -125,6 +129,204 @@ function formatDuration(start: Date, end: Date) {
   return `${hours}h ${minutes}m`;
 }
 
+const NowIndicator = memo(function NowIndicator({
+  date,
+}: {
+  date: NowIndicatorContentArg["date"];
+}) {
+  if (
+    date.getUTCHours() === 0 &&
+    date.getUTCMinutes() === 0 &&
+    date.getUTCSeconds() === 0
+  )
+    return null; // It's a line, not a label
+
+  // arg.date is already shifted to Moscow wall clock (represented as UTC).
+  const text = moment.utc(date).format("HH:mm");
+
+  const isNearTimeLabel =
+    date.getUTCMinutes() < 15 || date.getUTCMinutes() > 45;
+  if (!isNearTimeLabel) {
+    return <div>{text}</div>;
+  } else {
+    return (
+      <div className="bg-base-100 -mt-6 flex h-12 translate-y-2 items-center justify-end">
+        {text}
+      </div>
+    );
+  }
+});
+
+function renderNowIndicator(arg: NowIndicatorContentArg) {
+  return <NowIndicator date={arg.date} />;
+}
+
+function calendarTitleFormat(arg: { date: { year: number } }) {
+  if (arg.date.year === new Date().getFullYear()) {
+    // Show only month if current year
+    return moment(arg.date).format("MMMM");
+  } else {
+    // Show month and year otherwise
+    return moment(arg.date).format("MMMM YYYY");
+  }
+}
+
+function calendarListDayFormat(arg: { date: { year: number } }) {
+  if (arg.date.year === new Date().getFullYear()) {
+    // Show month, day, weekday
+    return moment(arg.date).format("MMMM D, dddd");
+  } else {
+    // Add year if not current year
+    return moment(arg.date).format("YYYY, MMMM D");
+  }
+}
+
+function handleEventsSet(events: EventApi[]) {
+  // Remove duplicates.
+  // Accumulate 'extendedProps.calendarURLs' to use it later.
+  const unique: Record<string, EventApi> = {};
+  for (const event of events) {
+    // Using 'id' instead of 'title' is a fix for Music romm
+    const uniqueId = (event.id || event.title) + event.startStr + event.endStr;
+    if (!(uniqueId in unique)) {
+      unique[uniqueId] = event;
+    } else {
+      const calendarURLs = (
+        unique[uniqueId].extendedProps.calendarURLs as string[]
+      ).concat(event.extendedProps.calendarURLs as string[]);
+      unique[uniqueId].remove();
+      unique[uniqueId] = event;
+      unique[uniqueId].setExtendedProp("calendarURLs", calendarURLs);
+    }
+  }
+}
+
+function handleEventClassNames(arg: EventContentArg) {
+  return cn(
+    "cursor-pointer text-sm rounded-md! bg-transparent! border-0! overflow-clip",
+    arg.event.extendedProps.isDraft && "!cursor-default rounded-md!",
+  );
+}
+
+const PLUGINS = [
+  momentPlugin,
+  dayGridPlugin,
+  timeGridPlugin,
+  listPlugin,
+  interactionPlugin,
+];
+const SLOT_TIME_FORMAT = {
+  hour: "2-digit",
+  minute: "2-digit",
+  meridiem: false,
+  hour12: false,
+} as const;
+const HEADER_TOOLBAR = {
+  left: "prev,title,next today",
+  center: undefined,
+  right: "timeGrid3 timeGridWeek dayGridMonth listMonth",
+} as const;
+const BUTTON_TEXT = {
+  today: "Today",
+  listMonth: "List",
+  timeGrid3: "3 days",
+  timeGridWeek: "Week",
+  dayGridMonth: "Month",
+} as const;
+
+interface MemoizedCalendarProps {
+  calendarRef: React.RefObject<FullCalendar | null>;
+  calendarView: string;
+  selectable: boolean;
+  selectMirror: boolean;
+  onSlotSelect: (selectInfo: DateSelectArg) => void;
+  onDateClick: (arg: DateClickArg) => void;
+  onEventClick: (info: EventClickArg) => void;
+  onDatesSet: (arg: DatesSetArg) => void;
+  renderTimeGridEvent: (arg: EventContentArg) => React.ReactNode;
+  renderDayHeader: (arg: DayHeaderContentArg) => React.ReactNode;
+}
+
+const MemoizedCalendar = memo(function MemoizedCalendar({
+  calendarRef,
+  calendarView,
+  selectable,
+  selectMirror,
+  onSlotSelect,
+  onDateClick,
+  onEventClick,
+  onDatesSet,
+  renderTimeGridEvent,
+  renderDayHeader,
+}: MemoizedCalendarProps) {
+  const views = useMemo(
+    () => ({
+      listMonth: {
+        eventContent: renderEventListMonth,
+        listDayFormat: calendarListDayFormat,
+      },
+      timeGridWeek: {
+        eventContent: renderTimeGridEvent,
+        dayHeaderContent: renderDayHeader,
+        slotMinHeight: 40,
+      },
+      timeGrid3: {
+        type: "timeGrid",
+        dayCount: 3,
+        eventContent: renderTimeGridEvent,
+        dayHeaderContent: renderDayHeader,
+        slotMinHeight: 40,
+      },
+      dayGridMonth: {
+        eventContent: renderEventDayGridMonth,
+      },
+    }),
+    [renderTimeGridEvent, renderDayHeader],
+  );
+
+  return (
+    <FullCalendar
+      ref={calendarRef}
+      eventsSet={handleEventsSet}
+      progressiveEventRendering={true}
+      timeZone="Europe/Moscow"
+      plugins={PLUGINS}
+      initialView={calendarView}
+      slotDuration="00:30:00"
+      eventTimeFormat={SLOT_TIME_FORMAT}
+      slotLabelFormat={SLOT_TIME_FORMAT}
+      headerToolbar={HEADER_TOOLBAR}
+      height="auto"
+      contentHeight="auto"
+      buttonText={BUTTON_TEXT}
+      titleFormat={calendarTitleFormat}
+      views={views}
+      allDayText=""
+      nowIndicator={true}
+      nowIndicatorContent={renderNowIndicator}
+      firstDay={1}
+      navLinks={false}
+      eventInteractive={true}
+      expandRows={true}
+      eventClassNames={handleEventClassNames}
+      dateClick={onDateClick}
+      eventClick={onEventClick}
+      scrollTime="07:30:00"
+      scrollTimeReset={false}
+      noEventsContent={renderNoEventsContent}
+      datesSet={onDatesSet}
+      selectable={selectable}
+      selectMirror={selectMirror}
+      selectOverlap={false}
+      select={onSlotSelect}
+      longPressDelay={500}
+      selectLongPressDelay={500}
+      unselectAuto={false}
+      unselectCancel=".fc-event"
+    />
+  );
+});
+
 export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<Slot | undefined>(undefined);
@@ -161,7 +363,10 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const room = rooms?.find((r) => r.id === roomId);
 
   const [calendarView, setCalendarView] = useState("timeGrid3");
-  const [bookingDraft, setBookingDraft] = useState<BookingDraft | null>(null);
+  const bookingDraftRef = useRef<BookingDraft | null>(null);
+  const [draftPhase, setDraftPhase] = useState<BookingDraft["phase"] | null>(
+    null,
+  );
   const dragStateRef = useRef<{
     anchor: DraftDragAnchor;
     pointerId: number;
@@ -177,8 +382,38 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const tapTwoStepTimeGrid =
     narrowForTapBooking && calendarView.startsWith("timeGrid");
 
+  const syncDraftToCalendar = useCallback(() => {
+    const draft = bookingDraftRef.current;
+    if (!draft || !room) return;
+
+    const api = calendarRef.current?.getApi();
+    if (!api) return;
+
+    const durationLabel = formatDuration(draft.start, draft.end);
+    const draftEvent = api.getEventById(DRAFT_SLOT_EVENT_ID);
+    if (draftEvent) {
+      draftEvent.setDates(draft.start, draft.end);
+      draftEvent.setExtendedProp("durationLabel", durationLabel);
+      return;
+    }
+
+    api.addEvent({
+      id: DRAFT_SLOT_EVENT_ID,
+      title: "New booking",
+      start: draft.start,
+      end: draft.end,
+      display: "block",
+      extendedProps: {
+        isDraft: true,
+        durationLabel,
+      },
+      color: "#9A2EFF",
+    });
+  }, [room]);
+
   const clearBookingDraft = useCallback(() => {
-    setBookingDraft(null);
+    bookingDraftRef.current = null;
+    setDraftPhase(null);
     dragStateRef.current = null;
     const api = calendarRef.current?.getApi();
     api?.getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
@@ -213,7 +448,8 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     if (!open) {
       setSelectedSlot(undefined);
       setSelectedBookingDetails(undefined);
-      setBookingDraft(null);
+      bookingDraftRef.current = null;
+      setDraftPhase(null);
       const calendarApi = calendarRef.current?.getApi();
       if (calendarApi) {
         calendarApi.unselect();
@@ -241,31 +477,41 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
 
       if (clickedMs < nowFloorMs) return;
 
-      // For overlap check, use real UTC
+      // For overlap check, use real UTC. Check for 1 hour overlap since initial tile is 1 hour.
       const clickedUtcMs = clickedMs - 3 * 3600 * 1000;
       if (
-        hasBookingsOverlap(clickedUtcMs, clickedUtcMs + DRAFT_SLOT_MS, bookings)
+        hasBookingsOverlap(
+          clickedUtcMs,
+          clickedUtcMs + 60 * 60 * 1000,
+          bookings,
+        )
       ) {
         return;
       }
 
       const clicked = new Date(clickedMs);
 
-      setBookingDraft((_prev) => {
-        // Re-tapping the grid repositions the preview to a fresh 30-minute slot.
-        return {
-          phase: "preview",
-          start: clicked,
-          end: addDraftSlotMs(clicked),
-        };
-      });
+      bookingDraftRef.current = {
+        phase: "preview",
+        start: clicked,
+        end: addDraftSlotMs(clicked),
+      };
+      setDraftPhase("preview");
+      syncDraftToCalendar();
     },
-    [narrowForTapBooking, room, bookingModalOpen, bookings],
+    [
+      narrowForTapBooking,
+      room,
+      bookingModalOpen,
+      bookings,
+      syncDraftToCalendar,
+    ],
   );
 
   const handleDraftDragStart = useCallback(
     (anchor: DraftDragAnchor, pointerId: number, clientY: number) => {
-      if (!bookingDraft) return;
+      const draft = bookingDraftRef.current;
+      if (!draft) return;
       const slotEl = document.querySelector(
         ".fc-timegrid-slot",
       ) as HTMLElement | null;
@@ -275,17 +521,18 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         anchor,
         pointerId,
         startY: clientY,
-        initialStartMs: bookingDraft.start.getTime(),
-        initialEndMs: bookingDraft.end.getTime(),
+        initialStartMs: draft.start.getTime(),
+        initialEndMs: draft.end.getTime(),
         slotHeightPx: Math.max(1, slotHeightPx),
       };
-      setBookingDraft({
+      bookingDraftRef.current = {
+        ...draft,
         phase: "dragging",
-        start: bookingDraft.start,
-        end: bookingDraft.end,
-      });
+      };
+      setDraftPhase("dragging");
+      syncDraftToCalendar();
     },
-    [bookingDraft],
+    [syncDraftToCalendar],
   );
 
   const handleDraftPointerDown = useCallback(
@@ -297,6 +544,28 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     },
     [handleDraftDragStart],
   );
+
+  const handleEventClick = useCallback(
+    (info: EventClickArg) => {
+      info.jsEvent.preventDefault();
+      info.jsEvent.stopPropagation();
+      if (info.event.extendedProps.isDraft) return;
+      const booking = info.event.extendedProps.booking;
+      if (!booking) return;
+      clearBookingDraft();
+      setSelectedSlot(undefined);
+      setSelectedBookingDetails(schemaToBooking(booking));
+      setBookingModalOpen(true);
+    },
+    [clearBookingDraft],
+  );
+
+  const handleDatesSet = useCallback((arg: DatesSetArg) => {
+    setCalendarView(arg.view.type);
+    if (arg.start && arg.end) {
+      setDateRange({ startDate: arg.start, endDate: arg.end });
+    }
+  }, []);
 
   const renderTimeGridEvent = useCallback(
     (arg: EventContentArg) => {
@@ -368,100 +637,124 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       const diffMs = stepCount * DRAFT_SLOT_STEP_MS;
 
       const nowMs = Date.now() + 3 * 3600 * 1000;
-      const nowFloorMs = roundUpToStepMs(nowMs, DRAFT_SLOT_STEP_MS);
 
-      setBookingDraft((prev) => {
-        if (!prev) return prev;
+      const draft = bookingDraftRef.current;
+      if (!draft) return;
 
-        // If the initial tile was exactly 30 minutes, allow dragging in either direction to expand.
-        const isInitial30m =
-          dragState.initialEndMs - dragState.initialStartMs ===
-          DRAFT_SLOT_STEP_MS;
-        let effectiveAnchor = dragState.anchor;
-        if (isInitial30m) {
-          if (diffMs < 0) effectiveAnchor = "top";
-          else if (diffMs > 0) effectiveAnchor = "bottom";
-        }
+      let nextStart: number;
+      let nextEnd: number;
 
-        if (effectiveAnchor === "top") {
-          const tentativeStart = roundToNearestStepMs(
-            dragState.initialStartMs + diffMs,
-            DRAFT_SLOT_STEP_MS,
-          );
-          const minStartLimit = Math.max(
-            nowFloorMs,
-            dragState.initialEndMs - DRAFT_SLOT_MAX_MS,
-          );
-          const maxStartLimit = dragState.initialEndMs - DRAFT_SLOT_MS;
+      if (dragState.anchor === "top") {
+        const tentativeStart = roundToNearestStepMs(
+          dragState.initialStartMs + diffMs,
+          DRAFT_SLOT_STEP_MS,
+        );
+        const maxStartPossible = dragState.initialEndMs - DRAFT_SLOT_STEP_MS;
 
-          let nextStart = Math.min(
-            Math.max(tentativeStart, minStartLimit),
-            maxStartLimit,
-          );
+        if (tentativeStart <= maxStartPossible) {
+          // Normal behavior: move start edge (shrinking or expanding UP)
+          nextStart = tentativeStart;
+          nextEnd = dragState.initialEndMs;
 
-          // Clamp by bookings: convert to real UTC for comparison
+          // Limits: allow dragging right to current time
+          const minStartLimit = Math.max(nowMs, nextEnd - DRAFT_SLOT_MAX_MS);
+          nextStart = Math.max(nextStart, minStartLimit);
+
+          // Overlaps: since we only move start, we only need to check what's above us
           if (bookings) {
             for (const b of bookings) {
-              const bStart = moment(b.start).valueOf();
-              const bEnd = moment(b.end).valueOf();
-
-              // Shift back to real UTC for overlap check
-              const nextStartUtc = nextStart - 3 * 3600 * 1000;
-              const fixedEndUtc = dragState.initialEndMs - 3 * 3600 * 1000;
-
-              if (nextStartUtc < bEnd && fixedEndUtc > bStart) {
-                // Shift booking end forward to calendar space for clamping
-                nextStart = Math.max(nextStart, bEnd + 3 * 3600 * 1000);
+              const bStart = moment(b.start).valueOf() + 3 * 3600 * 1000;
+              const bEnd = moment(b.end).valueOf() + 3 * 3600 * 1000;
+              if (nextStart < bEnd && nextEnd > bStart) {
+                nextStart = Math.max(nextStart, bEnd);
               }
             }
           }
-
-          if (nextStart > maxStartLimit) nextStart = maxStartLimit;
-
-          return {
-            phase: "dragging",
-            start: new Date(nextStart),
-            end: new Date(dragState.initialEndMs),
-          };
+          if (nextStart > maxStartPossible) nextStart = maxStartPossible;
         } else {
-          const tentativeEnd = roundToNearestStepMs(
-            dragState.initialEndMs + diffMs,
-            DRAFT_SLOT_STEP_MS,
-          );
-          const minEndLimit = dragState.initialStartMs + DRAFT_SLOT_MS;
-          const maxEndLimit = dragState.initialStartMs + DRAFT_SLOT_MAX_MS;
+          // "Push" behavior: move bottom edge DOWN (maintaining 30m duration)
+          const overflowMs = tentativeStart - maxStartPossible;
+          nextStart = maxStartPossible;
+          nextEnd = dragState.initialEndMs + overflowMs;
 
-          let nextEnd = Math.max(
-            minEndLimit,
-            Math.min(maxEndLimit, tentativeEnd),
-          );
+          // Limits
+          const maxEndLimit = nextStart + DRAFT_SLOT_MAX_MS;
+          nextEnd = Math.min(nextEnd, maxEndLimit);
 
-          // Clamp by bookings
+          // Overlaps: since we are pushing end down, check what's below us
           if (bookings) {
             for (const b of bookings) {
-              const bStart = moment(b.start).valueOf();
-              const bEnd = moment(b.end).valueOf();
-
-              // Shift back to real UTC
-              const fixedStartUtc = dragState.initialStartMs - 3 * 3600 * 1000;
-              const nextEndUtc = nextEnd - 3 * 3600 * 1000;
-
-              if (fixedStartUtc < bEnd && nextEndUtc > bStart) {
-                // Shift booking start forward to calendar space
-                nextEnd = Math.min(nextEnd, bStart + 3 * 3600 * 1000);
+              const bStart = moment(b.start).valueOf() + 3 * 3600 * 1000;
+              const bEnd = moment(b.end).valueOf() + 3 * 3600 * 1000;
+              if (nextStart < bEnd && nextEnd > bStart) {
+                nextEnd = Math.min(nextEnd, bStart);
               }
             }
           }
-
-          if (nextEnd < minEndLimit) nextEnd = minEndLimit;
-
-          return {
-            phase: "dragging",
-            start: new Date(dragState.initialStartMs),
-            end: new Date(nextEnd),
-          };
+          if (nextEnd < nextStart + DRAFT_SLOT_STEP_MS) {
+            nextEnd = nextStart + DRAFT_SLOT_STEP_MS;
+          }
         }
-      });
+      } else {
+        // anchor === "bottom"
+        const tentativeEnd = roundToNearestStepMs(
+          dragState.initialEndMs + diffMs,
+          DRAFT_SLOT_STEP_MS,
+        );
+        const minEndPossible = dragState.initialStartMs + DRAFT_SLOT_STEP_MS;
+
+        if (tentativeEnd >= minEndPossible) {
+          // Normal behavior: move end edge (shrinking or expanding DOWN)
+          nextStart = dragState.initialStartMs;
+          nextEnd = tentativeEnd;
+
+          // Limits
+          const maxEndLimit = nextStart + DRAFT_SLOT_MAX_MS;
+          nextEnd = Math.min(nextEnd, maxEndLimit);
+
+          // Overlaps
+          if (bookings) {
+            for (const b of bookings) {
+              const bStart = moment(b.start).valueOf() + 3 * 3600 * 1000;
+              const bEnd = moment(b.end).valueOf() + 3 * 3600 * 1000;
+              if (nextStart < bEnd && nextEnd > bStart) {
+                nextEnd = Math.min(nextEnd, bStart);
+              }
+            }
+          }
+          if (nextEnd < minEndPossible) nextEnd = minEndPossible;
+        } else {
+          // "Push" behavior: move top edge UP (maintaining 30m duration)
+          const overflowMs = minEndPossible - tentativeEnd;
+          nextEnd = minEndPossible;
+          nextStart = dragState.initialStartMs - overflowMs;
+
+          // Limits: allow dragging top edge up right to current time
+          const minStartLimit = Math.max(nowMs, nextEnd - DRAFT_SLOT_MAX_MS);
+          nextStart = Math.max(nextStart, minStartLimit);
+
+          // Overlaps
+          if (bookings) {
+            for (const b of bookings) {
+              const bStart = moment(b.start).valueOf() + 3 * 3600 * 1000;
+              const bEnd = moment(b.end).valueOf() + 3 * 3600 * 1000;
+              if (nextStart < bEnd && nextEnd > bStart) {
+                nextStart = Math.max(nextStart, bEnd);
+              }
+            }
+          }
+          if (nextStart > nextEnd - DRAFT_SLOT_STEP_MS) {
+            nextStart = nextEnd - DRAFT_SLOT_STEP_MS;
+          }
+        }
+      }
+
+      bookingDraftRef.current = {
+        phase: "dragging",
+        start: new Date(nextStart),
+        end: new Date(nextEnd),
+      };
+      syncDraftToCalendar();
     }
 
     function handlePointerRelease(event: PointerEvent) {
@@ -469,10 +762,14 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       if (!dragState) return;
       if (event.pointerId !== dragState.pointerId) return;
       dragStateRef.current = null;
-      setBookingDraft((prev) => {
-        if (!prev) return prev;
-        return { phase: "preview", start: prev.start, end: prev.end };
-      });
+      if (bookingDraftRef.current) {
+        bookingDraftRef.current = {
+          ...bookingDraftRef.current,
+          phase: "preview",
+        };
+        setDraftPhase("preview");
+        syncDraftToCalendar();
+      }
     }
 
     window.addEventListener("pointermove", handlePointerMove);
@@ -483,14 +780,15 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       window.removeEventListener("pointerup", handlePointerRelease);
       window.removeEventListener("pointercancel", handlePointerRelease);
     };
-  }, [bookings]);
+  }, [bookings, syncDraftToCalendar]);
 
   const handleDraftBook = useCallback(() => {
-    if (!room || !bookingDraft) return;
+    const draft = bookingDraftRef.current;
+    if (!room || !draft) return;
 
     // Normalize to real UTC before sending to modal
-    const start = fromCalendarDate(bookingDraft.start);
-    const end = fromCalendarDate(bookingDraft.end);
+    const start = fromCalendarDate(draft.start);
+    const end = fromCalendarDate(draft.end);
 
     if (start.getTime() < Date.now()) return;
 
@@ -509,62 +807,26 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     setSelectedSlot(slot);
     setSelectedBookingDetails(undefined);
     setBookingModalOpen(true);
-    setBookingDraft(null);
+    bookingDraftRef.current = null;
+    setDraftPhase(null);
     calendarRef.current?.getApi().getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
-  }, [room, bookingDraft]);
-
-  // const draftDurationLabel = useMemo(() => {
-  //   if (!bookingDraft) return "";
-  //   return formatDuration(bookingDraft.start, bookingDraft.end);
-  // }, [bookingDraft]);
+  }, [room]);
 
   useEffect(() => {
-    if (!bookingDraft || !room) return;
-
-    const api = calendarRef.current?.getApi();
-    if (!api) return;
-
-    const durationLabel = formatDuration(bookingDraft.start, bookingDraft.end);
-    const draftEvent = api.getEventById(DRAFT_SLOT_EVENT_ID);
-    if (draftEvent) {
-      draftEvent.setDates(bookingDraft.start, bookingDraft.end);
-      draftEvent.setExtendedProp("durationLabel", durationLabel);
-      return;
-    }
-
-    api.addEvent({
-      id: DRAFT_SLOT_EVENT_ID,
-      title: "New booking",
-      start: bookingDraft.start,
-      end: bookingDraft.end,
-      display: "block",
-      extendedProps: {
-        isDraft: true,
-        durationLabel,
-      },
-      color: "#9A2EFF",
-    });
-  }, [bookingDraft, room]);
-
-  useEffect(() => {
-    if (!bookingDraft) return;
+    const draft = bookingDraftRef.current;
+    if (!draft) return;
 
     if (!calendarView.startsWith("timeGrid")) {
-      setBookingDraft(null);
-      calendarRef.current?.getApi().getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
+      clearBookingDraft();
       return;
     }
 
     const vs = dateRange.startDate.getTime();
     const ve = dateRange.endDate.getTime();
-    if (
-      bookingDraft.start.getTime() >= ve ||
-      bookingDraft.end.getTime() <= vs
-    ) {
-      setBookingDraft(null);
-      calendarRef.current?.getApi().getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
+    if (draft.start.getTime() >= ve || draft.end.getTime() <= vs) {
+      clearBookingDraft();
     }
-  }, [calendarView, dateRange, bookingDraft]);
+  }, [calendarView, dateRange, clearBookingDraft]);
 
   useEffect(() => {
     if (!bookings) return;
@@ -620,180 +882,27 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
 
   return (
     <div
-      className={clsx(
+      className={cn(
         "relative overflow-clip",
         isPending && "calendar-loading",
-        bookingDraft && "pb-28",
+        draftPhase && "pb-28",
       )}
     >
-      <FullCalendar
-        ref={calendarRef}
-        eventsSet={(events) => {
-          // Remove duplicates.
-          // Accumulate 'extendedProps.calendarURLs' to use it later.
-          const unique: Record<string, EventApi> = {};
-          for (const event of events) {
-            // Using 'id' instead of 'title' is a fix for Music romm
-            const uniqueId =
-              (event.id || event.title) + event.startStr + event.endStr;
-            if (!(uniqueId in unique)) {
-              unique[uniqueId] = event;
-            } else {
-              const calendarURLs = (
-                unique[uniqueId].extendedProps.calendarURLs as string[]
-              ).concat(event.extendedProps.calendarURLs as string[]);
-              unique[uniqueId].remove();
-              unique[uniqueId] = event;
-              unique[uniqueId].setExtendedProp("calendarURLs", calendarURLs);
-            }
-          }
-        }}
-        progressiveEventRendering={true}
-        timeZone="Europe/Moscow" // Use the same timezone for everyone
-        plugins={[
-          momentPlugin,
-          dayGridPlugin,
-          timeGridPlugin,
-          listPlugin,
-          interactionPlugin,
-        ]}
-        initialView={calendarView} // Default view
-        slotDuration="00:30:00"
-        eventTimeFormat={{
-          // Use 24-hour format
-          hour: "2-digit",
-          minute: "2-digit",
-          meridiem: false,
-          hour12: false,
-        }}
-        slotLabelFormat={{
-          // Use 24-hour format
-          hour: "2-digit",
-          minute: "2-digit",
-          meridiem: false,
-          hour12: false,
-        }}
-        headerToolbar={{
-          // Buttons in header
-          left: "prev,title,next today",
-          center: undefined,
-          right: "timeGrid3 timeGridWeek dayGridMonth listMonth",
-        }}
-        height="auto"
-        contentHeight="auto"
-        buttonText={{
-          today: "Today",
-          listMonth: "List",
-          timeGrid3: "3 days",
-          timeGridWeek: "Week",
-          dayGridMonth: "Month",
-        }}
-        titleFormat={(arg) => {
-          if (arg.date.year === new Date().getFullYear()) {
-            // Show only month if current year
-            return moment(arg.date).format("MMMM");
-          } else {
-            // Show month and year otherwise
-            return moment(arg.date).format("MMMM YYYY");
-          }
-        }}
-        views={{
-          listMonth: {
-            eventContent: renderEventListMonth,
-            listDayFormat: (arg) => {
-              if (arg.date.year === new Date().getFullYear()) {
-                // Show month, day, weekday
-                return moment(arg.date).format("MMMM D, dddd");
-              } else {
-                // Add year if not current year
-                return moment(arg.date).format("YYYY, MMMM D");
-              }
-            },
-          },
-          timeGridWeek: {
-            eventContent: renderTimeGridEvent,
-            dayHeaderContent: renderDayHeader,
-            slotMinHeight: 40,
-          },
-          timeGrid3: {
-            type: "timeGrid",
-            dayCount: 3,
-            eventContent: renderTimeGridEvent,
-            dayHeaderContent: renderDayHeader,
-            slotMinHeight: 40,
-          },
-          dayGridMonth: {
-            eventContent: renderEventDayGridMonth,
-          },
-        }}
-        allDayText="" // Remove text in all day row
-        nowIndicator={true} // Display current time as line
-        nowIndicatorContent={(arg) => {
-          if (
-            arg.date.getUTCHours() === 0 &&
-            arg.date.getUTCMinutes() === 0 &&
-            arg.date.getUTCSeconds() === 0
-          )
-            return null; // It's a line, not a label
-
-          // arg.date is already shifted to Moscow wall clock (represented as UTC).
-          const text = moment.utc(arg.date).format("HH:mm");
-
-          const isNearTimeLabel =
-            arg.date.getUTCMinutes() < 15 || arg.date.getUTCMinutes() > 45;
-          if (!isNearTimeLabel) {
-            return <div>{text}</div>;
-          } else {
-            return (
-              <div className="bg-base-100 -mt-6 flex h-12 translate-y-2 items-center justify-end">
-                {text}
-              </div>
-            );
-          }
-        }}
-        firstDay={1} // From Monday
-        navLinks={false} // Dates are clickable
-        eventInteractive={true} // Make event tabbable
-        expandRows={true}
-        eventClassNames={(arg) =>
-          clsx(
-            "cursor-pointer text-sm rounded-md! bg-transparent! border-0! overflow-clip",
-            arg.event.extendedProps.isDraft && "!cursor-default rounded-md!",
-          )
-        }
-        dateClick={handleDateClick}
-        eventClick={(info) => {
-          info.jsEvent.preventDefault();
-          info.jsEvent.stopPropagation();
-          if (info.event.extendedProps.isDraft) return;
-          const booking = info.event.extendedProps.booking;
-          if (!booking) return;
-          clearBookingDraft();
-          setSelectedSlot(undefined);
-          setSelectedBookingDetails(schemaToBooking(booking));
-          setBookingModalOpen(true);
-        }}
-        scrollTime="07:30:00" // Scroll to 7:30am on launch
-        scrollTimeReset={false} // Do not reset scroll on date switch
-        noEventsContent={() => "No events this month"} // Custom message
-        datesSet={({ view, start, end }) => {
-          setCalendarView(view.type);
-          if (start && end) {
-            setDateRange({ startDate: start, endDate: end });
-          }
-        }}
+      <MemoizedCalendar
+        calendarRef={calendarRef}
+        calendarView={calendarView}
         selectable={!tapTwoStepTimeGrid}
         selectMirror={!tapTwoStepTimeGrid}
-        selectOverlap={false}
-        select={handleSlotSelect}
-        longPressDelay={500}
-        selectLongPressDelay={500}
-        unselectAuto={false}
-        unselectCancel=".fc-event"
+        onSlotSelect={handleSlotSelect}
+        onDateClick={handleDateClick}
+        onEventClick={handleEventClick}
+        onDatesSet={handleDatesSet}
+        renderTimeGridEvent={renderTimeGridEvent}
+        renderDayHeader={renderDayHeader}
       />
-      {bookingDraft && (
+      {draftPhase && (
         <div className="bg-base-200/95 border-base-300 fixed right-0 bottom-0 left-0 z-20 border-t px-3 pt-3 shadow-lg backdrop-blur-sm supports-[padding:max(0px)]:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          {bookingDraft.phase === "preview" && (
+          {draftPhase === "preview" && (
             <p className="text-base-content/80 mb-3 text-center text-sm">
               Drag tile edges to set start/end time.
             </p>
@@ -832,6 +941,10 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       />
     </div>
   );
+}
+
+function renderNoEventsContent() {
+  return "No events this month";
 }
 
 function renderEventListMonth({ event }: EventContentArg) {
@@ -932,7 +1045,7 @@ function renderEventTimeGridWeekRegular({
         </span>
       )}
       <span
-        className={clsx(
+        className={cn(
           "line-clamp-2 text-xs",
           event.allDay && "hidden sm:inline",
         )}

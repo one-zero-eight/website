@@ -7,9 +7,141 @@ import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
 import { RoomCalendar } from "@/components/room-booking/room-page/RoomCalendar.tsx";
 import { RoomMapPreview } from "@/components/room-booking/room-page/RoomMapPreview.tsx";
 import { Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useCopyToClipboard } from "usehooks-ts";
+
+const ViewOnMapButton = memo(function ViewOnMapButton({
+  sceneId,
+  areaId,
+}: {
+  sceneId?: string;
+  areaId?: string;
+}) {
+  return (
+    <div className="flex flex-row items-center gap-3 lg:hidden">
+      <div className="flex-1">
+        <Link
+          to="/maps"
+          search={
+            sceneId
+              ? {
+                  scene: sceneId,
+                  area: areaId,
+                }
+              : undefined
+          }
+          className="border-border bg-background hover:bg-muted text-foreground inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors"
+        >
+          <span className="icon-[material-symbols--map-outline] text-base" />
+          View on Map
+        </Link>
+      </div>
+    </div>
+  );
+});
+
+const RoomDetails = memo(function RoomDetails({
+  room,
+  sceneWithRoom,
+  roomArea,
+  handleShare,
+  copied,
+}: {
+  room: any;
+  sceneWithRoom: any;
+  roomArea: any;
+  handleShare: () => void;
+  copied: boolean;
+}) {
+  return (
+    <div className="p-4">
+      {/* Two-column layout on large screens */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+        {/* Room details column */}
+        <div className="flex min-h-full grow flex-col gap-3 lg:flex-1">
+          <h1 className="text-3xl font-semibold">{room.title}</h1>
+
+          {room.access_level && (
+            <div className="flex flex-row items-center gap-3">
+              <AccessLevelIcon
+                accessLevel={room.access_level}
+                className="text-3xl"
+              />
+              <div className="flex-1">
+                <p className="text-foreground text-sm font-medium">
+                  Access Level
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {room.access_level === RoomAccess_level.yellow
+                    ? "Yellow (for students)"
+                    : room.access_level === RoomAccess_level.red
+                      ? "Red (for employees)"
+                      : "Special rules apply"}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {room.capacity && (
+            <div className="flex flex-row items-center gap-3">
+              <span className="text-foreground icon-[material-symbols--event-seat-outline-rounded] text-3xl" />
+              <div className="flex-1">
+                <p className="text-foreground text-sm font-medium">Capacity</p>
+                <p className="text-muted-foreground text-sm">
+                  {room.capacity} people
+                </p>
+              </div>
+            </div>
+          )}
+
+          {room.restrict_daytime && (
+            <div className="flex flex-row items-center gap-3">
+              <span className="text-foreground icon-[material-symbols--schedule-outline] text-3xl" />
+              <div className="flex-1">
+                <p className="text-foreground text-sm font-medium">
+                  Time Restrictions
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  Students can book only at night (19:00-8:00) and weekends
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Share button */}
+          <div className="flex flex-row items-center gap-3">
+            <div className="flex-1">
+              <button
+                type="button"
+                onClick={handleShare}
+                className={`border-border bg-background hover:bg-muted inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                  copied
+                    ? "text-green-700 dark:text-green-500"
+                    : "text-foreground"
+                }`}
+              >
+                <span className="icon-[material-symbols--share-outline] text-base" />
+                {copied ? "Link copied!" : "Share this room"}
+              </button>
+            </div>
+          </div>
+
+          {/* View on Map link - visible only on mobile */}
+          <ViewOnMapButton
+            sceneId={sceneWithRoom?.scene_id}
+            areaId={roomArea?.svg_polygon_id ?? undefined}
+          />
+        </div>
+
+        {/* Map column - visible only on desktop */}
+        <div className="hidden lg:flex lg:flex-1">
+          <RoomMapPreview roomId={room.id} />
+        </div>
+      </div>
+    </div>
+  );
+});
 
 export function RoomPage({ id }: { id: string }) {
   const { data: rooms } = $roomBooking.useQuery("get", "/rooms/", {
@@ -18,7 +150,7 @@ export function RoomPage({ id }: { id: string }) {
   const room = rooms?.find((r) => r.id === id);
   const [_, _copy] = useCopyToClipboard();
   const [copied, setCopied] = useState(false);
-  const [timer, setTimer] = useState<any>();
+  const timerRef = useRef<any>(null);
 
   // Get maps data for navigation
   const { data: scenes } = $maps.useQuery("get", "/scenes/");
@@ -57,7 +189,24 @@ export function RoomPage({ id }: { id: string }) {
     return scenes.find((scene) => scene.scene_id === matchingResult.scene_id);
   }, [scenes, searchResult, id]);
 
-  const handleShare = async () => {
+  const copyToClipboard = useCallback(
+    (url: string) => {
+      _copy(url).then((ok) => {
+        if (timerRef.current !== null) {
+          clearTimeout(timerRef.current);
+        }
+        if (ok) {
+          setCopied(true);
+          timerRef.current = setTimeout(() => setCopied(false), 1500);
+        } else {
+          setCopied(false);
+        }
+      });
+    },
+    [_copy],
+  );
+
+  const handleShare = useCallback(async () => {
     const url = window.location.href;
 
     if (navigator.share) {
@@ -74,21 +223,7 @@ export function RoomPage({ id }: { id: string }) {
     } else {
       copyToClipboard(url);
     }
-  };
-
-  const copyToClipboard = (url: string) => {
-    _copy(url).then((ok) => {
-      if (timer !== undefined) {
-        clearTimeout(timer);
-      }
-      if (ok) {
-        setCopied(true);
-        setTimer(setTimeout(() => setCopied(false), 1500));
-      } else {
-        setCopied(false);
-      }
-    });
-  };
+  }, [room, copyToClipboard]);
 
   if (!room) {
     return <Topbar title="Room" />;
@@ -104,108 +239,13 @@ export function RoomPage({ id }: { id: string }) {
       <Topbar title="Room details" />
       <BookingPageTabs />
 
-      <div className="p-4">
-        {/* Two-column layout on large screens */}
-        <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-          {/* Room details column */}
-          <div className="flex min-h-full grow flex-col gap-3 lg:flex-1">
-            <h1 className="text-3xl font-semibold">{room.title}</h1>
-
-            {room.access_level && (
-              <div className="flex flex-row items-center gap-3">
-                <AccessLevelIcon
-                  accessLevel={room.access_level}
-                  className="text-3xl"
-                />
-                <div className="flex-1">
-                  <p className="text-foreground text-sm font-medium">
-                    Access Level
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {room.access_level === RoomAccess_level.yellow
-                      ? "Yellow (for students)"
-                      : room.access_level === RoomAccess_level.red
-                        ? "Red (for employees)"
-                        : "Special rules apply"}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {room.capacity && (
-              <div className="flex flex-row items-center gap-3">
-                <span className="text-foreground icon-[material-symbols--event-seat-outline-rounded] text-3xl" />
-                <div className="flex-1">
-                  <p className="text-foreground text-sm font-medium">
-                    Capacity
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {room.capacity} people
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {room.restrict_daytime && (
-              <div className="flex flex-row items-center gap-3">
-                <span className="text-foreground icon-[material-symbols--schedule-outline] text-3xl" />
-                <div className="flex-1">
-                  <p className="text-foreground text-sm font-medium">
-                    Time Restrictions
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    Students can book only at night (19:00-8:00) and weekends
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Share button */}
-            <div className="flex flex-row items-center gap-3">
-              <div className="flex-1">
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className={`border-border bg-background hover:bg-muted inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-                    copied
-                      ? "text-green-700 dark:text-green-500"
-                      : "text-foreground"
-                  }`}
-                >
-                  <span className="icon-[material-symbols--share-outline] text-base" />
-                  {copied ? "Link copied!" : "Share this room"}
-                </button>
-              </div>
-            </div>
-
-            {/* View on Map link - visible only on mobile */}
-            <div className="flex flex-row items-center gap-3 lg:hidden">
-              <div className="flex-1">
-                <Link
-                  to="/maps"
-                  search={
-                    sceneWithRoom && roomArea
-                      ? {
-                          scene: sceneWithRoom.scene_id,
-                          area: roomArea.svg_polygon_id ?? undefined,
-                        }
-                      : undefined
-                  }
-                  className="border-border bg-background hover:bg-muted text-foreground inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors"
-                >
-                  <span className="icon-[material-symbols--map-outline] text-base" />
-                  View on Map
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Map column - visible only on desktop */}
-          <div className="hidden lg:flex lg:flex-1">
-            <RoomMapPreview roomId={room.id} />
-          </div>
-        </div>
-      </div>
+      <RoomDetails
+        room={room}
+        sceneWithRoom={sceneWithRoom}
+        roomArea={roomArea}
+        handleShare={handleShare}
+        copied={copied}
+      />
 
       <RoomCalendar roomId={room.id} />
     </>
