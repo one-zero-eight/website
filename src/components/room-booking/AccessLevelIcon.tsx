@@ -1,5 +1,6 @@
 import { RoomAccess_level } from "@/api/room-booking/types.ts";
 import { cn } from "@/lib/ui/cn";
+import { memo } from "react";
 
 export const accessLevelColors: Record<RoomAccess_level, string> = {
   [RoomAccess_level.yellow]: "#FFD700", // Gold
@@ -7,7 +8,7 @@ export const accessLevelColors: Record<RoomAccess_level, string> = {
   [RoomAccess_level.special]: "#ac72e4", // Violet
 };
 
-export function AccessLevelIcon({
+export const AccessLevelIcon = memo(function AccessLevelIcon({
   accessLevel,
   className,
 }: {
@@ -23,4 +24,4 @@ export function AccessLevelIcon({
       style={{ color: accessLevelColors[accessLevel] ?? "inherit" }}
     />
   );
-}
+});
