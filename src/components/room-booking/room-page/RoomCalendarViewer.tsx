@@ -51,7 +51,7 @@ function fromCalendarDate(d: Date): Date {
 
 /**
  * Converts a real UTC timestamp to the shifted 'Calendar Space' (Moscow Wall Clock as UTC).
- 
+
 function toCalendarDate(d: Date | number): Date {
   const ms = typeof d === "number" ? d : d.getTime();
   return new Date(ms + 3 * 3600 * 1000);
@@ -582,16 +582,20 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         return (
           <div
             className="pointer-events-auto relative flex h-full items-center justify-center rounded-md border px-3 py-2 text-center"
-            style={{ backgroundColor: "#2D0363", borderColor: "#5E15BC" }}
+            style={{
+              backgroundColor:
+                "color-mix(in srgb, var(--color-primary) 20%, var(--color-base-100))",
+              borderColor: "var(--color-primary)",
+            }}
           >
             {/* Top and bottom bars aligned with edges */}
             <div
               className="absolute top-0 left-1/2 h-1.5 w-1/2 -translate-x-1/2 rounded-b-full"
-              style={{ backgroundColor: "#5E15BC" }}
+              style={{ backgroundColor: "var(--color-primary)" }}
             />
             <div
               className="absolute bottom-0 left-1/2 h-1.5 w-1/2 -translate-x-1/2 rounded-t-full"
-              style={{ backgroundColor: "#5E15BC" }}
+              style={{ backgroundColor: "var(--color-primary)" }}
             />
 
             <button
@@ -611,7 +615,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
               onPointerDown={(event) => handleDraftPointerDown("bottom", event)}
             />
             {!is30m && (
-              <span className="pointer-events-none px-2 text-xs font-semibold text-white">
+              <span className="text-base-content pointer-events-none px-2 text-xs font-semibold">
                 {durationLabel || "30m"}
               </span>
             )}
@@ -649,12 +653,16 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           dragState.initialStartMs + diffMs,
           DRAFT_SLOT_STEP_MS,
         );
-        const maxStartPossible = dragState.initialEndMs - DRAFT_SLOT_STEP_MS;
 
-        if (tentativeStart <= maxStartPossible) {
+        if (tentativeStart < dragState.initialEndMs) {
           // Normal behavior: move start edge (shrinking or expanding UP)
           nextStart = tentativeStart;
           nextEnd = dragState.initialEndMs;
+
+          // Enforce 30m minimum duration if not flipped
+          if (nextStart > dragState.initialEndMs - DRAFT_SLOT_STEP_MS) {
+            nextStart = dragState.initialEndMs - DRAFT_SLOT_STEP_MS;
+          }
 
           // Limits: allow dragging right to current time
           const minStartLimit = Math.max(nowMs, nextEnd - DRAFT_SLOT_MAX_MS);
@@ -670,12 +678,16 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
               }
             }
           }
-          if (nextStart > maxStartPossible) nextStart = maxStartPossible;
+          if (nextStart > nextEnd - DRAFT_SLOT_STEP_MS) {
+            nextStart = nextEnd - DRAFT_SLOT_STEP_MS;
+          }
         } else {
-          // "Push" behavior: move bottom edge DOWN (maintaining 30m duration)
-          const overflowMs = tentativeStart - maxStartPossible;
-          nextStart = maxStartPossible;
-          nextEnd = dragState.initialEndMs + overflowMs;
+          // Flip behavior: move bottom edge DOWN (starting from initialEndMs)
+          nextStart = dragState.initialEndMs;
+          nextEnd = Math.max(
+            tentativeStart,
+            dragState.initialEndMs + DRAFT_SLOT_STEP_MS,
+          );
 
           // Limits
           const maxEndLimit = nextStart + DRAFT_SLOT_MAX_MS;
@@ -701,12 +713,16 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           dragState.initialEndMs + diffMs,
           DRAFT_SLOT_STEP_MS,
         );
-        const minEndPossible = dragState.initialStartMs + DRAFT_SLOT_STEP_MS;
 
-        if (tentativeEnd >= minEndPossible) {
+        if (tentativeEnd > dragState.initialStartMs) {
           // Normal behavior: move end edge (shrinking or expanding DOWN)
           nextStart = dragState.initialStartMs;
           nextEnd = tentativeEnd;
+
+          // Enforce 30m minimum duration
+          if (nextEnd < dragState.initialStartMs + DRAFT_SLOT_STEP_MS) {
+            nextEnd = dragState.initialStartMs + DRAFT_SLOT_STEP_MS;
+          }
 
           // Limits
           const maxEndLimit = nextStart + DRAFT_SLOT_MAX_MS;
@@ -722,12 +738,16 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
               }
             }
           }
-          if (nextEnd < minEndPossible) nextEnd = minEndPossible;
+          if (nextEnd < nextStart + DRAFT_SLOT_STEP_MS) {
+            nextEnd = nextStart + DRAFT_SLOT_STEP_MS;
+          }
         } else {
-          // "Push" behavior: move top edge UP (maintaining 30m duration)
-          const overflowMs = minEndPossible - tentativeEnd;
-          nextEnd = minEndPossible;
-          nextStart = dragState.initialStartMs - overflowMs;
+          // Flip behavior: move top edge UP (ending at initialStartMs)
+          nextEnd = dragState.initialStartMs;
+          nextStart = Math.min(
+            tentativeEnd,
+            dragState.initialStartMs - DRAFT_SLOT_STEP_MS,
+          );
 
           // Limits: allow dragging top edge up right to current time
           const minStartLimit = Math.max(nowMs, nextEnd - DRAFT_SLOT_MAX_MS);
@@ -907,7 +927,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
               Drag tile edges to set start/end time.
             </p>
           )}
-          {/*           
+          {/*
           <p className="text-base-content/80 mb-3 text-center text-sm">
             Duration: {draftDurationLabel}
           </p> */}
@@ -976,16 +996,20 @@ function renderEventTimeGridWeekRegular({
     return (
       <div
         className="pointer-events-auto relative flex h-full items-center justify-center rounded-md border px-3 py-2 text-center"
-        style={{ backgroundColor: "#2D0363", borderColor: "#5E15BC" }}
+        style={{
+          backgroundColor:
+            "color-mix(in srgb, var(--color-primary) 20%, var(--color-base-100))",
+          borderColor: "var(--color-primary)",
+        }}
       >
         {/* Top and bottom bars aligned with edges */}
         <div
           className="absolute top-0 left-1/2 h-1.5 w-1/2 -translate-x-1/2 rounded-b-full"
-          style={{ backgroundColor: "#5E15BC" }}
+          style={{ backgroundColor: "var(--color-primary)" }}
         />
         <div
           className="absolute bottom-0 left-1/2 h-1.5 w-1/2 -translate-x-1/2 rounded-t-full"
-          style={{ backgroundColor: "#5E15BC" }}
+          style={{ backgroundColor: "var(--color-primary)" }}
         />
 
         <button
@@ -1001,7 +1025,7 @@ function renderEventTimeGridWeekRegular({
           className="absolute right-0 bottom-0 left-0 z-10 h-1/2 cursor-ns-resize touch-none bg-transparent"
         />
         {!is30m && (
-          <span className="pointer-events-none px-2 text-xs font-semibold text-white">
+          <span className="text-base-content pointer-events-none px-2 text-xs font-semibold">
             {durationLabel || "30m"}
           </span>
         )}
