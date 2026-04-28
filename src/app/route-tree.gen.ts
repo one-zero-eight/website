@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as With_menuRouteRouteImport } from "./routes/_with_menu/route";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as RoomsRoomRouteImport } from "./routes/rooms.$room";
 import { Route as FormsSubmitRouteImport } from "./routes/forms.submit";
 import { Route as With_menuWorkshopsRouteImport } from "./routes/_with_menu/workshops";
 import { Route as With_menuTimerRouteImport } from "./routes/_with_menu/timer";
@@ -66,6 +67,11 @@ const With_menuRouteRoute = With_menuRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const RoomsRoomRoute = RoomsRoomRouteImport.update({
+  id: "/rooms/$room",
+  path: "/rooms/$room",
   getParentRoute: () => rootRouteImport,
 } as any);
 const FormsSubmitRoute = FormsSubmitRouteImport.update({
@@ -334,6 +340,7 @@ export interface FileRoutesByFullPath {
   "/timer": typeof With_menuTimerRoute;
   "/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
+  "/rooms/$room": typeof RoomsRoomRoute;
   "/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/account/token": typeof With_menuAccountTokenRoute;
   "/clubs/admin": typeof With_menuClubsAdminRoute;
@@ -384,6 +391,7 @@ export interface FileRoutesByTo {
   "/timer": typeof With_menuTimerRoute;
   "/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
+  "/rooms/$room": typeof RoomsRoomRoute;
   "/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/account/token": typeof With_menuAccountTokenRoute;
   "/clubs/admin": typeof With_menuClubsAdminRoute;
@@ -436,6 +444,7 @@ export interface FileRoutesById {
   "/_with_menu/timer": typeof With_menuTimerRoute;
   "/_with_menu/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
+  "/rooms/$room": typeof RoomsRoomRoute;
   "/_with_menu/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/_with_menu/account/token": typeof With_menuAccountTokenRoute;
   "/_with_menu/clubs/admin": typeof With_menuClubsAdminRoute;
@@ -488,6 +497,7 @@ export interface FileRouteTypes {
     | "/timer"
     | "/workshops"
     | "/forms/submit"
+    | "/rooms/$room"
     | "/account/connect-telegram"
     | "/account/token"
     | "/clubs/admin"
@@ -538,6 +548,7 @@ export interface FileRouteTypes {
     | "/timer"
     | "/workshops"
     | "/forms/submit"
+    | "/rooms/$room"
     | "/account/connect-telegram"
     | "/account/token"
     | "/clubs/admin"
@@ -589,6 +600,7 @@ export interface FileRouteTypes {
     | "/_with_menu/timer"
     | "/_with_menu/workshops"
     | "/forms/submit"
+    | "/rooms/$room"
     | "/_with_menu/account/connect-telegram"
     | "/_with_menu/account/token"
     | "/_with_menu/clubs/admin"
@@ -627,6 +639,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   With_menuRouteRoute: typeof With_menuRouteRouteWithChildren;
   FormsSubmitRoute: typeof FormsSubmitRoute;
+  RoomsRoomRoute: typeof RoomsRoomRoute;
   GuardGoogleFilesSlugJoinRoute: typeof GuardGoogleFilesSlugJoinRoute;
 }
 
@@ -644,6 +657,13 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/";
       preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/rooms/$room": {
+      id: "/rooms/$room";
+      path: "/rooms/$room";
+      fullPath: "/rooms/$room";
+      preLoaderRoute: typeof RoomsRoomRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/forms/submit": {
@@ -1083,6 +1103,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   With_menuRouteRoute: With_menuRouteRouteWithChildren,
   FormsSubmitRoute: FormsSubmitRoute,
+  RoomsRoomRoute: RoomsRoomRoute,
   GuardGoogleFilesSlugJoinRoute: GuardGoogleFilesSlugJoinRoute,
 };
 export const routeTree = rootRouteImport
