@@ -333,6 +333,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const [selectedBookingDetails, setSelectedBookingDetails] = useState<
     Booking | undefined
   >(undefined);
+  const [pastBookingPopupVisible, setPastBookingPopupVisible] = useState(false);
 
   const [dateRange, setDateRange] = useState(getTimeRangeForWeek());
   const { data: bookings, isPending } = $roomBooking.useQuery(
@@ -364,6 +365,9 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
 
   const [calendarView, setCalendarView] = useState("timeGrid3");
   const bookingDraftRef = useRef<BookingDraft | null>(null);
+  const pastBookingPopupTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
   const [draftPhase, setDraftPhase] = useState<BookingDraft["phase"] | null>(
     null,
   );
@@ -381,6 +385,25 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const narrowForTapBooking = useNarrowScreenForTapBooking();
   const tapTwoStepTimeGrid =
     narrowForTapBooking && calendarView.startsWith("timeGrid");
+
+  const hidePastBookingPopup = useCallback(() => {
+    setPastBookingPopupVisible(false);
+    if (pastBookingPopupTimeoutRef.current) {
+      clearTimeout(pastBookingPopupTimeoutRef.current);
+      pastBookingPopupTimeoutRef.current = null;
+    }
+  }, []);
+
+  const showPastBookingPopup = useCallback(() => {
+    setPastBookingPopupVisible(true);
+    if (pastBookingPopupTimeoutRef.current) {
+      clearTimeout(pastBookingPopupTimeoutRef.current);
+    }
+    pastBookingPopupTimeoutRef.current = setTimeout(() => {
+      setPastBookingPopupVisible(false);
+      pastBookingPopupTimeoutRef.current = null;
+    }, 3000);
+  }, []);
 
   const syncDraftToCalendar = useCallback(() => {
     const draft = bookingDraftRef.current;
@@ -423,6 +446,15 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     (selectInfo: DateSelectArg) => {
       if (!room) return;
 
+      const start = fromCalendarDate(new Date(selectInfo.startStr));
+      const end = fromCalendarDate(new Date(selectInfo.endStr));
+      if (start.getTime() < Date.now()) {
+        calendarRef.current?.getApi().unselect();
+        showPastBookingPopup();
+        return;
+      }
+
+      hidePastBookingPopup();
       const slot: Slot = {
         room: {
           idx: 0,
@@ -432,15 +464,15 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           restrict_daytime: room.restrict_daytime,
         },
         // selectInfo already provides shifted dates, normalize them for the modal
-        start: fromCalendarDate(new Date(selectInfo.startStr)),
-        end: fromCalendarDate(new Date(selectInfo.endStr)),
+        start,
+        end,
       };
 
       setSelectedSlot(slot);
       setSelectedBookingDetails(undefined);
       setBookingModalOpen(true);
     },
-    [room],
+    [room, hidePastBookingPopup, showPastBookingPopup],
   );
 
   const handleModalClose = useCallback((open: boolean) => {
@@ -475,7 +507,10 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       const nowMs = Date.now() + 3 * 3600 * 1000;
       const nowFloorMs = roundUpToStepMs(nowMs, DRAFT_SLOT_STEP_MS);
 
-      if (clickedMs < nowFloorMs) return;
+      if (clickedMs < nowFloorMs) {
+        showPastBookingPopup();
+        return;
+      }
 
       // For overlap check, use real UTC. Check for 1 hour overlap since initial tile is 1 hour.
       const clickedUtcMs = clickedMs - 3 * 3600 * 1000;
@@ -489,6 +524,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         return;
       }
 
+      hidePastBookingPopup();
       const clicked = new Date(clickedMs);
 
       bookingDraftRef.current = {
@@ -504,6 +540,8 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       room,
       bookingModalOpen,
       bookings,
+      hidePastBookingPopup,
+      showPastBookingPopup,
       syncDraftToCalendar,
     ],
   );
@@ -774,6 +812,9 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         start: new Date(nextStart),
         end: new Date(nextEnd),
       };
+      if (fromCalendarDate(new Date(nextStart)).getTime() >= Date.now()) {
+        hidePastBookingPopup();
+      }
       syncDraftToCalendar();
     }
 
@@ -800,7 +841,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       window.removeEventListener("pointerup", handlePointerRelease);
       window.removeEventListener("pointercancel", handlePointerRelease);
     };
-  }, [bookings, syncDraftToCalendar]);
+  }, [bookings, hidePastBookingPopup, syncDraftToCalendar]);
 
   const handleDraftBook = useCallback(() => {
     const draft = bookingDraftRef.current;
@@ -810,8 +851,12 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     const start = fromCalendarDate(draft.start);
     const end = fromCalendarDate(draft.end);
 
-    if (start.getTime() < Date.now()) return;
+    if (start.getTime() < Date.now()) {
+      showPastBookingPopup();
+      return;
+    }
 
+    hidePastBookingPopup();
     const slot: Slot = {
       room: {
         idx: 0,
@@ -830,7 +875,15 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     bookingDraftRef.current = null;
     setDraftPhase(null);
     calendarRef.current?.getApi().getEventById(DRAFT_SLOT_EVENT_ID)?.remove();
-  }, [room]);
+  }, [room, hidePastBookingPopup, showPastBookingPopup]);
+
+  useEffect(() => {
+    return () => {
+      if (pastBookingPopupTimeoutRef.current) {
+        clearTimeout(pastBookingPopupTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const draft = bookingDraftRef.current;
@@ -920,8 +973,22 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         renderTimeGridEvent={renderTimeGridEvent}
         renderDayHeader={renderDayHeader}
       />
+      {pastBookingPopupVisible && !draftPhase && (
+        <div className="pointer-events-none fixed right-3 bottom-14 left-3 z-30 flex justify-center @md/content:justify-end">
+          <div className="rounded-xs border border-red-600 bg-red-400 px-3 py-1 text-sm font-medium text-red-900 shadow-sm dark:border-red-700 dark:bg-red-900 dark:text-red-500">
+            You cannot book in the past.
+          </div>
+        </div>
+      )}
       {draftPhase && (
-        <div className="bg-base-200/95 border-base-300 fixed right-0 bottom-0 left-0 z-20 border-t px-3 pt-3 shadow-lg backdrop-blur-sm supports-[padding:max(0px)]:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="bg-base-200/95 border-base-300 fixed right-0 bottom-0 left-0 z-20 border-t px-0 pt-3 shadow-lg backdrop-blur-sm supports-[padding:max(0px)]:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          {pastBookingPopupVisible && (
+            <div className="pointer-events-none absolute right-3 bottom-full left-3 z-30 mb-2 flex justify-center @md/content:justify-end">
+              <div className="rounded-xs border border-red-600 bg-red-400 px-3 py-1 text-sm font-medium text-red-900 shadow-sm dark:border-red-700 dark:bg-red-900 dark:text-red-500">
+                You cannot book in the past.
+              </div>
+            </div>
+          )}
           {draftPhase === "preview" && (
             <p className="text-base-content/80 mb-3 text-center text-sm">
               Drag tile edges to set start/end time.
