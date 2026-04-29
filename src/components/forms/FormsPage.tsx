@@ -1,3 +1,5 @@
+import { $forms } from "@/api/forms";
+import { useToast } from "@/components/toast";
 import { useState } from "react";
 import {
   FormUrlInput,
@@ -7,12 +9,28 @@ import {
 } from "./index.ts";
 
 export function FormsPage() {
+  const { showError } = useToast();
   const [formUrl, setFormUrl] = useState("");
   const [error, setError] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [copied, setCopied] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+
+  const { mutate: createShortLink, isPending: isGenerating } =
+    $forms.useMutation("post", "/links", {
+      onMutate: () => {
+        setGeneratedUrl("");
+        setCopied(false);
+      },
+      onSuccess: (view) => {
+        setGeneratedUrl(
+          `${window.location.origin}/forms/submit?slug=${encodeURIComponent(view.slug)}`,
+        );
+      },
+      onError: () => {
+        showError("Error", "Failed to create short link");
+      },
+    });
 
   const validateUrl = (rawUrl: string): string => {
     if (!rawUrl.trim()) return "";
@@ -108,7 +126,7 @@ export function FormsPage() {
     }
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = () => {
     if (!formUrl.trim()) return;
 
     const validationError = validateUrl(formUrl);
@@ -117,15 +135,13 @@ export function FormsPage() {
       return;
     }
 
-    setIsGenerating(true);
+    const normalized = formUrl.trim().match(/^https?:\/\//)
+      ? formUrl.trim()
+      : `https://${formUrl.trim()}`;
 
-    // Add a delay to show loading state
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const url = `${window.location.origin}/forms/submit?form=${encodeURIComponent(formUrl.trim())}`;
-    setGeneratedUrl(url);
-    setCopied(false);
-    setIsGenerating(false);
+    createShortLink({
+      body: { form_url: normalized },
+    });
   };
 
   const handleCopy = async () => {

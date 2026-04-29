@@ -22,6 +22,7 @@ export function GeneratedLink({
           className="border-base-content/20 bg-base-100 text-base-content/80 rounded-field h-10 flex-1 border-2 p-3 text-sm outline-hidden"
         />
         <button
+          type="button"
           onClick={onCopy}
           className="bg-primary rounded-field flex h-10 items-center justify-center gap-2 px-3 py-1 text-sm font-normal text-white shadow-[0px-0px-4px-#00000040] transition-colors hover:bg-[#6600CC]"
         >
