@@ -4,6 +4,59 @@
  */
 
 export interface paths {
+  "/links": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Links */
+    get: operations["get_links_links_get"];
+    put?: never;
+    /** Create Link */
+    post: operations["create_link_links_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/links/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Resolve Link */
+    get: operations["resolve_link_links__slug__get"];
+    put?: never;
+    post?: never;
+    /** Delete Link */
+    delete: operations["delete_link_links__slug__delete"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/links/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Verify Link Signature */
+    post: operations["verify_link_signature_links_verify_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/user/me": {
     parameters: {
       query?: never;
@@ -28,6 +81,25 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** CreateLink */
+    CreateLink: {
+      /** Form Url */
+      form_url: string;
+    };
+    /** HTTPValidationError */
+    HTTPValidationError: {
+      /** Detail */
+      detail?: components["schemas"]["ValidationError"][];
+    };
+    /** SignaturePayload */
+    SignaturePayload: {
+      /** Email */
+      email: string;
+      /** Fio */
+      fio: string;
+      /** Telegram */
+      telegram: string;
+    };
     /** TelegramWidgetData */
     TelegramWidgetData: {
       /** Id */
@@ -69,6 +141,54 @@ export interface components {
       telegram: components["schemas"]["TelegramWidgetData"] | null;
       innopolis_sso: components["schemas"]["UserInfoFromSSO"] | null;
     };
+    /** ValidationError */
+    ValidationError: {
+      /** Location */
+      loc: (string | number)[];
+      /** Message */
+      msg: string;
+      /** Error Type */
+      type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
+    };
+    /** VerifySignatureRequest */
+    VerifySignatureRequest: {
+      /** S */
+      s: string;
+    };
+    /** VerifySignatureResponse */
+    VerifySignatureResponse: {
+      /** Valid */
+      valid: boolean;
+      payload?: components["schemas"]["SignaturePayload"] | null;
+    };
+    /** ViewLink */
+    ViewLink: {
+      /** Slug */
+      slug: string;
+      /** Short Path */
+      short_path: string;
+    };
+    /** ViewLinksItem */
+    ViewLinksItem: {
+      /** Slug */
+      slug: string;
+      /** Form Url */
+      form_url: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+    };
+    /** ViewResolvedLink */
+    ViewResolvedLink: {
+      /** Url */
+      url: string;
+    };
   };
   responses: never;
   parameters: never;
@@ -76,12 +196,228 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaCreateLink = components["schemas"]["CreateLink"];
+export type SchemaHttpValidationError =
+  components["schemas"]["HTTPValidationError"];
+export type SchemaSignaturePayload = components["schemas"]["SignaturePayload"];
 export type SchemaTelegramWidgetData =
   components["schemas"]["TelegramWidgetData"];
 export type SchemaUserInfoFromSso = components["schemas"]["UserInfoFromSSO"];
 export type SchemaUserSchema = components["schemas"]["UserSchema"];
+export type SchemaValidationError = components["schemas"]["ValidationError"];
+export type SchemaVerifySignatureRequest =
+  components["schemas"]["VerifySignatureRequest"];
+export type SchemaVerifySignatureResponse =
+  components["schemas"]["VerifySignatureResponse"];
+export type SchemaViewLink = components["schemas"]["ViewLink"];
+export type SchemaViewLinksItem = components["schemas"]["ViewLinksItem"];
+export type SchemaViewResolvedLink = components["schemas"]["ViewResolvedLink"];
 export type $defs = Record<string, never>;
 export interface operations {
+  get_links_links_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current user links */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ViewLinksItem"][];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  create_link_links_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateLink"];
+      };
+    };
+    responses: {
+      /** @description Short link created */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ViewLink"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Failed to generate unique slug */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  resolve_link_links__slug__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Resolved signed Yandex form URL */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ViewResolvedLink"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Link belongs to another user */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Link not found OR User not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  delete_link_links__slug__delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Link deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Link not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  verify_link_signature_links_verify_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VerifySignatureRequest"];
+      };
+    };
+    responses: {
+      /** @description Signature verification result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["VerifySignatureResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   get_me_user_me_get: {
     parameters: {
       query?: never;
