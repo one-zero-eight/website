@@ -10,6 +10,14 @@
   width: 200%;
   height: inherit;
   display: flex;
+  transition: all 500ms;
+}
+
+.doubleScreenContainer_moved {
+  width: 200%;
+  height: inherit;
+  display: flex;
+  transform: translateX(-50%);
 }
 
 .ordinaryScreen {
@@ -75,9 +83,15 @@
   overflow: hidden;
 }
 
+.dropArea_squared {
+  position: relative;
+  --drop-area-rounding: 20px;
+}
+
 .backgroundIcon {
   width: 50%;
   height: 50%;
+  align-self: center;
 }
 
 @keyframes uploading {
@@ -136,6 +150,12 @@
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+}
+
+.configurationBox_loading {
+  width: 100%;
+  color: var(--drop-area-color);
+  align-items: center;
 }
 
 .configurationBox__scrollPart {
