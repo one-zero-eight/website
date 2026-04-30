@@ -2,7 +2,7 @@ import inputStyles from "@/components/web-print/printers.input.module.css";
 import styles from "@/components/web-print/printers.module.css";
 import fontStyles from "@/components/web-print/printers.fonts.module.css";
 import { JSX, useEffect, useRef, useState } from "react";
-import { Alert } from "@/components/web-print/Alert.tsx";
+import { Modal } from "@/components/common/Modal.tsx";
 
 export function ScalableIntInput({
   defaultValue,
@@ -117,12 +117,13 @@ export function ScalableIntInput({
         +
       </button>
 
-      <Alert
-        isShown={alert as unknown as boolean}
-        onClose={() => setAlert(null)}
+      <Modal
+        open={alert as unknown as boolean}
+        onOpenChange={() => setAlert(null)}
+        title={"Warning"}
       >
         {alert}
-      </Alert>
+      </Modal>
     </div>
   );
 }

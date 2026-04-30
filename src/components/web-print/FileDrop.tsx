@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, JSX } from "react";
 import fontStyles from "@/components/web-print/printers.fonts.module.css";
 import marginStyles from "@/components/web-print/printers.margins.module.css";
 import themeStyles from "@/components/web-print/printers.theme.module.css";
-import { Alert } from "@/components/web-print/Alert.tsx";
+import { Modal } from "@/components/common/Modal.tsx";
 
 export function FileDrop({
   fileProcess,
@@ -225,12 +225,13 @@ export function FileDrop({
         )}
       </div>
 
-      <Alert
-        isShown={alert as unknown as boolean}
-        onClose={() => setAlert(null)}
+      <Modal
+        open={alert as unknown as boolean}
+        onOpenChange={() => setAlert(null)}
+        title={"Warning"}
       >
         {alert}
-      </Alert>
+      </Modal>
     </>
   );
 }
