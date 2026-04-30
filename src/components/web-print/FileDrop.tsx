@@ -9,10 +9,12 @@ export function FileDrop({
   fileProcess,
   isFileProcessing,
   blobPreviewURL,
+  isFunctional,
 }: {
   fileProcess: (file: File) => void;
   isFileProcessing: boolean;
   blobPreviewURL: string | undefined;
+  isFunctional: boolean;
 }) {
   const [alert, setAlert] = useState<JSX.Element | null>(null);
 
@@ -31,6 +33,8 @@ export function FileDrop({
   const previewReference = useRef<HTMLEmbedElement>(null);
 
   useEffect(() => {
+    if (!isFunctional) return;
+
     const fileInput = fileInputReference.current;
     const dropArea = dropAreaReference.current;
     const preview = previewReference.current;
@@ -170,6 +174,7 @@ export function FileDrop({
     isFileProcessing,
     acceptableFileExtensions,
     acceptableFileTypes,
+    isFunctional,
   ]);
 
   return (
@@ -179,7 +184,7 @@ export function FileDrop({
       >
         <div
           ref={dropAreaReference}
-          className={`${styles.dropArea} ${blobPreviewURL && themeStyles.dropArea_squared}`}
+          className={`${styles.dropArea} ${blobPreviewURL && styles.dropArea_squared}`}
         >
           {isFileProcessing ? (
             <span
@@ -205,17 +210,19 @@ export function FileDrop({
           )}
         </div>
 
-        <label
-          ref={fileInputReference}
-          className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding}`}
-        >
-          Attach file
-          <input
-            type="file"
-            id="fileToBePrinted"
-            accept={acceptableFileExtensions}
-          />
-        </label>
+        {isFunctional && (
+          <label
+            ref={fileInputReference}
+            className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding}`}
+          >
+            Attach file
+            <input
+              type="file"
+              id="fileToBePrinted"
+              accept={acceptableFileExtensions}
+            />
+          </label>
+        )}
       </div>
 
       <Alert
