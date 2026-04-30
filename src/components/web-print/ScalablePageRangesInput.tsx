@@ -1,8 +1,8 @@
 import styles from "@/components/web-print/printers.module.css";
 import inputStyles from "@/components/web-print/printers.input.module.css";
 import themeStyles from "@/components/web-print/printers.theme.module.css";
-import { Alert } from "@/components/web-print/Alert.tsx";
 import { JSX, useEffect, useRef, useState } from "react";
+import { Modal } from "@/components/common/Modal.tsx";
 
 export function ScalablePageRangesInput({
   onTyped,
@@ -116,12 +116,13 @@ export function ScalablePageRangesInput({
         className={`${inputStyles.input} ${inputStyles.input_rounded}`}
       />
 
-      <Alert
-        isShown={alert as unknown as boolean}
-        onClose={() => setAlert(null)}
+      <Modal
+        open={alert as unknown as boolean}
+        onOpenChange={() => setAlert(null)}
+        title={"Warning"}
       >
         {alert}
-      </Alert>
+      </Modal>
     </>
   );
 }
