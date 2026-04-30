@@ -44,6 +44,7 @@
 }
 
 .button {
+  anchor-name: --button;
   user-select: none;
   width: fit-content;
   background-color: var(--button-color);
@@ -92,6 +93,14 @@
   width: 50%;
   height: 50%;
   align-self: center;
+}
+
+.sideIcon {
+  position: absolute;
+  position-anchor: --button;
+  height: anchor-size(height);
+  width: anchor-size(height);
+  margin-left: var(--button-left-margin);
 }
 
 @keyframes uploading {

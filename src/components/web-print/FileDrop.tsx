@@ -196,7 +196,7 @@ export function FileDrop({
                 className={`icon-[material-symbols--docs-rounded] ${styles.backgroundIcon}`}
               />
               <span className={`${fontStyles.headFont} font-black!`}>
-                Drag&Drop
+                {isFunctional ? "Drag&Drop" : "Preview"}
               </span>
               {blobPreviewURL && (
                 <embed
