@@ -1,6 +1,6 @@
 import styles from "@/components/web-print/printers.module.css";
 import { ConfigurationHeader } from "@/components/web-print/ConfigurationHeader.tsx";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { FileDrop } from "@/components/web-print/FileDrop.tsx";
 import { $printers } from "@/api/printers";
 import { IconValueStatusSelect } from "@/components/web-print/IconValueStatusSelect.tsx";
@@ -9,24 +9,77 @@ import fontStyles from "@/components/web-print/printers.fonts.module.css";
 import { ScalableIntInput } from "@/components/web-print/ScalableIntInput.tsx";
 import { Switch } from "@/components/web-print/Switch.tsx";
 import { ScalablePageRangesInput } from "@/components/web-print/ScalablePageRangesInput.tsx";
+import { Alert } from "@/components/web-print/Alert.tsx";
+import {
+  PrintingOptionsNumberUp,
+  PrintingOptionsSides,
+} from "@/api/printers/types.ts";
 
-enum Layout {
-  "1x1" = 1,
-  "1x2" = 2,
-  "2x2" = 4,
-  "2x3" = 6,
-  "3x3" = 9,
-  "4x4" = 16,
+function calcNumberOfPagesInRanges(ranges: string, until: number) {
+  let count = 0;
+  for (const elem of ranges.split(","))
+    if (elem.includes("-")) {
+      if (parseInt(elem.split("-")[0]) > until) break;
+      if (parseInt(elem.split("-")[0]) === until) {
+        count++;
+        break;
+      }
+      if (parseInt(elem.split("-")[1]) > until)
+        count += until - parseInt(elem.split("-")[0]) + 1;
+      else
+        count +=
+          parseInt(elem.split("-")[1]) - parseInt(elem.split("-")[0]) + 1;
+    } else {
+      if (parseInt(elem) > until) break;
+      count++;
+    }
+  return count;
 }
 
-export function ConfigurationScreen() {
+function calcPrintJobActualPapersCount(
+  ranges: string | null,
+  copiesCount: number,
+  numberUp: PrintingOptionsNumberUp,
+  sides: PrintingOptionsSides,
+  pagesCount: number,
+) {
+  const sideFactor =
+    sides === PrintingOptionsSides.two_sided_long_edge ? 1 / 2 : 1;
+  const numberUpFactor = 1 / parseInt(numberUp);
+  if (!ranges)
+    return Math.ceil(pagesCount * numberUpFactor * sideFactor * copiesCount);
+  pagesCount = Math.ceil(pagesCount * numberUpFactor);
+  pagesCount = calcNumberOfPagesInRanges(ranges, pagesCount);
+  return Math.ceil(pagesCount * sideFactor * copiesCount);
+}
+
+export function ConfigurationScreen({
+  setJobState,
+  preparedDocumentURL,
+  setPreparedDocumentURL,
+  setJobId,
+  setPrintJobActualPapersCount,
+}: {
+  setJobState: (value: boolean) => void;
+  preparedDocumentURL: string | undefined;
+  setPreparedDocumentURL: (value: string) => void;
+  setJobId: (value: number) => void;
+  setPrintJobActualPapersCount: (value: number) => void;
+}) {
+  const [alert, setAlert] = useState<JSX.Element | null>(null);
+
+  const [preparedDocumentName, setPreparedDocumentName] = useState<string>("");
   const [configurationType, setConfigurationType] = useState<boolean>(true);
-  const [preparedDocumentURL, setPreparedDocumentURL] = useState<string>();
-  const [_printerCupsName, setPrinterCupsName] = useState<string>("");
-  const [_copiesCount, setCopiesCount] = useState<number>(1);
-  const [sides, setSides] = useState<boolean>(true);
-  const [_pages, setPages] = useState<string | null>(null);
-  const [_numberUp, setNumberUp] = useState<Layout>(Layout["1x1"]);
+  const [printerCupsName, setPrinterCupsName] = useState<string>("");
+  const [copiesCount, setCopiesCount] = useState<number>(1);
+  const [pagesCount, setPagesCount] = useState<number>(0);
+  const [sides, setSides] = useState<PrintingOptionsSides>(
+    PrintingOptionsSides.two_sided_long_edge,
+  );
+  const [pages, setPages] = useState<string | null>(null);
+  const [numberUp, setNumberUp] = useState<PrintingOptionsNumberUp>(
+    PrintingOptionsNumberUp.Value1,
+  );
 
   const { data: rawPrinters } = $printers.useQuery(
     "get",
@@ -38,6 +91,8 @@ export function ConfigurationScreen() {
   );
   const { mutateAsync: prepareFile, isPending: isFilePreparing } =
     $printers.useMutation("post", "/print/prepare");
+  const { mutateAsync: print, isPending: isPrintStarting } =
+    $printers.useMutation("post", "/print/print");
   const { mutateAsync: getPreparedFile, isPending: isFileDownloading } =
     $printers.useMutation("get", "/print/get_file");
 
@@ -45,16 +100,60 @@ export function ConfigurationScreen() {
     if (preparedDocumentURL) URL.revokeObjectURL(preparedDocumentURL);
     const formData = new FormData();
     formData.append("file", file);
-    const preparationResponse = await prepareFile({
-      // @ts-expect-error - FormData type mismatch with API
-      body: formData,
-    });
-    // @ts-expect-error - response type mismatch with API
-    const getResponse: Blob = await getPreparedFile({
-      params: { query: { filename: preparationResponse.filename } },
-      parseAs: "blob",
-    });
-    setPreparedDocumentURL(URL.createObjectURL(getResponse));
+    try {
+      const preparationResponse = await prepareFile({
+        // @ts-expect-error - FormData type mismatch with API
+        body: formData,
+      });
+      setPreparedDocumentName(preparationResponse.filename);
+      setPagesCount(preparationResponse.pages);
+      // @ts-expect-error - response type mismatch with API
+      const getResponse: Blob = await getPreparedFile({
+        params: { query: { filename: preparationResponse.filename } },
+        parseAs: "blob",
+      });
+      setPreparedDocumentURL(URL.createObjectURL(getResponse));
+    } catch (exception: any) {
+      if (!Object.hasOwn(exception, "detail"))
+        exception.detail = "Unknown error. Service is unavailable";
+      setAlert(<p>{exception.detail}</p>);
+    }
+  }
+
+  async function start() {
+    try {
+      const printResponse = await print({
+        params: {
+          query: {
+            filename: preparedDocumentName,
+            printer_cups_name: printerCupsName,
+          },
+        },
+        body: {
+          printing_options: {
+            copies: copiesCount.toString(),
+            "page-ranges": pages,
+            sides: sides,
+            "number-up": numberUp,
+          },
+        },
+      });
+      setPrintJobActualPapersCount(
+        calcPrintJobActualPapersCount(
+          pages,
+          copiesCount,
+          numberUp,
+          sides,
+          pagesCount,
+        ),
+      );
+      setJobId(printResponse);
+      setJobState(true);
+    } catch (exception: any) {
+      if (!Object.hasOwn(exception, "detail"))
+        exception.detail = "Unknown error. Service is unavailable";
+      setAlert(<p>{exception.detail}</p>);
+    }
   }
 
   return (
@@ -101,7 +200,16 @@ export function ConfigurationScreen() {
             </div>
             <div className={styles.scrollPart__elem}>
               <p className={fontStyles.formPointFont}>Printing on both sides</p>
-              <Switch state={sides} onSwitched={setSides} />
+              <Switch
+                state={sides === PrintingOptionsSides.two_sided_long_edge}
+                onSwitched={(value: boolean) =>
+                  setSides(
+                    value
+                      ? PrintingOptionsSides.two_sided_long_edge
+                      : PrintingOptionsSides.one_sided,
+                  )
+                }
+              />
             </div>
             <div className={styles.scrollPart__elem}>
               <p className={fontStyles.formPointFont}>Specific pages</p>
@@ -111,35 +219,45 @@ export function ConfigurationScreen() {
               <p className={fontStyles.formPointFont}>Layout</p>
               <IconValueStatusSelect
                 icons={undefined}
-                names={Object.keys(Layout).filter((elem) => elem.includes("x"))}
-                values={Object.keys(Layout).filter(
-                  (elem) => !elem.includes("x"),
+                names={["1x1", "1x2", "2x2", "2x3", "3x3", "4x4"]}
+                values={Object.values(PrintingOptionsNumberUp)}
+                statuses={Object.values(PrintingOptionsNumberUp).map(
+                  (elem) =>
+                    `\xa0(${elem} ${parseInt(elem) > 1 ? "pages" : "page"} per list)`,
                 )}
-                statuses={Object.keys(Layout)
-                  .filter((elem) => elem.includes("x"))
-                  .map(
-                    (elem) =>
-                      `\xa0(${Layout[elem as unknown as number]} ${parseInt(Layout[elem as unknown as number]) > 1 ? "pages" : "page"} per list)`,
-                  )}
-                onSelected={(numberUp: string) => {
-                  setNumberUp(parseInt(numberUp));
-                }}
+                // @ts-expect-error - String-valued enum is okay to accept a confidently valid string
+                onSelected={setNumberUp}
               />
             </div>
           </div>
-          <button
-            className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding}`}
-            onClick={() => {}}
-          >
-            {configurationType ? "Start printing" : "Start scanning"}
-          </button>
+          <div>
+            <button
+              className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding}`}
+              onClick={start}
+            >
+              {configurationType ? "Start printing" : "Start scanning"}
+            </button>
+            {isPrintStarting && (
+              <span
+                className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
+              ></span>
+            )}
+          </div>
         </div>
         <FileDrop
           fileProcess={fileProcess}
           isFileProcessing={isFilePreparing || isFileDownloading}
           blobPreviewURL={preparedDocumentURL}
+          isFunctional={true}
         />
       </div>
+
+      <Alert
+        isShown={alert as unknown as boolean}
+        onClose={() => setAlert(null)}
+      >
+        {alert}
+      </Alert>
     </div>
   );
 }

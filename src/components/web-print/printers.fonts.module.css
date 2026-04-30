@@ -8,12 +8,6 @@
   font-weight: var(--font-weight-medium);
 }
 
-.alertFont {
-  font-size: 14px;
-  line-height: 1.429;
-  color: #adb6c4;
-}
-
 .formPointFont {
   font-family: Roboto, sans-serif;
   margin-right: var(--form-point-margin);
