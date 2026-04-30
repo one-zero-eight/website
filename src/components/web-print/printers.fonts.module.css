@@ -6,6 +6,7 @@
 .buttonFont {
   font-size: var(--button-font-size);
   font-weight: var(--font-weight-medium);
+  color: var(--color-base-content);
 }
 
 .formPointFont {
