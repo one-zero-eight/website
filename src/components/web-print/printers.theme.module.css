@@ -27,6 +27,7 @@
 [data-theme="light"] .webPrintPage {
   --button-color: #e4e7ec;
   --drop-area-color: #e4e7ec;
+  --color-primary: #e1cefd;
 }
 
 :global(#fileToBePrinted) {
