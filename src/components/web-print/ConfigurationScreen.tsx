@@ -9,11 +9,11 @@ import fontStyles from "@/components/web-print/printers.fonts.module.css";
 import { ScalableIntInput } from "@/components/web-print/ScalableIntInput.tsx";
 import { Switch } from "@/components/web-print/Switch.tsx";
 import { ScalablePageRangesInput } from "@/components/web-print/ScalablePageRangesInput.tsx";
-import { Alert } from "@/components/web-print/Alert.tsx";
 import {
   PrintingOptionsNumberUp,
   PrintingOptionsSides,
 } from "@/api/printers/types.ts";
+import { Modal } from "@/components/common/Modal.tsx";
 
 function calcNumberOfPagesInRanges(ranges: string, until: number) {
   let count = 0;
@@ -252,12 +252,13 @@ export function ConfigurationScreen({
         />
       </div>
 
-      <Alert
-        isShown={alert as unknown as boolean}
-        onClose={() => setAlert(null)}
+      <Modal
+        open={alert as unknown as boolean}
+        onOpenChange={() => setAlert(null)}
+        title={"Warning"}
       >
         {alert}
-      </Alert>
+      </Modal>
     </div>
   );
 }
