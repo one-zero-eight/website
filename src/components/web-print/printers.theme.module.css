@@ -25,18 +25,10 @@
 }
 
 [data-theme="light"] .webPrintPage {
-  --button-color: #bcc3cd;
-  --drop-area-color: #b8bdc8;
-}
-
-.webPrintPage .dropArea_squared {
-  --drop-area-rounding: 20px;
+  --button-color: #e4e7ec;
+  --drop-area-color: #e4e7ec;
 }
 
 :global(#fileToBePrinted) {
   display: none;
-}
-
-.dropArea_squared {
-  position: relative;
 }
