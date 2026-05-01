@@ -6,32 +6,25 @@ import { ProcessingScreen } from "@/components/web-print/ProcessingScreen.tsx";
 import { useState } from "react";
 
 export function WebPrintPage() {
-  const [jobId, setJobId] = useState<number>();
-  const [jobState, setJobState] = useState<boolean>(false);
+  const [screenSwitch, setScreenSwitch] = useState<boolean>(false);
   const [preparedDocumentURL, setPreparedDocumentURL] = useState<string>();
-  const [printJobActualPapersCount, setPrintJobActualPapersCount] =
-    useState<number>(0);
 
   return (
     <div
       className={`${themeStyles.webPrintPage} ${styles.noXOverflowFrame_full}`}
     >
       <DoubleScreenContainer
-        className={jobState && styles.doubleScreenContainer_moved}
+        className={screenSwitch && styles.doubleScreenContainer_moved}
       >
         <ConfigurationScreen
-          setJobState={setJobState}
+          screenSwitch={screenSwitch}
+          setScreenSwitch={setScreenSwitch}
           preparedDocumentURL={preparedDocumentURL}
           setPreparedDocumentURL={setPreparedDocumentURL}
-          setJobId={setJobId}
-          setPrintJobActualPapersCount={setPrintJobActualPapersCount}
         />
         <ProcessingScreen
-          jobState={jobState}
-          setJobState={setJobState}
+          setScreenSwitch={setScreenSwitch}
           preparedDocumentURL={preparedDocumentURL}
-          jobId={jobId}
-          printJobActualPapersCount={printJobActualPapersCount}
         />
       </DoubleScreenContainer>
     </div>
