@@ -54,6 +54,11 @@
   transition: background-color 250ms;
 }
 
+.button_inactive {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .button:hover {
   background-color: var(--color-primary);
 }
