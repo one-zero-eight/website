@@ -1,6 +1,6 @@
 import styles from "@/components/web-print/printers.module.css";
 import { ConfigurationHeader } from "@/components/web-print/ConfigurationHeader.tsx";
-import { JSX, useState } from "react";
+import { JSX, useCallback, useEffect, useRef, useState } from "react";
 import { FileDrop } from "@/components/web-print/FileDrop.tsx";
 import { $printers } from "@/api/printers";
 import { IconValueStatusSelect } from "@/components/web-print/IconValueStatusSelect.tsx";
@@ -10,6 +10,7 @@ import { ScalableIntInput } from "@/components/web-print/ScalableIntInput.tsx";
 import { Switch } from "@/components/web-print/Switch.tsx";
 import { ScalablePageRangesInput } from "@/components/web-print/ScalablePageRangesInput.tsx";
 import {
+  JobStateEnum,
   PrintingOptionsNumberUp,
   PrintingOptionsSides,
 } from "@/api/printers/types.ts";
@@ -54,19 +55,19 @@ function calcPrintJobActualPapersCount(
 }
 
 export function ConfigurationScreen({
-  setJobState,
+  screenSwitch,
+  setScreenSwitch,
   preparedDocumentURL,
   setPreparedDocumentURL,
-  setJobId,
-  setPrintJobActualPapersCount,
 }: {
-  setJobState: (value: boolean) => void;
+  screenSwitch: boolean;
+  setScreenSwitch: (value: boolean) => void;
   preparedDocumentURL: string | undefined;
   setPreparedDocumentURL: (value: string) => void;
-  setJobId: (value: number) => void;
-  setPrintJobActualPapersCount: (value: number) => void;
 }) {
   const [alert, setAlert] = useState<JSX.Element | null>(null);
+
+  const startButtonReference = useRef<HTMLButtonElement>(null);
 
   const [preparedDocumentName, setPreparedDocumentName] = useState<string>("");
   const [configurationType, setConfigurationType] = useState<boolean>(true);
@@ -95,6 +96,22 @@ export function ConfigurationScreen({
     $printers.useMutation("post", "/print/print");
   const { mutateAsync: getPreparedFile, isPending: isFileDownloading } =
     $printers.useMutation("get", "/print/get_file");
+  const { mutateAsync: getJobStatus } = $printers.useMutation(
+    "get",
+    "/print/job_status",
+  );
+  const { mutateAsync: cancelJob, isPending: isCancelling } =
+    $printers.useMutation("post", "/print/cancel");
+
+  const showExceptionDetail = useCallback((prefix: string, exception: any) => {
+    if (!Object.hasOwn(exception, "detail"))
+      exception.detail = "Unknown error. Service is unavailable";
+    setAlert(
+      <p>
+        {prefix}: {exception.detail}
+      </p>,
+    );
+  }, []);
 
   async function fileProcess(file: File) {
     if (preparedDocumentURL) URL.revokeObjectURL(preparedDocumentURL);
@@ -114,47 +131,119 @@ export function ConfigurationScreen({
       });
       setPreparedDocumentURL(URL.createObjectURL(getResponse));
     } catch (exception: any) {
-      if (!Object.hasOwn(exception, "detail"))
-        exception.detail = "Unknown error. Service is unavailable";
-      setAlert(<p>{exception.detail}</p>);
+      showExceptionDetail("Documents processing problem", exception);
     }
   }
 
-  async function start() {
+  const [jobId, setJobId] = useState<number>();
+  async function startAndWait() {
     try {
-      const printResponse = await print({
-        params: {
-          query: {
-            filename: preparedDocumentName,
-            printer_cups_name: printerCupsName,
+      setJobId(
+        await print({
+          params: {
+            query: {
+              filename: preparedDocumentName,
+              printer_cups_name: printerCupsName,
+            },
           },
-        },
-        body: {
-          printing_options: {
-            copies: copiesCount.toString(),
-            "page-ranges": pages,
-            sides: sides,
-            "number-up": numberUp,
+          body: {
+            printing_options: {
+              copies: copiesCount.toString(),
+              "page-ranges": pages,
+              sides: sides,
+              "number-up": numberUp,
+            },
           },
-        },
-      });
-      setPrintJobActualPapersCount(
+        }),
+      );
+    } catch (exception: any) {
+      showExceptionDetail("Start problem", exception);
+      return;
+    }
+    setScreenSwitch(true);
+  }
+
+  useEffect(() => {
+    async function waitTillThePrintingEnd() {
+      if (!jobId) return;
+      const startTime = performance.now();
+      while (
+        performance.now() - startTime <
         calcPrintJobActualPapersCount(
           pages,
           copiesCount,
           numberUp,
           sides,
           pagesCount,
-        ),
-      );
-      setJobId(printResponse);
-      setJobState(true);
-    } catch (exception: any) {
-      if (!Object.hasOwn(exception, "detail"))
-        exception.detail = "Unknown error. Service is unavailable";
-      setAlert(<p>{exception.detail}</p>);
+        ) *
+          60 *
+          1000 // 60K milliseconds per page
+      ) {
+        if (!screenSwitch) break;
+        let jobStatus;
+        try {
+          jobStatus = await getJobStatus({
+            params: { query: { job_id: jobId } },
+          });
+        } catch (exception: any) {
+          console.log(
+            `[web-print] Error during status retrieval for a job by id ${jobId}\n${exception}`,
+          );
+          continue;
+        }
+        if (
+          [
+            JobStateEnum.Value9 /* completed */,
+            JobStateEnum.Value7 /* cancelled */,
+            JobStateEnum.Value8 /* aborted */,
+          ].includes(jobStatus.job_state)
+        ) {
+          setScreenSwitch(false);
+          return;
+        }
+        if (jobStatus.printer_state_message?.includes("Replace the toner")) {
+          setAlert(
+            <>
+              <p className="font-bold!">No toner</p>
+              <p>The job cannot be completed</p>
+            </>,
+          );
+          setScreenSwitch(false);
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      try {
+        await cancelJob({
+          params: { query: { job_id: jobId } },
+        });
+      } catch (exception: any) {
+        console.log(
+          `[web-print] Error during cancellation of a job by id ${jobId}\n${exception}`,
+        );
+      }
+      if (screenSwitch)
+        setAlert(
+          <>
+            <p className="font-bold!">The job has been timed out!</p>
+            <p>Probably, the printer is busy, try to reboot it</p>
+          </>,
+        );
+      setScreenSwitch(false);
     }
-  }
+    waitTillThePrintingEnd();
+  }, [
+    cancelJob,
+    copiesCount,
+    getJobStatus,
+    jobId,
+    numberUp,
+    pages,
+    pagesCount,
+    screenSwitch,
+    setScreenSwitch,
+    sides,
+  ]);
 
   return (
     <div className={styles.ordinaryScreen}>
@@ -232,12 +321,13 @@ export function ConfigurationScreen({
           </div>
           <div>
             <button
-              className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding}`}
-              onClick={start}
+              ref={startButtonReference}
+              className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${(isPrintStarting || isCancelling) && styles.button_inactive}`}
+              onClick={startAndWait}
             >
               {configurationType ? "Start printing" : "Start scanning"}
             </button>
-            {isPrintStarting && (
+            {(isPrintStarting || isCancelling) && (
               <span
                 className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
               ></span>
