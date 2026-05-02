@@ -990,7 +990,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
             </div>
           )}
           {draftPhase === "preview" && (
-            <p className="text-base-content/80 mb-3 text-center text-sm">
+            <p className="text-base-content mb-3 text-center text-sm">
               Drag tile edges to set start/end time.
             </p>
           )}
@@ -998,17 +998,17 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           <p className="text-base-content/80 mb-3 text-center text-sm">
             Duration: {draftDurationLabel}
           </p> */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pb-3">
+          <div className="flex flex-wrap items-center justify-center gap-2 px-6 pb-3">
             <button
               type="button"
-              className="btn btn-soft btn-sm min-w-24"
+              className="btn btn-soft grow"
               onClick={clearBookingDraft}
             >
               Cancel
             </button>
             <button
               type="button"
-              className="btn btn-primary btn-sm min-w-24"
+              className="btn btn-primary grow"
               onClick={handleDraftBook}
             >
               Book
