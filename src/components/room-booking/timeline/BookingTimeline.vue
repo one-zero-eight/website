@@ -1398,46 +1398,44 @@ $button-height: 50px;
 }
 
 .root {
-  --c-bg-items: #{colors.$gray-50};
-  --c-bg-sheet: #{colors.$gray-100};
-  --c-borders: #{colors.$gray-200};
-  --c-text: #{colors.$gray-900};
-  --c-text-muted: #{colors.$gray-500};
-  --c-text-muted-2: #{colors.$gray-300};
-  --c-textbox-bg-red: #{colors.$red-400};
-  --c-textbox-text-red: #{colors.$red-900};
-  --c-textbox-borders-red: #{colors.$red-600};
-  --c-textbox-bg-purple: #{colors.$purple-400};
-  --c-textbox-text-purple: #{colors.$purple-900};
-  --c-textbox-borders-purple: #{colors.$purple-600};
-  --c-textbox-bg-green: #{colors.$green-400};
-  --c-textbox-text-green: #{colors.$green-900};
-  --c-textbox-borders-green: #{colors.$green-600};
-  --c-ruler-now: #{colors.$red-600};
-  --c-ruler-new: #{colors.$purple-600};
-  --c-skeleton-bg: #{colors.$gray-300};
+  --c-bg-items: var(--color-base-150);
+  --c-borders: var(--color-mauve-200);
+  --c-text: var(--color-base-content);
+  --c-text-muted: var(--color-mauve-500);
+  --c-text-muted-2: var(--color-mauve-700);
+  --c-textbox-bg-red: var(--color-red-400);
+  --c-textbox-text-red: var(--color-red-900);
+  --c-textbox-borders-red: var(--color-red-600);
+  --c-textbox-bg-purple: var(--color-primary);
+  --c-textbox-text-purple: var(--color-primary-content);
+  --c-textbox-borders-purple: var(--color-purple-600);
+  --c-textbox-bg-green: var(--color-green-400);
+  --c-textbox-text-green: var(--color-green-900);
+  --c-textbox-borders-green: var(--color-green-500);
+  --c-ruler-now: var(--color-red-600);
+  --c-ruler-new: var(--color-purple-600);
+  --c-skeleton-bg: var(--color-gray-300);
 }
 
 :global([data-theme="dark"]) {
   .root {
-    --c-bg-items: #{colors.$gray-950};
-    --c-bg-sheet: #{colors.$gray-900};
-    --c-borders: #{colors.$gray-800};
-    --c-text: #{colors.$gray-200};
-    --c-text-muted: #{colors.$gray-500};
-    --c-text-muted-2: #{colors.$gray-700};
-    --c-textbox-bg-red: #{colors.$red-900};
-    --c-textbox-text-red: #{colors.$red-500};
-    --c-textbox-borders-red: #{colors.$red-700};
-    --c-textbox-bg-purple: #{colors.$purple-900};
-    --c-textbox-text-purple: #{colors.$purple-500};
-    --c-textbox-borders-purple: #{colors.$purple-700};
-    --c-textbox-bg-green: #{colors.$green-900};
-    --c-textbox-text-green: #{colors.$green-500};
-    --c-textbox-borders-green: #{colors.$green-700};
-    --c-ruler-now: #{colors.$red-800};
-    --c-ruler-new: #{colors.$purple-800};
-    --c-skeleton-bg: #{colors.$gray-800};
+    --c-bg-items: var(--color-base-150);
+    --c-borders: var(--color-mauve-800);
+    --c-text: var(--color-base-content);
+    --c-text-muted: var(--color-mauve-400);
+    --c-text-muted-2: var(--color-mauve-600);
+    --c-textbox-bg-red: var(--color-red-900);
+    --c-textbox-text-red: var(--color-red-500);
+    --c-textbox-borders-red: var(--color-red-800);
+    --c-textbox-bg-purple: var(--color-purple-800);
+    --c-textbox-text-purple: var(--color-primary-content);
+    --c-textbox-borders-purple: var(--color-purple-700);
+    --c-textbox-bg-green: var(--color-green-800);
+    --c-textbox-text-green: var(--color-green-500);
+    --c-textbox-borders-green: var(--color-green-700);
+    --c-ruler-now: var(--color-red-800);
+    --c-ruler-new: var(--color-purple-800);
+    --c-skeleton-bg: var(--color-mauve-800);
   }
 }
 

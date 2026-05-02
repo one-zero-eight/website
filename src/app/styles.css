@@ -13,10 +13,12 @@
   default: true;
   prefersdark: true;
   color-scheme: "dark";
-  --color-base-100: rgb(11 11 11);
-  --color-base-200: rgb(27 27 27);
-  --color-base-300: rgb(34 34 34);
-  --color-base-content: oklch(97.807% 0.029 256.847);
+  --color-base-100: oklch(16% 0.008 326);
+  --color-base-150: oklch(19% 0.01 325.6);
+  --color-base-200: oklch(20% 0.015 323);
+  --color-base-300: oklch(25% 0.019 322.12);
+  --color-base-content: oklch(100% 0.05 325.885);
+  /* oklch(97.807% 0.029 256.847); */
   --color-primary: rgb(151 71 255);
   --color-primary-content: oklch(96% 0.018 272.314);
   --color-secondary: rgb(
@@ -43,11 +45,12 @@
   default: false;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: rgb(255 255 255);
-  --color-base-200: rgb(242 243 245);
-  --color-base-300: rgb(227 229 232);
-  --color-base-content: oklch(21% 0.006 285.885);
-  --color-primary: rgb(151 71 255);
+  --color-base-100: oklch(99.5% 0 0);
+  --color-base-150: oklch(98% 0.001 325.6);
+  --color-base-200: oklch(96% 0.003 325.6);
+  --color-base-300: oklch(92.2% 0.005 325.62);
+  --color-base-content: oklch(20% 0.05 325.885);
+  --color-primary: oklch(65% 0.25 298.01);
   --color-primary-content: oklch(93% 0.034 272.788);
   --color-secondary: rgb(
     46 139 87
@@ -133,7 +136,7 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
+    border-color: var(--color-base-300, currentcolor);
   }
 
   button:not(:disabled),
@@ -143,7 +146,7 @@
 
   input::placeholder,
   textarea::placeholder {
-    color: var(--color-gray-400); /* Make input placeholder gray */
+    color: var(--color-base/50); /* Make input placeholder gray */
   }
 }
 

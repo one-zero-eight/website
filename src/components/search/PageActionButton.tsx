@@ -21,7 +21,7 @@ export const PageActionButton = ({
       onClick={onClick}
       className={cn(
         "bg-primary sm:rounded-field flex h-10 items-center gap-2 rounded-r-lg px-4 py-2 text-sm font-medium text-white transition-colors",
-        border && "border! border-gray-400",
+        border && "border-base-content/50 border!",
         className,
       )}
     >

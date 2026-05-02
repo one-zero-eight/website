@@ -83,9 +83,7 @@ function FullscreenMode({
 
   return (
     <FloatingPortal>
-      <FloatingOverlay className="z-10 bg-gray-50 dark:bg-gray-900">
-        {children}
-      </FloatingOverlay>
+      <FloatingOverlay className="z-10">{children}</FloatingOverlay>
     </FloatingPortal>
   );
 }

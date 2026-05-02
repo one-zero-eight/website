@@ -30,12 +30,12 @@ export default function OfflineNotification() {
 
   return (
     <div className="rounded-field fixed top-2 left-1/2 z-50 mx-auto flex -translate-x-1/2 items-center justify-between bg-red-600 shadow-lg">
-      <p className="pl-3 text-[16px] font-medium text-white">
+      <p className="text-base-content pl-3 text-[16px] font-medium">
         No internet connection!
       </p>
       <button
         type="button"
-        className="flex p-2 pr-3 text-white hover:text-gray-300"
+        className="text-base-content hover:text-base-content/50 flex p-2 pr-3"
         onClick={() => setIsClosed(true)}
       >
         <span className="icon-[material-symbols--close] text-2xl" />

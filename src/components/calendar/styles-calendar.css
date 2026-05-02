@@ -23,7 +23,7 @@
   }
 
   .fc-timegrid-slot-label {
-    @apply relative top-[-0.5rem] border-t-0 pr-1 align-top text-xs text-gray-500;
+    @apply text-base-content/50 relative top-[-0.5rem] border-t-0 pr-1 align-top text-xs;
   }
 
   .fc-header-toolbar.fc-toolbar {
@@ -116,7 +116,7 @@
   }
 
   .fc-col-header-cell-cushion {
-    @apply text-lg text-gray-500;
+    @apply text-base-content/50 text-lg;
   }
 
   .fc-day-today {
@@ -126,7 +126,7 @@
   }
 
   .week-cell {
-    @apply text-xs text-gray-500;
+    @apply text-base-content/50 text-xs;
   }
 
   .fc-list-empty-cushion {
@@ -147,7 +147,7 @@
   }
 
   .fc-list-day-side-text {
-    @apply min-h-full align-bottom font-light text-gray-600 dark:text-gray-500;
+    @apply text-base-content/50 min-h-full align-bottom font-light;
   }
 
   .fc-list-day.fc-day-today .fc-list-day-text::after {

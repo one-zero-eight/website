@@ -87,7 +87,7 @@ export default function SearchResult({
         "bg-base-200 rounded-field relative grid cursor-pointer grid-cols-[2rem_1fr_auto] items-start gap-4 border! p-4",
         isSelected
           ? "border-primary drop-shadow-[0_0_4px_#9747FF]"
-          : "border-gray-400",
+          : "border-base-content/50",
       )}
     >
       <div className="flex items-start justify-center">{getIcon()}</div>

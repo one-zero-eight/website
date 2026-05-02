@@ -26,7 +26,7 @@ export function DateTime({
     >
       <div className="grid grid-cols-2 gap-3">
         <div className="flex w-full flex-2 flex-col gap-1">
-          <label className="text-xs font-medium tracking-wider text-gray-800 dark:text-white">
+          <label className="text-base-content text-xs font-medium tracking-wider">
             Date: <span className="text-red-500">*</span>
           </label>
           <input
@@ -40,7 +40,7 @@ export function DateTime({
         </div>
 
         <div className="flex w-full flex-1 flex-col gap-1">
-          <label className="text-xs font-medium tracking-wider text-gray-800 dark:text-white">
+          <label className="text-base-content text-xs font-medium tracking-wider">
             Place:
           </label>
           <input
@@ -61,7 +61,7 @@ export function DateTime({
 
       <div className="flex gap-3">
         <div className="flex flex-1 flex-col gap-1">
-          <label className="text-xs font-medium tracking-wider text-gray-800 dark:text-white">
+          <label className="text-base-content text-xs font-medium tracking-wider">
             Start Time: <span className="text-red-500">*</span>
           </label>
           <input
@@ -75,7 +75,7 @@ export function DateTime({
         </div>
 
         <div className="flex flex-1 flex-col gap-1">
-          <label className="text-xs font-medium tracking-wider text-gray-800 dark:text-white">
+          <label className="text-base-content text-xs font-medium tracking-wider">
             End Time: <span className="text-red-500">*</span>
           </label>
           <input

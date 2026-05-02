@@ -64,7 +64,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
           {...getReferenceProps()}
           className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2"
         >
-          <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-base-content/70 text-3xl" />
+          <span className="icon-[material-symbols--sentiment-satisfied-outline-rounded] text-base-content/50 text-3xl" />
         </button>
       </Tooltip>
 

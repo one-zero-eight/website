@@ -190,7 +190,7 @@ const TimerPage = () => {
           onInput={(e) => updateTextAreaHeight(e.target as HTMLTextAreaElement)}
           rows={1}
           spellCheck={false}
-          className="rounded-box w-full max-w-[900px] resize-none overflow-hidden border-none bg-transparent px-6 py-3 text-center text-2xl leading-tight font-bold transition-all duration-300 outline-none placeholder:text-gray-400 focus:bg-gray-100/50 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl dark:focus:bg-gray-900/50"
+          className="rounded-box placeholder:text-base-content/50 focus:bg-base-300 w-full max-w-[900px] resize-none overflow-hidden border-none bg-transparent px-6 py-3 text-center text-2xl leading-tight font-bold transition-all duration-300 outline-none sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
         />
       </div>
 
@@ -248,7 +248,7 @@ const TimerPage = () => {
 
           {isRunning && initialSeconds > 0 && (
             <div className="mx-auto my-6 w-full max-w-[90vw] px-4 sm:my-8 md:my-12 md:max-w-[900px] md:px-8">
-              <div className="relative h-6 w-full overflow-hidden rounded-[25px] bg-gray-300 shadow-[0_4px_15px_rgba(0,0,0,0.15)] sm:h-8 md:h-10">
+              <div className="bg-base-content/80 relative h-6 w-full overflow-hidden rounded-[25px] shadow-[0_4px_15px_rgba(0,0,0,0.15)] sm:h-8 md:h-10">
                 <div
                   className="bg-primary h-full rounded-[25px] shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-linear"
                   style={{

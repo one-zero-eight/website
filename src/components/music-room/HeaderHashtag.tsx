@@ -2,7 +2,7 @@ export function HeaderHashtag({ link }: { link: string }) {
   return (
     <a
       href={link}
-      className="text-3xl text-gray-500 no-underline hover:underline"
+      className="text-base-content/50 text-3xl no-underline hover:underline"
     >
       #
     </a>

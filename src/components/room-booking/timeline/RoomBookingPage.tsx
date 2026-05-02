@@ -143,8 +143,8 @@ export function RoomBookingPage() {
                 </h1>
               ) : (
                 <section className="relative h-screen w-full overflow-hidden text-[#feda4a]">
-                  <div className="absolute inset-0 [perspective:1000px]">
-                    <div className="animate-booking-error absolute top-full left-1/2 w-[190vw] -translate-x-1/2 text-center font-bold tracking-wide uppercase [transform-style:preserve-3d]">
+                  <div className="absolute inset-0 perspective-[1000px]">
+                    <div className="animate-booking-error absolute top-full left-1/2 w-[190vw] -translate-x-1/2 text-center font-bold tracking-wide uppercase transform-3d">
                       <p className="mb-6 text-2xl md:text-4xl">
                         Error loading bookings
                       </p>

@@ -36,7 +36,7 @@ export default function Sidebar() {
           !isMinimized ? "px-2" : "px-1",
         )}
       >
-        <div className="mb-2.5 flex w-full items-center justify-center border-b border-b-gray-500/20 p-2.5">
+        <div className="border-b-base-content/20 mb-2.5 flex w-full items-center justify-center border-b p-2.5">
           <Link to="/" className="flex place-self-center">
             <Logo
               className={cn(!isMinimized ? "mt-2 size-16" : "mt-2 size-10")}
@@ -49,7 +49,7 @@ export default function Sidebar() {
             item.type === "separator" ? (
               <div
                 key={index}
-                className="my-2 h-px w-full shrink-0 rounded-full bg-gray-500/20"
+                className="bg-base-content/20 my-2 h-px w-full shrink-0 rounded-full"
               />
             ) : // Hide Forms item for non-staff users
             !(
@@ -134,7 +134,7 @@ function SidebarLink({
     return (
       <a
         className={cn(
-          "text-base-content/50 flex w-full rounded-sm py-0.5 select-none hover:bg-gray-500/10",
+          "text-base-content/50 hover:bg-base-300 flex w-full rounded-sm py-0.5 select-none",
           !isMinimized ? "px-2 text-2xl" : "justify-center px-0.5 text-2xl",
         )}
         target="_blank"
@@ -150,7 +150,7 @@ function SidebarLink({
     return (
       <Link
         className={cn(
-          "text-base-content/50 flex w-full rounded-sm py-0.5 select-none hover:bg-gray-500/10",
+          "text-base-content/50 hover:bg-base-300 flex w-full rounded-sm py-0.5 select-none",
           "[&.is-active]:text-primary",
           !isMinimized ? "px-2 text-2xl" : "justify-center px-0.5 text-2xl",
         )}

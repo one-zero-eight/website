@@ -857,10 +857,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               <button
                 type="submit"
                 disabled={isUpdating}
-                className={cn(
-                  "btn btn-primary",
-                  isUpdating && "btn-disabled",
-                )}
+                className={cn("btn btn-primary", isUpdating && "btn-disabled")}
               >
                 {isUpdating && (
                   <span className="loading loading-spinner loading-sm" />

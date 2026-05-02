@@ -12,7 +12,7 @@ export function ActResult({
     <div
       tabIndex={0}
       className={cn(
-        "bg-base-200 rounded-field flex flex-col border! border-gray-400 p-4",
+        "bg-base-200 rounded-field border-base-content/50 flex flex-col border! p-4",
       )}
     >
       {answer}

@@ -5,7 +5,7 @@
  * - Add `badge` field to a link item in `items`.
  * - Example:
  *   badge: (
- *     <span className="ml-2 rounded-full bg-yellow-500 px-2 py-0.5 text-xs font-medium text-black">
+ *     <span className="ml-2 rounded-full bg-yellow-500 px-2 py-0.5 text-xs font-medium text-mauve-800">
  *       STAFF
  *     </span>
  *   )
@@ -17,7 +17,7 @@
  *       title: "Events",
  *       to: "/events",
  *       badge: (
- *         <span className="ml-2 rounded-full bg-gray-500 px-2 py-0.5 text-xs font-medium text-white">
+ *         <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
  *           DEV
  *         </span>
  *       ),
@@ -102,7 +102,7 @@ export const items: ItemType[] = [
       title: "Events",
       to: "/events",
       badge: (
-        <span className="ml-2 rounded-full bg-gray-500 px-2 py-0.5 text-xs font-medium text-white">
+        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
           DEV
         </span>
       ),
@@ -183,7 +183,7 @@ export const items: ItemType[] = [
     icon: <span className="icon-[material-symbols--description-outline]" />,
     staff_only: true,
     badge: (
-      <span className="ml-2 rounded-full bg-yellow-500 px-2 py-0.5 text-xs font-medium text-black">
+      <span className="ml-2 rounded-full bg-yellow-500 px-2 py-0.5 text-xs font-medium text-mauve-800">
         STAFF
       </span>
     ),

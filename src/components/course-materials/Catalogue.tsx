@@ -257,7 +257,7 @@ const CourseCard = ({
                   {"link" in source && source?.link && (
                     <a
                       href={source.link}
-                      className="inline-block truncate text-xs text-gray-500 hover:text-blue-500"
+                      className="text-base-content/50 inline-block truncate text-xs hover:text-blue-500"
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}

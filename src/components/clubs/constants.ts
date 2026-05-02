@@ -51,7 +51,7 @@ export function getClubTypeColor(type: clubsTypes.ClubType): string {
     case "art":
       return "bg-pink-500/10 text-pink-600 dark:text-pink-400";
     default:
-      return "bg-gray-500/10 text-gray-600 dark:text-gray-400";
+      return "bg-base-200 text-base-content/50";
   }
 }
 

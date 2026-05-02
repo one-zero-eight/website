@@ -39,7 +39,7 @@ export function MorePage() {
         <SwitchThemeButton />
         <UserMenu isMobile={false} isSidebar={false} />
       </div>
-      <div className="my-1 h-0.5 w-full rounded-full bg-gray-500/20" />
+      <div className="bg-base-content/10 my-1 h-0.5 w-full rounded-full" />
 
       {items
         .filter((item) => !item.hideOnMore)
@@ -47,7 +47,7 @@ export function MorePage() {
           item.type === "separator" ? (
             <div
               key={index}
-              className="my-1 h-0.5 w-full shrink-0 rounded-full bg-gray-500/20"
+              className="bg-base-content/10 my-1 h-0.5 w-full shrink-0 rounded-full"
             />
           ) : // Hide Forms item for non-staff users
           !(
@@ -89,7 +89,7 @@ function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
     return (
       <a
         className={cn(
-          "text-base-content/70 flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
+          "text-base-content/70 hover:bg-base-300 flex w-full rounded-xl py-2 select-none",
           "px-4 text-2xl",
         )}
         href={props.href}
@@ -103,7 +103,7 @@ function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
     return (
       <Link
         className={cn(
-          "text-base-content/70 flex w-full rounded-xl py-2 select-none hover:bg-gray-500/10",
+          "text-base-content/70 hover:bg-base-300 flex w-full rounded-xl py-2 select-none",
           "[&.is-active]:text-primary",
           "px-4 text-2xl",
         )}

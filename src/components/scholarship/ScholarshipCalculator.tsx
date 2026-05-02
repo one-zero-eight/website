@@ -233,7 +233,7 @@ export default function ScholarshipCalculator() {
               "font-handwritten hover:bg-primary/20 w-full rounded-l-2xl p-2 text-center text-lg transition-colors",
               course === "B25"
                 ? "bg-primary/10 text-primary"
-                : "bg-transparent text-gray-500",
+                : "text-base-content/50 bg-transparent",
             )}
           >
             B25
@@ -244,7 +244,7 @@ export default function ScholarshipCalculator() {
               "font-handwritten hover:bg-primary/20 w-full p-2 text-center text-lg transition-colors",
               course === "B24"
                 ? "bg-primary/10 text-primary"
-                : "bg-transparent text-gray-500",
+                : "text-base-content/50 bg-transparent",
             )}
           >
             B24
@@ -255,7 +255,7 @@ export default function ScholarshipCalculator() {
               "font-handwritten hover:bg-primary/20 w-full p-2 text-center text-lg transition-colors",
               course === "B23"
                 ? "bg-primary/10 text-primary"
-                : "bg-transparent text-gray-500",
+                : "text-base-content/50 bg-transparent",
             )}
           >
             B23
@@ -266,7 +266,7 @@ export default function ScholarshipCalculator() {
               "font-handwritten hover:bg-primary/20 w-full rounded-r-2xl p-2 text-center text-lg transition-colors",
               course === "M25"
                 ? "bg-primary/10 text-primary"
-                : "bg-transparent text-gray-500",
+                : "text-base-content/50 bg-transparent",
             )}
           >
             M25

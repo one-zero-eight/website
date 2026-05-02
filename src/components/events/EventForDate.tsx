@@ -57,7 +57,7 @@ export function ItemsList({
   if (events.length === 0) {
     return (
       <div className="col-span-full w-full pt-10 text-center text-xl">
-        <h2 className="text-gray-200">No events found!</h2>
+        <h2 className="text-base-content">No events found!</h2>
       </div>
     );
   }

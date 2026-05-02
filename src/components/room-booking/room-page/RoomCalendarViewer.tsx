@@ -204,7 +204,7 @@ function handleEventsSet(events: EventApi[]) {
 function handleEventClassNames(arg: EventContentArg) {
   return cn(
     "cursor-pointer text-sm rounded-md! bg-transparent! border-0! overflow-clip",
-    arg.event.extendedProps.isDraft && "!cursor-default rounded-md!",
+    arg.event.extendedProps.isDraft && "cursor-default! rounded-md!",
   );
 }
 
@@ -1001,14 +1001,14 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           <div className="flex flex-wrap items-center justify-center gap-2 pb-3">
             <button
               type="button"
-              className="btn btn-outline btn-sm min-w-[6rem]"
+              className="btn btn-outline btn-sm min-w-24"
               onClick={clearBookingDraft}
             >
               Cancel
             </button>
             <button
               type="button"
-              className="btn btn-primary btn-sm min-w-[6rem]"
+              className="btn btn-primary btn-sm min-w-24"
               onClick={handleDraftBook}
             >
               Book

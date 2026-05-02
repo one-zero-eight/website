@@ -505,7 +505,7 @@ Diff component shows a side-by-side comparison of two items
 ```
 
 #### Rules
-- To maintain aspect ratio, add `aspect-16/9` or other aspect ratio classes to `<figure class="diff">` element
+- To maintain aspect ratio, add `aspect-video` or other aspect ratio classes to `<figure class="diff">` element
 
 ### divider
 Divider will be used to separate content vertically or horizontally
@@ -1716,7 +1716,7 @@ Rotating words in a sentence, different colors for each word
 ```
 Custom line height in case you have a tall font or need more vertical spacing between lines
 ```html
-<span class="text-rotate max-md:text-3xl text-7xl font-title leading-[2]">
+<span class="text-rotate max-md:text-3xl text-7xl font-title leading-loose">
   <span class="justify-items-center">
     <span>📐 DESIGN</span>
     <span>⌨️ DEVELOP</span>

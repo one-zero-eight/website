@@ -30,7 +30,7 @@ export function SearchExample({ searchQueries }: SearchExampleProps) {
   };
 
   return (
-    <p className="text-muted-foreground flex gap-2 text-sm text-gray-600 dark:text-[#8A8A8A]">
+    <p className="text-base-content/50 flex gap-2 text-sm">
       Example:{" "}
       <a
         href="#"
