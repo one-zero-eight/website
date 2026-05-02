@@ -69,6 +69,7 @@ export function ConfigurationScreen({
 
   const startButtonReference = useRef<HTMLButtonElement>(null);
 
+  const [unpreparedFile, setUnpreparedFile] = useState<File>();
   const [preparedDocumentName, setPreparedDocumentName] = useState<string>("");
   const [configurationType, setConfigurationType] = useState<boolean>(true);
   const [printerCupsName, setPrinterCupsName] = useState<string>("");
@@ -113,8 +114,9 @@ export function ConfigurationScreen({
     );
   }, []);
 
-  async function fileProcess(file: File) {
-    if (preparedDocumentURL) URL.revokeObjectURL(preparedDocumentURL);
+  async function fileProcess(file: File, justPrepare: boolean = false) {
+    if (!justPrepare)
+      if (preparedDocumentURL) URL.revokeObjectURL(preparedDocumentURL);
     const formData = new FormData();
     formData.append("file", file);
     try {
@@ -122,8 +124,10 @@ export function ConfigurationScreen({
         // @ts-expect-error - FormData type mismatch with API
         body: formData,
       });
+      setUnpreparedFile(file);
       setPreparedDocumentName(preparationResponse.filename);
       setPagesCount(preparationResponse.pages);
+      if (justPrepare) return;
       // @ts-expect-error - response type mismatch with API
       const getResponse: Blob = await getPreparedFile({
         params: { query: { filename: preparationResponse.filename } },
@@ -163,87 +167,96 @@ export function ConfigurationScreen({
     setScreenSwitch(true);
   }
 
-  useEffect(() => {
-    async function waitTillThePrintingEnd() {
-      if (!jobId) return;
-      const startTime = performance.now();
-      while (
-        performance.now() - startTime <
-        calcPrintJobActualPapersCount(
-          pages,
-          copiesCount,
-          numberUp,
-          sides,
-          pagesCount,
-        ) *
-          60 *
-          1000 // 60K milliseconds per page
-      ) {
-        if (!screenSwitch) break;
-        let jobStatus;
+  useEffect(
+    () => {
+      async function waitTillThePrintingEnd() {
+        if (!jobId) return;
+        const startTime = performance.now();
+        while (
+          performance.now() - startTime <
+          calcPrintJobActualPapersCount(
+            pages,
+            copiesCount,
+            numberUp,
+            sides,
+            pagesCount,
+          ) *
+            60 *
+            1000 // 60K milliseconds per page
+        ) {
+          if (!screenSwitch) break;
+          let jobStatus;
+          try {
+            jobStatus = await getJobStatus({
+              params: { query: { job_id: jobId } },
+            });
+          } catch (exception: any) {
+            console.log(
+              `[web-print] Error during status retrieval for a job by id ${jobId}\n${exception}`,
+            );
+            continue;
+          }
+          if (
+            [
+              JobStateEnum.Value9 /* completed */,
+              JobStateEnum.Value7 /* cancelled */,
+              JobStateEnum.Value8 /* aborted */,
+            ].includes(jobStatus.job_state)
+          ) {
+            fileProcess(unpreparedFile!, true);
+            setScreenSwitch(false);
+            return;
+          }
+          if (jobStatus.printer_state_message?.includes("Replace the toner")) {
+            setAlert(
+              <>
+                <p className="font-bold!">No toner</p>
+                <p>The job cannot be completed</p>
+              </>,
+            );
+            fileProcess(unpreparedFile!, true);
+            setScreenSwitch(false);
+            return;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
         try {
-          jobStatus = await getJobStatus({
+          await cancelJob({
             params: { query: { job_id: jobId } },
           });
         } catch (exception: any) {
           console.log(
-            `[web-print] Error during status retrieval for a job by id ${jobId}\n${exception}`,
+            `[web-print] Error during cancellation of a job by id ${jobId}\n${exception}`,
           );
-          continue;
         }
-        if (
-          [
-            JobStateEnum.Value9 /* completed */,
-            JobStateEnum.Value7 /* cancelled */,
-            JobStateEnum.Value8 /* aborted */,
-          ].includes(jobStatus.job_state)
-        ) {
-          setScreenSwitch(false);
-          return;
-        }
-        if (jobStatus.printer_state_message?.includes("Replace the toner")) {
+        if (screenSwitch) {
           setAlert(
             <>
-              <p className="font-bold!">No toner</p>
-              <p>The job cannot be completed</p>
+              <p className="font-bold!">The job has been timed out!</p>
+              <p>Probably, the printer is busy, try to reboot it</p>
             </>,
           );
-          setScreenSwitch(false);
-          return;
+          fileProcess(unpreparedFile!, true);
         }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setScreenSwitch(false);
       }
-      try {
-        await cancelJob({
-          params: { query: { job_id: jobId } },
-        });
-      } catch (exception: any) {
-        console.log(
-          `[web-print] Error during cancellation of a job by id ${jobId}\n${exception}`,
-        );
-      }
-      if (screenSwitch)
-        setAlert(
-          <>
-            <p className="font-bold!">The job has been timed out!</p>
-            <p>Probably, the printer is busy, try to reboot it</p>
-          </>,
-        );
-      setScreenSwitch(false);
-    }
-    waitTillThePrintingEnd();
-  }, [
-    cancelJob,
-    copiesCount,
-    getJobStatus,
-    jobId,
-    numberUp,
-    pages,
-    pagesCount,
-    screenSwitch,
-    setScreenSwitch,
-    sides,
-  ]);
+      waitTillThePrintingEnd();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      cancelJob,
+      copiesCount,
+      getJobStatus,
+      jobId,
+      numberUp,
+      pages,
+      pagesCount,
+      screenSwitch,
+      setScreenSwitch,
+      sides,
+      unpreparedFile,
+    ],
+  );
 
   return (
     <div className={styles.ordinaryScreen}>
@@ -322,12 +335,12 @@ export function ConfigurationScreen({
           <div>
             <button
               ref={startButtonReference}
-              className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${(isPrintStarting || isCancelling) && styles.button_inactive}`}
+              className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${(isPrintStarting || isCancelling || isFilePreparing) && styles.button_inactive}`}
               onClick={startAndWait}
             >
               {configurationType ? "Start printing" : "Start scanning"}
             </button>
-            {(isPrintStarting || isCancelling) && (
+            {(isPrintStarting || isCancelling || isFilePreparing) && (
               <span
                 className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
               ></span>
