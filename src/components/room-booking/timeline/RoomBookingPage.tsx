@@ -6,12 +6,8 @@ import { T } from "@/lib/utils/dates.ts";
 import { getRouteApi } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { getTimeRangeForWeek } from "../utils.ts";
-import {
-  type Booking,
-  schemaToBooking,
-  type ScrollToOptions,
-  type Slot,
-} from "./types.ts";
+import { type Booking, schemaToBooking, type Slot } from "./types.ts";
+import type { BookingTimelineHandle } from "./BookingTimeline.tsx";
 
 // TODO: Remove this
 const IS_MAINTENANCE =
@@ -22,12 +18,6 @@ const BookingTimeline = lazy(
   () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),
 );
 
-type TimelineRef = {
-  __veauryVueRef__: {
-    scrollTo: (options: ScrollToOptions) => void;
-  };
-};
-
 const routeApi = getRouteApi("/_with_menu/room-booking/");
 
 export function RoomBookingPage() {
@@ -35,17 +25,17 @@ export function RoomBookingPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [newBookingSlot, setNewBookingSlot] = useState<Slot>();
   const [bookingDetails, setBookingDetails] = useState<Booking>();
-  const timelineRef = useRef<TimelineRef | null>(null);
+  const timelineRef = useRef<BookingTimelineHandle | null>(null);
   const [timelineLoaded, setTimelineLoaded] = useState(false);
 
-  const setTimelineRef = (x: TimelineRef) => {
+  const setTimelineRef = (x: BookingTimelineHandle | null) => {
     timelineRef.current = x;
     setTimelineLoaded(true);
   };
 
   useEffect(() => {
     if (timelineLoaded && search.d) {
-      timelineRef.current?.__veauryVueRef__.scrollTo({
+      timelineRef.current?.scrollTo({
         to: new Date(search.d),
         behavior: "smooth",
         offsetMs: -T.Min * 20,
@@ -132,7 +122,7 @@ export function RoomBookingPage() {
                 setNewBookingSlot(undefined);
                 setModalOpen(true);
               }}
-              ref={setTimelineRef}
+              ref={setTimelineRef as React.Ref<BookingTimelineHandle>}
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center">

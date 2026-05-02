@@ -1,6 +1,38 @@
-import { RefObject, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export function useElementWidth(myRef: RefObject<HTMLElement | null>) {
+export function useElementSize(elRef: React.RefObject<HTMLElement | null>): {
+  width: number;
+  height: number;
+} {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const observerRef = useRef<ResizeObserver | null>(null);
+
+  const handleResize = useCallback(() => {
+    setSize({
+      width: elRef.current?.offsetWidth ?? 0,
+      height: elRef.current?.offsetHeight ?? 0,
+    });
+  }, [elRef]);
+
+  useEffect(() => {
+    const el = elRef.current;
+    if (!el) return;
+
+    handleResize();
+
+    observerRef.current = new ResizeObserver(handleResize);
+    observerRef.current.observe(el);
+
+    return () => {
+      observerRef.current?.disconnect();
+      observerRef.current = null;
+    };
+  }, [elRef, handleResize]);
+
+  return size;
+}
+
+export function useElementWidth(myRef: React.RefObject<HTMLElement | null>) {
   const [width, setWidth] = useState(0);
 
   const handleResize = useCallback(() => {
@@ -22,7 +54,7 @@ export function useElementWidth(myRef: RefObject<HTMLElement | null>) {
   return width;
 }
 
-export function useElementHeight(myRef: RefObject<HTMLElement | null>) {
+export function useElementHeight(myRef: React.RefObject<HTMLElement | null>) {
   const [height, setHeight] = useState(0);
 
   const handleResize = useCallback(() => {
