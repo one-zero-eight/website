@@ -1001,7 +1001,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           <div className="flex flex-wrap items-center justify-center gap-2 pb-3">
             <button
               type="button"
-              className="btn btn-outline btn-sm min-w-24"
+              className="btn btn-soft btn-sm min-w-24"
               onClick={clearBookingDraft}
             >
               Cancel

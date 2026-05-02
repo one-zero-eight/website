@@ -95,7 +95,7 @@ export function NewBookingPreview({
 
       {/* New booking bar */}
       <div
-        className="absolute px-0.5 py-1.5 whitespace-nowrap select-none"
+        className="absolute py-1.5 pl-px whitespace-nowrap select-none"
         style={{
           left: sidebarWidth + viewportX,
           top: headerHeight + newY,
@@ -106,14 +106,14 @@ export function NewBookingPreview({
       >
         <div
           id={NEW_BOOKING_BOX_ID}
-          className="bg-primary text-primary-content relative flex h-full w-full items-center justify-center rounded-sm border border-purple-600 dark:border-purple-700"
+          className="bg-primary/50 text-primary-content border-primary relative flex h-full w-full items-center justify-center overflow-hidden rounded-sm border"
         >
           {isTouched && (
             <>
               {/* Left drag handle */}
-              <span className="absolute top-1/2 left-0 h-4/5 w-[5px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-600 dark:bg-purple-700" />
+              <span className="bg-primary absolute top-1/2 left-0 h-4/5 w-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full" />
               {/* Right drag handle */}
-              <span className="absolute top-1/2 right-0 h-4/5 w-[5px] translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-600 dark:bg-purple-700" />
+              <span className="bg-primary absolute top-1/2 right-0 h-4/5 w-[6px] translate-x-1/2 -translate-y-1/2 rounded-full" />
             </>
           )}
           <span>{durationText}</span>
