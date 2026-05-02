@@ -15,6 +15,7 @@ import {
   PrintingOptionsSides,
 } from "@/api/printers/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
+import { DeviceChoicePoint } from "@/components/web-print/DeviceChoicePoint.tsx";
 
 function calcNumberOfPagesInRanges(ranges: string, until: number) {
   let count = 0;
@@ -72,7 +73,7 @@ export function ConfigurationScreen({
   const [unpreparedFile, setUnpreparedFile] = useState<File>();
   const [preparedDocumentName, setPreparedDocumentName] = useState<string>("");
   const [configurationType, setConfigurationType] = useState<boolean>(true);
-  const [printerCupsName, setPrinterCupsName] = useState<string>("");
+  const [deviceName, setDeviceName] = useState<string>("");
   const [copiesCount, setCopiesCount] = useState<number>(1);
   const [pagesCount, setPagesCount] = useState<number>(0);
   const [sides, setSides] = useState<PrintingOptionsSides>(
@@ -83,14 +84,6 @@ export function ConfigurationScreen({
     PrintingOptionsNumberUp.Value1,
   );
 
-  const { data: rawPrinters } = $printers.useQuery(
-    "get",
-    "/print/get_printers",
-  );
-  const { data: rawStatuses } = $printers.useQuery(
-    "get",
-    "/print/get_printers_status",
-  );
   const { mutateAsync: prepareFile, isPending: isFilePreparing } =
     $printers.useMutation("post", "/print/prepare");
   const { mutateAsync: print, isPending: isPrintStarting } =
@@ -147,7 +140,7 @@ export function ConfigurationScreen({
           params: {
             query: {
               filename: preparedDocumentName,
-              printer_cups_name: printerCupsName,
+              printer_cups_name: deviceName,
             },
           },
           body: {
@@ -267,22 +260,10 @@ export function ConfigurationScreen({
             onClick={() => setConfigurationType(!configurationType)}
           />
           <div className={styles.configurationBox__scrollPart}>
-            <div className={styles.scrollPart__elem}>
-              <p className={fontStyles.formPointFont}>Printer</p>
-              <IconValueStatusSelect
-                icons={rawPrinters?.map(() => "🖨️")}
-                names={rawPrinters?.map((printer) => printer.display_name)}
-                values={rawPrinters?.map((printer) => printer.cups_name)}
-                statuses={rawStatuses?.map((status) =>
-                  status.offline
-                    ? ", 💀 offline"
-                    : status.paper_percentage
-                      ? ", 📃\xa0has\xa0paper"
-                      : ", ✂️\xa0no\xa0paper",
-                )}
-                onSelected={setPrinterCupsName}
-              />
-            </div>
+            <DeviceChoicePoint
+              configurationType={configurationType}
+              setDeviceName={setDeviceName}
+            />
             <div className={styles.scrollPart__elem}>
               <p className={fontStyles.formPointFont}>Copies</p>
               <ScalableIntInput
