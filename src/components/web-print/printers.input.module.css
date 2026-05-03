@@ -27,6 +27,7 @@
   justify-content: center;
   align-items: center;
   border-radius: var(--select-rounding) 0 0 var(--select-rounding);
+  padding: 0;
 }
 
 .button_inline + .input + .button_inline {
