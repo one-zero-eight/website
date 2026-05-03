@@ -4,9 +4,11 @@ import fontStyles from "@/components/web-print/printers.fonts.module.css";
 import { IconValueStatusSelect } from "@/components/web-print/IconValueStatusSelect.tsx";
 
 export function DeviceChoicePoint({
+  defaultValue,
   setDeviceName,
   configurationType, // false for scanning
 }: {
+  defaultValue: string;
   setDeviceName: (value: string) => void;
   configurationType: boolean;
 }) {
@@ -23,6 +25,7 @@ export function DeviceChoicePoint({
         {configurationType ? "Printer" : "Scanner"}
       </p>
       <IconValueStatusSelect
+        defaultValue={defaultValue}
         icons={rawDevices?.map(() => (configurationType ? "🖨️" : "📰"))}
         names={rawDevices?.map((device) => device.display_name)}
         values={rawDevices?.map((device) =>

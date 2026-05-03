@@ -6,12 +6,14 @@ export function IconValueStatusSelect({
   icons,
   names,
   values,
+  defaultValue,
   statuses,
   onSelected,
 }: {
   icons: string[] | undefined;
   names: string[] | undefined;
   values: string[] | undefined;
+  defaultValue: string;
   statuses: string[] | undefined;
   onSelected: (value: string) => void;
 }) {
@@ -26,12 +28,14 @@ export function IconValueStatusSelect({
     }
 
     input.addEventListener("change", pass);
+    if (defaultValue && values?.includes(defaultValue))
+      input.value = defaultValue;
     onSelected(input.value);
 
     return () => {
       if (input) input.removeEventListener("change", pass);
     };
-  }, [onSelected, values]);
+  }, [defaultValue, onSelected, values]);
 
   return (
     <div className={selectStyles.selectWrapper}>
