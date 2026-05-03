@@ -13,9 +13,14 @@ import {
   JobStateEnum,
   PrintingOptionsNumberUp,
   PrintingOptionsSides,
+  ScanningOptionsCrop,
+  ScanningOptionsInput_source,
+  ScanningOptionsQuality,
+  ScanningOptionsSides,
 } from "@/api/printers/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import { DeviceChoicePoint } from "@/components/web-print/DeviceChoicePoint.tsx";
+import Tooltip from "@/components/common/Tooltip.tsx";
 
 function calcNumberOfPagesInRanges(ranges: string, until: number) {
   let count = 0;
@@ -70,10 +75,11 @@ export function ConfigurationScreen({
 
   const startButtonReference = useRef<HTMLButtonElement>(null);
 
+  const [deviceName, setDeviceName] = useState<string>("");
+
   const [unpreparedFile, setUnpreparedFile] = useState<File>();
   const [preparedDocumentName, setPreparedDocumentName] = useState<string>("");
   const [configurationType, setConfigurationType] = useState<boolean>(true);
-  const [deviceName, setDeviceName] = useState<string>("");
   const [copiesCount, setCopiesCount] = useState<number>(1);
   const [pagesCount, setPagesCount] = useState<number>(0);
   const [sides, setSides] = useState<PrintingOptionsSides>(
@@ -82,6 +88,19 @@ export function ConfigurationScreen({
   const [pages, setPages] = useState<string | null>(null);
   const [numberUp, setNumberUp] = useState<PrintingOptionsNumberUp>(
     PrintingOptionsNumberUp.Value1,
+  );
+
+  const [mode, setMode] = useState<ScanningOptionsInput_source>(
+    ScanningOptionsInput_source.Platen,
+  );
+  const [scanSides, setScanSides] = useState<ScanningOptionsSides>(
+    ScanningOptionsSides.false,
+  );
+  const [quality, setQuality] = useState<ScanningOptionsQuality>(
+    ScanningOptionsQuality.Value200,
+  );
+  const [crop, setCrop] = useState<ScanningOptionsCrop>(
+    ScanningOptionsCrop.false,
   );
 
   const { mutateAsync: prepareFile, isPending: isFilePreparing } =
@@ -261,57 +280,141 @@ export function ConfigurationScreen({
           />
           <div className={styles.configurationBox__scrollPart}>
             <DeviceChoicePoint
+              defaultValue={deviceName}
               configurationType={configurationType}
               setDeviceName={setDeviceName}
             />
-            <div className={styles.scrollPart__elem}>
-              <p className={fontStyles.formPointFont}>Copies</p>
-              <ScalableIntInput
-                defaultValue={1}
-                onTyped={setCopiesCount}
-                maximum={50}
-                minimum={1}
-                outOfRangeAlert={
-                  <p>
-                    You can do not more than{" "}
-                    <span className="font-bold!">50&nbsp;copies</span>
-                    <br />
-                    (and not less than 1)
+            {configurationType ? (
+              <>
+                <div className={styles.scrollPart__elem}>
+                  <p className={fontStyles.formPointFont}>Copies</p>
+                  <ScalableIntInput
+                    defaultValue={copiesCount}
+                    onTyped={setCopiesCount}
+                    maximum={50}
+                    minimum={1}
+                    outOfRangeAlert={
+                      <p>
+                        You can do not more than{" "}
+                        <span className="font-bold!">50&nbsp;copies</span>
+                        <br />
+                        (and not less than 1)
+                      </p>
+                    }
+                  />
+                </div>
+                <div className={styles.scrollPart__elem}>
+                  <p className={fontStyles.formPointFont}>
+                    Printing on both sides
                   </p>
-                }
-              />
-            </div>
-            <div className={styles.scrollPart__elem}>
-              <p className={fontStyles.formPointFont}>Printing on both sides</p>
-              <Switch
-                state={sides === PrintingOptionsSides.two_sided_long_edge}
-                onSwitched={(value: boolean) =>
-                  setSides(
-                    value
-                      ? PrintingOptionsSides.two_sided_long_edge
-                      : PrintingOptionsSides.one_sided,
-                  )
-                }
-              />
-            </div>
-            <div className={styles.scrollPart__elem}>
-              <p className={fontStyles.formPointFont}>Specific pages</p>
-              <ScalablePageRangesInput onTyped={setPages} />
-            </div>
-            <div className={styles.scrollPart__elem}>
-              <p className={fontStyles.formPointFont}>Layout</p>
-              <IconValueStatusSelect
-                icons={undefined}
-                names={["1x1", "1x2", "2x2", "2x3", "3x3", "4x4"]}
-                values={Object.values(PrintingOptionsNumberUp)}
-                statuses={Object.values(PrintingOptionsNumberUp).map(
-                  (elem) =>
-                    `\xa0(${elem} ${parseInt(elem) > 1 ? "pages" : "page"} per list)`,
+                  <Switch
+                    state={sides === PrintingOptionsSides.two_sided_long_edge}
+                    onSwitched={(value: boolean) =>
+                      setSides(
+                        value
+                          ? PrintingOptionsSides.two_sided_long_edge
+                          : PrintingOptionsSides.one_sided,
+                      )
+                    }
+                  />
+                </div>
+                <div className={styles.scrollPart__elem}>
+                  <p className={fontStyles.formPointFont}>Specific pages</p>
+                  <ScalablePageRangesInput
+                    defaultValue={pages}
+                    onTyped={setPages}
+                  />
+                </div>
+                <div className={styles.scrollPart__elem}>
+                  <p className={fontStyles.formPointFont}>Layout</p>
+                  <IconValueStatusSelect
+                    icons={undefined}
+                    names={["1x1", "1x2", "2x2", "2x3", "3x3", "4x4"]}
+                    values={Object.values(PrintingOptionsNumberUp)}
+                    defaultValue={numberUp}
+                    statuses={Object.values(PrintingOptionsNumberUp).map(
+                      (elem) =>
+                        `\xa0(${elem} ${parseInt(elem) > 1 ? "pages" : "page"} per list)`,
+                    )}
+                    // @ts-expect-error - String-valued enum is okay to accept a confidently valid string
+                    onSelected={setNumberUp}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.scrollPart__elem}>
+                  <p className={fontStyles.formPointFont}>Mode</p>
+                  <Tooltip
+                    content={
+                      mode === ScanningOptionsInput_source.Adf
+                        ? "Scan placed on top of the printer A4 paper documents automatically"
+                        : "Scan one page at a time, placing it on the glass"
+                    }
+                  >
+                    <IconValueStatusSelect
+                      icons={undefined}
+                      names={["Manual Scanning", "Automatic Scanning"]}
+                      values={Object.values(ScanningOptionsInput_source)}
+                      defaultValue={mode}
+                      statuses={["", ""]}
+                      // @ts-expect-error - String-valued enum is okay to accept a confidently valid string
+                      onSelected={setMode}
+                    />
+                  </Tooltip>
+                </div>
+                {mode === ScanningOptionsInput_source.Adf && (
+                  <div className={styles.scrollPart__elem}>
+                    <p className={fontStyles.formPointFont}>
+                      Scan from both sides
+                    </p>
+                    <Tooltip content="Applicable only for Automatic mode">
+                      <Switch
+                        state={scanSides === ScanningOptionsSides.true}
+                        onSwitched={(value: boolean) =>
+                          setScanSides(
+                            value
+                              ? ScanningOptionsSides.true
+                              : ScanningOptionsSides.false,
+                          )
+                        }
+                      />
+                    </Tooltip>
+                  </div>
                 )}
-                // @ts-expect-error - String-valued enum is okay to accept a confidently valid string
-                onSelected={setNumberUp}
-              />
-            </div>
+                <div className={styles.scrollPart__elem}>
+                  <p className={fontStyles.formPointFont}>Quality</p>
+                  <IconValueStatusSelect
+                    icons={Object.values(ScanningOptionsQuality).map(
+                      () => "👾",
+                    )}
+                    names={Object.values(ScanningOptionsQuality)}
+                    values={Object.values(ScanningOptionsQuality)}
+                    defaultValue={quality}
+                    statuses={Object.values(ScanningOptionsQuality).map(
+                      () => "\xa0dpi",
+                    )}
+                    // @ts-expect-error - String-valued enum is okay to accept a confidently valid string
+                    onSelected={setQuality}
+                  />
+                </div>
+                <div className={styles.scrollPart__elem}>
+                  <p className={fontStyles.formPointFont}>AI Crop</p>
+                  <Tooltip content="Automatically fit the resulting PDF page to the scan">
+                    <Switch
+                      state={crop === ScanningOptionsCrop.true}
+                      onSwitched={(value: boolean) =>
+                        setCrop(
+                          value
+                            ? ScanningOptionsCrop.true
+                            : ScanningOptionsCrop.false,
+                        )
+                      }
+                    />
+                  </Tooltip>
+                </div>
+              </>
+            )}
           </div>
           <div>
             <button
@@ -332,7 +435,7 @@ export function ConfigurationScreen({
           fileProcess={fileProcess}
           isFileProcessing={isFilePreparing || isFileDownloading}
           blobPreviewURL={preparedDocumentURL}
-          isFunctional={true}
+          isFunctional={configurationType}
         />
       </div>
 
