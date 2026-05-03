@@ -5,8 +5,10 @@ import { JSX, useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/common/Modal.tsx";
 
 export function ScalablePageRangesInput({
+  defaultValue,
   onTyped,
 }: {
+  defaultValue: string | null;
   onTyped: (value: string | null) => void;
 }) {
   const [alert, setAlert] = useState<JSX.Element | null>(null);
@@ -54,7 +56,8 @@ export function ScalablePageRangesInput({
             <p> An example: 1-5,8,16-20</p>
           </>,
         );
-        input!.value = " ";
+        onTyped(null);
+        input!.value = "";
       } else {
         const ranges = value
           .split(",")
@@ -62,7 +65,7 @@ export function ScalablePageRangesInput({
             [
               parseInt(elem.split("-")[0]),
               parseInt(elem.split("-")[1] || elem.split("-")[0]),
-            ].toSorted(),
+            ].toSorted((a, b) => a - b),
           );
         ranges.sort((elem1, elem2) => (elem1[0] < elem2[0] ? -1 : 1));
         const correctRanges = [[0, 0]];
@@ -95,9 +98,12 @@ export function ScalablePageRangesInput({
           elem[0] == elem[1] ? elem[0] : elem.join("-"),
         );
         onTyped(correctRangesStringWay.join(","));
+        input!.value = correctRangesStringWay.join(",");
       }
       firefoxFieldSizingContent();
     }
+
+    input.value = defaultValue || "";
 
     input.addEventListener("change", change);
     input.addEventListener("input", firefoxFieldSizingContent);
@@ -105,7 +111,7 @@ export function ScalablePageRangesInput({
       input.removeEventListener("change", change);
       input.removeEventListener("input", firefoxFieldSizingContent);
     };
-  }, [onTyped]);
+  }, [defaultValue, onTyped]);
 
   return (
     <>
