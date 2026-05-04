@@ -446,8 +446,8 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     (selectInfo: DateSelectArg) => {
       if (!room) return;
 
-      const start = fromCalendarDate(new Date(selectInfo.startStr));
-      const end = fromCalendarDate(new Date(selectInfo.endStr));
+      const start = fromCalendarDate(selectInfo.start);
+      const end = fromCalendarDate(selectInfo.end);
       if (start.getTime() < Date.now()) {
         calendarRef.current?.getApi().unselect();
         showPastBookingPopup();
@@ -463,7 +463,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
           short_name: room.short_name,
           restrict_daytime: room.restrict_daytime,
         },
-        // selectInfo already provides shifted dates, normalize them for the modal
+        // selectInfo Date objects are in shifted calendar space, normalize them for the modal.
         start,
         end,
       };
