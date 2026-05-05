@@ -2,13 +2,16 @@ import styles from "@/components/web-print/printers.module.css";
 import { FileDrop } from "@/components/web-print/FileDrop.tsx";
 import fontStyles from "@/components/web-print/printers.fonts.module.css";
 import marginStyles from "@/components/web-print/printers.margins.module.css";
+import { RefObject } from "react";
 
 export function ProcessingScreen({
   setScreenSwitch,
-  preparedDocumentURL,
+  preparedFile,
+  stopJobsRef,
 }: {
   setScreenSwitch: (value: boolean) => void;
-  preparedDocumentURL: string | undefined;
+  preparedFile: File | undefined;
+  stopJobsRef: RefObject<boolean>;
 }) {
   return (
     <div className={styles.ordinaryScreen}>
@@ -16,7 +19,9 @@ export function ProcessingScreen({
         <FileDrop
           fileProcess={() => {}}
           isFileProcessing={false}
-          blobPreviewURL={preparedDocumentURL}
+          blobPreviewURL={
+            preparedFile ? URL.createObjectURL(preparedFile) : undefined
+          }
           isFunctional={false}
         />
         <div
@@ -28,7 +33,10 @@ export function ProcessingScreen({
           ></span>
           <button
             className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding}`}
-            onClick={() => setScreenSwitch(false)}
+            onClick={() => {
+              setScreenSwitch(false);
+              stopJobsRef.current = true;
+            }}
           >
             {"Cancel"}
           </button>
