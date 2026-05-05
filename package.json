@@ -75,7 +75,7 @@
     "openapi-typescript": "^7.10.1",
     "openapi-typescript-helpers": "^0.0.15",
     "pdfjs-dist": "*",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.10",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "react": "^19.2.0",
