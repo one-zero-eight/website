@@ -13,11 +13,6 @@ import {
   type Slot,
 } from "./types.ts";
 
-// TODO: Remove this
-const IS_MAINTENANCE =
-  Date.now() > new Date("2026-02-19T09:30:00+03:00").getTime() &&
-  Date.now() < new Date("2026-02-19T16:30:00+03:00").getTime();
-
 const BookingTimeline = lazy(
   () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),
 );
@@ -84,7 +79,6 @@ export function RoomBookingPage() {
   const {
     data: rawBookings,
     isPending: isBookingsPending,
-    error: bookingsError,
     status: bookingsStatus,
   } = $roomBooking.useQuery(
     "get",
@@ -136,29 +130,18 @@ export function RoomBookingPage() {
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center">
-              {IS_MAINTENANCE ? (
-                <h1 className="m-4 text-center text-lg">
-                  Room booking may be unavailable due to scheduled maintenance
-                  work by IT department
-                </h1>
-              ) : (
-                <section className="relative h-screen w-full overflow-hidden text-[#feda4a]">
-                  <div className="absolute inset-0 perspective-[1000px]">
-                    <div className="animate-booking-error absolute top-full left-1/2 w-[190vw] -translate-x-1/2 text-center font-bold tracking-wide uppercase transform-3d">
-                      <p className="mb-6 text-2xl md:text-4xl">
-                        Error loading bookings
-                      </p>
-                      <h1 className="mb-8 text-4xl leading-tight md:text-7xl">
-                        Most probably Outlook API is down
-                      </h1>
-
-                      <div className="space-y-6 text-lg leading-[1.8] whitespace-pre-wrap md:text-3xl">
-                        <p>{bookingsError?.detail?.toString()}</p>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              )}
+              <h1 className="m-4 text-center text-lg">
+                Most probably Outlook API is down
+              </h1>
+              <p className="text-base-content/70 mx-4 text-center text-sm">
+                Try to Reload this page.
+              </p>
+              <p className="text-base-content/15 mx-4 py-3 text-center text-sm">
+                <span className="block">
+                  Our kittens are working on resolving this problem
+                </span>
+                <span className="block">₍^. .^₎⟆</span>
+              </p>
             </div>
           )}
         </Suspense>
