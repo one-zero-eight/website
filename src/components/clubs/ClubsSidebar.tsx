@@ -1,6 +1,5 @@
 import { clubsTypes } from "@/api/clubs";
 import { clubTypesOrder, getClubTypeLabel } from "./constants.ts";
-import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/ui/cn";
 
 export function ClubsSidebar({
@@ -20,28 +19,16 @@ export function ClubsSidebar({
   mobileFiltersOpen: boolean;
   setMobileFiltersOpen: (open: boolean) => void;
 }) {
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const [readOnly, setReadOnly] = useState(true);
-
-  useEffect(() => {
-    if (searchInputRef.current) {
-      searchInputRef.current.focus({ preventScroll: true });
-      setReadOnly(false);
-    }
-  }, []);
-
   const sidebarContent = (
     <div className="card-body bg-base-100 rounded-box flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h3 className="text-base-content text-sm font-semibold">Search</h3>
         <div className="border-base-300 focus-within:border-b-primary flex items-center border-b px-2 pb-px focus-within:border-b-2 focus-within:pb-0">
           <input
-            ref={searchInputRef}
             type="text"
             placeholder="Search clubs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            readOnly={readOnly}
             className="min-w-0 grow bg-transparent px-2 py-1 outline-hidden"
           />
           <span className="icon-[material-symbols--search-rounded] text-base-300 shrink-0 text-2xl" />
