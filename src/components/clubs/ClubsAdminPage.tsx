@@ -15,7 +15,7 @@ export function ClubsAdminPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
 
   const fuse = useMemo(
-    () => clubs && clubLeaders && createFuseInstance(clubs, clubLeaders),
+    () => clubs && createFuseInstance(clubs, clubLeaders),
     [clubs, clubLeaders],
   );
 
@@ -23,8 +23,9 @@ export function ClubsAdminPage() {
     if (!clubs) return [];
 
     let foundClubs = clubs;
-    if (search && fuse) {
-      foundClubs = searchClubs(fuse, search);
+    const trimmedSearch = search.trim();
+    if (trimmedSearch && fuse) {
+      foundClubs = searchClubs(fuse, trimmedSearch);
     }
 
     return foundClubs;
