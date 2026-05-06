@@ -1,8 +1,8 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
 import { BookingStatus, SchemaAttendee } from "@/api/room-booking/types.ts";
-import { sanitizeBookingTitle } from "@/components/room-booking/utils.ts";
 import { Modal } from "@/components/common/Modal.tsx";
+import { sanitizeBookingTitle } from "@/components/room-booking/utils.ts";
 import {
   clockTime,
   durationFormatted,
@@ -60,9 +60,7 @@ function Attendee({
       </div>
 
       <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
-        <div className="flex h-fit w-6">
-          <span className="icon-[material-symbols--xl] text-xl" />
-        </div>
+        <div className="flex h-fit w-6"> </div>
         <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
           <a
             className="text-base hover:underline"
@@ -76,9 +74,7 @@ function Attendee({
       </div>
 
       <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
-        <div className="flex h-fit w-6">
-          <span className="text-xl" />
-        </div>
+        <div className="flex h-fit w-6"></div>
         <div className="flex w-full flex-col wrap-anywhere whitespace-pre-wrap">
           <a
             className="text-base hover:underline"
