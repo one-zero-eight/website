@@ -474,6 +474,13 @@ export function BookingModal({
     );
     return date;
   };
+  const formatBookingDate = (date: Date) =>
+    `${date.toLocaleString("en-US", { day: "2-digit", month: "long" })}, ${date.toLocaleString("en-US", { weekday: "long" })}`;
+  // Show end date only if start and end dates differ
+  const showEndDate =
+    start &&
+    end &&
+    (start.getMonth() !== end.getMonth() || start.getDate() !== end.getDate());
 
   const BookingDateTime = (
     <div className="my-1">
@@ -512,7 +519,8 @@ export function BookingModal({
         <span className="icon-[material-symbols--today-outline] text-xl" />
       </div>
       <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
-        {`${start?.toLocaleString("en-US", { day: "2-digit", month: "long" })}, ${start?.toLocaleString("en-US", { weekday: "long" })}`}
+        {start && formatBookingDate(start)}
+        {showEndDate && ` – ${formatBookingDate(end)}`}
       </p>
     </div>
   );
