@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 const GMAIL_STORAGE_KEY = "guard_saved_gmail";
 
-export const Route = createFileRoute("/guard/google/files/$slug/join" as any)({
+export const Route = createFileRoute("/guard/google/files/$slug/join")({
   component: RouteComponent,
 });
 

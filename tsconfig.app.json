@@ -15,8 +15,7 @@
     "incremental": true,
     "allowImportingTsExtensions": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "/public/*": ["./public/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]
