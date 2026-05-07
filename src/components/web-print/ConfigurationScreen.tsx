@@ -18,6 +18,8 @@ export function ConfigurationScreen({
   showPopupWithExceptionDetail,
   preparedFilePagesCount,
   stopJobsRef,
+  setPreparedFileName,
+  setPreparedFilePagesCount,
 }: {
   screenSwitch: boolean;
   setScreenSwitch: (value: boolean) => void;
@@ -30,6 +32,8 @@ export function ConfigurationScreen({
   showPopupWithExceptionDetail: (prefix: string, exception: any) => void;
   preparedFilePagesCount: number | undefined;
   stopJobsRef: RefObject<boolean>;
+  setPreparedFileName: (value: string) => void;
+  setPreparedFilePagesCount: (value: number) => void;
 }) {
   const [alert, setAlert] = useState<JSX.Element | null>(null);
 
@@ -57,7 +61,12 @@ export function ConfigurationScreen({
           />
           <ScanJobStartAndWait
             rootStyles={configurationType ? "hidden" : ""}
-            isFilePreparing={isFilePreparing}
+            showPopupWithExceptionDetail={showPopupWithExceptionDetail}
+            setScreenSwitch={setScreenSwitch}
+            preparedFileName={preparedFileName}
+            getFile={getFile}
+            setPreparedFileName={setPreparedFileName}
+            setPreparedFilePagesCount={setPreparedFilePagesCount}
           />
         </div>
         <FileDrop
