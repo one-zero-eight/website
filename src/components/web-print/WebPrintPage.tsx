@@ -45,12 +45,19 @@ export function WebPrintPage() {
       throw exception;
     }
   }
-  const { mutateAsync: getPreparedFile, isPending: isFileDownloading } =
-    $printers.useMutation("get", "/print/get_file");
-  async function getFile(filename: string) {
+  const {
+    mutateAsync: getPreparedPrintFile,
+    isPending: isPrintFileDownloading,
+  } = $printers.useMutation("get", "/print/get_file");
+  const { mutateAsync: getPreparedScanFile, isPending: isScanFileDownloading } =
+    $printers.useMutation("get", "/scan/get_file");
+  const isFileDownloading = isPrintFileDownloading || isScanFileDownloading;
+  async function getFile(filename: string, scan: boolean = false) {
     try {
       // @ts-expect-error - response type mismatch with API
-      const getResponse: Blob = await getPreparedFile({
+      const getResponse: Blob = await (
+        scan ? getPreparedScanFile : getPreparedPrintFile
+      )({
         params: { query: { filename: filename } },
         parseAs: "blob",
       });
@@ -83,6 +90,8 @@ export function WebPrintPage() {
             showPopupWithExceptionDetail={showPopupWithExceptionDetail}
             preparedFilePagesCount={preparedFilePagesCount}
             stopJobsRef={stopJobsRef}
+            setPreparedFilePagesCount={setPreparedFilePagesCount}
+            setPreparedFileName={setPreparedFileName}
           />
           <ProcessingScreen
             setScreenSwitch={setScreenSwitch}
