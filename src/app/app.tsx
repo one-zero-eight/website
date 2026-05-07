@@ -2,7 +2,6 @@ import { useMe } from "@/api/accounts/user.ts";
 import { AuthManager } from "@/api/helpers/AuthManager.tsx";
 import { PwaPromptProvider } from "@/app/pwa-prompt.tsx";
 import { queryClient } from "@/app/query-client.ts";
-import { GoogleAnalytics } from "@/app/tracking/GoogleAnalytics.tsx";
 import { UserInfoTracker } from "@/app/tracking/UserInfoTracker.tsx";
 import { YandexMetrika } from "@/app/tracking/YandexMetrika.tsx";
 import { ToastContainer, ToastProvider } from "@/components/toast";
@@ -23,7 +22,6 @@ export function App({ router }: { router: Register["router"] }) {
       </PwaPromptProvider>
 
       <YandexMetrika />
-      <GoogleAnalytics />
       <UserInfoTracker />
       <ThemeChanger />
       <AuthManager />
