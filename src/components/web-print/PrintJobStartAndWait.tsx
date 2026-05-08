@@ -132,7 +132,6 @@ export function PrintJobStartAndWait({
           );
           continue;
         }
-        console.log(jobStatus);
         if (
           [
             JobStateEnum.Value9 /* completed */,
