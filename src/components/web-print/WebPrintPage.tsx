@@ -19,11 +19,18 @@ export function WebPrintPage() {
     );
   }
 
+  const [configurationType, setConfigurationType] = useState<boolean>(true);
   const [screenSwitch, setScreenSwitch] = useState<boolean>(false); // false is configuration
   const [preparedFile, setPreparedFile] = useState<File>();
   const [preparedFileName, setPreparedFileName] = useState<string>();
+  const [meaningfulFileName, setMeaningfulFilName] = useState<string>();
   const [preparedFilePagesCount, setPreparedFilePagesCount] =
     useState<number>();
+
+  const [_oneMoreScanTransfer, setOneMoreScanTransfer] =
+    useState<boolean>(false);
+  const [scanningInProgressTransfer, setScanningInProgressTransfer] =
+    useState<boolean>(false);
 
   const stopJobsRef = useRef<boolean>(false);
 
@@ -92,11 +99,19 @@ export function WebPrintPage() {
             stopJobsRef={stopJobsRef}
             setPreparedFilePagesCount={setPreparedFilePagesCount}
             setPreparedFileName={setPreparedFileName}
+            configurationType={configurationType}
+            setConfigurationType={setConfigurationType}
+            setScannerInProgressTransfer={setScanningInProgressTransfer}
           />
           <ProcessingScreen
             setScreenSwitch={setScreenSwitch}
             preparedFile={preparedFile}
+            meaningfulFileName={meaningfulFileName}
+            setMeaningfulFileName={setMeaningfulFilName}
             stopJobsRef={stopJobsRef}
+            configurationType={configurationType}
+            scanningInProgressTransfer={scanningInProgressTransfer}
+            setOneMoreScanTransfer={setOneMoreScanTransfer}
           />
         </DoubleScreenContainer>
       </div>

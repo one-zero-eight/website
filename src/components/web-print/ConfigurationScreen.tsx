@@ -20,6 +20,9 @@ export function ConfigurationScreen({
   stopJobsRef,
   setPreparedFileName,
   setPreparedFilePagesCount,
+  configurationType,
+  setConfigurationType,
+  setScannerInProgressTransfer,
 }: {
   screenSwitch: boolean;
   setScreenSwitch: (value: boolean) => void;
@@ -34,10 +37,11 @@ export function ConfigurationScreen({
   stopJobsRef: RefObject<boolean>;
   setPreparedFileName: (value: string) => void;
   setPreparedFilePagesCount: (value: number) => void;
+  configurationType: boolean;
+  setConfigurationType: (value: boolean) => void;
+  setScannerInProgressTransfer: (value: boolean) => void;
 }) {
   const [alert, setAlert] = useState<JSX.Element | null>(null);
-
-  const [configurationType, setConfigurationType] = useState<boolean>(true);
 
   return (
     <div className={styles.ordinaryScreen}>
@@ -48,7 +52,7 @@ export function ConfigurationScreen({
             onClick={() => setConfigurationType(!configurationType)}
           />
           <PrintJobStartAndWait
-            rootStyles={configurationType ? "" : "hidden"}
+            rootStyles={configurationType ? "" : "hidden!"}
             preparedFileName={preparedFileName}
             showPopupWithExceptionDetail={showPopupWithExceptionDetail}
             isFilePreparing={isFilePreparing}
@@ -60,13 +64,14 @@ export function ConfigurationScreen({
             stopJobsRef={stopJobsRef}
           />
           <ScanJobStartAndWait
-            rootStyles={configurationType ? "hidden" : ""}
+            rootStyles={configurationType ? "hidden!" : ""}
             showPopupWithExceptionDetail={showPopupWithExceptionDetail}
             setScreenSwitch={setScreenSwitch}
             preparedFileName={preparedFileName}
             getFile={getFile}
             setPreparedFileName={setPreparedFileName}
             setPreparedFilePagesCount={setPreparedFilePagesCount}
+            setScannerInProgressTransfer={setScannerInProgressTransfer}
           />
         </div>
         <FileDrop
@@ -75,7 +80,10 @@ export function ConfigurationScreen({
           }}
           isFileProcessing={isFilePreparing || isFileDownloading}
           blobPreviewURL={
-            preparedFile ? URL.createObjectURL(preparedFile) : undefined
+            preparedFile
+              ? URL.createObjectURL(preparedFile) +
+                `#filename=${preparedFile.name}`
+              : undefined
           }
           isFunctional={configurationType}
         />

@@ -5,6 +5,7 @@
   --main-padding: 16px;
   --button-padding: 4px 14px;
   --select-padding: 6px;
+  --scan-grid-elem-padding: 10px;
   --button-horizontal-padding: 14px;
   --text-grid-gap: 14px;
 
@@ -13,6 +14,7 @@
   --button-left-margin: 8px;
 
   --drop-area-border-width: 7px;
+  --icon-square-width: 40px;
 
   --button-rounding: 12px;
   --select-rounding: 8px;
