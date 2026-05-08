@@ -27,7 +27,7 @@ export function WebPrintPage() {
   const [preparedFilePagesCount, setPreparedFilePagesCount] =
     useState<number>();
 
-  const [_oneMoreScanTransfer, setOneMoreScanTransfer] =
+  const [oneMoreScanTransfer, setOneMoreScanTransfer] =
     useState<boolean>(false);
   const [scanningInProgressTransfer, setScanningInProgressTransfer] =
     useState<boolean>(false);
@@ -36,16 +36,27 @@ export function WebPrintPage() {
 
   const { mutateAsync: prepare, isPending: isFilePreparing } =
     $printers.useMutation("post", "/print/prepare");
-  async function prepareFile(file: File) {
+  const {
+    mutateAsync: removeLastPagePrepare,
+    isPending: isFileRemovePreparing,
+  } = $printers.useMutation("post", "/scan/manual/remove_last_page");
+  async function prepareFile(file: File, scan: boolean = false) {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const preparationResponse = await prepare({
-        // @ts-expect-error - FormData type mismatch with API
-        body: formData,
-      });
+      const preparationResponse = scan
+        ? await removeLastPagePrepare({
+            params: { query: { filename: preparedFileName! } },
+          })
+        : await prepare({
+            // @ts-expect-error - FormData type mismatch with API
+            body: formData,
+          });
       setPreparedFileName(preparationResponse.filename);
-      setPreparedFilePagesCount(preparationResponse.pages);
+      setPreparedFilePagesCount(
+        // @ts-expect-error - API fields mismatch
+        scan ? preparationResponse.page_count : preparationResponse.pages,
+      );
       return preparationResponse.filename;
     } catch (exception: any) {
       showPopupWithExceptionDetail("Documents processing problem", exception);
@@ -92,7 +103,7 @@ export function WebPrintPage() {
             getFile={getFile}
             preparedFile={preparedFile}
             preparedFileName={preparedFileName}
-            isFilePreparing={isFilePreparing}
+            isFilePreparing={isFilePreparing || isFileRemovePreparing}
             isFileDownloading={isFileDownloading}
             showPopupWithExceptionDetail={showPopupWithExceptionDetail}
             preparedFilePagesCount={preparedFilePagesCount}
@@ -102,6 +113,9 @@ export function WebPrintPage() {
             configurationType={configurationType}
             setConfigurationType={setConfigurationType}
             setScannerInProgressTransfer={setScanningInProgressTransfer}
+            oneMoreScanTransfer={oneMoreScanTransfer}
+            setOneMoreScanTransfer={setOneMoreScanTransfer}
+            meaningfulFileName={meaningfulFileName}
           />
           <ProcessingScreen
             setScreenSwitch={setScreenSwitch}
@@ -112,6 +126,8 @@ export function WebPrintPage() {
             configurationType={configurationType}
             scanningInProgressTransfer={scanningInProgressTransfer}
             setOneMoreScanTransfer={setOneMoreScanTransfer}
+            prepareFile={prepareFile}
+            getFile={getFile}
           />
         </DoubleScreenContainer>
       </div>
