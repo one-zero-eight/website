@@ -14,7 +14,9 @@ export function ProcessingScreen({
   stopJobsRef,
   configurationType,
   scanningInProgressTransfer,
-  _setOneMoreScanTransfer,
+  setOneMoreScanTransfer,
+  prepareFile,
+  getFile,
 }: {
   setScreenSwitch: (value: boolean) => void;
   preparedFile: File | undefined;
@@ -23,7 +25,9 @@ export function ProcessingScreen({
   stopJobsRef: RefObject<boolean>;
   configurationType: boolean;
   scanningInProgressTransfer: boolean;
-  _setOneMoreScanTransfer: (value: boolean) => void;
+  setOneMoreScanTransfer: (value: boolean) => void;
+  prepareFile: (file: File, scan: boolean) => Promise<string>;
+  getFile: (filename: string, scan: boolean) => Promise<void>;
 }) {
   const { mutateAsync: deleteScanFileFromTheServer } = $printers.useMutation(
     "post",
@@ -39,7 +43,7 @@ export function ProcessingScreen({
           blobPreviewURL={
             preparedFile
               ? URL.createObjectURL(preparedFile) +
-                `#filename=${preparedFile.name}`
+                `#filename=${meaningfulFileName || preparedFile.name}`
               : undefined
           }
           isFunctional={false}
@@ -48,7 +52,7 @@ export function ProcessingScreen({
           className={`${styles.configurationBox} ${styles.configurationBox_loading}`}
         >
           <p className={`${fontStyles.headFont} ${fontStyles.color}`}>
-            {meaningfulFileName || "{InternalName}.pdf"}
+            {meaningfulFileName || `${preparedFile?.name}`}
           </p>
           {(configurationType || scanningInProgressTransfer) && (
             <span
@@ -57,7 +61,12 @@ export function ProcessingScreen({
           )}
           {!configurationType && !scanningInProgressTransfer && (
             <div className={`${styles.configurationBox__scrollPart}`}>
-              <button className={styles.scanButton} onClick={() => {}}>
+              <button
+                className={styles.scanButton}
+                onClick={() => {
+                  setOneMoreScanTransfer(true);
+                }}
+              >
                 <div className={styles.iconSquare}>
                   <span
                     className={`icon-[material-symbols--text-select-move-forward-word-rounded] ${styles.backgroundIcon}`}
@@ -65,7 +74,12 @@ export function ProcessingScreen({
                 </div>
                 <p className={fontStyles.formPointFont}>Scan one more page</p>
               </button>
-              <button className={styles.scanButton}>
+              <button
+                className={styles.scanButton}
+                onClick={async () => {
+                  await getFile(await prepareFile(preparedFile!, true), true);
+                }}
+              >
                 <div className={styles.iconSquare}>
                   <span
                     className={`icon-[material-symbols--ink-eraser-rounded] ${styles.backgroundIcon}`}
@@ -94,6 +108,8 @@ export function ProcessingScreen({
                   await deleteScanFileFromTheServer({
                     params: { query: { filename: preparedFile!.name } },
                   });
+                  // for instant print
+                  await prepareFile(preparedFile!, false);
                 } catch {
                   console.log(
                     "[web-print] Fail to delete the scan from the servers",
