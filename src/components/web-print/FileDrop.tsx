@@ -223,6 +223,16 @@ export function FileDrop({
             />
           </label>
         )}
+
+        {!isFunctional && blobPreviewURL && (
+          <a
+            href={blobPreviewURL}
+            download={blobPreviewURL.split("#filename=")[1]}
+            className={`${styles.button} ${marginStyles.bottomMargin_doubleMainPadding} ${fontStyles.buttonFont}`}
+          >
+            Download
+          </a>
+        )}
       </div>
 
       <Modal
