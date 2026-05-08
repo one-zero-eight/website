@@ -1,12 +1,17 @@
 .input {
   field-sizing: content;
-  max-width: 280px;
+  max-width: 160px;
   border: none;
   outline: none;
   background-color: var(--button-color);
   padding: var(--select-padding) calc(var(--select-padding) * 3);
   cursor: text;
   appearance: textfield;
+}
+
+.input_dropBackground {
+  height: 100%;
+  background-color: var(--drop-area-color);
 }
 
 .input_rounded {

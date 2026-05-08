@@ -174,12 +174,20 @@
 }
 
 .configurationBox__scrollPart {
-  height: 60%;
+  max-height: 60%;
+  width: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   overflow-y: auto;
   overflow-x: hidden;
   margin: var(--main-padding) 0;
   padding-right: var(--select-padding);
   box-sizing: border-box;
+}
+
+.configurationBox__scrollPart_60 {
+  height: 60%;
 }
 
 .scrollPart__elem {
@@ -189,10 +197,41 @@
   flex-wrap: nowrap;
   align-items: center;
   margin-top: var(--form-point-margin);
+  color: var(--color-base-content);
 }
 
 .scrollPart__elem:first-of-type {
   margin-top: 0;
+}
+
+.scanButton {
+  background-color: var(--button-color);
+  padding: var(--scan-grid-elem-padding);
+  border-radius: var(--button-rounding);
+  display: flex;
+  align-items: center;
+  color: var(--color-base-content);
+  width: 235px;
+  margin-bottom: var(--form-point-margin);
+  outline: none;
+  transition: all 250ms;
+  cursor: pointer;
+}
+
+.scanButton:hover {
+  background-color: var(--color-primary);
+}
+
+.iconSquare {
+  display: flex;
+  justify-content: center;
+  background-color: var(--drop-area-color);
+  width: var(--icon-square-width);
+  height: var(--icon-square-width);
+  border-radius: calc(
+    var(--button-rounding) - var(--scan-grid-elem-padding) / 2
+  );
+  margin-right: var(--scan-grid-elem-padding);
 }
 
 .switch {
