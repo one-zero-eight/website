@@ -10,7 +10,7 @@ import {
 } from "@/api/printers/types.ts";
 import { IconValueStatusSelect } from "@/components/web-print/IconValueStatusSelect.tsx";
 import { $printers } from "@/api/printers";
-import { JSX, useEffect, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import { Switch } from "@/components/web-print/Switch.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 
@@ -23,6 +23,8 @@ export function ScanJobStartAndWait({
   setPreparedFileName,
   setPreparedFilePagesCount,
   setScannerInProgressTransfer,
+  oneMoreScanTransfer,
+  setOneMoreScanTransfer,
 }: {
   rootStyles: string;
   showPopupWithExceptionDetail: (prefix: string, exception: any) => void;
@@ -32,6 +34,8 @@ export function ScanJobStartAndWait({
   setPreparedFileName: (value: string) => void;
   setPreparedFilePagesCount: (value: number) => void;
   setScannerInProgressTransfer: (value: boolean) => void;
+  oneMoreScanTransfer: boolean;
+  setOneMoreScanTransfer: (value: boolean) => void;
 }) {
   const [alert, setAlert] = useState<JSX.Element>();
 
@@ -49,6 +53,8 @@ export function ScanJobStartAndWait({
     ScanningOptionsCrop.false,
   );
 
+  const newScan = useRef<boolean>(false);
+
   const { data: rawScanners } = $printers.useQuery("get", "/scan/get_scanners");
   const { data: rawStatuses } = $printers.useQuery(
     "get",
@@ -61,9 +67,109 @@ export function ScanJobStartAndWait({
   const { mutateAsync: cancelScan, isPending: isScanCancelling } =
     $printers.useMutation("post", "/scan/manual/cancel_scan");
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  async function scanAndWait() {
+    let jobId;
+    try {
+      jobId = await scan({
+        params: {
+          query: {
+            scanner_name: scannerName,
+          },
+        },
+        body: {
+          scanning_options: {
+            sides: scanSides,
+            crop: crop,
+            quality: quality,
+            input_source: mode,
+          },
+        },
+      });
+      setScreenSwitch(true);
+    } catch (exception: any) {
+      showPopupWithExceptionDetail("Start problem", exception);
+      return;
+    }
+    if (!jobId) return;
+    const startTime = performance.now();
+    const promisedScan = waitTillTheEnd({
+      params: {
+        query: {
+          scanner_name: scannerName,
+          job_id: jobId,
+          prev_filename: newScan.current ? null : preparedFileName,
+        },
+      },
+    });
+    newScan.current = false;
+    let scanWasResolved = false;
+    promisedScan.then(() => {
+      scanWasResolved = true;
+    });
+    while (
+      performance.now() - startTime <
+      60 * 1000 // 60K milliseconds per batch (either a page or a list of pages from automatic feeder)
+    ) {
+      if (scanWasResolved) {
+        const scan = await promisedScan;
+        if (!scan) {
+          setAlert(
+            <>
+              <p className="font-bold!">The scanner returned nothing</p>
+              <p>Please, try to scan again</p>
+            </>,
+          );
+          await cancelScan({
+            params: {
+              query: { scanner_name: scannerName, job_id: jobId },
+            },
+          });
+          return;
+        }
+        setPreparedFileName(scan.filename);
+        setPreparedFilePagesCount(scan.page_count);
+        try {
+          await cancelScan({
+            params: {
+              query: { scanner_name: scannerName, job_id: jobId },
+            },
+          });
+        } catch {
+          console.log("[web-print] cancellation error");
+        }
+        await getFile(scan.filename, true);
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+    setAlert(
+      <>
+        <p className="font-bold!">The job has been timed out!</p>
+        <p>Probably, the scanner is busy, try to reboot it</p>
+      </>,
+    );
+    await cancelScan({
+      params: {
+        query: { scanner_name: scannerName, job_id: jobId },
+      },
+    });
+  }
+
   useEffect(() => {
     setScannerInProgressTransfer(isScanStarting || isScanWaiting);
-  }, [isScanStarting, isScanWaiting, setScannerInProgressTransfer]);
+    if (oneMoreScanTransfer) {
+      scanAndWait().then(() => {});
+      setOneMoreScanTransfer(false);
+    }
+  }, [
+    isScanStarting,
+    isScanWaiting,
+    oneMoreScanTransfer,
+    scanAndWait,
+    setScannerInProgressTransfer,
+    setOneMoreScanTransfer,
+  ]);
 
   return (
     <>
@@ -152,90 +258,8 @@ export function ScanJobStartAndWait({
         <button
           className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${(isScanWaiting || isScanStarting || isScanCancelling) && styles.button_inactive}`}
           onClick={async () => {
-            let jobId;
-            try {
-              jobId = await scan({
-                params: {
-                  query: {
-                    scanner_name: scannerName,
-                  },
-                },
-                body: {
-                  scanning_options: {
-                    sides: scanSides,
-                    crop: crop,
-                    quality: quality,
-                    input_source: mode,
-                  },
-                },
-              });
-              setScreenSwitch(true);
-            } catch (exception: any) {
-              showPopupWithExceptionDetail("Start problem", exception);
-              return;
-            }
-            if (!jobId) return;
-            const startTime = performance.now();
-            const promisedScan = waitTillTheEnd({
-              params: {
-                query: {
-                  scanner_name: scannerName,
-                  job_id: jobId,
-                  prev_filename: preparedFileName,
-                },
-              },
-            });
-            let scanWasResolved = false;
-            promisedScan.then(() => {
-              scanWasResolved = true;
-            });
-            while (
-              performance.now() - startTime <
-              30 * 1000 // 30K milliseconds per page
-            ) {
-              if (scanWasResolved) {
-                const scan = await promisedScan;
-                if (!scan) {
-                  setAlert(
-                    <>
-                      <p className="font-bold!">The scanner returned nothing</p>
-                      <p>Please, try to scan again</p>
-                    </>,
-                  );
-                  await cancelScan({
-                    params: {
-                      query: { scanner_name: scannerName, job_id: jobId },
-                    },
-                  });
-                  return;
-                }
-                setPreparedFileName(scan.filename);
-                setPreparedFilePagesCount(scan.page_count);
-                try {
-                  await cancelScan({
-                    params: {
-                      query: { scanner_name: scannerName, job_id: jobId },
-                    },
-                  });
-                } catch {
-                  console.log("[web-print] cancellation error");
-                }
-                await getFile(scan.filename, true);
-                return;
-              }
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-            }
-            setAlert(
-              <>
-                <p className="font-bold!">The job has been timed out!</p>
-                <p>Probably, the scanner is busy, try to reboot it</p>
-              </>,
-            );
-            await cancelScan({
-              params: {
-                query: { scanner_name: scannerName, job_id: jobId },
-              },
-            });
+            newScan.current = true;
+            await scanAndWait();
           }}
         >
           Start scanning

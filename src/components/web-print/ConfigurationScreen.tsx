@@ -23,6 +23,9 @@ export function ConfigurationScreen({
   configurationType,
   setConfigurationType,
   setScannerInProgressTransfer,
+  oneMoreScanTransfer,
+  setOneMoreScanTransfer,
+  meaningfulFileName,
 }: {
   screenSwitch: boolean;
   setScreenSwitch: (value: boolean) => void;
@@ -40,6 +43,9 @@ export function ConfigurationScreen({
   configurationType: boolean;
   setConfigurationType: (value: boolean) => void;
   setScannerInProgressTransfer: (value: boolean) => void;
+  oneMoreScanTransfer: boolean;
+  setOneMoreScanTransfer: (value: boolean) => void;
+  meaningfulFileName: string | undefined;
 }) {
   const [alert, setAlert] = useState<JSX.Element | null>(null);
 
@@ -72,6 +78,8 @@ export function ConfigurationScreen({
             setPreparedFileName={setPreparedFileName}
             setPreparedFilePagesCount={setPreparedFilePagesCount}
             setScannerInProgressTransfer={setScannerInProgressTransfer}
+            oneMoreScanTransfer={oneMoreScanTransfer}
+            setOneMoreScanTransfer={setOneMoreScanTransfer}
           />
         </div>
         <FileDrop
@@ -82,7 +90,7 @@ export function ConfigurationScreen({
           blobPreviewURL={
             preparedFile
               ? URL.createObjectURL(preparedFile) +
-                `#filename=${preparedFile.name}`
+                `#filename=${meaningfulFileName || preparedFile.name}`
               : undefined
           }
           isFunctional={configurationType}
