@@ -10,7 +10,7 @@ import {
 } from "@/api/printers/types.ts";
 import { IconValueStatusSelect } from "@/components/web-print/IconValueStatusSelect.tsx";
 import { $printers } from "@/api/printers";
-import { JSX, useRef, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { Switch } from "@/components/web-print/Switch.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 
@@ -22,6 +22,7 @@ export function ScanJobStartAndWait({
   getFile,
   setPreparedFileName,
   setPreparedFilePagesCount,
+  setScannerInProgressTransfer,
 }: {
   rootStyles: string;
   showPopupWithExceptionDetail: (prefix: string, exception: any) => void;
@@ -30,6 +31,7 @@ export function ScanJobStartAndWait({
   getFile: (filename: string, scan?: boolean) => Promise<void>;
   setPreparedFileName: (value: string) => void;
   setPreparedFilePagesCount: (value: number) => void;
+  setScannerInProgressTransfer: (value: boolean) => void;
 }) {
   const [alert, setAlert] = useState<JSX.Element>();
 
@@ -47,8 +49,6 @@ export function ScanJobStartAndWait({
     ScanningOptionsCrop.false,
   );
 
-  const jobId = useRef<string | null>(null);
-
   const { data: rawScanners } = $printers.useQuery("get", "/scan/get_scanners");
   const { data: rawStatuses } = $printers.useQuery(
     "get",
@@ -58,10 +58,18 @@ export function ScanJobStartAndWait({
     $printers.useMutation("post", "/scan/manual/start_scan");
   const { mutateAsync: waitTillTheEnd, isPending: isScanWaiting } =
     $printers.useMutation("post", "/scan/manual/wait_and_merge");
+  const { mutateAsync: cancelScan, isPending: isScanCancelling } =
+    $printers.useMutation("post", "/scan/manual/cancel_scan");
+
+  useEffect(() => {
+    setScannerInProgressTransfer(isScanStarting || isScanWaiting);
+  }, [isScanStarting, isScanWaiting, setScannerInProgressTransfer]);
 
   return (
     <>
-      <div className={`${styles.configurationBox__scrollPart} ${rootStyles}`}>
+      <div
+        className={`${styles.configurationBox__scrollPart} ${styles.configurationBox__scrollPart_60} ${rootStyles}`}
+      >
         <div className={styles.scrollPart__elem}>
           <p className={fontStyles.formPointFont}>Scanner</p>
           <IconValueStatusSelect
@@ -142,10 +150,11 @@ export function ScanJobStartAndWait({
       </div>
       <div className={rootStyles}>
         <button
-          className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${(isScanWaiting || isScanStarting) && styles.button_inactive}`}
+          className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${(isScanWaiting || isScanStarting || isScanCancelling) && styles.button_inactive}`}
           onClick={async () => {
+            let jobId;
             try {
-              jobId.current = await scan({
+              jobId = await scan({
                 params: {
                   query: {
                     scanner_name: scannerName,
@@ -165,16 +174,13 @@ export function ScanJobStartAndWait({
               showPopupWithExceptionDetail("Start problem", exception);
               return;
             }
-            if (!jobId.current) {
-              setAlert(<p className="font-bold!">Failed to start the job</p>);
-              return;
-            }
+            if (!jobId) return;
             const startTime = performance.now();
             const promisedScan = waitTillTheEnd({
               params: {
                 query: {
                   scanner_name: scannerName,
-                  job_id: jobId.current,
+                  job_id: jobId,
                   prev_filename: preparedFileName,
                 },
               },
@@ -189,7 +195,6 @@ export function ScanJobStartAndWait({
             ) {
               if (scanWasResolved) {
                 const scan = await promisedScan;
-                console.log(scan);
                 if (!scan) {
                   setAlert(
                     <>
@@ -197,10 +202,24 @@ export function ScanJobStartAndWait({
                       <p>Please, try to scan again</p>
                     </>,
                   );
+                  await cancelScan({
+                    params: {
+                      query: { scanner_name: scannerName, job_id: jobId },
+                    },
+                  });
                   return;
                 }
                 setPreparedFileName(scan.filename);
                 setPreparedFilePagesCount(scan.page_count);
+                try {
+                  await cancelScan({
+                    params: {
+                      query: { scanner_name: scannerName, job_id: jobId },
+                    },
+                  });
+                } catch {
+                  console.log("[web-print] cancellation error");
+                }
                 await getFile(scan.filename, true);
                 return;
               }
@@ -212,11 +231,16 @@ export function ScanJobStartAndWait({
                 <p>Probably, the scanner is busy, try to reboot it</p>
               </>,
             );
+            await cancelScan({
+              params: {
+                query: { scanner_name: scannerName, job_id: jobId },
+              },
+            });
           }}
         >
           Start scanning
         </button>
-        {(isScanWaiting || isScanStarting) && (
+        {(isScanWaiting || isScanStarting || isScanCancelling) && (
           <span
             className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
           ></span>
