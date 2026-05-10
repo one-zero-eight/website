@@ -18,6 +18,7 @@ const Links = () => {
   const timeoutRef = useRef<NodeJS.Timeout | number>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [showAll, setShowAll] = useState(false);
 
   const fuse = useMemo(() => createFuseInstance(resourcesList), []);
 
@@ -39,12 +40,22 @@ const Links = () => {
     [searchQuery, activeGroup, fuse, userFrequencies],
   );
 
+  // Reset showAll when filters change
+  useEffect(() => {
+    setShowAll(false);
+  }, [searchQuery, activeGroup]);
+
   useEffect(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setVisibleItems([]);
     setActiveIndex(0);
 
-    filteredResources.forEach((_, index) => {
+    const itemsToAnimate =
+      searchQuery || showAll
+        ? filteredResources
+        : filteredResources.slice(0, 6);
+
+    itemsToAnimate.forEach((_, index) => {
       timeoutRef.current = setTimeout(() => {
         setVisibleItems((prev) => [...prev, index]);
       }, index * 100);
@@ -53,11 +64,16 @@ const Links = () => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [filteredResources]);
+  }, [filteredResources, searchQuery, showAll]);
+
+  const displayedResources = useMemo(() => {
+    if (searchQuery || showAll) return filteredResources;
+    return filteredResources.slice(0, 6);
+  }, [filteredResources, searchQuery, showAll]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      if (filteredResources.length === 0) return;
+      if (displayedResources.length === 0) return;
 
       if (event.key === "Enter") {
         event.preventDefault();
@@ -65,22 +81,22 @@ const Links = () => {
         const frequencies = JSON.parse(
           localStorage.getItem("userFrequencies") || "{}",
         );
-        frequencies[filteredResources[activeIndex].url] =
-          (frequencies[filteredResources[activeIndex].url] || 0) + 1;
+        frequencies[displayedResources[activeIndex].url] =
+          (frequencies[displayedResources[activeIndex].url] || 0) + 1;
         localStorage.setItem("userFrequencies", JSON.stringify(frequencies));
 
-        window.open(filteredResources[activeIndex].url, "_blank");
+        window.open(displayedResources[activeIndex].url, "_blank");
       } else if (event.key === "ArrowDown") {
         event.preventDefault();
-        setActiveIndex((prev) => (prev + 1) % filteredResources.length);
+        setActiveIndex((prev) => (prev + 1) % displayedResources.length);
       } else if (event.key === "ArrowUp") {
         event.preventDefault();
         setActiveIndex((prev) =>
-          prev === 0 ? filteredResources.length - 1 : prev - 1,
+          prev === 0 ? displayedResources.length - 1 : prev - 1,
         );
       }
     },
-    [filteredResources, activeIndex],
+    [displayedResources, activeIndex],
   );
 
   return (
@@ -127,9 +143,9 @@ const Links = () => {
           </div>
         </div>
 
-        {filteredResources.length > 0 ? (
+        {displayedResources.length > 0 ? (
           <div className="grid flex-4 grid-cols-1 gap-5 lg:grid-cols-3">
-            {filteredResources.map((resource, index) => (
+            {displayedResources.map((resource, index) => (
               <a
                 onClick={() => {
                   const frequencies = JSON.parse(
@@ -179,6 +195,15 @@ const Links = () => {
                 </div>
               </a>
             ))}
+            {!searchQuery && filteredResources.length > 6 && !showAll && (
+              <button
+                type="button"
+                onClick={() => setShowAll(true)}
+                className="btn btn-ghost min-h-[100px] lg:col-span-3"
+              >
+                Show all ({filteredResources.length})
+              </button>
+            )}
           </div>
         ) : (
           <p className="text-base-content flex-4 text-lg">No results found.</p>
