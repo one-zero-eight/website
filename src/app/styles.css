@@ -5,7 +5,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @plugin "@iconify/tailwind4";
-@plugin "daisyui/index.js";
+@plugin "daisyui" {
+  themes: false;
+}
 
 /* Dark theme */
 @plugin "daisyui/theme" {
