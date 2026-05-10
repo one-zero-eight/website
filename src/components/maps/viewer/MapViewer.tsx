@@ -358,7 +358,7 @@ export const MapViewer = memo(function MapViewer({
         <div
           ref={imageRef}
           dangerouslySetInnerHTML={{ __html: mapSvgData }}
-          className="h-full w-full [&>svg]:h-full! [&>svg]:w-full!"
+          className="h-full w-full [&>svg]:h-full! [&>svg]:w-full! [&>svg]:overflow-visible"
         />
       ) : null,
     [mapSvgData],
