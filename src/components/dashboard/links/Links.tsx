@@ -204,6 +204,15 @@ const Links = () => {
                 Show all ({filteredResources.length})
               </button>
             )}
+            {!searchQuery && filteredResources.length > 6 && showAll && (
+              <button
+                type="button"
+                onClick={() => setShowAll(false)}
+                className="btn btn-ghost min-h-[100px] lg:col-span-3"
+              >
+                Collapse
+              </button>
+            )}
           </div>
         ) : (
           <p className="text-base-content flex-4 text-lg">No results found.</p>
