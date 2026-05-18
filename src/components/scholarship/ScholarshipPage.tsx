@@ -91,7 +91,7 @@ export function ScholarshipPage() {
         <p>
           See your scholarship for the current semester on the{" "}
           <a
-            href="https://my.university.innopolis.ru/profile/personal-form/index?tab=scholarship"
+            href="https://my.innopolis.university/education/scholarship"
             target="_blank"
             className="italic underline"
           >

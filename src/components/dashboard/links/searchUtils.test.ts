@@ -27,7 +27,6 @@ const testScenarios: TestScenario[] = [
       "https://sport.innopolis.university/profile/": 3,
       "https://moodle.innopolis.university/my/": 3,
       "https://baam.tatar/s": 3,
-      "https://my.university.innopolis.ru/": 3,
       "https://my.innopolis.university/event": 3,
       "https://t.me/IUSportBot": 3,
       "https://my.innopolis.university/store": 3,

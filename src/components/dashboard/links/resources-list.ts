@@ -117,23 +117,13 @@ export const resourcesList: ResourceType[] = [
     frequency: 113,
   },
   {
-    url: "https://my.university.innopolis.ru/profile/personal-form/index?tab=scholarship",
-    resource: "Legacy My University",
+    url: "https://my.innopolis.university/education/scholarship",
+    resource: "My University",
     title: "Scholarship",
     description:
       "See how the scholarship is calculated for your current semester in My University.",
     icon: "icon-[material-symbols--credit-card-outline]",
     category: "Financial",
-    frequency: 0,
-  },
-  {
-    url: "https://my.university.innopolis.ru/profile/applications",
-    resource: "Legacy My University",
-    title: "Templates of applications",
-    description:
-      "Access and download templates for various university applications.",
-    icon: "icon-[material-symbols--article-outline]",
-    category: "Academic",
     frequency: 0,
   },
   // < My University <

@@ -38,7 +38,6 @@ export default function IframePreviewCard({
     url.startsWith("http://") ||
     url.startsWith("https://hotel.innopolis.university/") ||
     url.startsWith("https://help.university.innopolis.ru/") ||
-    url.startsWith("https://my.university.innopolis.ru/") ||
     url.startsWith("https://disk.yandex.ru/") ||
     url.startsWith("https://my.innopolis.university/");
 
