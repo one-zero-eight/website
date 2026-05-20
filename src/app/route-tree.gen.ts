@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
+import { Route as ScheduleAssistantRouteRouteImport } from "./routes/schedule-assistant/route";
 import { Route as With_menuRouteRouteImport } from "./routes/_with_menu/route";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as ScheduleAssistantIndexRouteImport } from "./routes/schedule-assistant/index";
@@ -65,6 +66,11 @@ import { Route as With_menuEventsIdEditRouteImport } from "./routes/_with_menu/e
 import { Route as With_menuClubsSlugEditRouteImport } from "./routes/_with_menu/clubs/$slug.edit";
 import { Route as GuardGoogleFilesSlugJoinRouteImport } from "./routes/guard.google.files.$slug.join";
 
+const ScheduleAssistantRouteRoute = ScheduleAssistantRouteRouteImport.update({
+  id: "/schedule-assistant",
+  path: "/schedule-assistant",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const With_menuRouteRoute = With_menuRouteRouteImport.update({
   id: "/_with_menu",
   getParentRoute: () => rootRouteImport,
@@ -75,20 +81,20 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any);
 const ScheduleAssistantIndexRoute = ScheduleAssistantIndexRouteImport.update({
-  id: "/schedule-assistant/",
-  path: "/schedule-assistant/",
-  getParentRoute: () => rootRouteImport,
+  id: "/",
+  path: "/",
+  getParentRoute: () => ScheduleAssistantRouteRoute,
 } as any);
 const ScheduleAssistantTimetableRoute =
   ScheduleAssistantTimetableRouteImport.update({
-    id: "/schedule-assistant/timetable",
-    path: "/schedule-assistant/timetable",
-    getParentRoute: () => rootRouteImport,
+    id: "/timetable",
+    path: "/timetable",
+    getParentRoute: () => ScheduleAssistantRouteRoute,
   } as any);
 const ScheduleAssistantChecksRoute = ScheduleAssistantChecksRouteImport.update({
-  id: "/schedule-assistant/checks",
-  path: "/schedule-assistant/checks",
-  getParentRoute: () => rootRouteImport,
+  id: "/checks",
+  path: "/checks",
+  getParentRoute: () => ScheduleAssistantRouteRoute,
 } as any);
 const RoomsRoomRoute = RoomsRoomRouteImport.update({
   id: "/rooms/$room",
@@ -172,9 +178,9 @@ const With_menu42Route = With_menu42RouteImport.update({
 } as any);
 const ScheduleAssistantSettingsIndexRoute =
   ScheduleAssistantSettingsIndexRouteImport.update({
-    id: "/schedule-assistant/settings/",
-    path: "/schedule-assistant/settings/",
-    getParentRoute: () => rootRouteImport,
+    id: "/settings/",
+    path: "/settings/",
+    getParentRoute: () => ScheduleAssistantRouteRoute,
   } as any);
 const With_menuStudentAffairsIndexRoute =
   With_menuStudentAffairsIndexRouteImport.update({
@@ -225,9 +231,9 @@ const With_menuAccountIndexRoute = With_menuAccountIndexRouteImport.update({
 } as any);
 const ScheduleAssistantSettingsSettingsTabRoute =
   ScheduleAssistantSettingsSettingsTabRouteImport.update({
-    id: "/schedule-assistant/settings/$settingsTab",
-    path: "/schedule-assistant/settings/$settingsTab",
-    getParentRoute: () => rootRouteImport,
+    id: "/settings/$settingsTab",
+    path: "/settings/$settingsTab",
+    getParentRoute: () => ScheduleAssistantRouteRoute,
   } as any);
 const With_menuStudentAffairsSignOutRoute =
   With_menuStudentAffairsSignOutRouteImport.update({
@@ -358,6 +364,7 @@ const GuardGoogleFilesSlugJoinRoute =
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/schedule-assistant": typeof ScheduleAssistantRouteRouteWithChildren;
   "/42": typeof With_menu42Route;
   "/calendar": typeof With_menuCalendarRoute;
   "/dashboard": typeof With_menuDashboardRoute;
@@ -472,6 +479,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/_with_menu": typeof With_menuRouteRouteWithChildren;
+  "/schedule-assistant": typeof ScheduleAssistantRouteRouteWithChildren;
   "/_with_menu/42": typeof With_menu42Route;
   "/_with_menu/calendar": typeof With_menuCalendarRoute;
   "/_with_menu/dashboard": typeof With_menuDashboardRoute;
@@ -530,6 +538,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
+    | "/schedule-assistant"
     | "/42"
     | "/calendar"
     | "/dashboard"
@@ -643,6 +652,7 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/_with_menu"
+    | "/schedule-assistant"
     | "/_with_menu/42"
     | "/_with_menu/calendar"
     | "/_with_menu/dashboard"
@@ -701,18 +711,21 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   With_menuRouteRoute: typeof With_menuRouteRouteWithChildren;
+  ScheduleAssistantRouteRoute: typeof ScheduleAssistantRouteRouteWithChildren;
   FormsSubmitRoute: typeof FormsSubmitRoute;
   RoomsRoomRoute: typeof RoomsRoomRoute;
-  ScheduleAssistantChecksRoute: typeof ScheduleAssistantChecksRoute;
-  ScheduleAssistantTimetableRoute: typeof ScheduleAssistantTimetableRoute;
-  ScheduleAssistantIndexRoute: typeof ScheduleAssistantIndexRoute;
-  ScheduleAssistantSettingsSettingsTabRoute: typeof ScheduleAssistantSettingsSettingsTabRoute;
-  ScheduleAssistantSettingsIndexRoute: typeof ScheduleAssistantSettingsIndexRoute;
   GuardGoogleFilesSlugJoinRoute: typeof GuardGoogleFilesSlugJoinRoute;
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/schedule-assistant": {
+      id: "/schedule-assistant";
+      path: "/schedule-assistant";
+      fullPath: "/schedule-assistant";
+      preLoaderRoute: typeof ScheduleAssistantRouteRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/_with_menu": {
       id: "/_with_menu";
       path: "";
@@ -729,24 +742,24 @@ declare module "@tanstack/react-router" {
     };
     "/schedule-assistant/": {
       id: "/schedule-assistant/";
-      path: "/schedule-assistant";
+      path: "/";
       fullPath: "/schedule-assistant/";
       preLoaderRoute: typeof ScheduleAssistantIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
+      parentRoute: typeof ScheduleAssistantRouteRoute;
     };
     "/schedule-assistant/timetable": {
       id: "/schedule-assistant/timetable";
-      path: "/schedule-assistant/timetable";
+      path: "/timetable";
       fullPath: "/schedule-assistant/timetable";
       preLoaderRoute: typeof ScheduleAssistantTimetableRouteImport;
-      parentRoute: typeof rootRouteImport;
+      parentRoute: typeof ScheduleAssistantRouteRoute;
     };
     "/schedule-assistant/checks": {
       id: "/schedule-assistant/checks";
-      path: "/schedule-assistant/checks";
+      path: "/checks";
       fullPath: "/schedule-assistant/checks";
       preLoaderRoute: typeof ScheduleAssistantChecksRouteImport;
-      parentRoute: typeof rootRouteImport;
+      parentRoute: typeof ScheduleAssistantRouteRoute;
     };
     "/rooms/$room": {
       id: "/rooms/$room";
@@ -862,10 +875,10 @@ declare module "@tanstack/react-router" {
     };
     "/schedule-assistant/settings/": {
       id: "/schedule-assistant/settings/";
-      path: "/schedule-assistant/settings";
+      path: "/settings";
       fullPath: "/schedule-assistant/settings/";
       preLoaderRoute: typeof ScheduleAssistantSettingsIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
+      parentRoute: typeof ScheduleAssistantRouteRoute;
     };
     "/_with_menu/student-affairs/": {
       id: "/_with_menu/student-affairs/";
@@ -932,10 +945,10 @@ declare module "@tanstack/react-router" {
     };
     "/schedule-assistant/settings/$settingsTab": {
       id: "/schedule-assistant/settings/$settingsTab";
-      path: "/schedule-assistant/settings/$settingsTab";
+      path: "/settings/$settingsTab";
       fullPath: "/schedule-assistant/settings/$settingsTab";
       preLoaderRoute: typeof ScheduleAssistantSettingsSettingsTabRouteImport;
-      parentRoute: typeof rootRouteImport;
+      parentRoute: typeof ScheduleAssistantRouteRoute;
     };
     "/_with_menu/student-affairs/sign-out": {
       id: "/_with_menu/student-affairs/sign-out";
@@ -1202,17 +1215,35 @@ const With_menuRouteRouteWithChildren = With_menuRouteRoute._addFileChildren(
   With_menuRouteRouteChildren,
 );
 
+interface ScheduleAssistantRouteRouteChildren {
+  ScheduleAssistantChecksRoute: typeof ScheduleAssistantChecksRoute;
+  ScheduleAssistantTimetableRoute: typeof ScheduleAssistantTimetableRoute;
+  ScheduleAssistantIndexRoute: typeof ScheduleAssistantIndexRoute;
+  ScheduleAssistantSettingsSettingsTabRoute: typeof ScheduleAssistantSettingsSettingsTabRoute;
+  ScheduleAssistantSettingsIndexRoute: typeof ScheduleAssistantSettingsIndexRoute;
+}
+
+const ScheduleAssistantRouteRouteChildren: ScheduleAssistantRouteRouteChildren =
+  {
+    ScheduleAssistantChecksRoute: ScheduleAssistantChecksRoute,
+    ScheduleAssistantTimetableRoute: ScheduleAssistantTimetableRoute,
+    ScheduleAssistantIndexRoute: ScheduleAssistantIndexRoute,
+    ScheduleAssistantSettingsSettingsTabRoute:
+      ScheduleAssistantSettingsSettingsTabRoute,
+    ScheduleAssistantSettingsIndexRoute: ScheduleAssistantSettingsIndexRoute,
+  };
+
+const ScheduleAssistantRouteRouteWithChildren =
+  ScheduleAssistantRouteRoute._addFileChildren(
+    ScheduleAssistantRouteRouteChildren,
+  );
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   With_menuRouteRoute: With_menuRouteRouteWithChildren,
+  ScheduleAssistantRouteRoute: ScheduleAssistantRouteRouteWithChildren,
   FormsSubmitRoute: FormsSubmitRoute,
   RoomsRoomRoute: RoomsRoomRoute,
-  ScheduleAssistantChecksRoute: ScheduleAssistantChecksRoute,
-  ScheduleAssistantTimetableRoute: ScheduleAssistantTimetableRoute,
-  ScheduleAssistantIndexRoute: ScheduleAssistantIndexRoute,
-  ScheduleAssistantSettingsSettingsTabRoute:
-    ScheduleAssistantSettingsSettingsTabRoute,
-  ScheduleAssistantSettingsIndexRoute: ScheduleAssistantSettingsIndexRoute,
   GuardGoogleFilesSlugJoinRoute: GuardGoogleFilesSlugJoinRoute,
 };
 export const routeTree = rootRouteImport

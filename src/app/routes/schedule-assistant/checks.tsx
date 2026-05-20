@@ -1,4 +1,3 @@
-import { ScheduleAssistantPage } from "@/components/schedule-assistant/ScheduleAssistantPage.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/schedule-assistant/checks")({
@@ -6,5 +5,5 @@ export const Route = createFileRoute("/schedule-assistant/checks")({
 });
 
 function RouteComponent() {
-  return <ScheduleAssistantPage tab="checks" settingsSubTab="courses" />;
+  return <div className="flex w-full flex-1" />;
 }

@@ -1,10 +1,11 @@
 import { CoursesTabContent } from "@/components/schedule-assistant/settings/CoursesTabContent.tsx";
+import { isSettingsSelectionValid } from "@/components/schedule-assistant/settings/groupsSelection.ts";
 import { InstructorsTabContent } from "@/components/schedule-assistant/settings/InstructorsTabContent.tsx";
 import { RoomsTabContent } from "@/components/schedule-assistant/settings/RoomsTabContent.tsx";
 import { SemesterTabContent } from "@/components/schedule-assistant/settings/SemesterTabContent.tsx";
 import { SettingsSidebar } from "@/components/schedule-assistant/settings/SettingsSidebar.tsx";
+import { SettingsTopTabs } from "@/components/schedule-assistant/settings/SettingsTopTabs.tsx";
 import { StudentsGroupsTabContent } from "@/components/schedule-assistant/settings/StudentsGroupsTabContent.tsx";
-import { isSettingsSelectionValid } from "@/components/schedule-assistant/settings/groupsSelection.ts";
 import {
   ConfigProvider,
   useConfig,
@@ -16,33 +17,30 @@ import {
   useSelection,
   useSelectionState,
 } from "@/components/schedule-assistant/settings/useSelection.tsx";
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import clsx from "clsx";
 import { useEffect } from "react";
 
-const settingsRouteApi = getRouteApi(
-  "/schedule-assistant/settings/$settingsTab",
-);
-
-export function SettingsWorkspace() {
-  const { settingsTab } = settingsRouteApi.useParams();
-  const routeSettingsSubTab = settingsTab as SettingsSubTab;
+export function SettingsWorkspace({
+  settingsTab,
+}: {
+  settingsTab: SettingsSubTab;
+}) {
   const configStore = useConfigState();
-  const selectionStore = useSelectionState(routeSettingsSubTab);
+  const selectionStore = useSelectionState(settingsTab);
 
   return (
     <ConfigProvider value={configStore}>
       <SelectionProvider value={selectionStore}>
-        <SettingsWorkspaceInner />
+        <SettingsWorkspaceInner settingsTab={settingsTab} />
       </SelectionProvider>
     </ConfigProvider>
   );
 }
 
-function SettingsWorkspaceInner() {
-  const navigate = useNavigate();
-  const { settingsTab } = settingsRouteApi.useParams();
-  const routeSettingsSubTab = settingsTab as SettingsSubTab;
+function SettingsWorkspaceInner({
+  settingsTab: routeSettingsSubTab,
+}: {
+  settingsTab: SettingsSubTab;
+}) {
   const { configData, addProgram, addRoom, addCourse, addInstructor } =
     useConfig();
   const {
@@ -90,69 +88,11 @@ function SettingsWorkspaceInner() {
     return () => window.removeEventListener("keydown", handleGlobalEsc);
   }, [clearAllSelection]);
 
-  function handleNavigateToSettingsTab(tab: SettingsSubTab) {
-    navigate({
-      to: "/schedule-assistant/settings/$settingsTab",
-      params: { settingsTab: tab },
-    });
-  }
-
   return (
     <div className="flex w-full flex-col gap-3 p-4">
       <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_360px] xl:grid-rows-[auto_minmax(0,1fr)]">
         <div className="xl:col-start-1 xl:row-start-1">
-          <div className="tabs tabs-box bg-base-200 h-auto w-full shrink-0 flex-wrap justify-start gap-1 p-1">
-            <button
-              type="button"
-              className={clsx(
-                "tab rounded-btn",
-                settingsSubTab === "courses" ? "tab-active" : "",
-              )}
-              onClick={() => handleNavigateToSettingsTab("courses")}
-            >
-              Курсы
-            </button>
-            <button
-              type="button"
-              className={clsx(
-                "tab rounded-btn",
-                settingsSubTab === "groups" ? "tab-active" : "",
-              )}
-              onClick={() => handleNavigateToSettingsTab("groups")}
-            >
-              Программы и Группы
-            </button>
-            <button
-              type="button"
-              className={clsx(
-                "tab rounded-btn",
-                settingsSubTab === "instructors" ? "tab-active" : "",
-              )}
-              onClick={() => handleNavigateToSettingsTab("instructors")}
-            >
-              Преподаватели
-            </button>
-            <button
-              type="button"
-              className={clsx(
-                "tab rounded-btn",
-                settingsSubTab === "rooms" ? "tab-active" : "",
-              )}
-              onClick={() => handleNavigateToSettingsTab("rooms")}
-            >
-              Аудитории
-            </button>
-            <button
-              type="button"
-              className={clsx(
-                "tab rounded-btn",
-                settingsSubTab === "semester" ? "tab-active" : "",
-              )}
-              onClick={() => handleNavigateToSettingsTab("semester")}
-            >
-              Семестр и общие параметры
-            </button>
-          </div>
+          <SettingsTopTabs />
         </div>
 
         <div className="border-base-300 bg-base-100 rounded-box min-h-0 border p-3 xl:col-start-1 xl:row-start-2">
