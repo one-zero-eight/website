@@ -1,0 +1,763 @@
+/** Port of schedule-assistant-viewer.html script (same behavior). */
+
+export const DAY_NAMES = [
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+  "Sun",
+] as const;
+
+/** Короткие подписи дней для UI (гистограммы и т.п.). */
+const DAY_LABEL_RU: Record<(typeof DAY_NAMES)[number], string> = {
+  Mon: "Пн",
+  Tue: "Вт",
+  Wed: "Ср",
+  Thu: "Чт",
+  Fri: "Пт",
+  Sat: "Сб",
+  Sun: "Вс",
+};
+export const DEFAULT_TIME_SLOTS = [
+  "09:00",
+  "10:30",
+  "12:10",
+  "14:00",
+  "15:30",
+  "17:10",
+  "18:40",
+];
+
+/** Один источник текстов `title` для таблицы и для HTML панели деталей. */
+export const scheduleAssistantDetailTooltips = {
+  room: "Показать аудиторию в панели деталей",
+  instructor: "Показать преподавателя в панели деталей",
+  group: "Показать группу в панели деталей",
+  program: "Показать программу в панели деталей",
+  resource: "Показать в панели деталей",
+} as const;
+
+export type Meeting = {
+  instance_id: string;
+  course: string;
+  tag: string;
+  groups: string[];
+  date: string;
+  start: string;
+  room: string;
+  instructors: string[];
+  /** Copied from component; used in detail panel. */
+  instructor_pool: unknown[];
+  courseTab: string;
+};
+
+export type Column = {
+  yearLabel: string;
+  groupId: string;
+  groupLabel: string;
+};
+
+export type WeekRange = { key: string; start: string; end: string };
+
+export type BuiltGrid = {
+  allowedDays: string[];
+  slots: { start: string; end: string; label: string }[];
+  map: Map<string, Meeting[]>;
+  weekMeetings: Meeting[];
+  backToBackSources: Set<string>;
+  backToBackTargets: Set<string>;
+  tabMode: string;
+};
+
+export type Selection =
+  | null
+  | { type: "meeting"; value: string; course: string }
+  | { type: "program"; value: string }
+  | { type: "group"; value: string }
+  | { type: "instructor"; value: string }
+  | { type: "room"; value: string };
+
+export function dayKey(dateStr: string) {
+  const d = new Date(`${dateStr}T00:00:00`);
+  return DAY_NAMES[d.getDay() === 0 ? 6 : d.getDay() - 1];
+}
+
+export function toMinutes(timeStr: string) {
+  const [h, m] = String(timeStr).split(":").map(Number);
+  return h * 60 + m;
+}
+
+export function add90m(timeStr: string) {
+  const total = toMinutes(timeStr) + 90;
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+export function uniqueSorted<T>(arr: T[]) {
+  return Array.from(new Set(arr)).sort() as T[];
+}
+
+export function hashString(str: string) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+  }
+  return h >>> 0;
+}
+
+/** Одинаковая палитра для одного курса (trim, пустое → «—»). */
+export function courseColorKey(course: string | undefined | null): string {
+  const t = String(course ?? "").trim();
+  return t || "—";
+}
+
+export function buildCourseColors(meetings: Meeting[]) {
+  const subjects = Array.from(
+    new Set((meetings || []).map((m) => courseColorKey(m.course))),
+  ).sort();
+  const out: Record<string, { bg: string; border: string }> = {};
+  const GOLDEN_HUE_STEP = 137.508;
+  for (const subject of subjects) {
+    const hue = (hashString(subject) * GOLDEN_HUE_STEP) % 360;
+    const mix = hashString(`${subject}\0sat`);
+    const s = 64 + (mix % 4) * 9;
+    const l = 78 + ((mix >>> 3) % 5) * 3.2;
+    const borderS = Math.min(96, s + 8);
+    const borderL = Math.max(34, l - 28);
+    out[subject] = {
+      bg: `hsl(${hue.toFixed(2)}, ${s}%, ${l.toFixed(1)}%)`,
+      border: `hsl(${hue.toFixed(2)}, ${borderS}%, ${borderL}%)`,
+    };
+  }
+  return out;
+}
+
+export function colorBySubject(
+  subject: string,
+  courseColors: Record<string, { bg: string; border: string }>,
+) {
+  const key = courseColorKey(subject);
+  if (courseColors && courseColors[key]) return courseColors[key];
+  const h = hashString(key) % 360;
+  return {
+    bg: `hsl(${h}, 76%, 82%)`,
+    border: `hsl(${h}, 82%, 48%)`,
+  };
+}
+
+export function meetingSelectionKey(m: Meeting) {
+  return m.instance_id;
+}
+
+export function signatureMeeting(m: Meeting) {
+  const inst = (m.instructors || []).join("|");
+  const groups = (m.groups || []).slice().sort().join("|");
+  return `${m.course}|${m.tag}|${m.date}|${m.start}|${groups}|${inst}|${m.room || "-"}`;
+}
+
+export type MergedRow = { sign: string; sample: Meeting; count: number };
+
+export function mergedMeetingsForCell(meetings: Meeting[] | undefined) {
+  const merged = new Map<string, MergedRow>();
+  for (const m of meetings || []) {
+    const sign = signatureMeeting(m);
+    const row = merged.get(sign) || { sign, sample: m, count: 0 };
+    row.count += 1;
+    merged.set(sign, row);
+  }
+  return Array.from(merged.values()).sort((a, b) =>
+    a.sign.localeCompare(b.sign),
+  );
+}
+
+export function cellSignature(mergedRows: MergedRow[]) {
+  if (!mergedRows.length) return "";
+  return mergedRows.map((r) => `${r.sign}#${r.count}`).join("||");
+}
+
+export function buildGroupMeta(config: Record<string, unknown>) {
+  const groupNames: Record<string, string> = {};
+  const byProgram: Record<string, Set<string>> = {};
+  const sections = (config.sections || []) as Array<{
+    code?: string;
+    programs?: unknown[];
+  }>;
+  for (const section of sections) {
+    const sectionCode = String(section?.code || "");
+    for (const p of section?.programs || []) {
+      const prog = p as { name?: string; tracks?: { groups?: string[] }[] };
+      const yearLabel = prog.name || sectionCode;
+      if (!byProgram[yearLabel]) byProgram[yearLabel] = new Set();
+      for (const tr of prog.tracks || []) {
+        for (const g of tr.groups || []) {
+          byProgram[yearLabel].add(g);
+        }
+      }
+    }
+  }
+  for (const g of (config.students_groups as {
+    code?: string;
+    name?: string;
+  }[]) || []) {
+    const code = String(g?.code || "");
+    if (!code) continue;
+    groupNames[code] = String(g?.name || code);
+  }
+  return { groupNames, byProgram };
+}
+
+export function buildRoomCapacityMap(config: Record<string, unknown>) {
+  const out: Record<string, number> = {};
+  for (const r of (config.rooms as { id: string; capacity: number }[]) || [])
+    out[r.id] = r.capacity;
+  return out;
+}
+
+export function buildGroupSizeMap(config: Record<string, unknown>) {
+  const out: Record<string, number | null> = {};
+  for (const g of (config.students_groups as {
+    code?: string;
+    estimated_size?: number;
+  }[]) || []) {
+    const code = String(g?.code || "");
+    if (!code) continue;
+    out[code] = Number.isFinite(g.estimated_size) ? g.estimated_size! : null;
+  }
+  return out;
+}
+
+export function meetingStudentCount(
+  m: Meeting,
+  groupSizeById: Record<string, number | null | undefined>,
+) {
+  return (m.groups || []).reduce((acc, gid) => {
+    const n = groupSizeById?.[gid];
+    return acc + (Number.isFinite(n as number) ? (n as number) : 0);
+  }, 0);
+}
+
+/** Same text as in TimetableWorkspace meeting card room line: `ROOM (students / capacity)`. */
+export function meetingRoomLoadLabel(
+  m: Meeting,
+  roomCapacityById: Record<string, number | undefined>,
+  groupSizeById: Record<string, number | null | undefined>,
+) {
+  const students = meetingStudentCount(m, groupSizeById);
+  const cap = roomCapacityById?.[m.room];
+  return `${m.room || "-"} (${students} / ${cap ?? "-"})`;
+}
+
+export function meetingRoomLoadOverCapacity(
+  m: Meeting,
+  roomCapacityById: Record<string, number | undefined>,
+  groupSizeById: Record<string, number | null | undefined>,
+) {
+  const students = meetingStudentCount(m, groupSizeById);
+  const cap = roomCapacityById?.[m.room];
+  return Number.isFinite(cap) && students > (cap as number);
+}
+
+export function inferCourseTabFromName(name: string) {
+  const lowered = String(name || "")
+    .trim()
+    .toLowerCase();
+  if (lowered.includes("english") || lowered.includes("foreign language"))
+    return "english";
+  return "core";
+}
+
+export function buildCourseTabMap(config: Record<string, unknown>) {
+  const out: Record<string, string> = {};
+  for (const course of (config.courses as {
+    name: string;
+    course_tags?: string[];
+  }[]) || []) {
+    const tags = (course.course_tags || []).map((t) =>
+      String(t).trim().toLowerCase(),
+    );
+    out[course.name] = tags.includes("english")
+      ? "english"
+      : inferCourseTabFromName(course.name);
+  }
+  return out;
+}
+
+export function filterMeetingsByTab(meetings: Meeting[], tabMode: string) {
+  if (tabMode === "english")
+    return (meetings || []).filter((m) => m.courseTab === "english");
+  if (tabMode === "core")
+    return (meetings || []).filter((m) => m.courseTab !== "english");
+  return meetings || [];
+}
+
+export function roomFillPercent(
+  meeting: Meeting,
+  roomCapacityById: Record<string, number | undefined>,
+  groupSizeById: Record<string, number | null | undefined>,
+) {
+  const capacity = roomCapacityById?.[meeting.room];
+  const students = meetingStudentCount(meeting, groupSizeById);
+  if (!Number.isFinite(capacity) || (capacity as number) <= 0) return "-";
+  return `${Math.round((students / (capacity as number)) * 100)}%`;
+}
+
+export function buildColumns(
+  config: Record<string, unknown>,
+  output: Record<string, unknown>,
+) {
+  const meta = buildGroupMeta(config);
+  const usedGroups = new Set<string>();
+  for (const course of ((
+    output.schedule as {
+      courses?: { components?: { sessions?: { audience?: string[] }[] }[] }[];
+    }
+  )?.courses || []) as {
+    components?: { sessions?: { audience?: string[] }[] }[];
+  }[]) {
+    for (const comp of course.components || []) {
+      for (const s of comp.sessions || []) {
+        for (const g of s.audience || []) usedGroups.add(g);
+      }
+    }
+  }
+
+  const columns: Column[] = [];
+  for (const [yearLabel, groupsSet] of Object.entries(meta.byProgram)) {
+    const groups = Array.from(groupsSet)
+      .filter((g) => usedGroups.has(g))
+      .sort();
+    for (const gid of groups) {
+      columns.push({
+        yearLabel,
+        groupId: gid,
+        groupLabel: meta.groupNames[gid] || gid,
+      });
+    }
+  }
+  const known = new Set(columns.map((c) => c.groupId));
+  for (const gid of Array.from(usedGroups).sort()) {
+    if (!known.has(gid)) {
+      columns.push({
+        yearLabel: "Other",
+        groupId: gid,
+        groupLabel: meta.groupNames[gid] || gid,
+      });
+    }
+  }
+  return columns;
+}
+
+export function buildMeetings(
+  output: Record<string, unknown>,
+  courseTabByName: Record<string, string>,
+) {
+  const flat: Meeting[] = [];
+  for (const [courseIdx, course] of (
+    (output.schedule as { courses?: unknown[] })?.courses || []
+  ).entries()) {
+    const c = course as {
+      name: string;
+      components?: {
+        tag: string;
+        instructor_pool?: unknown[];
+        sessions?: {
+          dates?: string[];
+          start_times?: string[];
+          rooms?: string[];
+          instructors?: string[][];
+          audience?: string[];
+        }[];
+      }[];
+    };
+    for (const [compIdx, comp] of (c.components || []).entries()) {
+      for (const [seriesIdx, series] of (comp.sessions || []).entries()) {
+        const n = series.dates?.length || 0;
+        for (let i = 0; i < n; i++) {
+          flat.push({
+            instance_id: `${courseIdx}:${compIdx}:${seriesIdx}:${i}`,
+            course: c.name,
+            tag: comp.tag,
+            groups: series.audience || [],
+            date: series.dates![i],
+            start: String(series.start_times![i]).slice(0, 5),
+            room: series.rooms![i],
+            instructors: series.instructors![i] || [],
+            instructor_pool: comp.instructor_pool || [],
+            courseTab:
+              courseTabByName?.[c.name] || inferCourseTabFromName(c.name),
+          });
+        }
+      }
+    }
+  }
+  return flat;
+}
+
+export function buildWeeks(meetings: Meeting[]) {
+  const dates = uniqueSorted(meetings.map((m) => m.date));
+  const byWeek: Record<string, string[]> = {};
+  for (const d of dates) {
+    const dt = new Date(`${d}T00:00:00`);
+    const monday = new Date(dt);
+    const day = (dt.getDay() + 6) % 7;
+    monday.setDate(dt.getDate() - day);
+    const monStr = monday.toISOString().slice(0, 10);
+    if (!byWeek[monStr]) byWeek[monStr] = [];
+    byWeek[monStr].push(d);
+  }
+  return Object.keys(byWeek)
+    .sort()
+    .map((mon) => ({
+      key: mon,
+      start: mon,
+      end: byWeek[mon].sort().at(-1)!,
+    }));
+}
+
+export function buildGrid(
+  config: Record<string, unknown>,
+  allMeetings: Meeting[],
+  weekStart: string,
+  tabMode: string,
+): BuiltGrid {
+  const meetings = filterMeetingsByTab(allMeetings, tabMode).filter((m) => {
+    const dt = new Date(`${m.date}T00:00:00`);
+    const monday = new Date(dt);
+    const day = (dt.getDay() + 6) % 7;
+    monday.setDate(dt.getDate() - day);
+    return monday.toISOString().slice(0, 10) === weekStart;
+  });
+
+  const term = config.term as
+    | { days?: string[]; time_slots?: string[] }
+    | undefined;
+  const allowedDays = term?.days || ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const slotStartsRaw = (
+    term?.time_slots?.length ? term.time_slots : DEFAULT_TIME_SLOTS
+  )
+    .map((t) => String(t).trim().slice(0, 5))
+    .filter((t) => t.length > 0);
+  const slotStarts =
+    slotStartsRaw.length > 0 ? slotStartsRaw : DEFAULT_TIME_SLOTS;
+  const slots = slotStarts.map((s) => ({
+    start: s,
+    end: add90m(s),
+    label: `${s}-${add90m(s)}`,
+  }));
+  const map = new Map<string, Meeting[]>();
+  const backToBackSources = new Set<string>();
+  const backToBackTargets = new Set<string>();
+
+  for (const m of meetings) {
+    const d = dayKey(m.date);
+    const slot = String(m.start).slice(0, 5);
+    for (const g of m.groups) {
+      const k = `${d}|${slot}|${g}`;
+      const current = map.get(k) || [];
+      current.push(m);
+      map.set(k, current);
+    }
+  }
+
+  const slotIndexByStart: Record<string, number> = {};
+  slots.forEach((s, i) => {
+    slotIndexByStart[s.start] = i;
+  });
+  const byDayCourse = new Map<string, Meeting[]>();
+  for (const m of meetings) {
+    const key = `${m.date}|${m.course}`;
+    const arr = byDayCourse.get(key) || [];
+    arr.push(m);
+    byDayCourse.set(key, arr);
+  }
+  for (const arr of byDayCourse.values()) {
+    const lecs = arr.filter((m) => String(m.tag).toLowerCase() === "lec");
+    const tuts = arr.filter((m) => String(m.tag).toLowerCase() === "tut");
+    for (const lec of lecs) {
+      const lecIdx = slotIndexByStart[String(lec.start).slice(0, 5)];
+      if (!Number.isFinite(lecIdx)) continue;
+      for (const tut of tuts) {
+        const tutIdx = slotIndexByStart[String(tut.start).slice(0, 5)];
+        if (!Number.isFinite(tutIdx) || tutIdx !== lecIdx + 1) continue;
+        const lecGroups = new Set(lec.groups || []);
+        const shareAudience = (tut.groups || []).some((g) => lecGroups.has(g));
+        if (!shareAudience) continue;
+        backToBackSources.add(lec.instance_id);
+        backToBackTargets.add(tut.instance_id);
+      }
+    }
+  }
+
+  return {
+    allowedDays,
+    slots,
+    map,
+    weekMeetings: meetings,
+    backToBackSources,
+    backToBackTargets,
+    tabMode,
+  };
+}
+
+export function columnsForTab(
+  tabMode: string,
+  baseColumns: Column[],
+  allMeetings: Meeting[],
+  config: Record<string, unknown>,
+): Column[] {
+  if (!baseColumns.length) return [];
+  if (tabMode !== "core" && tabMode !== "english") return baseColumns;
+  const tabMeetings = filterMeetingsByTab(allMeetings, tabMode);
+  const usedGroups = new Set<string>();
+  for (const m of tabMeetings) {
+    for (const g of m.groups || []) usedGroups.add(g);
+  }
+  if (tabMode === "english") {
+    const normalizeEnglishTrackLabel = (trackName: string, groupId: string) => {
+      const t = String(trackName || "")
+        .trim()
+        .toLowerCase();
+      const gid = String(groupId || "")
+        .trim()
+        .toLowerCase();
+      if (t.startsWith("awa") || gid.startsWith("eng-awa")) return "AWA";
+      if (t.startsWith("eap") || gid.startsWith("eng-eap")) return "EAP";
+      if (t === "fl" || t.startsWith("fl ") || gid.startsWith("eng-fl"))
+        return "FL";
+      return "FL";
+    };
+    const byId: Record<string, Column> = {};
+    for (const col of baseColumns) byId[col.groupId] = col;
+    const englishPrograms = ((
+      (config.sections as {
+        code?: string;
+        programs?: { tracks?: { name?: string; groups?: string[] }[] }[];
+      }[]) || []
+    ).find((section) => String(section?.code || "") === "english")?.programs ||
+      []) as { tracks?: { name?: string; groups?: string[] }[] }[];
+    const ordered: Column[] = [];
+    const seen = new Set<string>();
+    for (const program of englishPrograms) {
+      for (const track of program?.tracks || []) {
+        const trackLabel = normalizeEnglishTrackLabel(track?.name || "", "");
+        for (const gid of track?.groups || []) {
+          if (!usedGroups.has(gid) || seen.has(gid)) continue;
+          const base = byId[gid];
+          const baseGroupLabel = base?.groupLabel || gid;
+          ordered.push({
+            yearLabel: trackLabel,
+            groupId: gid,
+            groupLabel: baseGroupLabel,
+          });
+          seen.add(gid);
+        }
+      }
+    }
+    for (const gid of Array.from(usedGroups).sort()) {
+      if (seen.has(gid)) continue;
+      const base = byId[gid];
+      const trackLabel = normalizeEnglishTrackLabel("", gid);
+      ordered.push({
+        yearLabel: trackLabel,
+        groupId: gid,
+        groupLabel: base?.groupLabel || gid,
+      });
+    }
+    return ordered;
+  }
+  return baseColumns.filter((c) => usedGroups.has(c.groupId));
+}
+
+export function filterMeetingsToCurrentWeek(
+  meetings: Meeting[],
+  weeks: WeekRange[],
+  weekIndex: number,
+) {
+  const wk = weeks[weekIndex];
+  if (!wk) return [];
+  return (meetings || []).filter((m) => {
+    const dt = new Date(`${m.date}T00:00:00`);
+    const monday = new Date(dt);
+    const day = (dt.getDay() + 6) % 7;
+    monday.setDate(dt.getDate() - day);
+    return monday.toISOString().slice(0, 10) === wk.start;
+  });
+}
+
+export function weekdaySessionCounts(meetings: Meeting[]) {
+  const counts = Object.fromEntries(DAY_NAMES.map((d) => [d, 0])) as Record<
+    string,
+    number
+  >;
+  for (const m of meetings || []) {
+    const dk = dayKey(m.date);
+    if (counts[dk] !== undefined) counts[dk] += 1;
+  }
+  return counts;
+}
+
+export function weekdayDistinctCourseCounts(meetings: Meeting[]) {
+  const sets = Object.fromEntries(
+    DAY_NAMES.map((d) => [d, new Set<string>()]),
+  ) as Record<string, Set<string>>;
+  for (const m of meetings || []) {
+    const dk = dayKey(m.date);
+    if (sets[dk] !== undefined && m.course) sets[dk].add(m.course);
+  }
+  return DAY_NAMES.map((d) => sets[d].size);
+}
+
+export const MEETING_HOURS_PER_SLOT = 1.5;
+
+export function weekdayWeightedMeetingHours(meetings: Meeting[]) {
+  const sums = DAY_NAMES.map(() => 0);
+  const dayIndex = Object.fromEntries(
+    DAY_NAMES.map((d, i) => [d, i]),
+  ) as Record<string, number>;
+  for (const m of meetings || []) {
+    const dk = dayKey(m.date);
+    const i = dayIndex[dk];
+    if (i === undefined) continue;
+    const g = (m.groups || []).length;
+    sums[i] += MEETING_HOURS_PER_SLOT * g;
+  }
+  return sums;
+}
+
+function histTooltipAttr(text: string) {
+  return String(text).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
+export function singleWeekdayHistogramHtml(
+  title: string,
+  subtitle: string,
+  vals: number[],
+  tooltipLine: (day: string, n: number) => string,
+  options?: { formatBarLabel?: (v: number) => string },
+) {
+  const formatBarLabel = options?.formatBarLabel ?? ((v: number) => String(v));
+  const maxVal = Math.max(0, ...vals);
+  const max = maxVal > 0 ? maxVal : 1;
+  const bars = DAY_NAMES.map((day, i) => {
+    const n = vals[i]!;
+    const pct = max > 0 ? (n / max) * 100 : 0;
+    const h = n === 0 ? 3 : Math.max(8, Math.round((pct / 100) * 88));
+    const tip = tooltipLine(day, n);
+    const barHtml =
+      n === 0
+        ? `<div class="box-border h-[3px] min-h-0 w-[78%] max-w-7 rounded-t-md rounded-b-sm bg-[#b8c9e0] opacity-35"></div>`
+        : `<div class="box-border max-h-full min-h-[3px] w-[78%] max-w-7 rounded-t-md rounded-b-sm bg-gradient-to-b from-[#3d84d6] to-[#2269bd] shadow-sm" style="height:${h}px"></div>`;
+    return (
+      `<div class="flex h-full min-h-0 min-w-0 flex-1 flex-col items-center" title="${histTooltipAttr(tip)}">` +
+      `<div class="flex min-h-0 w-full flex-1 items-end justify-center overflow-hidden">${barHtml}</div>` +
+      `<div class="mt-1 text-[0.6875rem] font-bold uppercase tracking-wide text-[#4f5c6d]">${DAY_LABEL_RU[day as (typeof DAY_NAMES)[number]] ?? day.slice(0, 3)}</div>` +
+      `<div class="mt-0.5 text-[0.6875rem] text-[#5a6473]">${formatBarLabel(n)}</div>` +
+      `</div>`
+    );
+  }).join("");
+  return (
+    `<div class="rounded-lg border border-[#d8dfeb] bg-[#f6f9ff] px-2 py-2.5">` +
+    `<div class="mb-1.5 text-[0.6875rem] font-bold uppercase tracking-wide text-[#2d4f80]">${title}</div>` +
+    `<div class="relative z-[1] mb-2.5 text-[0.6875rem] leading-snug text-[#4f5c6d]">${subtitle}</div>` +
+    `<div class="flex h-24 min-h-0 items-end justify-between gap-1 overflow-hidden">${bars}</div>` +
+    `</div>`
+  );
+}
+
+export function workloadHistogramHtml(meetings: Meeting[]) {
+  const counts = weekdaySessionCounts(meetings);
+  const vals = DAY_NAMES.map((d) => counts[d] || 0);
+  const totalSessions = vals.reduce((a, b) => a + b, 0);
+  const totalMin = totalSessions * 90;
+  const subtitle =
+    totalSessions > 0
+      ? `${totalSessions} занятий · ${totalMin} мин в расписании`
+      : "На этой неделе нет занятий";
+  return singleWeekdayHistogramHtml(
+    "Нагрузка по дням (видимая неделя)",
+    subtitle,
+    vals,
+    (day, n) =>
+      `${DAY_LABEL_RU[day as (typeof DAY_NAMES)[number]] ?? day}: ${n} занят.`,
+  );
+}
+
+export function groupWeekHistogramsHtml(meetings: Meeting[]) {
+  const eventCounts = weekdaySessionCounts(meetings);
+  const valsEvents = DAY_NAMES.map((d) => eventCounts[d] || 0);
+  const totalEvents = valsEvents.reduce((a, b) => a + b, 0);
+  const totalMin = totalEvents * 90;
+  const subEvents =
+    totalEvents > 0
+      ? `${totalEvents} событий · ${totalMin} мин в расписании`
+      : "На этой неделе нет событий";
+
+  const valsSubjects = weekdayDistinctCourseCounts(meetings);
+  const maxInOneDay = Math.max(0, ...valsSubjects);
+  const uniqueCoursesWeek = new Set(
+    (meetings || []).map((m) => m.course).filter(Boolean),
+  ).size;
+  const subSubjects =
+    uniqueCoursesWeek > 0
+      ? `${uniqueCoursesWeek} различных курсов на неделе · до ${maxInOneDay} в один день`
+      : "На этой неделе нет курсов";
+
+  const valsHours = weekdayWeightedMeetingHours(meetings);
+  const totalWeightedH = valsHours.reduce((a, b) => a + b, 0);
+  const subHours =
+    totalWeightedH > 0
+      ? `${totalWeightedH.toFixed(1)} ч всего · на занятие: ${MEETING_HOURS_PER_SLOT} ч × (число групп), сумма по дням`
+      : "Нет взвешенных часов на этой неделе";
+  const fmtH = (v: number) => (Math.abs(v) < 1e-9 ? "0" : Number(v).toFixed(1));
+  const dayRu = (d: string) =>
+    DAY_LABEL_RU[d as (typeof DAY_NAMES)[number]] ?? d;
+
+  return (
+    singleWeekdayHistogramHtml(
+      "События по дням недели (видимая неделя)",
+      subEvents,
+      valsEvents,
+      (day, n) => `${dayRu(day)}: ${n} с.`,
+    ) +
+    singleWeekdayHistogramHtml(
+      "Разные курсы по дням (видимая неделя)",
+      subSubjects,
+      valsSubjects,
+      (day, n) => `${dayRu(day)}: ${n} курсов`,
+    ) +
+    singleWeekdayHistogramHtml(
+      "Часы занятий по дням (видимая неделя)",
+      subHours,
+      valsHours,
+      (day, n) =>
+        `${dayRu(day)}: ${fmtH(n)} ч (${MEETING_HOURS_PER_SLOT} ч × группы, сумма)`,
+      { formatBarLabel: fmtH },
+    )
+  );
+}
+
+export function computeWeekStats(
+  allMeetings: Meeting[],
+  weeks: WeekRange[],
+  weekIndex: number,
+) {
+  const wk = weeks[weekIndex];
+  const weekMeetings = wk
+    ? allMeetings.filter((m) => {
+        const dt = new Date(`${m.date}T00:00:00`);
+        const monday = new Date(dt);
+        const day = (dt.getDay() + 6) % 7;
+        monday.setDate(dt.getDate() - day);
+        return monday.toISOString().slice(0, 10) === wk.start;
+      })
+    : [];
+  const courses = new Set(weekMeetings.map((m) => m.course)).size;
+  const instructors = new Set(weekMeetings.flatMap((m) => m.instructors || []))
+    .size;
+  const rooms = new Set(weekMeetings.map((m) => m.room)).size;
+  return { weekMeetings, courses, instructors, rooms };
+}
