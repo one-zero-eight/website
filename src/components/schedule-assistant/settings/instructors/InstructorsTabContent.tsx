@@ -1,5 +1,5 @@
-import type { ScheduleConfigInstructor } from "@/components/schedule-assistant/settings/configTypes.ts";
-import { useConfig } from "@/components/schedule-assistant/settings/useConfig.tsx";
+import type { SchemaInstructorConfig } from "@/api/schedule-assistant/types.ts";
+import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   getSettingsSelectionKey,
   useSelection,
@@ -13,15 +13,18 @@ export function InstructorsTabContent({
 }: {
   onAddInstructor: () => void;
 }) {
-  const { configData } = useConfig();
+  const { config } = useConfig();
   const { selectedSelectionId, selectItem } = useSelection();
   const items: SettingsListRow[] = useMemo(
     () =>
-      (configData?.instructors || []).map(
-        (instructor: ScheduleConfigInstructor, index: number) => {
+      (config?.instructors || []).map(
+        (instructor: SchemaInstructorConfig, index: number) => {
           const idStr = String(instructor?.id ?? "");
           const nameStr =
-            instructor?.name != null ? String(instructor.name).trim() : "";
+            instructor.name_ru ??
+            instructor.name_en ??
+            instructor.email ??
+            instructor.id;
           const title = nameStr || idStr;
           const subtitle = nameStr ? idStr : undefined;
           return {
@@ -32,7 +35,7 @@ export function InstructorsTabContent({
           };
         },
       ),
-    [configData],
+    [config],
   );
   return (
     <div className="flex flex-col gap-2">

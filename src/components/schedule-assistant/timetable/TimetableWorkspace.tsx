@@ -1,9 +1,9 @@
+import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import clsx from "clsx";
 import {
   ConfigProvider,
   useConfig,
-  useConfigState,
-} from "@/components/schedule-assistant/settings/useConfig.tsx";
+} from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   createContext,
   memo,
@@ -27,7 +27,6 @@ import {
   type WeekRange,
   buildColumns,
   buildCourseColors,
-  buildCourseTabMap,
   buildGrid,
   buildGroupSizeMap,
   buildMeetings,
@@ -43,9 +42,10 @@ import {
   mergedMeetingsForCell,
   roomFillPercent,
   scheduleAssistantDetailTooltips,
+  buildCoursesToSections,
 } from "./timetableViewerModel.ts";
 
-type InnerTab = "core" | "english" | "instructor" | "room";
+type InnerTab = "instructor" | "room" | string;
 
 type SelectionStore = {
   subscribe: (cb: () => void) => () => void;
@@ -179,7 +179,14 @@ function meetingCardPropsEqual(
     pm.room !== nm.room ||
     pm.start !== nm.start ||
     pm.date !== nm.date ||
-    (pm.instructors?.join("\0") ?? "") !== (nm.instructors?.join("\0") ?? "")
+    ((typeof pm.instructors === "string"
+      ? [pm.instructors]
+      : pm.instructors
+    )?.join("\0") ?? "") !==
+      ((typeof nm.instructors === "string"
+        ? [nm.instructors]
+        : nm.instructors
+      )?.join("\0") ?? "")
   ) {
     return false;
   }
@@ -206,9 +213,7 @@ function utilizationMeetingCardPropsEqual(
 }
 
 function TimetableWorkspaceInner() {
-  const { configData, outputData } = useConfig();
-  const config = configData as Record<string, unknown> | null;
-  const output = outputData as Record<string, unknown> | null;
+  const { config } = useConfig();
   const [msg, setMsg] = useState("");
   const [weeks, setWeeks] = useState<WeekRange[]>([]);
   const [weekIndex, setWeekIndex] = useState(0);
@@ -235,8 +240,13 @@ function TimetableWorkspaceInner() {
 
   const selectionStore = useMemo(() => createSelectionStore(), []);
 
+  const coursesToSections = useMemo(
+    () => config && buildCoursesToSections(config),
+    [config],
+  );
+
   useEffect(() => {
-    if (!config || !output) {
+    if (!config || !coursesToSections) {
       setAllMeetings([]);
       setColumns([]);
       setWeeks([]);
@@ -245,17 +255,16 @@ function TimetableWorkspaceInner() {
       return;
     }
     try {
-      const tabMap = buildCourseTabMap(config);
-      const meetings = buildMeetings(output, tabMap);
+      const meetings = buildMeetings(config, coursesToSections);
       if (!meetings.length)
-        throw new Error("В output.yaml не найдено занятий.");
+        throw new Error("В config.yaml не найдено занятий.");
       if (!config.term)
         throw new Error(
           "config.yaml не похож на конфиг расписания (нет term).",
         );
-      const cols = buildColumns(config, output);
+      const cols = buildColumns(config);
       if (!cols.length)
-        throw new Error("Не удалось построить колонки групп из config/output.");
+        throw new Error("Не удалось построить колонки групп из config.");
 
       setAllMeetings(meetings);
       setRoomCapacityById(buildRoomCapacityMap(config));
@@ -269,7 +278,7 @@ function TimetableWorkspaceInner() {
     } catch (e: unknown) {
       setMsg(String((e as Error)?.message || e));
     }
-  }, [config, output, selectionStore]);
+  }, [config, coursesToSections, selectionStore]);
 
   useEffect(() => {
     function handleGlobalEsc(event: KeyboardEvent) {
@@ -437,14 +446,6 @@ function TimetableWorkspaceInner() {
       </div>
     );
   }
-  if (!output) {
-    return (
-      <div className="text-base-content/70 flex h-full items-center justify-center p-4 text-sm">
-        Для таблицы расписания загрузите output.yaml во вкладке «Настройки»
-        (можно вместе с config при нажатии «Построить»).
-      </div>
-    );
-  }
 
   const weekLabel = !weeks.length
     ? "Нет недель"
@@ -503,8 +504,11 @@ function TimetableWorkspaceInner() {
                     setActiveTab(e.target.value as InnerTab);
                   }}
                 >
-                  <option value="core">Основные курсы</option>
-                  <option value="english">Английский</option>
+                  {config.sections.map((section) => (
+                    <option key={section.code} value={section.code}>
+                      {section.name}
+                    </option>
+                  ))}
                   <option value="instructor">По преподавателям</option>
                   <option value="room">По аудиториям</option>
                 </select>
@@ -546,7 +550,7 @@ function TimetableWorkspaceInner() {
                           grid,
                           columns,
                           allMeetings,
-                          config: config as Record<string, unknown>,
+                          config,
                           activeTab,
                           courseColors,
                           roomCapacityById,
@@ -571,8 +575,7 @@ function TimetableWorkspaceInner() {
             <TimetableDetailPanel
               allMeetings={allMeetings}
               columns={columns}
-              config={config as Record<string, unknown>}
-              output={output as Record<string, unknown>}
+              config={config}
               roomCapacityById={roomCapacityById}
               groupSizeById={groupSizeById}
               weeks={weeks}
@@ -589,9 +592,8 @@ function TimetableWorkspaceInner() {
 const TimetableWorkspaceContent = memo(TimetableWorkspaceInner);
 
 export function TimetableWorkspace() {
-  const configStore = useConfigState();
   return (
-    <ConfigProvider value={configStore}>
+    <ConfigProvider>
       <TimetableWorkspaceContent />
     </ConfigProvider>
   );
@@ -600,8 +602,7 @@ export function TimetableWorkspace() {
 type TimetableDetailPanelProps = {
   allMeetings: Meeting[];
   columns: Column[];
-  config: Record<string, unknown>;
-  output: Record<string, unknown>;
+  config: SchemaScheduleConfig;
   roomCapacityById: Record<string, number>;
   groupSizeById: Record<string, number | null | undefined>;
   weeks: WeekRange[];
@@ -617,7 +618,6 @@ function timetableDetailPanelPropsEqual(
     prev.allMeetings === next.allMeetings &&
     prev.columns === next.columns &&
     prev.config === next.config &&
-    prev.output === next.output &&
     prev.roomCapacityById === next.roomCapacityById &&
     prev.groupSizeById === next.groupSizeById &&
     prev.weeks === next.weeks &&
@@ -630,7 +630,6 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   allMeetings,
   columns,
   config,
-  output,
   roomCapacityById,
   groupSizeById,
   weeks,
@@ -647,7 +646,6 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
         allMeetings,
         columns,
         config,
-        output,
         roomCapacityById,
         groupSizeById,
         weeks,
@@ -658,7 +656,6 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
       allMeetings,
       columns,
       config,
-      output,
       roomCapacityById,
       groupSizeById,
       weeks,
@@ -946,7 +943,7 @@ function renderCoreRows(args: {
   grid: BuiltGrid;
   columns: Column[];
   allMeetings: Meeting[];
-  config: Record<string, unknown>;
+  config: SchemaScheduleConfig;
   activeTab: InnerTab;
   courseColors: Record<string, { bg: string; border: string }>;
   roomCapacityById: Record<string, number>;
@@ -1249,10 +1246,17 @@ const MeetingCard = memo(function MeetingCard({
       <div className="min-h-0 flex-1" />
       <div
         className="line w-full min-w-0 overflow-hidden text-[0.75rem] leading-[1.25] text-ellipsis whitespace-nowrap text-[#313b49]"
-        title={(m.instructors || []).join(" / ")}
+        title={(typeof m.instructors === "string"
+          ? [m.instructors]
+          : m.instructors
+        ).join(" / ")}
       >
-        {m.instructors?.length
-          ? m.instructors.map((name, idx) => (
+        {(typeof m.instructors === "string" ? [m.instructors] : m.instructors)
+          .length
+          ? (typeof m.instructors === "string"
+              ? [m.instructors]
+              : m.instructors
+            ).map((name, idx) => (
               <span key={name}>
                 <span
                   className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
@@ -1325,7 +1329,11 @@ function renderUtilizationRows(args: {
   let headerTitle = "";
   if (mode === "instructor") {
     resourceCols = Array.from(
-      new Set(weekMeetings.flatMap((m) => m.instructors || [])),
+      new Set(
+        weekMeetings.flatMap((m) =>
+          typeof m.instructors === "string" ? [m.instructors] : m.instructors,
+        ),
+      ),
     ).sort();
     headerTitle = "Преподаватели";
   } else {
@@ -1391,7 +1399,11 @@ function renderUtilizationRows(args: {
           if (dayKeyFromModel(m.date) !== day) return false;
           if (String(m.start).slice(0, 5) !== slot.start) return false;
           if (mode === "instructor")
-            return (m.instructors || []).includes(resource);
+            return (
+              typeof m.instructors === "string"
+                ? [m.instructors]
+                : m.instructors
+            ).includes(resource);
           return (m.room || "") === resource;
         });
 
@@ -1572,7 +1584,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
         title={
           mode === "instructor"
             ? `${m.groups.join(", ")} | ${roomLoad}`
-            : `${m.groups.join(", ")} | ${roomLoad} | заполн. ${roomFillPercent(m, roomCapacityById, groupSizeById)} | ${(m.instructors || []).join(" / ")}`
+            : `${m.groups.join(", ")} | ${roomLoad} | заполн. ${roomFillPercent(m, roomCapacityById, groupSizeById)} | ${(typeof m.instructors === "string" ? [m.instructors] : m.instructors).join(" / ")}`
         }
       >
         {mode === "instructor" ? (
@@ -1611,8 +1623,14 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
               roomLoad
             )}{" "}
             | заполн. {roomFillPercent(m, roomCapacityById, groupSizeById)} |{" "}
-            {(m.instructors || []).length
-              ? m.instructors.map((name, idx) => (
+            {(typeof m.instructors === "string"
+              ? [m.instructors]
+              : m.instructors
+            ).length
+              ? (typeof m.instructors === "string"
+                  ? [m.instructors]
+                  : m.instructors
+                ).map((name, idx) => (
                   <span key={name}>
                     {idx > 0 ? " / " : null}
                     <span

@@ -1,10 +1,9 @@
-import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/normalizeTrackFromSectionProgram.ts";
+import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 import type {
-  ScheduleConfigDraft,
-  ScheduleConfigProgram,
-  ScheduleConfigSection,
-  ScheduleConfigSectionProgram,
-} from "@/components/schedule-assistant/settings/configTypes.ts";
+  SchemaScheduleConfig,
+  SchemaSectionProgram,
+  SchemaSectionConfig,
+} from "@/api/schedule-assistant/types.ts";
 import type { SettingsSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
 
 /** Узел трека в tree view «программы и группы». */
@@ -52,9 +51,7 @@ function parseEstimatedSize(raw: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function programStableId(
-  program: ScheduleConfigSectionProgram | ScheduleConfigProgram,
-): string {
+function programStableId(program: SchemaSectionProgram): string {
   return String(program?.code || "").trim();
 }
 
@@ -63,7 +60,7 @@ function programStableId(
  * и стабильные `itemId`. Проекция конфига в tree view, не отдельная сущность в YAML.
  */
 export function buildProgramsGroupsTreeView(
-  config: ScheduleConfigDraft | null,
+  config: SchemaScheduleConfig | null,
 ): ProgramTreeProgram[] {
   const groupMetaById: Record<
     string,
@@ -151,11 +148,11 @@ export function buildProgramsGroupsTreeView(
 
 /** Табы секций для того же tree view (курсы / программы и группы). */
 export function buildProgramsGroupsTreeViewSectionTabs(
-  config: ScheduleConfigDraft | null,
+  config: SchemaScheduleConfig | null,
 ): ProgramSection[] {
   const sectionsRaw = Array.isArray(config?.sections) ? config.sections : [];
   return sectionsRaw
-    .map((section: ScheduleConfigSection) => {
+    .map((section: SchemaSectionConfig) => {
       const sectionCode = String(section?.code || "").trim();
       const sectionName = String(section?.name || section?.code || "").trim();
       const programs = Array.isArray(section?.programs) ? section.programs : [];

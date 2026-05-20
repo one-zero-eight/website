@@ -1,13 +1,13 @@
 import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
 
-import type { ProgramTreeProgram } from "@/components/schedule-assistant/settings/programsGroupsTreeView.ts";
+import type { ProgramTreeProgram } from "@/components/schedule-assistant/settings/groups/programsGroupsTreeView.ts";
 import {
   buildProgramsGroupsTreeView,
   buildProgramsGroupsTreeViewSectionTabs,
-} from "@/components/schedule-assistant/settings/programsGroupsTreeView.ts";
+} from "@/components/schedule-assistant/settings/groups/programsGroupsTreeView.ts";
 import { SectionTabsBar } from "@/components/schedule-assistant/settings/SectionTabsBar.tsx";
-import { useConfig } from "@/components/schedule-assistant/settings/useConfig.tsx";
+import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   getSettingsSelectionKey,
   useSelection,
@@ -16,20 +16,20 @@ import {
 const STUDENT_GROUPS_SUBTAB_STORAGE_KEY =
   "schedule-assistant:settings:groups-subtab";
 
-export function StudentsGroupsTabContent({
+export function GroupsTabContent({
   onAddProgram,
 }: {
   onAddProgram: (sectionCode: string) => void;
 }) {
-  const { configData } = useConfig();
+  const { config } = useConfig();
   const { selectedSelectionId, selectItem } = useSelection();
   const programsGroupsTreeView = useMemo(
-    () => buildProgramsGroupsTreeView(configData),
-    [configData],
+    () => buildProgramsGroupsTreeView(config),
+    [config],
   );
   const programSections = useMemo(
-    () => buildProgramsGroupsTreeViewSectionTabs(configData),
-    [configData],
+    () => buildProgramsGroupsTreeViewSectionTabs(config),
+    [config],
   );
   const sections = programSections;
   const sectionMeta = sections.map((section) => ({

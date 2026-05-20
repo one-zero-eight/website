@@ -20,13 +20,9 @@ export function ConfigLoadModal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onLoad: (
-    configFile: File | null,
-    outputFile: File | null,
-  ) => Promise<ConfigLoadResult>;
+  onLoad: (configFile: File | null) => Promise<ConfigLoadResult>;
 }) {
   const [configFile, setConfigFile] = useState<File | null>(null);
-  const [outputFile, setOutputFile] = useState<File | null>(null);
   const [loadPhase, setLoadPhase] = useState<"idle" | "loading" | "success">(
     "idle",
   );
@@ -53,7 +49,6 @@ export function ConfigLoadModal({
   useEffect(() => {
     if (!open) {
       setConfigFile(null);
-      setOutputFile(null);
       setLoadPhase("idle");
       setLoadError("");
       setSuccessTick(0);
@@ -76,7 +71,7 @@ export function ConfigLoadModal({
     setLoadError("");
     setLoadPhase("loading");
     try {
-      const result = await onLoad(configFile, outputFile);
+      const result = await onLoad(configFile);
       if (!result.ok) {
         setLoadError(result.message);
         setLoadPhase("idle");
@@ -147,25 +142,6 @@ export function ConfigLoadModal({
                     onChange={(e) => {
                       setLoadError("");
                       setConfigFile(e.target.files?.[0] || null);
-                    }}
-                  />
-                </label>
-                <label className="form-control min-w-0 gap-1.5">
-                  <span className="label-text text-base-content/70 text-xs font-medium tracking-wide uppercase">
-                    Output YAML{" "}
-                    <span className="text-base-content/50 normal-case">
-                      (необязательно)
-                    </span>
-                  </span>
-                  <input
-                    name="outputFile"
-                    type="file"
-                    className="file-input file-input-bordered file-input-sm w-full max-w-full"
-                    accept=".yaml,.yml"
-                    disabled={fileInputsDisabled}
-                    onChange={(e) => {
-                      setLoadError("");
-                      setOutputFile(e.target.files?.[0] || null);
                     }}
                   />
                 </label>

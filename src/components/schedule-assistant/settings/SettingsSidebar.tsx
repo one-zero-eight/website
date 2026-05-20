@@ -7,28 +7,28 @@ import {
   RoomDetails,
   SelectItemNotice,
   TrackDetails,
-} from "@/components/schedule-assistant/settings/details.tsx";
+} from "@/components/schedule-assistant/settings/SettingsSidebarDetails.tsx";
 import {
   isSettingsSelectionValid,
   resolveGroupsSelection,
-} from "@/components/schedule-assistant/settings/groupsSelection.ts";
-import { useConfig } from "@/components/schedule-assistant/settings/useConfig.tsx";
+} from "@/components/schedule-assistant/settings/groups/groupsSelection.ts";
+import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { useSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
 import { useMemo } from "react";
 
 export function SettingsSidebar() {
-  const { configData } = useConfig();
+  const { config } = useConfig();
   const { selectedSelection, settingsSubTab } = useSelection();
   const groupsSelection = useMemo(
-    () => resolveGroupsSelection(configData, selectedSelection),
-    [configData, selectedSelection],
+    () => resolveGroupsSelection(config, selectedSelection),
+    [config, selectedSelection],
   );
 
   if (settingsSubTab === "semester") {
     return null;
   }
 
-  if (configData == null) {
+  if (config == null) {
     return (
       <div className="text-base-content/70 text-sm">
         Загрузите конфигурацию, чтобы редактировать настройки.
@@ -40,9 +40,7 @@ export function SettingsSidebar() {
     return <SelectItemNotice />;
   }
 
-  if (
-    !isSettingsSelectionValid(configData, settingsSubTab, selectedSelection)
-  ) {
+  if (!isSettingsSelectionValid(config, settingsSubTab, selectedSelection)) {
     if (settingsSubTab === "groups") {
       return <GroupNotFoundNotice />;
     }
@@ -54,7 +52,7 @@ export function SettingsSidebar() {
   }
 
   if (settingsSubTab === "rooms" && selectedSelection.kind === "room") {
-    const room = configData.rooms?.[selectedSelection.roomIndex];
+    const room = config.rooms?.[selectedSelection.roomIndex];
     return <RoomDetails roomId={String(room?.id ?? "")} />;
   }
 

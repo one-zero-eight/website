@@ -1,9 +1,9 @@
-import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/normalizeTrackFromSectionProgram.ts";
-import { buildProgramsGroupsTreeViewSectionTabs } from "@/components/schedule-assistant/settings/programsGroupsTreeView.ts";
+import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
+import { buildProgramsGroupsTreeViewSectionTabs } from "@/components/schedule-assistant/settings/groups/programsGroupsTreeView.ts";
 import type {
-  ScheduleConfigCourse,
-  ScheduleConfigDraft,
-} from "@/components/schedule-assistant/settings/configTypes.ts";
+  SchemaCourseConfig,
+  SchemaScheduleConfig,
+} from "@/api/schedule-assistant/types.ts";
 import type { SettingsListRow } from "@/components/schedule-assistant/settings/useSelection.tsx";
 
 /** Курс в сводке по секциям на вкладке «Курсы» (id = `course-${courseIndex}`). */
@@ -43,10 +43,10 @@ function parseProgramTrackSelector(
 }
 
 function buildCourseUsageRows(
-  config: ScheduleConfigDraft | null,
+  config: SchemaScheduleConfig | null,
 ): CourseUsageRow[] {
   return (config?.courses || []).map(
-    (course: ScheduleConfigCourse, index: number) => {
+    (course: SchemaCourseConfig, index: number) => {
       const components = (course?.components || [])
         .map((comp) => comp?.tag)
         .filter(Boolean);
@@ -63,7 +63,7 @@ function buildCourseUsageRows(
 
 /** Дерево курсов по секциям конфига — только для UI вкладки «Курсы». */
 export function buildCoursesTabSections(
-  config: ScheduleConfigDraft | null,
+  config: SchemaScheduleConfig | null,
 ): CourseUsageSectionGroup[] {
   const courseItems = buildCourseUsageRows(config);
   if (!courseItems.length) return [];

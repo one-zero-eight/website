@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { buildCoursesTabSections } from "./coursesTabSections.ts";
 import { SectionTabsBar } from "@/components/schedule-assistant/settings/SectionTabsBar.tsx";
-import { useConfig } from "@/components/schedule-assistant/settings/useConfig.tsx";
+import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   getSettingsSelectionKey,
   useSelection,
@@ -16,12 +16,9 @@ export function CoursesTabContent({
 }: {
   onAddCourse: () => void;
 }) {
-  const { configData } = useConfig();
+  const { config } = useConfig();
   const { selectedSelectionId, selectItem } = useSelection();
-  const sections = useMemo(
-    () => buildCoursesTabSections(configData),
-    [configData],
-  );
+  const sections = useMemo(() => buildCoursesTabSections(config), [config]);
   const [activeSectionKey, setActiveSectionKey] = useState(() => {
     if (typeof window === "undefined") return "";
     return window.localStorage.getItem(COURSES_SUBTAB_STORAGE_KEY) || "";

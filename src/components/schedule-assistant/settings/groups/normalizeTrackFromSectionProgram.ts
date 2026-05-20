@@ -1,14 +1,11 @@
-import type {
-  ScheduleConfigProgram,
-  ScheduleConfigSectionProgram,
-} from "@/components/schedule-assistant/settings/configTypes.ts";
+import type { SchemaSectionProgram } from "@/api/schedule-assistant/types.ts";
 
 /**
  * Единый список треков для программы в `sections[].programs[]`:
  * либо `tracks`, либо один синтетический трек из верхнего `groups`, если треков нет.
  */
 export function normalizeTracksFromSectionProgram(
-  program: ScheduleConfigSectionProgram | ScheduleConfigProgram,
+  program: SchemaSectionProgram,
 ): Array<{
   name: string;
   groups: string[];

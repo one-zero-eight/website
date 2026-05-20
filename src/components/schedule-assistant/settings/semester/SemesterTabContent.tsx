@@ -1,11 +1,11 @@
 import { ConfigLoadModal } from "@/components/schedule-assistant/settings/ConfigLoadModal.tsx";
-import { SemesterDetails } from "@/components/schedule-assistant/settings/details.tsx";
-import { useConfig } from "@/components/schedule-assistant/settings/useConfig.tsx";
+import { SemesterDetails } from "@/components/schedule-assistant/settings/SettingsSidebarDetails.tsx";
+import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { useState } from "react";
 
 export function SemesterTabContent() {
-  const { configData, loadConfigFiles, exportConfig } = useConfig();
-  const canExportConfig = configData != null;
+  const { config, loadConfigFiles, exportConfig } = useConfig();
+  const canExportConfig = config != null;
   const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
 
   return (

@@ -1,3 +1,4 @@
+import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import clsx from "clsx";
 import type { ReactNode } from "react";
 
@@ -78,11 +79,17 @@ function DetailRoomLoad({
   );
 }
 
-function DetailInstructorLinks({ instructors }: { instructors: string[] }) {
-  if (!instructors?.length) return "-";
+function DetailInstructorLinks({
+  instructors,
+}: {
+  instructors: string | string[];
+}) {
+  const instructorsArray =
+    typeof instructors === "string" ? [instructors] : instructors;
+  if (!instructorsArray?.length) return "-";
   return (
     <>
-      {instructors.map((name, idx) => (
+      {instructorsArray.map((name, idx) => (
         <span key={name}>
           {idx > 0 ? " / " : null}
           <span
@@ -122,8 +129,7 @@ export function computeDetailPanel(input: {
   selection: Selection;
   allMeetings: Meeting[];
   columns: Column[];
-  config: Record<string, unknown>;
-  output: Record<string, unknown>;
+  config: SchemaScheduleConfig;
   roomCapacityById: Record<string, number>;
   groupSizeById: Record<string, number | null | undefined>;
   weeks: WeekRange[];
@@ -134,7 +140,6 @@ export function computeDetailPanel(input: {
     allMeetings: meetings,
     columns,
     config,
-    output,
     roomCapacityById,
     groupSizeById,
     weeks,
@@ -218,7 +223,7 @@ export function computeDetailPanel(input: {
           </div>
           <div className="text-[#4f5c6d]">
             <b className="font-bold text-[#243957]">преподаватель:</b>{" "}
-            <DetailInstructorLinks instructors={m.instructors || []} />
+            <DetailInstructorLinks instructors={m.instructors} />
           </div>
         </DetailRow>,
       );
@@ -245,13 +250,7 @@ export function computeDetailPanel(input: {
         byTag[m.tag].push(m);
       }
       parts.push(<DetailSection key="comp" title="Компоненты" />);
-      const courseCfg = (
-        (
-          output.schedule as {
-            courses?: { name: string; components?: { tag?: string }[] }[];
-          }
-        )?.courses || []
-      ).find((c) => c.name === courseName);
+      const courseCfg = config.courses.find((c) => c.name === courseName);
       const orderedTags: string[] = [];
       for (const comp of courseCfg?.components || []) {
         if (comp?.tag && byTag[comp.tag] && !orderedTags.includes(comp.tag))
@@ -297,8 +296,7 @@ export function computeDetailPanel(input: {
                   roomCapacityById={roomCapacityById}
                   groupSizeById={groupSizeById}
                 />{" "}
-                | препод.{" "}
-                <DetailInstructorLinks instructors={m.instructors || []} />
+                | препод. <DetailInstructorLinks instructors={m.instructors} />
               </div>
             </DetailRow>,
           );
@@ -349,7 +347,7 @@ export function computeDetailPanel(input: {
           </div>
           <div className="text-[#4f5c6d]">
             группы: <DetailGroupLinks groups={m.groups || []} /> | препод.:{" "}
-            <DetailInstructorLinks instructors={m.instructors || []} /> | ауд.:{" "}
+            <DetailInstructorLinks instructors={m.instructors} /> | ауд.:{" "}
             <DetailRoomLoad
               m={m}
               roomCapacityById={roomCapacityById}
@@ -387,15 +385,19 @@ export function computeDetailPanel(input: {
               roomCapacityById={roomCapacityById}
               groupSizeById={groupSizeById}
             />{" "}
-            | препод.:{" "}
-            <DetailInstructorLinks instructors={m.instructors || []} />
+            | препод.: <DetailInstructorLinks instructors={m.instructors} />
           </div>
         </DetailRow>,
       );
     }
   } else if (sel.type === "instructor") {
     const mm = meetings
-      .filter((m) => (m.instructors || []).includes(sel.value))
+      .filter((m) =>
+        (typeof m.instructors === "string"
+          ? [m.instructors]
+          : m.instructors
+        ).includes(sel.value),
+      )
       .sort((a, b) =>
         `${a.date}|${a.start}`.localeCompare(`${b.date}|${b.start}`),
       );
@@ -455,7 +457,7 @@ export function computeDetailPanel(input: {
               groupSizeById={groupSizeById}
             />{" "}
             | заполн.: {rfp(m)} | препод.:{" "}
-            <DetailInstructorLinks instructors={m.instructors || []} />
+            <DetailInstructorLinks instructors={m.instructors} />
           </div>
         </DetailRow>,
       );

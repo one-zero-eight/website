@@ -1,4 +1,5 @@
 /** Port of schedule-assistant-viewer.html script (same behavior). */
+import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 
 export const DAY_NAMES = [
   "Mon",
@@ -47,10 +48,10 @@ export type Meeting = {
   date: string;
   start: string;
   room: string;
-  instructors: string[];
+  instructors: string | string[];
   /** Copied from component; used in detail panel. */
   instructor_pool: unknown[];
-  courseTab: string;
+  sections: string[];
 };
 
 export type Column = {
@@ -82,6 +83,64 @@ export type Selection =
 export function dayKey(dateStr: string) {
   const d = new Date(`${dateStr}T00:00:00`);
   return DAY_NAMES[d.getDay() === 0 ? 6 : d.getDay() - 1];
+}
+
+const WEEKLY_PATTERN_DAY_TO_KEY: Record<string, (typeof DAY_NAMES)[number]> = {
+  monday: "Mon",
+  mon: "Mon",
+  tuesday: "Tue",
+  tue: "Tue",
+  wednesday: "Wed",
+  wed: "Wed",
+  thursday: "Thu",
+  thu: "Thu",
+  friday: "Fri",
+  fri: "Fri",
+  saturday: "Sat",
+  sat: "Sat",
+  sunday: "Sun",
+  sun: "Sun",
+};
+
+export function weeklyPatternDayKey(day: string) {
+  const raw = String(day || "").trim();
+  if (!raw) return null;
+  const lowered = raw.toLowerCase();
+  if (WEEKLY_PATTERN_DAY_TO_KEY[lowered])
+    return WEEKLY_PATTERN_DAY_TO_KEY[lowered];
+  if ((DAY_NAMES as readonly string[]).includes(raw))
+    return raw as (typeof DAY_NAMES)[number];
+  return null;
+}
+
+function formatLocalDate(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+export function semesterDatesForWeekday(
+  config: SchemaScheduleConfig,
+  weekday: (typeof DAY_NAMES)[number],
+) {
+  const semester = config.term?.semester;
+  if (!semester?.start_date || !semester?.end_date) return [];
+  const allowed = new Set(
+    config.term?.days?.length
+      ? config.term.days
+      : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  );
+  if (!allowed.has(weekday)) return [];
+  const out: string[] = [];
+  const cur = new Date(`${semester.start_date}T00:00:00`);
+  const end = new Date(`${semester.end_date}T00:00:00`);
+  while (cur <= end) {
+    const iso = formatLocalDate(cur);
+    if (dayKey(iso) === weekday) out.push(iso);
+    cur.setDate(cur.getDate() + 1);
+  }
+  return out;
 }
 
 export function toMinutes(timeStr: string) {
@@ -154,7 +213,9 @@ export function meetingSelectionKey(m: Meeting) {
 }
 
 export function signatureMeeting(m: Meeting) {
-  const inst = (m.instructors || []).join("|");
+  const inst = (
+    typeof m.instructors === "string" ? [m.instructors] : m.instructors
+  ).join("|");
   const groups = (m.groups || []).slice().sort().join("|");
   return `${m.course}|${m.tag}|${m.date}|${m.start}|${groups}|${inst}|${m.room || "-"}`;
 }
@@ -179,45 +240,36 @@ export function cellSignature(mergedRows: MergedRow[]) {
   return mergedRows.map((r) => `${r.sign}#${r.count}`).join("||");
 }
 
-export function buildGroupMeta(config: Record<string, unknown>) {
+export function buildGroupMeta(config: SchemaScheduleConfig) {
   const groupNames: Record<string, string> = {};
   const byProgram: Record<string, Set<string>> = {};
-  const sections = (config.sections || []) as Array<{
-    code?: string;
-    programs?: unknown[];
-  }>;
-  for (const section of sections) {
-    const sectionCode = String(section?.code || "");
-    for (const p of section?.programs || []) {
-      const prog = p as { name?: string; tracks?: { groups?: string[] }[] };
-      const yearLabel = prog.name || sectionCode;
+  for (const section of config.sections) {
+    for (const program of section.programs) {
+      const yearLabel = program.name || section.code;
       if (!byProgram[yearLabel]) byProgram[yearLabel] = new Set();
-      for (const tr of prog.tracks || []) {
+      for (const tr of program.tracks || []) {
         for (const g of tr.groups || []) {
           byProgram[yearLabel].add(g);
         }
       }
     }
   }
-  for (const g of (config.students_groups as {
-    code?: string;
-    name?: string;
-  }[]) || []) {
-    const code = String(g?.code || "");
+  for (const g of config.students_groups) {
+    const code = g.code;
     if (!code) continue;
-    groupNames[code] = String(g?.name || code);
+    groupNames[code] = g.name || code;
   }
   return { groupNames, byProgram };
 }
 
-export function buildRoomCapacityMap(config: Record<string, unknown>) {
+export function buildRoomCapacityMap(config: SchemaScheduleConfig) {
   const out: Record<string, number> = {};
   for (const r of (config.rooms as { id: string; capacity: number }[]) || [])
     out[r.id] = r.capacity;
   return out;
 }
 
-export function buildGroupSizeMap(config: Record<string, unknown>) {
+export function buildGroupSizeMap(config: SchemaScheduleConfig) {
   const out: Record<string, number | null> = {};
   for (const g of (config.students_groups as {
     code?: string;
@@ -261,37 +313,9 @@ export function meetingRoomLoadOverCapacity(
   return Number.isFinite(cap) && students > (cap as number);
 }
 
-export function inferCourseTabFromName(name: string) {
-  const lowered = String(name || "")
-    .trim()
-    .toLowerCase();
-  if (lowered.includes("english") || lowered.includes("foreign language"))
-    return "english";
-  return "core";
-}
-
-export function buildCourseTabMap(config: Record<string, unknown>) {
-  const out: Record<string, string> = {};
-  for (const course of (config.courses as {
-    name: string;
-    course_tags?: string[];
-  }[]) || []) {
-    const tags = (course.course_tags || []).map((t) =>
-      String(t).trim().toLowerCase(),
-    );
-    out[course.name] = tags.includes("english")
-      ? "english"
-      : inferCourseTabFromName(course.name);
-  }
-  return out;
-}
-
 export function filterMeetingsByTab(meetings: Meeting[], tabMode: string) {
-  if (tabMode === "english")
-    return (meetings || []).filter((m) => m.courseTab === "english");
-  if (tabMode === "core")
-    return (meetings || []).filter((m) => m.courseTab !== "english");
-  return meetings || [];
+  if (tabMode === "instructor" || tabMode === "room") return meetings;
+  return meetings.filter((m) => m.sections.includes(tabMode));
 }
 
 export function roomFillPercent(
@@ -305,19 +329,10 @@ export function roomFillPercent(
   return `${Math.round((students / (capacity as number)) * 100)}%`;
 }
 
-export function buildColumns(
-  config: Record<string, unknown>,
-  output: Record<string, unknown>,
-) {
+export function buildColumns(config: SchemaScheduleConfig) {
   const meta = buildGroupMeta(config);
   const usedGroups = new Set<string>();
-  for (const course of ((
-    output.schedule as {
-      courses?: { components?: { sessions?: { audience?: string[] }[] }[] }[];
-    }
-  )?.courses || []) as {
-    components?: { sessions?: { audience?: string[] }[] }[];
-  }[]) {
+  for (const course of config.courses) {
     for (const comp of course.components || []) {
       for (const s of comp.sessions || []) {
         for (const g of s.audience || []) usedGroups.add(g);
@@ -352,49 +367,91 @@ export function buildColumns(
 }
 
 export function buildMeetings(
-  output: Record<string, unknown>,
-  courseTabByName: Record<string, string>,
+  config: SchemaScheduleConfig,
+  coursesToSections: { [key: string]: string[] },
 ) {
   const flat: Meeting[] = [];
-  for (const [courseIdx, course] of (
-    (output.schedule as { courses?: unknown[] })?.courses || []
-  ).entries()) {
-    const c = course as {
-      name: string;
-      components?: {
-        tag: string;
-        instructor_pool?: unknown[];
-        sessions?: {
-          dates?: string[];
-          start_times?: string[];
-          rooms?: string[];
-          instructors?: string[][];
-          audience?: string[];
-        }[];
-      }[];
-    };
-    for (const [compIdx, comp] of (c.components || []).entries()) {
-      for (const [seriesIdx, series] of (comp.sessions || []).entries()) {
-        const n = series.dates?.length || 0;
-        for (let i = 0; i < n; i++) {
-          flat.push({
-            instance_id: `${courseIdx}:${compIdx}:${seriesIdx}:${i}`,
-            course: c.name,
-            tag: comp.tag,
-            groups: series.audience || [],
-            date: series.dates![i],
-            start: String(series.start_times![i]).slice(0, 5),
-            room: series.rooms![i],
-            instructors: series.instructors![i] || [],
-            instructor_pool: comp.instructor_pool || [],
-            courseTab:
-              courseTabByName?.[c.name] || inferCourseTabFromName(c.name),
-          });
+  for (const [courseIdx, course] of config.courses.entries()) {
+    for (const [componentIdx, component] of (
+      course.components || []
+    ).entries()) {
+      for (const [seriesIdx, series] of (component.sessions || []).entries()) {
+        if (
+          series.dates &&
+          series.times &&
+          series.rooms &&
+          series.instructors
+        ) {
+          for (let i = 0; i < series.dates.length; i++) {
+            flat.push({
+              instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:${i}`,
+              course: course.name,
+              tag: component.tag,
+              groups: series.audience,
+              date: series.dates[i],
+              start: series.times[i].slice(0, 5),
+              room: series.rooms[i],
+              instructors: series.instructors[i],
+              instructor_pool: component.instructor_pool,
+              sections: coursesToSections[courseIdx] || ["Unknown"],
+            });
+          }
+        }
+
+        const pattern = series.weekly_pattern || [];
+        if (pattern.length > 0) {
+          for (const [slotIdx, slot] of pattern.entries()) {
+            const weekday = weeklyPatternDayKey(slot.day);
+            if (!weekday) continue;
+            for (const date of semesterDatesForWeekday(config, weekday)) {
+              flat.push({
+                instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
+                course: course.name,
+                tag: component.tag,
+                groups: series.audience,
+                date,
+                start: String(slot.time).slice(0, 5),
+                room: slot.room ?? "",
+                instructors: slot.instructor ?? "",
+                instructor_pool: component.instructor_pool,
+                sections: coursesToSections[courseIdx] || ["Unknown"],
+              });
+            }
+          }
         }
       }
     }
   }
   return flat;
+}
+
+export function buildCoursesToSections(config: SchemaScheduleConfig) {
+  const groupsToSections: { [key: string]: string } = {};
+  for (const section of config.sections) {
+    const sectionCode = section.code;
+    for (const program of section.programs) {
+      for (const track of program.tracks || []) {
+        for (const group of track.groups) {
+          groupsToSections[group] = sectionCode;
+        }
+      }
+      for (const group of program.groups || []) {
+        groupsToSections[group] = sectionCode;
+      }
+    }
+  }
+  const coursesToSections: { [key: string]: string[] } = {};
+  for (const [courseIdx, course] of config.courses.entries()) {
+    const courseSections = new Set<string>();
+    for (const [_, component] of course.components.entries()) {
+      component.student_groups.forEach((studentGroup) =>
+        courseSections.add(groupsToSections[studentGroup]),
+      );
+    }
+    coursesToSections[courseIdx] = courseSections.values().toArray();
+  }
+
+  return coursesToSections;
 }
 
 export function buildWeeks(meetings: Meeting[]) {
@@ -419,7 +476,7 @@ export function buildWeeks(meetings: Meeting[]) {
 }
 
 export function buildGrid(
-  config: Record<string, unknown>,
+  config: SchemaScheduleConfig,
   allMeetings: Meeting[],
   weekStart: string,
   tabMode: string,
@@ -507,10 +564,10 @@ export function columnsForTab(
   tabMode: string,
   baseColumns: Column[],
   allMeetings: Meeting[],
-  config: Record<string, unknown>,
+  config: SchemaScheduleConfig,
 ): Column[] {
   if (!baseColumns.length) return [];
-  if (tabMode !== "core" && tabMode !== "english") return baseColumns;
+  if (tabMode === "instructor" || tabMode === "room") return baseColumns;
   const tabMeetings = filterMeetingsByTab(allMeetings, tabMode);
   const usedGroups = new Set<string>();
   for (const m of tabMeetings) {
@@ -738,26 +795,4 @@ export function groupWeekHistogramsHtml(meetings: Meeting[]) {
       { formatBarLabel: fmtH },
     )
   );
-}
-
-export function computeWeekStats(
-  allMeetings: Meeting[],
-  weeks: WeekRange[],
-  weekIndex: number,
-) {
-  const wk = weeks[weekIndex];
-  const weekMeetings = wk
-    ? allMeetings.filter((m) => {
-        const dt = new Date(`${m.date}T00:00:00`);
-        const monday = new Date(dt);
-        const day = (dt.getDay() + 6) % 7;
-        monday.setDate(dt.getDate() - day);
-        return monday.toISOString().slice(0, 10) === wk.start;
-      })
-    : [];
-  const courses = new Set(weekMeetings.map((m) => m.course)).size;
-  const instructors = new Set(weekMeetings.flatMap((m) => m.instructors || []))
-    .size;
-  const rooms = new Set(weekMeetings.map((m) => m.room)).size;
-  return { weekMeetings, courses, instructors, rooms };
 }

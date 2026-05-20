@@ -1,9 +1,8 @@
-import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/normalizeTrackFromSectionProgram.ts";
+import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 import type {
-  ScheduleConfigDraft,
-  ScheduleConfigProgram,
-  ScheduleConfigSectionProgram,
-} from "@/components/schedule-assistant/settings/configTypes.ts";
+  SchemaScheduleConfig,
+  SchemaSectionProgram,
+} from "@/api/schedule-assistant/types.ts";
 import type {
   SettingsSelection,
   SettingsSubTab,
@@ -37,14 +36,12 @@ export type ProgramTreeSelection =
       headingSubtitle?: string;
       titleFallback: string;
     };
-function programStableId(
-  program: ScheduleConfigSectionProgram | ScheduleConfigProgram,
-): string {
+function programStableId(program: SchemaSectionProgram): string {
   return String(program?.code || "").trim();
 }
 
 function getGroupDisplayLabel(
-  config: ScheduleConfigDraft | null,
+  config: SchemaScheduleConfig | null,
   groupId: string,
 ): string {
   const list = Array.isArray(config?.students_groups)
@@ -59,7 +56,7 @@ function getGroupDisplayLabel(
 }
 
 function findSectionProgram(
-  config: ScheduleConfigDraft | null,
+  config: SchemaScheduleConfig | null,
   sectionCode: string,
   programIndex: number,
 ) {
@@ -77,7 +74,7 @@ function findSectionProgram(
 
 /** Соответствие выбранного узла дерева групп данным конфига (без построения дерева). */
 export function resolveGroupsSelection(
-  config: ScheduleConfigDraft | null,
+  config: SchemaScheduleConfig | null,
   selection: SettingsSelection | null,
 ): ProgramTreeSelection | null {
   if (
@@ -157,7 +154,7 @@ export function resolveGroupsSelection(
 }
 
 export function isSettingsSelectionValid(
-  config: ScheduleConfigDraft | null,
+  config: SchemaScheduleConfig | null,
   tab: SettingsSubTab,
   selection: SettingsSelection | null,
 ): boolean {

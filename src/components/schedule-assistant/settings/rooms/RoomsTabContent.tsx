@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import { useMemo } from "react";
 
-import type { ScheduleConfigRoom } from "@/components/schedule-assistant/settings/configTypes.ts";
-import { useConfig } from "@/components/schedule-assistant/settings/useConfig.tsx";
+import type { SchemaRoomConfig } from "@/api/schedule-assistant/types.ts";
+import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   getSettingsSelectionKey,
   useSelection,
@@ -28,11 +28,11 @@ function roomCapacityToLabel(value: unknown): string {
 }
 
 export function RoomsTabContent({ onAddRoom }: { onAddRoom: () => void }) {
-  const { configData } = useConfig();
+  const { config } = useConfig();
   const { selectedSelectionId, selectItem } = useSelection();
   const groups: RoomsFloorGroup[] = useMemo(() => {
-    const roomsItems: RoomListRow[] = (configData?.rooms || []).map(
-      (room: ScheduleConfigRoom, index: number) => ({
+    const roomsItems: RoomListRow[] = (config?.rooms || []).map(
+      (room: SchemaRoomConfig, index: number) => ({
         id: `room-${index}`,
         title: String(room?.id || ""),
         subtitle:
@@ -63,7 +63,7 @@ export function RoomsTabContent({ onAddRoom }: { onAddRoom: () => void }) {
         if (b.floor === "Без этажа") return -1;
         return a.floor.localeCompare(b.floor, "ru");
       });
-  }, [configData]);
+  }, [config]);
   return (
     <div className="flex flex-col gap-2">
       {!groups.length ? (

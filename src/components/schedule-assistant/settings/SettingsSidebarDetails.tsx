@@ -1,14 +1,9 @@
 /* eslint-disable react-hooks/immutability */
-import type {
-  ScheduleConfigCourse,
-  ScheduleConfigProgram,
-  ScheduleConfigSectionProgram,
-} from "@/components/schedule-assistant/settings/configTypes.ts";
 import {
-  collectKnownStudentGroupIds,
-  courseComponentsYamlLintExtensions,
-  validateCourseComponentsYaml,
-} from "@/components/schedule-assistant/settings/courseComponentsYamlLint.ts";
+  SchemaCourseConfig,
+  SchemaSectionProgram,
+  SectionProgramLanguageAnyOf0,
+} from "@/api/schedule-assistant/types.ts";
 import {
   useConfig,
   useCourse,
@@ -18,13 +13,18 @@ import {
   useSemesterSettings,
   useStudentGroup,
   useTrack,
-} from "@/components/schedule-assistant/settings/useConfig.tsx";
+} from "@/components/schedule-assistant/config/useConfig.tsx";
+import {
+  collectKnownStudentGroupIds,
+  courseComponentsYamlLintExtensions,
+  validateCourseComponentsYaml,
+} from "@/components/schedule-assistant/settings/courses/courseComponentsYamlLint.ts";
 import { useSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
 import {
   TERM_WEEKDAY_KEYS,
   TERM_WEEKDAY_LABEL_RU,
-  toggleTermWeekday,
   type TermWeekdayKey,
+  toggleTermWeekday,
 } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { yaml } from "@codemirror/lang-yaml";
 import { lintKeymap } from "@codemirror/lint";
@@ -32,24 +32,19 @@ import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import clsx from "clsx";
 import {
+  type KeyboardEvent,
+  type ReactNode,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
-  type ReactNode,
 } from "react";
 import { stringify } from "yaml";
 
-function programStableId(
-  program: ScheduleConfigSectionProgram | ScheduleConfigProgram,
-): string {
+function programStableId(program: SchemaSectionProgram): string {
   return String(program?.code || "").trim();
-}
-
-function defaultOnCreateStudentGroup(_groupId: string) {
-  alert("TODO");
 }
 
 const detailCaptionUpperClass =
@@ -369,7 +364,7 @@ export function RoomDetails({ roomId }: { roomId: string }) {
 }
 
 export function CourseDetails({ courseIndex }: { courseIndex: number }) {
-  const { configData } = useConfig();
+  const { config } = useConfig();
   const { course, courseState, updateCourseComponents, deleteCourse } =
     useCourse(courseIndex);
   const { deselectItem } = useSelection();
@@ -384,15 +379,17 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const headingTitle = String(course?.name || `Курс #${courseIndex + 1}`);
   const headingSubtitle = componentTags.length ? componentTags.join(", ") : "—";
   const knownStudentGroupIds = useMemo(
-    () => collectKnownStudentGroupIds(configData),
-    [configData],
+    () => collectKnownStudentGroupIds(config),
+    [config],
   );
 
   const componentsSignature = stringify(components, { lineWidth: 0 });
   const [yamlText, setYamlText] = useState(componentsSignature);
   const [parseError, setParseError] = useState<string | null>(null);
 
-  const handleCreateStudentGroup = defaultOnCreateStudentGroup;
+  const handleCreateStudentGroup = useCallback((_groupId: string) => {
+    alert("TODO");
+  }, []);
   const yamlLintExtensions = useMemo(
     () =>
       courseComponentsYamlLintExtensions(
@@ -414,7 +411,7 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
       return;
     }
     setParseError(null);
-    updateCourseComponents(result.value as ScheduleConfigCourse["components"]);
+    updateCourseComponents(result.value as SchemaCourseConfig["components"]);
   }
 
   return (
@@ -694,9 +691,11 @@ export function ProgramDetails({
             onChange={(event) => {
               if (!programState) return;
               programState.language =
-                event.target.value === "en" || event.target.value === "ru"
-                  ? event.target.value
-                  : null;
+                event.target.value === "en"
+                  ? SectionProgramLanguageAnyOf0.en
+                  : event.target.value === "ru"
+                    ? SectionProgramLanguageAnyOf0.ru
+                    : null;
             }}
           />
         </label>
@@ -773,7 +772,7 @@ export function TrackDetails({
   trackIndex: number;
   titleFallback?: string;
 }) {
-  const { configData, addGroupToTrack, removeGroupFromTrackAndConfig } =
+  const { config, addGroupToTrack, removeGroupFromTrackAndConfig } =
     useConfig();
   const { track, trackState, setTrackGroups, deleteTrack } = useTrack(
     sectionCode,
@@ -791,8 +790,8 @@ export function TrackDetails({
   const code = track && "code" in track ? String(track.code ?? "") : "";
   const kind = track && "kind" in track ? String(track.kind ?? "") : "";
   const trackGroups = Array.isArray(track?.groups) ? track.groups : [];
-  const studentsGroups = Array.isArray(configData?.students_groups)
-    ? configData.students_groups
+  const studentsGroups = Array.isArray(config?.students_groups)
+    ? config.students_groups
     : [];
   const groups = trackGroups.map((groupId: string) => {
     const groupEntity = studentsGroups.find(
@@ -915,23 +914,36 @@ export function InstructorDetails({
   const { instructor, instructorState, deleteInstructor } =
     useInstructor(instructorIndex);
   const { deselectItem } = useSelection();
-  const idValue = String(instructor?.id ?? "");
-  const nameValue = String(instructor?.name ?? "");
-  const headingTitle = nameValue.trim() || idValue;
+  const headingTitle =
+    instructor?.name_ru ??
+    instructor?.name_en ??
+    instructor?.email ??
+    instructor?.id ??
+    "";
   const headingSubtitle = "Преподаватель";
-  const roleValue = instructor?.role != null ? String(instructor.role) : "";
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
       <div className={settingsDetailShellClass}>
         <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Имя</span>
+          <span className={detailLabelUpperClass}>Имя (на русском)</span>
           <input
             className={detailInputClass}
-            value={nameValue}
+            value={instructor?.name_ru ?? ""}
             onChange={(event) => {
               if (!instructorState) return;
-              instructorState.name = event.target.value;
+              instructorState.name_ru = event.target.value.trim() || null;
+            }}
+          />
+        </label>
+        <label className={`${detailControlClass} shrink-0`}>
+          <span className={detailLabelUpperClass}>Имя (на английском)</span>
+          <input
+            className={detailInputClass}
+            value={instructor?.name_en ?? ""}
+            onChange={(event) => {
+              if (!instructorState) return;
+              instructorState.name_en = event.target.value.trim() || null;
             }}
           />
         </label>
@@ -939,10 +951,32 @@ export function InstructorDetails({
           <span className={detailLabelUpperClass}>Идентификатор</span>
           <input
             className={detailInputClass}
-            value={idValue}
+            value={instructor?.id ?? ""}
             onChange={(event) => {
               if (!instructorState) return;
-              instructorState.id = event.target.value;
+              instructorState.id = event.target.value.trim();
+            }}
+          />
+        </label>
+        <label className={`${detailControlClass} shrink-0`}>
+          <span className={detailLabelUpperClass}>Корпоративная почта</span>
+          <input
+            className={detailInputClass}
+            value={instructor?.email ?? ""}
+            onChange={(event) => {
+              if (!instructorState) return;
+              instructorState.email = event.target.value.trim() || null;
+            }}
+          />
+        </label>
+        <label className={`${detailControlClass} shrink-0`}>
+          <span className={detailLabelUpperClass}>Алиас Telegram</span>
+          <input
+            className={detailInputClass}
+            value={instructor?.alias ?? ""}
+            onChange={(event) => {
+              if (!instructorState) return;
+              instructorState.alias = event.target.value.trim() || null;
             }}
           />
         </label>
@@ -950,12 +984,10 @@ export function InstructorDetails({
           <span className={detailLabelUpperClass}>Роль</span>
           <input
             className={detailInputClass}
-            value={roleValue}
+            value={instructor?.role ?? ""}
             onChange={(event) => {
               if (!instructorState) return;
-              instructorState.role = event.target.value.trim()
-                ? event.target.value
-                : null;
+              instructorState.role = event.target.value.trim() || null;
             }}
           />
         </label>
@@ -979,6 +1011,7 @@ export function SemesterDetails() {
   const days = TERM_WEEKDAY_KEYS.filter((key) =>
     (term?.days || []).includes(key),
   );
+  const startingDay = term?.starting_day ?? "";
   const timeSlots = Array.isArray(term?.time_slots)
     ? term.time_slots.join("\n")
     : "";
@@ -1046,6 +1079,32 @@ export function SemesterDetails() {
                     : "btn-outline bg-base-100 text-base-content/55 hover:border-base-content/30",
                 )}
                 onClick={() => handleToggleDay(key)}
+              >
+                {TERM_WEEKDAY_LABEL_RU[key]}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className={`${detailControlClass} shrink-0`}>
+        <span className={detailLabelUpperClass}>Начальный день недели</span>
+        <div className="flex flex-wrap gap-2">
+          {TERM_WEEKDAY_KEYS.map((key) => {
+            const active = startingDay == key;
+            return (
+              <button
+                key={key}
+                type="button"
+                className={clsx(
+                  "btn btn-sm border-base-300 min-w-[2.75rem] font-medium transition-colors",
+                  active
+                    ? "btn-secondary text-secondary-content"
+                    : "btn-outline bg-base-100 text-base-content/55 hover:border-base-content/30",
+                )}
+                onClick={() => {
+                  if (!termState) return;
+                  termState.starting_day = key;
+                }}
               >
                 {TERM_WEEKDAY_LABEL_RU[key]}
               </button>

@@ -2,16 +2,16 @@ import type { ConfigLoadResult } from "@/components/schedule-assistant/settings/
 import {
   nextGroupIdentifiers,
   programCodeForGroupIdentifiers,
-} from "@/components/schedule-assistant/groupIdentifiers.ts";
-import type {
-  ScheduleConfigCourse,
-  ScheduleConfigDraft,
-  ScheduleConfigInstructor,
-  ScheduleConfigProgram,
-  ScheduleConfigSectionProgram,
-  ScheduleConfigStudentsGroup,
-  ScheduleConfigTerm,
-} from "@/components/schedule-assistant/settings/configTypes.ts";
+} from "@/components/schedule-assistant/config/groupIdentifiers.ts";
+import {
+  SchemaCourseConfig,
+  SchemaScheduleConfig,
+  SchemaInstructorConfig,
+  SchemaSectionProgram,
+  SchemaStudentsGroups,
+  SchemaTermConfig,
+  SectionProgramLanguageAnyOf0,
+} from "@/api/schedule-assistant/types.ts";
 import { parse, stringify } from "yaml";
 import {
   createContext,
@@ -19,29 +19,23 @@ import {
   useContext,
   useEffect,
   useMemo,
-  type ReactNode,
 } from "react";
 import { proxy, subscribe } from "valtio";
 import { useSnapshot } from "valtio/react";
 
-export type ConfigStore = {
+export type ConfigContextType = {
   state: ConfigState;
   actions: ConfigActions;
 };
 
 type ConfigState = {
-  configData: ScheduleConfigDraft | null;
-  outputData: unknown;
+  config: SchemaScheduleConfig | null;
 };
 
 export type ConfigActions = {
-  setConfigData: (configData: ScheduleConfigDraft | null) => void;
-  setOutputData: (outputData: unknown) => void;
-  updateConfigData: (mutator: (draft: ScheduleConfigDraft) => void) => void;
-  loadConfigFiles: (
-    configFile: File | null,
-    outputFile: File | null,
-  ) => Promise<ConfigLoadResult>;
+  setConfigData: (configData: SchemaScheduleConfig | null) => void;
+  updateConfigData: (mutator: (draft: SchemaScheduleConfig) => void) => void;
+  loadConfigFiles: (configFile: File | null) => Promise<ConfigLoadResult>;
   exportConfig: () => void;
   addProgram: (sectionCode: string) => void;
   addRoom: () => void;
@@ -62,7 +56,7 @@ export type ConfigActions = {
     sectionCode: string,
     programIndex: number,
     trackIndex: number,
-    program: ScheduleConfigSectionProgram | ScheduleConfigProgram | null,
+    program: SchemaSectionProgram | null,
   ) => void;
   removeGroupFromTrackAndConfig: (
     sectionCode: string,
@@ -74,13 +68,15 @@ export type ConfigActions = {
 
 export type ConfigView = ConfigState & ConfigActions;
 
-const ConfigContext = createContext<ConfigStore | null>(null);
+const ConfigContext = createContext<ConfigContextType | null>(null);
 const CONFIG_STORAGE_KEY = "schedule-assistant:config-state";
 
-function createEmptyScheduleConfigDraft(): ScheduleConfigDraft {
+function createEmptyScheduleConfigDraft(): SchemaScheduleConfig {
   return {
+    $schema: null,
     term: {
       name: "",
+      starting_day: "Mon",
       semester: {
         start_date: "1970-01-01",
         end_date: "1970-01-01",
@@ -99,24 +95,19 @@ function createEmptyScheduleConfigDraft(): ScheduleConfigDraft {
     rooms: [],
     instructors: [],
     sections: [],
-    programs: {},
     students_groups: [],
     courses: [],
   };
 }
 
-function readStoredConfigState(): {
-  configData: ScheduleConfigDraft | null;
-  outputData: unknown;
-} | null {
+function readStoredConfigState(): ConfigState | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(CONFIG_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     return {
-      configData: parsed?.configData ?? null,
-      outputData: parsed?.outputData ?? null,
+      config: parsed?.config ?? null,
     };
   } catch {
     window.localStorage.removeItem(CONFIG_STORAGE_KEY);
@@ -124,49 +115,15 @@ function readStoredConfigState(): {
   }
 }
 
-export function useConfigState(
-  initialConfig: ScheduleConfigDraft | null = null,
-): ConfigStore {
-  const store = useMemo(
-    () => createConfigStore(initialConfig),
-    [initialConfig],
-  );
-
-  useEffect(() => {
-    return subscribe(store.state, () => {
-      if (typeof window === "undefined") return;
-      try {
-        window.localStorage.setItem(
-          CONFIG_STORAGE_KEY,
-          JSON.stringify({
-            configData: store.state.configData,
-            outputData: store.state.outputData,
-          }),
-        );
-      } catch {
-        // Ignore storage errors in private mode/quota cases.
-      }
-    });
-  }, [store]);
-
-  return store;
-}
-
 function createConfigStore(
-  initialConfig: ScheduleConfigDraft | null,
-): ConfigStore {
-  const storedState = readStoredConfigState();
+  initialState: ConfigState | null,
+): ConfigContextType {
   const state = proxy<ConfigState>({
-    configData: storedState?.configData ?? initialConfig,
-    outputData: storedState?.outputData ?? null,
+    config: initialState?.config ?? null,
   });
 
-  function setConfigData(configData: ScheduleConfigDraft | null) {
-    state.configData = configData;
-  }
-
-  function setOutputData(outputData: unknown) {
-    state.outputData = outputData;
+  function setConfigData(configData: SchemaScheduleConfig | null) {
+    state.config = configData;
   }
 
   async function readYamlFile(file: File | null) {
@@ -176,27 +133,13 @@ function createConfigStore(
 
   async function loadConfigFiles(
     configFile: File | null,
-    outputFile: File | null,
   ): Promise<ConfigLoadResult> {
     try {
       if (!configFile) {
         return { ok: false, message: "Выберите файл config.yaml." };
       }
       const config = await readYamlFile(configFile);
-      if (!outputFile) {
-        setConfigData((config || null) as ScheduleConfigDraft | null);
-        setOutputData(null);
-        return { ok: true };
-      }
-      const output = await readYamlFile(outputFile);
-      if (!output?.schedule?.courses) {
-        return {
-          ok: false,
-          message: "Некорректный output.yaml: не найден schedule.courses.",
-        };
-      }
-      setConfigData((config || null) as ScheduleConfigDraft | null);
-      setOutputData(output);
+      setConfigData((config || null) as SchemaScheduleConfig | null);
       return { ok: true };
     } catch (e: any) {
       return {
@@ -207,8 +150,8 @@ function createConfigStore(
   }
 
   function exportConfig() {
-    if (state.configData == null) return;
-    const text = stringify(state.configData);
+    if (state.config == null) return;
+    const text = stringify(state.config);
     const blob = new Blob([text], { type: "application/x-yaml;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -218,11 +161,11 @@ function createConfigStore(
     URL.revokeObjectURL(url);
   }
 
-  function updateConfigData(mutator: (draft: ScheduleConfigDraft) => void) {
-    if (state.configData == null) {
-      state.configData = createEmptyScheduleConfigDraft();
+  function updateConfigData(mutator: (draft: SchemaScheduleConfig) => void) {
+    if (state.config == null) {
+      state.config = createEmptyScheduleConfigDraft();
     }
-    mutator(state.configData);
+    mutator(state.config);
   }
 
   function addProgram(sectionCode: string) {
@@ -233,12 +176,12 @@ function createConfigStore(
       );
       if (section) {
         if (!Array.isArray(section.programs)) section.programs = [];
-        const newProgram: ScheduleConfigSectionProgram = {
+        const newProgram: SchemaSectionProgram = {
           code: `new-program-${section.programs.length + 1}`,
           name: "Новая программа",
           kind: "degree_year",
           degree: null,
-          language: "en",
+          language: SectionProgramLanguageAnyOf0.en,
           year: null,
           applies_to: [],
           tracks: [],
@@ -247,19 +190,6 @@ function createConfigStore(
         section.programs.push(newProgram);
         return;
       }
-
-      if (!draft.programs || typeof draft.programs !== "object")
-        draft.programs = {};
-      if (!Array.isArray(draft.programs[sectionCode]))
-        draft.programs[sectionCode] = [];
-      const rootProgram: ScheduleConfigProgram = {
-        code: `new-program-${draft.programs[sectionCode].length + 1}`,
-        name: "Новая программа",
-        language: "en",
-        year: null,
-        tracks: [],
-      };
-      draft.programs[sectionCode].push(rootProgram);
     });
   }
 
@@ -290,7 +220,11 @@ function createConfigStore(
       if (!Array.isArray(draft.instructors)) draft.instructors = [];
       draft.instructors.push({
         id: `new-instructor-${draft.instructors.length + 1}`,
-        name: "",
+        alias: null,
+        email: null,
+        name_en: null,
+        name_ru: null,
+        position: null,
         role: null,
       });
     });
@@ -330,7 +264,7 @@ function createConfigStore(
     sectionCode: string,
     programIndex: number,
     trackIndex: number,
-    program: ScheduleConfigSectionProgram | ScheduleConfigProgram | null,
+    program: SchemaSectionProgram | null,
   ) {
     updateConfigData((draft) => {
       mutateProgramInDraft(draft, sectionCode, programIndex, (target) => {
@@ -398,7 +332,6 @@ function createConfigStore(
     state,
     actions: {
       setConfigData,
-      setOutputData,
       updateConfigData,
       loadConfigFiles,
       exportConfig,
@@ -414,19 +347,36 @@ function createConfigStore(
   };
 }
 
-export function ConfigProvider({
-  value,
-  children,
-}: {
-  value: ConfigStore;
-  children: ReactNode;
-}) {
+export function ConfigProvider({ children }: React.PropsWithChildren) {
+  const configStore = useMemo(
+    () => createConfigStore(readStoredConfigState()),
+    [],
+  );
+
+  useEffect(() => {
+    return subscribe(configStore.state, () => {
+      if (typeof window === "undefined") return;
+      try {
+        window.localStorage.setItem(
+          CONFIG_STORAGE_KEY,
+          JSON.stringify({
+            config: configStore.state.config,
+          }),
+        );
+      } catch {
+        // Ignore storage errors in private mode/quota cases.
+      }
+    });
+  }, [configStore]);
+
   return (
-    <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>
+    <ConfigContext.Provider value={configStore}>
+      {children}
+    </ConfigContext.Provider>
   );
 }
 
-export function useConfigStore() {
+export function useConfigContext() {
   const ctx = useContext(ConfigContext);
   if (!ctx) {
     throw new Error("useConfig must be used inside ConfigProvider.");
@@ -435,28 +385,25 @@ export function useConfigStore() {
 }
 
 export function useConfig(): ConfigView {
-  const ctx = useConfigStore();
+  const ctx = useConfigContext();
   const snap = useSnapshot(ctx.state, { sync: true });
   return {
-    configData: snap.configData as unknown as ScheduleConfigDraft | null,
-    outputData: snap.outputData,
+    config: snap.config as unknown as SchemaScheduleConfig | null,
     ...ctx.actions,
   };
 }
 
 export function useRoom(roomId: string) {
-  const { state } = useConfigStore();
+  const { state } = useConfigContext();
   const snap = useSnapshot(state, { sync: true });
   const { updateConfigData } = useConfig();
-  const rooms = Array.isArray(snap.configData?.rooms)
-    ? snap.configData.rooms
-    : [];
+  const rooms = Array.isArray(snap.config?.rooms) ? snap.config.rooms : [];
   const roomIndex = rooms.findIndex(
     (room) => String(room?.id ?? "") === roomId,
   );
   const room = roomIndex >= 0 ? rooms[roomIndex] : null;
   const roomState =
-    roomIndex >= 0 ? (state.configData?.rooms?.[roomIndex] ?? null) : null;
+    roomIndex >= 0 ? (state.config?.rooms?.[roomIndex] ?? null) : null;
 
   const deleteRoom = useCallback(() => {
     if (roomIndex < 0) return;
@@ -475,44 +422,33 @@ export function useRoom(roomId: string) {
 }
 
 function getProgramFromConfig(
-  configData: ScheduleConfigDraft | null,
+  configData: SchemaScheduleConfig | null,
   sectionCode: string,
   programIndex: number,
-): ScheduleConfigSectionProgram | ScheduleConfigProgram | null {
+): SchemaSectionProgram | null {
   if (!configData) return null;
   const section = configData.sections.find(
     (candidate) => String(candidate.code) === sectionCode,
   );
-  if (section?.programs?.[programIndex]) return section.programs[programIndex];
-  const rootPrograms = configData.programs?.[sectionCode];
-  if (Array.isArray(rootPrograms) && rootPrograms[programIndex])
-    return rootPrograms[programIndex];
-  return null;
+  return section?.programs[programIndex] ?? null;
 }
 
 function mutateProgramInDraft(
-  draft: ScheduleConfigDraft,
+  draft: SchemaScheduleConfig,
   sectionCode: string,
   programIndex: number,
-  mutator: (
-    program: ScheduleConfigSectionProgram | ScheduleConfigProgram,
-  ) => void,
+  mutator: (program: SchemaSectionProgram) => void,
 ) {
   const section = draft.sections.find(
     (candidate) => String(candidate.code) === sectionCode,
   );
-  if (section?.programs?.[programIndex]) {
+  if (section?.programs[programIndex]) {
     mutator(section.programs[programIndex]);
-    return;
-  }
-  const rootPrograms = draft.programs?.[sectionCode];
-  if (Array.isArray(rootPrograms) && rootPrograms[programIndex]) {
-    mutator(rootPrograms[programIndex]);
   }
 }
 
 function renameStudentGroupInDraft(
-  draft: ScheduleConfigDraft,
+  draft: SchemaScheduleConfig,
   oldCode: string,
   newCode: string,
 ) {
@@ -528,43 +464,27 @@ function renameStudentGroupInDraft(
   if (target) target.code = newCode;
 
   for (const section of draft.sections) {
-    if (!Array.isArray(section?.programs)) continue;
+    if (!Array.isArray(section.programs)) continue;
     for (const program of section.programs) {
-      if (Array.isArray(program?.tracks)) {
+      if (Array.isArray(program.tracks)) {
         for (const track of program.tracks) {
-          if (!Array.isArray(track?.groups)) continue;
+          if (!Array.isArray(track.groups)) continue;
           track.groups = track.groups.map((code) =>
             String(code) === oldCode ? newCode : code,
           );
         }
       }
-      if (Array.isArray(program?.groups)) {
+      if (Array.isArray(program.groups)) {
         program.groups = program.groups.map((code) =>
           String(code) === oldCode ? newCode : code,
         );
       }
     }
   }
-
-  if (draft.programs && typeof draft.programs === "object") {
-    for (const sectionCode of Object.keys(draft.programs)) {
-      const programs = draft.programs[sectionCode];
-      if (!Array.isArray(programs)) continue;
-      for (const program of programs) {
-        if (!Array.isArray(program?.tracks)) continue;
-        for (const track of program.tracks) {
-          if (!Array.isArray(track?.groups)) continue;
-          track.groups = track.groups.map((code) =>
-            String(code) === oldCode ? newCode : code,
-          );
-        }
-      }
-    }
-  }
 }
 
 function deleteStudentGroupFromDraft(
-  draft: ScheduleConfigDraft,
+  draft: SchemaScheduleConfig,
   groupCode: string,
 ) {
   draft.students_groups = draft.students_groups.filter(
@@ -572,58 +492,42 @@ function deleteStudentGroupFromDraft(
   );
 
   for (const section of draft.sections) {
-    if (!Array.isArray(section?.programs)) continue;
+    if (!Array.isArray(section.programs)) continue;
     for (const program of section.programs) {
-      if (Array.isArray(program?.tracks)) {
+      if (Array.isArray(program.tracks)) {
         for (const track of program.tracks) {
-          if (!Array.isArray(track?.groups)) continue;
+          if (!Array.isArray(track.groups)) continue;
           track.groups = track.groups.filter(
             (code) => String(code) !== groupCode,
           );
         }
       }
-      if (Array.isArray(program?.groups)) {
+      if (Array.isArray(program.groups)) {
         program.groups = program.groups.filter(
           (code) => String(code) !== groupCode,
         );
       }
     }
   }
-
-  if (draft.programs && typeof draft.programs === "object") {
-    for (const sectionCode of Object.keys(draft.programs)) {
-      const programs = draft.programs[sectionCode];
-      if (!Array.isArray(programs)) continue;
-      for (const program of programs) {
-        if (!Array.isArray(program?.tracks)) continue;
-        for (const track of program.tracks) {
-          if (!Array.isArray(track?.groups)) continue;
-          track.groups = track.groups.filter(
-            (code) => String(code) !== groupCode,
-          );
-        }
-      }
-    }
-  }
 }
 
 export function useCourse(courseIndex: number) {
-  const { state } = useConfigStore();
+  const { state } = useConfigContext();
   const snap = useSnapshot(state, { sync: true });
   const { updateConfigData } = useConfig();
   const course =
     Number.isInteger(courseIndex) &&
     courseIndex >= 0 &&
-    Array.isArray(snap.configData?.courses)
-      ? snap.configData.courses[courseIndex] || null
+    Array.isArray(snap.config?.courses)
+      ? snap.config.courses[courseIndex] || null
       : null;
   const courseState =
     Number.isInteger(courseIndex) && courseIndex >= 0
-      ? (state.configData?.courses?.[courseIndex] ?? null)
+      ? (state.config?.courses?.[courseIndex] ?? null)
       : null;
 
   const updateCourseComponents = useCallback(
-    (components: ScheduleConfigCourse["components"]) => {
+    (components: SchemaCourseConfig["components"]) => {
       if (!Number.isInteger(courseIndex) || courseIndex < 0) return;
       updateConfigData((draft) => {
         const draftCourse = draft.courses[courseIndex];
@@ -652,20 +556,20 @@ export function useCourse(courseIndex: number) {
 }
 
 export function useProgram(sectionCode: string, programIndex: number) {
-  const { state } = useConfigStore();
+  const { state } = useConfigContext();
   const snap = useSnapshot(state, { sync: true });
   const { updateConfigData } = useConfig();
   const program = useMemo(
     () =>
       getProgramFromConfig(
-        snap.configData as unknown as ScheduleConfigDraft | null,
+        snap.config as unknown as SchemaScheduleConfig | null,
         sectionCode,
         programIndex,
       ),
-    [snap.configData, sectionCode, programIndex],
+    [snap.config, sectionCode, programIndex],
   );
   const programState = getProgramFromConfig(
-    state.configData as unknown as ScheduleConfigDraft | null,
+    state.config as unknown as SchemaScheduleConfig | null,
     sectionCode,
     programIndex,
   );
@@ -676,22 +580,13 @@ export function useProgram(sectionCode: string, programIndex: number) {
     updateConfigData((draft) => {
       mutateProgramInDraft(draft, sectionCode, programIndex, (target) => {
         if (!Array.isArray(target.tracks)) target.tracks = [];
-        if ("groups" in target) {
-          const sectionTrack = {
-            code: `new-track-${target.tracks.length + 1}`,
-            name: `Новый трек ${target.tracks.length + 1}`,
-            kind: null,
-            groups: [],
-          };
-          (target.tracks as ScheduleConfigSectionProgram["tracks"]).push(
-            sectionTrack,
-          );
-          return;
-        }
-        target.tracks.push({
+        const sectionTrack = {
+          code: `new-track-${target.tracks.length + 1}`,
           name: `Новый трек ${target.tracks.length + 1}`,
+          kind: null,
           groups: [],
-        });
+        };
+        (target.tracks as SchemaSectionProgram["tracks"]).push(sectionTrack);
       });
     });
   }, [sectionCode, programIndex, updateConfigData]);
@@ -703,13 +598,8 @@ export function useProgram(sectionCode: string, programIndex: number) {
       const section = draft.sections.find(
         (candidate) => String(candidate.code) === sectionCode,
       );
-      if (section?.programs?.[programIndex]) {
+      if (section?.programs[programIndex]) {
         section.programs.splice(programIndex, 1);
-        return;
-      }
-      const rootPrograms = draft.programs?.[sectionCode];
-      if (Array.isArray(rootPrograms) && rootPrograms[programIndex]) {
-        rootPrograms.splice(programIndex, 1);
       }
     });
   }, [sectionCode, programIndex, updateConfigData]);
@@ -729,17 +619,17 @@ export function useTrack(
   programIndex: number,
   trackIndex: number,
 ) {
-  const { state } = useConfigStore();
+  const { state } = useConfigContext();
   const snap = useSnapshot(state, { sync: true });
   const { updateConfigData } = useConfig();
   const program = useMemo(
     () =>
       getProgramFromConfig(
-        snap.configData as unknown as ScheduleConfigDraft | null,
+        snap.config as unknown as SchemaScheduleConfig | null,
         sectionCode,
         programIndex,
       ),
-    [snap.configData, sectionCode, programIndex],
+    [snap.config, sectionCode, programIndex],
   );
   const track =
     Number.isInteger(trackIndex) &&
@@ -748,7 +638,7 @@ export function useTrack(
       ? program.tracks[trackIndex] || null
       : null;
   const programState = getProgramFromConfig(
-    state.configData as unknown as ScheduleConfigDraft | null,
+    state.config as unknown as SchemaScheduleConfig | null,
     sectionCode,
     programIndex,
   );
@@ -807,18 +697,18 @@ export function useTrack(
 }
 
 export function useStudentGroup(groupCode: string) {
-  const { state } = useConfigStore();
+  const { state } = useConfigContext();
   const snap = useSnapshot(state, { sync: true });
   const { updateConfigData } = useConfig();
-  const studentGroup = useMemo((): ScheduleConfigStudentsGroup | null => {
+  const studentGroup = useMemo((): SchemaStudentsGroups | null => {
     const found =
-      snap.configData?.students_groups.find(
+      snap.config?.students_groups.find(
         (candidate) => String(candidate.code) === groupCode,
       ) || null;
-    return found as unknown as ScheduleConfigStudentsGroup | null;
-  }, [snap.configData, groupCode]);
+    return found as unknown as SchemaStudentsGroups | null;
+  }, [snap.config, groupCode]);
   const studentGroupState =
-    state.configData?.students_groups.find(
+    state.config?.students_groups.find(
       (candidate) => String(candidate.code) === groupCode,
     ) ?? null;
 
@@ -851,14 +741,14 @@ export function useStudentGroup(groupCode: string) {
 }
 
 export function useInstructor(instructorIndex: number) {
-  const { state, actions } = useConfigStore();
+  const { state, actions } = useConfigContext();
   const snap = useSnapshot(state, { sync: true });
-  const configData = snap.configData as unknown as ScheduleConfigDraft | null;
+  const configData = snap.config as unknown as SchemaScheduleConfig | null;
   const instructorState =
     Number.isInteger(instructorIndex) && instructorIndex >= 0
-      ? (state.configData?.instructors?.[instructorIndex] ?? null)
+      ? (state.config?.instructors?.[instructorIndex] ?? null)
       : null;
-  const instructor = useMemo((): ScheduleConfigInstructor | null => {
+  const instructor = useMemo((): SchemaInstructorConfig | null => {
     if (
       !Number.isInteger(instructorIndex) ||
       instructorIndex < 0 ||
@@ -886,12 +776,11 @@ export function useInstructor(instructorIndex: number) {
 }
 
 export function useSemesterSettings() {
-  const { state } = useConfigStore();
+  const { state } = useConfigContext();
   const snap = useSnapshot(state, { sync: true });
   const { updateConfigData } = useConfig();
-  const term = (snap.configData?.term || null) as ScheduleConfigTerm | null;
-  const termState = (state.configData?.term ||
-    null) as ScheduleConfigTerm | null;
+  const term = (snap.config?.term || null) as SchemaTermConfig | null;
+  const termState = (state.config?.term || null) as SchemaTermConfig | null;
 
   const updateTermName = useCallback(
     (value: string) => {

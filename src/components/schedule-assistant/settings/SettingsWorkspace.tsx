@@ -1,16 +1,15 @@
-import { CoursesTabContent } from "@/components/schedule-assistant/settings/CoursesTabContent.tsx";
-import { isSettingsSelectionValid } from "@/components/schedule-assistant/settings/groupsSelection.ts";
-import { InstructorsTabContent } from "@/components/schedule-assistant/settings/InstructorsTabContent.tsx";
-import { RoomsTabContent } from "@/components/schedule-assistant/settings/RoomsTabContent.tsx";
-import { SemesterTabContent } from "@/components/schedule-assistant/settings/SemesterTabContent.tsx";
+import { CoursesTabContent } from "@/components/schedule-assistant/settings/courses/CoursesTabContent.tsx";
+import { isSettingsSelectionValid } from "@/components/schedule-assistant/settings/groups/groupsSelection.ts";
+import { InstructorsTabContent } from "@/components/schedule-assistant/settings/instructors/InstructorsTabContent.tsx";
+import { RoomsTabContent } from "@/components/schedule-assistant/settings/rooms/RoomsTabContent.tsx";
+import { SemesterTabContent } from "@/components/schedule-assistant/settings/semester/SemesterTabContent.tsx";
 import { SettingsSidebar } from "@/components/schedule-assistant/settings/SettingsSidebar.tsx";
 import { SettingsTopTabs } from "@/components/schedule-assistant/settings/SettingsTopTabs.tsx";
-import { StudentsGroupsTabContent } from "@/components/schedule-assistant/settings/StudentsGroupsTabContent.tsx";
+import { GroupsTabContent } from "@/components/schedule-assistant/settings/groups/GroupsTabContent.tsx";
 import {
   ConfigProvider,
   useConfig,
-  useConfigState,
-} from "@/components/schedule-assistant/settings/useConfig.tsx";
+} from "@/components/schedule-assistant/config/useConfig.tsx";
 import type { SettingsSubTab } from "@/components/schedule-assistant/settings/useSelection.tsx";
 import {
   SelectionProvider,
@@ -24,11 +23,10 @@ export function SettingsWorkspace({
 }: {
   settingsTab: SettingsSubTab;
 }) {
-  const configStore = useConfigState();
   const selectionStore = useSelectionState(settingsTab);
 
   return (
-    <ConfigProvider value={configStore}>
+    <ConfigProvider>
       <SelectionProvider value={selectionStore}>
         <SettingsWorkspaceInner settingsTab={settingsTab} />
       </SelectionProvider>
@@ -41,8 +39,7 @@ function SettingsWorkspaceInner({
 }: {
   settingsTab: SettingsSubTab;
 }) {
-  const { configData, addProgram, addRoom, addCourse, addInstructor } =
-    useConfig();
+  const { config, addProgram, addRoom, addCourse, addInstructor } = useConfig();
   const {
     settingsSubTab,
     setSettingsSubTab,
@@ -59,14 +56,14 @@ function SettingsWorkspaceInner({
     setSettingsSelectionByTab((prev) => {
       const current = prev[settingsSubTab];
       if (!current) return prev;
-      if (isSettingsSelectionValid(configData, settingsSubTab, current))
+      if (isSettingsSelectionValid(config, settingsSubTab, current))
         return prev;
       return {
         ...prev,
         [settingsSubTab]: null,
       };
     });
-  }, [configData, settingsSubTab, setSettingsSelectionByTab]);
+  }, [config, settingsSubTab, setSettingsSelectionByTab]);
 
   useEffect(() => {
     function handleGlobalEsc(event: KeyboardEvent) {
@@ -99,7 +96,7 @@ function SettingsWorkspaceInner({
           <div className="flex h-full min-h-0 flex-col">
             <div className="min-h-0 flex-1 overflow-auto p-3">
               {settingsSubTab === "groups" ? (
-                <StudentsGroupsTabContent onAddProgram={addProgram} />
+                <GroupsTabContent onAddProgram={addProgram} />
               ) : settingsSubTab === "courses" ? (
                 <CoursesTabContent onAddCourse={addCourse} />
               ) : settingsSubTab === "rooms" ? (
