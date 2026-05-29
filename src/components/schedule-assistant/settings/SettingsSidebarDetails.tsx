@@ -364,7 +364,7 @@ export function RoomDetails({ roomId }: { roomId: string }) {
 }
 
 export function CourseDetails({ courseIndex }: { courseIndex: number }) {
-  const { config } = useConfig();
+  const { config, updateConfigData } = useConfig();
   const { course, courseState, updateCourseComponents, deleteCourse } =
     useCourse(courseIndex);
   const { deselectItem } = useSelection();
@@ -387,9 +387,26 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const [yamlText, setYamlText] = useState(componentsSignature);
   const [parseError, setParseError] = useState<string | null>(null);
 
-  const handleCreateStudentGroup = useCallback((_groupId: string) => {
-    alert("TODO");
-  }, []);
+  const handleCreateStudentGroup = useCallback(
+    (groupId: string) => {
+      const normalized = groupId.trim();
+      if (!normalized) return;
+      updateConfigData((draft) => {
+        const exists = draft.students_groups.some(
+          (candidate) => String(candidate.code) === normalized,
+        );
+        if (exists) return;
+        draft.students_groups.push({
+          code: normalized,
+          kind: "core",
+          name: normalized,
+          estimated_size: null,
+          students: [],
+        });
+      });
+    },
+    [updateConfigData],
+  );
   const yamlLintExtensions = useMemo(
     () =>
       courseComponentsYamlLintExtensions(
@@ -981,13 +998,13 @@ export function InstructorDetails({
           />
         </label>
         <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Роль</span>
+          <span className={detailLabelUpperClass}>Должность</span>
           <input
             className={detailInputClass}
-            value={instructor?.role ?? ""}
+            value={instructor?.position ?? ""}
             onChange={(event) => {
               if (!instructorState) return;
-              instructorState.role = event.target.value.trim() || null;
+              instructorState.position = event.target.value.trim() || null;
             }}
           />
         </label>

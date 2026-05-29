@@ -15,6 +15,75 @@ const courseComponentsRootSchema = {
   type: "array",
   items: { $ref: "#/$defs/component" },
   $defs: {
+    weeklyPatternSlot: {
+      type: "object",
+      additionalProperties: false,
+      required: ["day", "time"],
+      properties: {
+        day: { type: "string" },
+        time: { type: "string" },
+        room: { type: ["string", "null"] },
+        instructor: {
+          anyOf: [
+            { type: "null" },
+            { type: "string" },
+            { type: "array", items: { type: "string" } },
+          ],
+        },
+      },
+    },
+    componentSessionSeries: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        audience: {
+          type: "array",
+          items: { type: "string" },
+          default: [],
+        },
+        weekly_pattern: {
+          anyOf: [
+            { type: "null" },
+            {
+              type: "array",
+              items: { $ref: "#/$defs/weeklyPatternSlot" },
+            },
+          ],
+        },
+        dates: {
+          anyOf: [
+            { type: "null" },
+            { type: "array", items: { type: "string" } },
+          ],
+        },
+        times: {
+          anyOf: [
+            { type: "null" },
+            { type: "array", items: { type: "string" } },
+          ],
+        },
+        rooms: {
+          anyOf: [
+            { type: "null" },
+            { type: "array", items: { type: "string" } },
+          ],
+        },
+        instructors: {
+          anyOf: [
+            { type: "null" },
+            {
+              type: "array",
+              items: {
+                anyOf: [
+                  { type: "string" },
+                  { type: "array", items: { type: "string" } },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    },
     component: {
       type: "object",
       additionalProperties: false,
@@ -25,15 +94,23 @@ const courseComponentsRootSchema = {
           description: "Тип занятия: lec, tut, lab, class и т.д.",
         },
         per_week: {
-          type: "integer",
-          minimum: 0,
-          default: 1,
+          anyOf: [{ type: "integer", minimum: 0 }, { type: "null" }],
           description: "Число занятий в неделю",
+        },
+        per_semester: {
+          anyOf: [{ type: "integer", minimum: 0 }, { type: "null" }],
+          description: "Число занятий за семестр (элективы и т.п.)",
         },
         instructor_pool: {
           type: "array",
           description: "Пул преподавателей (вложенные массивы — co-teaching)",
           default: [],
+          items: {
+            anyOf: [
+              { type: "string" },
+              { type: "array", items: { type: "string" } },
+            ],
+          },
         },
         student_groups: {
           type: "array",
@@ -54,6 +131,15 @@ const courseComponentsRootSchema = {
             { type: "null" },
             { type: "integer" },
             { type: "array", items: { type: "integer" } },
+          ],
+        },
+        sessions: {
+          anyOf: [
+            { type: "null" },
+            {
+              type: "array",
+              items: { $ref: "#/$defs/componentSessionSeries" },
+            },
           ],
         },
       },

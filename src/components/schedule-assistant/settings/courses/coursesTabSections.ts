@@ -1,4 +1,5 @@
 import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
+import { resolveCourseUsageTargets } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { buildProgramsGroupsTreeViewSectionTabs } from "@/components/schedule-assistant/settings/groups/programsGroupsTreeView.ts";
 import type {
   SchemaCourseConfig,
@@ -28,19 +29,6 @@ export type CourseUsageSectionGroup = {
   title: string;
   programs: CourseUsageProgramGroup[];
 };
-
-function parseProgramTrackSelector(
-  selector: string,
-): { programId: string; trackName: string } | null {
-  if (!selector.startsWith("@")) return null;
-  const withoutPrefix = selector.slice(1);
-  const slash = withoutPrefix.indexOf("/");
-  if (slash <= 0 || slash >= withoutPrefix.length - 1) return null;
-  return {
-    programId: withoutPrefix.slice(0, slash).trim(),
-    trackName: withoutPrefix.slice(slash + 1).trim(),
-  };
-}
 
 function buildCourseUsageRows(
   config: SchemaScheduleConfig | null,
@@ -77,7 +65,10 @@ export function buildCoursesTabSections(
     string,
     { programId: string; programTitle: string; trackName: string }
   >();
-  const programById = new Map<string, { title: string; tracks: Set<string> }>();
+  const programById = new Map<
+    string,
+    { title: string; trackNames: string[] }
+  >();
 
   for (const section of config?.sections ?? []) {
     if (!section?.code || !Array.isArray(section.programs)) continue;
@@ -85,17 +76,16 @@ export function buildCoursesTabSections(
     for (const program of section.programs) {
       const programId = String(program?.code || "").trim();
       const programTitle = String(program?.name || programId || sectionCode);
+      const normalizedTracks = normalizeTracksFromSectionProgram(program);
       if (programId) {
         programById.set(programId, {
           title: programTitle,
-          tracks: new Set(
-            normalizeTracksFromSectionProgram(program).map((t) =>
-              String(t?.name || ""),
-            ),
+          trackNames: normalizedTracks.map((t) =>
+            String(t?.name || "Без направления"),
           ),
         });
       }
-      for (const track of normalizeTracksFromSectionProgram(program)) {
+      for (const track of normalizedTracks) {
         const trackName = String(track?.name || "Без направления");
         for (const groupId of track?.groups || []) {
           groupToProgramTrack.set(String(groupId), {
@@ -126,21 +116,14 @@ export function buildCoursesTabSections(
         const rawTarget = String(target || "").trim();
         if (!rawTarget) continue;
 
-        const parsed = parseProgramTrackSelector(rawTarget);
-        if (parsed) {
-          const programMeta = programById.get(parsed.programId);
-          const programTitle = programMeta?.title || parsed.programId;
-          const trackTitle = parsed.trackName || "Без направления";
+        for (const resolved of resolveCourseUsageTargets(
+          config,
+          rawTarget,
+          programById,
+          groupToProgramTrack,
+        )) {
           seenTargets.add(
-            `${parsed.programId}|||${programTitle}|||${trackTitle}`,
-          );
-          continue;
-        }
-
-        const byGroup = groupToProgramTrack.get(rawTarget);
-        if (byGroup) {
-          seenTargets.add(
-            `${byGroup.programId}|||${byGroup.programTitle}|||${byGroup.trackName}`,
+            `${resolved.programId}|||${resolved.programTitle}|||${resolved.trackTitle}`,
           );
         }
       }

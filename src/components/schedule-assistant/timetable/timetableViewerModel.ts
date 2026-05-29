@@ -1,5 +1,7 @@
 /** Port of schedule-assistant-viewer.html script (same behavior). */
 import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
+import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 
 export const DAY_NAMES = [
   "Mon",
@@ -21,15 +23,6 @@ const DAY_LABEL_RU: Record<(typeof DAY_NAMES)[number], string> = {
   Sat: "Сб",
   Sun: "Вс",
 };
-export const DEFAULT_TIME_SLOTS = [
-  "09:00",
-  "10:30",
-  "12:10",
-  "14:00",
-  "15:30",
-  "17:10",
-  "18:40",
-];
 
 /** Один источник текстов `title` для таблицы и для HTML панели деталей. */
 export const scheduleAssistantDetailTooltips = {
@@ -120,17 +113,21 @@ function formatLocalDate(d: Date) {
   return `${y}-${m}-${day}`;
 }
 
+export function weekStartMondayIso(dateStr: string) {
+  const dt = new Date(`${dateStr}T00:00:00`);
+  const monday = new Date(dt);
+  const day = (dt.getDay() + 6) % 7;
+  monday.setDate(dt.getDate() - day);
+  return formatLocalDate(monday);
+}
+
 export function semesterDatesForWeekday(
   config: SchemaScheduleConfig,
   weekday: (typeof DAY_NAMES)[number],
 ) {
-  const semester = config.term?.semester;
-  if (!semester?.start_date || !semester?.end_date) return [];
-  const allowed = new Set(
-    config.term?.days?.length
-      ? config.term.days
-      : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-  );
+  const semester = config.term.semester;
+  if (!semester.start_date || !semester.end_date) return [];
+  const allowed = new Set(config.term.days);
   if (!allowed.has(weekday)) return [];
   const out: string[] = [];
   const cur = new Date(`${semester.start_date}T00:00:00`);
@@ -247,7 +244,7 @@ export function buildGroupMeta(config: SchemaScheduleConfig) {
     for (const program of section.programs) {
       const yearLabel = program.name || section.code;
       if (!byProgram[yearLabel]) byProgram[yearLabel] = new Set();
-      for (const tr of program.tracks || []) {
+      for (const tr of normalizeTracksFromSectionProgram(program)) {
         for (const g of tr.groups || []) {
           byProgram[yearLabel].add(g);
         }
@@ -264,20 +261,14 @@ export function buildGroupMeta(config: SchemaScheduleConfig) {
 
 export function buildRoomCapacityMap(config: SchemaScheduleConfig) {
   const out: Record<string, number> = {};
-  for (const r of (config.rooms as { id: string; capacity: number }[]) || [])
-    out[r.id] = r.capacity;
+  for (const r of config.rooms) out[r.id] = r.capacity;
   return out;
 }
 
 export function buildGroupSizeMap(config: SchemaScheduleConfig) {
   const out: Record<string, number | null> = {};
-  for (const g of (config.students_groups as {
-    code?: string;
-    estimated_size?: number;
-  }[]) || []) {
-    const code = String(g?.code || "");
-    if (!code) continue;
-    out[code] = Number.isFinite(g.estimated_size) ? g.estimated_size! : null;
+  for (const g of config.students_groups) {
+    out[g.code] = Number.isFinite(g.estimated_size) ? g.estimated_size! : null;
   }
   return out;
 }
@@ -314,7 +305,9 @@ export function meetingRoomLoadOverCapacity(
 }
 
 export function filterMeetingsByTab(meetings: Meeting[], tabMode: string) {
-  if (tabMode === "instructor" || tabMode === "room") return meetings;
+  if (tabMode === "instructor" || tabMode === "room" || tabMode === "all") {
+    return meetings;
+  }
   return meetings.filter((m) => m.sections.includes(tabMode));
 }
 
@@ -335,7 +328,9 @@ export function buildColumns(config: SchemaScheduleConfig) {
   for (const course of config.courses) {
     for (const comp of course.components || []) {
       for (const s of comp.sessions || []) {
-        for (const g of s.audience || []) usedGroups.add(g);
+        for (const g of expandStudentGroupSelectors(config, s.audience || [])) {
+          usedGroups.add(g);
+        }
       }
     }
   }
@@ -376,24 +371,26 @@ export function buildMeetings(
       course.components || []
     ).entries()) {
       for (const [seriesIdx, series] of (component.sessions || []).entries()) {
-        if (
-          series.dates &&
-          series.times &&
-          series.rooms &&
-          series.instructors
-        ) {
-          for (let i = 0; i < series.dates.length; i++) {
+        const audienceGroups = expandStudentGroupSelectors(
+          config,
+          series.audience || [],
+        );
+        const dateCount = series.dates?.length ?? 0;
+        const timeCount = series.times?.length ?? 0;
+        if (dateCount > 0 && timeCount > 0) {
+          const meetingCount = Math.min(dateCount, timeCount);
+          for (let i = 0; i < meetingCount; i++) {
             flat.push({
               instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:${i}`,
               course: course.name,
               tag: component.tag,
-              groups: series.audience,
-              date: series.dates[i],
-              start: series.times[i].slice(0, 5),
-              room: series.rooms[i],
-              instructors: series.instructors[i],
+              groups: audienceGroups,
+              date: series.dates![i],
+              start: String(series.times![i]).slice(0, 5),
+              room: series.rooms?.[i] ?? "",
+              instructors: series.instructors?.[i] ?? "",
               instructor_pool: component.instructor_pool,
-              sections: coursesToSections[courseIdx] || ["Unknown"],
+              sections: coursesToSections[courseIdx] ?? [],
             });
           }
         }
@@ -408,13 +405,13 @@ export function buildMeetings(
                 instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
                 course: course.name,
                 tag: component.tag,
-                groups: series.audience,
+                groups: audienceGroups,
                 date,
                 start: String(slot.time).slice(0, 5),
                 room: slot.room ?? "",
                 instructors: slot.instructor ?? "",
                 instructor_pool: component.instructor_pool,
-                sections: coursesToSections[courseIdx] || ["Unknown"],
+                sections: coursesToSections[courseIdx] ?? [],
               });
             }
           }
@@ -430,25 +427,26 @@ export function buildCoursesToSections(config: SchemaScheduleConfig) {
   for (const section of config.sections) {
     const sectionCode = section.code;
     for (const program of section.programs) {
-      for (const track of program.tracks || []) {
-        for (const group of track.groups) {
+      for (const track of normalizeTracksFromSectionProgram(program)) {
+        for (const group of track.groups || []) {
           groupsToSections[group] = sectionCode;
         }
-      }
-      for (const group of program.groups || []) {
-        groupsToSections[group] = sectionCode;
       }
     }
   }
   const coursesToSections: { [key: string]: string[] } = {};
   for (const [courseIdx, course] of config.courses.entries()) {
     const courseSections = new Set<string>();
-    for (const [_, component] of course.components.entries()) {
-      component.student_groups.forEach((studentGroup) =>
-        courseSections.add(groupsToSections[studentGroup]),
-      );
+    for (const component of course.components) {
+      for (const groupId of expandStudentGroupSelectors(
+        config,
+        component.student_groups || [],
+      )) {
+        const sectionCode = groupsToSections[groupId];
+        if (sectionCode) courseSections.add(sectionCode);
+      }
     }
-    coursesToSections[courseIdx] = courseSections.values().toArray();
+    coursesToSections[courseIdx] = Array.from(courseSections);
   }
 
   return coursesToSections;
@@ -458,11 +456,7 @@ export function buildWeeks(meetings: Meeting[]) {
   const dates = uniqueSorted(meetings.map((m) => m.date));
   const byWeek: Record<string, string[]> = {};
   for (const d of dates) {
-    const dt = new Date(`${d}T00:00:00`);
-    const monday = new Date(dt);
-    const day = (dt.getDay() + 6) % 7;
-    monday.setDate(dt.getDate() - day);
-    const monStr = monday.toISOString().slice(0, 10);
+    const monStr = weekStartMondayIso(d);
     if (!byWeek[monStr]) byWeek[monStr] = [];
     byWeek[monStr].push(d);
   }
@@ -482,24 +476,13 @@ export function buildGrid(
   tabMode: string,
 ): BuiltGrid {
   const meetings = filterMeetingsByTab(allMeetings, tabMode).filter((m) => {
-    const dt = new Date(`${m.date}T00:00:00`);
-    const monday = new Date(dt);
-    const day = (dt.getDay() + 6) % 7;
-    monday.setDate(dt.getDate() - day);
-    return monday.toISOString().slice(0, 10) === weekStart;
+    return weekStartMondayIso(m.date) === weekStart;
   });
 
-  const term = config.term as
-    | { days?: string[]; time_slots?: string[] }
-    | undefined;
-  const allowedDays = term?.days || ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const slotStartsRaw = (
-    term?.time_slots?.length ? term.time_slots : DEFAULT_TIME_SLOTS
-  )
+  const allowedDays = config.term.days;
+  const slotStarts = config.term.time_slots
     .map((t) => String(t).trim().slice(0, 5))
     .filter((t) => t.length > 0);
-  const slotStarts =
-    slotStartsRaw.length > 0 ? slotStartsRaw : DEFAULT_TIME_SLOTS;
   const slots = slotStarts.map((s) => ({
     start: s,
     end: add90m(s),
@@ -589,17 +572,13 @@ export function columnsForTab(
     };
     const byId: Record<string, Column> = {};
     for (const col of baseColumns) byId[col.groupId] = col;
-    const englishPrograms = ((
-      (config.sections as {
-        code?: string;
-        programs?: { tracks?: { name?: string; groups?: string[] }[] }[];
-      }[]) || []
-    ).find((section) => String(section?.code || "") === "english")?.programs ||
-      []) as { tracks?: { name?: string; groups?: string[] }[] }[];
+    const englishPrograms =
+      config.sections.find((section) => section.code === "english")?.programs ??
+      [];
     const ordered: Column[] = [];
     const seen = new Set<string>();
     for (const program of englishPrograms) {
-      for (const track of program?.tracks || []) {
+      for (const track of normalizeTracksFromSectionProgram(program)) {
         const trackLabel = normalizeEnglishTrackLabel(track?.name || "", "");
         for (const gid of track?.groups || []) {
           if (!usedGroups.has(gid) || seen.has(gid)) continue;
@@ -637,11 +616,7 @@ export function filterMeetingsToCurrentWeek(
   const wk = weeks[weekIndex];
   if (!wk) return [];
   return (meetings || []).filter((m) => {
-    const dt = new Date(`${m.date}T00:00:00`);
-    const monday = new Date(dt);
-    const day = (dt.getDay() + 6) % 7;
-    monday.setDate(dt.getDate() - day);
-    return monday.toISOString().slice(0, 10) === wk.start;
+    return weekStartMondayIso(m.date) === wk.start;
   });
 }
 

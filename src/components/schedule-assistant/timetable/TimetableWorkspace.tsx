@@ -354,15 +354,12 @@ function TimetableWorkspaceInner() {
     };
   }, []);
 
-  const gridTabMode =
-    activeTab === "core" || activeTab === "english" ? activeTab : "all";
-
   const grid: BuiltGrid | null = useMemo(() => {
     if (!config || !allMeetings.length || !weeks.length) return null;
     const wk = weeks[weekIndex];
     if (!wk) return null;
-    return buildGrid(config, allMeetings, wk.start, gridTabMode);
-  }, [config, allMeetings, weeks, weekIndex, gridTabMode]);
+    return buildGrid(config, allMeetings, wk.start, activeTab);
+  }, [config, allMeetings, weeks, weekIndex, activeTab]);
 
   const selectMeeting = useCallback(
     (valueKey: string, course: string) => {

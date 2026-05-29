@@ -83,13 +83,13 @@ function createEmptyScheduleConfigDraft(): SchemaScheduleConfig {
       },
       days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
       time_slots: [
-        "09:00",
-        "10:30",
-        "12:10",
-        "14:00",
-        "15:30",
-        "17:10",
-        "18:40",
+        "09:00-10:30",
+        "10:40-12:10",
+        "12:40-14:10",
+        "14:20-15:50",
+        "16:00-17:30",
+        "17:40-19:10",
+        "19:20-20:50",
       ],
     },
     rooms: [],
@@ -138,8 +138,11 @@ function createConfigStore(
       if (!configFile) {
         return { ok: false, message: "Выберите файл config.yaml." };
       }
-      const config = await readYamlFile(configFile);
-      setConfigData((config || null) as SchemaScheduleConfig | null);
+      const parsed = await readYamlFile(configFile);
+      if (!parsed || typeof parsed !== "object") {
+        return { ok: false, message: "Некорректный config.yaml." };
+      }
+      setConfigData(parsed as SchemaScheduleConfig);
       return { ok: true };
     } catch (e: any) {
       return {
@@ -225,7 +228,6 @@ function createConfigStore(
         name_en: null,
         name_ru: null,
         position: null,
-        role: null,
       });
     });
   }
@@ -447,6 +449,38 @@ function mutateProgramInDraft(
   }
 }
 
+function replaceStudentGroupInCourses(
+  draft: SchemaScheduleConfig,
+  oldCode: string,
+  newCode: string | null,
+) {
+  for (const course of draft.courses) {
+    for (const component of course.components || []) {
+      if (Array.isArray(component.student_groups)) {
+        component.student_groups = component.student_groups
+          .map((token) => {
+            if (String(token) !== oldCode) return token;
+            return newCode;
+          })
+          .filter((token): token is string => {
+            return token != null && String(token).length > 0;
+          });
+      }
+      for (const series of component.sessions || []) {
+        if (!Array.isArray(series?.audience)) continue;
+        series.audience = series.audience
+          .map((token) => {
+            if (String(token) !== oldCode) return token;
+            return newCode;
+          })
+          .filter((token): token is string => {
+            return token != null && String(token).length > 0;
+          });
+      }
+    }
+  }
+}
+
 function renameStudentGroupInDraft(
   draft: SchemaScheduleConfig,
   oldCode: string,
@@ -462,6 +496,8 @@ function renameStudentGroupInDraft(
     (candidate) => String(candidate.code) === oldCode,
   );
   if (target) target.code = newCode;
+
+  replaceStudentGroupInCourses(draft, oldCode, newCode);
 
   for (const section of draft.sections) {
     if (!Array.isArray(section.programs)) continue;
@@ -487,6 +523,8 @@ function deleteStudentGroupFromDraft(
   draft: SchemaScheduleConfig,
   groupCode: string,
 ) {
+  replaceStudentGroupInCourses(draft, groupCode, null);
+
   draft.students_groups = draft.students_groups.filter(
     (candidate) => String(candidate.code) !== groupCode,
   );
