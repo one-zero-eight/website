@@ -11,12 +11,8 @@ import {
 
 const COURSES_SUBTAB_STORAGE_KEY = "schedule-assistant:settings:courses-subtab";
 
-export function CoursesTabContent({
-  onAddCourse,
-}: {
-  onAddCourse: () => void;
-}) {
-  const { config } = useConfig();
+export function CoursesTabContent() {
+  const { config, updateConfigData } = useConfig();
   const { selectedSelectionId, selectItem } = useSelection();
   const sections = useMemo(() => buildCoursesTabSections(config), [config]);
   const [activeSectionKey, setActiveSectionKey] = useState(() => {
@@ -48,7 +44,15 @@ export function CoursesTabContent({
         <button
           type="button"
           className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
-          onClick={onAddCourse}
+          onClick={() =>
+            updateConfigData((draft) => {
+              draft.courses.push({
+                name: "Новый курс",
+                course_tags: [],
+                components: [],
+              });
+            })
+          }
         >
           Добавить курс
         </button>
@@ -124,7 +128,15 @@ export function CoursesTabContent({
       <button
         type="button"
         className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
-        onClick={onAddCourse}
+        onClick={() =>
+          updateConfigData((draft) => {
+            draft.courses.push({
+              name: "Новый курс",
+              course_tags: [],
+              components: [],
+            });
+          })
+        }
       >
         Добавить курс
       </button>

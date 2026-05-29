@@ -7,6 +7,10 @@ import {
   buildProgramsGroupsTreeViewSectionTabs,
 } from "@/components/schedule-assistant/settings/groups/programsGroupsTreeView.ts";
 import { SectionTabsBar } from "@/components/schedule-assistant/settings/SectionTabsBar.tsx";
+import {
+  SchemaSectionProgram,
+  SectionProgramLanguageAnyOf0,
+} from "@/api/schedule-assistant/types.ts";
 import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   getSettingsSelectionKey,
@@ -16,12 +20,8 @@ import {
 const STUDENT_GROUPS_SUBTAB_STORAGE_KEY =
   "schedule-assistant:settings:groups-subtab";
 
-export function GroupsTabContent({
-  onAddProgram,
-}: {
-  onAddProgram: (sectionCode: string) => void;
-}) {
-  const { config } = useConfig();
+export function GroupsTabContent() {
+  const { config, updateConfigData } = useConfig();
   const { selectedSelectionId, selectItem } = useSelection();
   const programsGroupsTreeView = useMemo(
     () => buildProgramsGroupsTreeView(config),
@@ -272,7 +272,25 @@ export function GroupsTabContent({
       <button
         type="button"
         className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
-        onClick={() => onAddProgram(activeSectionKey)}
+        onClick={() =>
+          updateConfigData((draft) => {
+            const section = draft.sections.find(
+              (s) => s.code === activeSectionKey,
+            )!;
+            const newProgram: SchemaSectionProgram = {
+              code: `new-program-${section.programs.length + 1}`,
+              name: "Новая программа",
+              kind: "degree_year",
+              degree: null,
+              language: SectionProgramLanguageAnyOf0.en,
+              year: null,
+              applies_to: [],
+              tracks: [],
+              groups: [],
+            };
+            section.programs.push(newProgram);
+          })
+        }
       >
         Добавить программу
       </button>

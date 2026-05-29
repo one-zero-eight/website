@@ -39,7 +39,7 @@ function SettingsWorkspaceInner({
 }: {
   settingsTab: SettingsSubTab;
 }) {
-  const { config, addProgram, addRoom, addCourse, addInstructor } = useConfig();
+  const { config } = useConfig();
   const {
     settingsSubTab,
     setSettingsSubTab,
@@ -96,13 +96,13 @@ function SettingsWorkspaceInner({
           <div className="flex h-full min-h-0 flex-col">
             <div className="min-h-0 flex-1 overflow-auto p-3">
               {settingsSubTab === "groups" ? (
-                <GroupsTabContent onAddProgram={addProgram} />
+                <GroupsTabContent />
               ) : settingsSubTab === "courses" ? (
-                <CoursesTabContent onAddCourse={addCourse} />
+                <CoursesTabContent />
               ) : settingsSubTab === "rooms" ? (
-                <RoomsTabContent onAddRoom={addRoom} />
+                <RoomsTabContent />
               ) : settingsSubTab === "instructors" ? (
-                <InstructorsTabContent onAddInstructor={addInstructor} />
+                <InstructorsTabContent />
               ) : settingsSubTab === "semester" ? (
                 <SemesterTabContent />
               ) : null}

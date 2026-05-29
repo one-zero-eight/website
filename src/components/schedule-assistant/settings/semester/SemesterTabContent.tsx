@@ -1,12 +1,43 @@
+import type { ConfigLoadResult } from "@/components/schedule-assistant/settings/ConfigLoadModal.tsx";
+import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { ConfigLoadModal } from "@/components/schedule-assistant/settings/ConfigLoadModal.tsx";
 import { SemesterDetails } from "@/components/schedule-assistant/settings/SettingsSidebarDetails.tsx";
-import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
+import { parse, stringify } from "yaml";
 import { useState } from "react";
 
 export function SemesterTabContent() {
-  const { config, loadConfigFiles, exportConfig } = useConfig();
-  const canExportConfig = config != null;
+  const { config, setConfigData } = useConfig();
   const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
+
+  async function loadConfigFiles(
+    configFile: File | null,
+  ): Promise<ConfigLoadResult> {
+    try {
+      if (!configFile) {
+        return { ok: false, message: "Выберите файл config.yaml." };
+      }
+      const parsed = parse(await configFile.text()) as SchemaScheduleConfig;
+      setConfigData(parsed);
+      return { ok: true };
+    } catch (e: any) {
+      return {
+        ok: false,
+        message: `Ошибка чтения YAML: ${e?.message || String(e)}`,
+      };
+    }
+  }
+
+  function exportConfig() {
+    const text = stringify(config);
+    const blob = new Blob([text], { type: "application/x-yaml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "config.yaml";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-0.5 pt-0.5 pb-1">
@@ -26,7 +57,6 @@ export function SemesterTabContent() {
             <button
               type="button"
               className="btn btn-outline btn-secondary btn-sm"
-              disabled={!canExportConfig}
               onClick={exportConfig}
             >
               Выгрузить конфигурацию

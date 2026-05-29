@@ -28,14 +28,6 @@ export function SettingsSidebar() {
     return null;
   }
 
-  if (config == null) {
-    return (
-      <div className="text-base-content/70 text-sm">
-        Загрузите конфигурацию, чтобы редактировать настройки.
-      </div>
-    );
-  }
-
   if (!selectedSelection) {
     return <SelectItemNotice />;
   }

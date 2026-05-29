@@ -5,6 +5,13 @@ import {
   SectionProgramLanguageAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
 import {
+  nextGroupIdentifiers,
+  programCodeForGroupIdentifiers,
+} from "@/components/schedule-assistant/config/groupIdentifiers.ts";
+import {
+  deleteStudentGroupFromDraft,
+  mutateProgramInDraft,
+  renameStudentGroupInDraft,
   useConfig,
   useCourse,
   useInstructor,
@@ -294,7 +301,8 @@ export function SettingsSidebarDetailFrame({
 }
 
 export function RoomDetails({ roomId }: { roomId: string }) {
-  const { room, roomState, deleteRoom } = useRoom(roomId);
+  const { room, roomState, roomIndex } = useRoom(roomId);
+  const { updateConfigData } = useConfig();
   const { deselectItem } = useSelection();
   const headingTitle = room ? String(room.id) : roomId || "—";
   const headingSubtitle = "Аудитория";
@@ -354,7 +362,9 @@ export function RoomDetails({ roomId }: { roomId: string }) {
         <SettingsDetailDeleteButton
           label="Удалить аудиторию"
           onClick={() => {
-            deleteRoom();
+            updateConfigData((draft) => {
+              draft.rooms.splice(roomIndex, 1);
+            });
             deselectItem();
           }}
         />
@@ -365,8 +375,7 @@ export function RoomDetails({ roomId }: { roomId: string }) {
 
 export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const { config, updateConfigData } = useConfig();
-  const { course, courseState, updateCourseComponents, deleteCourse } =
-    useCourse(courseIndex);
+  const { course, courseState } = useCourse(courseIndex);
   const { deselectItem } = useSelection();
   const name = String(course?.name ?? "");
   const tags = Array.isArray(course?.course_tags)
@@ -428,7 +437,10 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
       return;
     }
     setParseError(null);
-    updateCourseComponents(result.value as SchemaCourseConfig["components"]);
+    updateConfigData((draft) => {
+      draft.courses[courseIndex].components =
+        result.value as SchemaCourseConfig["components"];
+    });
   }
 
   return (
@@ -493,7 +505,9 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
         <SettingsDetailDeleteButton
           label="Удалить курс"
           onClick={() => {
-            deleteCourse();
+            updateConfigData((draft) => {
+              draft.courses.splice(courseIndex, 1);
+            });
             deselectItem();
           }}
         />
@@ -515,12 +529,8 @@ export function GroupDetails({
   trackIndex: number;
   titleFallback?: string;
 }) {
-  const {
-    studentGroup,
-    studentGroupState,
-    renameStudentGroup,
-    deleteStudentGroup,
-  } = useStudentGroup(groupId);
+  const { studentGroup, studentGroupState } = useStudentGroup(groupId);
+  const { updateConfigData } = useConfig();
   const { track } = useTrack(sectionCode, programIndex, trackIndex);
   const { selectItem, deselectItem } = useSelection();
   const code = groupId;
@@ -563,7 +573,9 @@ export function GroupDetails({
             onChange={(event) => {
               const newId = event.target.value.trim();
               if (!newId || newId === groupId) return;
-              renameStudentGroup(newId);
+              updateConfigData((draft) => {
+                renameStudentGroupInDraft(draft, groupId, newId);
+              });
               selectItem({
                 kind: "group",
                 sectionCode,
@@ -626,7 +638,9 @@ export function GroupDetails({
         <SettingsDetailDeleteButton
           label="Удалить группу"
           onClick={() => {
-            deleteStudentGroup();
+            updateConfigData((draft) => {
+              deleteStudentGroupFromDraft(draft, groupId);
+            });
             deselectItem();
           }}
         />
@@ -642,11 +656,8 @@ export function ProgramDetails({
   sectionCode: string;
   programIndex: number;
 }) {
-  const { moveTrack, deleteTrackAtIndex } = useConfig();
-  const { program, programState, addTrack, deleteProgram } = useProgram(
-    sectionCode,
-    programIndex,
-  );
+  const { updateConfigData } = useConfig();
+  const { program, programState } = useProgram(sectionCode, programIndex);
   const { selectItem, deselectItem } = useSelection();
   const name = String(program?.name ?? "");
   const code = String(program?.code ?? "");
@@ -732,7 +743,23 @@ export function ProgramDetails({
         <SettingsDetailNestedList
           sectionTitle="Треки"
           addButtonLabel="Добавить трек"
-          onAdd={addTrack}
+          onAdd={() =>
+            updateConfigData((draft) => {
+              mutateProgramInDraft(
+                draft,
+                sectionCode,
+                programIndex,
+                (target) => {
+                  target.tracks.push({
+                    code: `new-track-${target.tracks.length + 1}`,
+                    name: `Новый трек ${target.tracks.length + 1}`,
+                    kind: null,
+                    groups: [],
+                  });
+                },
+              );
+            })
+          }
           emptyHint="Нет треков"
           isEmpty={!tracks.length}
         >
@@ -742,13 +769,42 @@ export function ProgramDetails({
               disableMoveUp={index === 0}
               disableMoveDown={index === tracks.length - 1}
               onMoveUp={() =>
-                moveTrack(sectionCode, programIndex, index, index - 1)
+                updateConfigData((draft) => {
+                  mutateProgramInDraft(
+                    draft,
+                    sectionCode,
+                    programIndex,
+                    (target) => {
+                      const [moved] = target.tracks.splice(index, 1);
+                      target.tracks.splice(index - 1, 0, moved);
+                    },
+                  );
+                })
               }
               onMoveDown={() =>
-                moveTrack(sectionCode, programIndex, index, index + 1)
+                updateConfigData((draft) => {
+                  mutateProgramInDraft(
+                    draft,
+                    sectionCode,
+                    programIndex,
+                    (target) => {
+                      const [moved] = target.tracks.splice(index, 1);
+                      target.tracks.splice(index + 1, 0, moved);
+                    },
+                  );
+                })
               }
               onDelete={() =>
-                deleteTrackAtIndex(sectionCode, programIndex, index)
+                updateConfigData((draft) => {
+                  mutateProgramInDraft(
+                    draft,
+                    sectionCode,
+                    programIndex,
+                    (target) => {
+                      target.tracks.splice(index, 1);
+                    },
+                  );
+                })
               }
             >
               <SettingsDetailSelectableRowButton
@@ -769,7 +825,12 @@ export function ProgramDetails({
         <SettingsDetailDeleteButton
           label="Удалить программу"
           onClick={() => {
-            deleteProgram();
+            updateConfigData((draft) => {
+              const section = draft.sections.find(
+                (candidate) => candidate.code === sectionCode,
+              )!;
+              section.programs.splice(programIndex, 1);
+            });
             deselectItem();
           }}
         />
@@ -789,13 +850,8 @@ export function TrackDetails({
   trackIndex: number;
   titleFallback?: string;
 }) {
-  const { config, addGroupToTrack, removeGroupFromTrackAndConfig } =
-    useConfig();
-  const { track, trackState, setTrackGroups, deleteTrack } = useTrack(
-    sectionCode,
-    programIndex,
-    trackIndex,
-  );
+  const { config, updateConfigData } = useConfig();
+  const { track, trackState } = useTrack(sectionCode, programIndex, trackIndex);
   const { program } = useProgram(sectionCode, programIndex);
   const { selectItem, deselectItem } = useSelection();
   const name = String(track?.name ?? titleFallback ?? "");
@@ -861,7 +917,43 @@ export function TrackDetails({
           sectionTitle="Группы"
           addButtonLabel="Добавить группу"
           onAdd={() =>
-            addGroupToTrack(sectionCode, programIndex, trackIndex, program)
+            updateConfigData((draft) => {
+              mutateProgramInDraft(
+                draft,
+                sectionCode,
+                programIndex,
+                (target) => {
+                  const draftTrack = target.tracks[trackIndex];
+                  const existingIds = [...draftTrack.groups];
+                  const { code: newGroupId, name: newGroupName } =
+                    nextGroupIdentifiers(
+                      existingIds,
+                      (id) => {
+                        const entity = draft.students_groups.find(
+                          (candidate) => candidate.code === id,
+                        );
+                        return entity?.name ?? undefined;
+                      },
+                      {
+                        programCode: programCodeForGroupIdentifiers(
+                          program,
+                          sectionCode,
+                          programIndex,
+                        ),
+                        track: draftTrack,
+                      },
+                    );
+                  draftTrack.groups.push(newGroupId);
+                  draft.students_groups.push({
+                    code: newGroupId,
+                    kind: "core",
+                    name: newGroupName,
+                    estimated_size: null,
+                    students: [],
+                  });
+                },
+              );
+            })
           }
           emptyHint="Нет групп"
           isEmpty={!groups.length}
@@ -876,22 +968,50 @@ export function TrackDetails({
                 const reordered = [...trackGroups];
                 const [moved] = reordered.splice(index, 1);
                 reordered.splice(index - 1, 0, moved);
-                setTrackGroups(reordered);
+                updateConfigData((draft) => {
+                  mutateProgramInDraft(
+                    draft,
+                    sectionCode,
+                    programIndex,
+                    (target) => {
+                      target.tracks[trackIndex].groups = reordered;
+                    },
+                  );
+                });
               }}
               onMoveDown={() => {
                 if (index >= trackGroups.length - 1) return;
                 const reordered = [...trackGroups];
                 const [moved] = reordered.splice(index, 1);
                 reordered.splice(index + 1, 0, moved);
-                setTrackGroups(reordered);
+                updateConfigData((draft) => {
+                  mutateProgramInDraft(
+                    draft,
+                    sectionCode,
+                    programIndex,
+                    (target) => {
+                      target.tracks[trackIndex].groups = reordered;
+                    },
+                  );
+                });
               }}
               onDelete={() =>
-                removeGroupFromTrackAndConfig(
-                  sectionCode,
-                  programIndex,
-                  trackIndex,
-                  String(group.id),
-                )
+                updateConfigData((draft) => {
+                  mutateProgramInDraft(
+                    draft,
+                    sectionCode,
+                    programIndex,
+                    (target) => {
+                      const draftTrack = target.tracks[trackIndex];
+                      draftTrack.groups = draftTrack.groups.filter(
+                        (current) => current !== String(group.id),
+                      );
+                    },
+                  );
+                  draft.students_groups = draft.students_groups.filter(
+                    (candidate) => candidate.code !== String(group.id),
+                  );
+                })
               }
             >
               <SettingsDetailSelectableRowButton
@@ -914,7 +1034,16 @@ export function TrackDetails({
         <SettingsDetailDeleteButton
           label="Удалить трек"
           onClick={() => {
-            deleteTrack();
+            updateConfigData((draft) => {
+              mutateProgramInDraft(
+                draft,
+                sectionCode,
+                programIndex,
+                (target) => {
+                  target.tracks.splice(trackIndex, 1);
+                },
+              );
+            });
             deselectItem();
           }}
         />
@@ -928,8 +1057,8 @@ export function InstructorDetails({
 }: {
   instructorIndex: number;
 }) {
-  const { instructor, instructorState, deleteInstructor } =
-    useInstructor(instructorIndex);
+  const { instructor, instructorState } = useInstructor(instructorIndex);
+  const { updateConfigData } = useConfig();
   const { deselectItem } = useSelection();
   const headingTitle =
     instructor?.name_ru ??
@@ -1011,7 +1140,9 @@ export function InstructorDetails({
         <SettingsDetailDeleteButton
           label="Удалить преподавателя"
           onClick={() => {
-            deleteInstructor();
+            updateConfigData((draft) => {
+              draft.instructors.splice(instructorIndex, 1);
+            });
             deselectItem();
           }}
         />

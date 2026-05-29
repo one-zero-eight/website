@@ -8,12 +8,8 @@ import {
 import clsx from "clsx";
 import { useMemo } from "react";
 
-export function InstructorsTabContent({
-  onAddInstructor,
-}: {
-  onAddInstructor: () => void;
-}) {
-  const { config } = useConfig();
+export function InstructorsTabContent() {
+  const { config, updateConfigData } = useConfig();
   const { selectedSelectionId, selectItem } = useSelection();
   const items: SettingsListRow[] = useMemo(
     () =>
@@ -70,7 +66,18 @@ export function InstructorsTabContent({
       <button
         type="button"
         className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
-        onClick={onAddInstructor}
+        onClick={() =>
+          updateConfigData((draft) => {
+            draft.instructors.push({
+              id: `new-instructor-${draft.instructors.length + 1}`,
+              alias: null,
+              email: null,
+              name_en: null,
+              name_ru: null,
+              position: null,
+            });
+          })
+        }
       >
         Добавить преподавателя
       </button>

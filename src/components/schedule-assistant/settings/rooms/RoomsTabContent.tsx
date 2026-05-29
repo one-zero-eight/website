@@ -27,8 +27,8 @@ function roomCapacityToLabel(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
-export function RoomsTabContent({ onAddRoom }: { onAddRoom: () => void }) {
-  const { config } = useConfig();
+export function RoomsTabContent() {
+  const { config, updateConfigData } = useConfig();
   const { selectedSelectionId, selectItem } = useSelection();
   const groups: RoomsFloorGroup[] = useMemo(() => {
     const roomsItems: RoomListRow[] = (config?.rooms || []).map(
@@ -111,7 +111,15 @@ export function RoomsTabContent({ onAddRoom }: { onAddRoom: () => void }) {
       <button
         type="button"
         className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
-        onClick={onAddRoom}
+        onClick={() =>
+          updateConfigData((draft) => {
+            draft.rooms.push({
+              id: `NEW-${draft.rooms.length + 1}`,
+              name: "",
+              capacity: 0,
+            });
+          })
+        }
       >
         Добавить аудиторию
       </button>
