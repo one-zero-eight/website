@@ -954,13 +954,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   }, [bookings]);
 
   return (
-    <div
-      className={cn(
-        "relative overflow-clip",
-        isPending && "calendar-loading",
-        draftPhase && "pb-28",
-      )}
-    >
+    <div className={cn(isPending && "calendar-loading", draftPhase && "pb-28")}>
       <MemoizedCalendar
         calendarRef={calendarRef}
         calendarView={calendarView}
