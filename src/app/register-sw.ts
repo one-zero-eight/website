@@ -1,10 +1,13 @@
 import { registerSW } from "virtual:pwa-register";
+import { repairPoisonedPrecache } from "./sw-cache-repair.ts";
 
 export function registerServiceWorker() {
   // Enable offline support via PWA service worker
   registerSW({
     onRegisteredSW(swUrl, r) {
       if (r === undefined) return;
+
+      void repairPoisonedPrecache(r);
 
       // Check for updates periodically
       // https://vite-pwa-org.netlify.app/guide/periodic-sw-updates.html
@@ -30,6 +33,14 @@ export function registerServiceWorker() {
 
       // Check every 30 minutes
       setInterval(checkUpdate, 30 * 60 * 1000);
+
+      // Trigger update check on page focus
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          void repairPoisonedPrecache(r);
+          void checkUpdate();
+        }
+      });
     },
   });
 }
