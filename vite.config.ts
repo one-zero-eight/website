@@ -8,6 +8,7 @@ import { defineConfig } from "vite";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
 import mkcert from "vite-plugin-mkcert";
 import { VitePWA } from "vite-plugin-pwa";
+import { sri } from "vite-plugin-sri3";
 import { fileURLToPath, URL } from "node:url";
 import { version } from "./package.json";
 
@@ -66,6 +67,9 @@ export default defineConfig({
 
     // Minify the index.html
     ViteMinifyPlugin({}),
+
+    // Subresource Integrity for built JS/CSS in index.html
+    sri(),
   ],
 
   server: {
