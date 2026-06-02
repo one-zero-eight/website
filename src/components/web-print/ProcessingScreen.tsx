@@ -9,25 +9,27 @@ import { $printers } from "@/api/printers";
 export function ProcessingScreen({
   setScreenSwitch,
   preparedFile,
-  meaningfulFileName,
-  setMeaningfulFileName,
+  downloadFileName,
+  setDownloadFileName,
   stopJobsRef,
   configurationType,
   scanningInProgressTransfer,
   setOneMoreScanTransfer,
   prepareFile,
   getFile,
+  fileBlob,
 }: {
   setScreenSwitch: (value: boolean) => void;
   preparedFile: File | undefined;
-  meaningfulFileName: string | undefined;
-  setMeaningfulFileName: (value: string) => void;
+  downloadFileName: string | undefined;
+  setDownloadFileName: (value: string) => void;
   stopJobsRef: RefObject<boolean>;
   configurationType: boolean;
   scanningInProgressTransfer: boolean;
   setOneMoreScanTransfer: (value: boolean) => void;
   prepareFile: (file: File, scan: boolean) => Promise<string>;
   getFile: (filename: string, scan: boolean) => Promise<void>;
+  fileBlob: string | undefined;
 }) {
   const { mutateAsync: deleteScanFileFromTheServer } = $printers.useMutation(
     "post",
@@ -40,19 +42,15 @@ export function ProcessingScreen({
         <FileDrop
           fileProcess={() => {}}
           isFileProcessing={false}
-          blobPreviewURL={
-            preparedFile
-              ? URL.createObjectURL(preparedFile) +
-                `#filename=${meaningfulFileName || preparedFile.name}`
-              : undefined
-          }
+          blobPreviewURL={fileBlob}
+          downloadFileName={downloadFileName}
           isFunctional={false}
         />
         <div
           className={`${styles.configurationBox} ${styles.configurationBox_loading}`}
         >
           <p className={`${fontStyles.headFont} ${fontStyles.color}`}>
-            {meaningfulFileName || `${preparedFile?.name}`}
+            {downloadFileName}
           </p>
           {(configurationType || scanningInProgressTransfer) && (
             <span
@@ -94,8 +92,8 @@ export function ProcessingScreen({
                   ></span>
                 </div>
                 <ScalableDocumentNameInput
-                  defaultValue={meaningfulFileName}
-                  onTyped={setMeaningfulFileName}
+                  defaultValue={downloadFileName}
+                  onTyped={setDownloadFileName}
                 />
               </div>
             </div>
