@@ -25,7 +25,8 @@ export function ConfigurationScreen({
   setScannerInProgressTransfer,
   oneMoreScanTransfer,
   setOneMoreScanTransfer,
-  meaningfulFileName,
+  fileBlob,
+  downloadFileName,
 }: {
   screenSwitch: boolean;
   setScreenSwitch: (value: boolean) => void;
@@ -45,7 +46,8 @@ export function ConfigurationScreen({
   setScannerInProgressTransfer: (value: boolean) => void;
   oneMoreScanTransfer: boolean;
   setOneMoreScanTransfer: (value: boolean) => void;
-  meaningfulFileName: string | undefined;
+  fileBlob: string | undefined;
+  downloadFileName: string | undefined;
 }) {
   const [alert, setAlert] = useState<JSX.Element | null>(null);
 
@@ -87,12 +89,8 @@ export function ConfigurationScreen({
             await getFile(await prepareFile(file));
           }}
           isFileProcessing={isFilePreparing || isFileDownloading}
-          blobPreviewURL={
-            preparedFile
-              ? URL.createObjectURL(preparedFile) +
-                `#filename=${meaningfulFileName || preparedFile.name}`
-              : undefined
-          }
+          blobPreviewURL={fileBlob}
+          downloadFileName={downloadFileName}
           isFunctional={configurationType}
         />
       </div>
