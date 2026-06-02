@@ -9,11 +9,13 @@ export function FileDrop({
   fileProcess,
   isFileProcessing,
   blobPreviewURL,
+  downloadFileName,
   isFunctional,
 }: {
   fileProcess: (file: File) => void;
   isFileProcessing: boolean;
   blobPreviewURL: string | undefined;
+  downloadFileName: string | undefined;
   isFunctional: boolean;
 }) {
   const [alert, setAlert] = useState<JSX.Element | null>(null);
@@ -28,9 +30,9 @@ export function FileDrop({
     "application/vnd.oasis.opendocument.text," +
     "application/vnd.oasis.opendocument.spreadsheet";
 
-  const dropAreaReference = useRef<HTMLDivElement>(null);
-  const fileInputReference = useRef<HTMLLabelElement>(null);
-  const previewReference = useRef<HTMLEmbedElement>(null);
+  const dropAreaReference = useRef<HTMLDivElement | null>(null);
+  const fileInputReference = useRef<HTMLLabelElement | null>(null);
+  const previewReference = useRef<HTMLEmbedElement | null>(null);
 
   useEffect(() => {
     if (!isFunctional) return;
@@ -227,7 +229,7 @@ export function FileDrop({
         {!isFunctional && blobPreviewURL && (
           <a
             href={blobPreviewURL}
-            download={blobPreviewURL.split("#filename=")[1]}
+            download={downloadFileName}
             className={`${styles.button} ${marginStyles.bottomMargin_doubleMainPadding} ${fontStyles.buttonFont}`}
           >
             Download

@@ -22,8 +22,9 @@ export function WebPrintPage() {
   const [configurationType, setConfigurationType] = useState<boolean>(true);
   const [screenSwitch, setScreenSwitch] = useState<boolean>(false); // false is configuration
   const [preparedFile, setPreparedFile] = useState<File>();
+  const [fileBlob, setFileBlob] = useState<string | undefined>(undefined);
   const [preparedFileName, setPreparedFileName] = useState<string>();
-  const [meaningfulFileName, setMeaningfulFilName] = useState<string>();
+  const [downloadFileName, setDownloadFileName] = useState<string>();
   const [preparedFilePagesCount, setPreparedFilePagesCount] =
     useState<number>();
 
@@ -79,9 +80,10 @@ export function WebPrintPage() {
         params: { query: { filename: filename } },
         parseAs: "blob",
       });
-      setPreparedFile(
-        new File([getResponse], filename, { type: "application/pdf" }),
-      );
+      setDownloadFileName(filename);
+      let newFile = new File([getResponse], filename, { type: "application/pdf" })
+      setPreparedFile(newFile);
+      setFileBlob(URL.createObjectURL(newFile))
     } catch (exception: any) {
       showPopupWithExceptionDetail("Documents processing problem", exception);
       throw exception;
@@ -102,6 +104,7 @@ export function WebPrintPage() {
             prepareFile={prepareFile}
             getFile={getFile}
             preparedFile={preparedFile}
+            fileBlob={fileBlob}
             preparedFileName={preparedFileName}
             isFilePreparing={isFilePreparing || isFileRemovePreparing}
             isFileDownloading={isFileDownloading}
@@ -115,13 +118,14 @@ export function WebPrintPage() {
             setScannerInProgressTransfer={setScanningInProgressTransfer}
             oneMoreScanTransfer={oneMoreScanTransfer}
             setOneMoreScanTransfer={setOneMoreScanTransfer}
-            meaningfulFileName={meaningfulFileName}
+            downloadFileName={downloadFileName}
           />
           <ProcessingScreen
             setScreenSwitch={setScreenSwitch}
             preparedFile={preparedFile}
-            meaningfulFileName={meaningfulFileName}
-            setMeaningfulFileName={setMeaningfulFilName}
+            fileBlob={fileBlob}
+            downloadFileName={downloadFileName}
+            setDownloadFileName={setDownloadFileName}
             stopJobsRef={stopJobsRef}
             configurationType={configurationType}
             scanningInProgressTransfer={scanningInProgressTransfer}
