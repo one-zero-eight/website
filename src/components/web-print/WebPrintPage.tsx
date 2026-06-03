@@ -6,6 +6,7 @@ import { ProcessingScreen } from "@/components/web-print/ProcessingScreen.tsx";
 import { JSX, useRef, useState } from "react";
 import { Modal } from "@/components/common/Modal.tsx";
 import { $printers } from "@/api/printers";
+import { ConfigurationSelectionScreen } from "@/components/web-print/ConfigurationSelectionScreen.tsx";
 
 export function WebPrintPage() {
   const [alert, setAlert] = useState<JSX.Element>();
@@ -19,7 +20,9 @@ export function WebPrintPage() {
     );
   }
 
-  const [configurationType, setConfigurationType] = useState<boolean>(true);
+  const [configurationType, setConfigurationType] = useState<
+    boolean | undefined
+  >(undefined);
   const [screenSwitch, setScreenSwitch] = useState<boolean>(false); // false is configuration
   const [preparedFile, setPreparedFile] = useState<File>();
   const [fileBlob, setFileBlob] = useState<string | undefined>(undefined);
@@ -81,9 +84,11 @@ export function WebPrintPage() {
         parseAs: "blob",
       });
       setDownloadFileName(filename);
-      let newFile = new File([getResponse], filename, { type: "application/pdf" })
+      const newFile = new File([getResponse], filename, {
+        type: "application/pdf",
+      });
       setPreparedFile(newFile);
-      setFileBlob(URL.createObjectURL(newFile))
+      setFileBlob(URL.createObjectURL(newFile));
     } catch (exception: any) {
       showPopupWithExceptionDetail("Documents processing problem", exception);
       throw exception;
@@ -98,41 +103,49 @@ export function WebPrintPage() {
         <DoubleScreenContainer
           className={screenSwitch && styles.doubleScreenContainer_moved}
         >
-          <ConfigurationScreen
-            screenSwitch={screenSwitch}
-            setScreenSwitch={setScreenSwitch}
-            prepareFile={prepareFile}
-            getFile={getFile}
-            preparedFile={preparedFile}
-            fileBlob={fileBlob}
-            preparedFileName={preparedFileName}
-            isFilePreparing={isFilePreparing || isFileRemovePreparing}
-            isFileDownloading={isFileDownloading}
-            showPopupWithExceptionDetail={showPopupWithExceptionDetail}
-            preparedFilePagesCount={preparedFilePagesCount}
-            stopJobsRef={stopJobsRef}
-            setPreparedFilePagesCount={setPreparedFilePagesCount}
-            setPreparedFileName={setPreparedFileName}
-            configurationType={configurationType}
-            setConfigurationType={setConfigurationType}
-            setScannerInProgressTransfer={setScanningInProgressTransfer}
-            oneMoreScanTransfer={oneMoreScanTransfer}
-            setOneMoreScanTransfer={setOneMoreScanTransfer}
-            downloadFileName={downloadFileName}
-          />
-          <ProcessingScreen
-            setScreenSwitch={setScreenSwitch}
-            preparedFile={preparedFile}
-            fileBlob={fileBlob}
-            downloadFileName={downloadFileName}
-            setDownloadFileName={setDownloadFileName}
-            stopJobsRef={stopJobsRef}
-            configurationType={configurationType}
-            scanningInProgressTransfer={scanningInProgressTransfer}
-            setOneMoreScanTransfer={setOneMoreScanTransfer}
-            prepareFile={prepareFile}
-            getFile={getFile}
-          />
+          {configurationType === undefined ? (
+            <ConfigurationSelectionScreen
+              setConfigurationType={setConfigurationType}
+            />
+          ) : (
+            <>
+              <ConfigurationScreen
+                screenSwitch={screenSwitch}
+                setScreenSwitch={setScreenSwitch}
+                prepareFile={prepareFile}
+                getFile={getFile}
+                preparedFile={preparedFile}
+                fileBlob={fileBlob}
+                preparedFileName={preparedFileName}
+                isFilePreparing={isFilePreparing || isFileRemovePreparing}
+                isFileDownloading={isFileDownloading}
+                showPopupWithExceptionDetail={showPopupWithExceptionDetail}
+                preparedFilePagesCount={preparedFilePagesCount}
+                stopJobsRef={stopJobsRef}
+                setPreparedFilePagesCount={setPreparedFilePagesCount}
+                setPreparedFileName={setPreparedFileName}
+                configurationType={configurationType}
+                setConfigurationType={setConfigurationType}
+                setScannerInProgressTransfer={setScanningInProgressTransfer}
+                oneMoreScanTransfer={oneMoreScanTransfer}
+                setOneMoreScanTransfer={setOneMoreScanTransfer}
+                downloadFileName={downloadFileName}
+              />
+              <ProcessingScreen
+                setScreenSwitch={setScreenSwitch}
+                preparedFile={preparedFile}
+                fileBlob={fileBlob}
+                downloadFileName={downloadFileName}
+                setDownloadFileName={setDownloadFileName}
+                stopJobsRef={stopJobsRef}
+                configurationType={configurationType}
+                scanningInProgressTransfer={scanningInProgressTransfer}
+                setOneMoreScanTransfer={setOneMoreScanTransfer}
+                prepareFile={prepareFile}
+                getFile={getFile}
+              />
+            </>
+          )}
         </DoubleScreenContainer>
       </div>
       <Modal
