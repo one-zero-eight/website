@@ -98,8 +98,6 @@
 
 .select option:hover {
   background: var(--color-primary);
-  gap: var(--select-padding);
-  padding-left: var(--select-padding);
 }
 
 .option__icon {
@@ -110,14 +108,6 @@
 .option__status {
   margin: 0 var(--selectedcontent-icon-margin) 0 0;
   transition: margin 250ms;
-}
-
-.select option:hover .option__icon {
-  margin: 0 var(--select-padding) 0 0;
-}
-
-.select option:hover .option__status {
-  margin: 0 var(--select-padding) 0 calc(-1 * var(--select-padding));
 }
 
 .select option::checkmark {
