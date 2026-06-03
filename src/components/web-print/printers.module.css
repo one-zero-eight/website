@@ -262,3 +262,22 @@
   background-color: var(--color-secondary-content);
   transform: translateX(var(--height));
 }
+
+.fiftyButton {
+  height: 100%;
+  width: calc(50% - var(--main-padding) / 2);
+  background-color: var(--button-color);
+  border-radius: var(--button-rounding);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-base-content);
+  outline: none;
+  cursor: pointer;
+  transition: all 500ms;
+}
+
+.fiftyButton:hover {
+  transform: scale(95%);
+}
