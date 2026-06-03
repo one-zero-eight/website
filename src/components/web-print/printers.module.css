@@ -281,3 +281,9 @@
 .fiftyButton:hover {
   transform: scale(95%);
 }
+
+.buttonWithRightCaptionContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}

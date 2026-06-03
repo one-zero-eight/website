@@ -9,3 +9,7 @@
 .bottomMargin_doubleMainPadding {
   margin-bottom: calc(var(--main-padding) * 2);
 }
+
+.mainPadding {
+  margin-bottom: var(--main-padding);
+}

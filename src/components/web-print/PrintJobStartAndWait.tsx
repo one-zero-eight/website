@@ -11,7 +11,7 @@ import {
 } from "@/api/printers/types.ts";
 import { ScalablePageRangesInput } from "@/components/web-print/ScalablePageRangesInput.tsx";
 import { IconValueStatusSelect } from "@/components/web-print/IconValueStatusSelect.tsx";
-import { JSX, RefObject, useEffect, useState } from "react";
+import { JSX, RefObject, useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/common/Modal.tsx";
 
 function calcNumberOfPagesInRanges(ranges: string, until: number) {
@@ -88,6 +88,8 @@ export function PrintJobStartAndWait({
   );
   const [jobId, setJobId] = useState<number>();
 
+  const papersIndication = useRef<HTMLParagraphElement | null>(null);
+
   const { data: rawPrinters } = $printers.useQuery(
     "get",
     "/print/get_printers",
@@ -106,14 +108,23 @@ export function PrintJobStartAndWait({
     $printers.useMutation("post", "/print/cancel");
 
   useEffect(() => {
+    const actualPapersCount = preparedFilePagesCount
+      ? calcPrintJobActualPapersCount(
+          pages,
+          copiesCount,
+          numberUp,
+          sides,
+          preparedFilePagesCount,
+        )
+      : 0;
+    if (!actualPapersCount && papersIndication.current)
+      papersIndication.current.classList.add("hidden");
+    else if (papersIndication.current) {
+      papersIndication.current.classList.remove("hidden");
+      papersIndication.current.children[0].textContent =
+        actualPapersCount.toString();
+    }
     if (!preparedFilePagesCount || !jobId) return;
-    const actualPapersCount = calcPrintJobActualPapersCount(
-      pages,
-      copiesCount,
-      numberUp,
-      sides,
-      preparedFilePagesCount,
-    );
     async function waitTillThePrintingEnd() {
       const startTime = performance.now();
       while (
@@ -255,7 +266,10 @@ export function PrintJobStartAndWait({
           />
         </div>
       </div>
-      <div className={rootStyles}>
+
+      <div
+        className={`${rootStyles} ${isPrintStarting || isCancelling || isFilePreparing ? "block" : styles.buttonWithRightCaptionContainer}`}
+      >
         <button
           className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${(isPrintStarting || isCancelling || isFilePreparing) && styles.button_inactive}`}
           onClick={async () => {
@@ -291,10 +305,17 @@ export function PrintJobStartAndWait({
         >
           Start printing
         </button>
-        {(isPrintStarting || isCancelling || isFilePreparing) && (
+        {isPrintStarting || isCancelling || isFilePreparing ? (
           <span
             className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
           ></span>
+        ) : (
+          <p
+            ref={papersIndication}
+            className={`${marginStyles.bottomMargin_doubleMainPadding} ${marginStyles.leftMargin_buttonHorizontalPadding} ${fontStyles.formSecondary}`}
+          >
+            <span>10</span> papers
+          </p>
         )}
       </div>
 

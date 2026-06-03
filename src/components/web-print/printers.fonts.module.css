@@ -14,6 +14,10 @@
   margin-right: var(--form-point-margin);
 }
 
+.formSecondary {
+  color: var(--color-gray-400);
+}
+
 .color {
   color: var(--color-base-content);
 }
