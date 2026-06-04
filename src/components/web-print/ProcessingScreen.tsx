@@ -61,7 +61,7 @@ export function ProcessingScreen({
             ></span>
           )}
           {!configurationType && !scanningInProgressTransfer && (
-            <div className={`${styles.configurationBox__scrollPart}`}>
+            <div className={`${styles.scanButtonsBox}`}>
               <button
                 className={styles.scanButton}
                 onClick={() => {

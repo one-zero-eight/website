@@ -6,9 +6,11 @@ import Tooltip from "@/components/common/Tooltip.tsx";
 export function ConfigurationHeader({
   configurationType,
   onClick,
+  miniHeader,
 }: {
   configurationType: boolean;
   onClick: () => void;
+  miniHeader: boolean;
 }) {
   return (
     <div className={`${styles.headline} ${fontStyles.headFont}`}>
@@ -27,9 +29,13 @@ export function ConfigurationHeader({
           {configurationType ? " Print" : "Scan"}
         </button>
       </Tooltip>
-      <p className={marginStyles.leftMargin_buttonHorizontalPadding}>
-        Job&nbsp;Configuration
-      </p>
+      {miniHeader ? (
+        <p className={marginStyles.leftMargin_buttonHorizontalPadding}>Job</p>
+      ) : (
+        <p className={marginStyles.leftMargin_buttonHorizontalPadding}>
+          Job&nbsp;Configuration
+        </p>
+      )}
     </div>
   );
 }
