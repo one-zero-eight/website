@@ -1,5 +1,5 @@
-import selectStyles from "@/components/web-print/printers.select.module.css";
-import styles from "@/components/web-print/printers.module.css";
+import selectStyles from "@/components/web-print/css/printers.select.module.css";
+import styles from "@/components/web-print/css/printers.module.css";
 import { useEffect, useRef } from "react";
 
 export function IconValueStatusSelect({

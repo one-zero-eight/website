@@ -1,6 +1,6 @@
-import styles from "@/components/web-print/printers.module.css";
-import fontStyles from "@/components/web-print/printers.fonts.module.css";
-import marginStyles from "@/components/web-print/printers.margins.module.css";
+import styles from "@/components/web-print/css/printers.module.css";
+import fontStyles from "@/components/web-print/css/printers.fonts.module.css";
+import marginStyles from "@/components/web-print/css/printers.margins.module.css";
 import Tooltip from "@/components/common/Tooltip.tsx";
 
 export function ConfigurationHeader({
