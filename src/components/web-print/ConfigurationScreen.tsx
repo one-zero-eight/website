@@ -1,4 +1,4 @@
-import styles from "@/components/web-print/printers.module.css";
+import styles from "@/components/web-print/css/printers.module.css";
 import { ConfigurationHeader } from "@/components/web-print/ConfigurationHeader.tsx";
 import { JSX, RefObject, useState } from "react";
 import { FileDrop } from "@/components/web-print/FileDrop.tsx";

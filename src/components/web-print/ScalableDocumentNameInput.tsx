@@ -1,4 +1,4 @@
-import inputStyles from "@/components/web-print/printers.input.module.css";
+import inputStyles from "@/components/web-print/css/printers.input.module.css";
 import { useEffect, useRef } from "react";
 
 export function ScalableDocumentNameInput({

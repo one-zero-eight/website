@@ -1,4 +1,4 @@
-import styles from "@/components/web-print/printers.module.css";
+import styles from "@/components/web-print/css/printers.module.css";
 
 export function DoubleScreenContainer({
   className,
