@@ -7,6 +7,8 @@ import { JSX, useRef, useState } from "react";
 import { Modal } from "@/components/common/Modal.tsx";
 import { $printers } from "@/api/printers";
 import { ConfigurationSelectionScreen } from "@/components/web-print/ConfigurationSelectionScreen.tsx";
+import { useMe } from "@/api/accounts/user.ts";
+import { AuthWall } from "@/components/common/AuthWall.tsx";
 
 export function WebPrintPage() {
   const [alert, setAlert] = useState<JSX.Element>();
@@ -38,6 +40,13 @@ export function WebPrintPage() {
 
   const stopJobsRef = useRef<boolean>(false);
 
+  if (!useMe()) {
+    return (
+      <div className="flex flex-col gap-64">
+        <AuthWall />
+      </div>
+    );
+  }
   const { mutateAsync: prepare, isPending: isFilePreparing } =
     $printers.useMutation("post", "/print/prepare");
   const {
