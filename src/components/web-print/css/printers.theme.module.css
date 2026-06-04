@@ -24,6 +24,7 @@
   --after-arrow-width: 16px;
 
   --button-font-size: 22px;
+  --head-font-size: 30px;
 }
 
 [data-theme="light"] .webPrintPage {
@@ -34,4 +35,15 @@
 
 :global(#fileToBePrinted) {
   display: none;
+}
+
+@media (width < 430px) {
+  .webPrintPage {
+    --head-font-size: 20px;
+    --button-font-size: 16px;
+
+    --main-padding: 12px;
+    --button-left-margin: 6px;
+    --button-horizontal-padding: 8px;
+  }
 }
