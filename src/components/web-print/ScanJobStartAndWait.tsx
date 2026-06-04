@@ -22,9 +22,13 @@ export function ScanJobStartAndWait({
   getFile,
   setPreparedFileName,
   setPreparedFilePagesCount,
+  scannerInProgressTransfer,
   setScannerInProgressTransfer,
   oneMoreScanTransfer,
   setOneMoreScanTransfer,
+  startTrigger,
+  setStartTrigger,
+  startButtonPosition,
 }: {
   rootStyles: string;
   showPopupWithExceptionDetail: (prefix: string, exception: any) => void;
@@ -36,6 +40,10 @@ export function ScanJobStartAndWait({
   setScannerInProgressTransfer: (value: boolean) => void;
   oneMoreScanTransfer: boolean;
   setOneMoreScanTransfer: (value: boolean) => void;
+  startTrigger: boolean;
+  setStartTrigger: (value: boolean) => void;
+  startButtonPosition: boolean;
+  scannerInProgressTransfer: boolean;
 }) {
   const [alert, setAlert] = useState<JSX.Element>();
 
@@ -157,9 +165,12 @@ export function ScanJobStartAndWait({
   }
 
   useEffect(() => {
-    setScannerInProgressTransfer(isScanStarting || isScanWaiting);
-    if (oneMoreScanTransfer) {
+    setScannerInProgressTransfer(isScanWaiting || isScanStarting);
+
+    if (oneMoreScanTransfer || startTrigger) {
+      if (startTrigger) newScan.current = true;
       scanAndWait().then(() => {});
+      setStartTrigger(false);
       setOneMoreScanTransfer(false);
     }
   }, [
@@ -169,6 +180,9 @@ export function ScanJobStartAndWait({
     scanAndWait,
     setScannerInProgressTransfer,
     setOneMoreScanTransfer,
+    isScanCancelling,
+    startTrigger,
+    setStartTrigger,
   ]);
 
   return (
@@ -254,22 +268,24 @@ export function ScanJobStartAndWait({
           </Tooltip>
         </div>
       </div>
-      <div className={rootStyles}>
-        <button
-          className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${(isScanWaiting || isScanStarting || isScanCancelling) && styles.button_inactive}`}
-          onClick={async () => {
-            newScan.current = true;
-            await scanAndWait();
-          }}
-        >
-          Start scanning
-        </button>
-        {(isScanWaiting || isScanStarting || isScanCancelling) && (
-          <span
-            className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
-          ></span>
-        )}
-      </div>
+      {startButtonPosition && (
+        <div className={rootStyles}>
+          <button
+            className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${(scannerInProgressTransfer || isScanCancelling) && styles.button_inactive}`}
+            onClick={async () => {
+              newScan.current = true;
+              await scanAndWait();
+            }}
+          >
+            Start scanning
+          </button>
+          {(scannerInProgressTransfer || isScanCancelling) && (
+            <span
+              className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
+            ></span>
+          )}
+        </div>
+      )}
 
       <Modal
         open={alert as unknown as boolean}

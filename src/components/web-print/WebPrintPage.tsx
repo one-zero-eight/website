@@ -163,6 +163,7 @@ export function WebPrintPage() {
                 setOneMoreScanTransfer={setOneMoreScanTransfer}
                 downloadFileName={downloadFileName}
                 startButtonPosition={startButtonPosition}
+                scannerInProgressTransfer={scanningInProgressTransfer}
               />
               <ProcessingScreen
                 screenSwitch={screenSwitch}

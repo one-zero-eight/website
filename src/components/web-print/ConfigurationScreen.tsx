@@ -26,6 +26,7 @@ export function ConfigurationScreen({
   configurationType,
   setConfigurationType,
   setScannerInProgressTransfer,
+  scannerInProgressTransfer,
   oneMoreScanTransfer,
   setOneMoreScanTransfer,
   fileBlob,
@@ -53,6 +54,7 @@ export function ConfigurationScreen({
   fileBlob: string | undefined;
   downloadFileName: string | undefined;
   startButtonPosition: boolean;
+  scannerInProgressTransfer: boolean;
 }) {
   const [alert, setAlert] = useState<JSX.Element | null>(null);
 
@@ -61,6 +63,7 @@ export function ConfigurationScreen({
   const [actualPapersCountTransfer, setActualPapersCountTransfer] =
     useState<number>(0);
   const [printStartTrigger, setPrintStartTrigger] = useState<boolean>(false);
+  const [scanStartTrigger, setScanStartTrigger] = useState<boolean>(false);
 
   return (
     <div className={styles.ordinaryScreen}>
@@ -69,6 +72,7 @@ export function ConfigurationScreen({
           <ConfigurationHeader
             configurationType={configurationType}
             onClick={() => setConfigurationType(!configurationType)}
+            miniHeader={!startButtonPosition}
           />
           <PrintJobStartAndWait
             rootStyles={configurationType ? "" : "hidden!"}
@@ -100,6 +104,10 @@ export function ConfigurationScreen({
             setScannerInProgressTransfer={setScannerInProgressTransfer}
             oneMoreScanTransfer={oneMoreScanTransfer}
             setOneMoreScanTransfer={setOneMoreScanTransfer}
+            startTrigger={scanStartTrigger}
+            setStartTrigger={setScanStartTrigger}
+            startButtonPosition={startButtonPosition}
+            scannerInProgressTransfer={scannerInProgressTransfer}
           />
         </div>
         <FileDrop
@@ -111,29 +119,50 @@ export function ConfigurationScreen({
           downloadFileName={downloadFileName}
           isFunctional={configurationType}
         />
-        {!startButtonPosition && configurationType ? (
-          <div
-            className={`${printInProgressTransfer ? "block" : styles.buttonWithRightCaptionContainer} ${marginStyles.paddingObject}`}
-          >
-            <button
-              className={`${styles.button} ${fontStyles.buttonFont} ${printInProgressTransfer && styles.button_inactive}`}
-              onClick={() => {
-                setPrintStartTrigger(true);
-              }}
-            >
-              Start {configurationType ? "printing" : "scanning"}
-            </button>
-            {printInProgressTransfer ? (
-              <span
-                className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
-              ></span>
-            ) : (
-              <PaperCountIndication papersCount={actualPapersCountTransfer} />
-            )}
-          </div>
-        ) : (
-          <></>
-        )}
+
+        <div
+          className={`${printInProgressTransfer || scannerInProgressTransfer ? styles.buttonWithRightCaptionContainer_block : styles.buttonWithRightCaptionContainer} ${marginStyles.paddingObject}`}
+        >
+          {!startButtonPosition && configurationType ? (
+            <>
+              <button
+                className={`${styles.button} ${fontStyles.buttonFont} ${printInProgressTransfer && styles.button_inactive}`}
+                onClick={() => {
+                  setPrintStartTrigger(true);
+                }}
+              >
+                Start printing
+              </button>
+              {printInProgressTransfer ? (
+                <span
+                  className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
+                ></span>
+              ) : (
+                <PaperCountIndication papersCount={actualPapersCountTransfer} />
+              )}
+            </>
+          ) : !startButtonPosition ? (
+            <>
+              <button
+                className={`${styles.button} ${fontStyles.buttonFont} ${scannerInProgressTransfer && styles.button_inactive} ${styles.button_center}`}
+                onClick={() => {
+                  setScanStartTrigger(true);
+                }}
+              >
+                Start scanning
+              </button>
+              {scannerInProgressTransfer ? (
+                <span
+                  className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
+                ></span>
+              ) : (
+                <PaperCountIndication papersCount={0} />
+              )}
+            </>
+          ) : (
+            <></>
+          )}
+        </div>
       </div>
 
       <Modal
