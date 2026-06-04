@@ -101,27 +101,29 @@ export function ProcessingScreen({
               </div>
             </div>
           )}
-          <button
-            className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${scanningInProgressTransfer && styles.button_inactive}`}
-            onClick={async () => {
-              if (!configurationType)
-                try {
-                  await deleteScanFileFromTheServer({
-                    params: { query: { filename: preparedFile!.name } },
-                  });
-                  // for instant print
-                  await prepareFile(preparedFile!, false);
-                } catch {
-                  console.log(
-                    "[web-print] Fail to delete the scan from the servers",
-                  );
-                }
-              setScreenSwitch(false);
-              stopJobsRef.current = true;
-            }}
-          >
-            {configurationType ? "Cancel" : "Finish"}
-          </button>
+          <div className={marginStyles.paddingObject}>
+            <button
+              className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${scanningInProgressTransfer && styles.button_inactive}`}
+              onClick={async () => {
+                if (!configurationType)
+                  try {
+                    await deleteScanFileFromTheServer({
+                      params: { query: { filename: preparedFile!.name } },
+                    });
+                    // for instant print
+                    await prepareFile(preparedFile!, false);
+                  } catch {
+                    console.log(
+                      "[web-print] Fail to delete the scan from the servers",
+                    );
+                  }
+                setScreenSwitch(false);
+                stopJobsRef.current = true;
+              }}
+            >
+              {configurationType ? "Cancel" : "Finish"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
