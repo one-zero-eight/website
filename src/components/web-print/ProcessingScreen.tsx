@@ -7,6 +7,7 @@ import { ScalableDocumentNameInput } from "@/components/web-print/ScalableDocume
 import { $printers } from "@/api/printers";
 
 export function ProcessingScreen({
+  screenSwitch,
   setScreenSwitch,
   preparedFile,
   downloadFileName,
@@ -19,6 +20,7 @@ export function ProcessingScreen({
   getFile,
   fileBlob,
 }: {
+  screenSwitch: boolean;
   setScreenSwitch: (value: boolean) => void;
   preparedFile: File | undefined;
   downloadFileName: string | undefined;
@@ -52,7 +54,8 @@ export function ProcessingScreen({
           <p className={`${fontStyles.headFont} ${fontStyles.color}`}>
             {downloadFileName || "Waiting for scan"}
           </p>
-          {(configurationType || scanningInProgressTransfer) && (
+          {((configurationType && screenSwitch) ||
+            scanningInProgressTransfer) && (
             <span
               className={`icon-[material-symbols--progress-activity] ${styles.backgroundIcon} ${styles.rotationAnimation}`}
             ></span>

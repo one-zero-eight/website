@@ -1,5 +1,5 @@
 .headFont {
-  font-size: 30px;
+  font-size: var(--head-font-size);
   font-weight: var(--font-weight-medium);
 }
 

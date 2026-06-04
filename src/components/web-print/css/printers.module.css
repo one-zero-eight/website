@@ -26,6 +26,9 @@
   height: 100%;
   width: 50%;
   display: flex;
+  justify-content: center;
+  container-type: size;
+  container-name: ordinary-screen;
 }
 
 .ordinaryScreen__contentSizeRestrictor {
@@ -77,6 +80,7 @@
 .dropArea {
   width: 100%;
   height: 100%;
+  min-height: 100px;
   margin-bottom: var(--main-padding);
   display: flex;
   flex-direction: column;
@@ -286,4 +290,41 @@
   position: relative;
   display: flex;
   align-items: center;
+}
+
+@container ordinary-screen (width < 750px) {
+  .ordinaryScreen__contentSizeRestrictor {
+    flex-direction: column;
+    --ordinary-screen-750: true;
+  }
+
+  .fiftyButton {
+    width: 100%;
+    height: calc(50% - var(--main-padding) / 2);
+  }
+
+  .button {
+    align-self: center;
+  }
+
+  .dropContainer {
+    max-width: none;
+    margin-left: 0 !important;
+    margin-bottom: var(--main-padding);
+  }
+
+  .configurationBox__scrollPart {
+    max-height: none;
+    height: 100%;
+  }
+
+  .buttonWithRightCaptionContainer {
+    justify-content: center;
+  }
+}
+
+@container ordinary-screen (height < 450px) and (width < 750px) {
+  .dropArea {
+    display: none;
+  }
 }

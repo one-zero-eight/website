@@ -11,8 +11,9 @@ import {
 } from "@/api/printers/types.ts";
 import { ScalablePageRangesInput } from "@/components/web-print/ScalablePageRangesInput.tsx";
 import { IconValueStatusSelect } from "@/components/web-print/IconValueStatusSelect.tsx";
-import { JSX, RefObject, useEffect, useRef, useState } from "react";
+import { JSX, RefObject, useCallback, useEffect, useState } from "react";
 import { Modal } from "@/components/common/Modal.tsx";
+import { PaperCountIndication } from "@/components/web-print/PaperCountIndication.tsx";
 
 function calcNumberOfPagesInRanges(ranges: string, until: number) {
   let count = 0;
@@ -63,6 +64,13 @@ export function PrintJobStartAndWait({
   preparedFile,
   screenSwitch,
   stopJobsRef,
+  startButtonPosition,
+  printInProgressTransfer,
+  setPrintInProgressTransfer,
+  startTrigger,
+  setStartTrigger,
+  actualPapersCountTransfer,
+  setActualPapersCountTransfer,
 }: {
   rootStyles: string;
   preparedFileName: string | undefined;
@@ -74,6 +82,13 @@ export function PrintJobStartAndWait({
   preparedFile: File | undefined;
   screenSwitch: boolean;
   stopJobsRef: RefObject<boolean>;
+  startButtonPosition: boolean;
+  printInProgressTransfer: boolean;
+  setPrintInProgressTransfer: (value: boolean) => void;
+  startTrigger: boolean;
+  setStartTrigger: (value: boolean) => void;
+  actualPapersCountTransfer: number;
+  setActualPapersCountTransfer: (value: number) => void;
 }) {
   const [alert, setAlert] = useState<JSX.Element>();
 
@@ -87,8 +102,6 @@ export function PrintJobStartAndWait({
     PrintingOptionsNumberUp.Value1,
   );
   const [jobId, setJobId] = useState<number>();
-
-  const papersIndication = useRef<HTMLParagraphElement | null>(null);
 
   const { data: rawPrinters } = $printers.useQuery(
     "get",
@@ -107,7 +120,57 @@ export function PrintJobStartAndWait({
   const { mutateAsync: cancelJob, isPending: isCancelling } =
     $printers.useMutation("post", "/print/cancel");
 
+  const startClick = useCallback(async () => {
+    if (!preparedFileName) {
+      setAlert(<p>There is no file to be printed!</p>);
+      return;
+    }
+    try {
+      setJobId(
+        await print({
+          params: {
+            query: {
+              filename: preparedFileName,
+              printer_cups_name: printerName,
+            },
+          },
+          body: {
+            printing_options: {
+              copies: copiesCount.toString(),
+              "page-ranges": pages,
+              sides: sides,
+              "number-up": numberUp,
+            },
+          },
+        }),
+      );
+      setScreenSwitch(true);
+      stopJobsRef.current = false;
+    } catch (exception: any) {
+      showPopupWithExceptionDetail("Start problem", exception);
+    }
+  }, [
+    copiesCount,
+    numberUp,
+    pages,
+    preparedFileName,
+    print,
+    printerName,
+    setScreenSwitch,
+    showPopupWithExceptionDetail,
+    sides,
+    stopJobsRef,
+  ]);
   useEffect(() => {
+    setPrintInProgressTransfer(
+      isPrintStarting || isCancelling || isFilePreparing,
+    );
+    if (startTrigger) {
+      setStartTrigger(false);
+      startClick().then(() => {});
+      return;
+    }
+
     const actualPapersCount = preparedFilePagesCount
       ? calcPrintJobActualPapersCount(
           pages,
@@ -117,13 +180,7 @@ export function PrintJobStartAndWait({
           preparedFilePagesCount,
         )
       : 0;
-    if (!actualPapersCount && papersIndication.current)
-      papersIndication.current.classList.add("hidden");
-    else if (papersIndication.current) {
-      papersIndication.current.classList.remove("hidden");
-      papersIndication.current.children[0].textContent =
-        actualPapersCount.toString();
-    }
+    setActualPapersCountTransfer(actualPapersCount);
     if (!preparedFilePagesCount || !jobId) return;
     async function waitTillThePrintingEnd() {
       const startTime = performance.now();
@@ -182,6 +239,9 @@ export function PrintJobStartAndWait({
     cancelJob,
     copiesCount,
     getJobStatus,
+    isCancelling,
+    isFilePreparing,
+    isPrintStarting,
     jobId,
     numberUp,
     pages,
@@ -189,8 +249,13 @@ export function PrintJobStartAndWait({
     preparedFile,
     preparedFilePagesCount,
     screenSwitch,
+    setActualPapersCountTransfer,
+    setPrintInProgressTransfer,
     setScreenSwitch,
+    setStartTrigger,
     sides,
+    startClick,
+    startTrigger,
     stopJobsRef,
   ]);
 
@@ -266,58 +331,25 @@ export function PrintJobStartAndWait({
           />
         </div>
       </div>
-
-      <div
-        className={`${rootStyles} ${isPrintStarting || isCancelling || isFilePreparing ? "block" : styles.buttonWithRightCaptionContainer}`}
-      >
-        <button
-          className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${(isPrintStarting || isCancelling || isFilePreparing) && styles.button_inactive}`}
-          onClick={async () => {
-            if (!preparedFileName) {
-              setAlert(<p>There is no file to be printed!</p>);
-              return;
-            }
-            try {
-              setJobId(
-                await print({
-                  params: {
-                    query: {
-                      filename: preparedFileName,
-                      printer_cups_name: printerName,
-                    },
-                  },
-                  body: {
-                    printing_options: {
-                      copies: copiesCount.toString(),
-                      "page-ranges": pages,
-                      sides: sides,
-                      "number-up": numberUp,
-                    },
-                  },
-                }),
-              );
-              setScreenSwitch(true);
-              stopJobsRef.current = false;
-            } catch (exception: any) {
-              showPopupWithExceptionDetail("Start problem", exception);
-            }
-          }}
+      {startButtonPosition && (
+        <div
+          className={`${rootStyles} ${marginStyles.bottomMargin_doubleMainPadding} ${printInProgressTransfer ? "block" : styles.buttonWithRightCaptionContainer}`}
         >
-          Start printing
-        </button>
-        {isPrintStarting || isCancelling || isFilePreparing ? (
-          <span
-            className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
-          ></span>
-        ) : (
-          <p
-            ref={papersIndication}
-            className={`${marginStyles.bottomMargin_doubleMainPadding} ${marginStyles.leftMargin_buttonHorizontalPadding} ${fontStyles.formSecondary}`}
+          <button
+            className={`${styles.button} ${fontStyles.buttonFont} ${printInProgressTransfer && styles.button_inactive}`}
+            onClick={startClick}
           >
-            <span>10</span> papers
-          </p>
-        )}
-      </div>
+            Start printing
+          </button>
+          {printInProgressTransfer ? (
+            <span
+              className={`icon-[material-symbols--progress-activity] ${styles.sideIcon} ${styles.rotationAnimation}`}
+            ></span>
+          ) : (
+            <PaperCountIndication papersCount={actualPapersCountTransfer} />
+          )}
+        </div>
+      )}
 
       <Modal
         open={alert as unknown as boolean}

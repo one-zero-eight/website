@@ -28,7 +28,7 @@ export function ConfigurationHeader({
         </button>
       </Tooltip>
       <p className={marginStyles.leftMargin_buttonHorizontalPadding}>
-        Job Configuration
+        Job&nbsp;Configuration
       </p>
     </div>
   );
