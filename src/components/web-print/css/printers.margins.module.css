@@ -13,3 +13,13 @@
 .mainPadding {
   margin-bottom: var(--main-padding);
 }
+
+.paddingObject {
+  padding-bottom: var(--main-padding);
+}
+
+@container ordinary-screen (height < 650px) {
+  .bottomMargin_doubleMainPadding {
+    margin-bottom: 0;
+  }
+}

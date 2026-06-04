@@ -3,7 +3,7 @@ import themeStyles from "@/components/web-print/css/printers.theme.module.css";
 import { DoubleScreenContainer } from "@/components/web-print/DoubleScreenContainer.tsx";
 import { ConfigurationScreen } from "@/components/web-print/ConfigurationScreen.tsx";
 import { ProcessingScreen } from "@/components/web-print/ProcessingScreen.tsx";
-import { JSX, useRef, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/common/Modal.tsx";
 import { $printers } from "@/api/printers";
 import { ConfigurationSelectionScreen } from "@/components/web-print/ConfigurationSelectionScreen.tsx";
@@ -39,6 +39,29 @@ export function WebPrintPage() {
     useState<boolean>(false);
 
   const stopJobsRef = useRef<boolean>(false);
+
+  const [startButtonPosition, setStartButtonPosition] = useState<boolean>(true);
+  useEffect(() => {
+    function onResize() {
+      if (
+        window
+          .getComputedStyle(
+            document.querySelector(
+              `.${styles.ordinaryScreen__contentSizeRestrictor}`,
+            )!,
+          )
+          .getPropertyValue("--ordinary-screen-750") == "true"
+      )
+        setStartButtonPosition(false);
+      else setStartButtonPosition(true);
+    }
+    onResize();
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
 
   if (!useMe()) {
     return (
@@ -139,8 +162,10 @@ export function WebPrintPage() {
                 oneMoreScanTransfer={oneMoreScanTransfer}
                 setOneMoreScanTransfer={setOneMoreScanTransfer}
                 downloadFileName={downloadFileName}
+                startButtonPosition={startButtonPosition}
               />
               <ProcessingScreen
+                screenSwitch={screenSwitch}
                 setScreenSwitch={setScreenSwitch}
                 preparedFile={preparedFile}
                 fileBlob={fileBlob}
