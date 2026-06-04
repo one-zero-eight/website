@@ -1,7 +1,7 @@
-import styles from "@/components/web-print/printers.module.css";
+import styles from "@/components/web-print/css/printers.module.css";
 import { FileDrop } from "@/components/web-print/FileDrop.tsx";
-import fontStyles from "@/components/web-print/printers.fonts.module.css";
-import marginStyles from "@/components/web-print/printers.margins.module.css";
+import fontStyles from "@/components/web-print/css/printers.fonts.module.css";
+import marginStyles from "@/components/web-print/css/printers.margins.module.css";
 import { RefObject } from "react";
 import { ScalableDocumentNameInput } from "@/components/web-print/ScalableDocumentNameInput.tsx";
 import { $printers } from "@/api/printers";
@@ -50,7 +50,7 @@ export function ProcessingScreen({
           className={`${styles.configurationBox} ${styles.configurationBox_loading}`}
         >
           <p className={`${fontStyles.headFont} ${fontStyles.color}`}>
-            {downloadFileName}
+            {downloadFileName || "Waiting for scan"}
           </p>
           {(configurationType || scanningInProgressTransfer) && (
             <span

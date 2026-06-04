@@ -1,5 +1,5 @@
-import styles from "@/components/web-print/printers.module.css";
-import fontStyles from "@/components/web-print/printers.fonts.module.css";
+import styles from "@/components/web-print/css/printers.module.css";
+import fontStyles from "@/components/web-print/css/printers.fonts.module.css";
 
 export function ConfigurationSelectionScreen({
   setConfigurationType,

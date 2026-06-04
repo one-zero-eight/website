@@ -1,6 +1,6 @@
-import styles from "@/components/web-print/printers.module.css";
-import inputStyles from "@/components/web-print/printers.input.module.css";
-import themeStyles from "@/components/web-print/printers.theme.module.css";
+import styles from "@/components/web-print/css/printers.module.css";
+import inputStyles from "@/components/web-print/css/printers.input.module.css";
+import themeStyles from "@/components/web-print/css/printers.theme.module.css";
 import { JSX, useEffect, useRef, useState } from "react";
 import { Modal } from "@/components/common/Modal.tsx";
 
