@@ -6,6 +6,7 @@ import { AdvWidget } from "@/components/dashboard/AdvWidget.tsx";
 import { CountdownWidget } from "@/components/dashboard/CountdownWidget.tsx";
 import { PwaWidget } from "@/components/dashboard/PwaWidget.tsx";
 import { SportsWidget } from "@/components/dashboard/SportsWidget.tsx";
+import { MusicRoomWidget } from "@/components/dashboard/MusicRoomWidget.tsx";
 import { TelegramReconnectWidget } from "@/components/dashboard/TelegramReconnectWidget.tsx";
 import { Link } from "@tanstack/react-router";
 import Links from "./links/Links.tsx";
@@ -32,6 +33,7 @@ export function DashboardPage() {
         <TelegramReconnectWidget />
         <AcademicCalendarWidget />
         <SportsWidget />
+        <MusicRoomWidget />
         <CountdownWidget />
         <PwaWidget />
         <AdvWidget />
