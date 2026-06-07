@@ -1,9 +1,9 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { SportPage } from "@/components/sport/SportPage.tsx";
-import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_with_menu/sport")({
+export const Route = createFileRoute("/_with_menu/sport/")({
   component: RouteComponent,
 });
 
@@ -19,7 +19,7 @@ function RouteComponent() {
       </Helmet>
 
       <Topbar title="Sport" />
-      <SportPage />
+      <SportPage activeTab="dashboard" />
     </>
   );
 }
