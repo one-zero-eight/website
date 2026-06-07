@@ -379,7 +379,7 @@ export declare function createQuerySerializer<T = unknown>(
 
 /**
  * Handle different OpenAPI 3.x serialization styles
- * @type {import("./index.js").defaultPathSerializer}
+ * @type {import("./create-fetch-client.js").defaultPathSerializer}
  * @see https://swagger.io/docs/specification/serialization/#path
  */
 export declare function defaultPathSerializer(

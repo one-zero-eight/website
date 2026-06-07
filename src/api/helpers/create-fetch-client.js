@@ -21,7 +21,7 @@ export function randomID() {
 
 /**
  * Create an openapi-fetch client.
- * @type {import("./index.js").default}
+ * @type {import("./create-fetch-client.js").default}
  */
 export default function createClient(clientOptions) {
   let {
@@ -42,7 +42,7 @@ export default function createClient(clientOptions) {
   /**
    * Per-request fetch (keeps settings created in createClient()
    * @param {T} url
-   * @param {import('./index.js').FetchOptions<T>} fetchOptions
+   * @param {import("./create-fetch-client.js").FetchOptions<T>} fetchOptions
    */
   async function coreFetch(schemaPath, fetchOptions) {
     const {
@@ -414,7 +414,7 @@ class PathClientProxyHandler {
 
 /**
  * Wrap openapi-fetch client to support a path based API.
- * @type {import("./index.js").wrapAsPathBasedClient}
+ * @type {import("./create-fetch-client.js").wrapAsPathBasedClient}
  */
 export function wrapAsPathBasedClient(coreClient) {
   const handler = new PathClientProxyHandler();
@@ -440,7 +440,7 @@ export function wrapAsPathBasedClient(coreClient) {
 /**
  * Convenience method to an openapi-fetch path based client.
  * Strictly equivalent to `wrapAsPathBasedClient(createClient(...))`.
- * @type {import("./index.js").createPathBasedClient}
+ * @type {import("./create-fetch-client.js").createPathBasedClient}
  */
 export function createPathBasedClient(clientOptions) {
   return wrapAsPathBasedClient(createClient(clientOptions));
@@ -450,7 +450,7 @@ export function createPathBasedClient(clientOptions) {
 
 /**
  * Serialize primitive param values
- * @type {import("./index.js").serializePrimitiveParam}
+ * @type {import("./create-fetch-client.js").serializePrimitiveParam}
  */
 export function serializePrimitiveParam(name, value, options) {
   if (value === undefined || value === null) {
@@ -466,7 +466,7 @@ export function serializePrimitiveParam(name, value, options) {
 
 /**
  * Serialize object param (shallow only)
- * @type {import("./index.js").serializeObjectParam}
+ * @type {import("./create-fetch-client.js").serializeObjectParam}
  */
 export function serializeObjectParam(name, value, options) {
   if (!value || typeof value !== "object") {
@@ -520,7 +520,7 @@ export function serializeObjectParam(name, value, options) {
 
 /**
  * Serialize array param (shallow only)
- * @type {import("./index.js").serializeArrayParam}
+ * @type {import("./create-fetch-client.js").serializeArrayParam}
  */
 export function serializeArrayParam(name, value, options) {
   if (!Array.isArray(value)) {
@@ -572,7 +572,7 @@ export function serializeArrayParam(name, value, options) {
 
 /**
  * Serialize query params to string
- * @type {import("./index.js").createQuerySerializer}
+ * @type {import("./create-fetch-client.js").createQuerySerializer}
  */
 export function createQuerySerializer(options) {
   return function querySerializer(queryParams) {
@@ -617,7 +617,7 @@ export function createQuerySerializer(options) {
 
 /**
  * Handle different OpenAPI 3.x serialization styles
- * @type {import("./index.js").defaultPathSerializer}
+ * @type {import("./create-fetch-client.js").defaultPathSerializer}
  * @see https://swagger.io/docs/specification/serialization/#path
  */
 export function defaultPathSerializer(pathname, pathParams) {
@@ -678,7 +678,7 @@ export function defaultPathSerializer(pathname, pathParams) {
 
 /**
  * Serialize body object to string
- * @type {import("./index.js").defaultBodySerializer}
+ * @type {import("./create-fetch-client.js").defaultBodySerializer}
  */
 export function defaultBodySerializer(body, headers) {
   if (body instanceof FormData) {
@@ -698,7 +698,7 @@ export function defaultBodySerializer(body, headers) {
 
 /**
  * Construct URL string from baseUrl and handle path and query params
- * @type {import("./index.js").createFinalURL}
+ * @type {import("./create-fetch-client.js").createFinalURL}
  */
 export function createFinalURL(pathname, options) {
   let finalURL = `${options.baseUrl}${pathname}`;
@@ -717,7 +717,7 @@ export function createFinalURL(pathname, options) {
 
 /**
  * Merge headers a and b, with b taking priority
- * @type {import("./index.js").mergeHeaders}
+ * @type {import("./create-fetch-client.js").mergeHeaders}
  */
 export function mergeHeaders(...allHeaders) {
   const finalHeaders = new Headers();
@@ -743,7 +743,7 @@ export function mergeHeaders(...allHeaders) {
 
 /**
  * Remove trailing slash from url
- * @type {import("./index.js").removeTrailingSlash}
+ * @type {import("./create-fetch-client.js").removeTrailingSlash}
  */
 export function removeTrailingSlash(url) {
   if (url.endsWith("/")) {
