@@ -3,6 +3,7 @@ import { eventBadges } from "../EventBadges";
 import {
   formatDate,
   formatTime,
+  getDate,
   parseTime,
   getSignedPeopleCount,
   imageLink,
@@ -22,6 +23,12 @@ export interface EventTitleProps {
   canEdit: boolean;
   myCheckins?: SchemaWorkshop[];
   className?: string;
+}
+
+function isNextDate(startDate: string, endDate: string) {
+  const [year, month, day] = startDate.split("-").map(Number);
+  const nextDate = new Date(Date.UTC(year, month - 1, day + 1));
+  return nextDate.toISOString().slice(0, 10) === endDate;
 }
 
 export default function EventTitle({
@@ -76,6 +83,18 @@ export default function EventTitle({
   };
 
   const signedPeople = getSignedPeopleCount(event);
+  const startDate = event.dtstart ? getDate(event.dtstart) : "";
+  const endDate = event.dtend ? getDate(event.dtend) : "";
+  const startTime = formatTime(parseTime(event.dtstart || ""));
+  const parsedEndTime = formatTime(parseTime(event.dtend || ""));
+  const endsAtNextDayMidnight =
+    startDate &&
+    endDate &&
+    parsedEndTime === "00:00" &&
+    isNextDate(startDate, endDate);
+  const isMultiDayEvent =
+    startDate && endDate && startDate !== endDate && !endsAtNextDayMidnight;
+  const endTime = endsAtNextDayMidnight ? "24:00" : parsedEndTime;
 
   return (
     <div className={cn("card card-border", className)}>
@@ -202,16 +221,19 @@ export default function EventTitle({
           <div className="flex items-center gap-1">
             <span className="text-primary icon-[mingcute--calendar-fill] text-2xl" />
             <span className="text-neutral-500 dark:text-neutral-400">
-              {formatDate(event.dtstart || "")}
+              {isMultiDayEvent
+                ? `${formatDate(event.dtstart || "")} ${startTime} - ${formatDate(event.dtend || "")} ${formatTime(parseTime(event.dtend || ""))}`
+                : formatDate(event.dtstart || "")}
             </span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-primary icon-[iconamoon--clock-fill] text-2xl" />
-            <span className="text-neutral-500 dark:text-neutral-400">
-              {formatTime(parseTime(event.dtstart || ""))}-
-              {formatTime(parseTime(event.dtend || ""))}
-            </span>
-          </div>
+          {!isMultiDayEvent && (
+            <div className="flex items-center gap-1">
+              <span className="text-primary icon-[iconamoon--clock-fill] text-2xl" />
+              <span className="text-neutral-500 dark:text-neutral-400">
+                {startTime}-{endTime}
+              </span>
+            </div>
+          )}
           {event.check_in_type === CheckInType.on_innohassle && (
             <div className="flex items-center gap-1">
               <span className="text-primary icon-[famicons--people] text-2xl" />

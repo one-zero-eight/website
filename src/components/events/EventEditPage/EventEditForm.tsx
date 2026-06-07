@@ -19,6 +19,7 @@ import {
   normalizeHostForForm,
   normalizeLink,
 } from "@/components/events/utils/event-utils";
+import { getDate, parseTime } from "@/components/events/utils/date-utils";
 import { MAX_CAPACITY } from "../constants.ts";
 import NameDescription from "./NameDescription.tsx";
 import ImageUpload from "./ImageUpload.tsx";
@@ -41,11 +42,14 @@ export function EventEditForm({
   const queryClient = useQueryClient();
   const storageKey = initialEvent ? null : "workshop-form-draft";
 
+  const getNextDate = (date: string) => {
+    const [year, month, day] = date.split("-").map(Number);
+    const nextDate = new Date(Date.UTC(year, month - 1, day + 1));
+    return nextDate.toISOString().slice(0, 10);
+  };
+
   const [eventForm, setEventForm] = useState<EventFormState>(() => {
     if (initialEvent) {
-      const dtstartDate = new Date(initialEvent.dtstart || "");
-      const dtendDate = new Date(initialEvent.dtend || "");
-
       const links: EventLink[] = [];
       initialEvent.links.forEach((link) =>
         links.push({
@@ -71,9 +75,10 @@ export function EventEditForm({
         ...baseEventFormState,
         ...initialEvent,
         hosts,
-        date: dtstartDate.toISOString().split("T")[0],
-        dtstart: dtstartDate.toTimeString().slice(0, 5),
-        dtend: dtendDate.toTimeString().slice(0, 5),
+        date: initialEvent.dtstart ? getDate(initialEvent.dtstart) : "",
+        end_date: initialEvent.dtend ? getDate(initialEvent.dtend) : "",
+        dtstart: initialEvent.dtstart ? parseTime(initialEvent.dtstart) : "",
+        dtend: initialEvent.dtend ? parseTime(initialEvent.dtend) : "",
         place: initialEvent.place || "",
         capacity: shouldBeUnlimited
           ? MAX_CAPACITY
@@ -94,6 +99,7 @@ export function EventEditForm({
       return {
         ...baseEventFormState,
         date: initialDate,
+        end_date: initialDate,
         dtstart: "18:00",
         dtend: "20:00",
       };
@@ -110,14 +116,18 @@ export function EventEditForm({
         type: h.host_type,
         name: h.name,
       }));
-      return { ...baseEventFormState, ...parsed, hosts };
+      return {
+        ...baseEventFormState,
+        ...parsed,
+        hosts,
+        end_date: parsed.end_date || parsed.date || "",
+      };
     }
 
     return baseEventFormState;
   });
 
   const [logoPreview, setImagePreview] = useState<string | null>(null);
-  const [checkInCloses, setCheckInCloses] = useState("");
 
   useEffect(() => {
     if (initialEvent?.image_file_id) {
@@ -188,17 +198,11 @@ export function EventEditForm({
       });
     }
 
-    const date = new Date(eventForm.date);
-
-    // If dtend is less than or equal to dtstart, consider dtend as next day
-    if (eventForm.dtend <= eventForm.dtstart) {
-      date.setDate(date.getDate() + 1);
-    }
-
-    // Handle time and dates
-    const pad = (n: number): string => n.toString().padStart(2, "0");
-    const endDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-
+    const endsAtSameDayMidnight =
+      eventForm.date === eventForm.end_date && eventForm.dtend === "00:00";
+    const endDate = endsAtSameDayMidnight
+      ? getNextDate(eventForm.end_date)
+      : eventForm.end_date;
     const dtstart = `${eventForm.date}T${eventForm.dtstart}:00+03:00`;
     const dtend = `${endDate}T${eventForm.dtend}:00+03:00`;
 
@@ -215,6 +219,8 @@ export function EventEditForm({
     if (eventForm.check_in_type === CheckInType.no_check_in) {
       check_in_opens = null;
     }
+    const check_in_closes =
+      eventForm.check_in_type === CheckInType.on_innohassle ? dtstart : null;
 
     return {
       english_name: eventForm.english_name,
@@ -222,12 +228,14 @@ export function EventEditForm({
       english_description: eventForm.english_description,
       russian_description: eventForm.russian_description,
       language: eventForm.language,
-      host: eventForm.hosts.map((host) => {
-        return { host_type: host.type, name: host.name };
-      }),
+      host: eventForm.hosts.map((host) => ({
+        host_type: host.type,
+        name: host.name.trim(),
+      })),
       dtstart,
       dtend,
       check_in_opens,
+      check_in_closes,
       place: eventForm.place?.trim() || "TBA",
       capacity:
         eventForm.check_in_type === CheckInType.on_innohassle
@@ -356,8 +364,6 @@ export function EventEditForm({
         queryClient.invalidateQueries({
           queryKey: $workshops.queryOptions("get", "/workshops/").queryKey,
         });
-        onClose?.();
-        throw redirect({ to: "/events" });
       },
     },
   );
@@ -388,6 +394,8 @@ export function EventEditForm({
             "Event Deleted",
             `Event "${eventName}" has been successfully deleted.`,
           );
+          onClose?.();
+          throw redirect({ to: "/events" });
         },
         onError: () => {
           showError(
@@ -488,11 +496,12 @@ export function EventEditForm({
     if (!eventForm.hosts?.length) {
       newErrors.host = "Host is required";
       showError("Validation Error", "Host is required");
-    }
-
-    if (!eventForm.hosts.some((h) => (h.name ?? "").trim())) {
-      newErrors.host = "Host name is required";
-      showError("Validation Error", "Host name is required");
+    } else if (eventForm.hosts.some((h) => !(h.name ?? "").trim())) {
+      newErrors.host = "Fill in all host fields or remove empty rows";
+      showError(
+        "Validation Error",
+        "Fill in all host fields or remove empty rows",
+      );
     }
 
     setErrors(newErrors);
@@ -536,6 +545,11 @@ export function EventEditForm({
       showError("Validation Error", "Date is required");
     }
 
+    if (!eventForm.end_date) {
+      newErrors.endDate = "End date is required";
+      showError("Validation Error", "End date is required");
+    }
+
     if (!eventForm.dtstart) {
       newErrors.stime = "Start time is required";
       showError("Validation Error", "Start time is required");
@@ -544,6 +558,22 @@ export function EventEditForm({
     if (!eventForm.dtend) {
       newErrors.etime = "End time required";
       showError("Validation Error", "End time required");
+    }
+
+    if (
+      eventForm.date &&
+      eventForm.end_date &&
+      eventForm.dtstart &&
+      eventForm.dtend &&
+      !(eventForm.date === eventForm.end_date && eventForm.dtend === "00:00") &&
+      `${eventForm.end_date}T${eventForm.dtend || "00:00"}` <
+        `${eventForm.date}T${eventForm.dtstart || "00:00"}`
+    ) {
+      newErrors.endDate = "End date/time cannot be before start date/time";
+      showError(
+        "Validation Error",
+        "End date/time cannot be before start date/time",
+      );
     }
 
     if (!initialEvent && eventForm.date) {
@@ -770,15 +800,6 @@ export function EventEditForm({
                           : ""
                       }
                       onChange={handleCheckIn}
-                    />
-                  </div>
-                  <div>
-                    <label className="mr-2">Close check-in at:</label>
-                    <input
-                      type="datetime-local"
-                      className="input"
-                      value={checkInCloses}
-                      onChange={(e) => setCheckInCloses(e.target.value)}
                     />
                   </div>
                 </>

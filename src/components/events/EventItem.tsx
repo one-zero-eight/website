@@ -10,10 +10,17 @@ import { EventItemProps } from "./types";
 import {
   formatDate,
   formatTime,
+  getDate,
   imageLink,
   isEventRecommended,
   parseTime,
 } from "./utils";
+
+function isNextDate(startDate: string, endDate: string) {
+  const [year, month, day] = startDate.split("-").map(Number);
+  const nextDate = new Date(Date.UTC(year, month - 1, day + 1));
+  return nextDate.toISOString().slice(0, 10) === endDate;
+}
 
 export function EventItem({
   event,
@@ -44,6 +51,17 @@ export function EventItem({
   const clubsList = clubsListProp ?? clubsListData;
 
   const checkedIn = !!myCheckins?.some((w) => w.id === event.id);
+  const startDate = event.dtstart ? getDate(event.dtstart) : "";
+  const endDate = event.dtend ? getDate(event.dtend) : "";
+  const startTime = formatTime(parseTime(event.dtstart || ""));
+  const parsedEndTime = formatTime(parseTime(event.dtend || ""));
+  const endsAtNextDayMidnight =
+    startDate &&
+    endDate &&
+    parsedEndTime === "00:00" &&
+    isNextDate(startDate, endDate);
+  const isMultiDayEvent =
+    startDate && endDate && startDate !== endDate && !endsAtNextDayMidnight;
 
   return (
     <div className="indicator w-full">
@@ -98,9 +116,19 @@ export function EventItem({
                 <div className="flex items-center gap-1">
                   <span className="icon-[mdi--calendar-outline] text-primary text-xl" />
                   <span className="flex items-end gap-1 text-neutral-500 dark:text-neutral-200">
-                    <span>{formatDate(event.dtstart || "")}</span>
-                    <span className="text-neutral-400">at</span>
-                    <span>{formatTime(parseTime(event.dtstart || ""))}</span>
+                    {isMultiDayEvent ? (
+                      <span>
+                        {formatDate(event.dtstart || "")} ({startTime})
+                        <span className="text-neutral-400">{" - "}</span>
+                        {formatDate(event.dtend || "")} ({parsedEndTime})
+                      </span>
+                    ) : (
+                      <>
+                        <span>{formatDate(event.dtstart || "")}</span>
+                        <span className="text-neutral-400">at</span>
+                        <span>{startTime}</span>
+                      </>
+                    )}
                   </span>
                 </div>
               </div>

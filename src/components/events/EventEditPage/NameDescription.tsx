@@ -177,7 +177,7 @@ export default function NameDescription({
         {/* Club leader hosts settings */}
         {clubs.length > 0 && !isAdmin && (
           <select
-            className="select"
+            className={cn("select", errors.host && "select-error")}
             value={clubHostIds[0] || "Pick a club"}
             onChange={(e) => {
               const clubId = e.target.value;
@@ -250,7 +250,10 @@ export default function NameDescription({
                     </select>
                     {isClub ? (
                       <select
-                        className="select w-full min-w-[120px] flex-1"
+                        className={cn(
+                          "select w-full min-w-[120px] flex-1",
+                          errors.host && "select-error",
+                        )}
                         value={host.name || ""}
                         onChange={(e) =>
                           updateHost(index, { name: e.target.value })

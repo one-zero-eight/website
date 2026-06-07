@@ -65,6 +65,7 @@ export type EventFormState = Omit<
   GenericBadgeFormScheme & {
     hosts: EventHostSelection[];
     date: string;
+    end_date: string;
     check_in_date: string;
     check_in_on_open: boolean;
     links: EventLink[];
@@ -84,6 +85,7 @@ export interface EventFormErrors {
   name?: string | null;
   host?: string | null;
   date?: string | null;
+  endDate?: string | null;
   stime?: string | null;
   etime?: string | null;
   links?: string | null;
