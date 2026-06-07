@@ -2,7 +2,7 @@ import {
   getMyAccessToken,
   invalidateMyAccessToken,
 } from "@/api/helpers/access-token.ts";
-import { Middleware } from "openapi-fetch";
+import { Middleware } from "@/api/helpers/create-fetch-client";
 
 export const authMiddleware: Middleware = {
   async onRequest({ request }) {

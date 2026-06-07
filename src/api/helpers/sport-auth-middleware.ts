@@ -2,7 +2,7 @@ import {
   getMySportAccessToken,
   invalidateMySportAccessToken,
 } from "@/api/helpers/sport-access-token.ts";
-import { Middleware } from "openapi-fetch";
+import { Middleware } from "@/api/helpers/create-fetch-client";
 
 export const sportAuthMiddleware: Middleware = {
   async onRequest({ request }) {

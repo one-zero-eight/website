@@ -1,5 +1,5 @@
-import createQueryClient from "@/api/helpers/create-query-client.ts";
-import createFetchClient from "openapi-fetch";
+import createQueryClient from "@/api/helpers/create-query-client";
+import createFetchClient from "@/api/helpers/create-fetch-client";
 import * as accountsTypes from "./types.ts";
 
 export type { accountsTypes };

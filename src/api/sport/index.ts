@@ -1,6 +1,6 @@
 import createQueryClient from "@/api/helpers/create-query-client.ts";
 import { sportAuthMiddleware } from "@/api/helpers/sport-auth-middleware.ts";
-import createFetchClient from "openapi-fetch";
+import createFetchClient from "@/api/helpers/create-fetch-client";
 import * as sportTypes from "./types.ts";
 
 export type { sportTypes };
