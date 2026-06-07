@@ -20,7 +20,6 @@ import { Route as RoomsRoomRouteImport } from "./routes/rooms.$room";
 import { Route as FormsSubmitRouteImport } from "./routes/forms.submit";
 import { Route as With_menuWorkshopsRouteImport } from "./routes/_with_menu/workshops";
 import { Route as With_menuTimerRouteImport } from "./routes/_with_menu/timer";
-import { Route as With_menuSportRouteImport } from "./routes/_with_menu/sport";
 import { Route as With_menuScholarshipRouteImport } from "./routes/_with_menu/scholarship";
 import { Route as With_menuMenuRouteImport } from "./routes/_with_menu/menu";
 import { Route as With_menuMapsRouteImport } from "./routes/_with_menu/maps";
@@ -37,6 +36,7 @@ import { Route as ScheduleAssistantForInstructorsIndexRouteImport } from "./rout
 import { Route as With_menuWhen2meetIndexRouteImport } from "./routes/_with_menu/when2meet/index";
 import { Route as With_menuTabletennisIndexRouteImport } from "./routes/_with_menu/tabletennis/index";
 import { Route as With_menuStudentAffairsIndexRouteImport } from "./routes/_with_menu/student-affairs/index";
+import { Route as With_menuSportIndexRouteImport } from "./routes/_with_menu/sport.index";
 import { Route as With_menuSearchIndexRouteImport } from "./routes/_with_menu/search/index";
 import { Route as With_menuScheduleIndexRouteImport } from "./routes/_with_menu/schedule/index";
 import { Route as With_menuRoomBookingIndexRouteImport } from "./routes/_with_menu/room-booking/index";
@@ -54,6 +54,8 @@ import { Route as With_menuTabletennisMatchesRouteImport } from "./routes/_with_
 import { Route as With_menuTabletennisEventsRouteImport } from "./routes/_with_menu/tabletennis/events";
 import { Route as With_menuStudentAffairsSignOutRouteImport } from "./routes/_with_menu/student-affairs/sign-out";
 import { Route as With_menuStudentAffairsSignInRouteImport } from "./routes/_with_menu/student-affairs/sign-in";
+import { Route as With_menuSportHistoryRouteImport } from "./routes/_with_menu/sport.history";
+import { Route as With_menuSportFaqRouteImport } from "./routes/_with_menu/sport.faq";
 import { Route as With_menuSearchAskRouteImport } from "./routes/_with_menu/search/ask";
 import { Route as With_menuSearchActRouteImport } from "./routes/_with_menu/search/act";
 import { Route as With_menuScheduleCategoryRouteImport } from "./routes/_with_menu/schedule/$category";
@@ -138,11 +140,6 @@ const With_menuWorkshopsRoute = With_menuWorkshopsRouteImport.update({
 const With_menuTimerRoute = With_menuTimerRouteImport.update({
   id: "/timer",
   path: "/timer",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
-const With_menuSportRoute = With_menuSportRouteImport.update({
-  id: "/sport",
-  path: "/sport",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menuScholarshipRoute = With_menuScholarshipRouteImport.update({
@@ -230,6 +227,11 @@ const With_menuStudentAffairsIndexRoute =
     path: "/student-affairs/",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
+const With_menuSportIndexRoute = With_menuSportIndexRouteImport.update({
+  id: "/sport/",
+  path: "/sport/",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuSearchIndexRoute = With_menuSearchIndexRouteImport.update({
   id: "/search/",
   path: "/search/",
@@ -323,6 +325,16 @@ const With_menuStudentAffairsSignInRoute =
     path: "/student-affairs/sign-in",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
+const With_menuSportHistoryRoute = With_menuSportHistoryRouteImport.update({
+  id: "/sport/history",
+  path: "/sport/history",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
+const With_menuSportFaqRoute = With_menuSportFaqRouteImport.update({
+  id: "/sport/faq",
+  path: "/sport/faq",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuSearchAskRoute = With_menuSearchAskRouteImport.update({
   id: "/search/ask",
   path: "/search/ask",
@@ -500,7 +512,6 @@ export interface FileRoutesByFullPath {
   "/maps": typeof With_menuMapsRoute;
   "/menu": typeof With_menuMenuRoute;
   "/scholarship": typeof With_menuScholarshipRoute;
-  "/sport": typeof With_menuSportRoute;
   "/timer": typeof With_menuTimerRoute;
   "/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
@@ -528,6 +539,8 @@ export interface FileRoutesByFullPath {
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/search/act": typeof With_menuSearchActRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
+  "/sport/faq": typeof With_menuSportFaqRoute;
+  "/sport/history": typeof With_menuSportHistoryRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
   "/tabletennis/events": typeof With_menuTabletennisEventsRoute;
@@ -545,6 +558,7 @@ export interface FileRoutesByFullPath {
   "/room-booking/": typeof With_menuRoomBookingIndexRoute;
   "/schedule/": typeof With_menuScheduleIndexRoute;
   "/search/": typeof With_menuSearchIndexRoute;
+  "/sport/": typeof With_menuSportIndexRoute;
   "/student-affairs/": typeof With_menuStudentAffairsIndexRoute;
   "/tabletennis/": typeof With_menuTabletennisIndexRoute;
   "/when2meet/": typeof With_menuWhen2meetIndexRoute;
@@ -574,7 +588,6 @@ export interface FileRoutesByTo {
   "/maps": typeof With_menuMapsRoute;
   "/menu": typeof With_menuMenuRoute;
   "/scholarship": typeof With_menuScholarshipRoute;
-  "/sport": typeof With_menuSportRoute;
   "/timer": typeof With_menuTimerRoute;
   "/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
@@ -602,6 +615,8 @@ export interface FileRoutesByTo {
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/search/act": typeof With_menuSearchActRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
+  "/sport/faq": typeof With_menuSportFaqRoute;
+  "/sport/history": typeof With_menuSportHistoryRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
   "/tabletennis/events": typeof With_menuTabletennisEventsRoute;
@@ -619,6 +634,7 @@ export interface FileRoutesByTo {
   "/room-booking": typeof With_menuRoomBookingIndexRoute;
   "/schedule": typeof With_menuScheduleIndexRoute;
   "/search": typeof With_menuSearchIndexRoute;
+  "/sport": typeof With_menuSportIndexRoute;
   "/student-affairs": typeof With_menuStudentAffairsIndexRoute;
   "/tabletennis": typeof With_menuTabletennisIndexRoute;
   "/when2meet": typeof With_menuWhen2meetIndexRoute;
@@ -652,7 +668,6 @@ export interface FileRoutesById {
   "/_with_menu/maps": typeof With_menuMapsRoute;
   "/_with_menu/menu": typeof With_menuMenuRoute;
   "/_with_menu/scholarship": typeof With_menuScholarshipRoute;
-  "/_with_menu/sport": typeof With_menuSportRoute;
   "/_with_menu/timer": typeof With_menuTimerRoute;
   "/_with_menu/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
@@ -680,6 +695,8 @@ export interface FileRoutesById {
   "/_with_menu/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/_with_menu/search/act": typeof With_menuSearchActRoute;
   "/_with_menu/search/ask": typeof With_menuSearchAskRoute;
+  "/_with_menu/sport/faq": typeof With_menuSportFaqRoute;
+  "/_with_menu/sport/history": typeof With_menuSportHistoryRoute;
   "/_with_menu/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/_with_menu/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
   "/_with_menu/tabletennis/events": typeof With_menuTabletennisEventsRoute;
@@ -697,6 +714,7 @@ export interface FileRoutesById {
   "/_with_menu/room-booking/": typeof With_menuRoomBookingIndexRoute;
   "/_with_menu/schedule/": typeof With_menuScheduleIndexRoute;
   "/_with_menu/search/": typeof With_menuSearchIndexRoute;
+  "/_with_menu/sport/": typeof With_menuSportIndexRoute;
   "/_with_menu/student-affairs/": typeof With_menuStudentAffairsIndexRoute;
   "/_with_menu/tabletennis/": typeof With_menuTabletennisIndexRoute;
   "/_with_menu/when2meet/": typeof With_menuWhen2meetIndexRoute;
@@ -730,7 +748,6 @@ export interface FileRouteTypes {
     | "/maps"
     | "/menu"
     | "/scholarship"
-    | "/sport"
     | "/timer"
     | "/workshops"
     | "/forms/submit"
@@ -758,6 +775,8 @@ export interface FileRouteTypes {
     | "/schedule/$category"
     | "/search/act"
     | "/search/ask"
+    | "/sport/faq"
+    | "/sport/history"
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
     | "/tabletennis/events"
@@ -775,6 +794,7 @@ export interface FileRouteTypes {
     | "/room-booking/"
     | "/schedule/"
     | "/search/"
+    | "/sport/"
     | "/student-affairs/"
     | "/tabletennis/"
     | "/when2meet/"
@@ -804,7 +824,6 @@ export interface FileRouteTypes {
     | "/maps"
     | "/menu"
     | "/scholarship"
-    | "/sport"
     | "/timer"
     | "/workshops"
     | "/forms/submit"
@@ -832,6 +851,8 @@ export interface FileRouteTypes {
     | "/schedule/$category"
     | "/search/act"
     | "/search/ask"
+    | "/sport/faq"
+    | "/sport/history"
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
     | "/tabletennis/events"
@@ -849,6 +870,7 @@ export interface FileRouteTypes {
     | "/room-booking"
     | "/schedule"
     | "/search"
+    | "/sport"
     | "/student-affairs"
     | "/tabletennis"
     | "/when2meet"
@@ -881,7 +903,6 @@ export interface FileRouteTypes {
     | "/_with_menu/maps"
     | "/_with_menu/menu"
     | "/_with_menu/scholarship"
-    | "/_with_menu/sport"
     | "/_with_menu/timer"
     | "/_with_menu/workshops"
     | "/forms/submit"
@@ -909,6 +930,8 @@ export interface FileRouteTypes {
     | "/_with_menu/schedule/$category"
     | "/_with_menu/search/act"
     | "/_with_menu/search/ask"
+    | "/_with_menu/sport/faq"
+    | "/_with_menu/sport/history"
     | "/_with_menu/student-affairs/sign-in"
     | "/_with_menu/student-affairs/sign-out"
     | "/_with_menu/tabletennis/events"
@@ -926,6 +949,7 @@ export interface FileRouteTypes {
     | "/_with_menu/room-booking/"
     | "/_with_menu/schedule/"
     | "/_with_menu/search/"
+    | "/_with_menu/sport/"
     | "/_with_menu/student-affairs/"
     | "/_with_menu/tabletennis/"
     | "/_with_menu/when2meet/"
@@ -1030,13 +1054,6 @@ declare module "@tanstack/react-router" {
       path: "/timer";
       fullPath: "/timer";
       preLoaderRoute: typeof With_menuTimerRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
-    "/_with_menu/sport": {
-      id: "/_with_menu/sport";
-      path: "/sport";
-      fullPath: "/sport";
-      preLoaderRoute: typeof With_menuSportRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/scholarship": {
@@ -1149,6 +1166,13 @@ declare module "@tanstack/react-router" {
       path: "/student-affairs";
       fullPath: "/student-affairs/";
       preLoaderRoute: typeof With_menuStudentAffairsIndexRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/sport/": {
+      id: "/_with_menu/sport/";
+      path: "/sport";
+      fullPath: "/sport/";
+      preLoaderRoute: typeof With_menuSportIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/search/": {
@@ -1268,6 +1292,20 @@ declare module "@tanstack/react-router" {
       path: "/student-affairs/sign-in";
       fullPath: "/student-affairs/sign-in";
       preLoaderRoute: typeof With_menuStudentAffairsSignInRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/sport/history": {
+      id: "/_with_menu/sport/history";
+      path: "/sport/history";
+      fullPath: "/sport/history";
+      preLoaderRoute: typeof With_menuSportHistoryRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/sport/faq": {
+      id: "/_with_menu/sport/faq";
+      path: "/sport/faq";
+      fullPath: "/sport/faq";
+      preLoaderRoute: typeof With_menuSportFaqRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/search/ask": {
@@ -1494,7 +1532,6 @@ interface With_menuRouteRouteChildren {
   With_menuMapsRoute: typeof With_menuMapsRoute;
   With_menuMenuRoute: typeof With_menuMenuRoute;
   With_menuScholarshipRoute: typeof With_menuScholarshipRoute;
-  With_menuSportRoute: typeof With_menuSportRoute;
   With_menuTimerRoute: typeof With_menuTimerRoute;
   With_menuWorkshopsRoute: typeof With_menuWorkshopsRoute;
   With_menuAccountConnectTelegramRoute: typeof With_menuAccountConnectTelegramRoute;
@@ -1517,6 +1554,8 @@ interface With_menuRouteRouteChildren {
   With_menuScheduleCategoryRoute: typeof With_menuScheduleCategoryRoute;
   With_menuSearchActRoute: typeof With_menuSearchActRoute;
   With_menuSearchAskRoute: typeof With_menuSearchAskRoute;
+  With_menuSportFaqRoute: typeof With_menuSportFaqRoute;
+  With_menuSportHistoryRoute: typeof With_menuSportHistoryRoute;
   With_menuStudentAffairsSignInRoute: typeof With_menuStudentAffairsSignInRoute;
   With_menuStudentAffairsSignOutRoute: typeof With_menuStudentAffairsSignOutRoute;
   With_menuTabletennisEventsRoute: typeof With_menuTabletennisEventsRoute;
@@ -1533,6 +1572,7 @@ interface With_menuRouteRouteChildren {
   With_menuRoomBookingIndexRoute: typeof With_menuRoomBookingIndexRoute;
   With_menuScheduleIndexRoute: typeof With_menuScheduleIndexRoute;
   With_menuSearchIndexRoute: typeof With_menuSearchIndexRoute;
+  With_menuSportIndexRoute: typeof With_menuSportIndexRoute;
   With_menuStudentAffairsIndexRoute: typeof With_menuStudentAffairsIndexRoute;
   With_menuTabletennisIndexRoute: typeof With_menuTabletennisIndexRoute;
   With_menuWhen2meetIndexRoute: typeof With_menuWhen2meetIndexRoute;
@@ -1558,7 +1598,6 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuMapsRoute: With_menuMapsRoute,
   With_menuMenuRoute: With_menuMenuRoute,
   With_menuScholarshipRoute: With_menuScholarshipRoute,
-  With_menuSportRoute: With_menuSportRoute,
   With_menuTimerRoute: With_menuTimerRoute,
   With_menuWorkshopsRoute: With_menuWorkshopsRoute,
   With_menuAccountConnectTelegramRoute: With_menuAccountConnectTelegramRoute,
@@ -1581,6 +1620,8 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuScheduleCategoryRoute: With_menuScheduleCategoryRoute,
   With_menuSearchActRoute: With_menuSearchActRoute,
   With_menuSearchAskRoute: With_menuSearchAskRoute,
+  With_menuSportFaqRoute: With_menuSportFaqRoute,
+  With_menuSportHistoryRoute: With_menuSportHistoryRoute,
   With_menuStudentAffairsSignInRoute: With_menuStudentAffairsSignInRoute,
   With_menuStudentAffairsSignOutRoute: With_menuStudentAffairsSignOutRoute,
   With_menuTabletennisEventsRoute: With_menuTabletennisEventsRoute,
@@ -1597,6 +1638,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuRoomBookingIndexRoute: With_menuRoomBookingIndexRoute,
   With_menuScheduleIndexRoute: With_menuScheduleIndexRoute,
   With_menuSearchIndexRoute: With_menuSearchIndexRoute,
+  With_menuSportIndexRoute: With_menuSportIndexRoute,
   With_menuStudentAffairsIndexRoute: With_menuStudentAffairsIndexRoute,
   With_menuTabletennisIndexRoute: With_menuTabletennisIndexRoute,
   With_menuWhen2meetIndexRoute: With_menuWhen2meetIndexRoute,
