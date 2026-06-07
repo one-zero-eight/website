@@ -105,11 +105,12 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                       {me?.innopolis_info?.email}
                     </p>
                     <p className="text-base-content/75 text-sm">
-                      {me.telegram_info && (
-                        <>
-                          @{me.telegram_info?.username || "no Telegram alias"}
-                        </>
-                      )}
+                      {me.telegram_info &&
+                        (me.telegram_info.username ? (
+                          <>@{me.telegram_info.username}</>
+                        ) : (
+                          "no Telegram alias"
+                        ))}
                     </p>
                   </div>
                   <Link
