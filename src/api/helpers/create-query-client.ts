@@ -34,7 +34,7 @@ import {
   MediaType,
   PathsWithMethod,
   RequiredKeysOf,
-} from "openapi-typescript-helpers";
+} from "@/api/helpers/openapi-typescript-helpers";
 
 // Helper type to dynamically infer the type from the `select` property
 type InferSelectReturnType<TData, TSelect> = TSelect extends (
