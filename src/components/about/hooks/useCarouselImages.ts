@@ -1,20 +1,31 @@
-export const useCarouselImages = () => {
-  const baseUrl = `${import.meta.env.VITE_MINIO_URL}/about/images`;
-  const imageNames = [
-    "108bows.webp",
-    "tender-kazan.webp",
-    "clubfest.webp",
-    "tender-perm.webp",
-    "vnedraid.webp",
-    "108forest.webp",
-    "garage.webp",
-    "tenderhack25.webp",
-    "hackaton.webp",
-    "artem-hellowin.webp",
-    "ruslan-gosling.webp",
-    "slippers.webp",
-    "hellowin2.webp",
-  ];
+export type AboutCarouselId = "development" | "events" | "team";
 
-  return imageNames.map((name) => `${baseUrl}/${name}`);
+const carouselImageNames: Record<AboutCarouselId, string[]> = {
+  development: [
+    "tender-kazan.webp",
+    "hackaton.webp",
+    "tenderhack25.webp",
+    "garage.webp",
+    "vnedraid.webp",
+  ],
+  events: [
+    "clubfest.webp",
+    "cosmonautics-day.webp",
+    "feb-6.webp",
+    "hellowin2.webp",
+    "slippers.webp",
+  ],
+  team: [
+    "108bows.webp",
+    "tender-perm.webp",
+    "108forest.webp",
+    "karting.webp",
+    "spb.webp",
+  ],
+};
+
+export const useCarouselImages = (id: AboutCarouselId) => {
+  const baseUrl = `${import.meta.env.VITE_MINIO_URL}/about/images`;
+
+  return carouselImageNames[id].map((name) => `${baseUrl}/${name}`);
 };

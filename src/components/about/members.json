@@ -119,12 +119,6 @@
     "avatar": ""
   },
   {
-    "fullName": "Alexandr Cherkasov",
-    "telegram": "c2xlZXB5aGVhZF9zYW55YQ==",
-    "github": "U2FueWFMaWtlSVQ=",
-    "avatar": ""
-  },
-  {
     "fullName": "Enzhe Shaikhutdinova",
     "telegram": "RW5qZTQ1",
     "github": "",
@@ -167,12 +161,6 @@
     "avatar": ""
   },
   {
-    "fullName": "Sergei Melnikov",
-    "telegram": "cGVwbHh4",
-    "github": "cGVwbHh4",
-    "avatar": ""
-  },
-  {
     "fullName": "Anastasia Kuznechenko",
     "telegram": "bl9hX3NfdF95X2FfMDA=",
     "github": "",
@@ -182,6 +170,12 @@
     "fullName": "Dmitrii Chudin",
     "telegram": "aWFtY2h1ZGlu",
     "github": "R3JpZ3N5Q2h1ZGlu",
+    "avatar": ""
+  },
+  {
+    "fullName": "Lisitskiy Nikita",
+    "telegram": "a2VhbWth",
+    "github": "a2VhbWth",
     "avatar": ""
   }
 ]

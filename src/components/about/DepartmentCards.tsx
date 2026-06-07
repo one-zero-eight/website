@@ -1,0 +1,23 @@
+import { cn } from "@/lib/ui/cn";
+import { departments } from "./aboutConstants.ts";
+
+export function DepartmentCards() {
+  return (
+    <div className="clear-both my-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {departments.map((department) => (
+        <div
+          key={department.title}
+          className="dark:bg-base-200 dark:border-base-100 flex flex-col items-center rounded-lg border-2 border-gray-200 bg-white px-4 py-8 text-center shadow-sm dark:border"
+        >
+          <span className={cn(department.icon, "text-primary text-5xl")} />
+          <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {department.title}
+          </h3>
+          <p className="mt-2 text-base leading-relaxed text-gray-600 dark:text-gray-400">
+            {department.description}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}

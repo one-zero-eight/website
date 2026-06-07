@@ -1,101 +1,168 @@
 import { TeamMembers } from "./TeamMembers.tsx";
 import { SectionHeader } from "./SectionHeader.tsx";
-import { ResourceCard } from "@/components/about/cards/ResourceCard.tsx";
+import { CarouselImage } from "./CarouselImage.tsx";
+import { DepartmentCards } from "./DepartmentCards.tsx";
+import { AboutAsideSection } from "./AboutAsideSection.tsx";
+import { AboutFloatedLogo } from "./AboutFloatedLogo.tsx";
+import { AboutInlineLogo108, AboutLogoPhrase } from "./AboutInlineLogo108.tsx";
+import {
+  aboutButtonClass,
+  aboutStackedButtonClass,
+  linkClass,
+} from "./aboutConstants.ts";
 
-<SectionHeader
-  id="intro"
-  title="Who we are?"
-  className="mb-6 text-start text-black dark:text-white"
-/>
+<SectionHeader id="intro" title="Who we are" className="text-start" />
 
 **one-zero-eight** is a student community enthusiastic about technology, striving to improve the Innopolis University environment. We develop projects, participate in hackathons, organize events, combining learning, collaboration, and fun.
 
-<SectionHeader
-  id="projects"
-  title="Projects"
-  className="mb-6 text-start text-black dark:text-white"
-/>
+<SectionHeader id="projects" title="Projects" className="text-start" />
 
-We solve daily issues of students and university staff by developing useful services.
+We develop projects for Innopolis University students and faculty. Our flagship project is <a href="/" className={linkClass}>InNoHassle</a>.
 
-**InNoHassle** - our flagman project, the ecosystem that combines university services in one website providing convenience both for students and university staff.
+<AboutFloatedLogo />
 
-You can check all released and developing projects in our <a href="https://github.com/one-zero-eight" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">GitHub main page</a>.
+The website is an ecosystem that brings together <AboutLogoPhrase before="all" after="team" /> services and useful Innopolis resources for students in one place.
 
-<SectionHeader
-  id="hackathons"
-  title="Hackathons"
-  className="mb-6 text-start text-black dark:text-white"
-/>
+We are not limited to a single website: we also build internal university tools and maintain the sports website. See the full project list <a href="https://github.com/one-zero-eight/.github/blob/main/profile/README.md" className={linkClass} target="_blank" rel="noopener noreferrer">here</a>.
 
-<SectionHeader
-  id="events"
-  title="Events"
-  className="mb-6 text-start text-black dark:text-white"
-/>
+<AboutAsideSection
+  aside={
+    <a
+      href="https://forms.gle/2vMmu4vSoVShvbMw6"
+      className={aboutButtonClass}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <span className="icon-[mdi--message-alert-outline] text-xl" />
+      Report an issue
+    </a>
+  }
+>
 
-<SectionHeader
-  id="feedback"
-  title="Feedback"
-  className="mb-6 text-start text-black dark:text-white"
-/>
+Let us know if you have ideas for our projects or run into any issues.
 
-Have an issue with the service? Or just want to contribute, express a suggestion for improvement? Send us the alert in the Google Form: <a href="https://forms.gle/2vMmu4vSoVShvbMw6" className="text-primary hover:underline">leave a feedback or report issue</a>.
-
-<div className="mt-6 flex w-full justify-center">
-  <ResourceCard
-    title="Feedback Report"
-    icon="icon-[mdi--message-alert-outline]"
-    link="https://forms.gle/2vMmu4vSoVShvbMw6"
-    color="text-primary"
-    className="w-30 delay-300"
-  />
-</div>
+</AboutAsideSection>
 
 <SectionHeader
-  id="join"
-  title="Join us"
-  className="mb-6 text-start text-black dark:text-white"
+  id="development"
+  title="Development"
+  className="text-start"
 />
+<AboutAsideSection
+  aside={
+    <>
+      <a
+        href="https://github.com/one-zero-eight"
+        className={aboutStackedButtonClass}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span className="icon-[mdi--github] shrink-0 text-xl" />
+        <span className="flex-1 text-center">Our GitHub</span>
+      </a>
+      <a
+        href="https://github.com/orgs/one-zero-eight/projects/4"
+        className={aboutStackedButtonClass}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span className="icon-[mdi--view-dashboard-outline] shrink-0 text-xl" />
+        <span className="flex-1 text-center">Our task board</span>
+      </a>
+      <a
+        href="https://github.com/one-zero-eight/.github/blob/main/CONTRIBUTING.md"
+        className={aboutStackedButtonClass}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span className="icon-[mdi--file-document-outline] shrink-0 text-xl" />
+        <span className="flex-1 text-center">CONTRIBUTING.md</span>
+      </a>
+    </>
+  }
+>
 
-Want to become a part of the projects? You can make a contribution or be a new member of our community!
+We love open source, we are open source, and we support open source. Projects for Innopolis University are built by students and everyone who cares, on a voluntary basis. You can support us by <a href="https://github.com/orgs/one-zero-eight/projects/4" className={linkClass} target="_blank" rel="noopener noreferrer">contributing</a>.
 
-<div className="mt-6 flex w-full flex-wrap justify-center gap-2">
-  <ResourceCard
-    title="Join Us!"
-    icon="icon-[mdi--robot-excited-outline]"
-    link="https://t.me/one_zero_eight_bot"
-    color="text-primary"
-    className="delay-600"
-  />
+Our areas of interest include product engineering, NLP, robotics, and whatever else comes our way. We are constantly expanding our skills through hands-on experience, including hackathons.
 
-  <ResourceCard
-    title="GitHub"
-    icon="icon-[mdi--github]"
-    link="https://github.com/one-zero-eight"
-    color="text-gray-800 dark:text-white"
-    className="delay-700"
-  />
-</div>
+</AboutAsideSection>
 
-Be the first who knows about new events and InNoHassle new features following our Telegram.
+<CarouselImage id="development" />
 
-<div className="mt-6 flex w-full justify-center">
-  <ResourceCard
-    title="Telegram Channel"
-    icon="icon-[uil--telegram-alt]"
-    link="https://t.me/one_zero_eight"
-    color="text-blue-500"
-    className="w-30 delay-400"
-  />
-</div>
+We have 2 candidates for master of sports in product engineering and 3 first-class rank holders. We have won 1M+ at hackathons.
 
-<SectionHeader
-  id="team"
-  title="Team"
-  className="mb-6 text-start text-black dark:text-white"
-/>
+<SectionHeader id="events" title="Events" className="text-start" />
 
-The core of one-zero-eight and the main resource is our team:
+We are an official Innopolis University club. <AboutLogoPhrase before="The" after="community" /> strives to improve the place where we live and grow. We often host movie nights, club presentations, and workshops.
+
+<AboutAsideSection
+  aside={
+    <a href="/clubs/one-zero-eight" className={aboutButtonClass}>
+      <span className="icon-[mdi--school-outline] text-xl" />
+      <span className="inline-flex items-center whitespace-nowrap">
+        108 club
+      </span>
+    </a>
+  }
+>
+
+On February 6, 2024, we held our first club presentation. We now run this event every year.
+
+</AboutAsideSection>
+
+<CarouselImage id="events" />
+
+<AboutAsideSection
+  aside={
+    <a
+      href="https://t.me/one_zero_eight"
+      className={aboutButtonClass}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <span className="icon-[uil--telegram-alt] text-xl" />
+      Telegram channel
+    </a>
+  }
+>
+
+You can learn about all new community projects and our events from our Telegram channel.
+
+</AboutAsideSection>
+
+<SectionHeader id="team" title="Team" className="text-start" />
+
+The main goal <AboutLogoPhrase before="of" after="members" /> is improving their skills and having fun. We pass knowledge from older generations to younger ones and stay friends within the team.
+
+We have three departments, each with its own focus:
+
+<DepartmentCards />
+
+Our team is our main resource:
 
 <TeamMembers />
+
+<AboutLogoPhrase after="is about" /> friendship, support, and passion for what
+you do. We used to share our passions with each other, whether it's programming,
+hiking, or archery.
+
+<CarouselImage id="team" />
+
+<AboutAsideSection
+  aside={
+    <a
+      href="https://t.me/one_zero_eight_bot"
+      className={aboutButtonClass}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <span className="icon-[mdi--robot-excited-outline] text-xl" />
+      Join us
+    </a>
+  }
+>
+
+We welcome everyone who wants to work in our team and contribute to open source. Our team includes members from Russia, Belarus, and Uzbekistan, and we are ready to keep growing.
+
+</AboutAsideSection>
