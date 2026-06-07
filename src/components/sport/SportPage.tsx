@@ -3,10 +3,23 @@ import { $sport } from "@/api/sport";
 import { useMySportAccessToken } from "@/api/helpers/sport-access-token.ts";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { SportFaqSection } from "@/components/sport/SportFaqSection.tsx";
-import { SportOverviewSection } from "@/components/sport/SportOverviewSection.tsx";
-import { SportScheduleSection } from "@/components/sport/SportScheduleSection.tsx";
+import {
+  SportOverviewSection,
+  SportProgressSection,
+  SportSemesterHistorySection,
+} from "@/components/sport/SportOverviewSection.tsx";
+import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 
-export function SportPage() {
+type SportTab = "dashboard" | "history" | "faq";
+type SportRoute = "/sport" | "/sport/history" | "/sport/faq";
+
+const sportTabs: { id: SportTab; title: string; to: SportRoute }[] = [
+  { id: "dashboard", title: "Calendar", to: "/sport" },
+  { id: "history", title: "History", to: "/sport/history" },
+  { id: "faq", title: "FAQ", to: "/sport/faq" },
+];
+
+export function SportPage({ activeTab }: { activeTab: SportTab }) {
   const { me } = useMe();
   const [sportToken] = useMySportAccessToken();
 
@@ -123,66 +136,49 @@ export function SportPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-4">
-      <SportOverviewSection
-        profile={profile}
-        hours={hours}
-        currentSemester={currentSemester}
-        semesterHistory={semesterHistory}
-        historyPending={historyPending}
-      />
-
-      <SportScheduleSection
-        enabled={canQuerySport}
-        studentId={profile.user_id}
-      />
-
-      <div className="grid grid-cols-1 gap-4 @xl/content:grid-cols-2">
-        <a
-          href="https://t.me/IUSportBot"
-          className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <div className="w-12 shrink-0">
-            <span className="icon-[mdi--robot-excited-outline] text-primary text-5xl" />
-          </div>
-          <div className="flex min-w-0 flex-col gap-2">
-            <p className="text-base-content flex items-center text-2xl font-semibold">
-              Sport bot in Telegram
-            </p>
-            <p className="text-base-content/75 text-lg">
-              Check in for trainings, view schedules, and track your sport hours
-              with @IUSportBot.
-            </p>
-          </div>
-        </a>
-        <a
-          href="https://sport.innopolis.university"
-          className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <div className="w-12 shrink-0">
-            <span className="icon-[material-symbols--quick-reference-outline-rounded] text-primary text-5xl" />
-          </div>
-          <div className="flex min-w-0 flex-col gap-2">
-            <p className="text-base-content text-2xl font-semibold">
-              Official website
-            </p>
-            <p className="text-base-content/75 text-lg">
-              Self-sport reports, medical references, and full sport office
-              features.
-            </p>
-          </div>
-        </a>
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-4">
+      <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b whitespace-nowrap">
+        {sportTabs.map((tab) => (
+          <SportTabLink key={tab.id} to={tab.to}>
+            {tab.title}
+          </SportTabLink>
+        ))}
       </div>
 
-      <SportFaqSection enabled={canQuerySport} />
+      {activeTab === "dashboard" ? (
+        <>
+          <SportOverviewSection profile={profile} />
+          <SportProgressSection
+            hours={hours}
+            currentSemester={currentSemester}
+          />
+        </>
+      ) : null}
+
+      {activeTab === "history" ? (
+        <SportSemesterHistorySection
+          semesterHistory={semesterHistory}
+          currentSemester={currentSemester}
+          historyPending={historyPending}
+        />
+      ) : null}
+
+      {activeTab === "faq" ? <SportFaqSection enabled={canQuerySport} /> : null}
 
       <p className="text-base-content/60 text-center text-sm">
         Other questions? Contact your sport course curator or the sport office.
       </p>
     </div>
+  );
+}
+
+function SportTabLink(props: ValidateLinkOptions) {
+  return (
+    <Link
+      className="px-2 py-1"
+      activeOptions={{ exact: true, includeSearch: true }}
+      activeProps={{ className: "border-b-2 border-b-primary" }}
+      {...props}
+    />
   );
 }
