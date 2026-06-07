@@ -1,23 +1,158 @@
 import { useMemo, useState } from "react";
 import clsx from "clsx";
-import { useTeamMembers } from "./hooks/useTeamMembers";
+import { useTeamMembers, type TeamMember } from "./hooks/useTeamMembers";
 import { MemberAvatar } from "./cards/MemberAvatar.tsx";
 
-const leaders = ["Artem Bulgakov", "Anna Belyakova", "Ruslan Bel'kov"];
+const leaderRowOrder = [
+  "Artem Bulgakov",
+  "Ruslan Bel'kov",
+  "Anna Belyakova",
+  "Alexandr Zolotarev",
+  "Vladislav Konovalov",
+];
+
+const leaderRoles: Record<string, string> = {
+  "Anna Belyakova": "leader",
+  "Artem Bulgakov": "Founder",
+  "Ruslan Bel'kov": "Founder",
+  "Alexandr Zolotarev": "tech leader",
+  "Vladislav Konovalov": "tech leader",
+};
+
+const mainLeaderName = Object.entries(leaderRoles).find(
+  ([, role]) => role === "leader",
+)?.[0];
+
+const otherLeaderRowOrder = leaderRowOrder.filter(
+  (name) => name !== mainLeaderName,
+);
+
+const membersLayoutClass =
+  "w-full [--member-cols:4] [--member-gap:0.5rem] sm:[--member-cols:5] sm:[--member-gap:0.75rem] md:[--member-cols:6] lg:[--member-cols:7]";
+
+const memberRowClass =
+  "flex w-full flex-wrap justify-center gap-[var(--member-gap)]";
+
+const memberCardClass =
+  "h-[110px] w-[calc((100%-(var(--member-cols)-1)*var(--member-gap))/var(--member-cols))] shrink-0 sm:h-[120px]";
 
 const safeDecode = (str: string | undefined): string => {
   if (!str) return "";
   try {
-    // Декодируем base64 в бинарную строку
     const binaryStr = atob(str);
     const bytes = Uint8Array.from(binaryStr, (c) => c.charCodeAt(0));
-    // Декодируем байты как UTF-8
     return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } catch {
-    // В случае ошибки (невалидный base64) возвращаем исходную строку
     return str;
   }
 };
+
+function TeamMemberCard({
+  member,
+  animationDelay,
+  isHovered,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  member: TeamMember;
+  animationDelay: number;
+  isHovered: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}) {
+  const isMainLeader = leaderRoles[member.fullName] === "leader";
+
+  return (
+    <div
+      className={clsx(
+        "animate-in slide-in-from-bottom-4 relative min-w-0",
+        memberCardClass,
+      )}
+      style={{
+        zIndex: isHovered ? 50 : 1,
+        transition: `z-index 0s linear ${isHovered ? "0s" : "0.3s"}`,
+        animationDelay: `${animationDelay}ms`,
+      }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      <div
+        className={clsx(
+          "dark:bg-base-200 absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 bg-white shadow-sm transition-all duration-300 ease-in-out dark:border",
+          isMainLeader
+            ? "border-primary dark:border-primary"
+            : "dark:border-base-100 border-gray-200",
+          isHovered
+            ? "dark:border-primary border-primary border-2 py-4 shadow-xl dark:border"
+            : "py-2 hover:shadow-md",
+        )}
+      >
+        <div className="flex w-full flex-col items-center justify-center">
+          <div
+            className={clsx(
+              "mb-2 transition-all duration-300",
+              isHovered && "scale-110",
+            )}
+          >
+            <MemberAvatar member={member} />
+          </div>
+          <div className="px-1 text-center">
+            <h3
+              className={clsx(
+                "line-clamp-2 font-medium text-gray-900 transition-all duration-300 dark:text-gray-100",
+                isHovered ? "text-sm" : "text-xs",
+              )}
+            >
+              {member.fullName}
+            </h3>
+            {leaderRoles[member.fullName] && (
+              <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
+                {leaderRoles[member.fullName]}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div
+          className={clsx(
+            "grid w-full px-2 transition-all duration-500 ease-in-out",
+            isHovered
+              ? "mt-3 grid-rows-[1fr] opacity-100"
+              : "mt-0 grid-rows-[0fr] opacity-0",
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="flex justify-center gap-2">
+              {member.github && (
+                <a
+                  href={`https://github.com/${safeDecode(member.github)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                  title={`GitHub: @${safeDecode(member.github)}`}
+                >
+                  <span className="icon-[mdi--github] text-xl text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100" />
+                </a>
+              )}
+
+              {member.telegram && (
+                <a
+                  href={`https://t.me/${safeDecode(member.telegram)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                  title={`Telegram: @${safeDecode(member.telegram)}`}
+                >
+                  <span className="icon-[mdi--telegram] text-xl text-blue-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function TeamMembers() {
   const {
@@ -26,28 +161,50 @@ export function TeamMembers() {
     error: membersError,
   } = useTeamMembers();
 
-  const shuffledMembers = useMemo(() => {
-    if (!teamMembers) return [];
+  const { leaderRowMembers, mainLeader, otherLeaders, otherMembers } =
+    useMemo(() => {
+      if (!teamMembers) {
+        return {
+          leaderRowMembers: [],
+          mainLeader: null,
+          otherLeaders: [],
+          otherMembers: [],
+        };
+      }
 
-    const leaderMembers = teamMembers
-      .filter((member) => leaders.includes(member.fullName))
-      .sort(
-        (a, b) => leaders.indexOf(a.fullName) - leaders.indexOf(b.fullName),
+      const leaderRowMembers = leaderRowOrder
+        .map((name) => teamMembers.find((member) => member.fullName === name))
+        .filter((member): member is TeamMember => member != null);
+
+      const mainLeader =
+        leaderRowMembers.find((member) => member.fullName === mainLeaderName) ??
+        null;
+
+      const otherLeaders = otherLeaderRowOrder
+        .map((name) => teamMembers.find((member) => member.fullName === name))
+        .filter((member): member is TeamMember => member != null);
+
+      const nonLeaderMembers = teamMembers.filter(
+        (member) => !leaderRowOrder.includes(member.fullName),
       );
-    const nonLeaderMembers = teamMembers.filter(
-      (member) => !leaders.includes(member.fullName),
-    );
 
-    const shuffled = [...nonLeaderMembers];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
+      const shuffled = [...nonLeaderMembers];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
 
-    return [...leaderMembers, ...shuffled];
-  }, [teamMembers]);
+      return {
+        leaderRowMembers,
+        mainLeader,
+        otherLeaders,
+        otherMembers: shuffled,
+      };
+    }, [teamMembers]);
 
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [hoveredMemberName, setHoveredMemberName] = useState<string | null>(
+    null,
+  );
 
   if (isLoadingMembers) {
     return (
@@ -77,7 +234,7 @@ export function TeamMembers() {
     );
   }
 
-  if (!shuffledMembers || shuffledMembers.length === 0) {
+  if (leaderRowMembers.length === 0 && otherMembers.length === 0) {
     return (
       <div className="mt-8 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
         <p className="text-gray-500 dark:text-gray-400">
@@ -88,98 +245,72 @@ export function TeamMembers() {
   }
 
   return (
-    <div className="relative mt-8 overflow-visible rounded-lg p-1 sm:p-4">
-      <div className="flex min-h-[200px] flex-wrap justify-center gap-1 sm:gap-4">
-        {shuffledMembers.map((member, index) => (
-          <div
-            key={`${member.fullName}-${index}`}
-            className={`animate-in slide-in-from-bottom-4 relative h-[120px] w-[29%] max-w-[110px] min-w-[90px] sm:h-[110px] sm:w-[110px]`}
-            style={{
-              zIndex: hoveredIndex === index ? 50 : 1,
-              transition: `z-index 0s linear ${hoveredIndex === index ? "0s" : "0.3s"}`,
-              animationDelay: `${100 + index * 50}ms`,
-            }}
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-          >
-            <div
-              className={clsx(
-                "dark:bg-base-200 dark:border-base-100 absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 border-gray-200 bg-white shadow-sm transition-all duration-300 ease-in-out dark:border",
-                hoveredIndex === index
-                  ? "dark:border-primary border-primary border-2 py-4 shadow-xl dark:border"
-                  : "py-2 hover:shadow-md",
-              )}
-            >
-              <div className="flex w-full flex-col items-center justify-center">
-                <div
-                  className={clsx(
-                    "transition-all duration-300",
-                    hoveredIndex === index ? "mb-2 scale-110" : "mb-2",
-                  )}
-                >
-                  <MemberAvatar member={member} />
-                </div>
-                <div className="px-1 text-center">
-                  <h3
-                    className={clsx(
-                      "line-clamp-2 font-medium text-gray-900 transition-all duration-300 dark:text-gray-100",
-                      hoveredIndex === index ? "text-sm" : "text-xs",
-                    )}
-                  >
-                    {member.fullName}
-                  </h3>
-                  {leaders.includes(member.fullName) &&
-                    (member.fullName !== "Anna Belyakova" ? (
-                      <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
-                        tech leader
-                      </span>
-                    ) : (
-                      <span className="text-primary animate-in fade-in zoom-in slide-in-from-top-1 block text-[10px] font-semibold tracking-wider uppercase duration-300">
-                        leader
-                      </span>
-                    ))}
-                </div>
+    <div
+      className={clsx(
+        "relative clear-both mt-8 mb-8 w-full overflow-visible",
+        membersLayoutClass,
+      )}
+    >
+      <div className="flex w-full flex-col gap-3 sm:gap-4">
+        {leaderRowMembers.length > 0 && (
+          <>
+            {mainLeader && (
+              <div className={clsx(memberRowClass, "sm:hidden")}>
+                <TeamMemberCard
+                  key={mainLeader.fullName}
+                  member={mainLeader}
+                  animationDelay={100}
+                  isHovered={hoveredMemberName === mainLeader.fullName}
+                  onMouseEnter={() => setHoveredMemberName(mainLeader.fullName)}
+                  onMouseLeave={() => setHoveredMemberName(null)}
+                />
               </div>
+            )}
 
-              <div
-                className={clsx(
-                  "grid w-full px-2 transition-all duration-500 ease-in-out",
-                  hoveredIndex === index
-                    ? "mt-3 grid-rows-[1fr] opacity-100"
-                    : "mt-0 grid-rows-[0fr] opacity-0",
-                )}
-              >
-                <div className="overflow-hidden">
-                  <div className="flex justify-center gap-2">
-                    {member.github && (
-                      <a
-                        href={`https://github.com/${safeDecode(member.github)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
-                        title={`GitHub: @${safeDecode(member.github)}`}
-                      >
-                        <span className="icon-[mdi--github] text-xl text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100" />
-                      </a>
-                    )}
-
-                    {member.telegram && (
-                      <a
-                        href={`https://t.me/${safeDecode(member.telegram)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
-                        title={`Telegram: @${safeDecode(member.telegram)}`}
-                      >
-                        <span className="icon-[mdi--telegram] text-xl text-blue-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
-                      </a>
-                    )}
-                  </div>
-                </div>
+            {otherLeaders.length > 0 && (
+              <div className={clsx(memberRowClass, "sm:hidden")}>
+                {otherLeaders.map((member, index) => (
+                  <TeamMemberCard
+                    key={member.fullName}
+                    member={member}
+                    animationDelay={150 + index * 50}
+                    isHovered={hoveredMemberName === member.fullName}
+                    onMouseEnter={() => setHoveredMemberName(member.fullName)}
+                    onMouseLeave={() => setHoveredMemberName(null)}
+                  />
+                ))}
               </div>
+            )}
+
+            <div className={clsx(memberRowClass, "hidden sm:flex")}>
+              {leaderRowMembers.map((member, index) => (
+                <TeamMemberCard
+                  key={member.fullName}
+                  member={member}
+                  animationDelay={100 + index * 50}
+                  isHovered={hoveredMemberName === member.fullName}
+                  onMouseEnter={() => setHoveredMemberName(member.fullName)}
+                  onMouseLeave={() => setHoveredMemberName(null)}
+                />
+              ))}
             </div>
+          </>
+        )}
+
+        {otherMembers.length > 0 && (
+          <div className={memberRowClass}>
+            {otherMembers.map((member, index) => (
+              <TeamMemberCard
+                key={member.fullName}
+                member={member}
+                animationDelay={100 + (leaderRowMembers.length + index) * 50}
+                isHovered={hoveredMemberName === member.fullName}
+                onMouseEnter={() => setHoveredMemberName(member.fullName)}
+                onMouseLeave={() => setHoveredMemberName(null)}
+              />
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
