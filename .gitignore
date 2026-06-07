@@ -10,6 +10,7 @@
 /build
 /coverage
 *.tsbuildinfo
+.tanstack
 
 # debug
 npm-debug.log*
