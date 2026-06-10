@@ -69,19 +69,31 @@ function createApiQueryError(body: unknown, response: Response) {
 }
 
 export function formatApiErrorMessage(
-  error: TypeError | { body?: unknown; httpCode: number },
+  error: unknown | TypeError | { body?: unknown; httpCode: number },
 ): string {
   if (error instanceof TypeError) {
     return `Network Error: ${error.message}`;
   }
-  const detail = (
-    error.body as { detail?: unknown } | undefined
-  )?.detail?.toString();
-  const code = error.httpCode.toString();
-  if (detail) {
-    return `Error ${code}: ${detail}`;
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "httpCode" in error &&
+    typeof (error as { httpCode: unknown }).httpCode === "number"
+  ) {
+    const apiError = error as { body?: unknown; httpCode: number };
+    const detail = (
+      apiError.body as { detail?: unknown } | undefined
+    )?.detail?.toString();
+    const code = apiError.httpCode.toString();
+    if (detail) {
+      return `Error ${code}: ${detail}`;
+    }
+    return `Error ${code}`;
   }
-  return `Error ${code}`;
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error ?? "Unknown error");
 }
 
 // Helper type to dynamically infer the type from the `select` property

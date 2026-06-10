@@ -38,12 +38,15 @@ import {
   courseComponentsYamlLintExtensions,
   validateCourseComponentsYaml,
 } from "@/components/schedule-assistant/settings/courses/courseComponentsYamlLint.ts";
+import { useBlurSaveField } from "@/components/schedule-assistant/settings/useBlurSaveField.ts";
 import { useSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
 import {
   normalizeTermWeekdays,
   TERM_WEEKDAY_KEYS,
   TERM_WEEKDAY_LABEL_RU,
   type TermWeekdayKey,
+  termWeekdayKeysToWeekdays,
+  termWeekdayKeyToWeekday,
   toggleTermWeekday,
 } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { yaml } from "@codemirror/lang-yaml";
@@ -334,11 +337,26 @@ export function SettingsSidebarDetailFrame({
 
 export function RoomDetails({ roomId }: { roomId: string }) {
   const { room, isPending, isError, error } = useRoom(roomId);
-  const { patchRoom, isPending: isSaving } = usePatchRoomMutation(roomId);
+  const { patchRoom } = usePatchRoomMutation(roomId);
   const { mutate: deleteRoom, isPending: isDeleting } = useDeleteRoomMutation();
   const { deselectItem } = useSelection();
   const headingTitle = room ? String(room.id) : roomId || "—";
   const headingSubtitle = "Аудитория";
+  const idField = useBlurSaveField(String(room?.id ?? ""), (value) => {
+    if (!room) return;
+    patchRoom({ id: value });
+  });
+  const nameField = useBlurSaveField(String(room?.name ?? ""), (value) => {
+    if (!room) return;
+    patchRoom({ name: value });
+  });
+  const capacityField = useBlurSaveField(
+    room?.capacity != null ? String(room.capacity) : "",
+    (value) => {
+      if (!room) return;
+      patchRoom({ capacity: Number(value) || 0 });
+    },
+  );
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
@@ -353,32 +371,18 @@ export function RoomDetails({ roomId }: { roomId: string }) {
           <div className={settingsDetailShellClass}>
             <label className={`${detailControlClass} shrink-0`}>
               <span className={detailLabelUpperClass}>Идентификатор</span>
-              <input
-                className={detailInputClass}
-                value={String(room.id ?? "")}
-                disabled={isSaving}
-                onChange={(event) => patchRoom({ id: event.target.value })}
-              />
+              <input className={detailInputClass} {...idField} />
             </label>
             <label className={`${detailControlClass} shrink-0`}>
               <span className={detailLabelUpperClass}>Название</span>
-              <input
-                className={detailInputClass}
-                value={String(room.name ?? "")}
-                disabled={isSaving}
-                onChange={(event) => patchRoom({ name: event.target.value })}
-              />
+              <input className={detailInputClass} {...nameField} />
             </label>
             <label className={`${detailControlClass} shrink-0`}>
               <span className={detailLabelUpperClass}>Вместимость</span>
               <input
                 type="number"
                 className={detailInputClass}
-                value={room.capacity != null ? String(room.capacity) : ""}
-                disabled={isSaving}
-                onChange={(event) =>
-                  patchRoom({ capacity: Number(event.target.value) || 0 })
-                }
+                {...capacityField}
               />
             </label>
             <SettingsDetailDeleteButton
@@ -402,8 +406,7 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const { config } = useConfig();
   const { course, courseName, isPending, isError, error } =
     useCourse(courseIndex);
-  const { patchCourse, isPending: isSaving } =
-    usePatchCourseMutation(courseName);
+  const { patchCourse } = usePatchCourseMutation(courseName);
   const { mutate: deleteCourse, isPending: isDeleting } =
     useDeleteCourseMutation();
   const { mutate: createStudentGroup } = useCreateStudentGroupMutation();
@@ -461,6 +464,18 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
     setParseError(null);
   }, [courseIndex, componentsSignature]);
 
+  const nameField = useBlurSaveField(name, (value) =>
+    patchCourse({ name: value }),
+  );
+  const tagsField = useBlurSaveField(tags, (value) =>
+    patchCourse({
+      course_tags: value
+        .split(",")
+        .map((chunk) => chunk.trim())
+        .filter(Boolean),
+    }),
+  );
+
   function handleCommitYaml() {
     const result = validateCourseComponentsYaml(yamlText);
     if (!result.ok) {
@@ -479,30 +494,13 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
         <div className={settingsDetailShellClass}>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Название</span>
-            <input
-              className={detailInputClass}
-              value={name}
-              disabled={isSaving}
-              onChange={(event) => patchCourse({ name: event.target.value })}
-            />
+            <input className={detailInputClass} {...nameField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>
               Теги курса (через запятую)
             </span>
-            <input
-              className={detailInputClass}
-              value={tags}
-              disabled={isSaving}
-              onChange={(event) =>
-                patchCourse({
-                  course_tags: event.target.value
-                    .split(",")
-                    .map((chunk) => chunk.trim())
-                    .filter(Boolean),
-                })
-              }
-            />
+            <input className={detailInputClass} {...tagsField} />
           </label>
 
           <div
@@ -519,7 +517,7 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
                   yaml(),
                   EditorView.lineWrapping,
                   ...yamlLintExtensions,
-                  keymap.of(lintKeymap),
+                  keymap.of(lintKeymap as Parameters<typeof keymap.of>[0]),
                 ]}
                 onChange={(value) => setYamlText(value)}
                 onBlur={handleCommitYaml}
@@ -564,9 +562,8 @@ export function GroupDetails({
   titleFallback?: string;
 }) {
   const { studentGroup, isPending, isError, error } = useStudentGroup(groupId);
-  const { patchStudentGroup, isPending: isSaving } =
-    usePatchStudentGroupMutation(groupId);
-  const { renameStudentGroup, isPending: isRenaming } = useRenameStudentGroup();
+  const { patchStudentGroup } = usePatchStudentGroupMutation(groupId);
+  const { renameStudentGroup } = useRenameStudentGroup();
   const { deleteStudentGroupCascade, isPending: isDeleting } =
     useDeleteStudentGroupCascade();
   const { track } = useTrack(sectionCode, programIndex, trackIndex);
@@ -584,7 +581,41 @@ export function GroupDetails({
     ? studentGroup.students.join("\n")
     : "";
 
-  const emailLineCount = students
+  const nameField = useBlurSaveField(name, (value) =>
+    patchStudentGroup({ name: value }),
+  );
+  const codeField = useBlurSaveField(code, (value) => {
+    const newId = value.trim();
+    if (!newId || newId === groupId) return;
+    void renameStudentGroup(groupId, newId).then(() => {
+      selectItem({
+        kind: "group",
+        sectionCode,
+        programIndex,
+        trackIndex,
+        groupId: newId,
+      });
+    });
+  });
+  const kindField = useBlurSaveField(kind, (value) =>
+    patchStudentGroup({ kind: value }),
+  );
+  const estimatedSizeField = useBlurSaveField(estimatedSize, (value) => {
+    const parsed = Number(value.trim());
+    patchStudentGroup({
+      estimated_size: Number.isFinite(parsed) ? parsed : null,
+    });
+  });
+  const studentsField = useBlurSaveField(students, (value) =>
+    patchStudentGroup({
+      students: value
+        .split("\n")
+        .map((chunk) => chunk.trim())
+        .filter(Boolean),
+    }),
+  );
+
+  const emailLineCount = studentsField.value
     .split("\n")
     .map((line: string) => line.trim())
     .filter(Boolean).length;
@@ -595,46 +626,15 @@ export function GroupDetails({
         <div className={settingsDetailShellClass}>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Название</span>
-            <input
-              className={detailInputClass}
-              value={name}
-              disabled={isSaving}
-              onChange={(event) =>
-                patchStudentGroup({ name: event.target.value })
-              }
-            />
+            <input className={detailInputClass} {...nameField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Код</span>
-            <input
-              className={detailInputClass}
-              value={code}
-              disabled={isRenaming}
-              onChange={(event) => {
-                const newId = event.target.value.trim();
-                if (!newId || newId === groupId) return;
-                void renameStudentGroup(groupId, newId).then(() => {
-                  selectItem({
-                    kind: "group",
-                    sectionCode,
-                    programIndex,
-                    trackIndex,
-                    groupId: newId,
-                  });
-                });
-              }}
-            />
+            <input className={detailInputClass} {...codeField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Тип</span>
-            <input
-              className={detailInputClass}
-              value={kind}
-              disabled={isSaving}
-              onChange={(event) =>
-                patchStudentGroup({ kind: event.target.value })
-              }
-            />
+            <input className={detailInputClass} {...kindField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Оценка размера</span>
@@ -642,14 +642,7 @@ export function GroupDetails({
               type="text"
               inputMode="numeric"
               className={detailInputClass}
-              value={estimatedSize}
-              disabled={isSaving}
-              onChange={(event) => {
-                const parsed = Number(event.target.value.trim());
-                patchStudentGroup({
-                  estimated_size: Number.isFinite(parsed) ? parsed : null,
-                });
-              }}
+              {...estimatedSizeField}
             />
           </label>
           <label
@@ -663,16 +656,7 @@ export function GroupDetails({
             </span>
             <textarea
               className={detailStudentsTextareaClass}
-              value={students}
-              disabled={isSaving}
-              onChange={(event) =>
-                patchStudentGroup({
-                  students: event.target.value
-                    .split("\n")
-                    .map((chunk) => chunk.trim())
-                    .filter(Boolean),
-                })
-              }
+              {...studentsField}
             />
           </label>
 
@@ -704,10 +688,7 @@ export function ProgramDetails({
     sectionCode,
     programIndex,
   );
-  const { updateProgram, isPending: isSaving } = useUpdateProgramMutation(
-    sectionCode,
-    programIndex,
-  );
+  const { updateProgram } = useUpdateProgramMutation(sectionCode, programIndex);
   const { deleteProgram, isPending: isDeleting } = useDeleteProgramFromSection(
     sectionCode,
     programIndex,
@@ -727,6 +708,38 @@ export function ProgramDetails({
       title: String(track?.name || "Track"),
     }),
   );
+  const nameField = useBlurSaveField(name, (value) =>
+    updateProgram((target) => {
+      target.name = value;
+    }),
+  );
+  const codeField = useBlurSaveField(code, (value) =>
+    updateProgram((target) => {
+      target.code = value;
+    }),
+  );
+  const kindField = useBlurSaveField(kind, (value) =>
+    updateProgram((target) => {
+      if (!("kind" in target)) return;
+      (target as Record<string, unknown>).kind = value;
+    }),
+  );
+  const languageField = useBlurSaveField(language, (value) =>
+    updateProgram((target) => {
+      target.language =
+        value === "en"
+          ? SectionProgramLanguageAnyOf0.en
+          : value === "ru"
+            ? SectionProgramLanguageAnyOf0.ru
+            : null;
+    }),
+  );
+  const yearField = useBlurSaveField(year, (value) =>
+    updateProgram((target) => {
+      const parsed = Number(value);
+      target.year = Number.isFinite(parsed) ? parsed : null;
+    }),
+  );
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
@@ -734,75 +747,23 @@ export function ProgramDetails({
         <div className={settingsDetailShellClass}>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Название</span>
-            <input
-              className={detailInputClass}
-              value={name}
-              disabled={isSaving}
-              onChange={(event) =>
-                updateProgram((target) => {
-                  target.name = event.target.value;
-                })
-              }
-            />
+            <input className={detailInputClass} {...nameField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Код</span>
-            <input
-              className={detailInputClass}
-              value={code}
-              disabled={isSaving}
-              onChange={(event) =>
-                updateProgram((target) => {
-                  target.code = event.target.value;
-                })
-              }
-            />
+            <input className={detailInputClass} {...codeField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Тип</span>
-            <input
-              className={detailInputClass}
-              value={kind}
-              disabled={isSaving}
-              onChange={(event) =>
-                updateProgram((target) => {
-                  if (!("kind" in target)) return;
-                  (target as Record<string, unknown>).kind = event.target.value;
-                })
-              }
-            />
+            <input className={detailInputClass} {...kindField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Язык</span>
-            <input
-              className={detailInputClass}
-              value={language}
-              disabled={isSaving}
-              onChange={(event) =>
-                updateProgram((target) => {
-                  target.language =
-                    event.target.value === "en"
-                      ? SectionProgramLanguageAnyOf0.en
-                      : event.target.value === "ru"
-                        ? SectionProgramLanguageAnyOf0.ru
-                        : null;
-                })
-              }
-            />
+            <input className={detailInputClass} {...languageField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Год</span>
-            <input
-              className={detailInputClass}
-              value={year}
-              disabled={isSaving}
-              onChange={(event) =>
-                updateProgram((target) => {
-                  const parsed = Number(event.target.value);
-                  target.year = Number.isFinite(parsed) ? parsed : null;
-                })
-              }
-            />
+            <input className={detailInputClass} {...yearField} />
           </label>
 
           <SettingsDetailNestedList
@@ -894,10 +855,7 @@ export function TrackDetails({
     programIndex,
     trackIndex,
   );
-  const { updateProgram, isPending: isSaving } = useUpdateProgramMutation(
-    sectionCode,
-    programIndex,
-  );
+  const { updateProgram } = useUpdateProgramMutation(sectionCode, programIndex);
   const { mutate: createStudentGroup } = useCreateStudentGroupMutation();
   const { deleteStudentGroupCascade } = useDeleteStudentGroupCascade();
   const { selectItem, deselectItem } = useSelection();
@@ -922,6 +880,25 @@ export function TrackDetails({
       title: String(groupEntity?.name || groupId),
     };
   });
+  const nameField = useBlurSaveField(name, (value) =>
+    updateProgram((target) => {
+      target.tracks[trackIndex].name = value;
+    }),
+  );
+  const codeField = useBlurSaveField(code, (value) =>
+    updateProgram((target) => {
+      const draftTrack = target.tracks[trackIndex];
+      if (!("code" in draftTrack)) return;
+      (draftTrack as Record<string, unknown>).code = value;
+    }),
+  );
+  const kindField = useBlurSaveField(kind, (value) =>
+    updateProgram((target) => {
+      const draftTrack = target.tracks[trackIndex];
+      if (!("kind" in draftTrack)) return;
+      (draftTrack as Record<string, unknown>).kind = value;
+    }),
+  );
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
@@ -929,48 +906,15 @@ export function TrackDetails({
         <div className={settingsDetailShellClass}>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Название</span>
-            <input
-              className={detailInputClass}
-              value={name}
-              disabled={isSaving}
-              onChange={(event) =>
-                updateProgram((target) => {
-                  target.tracks[trackIndex].name = event.target.value;
-                })
-              }
-            />
+            <input className={detailInputClass} {...nameField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Код</span>
-            <input
-              className={detailInputClass}
-              value={code}
-              disabled={isSaving}
-              onChange={(event) =>
-                updateProgram((target) => {
-                  const draftTrack = target.tracks[trackIndex];
-                  if (!("code" in draftTrack)) return;
-                  (draftTrack as Record<string, unknown>).code =
-                    event.target.value;
-                })
-              }
-            />
+            <input className={detailInputClass} {...codeField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Тип</span>
-            <input
-              className={detailInputClass}
-              value={kind}
-              disabled={isSaving}
-              onChange={(event) =>
-                updateProgram((target) => {
-                  const draftTrack = target.tracks[trackIndex];
-                  if (!("kind" in draftTrack)) return;
-                  (draftTrack as Record<string, unknown>).kind =
-                    event.target.value;
-                })
-              }
-            />
+            <input className={detailInputClass} {...kindField} />
           </label>
 
           <SettingsDetailNestedList
@@ -1082,8 +1026,7 @@ export function InstructorDetails({
 }) {
   const { instructor, instructorId, isPending, isError, error } =
     useInstructor(instructorIndex);
-  const { patchInstructor, isPending: isSaving } =
-    usePatchInstructorMutation(instructorId);
+  const { patchInstructor } = usePatchInstructorMutation(instructorId);
   const { mutate: deleteInstructor, isPending: isDeleting } =
     useDeleteInstructorMutation();
   const { deselectItem } = useSelection();
@@ -1094,6 +1037,24 @@ export function InstructorDetails({
     instructor?.id ??
     "";
   const headingSubtitle = "Преподаватель";
+  const nameRuField = useBlurSaveField(instructor?.name_ru ?? "", (value) =>
+    patchInstructor({ name_ru: value.trim() || null }),
+  );
+  const nameEnField = useBlurSaveField(instructor?.name_en ?? "", (value) =>
+    patchInstructor({ name_en: value.trim() || null }),
+  );
+  const idField = useBlurSaveField(instructor?.id ?? "", (value) =>
+    patchInstructor({ id: value.trim() }),
+  );
+  const emailField = useBlurSaveField(instructor?.email ?? "", (value) =>
+    patchInstructor({ email: value.trim() || null }),
+  );
+  const aliasField = useBlurSaveField(instructor?.alias ?? "", (value) =>
+    patchInstructor({ alias: value.trim() || null }),
+  );
+  const positionField = useBlurSaveField(instructor?.position ?? "", (value) =>
+    patchInstructor({ position: value.trim() || null }),
+  );
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
@@ -1101,79 +1062,27 @@ export function InstructorDetails({
         <div className={settingsDetailShellClass}>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Имя (на русском)</span>
-            <input
-              className={detailInputClass}
-              value={instructor?.name_ru ?? ""}
-              disabled={isSaving}
-              onChange={(event) =>
-                patchInstructor({
-                  name_ru: event.target.value.trim() || null,
-                })
-              }
-            />
+            <input className={detailInputClass} {...nameRuField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Имя (на английском)</span>
-            <input
-              className={detailInputClass}
-              value={instructor?.name_en ?? ""}
-              disabled={isSaving}
-              onChange={(event) =>
-                patchInstructor({
-                  name_en: event.target.value.trim() || null,
-                })
-              }
-            />
+            <input className={detailInputClass} {...nameEnField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Идентификатор</span>
-            <input
-              className={detailInputClass}
-              value={instructor?.id ?? ""}
-              disabled={isSaving}
-              onChange={(event) =>
-                patchInstructor({ id: event.target.value.trim() })
-              }
-            />
+            <input className={detailInputClass} {...idField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Корпоративная почта</span>
-            <input
-              className={detailInputClass}
-              value={instructor?.email ?? ""}
-              disabled={isSaving}
-              onChange={(event) =>
-                patchInstructor({
-                  email: event.target.value.trim() || null,
-                })
-              }
-            />
+            <input className={detailInputClass} {...emailField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Алиас Telegram</span>
-            <input
-              className={detailInputClass}
-              value={instructor?.alias ?? ""}
-              disabled={isSaving}
-              onChange={(event) =>
-                patchInstructor({
-                  alias: event.target.value.trim() || null,
-                })
-              }
-            />
+            <input className={detailInputClass} {...aliasField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Должность</span>
-            <input
-              className={detailInputClass}
-              value={instructor?.position ?? ""}
-              disabled={isSaving}
-              onChange={(event) =>
-                patchInstructor({
-                  position: event.target.value.trim() || null,
-                })
-              }
-            />
+            <input className={detailInputClass} {...positionField} />
           </label>
           <SettingsDetailDeleteButton
             label="Удалить преподавателя"
@@ -1196,7 +1105,7 @@ export function InstructorDetails({
 
 export function SemesterDetails() {
   const { term, isPending, isError, error } = useSemesterSettings();
-  const { patchTerm, isPending: isSaving } = usePatchTermMutation();
+  const { patchTerm } = usePatchTermMutation();
   const termName = String(term?.name ?? "");
   const startDate = toDateInputValue(term?.semester?.start_date);
   const endDate = toDateInputValue(term?.semester?.end_date);
@@ -1205,15 +1114,42 @@ export function SemesterDetails() {
     normalizeTermWeekdays(term?.starting_day ? [term.starting_day] : [])[0] ??
     "";
   const timeSlots = formatTermTimeSlots(term?.time_slots);
+  const termNameField = useBlurSaveField(termName, (value) =>
+    patchTerm((current) => ({ ...current, name: value })),
+  );
+  const startDateField = useBlurSaveField(startDate, (value) =>
+    patchTerm((current) => ({
+      ...current,
+      semester: {
+        ...current.semester,
+        start_date: value,
+      },
+    })),
+  );
+  const endDateField = useBlurSaveField(endDate, (value) =>
+    patchTerm((current) => ({
+      ...current,
+      semester: {
+        ...current.semester,
+        end_date: value,
+      },
+    })),
+  );
+  const timeSlotsField = useBlurSaveField(timeSlots, (value) =>
+    patchTerm((current) => ({
+      ...current,
+      time_slots: parseTermTimeSlotsText(value),
+    })),
+  );
 
   function handleToggleDay(key: TermWeekdayKey) {
     patchTerm((current) => ({
       ...current,
-      days: toggleTermWeekday(days, key),
+      days: termWeekdayKeysToWeekdays(toggleTermWeekday(days, key)),
     }));
   }
 
-  const timeSlotsTextareaRef = useAutosizeTextareaRef(timeSlots);
+  const timeSlotsTextareaRef = useAutosizeTextareaRef(timeSlotsField.value);
 
   if (isPending) {
     return <div className="skeleton h-40 w-full" />;
@@ -1233,11 +1169,7 @@ export function SemesterDetails() {
         <span className={detailLabelUpperClass}>Название семестра</span>
         <input
           className={detailInputClass}
-          value={termName}
-          disabled={isSaving}
-          onChange={(event) =>
-            patchTerm((current) => ({ ...current, name: event.target.value }))
-          }
+          {...termNameField}
           onKeyDown={handleEscapeBlur}
         />
       </label>
@@ -1246,17 +1178,7 @@ export function SemesterDetails() {
         <input
           type="date"
           className={detailInputClass}
-          value={startDate}
-          disabled={isSaving}
-          onChange={(event) =>
-            patchTerm((current) => ({
-              ...current,
-              semester: {
-                ...current.semester,
-                start_date: event.target.value,
-              },
-            }))
-          }
+          {...startDateField}
           onKeyDown={handleEscapeBlur}
         />
       </label>
@@ -1265,17 +1187,7 @@ export function SemesterDetails() {
         <input
           type="date"
           className={detailInputClass}
-          value={endDate}
-          disabled={isSaving}
-          onChange={(event) =>
-            patchTerm((current) => ({
-              ...current,
-              semester: {
-                ...current.semester,
-                end_date: event.target.value,
-              },
-            }))
-          }
+          {...endDateField}
           onKeyDown={handleEscapeBlur}
         />
       </label>
@@ -1294,7 +1206,6 @@ export function SemesterDetails() {
                     ? "btn-secondary text-secondary-content"
                     : "btn-outline bg-base-100 text-base-content/55 hover:border-base-content/30",
                 )}
-                disabled={isSaving}
                 onClick={() => handleToggleDay(key)}
               >
                 {TERM_WEEKDAY_LABEL_RU[key]}
@@ -1318,9 +1229,11 @@ export function SemesterDetails() {
                     ? "btn-secondary text-secondary-content"
                     : "btn-outline bg-base-100 text-base-content/55 hover:border-base-content/30",
                 )}
-                disabled={isSaving}
                 onClick={() =>
-                  patchTerm((current) => ({ ...current, starting_day: key }))
+                  patchTerm((current) => ({
+                    ...current,
+                    starting_day: termWeekdayKeyToWeekday(key),
+                  }))
                 }
               >
                 {TERM_WEEKDAY_LABEL_RU[key]}
@@ -1334,15 +1247,8 @@ export function SemesterDetails() {
         <textarea
           ref={timeSlotsTextareaRef}
           className={detailTimeSlotsTextareaClass}
-          value={timeSlots}
-          disabled={isSaving}
+          {...timeSlotsField}
           onKeyDown={handleEscapeBlur}
-          onChange={(event) =>
-            patchTerm((current) => ({
-              ...current,
-              time_slots: parseTermTimeSlotsText(event.target.value),
-            }))
-          }
         />
       </label>
     </div>

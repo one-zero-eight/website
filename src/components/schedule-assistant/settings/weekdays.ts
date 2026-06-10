@@ -1,3 +1,5 @@
+import { Weekday } from "@/api/schedule-assistant/types.ts";
+
 /** Ключи дней недели в конфиге (`config.term.days`), как в Python-модели. */
 export const TERM_WEEKDAY_KEYS = [
   "Mon",
@@ -20,6 +22,24 @@ export const TERM_WEEKDAY_LABEL_RU: Record<TermWeekdayKey, string> = {
   Sat: "Сб",
   Sun: "Вс",
 };
+
+const TERM_KEY_TO_WEEKDAY: Record<TermWeekdayKey, Weekday> = {
+  Mon: Weekday.MONDAY,
+  Tue: Weekday.TUESDAY,
+  Wed: Weekday.WEDNESDAY,
+  Thu: Weekday.THURSDAY,
+  Fri: Weekday.FRIDAY,
+  Sat: Weekday.SATURDAY,
+  Sun: Weekday.SUNDAY,
+};
+
+export function termWeekdayKeyToWeekday(key: TermWeekdayKey): Weekday {
+  return TERM_KEY_TO_WEEKDAY[key];
+}
+
+export function termWeekdayKeysToWeekdays(keys: TermWeekdayKey[]): Weekday[] {
+  return keys.map(termWeekdayKeyToWeekday);
+}
 
 const WEEKDAY_API_TO_KEY: Record<string, TermWeekdayKey> = {
   monday: "Mon",

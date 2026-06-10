@@ -250,7 +250,7 @@ export function computeDetailPanel(input: {
         byTag[m.tag].push(m);
       }
       parts.push(<DetailSection key="comp" title="Компоненты" />);
-      const courseCfg = config.courses.find((c) => c.name === courseName);
+      const courseCfg = config.courses?.find((c) => c.name === courseName);
       const orderedTags: string[] = [];
       for (const comp of courseCfg?.components || []) {
         if (comp?.tag && byTag[comp.tag] && !orderedTags.includes(comp.tag))

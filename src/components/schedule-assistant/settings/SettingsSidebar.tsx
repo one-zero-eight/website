@@ -44,7 +44,7 @@ export function SettingsSidebar() {
   }
 
   if (settingsSubTab === "rooms" && selectedSelection.kind === "room") {
-    const room = config.rooms?.[selectedSelection.roomIndex];
+    const room = config?.rooms?.[selectedSelection.roomIndex];
     return <RoomDetails roomId={String(room?.id ?? "")} />;
   }
 

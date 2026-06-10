@@ -1,4 +1,9 @@
-import { linter, lintGutter, type Diagnostic } from "@codemirror/lint";
+import {
+  linter,
+  lintGutter,
+  type Diagnostic,
+  type LintSource,
+} from "@codemirror/lint";
 import type { Extension } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import Ajv, { type ErrorObject } from "ajv";
@@ -452,9 +457,15 @@ export function courseComponentsYamlLintExtensions(
   onCreateGroup: (groupId: string) => void,
 ): Extension[] {
   return [
-    linter(createLintCourseComponentsYaml(knownGroupIds, onCreateGroup), {
-      delay: 280,
-    }),
+    linter(
+      createLintCourseComponentsYaml(
+        knownGroupIds,
+        onCreateGroup,
+      ) as unknown as LintSource,
+      {
+        delay: 280,
+      },
+    ),
     lintGutter(),
   ];
 }
