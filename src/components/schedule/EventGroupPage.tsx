@@ -1,4 +1,5 @@
 import { $events } from "@/api/events";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
@@ -16,6 +17,7 @@ export function EventGroupPage({ alias }: { alias: string }) {
     data: group,
     isLoading,
     isError,
+    error,
   } = $events.useQuery("get", "/event-groups/by-alias", {
     params: { query: { alias } },
   });
@@ -35,6 +37,11 @@ export function EventGroupPage({ alias }: { alias: string }) {
           <p className="text-base-content/75 text-lg">
             Event group <code className="font-mono">"{alias}"</code> not found.
           </p>
+          {isError && error && (
+            <p className="text-base-content/60 text-base">
+              {formatApiErrorMessage(error)}
+            </p>
+          )}
           <Link to="/schedule" className="btn btn-primary">
             Back to Schedule
           </Link>

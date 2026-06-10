@@ -33,8 +33,37 @@ import {
   HttpMethod,
   MediaType,
   PathsWithMethod,
+  QueryErrorResponse,
   RequiredKeysOf,
+  ResponseObjectMap,
 } from "@/api/helpers/openapi-typescript-helpers";
+
+type ApiQueryError<
+  PathMethod extends Record<string | number, any>,
+  Media extends MediaType,
+> = QueryErrorResponse<ResponseObjectMap<PathMethod>, Media>;
+
+function createApiQueryError(body: unknown, response: Response) {
+  return {
+    body,
+    httpCode: response.status,
+    response,
+  };
+}
+
+export function formatApiErrorMessage(error: {
+  body?: unknown;
+  httpCode: number;
+}): string {
+  const detail = (
+    error.body as { detail?: unknown } | undefined
+  )?.detail?.toString();
+  const code = error.httpCode.toString();
+  if (detail) {
+    return `Error ${code}: ${detail}`;
+  }
+  return `Error ${code}`;
+}
 
 // Helper type to dynamically infer the type from the `select` property
 type InferSelectReturnType<TData, TSelect> = TSelect extends (
@@ -67,7 +96,7 @@ export type QueryOptionsFunction<
   Options extends Omit<
     UseQueryOptions<
       Response["data"],
-      Response["error"],
+      ApiQueryError<Paths[Path][Method], Media>,
       InferSelectReturnType<Response["data"], Options["select"]>,
       QueryKey<Prefix, Paths, Method, Path>
     >,
@@ -83,7 +112,7 @@ export type QueryOptionsFunction<
   Omit<
     UseQueryOptions<
       Response["data"],
-      Response["error"],
+      ApiQueryError<Paths[Path][Method], Media>,
       InferSelectReturnType<Response["data"], Options["select"]>,
       QueryKey<Prefix, Paths, Method, Path>
     >,
@@ -92,12 +121,12 @@ export type QueryOptionsFunction<
     queryKey: DataTag<
       QueryKey<Prefix, Paths, Method, Path>,
       Response["data"],
-      Response["error"]
+      ApiQueryError<Paths[Path][Method], Media>
     >;
     queryFn: Exclude<
       UseQueryOptions<
         Response["data"],
-        Response["error"],
+        ApiQueryError<Paths[Path][Method], Media>,
         InferSelectReturnType<Response["data"], Options["select"]>,
         QueryKey<Prefix, Paths, Method, Path>
       >["queryFn"],
@@ -118,7 +147,7 @@ export type UseQueryMethod<
   Options extends Omit<
     UseQueryOptions<
       Response["data"],
-      Response["error"],
+      ApiQueryError<Paths[Path][Method], Media>,
       InferSelectReturnType<Response["data"], Options["select"]>,
       QueryKey<Prefix, Paths, Method, Path>
     >,
@@ -132,7 +161,7 @@ export type UseQueryMethod<
     : [InitWithUnknowns<Init>, Options?, QueryClient?]
 ) => UseQueryResult<
   InferSelectReturnType<Response["data"], Options["select"]>,
-  Response["error"]
+  ApiQueryError<Paths[Path][Method], Media>
 >;
 
 export type UseInfiniteQueryMethod<
@@ -147,7 +176,7 @@ export type UseInfiniteQueryMethod<
   Options extends Omit<
     UseInfiniteQueryOptions<
       Response["data"],
-      Response["error"],
+      ApiQueryError<Paths[Path][Method], Media>,
       InferSelectReturnType<InfiniteData<Response["data"]>, Options["select"]>,
       QueryKey<Prefix, Paths, Method, Path>,
       unknown
@@ -164,7 +193,7 @@ export type UseInfiniteQueryMethod<
   queryClient?: QueryClient,
 ) => UseInfiniteQueryResult<
   InferSelectReturnType<InfiniteData<Response["data"]>, Options["select"]>,
-  Response["error"]
+  ApiQueryError<Paths[Path][Method], Media>
 >;
 
 export type UseSuspenseQueryMethod<
@@ -179,7 +208,7 @@ export type UseSuspenseQueryMethod<
   Options extends Omit<
     UseSuspenseQueryOptions<
       Response["data"],
-      Response["error"],
+      ApiQueryError<Paths[Path][Method], Media>,
       InferSelectReturnType<Response["data"], Options["select"]>,
       QueryKey<Prefix, Paths, Method, Path>
     >,
@@ -193,7 +222,7 @@ export type UseSuspenseQueryMethod<
     : [InitWithUnknowns<Init>, Options?, QueryClient?]
 ) => UseSuspenseQueryResult<
   InferSelectReturnType<Response["data"], Options["select"]>,
-  Response["error"]
+  ApiQueryError<Paths[Path][Method], Media>
 >;
 
 export type UseMutationMethod<
@@ -211,7 +240,7 @@ export type UseMutationMethod<
   options?: Omit<
     UseMutationOptions<
       Response["data"],
-      Response["error"],
+      ApiQueryError<Paths[Path][Method], Media>,
       Init,
       TOnMutateResult
     >,
@@ -220,7 +249,7 @@ export type UseMutationMethod<
   queryClient?: QueryClient,
 ) => UseMutationResult<
   Response["data"],
-  Response["error"],
+  ApiQueryError<Paths[Path][Method], Media>,
   Init,
   TOnMutateResult
 >;
@@ -279,8 +308,8 @@ export default function createClient<
       signal,
       ...(init as any),
     }); // TODO: find a way to avoid as any
-    if (error) {
-      throw error;
+    if (!response.ok) {
+      throw createApiQueryError(error, response);
     }
     if (
       response.status === 204 ||
@@ -355,9 +384,9 @@ export default function createClient<
               },
             };
 
-            const { data, error } = await fn(path, mergedInit as any);
-            if (error) {
-              throw error;
+            const { data, error, response } = await fn(path, mergedInit as any);
+            if (!response.ok) {
+              throw createApiQueryError(error, response);
             }
             return data;
           },
@@ -373,14 +402,14 @@ export default function createClient<
           mutationFn: async (init) => {
             const mth = method.toUpperCase() as Uppercase<typeof method>;
             const fn = client[mth] as ClientMethod<Paths, typeof method, Media>;
-            const { data, error } = await fn(
+            const { data, error, response } = await fn(
               path,
               init as InitWithUnknowns<typeof init>,
             );
-            if (error || data === undefined) {
-              throw error;
+            if (!response.ok) {
+              throw createApiQueryError(error, response);
             }
-            return data;
+            return (data ?? null) as any;
           },
           ...options,
         },

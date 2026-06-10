@@ -323,6 +323,28 @@ export type ErrorResponse<
   Media extends MediaType = MediaType,
 > = GetResponseContent<T, Media, ErrorStatus>;
 
+export type ErrorStatusKey<T extends Record<string | number, any>> =
+  ErrorStatus & keyof T;
+
+/** Structured query error with status-specific body types */
+export type QueryErrorResponse<
+  T extends Record<string | number, any>,
+  Media extends MediaType = MediaType,
+> =
+  ErrorStatusKey<T> extends never
+    ? {
+        body: unknown;
+        httpCode: number;
+        response: Response;
+      }
+    : {
+        [K in ErrorStatusKey<T>]: {
+          body: Readable<GetResponseContent<T, Media, K>>;
+          httpCode: K extends number ? K : number;
+          response: Response;
+        };
+      }[ErrorStatusKey<T>];
+
 /** Return first JSON-like 2XX response from a path + HTTP method */
 export type SuccessResponseJSON<
   PathMethod extends Record<string | number, any>,

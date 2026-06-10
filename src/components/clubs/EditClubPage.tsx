@@ -1,4 +1,5 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useQueryClient } from "@tanstack/react-query";
@@ -192,9 +193,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       },
       onError: (error) => {
         console.error("Failed to update club:", error);
-        alert(
-          `Failed to update club: ${error?.detail || "Unknown error"}. Please try again.`,
-        );
+        alert(formatApiErrorMessage(error));
       },
     },
   );
@@ -218,7 +217,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       },
       onError: (error) => {
         console.error("Failed to upload logo:", error);
-        alert("Failed to upload logo. Please try again.");
+        alert(formatApiErrorMessage(error));
       },
     },
   );

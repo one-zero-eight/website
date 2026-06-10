@@ -1,4 +1,5 @@
 import { $events, eventsTypes } from "@/api/events";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { CategoryContainer } from "@/components/schedule/CategoryContainer.tsx";
 import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 import SearchBar from "@/components/schedule/SearchBar";
@@ -107,11 +108,11 @@ export default function SchedulePage({
     return (
       <div className="flex flex-col justify-center gap-2 p-4">
         <h2 className="text-xl font-bold">Error Loading Schedule</h2>
-        <p className="text-base-content/30">
-          {(error as any).message ||
-            "An error occurred while fetching the data. Please try again later."}
-        </p>
-        <button onClick={refetch} className="text-primary w-fit rounded-md">
+        <p className="text-base-content/30">{formatApiErrorMessage(error)}</p>
+        <button
+          onClick={() => refetch()}
+          className="text-primary w-fit rounded-md"
+        >
           Retry
         </button>
       </div>

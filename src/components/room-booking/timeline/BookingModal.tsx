@@ -1,5 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { BookingStatus, SchemaAttendee } from "@/api/room-booking/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import { sanitizeBookingTitle } from "@/components/room-booking/utils.ts";
@@ -561,9 +562,7 @@ export function BookingModal({
   );
 
   const errorText =
-    newSlot && creationError
-      ? `Booking failed: ${creationError.detail?.toString() || creationError.toString() || "unknown error"}`
-      : null;
+    newSlot && creationError ? formatApiErrorMessage(creationError) : null;
   const NewBookingError = errorText && (
     <div className="alert alert-error text-base">
       <span>{errorText}</span>
@@ -572,23 +571,13 @@ export function BookingModal({
 
   const UpdateBookingError = updateError && (
     <div className="alert alert-error text-base">
-      <span>
-        {updateError.detail?.toString() ||
-          updateError.toString() ||
-          "unknown error"}
-        .
-      </span>
+      <span>{formatApiErrorMessage(updateError)}</span>
     </div>
   );
 
   const DeleteBookingError = deletionError && (
     <div className="alert alert-error text-base">
-      <span>
-        {deletionError.detail?.toString() ||
-          deletionError.toString() ||
-          "unknown error"}
-        .
-      </span>
+      <span>{formatApiErrorMessage(deletionError)}</span>
     </div>
   );
 

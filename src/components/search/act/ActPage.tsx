@@ -1,4 +1,5 @@
 import { $search } from "@/api/search";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import SearchField from "@/components/search/SearchField.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -71,6 +72,9 @@ export function ActPage({ actQuery }: { actQuery: string }) {
       ) : error ? (
         <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
           <span>- Sorry, I can't help you with this question.</span>
+          <span className="text-base-content/60 text-sm">
+            {formatApiErrorMessage(error)}
+          </span>
         </div>
       ) : (
         <>

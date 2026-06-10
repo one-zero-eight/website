@@ -1,4 +1,5 @@
 import { $search, searchTypes } from "@/api/search";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import CustomSelect from "@/components/dashboard/links/CustomSelect.tsx";
 import { useEffect, useMemo, useState } from "react";
 import PreviewCard from "../search/PreviewCard.tsx";
@@ -418,7 +419,7 @@ export function CataloguePage() {
         <div className="text-center">
           <span className="icon-[material-symbols--error-outline] text-6xl text-red-500" />
           <p className="mt-4 text-lg font-medium">Failed to load courses</p>
-          <p className="text-base-content/75">Please try again later</p>
+          <p className="text-base-content/75">{formatApiErrorMessage(error)}</p>
         </div>
       </div>
     );

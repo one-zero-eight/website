@@ -1,4 +1,5 @@
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
 import { useNowMS } from "@/lib/utils/use-now.ts";
@@ -44,7 +45,7 @@ export function BookingsListPage() {
     <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
       <h2 className="text-base-content/70 text-2xl">Error loading bookings</h2>
       <p className="text-base-content/75 text-lg">
-        {error?.detail?.toString() || "Please try again later"}
+        {formatApiErrorMessage(error)}
       </p>
     </div>
   ) : bookings.length === 0 ? (

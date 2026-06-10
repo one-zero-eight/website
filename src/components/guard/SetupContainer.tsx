@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { guardTypes } from "@/api/guard";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useGuardMutations, FileRole } from "./hooks";
 import { extractSpreadsheetId, loadGmail, saveGmail } from "./utils";
 import { ModeToggle } from "./ModeToggle";
@@ -102,8 +103,8 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
             setTitle("");
             mutations.invalidateFiles();
           },
-          onError: () => {
-            setError("Failed to create spreadsheet.");
+          onError: (error) => {
+            setError(formatApiErrorMessage(error));
           },
         },
       );
@@ -157,8 +158,8 @@ export function SetupContainer({ serviceEmail }: SetupContainerProps) {
           setSpreadsheetId("");
           mutations.invalidateFiles();
         },
-        onError: () => {
-          setError("Failed to copy spreadsheet.");
+        onError: (error) => {
+          setError(formatApiErrorMessage(error));
         },
       },
     );

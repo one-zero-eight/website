@@ -6,7 +6,15 @@ export const queryClient = new QueryClient({
       networkMode: "offlineFirst",
 
       retry: (failureCount, error) => {
-        if (error.message === "Unauthorized") {
+        if (error instanceof Error && error.message === "Unauthorized") {
+          return false; // Do not retry on auth error
+        }
+        if (
+          typeof error === "object" &&
+          error !== null &&
+          "httpCode" in error &&
+          error.httpCode === 401
+        ) {
           return false; // Do not retry on auth error
         }
 

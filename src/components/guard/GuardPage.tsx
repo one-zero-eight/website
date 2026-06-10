@@ -1,3 +1,4 @@
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useState } from "react";
 import {
   useServiceAccountEmail,
@@ -130,8 +131,7 @@ export function GuardPage() {
               <div className="text-base-content/70">Loading...</div>
             ) : filesError ? (
               <div className="rounded-sm border-2 border-red-400 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-600 dark:bg-red-900/20 dark:text-red-200">
-                Error loading files:{" "}
-                {(filesError as any)?.message || "Unknown error"}
+                Error loading files: {formatApiErrorMessage(filesError)}
               </div>
             ) : files.length > 0 ? (
               <FilesList

@@ -1,4 +1,5 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -41,8 +42,8 @@ export function AddClubDialog({
         });
       }
     },
-    onError: () => {
-      setError("Failed to create club");
+    onError: (error) => {
+      setError(formatApiErrorMessage(error));
     },
   });
 

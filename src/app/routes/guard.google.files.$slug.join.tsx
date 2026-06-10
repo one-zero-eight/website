@@ -1,5 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $guard } from "@/api/guard";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
@@ -25,9 +26,7 @@ function RouteComponent() {
     error,
   } = $guard.useMutation("post", "/google/files/{slug}/joins");
 
-  const errorMessage = error
-    ? ((error as any)?.detail ?? "Failed to join file. Please try again.")
-    : null;
+  const errorMessage = error ? formatApiErrorMessage(error) : null;
 
   useEffect(() => {
     const savedGmail = localStorage.getItem(GMAIL_STORAGE_KEY);

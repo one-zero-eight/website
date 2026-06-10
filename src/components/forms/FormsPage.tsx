@@ -1,4 +1,5 @@
 import { $forms } from "@/api/forms";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { useState } from "react";
 import {
@@ -27,8 +28,8 @@ export function FormsPage() {
           `${window.location.origin}/forms/submit?slug=${encodeURIComponent(view.slug)}`,
         );
       },
-      onError: () => {
-        showError("Error", "Failed to create short link");
+      onError: (error) => {
+        showError("Error", formatApiErrorMessage(error));
       },
     });
 

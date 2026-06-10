@@ -1,4 +1,5 @@
 import { $workshops } from "@/api/workshops";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useToast } from "@/components/toast/index.ts";
 import { SchemaBadge, SchemaLink } from "@/api/workshops/types.ts";
@@ -296,11 +297,8 @@ export function EventEditForm({
             reloadDocument: true,
           });
         },
-        onError: () => {
-          showError(
-            "Creation Failed",
-            "Failed to create event. Please check all fields and try again.",
-          );
+        onError: (error) => {
+          showError("Creation Failed", formatApiErrorMessage(error));
         },
       },
     );
@@ -346,11 +344,8 @@ export function EventEditForm({
             reloadDocument: true,
           });
         },
-        onError: () => {
-          showError(
-            "Update Failed",
-            "Failed to update event. Please check all fields and try again.",
-          );
+        onError: (error) => {
+          showError("Update Failed", formatApiErrorMessage(error));
         },
       },
     );
@@ -397,11 +392,8 @@ export function EventEditForm({
           onClose?.();
           throw redirect({ to: "/events" });
         },
-        onError: () => {
-          showError(
-            "Delete Failed",
-            "Failed to delete event. Please try again.",
-          );
+        onError: (error) => {
+          showError("Delete Failed", formatApiErrorMessage(error));
         },
       },
     );
@@ -426,7 +418,7 @@ export function EventEditForm({
       },
       onError: (error) => {
         console.error("Failed to upload image:", error);
-        showError("Upload Failed", "Failed to upload image. Please try again.");
+        showError("Upload Failed", formatApiErrorMessage(error));
       },
     });
 

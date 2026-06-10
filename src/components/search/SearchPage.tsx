@@ -1,4 +1,5 @@
 import { $search, searchTypes } from "@/api/search";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   InfoSources,
   PathsSearchSearchGetParametersQueryResponse_types,
@@ -241,6 +242,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
           <p className="text-base-content py-4 text-xl font-semibold">
             Sorry, something gone wrong.
           </p>
+          <p className="text-base-content/75">{formatApiErrorMessage(error)}</p>
         </div>
       )}
     </div>

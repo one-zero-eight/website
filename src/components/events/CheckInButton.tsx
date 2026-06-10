@@ -1,4 +1,5 @@
 import { $workshops } from "@/api/workshops";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { CheckInType } from "@/api/workshops/types";
 import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -58,11 +59,8 @@ export function CheckInButton({
           "You have successfully checked-in for this event.",
         );
       },
-      onError: () => {
-        showError(
-          "Check-in Failed",
-          "Failed to check in. Please try again. Probably you have overlapping events",
-        );
+      onError: (error) => {
+        showError("Check-in Failed", formatApiErrorMessage(error));
       },
     });
 
@@ -92,8 +90,8 @@ export function CheckInButton({
           "You have successfully checked-out from this event.",
         );
       },
-      onError: () => {
-        showError("Check-out Failed", "Failed to check out. Please try again.");
+      onError: (error) => {
+        showError("Check-out Failed", formatApiErrorMessage(error));
       },
     });
 

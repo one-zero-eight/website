@@ -2,6 +2,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import SearchField from "@/components/search/SearchField.tsx";
 import { AskResult } from "./AskResult";
 import { $search, searchTypes } from "@/api/search";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useEffect, useState } from "react";
 import AnimatedDots from "../AnimatedDots";
 
@@ -77,6 +78,9 @@ export function AskPage({ askQuery }: { askQuery: string }) {
       ) : error ? (
         <div className="border-base-300 bg-base-200 text-base-content rounded-field flex flex-col gap-2 self-start border! px-4 py-2">
           <span>- Sorry, I can't help you with this question.</span>
+          <span className="text-base-content/60 text-sm">
+            {formatApiErrorMessage(error)}
+          </span>
         </div>
       ) : null}
 
