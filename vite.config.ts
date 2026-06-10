@@ -54,10 +54,7 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
         globPatterns: ["**/*.{js,css,html,json,svg,png,woff2}"],
-        navigateFallbackDenylist: [
-          /^\/api(?:\/|$)/,
-          /^\/assets\//,
-        ],
+        navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/assets\//],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
       },
       manifest: false, // Manifest is already in public/manifest.json
