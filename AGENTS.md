@@ -191,6 +191,7 @@ Example of POST mutation with body, query and path params:
 
 ```ts
 import { $accounts } from "@/api/accounts";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useQueryClient } from "@tanstack/react-query";
 
 const queryClient = useQueryClient();
@@ -207,8 +208,8 @@ const { mutate, isPending, isError, error } = $accounts.useMutation(
           .queryKey,
       });
     },
-    onError: () => {
-      showError("Error", "Failed to connect Telegram");
+    onError: (error) => {
+      showError("Error", formatApiErrorMessage(error));
     },
   },
 );
