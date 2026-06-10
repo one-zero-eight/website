@@ -38,6 +38,7 @@ import {
   courseComponentsYamlLintExtensions,
   validateCourseComponentsYaml,
 } from "@/components/schedule-assistant/settings/courses/courseComponentsYamlLint.ts";
+import { useRegisterSettingsDirty } from "@/components/schedule-assistant/settings/settingsSaveStatus.tsx";
 import { useBlurSaveField } from "@/components/schedule-assistant/settings/useBlurSaveField.ts";
 import { useSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
 import {
@@ -428,6 +429,7 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
 
   const componentsSignature = stringify(components, { lineWidth: 0 });
   const [yamlText, setYamlText] = useState(componentsSignature);
+  const [committedYaml, setCommittedYaml] = useState(componentsSignature);
   const [parseError, setParseError] = useState<string | null>(null);
 
   const handleCreateStudentGroup = useCallback(
@@ -461,8 +463,11 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
 
   useEffect(() => {
     setYamlText(componentsSignature);
+    setCommittedYaml(componentsSignature);
     setParseError(null);
   }, [courseIndex, componentsSignature]);
+
+  useRegisterSettingsDirty(yamlText !== committedYaml);
 
   const nameField = useBlurSaveField(name, (value) =>
     patchCourse({ name: value }),
@@ -483,6 +488,7 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
       return;
     }
     setParseError(null);
+    setCommittedYaml(yamlText);
     patchCourse({
       components: result.value as SchemaCourseConfig["components"],
     });
