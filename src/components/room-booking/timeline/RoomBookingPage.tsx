@@ -1,6 +1,6 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
-import { RoomAccess_level } from "@/api/room-booking/types.ts";
+import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types.ts";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
 import { getRouteApi } from "@tanstack/react-router";
@@ -68,9 +68,9 @@ export function RoomBookingPage() {
     rooms?.filter(
       (room) =>
         // Always show yellow
-        room.access_level === RoomAccess_level.yellow ||
+        room.access_level === RoomAccess_levelAnyOf0.yellow ||
         // If you are a staff, show red
-        (room.access_level === RoomAccess_level.red &&
+        (room.access_level === RoomAccess_levelAnyOf0.red &&
           me?.innopolis_info?.is_staff) ||
         // Also show rooms you have access to, even if they are red or special-access
         myAccessListRoomIds.includes(room.id),

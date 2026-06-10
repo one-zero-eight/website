@@ -1,5 +1,5 @@
 import { $roomBooking } from "@/api/room-booking";
-import { RoomAccess_level } from "@/api/room-booking/types";
+import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types";
 import { AccessLevelIcon } from "@/components/room-booking/AccessLevelIcon.tsx";
 import { Link } from "@tanstack/react-router";
 
@@ -44,9 +44,9 @@ export function RoomsList() {
                       Access Level
                     </p>
                     <p className="text-base-content/70 text-sm">
-                      {room.access_level === RoomAccess_level.yellow
+                      {room.access_level === RoomAccess_levelAnyOf0.yellow
                         ? "Yellow (for students)"
-                        : room.access_level === RoomAccess_level.red
+                        : room.access_level === RoomAccess_levelAnyOf0.red
                           ? "Red (for employees)"
                           : "Special rules apply"}
                     </p>

@@ -12,7 +12,7 @@ import { computed, onMounted, ref, shallowRef, unref, watch } from "vue";
 import type { Booking, Room, ScrollToOptions, Slot } from "./types.ts";
 import { accessLevelColors } from "../AccessLevelIcon.tsx";
 import { sanitizeBookingTitle } from "../utils.ts";
-import { RoomAccess_level } from "@/api/room-booking/types";
+import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types";
 
 /* ========================================================================== */
 /* ================================ Options ================================= */
@@ -99,12 +99,12 @@ const pixelsPerMinute = computed(() =>
     : PIXELS_PER_MINUTE_DEFAULT,
 );
 
-function accessLevelTooltip(accessLevel?: RoomAccess_level | null) {
+function accessLevelTooltip(accessLevel?: RoomAccess_levelAnyOf0 | null) {
   if (!accessLevel) return undefined;
 
-  return accessLevel === RoomAccess_level.yellow
+  return accessLevel === RoomAccess_levelAnyOf0.yellow
     ? "Yellow access level (for students)"
-    : accessLevel === RoomAccess_level.red
+    : accessLevel === RoomAccess_levelAnyOf0.red
       ? "Red access level (for employees)"
       : "Special rules apply";
 }

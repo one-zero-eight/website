@@ -1,6 +1,6 @@
 import { $maps } from "@/api/maps";
 import { $roomBooking } from "@/api/room-booking";
-import { RoomAccess_level } from "@/api/room-booking/types";
+import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { AccessLevelIcon } from "@/components/room-booking/AccessLevelIcon.tsx";
 import { BookingPageTabs } from "@/components/room-booking/BookingPageTabs.tsx";
@@ -73,9 +73,9 @@ const RoomDetails = memo(function RoomDetails({
                   Access Level
                 </p>
                 <p className="text-muted-foreground text-sm">
-                  {room.access_level === RoomAccess_level.yellow
+                  {room.access_level === RoomAccess_levelAnyOf0.yellow
                     ? "Yellow (for students)"
-                    : room.access_level === RoomAccess_level.red
+                    : room.access_level === RoomAccess_levelAnyOf0.red
                       ? "Red (for employees)"
                       : "Special rules apply"}
                 </p>

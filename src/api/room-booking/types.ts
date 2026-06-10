@@ -369,7 +369,7 @@ export interface components {
        * Access Level
        * @description Access level to the room. Yellow = for students. Red = for employees. Special = special rules apply.
        */
-      access_level?: RoomAccess_level | null;
+      access_level?: RoomAccess_levelAnyOf0 | null;
       /**
        * Restrict Daytime
        * @description Prohibit to book during working hours. True = this room is available only at night 19:00-8:00, or full day on weekends.
@@ -1155,7 +1155,7 @@ export enum BookingStatus {
   Decline = "Decline",
   Unknown = "Unknown",
 }
-export enum RoomAccess_level {
+export enum RoomAccess_levelAnyOf0 {
   yellow = "yellow",
   red = "red",
   special = "special",
