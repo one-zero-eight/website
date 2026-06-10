@@ -1,273 +1,218 @@
-import {
+import { $scheduleAssistant } from "@/api/schedule-assistant";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import type {
+  SchemaCourseConfig,
+  SchemaInstructor,
+  SchemaRoom,
   SchemaScheduleConfig,
   SchemaSectionProgram,
   SchemaStudentsGroups,
   SchemaTermConfig,
 } from "@/api/schedule-assistant/types.ts";
-import { createContext, useContext, useEffect, useMemo } from "react";
-import { proxy, subscribe } from "valtio";
-import { useSnapshot } from "valtio/react";
+import {
+  buildScheduleConfig,
+  deleteStudentGroupFromCourses,
+  deleteStudentGroupFromTerm,
+  getProgramFromTerm,
+  mutateProgramInTerm,
+  renameStudentGroupInCourses,
+  renameStudentGroupInTerm,
+} from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
+import { useToast } from "@/components/toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
 
-export type ConfigContextType = {
-  state: ConfigState;
-  setConfigData: (configData: SchemaScheduleConfig) => void;
-  updateConfigData: (mutator: (draft: SchemaScheduleConfig) => void) => void;
-};
+export {
+  deleteStudentGroupFromCourses,
+  deleteStudentGroupFromTerm,
+  formatTermTimeSlots,
+  getProgramFromTerm,
+  getScheduleSections,
+  mutateProgramInTerm,
+  parseTermTimeSlotsText,
+  renameStudentGroupInCourses,
+  renameStudentGroupInTerm,
+} from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 
-type ConfigState = {
-  config: SchemaScheduleConfig;
-};
-
-const ConfigContext = createContext<ConfigContextType | null>(null);
-const CONFIG_STORAGE_KEY = "schedule-assistant:config-state";
-
-function createDefaultScheduleConfig(): SchemaScheduleConfig {
+function combineQueryState(
+  queries: Array<{
+    isPending: boolean;
+    isError: boolean;
+    error: unknown;
+  }>,
+) {
   return {
-    $schema: null,
-    term: {
-      name: "",
-      starting_day: "Mon",
-      semester: {
-        start_date: "1970-01-01",
-        end_date: "1970-01-01",
-      },
-      days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-      time_slots: [
-        "09:00-10:30",
-        "10:40-12:10",
-        "12:40-14:10",
-        "14:20-15:50",
-        "16:00-17:30",
-        "17:40-19:10",
-        "19:20-20:50",
-      ],
+    isPending: queries.some((query) => query.isPending),
+    isError: queries.some((query) => query.isError),
+    error: queries.find((query) => query.error)?.error,
+  };
+}
+
+function useScheduleConfigInvalidation() {
+  const queryClient = useQueryClient();
+  return useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["scheduleAssistant"] });
+  }, [queryClient]);
+}
+
+function useScheduleConfigMutationToast() {
+  const { showError } = useToast();
+  return useCallback(
+    (error: unknown) => {
+      showError("Ошибка сохранения", formatApiErrorMessage(error));
     },
-    rooms: [],
-    instructors: [],
-    sections: [],
-    students_groups: [],
-    courses: [],
-  };
-}
-
-function readStoredConfigState(): ConfigState {
-  if (typeof window === "undefined") {
-    return { config: createDefaultScheduleConfig() };
-  }
-  try {
-    const raw = window.localStorage.getItem(CONFIG_STORAGE_KEY);
-    if (!raw) {
-      return { config: createDefaultScheduleConfig() };
-    }
-    const parsed = JSON.parse(raw);
-    return {
-      config: parsed.config ?? createDefaultScheduleConfig(),
-    };
-  } catch {
-    window.localStorage.removeItem(CONFIG_STORAGE_KEY);
-    return { config: createDefaultScheduleConfig() };
-  }
-}
-
-function createConfigStore(initialState: ConfigState): ConfigContextType {
-  const state = proxy<ConfigState>({
-    config: initialState.config,
-  });
-
-  function setConfigData(configData: SchemaScheduleConfig) {
-    state.config = configData;
-  }
-
-  function updateConfigData(mutator: (draft: SchemaScheduleConfig) => void) {
-    mutator(state.config);
-  }
-
-  return {
-    state,
-    setConfigData,
-    updateConfigData,
-  };
-}
-
-export function ConfigProvider({ children }: React.PropsWithChildren) {
-  const configStore = useMemo(
-    () => createConfigStore(readStoredConfigState()),
-    [],
+    [showError],
   );
+}
 
-  useEffect(() => {
-    return subscribe(configStore.state, () => {
-      if (typeof window === "undefined") return;
-      try {
-        window.localStorage.setItem(
-          CONFIG_STORAGE_KEY,
-          JSON.stringify({
-            config: configStore.state.config,
-          }),
-        );
-      } catch {
-        // Ignore storage errors in private mode/quota cases.
-      }
-    });
-  }, [configStore]);
+export function useTermQuery() {
+  return $scheduleAssistant.useQuery("get", "/schedule-config/term");
+}
 
-  return (
-    <ConfigContext.Provider value={configStore}>
-      {children}
-    </ConfigContext.Provider>
-  );
+export function useCoursesQuery() {
+  return $scheduleAssistant.useQuery("get", "/schedule-config/courses");
+}
+
+export function useRoomsQuery() {
+  return $scheduleAssistant.useQuery("get", "/schedule-config/rooms");
+}
+
+export function useInstructorsQuery() {
+  return $scheduleAssistant.useQuery("get", "/schedule-config/instructors");
+}
+
+export function useStudentGroupsQuery() {
+  return $scheduleAssistant.useQuery("get", "/schedule-config/student-groups");
 }
 
 export function useConfig() {
-  const ctx = useContext(ConfigContext);
-  if (!ctx) {
-    throw new Error("useConfig must be used inside ConfigProvider.");
+  return useScheduleConfig();
+}
+
+export function ScheduleConfigStatus({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { isPending, isError, error } = useScheduleConfig();
+  if (isPending) {
+    return (
+      <div className="flex min-h-0 flex-1 items-center justify-center p-8">
+        <span className="loading loading-spinner loading-lg" />
+      </div>
+    );
   }
-  const snap = useSnapshot(ctx.state, { sync: true });
+  if (isError) {
+    return (
+      <div className="text-error flex min-h-0 flex-1 items-center justify-center p-8 text-sm">
+        {formatApiErrorMessage(error)}
+      </div>
+    );
+  }
+  return children;
+}
+
+export function useScheduleConfig() {
+  const termQuery = useTermQuery();
+  const coursesQuery = useCoursesQuery();
+  const roomsQuery = useRoomsQuery();
+  const instructorsQuery = useInstructorsQuery();
+  const studentGroupsQuery = useStudentGroupsQuery();
+  const queryState = combineQueryState([
+    termQuery,
+    coursesQuery,
+    roomsQuery,
+    instructorsQuery,
+    studentGroupsQuery,
+  ]);
+
+  const config = useMemo((): SchemaScheduleConfig | null => {
+    if (!termQuery.data) return null;
+    return buildScheduleConfig(
+      termQuery.data,
+      coursesQuery.data ?? [],
+      roomsQuery.data ?? [],
+      instructorsQuery.data ?? [],
+      studentGroupsQuery.data ?? [],
+    );
+  }, [
+    termQuery.data,
+    coursesQuery.data,
+    roomsQuery.data,
+    instructorsQuery.data,
+    studentGroupsQuery.data,
+  ]);
+
   return {
-    config: snap.config as SchemaScheduleConfig,
-    configState: ctx.state.config,
-    setConfigData: ctx.setConfigData,
-    updateConfigData: ctx.updateConfigData,
+    config,
+    ...queryState,
   };
 }
 
 export function useRoom(roomId: string) {
-  const { config, configState } = useConfig();
-  const roomIndex = config.rooms.findIndex((room) => room.id === roomId);
-  const room = config.rooms[roomIndex];
-  const roomState = configState.rooms[roomIndex];
+  const query = $scheduleAssistant.useQuery(
+    "get",
+    "/schedule-config/rooms",
+    {},
+    {
+      select: (rooms) => {
+        const roomIndex = rooms.findIndex((room) => room.id === roomId);
+        return {
+          room: roomIndex >= 0 ? rooms[roomIndex] : undefined,
+          roomIndex,
+        };
+      },
+    },
+  );
 
   return {
-    room,
-    roomState,
-    roomIndex,
+    room: query.data?.room,
+    roomIndex: query.data?.roomIndex ?? -1,
+    isPending: query.isPending,
+    isError: query.isError,
+    error: query.error,
   };
 }
 
-export function getProgramFromConfig(
-  configData: SchemaScheduleConfig,
-  sectionCode: string,
-  programIndex: number,
-): SchemaSectionProgram {
-  const section = configData.sections.find(
-    (candidate) => candidate.code === sectionCode,
-  )!;
-  return section.programs[programIndex];
-}
-
-export function mutateProgramInDraft(
-  draft: SchemaScheduleConfig,
-  sectionCode: string,
-  programIndex: number,
-  mutator: (program: SchemaSectionProgram) => void,
-) {
-  const section = draft.sections.find(
-    (candidate) => candidate.code === sectionCode,
-  )!;
-  mutator(section.programs[programIndex]);
-}
-
-function replaceStudentGroupInCourses(
-  draft: SchemaScheduleConfig,
-  oldCode: string,
-  newCode: string | null,
-) {
-  for (const course of draft.courses) {
-    for (const component of course.components) {
-      component.student_groups = component.student_groups
-        .map((token) => (token !== oldCode ? token : newCode))
-        .filter((token): token is string => token != null);
-      for (const series of component.sessions!) {
-        series.audience = series.audience
-          .map((token) => (token !== oldCode ? token : newCode))
-          .filter((token): token is string => token != null);
-      }
-    }
-  }
-}
-
-export function renameStudentGroupInDraft(
-  draft: SchemaScheduleConfig,
-  oldCode: string,
-  newCode: string,
-) {
-  if (oldCode === newCode) return;
-  const alreadyExists = draft.students_groups.some(
-    (candidate) => candidate.code === newCode,
-  );
-  if (alreadyExists) return;
-
-  const target = draft.students_groups.find(
-    (candidate) => candidate.code === oldCode,
-  )!;
-  target.code = newCode;
-
-  replaceStudentGroupInCourses(draft, oldCode, newCode);
-
-  for (const section of draft.sections) {
-    for (const program of section.programs) {
-      for (const track of program.tracks) {
-        track.groups = track.groups.map((code) =>
-          code === oldCode ? newCode : code,
-        );
-      }
-      program.groups = program.groups.map((code) =>
-        code === oldCode ? newCode : code,
-      );
-    }
-  }
-}
-
-export function deleteStudentGroupFromDraft(
-  draft: SchemaScheduleConfig,
-  groupCode: string,
-) {
-  replaceStudentGroupInCourses(draft, groupCode, null);
-
-  draft.students_groups = draft.students_groups.filter(
-    (candidate) => candidate.code !== groupCode,
-  );
-
-  for (const section of draft.sections) {
-    for (const program of section.programs) {
-      for (const track of program.tracks) {
-        track.groups = track.groups.filter((code) => code !== groupCode);
-      }
-      program.groups = program.groups.filter((code) => code !== groupCode);
-    }
-  }
-}
-
 export function useCourse(courseIndex: number) {
-  const { config, configState } = useConfig();
-  const course = config.courses[courseIndex];
-  const courseState = configState.courses[courseIndex];
+  const query = $scheduleAssistant.useQuery(
+    "get",
+    "/schedule-config/courses",
+    {},
+    {
+      select: (courses) => ({
+        course: courses[courseIndex],
+        courseIndex,
+        courseName: courses[courseIndex]?.name,
+      }),
+    },
+  );
 
   return {
-    course,
-    courseState,
-    courseIndex,
+    course: query.data?.course,
+    courseIndex: query.data?.courseIndex ?? courseIndex,
+    courseName: query.data?.courseName,
+    isPending: query.isPending,
+    isError: query.isError,
+    error: query.error,
   };
 }
 
 export function useProgram(sectionCode: string, programIndex: number) {
-  const { config, configState } = useConfig();
+  const query = useTermQuery();
   const program = useMemo(
-    () => getProgramFromConfig(config, sectionCode, programIndex),
-    [config, sectionCode, programIndex],
-  );
-  const programState = getProgramFromConfig(
-    configState,
-    sectionCode,
-    programIndex,
+    () =>
+      query.data
+        ? getProgramFromTerm(query.data, sectionCode, programIndex)
+        : null,
+    [query.data, sectionCode, programIndex],
   );
 
   return {
     program,
-    programState,
-    sectionCode,
-    programIndex,
+    isPending: query.isPending,
+    isError: query.isError,
+    error: query.error,
   };
 }
 
@@ -276,65 +221,538 @@ export function useTrack(
   programIndex: number,
   trackIndex: number,
 ) {
-  const { config, configState } = useConfig();
-  const program = useMemo(
-    () => getProgramFromConfig(config, sectionCode, programIndex),
-    [config, sectionCode, programIndex],
-  );
-  const track = program.tracks[trackIndex];
-  const programState = getProgramFromConfig(
-    configState,
+  const { program, isPending, isError, error } = useProgram(
     sectionCode,
     programIndex,
   );
-  const trackState = programState.tracks[trackIndex];
+  const track = program?.tracks[trackIndex];
 
   return {
     track,
-    trackState,
+    program,
     sectionCode,
     programIndex,
     trackIndex,
+    isPending,
+    isError,
+    error,
   };
 }
 
 export function useStudentGroup(groupCode: string) {
-  const { config, configState } = useConfig();
-  const studentGroup = useMemo((): SchemaStudentsGroups => {
-    return config.students_groups.find(
-      (candidate) => candidate.code === groupCode,
-    )! as SchemaStudentsGroups;
-  }, [config, groupCode]);
-  const studentGroupState = configState.students_groups.find(
-    (candidate) => candidate.code === groupCode,
-  )!;
+  const query = $scheduleAssistant.useQuery(
+    "get",
+    "/schedule-config/student-groups",
+    {},
+    {
+      select: (groups) =>
+        groups.find((group) => group.code === groupCode) ?? null,
+    },
+  );
 
   return {
-    studentGroup,
-    studentGroupState,
+    studentGroup: query.data,
     groupCode,
+    isPending: query.isPending,
+    isError: query.isError,
+    error: query.error,
   };
 }
 
 export function useInstructor(instructorIndex: number) {
-  const { config, configState } = useConfig();
-  const instructor = config.instructors[instructorIndex];
-  const instructorState = configState.instructors[instructorIndex];
+  const query = $scheduleAssistant.useQuery(
+    "get",
+    "/schedule-config/instructors",
+    {},
+    {
+      select: (instructors) => ({
+        instructor: instructors[instructorIndex],
+        instructorIndex,
+        instructorId: instructors[instructorIndex]?.id,
+      }),
+    },
+  );
 
   return {
-    instructor,
-    instructorState,
-    instructorIndex,
+    instructor: query.data?.instructor,
+    instructorIndex: query.data?.instructorIndex ?? instructorIndex,
+    instructorId: query.data?.instructorId,
+    isPending: query.isPending,
+    isError: query.isError,
+    error: query.error,
   };
 }
 
 export function useSemesterSettings() {
-  const { config, configState } = useConfig();
-  const term = config.term as SchemaTermConfig;
-  const termState = configState.term as SchemaTermConfig;
-
+  const query = useTermQuery();
   return {
-    term,
-    termState,
+    term: query.data,
+    isPending: query.isPending,
+    isError: query.isError,
+    error: query.error,
   };
+}
+
+export function useUpdateTermMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation("put", "/schedule-config/term", {
+    onSuccess: invalidate,
+    onError,
+  });
+}
+
+export function useUploadScheduleConfigYamlMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation("put", "/schedule-config/yaml", {
+    onSuccess: invalidate,
+    onError,
+  });
+}
+
+export function useCreateRoomMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation("post", "/schedule-config/rooms", {
+    onSuccess: invalidate,
+    onError,
+  });
+}
+
+export function useUpdateRoomMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation(
+    "put",
+    "/schedule-config/rooms/{room_id}",
+    {
+      onSuccess: invalidate,
+      onError,
+    },
+  );
+}
+
+export function useDeleteRoomMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation(
+    "delete",
+    "/schedule-config/rooms/{room_id}",
+    {
+      onSuccess: invalidate,
+      onError,
+    },
+  );
+}
+
+export function useCreateInstructorMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation(
+    "post",
+    "/schedule-config/instructors",
+    {
+      onSuccess: invalidate,
+      onError,
+    },
+  );
+}
+
+export function useUpdateInstructorMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation(
+    "put",
+    "/schedule-config/instructors/{instructor_id}",
+    {
+      onSuccess: invalidate,
+      onError,
+    },
+  );
+}
+
+export function useDeleteInstructorMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation(
+    "delete",
+    "/schedule-config/instructors/{instructor_id}",
+    {
+      onSuccess: invalidate,
+      onError,
+    },
+  );
+}
+
+export function useCreateCourseMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation("post", "/schedule-config/courses", {
+    onSuccess: invalidate,
+    onError,
+  });
+}
+
+export function useUpdateCourseMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation(
+    "put",
+    "/schedule-config/courses/{course_name}",
+    {
+      onSuccess: invalidate,
+      onError,
+    },
+  );
+}
+
+export function useDeleteCourseMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation(
+    "delete",
+    "/schedule-config/courses/{course_name}",
+    {
+      onSuccess: invalidate,
+      onError,
+    },
+  );
+}
+
+export function useCreateStudentGroupMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation(
+    "post",
+    "/schedule-config/student-groups",
+    {
+      onSuccess: invalidate,
+      onError,
+    },
+  );
+}
+
+export function useUpdateStudentGroupMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation(
+    "put",
+    "/schedule-config/student-groups/{code}",
+    {
+      onSuccess: invalidate,
+      onError,
+    },
+  );
+}
+
+export function useDeleteStudentGroupMutation() {
+  const invalidate = useScheduleConfigInvalidation();
+  const onError = useScheduleConfigMutationToast();
+  return $scheduleAssistant.useMutation(
+    "delete",
+    "/schedule-config/student-groups/{code}",
+    {
+      onSuccess: invalidate,
+      onError,
+    },
+  );
+}
+
+export function useUpdateProgramMutation(
+  sectionCode: string,
+  programIndex: number,
+) {
+  const { data: term } = useTermQuery();
+  const {
+    mutate: updateTerm,
+    isPending,
+    isError,
+    error,
+  } = useUpdateTermMutation();
+
+  const updateProgram = useCallback(
+    (mutator: (program: SchemaSectionProgram) => void) => {
+      if (!term) return;
+      updateTerm({
+        body: mutateProgramInTerm(term, sectionCode, programIndex, mutator),
+      });
+    },
+    [programIndex, sectionCode, term, updateTerm],
+  );
+
+  return { updateProgram, isPending, isError, error };
+}
+
+export function usePatchTermMutation() {
+  const { data: term } = useTermQuery();
+  const {
+    mutate: updateTerm,
+    isPending,
+    isError,
+    error,
+  } = useUpdateTermMutation();
+
+  const patchTerm = useCallback(
+    (patch: (current: SchemaTermConfig) => SchemaTermConfig) => {
+      if (!term) return;
+      updateTerm({ body: patch(term) });
+    },
+    [term, updateTerm],
+  );
+
+  return { patchTerm, isPending, isError, error };
+}
+
+export function usePatchRoomMutation(roomId: string) {
+  const { room } = useRoom(roomId);
+  const { mutate, isPending, isError, error } = useUpdateRoomMutation();
+
+  const patchRoom = useCallback(
+    (patch: Partial<SchemaRoom>) => {
+      if (!room) return;
+      mutate({
+        params: { path: { room_id: roomId } },
+        body: { ...room, ...patch },
+      });
+    },
+    [mutate, room, roomId],
+  );
+
+  return { patchRoom, isPending, isError, error };
+}
+
+export function usePatchInstructorMutation(instructorId: string | undefined) {
+  const { mutate, isPending, isError, error } = useUpdateInstructorMutation();
+  const query = $scheduleAssistant.useQuery(
+    "get",
+    "/schedule-config/instructors",
+    {},
+    {
+      enabled: !!instructorId,
+      select: (instructors) =>
+        instructors.find((instructor) => instructor.id === instructorId),
+    },
+  );
+
+  const patchInstructor = useCallback(
+    (patch: Partial<SchemaInstructor>) => {
+      if (!instructorId || !query.data) return;
+      mutate({
+        params: { path: { instructor_id: instructorId } },
+        body: { ...query.data, ...patch },
+      });
+    },
+    [instructorId, mutate, query.data],
+  );
+
+  return { patchInstructor, isPending, isError, error };
+}
+
+export function usePatchCourseMutation(courseName: string | undefined) {
+  const { mutate, isPending, isError, error } = useUpdateCourseMutation();
+  const query = $scheduleAssistant.useQuery(
+    "get",
+    "/schedule-config/courses",
+    {},
+    {
+      enabled: !!courseName,
+      select: (courses) => courses.find((course) => course.name === courseName),
+    },
+  );
+
+  const patchCourse = useCallback(
+    (patch: Partial<SchemaCourseConfig>) => {
+      if (!courseName || !query.data) return;
+      mutate({
+        params: { path: { course_name: courseName } },
+        body: { ...query.data, ...patch },
+      });
+    },
+    [courseName, mutate, query.data],
+  );
+
+  return { patchCourse, isPending, isError, error };
+}
+
+export function usePatchStudentGroupMutation(groupCode: string) {
+  const { studentGroup } = useStudentGroup(groupCode);
+  const { mutate, isPending, isError, error } = useUpdateStudentGroupMutation();
+
+  const patchStudentGroup = useCallback(
+    (patch: Partial<SchemaStudentsGroups>) => {
+      if (!studentGroup) return;
+      mutate({
+        params: { path: { code: groupCode } },
+        body: { ...studentGroup, ...patch },
+      });
+    },
+    [groupCode, mutate, studentGroup],
+  );
+
+  return { patchStudentGroup, isPending, isError, error };
+}
+
+function courseReferencesStudentGroup(
+  course: SchemaCourseConfig,
+  groupCode: string,
+): boolean {
+  for (const component of course.components) {
+    if (component.student_groups.includes(groupCode)) return true;
+    for (const series of component.sessions ?? []) {
+      if (series.audience.includes(groupCode)) return true;
+    }
+  }
+  return false;
+}
+
+export function useAddProgramToSection(sectionCode: string) {
+  const { data: term } = useTermQuery();
+  const {
+    mutate: updateTerm,
+    isPending,
+    isError,
+    error,
+  } = useUpdateTermMutation();
+
+  const addProgram = useCallback(
+    (program: SchemaSectionProgram) => {
+      if (!term) return;
+      const nextTerm = structuredClone(term);
+      const section = (nextTerm.sections ?? []).find(
+        (candidate) => candidate.code === sectionCode,
+      );
+      if (!section) return;
+      section.programs.push(program);
+      updateTerm({ body: nextTerm });
+    },
+    [sectionCode, term, updateTerm],
+  );
+
+  return { addProgram, isPending, isError, error };
+}
+
+export function useDeleteProgramFromSection(
+  sectionCode: string,
+  programIndex: number,
+) {
+  const { data: term } = useTermQuery();
+  const {
+    mutate: updateTerm,
+    isPending,
+    isError,
+    error,
+  } = useUpdateTermMutation();
+
+  const deleteProgram = useCallback(() => {
+    if (!term) return;
+    const nextTerm = structuredClone(term);
+    const section = (nextTerm.sections ?? []).find(
+      (candidate) => candidate.code === sectionCode,
+    );
+    if (!section?.programs?.[programIndex]) return;
+    section.programs.splice(programIndex, 1);
+    updateTerm({ body: nextTerm });
+  }, [programIndex, sectionCode, term, updateTerm]);
+
+  return { deleteProgram, isPending, isError, error };
+}
+
+export function useRenameStudentGroup() {
+  const { data: term } = useTermQuery();
+  const { data: courses } = useCoursesQuery();
+  const { data: studentGroups } = useStudentGroupsQuery();
+  const {
+    mutateAsync: updateStudentGroup,
+    isPending,
+    isError,
+    error,
+  } = useUpdateStudentGroupMutation();
+  const { mutateAsync: updateCourse } = useUpdateCourseMutation();
+  const { mutateAsync: updateTerm } = useUpdateTermMutation();
+
+  const renameStudentGroup = useCallback(
+    async (oldCode: string, newCode: string) => {
+      if (!term || !courses || !studentGroups || oldCode === newCode) return;
+      if (studentGroups.some((group) => group.code === newCode)) return;
+      const group = studentGroups.find(
+        (candidate) => candidate.code === oldCode,
+      );
+      if (!group) return;
+
+      await updateStudentGroup({
+        params: { path: { code: oldCode } },
+        body: { ...group, code: newCode },
+      });
+
+      for (const course of courses) {
+        if (!courseReferencesStudentGroup(course, oldCode)) continue;
+        const [updatedCourse] = renameStudentGroupInCourses(
+          [course],
+          oldCode,
+          newCode,
+        );
+        await updateCourse({
+          params: { path: { course_name: course.name } },
+          body: updatedCourse,
+        });
+      }
+
+      await updateTerm({
+        body: renameStudentGroupInTerm(term, oldCode, newCode),
+      });
+    },
+    [
+      courses,
+      studentGroups,
+      term,
+      updateCourse,
+      updateStudentGroup,
+      updateTerm,
+    ],
+  );
+
+  return { renameStudentGroup, isPending, isError, error };
+}
+
+export function useDeleteStudentGroupCascade() {
+  const { data: term } = useTermQuery();
+  const { data: courses } = useCoursesQuery();
+  const {
+    mutateAsync: deleteStudentGroup,
+    isPending,
+    isError,
+    error,
+  } = useDeleteStudentGroupMutation();
+  const { mutateAsync: updateCourse } = useUpdateCourseMutation();
+  const { mutateAsync: updateTerm } = useUpdateTermMutation();
+
+  const deleteStudentGroupCascade = useCallback(
+    async (groupCode: string) => {
+      if (!term || !courses) return;
+
+      await updateTerm({
+        body: deleteStudentGroupFromTerm(term, groupCode),
+      });
+
+      for (const course of courses) {
+        if (!courseReferencesStudentGroup(course, groupCode)) continue;
+        const [updatedCourse] = deleteStudentGroupFromCourses(
+          [course],
+          groupCode,
+        );
+        await updateCourse({
+          params: { path: { course_name: course.name } },
+          body: updatedCourse,
+        });
+      }
+
+      await deleteStudentGroup({
+        params: { path: { code: groupCode } },
+      });
+    },
+    [courses, deleteStudentGroup, term, updateCourse, updateTerm],
+  );
+
+  return { deleteStudentGroupCascade, isPending, isError, error };
 }

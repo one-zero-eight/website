@@ -6,10 +6,7 @@ import { SemesterTabContent } from "@/components/schedule-assistant/settings/sem
 import { SettingsSidebar } from "@/components/schedule-assistant/settings/SettingsSidebar.tsx";
 import { SettingsTopTabs } from "@/components/schedule-assistant/settings/SettingsTopTabs.tsx";
 import { GroupsTabContent } from "@/components/schedule-assistant/settings/groups/GroupsTabContent.tsx";
-import {
-  ConfigProvider,
-  useConfig,
-} from "@/components/schedule-assistant/config/useConfig.tsx";
+import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import type { SettingsSubTab } from "@/components/schedule-assistant/settings/useSelection.tsx";
 import {
   SelectionProvider,
@@ -26,11 +23,9 @@ export function SettingsWorkspace({
   const selectionStore = useSelectionState(settingsTab);
 
   return (
-    <ConfigProvider>
-      <SelectionProvider value={selectionStore}>
-        <SettingsWorkspaceInner settingsTab={settingsTab} />
-      </SelectionProvider>
-    </ConfigProvider>
+    <SelectionProvider value={selectionStore}>
+      <SettingsWorkspaceInner settingsTab={settingsTab} />
+    </SelectionProvider>
   );
 }
 

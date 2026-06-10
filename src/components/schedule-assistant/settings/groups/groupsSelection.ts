@@ -3,6 +3,7 @@ import type {
   SchemaScheduleConfig,
   SchemaSectionProgram,
 } from "@/api/schedule-assistant/types.ts";
+import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import type {
   SettingsSelection,
   SettingsSubTab,
@@ -60,7 +61,7 @@ function findSectionProgram(
   sectionCode: string,
   programIndex: number,
 ) {
-  const sections = Array.isArray(config?.sections) ? config.sections : [];
+  const sections = getScheduleSections(config);
   const section = sections.find((s) => String(s.code) === String(sectionCode));
   const programs = section?.programs;
   if (

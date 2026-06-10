@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/immutability */
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   SchemaCourseConfig,
   SchemaSectionProgram,
@@ -9,17 +9,29 @@ import {
   programCodeForGroupIdentifiers,
 } from "@/components/schedule-assistant/config/groupIdentifiers.ts";
 import {
-  deleteStudentGroupFromDraft,
-  mutateProgramInDraft,
-  renameStudentGroupInDraft,
+  formatTermTimeSlots,
+  parseTermTimeSlotsText,
   useConfig,
   useCourse,
+  useCreateStudentGroupMutation,
+  useDeleteCourseMutation,
+  useDeleteInstructorMutation,
+  useDeleteProgramFromSection,
+  useDeleteRoomMutation,
+  useDeleteStudentGroupCascade,
   useInstructor,
+  usePatchCourseMutation,
+  usePatchInstructorMutation,
+  usePatchRoomMutation,
+  usePatchStudentGroupMutation,
+  usePatchTermMutation,
   useProgram,
+  useRenameStudentGroup,
   useRoom,
   useSemesterSettings,
   useStudentGroup,
   useTrack,
+  useUpdateProgramMutation,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   collectKnownStudentGroupIds,
@@ -28,6 +40,7 @@ import {
 } from "@/components/schedule-assistant/settings/courses/courseComponentsYamlLint.ts";
 import { useSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
 import {
+  normalizeTermWeekdays,
   TERM_WEEKDAY_KEYS,
   TERM_WEEKDAY_LABEL_RU,
   type TermWeekdayKey,
@@ -214,9 +227,28 @@ function useAutosizeTextareaRef(value: string) {
   return ref;
 }
 
-/** Одна строка — один элемент массива; пустые строки сохраняются (вставка между слотами, новая строка в конце). */
-function parseTermTimeSlotsText(raw: string): string[] {
-  return raw.split("\n").map((value) => value.trim());
+function DetailQueryState({
+  isPending,
+  isError,
+  error,
+  children,
+}: {
+  isPending: boolean;
+  isError: boolean;
+  error: unknown;
+  children: ReactNode;
+}) {
+  if (isPending) {
+    return <div className="skeleton h-32 w-full" />;
+  }
+  if (isError) {
+    return (
+      <div className="alert alert-error alert-soft text-sm">
+        {formatApiErrorMessage(error)}
+      </div>
+    );
+  }
+  return children;
 }
 
 /** Escape: снять фокус (у `type="date"` браузер часто не убирает фокус сам). */
@@ -301,81 +333,80 @@ export function SettingsSidebarDetailFrame({
 }
 
 export function RoomDetails({ roomId }: { roomId: string }) {
-  const { room, roomState, roomIndex } = useRoom(roomId);
-  const { updateConfigData } = useConfig();
+  const { room, isPending, isError, error } = useRoom(roomId);
+  const { patchRoom, isPending: isSaving } = usePatchRoomMutation(roomId);
+  const { mutate: deleteRoom, isPending: isDeleting } = useDeleteRoomMutation();
   const { deselectItem } = useSelection();
   const headingTitle = room ? String(room.id) : roomId || "—";
   const headingSubtitle = "Аудитория";
 
-  if (!room) {
-    return (
-      <SettingsSidebarDetailFrame
-        title={headingTitle}
-        subtitle={headingSubtitle}
-      >
-        <div className={settingsDetailShellClass}>
-          <div className="text-base-content/70 text-sm">
-            Аудитория не найдена в конфигурации.
-          </div>
-        </div>
-      </SettingsSidebarDetailFrame>
-    );
-  }
-
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
-      <div className={settingsDetailShellClass}>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Идентификатор</span>
-          <input
-            className={detailInputClass}
-            value={String(room?.id ?? "")}
-            onChange={(event) => {
-              if (!roomState) return;
-              roomState.id = event.target.value;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Название</span>
-          <input
-            className={detailInputClass}
-            value={String(room?.name ?? "")}
-            onChange={(event) => {
-              if (!roomState) return;
-              roomState.name = event.target.value;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Вместимость</span>
-          <input
-            type="number"
-            className={detailInputClass}
-            value={room?.capacity != null ? String(room.capacity) : ""}
-            onChange={(event) => {
-              if (!roomState) return;
-              roomState.capacity = Number(event.target.value) || 0;
-            }}
-          />
-        </label>
-        <SettingsDetailDeleteButton
-          label="Удалить аудиторию"
-          onClick={() => {
-            updateConfigData((draft) => {
-              draft.rooms.splice(roomIndex, 1);
-            });
-            deselectItem();
-          }}
-        />
-      </div>
+      <DetailQueryState isPending={isPending} isError={isError} error={error}>
+        {!room ? (
+          <div className={settingsDetailShellClass}>
+            <div className="text-base-content/70 text-sm">
+              Аудитория не найдена в конфигурации.
+            </div>
+          </div>
+        ) : (
+          <div className={settingsDetailShellClass}>
+            <label className={`${detailControlClass} shrink-0`}>
+              <span className={detailLabelUpperClass}>Идентификатор</span>
+              <input
+                className={detailInputClass}
+                value={String(room.id ?? "")}
+                disabled={isSaving}
+                onChange={(event) => patchRoom({ id: event.target.value })}
+              />
+            </label>
+            <label className={`${detailControlClass} shrink-0`}>
+              <span className={detailLabelUpperClass}>Название</span>
+              <input
+                className={detailInputClass}
+                value={String(room.name ?? "")}
+                disabled={isSaving}
+                onChange={(event) => patchRoom({ name: event.target.value })}
+              />
+            </label>
+            <label className={`${detailControlClass} shrink-0`}>
+              <span className={detailLabelUpperClass}>Вместимость</span>
+              <input
+                type="number"
+                className={detailInputClass}
+                value={room.capacity != null ? String(room.capacity) : ""}
+                disabled={isSaving}
+                onChange={(event) =>
+                  patchRoom({ capacity: Number(event.target.value) || 0 })
+                }
+              />
+            </label>
+            <SettingsDetailDeleteButton
+              label="Удалить аудиторию"
+              onClick={() => {
+                deleteRoom({ params: { path: { room_id: roomId } } });
+                deselectItem();
+              }}
+            />
+            {isDeleting ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : null}
+          </div>
+        )}
+      </DetailQueryState>
     </SettingsSidebarDetailFrame>
   );
 }
 
 export function CourseDetails({ courseIndex }: { courseIndex: number }) {
-  const { config, updateConfigData } = useConfig();
-  const { course, courseState } = useCourse(courseIndex);
+  const { config } = useConfig();
+  const { course, courseName, isPending, isError, error } =
+    useCourse(courseIndex);
+  const { patchCourse, isPending: isSaving } =
+    usePatchCourseMutation(courseName);
+  const { mutate: deleteCourse, isPending: isDeleting } =
+    useDeleteCourseMutation();
+  const { mutate: createStudentGroup } = useCreateStudentGroupMutation();
   const { deselectItem } = useSelection();
   const name = String(course?.name ?? "");
   const tags = Array.isArray(course?.course_tags)
@@ -400,21 +431,21 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
     (groupId: string) => {
       const normalized = groupId.trim();
       if (!normalized) return;
-      updateConfigData((draft) => {
-        const exists = draft.students_groups.some(
-          (candidate) => String(candidate.code) === normalized,
-        );
-        if (exists) return;
-        draft.students_groups.push({
+      const exists = (config?.students_groups ?? []).some(
+        (candidate) => String(candidate.code) === normalized,
+      );
+      if (exists) return;
+      createStudentGroup({
+        body: {
           code: normalized,
           kind: "core",
           name: normalized,
           estimated_size: null,
           students: [],
-        });
+        },
       });
     },
-    [updateConfigData],
+    [config?.students_groups, createStudentGroup],
   );
   const yamlLintExtensions = useMemo(
     () =>
@@ -437,81 +468,84 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
       return;
     }
     setParseError(null);
-    updateConfigData((draft) => {
-      draft.courses[courseIndex].components =
-        result.value as SchemaCourseConfig["components"];
+    patchCourse({
+      components: result.value as SchemaCourseConfig["components"],
     });
   }
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
-      <div className={settingsDetailShellClass}>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Название</span>
-          <input
-            className={detailInputClass}
-            value={name}
-            onChange={(event) => {
-              if (!courseState) return;
-              courseState.name = event.target.value;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>
-            Теги курса (через запятую)
-          </span>
-          <input
-            className={detailInputClass}
-            value={tags}
-            onChange={(event) => {
-              if (!courseState) return;
-              courseState.course_tags = event.target.value
-                .split(",")
-                .map((chunk) => chunk.trim())
-                .filter(Boolean);
-            }}
-          />
-        </label>
-
-        <div
-          className={`${detailControlClass} flex min-h-0 min-w-0 flex-1 flex-col gap-1.5`}
-        >
-          <span className={detailLabelUpperClass}>Компоненты (YAML)</span>
-          <div className="rounded-box overflow-scroll border">
-            <CodeMirror
-              value={yamlText}
-              height="auto"
-              theme="light"
-              className=""
-              extensions={[
-                yaml(),
-                EditorView.lineWrapping,
-                ...yamlLintExtensions,
-                keymap.of(lintKeymap),
-              ]}
-              onChange={(value) => setYamlText(value)}
-              onBlur={handleCommitYaml}
-              basicSetup={{ foldGutter: true }}
+      <DetailQueryState isPending={isPending} isError={isError} error={error}>
+        <div className={settingsDetailShellClass}>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Название</span>
+            <input
+              className={detailInputClass}
+              value={name}
+              disabled={isSaving}
+              onChange={(event) => patchCourse({ name: event.target.value })}
             />
-          </div>
-          {parseError ? (
-            <div className="text-error text-xs wrap-break-word">
-              {parseError}
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>
+              Теги курса (через запятую)
+            </span>
+            <input
+              className={detailInputClass}
+              value={tags}
+              disabled={isSaving}
+              onChange={(event) =>
+                patchCourse({
+                  course_tags: event.target.value
+                    .split(",")
+                    .map((chunk) => chunk.trim())
+                    .filter(Boolean),
+                })
+              }
+            />
+          </label>
+
+          <div
+            className={`${detailControlClass} flex min-h-0 min-w-0 flex-1 flex-col gap-1.5`}
+          >
+            <span className={detailLabelUpperClass}>Компоненты (YAML)</span>
+            <div className="rounded-box overflow-scroll border">
+              <CodeMirror
+                value={yamlText}
+                height="auto"
+                theme="light"
+                className=""
+                extensions={[
+                  yaml(),
+                  EditorView.lineWrapping,
+                  ...yamlLintExtensions,
+                  keymap.of(lintKeymap),
+                ]}
+                onChange={(value) => setYamlText(value)}
+                onBlur={handleCommitYaml}
+                basicSetup={{ foldGutter: true }}
+              />
             </div>
+            {parseError ? (
+              <div className="text-error text-xs wrap-break-word">
+                {parseError}
+              </div>
+            ) : null}
+          </div>
+
+          <SettingsDetailDeleteButton
+            label="Удалить курс"
+            onClick={() => {
+              if (!courseName) return;
+              deleteCourse({ params: { path: { course_name: courseName } } });
+              deselectItem();
+            }}
+          />
+          {isDeleting ? (
+            <span className="loading loading-spinner loading-sm" />
           ) : null}
         </div>
-
-        <SettingsDetailDeleteButton
-          label="Удалить курс"
-          onClick={() => {
-            updateConfigData((draft) => {
-              draft.courses.splice(courseIndex, 1);
-            });
-            deselectItem();
-          }}
-        />
-      </div>
+      </DetailQueryState>
     </SettingsSidebarDetailFrame>
   );
 }
@@ -529,8 +563,12 @@ export function GroupDetails({
   trackIndex: number;
   titleFallback?: string;
 }) {
-  const { studentGroup, studentGroupState } = useStudentGroup(groupId);
-  const { updateConfigData } = useConfig();
+  const { studentGroup, isPending, isError, error } = useStudentGroup(groupId);
+  const { patchStudentGroup, isPending: isSaving } =
+    usePatchStudentGroupMutation(groupId);
+  const { renameStudentGroup, isPending: isRenaming } = useRenameStudentGroup();
+  const { deleteStudentGroupCascade, isPending: isDeleting } =
+    useDeleteStudentGroupCascade();
   const { track } = useTrack(sectionCode, programIndex, trackIndex);
   const { selectItem, deselectItem } = useSelection();
   const code = groupId;
@@ -553,98 +591,104 @@ export function GroupDetails({
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
-      <div className={settingsDetailShellClass}>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Название</span>
-          <input
-            className={detailInputClass}
-            value={name}
-            onChange={(event) => {
-              if (!studentGroupState) return;
-              studentGroupState.name = event.target.value;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Код</span>
-          <input
-            className={detailInputClass}
-            value={code}
-            onChange={(event) => {
-              const newId = event.target.value.trim();
-              if (!newId || newId === groupId) return;
-              updateConfigData((draft) => {
-                renameStudentGroupInDraft(draft, groupId, newId);
-              });
-              selectItem({
-                kind: "group",
-                sectionCode,
-                programIndex,
-                trackIndex,
-                groupId: newId,
-              });
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Тип</span>
-          <input
-            className={detailInputClass}
-            value={kind}
-            onChange={(event) => {
-              if (!studentGroupState) return;
-              studentGroupState.kind = event.target.value;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Оценка размера</span>
-          <input
-            type="text"
-            inputMode="numeric"
-            className={detailInputClass}
-            value={estimatedSize}
-            onChange={(event) => {
-              if (!studentGroupState) return;
-              const parsed = Number(event.target.value.trim());
-              studentGroupState.estimated_size = Number.isFinite(parsed)
-                ? parsed
-                : null;
-            }}
-          />
-        </label>
-        <label
-          className={`${detailControlClass} flex min-h-0 flex-1 flex-col gap-1.5`}
-        >
-          <span className={detailLabelUpperClass}>
-            Студенты (по одному email в строке)
-            <span className="text-base-content/55 ml-1.5 font-medium tabular-nums">
-              · {emailLineCount}
+      <DetailQueryState isPending={isPending} isError={isError} error={error}>
+        <div className={settingsDetailShellClass}>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Название</span>
+            <input
+              className={detailInputClass}
+              value={name}
+              disabled={isSaving}
+              onChange={(event) =>
+                patchStudentGroup({ name: event.target.value })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Код</span>
+            <input
+              className={detailInputClass}
+              value={code}
+              disabled={isRenaming}
+              onChange={(event) => {
+                const newId = event.target.value.trim();
+                if (!newId || newId === groupId) return;
+                void renameStudentGroup(groupId, newId).then(() => {
+                  selectItem({
+                    kind: "group",
+                    sectionCode,
+                    programIndex,
+                    trackIndex,
+                    groupId: newId,
+                  });
+                });
+              }}
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Тип</span>
+            <input
+              className={detailInputClass}
+              value={kind}
+              disabled={isSaving}
+              onChange={(event) =>
+                patchStudentGroup({ kind: event.target.value })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Оценка размера</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              className={detailInputClass}
+              value={estimatedSize}
+              disabled={isSaving}
+              onChange={(event) => {
+                const parsed = Number(event.target.value.trim());
+                patchStudentGroup({
+                  estimated_size: Number.isFinite(parsed) ? parsed : null,
+                });
+              }}
+            />
+          </label>
+          <label
+            className={`${detailControlClass} flex min-h-0 flex-1 flex-col gap-1.5`}
+          >
+            <span className={detailLabelUpperClass}>
+              Студенты (по одному email в строке)
+              <span className="text-base-content/55 ml-1.5 font-medium tabular-nums">
+                · {emailLineCount}
+              </span>
             </span>
-          </span>
-          <textarea
-            className={detailStudentsTextareaClass}
-            value={students}
-            onChange={(event) => {
-              if (!studentGroupState) return;
-              studentGroupState.students = event.target.value
-                .split("\n")
-                .map((chunk) => chunk.trim())
-                .filter(Boolean);
+            <textarea
+              className={detailStudentsTextareaClass}
+              value={students}
+              disabled={isSaving}
+              onChange={(event) =>
+                patchStudentGroup({
+                  students: event.target.value
+                    .split("\n")
+                    .map((chunk) => chunk.trim())
+                    .filter(Boolean),
+                })
+              }
+            />
+          </label>
+
+          <SettingsDetailDeleteButton
+            label="Удалить группу"
+            onClick={() => {
+              void deleteStudentGroupCascade(groupId).then(() => {
+                deselectItem();
+              });
             }}
           />
-        </label>
-
-        <SettingsDetailDeleteButton
-          label="Удалить группу"
-          onClick={() => {
-            updateConfigData((draft) => {
-              deleteStudentGroupFromDraft(draft, groupId);
-            });
-            deselectItem();
-          }}
-        />
-      </div>
+          {isDeleting ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : null}
+        </div>
+      </DetailQueryState>
     </SettingsSidebarDetailFrame>
   );
 }
@@ -656,8 +700,18 @@ export function ProgramDetails({
   sectionCode: string;
   programIndex: number;
 }) {
-  const { updateConfigData } = useConfig();
-  const { program, programState } = useProgram(sectionCode, programIndex);
+  const { program, isPending, isError, error } = useProgram(
+    sectionCode,
+    programIndex,
+  );
+  const { updateProgram, isPending: isSaving } = useUpdateProgramMutation(
+    sectionCode,
+    programIndex,
+  );
+  const { deleteProgram, isPending: isDeleting } = useDeleteProgramFromSection(
+    sectionCode,
+    programIndex,
+  );
   const { selectItem, deselectItem } = useSelection();
   const name = String(program?.name ?? "");
   const code = String(program?.code ?? "");
@@ -676,165 +730,149 @@ export function ProgramDetails({
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
-      <div className={settingsDetailShellClass}>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Название</span>
-          <input
-            className={detailInputClass}
-            value={name}
-            onChange={(event) => {
-              if (!programState) return;
-              programState.name = event.target.value;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Код</span>
-          <input
-            className={detailInputClass}
-            value={code}
-            onChange={(event) => {
-              if (!programState) return;
-              programState.code = event.target.value;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Тип</span>
-          <input
-            className={detailInputClass}
-            value={kind}
-            onChange={(event) => {
-              if (!programState || !("kind" in programState)) return;
-              (programState as Record<string, unknown>).kind =
-                event.target.value;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Язык</span>
-          <input
-            className={detailInputClass}
-            value={language}
-            onChange={(event) => {
-              if (!programState) return;
-              programState.language =
-                event.target.value === "en"
-                  ? SectionProgramLanguageAnyOf0.en
-                  : event.target.value === "ru"
-                    ? SectionProgramLanguageAnyOf0.ru
-                    : null;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Год</span>
-          <input
-            className={detailInputClass}
-            value={year}
-            onChange={(event) => {
-              if (!programState) return;
-              const parsed = Number(event.target.value);
-              programState.year = Number.isFinite(parsed) ? parsed : null;
-            }}
-          />
-        </label>
+      <DetailQueryState isPending={isPending} isError={isError} error={error}>
+        <div className={settingsDetailShellClass}>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Название</span>
+            <input
+              className={detailInputClass}
+              value={name}
+              disabled={isSaving}
+              onChange={(event) =>
+                updateProgram((target) => {
+                  target.name = event.target.value;
+                })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Код</span>
+            <input
+              className={detailInputClass}
+              value={code}
+              disabled={isSaving}
+              onChange={(event) =>
+                updateProgram((target) => {
+                  target.code = event.target.value;
+                })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Тип</span>
+            <input
+              className={detailInputClass}
+              value={kind}
+              disabled={isSaving}
+              onChange={(event) =>
+                updateProgram((target) => {
+                  if (!("kind" in target)) return;
+                  (target as Record<string, unknown>).kind = event.target.value;
+                })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Язык</span>
+            <input
+              className={detailInputClass}
+              value={language}
+              disabled={isSaving}
+              onChange={(event) =>
+                updateProgram((target) => {
+                  target.language =
+                    event.target.value === "en"
+                      ? SectionProgramLanguageAnyOf0.en
+                      : event.target.value === "ru"
+                        ? SectionProgramLanguageAnyOf0.ru
+                        : null;
+                })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Год</span>
+            <input
+              className={detailInputClass}
+              value={year}
+              disabled={isSaving}
+              onChange={(event) =>
+                updateProgram((target) => {
+                  const parsed = Number(event.target.value);
+                  target.year = Number.isFinite(parsed) ? parsed : null;
+                })
+              }
+            />
+          </label>
 
-        <SettingsDetailNestedList
-          sectionTitle="Треки"
-          addButtonLabel="Добавить трек"
-          onAdd={() =>
-            updateConfigData((draft) => {
-              mutateProgramInDraft(
-                draft,
-                sectionCode,
-                programIndex,
-                (target) => {
-                  target.tracks.push({
-                    code: `new-track-${target.tracks.length + 1}`,
-                    name: `Новый трек ${target.tracks.length + 1}`,
-                    kind: null,
-                    groups: [],
-                  });
-                },
-              );
-            })
-          }
-          emptyHint="Нет треков"
-          isEmpty={!tracks.length}
-        >
-          {tracks.map((track: { id: string; title: string }, index: number) => (
-            <SettingsDetailReorderRow
-              key={track.id}
-              disableMoveUp={index === 0}
-              disableMoveDown={index === tracks.length - 1}
-              onMoveUp={() =>
-                updateConfigData((draft) => {
-                  mutateProgramInDraft(
-                    draft,
-                    sectionCode,
-                    programIndex,
-                    (target) => {
+          <SettingsDetailNestedList
+            sectionTitle="Треки"
+            addButtonLabel="Добавить трек"
+            onAdd={() =>
+              updateProgram((target) => {
+                target.tracks.push({
+                  code: `new-track-${target.tracks.length + 1}`,
+                  name: `Новый трек ${target.tracks.length + 1}`,
+                  kind: null,
+                  groups: [],
+                });
+              })
+            }
+            emptyHint="Нет треков"
+            isEmpty={!tracks.length}
+          >
+            {tracks.map(
+              (track: { id: string; title: string }, index: number) => (
+                <SettingsDetailReorderRow
+                  key={track.id}
+                  disableMoveUp={index === 0}
+                  disableMoveDown={index === tracks.length - 1}
+                  onMoveUp={() =>
+                    updateProgram((target) => {
                       const [moved] = target.tracks.splice(index, 1);
                       target.tracks.splice(index - 1, 0, moved);
-                    },
-                  );
-                })
-              }
-              onMoveDown={() =>
-                updateConfigData((draft) => {
-                  mutateProgramInDraft(
-                    draft,
-                    sectionCode,
-                    programIndex,
-                    (target) => {
+                    })
+                  }
+                  onMoveDown={() =>
+                    updateProgram((target) => {
                       const [moved] = target.tracks.splice(index, 1);
                       target.tracks.splice(index + 1, 0, moved);
-                    },
-                  );
-                })
-              }
-              onDelete={() =>
-                updateConfigData((draft) => {
-                  mutateProgramInDraft(
-                    draft,
-                    sectionCode,
-                    programIndex,
-                    (target) => {
+                    })
+                  }
+                  onDelete={() =>
+                    updateProgram((target) => {
                       target.tracks.splice(index, 1);
-                    },
-                  );
-                })
-              }
-            >
-              <SettingsDetailSelectableRowButton
-                title={track.title}
-                onClick={() =>
-                  selectItem({
-                    kind: "track",
-                    sectionCode,
-                    programIndex,
-                    trackIndex: Number(track.id),
-                  })
-                }
-              />
-            </SettingsDetailReorderRow>
-          ))}
-        </SettingsDetailNestedList>
+                    })
+                  }
+                >
+                  <SettingsDetailSelectableRowButton
+                    title={track.title}
+                    onClick={() =>
+                      selectItem({
+                        kind: "track",
+                        sectionCode,
+                        programIndex,
+                        trackIndex: Number(track.id),
+                      })
+                    }
+                  />
+                </SettingsDetailReorderRow>
+              ),
+            )}
+          </SettingsDetailNestedList>
 
-        <SettingsDetailDeleteButton
-          label="Удалить программу"
-          onClick={() => {
-            updateConfigData((draft) => {
-              const section = draft.sections.find(
-                (candidate) => candidate.code === sectionCode,
-              )!;
-              section.programs.splice(programIndex, 1);
-            });
-            deselectItem();
-          }}
-        />
-      </div>
+          <SettingsDetailDeleteButton
+            label="Удалить программу"
+            onClick={() => {
+              deleteProgram();
+              deselectItem();
+            }}
+          />
+          {isDeleting ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : null}
+        </div>
+      </DetailQueryState>
     </SettingsSidebarDetailFrame>
   );
 }
@@ -850,9 +888,18 @@ export function TrackDetails({
   trackIndex: number;
   titleFallback?: string;
 }) {
-  const { config, updateConfigData } = useConfig();
-  const { track, trackState } = useTrack(sectionCode, programIndex, trackIndex);
-  const { program } = useProgram(sectionCode, programIndex);
+  const { config } = useConfig();
+  const { track, program, isPending, isError, error } = useTrack(
+    sectionCode,
+    programIndex,
+    trackIndex,
+  );
+  const { updateProgram, isPending: isSaving } = useUpdateProgramMutation(
+    sectionCode,
+    programIndex,
+  );
+  const { mutate: createStudentGroup } = useCreateStudentGroupMutation();
+  const { deleteStudentGroupCascade } = useDeleteStudentGroupCascade();
   const { selectItem, deselectItem } = useSelection();
   const name = String(track?.name ?? titleFallback ?? "");
   const programTitleForSubtitle = String(
@@ -878,176 +925,152 @@ export function TrackDetails({
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
-      <div className={settingsDetailShellClass}>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Название</span>
-          <input
-            className={detailInputClass}
-            value={name}
-            onChange={(event) => {
-              if (!trackState) return;
-              trackState.name = event.target.value;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Код</span>
-          <input
-            className={detailInputClass}
-            value={code}
-            onChange={(event) => {
-              if (!trackState || !("code" in trackState)) return;
-              (trackState as Record<string, unknown>).code = event.target.value;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Тип</span>
-          <input
-            className={detailInputClass}
-            value={kind}
-            onChange={(event) => {
-              if (!trackState || !("kind" in trackState)) return;
-              (trackState as Record<string, unknown>).kind = event.target.value;
-            }}
-          />
-        </label>
-
-        <SettingsDetailNestedList
-          sectionTitle="Группы"
-          addButtonLabel="Добавить группу"
-          onAdd={() =>
-            updateConfigData((draft) => {
-              mutateProgramInDraft(
-                draft,
-                sectionCode,
-                programIndex,
-                (target) => {
-                  const draftTrack = target.tracks[trackIndex];
-                  const existingIds = [...draftTrack.groups];
-                  const { code: newGroupId, name: newGroupName } =
-                    nextGroupIdentifiers(
-                      existingIds,
-                      (id) => {
-                        const entity = draft.students_groups.find(
-                          (candidate) => candidate.code === id,
-                        );
-                        return entity?.name ?? undefined;
-                      },
-                      {
-                        programCode: programCodeForGroupIdentifiers(
-                          program,
-                          sectionCode,
-                          programIndex,
-                        ),
-                        track: draftTrack,
-                      },
-                    );
-                  draftTrack.groups.push(newGroupId);
-                  draft.students_groups.push({
-                    code: newGroupId,
-                    kind: "core",
-                    name: newGroupName,
-                    estimated_size: null,
-                    students: [],
-                  });
-                },
-              );
-            })
-          }
-          emptyHint="Нет групп"
-          isEmpty={!groups.length}
-        >
-          {groups.map((group: { id: string; title: string }, index: number) => (
-            <SettingsDetailReorderRow
-              key={group.id}
-              disableMoveUp={index === 0}
-              disableMoveDown={index === groups.length - 1}
-              onMoveUp={() => {
-                if (index <= 0) return;
-                const reordered = [...trackGroups];
-                const [moved] = reordered.splice(index, 1);
-                reordered.splice(index - 1, 0, moved);
-                updateConfigData((draft) => {
-                  mutateProgramInDraft(
-                    draft,
-                    sectionCode,
-                    programIndex,
-                    (target) => {
-                      target.tracks[trackIndex].groups = reordered;
-                    },
-                  );
-                });
-              }}
-              onMoveDown={() => {
-                if (index >= trackGroups.length - 1) return;
-                const reordered = [...trackGroups];
-                const [moved] = reordered.splice(index, 1);
-                reordered.splice(index + 1, 0, moved);
-                updateConfigData((draft) => {
-                  mutateProgramInDraft(
-                    draft,
-                    sectionCode,
-                    programIndex,
-                    (target) => {
-                      target.tracks[trackIndex].groups = reordered;
-                    },
-                  );
-                });
-              }}
-              onDelete={() =>
-                updateConfigData((draft) => {
-                  mutateProgramInDraft(
-                    draft,
-                    sectionCode,
-                    programIndex,
-                    (target) => {
-                      const draftTrack = target.tracks[trackIndex];
-                      draftTrack.groups = draftTrack.groups.filter(
-                        (current) => current !== String(group.id),
-                      );
-                    },
-                  );
-                  draft.students_groups = draft.students_groups.filter(
-                    (candidate) => candidate.code !== String(group.id),
-                  );
+      <DetailQueryState isPending={isPending} isError={isError} error={error}>
+        <div className={settingsDetailShellClass}>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Название</span>
+            <input
+              className={detailInputClass}
+              value={name}
+              disabled={isSaving}
+              onChange={(event) =>
+                updateProgram((target) => {
+                  target.tracks[trackIndex].name = event.target.value;
                 })
               }
-            >
-              <SettingsDetailSelectableRowButton
-                title={group.title}
-                subtitle={group.id !== group.title ? group.id : undefined}
-                onClick={() =>
-                  selectItem({
-                    kind: "group",
-                    sectionCode,
-                    programIndex,
-                    trackIndex,
-                    groupId: String(group.id),
-                  })
-                }
-              />
-            </SettingsDetailReorderRow>
-          ))}
-        </SettingsDetailNestedList>
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Код</span>
+            <input
+              className={detailInputClass}
+              value={code}
+              disabled={isSaving}
+              onChange={(event) =>
+                updateProgram((target) => {
+                  const draftTrack = target.tracks[trackIndex];
+                  if (!("code" in draftTrack)) return;
+                  (draftTrack as Record<string, unknown>).code =
+                    event.target.value;
+                })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Тип</span>
+            <input
+              className={detailInputClass}
+              value={kind}
+              disabled={isSaving}
+              onChange={(event) =>
+                updateProgram((target) => {
+                  const draftTrack = target.tracks[trackIndex];
+                  if (!("kind" in draftTrack)) return;
+                  (draftTrack as Record<string, unknown>).kind =
+                    event.target.value;
+                })
+              }
+            />
+          </label>
 
-        <SettingsDetailDeleteButton
-          label="Удалить трек"
-          onClick={() => {
-            updateConfigData((draft) => {
-              mutateProgramInDraft(
-                draft,
-                sectionCode,
-                programIndex,
-                (target) => {
-                  target.tracks.splice(trackIndex, 1);
+          <SettingsDetailNestedList
+            sectionTitle="Группы"
+            addButtonLabel="Добавить группу"
+            onAdd={() => {
+              if (!program || !track) return;
+              const draftTrack = structuredClone(track);
+              const existingIds = [...draftTrack.groups];
+              const { code: newGroupId, name: newGroupName } =
+                nextGroupIdentifiers(
+                  existingIds,
+                  (id) => {
+                    const entity = studentsGroups.find(
+                      (candidate) => candidate.code === id,
+                    );
+                    return entity?.name ?? undefined;
+                  },
+                  {
+                    programCode: programCodeForGroupIdentifiers(
+                      program,
+                      sectionCode,
+                      programIndex,
+                    ),
+                    track: draftTrack,
+                  },
+                );
+              updateProgram((target) => {
+                target.tracks[trackIndex].groups.push(newGroupId);
+              });
+              createStudentGroup({
+                body: {
+                  code: newGroupId,
+                  kind: "core",
+                  name: newGroupName,
+                  estimated_size: null,
+                  students: [],
                 },
-              );
-            });
-            deselectItem();
-          }}
-        />
-      </div>
+              });
+            }}
+            emptyHint="Нет групп"
+            isEmpty={!groups.length}
+          >
+            {groups.map(
+              (group: { id: string; title: string }, index: number) => (
+                <SettingsDetailReorderRow
+                  key={group.id}
+                  disableMoveUp={index === 0}
+                  disableMoveDown={index === groups.length - 1}
+                  onMoveUp={() => {
+                    if (index <= 0) return;
+                    const reordered = [...trackGroups];
+                    const [moved] = reordered.splice(index, 1);
+                    reordered.splice(index - 1, 0, moved);
+                    updateProgram((target) => {
+                      target.tracks[trackIndex].groups = reordered;
+                    });
+                  }}
+                  onMoveDown={() => {
+                    if (index >= trackGroups.length - 1) return;
+                    const reordered = [...trackGroups];
+                    const [moved] = reordered.splice(index, 1);
+                    reordered.splice(index + 1, 0, moved);
+                    updateProgram((target) => {
+                      target.tracks[trackIndex].groups = reordered;
+                    });
+                  }}
+                  onDelete={() => {
+                    void deleteStudentGroupCascade(String(group.id));
+                  }}
+                >
+                  <SettingsDetailSelectableRowButton
+                    title={group.title}
+                    subtitle={group.id !== group.title ? group.id : undefined}
+                    onClick={() =>
+                      selectItem({
+                        kind: "group",
+                        sectionCode,
+                        programIndex,
+                        trackIndex,
+                        groupId: String(group.id),
+                      })
+                    }
+                  />
+                </SettingsDetailReorderRow>
+              ),
+            )}
+          </SettingsDetailNestedList>
+
+          <SettingsDetailDeleteButton
+            label="Удалить трек"
+            onClick={() => {
+              updateProgram((target) => {
+                target.tracks.splice(trackIndex, 1);
+              });
+              deselectItem();
+            }}
+          />
+        </div>
+      </DetailQueryState>
     </SettingsSidebarDetailFrame>
   );
 }
@@ -1057,8 +1080,12 @@ export function InstructorDetails({
 }: {
   instructorIndex: number;
 }) {
-  const { instructor, instructorState } = useInstructor(instructorIndex);
-  const { updateConfigData } = useConfig();
+  const { instructor, instructorId, isPending, isError, error } =
+    useInstructor(instructorIndex);
+  const { patchInstructor, isPending: isSaving } =
+    usePatchInstructorMutation(instructorId);
+  const { mutate: deleteInstructor, isPending: isDeleting } =
+    useDeleteInstructorMutation();
   const { deselectItem } = useSelection();
   const headingTitle =
     instructor?.name_ru ??
@@ -1070,106 +1097,135 @@ export function InstructorDetails({
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
-      <div className={settingsDetailShellClass}>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Имя (на русском)</span>
-          <input
-            className={detailInputClass}
-            value={instructor?.name_ru ?? ""}
-            onChange={(event) => {
-              if (!instructorState) return;
-              instructorState.name_ru = event.target.value.trim() || null;
+      <DetailQueryState isPending={isPending} isError={isError} error={error}>
+        <div className={settingsDetailShellClass}>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Имя (на русском)</span>
+            <input
+              className={detailInputClass}
+              value={instructor?.name_ru ?? ""}
+              disabled={isSaving}
+              onChange={(event) =>
+                patchInstructor({
+                  name_ru: event.target.value.trim() || null,
+                })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Имя (на английском)</span>
+            <input
+              className={detailInputClass}
+              value={instructor?.name_en ?? ""}
+              disabled={isSaving}
+              onChange={(event) =>
+                patchInstructor({
+                  name_en: event.target.value.trim() || null,
+                })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Идентификатор</span>
+            <input
+              className={detailInputClass}
+              value={instructor?.id ?? ""}
+              disabled={isSaving}
+              onChange={(event) =>
+                patchInstructor({ id: event.target.value.trim() })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Корпоративная почта</span>
+            <input
+              className={detailInputClass}
+              value={instructor?.email ?? ""}
+              disabled={isSaving}
+              onChange={(event) =>
+                patchInstructor({
+                  email: event.target.value.trim() || null,
+                })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Алиас Telegram</span>
+            <input
+              className={detailInputClass}
+              value={instructor?.alias ?? ""}
+              disabled={isSaving}
+              onChange={(event) =>
+                patchInstructor({
+                  alias: event.target.value.trim() || null,
+                })
+              }
+            />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Должность</span>
+            <input
+              className={detailInputClass}
+              value={instructor?.position ?? ""}
+              disabled={isSaving}
+              onChange={(event) =>
+                patchInstructor({
+                  position: event.target.value.trim() || null,
+                })
+              }
+            />
+          </label>
+          <SettingsDetailDeleteButton
+            label="Удалить преподавателя"
+            onClick={() => {
+              if (!instructorId) return;
+              deleteInstructor({
+                params: { path: { instructor_id: instructorId } },
+              });
+              deselectItem();
             }}
           />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Имя (на английском)</span>
-          <input
-            className={detailInputClass}
-            value={instructor?.name_en ?? ""}
-            onChange={(event) => {
-              if (!instructorState) return;
-              instructorState.name_en = event.target.value.trim() || null;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Идентификатор</span>
-          <input
-            className={detailInputClass}
-            value={instructor?.id ?? ""}
-            onChange={(event) => {
-              if (!instructorState) return;
-              instructorState.id = event.target.value.trim();
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Корпоративная почта</span>
-          <input
-            className={detailInputClass}
-            value={instructor?.email ?? ""}
-            onChange={(event) => {
-              if (!instructorState) return;
-              instructorState.email = event.target.value.trim() || null;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Алиас Telegram</span>
-          <input
-            className={detailInputClass}
-            value={instructor?.alias ?? ""}
-            onChange={(event) => {
-              if (!instructorState) return;
-              instructorState.alias = event.target.value.trim() || null;
-            }}
-          />
-        </label>
-        <label className={`${detailControlClass} shrink-0`}>
-          <span className={detailLabelUpperClass}>Должность</span>
-          <input
-            className={detailInputClass}
-            value={instructor?.position ?? ""}
-            onChange={(event) => {
-              if (!instructorState) return;
-              instructorState.position = event.target.value.trim() || null;
-            }}
-          />
-        </label>
-        <SettingsDetailDeleteButton
-          label="Удалить преподавателя"
-          onClick={() => {
-            updateConfigData((draft) => {
-              draft.instructors.splice(instructorIndex, 1);
-            });
-            deselectItem();
-          }}
-        />
-      </div>
+          {isDeleting ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : null}
+        </div>
+      </DetailQueryState>
     </SettingsSidebarDetailFrame>
   );
 }
 
 export function SemesterDetails() {
-  const { term, termState } = useSemesterSettings();
+  const { term, isPending, isError, error } = useSemesterSettings();
+  const { patchTerm, isPending: isSaving } = usePatchTermMutation();
   const termName = String(term?.name ?? "");
   const startDate = toDateInputValue(term?.semester?.start_date);
   const endDate = toDateInputValue(term?.semester?.end_date);
-  const days = TERM_WEEKDAY_KEYS.filter((key) =>
-    (term?.days || []).includes(key),
-  );
-  const startingDay = term?.starting_day ?? "";
-  const timeSlots = Array.isArray(term?.time_slots)
-    ? term.time_slots.join("\n")
-    : "";
+  const days = normalizeTermWeekdays(term?.days);
+  const startingDay =
+    normalizeTermWeekdays(term?.starting_day ? [term.starting_day] : [])[0] ??
+    "";
+  const timeSlots = formatTermTimeSlots(term?.time_slots);
 
   function handleToggleDay(key: TermWeekdayKey) {
-    if (!termState) return;
-    termState.days = toggleTermWeekday(days, key);
+    patchTerm((current) => ({
+      ...current,
+      days: toggleTermWeekday(days, key),
+    }));
   }
 
   const timeSlotsTextareaRef = useAutosizeTextareaRef(timeSlots);
+
+  if (isPending) {
+    return <div className="skeleton h-40 w-full" />;
+  }
+
+  if (isError) {
+    return (
+      <div className="alert alert-error alert-soft text-sm">
+        {formatApiErrorMessage(error)}
+      </div>
+    );
+  }
 
   return (
     <div className={settingsDetailShellClass}>
@@ -1178,10 +1234,10 @@ export function SemesterDetails() {
         <input
           className={detailInputClass}
           value={termName}
-          onChange={(event) => {
-            if (!termState) return;
-            termState.name = event.target.value;
-          }}
+          disabled={isSaving}
+          onChange={(event) =>
+            patchTerm((current) => ({ ...current, name: event.target.value }))
+          }
           onKeyDown={handleEscapeBlur}
         />
       </label>
@@ -1191,10 +1247,16 @@ export function SemesterDetails() {
           type="date"
           className={detailInputClass}
           value={startDate}
-          onChange={(event) => {
-            if (!termState) return;
-            termState.semester.start_date = event.target.value;
-          }}
+          disabled={isSaving}
+          onChange={(event) =>
+            patchTerm((current) => ({
+              ...current,
+              semester: {
+                ...current.semester,
+                start_date: event.target.value,
+              },
+            }))
+          }
           onKeyDown={handleEscapeBlur}
         />
       </label>
@@ -1204,10 +1266,16 @@ export function SemesterDetails() {
           type="date"
           className={detailInputClass}
           value={endDate}
-          onChange={(event) => {
-            if (!termState) return;
-            termState.semester.end_date = event.target.value;
-          }}
+          disabled={isSaving}
+          onChange={(event) =>
+            patchTerm((current) => ({
+              ...current,
+              semester: {
+                ...current.semester,
+                end_date: event.target.value,
+              },
+            }))
+          }
           onKeyDown={handleEscapeBlur}
         />
       </label>
@@ -1226,6 +1294,7 @@ export function SemesterDetails() {
                     ? "btn-secondary text-secondary-content"
                     : "btn-outline bg-base-100 text-base-content/55 hover:border-base-content/30",
                 )}
+                disabled={isSaving}
                 onClick={() => handleToggleDay(key)}
               >
                 {TERM_WEEKDAY_LABEL_RU[key]}
@@ -1249,10 +1318,10 @@ export function SemesterDetails() {
                     ? "btn-secondary text-secondary-content"
                     : "btn-outline bg-base-100 text-base-content/55 hover:border-base-content/30",
                 )}
-                onClick={() => {
-                  if (!termState) return;
-                  termState.starting_day = key;
-                }}
+                disabled={isSaving}
+                onClick={() =>
+                  patchTerm((current) => ({ ...current, starting_day: key }))
+                }
               >
                 {TERM_WEEKDAY_LABEL_RU[key]}
               </button>
@@ -1266,11 +1335,14 @@ export function SemesterDetails() {
           ref={timeSlotsTextareaRef}
           className={detailTimeSlotsTextareaClass}
           value={timeSlots}
+          disabled={isSaving}
           onKeyDown={handleEscapeBlur}
-          onChange={(event) => {
-            if (!termState) return;
-            termState.time_slots = parseTermTimeSlotsText(event.target.value);
-          }}
+          onChange={(event) =>
+            patchTerm((current) => ({
+              ...current,
+              time_slots: parseTermTimeSlotsText(event.target.value),
+            }))
+          }
         />
       </label>
     </div>

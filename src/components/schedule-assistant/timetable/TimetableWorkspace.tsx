@@ -1,7 +1,7 @@
 import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import clsx from "clsx";
 import {
-  ConfigProvider,
+  getScheduleSections,
   useConfig,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
@@ -246,6 +246,22 @@ function TimetableWorkspaceInner() {
   );
 
   useEffect(() => {
+    if (!config) return;
+    const sectionCodes = getScheduleSections(config).map(
+      (section) => section.code,
+    );
+    if (!sectionCodes.length) return;
+    const validTabs = new Set<InnerTab>([
+      ...sectionCodes,
+      "instructor",
+      "room",
+    ]);
+    setActiveTab((current) =>
+      validTabs.has(current) ? current : (sectionCodes[0] as InnerTab),
+    );
+  }, [config?.term?.sections]);
+
+  useEffect(() => {
     if (!config || !coursesToSections) {
       setAllMeetings([]);
       setColumns([]);
@@ -361,6 +377,14 @@ function TimetableWorkspaceInner() {
     return buildGrid(config, allMeetings, wk.start, activeTab);
   }, [config, allMeetings, weeks, weekIndex, activeTab]);
 
+  const applyTabChange = useCallback(
+    (nextTab: InnerTab) => {
+      setActiveTab(nextTab);
+      selectionStore.setSelection(null);
+    },
+    [selectionStore],
+  );
+
   const selectMeeting = useCallback(
     (valueKey: string, course: string) => {
       selectionStore.setSelection({ type: "meeting", value: valueKey, course });
@@ -426,7 +450,10 @@ function TimetableWorkspaceInner() {
         t.closest(".detail") ||
         t.closest(".schedule-assistant-toolbar") ||
         t.closest("button") ||
-        t.closest("input")
+        t.closest("input") ||
+        t.closest("select") ||
+        t.closest("summary") ||
+        t.closest("details")
       ) {
         return;
       }
@@ -459,7 +486,7 @@ function TimetableWorkspaceInner() {
               </div>
             ) : null}
 
-            <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 px-2 py-1.5 text-sm">
+            <div className="schedule-assistant-toolbar relative z-30 flex shrink-0 flex-wrap items-center gap-2 px-2 py-1.5 text-sm">
               <div className="join shrink-0">
                 <button
                   type="button"
@@ -492,24 +519,11 @@ function TimetableWorkspaceInner() {
                   ›
                 </button>
               </div>
-              <label className="form-control shrink-0 sm:ml-auto">
-                <span className="sr-only">Режим таблицы</span>
-                <select
-                  className="select select-bordered select-xs h-8 min-h-8 w-[10.5rem] text-sm font-normal"
-                  value={activeTab}
-                  onChange={(e) => {
-                    setActiveTab(e.target.value as InnerTab);
-                  }}
-                >
-                  {config.sections.map((section) => (
-                    <option key={section.code} value={section.code}>
-                      {section.name}
-                    </option>
-                  ))}
-                  <option value="instructor">По преподавателям</option>
-                  <option value="room">По аудиториям</option>
-                </select>
-              </label>
+              <TimetableTabSelector
+                config={config}
+                activeTab={activeTab}
+                onTabChange={applyTabChange}
+              />
             </div>
 
             <div
@@ -524,43 +538,27 @@ function TimetableWorkspaceInner() {
                   isMiddleDragScrolling ? "cursor-grabbing" : "cursor-auto",
                 )}
               >
-                <table
-                  id="table"
-                  className="isolate w-max min-w-[980px] table-fixed border-separate border-spacing-0"
-                >
-                  {grid && columns.length
-                    ? activeTab === "instructor" || activeTab === "room"
-                      ? renderUtilizationRows({
-                          mode:
-                            activeTab === "instructor" ? "instructor" : "room",
-                          grid,
-                          courseColors,
-                          roomCapacityById,
-                          groupSizeById,
-                          selectMeeting,
-                          selectInstructorCell,
-                          selectRoomCell,
-                          selectInstructorHeader,
-                          selectRoomHeader,
-                        })
-                      : renderCoreRows({
-                          grid,
-                          columns,
-                          allMeetings,
-                          config,
-                          activeTab,
-                          courseColors,
-                          roomCapacityById,
-                          groupSizeById,
-                          selectMeeting,
-                          selectInstructorCell,
-                          selectRoomCell,
-                          selectProgram,
-                          selectGroup,
-                          clearSelection,
-                        })
-                    : null}
-                </table>
+                {grid && columns.length ? (
+                  <TimetableTable
+                    key={activeTab}
+                    tabMode={activeTab}
+                    grid={grid}
+                    columns={columns}
+                    allMeetings={allMeetings}
+                    config={config}
+                    courseColors={courseColors}
+                    roomCapacityById={roomCapacityById}
+                    groupSizeById={groupSizeById}
+                    selectMeeting={selectMeeting}
+                    selectInstructorCell={selectInstructorCell}
+                    selectRoomCell={selectRoomCell}
+                    selectInstructorHeader={selectInstructorHeader}
+                    selectRoomHeader={selectRoomHeader}
+                    selectProgram={selectProgram}
+                    selectGroup={selectGroup}
+                    clearSelection={clearSelection}
+                  />
+                ) : null}
               </div>
             </div>
           </div>
@@ -586,13 +584,140 @@ function TimetableWorkspaceInner() {
   );
 }
 
-const TimetableWorkspaceContent = memo(TimetableWorkspaceInner);
-
 export function TimetableWorkspace() {
+  return <TimetableWorkspaceInner />;
+}
+
+function TimetableTabSelector({
+  config,
+  activeTab,
+  onTabChange,
+}: {
+  config: SchemaScheduleConfig;
+  activeTab: InnerTab;
+  onTabChange: (tab: InnerTab) => void;
+}) {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const sections = getScheduleSections(config);
+  const options: { value: InnerTab; label: string }[] = [
+    ...sections.map((section) => ({
+      value: section.code,
+      label: section.name,
+    })),
+    { value: "instructor", label: "По преподавателям" },
+    { value: "room", label: "По аудиториям" },
+  ];
+  const currentLabel =
+    options.find((option) => option.value === activeTab)?.label ??
+    options[0]?.label ??
+    "Режим таблицы";
+
+  function handleOptionClick(nextTab: InnerTab) {
+    onTabChange(nextTab);
+    if (detailsRef.current) detailsRef.current.open = false;
+  }
+
   return (
-    <ConfigProvider>
-      <TimetableWorkspaceContent />
-    </ConfigProvider>
+    <details
+      ref={detailsRef}
+      className="dropdown dropdown-end shrink-0 sm:ml-auto"
+    >
+      <summary className="select select-bordered select-xs flex h-8 min-h-8 w-[10.5rem] cursor-pointer list-none items-center justify-between px-3 text-sm font-normal [&::-webkit-details-marker]:hidden">
+        <span className="truncate">{currentLabel}</span>
+        <span className="icon-[material-symbols--expand-more] shrink-0 text-base" />
+      </summary>
+      <ul className="dropdown-content border-base-300 bg-base-100 rounded-box z-40 mt-1 w-[12rem] border p-1 shadow-sm">
+        {options.map((option, i) => (
+          <li key={i}>
+            <button
+              type="button"
+              className={clsx(
+                "hover:bg-base-200 w-full rounded-md px-2 py-1.5 text-left text-sm",
+                activeTab === option.value && "bg-base-200 font-semibold",
+              )}
+              onClick={() => handleOptionClick(option.value)}
+            >
+              {option.label}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
+type TimetableTableProps = {
+  tabMode: InnerTab;
+  grid: BuiltGrid;
+  columns: Column[];
+  allMeetings: Meeting[];
+  config: SchemaScheduleConfig;
+  courseColors: Record<string, { bg: string; border: string }>;
+  roomCapacityById: Record<string, number>;
+  groupSizeById: Record<string, number | null | undefined>;
+  selectMeeting: (valueKey: string, course: string) => void;
+  selectInstructorCell: (name: string) => void;
+  selectRoomCell: (room: string) => void;
+  selectInstructorHeader: (name: string) => void;
+  selectRoomHeader: (room: string) => void;
+  selectProgram: (yearLabel: string) => void;
+  selectGroup: (groupId: string) => void;
+  clearSelection: () => void;
+};
+
+function TimetableTable({
+  tabMode,
+  grid,
+  columns,
+  allMeetings,
+  config,
+  courseColors,
+  roomCapacityById,
+  groupSizeById,
+  selectMeeting,
+  selectInstructorCell,
+  selectRoomCell,
+  selectInstructorHeader,
+  selectRoomHeader,
+  selectProgram,
+  selectGroup,
+  clearSelection,
+}: TimetableTableProps) {
+  return (
+    <table
+      id="table"
+      className="isolate w-max min-w-[980px] table-fixed border-separate border-spacing-0"
+    >
+      {tabMode === "instructor" || tabMode === "room"
+        ? renderUtilizationRows({
+            mode: tabMode === "instructor" ? "instructor" : "room",
+            grid,
+            courseColors,
+            roomCapacityById,
+            groupSizeById,
+            selectMeeting,
+            selectInstructorCell,
+            selectRoomCell,
+            selectInstructorHeader,
+            selectRoomHeader,
+          })
+        : renderCoreRows({
+            grid,
+            columns,
+            allMeetings,
+            config,
+            activeTab: tabMode,
+            courseColors,
+            roomCapacityById,
+            groupSizeById,
+            selectMeeting,
+            selectInstructorCell,
+            selectRoomCell,
+            selectProgram,
+            selectGroup,
+            clearSelection,
+          })}
+    </table>
   );
 }
 
@@ -855,8 +980,6 @@ type CorePrepared = {
   rows: CorePreparedRow[];
 };
 
-const coreRowsCache = new WeakMap<BuiltGrid, Map<string, CorePrepared>>();
-
 function buildCorePrepared(
   grid: BuiltGrid,
   visibleColumns: Column[],
@@ -977,17 +1100,7 @@ function renderCoreRows(args: {
   );
   if (!visibleColumns.length) return null;
 
-  const cacheKey = `${activeTab}|${visibleColumns.map((c) => c.groupId).join("|")}`;
-  let perGridCache = coreRowsCache.get(grid);
-  if (!perGridCache) {
-    perGridCache = new Map<string, CorePrepared>();
-    coreRowsCache.set(grid, perGridCache);
-  }
-  let prepared = perGridCache.get(cacheKey);
-  if (!prepared) {
-    prepared = buildCorePrepared(grid, visibleColumns);
-    perGridCache.set(cacheKey, prepared);
-  }
+  const prepared = buildCorePrepared(grid, visibleColumns);
 
   const thead = (
     <thead className="sticky top-0 z-[20]">
@@ -1008,7 +1121,7 @@ function renderCoreRows(args: {
         ))}
       </tr>
       <tr key="h2">
-        {Object.keys(prepared.columnsByYear).map((yearLabel) =>
+        {Object.keys(prepared.columnsByYear).flatMap((yearLabel) =>
           prepared.columnsByYear[yearLabel]!.map((col) => (
             <CoreGroupHeadCell
               key={col.groupId}
@@ -1431,7 +1544,10 @@ function renderUtilizationRows(args: {
         ).border;
 
         return (
-          <td className="link-cell relative w-[170px] max-w-[170px] min-w-[170px] border-r border-b border-[#d8dfeb] p-2 [vertical-align:top] align-top text-[0.75rem]">
+          <td
+            key={resource}
+            className="link-cell relative w-[170px] max-w-[170px] min-w-[170px] border-r border-b border-[#d8dfeb] p-2 [vertical-align:top] align-top text-[0.75rem]"
+          >
             {hasSource || hasTarget ? (
               <div
                 className={clsx(

@@ -21,10 +21,43 @@ export const TERM_WEEKDAY_LABEL_RU: Record<TermWeekdayKey, string> = {
   Sun: "Вс",
 };
 
+const WEEKDAY_API_TO_KEY: Record<string, TermWeekdayKey> = {
+  monday: "Mon",
+  mon: "Mon",
+  tuesday: "Tue",
+  tue: "Tue",
+  wednesday: "Wed",
+  wed: "Wed",
+  thursday: "Thu",
+  thu: "Thu",
+  friday: "Fri",
+  fri: "Fri",
+  saturday: "Sat",
+  sat: "Sat",
+  sunday: "Sun",
+  sun: "Sun",
+};
+
+function toTermWeekdayKey(raw: unknown): TermWeekdayKey | null {
+  const lowered = String(raw ?? "")
+    .trim()
+    .toLowerCase();
+  if (!lowered) return null;
+  if (WEEKDAY_API_TO_KEY[lowered]) return WEEKDAY_API_TO_KEY[lowered];
+  if ((TERM_WEEKDAY_KEYS as readonly string[]).includes(String(raw)))
+    return String(raw) as TermWeekdayKey;
+  return null;
+}
+
 /** Приводит значение из конфига к списку известных ключей в порядке пн→вс. */
 export function normalizeTermWeekdays(raw: unknown): TermWeekdayKey[] {
-  const arr = Array.isArray(raw) ? raw.map((x) => String(x)) : [];
-  return TERM_WEEKDAY_KEYS.filter((k) => arr.includes(k));
+  const arr = Array.isArray(raw) ? raw : [];
+  const set = new Set<TermWeekdayKey>();
+  for (const item of arr) {
+    const key = toTermWeekdayKey(item);
+    if (key) set.add(key);
+  }
+  return TERM_WEEKDAY_KEYS.filter((k) => set.has(k));
 }
 
 export function toggleTermWeekday(

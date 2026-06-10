@@ -2,8 +2,12 @@ import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
 
 import { buildCoursesTabSections } from "./coursesTabSections.ts";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { SectionTabsBar } from "@/components/schedule-assistant/settings/SectionTabsBar.tsx";
-import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
+import {
+  useConfig,
+  useCreateCourseMutation,
+} from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   getSettingsSelectionKey,
   useSelection,
@@ -12,7 +16,9 @@ import {
 const COURSES_SUBTAB_STORAGE_KEY = "schedule-assistant:settings:courses-subtab";
 
 export function CoursesTabContent() {
-  const { config, updateConfigData } = useConfig();
+  const { config, isPending, isError, error } = useConfig();
+  const { mutate: createCourse, isPending: isCreating } =
+    useCreateCourseMutation();
   const { selectedSelectionId, selectItem } = useSelection();
   const sections = useMemo(() => buildCoursesTabSections(config), [config]);
   const [activeSectionKey, setActiveSectionKey] = useState(() => {
@@ -35,6 +41,18 @@ export function CoursesTabContent() {
     window.localStorage.setItem(COURSES_SUBTAB_STORAGE_KEY, activeSectionKey);
   }, [activeSectionKey]);
 
+  if (isPending) {
+    return <div className="skeleton h-40 w-full" />;
+  }
+
+  if (isError) {
+    return (
+      <div className="alert alert-error alert-soft text-sm">
+        {formatApiErrorMessage(error)}
+      </div>
+    );
+  }
+
   if (!sections.length) {
     return (
       <div className="flex flex-col gap-2">
@@ -44,17 +62,22 @@ export function CoursesTabContent() {
         <button
           type="button"
           className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
+          disabled={isCreating}
           onClick={() =>
-            updateConfigData((draft) => {
-              draft.courses.push({
+            createCourse({
+              body: {
                 name: "Новый курс",
                 course_tags: [],
                 components: [],
-              });
+              },
             })
           }
         >
-          Добавить курс
+          {isCreating ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : (
+            "Добавить курс"
+          )}
         </button>
       </div>
     );
@@ -128,17 +151,22 @@ export function CoursesTabContent() {
       <button
         type="button"
         className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
+        disabled={isCreating}
         onClick={() =>
-          updateConfigData((draft) => {
-            draft.courses.push({
+          createCourse({
+            body: {
               name: "Новый курс",
               course_tags: [],
               components: [],
-            });
+            },
           })
         }
       >
-        Добавить курс
+        {isCreating ? (
+          <span className="loading loading-spinner loading-sm" />
+        ) : (
+          "Добавить курс"
+        )}
       </button>
     </div>
   );

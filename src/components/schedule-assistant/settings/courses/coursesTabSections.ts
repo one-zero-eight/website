@@ -5,6 +5,7 @@ import type {
   SchemaCourseConfig,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
+import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import type { SettingsListRow } from "@/components/schedule-assistant/settings/useSelection.tsx";
 
 /** Курс в сводке по секциям на вкладке «Курсы» (id = `course-${courseIndex}`). */
@@ -70,7 +71,7 @@ export function buildCoursesTabSections(
     { title: string; trackNames: string[] }
   >();
 
-  for (const section of config?.sections ?? []) {
+  for (const section of getScheduleSections(config)) {
     if (!section?.code || !Array.isArray(section.programs)) continue;
     const sectionCode = String(section.code);
     for (const program of section.programs) {

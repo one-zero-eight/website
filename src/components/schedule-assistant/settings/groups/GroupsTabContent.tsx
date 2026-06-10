@@ -11,7 +11,11 @@ import {
   SchemaSectionProgram,
   SectionProgramLanguageAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
-import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  useAddProgramToSection,
+  useConfig,
+} from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   getSettingsSelectionKey,
   useSelection,
@@ -21,7 +25,7 @@ const STUDENT_GROUPS_SUBTAB_STORAGE_KEY =
   "schedule-assistant:settings:groups-subtab";
 
 export function GroupsTabContent() {
-  const { config, updateConfigData } = useConfig();
+  const { config, isPending, isError, error } = useConfig();
   const { selectedSelectionId, selectItem } = useSelection();
   const programsGroupsTreeView = useMemo(
     () => buildProgramsGroupsTreeView(config),
@@ -72,6 +76,21 @@ export function GroupsTabContent() {
       activeSectionKey,
     );
   }, [activeSectionKey]);
+
+  const { addProgram, isPending: isAddingProgram } =
+    useAddProgramToSection(activeSectionKey);
+
+  if (isPending) {
+    return <div className="skeleton h-40 w-full" />;
+  }
+
+  if (isError) {
+    return (
+      <div className="alert alert-error alert-soft text-sm">
+        {formatApiErrorMessage(error)}
+      </div>
+    );
+  }
 
   if (!programsGroupsTreeView.length) {
     return (
@@ -272,27 +291,26 @@ export function GroupsTabContent() {
       <button
         type="button"
         className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
+        disabled={isAddingProgram}
         onClick={() =>
-          updateConfigData((draft) => {
-            const section = draft.sections.find(
-              (s) => s.code === activeSectionKey,
-            )!;
-            const newProgram: SchemaSectionProgram = {
-              code: `new-program-${section.programs.length + 1}`,
-              name: "Новая программа",
-              kind: "degree_year",
-              degree: null,
-              language: SectionProgramLanguageAnyOf0.en,
-              year: null,
-              applies_to: [],
-              tracks: [],
-              groups: [],
-            };
-            section.programs.push(newProgram);
-          })
+          addProgram({
+            code: `new-program-${(sectionPrograms[activeSectionKey]?.length ?? 0) + 1}`,
+            name: "Новая программа",
+            kind: "degree_year",
+            degree: null,
+            language: SectionProgramLanguageAnyOf0.en,
+            year: null,
+            applies_to: [],
+            tracks: [],
+            groups: [],
+          } satisfies SchemaSectionProgram)
         }
       >
-        Добавить программу
+        {isAddingProgram ? (
+          <span className="loading loading-spinner loading-sm" />
+        ) : (
+          "Добавить программу"
+        )}
       </button>
     </div>
   );

@@ -4,6 +4,7 @@ import type {
   SchemaSectionProgram,
   SchemaSectionConfig,
 } from "@/api/schedule-assistant/types.ts";
+import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import type { SettingsSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
 
 /** Узел трека в tree view «программы и группы». */
@@ -78,7 +79,7 @@ export function buildProgramsGroupsTreeView(
   }
 
   const rows: ProgramTreeProgram[] = [];
-  const sections = Array.isArray(config?.sections) ? config.sections : [];
+  const sections = getScheduleSections(config);
 
   for (const section of sections) {
     if (!section?.code || !Array.isArray(section?.programs)) continue;
@@ -150,7 +151,7 @@ export function buildProgramsGroupsTreeView(
 export function buildProgramsGroupsTreeViewSectionTabs(
   config: SchemaScheduleConfig | null,
 ): ProgramSection[] {
-  const sectionsRaw = Array.isArray(config?.sections) ? config.sections : [];
+  const sectionsRaw = getScheduleSections(config);
   return sectionsRaw
     .map((section: SchemaSectionConfig) => {
       const sectionCode = String(section?.code || "").trim();

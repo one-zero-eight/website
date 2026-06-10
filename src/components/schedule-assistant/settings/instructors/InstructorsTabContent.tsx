@@ -1,5 +1,9 @@
-import type { SchemaInstructorConfig } from "@/api/schedule-assistant/types.ts";
-import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
+import type { SchemaInstructor } from "@/api/schedule-assistant/types.ts";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  useCreateInstructorMutation,
+  useInstructorsQuery,
+} from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   getSettingsSelectionKey,
   useSelection,
@@ -9,30 +13,48 @@ import clsx from "clsx";
 import { useMemo } from "react";
 
 export function InstructorsTabContent() {
-  const { config, updateConfigData } = useConfig();
+  const {
+    data: instructors,
+    isPending,
+    isError,
+    error,
+  } = useInstructorsQuery();
+  const { mutate: createInstructor, isPending: isCreating } =
+    useCreateInstructorMutation();
   const { selectedSelectionId, selectItem } = useSelection();
   const items: SettingsListRow[] = useMemo(
     () =>
-      (config?.instructors || []).map(
-        (instructor: SchemaInstructorConfig, index: number) => {
-          const idStr = String(instructor?.id ?? "");
-          const nameStr =
-            instructor.name_ru ??
-            instructor.name_en ??
-            instructor.email ??
-            instructor.id;
-          const title = nameStr || idStr;
-          const subtitle = nameStr ? idStr : undefined;
-          return {
-            id: `instructor-${index}`,
-            title,
-            subtitle,
-            selection: { kind: "instructor", instructorIndex: index },
-          };
-        },
-      ),
-    [config],
+      (instructors ?? []).map((instructor: SchemaInstructor, index: number) => {
+        const idStr = String(instructor?.id ?? "");
+        const nameStr =
+          instructor.name_ru ??
+          instructor.name_en ??
+          instructor.email ??
+          instructor.id;
+        const title = nameStr || idStr;
+        const subtitle = nameStr ? idStr : undefined;
+        return {
+          id: `instructor-${index}`,
+          title,
+          subtitle,
+          selection: { kind: "instructor", instructorIndex: index },
+        };
+      }),
+    [instructors],
   );
+
+  if (isPending) {
+    return <div className="skeleton h-40 w-full" />;
+  }
+
+  if (isError) {
+    return (
+      <div className="alert alert-error alert-soft text-sm">
+        {formatApiErrorMessage(error)}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {items.length ? (
@@ -66,20 +88,25 @@ export function InstructorsTabContent() {
       <button
         type="button"
         className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
+        disabled={isCreating}
         onClick={() =>
-          updateConfigData((draft) => {
-            draft.instructors.push({
-              id: `new-instructor-${draft.instructors.length + 1}`,
+          createInstructor({
+            body: {
+              id: `new-instructor-${(instructors?.length ?? 0) + 1}`,
               alias: null,
               email: null,
               name_en: null,
               name_ru: null,
               position: null,
-            });
+            },
           })
         }
       >
-        Добавить преподавателя
+        {isCreating ? (
+          <span className="loading loading-spinner loading-sm" />
+        ) : (
+          "Добавить преподавателя"
+        )}
       </button>
     </div>
   );

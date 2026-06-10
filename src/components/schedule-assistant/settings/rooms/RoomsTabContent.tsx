@@ -1,8 +1,12 @@
 import clsx from "clsx";
 import { useMemo } from "react";
 
-import type { SchemaRoomConfig } from "@/api/schedule-assistant/types.ts";
-import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
+import type { SchemaRoom } from "@/api/schedule-assistant/types.ts";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  useCreateRoomMutation,
+  useRoomsQuery,
+} from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   getSettingsSelectionKey,
   useSelection,
@@ -28,11 +32,12 @@ function roomCapacityToLabel(value: unknown): string {
 }
 
 export function RoomsTabContent() {
-  const { config, updateConfigData } = useConfig();
+  const { data: rooms, isPending, isError, error } = useRoomsQuery();
+  const { mutate: createRoom, isPending: isCreating } = useCreateRoomMutation();
   const { selectedSelectionId, selectItem } = useSelection();
   const groups: RoomsFloorGroup[] = useMemo(() => {
-    const roomsItems: RoomListRow[] = (config?.rooms || []).map(
-      (room: SchemaRoomConfig, index: number) => ({
+    const roomsItems: RoomListRow[] = (rooms ?? []).map(
+      (room: SchemaRoom, index: number) => ({
         id: `room-${index}`,
         title: String(room?.id || ""),
         subtitle:
@@ -63,7 +68,20 @@ export function RoomsTabContent() {
         if (b.floor === "Без этажа") return -1;
         return a.floor.localeCompare(b.floor, "ru");
       });
-  }, [config]);
+  }, [rooms]);
+
+  if (isPending) {
+    return <div className="skeleton h-40 w-full" />;
+  }
+
+  if (isError) {
+    return (
+      <div className="alert alert-error alert-soft text-sm">
+        {formatApiErrorMessage(error)}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {!groups.length ? (
@@ -111,17 +129,22 @@ export function RoomsTabContent() {
       <button
         type="button"
         className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
+        disabled={isCreating}
         onClick={() =>
-          updateConfigData((draft) => {
-            draft.rooms.push({
-              id: `NEW-${draft.rooms.length + 1}`,
+          createRoom({
+            body: {
+              id: `NEW-${(rooms?.length ?? 0) + 1}`,
               name: "",
               capacity: 0,
-            });
+            },
           })
         }
       >
-        Добавить аудиторию
+        {isCreating ? (
+          <span className="loading loading-spinner loading-sm" />
+        ) : (
+          "Добавить аудиторию"
+        )}
       </button>
     </div>
   );

@@ -1,4 +1,8 @@
-import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import type {
+  SchemaScheduleConfig,
+  SchemaSectionProgram,
+} from "@/api/schedule-assistant/types.ts";
+import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 
 export function isStudentGroupSelector(token: string): boolean {
@@ -44,7 +48,7 @@ function trackMatchesRef(
 }
 
 function collectGroupsFromProgram(
-  program: SchemaScheduleConfig["sections"][number]["programs"][number],
+  program: SchemaSectionProgram,
   trackRef?: string,
 ): string[] {
   const tracks = normalizeTracksFromSectionProgram(program);
@@ -78,7 +82,7 @@ export function expandStudentGroupSelector(
   if (!parsed) return [raw];
 
   const groups: string[] = [];
-  for (const section of config?.sections || []) {
+  for (const section of getScheduleSections(config)) {
     for (const program of section.programs || []) {
       if (String(program.code || "").trim() !== parsed.programCode) continue;
       if (parsed.kind === "program") {

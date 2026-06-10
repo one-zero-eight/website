@@ -1,13 +1,17 @@
 import type { ConfigLoadResult } from "@/components/schedule-assistant/settings/ConfigLoadModal.tsx";
-import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
-import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
+import {
+  useConfig,
+  useUploadScheduleConfigYamlMutation,
+} from "@/components/schedule-assistant/config/useConfig.tsx";
 import { ConfigLoadModal } from "@/components/schedule-assistant/settings/ConfigLoadModal.tsx";
 import { SemesterDetails } from "@/components/schedule-assistant/settings/SettingsSidebarDetails.tsx";
-import { parse, stringify } from "yaml";
 import { useState } from "react";
+import { stringify } from "yaml";
 
 export function SemesterTabContent() {
-  const { config, setConfigData } = useConfig();
+  const { config } = useConfig();
+  const { mutateAsync: uploadConfigYaml, isPending: isUploading } =
+    useUploadScheduleConfigYamlMutation();
   const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
 
   async function loadConfigFiles(
@@ -17,18 +21,18 @@ export function SemesterTabContent() {
       if (!configFile) {
         return { ok: false, message: "Выберите файл config.yaml." };
       }
-      const parsed = parse(await configFile.text()) as SchemaScheduleConfig;
-      setConfigData(parsed);
+      await uploadConfigYaml({ body: await configFile.text() });
       return { ok: true };
-    } catch (e: any) {
+    } catch (e: unknown) {
       return {
         ok: false,
-        message: `Ошибка чтения YAML: ${e?.message || String(e)}`,
+        message: `Ошибка загрузки YAML: ${(e as Error)?.message || String(e)}`,
       };
     }
   }
 
   function exportConfig() {
+    if (!config) return;
     const text = stringify(config);
     const blob = new Blob([text], { type: "application/x-yaml;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -50,6 +54,7 @@ export function SemesterTabContent() {
             <button
               type="button"
               className="btn btn-primary btn-sm"
+              disabled={isUploading}
               onClick={() => setIsLoadModalOpen(true)}
             >
               Загрузить конфигурацию
@@ -57,6 +62,7 @@ export function SemesterTabContent() {
             <button
               type="button"
               className="btn btn-outline btn-secondary btn-sm"
+              disabled={!config}
               onClick={exportConfig}
             >
               Выгрузить конфигурацию
