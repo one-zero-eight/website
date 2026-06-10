@@ -1,4 +1,4 @@
-import { navigateToSignOut } from "@/api/accounts/sign-in.ts";
+import { navigateToSignOut } from "@/api/accounts/sign-in.tsx";
 import { useMe } from "@/api/accounts/user.ts";
 import { SignInButtonIcon } from "@/components/common/SignInButton";
 import Tooltip from "@/components/common/Tooltip.tsx";

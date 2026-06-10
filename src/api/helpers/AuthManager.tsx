@@ -1,5 +1,4 @@
 import { $accounts, accountsTypes } from "@/api/accounts";
-import { navigateToSignIn, shouldAutoSignIn } from "@/api/accounts/sign-in.ts";
 import {
   checkIsTokenExpired,
   invalidateMyAccessToken,
@@ -24,7 +23,10 @@ export function AuthManager({ children }: PropsWithChildren) {
     {},
     { enabled: false },
   );
-  const { data: me, isPending } = $accounts.useQuery("get", "/users/me");
+  const { data: me, isPending, error } = $accounts.useQuery("get", "/users/me");
+  const isNetworkError =
+    error instanceof TypeError && error.message === "Failed to fetch";
+
   const [_, setStoredMe] = useLocalStorage<accountsTypes.SchemaViewUser | null>(
     "user",
     null,
@@ -42,18 +44,15 @@ export function AuthManager({ children }: PropsWithChildren) {
     !sportToken && me && sportTokenRefetchCount < 2;
 
   useEffect(() => {
-    if (me || !isPending) {
+    if ((me || !isPending) && !(isNetworkError && !me)) {
       setStoredMe(me ?? null);
       if (!me) {
         console.log("[auth] User logged out, removing tokens");
         invalidateMyAccessToken();
         invalidateMySportAccessToken();
-        if (shouldAutoSignIn()) {
-          navigateToSignIn("", "none");
-        }
       }
     }
-  }, [me, isPending, setStoredMe]);
+  }, [me, isPending, isNetworkError, setStoredMe]);
 
   useEffect(() => {
     // Invalidate token if it's expired

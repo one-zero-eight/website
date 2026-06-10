@@ -1,3 +1,4 @@
+import { AutoSignIn } from "@/api/accounts/sign-in.tsx";
 import { BottomNavigation } from "@/components/layout/BottomNavigation.tsx";
 import OfflineNotification from "@/components/layout/Offline.tsx";
 import Sidebar from "@/components/layout/Sidebar.tsx";
@@ -93,6 +94,7 @@ function RouteComponent() {
       </Helmet>
 
       <OfflineNotification />
+      <AutoSignIn />
       <Outlet />
     </>
   );

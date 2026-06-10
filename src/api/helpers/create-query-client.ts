@@ -43,6 +43,23 @@ type ApiQueryError<
   Media extends MediaType,
 > = QueryErrorResponse<ResponseObjectMap<PathMethod>, Media>;
 
+export type ClientError<
+  PathMethod extends Record<string | number, any>,
+  Media extends MediaType,
+> = ApiQueryError<PathMethod, Media> | TypeError;
+
+export function isApiHttpError<
+  PathMethod extends Record<string | number, any>,
+  Media extends MediaType,
+>(error: unknown): error is ApiQueryError<PathMethod, Media> {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "httpCode" in error &&
+    "response" in error
+  );
+}
+
 function createApiQueryError(body: unknown, response: Response) {
   return {
     body,
@@ -51,10 +68,12 @@ function createApiQueryError(body: unknown, response: Response) {
   };
 }
 
-export function formatApiErrorMessage(error: {
-  body?: unknown;
-  httpCode: number;
-}): string {
+export function formatApiErrorMessage(
+  error: TypeError | { body?: unknown; httpCode: number },
+): string {
+  if (error instanceof TypeError) {
+    return `Network Error: ${error.message}`;
+  }
   const detail = (
     error.body as { detail?: unknown } | undefined
   )?.detail?.toString();
@@ -96,7 +115,7 @@ export type QueryOptionsFunction<
   Options extends Omit<
     UseQueryOptions<
       Response["data"],
-      ApiQueryError<Paths[Path][Method], Media>,
+      ClientError<Paths[Path][Method], Media>,
       InferSelectReturnType<Response["data"], Options["select"]>,
       QueryKey<Prefix, Paths, Method, Path>
     >,
@@ -112,7 +131,7 @@ export type QueryOptionsFunction<
   Omit<
     UseQueryOptions<
       Response["data"],
-      ApiQueryError<Paths[Path][Method], Media>,
+      ClientError<Paths[Path][Method], Media>,
       InferSelectReturnType<Response["data"], Options["select"]>,
       QueryKey<Prefix, Paths, Method, Path>
     >,
@@ -121,12 +140,12 @@ export type QueryOptionsFunction<
     queryKey: DataTag<
       QueryKey<Prefix, Paths, Method, Path>,
       Response["data"],
-      ApiQueryError<Paths[Path][Method], Media>
+      ClientError<Paths[Path][Method], Media>
     >;
     queryFn: Exclude<
       UseQueryOptions<
         Response["data"],
-        ApiQueryError<Paths[Path][Method], Media>,
+        ClientError<Paths[Path][Method], Media>,
         InferSelectReturnType<Response["data"], Options["select"]>,
         QueryKey<Prefix, Paths, Method, Path>
       >["queryFn"],
@@ -147,7 +166,7 @@ export type UseQueryMethod<
   Options extends Omit<
     UseQueryOptions<
       Response["data"],
-      ApiQueryError<Paths[Path][Method], Media>,
+      ClientError<Paths[Path][Method], Media>,
       InferSelectReturnType<Response["data"], Options["select"]>,
       QueryKey<Prefix, Paths, Method, Path>
     >,
@@ -161,7 +180,7 @@ export type UseQueryMethod<
     : [InitWithUnknowns<Init>, Options?, QueryClient?]
 ) => UseQueryResult<
   InferSelectReturnType<Response["data"], Options["select"]>,
-  ApiQueryError<Paths[Path][Method], Media>
+  ClientError<Paths[Path][Method], Media>
 >;
 
 export type UseInfiniteQueryMethod<
@@ -176,7 +195,7 @@ export type UseInfiniteQueryMethod<
   Options extends Omit<
     UseInfiniteQueryOptions<
       Response["data"],
-      ApiQueryError<Paths[Path][Method], Media>,
+      ClientError<Paths[Path][Method], Media>,
       InferSelectReturnType<InfiniteData<Response["data"]>, Options["select"]>,
       QueryKey<Prefix, Paths, Method, Path>,
       unknown
@@ -193,7 +212,7 @@ export type UseInfiniteQueryMethod<
   queryClient?: QueryClient,
 ) => UseInfiniteQueryResult<
   InferSelectReturnType<InfiniteData<Response["data"]>, Options["select"]>,
-  ApiQueryError<Paths[Path][Method], Media>
+  ClientError<Paths[Path][Method], Media>
 >;
 
 export type UseSuspenseQueryMethod<
@@ -208,7 +227,7 @@ export type UseSuspenseQueryMethod<
   Options extends Omit<
     UseSuspenseQueryOptions<
       Response["data"],
-      ApiQueryError<Paths[Path][Method], Media>,
+      ClientError<Paths[Path][Method], Media>,
       InferSelectReturnType<Response["data"], Options["select"]>,
       QueryKey<Prefix, Paths, Method, Path>
     >,
@@ -222,7 +241,7 @@ export type UseSuspenseQueryMethod<
     : [InitWithUnknowns<Init>, Options?, QueryClient?]
 ) => UseSuspenseQueryResult<
   InferSelectReturnType<Response["data"], Options["select"]>,
-  ApiQueryError<Paths[Path][Method], Media>
+  ClientError<Paths[Path][Method], Media>
 >;
 
 export type UseMutationMethod<
@@ -240,7 +259,7 @@ export type UseMutationMethod<
   options?: Omit<
     UseMutationOptions<
       Response["data"],
-      ApiQueryError<Paths[Path][Method], Media>,
+      ClientError<Paths[Path][Method], Media>,
       Init,
       TOnMutateResult
     >,
@@ -249,7 +268,7 @@ export type UseMutationMethod<
   queryClient?: QueryClient,
 ) => UseMutationResult<
   Response["data"],
-  ApiQueryError<Paths[Path][Method], Media>,
+  ClientError<Paths[Path][Method], Media>,
   Init,
   TOnMutateResult
 >;

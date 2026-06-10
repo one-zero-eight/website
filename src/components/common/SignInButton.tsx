@@ -1,4 +1,4 @@
-import { navigateToSignIn } from "@/api/accounts/sign-in.ts";
+import { navigateToSignIn } from "@/api/accounts/sign-in.tsx";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { cn } from "@/lib/ui/cn";
 import { forwardRef } from "react";
