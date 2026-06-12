@@ -1,7 +1,7 @@
 // referred to @evermake: https://github.com/evermake/108-website/blob/main/src/pages/about.vue
 import { AboutAsideSection } from "./AboutAsideSection.tsx";
 import { AboutFloatedLogo } from "./AboutFloatedLogo.tsx";
-import { AboutLogoPhrase } from "./AboutInlineLogo108.tsx";
+import { AboutLogoPhrase } from "../icons/InlineLogo108.tsx";
 import { CarouselImage } from "./CarouselImage.tsx";
 import { DepartmentCards } from "./DepartmentCards.tsx";
 import { SectionHeader } from "./SectionHeader.tsx";
