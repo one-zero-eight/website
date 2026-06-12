@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import membersConfig from "@/components/about/members.json";
+import { getTelegramAvatarPath } from "../minio";
 
 export interface TeamMember {
   fullName: string;
@@ -22,9 +23,7 @@ export const useTeamMembers = () => {
           fullName: member.fullName,
           telegram,
           github,
-          avatar: telegram
-            ? `https://storage.innohassle.ru/website-static/about/avatars/${telegram}.webp`
-            : member.avatar,
+          avatar: telegram ? getTelegramAvatarPath(telegram) : member.avatar,
         };
       });
     },

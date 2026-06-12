@@ -1,3 +1,5 @@
+import { getImagePath } from "../minio";
+
 export type AboutCarouselId = "development" | "events" | "team";
 
 const carouselImageNames: Record<AboutCarouselId, string[]> = {
@@ -25,7 +27,5 @@ const carouselImageNames: Record<AboutCarouselId, string[]> = {
 };
 
 export const useCarouselImages = (id: AboutCarouselId) => {
-  const baseUrl = `${import.meta.env.VITE_MINIO_URL}/about/images`;
-
-  return carouselImageNames[id].map((name) => `${baseUrl}/${name}`);
+  return carouselImageNames[id].map((name) => getImagePath(name));
 };
