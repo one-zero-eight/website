@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
 
 interface SectionHeaderProps {
@@ -22,7 +22,7 @@ export const SectionHeader = ({ id, title, className }: SectionHeaderProps) => {
   return (
     <h2
       id={id}
-      className={clsx(
+      className={cn(
         "group clear-both mt-16 mb-3 flex scroll-mt-24 items-center text-start first:mt-0 sm:mt-20",
         "text-3xl font-bold sm:text-4xl",
         className,
@@ -42,7 +42,7 @@ export const SectionHeader = ({ id, title, className }: SectionHeaderProps) => {
           aria-label={`Link to ${title}`}
         >
           <span
-            className={clsx(
+            className={cn(
               "text-xl",
               copied
                 ? "icon-[mdi--check] text-green-500"
