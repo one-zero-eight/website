@@ -259,11 +259,11 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
   };
 
   return (
-    <section className="relative mb-4">
+    <section className="relative -mx-6 mb-4 sm:mx-0">
       <div
         ref={viewportRef}
         className={cn(
-          "rounded-box overflow-x-auto overscroll-x-contain",
+          "sm:rounded-box overflow-x-auto overscroll-x-contain",
           "max-sm:touch-pan-y sm:touch-pan-x",
           "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
           "mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]",
