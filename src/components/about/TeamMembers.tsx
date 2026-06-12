@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import clsx from "clsx";
+import { cn } from "@/lib/ui/cn";
 import { useTeamMembers, type TeamMember } from "./hooks/useTeamMembers";
 import { MemberAvatar } from "./cards/MemberAvatar.tsx";
 
@@ -64,7 +64,7 @@ function TeamMemberCard({
 
   return (
     <div
-      className={clsx(
+      className={cn(
         "animate-in slide-in-from-bottom-4 relative min-w-0",
         memberCardClass,
       )}
@@ -77,7 +77,7 @@ function TeamMemberCard({
       onMouseLeave={onMouseLeave}
     >
       <div
-        className={clsx(
+        className={cn(
           "bg-base-200 absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 shadow-sm transition-all duration-300 ease-in-out",
           isHovered
             ? "border-primary py-4 shadow-xl"
@@ -88,7 +88,7 @@ function TeamMemberCard({
       >
         <div className="flex w-full flex-col items-center justify-center">
           <div
-            className={clsx(
+            className={cn(
               "mb-2 transition-all duration-300",
               isHovered && "scale-110",
             )}
@@ -97,7 +97,7 @@ function TeamMemberCard({
           </div>
           <div className="px-1 text-center">
             <h3
-              className={clsx(
+              className={cn(
                 "line-clamp-2 font-medium transition-all duration-300",
                 isHovered ? "text-sm" : "text-xs",
               )}
@@ -113,7 +113,7 @@ function TeamMemberCard({
         </div>
 
         <div
-          className={clsx(
+          className={cn(
             "grid w-full px-2 transition-all duration-500 ease-in-out",
             isHovered
               ? "mt-3 grid-rows-[1fr] opacity-100"
@@ -245,7 +245,7 @@ export function TeamMembers() {
 
   return (
     <div
-      className={clsx(
+      className={cn(
         "relative clear-both mt-8 mb-8 w-full overflow-visible",
         membersLayoutClass,
       )}
@@ -254,7 +254,7 @@ export function TeamMembers() {
         {leaderRowMembers.length > 0 && (
           <>
             {mainLeader && (
-              <div className={clsx(memberRowClass, "sm:hidden")}>
+              <div className={cn(memberRowClass, "sm:hidden")}>
                 <TeamMemberCard
                   key={mainLeader.fullName}
                   member={mainLeader}
@@ -267,7 +267,7 @@ export function TeamMembers() {
             )}
 
             {otherLeaders.length > 0 && (
-              <div className={clsx(memberRowClass, "sm:hidden")}>
+              <div className={cn(memberRowClass, "sm:hidden")}>
                 {otherLeaders.map((member, index) => (
                   <TeamMemberCard
                     key={member.fullName}
@@ -281,7 +281,7 @@ export function TeamMembers() {
               </div>
             )}
 
-            <div className={clsx(memberRowClass, "hidden sm:flex")}>
+            <div className={cn(memberRowClass, "hidden sm:flex")}>
               {leaderRowMembers.map((member, index) => (
                 <TeamMemberCard
                   key={member.fullName}
