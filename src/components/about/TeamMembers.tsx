@@ -78,13 +78,12 @@ function TeamMemberCard({
     >
       <div
         className={clsx(
-          "dark:bg-base-200 absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 bg-white shadow-sm transition-all duration-300 ease-in-out dark:border",
-          isMainLeader
-            ? "border-primary dark:border-primary"
-            : "dark:border-base-100 border-gray-200",
+          "bg-base-200 absolute top-0 left-0 flex min-h-full w-full flex-col items-center justify-center rounded-lg border-2 shadow-sm transition-all duration-300 ease-in-out",
           isHovered
-            ? "dark:border-primary border-primary border-2 py-4 shadow-xl dark:border"
-            : "py-2 hover:shadow-md",
+            ? "border-primary py-4 shadow-xl"
+            : isMainLeader
+              ? "border-primary"
+              : "border-transparent",
         )}
       >
         <div className="flex w-full flex-col items-center justify-center">
@@ -99,7 +98,7 @@ function TeamMemberCard({
           <div className="px-1 text-center">
             <h3
               className={clsx(
-                "line-clamp-2 font-medium text-gray-900 transition-all duration-300 dark:text-gray-100",
+                "line-clamp-2 font-medium transition-all duration-300",
                 isHovered ? "text-sm" : "text-xs",
               )}
             >
@@ -128,7 +127,7 @@ function TeamMemberCard({
                   href={`https://github.com/${safeDecode(member.github)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="group hover:bg-base-100/50 flex items-center justify-center rounded-md p-1.5 transition-colors"
                   title={`GitHub: @${safeDecode(member.github)}`}
                 >
                   <span className="icon-[mdi--github] text-xl text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100" />
@@ -140,7 +139,7 @@ function TeamMemberCard({
                   href={`https://t.me/${safeDecode(member.telegram)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="group hover:bg-base-100/50 flex items-center justify-center rounded-md p-1.5 transition-colors"
                   title={`Telegram: @${safeDecode(member.telegram)}`}
                 >
                   <span className="icon-[mdi--telegram] text-xl text-blue-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" />

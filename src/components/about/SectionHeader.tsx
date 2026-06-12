@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { useState } from "react";
-import { aboutHeadingClass } from "./aboutConstants.ts";
 
 interface SectionHeaderProps {
   id: string;
@@ -25,7 +24,7 @@ export const SectionHeader = ({ id, title, className }: SectionHeaderProps) => {
       id={id}
       className={clsx(
         "group clear-both mt-16 mb-3 flex scroll-mt-24 items-center text-start first:mt-0 sm:mt-20",
-        aboutHeadingClass,
+        "text-3xl font-bold sm:text-4xl",
         className,
       )}
     >
