@@ -151,7 +151,7 @@ export function AboutPage() {
           <CarouselImage id="development" />
 
           <p>
-            We have 2 Candidate Masters of Sports in product engineering, 2
+            We have 2 Candidate Masters of Sports in competitive programming, 2
             First-Class Rank holders, and 1 Second-Class Rank holder. We have
             won over 1M rubles at hackathons.
           </p>
