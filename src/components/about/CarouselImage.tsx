@@ -9,7 +9,7 @@ const imageClass =
   "h-[200px] w-auto shrink-0 rounded-box object-cover sm:h-[300px]";
 
 const pauseDurationMs = 2500;
-const marqueeSpeedPx = 0.6;
+const marqueeSpeedPxPerSec = 36;
 
 function getSetWidth(track: HTMLElement, setSize: number) {
   const first = track.children[0] as HTMLElement | undefined;
@@ -20,19 +20,20 @@ function getSetWidth(track: HTMLElement, setSize: number) {
   return secondSetStart.offsetLeft - first.offsetLeft;
 }
 
-function normalizeScroll(viewport: HTMLDivElement, setWidth: number) {
-  if (setWidth <= 0) return;
+function normalizeOffset(offset: number, setWidth: number) {
+  if (setWidth <= 0) return offset;
 
-  if (viewport.scrollLeft >= setWidth * 2) {
-    const jumps = Math.floor((viewport.scrollLeft - setWidth) / setWidth);
-    viewport.scrollLeft -= setWidth * jumps;
-    return;
+  if (offset >= setWidth * 2) {
+    const jumps = Math.floor((offset - setWidth) / setWidth);
+    return offset - setWidth * jumps;
   }
 
-  if (viewport.scrollLeft < setWidth) {
-    const jumps = Math.ceil((setWidth - viewport.scrollLeft) / setWidth);
-    viewport.scrollLeft += setWidth * jumps;
+  if (offset < setWidth) {
+    const jumps = Math.ceil((setWidth - offset) / setWidth);
+    return offset + setWidth * jumps;
   }
+
+  return offset;
 }
 
 export function CarouselImage({ id }: { id: AboutCarouselId }) {
@@ -40,26 +41,30 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const setWidthRef = useRef(0);
+  const offsetRef = useRef(0);
   const pausedRef = useRef(false);
   const resumeTimeoutRef = useRef<number>();
-  const scrollEndTimeoutRef = useRef<number>();
+  const interactionEndTimeoutRef = useRef<number>();
   const userInteractingRef = useRef(false);
   const isInitializedRef = useRef(false);
 
   const setSize = carouselImages.length;
   const marqueeImages = useMemo(
     () => [...carouselImages, ...carouselImages, ...carouselImages],
-    [carouselImages],
+    [id, setSize],
   );
-  const showControls = setSize > 1;
+  const showMarquee = setSize > 1;
 
   useEffect(() => {
-    const viewport = viewportRef.current;
     const track = trackRef.current;
-    if (!viewport || !track || !showControls) return;
+    if (!track || !showMarquee) return;
 
     isInitializedRef.current = false;
     setWidthRef.current = 0;
+
+    const applyTransform = () => {
+      track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`;
+    };
 
     const measure = () => {
       const setWidth = getSetWidth(track, setSize);
@@ -69,23 +74,26 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
       return setWidth;
     };
 
-    const initializeScroll = () => {
+    const initializeOffset = () => {
       const setWidth = measure();
       if (setWidth <= 0) return;
 
       if (!isInitializedRef.current) {
-        viewport.scrollLeft = setWidth;
+        offsetRef.current = setWidth;
         isInitializedRef.current = true;
       }
+
+      offsetRef.current = normalizeOffset(offsetRef.current, setWidth);
+      applyTransform();
     };
 
-    initializeScroll();
-    requestAnimationFrame(initializeScroll);
+    initializeOffset();
+    requestAnimationFrame(initializeOffset);
 
     let measureTimeout: number;
     const scheduleMeasure = () => {
       clearTimeout(measureTimeout);
-      measureTimeout = window.setTimeout(initializeScroll, 50);
+      measureTimeout = window.setTimeout(initializeOffset, 50);
     };
 
     const images = track.querySelectorAll("img");
@@ -101,20 +109,25 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
         image.removeEventListener("load", scheduleMeasure);
       }
     };
-  }, [showControls, setSize, id]);
+  }, [showMarquee, setSize, id]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
     const track = trackRef.current;
-    if (!viewport || !track || !showControls) return;
+    if (!viewport || !track || !showMarquee) return;
 
     let frameId = 0;
+    let lastFrameTime = 0;
     const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
     const touchState = {
       startX: 0,
       startY: 0,
-      startScrollLeft: 0,
+      startOffset: 0,
       axis: null as "x" | "y" | null,
+    };
+
+    const applyTransform = () => {
+      track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`;
     };
 
     const pauseTemporarily = () => {
@@ -125,10 +138,24 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
       }, pauseDurationMs);
     };
 
-    const tick = () => {
-      if (!pausedRef.current) {
-        viewport.scrollLeft += marqueeSpeedPx;
-        normalizeScroll(viewport, setWidthRef.current);
+    const updateOffset = (delta: number) => {
+      const setWidth = setWidthRef.current;
+      if (setWidth <= 0) return;
+
+      offsetRef.current = normalizeOffset(offsetRef.current + delta, setWidth);
+      applyTransform();
+    };
+
+    const tick = (time: number) => {
+      if (lastFrameTime === 0) {
+        lastFrameTime = time;
+      }
+
+      const deltaMs = time - lastFrameTime;
+      lastFrameTime = time;
+
+      if (!pausedRef.current && setWidthRef.current > 0) {
+        updateOffset((marqueeSpeedPxPerSec * deltaMs) / 1000);
       }
 
       frameId = requestAnimationFrame(tick);
@@ -147,12 +174,10 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
       event.preventDefault();
       userInteractingRef.current = true;
       pauseTemporarily();
-      viewport.scrollLeft += delta;
-      normalizeScroll(viewport, setWidthRef.current);
+      updateOffset(delta);
 
-      clearTimeout(scrollEndTimeoutRef.current);
-      scrollEndTimeoutRef.current = window.setTimeout(() => {
-        normalizeScroll(viewport, setWidthRef.current);
+      clearTimeout(interactionEndTimeoutRef.current);
+      interactionEndTimeoutRef.current = window.setTimeout(() => {
         userInteractingRef.current = false;
       }, 120);
     };
@@ -170,7 +195,7 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
 
       touchState.startX = touch.clientX;
       touchState.startY = touch.clientY;
-      touchState.startScrollLeft = viewport.scrollLeft;
+      touchState.startOffset = offsetRef.current;
       touchState.axis = null;
       pauseTemporarily();
     };
@@ -192,15 +217,21 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
 
       event.preventDefault();
       userInteractingRef.current = true;
-      viewport.scrollLeft = touchState.startScrollLeft - deltaX;
+
+      const setWidth = setWidthRef.current;
+      if (setWidth <= 0) return;
+
+      offsetRef.current = normalizeOffset(
+        touchState.startOffset - deltaX,
+        setWidth,
+      );
+      applyTransform();
     };
 
     const handleTouchEnd = () => {
       if (touchState.axis === "x") {
-        normalizeScroll(viewport, setWidthRef.current);
-
-        clearTimeout(scrollEndTimeoutRef.current);
-        scrollEndTimeoutRef.current = window.setTimeout(() => {
+        clearTimeout(interactionEndTimeoutRef.current);
+        interactionEndTimeoutRef.current = window.setTimeout(() => {
           userInteractingRef.current = false;
         }, 120);
       }
@@ -208,21 +239,8 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
       touchState.axis = null;
     };
 
-    const handleScroll = () => {
-      if (!userInteractingRef.current) return;
-
-      normalizeScroll(viewport, setWidthRef.current);
-
-      clearTimeout(scrollEndTimeoutRef.current);
-      scrollEndTimeoutRef.current = window.setTimeout(() => {
-        normalizeScroll(viewport, setWidthRef.current);
-        userInteractingRef.current = false;
-      }, 120);
-    };
-
     frameId = requestAnimationFrame(tick);
     viewport.addEventListener("wheel", handleWheel, { passive: false });
-    viewport.addEventListener("scroll", handleScroll, { passive: true });
     viewport.addEventListener("pointerdown", handleUserInteractionStart);
     viewport.addEventListener("touchstart", handleTouchStart, {
       passive: true,
@@ -234,16 +252,15 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
     return () => {
       cancelAnimationFrame(frameId);
       clearTimeout(resumeTimeoutRef.current);
-      clearTimeout(scrollEndTimeoutRef.current);
+      clearTimeout(interactionEndTimeoutRef.current);
       viewport.removeEventListener("wheel", handleWheel);
-      viewport.removeEventListener("scroll", handleScroll);
       viewport.removeEventListener("pointerdown", handleUserInteractionStart);
       viewport.removeEventListener("touchstart", handleTouchStart);
       viewport.removeEventListener("touchmove", handleTouchMove);
       viewport.removeEventListener("touchend", handleTouchEnd);
       viewport.removeEventListener("touchcancel", handleTouchEnd);
     };
-  }, [showControls, setSize, id]);
+  }, [showMarquee, setSize, id]);
 
   if (carouselImages.length === 0) {
     return null;
@@ -263,15 +280,17 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
       <div
         ref={viewportRef}
         className={cn(
-          "sm:rounded-box overflow-x-auto overscroll-x-contain",
-          "max-sm:touch-pan-y sm:touch-pan-x",
-          "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+          "sm:rounded-box overflow-hidden",
+          "max-sm:touch-pan-y",
           "mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]",
         )}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div ref={trackRef} className="flex w-max gap-3 sm:gap-4">
+        <div
+          ref={trackRef}
+          className="flex w-max gap-3 will-change-transform sm:gap-4"
+        >
           {marqueeImages.map((image, index) => (
             <img
               key={`${id}-${index}`}
