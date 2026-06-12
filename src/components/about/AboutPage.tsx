@@ -6,6 +6,7 @@ import { CarouselImage } from "./CarouselImage.tsx";
 import { DepartmentCards } from "./DepartmentCards.tsx";
 import { SectionHeader } from "./SectionHeader.tsx";
 import { TeamMembers } from "./TeamMembers.tsx";
+import { Link } from "@tanstack/react-router";
 
 export function AboutPage() {
   return (
@@ -37,9 +38,9 @@ export function AboutPage() {
           <p>
             We develop projects for Innopolis University students and faculty.
             Our flagship project is{" "}
-            <a href="/" className="link link-hover text-primary">
+            <Link to="/" className="link link-hover text-primary">
               InNoHassle
-            </a>
+            </Link>
             .
           </p>
 
@@ -75,7 +76,7 @@ export function AboutPage() {
                 rel="noopener noreferrer"
               >
                 <span className="icon-[mdi--message-alert-outline] text-xl" />
-                <span className="flex-1 text-center">Report an issue</span>
+                <span className="ml-1">Report an issue</span>
               </a>
             }
           >
@@ -101,7 +102,7 @@ export function AboutPage() {
                   rel="noopener noreferrer"
                 >
                   <span className="icon-[mdi--github] shrink-0 text-xl" />
-                  <span className="flex-1 text-center">Our GitHub</span>
+                  <span className="text-center md:flex-1">Our GitHub</span>
                 </a>
                 <a
                   href="https://github.com/orgs/one-zero-eight/projects/4"
@@ -110,7 +111,7 @@ export function AboutPage() {
                   rel="noopener noreferrer"
                 >
                   <span className="icon-[mdi--view-dashboard-outline] shrink-0 text-xl" />
-                  <span className="flex-1 text-center">Our task board</span>
+                  <span className="text-center md:flex-1">Our task board</span>
                 </a>
                 <a
                   href="https://github.com/one-zero-eight/.github/blob/main/CONTRIBUTING.md"
@@ -119,7 +120,7 @@ export function AboutPage() {
                   rel="noopener noreferrer"
                 >
                   <span className="icon-[mdi--file-document-outline] shrink-0 text-xl" />
-                  <span className="flex-1 text-center">CONTRIBUTING.md</span>
+                  <span className="text-center md:flex-1">CONTRIBUTING.md</span>
                 </a>
               </>
             }
@@ -166,12 +167,16 @@ export function AboutPage() {
 
           <AboutAsideSection
             aside={
-              <a href="/clubs/one-zero-eight" className="btn">
+              <Link
+                to="/clubs/$slug"
+                params={{ slug: "one-zero-eight" }}
+                className="btn"
+              >
                 <span className="icon-[mdi--school-outline] text-xl" />
                 <span className="inline-flex items-center whitespace-nowrap">
                   108 club
                 </span>
-              </a>
+              </Link>
             }
           >
             <p>
