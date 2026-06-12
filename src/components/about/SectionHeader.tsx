@@ -38,7 +38,7 @@ export const SectionHeader = ({ id, title, className }: SectionHeaderProps) => {
         <a
           href={`#${id}`}
           onClick={handleCopy}
-          className="absolute left-full ml-2 cursor-pointer text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+          className="hover:text-base-content/50 absolute left-full ml-2 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100"
           aria-label={`Link to ${title}`}
         >
           <span
