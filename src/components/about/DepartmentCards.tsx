@@ -7,13 +7,11 @@ export function DepartmentCards() {
       {departments.map((department) => (
         <div
           key={department.title}
-          className="dark:bg-base-200 dark:border-base-100 flex flex-col items-center rounded-lg border-2 border-gray-200 bg-white px-4 py-8 text-center shadow-sm dark:border"
+          className="bg-base-200 flex flex-col items-center rounded-lg px-4 py-8 text-center shadow-sm"
         >
           <span className={cn(department.icon, "text-primary text-5xl")} />
-          <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {department.title}
-          </h3>
-          <p className="mt-2 text-base leading-relaxed text-gray-600 dark:text-gray-400">
+          <h3 className="mt-4 text-lg font-semibold">{department.title}</h3>
+          <p className="text-base-content/70 mt-2 text-base leading-relaxed">
             {department.description}
           </p>
         </div>
