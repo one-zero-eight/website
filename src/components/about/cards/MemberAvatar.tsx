@@ -1,3 +1,4 @@
+import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
 import { type TeamMember } from "../hooks/useTeamMembers.ts";
 
@@ -48,7 +49,11 @@ export const MemberAvatar = ({
 
   return (
     <div
-      className={`relative flex ${className} items-center justify-center overflow-hidden rounded-full font-semibold text-white ${getRandomColor(member.fullName)}`}
+      className={cn(
+        "relative flex items-center justify-center overflow-hidden rounded-full font-semibold text-white",
+        className,
+        getRandomColor(member.fullName),
+      )}
     >
       <span className="text-xs">{getInitials(member.fullName)}</span>
       {member.avatar && !imageError && (
