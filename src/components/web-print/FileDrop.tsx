@@ -232,7 +232,7 @@ export function FileDrop({
             download={downloadFileName}
             className={`${styles.button} ${marginStyles.bottomMargin_doubleMainPadding} ${fontStyles.buttonFont}`}
           >
-            Download
+            Download result
           </a>
         )}
       </div>

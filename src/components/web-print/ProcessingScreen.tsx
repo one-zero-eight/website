@@ -57,73 +57,77 @@ export function ProcessingScreen({
           {((configurationType && screenSwitch) ||
             scanningInProgressTransfer) && (
             <span
-              className={`icon-[material-symbols--progress-activity] ${styles.backgroundIcon} ${styles.rotationAnimation}`}
+              className={`icon-[material-symbols--progress-activity] ${styles.backgroundIcon} ${styles.backgroundIcon_dimmed} ${styles.rotationAnimation}`}
             ></span>
           )}
-          {!configurationType && !scanningInProgressTransfer && (
-            <div className={`${styles.scanButtonsBox}`}>
-              <button
-                className={styles.scanButton}
-                onClick={() => {
-                  setOneMoreScanTransfer(true);
-                }}
-              >
-                <div className={styles.iconSquare}>
-                  <span
-                    className={`icon-[material-symbols--text-select-move-forward-word-rounded] ${styles.backgroundIcon}`}
-                  ></span>
+          <div
+            className={`${styles.configurationBox__scrollPart} ${styles.configurationBox__scrollPart_unpadded} ${((configurationType && screenSwitch) || scanningInProgressTransfer) && styles.configurationBox__scrollPart_fit}`}
+          >
+            {!configurationType && !scanningInProgressTransfer && (
+              <div className={`${styles.scanButtonsBox}`}>
+                <button
+                  className={styles.scanButton}
+                  onClick={() => {
+                    setOneMoreScanTransfer(true);
+                  }}
+                >
+                  <div className={styles.iconSquare}>
+                    <span
+                      className={`icon-[material-symbols--text-select-move-forward-word-rounded] ${styles.backgroundIcon}`}
+                    ></span>
+                  </div>
+                  <p className={fontStyles.formPointFont}>Scan one more page</p>
+                </button>
+                <button
+                  className={styles.scanButton}
+                  onClick={async () => {
+                    await getFile(await prepareFile(preparedFile!, true), true);
+                  }}
+                >
+                  <div className={styles.iconSquare}>
+                    <span
+                      className={`icon-[material-symbols--ink-eraser-rounded] ${styles.backgroundIcon}`}
+                    ></span>
+                  </div>
+                  <p className={fontStyles.formPointFont}>
+                    Remove the last page
+                  </p>
+                </button>
+                <div className={styles.scanButton}>
+                  <div className={styles.iconSquare}>
+                    <span
+                      className={`icon-[material-symbols--label-rounded] ${styles.backgroundIcon}`}
+                    ></span>
+                  </div>
+                  <ScalableDocumentNameInput
+                    defaultValue={downloadFileName}
+                    onTyped={setDownloadFileName}
+                  />
                 </div>
-                <p className={fontStyles.formPointFont}>Scan one more page</p>
-              </button>
-              <button
-                className={styles.scanButton}
-                onClick={async () => {
-                  await getFile(await prepareFile(preparedFile!, true), true);
-                }}
-              >
-                <div className={styles.iconSquare}>
-                  <span
-                    className={`icon-[material-symbols--ink-eraser-rounded] ${styles.backgroundIcon}`}
-                  ></span>
-                </div>
-                <p className={fontStyles.formPointFont}>Remove the last page</p>
-              </button>
-              <div className={styles.scanButton}>
-                <div className={styles.iconSquare}>
-                  <span
-                    className={`icon-[material-symbols--label-rounded] ${styles.backgroundIcon}`}
-                  ></span>
-                </div>
-                <ScalableDocumentNameInput
-                  defaultValue={downloadFileName}
-                  onTyped={setDownloadFileName}
-                />
               </div>
-            </div>
-          )}
-          <div className={marginStyles.paddingObject}>
-            <button
-              className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${scanningInProgressTransfer && styles.button_inactive}`}
-              onClick={async () => {
-                if (!configurationType)
-                  try {
-                    await deleteScanFileFromTheServer({
-                      params: { query: { filename: preparedFile!.name } },
-                    });
-                    // for instant print
-                    await prepareFile(preparedFile!, false);
-                  } catch {
-                    console.log(
-                      "[web-print] Fail to delete the scan from the servers",
-                    );
-                  }
-                setScreenSwitch(false);
-                stopJobsRef.current = true;
-              }}
-            >
-              {configurationType ? "Cancel" : "Finish"}
-            </button>
+            )}
           </div>
+          <button
+            className={`${styles.button} ${fontStyles.buttonFont} ${marginStyles.bottomMargin_doubleMainPadding} ${scanningInProgressTransfer && styles.button_inactive}`}
+            onClick={async () => {
+              if (!configurationType)
+                try {
+                  await deleteScanFileFromTheServer({
+                    params: { query: { filename: preparedFile!.name } },
+                  });
+                  // for instant print
+                  await prepareFile(preparedFile!, false);
+                } catch {
+                  console.log(
+                    "[web-print] Fail to delete the scan from the servers",
+                  );
+                }
+              setScreenSwitch(false);
+              stopJobsRef.current = true;
+            }}
+          >
+            {configurationType ? "Cancel" : "Finish"}
+          </button>
         </div>
       </div>
     </div>
