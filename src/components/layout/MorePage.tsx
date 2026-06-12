@@ -62,6 +62,18 @@ export function MorePage() {
           ) : null,
         )}
 
+      <div className="my-2">
+        <Link
+          to="/about"
+          activeProps={{ className: "is-active" }}
+          className="hover:bg-base-300 flex rounded-xl px-4 py-2 transition-colors"
+        >
+          <span className="in-[.is-active]:selected in-[.is-active]:text-primary text-base-content/50 flex w-fit items-center text-base font-normal whitespace-nowrap in-[.is-active]:font-medium">
+            About us
+          </span>
+        </Link>
+      </div>
+
       <LeaveFeedbackButton isMorePage={true} />
     </div>
   );
