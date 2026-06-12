@@ -121,7 +121,7 @@ export function ConfigurationScreen({
         />
 
         <div
-          className={`${printInProgressTransfer || scannerInProgressTransfer ? styles.buttonWithRightCaptionContainer_block : styles.buttonWithRightCaptionContainer} ${marginStyles.paddingObject}`}
+          className={`${printInProgressTransfer || scannerInProgressTransfer ? styles.buttonWithRightCaptionContainer_block : styles.buttonWithRightCaptionContainer}`}
         >
           {!startButtonPosition && configurationType ? (
             <>
@@ -144,7 +144,7 @@ export function ConfigurationScreen({
           ) : !startButtonPosition ? (
             <>
               <button
-                className={`${styles.button} ${fontStyles.buttonFont} ${scannerInProgressTransfer && styles.button_inactive} ${styles.button_center}`}
+                className={`${styles.button} ${fontStyles.buttonFont} ${scannerInProgressTransfer && styles.button_inactive} ${styles.button_center} ${marginStyles.bottomMargin_doubleMainPadding}`}
                 onClick={() => {
                   setScanStartTrigger(true);
                 }}

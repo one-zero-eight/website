@@ -14,11 +14,7 @@
   margin-bottom: var(--main-padding);
 }
 
-.paddingObject {
-  padding-bottom: var(--main-padding);
-}
-
-@container ordinary-screen (height < 650px) and (width < 750px) {
+@container ordinary-screen (height < 650px) or (width < 750px) {
   .bottomMargin_doubleMainPadding {
     margin-bottom: 0;
   }

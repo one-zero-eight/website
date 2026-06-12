@@ -261,9 +261,7 @@ export function PrintJobStartAndWait({
 
   return (
     <>
-      <div
-        className={`${styles.configurationBox__scrollPart} ${styles.configurationBox__scrollPart_60} ${rootStyles}`}
-      >
+      <div className={`${styles.configurationBox__scrollPart} ${rootStyles}`}>
         <div className={styles.scrollPart__elem}>
           <p className={fontStyles.formPointFont}>Printer</p>
           <IconValueStatusSelect

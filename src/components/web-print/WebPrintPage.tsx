@@ -130,7 +130,7 @@ export function WebPrintPage() {
   return (
     <>
       <div
-        className={`${themeStyles.webPrintPage} ${styles.noXOverflowFrame_full}`}
+        className={`${themeStyles.webPrintPage} ${styles.noOverflowFrame_full}`}
       >
         <DoubleScreenContainer
           className={screenSwitch && styles.doubleScreenContainer_moved}
