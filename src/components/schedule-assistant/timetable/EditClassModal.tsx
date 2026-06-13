@@ -12,8 +12,10 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   applyMeetingEditsToCourse,
+  getWeeklySlotFromMeeting,
   meetingInstructorsLabel,
   meetingOriginalValues,
+  meetingPatternBaseValues,
   parseMeetingInstanceId,
   timeOptionsForConfig,
   weekdayOptionsForConfig,
@@ -21,7 +23,8 @@ import {
   type MeetingFieldEdits,
   type MeetingOriginalValues,
 } from "./meetingEditUtils.ts";
-import type { Meeting } from "./timetableViewerModel.ts";
+import { MeetingOverrideIndicator } from "./meetingOverrideIndicator.tsx";
+import type { Meeting, MeetingOverrideField } from "./timetableViewerModel.ts";
 
 const SCOPE_OPTIONS: { value: EditClassScope; label: string }[] = [
   { value: "single", label: "Только это занятие" },
@@ -89,11 +92,15 @@ function EditClassField({
   label,
   changed,
   originalLabel,
+  overridden,
+  patternLabel,
   children,
 }: {
   label: string;
   changed: boolean;
   originalLabel: string;
+  overridden?: boolean;
+  patternLabel?: string;
   children: ReactNode;
 }) {
   return (
@@ -101,12 +108,15 @@ function EditClassField({
       className={clsx(
         "flex flex-col gap-1 rounded-lg",
         changed && "bg-warning/10 ring-warning/40 px-2 py-1.5 ring-2",
+        !changed && overridden && "bg-info/10 ring-info/40 px-2 py-1.5 ring-2",
       )}
     >
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium">{label}</span>
         {changed ? (
           <span className="badge badge-warning badge-sm">изменено</span>
+        ) : overridden ? (
+          <span className="badge badge-info badge-sm">переопр.</span>
         ) : (
           <span className="text-base-content/50 text-xs">без изменений</span>
         )}
@@ -114,6 +124,11 @@ function EditClassField({
       {changed ? (
         <div className="text-base-content/60 text-xs">
           Было: {originalLabel}
+        </div>
+      ) : null}
+      {!changed && overridden && patternLabel ? (
+        <div className="text-base-content/60 text-xs">
+          В шаблоне: {patternLabel}
         </div>
       ) : null}
       {children}
@@ -221,6 +236,15 @@ export function EditClassModal({
     }
     return items;
   }, [config.instructors, meeting?.instructors]);
+
+  const patternBase = useMemo(() => {
+    if (!meeting) return null;
+    const slot = getWeeklySlotFromMeeting(courses, meeting);
+    if (!slot) return null;
+    return meetingPatternBaseValues(slot);
+  }, [courses, meeting]);
+
+  const overrideFields = meeting?.override_fields;
 
   useEffect(() => {
     if (!open || !meeting || !originals) return;
@@ -342,6 +366,42 @@ export function EditClassModal({
   );
   const canSave = hasMeetingEdits(fieldEdits);
 
+  function isFieldOverridden(field: MeetingOverrideField) {
+    return overrideFields?.includes(field) ?? false;
+  }
+
+  function patternRoomLabel() {
+    if (!patternBase) return "";
+    return patternBase.room || "—";
+  }
+
+  function patternTimeLabel() {
+    if (!patternBase) return "";
+    return (
+      timeOptions.find((slot) => slot.value === patternBase.time)?.label ||
+      patternBase.time ||
+      "—"
+    );
+  }
+
+  function patternWeekdayLabel() {
+    if (!patternBase) return "";
+    return (
+      weekdayOptions.find((day) => day.key === patternBase.weekday)?.label ||
+      patternBase.weekday
+    );
+  }
+
+  function patternInstructorLabel() {
+    if (!patternBase) return "";
+    return (
+      instructorOptions.find((item) => item.id === patternBase.instructor)
+        ?.label ||
+      patternBase.instructor ||
+      "—"
+    );
+  }
+
   return (
     <Modal
       open={open}
@@ -355,7 +415,10 @@ export function EditClassModal({
     >
       <div className="flex flex-col gap-3">
         <div className="rounded-box border-base-300 bg-base-100 border px-3 py-2 text-sm">
-          <div className="font-medium">{title}</div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="font-medium">{title}</div>
+            <MeetingOverrideIndicator fields={overrideFields} />
+          </div>
           <div className="text-base-content/70 mt-1">
             {meeting.date} {meeting.start}
             {meeting.room ? ` · ${meeting.room}` : ""}
@@ -368,6 +431,8 @@ export function EditClassModal({
             label="Аудитория"
             changed={roomChanged}
             originalLabel={originalRoomLabel}
+            overridden={isFieldOverridden("room")}
+            patternLabel={patternRoomLabel()}
           >
             <EditClassDropdown
               value={roomValue}
@@ -385,6 +450,8 @@ export function EditClassModal({
             label="Время"
             changed={timeChanged}
             originalLabel={originalTimeLabel}
+            overridden={isFieldOverridden("time")}
+            patternLabel={patternTimeLabel()}
           >
             <EditClassDropdown
               value={timeValue}
@@ -402,6 +469,8 @@ export function EditClassModal({
             label="День недели"
             changed={weekdayChanged}
             originalLabel={originalWeekdayLabel}
+            overridden={isFieldOverridden("weekday")}
+            patternLabel={patternWeekdayLabel()}
           >
             <EditClassDropdown
               value={weekdayValue}
@@ -419,6 +488,8 @@ export function EditClassModal({
             label="Преподаватель"
             changed={instructorChanged}
             originalLabel={originalInstructorLabel}
+            overridden={isFieldOverridden("instructor")}
+            patternLabel={patternInstructorLabel()}
           >
             <EditClassDropdown
               value={instructorValue}

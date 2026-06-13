@@ -516,3 +516,32 @@ export function timeOptionsForConfig(config: SchemaScheduleConfig) {
 export function currentMeetingWeekday(meeting: Meeting): TermWeekdayKey {
   return dayKey(meeting.date) as TermWeekdayKey;
 }
+
+export function getWeeklySlotFromMeeting(
+  courses: SchemaCourseConfig[] | undefined,
+  meeting: Meeting,
+): SchemaWeeklyPatternSlot | null {
+  const ref = parseMeetingInstanceId(meeting.instance_id);
+  if (!ref || ref.kind !== "wp") return null;
+  const course = courses?.find((item) => item.name === meeting.course);
+  if (!course) return null;
+  const component = course.components?.[ref.componentIdx];
+  const series = component?.sessions?.[ref.seriesIdx];
+  const slot = series?.weekly_pattern?.[ref.slotIdx];
+  return slot ?? null;
+}
+
+export function meetingPatternBaseValues(
+  slot: SchemaWeeklyPatternSlot,
+): MeetingOriginalValues {
+  const weekday = weeklyPatternDayKey(String(slot.weekday));
+  const instructor = Array.isArray(slot.instructor)
+    ? slot.instructor[0]
+    : slot.instructor;
+  return {
+    room: String(slot.room ?? "").trim(),
+    time: String(slot.start_time).slice(0, 5),
+    weekday: (weekday || "Mon") as TermWeekdayKey,
+    instructor: String(instructor ?? "").trim(),
+  };
+}

@@ -16,6 +16,7 @@ import {
   scheduleAssistantDetailTooltips,
   workloadHistogramHtml,
 } from "./timetableViewerModel.ts";
+import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
 
 export type DetailPanelState = {
   detailTitle: string;
@@ -206,8 +207,18 @@ export function computeDetailPanel(input: {
             {m.tag})
           </div>
           <div className="text-[#243957]">
-            <b className="font-bold text-[#243957]">дата и время:</b> {m.date}{" "}
-            {m.start}
+            <b className="font-bold text-[#243957]">дата и время:</b>{" "}
+            <span className="inline-flex flex-wrap items-center gap-1">
+              {m.date} {m.start}
+              <MeetingOverrideFieldBadge
+                field="weekday"
+                fields={m.override_fields}
+              />
+              <MeetingOverrideFieldBadge
+                field="time"
+                fields={m.override_fields}
+              />
+            </span>
           </div>
           <div className="text-[#243957]">
             <b className="font-bold text-[#243957]">группы:</b>{" "}
@@ -215,15 +226,27 @@ export function computeDetailPanel(input: {
           </div>
           <div className="text-[#4f5c6d]">
             <b className="font-bold text-[#243957]">аудитория:</b>{" "}
-            <DetailRoomLoad
-              m={m}
-              roomCapacityById={roomCapacityById}
-              groupSizeById={groupSizeById}
-            />
+            <span className="inline-flex flex-wrap items-center gap-1">
+              <DetailRoomLoad
+                m={m}
+                roomCapacityById={roomCapacityById}
+                groupSizeById={groupSizeById}
+              />
+              <MeetingOverrideFieldBadge
+                field="room"
+                fields={m.override_fields}
+              />
+            </span>
           </div>
           <div className="text-[#4f5c6d]">
             <b className="font-bold text-[#243957]">преподаватель:</b>{" "}
-            <DetailInstructorLinks instructors={m.instructors} />
+            <span className="inline-flex flex-wrap items-center gap-1">
+              <DetailInstructorLinks instructors={m.instructors} />
+              <MeetingOverrideFieldBadge
+                field="instructor"
+                fields={m.override_fields}
+              />
+            </span>
           </div>
         </DetailRow>,
       );
@@ -287,16 +310,37 @@ export function computeDetailPanel(input: {
                 <b>
                   {m.date} {m.start}
                 </b>{" "}
+                <MeetingOverrideFieldBadge
+                  field="weekday"
+                  fields={m.override_fields}
+                />
+                <MeetingOverrideFieldBadge
+                  field="time"
+                  fields={m.override_fields}
+                />{" "}
                 - <DetailGroupLinks groups={m.groups || []} />
               </div>
               <div className="ml-3 text-[#4f5c6d]">
-                ауд.{" "}
-                <DetailRoomLoad
-                  m={m}
-                  roomCapacityById={roomCapacityById}
-                  groupSizeById={groupSizeById}
-                />{" "}
-                | препод. <DetailInstructorLinks instructors={m.instructors} />
+                <span className="inline-flex flex-wrap items-center gap-1">
+                  ауд.{" "}
+                  <DetailRoomLoad
+                    m={m}
+                    roomCapacityById={roomCapacityById}
+                    groupSizeById={groupSizeById}
+                  />
+                  <MeetingOverrideFieldBadge
+                    field="room"
+                    fields={m.override_fields}
+                  />
+                </span>{" "}
+                |{" "}
+                <span className="inline-flex flex-wrap items-center gap-1">
+                  препод. <DetailInstructorLinks instructors={m.instructors} />
+                  <MeetingOverrideFieldBadge
+                    field="instructor"
+                    fields={m.override_fields}
+                  />
+                </span>
               </div>
             </DetailRow>,
           );

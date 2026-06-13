@@ -18,6 +18,7 @@ import {
 } from "react";
 
 import { EditClassModal } from "./EditClassModal.tsx";
+import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
 import { computeDetailPanel } from "./scheduleAssistantDetailPanel.tsx";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
@@ -181,6 +182,8 @@ function meetingCardPropsEqual(
     pm.room !== nm.room ||
     pm.start !== nm.start ||
     pm.date !== nm.date ||
+    (pm.override_fields?.join("\0") ?? "") !==
+      (nm.override_fields?.join("\0") ?? "") ||
     ((typeof pm.instructors === "string"
       ? [pm.instructors]
       : pm.instructors
@@ -1388,7 +1391,16 @@ const MeetingCard = memo(function MeetingCard({
         className="subject line-clamp-3 min-w-0 text-[0.8125rem] leading-[1.08] font-bold [overflow-wrap:anywhere] text-[#1a2332]"
         title={`${courseTitle} (${m.tag})${count > 1 ? ` x${count}` : ""}`}
       >
-        {courseTitle} ({m.tag}){count > 1 ? ` x${count}` : ""}
+        <span className="inline-flex max-w-full flex-wrap items-center gap-1">
+          <span className="min-w-0">
+            {courseTitle} ({m.tag}){count > 1 ? ` x${count}` : ""}
+          </span>
+          <MeetingOverrideFieldBadge
+            field="weekday"
+            fields={m.override_fields}
+          />
+          <MeetingOverrideFieldBadge field="time" fields={m.override_fields} />
+        </span>
       </div>
       <div className="min-h-0 flex-1" />
       <div
@@ -1398,27 +1410,37 @@ const MeetingCard = memo(function MeetingCard({
           : m.instructors
         ).join(" / ")}
       >
-        {(typeof m.instructors === "string" ? [m.instructors] : m.instructors)
-          .length
-          ? (typeof m.instructors === "string"
+        <span className="inline-flex max-w-full items-center gap-1">
+          <span className="min-w-0 truncate">
+            {(typeof m.instructors === "string"
               ? [m.instructors]
               : m.instructors
-            ).map((name, idx) => (
-              <span key={name}>
-                <span
-                  className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
-                  title={scheduleAssistantDetailTooltips.instructor}
-                  onClick={(ev) => {
-                    ev.stopPropagation();
-                    selectInstructorCell(name);
-                  }}
-                >
-                  {name}
-                </span>
-                {idx < (m.instructors?.length ?? 0) - 1 ? " / " : null}
-              </span>
-            ))
-          : "-"}
+            ).length
+              ? (typeof m.instructors === "string"
+                  ? [m.instructors]
+                  : m.instructors
+                ).map((name, idx) => (
+                  <span key={name}>
+                    <span
+                      className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
+                      title={scheduleAssistantDetailTooltips.instructor}
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        selectInstructorCell(name);
+                      }}
+                    >
+                      {name}
+                    </span>
+                    {idx < (m.instructors?.length ?? 0) - 1 ? " / " : null}
+                  </span>
+                ))
+              : "-"}
+          </span>
+          <MeetingOverrideFieldBadge
+            field="instructor"
+            fields={m.override_fields}
+          />
+        </span>
       </div>
       <div
         className={clsx(
@@ -1427,20 +1449,23 @@ const MeetingCard = memo(function MeetingCard({
         )}
         title={roomLoadLabel}
       >
-        {roomIdTrim ? (
-          <span
-            className={clsx(roomClickableClass, "inline")}
-            title={scheduleAssistantDetailTooltips.room}
-            onClick={(ev) => {
-              ev.stopPropagation();
-              selectRoomCell(m.room);
-            }}
-          >
-            {roomLoadLabel}
-          </span>
-        ) : (
-          roomLoadLabel
-        )}
+        <span className="inline-flex max-w-full items-center gap-1">
+          {roomIdTrim ? (
+            <span
+              className={clsx(roomClickableClass, "inline min-w-0 truncate")}
+              title={scheduleAssistantDetailTooltips.room}
+              onClick={(ev) => {
+                ev.stopPropagation();
+                selectRoomCell(m.room);
+              }}
+            >
+              {roomLoadLabel}
+            </span>
+          ) : (
+            <span className="min-w-0 truncate">{roomLoadLabel}</span>
+          )}
+          <MeetingOverrideFieldBadge field="room" fields={m.override_fields} />
+        </span>
       </div>
     </div>
   );

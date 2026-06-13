@@ -43,6 +43,8 @@ export const scheduleAssistantDetailTooltips = {
   resource: "Показать в панели деталей",
 } as const;
 
+export type MeetingOverrideField = "room" | "time" | "weekday" | "instructor";
+
 export type Meeting = {
   instance_id: string;
   course: string;
@@ -55,6 +57,10 @@ export type Meeting = {
   /** Copied from component; used in detail panel. */
   instructor_pool: unknown[];
   sections: string[];
+  /** Canonical weekly-pattern date before edit.date override. */
+  pattern_date?: string;
+  /** Fields that differ from the recurring weekly pattern base. */
+  override_fields?: MeetingOverrideField[];
 };
 
 export type Column = {
@@ -169,6 +175,57 @@ export function findEditForMeetingDate(
   return edits.find(
     (edit) => weekStartForDate(edit.select_week, startingDay) === weekKey,
   );
+}
+
+function instructorKey(value: string | string[] | null | undefined) {
+  const list = typeof value === "string" ? [value] : value || [];
+  return list
+    .map((item) => String(item).trim())
+    .filter(Boolean)
+    .join("\0");
+}
+
+function dateOnly(value: string | null | undefined) {
+  return String(value || "").slice(0, 10);
+}
+
+function timeKey(value: string | null | undefined) {
+  return String(value || "")
+    .trim()
+    .slice(0, 5);
+}
+
+export function weeklyMeetingOverrideFields(
+  slot: SchemaWeeklyPatternSlot,
+  patternDate: string,
+  config: SchemaScheduleConfig,
+): MeetingOverrideField[] {
+  const resolved = resolveWeeklyMeetingFields(slot, patternDate, config);
+  if (resolved.cancelled) return [];
+
+  const fields: MeetingOverrideField[] = [];
+  const baseStart = timeKey(slot.start_time);
+  const baseRoom = String(slot.room ?? "").trim();
+  const baseInstructor = instructorKey(slot.instructor);
+
+  const resolvedStart = timeKey(resolved.start);
+  const resolvedRoom = String(resolved.room ?? "").trim();
+  const resolvedInstructor = instructorKey(resolved.instructors);
+
+  if (dateOnly(resolved.date) !== dateOnly(patternDate)) {
+    fields.push("weekday");
+  }
+  if (resolvedStart !== baseStart) {
+    fields.push("time");
+  }
+  if (resolvedRoom !== baseRoom) {
+    fields.push("room");
+  }
+  if (resolvedInstructor !== baseInstructor) {
+    fields.push("instructor");
+  }
+
+  return fields;
 }
 
 export function resolveWeeklyMeetingFields(
@@ -561,6 +618,11 @@ export function buildMeetings(
             for (const date of semesterDatesForWeekday(config, weekday)) {
               const resolved = resolveWeeklyMeetingFields(slot, date, config);
               if (resolved.cancelled) continue;
+              const overrideFields = weeklyMeetingOverrideFields(
+                slot,
+                date,
+                config,
+              );
               flat.push({
                 instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
                 course: course.name,
@@ -572,6 +634,10 @@ export function buildMeetings(
                 instructors: resolved.instructors,
                 instructor_pool: component.instructor_pool,
                 sections: coursesToSections[courseIdx] ?? [],
+                pattern_date: date,
+                override_fields: overrideFields.length
+                  ? overrideFields
+                  : undefined,
               });
             }
           }
