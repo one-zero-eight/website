@@ -1,4 +1,3 @@
-import { cn } from "@/lib/ui/cn";
 import { useEffect, useMemo, useRef } from "react";
 import {
   useCarouselImages,
@@ -43,15 +42,15 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
   const setWidthRef = useRef(0);
   const offsetRef = useRef(0);
   const pausedRef = useRef(false);
-  const resumeTimeoutRef = useRef<number>();
-  const interactionEndTimeoutRef = useRef<number>();
+  const resumeTimeoutRef = useRef<number | undefined>(undefined);
+  const interactionEndTimeoutRef = useRef<number | undefined>(undefined);
   const userInteractingRef = useRef(false);
   const isInitializedRef = useRef(false);
 
   const setSize = carouselImages.length;
   const marqueeImages = useMemo(
     () => [...carouselImages, ...carouselImages, ...carouselImages],
-    [id, setSize],
+    [carouselImages],
   );
   const showMarquee = setSize > 1;
 
@@ -277,33 +276,33 @@ export function CarouselImage({ id }: { id: AboutCarouselId }) {
 
   return (
     <section className="relative -mx-6 mb-4 sm:mx-0">
-      <div
-        ref={viewportRef}
-        className={cn(
-          "sm:rounded-box overflow-hidden",
-          "max-sm:touch-pan-y",
-          "mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]",
-        )}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
+      <div className="sm:rounded-box relative overflow-hidden">
         <div
-          ref={trackRef}
-          className="flex w-max gap-3 will-change-transform sm:gap-4"
+          ref={viewportRef}
+          className="overflow-hidden max-sm:touch-pan-y"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
-          {marqueeImages.map((image, index) => (
-            <img
-              key={`${id}-${index}`}
-              data-carousel-item
-              src={image}
-              alt={`Community photo ${(index % setSize) + 1}`}
-              className={imageClass}
-              loading="lazy"
-              draggable={false}
-              onError={(e) => (e.currentTarget.style.display = "none")}
-            />
-          ))}
+          <div
+            ref={trackRef}
+            className="flex w-max gap-3 will-change-transform sm:gap-4"
+          >
+            {marqueeImages.map((image, index) => (
+              <img
+                key={`${id}-${index}`}
+                data-carousel-item
+                src={image}
+                alt={`Community photo ${(index % setSize) + 1}`}
+                className={imageClass}
+                loading="lazy"
+                draggable={false}
+                onError={(e) => (e.currentTarget.style.display = "none")}
+              />
+            ))}
+          </div>
         </div>
+        <div className="dark:from-base-100 pointer-events-none absolute inset-y-0 left-0 w-10 bg-linear-to-r from-black to-transparent sm:w-16" />
+        <div className="dark:from-base-100 pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-black to-transparent sm:w-16" />
       </div>
     </section>
   );

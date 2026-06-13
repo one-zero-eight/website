@@ -235,15 +235,20 @@ export function AboutPage() {
 
           <AboutAsideSection
             aside={
-              <a
-                href="https://t.me/one_zero_eight_bot"
-                className={aboutActionButtonClass}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="icon-[mdi--robot-excited-outline] text-xl" />
-                <span>Join us</span>
-              </a>
+              <div className="flex w-full flex-col items-center gap-2">
+                <a
+                  href="https://t.me/one_zero_eight_bot"
+                  className={aboutActionButtonClass}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="icon-[mdi--robot-excited-outline] text-xl" />
+                  <span>Join us</span>
+                </a>
+                <span className="text-base-content text-sm font-medium">
+                  Meow!
+                </span>
+              </div>
             }
           >
             <p>
