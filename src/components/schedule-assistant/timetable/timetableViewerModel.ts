@@ -1,5 +1,10 @@
 /** Port of schedule-assistant-viewer.html script (same behavior). */
-import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import type {
+  SchemaScheduleConfig,
+  SchemaWeeklyPatternSlot,
+  SchemaWeeklyPatternSlotEdit,
+} from "@/api/schedule-assistant/types.ts";
+import { Weekday } from "@/api/schedule-assistant/types.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import {
   expandStudentGroupSelectors,
@@ -129,6 +134,80 @@ function formatLocalDate(d: Date) {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+const WEEKDAY_TO_JS_INDEX: Record<Weekday, number> = {
+  [Weekday.MONDAY]: 0,
+  [Weekday.TUESDAY]: 1,
+  [Weekday.WEDNESDAY]: 2,
+  [Weekday.THURSDAY]: 3,
+  [Weekday.FRIDAY]: 4,
+  [Weekday.SATURDAY]: 5,
+  [Weekday.SUNDAY]: 6,
+};
+
+export function weekStartForDate(
+  dateStr: string,
+  startingDay: Weekday = Weekday.MONDAY,
+) {
+  const dt = new Date(`${dateStr}T00:00:00`);
+  const startIdx = WEEKDAY_TO_JS_INDEX[startingDay] ?? 0;
+  const dayIdx = (dt.getDay() + 6) % 7;
+  const diff = (dayIdx - startIdx + 7) % 7;
+  const result = new Date(dt);
+  result.setDate(dt.getDate() - diff);
+  return formatLocalDate(result);
+}
+
+export function findEditForMeetingDate(
+  date: string,
+  edits: SchemaWeeklyPatternSlotEdit[] | null | undefined,
+  startingDay: Weekday,
+) {
+  if (!edits?.length) return undefined;
+  const weekKey = weekStartForDate(date, startingDay);
+  return edits.find(
+    (edit) => weekStartForDate(edit.select_week, startingDay) === weekKey,
+  );
+}
+
+export function resolveWeeklyMeetingFields(
+  slot: SchemaWeeklyPatternSlot,
+  date: string,
+  config: SchemaScheduleConfig,
+) {
+  const startingDay = config.term.starting_day ?? Weekday.MONDAY;
+  const edit = findEditForMeetingDate(date, slot.edits, startingDay);
+  if (edit?.cancel) {
+    return {
+      date,
+      start: String(slot.start_time).slice(0, 5),
+      room: slot.room ?? "",
+      instructors: slot.instructor ?? "",
+      cancelled: true,
+    };
+  }
+
+  const resolvedDate = edit?.date ?? date;
+  const resolvedStart = edit?.start_time
+    ? String(edit.start_time).slice(0, 5)
+    : String(slot.start_time).slice(0, 5);
+  const resolvedRoom =
+    edit?.room !== undefined && edit?.room !== null
+      ? edit.room
+      : (slot.room ?? "");
+  const resolvedInstructor =
+    edit?.instructor !== undefined && edit?.instructor !== null
+      ? edit.instructor
+      : (slot.instructor ?? "");
+
+  return {
+    date: resolvedDate,
+    start: resolvedStart,
+    room: resolvedRoom || "",
+    instructors: resolvedInstructor,
+    cancelled: false,
+  };
 }
 
 export function weekStartMondayIso(dateStr: string) {
@@ -480,15 +559,17 @@ export function buildMeetings(
             const weekday = weeklyPatternDayKey(String(slot.weekday ?? ""));
             if (!weekday) continue;
             for (const date of semesterDatesForWeekday(config, weekday)) {
+              const resolved = resolveWeeklyMeetingFields(slot, date, config);
+              if (resolved.cancelled) continue;
               flat.push({
                 instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
                 course: course.name,
                 tag: component.tag,
                 groups: audienceGroups,
-                date,
-                start: String(slot.start_time).slice(0, 5),
-                room: slot.room ?? "",
-                instructors: slot.instructor ?? "",
+                date: resolved.date,
+                start: resolved.start,
+                room: resolved.room,
+                instructors: resolved.instructors,
                 instructor_pool: component.instructor_pool,
                 sections: coursesToSections[courseIdx] ?? [],
               });

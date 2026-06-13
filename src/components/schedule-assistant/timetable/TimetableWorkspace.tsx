@@ -17,7 +17,9 @@ import {
   useSyncExternalStore,
 } from "react";
 
+import { EditClassModal } from "./EditClassModal.tsx";
 import { computeDetailPanel } from "./scheduleAssistantDetailPanel.tsx";
+import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
   type BuiltGrid,
   type Column,
@@ -259,6 +261,7 @@ function TimetableWorkspaceInner() {
     setActiveTab((current) =>
       validTabs.has(current) ? current : (sectionCodes[0] as InnerTab),
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config?.term?.sections]);
 
   useEffect(() => {
@@ -486,7 +489,7 @@ function TimetableWorkspaceInner() {
               </div>
             ) : null}
 
-            <div className="schedule-assistant-toolbar relative z-30 flex shrink-0 flex-wrap items-center gap-2 px-2 py-1.5 text-sm">
+            <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 px-2 py-1.5 text-sm">
               <div className="join shrink-0">
                 <button
                   type="button"
@@ -564,7 +567,7 @@ function TimetableWorkspaceInner() {
           </div>
 
           <aside
-            className="detail border-base-300 bg-base-100 rounded-box z-0 mt-4 mr-4 mb-4 ml-3 flex min-h-0 w-[360px] shrink-0 flex-col self-stretch overflow-y-auto border p-3 max-[1200px]:m-0 max-[1200px]:mt-2 max-[1200px]:min-h-0 max-[1200px]:w-full max-[1200px]:flex-1"
+            className="detail border-base-300 bg-base-100 rounded-box mt-4 mr-4 mb-4 ml-3 flex min-h-0 w-[360px] shrink-0 flex-col self-stretch overflow-y-auto border p-3 max-[1200px]:m-0 max-[1200px]:mt-2 max-[1200px]:min-h-0 max-[1200px]:w-full max-[1200px]:flex-1"
             id="detail"
           >
             <TimetableDetailPanel
@@ -626,7 +629,7 @@ function TimetableTabSelector({
         <span className="truncate">{currentLabel}</span>
         <span className="icon-[material-symbols--expand-more] shrink-0 text-base" />
       </summary>
-      <ul className="dropdown-content border-base-300 bg-base-100 rounded-box z-40 mt-1 w-[12rem] border p-1 shadow-sm">
+      <ul className="dropdown-content border-base-300 bg-base-100 rounded-box mt-1 w-[12rem] border p-1 shadow-sm">
         {options.map((option, i) => (
           <li key={i}>
             <button
@@ -761,6 +764,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   const selection = useSelectionSnapshot();
   const selectionStore = useSelectionStore();
   const deferredSelection = useDeferredValue(selection);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const detail = useMemo(
     () =>
       computeDetailPanel({
@@ -819,6 +823,20 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
     [selectionStore],
   );
 
+  const selectedMeeting = useMemo(() => {
+    if (deferredSelection?.type !== "meeting") return null;
+    return (
+      allMeetings.find(
+        (meeting) => meeting.instance_id === deferredSelection.value,
+      ) ?? null
+    );
+  }, [allMeetings, deferredSelection]);
+
+  const canEditSelectedMeeting = useMemo(() => {
+    if (!selectedMeeting) return false;
+    return !!parseMeetingInstanceId(selectedMeeting.instance_id);
+  }, [selectedMeeting]);
+
   return (
     <>
       <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -828,14 +846,27 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
         >
           {detail.detailTitle}
         </div>
-        <button
-          className="btn btn-outline btn-xs shrink-0"
-          id="clearSelectionBtn"
-          type="button"
-          onClick={clearSelection}
-        >
-          Сбросить
-        </button>
+        {!editModalOpen ? (
+          <div className="flex shrink-0 items-center gap-1">
+            {canEditSelectedMeeting ? (
+              <button
+                className="btn btn-primary btn-xs"
+                type="button"
+                onClick={() => setEditModalOpen(true)}
+              >
+                Редактировать
+              </button>
+            ) : null}
+            <button
+              className="btn btn-outline btn-xs shrink-0"
+              id="clearSelectionBtn"
+              type="button"
+              onClick={clearSelection}
+            >
+              Сбросить
+            </button>
+          </div>
+        ) : null}
       </div>
       <div
         className="detail-summary mb-2 min-h-4 text-[0.8125rem] text-[#4f5c6d]"
@@ -863,6 +894,12 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
       >
         {detail.listContent}
       </div>
+      <EditClassModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        meeting={selectedMeeting}
+        config={config}
+      />
     </>
   );
 }, timetableDetailPanelPropsEqual);
