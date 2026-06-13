@@ -54,6 +54,11 @@ import {
   roomFillPercent,
   scheduleAssistantDetailTooltips,
   buildCoursesToSections,
+  todayIsoDate,
+  weekIndexForDate,
+  WEEK_RELATIVE_LABELS,
+  weekRelativeToToday,
+  type WeekRelativePosition,
 } from "./timetableViewerModel.ts";
 
 type InnerTab = "instructor" | "room" | string;
@@ -250,6 +255,7 @@ function TimetableWorkspaceInner() {
     startScrollLeft: number;
     startScrollTop: number;
   } | null>(null);
+  const activeWeekStartRef = useRef<string | null>(null);
 
   const selectionStore = useMemo(() => createSelectionStore(), []);
 
@@ -276,11 +282,16 @@ function TimetableWorkspaceInner() {
   }, [config?.term?.sections]);
 
   useEffect(() => {
+    activeWeekStartRef.current = weeks[weekIndex]?.start ?? null;
+  }, [weeks, weekIndex]);
+
+  useEffect(() => {
     if (!config || !coursesToSections) {
       setAllMeetings([]);
       setColumns([]);
       setWeeks([]);
       setWeekIndex(0);
+      activeWeekStartRef.current = null;
       setMsg("");
       return;
     }
@@ -302,8 +313,22 @@ function TimetableWorkspaceInner() {
       setCourseColors(buildCourseColors(meetings));
       selectionStore.setSelection(null);
       setColumns(cols);
-      setWeeks(buildWeeks(meetings));
-      setWeekIndex(0);
+      const nextWeeks = buildWeeks(meetings);
+      setWeeks(nextWeeks);
+      setWeekIndex((currentIndex) => {
+        const preservedStart = activeWeekStartRef.current;
+        if (preservedStart) {
+          const preservedIndex = nextWeeks.findIndex(
+            (week) => week.start === preservedStart,
+          );
+          if (preservedIndex >= 0) return preservedIndex;
+        }
+        if (!nextWeeks.length) return 0;
+        if (!preservedStart) {
+          return weekIndexForDate(nextWeeks, todayIsoDate());
+        }
+        return Math.min(currentIndex, nextWeeks.length - 1);
+      });
       setMsg("");
     } catch (e: unknown) {
       setMsg(String((e as Error)?.message || e));
@@ -488,6 +513,14 @@ function TimetableWorkspaceInner() {
   const weekLabel = !weeks.length
     ? "Нет недель"
     : `Нед. ${weekIndex + 1}/${weeks.length}: ${weeks[weekIndex]!.start} — ${weeks[weekIndex]!.end}`;
+  const weekRelative: WeekRelativePosition | null = weeks[weekIndex]
+    ? weekRelativeToToday(weeks[weekIndex]!)
+    : null;
+  const weekRelativeBadgeClass: Record<WeekRelativePosition, string> = {
+    current: "badge-success",
+    past: "border-[#7f1d1d] bg-[#7f1d1d] text-white",
+    future: "badge-info",
+  };
 
   return (
     <SelectionStoreContext.Provider value={selectionStore}>
@@ -501,37 +534,48 @@ function TimetableWorkspaceInner() {
             ) : null}
 
             <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 px-2 py-1.5 text-sm">
-              <div className="join shrink-0">
-                <button
-                  type="button"
-                  className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                  title="Предыдущая неделя"
-                  disabled={weekIndex <= 0 || !weeks.length}
-                  onClick={() => {
-                    if (weekIndex > 0) setWeekIndex((i) => i - 1);
-                  }}
-                >
-                  ‹
-                </button>
-                <span
-                  className="join-item btn btn-xs btn-ghost no-animation text-base-content flex min-h-8 max-w-[min(100vw-8rem,20rem)] min-w-[10.5rem] cursor-default items-center justify-center px-2 text-center text-sm font-normal normal-case"
-                  role="status"
-                  aria-live="polite"
-                >
-                  {weekLabel}
-                </span>
-                <button
-                  type="button"
-                  className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                  title="Следующая неделя"
-                  disabled={weekIndex >= weeks.length - 1 || !weeks.length}
-                  onClick={() => {
-                    if (weekIndex < weeks.length - 1)
-                      setWeekIndex((i) => i + 1);
-                  }}
-                >
-                  ›
-                </button>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <div className="join">
+                  <button
+                    type="button"
+                    className="btn btn-xs join-item min-h-8 min-w-8 px-0"
+                    title="Предыдущая неделя"
+                    disabled={weekIndex <= 0 || !weeks.length}
+                    onClick={() => {
+                      if (weekIndex > 0) setWeekIndex((i) => i - 1);
+                    }}
+                  >
+                    ‹
+                  </button>
+                  <span
+                    className="join-item btn btn-xs btn-ghost no-animation text-base-content inline-flex h-auto min-h-8 max-w-[min(100vw-8rem,28rem)] min-w-[10.5rem] cursor-default items-center justify-center px-2 py-1 text-center text-sm leading-tight font-normal whitespace-nowrap normal-case"
+                    role="status"
+                  >
+                    {weekLabel}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-xs join-item min-h-8 min-w-8 px-0"
+                    title="Следующая неделя"
+                    disabled={weekIndex >= weeks.length - 1 || !weeks.length}
+                    onClick={() => {
+                      if (weekIndex < weeks.length - 1)
+                        setWeekIndex((i) => i + 1);
+                    }}
+                  >
+                    ›
+                  </button>
+                </div>
+                {weekRelative ? (
+                  <span
+                    className={clsx(
+                      "badge badge-xs shrink-0",
+                      weekRelativeBadgeClass[weekRelative],
+                    )}
+                  >
+                    {WEEK_RELATIVE_LABELS[weekRelative]} неделя
+                  </span>
+                ) : null}
               </div>
               <TimetableTabSelector
                 config={config}

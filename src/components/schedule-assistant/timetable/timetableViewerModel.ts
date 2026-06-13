@@ -788,6 +788,54 @@ export function buildWeeks(meetings: Meeting[]) {
     }));
 }
 
+export function todayIsoDate() {
+  return formatLocalDate(new Date());
+}
+
+export function weekIndexForDate(weeks: WeekRange[], dateStr: string) {
+  if (!weeks.length) return 0;
+  const date = String(dateStr).slice(0, 10);
+
+  const containingIndex = weeks.findIndex(
+    (week) => date >= week.start && date <= week.end,
+  );
+  if (containingIndex >= 0) return containingIndex;
+
+  const weekStart = weekStartMondayIso(date);
+  const weekStartIndex = weeks.findIndex((week) => week.start === weekStart);
+  if (weekStartIndex >= 0) return weekStartIndex;
+
+  if (date < weeks[0]!.start) return 0;
+
+  const lastIndex = weeks.length - 1;
+  if (date > weeks[lastIndex]!.end) return lastIndex;
+
+  let bestIndex = 0;
+  for (let i = 0; i < weeks.length; i++) {
+    if (weeks[i]!.start <= date) bestIndex = i;
+    else break;
+  }
+  return bestIndex;
+}
+
+export type WeekRelativePosition = "current" | "past" | "future";
+
+export const WEEK_RELATIVE_LABELS: Record<WeekRelativePosition, string> = {
+  current: "текущая",
+  past: "прошлая",
+  future: "будущая",
+};
+
+export function weekRelativeToToday(
+  week: WeekRange,
+  dateStr: string = todayIsoDate(),
+): WeekRelativePosition {
+  const date = String(dateStr).slice(0, 10);
+  if (date >= week.start && date <= week.end) return "current";
+  if (date < week.start) return "future";
+  return "past";
+}
+
 export function buildGrid(
   config: SchemaScheduleConfig,
   allMeetings: Meeting[],
