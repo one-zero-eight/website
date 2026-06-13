@@ -1,9 +1,13 @@
 import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import clsx from "clsx";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   getScheduleSections,
   useConfig,
+  useCoursesQuery,
+  useUpdateCourseMutation,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
+import { useToast } from "@/components/toast";
 import {
   createContext,
   memo,
@@ -19,8 +23,12 @@ import {
 
 import { EditClassModal } from "./EditClassModal.tsx";
 import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
+import {
+  canRestoreMeeting,
+  parseMeetingInstanceId,
+  restoreMeetingInCourse,
+} from "./meetingEditUtils.ts";
 import { computeDetailPanel } from "./scheduleAssistantDetailPanel.tsx";
-import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
   type BuiltGrid,
   type Column,
@@ -768,6 +776,56 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   const selectionStore = useSelectionStore();
   const deferredSelection = useDeferredValue(selection);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [restoringMeetingId, setRestoringMeetingId] = useState<string | null>(
+    null,
+  );
+  const { data: courses } = useCoursesQuery();
+  const { mutate: updateCourse, isPending: isRestorePending } =
+    useUpdateCourseMutation();
+  const { showError, showSuccess } = useToast();
+
+  const handleRestoreMeeting = useCallback(
+    (meeting: Meeting) => {
+      if (!canRestoreMeeting(meeting) || !courses) return;
+      const meetingRef = parseMeetingInstanceId(meeting.instance_id);
+      if (!meetingRef || meetingRef.kind !== "wp") return;
+
+      const course = courses.find((item) => item.name === meeting.course);
+      if (!course) {
+        showError("Ошибка", "Курс не найден в конфигурации.");
+        return;
+      }
+
+      const updatedCourse = restoreMeetingInCourse(course, meetingRef, config);
+      if (!updatedCourse) {
+        showError("Ошибка", "Не удалось восстановить занятие.");
+        return;
+      }
+
+      setRestoringMeetingId(meeting.instance_id);
+      updateCourse(
+        {
+          params: { path: { course_name: course.name } },
+          body: updatedCourse,
+        },
+        {
+          onSuccess: () => {
+            showSuccess(
+              "Восстановлено",
+              "Занятие снова добавлено в расписание.",
+            );
+            setRestoringMeetingId(null);
+          },
+          onError: (error) => {
+            showError("Ошибка восстановления", formatApiErrorMessage(error));
+            setRestoringMeetingId(null);
+          },
+        },
+      );
+    },
+    [config, courses, showError, showSuccess, updateCourse],
+  );
+
   const detail = useMemo(
     () =>
       computeDetailPanel({
@@ -779,6 +837,8 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
         groupSizeById,
         weeks,
         weekIndex,
+        onRestoreMeeting: handleRestoreMeeting,
+        restoringMeetingId: isRestorePending ? restoringMeetingId : null,
       }),
     [
       deferredSelection,
@@ -789,6 +849,9 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
       groupSizeById,
       weeks,
       weekIndex,
+      handleRestoreMeeting,
+      isRestorePending,
+      restoringMeetingId,
     ],
   );
 

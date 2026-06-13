@@ -61,6 +61,8 @@ export type Meeting = {
   pattern_date?: string;
   /** Fields that differ from the recurring weekly pattern base. */
   override_fields?: MeetingOverrideField[];
+  /** Weekly-pattern occurrence cancelled via edit.cancel. */
+  cancelled?: boolean;
 };
 
 export type Column = {
@@ -617,7 +619,23 @@ export function buildMeetings(
             if (!weekday) continue;
             for (const date of semesterDatesForWeekday(config, weekday)) {
               const resolved = resolveWeeklyMeetingFields(slot, date, config);
-              if (resolved.cancelled) continue;
+              if (resolved.cancelled) {
+                flat.push({
+                  instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
+                  course: course.name,
+                  tag: component.tag,
+                  groups: audienceGroups,
+                  date: resolved.date,
+                  start: resolved.start,
+                  room: resolved.room,
+                  instructors: resolved.instructors,
+                  instructor_pool: component.instructor_pool,
+                  sections: coursesToSections[courseIdx] ?? [],
+                  pattern_date: date,
+                  cancelled: true,
+                });
+                continue;
+              }
               const overrideFields = weeklyMeetingOverrideFields(
                 slot,
                 date,
@@ -778,6 +796,7 @@ export function buildGrid(
 ): BuiltGrid {
   const meetings = filterMeetingsByTab(allMeetings, tabMode, config).filter(
     (m) => {
+      if (m.cancelled) return false;
       return weekStartMondayIso(m.date) === weekStart;
     },
   );
@@ -929,6 +948,7 @@ export function filterMeetingsToCurrentWeek(
   const wk = weeks[weekIndex];
   if (!wk) return [];
   return (meetings || []).filter((m) => {
+    if (m.cancelled) return false;
     return weekStartMondayIso(m.date) === wk.start;
   });
 }

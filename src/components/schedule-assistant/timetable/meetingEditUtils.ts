@@ -450,6 +450,63 @@ export function applyMeetingEditsToCourse(
   return nextCourse;
 }
 
+function weeklyEditHasOnlyCancel(edit: SchemaWeeklyPatternSlotEdit) {
+  return (
+    edit.cancel &&
+    !edit.date &&
+    !edit.start_time &&
+    !edit.room &&
+    (edit.instructor === undefined || edit.instructor === null)
+  );
+}
+
+function restoreWeeklySingleCancel(
+  slot: SchemaWeeklyPatternSlot,
+  meetingDate: string,
+  startingDay: Weekday,
+) {
+  const edits = slot.edits || [];
+  const idx = edits.findIndex(
+    (edit) =>
+      weekStartForDate(edit.select_week, startingDay) ===
+      weekStartForDate(meetingDate, startingDay),
+  );
+  if (idx < 0) return false;
+
+  const edit = edits[idx]!;
+  if (!edit.cancel) return false;
+
+  if (weeklyEditHasOnlyCancel(edit)) {
+    slot.edits = edits.filter((_, itemIdx) => itemIdx !== idx);
+  } else {
+    slot.edits = edits.map((item, itemIdx) =>
+      itemIdx === idx ? { ...item, cancel: false } : item,
+    );
+  }
+  return true;
+}
+
+export function canRestoreMeeting(meeting: Meeting) {
+  if (!meeting.cancelled) return false;
+  const ref = parseMeetingInstanceId(meeting.instance_id);
+  return ref?.kind === "wp";
+}
+
+export function restoreMeetingInCourse(
+  course: SchemaCourseConfig,
+  ref: Extract<MeetingRef, { kind: "wp" }>,
+  config: SchemaScheduleConfig,
+): SchemaCourseConfig | null {
+  const nextCourse = structuredClone(course);
+  const startingDay = config.term.starting_day ?? Weekday.MONDAY;
+  const ctx = getWeeklySlotContext(nextCourse, ref);
+  if (!ctx) return null;
+
+  const restored = restoreWeeklySingleCancel(ctx.slot, ref.date, startingDay);
+  if (!restored) return null;
+  return nextCourse;
+}
+
 export function applyMeetingEditToCourse(
   course: SchemaCourseConfig,
   ref: MeetingRef,
