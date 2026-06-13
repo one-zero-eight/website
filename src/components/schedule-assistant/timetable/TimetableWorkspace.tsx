@@ -22,6 +22,11 @@ import {
 } from "react";
 
 import { EditClassModal } from "./EditClassModal.tsx";
+import { TimetableCalendarTable } from "./TimetableCalendarTable.tsx";
+import {
+  TimetableLayoutSelector,
+  type TimetableLayoutMode,
+} from "./TimetableLayoutSelector.tsx";
 import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
 import {
   canRestoreMeeting,
@@ -29,6 +34,7 @@ import {
   restoreMeetingInCourse,
 } from "./meetingEditUtils.ts";
 import { computeDetailPanel } from "./scheduleAssistantDetailPanel.tsx";
+import { buildCalendarGrid } from "./timetableCalendarModel.ts";
 import {
   type BuiltGrid,
   type Column,
@@ -57,6 +63,7 @@ import {
   todayIsoDate,
   weekIndexForDate,
   WEEK_RELATIVE_LABELS,
+  WEEK_RELATIVE_BADGE_CLASS,
   weekRelativeToToday,
   type WeekRelativePosition,
 } from "./timetableViewerModel.ts";
@@ -241,6 +248,7 @@ function TimetableWorkspaceInner() {
     Record<string, { bg: string; border: string }>
   >({});
   const [activeTab, setActiveTab] = useState<InnerTab>("core");
+  const [layoutMode, setLayoutMode] = useState<TimetableLayoutMode>("groups");
   const [roomCapacityById, setRoomCapacityById] = useState<
     Record<string, number>
   >({});
@@ -280,6 +288,14 @@ function TimetableWorkspaceInner() {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config?.term?.sections]);
+
+  const isUtilizationTab = activeTab === "instructor" || activeTab === "room";
+
+  useEffect(() => {
+    if (isUtilizationTab && layoutMode === "calendar") {
+      setLayoutMode("groups");
+    }
+  }, [isUtilizationTab, layoutMode]);
 
   useEffect(() => {
     activeWeekStartRef.current = weeks[weekIndex]?.start ?? null;
@@ -416,6 +432,19 @@ function TimetableWorkspaceInner() {
     return buildGrid(config, allMeetings, wk.start, activeTab);
   }, [config, allMeetings, weeks, weekIndex, activeTab]);
 
+  const calendarGrid = useMemo(() => {
+    if (!config || !allMeetings.length || !weeks.length) return null;
+    return buildCalendarGrid(config, allMeetings, weeks, activeTab);
+  }, [config, allMeetings, weeks, activeTab]);
+
+  useEffect(() => {
+    if (layoutMode !== "calendar" || !calendarGrid) return;
+    const currentWeekRow = gridWrapRef.current?.querySelector(
+      "[data-current-week]",
+    );
+    currentWeekRow?.scrollIntoView({ block: "start" });
+  }, [layoutMode, calendarGrid]);
+
   const applyTabChange = useCallback(
     (nextTab: InnerTab) => {
       setActiveTab(nextTab);
@@ -516,11 +545,7 @@ function TimetableWorkspaceInner() {
   const weekRelative: WeekRelativePosition | null = weeks[weekIndex]
     ? weekRelativeToToday(weeks[weekIndex]!)
     : null;
-  const weekRelativeBadgeClass: Record<WeekRelativePosition, string> = {
-    current: "badge-success",
-    past: "border-[#7f1d1d] bg-[#7f1d1d] text-white",
-    future: "badge-info",
-  };
+  const weekRelativeBadgeClass = WEEK_RELATIVE_BADGE_CLASS;
 
   return (
     <SelectionStoreContext.Provider value={selectionStore}>
@@ -534,54 +559,63 @@ function TimetableWorkspaceInner() {
             ) : null}
 
             <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 px-2 py-1.5 text-sm">
-              <div className="flex shrink-0 items-center gap-1.5">
-                <div className="join">
-                  <button
-                    type="button"
-                    className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                    title="Предыдущая неделя"
-                    disabled={weekIndex <= 0 || !weeks.length}
-                    onClick={() => {
-                      if (weekIndex > 0) setWeekIndex((i) => i - 1);
-                    }}
-                  >
-                    ‹
-                  </button>
-                  <span
-                    className="join-item btn btn-xs btn-ghost no-animation text-base-content inline-flex h-auto min-h-8 max-w-[min(100vw-8rem,28rem)] min-w-[10.5rem] cursor-default items-center justify-center px-2 py-1 text-center text-sm leading-tight font-normal whitespace-nowrap normal-case"
-                    role="status"
-                  >
-                    {weekLabel}
-                  </span>
-                  <button
-                    type="button"
-                    className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                    title="Следующая неделя"
-                    disabled={weekIndex >= weeks.length - 1 || !weeks.length}
-                    onClick={() => {
-                      if (weekIndex < weeks.length - 1)
-                        setWeekIndex((i) => i + 1);
-                    }}
-                  >
-                    ›
-                  </button>
+              {layoutMode === "groups" ? (
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <div className="join">
+                    <button
+                      type="button"
+                      className="btn btn-xs join-item min-h-8 min-w-8 px-0"
+                      title="Предыдущая неделя"
+                      disabled={weekIndex <= 0 || !weeks.length}
+                      onClick={() => {
+                        if (weekIndex > 0) setWeekIndex((i) => i - 1);
+                      }}
+                    >
+                      ‹
+                    </button>
+                    <span
+                      className="join-item btn btn-xs btn-ghost no-animation text-base-content inline-flex h-auto min-h-8 max-w-[min(100vw-8rem,28rem)] min-w-[10.5rem] cursor-default items-center justify-center px-2 py-1 text-center text-sm leading-tight font-normal whitespace-nowrap normal-case"
+                      role="status"
+                    >
+                      {weekLabel}
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn-xs join-item min-h-8 min-w-8 px-0"
+                      title="Следующая неделя"
+                      disabled={weekIndex >= weeks.length - 1 || !weeks.length}
+                      onClick={() => {
+                        if (weekIndex < weeks.length - 1)
+                          setWeekIndex((i) => i + 1);
+                      }}
+                    >
+                      ›
+                    </button>
+                  </div>
+                  {weekRelative ? (
+                    <span
+                      className={clsx(
+                        "badge badge-xs shrink-0",
+                        weekRelativeBadgeClass[weekRelative],
+                      )}
+                    >
+                      {WEEK_RELATIVE_LABELS[weekRelative]} неделя
+                    </span>
+                  ) : null}
                 </div>
-                {weekRelative ? (
-                  <span
-                    className={clsx(
-                      "badge badge-xs shrink-0",
-                      weekRelativeBadgeClass[weekRelative],
-                    )}
-                  >
-                    {WEEK_RELATIVE_LABELS[weekRelative]} неделя
-                  </span>
-                ) : null}
+              ) : null}
+              <div className="ml-auto flex shrink-0 items-center gap-2">
+                <TimetableLayoutSelector
+                  layoutMode={layoutMode}
+                  onLayoutModeChange={setLayoutMode}
+                  calendarDisabled={isUtilizationTab}
+                />
+                <TimetableTabSelector
+                  config={config}
+                  activeTab={activeTab}
+                  onTabChange={applyTabChange}
+                />
               </div>
-              <TimetableTabSelector
-                config={config}
-                activeTab={activeTab}
-                onTabChange={applyTabChange}
-              />
             </div>
 
             <div
@@ -596,27 +630,27 @@ function TimetableWorkspaceInner() {
                   isMiddleDragScrolling ? "cursor-grabbing" : "cursor-auto",
                 )}
               >
-                {grid && columns.length ? (
-                  <TimetableTable
-                    key={activeTab}
-                    tabMode={activeTab}
-                    grid={grid}
-                    columns={columns}
-                    allMeetings={allMeetings}
-                    config={config}
-                    courseColors={courseColors}
-                    roomCapacityById={roomCapacityById}
-                    groupSizeById={groupSizeById}
-                    selectMeeting={selectMeeting}
-                    selectInstructorCell={selectInstructorCell}
-                    selectRoomCell={selectRoomCell}
-                    selectInstructorHeader={selectInstructorHeader}
-                    selectRoomHeader={selectRoomHeader}
-                    selectProgram={selectProgram}
-                    selectGroup={selectGroup}
-                    clearSelection={clearSelection}
-                  />
-                ) : null}
+                <TimetableMainGrid
+                  layoutMode={layoutMode}
+                  isUtilizationTab={isUtilizationTab}
+                  calendarGrid={calendarGrid}
+                  grid={grid}
+                  columns={columns}
+                  activeTab={activeTab}
+                  allMeetings={allMeetings}
+                  config={config}
+                  courseColors={courseColors}
+                  roomCapacityById={roomCapacityById}
+                  groupSizeById={groupSizeById}
+                  selectMeeting={selectMeeting}
+                  selectInstructorCell={selectInstructorCell}
+                  selectRoomCell={selectRoomCell}
+                  selectInstructorHeader={selectInstructorHeader}
+                  selectRoomHeader={selectRoomHeader}
+                  selectProgram={selectProgram}
+                  selectGroup={selectGroup}
+                  clearSelection={clearSelection}
+                />
               </div>
             </div>
           </div>
@@ -644,6 +678,86 @@ function TimetableWorkspaceInner() {
 
 export function TimetableWorkspace() {
   return <TimetableWorkspaceInner />;
+}
+
+function TimetableMainGrid({
+  layoutMode,
+  isUtilizationTab,
+  calendarGrid,
+  grid,
+  columns,
+  activeTab,
+  allMeetings,
+  config,
+  courseColors,
+  roomCapacityById,
+  groupSizeById,
+  selectMeeting,
+  selectInstructorCell,
+  selectRoomCell,
+  selectInstructorHeader,
+  selectRoomHeader,
+  selectProgram,
+  selectGroup,
+  clearSelection,
+}: {
+  layoutMode: TimetableLayoutMode;
+  isUtilizationTab: boolean;
+  calendarGrid: ReturnType<typeof buildCalendarGrid>;
+  grid: BuiltGrid | null;
+  columns: Column[];
+  activeTab: InnerTab;
+  allMeetings: Meeting[];
+  config: SchemaScheduleConfig;
+  courseColors: Record<string, { bg: string; border: string }>;
+  roomCapacityById: Record<string, number>;
+  groupSizeById: Record<string, number | null | undefined>;
+  selectMeeting: (valueKey: string, course: string) => void;
+  selectInstructorCell: (name: string) => void;
+  selectRoomCell: (room: string) => void;
+  selectInstructorHeader: (name: string) => void;
+  selectRoomHeader: (room: string) => void;
+  selectProgram: (yearLabel: string) => void;
+  selectGroup: (groupId: string) => void;
+  clearSelection: () => void;
+}) {
+  const selection = useSelectionSnapshot();
+
+  if (layoutMode === "calendar" && !isUtilizationTab) {
+    if (!calendarGrid) return null;
+    return (
+      <TimetableCalendarTable
+        calendarGrid={calendarGrid}
+        selection={selection}
+        selectMeeting={selectMeeting}
+        clearSelection={clearSelection}
+      />
+    );
+  }
+
+  if (!grid || !columns.length) return null;
+
+  return (
+    <TimetableTable
+      key={activeTab}
+      tabMode={activeTab}
+      grid={grid}
+      columns={columns}
+      allMeetings={allMeetings}
+      config={config}
+      courseColors={courseColors}
+      roomCapacityById={roomCapacityById}
+      groupSizeById={groupSizeById}
+      selectMeeting={selectMeeting}
+      selectInstructorCell={selectInstructorCell}
+      selectRoomCell={selectRoomCell}
+      selectInstructorHeader={selectInstructorHeader}
+      selectRoomHeader={selectRoomHeader}
+      selectProgram={selectProgram}
+      selectGroup={selectGroup}
+      clearSelection={clearSelection}
+    />
+  );
 }
 
 function TimetableTabSelector({
@@ -676,10 +790,7 @@ function TimetableTabSelector({
   }
 
   return (
-    <details
-      ref={detailsRef}
-      className="dropdown dropdown-end shrink-0 sm:ml-auto"
-    >
+    <details ref={detailsRef} className="dropdown dropdown-end shrink-0">
       <summary className="select select-bordered select-xs flex h-8 min-h-8 w-[10.5rem] cursor-pointer list-none items-center justify-between px-3 text-sm font-normal [&::-webkit-details-marker]:hidden">
         <span className="truncate">{currentLabel}</span>
         <span className="icon-[material-symbols--expand-more] shrink-0 text-base" />

@@ -826,6 +826,12 @@ export const WEEK_RELATIVE_LABELS: Record<WeekRelativePosition, string> = {
   future: "будущая",
 };
 
+export const WEEK_RELATIVE_BADGE_CLASS: Record<WeekRelativePosition, string> = {
+  current: "badge-success",
+  past: "badge-error",
+  future: "badge-info",
+};
+
 export function weekRelativeToToday(
   week: WeekRange,
   dateStr: string = todayIsoDate(),
