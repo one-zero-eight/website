@@ -7,6 +7,11 @@ import { DepartmentCards } from "./DepartmentCards.tsx";
 import { SectionHeader } from "./SectionHeader.tsx";
 import { TeamMembers } from "./TeamMembers.tsx";
 import { Link } from "@tanstack/react-router";
+import { cn } from "@/lib/ui/cn";
+
+const aboutActionButtonClass =
+  "bg-base-200 hover:bg-base-300 rounded-box flex items-center justify-center gap-2 px-5 py-3 text-base font-semibold text-base-content transition-colors";
+const aboutDevelopmentButtonClass = cn(aboutActionButtonClass, "md:!w-64");
 
 export function AboutPage() {
   return (
@@ -71,12 +76,12 @@ export function AboutPage() {
             aside={
               <a
                 href="https://forms.gle/2vMmu4vSoVShvbMw6"
-                className="btn"
+                className={aboutActionButtonClass}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <span className="icon-[mdi--message-alert-outline] text-xl" />
-                <span className="ml-1">Report an issue</span>
+                <span>Report an issue</span>
               </a>
             }
           >
@@ -97,30 +102,30 @@ export function AboutPage() {
               <>
                 <a
                   href="https://github.com/one-zero-eight"
-                  className="btn"
+                  className={aboutDevelopmentButtonClass}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span className="icon-[mdi--github] shrink-0 text-xl" />
-                  <span className="text-center md:flex-1">Our GitHub</span>
+                  <span className="icon-[mdi--github] text-xl" />
+                  <span>Our GitHub</span>
                 </a>
                 <a
                   href="https://github.com/orgs/one-zero-eight/projects/4"
-                  className="btn"
+                  className={aboutDevelopmentButtonClass}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span className="icon-[mdi--view-dashboard-outline] shrink-0 text-xl" />
-                  <span className="text-center md:flex-1">Our task board</span>
+                  <span className="icon-[mdi--view-dashboard-outline] text-xl" />
+                  <span>Our task board</span>
                 </a>
                 <a
                   href="https://github.com/one-zero-eight/.github/blob/main/CONTRIBUTING.md"
-                  className="btn"
+                  className={aboutDevelopmentButtonClass}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span className="icon-[mdi--file-document-outline] shrink-0 text-xl" />
-                  <span className="text-center md:flex-1">CONTRIBUTING.md</span>
+                  <span className="icon-[mdi--file-document-outline] text-2xl" />
+                  <span>CONTRIBUTING.md</span>
                 </a>
               </>
             }
@@ -170,17 +175,15 @@ export function AboutPage() {
               <Link
                 to="/clubs/$slug"
                 params={{ slug: "one-zero-eight" }}
-                className="btn"
+                className={aboutActionButtonClass}
               >
                 <span className="icon-[mdi--school-outline] text-xl" />
-                <span className="inline-flex items-center whitespace-nowrap">
-                  108 club
-                </span>
+                <span>108 club</span>
               </Link>
             }
           >
             <p>
-              On February 6, 2024, we held our first club presentation. We now
+              On February 6, 2023, we held our first club presentation. We now
               run this event every year.
             </p>
           </AboutAsideSection>
@@ -191,12 +194,12 @@ export function AboutPage() {
             aside={
               <a
                 href="https://t.me/one_zero_eight"
-                className="btn"
+                className={aboutActionButtonClass}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <span className="icon-[uil--telegram-alt] text-xl" />
-                Telegram channel
+                <span>Telegram channel</span>
               </a>
             }
           >
@@ -234,12 +237,12 @@ export function AboutPage() {
             aside={
               <a
                 href="https://t.me/one_zero_eight_bot"
-                className="btn"
+                className={aboutActionButtonClass}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <span className="icon-[mdi--robot-excited-outline] text-xl" />
-                Join us
+                <span>Join us</span>
               </a>
             }
           >
