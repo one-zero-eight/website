@@ -139,6 +139,7 @@ export function formatTimeRangeMoscow(
     x.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
+      hour12: false,
       timeZone: MSK_TZ,
     });
   return `${t(s)} – ${t(e)}`;
