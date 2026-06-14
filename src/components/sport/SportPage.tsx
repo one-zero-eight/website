@@ -8,6 +8,7 @@ import {
   SportProgressSection,
   SportSemesterHistorySection,
 } from "@/components/sport/SportOverviewSection.tsx";
+import { SportScheduleSection } from "@/components/sport/SportScheduleSection.tsx";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 
 type SportTab = "dashboard" | "history" | "faq";
@@ -152,6 +153,12 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
             hours={hours}
             currentSemester={currentSemester}
           />
+          {studentId != null ? (
+            <SportScheduleSection
+              enabled={canQuerySport}
+              studentId={Number(studentId)}
+            />
+          ) : null}
         </>
       ) : null}
 
