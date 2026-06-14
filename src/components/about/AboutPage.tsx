@@ -245,9 +245,6 @@ export function AboutPage() {
                   <span className="icon-[mdi--robot-excited-outline] text-xl" />
                   <span>Join us</span>
                 </a>
-                <span className="text-base-content text-sm font-medium">
-                  Meow!
-                </span>
               </div>
             }
           >
