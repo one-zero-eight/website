@@ -127,6 +127,19 @@ export const items: ItemType[] = [
     to: "/timer",
     icon: <span className="icon-[material-symbols--timer-outline-rounded]" />,
   },
+  ...((import.meta.env.VITE_PRODUCTION && []) || [
+    {
+      type: "local",
+      title: "When2Meet",
+      to: "/when-to-meet",
+      badge: (
+        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
+          DEV
+        </span>
+      ),
+      icon: <span className="icon-[mdi--calendar-outline]" />,
+    },
+  ]),
   {
     type: "local",
     title: "Scholarship",
