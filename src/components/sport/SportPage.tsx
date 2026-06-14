@@ -138,7 +138,7 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-4">
-      <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b whitespace-nowrap">
+      <div className="border-base-300 -my-4 flex shrink-0 flex-row gap-1 overflow-x-auto border-b whitespace-nowrap">
         {sportTabs.map((tab) => (
           <SportTabLink key={tab.id} to={tab.to}>
             {tab.title}

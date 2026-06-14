@@ -19,7 +19,6 @@ import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 
-type PaidFilter = "all" | "free" | "paid";
 type ScheduleView = "listWeek" | "timeGridDay";
 
 const legacyGroupColors = [
@@ -71,7 +70,6 @@ export function SportScheduleSection({
   const { showError, showSuccess } = useToast();
   const [weekAnchor, setWeekAnchor] = useState(() => new Date());
   const [selectedSportId, setSelectedSportId] = useState<number | null>(null);
-  const [paidFilter, setPaidFilter] = useState<PaidFilter>("all");
   const [view, setView] = useState<ScheduleView>("listWeek");
   const [pendingTrainingId, setPendingTrainingId] = useState<number | null>(
     null,
@@ -192,20 +190,10 @@ export function SportScheduleSection({
   );
 
   const filteredSchedule = useMemo(() => {
-    return (schedule ?? [])
-      .filter((training) => {
-        if (paidFilter === "free") {
-          return !training.is_paid;
-        }
-        if (paidFilter === "paid") {
-          return training.is_paid;
-        }
-        return true;
-      })
-      .toSorted(
-        (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
-      );
-  }, [paidFilter, schedule]);
+    return (schedule ?? []).toSorted(
+      (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
+    );
+  }, [schedule]);
 
   const groupColorMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -266,26 +254,6 @@ export function SportScheduleSection({
           <div className="flex flex-row items-start justify-between gap-4">
             <div className="min-w-0">
               <h2 className="text-3xl font-medium">Schedule</h2>
-            </div>
-
-            <div className="join shrink-0">
-              {(["all", "free", "paid"] as const).map((filter) => (
-                <button
-                  key={filter}
-                  type="button"
-                  className={cn(
-                    "btn btn-outline btn-primary btn-sm join-item px-3 font-normal",
-                    paidFilter === filter && "btn-active",
-                  )}
-                  onClick={() => setPaidFilter(filter)}
-                >
-                  {filter === "all"
-                    ? "All"
-                    : filter === "free"
-                      ? "Free"
-                      : "Paid"}
-                </button>
-              ))}
             </div>
           </div>
 
