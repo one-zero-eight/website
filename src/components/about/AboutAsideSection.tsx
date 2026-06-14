@@ -8,11 +8,11 @@ export function AboutAsideSection({
   children: ReactNode;
 }) {
   return (
-    <div className="mb-4 flex flex-col-reverse gap-4 md:block [&_p]:mb-4 [&_p:last-child]:mb-0">
-      <div className="flex flex-col items-end gap-2 md:float-right md:mb-0 md:ml-6 md:w-52 md:max-w-xs md:items-stretch lg:max-w-none [&_a]:w-full">
+    <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-start md:gap-6 [&_p]:mb-4 [&_p:last-child]:mb-0">
+      <div className="min-w-0 flex-1">{children}</div>
+      <div className="flex w-full flex-col items-end gap-2 md:w-64 md:shrink-0 md:items-stretch [&_a]:w-full">
         {aside}
       </div>
-      <div>{children}</div>
     </div>
   );
 }

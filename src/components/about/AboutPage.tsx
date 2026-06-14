@@ -7,11 +7,8 @@ import { DepartmentCards } from "./DepartmentCards.tsx";
 import { SectionHeader } from "./SectionHeader.tsx";
 import { TeamMembers } from "./TeamMembers.tsx";
 import { Link } from "@tanstack/react-router";
-import { cn } from "@/lib/ui/cn";
-
 const aboutActionButtonClass =
   "bg-base-200 hover:bg-base-300 rounded-box flex items-center justify-center gap-2 px-5 py-3 text-base font-semibold text-base-content transition-colors";
-const aboutDevelopmentButtonClass = cn(aboutActionButtonClass, "md:!w-64");
 
 export function AboutPage() {
   return (
@@ -102,7 +99,7 @@ export function AboutPage() {
               <>
                 <a
                   href="https://github.com/one-zero-eight"
-                  className={aboutDevelopmentButtonClass}
+                  className={aboutActionButtonClass}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -111,7 +108,7 @@ export function AboutPage() {
                 </a>
                 <a
                   href="https://github.com/orgs/one-zero-eight/projects/4"
-                  className={aboutDevelopmentButtonClass}
+                  className={aboutActionButtonClass}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -120,7 +117,7 @@ export function AboutPage() {
                 </a>
                 <a
                   href="https://github.com/one-zero-eight/.github/blob/main/CONTRIBUTING.md"
-                  className={aboutDevelopmentButtonClass}
+                  className={aboutActionButtonClass}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
