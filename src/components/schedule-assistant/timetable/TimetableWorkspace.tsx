@@ -1,9 +1,13 @@
 import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import clsx from "clsx";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   getScheduleSections,
   useConfig,
+  useCoursesQuery,
+  useUpdateCourseMutation,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
+import { useToast } from "@/components/toast";
 import {
   createContext,
   memo,
@@ -17,6 +21,13 @@ import {
   useSyncExternalStore,
 } from "react";
 
+import { EditClassModal } from "./EditClassModal.tsx";
+import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
+import {
+  canRestoreMeeting,
+  parseMeetingInstanceId,
+  restoreMeetingInCourse,
+} from "./meetingEditUtils.ts";
 import { computeDetailPanel } from "./scheduleAssistantDetailPanel.tsx";
 import {
   type BuiltGrid,
@@ -43,6 +54,11 @@ import {
   roomFillPercent,
   scheduleAssistantDetailTooltips,
   buildCoursesToSections,
+  todayIsoDate,
+  weekIndexForDate,
+  WEEK_RELATIVE_LABELS,
+  weekRelativeToToday,
+  type WeekRelativePosition,
 } from "./timetableViewerModel.ts";
 
 type InnerTab = "instructor" | "room" | string;
@@ -179,6 +195,8 @@ function meetingCardPropsEqual(
     pm.room !== nm.room ||
     pm.start !== nm.start ||
     pm.date !== nm.date ||
+    (pm.override_fields?.join("\0") ?? "") !==
+      (nm.override_fields?.join("\0") ?? "") ||
     ((typeof pm.instructors === "string"
       ? [pm.instructors]
       : pm.instructors
@@ -237,6 +255,7 @@ function TimetableWorkspaceInner() {
     startScrollLeft: number;
     startScrollTop: number;
   } | null>(null);
+  const activeWeekStartRef = useRef<string | null>(null);
 
   const selectionStore = useMemo(() => createSelectionStore(), []);
 
@@ -259,7 +278,12 @@ function TimetableWorkspaceInner() {
     setActiveTab((current) =>
       validTabs.has(current) ? current : (sectionCodes[0] as InnerTab),
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config?.term?.sections]);
+
+  useEffect(() => {
+    activeWeekStartRef.current = weeks[weekIndex]?.start ?? null;
+  }, [weeks, weekIndex]);
 
   useEffect(() => {
     if (!config || !coursesToSections) {
@@ -267,6 +291,7 @@ function TimetableWorkspaceInner() {
       setColumns([]);
       setWeeks([]);
       setWeekIndex(0);
+      activeWeekStartRef.current = null;
       setMsg("");
       return;
     }
@@ -288,8 +313,22 @@ function TimetableWorkspaceInner() {
       setCourseColors(buildCourseColors(meetings));
       selectionStore.setSelection(null);
       setColumns(cols);
-      setWeeks(buildWeeks(meetings));
-      setWeekIndex(0);
+      const nextWeeks = buildWeeks(meetings);
+      setWeeks(nextWeeks);
+      setWeekIndex((currentIndex) => {
+        const preservedStart = activeWeekStartRef.current;
+        if (preservedStart) {
+          const preservedIndex = nextWeeks.findIndex(
+            (week) => week.start === preservedStart,
+          );
+          if (preservedIndex >= 0) return preservedIndex;
+        }
+        if (!nextWeeks.length) return 0;
+        if (!preservedStart) {
+          return weekIndexForDate(nextWeeks, todayIsoDate());
+        }
+        return Math.min(currentIndex, nextWeeks.length - 1);
+      });
       setMsg("");
     } catch (e: unknown) {
       setMsg(String((e as Error)?.message || e));
@@ -474,6 +513,14 @@ function TimetableWorkspaceInner() {
   const weekLabel = !weeks.length
     ? "Нет недель"
     : `Нед. ${weekIndex + 1}/${weeks.length}: ${weeks[weekIndex]!.start} — ${weeks[weekIndex]!.end}`;
+  const weekRelative: WeekRelativePosition | null = weeks[weekIndex]
+    ? weekRelativeToToday(weeks[weekIndex]!)
+    : null;
+  const weekRelativeBadgeClass: Record<WeekRelativePosition, string> = {
+    current: "badge-success",
+    past: "border-[#7f1d1d] bg-[#7f1d1d] text-white",
+    future: "badge-info",
+  };
 
   return (
     <SelectionStoreContext.Provider value={selectionStore}>
@@ -486,38 +533,49 @@ function TimetableWorkspaceInner() {
               </div>
             ) : null}
 
-            <div className="schedule-assistant-toolbar relative z-30 flex shrink-0 flex-wrap items-center gap-2 px-2 py-1.5 text-sm">
-              <div className="join shrink-0">
-                <button
-                  type="button"
-                  className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                  title="Предыдущая неделя"
-                  disabled={weekIndex <= 0 || !weeks.length}
-                  onClick={() => {
-                    if (weekIndex > 0) setWeekIndex((i) => i - 1);
-                  }}
-                >
-                  ‹
-                </button>
-                <span
-                  className="join-item btn btn-xs btn-ghost no-animation text-base-content flex min-h-8 max-w-[min(100vw-8rem,20rem)] min-w-[10.5rem] cursor-default items-center justify-center px-2 text-center text-sm font-normal normal-case"
-                  role="status"
-                  aria-live="polite"
-                >
-                  {weekLabel}
-                </span>
-                <button
-                  type="button"
-                  className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                  title="Следующая неделя"
-                  disabled={weekIndex >= weeks.length - 1 || !weeks.length}
-                  onClick={() => {
-                    if (weekIndex < weeks.length - 1)
-                      setWeekIndex((i) => i + 1);
-                  }}
-                >
-                  ›
-                </button>
+            <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 px-2 py-1.5 text-sm">
+              <div className="flex shrink-0 items-center gap-1.5">
+                <div className="join">
+                  <button
+                    type="button"
+                    className="btn btn-xs join-item min-h-8 min-w-8 px-0"
+                    title="Предыдущая неделя"
+                    disabled={weekIndex <= 0 || !weeks.length}
+                    onClick={() => {
+                      if (weekIndex > 0) setWeekIndex((i) => i - 1);
+                    }}
+                  >
+                    ‹
+                  </button>
+                  <span
+                    className="join-item btn btn-xs btn-ghost no-animation text-base-content inline-flex h-auto min-h-8 max-w-[min(100vw-8rem,28rem)] min-w-[10.5rem] cursor-default items-center justify-center px-2 py-1 text-center text-sm leading-tight font-normal whitespace-nowrap normal-case"
+                    role="status"
+                  >
+                    {weekLabel}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-xs join-item min-h-8 min-w-8 px-0"
+                    title="Следующая неделя"
+                    disabled={weekIndex >= weeks.length - 1 || !weeks.length}
+                    onClick={() => {
+                      if (weekIndex < weeks.length - 1)
+                        setWeekIndex((i) => i + 1);
+                    }}
+                  >
+                    ›
+                  </button>
+                </div>
+                {weekRelative ? (
+                  <span
+                    className={clsx(
+                      "badge badge-xs shrink-0",
+                      weekRelativeBadgeClass[weekRelative],
+                    )}
+                  >
+                    {WEEK_RELATIVE_LABELS[weekRelative]} неделя
+                  </span>
+                ) : null}
               </div>
               <TimetableTabSelector
                 config={config}
@@ -564,7 +622,7 @@ function TimetableWorkspaceInner() {
           </div>
 
           <aside
-            className="detail border-base-300 bg-base-100 rounded-box z-0 mt-4 mr-4 mb-4 ml-3 flex min-h-0 w-[360px] shrink-0 flex-col self-stretch overflow-y-auto border p-3 max-[1200px]:m-0 max-[1200px]:mt-2 max-[1200px]:min-h-0 max-[1200px]:w-full max-[1200px]:flex-1"
+            className="detail border-base-300 bg-base-100 rounded-box mt-4 mr-4 mb-4 ml-3 flex min-h-0 w-[360px] shrink-0 flex-col self-stretch overflow-y-auto border p-3 max-[1200px]:m-0 max-[1200px]:mt-2 max-[1200px]:min-h-0 max-[1200px]:w-full max-[1200px]:flex-1"
             id="detail"
           >
             <TimetableDetailPanel
@@ -626,7 +684,7 @@ function TimetableTabSelector({
         <span className="truncate">{currentLabel}</span>
         <span className="icon-[material-symbols--expand-more] shrink-0 text-base" />
       </summary>
-      <ul className="dropdown-content border-base-300 bg-base-100 rounded-box z-40 mt-1 w-[12rem] border p-1 shadow-sm">
+      <ul className="dropdown-content border-base-300 bg-base-100 rounded-box mt-1 w-[12rem] border p-1 shadow-sm">
         {options.map((option, i) => (
           <li key={i}>
             <button
@@ -761,6 +819,57 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   const selection = useSelectionSnapshot();
   const selectionStore = useSelectionStore();
   const deferredSelection = useDeferredValue(selection);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [restoringMeetingId, setRestoringMeetingId] = useState<string | null>(
+    null,
+  );
+  const { data: courses } = useCoursesQuery();
+  const { mutate: updateCourse, isPending: isRestorePending } =
+    useUpdateCourseMutation();
+  const { showError, showSuccess } = useToast();
+
+  const handleRestoreMeeting = useCallback(
+    (meeting: Meeting) => {
+      if (!canRestoreMeeting(meeting) || !courses) return;
+      const meetingRef = parseMeetingInstanceId(meeting.instance_id);
+      if (!meetingRef || meetingRef.kind !== "wp") return;
+
+      const course = courses.find((item) => item.name === meeting.course);
+      if (!course) {
+        showError("Ошибка", "Курс не найден в конфигурации.");
+        return;
+      }
+
+      const updatedCourse = restoreMeetingInCourse(course, meetingRef, config);
+      if (!updatedCourse) {
+        showError("Ошибка", "Не удалось восстановить занятие.");
+        return;
+      }
+
+      setRestoringMeetingId(meeting.instance_id);
+      updateCourse(
+        {
+          params: { path: { course_name: course.name } },
+          body: updatedCourse,
+        },
+        {
+          onSuccess: () => {
+            showSuccess(
+              "Восстановлено",
+              "Занятие снова добавлено в расписание.",
+            );
+            setRestoringMeetingId(null);
+          },
+          onError: (error) => {
+            showError("Ошибка восстановления", formatApiErrorMessage(error));
+            setRestoringMeetingId(null);
+          },
+        },
+      );
+    },
+    [config, courses, showError, showSuccess, updateCourse],
+  );
+
   const detail = useMemo(
     () =>
       computeDetailPanel({
@@ -772,6 +881,8 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
         groupSizeById,
         weeks,
         weekIndex,
+        onRestoreMeeting: handleRestoreMeeting,
+        restoringMeetingId: isRestorePending ? restoringMeetingId : null,
       }),
     [
       deferredSelection,
@@ -782,6 +893,9 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
       groupSizeById,
       weeks,
       weekIndex,
+      handleRestoreMeeting,
+      isRestorePending,
+      restoringMeetingId,
     ],
   );
 
@@ -819,6 +933,20 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
     [selectionStore],
   );
 
+  const selectedMeeting = useMemo(() => {
+    if (deferredSelection?.type !== "meeting") return null;
+    return (
+      allMeetings.find(
+        (meeting) => meeting.instance_id === deferredSelection.value,
+      ) ?? null
+    );
+  }, [allMeetings, deferredSelection]);
+
+  const canEditSelectedMeeting = useMemo(() => {
+    if (!selectedMeeting) return false;
+    return !!parseMeetingInstanceId(selectedMeeting.instance_id);
+  }, [selectedMeeting]);
+
   return (
     <>
       <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -828,14 +956,27 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
         >
           {detail.detailTitle}
         </div>
-        <button
-          className="btn btn-outline btn-xs shrink-0"
-          id="clearSelectionBtn"
-          type="button"
-          onClick={clearSelection}
-        >
-          Сбросить
-        </button>
+        {!editModalOpen ? (
+          <div className="flex shrink-0 items-center gap-1">
+            {canEditSelectedMeeting ? (
+              <button
+                className="btn btn-primary btn-xs"
+                type="button"
+                onClick={() => setEditModalOpen(true)}
+              >
+                Редактировать
+              </button>
+            ) : null}
+            <button
+              className="btn btn-outline btn-xs shrink-0"
+              id="clearSelectionBtn"
+              type="button"
+              onClick={clearSelection}
+            >
+              Сбросить
+            </button>
+          </div>
+        ) : null}
       </div>
       <div
         className="detail-summary mb-2 min-h-4 text-[0.8125rem] text-[#4f5c6d]"
@@ -863,6 +1004,12 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
       >
         {detail.listContent}
       </div>
+      <EditClassModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        meeting={selectedMeeting}
+        config={config}
+      />
     </>
   );
 }, timetableDetailPanelPropsEqual);
@@ -1351,7 +1498,16 @@ const MeetingCard = memo(function MeetingCard({
         className="subject line-clamp-3 min-w-0 text-[0.8125rem] leading-[1.08] font-bold [overflow-wrap:anywhere] text-[#1a2332]"
         title={`${courseTitle} (${m.tag})${count > 1 ? ` x${count}` : ""}`}
       >
-        {courseTitle} ({m.tag}){count > 1 ? ` x${count}` : ""}
+        <span className="inline-flex max-w-full flex-wrap items-center gap-1">
+          <span className="min-w-0">
+            {courseTitle} ({m.tag}){count > 1 ? ` x${count}` : ""}
+          </span>
+          <MeetingOverrideFieldBadge
+            field="weekday"
+            fields={m.override_fields}
+          />
+          <MeetingOverrideFieldBadge field="time" fields={m.override_fields} />
+        </span>
       </div>
       <div className="min-h-0 flex-1" />
       <div
@@ -1361,27 +1517,37 @@ const MeetingCard = memo(function MeetingCard({
           : m.instructors
         ).join(" / ")}
       >
-        {(typeof m.instructors === "string" ? [m.instructors] : m.instructors)
-          .length
-          ? (typeof m.instructors === "string"
+        <span className="inline-flex max-w-full items-center gap-1">
+          <span className="min-w-0 truncate">
+            {(typeof m.instructors === "string"
               ? [m.instructors]
               : m.instructors
-            ).map((name, idx) => (
-              <span key={name}>
-                <span
-                  className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
-                  title={scheduleAssistantDetailTooltips.instructor}
-                  onClick={(ev) => {
-                    ev.stopPropagation();
-                    selectInstructorCell(name);
-                  }}
-                >
-                  {name}
-                </span>
-                {idx < (m.instructors?.length ?? 0) - 1 ? " / " : null}
-              </span>
-            ))
-          : "-"}
+            ).length
+              ? (typeof m.instructors === "string"
+                  ? [m.instructors]
+                  : m.instructors
+                ).map((name, idx) => (
+                  <span key={name}>
+                    <span
+                      className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
+                      title={scheduleAssistantDetailTooltips.instructor}
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        selectInstructorCell(name);
+                      }}
+                    >
+                      {name}
+                    </span>
+                    {idx < (m.instructors?.length ?? 0) - 1 ? " / " : null}
+                  </span>
+                ))
+              : "-"}
+          </span>
+          <MeetingOverrideFieldBadge
+            field="instructor"
+            fields={m.override_fields}
+          />
+        </span>
       </div>
       <div
         className={clsx(
@@ -1390,20 +1556,23 @@ const MeetingCard = memo(function MeetingCard({
         )}
         title={roomLoadLabel}
       >
-        {roomIdTrim ? (
-          <span
-            className={clsx(roomClickableClass, "inline")}
-            title={scheduleAssistantDetailTooltips.room}
-            onClick={(ev) => {
-              ev.stopPropagation();
-              selectRoomCell(m.room);
-            }}
-          >
-            {roomLoadLabel}
-          </span>
-        ) : (
-          roomLoadLabel
-        )}
+        <span className="inline-flex max-w-full items-center gap-1">
+          {roomIdTrim ? (
+            <span
+              className={clsx(roomClickableClass, "inline min-w-0 truncate")}
+              title={scheduleAssistantDetailTooltips.room}
+              onClick={(ev) => {
+                ev.stopPropagation();
+                selectRoomCell(m.room);
+              }}
+            >
+              {roomLoadLabel}
+            </span>
+          ) : (
+            <span className="min-w-0 truncate">{roomLoadLabel}</span>
+          )}
+          <MeetingOverrideFieldBadge field="room" fields={m.override_fields} />
+        </span>
       </div>
     </div>
   );

@@ -114,7 +114,7 @@ function buildXml(routes) {
   const urls = routes
     .map((route) => {
       const location = route === "/" ? SITE_URL : `${SITE_URL}${route}`;
-      const priority = route === "/" ? "1.0" : "0.5";
+      const priority = route === "/" ? "1.0" : route === '/about' ? "1.0" : "0.5";
 
       return [
         "  <url>",

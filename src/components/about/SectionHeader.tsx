@@ -1,0 +1,56 @@
+import { cn } from "@/lib/ui/cn";
+import { useState } from "react";
+
+interface SectionHeaderProps {
+  id: string;
+  title: string;
+  className?: string;
+}
+
+export const SectionHeader = ({ id, title, className }: SectionHeaderProps) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const url = `${window.location.origin}${window.location.pathname}#${id}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    window.location.hash = id;
+  };
+
+  return (
+    <h2
+      id={id}
+      className={cn(
+        "group clear-both mt-16 mb-3 flex scroll-mt-24 items-center text-start first:mt-0 sm:mt-20",
+        "text-3xl font-bold sm:text-4xl",
+        className,
+      )}
+    >
+      <span className="relative flex items-center">
+        <a
+          href={`#${id}`}
+          className="decoration-dotted underline-offset-4 hover:underline"
+        >
+          {title}
+        </a>
+        <a
+          href={`#${id}`}
+          onClick={handleCopy}
+          className="hover:text-base-content/50 absolute left-full ml-2 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100"
+          aria-label={`Link to ${title}`}
+        >
+          <span
+            className={cn(
+              "text-xl",
+              copied
+                ? "icon-[mdi--check] text-green-500"
+                : "icon-[mdi--link-variant]",
+            )}
+          />
+        </a>
+      </span>
+    </h2>
+  );
+};

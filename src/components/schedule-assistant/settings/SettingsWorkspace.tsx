@@ -4,6 +4,7 @@ import { InstructorsTabContent } from "@/components/schedule-assistant/settings/
 import { RoomsTabContent } from "@/components/schedule-assistant/settings/rooms/RoomsTabContent.tsx";
 import { SemesterTabContent } from "@/components/schedule-assistant/settings/semester/SemesterTabContent.tsx";
 import { SettingsSidebar } from "@/components/schedule-assistant/settings/SettingsSidebar.tsx";
+import { SettingsSaveStatusProvider } from "@/components/schedule-assistant/settings/settingsSaveStatus.tsx";
 import { SettingsTopTabs } from "@/components/schedule-assistant/settings/SettingsTopTabs.tsx";
 import { GroupsTabContent } from "@/components/schedule-assistant/settings/groups/GroupsTabContent.tsx";
 import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
@@ -81,36 +82,38 @@ function SettingsWorkspaceInner({
   }, [clearAllSelection]);
 
   return (
-    <div className="flex w-full flex-col gap-3 p-4">
-      <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_360px] xl:grid-rows-[auto_minmax(0,1fr)]">
-        <div className="xl:col-start-1 xl:row-start-1">
-          <SettingsTopTabs />
-        </div>
+    <SettingsSaveStatusProvider>
+      <div className="flex w-full flex-col gap-3 p-4">
+        <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_360px] xl:grid-rows-[auto_minmax(0,1fr)]">
+          <div className="xl:col-start-1 xl:row-start-1">
+            <SettingsTopTabs />
+          </div>
 
-        <div className="border-base-300 bg-base-100 rounded-box min-h-0 border p-3 xl:col-start-1 xl:row-start-2">
-          <div className="flex h-full min-h-0 flex-col">
-            <div className="min-h-0 flex-1 overflow-auto p-3">
-              {settingsSubTab === "groups" ? (
-                <GroupsTabContent />
-              ) : settingsSubTab === "courses" ? (
-                <CoursesTabContent />
-              ) : settingsSubTab === "rooms" ? (
-                <RoomsTabContent />
-              ) : settingsSubTab === "instructors" ? (
-                <InstructorsTabContent />
-              ) : settingsSubTab === "semester" ? (
-                <SemesterTabContent />
-              ) : null}
+          <div className="border-base-300 bg-base-100 rounded-box min-h-0 border p-3 xl:col-start-1 xl:row-start-2">
+            <div className="flex h-full min-h-0 flex-col">
+              <div className="min-h-0 flex-1 overflow-auto p-3">
+                {settingsSubTab === "groups" ? (
+                  <GroupsTabContent />
+                ) : settingsSubTab === "courses" ? (
+                  <CoursesTabContent />
+                ) : settingsSubTab === "rooms" ? (
+                  <RoomsTabContent />
+                ) : settingsSubTab === "instructors" ? (
+                  <InstructorsTabContent />
+                ) : settingsSubTab === "semester" ? (
+                  <SemesterTabContent />
+                ) : null}
+              </div>
             </div>
           </div>
-        </div>
 
-        <aside className="border-base-300 bg-base-100 rounded-box sticky top-4 flex max-h-[calc(100vh-2rem)] min-h-0 w-full flex-col self-start overflow-hidden border p-3 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:h-[calc(100vh-2rem)]">
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-            <SettingsSidebar />
-          </div>
-        </aside>
+          <aside className="border-base-300 bg-base-100 rounded-box sticky top-4 flex max-h-[calc(100vh-2rem)] min-h-0 w-full flex-col self-start overflow-hidden border p-3 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:h-[calc(100vh-2rem)]">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+              <SettingsSidebar />
+            </div>
+          </aside>
+        </div>
       </div>
-    </div>
+    </SettingsSaveStatusProvider>
   );
 }

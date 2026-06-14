@@ -16,6 +16,8 @@ import {
   scheduleAssistantDetailTooltips,
   workloadHistogramHtml,
 } from "./timetableViewerModel.ts";
+import { canRestoreMeeting } from "./meetingEditUtils.ts";
+import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
 
 export type DetailPanelState = {
   detailTitle: string;
@@ -125,6 +127,103 @@ function DetailGroupLinks({ groups }: { groups: string[] }) {
   );
 }
 
+function DetailMeetingSessionRow({
+  m,
+  roomCapacityById,
+  groupSizeById,
+  indented = false,
+  onRestoreMeeting,
+  restoringMeetingId,
+}: {
+  m: Meeting;
+  roomCapacityById: Record<string, number>;
+  groupSizeById: Record<string, number | null | undefined>;
+  indented?: boolean;
+  onRestoreMeeting?: (meeting: Meeting) => void;
+  restoringMeetingId?: string | null;
+}) {
+  const rowClass = clsx(indented && "ml-3", m.cancelled && "opacity-75");
+  const textClass = clsx(m.cancelled && "line-through decoration-[#94a3b8]");
+  const canRestore = canRestoreMeeting(m);
+  const isRestoring = restoringMeetingId === m.instance_id;
+
+  return (
+    <DetailRow key={m.instance_id}>
+      <div className={clsx(rowClass, "text-[#243957]")}>
+        <span className="inline-flex flex-wrap items-center gap-1">
+          <b className={textClass}>
+            {m.date} {m.start}
+          </b>
+          {!m.cancelled ? (
+            <>
+              <MeetingOverrideFieldBadge
+                field="weekday"
+                fields={m.override_fields}
+              />
+              <MeetingOverrideFieldBadge
+                field="time"
+                fields={m.override_fields}
+              />
+            </>
+          ) : (
+            <span className="badge badge-error badge-xs no-underline">
+              отменено
+            </span>
+          )}{" "}
+          - <DetailGroupLinks groups={m.groups || []} />
+        </span>
+      </div>
+      <div className={clsx(rowClass, "text-[#4f5c6d]")}>
+        <span className="inline-flex flex-wrap items-center gap-1">
+          <span className={textClass}>ауд.</span>{" "}
+          <DetailRoomLoad
+            m={m}
+            roomCapacityById={roomCapacityById}
+            groupSizeById={groupSizeById}
+          />
+          {!m.cancelled ? (
+            <MeetingOverrideFieldBadge
+              field="room"
+              fields={m.override_fields}
+            />
+          ) : null}
+        </span>{" "}
+        |{" "}
+        <span className="inline-flex flex-wrap items-center gap-1">
+          <span className={textClass}>препод.</span>{" "}
+          <DetailInstructorLinks instructors={m.instructors} />
+          {!m.cancelled ? (
+            <MeetingOverrideFieldBadge
+              field="instructor"
+              fields={m.override_fields}
+            />
+          ) : null}
+        </span>
+      </div>
+      {m.cancelled && canRestore && onRestoreMeeting ? (
+        <div className={clsx(rowClass, "mt-1")}>
+          <button
+            type="button"
+            className="btn btn-outline btn-xs"
+            disabled={isRestoring}
+            onClick={() => onRestoreMeeting(m)}
+          >
+            {isRestoring ? (
+              <span className="loading loading-spinner loading-xs" />
+            ) : (
+              "Восстановить"
+            )}
+          </button>
+        </div>
+      ) : null}
+    </DetailRow>
+  );
+}
+
+function activeMeetings(items: Meeting[]) {
+  return items.filter((m) => !m.cancelled);
+}
+
 export function computeDetailPanel(input: {
   selection: Selection;
   allMeetings: Meeting[];
@@ -134,6 +233,8 @@ export function computeDetailPanel(input: {
   groupSizeById: Record<string, number | null | undefined>;
   weeks: WeekRange[];
   weekIndex: number;
+  onRestoreMeeting?: (meeting: Meeting) => void;
+  restoringMeetingId?: string | null;
 }): DetailPanelState {
   const {
     selection: sel,
@@ -144,6 +245,8 @@ export function computeDetailPanel(input: {
     groupSizeById,
     weeks,
     weekIndex,
+    onRestoreMeeting,
+    restoringMeetingId,
   } = input;
 
   const rfp = (m: Meeting) =>
@@ -198,34 +301,15 @@ export function computeDetailPanel(input: {
       : `${mm.length} совпад. | курс: ${courseName || "-"}`;
     parts.push(<DetailSection key="sel-meet-h" title="Выбранное занятие" />);
     for (const m of mm.slice(0, 20)) {
-      const rowCourse = String(m.course || courseName || "").trim() || "—";
       parts.push(
-        <DetailRow key={m.instance_id}>
-          <div className="text-[#243957]">
-            <b className="font-bold text-[#243957]">название:</b> {rowCourse} (
-            {m.tag})
-          </div>
-          <div className="text-[#243957]">
-            <b className="font-bold text-[#243957]">дата и время:</b> {m.date}{" "}
-            {m.start}
-          </div>
-          <div className="text-[#243957]">
-            <b className="font-bold text-[#243957]">группы:</b>{" "}
-            <DetailGroupLinks groups={m.groups || []} />
-          </div>
-          <div className="text-[#4f5c6d]">
-            <b className="font-bold text-[#243957]">аудитория:</b>{" "}
-            <DetailRoomLoad
-              m={m}
-              roomCapacityById={roomCapacityById}
-              groupSizeById={groupSizeById}
-            />
-          </div>
-          <div className="text-[#4f5c6d]">
-            <b className="font-bold text-[#243957]">преподаватель:</b>{" "}
-            <DetailInstructorLinks instructors={m.instructors} />
-          </div>
-        </DetailRow>,
+        <DetailMeetingSessionRow
+          key={m.instance_id}
+          m={m}
+          roomCapacityById={roomCapacityById}
+          groupSizeById={groupSizeById}
+          onRestoreMeeting={onRestoreMeeting}
+          restoringMeetingId={restoringMeetingId}
+        />,
       );
     }
     parts.push(<div key="div-meet" className="my-2 h-px bg-[#ccd9ee]" />);
@@ -261,14 +345,22 @@ export function computeDetailPanel(input: {
       }
       for (const tag of orderedTags) {
         const tagSessions = byTag[tag]!;
+        const activeCount = tagSessions.filter((m) => !m.cancelled).length;
+        const canceledCount = tagSessions.filter((m) => m.cancelled).length;
         const componentPool =
-          (tagSessions[0] as Meeting & { instructor_pool?: unknown[] })
-            .instructor_pool || [];
+          (tagSessions.find((m) => !m.cancelled) ?? tagSessions[0])
+            ?.instructor_pool || [];
         parts.push(
           <DetailRow key={`tag-${tag}-h`}>
             <span className="text-[#243957]">
-              <b className="font-bold text-[#243957]">{tag}</b>:{" "}
-              {tagSessions.length} занятий
+              <b className="font-bold text-[#243957]">{tag}</b>: {activeCount}{" "}
+              занятий
+              {canceledCount ? (
+                <span className="text-[#4f5c6d]">
+                  {" "}
+                  · {canceledCount} отменено
+                </span>
+              ) : null}
             </span>
           </DetailRow>,
         );
@@ -280,25 +372,17 @@ export function computeDetailPanel(input: {
             </span>
           </DetailRow>,
         );
-        for (const m of byTag[tag]!.slice(0, 20)) {
+        for (const m of byTag[tag]!) {
           parts.push(
-            <DetailRow key={`${tag}-${m.instance_id}`}>
-              <div className="ml-3 text-[#243957]">
-                <b>
-                  {m.date} {m.start}
-                </b>{" "}
-                - <DetailGroupLinks groups={m.groups || []} />
-              </div>
-              <div className="ml-3 text-[#4f5c6d]">
-                ауд.{" "}
-                <DetailRoomLoad
-                  m={m}
-                  roomCapacityById={roomCapacityById}
-                  groupSizeById={groupSizeById}
-                />{" "}
-                | препод. <DetailInstructorLinks instructors={m.instructors} />
-              </div>
-            </DetailRow>,
+            <DetailMeetingSessionRow
+              key={`${tag}-${m.instance_id}`}
+              m={m}
+              roomCapacityById={roomCapacityById}
+              groupSizeById={groupSizeById}
+              indented
+              onRestoreMeeting={onRestoreMeeting}
+              restoringMeetingId={restoringMeetingId}
+            />,
           );
         }
       }
@@ -325,11 +409,13 @@ export function computeDetailPanel(input: {
     const groupIds = new Set(
       columns.filter((c) => c.yearLabel === sel.value).map((c) => c.groupId),
     );
-    const mm = meetings
-      .filter((m) => (m.groups || []).some((g) => groupIds.has(g)))
-      .sort((a, b) =>
-        `${a.date}|${a.start}`.localeCompare(`${b.date}|${b.start}`),
-      );
+    const mm = activeMeetings(
+      meetings
+        .filter((m) => (m.groups || []).some((g) => groupIds.has(g)))
+        .sort((a, b) =>
+          `${a.date}|${a.start}`.localeCompare(`${b.date}|${b.start}`),
+        ),
+    );
     detailTitle = "Программа";
     detailSummary = `${sel.value} | ${mm.length} занятий`;
     const weekMm = filterMeetingsToCurrentWeek(mm, weeks, weekIndex);
@@ -358,11 +444,13 @@ export function computeDetailPanel(input: {
       );
     }
   } else if (sel.type === "group") {
-    const mm = meetings
-      .filter((m) => (m.groups || []).includes(sel.value))
-      .sort((a, b) =>
-        `${a.date}|${a.start}`.localeCompare(`${b.date}|${b.start}`),
-      );
+    const mm = activeMeetings(
+      meetings
+        .filter((m) => (m.groups || []).includes(sel.value))
+        .sort((a, b) =>
+          `${a.date}|${a.start}`.localeCompare(`${b.date}|${b.start}`),
+        ),
+    );
     detailTitle = "Группа";
     detailSummary = `${sel.value} | ${mm.length} занятий`;
     const weekMm = filterMeetingsToCurrentWeek(mm, weeks, weekIndex);
@@ -391,16 +479,18 @@ export function computeDetailPanel(input: {
       );
     }
   } else if (sel.type === "instructor") {
-    const mm = meetings
-      .filter((m) =>
-        (typeof m.instructors === "string"
-          ? [m.instructors]
-          : m.instructors
-        ).includes(sel.value),
-      )
-      .sort((a, b) =>
-        `${a.date}|${a.start}`.localeCompare(`${b.date}|${b.start}`),
-      );
+    const mm = activeMeetings(
+      meetings
+        .filter((m) =>
+          (typeof m.instructors === "string"
+            ? [m.instructors]
+            : m.instructors
+          ).includes(sel.value),
+        )
+        .sort((a, b) =>
+          `${a.date}|${a.start}`.localeCompare(`${b.date}|${b.start}`),
+        ),
+    );
     detailTitle = "Преподаватель";
     detailSummary = `${sel.value} | ${mm.length} занятий`;
     const weekMm = filterMeetingsToCurrentWeek(mm, weeks, weekIndex);
@@ -428,11 +518,13 @@ export function computeDetailPanel(input: {
       );
     }
   } else if (sel.type === "room") {
-    const mm = meetings
-      .filter((m) => (m.room || "") === sel.value)
-      .sort((a, b) =>
-        `${a.date}|${a.start}`.localeCompare(`${b.date}|${b.start}`),
-      );
+    const mm = activeMeetings(
+      meetings
+        .filter((m) => (m.room || "") === sel.value)
+        .sort((a, b) =>
+          `${a.date}|${a.start}`.localeCompare(`${b.date}|${b.start}`),
+        ),
+    );
     const roomCap = roomCapacityById?.[sel.value];
     detailTitle = "Аудитория";
     detailSummary = `${sel.value} (вместим.: ${roomCap ?? "-"}) | ${mm.length} занятий`;
