@@ -387,7 +387,7 @@ export function MeetingPage({
                 {meetingName}
               </h1>
               <a
-                href={`/when-to-meet/${meetingId}`}
+                href={`/when2meet/${meetingId}`}
                 className="link link-primary text-sm font-medium"
               >
                 Edit event

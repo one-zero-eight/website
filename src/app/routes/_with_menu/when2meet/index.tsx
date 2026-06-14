@@ -1,9 +1,9 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { MeetingsLandingPage } from "@/components/when-to-meet/MeetingsLandingPage.tsx";
+import { MeetingsLandingPage } from "@/components/when2meet/MeetingsLandingPage";
 
-export const Route = createFileRoute("/_with_menu/when-to-meet/")({
+export const Route = createFileRoute("/_with_menu/when2meet/")({
   component: RouteComponent,
 });
 

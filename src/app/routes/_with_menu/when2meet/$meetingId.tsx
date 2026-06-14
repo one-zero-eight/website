@@ -1,9 +1,9 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import { MeetingPage } from "@/components/when-to-meet/MeetingPage.tsx";
+import { MeetingPage } from "@/components/when2meet/MeetingPage";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_with_menu/when-to-meet/$meetingId")({
+export const Route = createFileRoute("/_with_menu/when2meet/$meetingId")({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>): { name?: string } => {
     return {

@@ -33,7 +33,7 @@ import { Route as With_menuCalendarRouteImport } from "./routes/_with_menu/calen
 import { Route as With_menuAboutRouteImport } from "./routes/_with_menu/about";
 import { Route as With_menu42RouteImport } from "./routes/_with_menu/42";
 import { Route as ScheduleAssistantSettingsIndexRouteImport } from "./routes/schedule-assistant/settings/index";
-import { Route as With_menuWhenToMeetIndexRouteImport } from "./routes/_with_menu/when-to-meet/index";
+import { Route as With_menuWhen2meetIndexRouteImport } from "./routes/_with_menu/when2meet/index";
 import { Route as With_menuStudentAffairsIndexRouteImport } from "./routes/_with_menu/student-affairs/index";
 import { Route as With_menuSearchIndexRouteImport } from "./routes/_with_menu/search/index";
 import { Route as With_menuScheduleIndexRouteImport } from "./routes/_with_menu/schedule/index";
@@ -44,7 +44,7 @@ import { Route as With_menuClubsIndexRouteImport } from "./routes/_with_menu/clu
 import { Route as With_menuCatalogueIndexRouteImport } from "./routes/_with_menu/catalogue/index";
 import { Route as With_menuAccountIndexRouteImport } from "./routes/_with_menu/account/index";
 import { Route as ScheduleAssistantSettingsSettingsTabRouteImport } from "./routes/schedule-assistant/settings/$settingsTab";
-import { Route as With_menuWhenToMeetMeetingIdRouteImport } from "./routes/_with_menu/when-to-meet/$meetingId";
+import { Route as With_menuWhen2meetMeetingIdRouteImport } from "./routes/_with_menu/when2meet/$meetingId";
 import { Route as With_menuStudentAffairsSignOutRouteImport } from "./routes/_with_menu/student-affairs/sign-out";
 import { Route as With_menuStudentAffairsSignInRouteImport } from "./routes/_with_menu/student-affairs/sign-in";
 import { Route as With_menuSearchAskRouteImport } from "./routes/_with_menu/search/ask";
@@ -190,12 +190,11 @@ const ScheduleAssistantSettingsIndexRoute =
     path: "/settings/",
     getParentRoute: () => ScheduleAssistantRouteRoute,
   } as any);
-const With_menuWhenToMeetIndexRoute =
-  With_menuWhenToMeetIndexRouteImport.update({
-    id: "/when-to-meet/",
-    path: "/when-to-meet/",
-    getParentRoute: () => With_menuRouteRoute,
-  } as any);
+const With_menuWhen2meetIndexRoute = With_menuWhen2meetIndexRouteImport.update({
+  id: "/when2meet/",
+  path: "/when2meet/",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuStudentAffairsIndexRoute =
   With_menuStudentAffairsIndexRouteImport.update({
     id: "/student-affairs/",
@@ -249,10 +248,10 @@ const ScheduleAssistantSettingsSettingsTabRoute =
     path: "/settings/$settingsTab",
     getParentRoute: () => ScheduleAssistantRouteRoute,
   } as any);
-const With_menuWhenToMeetMeetingIdRoute =
-  With_menuWhenToMeetMeetingIdRouteImport.update({
-    id: "/when-to-meet/$meetingId",
-    path: "/when-to-meet/$meetingId",
+const With_menuWhen2meetMeetingIdRoute =
+  With_menuWhen2meetMeetingIdRouteImport.update({
+    id: "/when2meet/$meetingId",
+    path: "/when2meet/$meetingId",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
 const With_menuStudentAffairsSignOutRoute =
@@ -420,7 +419,7 @@ export interface FileRoutesByFullPath {
   "/search/ask": typeof With_menuSearchAskRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
-  "/when-to-meet/$meetingId": typeof With_menuWhenToMeetMeetingIdRoute;
+  "/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
   "/account/": typeof With_menuAccountIndexRoute;
   "/catalogue/": typeof With_menuCatalogueIndexRoute;
@@ -431,7 +430,7 @@ export interface FileRoutesByFullPath {
   "/schedule/": typeof With_menuScheduleIndexRoute;
   "/search/": typeof With_menuSearchIndexRoute;
   "/student-affairs/": typeof With_menuStudentAffairsIndexRoute;
-  "/when-to-meet/": typeof With_menuWhenToMeetIndexRoute;
+  "/when2meet/": typeof With_menuWhen2meetIndexRoute;
   "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/events/$id/edit": typeof With_menuEventsIdEditRoute;
@@ -479,7 +478,7 @@ export interface FileRoutesByTo {
   "/search/ask": typeof With_menuSearchAskRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
-  "/when-to-meet/$meetingId": typeof With_menuWhenToMeetMeetingIdRoute;
+  "/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
   "/account": typeof With_menuAccountIndexRoute;
   "/catalogue": typeof With_menuCatalogueIndexRoute;
@@ -490,7 +489,7 @@ export interface FileRoutesByTo {
   "/schedule": typeof With_menuScheduleIndexRoute;
   "/search": typeof With_menuSearchIndexRoute;
   "/student-affairs": typeof With_menuStudentAffairsIndexRoute;
-  "/when-to-meet": typeof With_menuWhenToMeetIndexRoute;
+  "/when2meet": typeof With_menuWhen2meetIndexRoute;
   "/schedule-assistant/settings": typeof ScheduleAssistantSettingsIndexRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/events/$id/edit": typeof With_menuEventsIdEditRoute;
@@ -541,7 +540,7 @@ export interface FileRoutesById {
   "/_with_menu/search/ask": typeof With_menuSearchAskRoute;
   "/_with_menu/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/_with_menu/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
-  "/_with_menu/when-to-meet/$meetingId": typeof With_menuWhenToMeetMeetingIdRoute;
+  "/_with_menu/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
   "/_with_menu/account/": typeof With_menuAccountIndexRoute;
   "/_with_menu/catalogue/": typeof With_menuCatalogueIndexRoute;
@@ -552,7 +551,7 @@ export interface FileRoutesById {
   "/_with_menu/schedule/": typeof With_menuScheduleIndexRoute;
   "/_with_menu/search/": typeof With_menuSearchIndexRoute;
   "/_with_menu/student-affairs/": typeof With_menuStudentAffairsIndexRoute;
-  "/_with_menu/when-to-meet/": typeof With_menuWhenToMeetIndexRoute;
+  "/_with_menu/when2meet/": typeof With_menuWhen2meetIndexRoute;
   "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/_with_menu/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/_with_menu/events/$id/edit": typeof With_menuEventsIdEditRoute;
@@ -603,7 +602,7 @@ export interface FileRouteTypes {
     | "/search/ask"
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
-    | "/when-to-meet/$meetingId"
+    | "/when2meet/$meetingId"
     | "/schedule-assistant/settings/$settingsTab"
     | "/account/"
     | "/catalogue/"
@@ -614,7 +613,7 @@ export interface FileRouteTypes {
     | "/schedule/"
     | "/search/"
     | "/student-affairs/"
-    | "/when-to-meet/"
+    | "/when2meet/"
     | "/schedule-assistant/settings/"
     | "/clubs/$slug/edit"
     | "/events/$id/edit"
@@ -662,7 +661,7 @@ export interface FileRouteTypes {
     | "/search/ask"
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
-    | "/when-to-meet/$meetingId"
+    | "/when2meet/$meetingId"
     | "/schedule-assistant/settings/$settingsTab"
     | "/account"
     | "/catalogue"
@@ -673,7 +672,7 @@ export interface FileRouteTypes {
     | "/schedule"
     | "/search"
     | "/student-affairs"
-    | "/when-to-meet"
+    | "/when2meet"
     | "/schedule-assistant/settings"
     | "/clubs/$slug/edit"
     | "/events/$id/edit"
@@ -723,7 +722,7 @@ export interface FileRouteTypes {
     | "/_with_menu/search/ask"
     | "/_with_menu/student-affairs/sign-in"
     | "/_with_menu/student-affairs/sign-out"
-    | "/_with_menu/when-to-meet/$meetingId"
+    | "/_with_menu/when2meet/$meetingId"
     | "/schedule-assistant/settings/$settingsTab"
     | "/_with_menu/account/"
     | "/_with_menu/catalogue/"
@@ -734,7 +733,7 @@ export interface FileRouteTypes {
     | "/_with_menu/schedule/"
     | "/_with_menu/search/"
     | "/_with_menu/student-affairs/"
-    | "/_with_menu/when-to-meet/"
+    | "/_with_menu/when2meet/"
     | "/schedule-assistant/settings/"
     | "/_with_menu/clubs/$slug/edit"
     | "/_with_menu/events/$id/edit"
@@ -925,11 +924,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ScheduleAssistantSettingsIndexRouteImport;
       parentRoute: typeof ScheduleAssistantRouteRoute;
     };
-    "/_with_menu/when-to-meet/": {
-      id: "/_with_menu/when-to-meet/";
-      path: "/when-to-meet";
-      fullPath: "/when-to-meet/";
-      preLoaderRoute: typeof With_menuWhenToMeetIndexRouteImport;
+    "/_with_menu/when2meet/": {
+      id: "/_with_menu/when2meet/";
+      path: "/when2meet";
+      fullPath: "/when2meet/";
+      preLoaderRoute: typeof With_menuWhen2meetIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/student-affairs/": {
@@ -1002,11 +1001,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ScheduleAssistantSettingsSettingsTabRouteImport;
       parentRoute: typeof ScheduleAssistantRouteRoute;
     };
-    "/_with_menu/when-to-meet/$meetingId": {
-      id: "/_with_menu/when-to-meet/$meetingId";
-      path: "/when-to-meet/$meetingId";
-      fullPath: "/when-to-meet/$meetingId";
-      preLoaderRoute: typeof With_menuWhenToMeetMeetingIdRouteImport;
+    "/_with_menu/when2meet/$meetingId": {
+      id: "/_with_menu/when2meet/$meetingId";
+      path: "/when2meet/$meetingId";
+      fullPath: "/when2meet/$meetingId";
+      preLoaderRoute: typeof With_menuWhen2meetMeetingIdRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/student-affairs/sign-out": {
@@ -1204,7 +1203,7 @@ interface With_menuRouteRouteChildren {
   With_menuSearchAskRoute: typeof With_menuSearchAskRoute;
   With_menuStudentAffairsSignInRoute: typeof With_menuStudentAffairsSignInRoute;
   With_menuStudentAffairsSignOutRoute: typeof With_menuStudentAffairsSignOutRoute;
-  With_menuWhenToMeetMeetingIdRoute: typeof With_menuWhenToMeetMeetingIdRoute;
+  With_menuWhen2meetMeetingIdRoute: typeof With_menuWhen2meetMeetingIdRoute;
   With_menuAccountIndexRoute: typeof With_menuAccountIndexRoute;
   With_menuCatalogueIndexRoute: typeof With_menuCatalogueIndexRoute;
   With_menuClubsIndexRoute: typeof With_menuClubsIndexRoute;
@@ -1214,7 +1213,7 @@ interface With_menuRouteRouteChildren {
   With_menuScheduleIndexRoute: typeof With_menuScheduleIndexRoute;
   With_menuSearchIndexRoute: typeof With_menuSearchIndexRoute;
   With_menuStudentAffairsIndexRoute: typeof With_menuStudentAffairsIndexRoute;
-  With_menuWhenToMeetIndexRoute: typeof With_menuWhenToMeetIndexRoute;
+  With_menuWhen2meetIndexRoute: typeof With_menuWhen2meetIndexRoute;
   With_menuClubsSlugEditRoute: typeof With_menuClubsSlugEditRoute;
   With_menuEventsIdEditRoute: typeof With_menuEventsIdEditRoute;
   With_menuRoomBookingRoomsRoomRoute: typeof With_menuRoomBookingRoomsRoomRoute;
@@ -1255,7 +1254,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuSearchAskRoute: With_menuSearchAskRoute,
   With_menuStudentAffairsSignInRoute: With_menuStudentAffairsSignInRoute,
   With_menuStudentAffairsSignOutRoute: With_menuStudentAffairsSignOutRoute,
-  With_menuWhenToMeetMeetingIdRoute: With_menuWhenToMeetMeetingIdRoute,
+  With_menuWhen2meetMeetingIdRoute: With_menuWhen2meetMeetingIdRoute,
   With_menuAccountIndexRoute: With_menuAccountIndexRoute,
   With_menuCatalogueIndexRoute: With_menuCatalogueIndexRoute,
   With_menuClubsIndexRoute: With_menuClubsIndexRoute,
@@ -1265,7 +1264,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuScheduleIndexRoute: With_menuScheduleIndexRoute,
   With_menuSearchIndexRoute: With_menuSearchIndexRoute,
   With_menuStudentAffairsIndexRoute: With_menuStudentAffairsIndexRoute,
-  With_menuWhenToMeetIndexRoute: With_menuWhenToMeetIndexRoute,
+  With_menuWhen2meetIndexRoute: With_menuWhen2meetIndexRoute,
   With_menuClubsSlugEditRoute: With_menuClubsSlugEditRoute,
   With_menuEventsIdEditRoute: With_menuEventsIdEditRoute,
   With_menuRoomBookingRoomsRoomRoute: With_menuRoomBookingRoomsRoomRoute,

@@ -103,7 +103,7 @@ export function CreationDialog({
     );
     handleOpenChange(false);
     navigate({
-      to: "/when-to-meet/$meetingId",
+      to: "/when2meet/$meetingId",
       params: { meetingId: `mock-${Date.now().toString(36)}` },
       search: { name: trimmedName },
     });
