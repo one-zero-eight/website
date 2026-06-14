@@ -161,7 +161,7 @@ export function SportOverviewSection({
                 {profile.trainer_info.groups.map((group) => (
                   <span
                     key={group.id}
-                    className="badge badge-accent h-fit min-h-8 shrink-0 px-3 py-1.5 text-sm font-medium"
+                    className="badge h-fit min-h-8 shrink-0 px-3 py-1.5 text-sm font-medium"
                   >
                     {group.display_name}
                   </span>
