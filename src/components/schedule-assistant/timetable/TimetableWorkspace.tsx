@@ -262,6 +262,7 @@ function TimetableWorkspaceInner() {
     startY: number;
     startScrollLeft: number;
     startScrollTop: number;
+    horizontalScrollEl: HTMLElement;
   } | null>(null);
   const activeWeekStartRef = useRef<string | null>(null);
 
@@ -376,14 +377,23 @@ function TimetableWorkspaceInner() {
     if (!wrap) return;
     const targetWrap = wrap;
 
+    function calendarDaysScrollEl() {
+      return targetWrap.querySelector<HTMLElement>("#calendar-days-scroll");
+    }
+
+    function horizontalScrollEl() {
+      return calendarDaysScrollEl() ?? targetWrap;
+    }
+
     function handleWrapMouseDown(event: MouseEvent) {
       if (event.button !== 1) return;
       event.preventDefault();
       dragScrollStateRef.current = {
         startX: event.clientX,
         startY: event.clientY,
-        startScrollLeft: targetWrap.scrollLeft,
+        startScrollLeft: horizontalScrollEl().scrollLeft,
         startScrollTop: targetWrap.scrollTop,
+        horizontalScrollEl: horizontalScrollEl(),
       };
       setIsMiddleDragScrolling(true);
     }
@@ -407,7 +417,7 @@ function TimetableWorkspaceInner() {
       if (!dragState || !wrap) return;
       const dx = event.clientX - dragState.startX;
       const dy = event.clientY - dragState.startY;
-      wrap.scrollLeft = dragState.startScrollLeft - dx;
+      dragState.horizontalScrollEl.scrollLeft = dragState.startScrollLeft - dx;
       wrap.scrollTop = dragState.startScrollTop - dy;
     }
 
@@ -626,7 +636,10 @@ function TimetableWorkspaceInner() {
                 id="gridWrap"
                 ref={gridWrapRef}
                 className={clsx(
-                  "rounded-tr-box min-h-80 flex-1 overflow-auto overscroll-x-contain border border-t-0 border-[#d8dfeb] bg-white [overflow-anchor:none]",
+                  "rounded-tr-box min-h-80 flex-1 border border-t-0 border-[#d8dfeb] bg-white [overflow-anchor:none]",
+                  layoutMode === "calendar" && !isUtilizationTab
+                    ? "overflow-x-hidden overflow-y-auto overscroll-y-contain"
+                    : "overflow-auto overscroll-x-contain",
                   isMiddleDragScrolling ? "cursor-grabbing" : "cursor-auto",
                 )}
               >

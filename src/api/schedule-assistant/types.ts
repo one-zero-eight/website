@@ -713,6 +713,21 @@ export interface components {
        */
       name: string;
       /**
+       * Short Name
+       * @description Short English display name
+       */
+      short_name?: string | null;
+      /**
+       * Name Ru
+       * @description Russian display name
+       */
+      name_ru?: string | null;
+      /**
+       * Short Name Ru
+       * @description Short Russian display name
+       */
+      short_name_ru?: string | null;
+      /**
        * Course Tags
        * @description Course tags (for example, core_course / elective / english)
        * @default []

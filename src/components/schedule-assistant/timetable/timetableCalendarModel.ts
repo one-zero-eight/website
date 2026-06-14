@@ -77,27 +77,38 @@ function formatCalendarDate(dateStr: string) {
   });
 }
 
-export const MEETING_CALENDAR_GROUPS_LIMIT = 1;
+export const MEETING_CALENDAR_GROUPS_LIMIT = 3;
 
 export function meetingCalendarMainLabel(meeting: Meeting) {
-  const course = String(meeting.course || "").trim();
+  const course = String(
+    meeting.course_short_name || meeting.course || "",
+  ).trim();
   const room = String(meeting.room || "").trim();
   return [course, room].filter(Boolean).join(" ") || "—";
 }
 
 export function meetingCalendarGroupsLabel(
-  groups: string[] | undefined,
+  meeting: Meeting,
   limit = MEETING_CALENDAR_GROUPS_LIMIT,
 ) {
-  const list = (groups || []).filter(Boolean);
+  const list = (meeting.groups || []).filter(Boolean);
   if (!list.length) return null;
+
+  const shortName = String(meeting.course_short_name ?? "")
+    .trim()
+    .toLowerCase();
+  if (list.length === 1 && shortName) {
+    const onlyGroup = list[0]!.trim().toLowerCase();
+    if (onlyGroup === shortName) return null;
+  }
+
   if (list.length <= limit) return list.join(", ");
   return `${list.slice(0, limit).join(", ")}, ...`;
 }
 
 export function meetingCalendarCellLabel(meeting: Meeting) {
   const mainLabel = meetingCalendarMainLabel(meeting);
-  const groupsLabel = meetingCalendarGroupsLabel(meeting.groups);
+  const groupsLabel = meetingCalendarGroupsLabel(meeting);
   if (!groupsLabel) return mainLabel;
   return `${mainLabel} (${groupsLabel})`;
 }

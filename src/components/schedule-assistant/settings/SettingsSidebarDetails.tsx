@@ -472,6 +472,16 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const nameField = useBlurSaveField(name, (value) =>
     patchCourse({ name: value }),
   );
+  const shortNameField = useBlurSaveField(course?.short_name ?? "", (value) =>
+    patchCourse({ short_name: value.trim() || null }),
+  );
+  const nameRuField = useBlurSaveField(course?.name_ru ?? "", (value) =>
+    patchCourse({ name_ru: value.trim() || null }),
+  );
+  const shortNameRuField = useBlurSaveField(
+    course?.short_name_ru ?? "",
+    (value) => patchCourse({ short_name_ru: value.trim() || null }),
+  );
   const tagsField = useBlurSaveField(tags, (value) =>
     patchCourse({
       course_tags: value
@@ -501,6 +511,22 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Название</span>
             <input className={detailInputClass} {...nameField} />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>
+              Короткое название (EN)
+            </span>
+            <input className={detailInputClass} {...shortNameField} />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Название (RU)</span>
+            <input className={detailInputClass} {...nameRuField} />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>
+              Короткое название (RU)
+            </span>
+            <input className={detailInputClass} {...shortNameRuField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>

@@ -48,6 +48,8 @@ export type MeetingOverrideField = "room" | "time" | "weekday" | "instructor";
 export type Meeting = {
   instance_id: string;
   course: string;
+  /** Short English display name from course config. */
+  course_short_name?: string;
   tag: string;
   groups: string[];
   date: string;
@@ -579,6 +581,17 @@ export function buildColumns(config: SchemaScheduleConfig) {
   return columns;
 }
 
+function meetingCourseFields(course: {
+  name: string;
+  short_name?: string | null;
+}) {
+  const shortName = String(course.short_name ?? "").trim();
+  return {
+    course: course.name,
+    course_short_name: shortName || undefined,
+  };
+}
+
 export function buildMeetings(
   config: SchemaScheduleConfig,
   coursesToSections: { [key: string]: string[] },
@@ -600,7 +613,7 @@ export function buildMeetings(
           if (!occurrence.date || !occurrence.start_time) continue;
           flat.push({
             instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:occ:${occIdx}`,
-            course: course.name,
+            ...meetingCourseFields(course),
             tag: component.tag,
             groups: audienceGroups,
             date: occurrence.date,
@@ -622,7 +635,7 @@ export function buildMeetings(
               if (resolved.cancelled) {
                 flat.push({
                   instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
-                  course: course.name,
+                  ...meetingCourseFields(course),
                   tag: component.tag,
                   groups: audienceGroups,
                   date: resolved.date,
@@ -643,7 +656,7 @@ export function buildMeetings(
               );
               flat.push({
                 instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:wp:${slotIdx}:${date}`,
-                course: course.name,
+                ...meetingCourseFields(course),
                 tag: component.tag,
                 groups: audienceGroups,
                 date: resolved.date,
