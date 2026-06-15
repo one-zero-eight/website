@@ -204,10 +204,7 @@ export interface components {
     };
     /** Body_set_event_image_workshops__workshop_id__image_post */
     Body_set_event_image_workshops__workshop_id__image_post: {
-      /**
-       * Image File
-       * Format: binary
-       */
+      /** Image File */
       image_file: string;
     };
     /**
@@ -338,6 +335,10 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
     };
     /** ViewUserScheme */
     ViewUserScheme: {

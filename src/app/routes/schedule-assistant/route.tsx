@@ -1,4 +1,5 @@
 import { ScheduleConfigStatus } from "@/components/schedule-assistant/config/useConfig.tsx";
+import { ChecksSessionProvider } from "@/components/schedule-assistant/checks/checksSession.tsx";
 import { MainFloatingMenu } from "@/components/schedule-assistant/MainFloatingMenu.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
@@ -24,11 +25,13 @@ function RouteComponent() {
       </Helmet>
 
       <ScheduleConfigStatus>
-        <div className="bg-base-200/40 relative flex min-h-0 flex-1 flex-col overflow-auto pb-32">
-          <Outlet />
+        <ChecksSessionProvider>
+          <div className="bg-base-200/40 relative flex min-h-0 flex-1 flex-col overflow-hidden">
+            <Outlet />
 
-          <MainFloatingMenu />
-        </div>
+            <MainFloatingMenu />
+          </div>
+        </ChecksSessionProvider>
       </ScheduleConfigStatus>
     </div>
   );

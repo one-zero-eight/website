@@ -34,6 +34,21 @@ const DAY_LABEL_RU: Record<(typeof DAY_NAMES)[number], string> = {
   Sun: "Вс",
 };
 
+/** Полные подписи дней для строк таблицы. */
+export const WEEKDAY_LABEL_RU: Record<(typeof DAY_NAMES)[number], string> = {
+  Mon: "Понедельник",
+  Tue: "Вторник",
+  Wed: "Среда",
+  Thu: "Четверг",
+  Fri: "Пятница",
+  Sat: "Суббота",
+  Sun: "Воскресенье",
+};
+
+export function weekdayLabelRu(day: string) {
+  return WEEKDAY_LABEL_RU[day as (typeof DAY_NAMES)[number]] ?? day;
+}
+
 /** Один источник текстов `title` для таблицы и для HTML панели деталей. */
 export const scheduleAssistantDetailTooltips = {
   room: "Показать аудиторию в панели деталей",
@@ -42,6 +57,10 @@ export const scheduleAssistantDetailTooltips = {
   program: "Показать программу в панели деталей",
   resource: "Показать в панели деталей",
 } as const;
+
+export function instructorDetailTooltip(name: string) {
+  return `Показать преподавателя «${name}» в панели деталей`;
+}
 
 export type MeetingOverrideField = "room" | "time" | "weekday" | "instructor";
 

@@ -1,6 +1,7 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
+import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import {
   useCoursesQuery,
   useUpdateCourseMutation,
@@ -8,7 +9,7 @@ import {
 import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
 import clsx from "clsx";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import {
   applyMeetingEditsToCourse,
@@ -45,46 +46,15 @@ function EditClassDropdown({
   placeholder: string;
   disabled?: boolean;
 }) {
-  const detailsRef = useRef<HTMLDetailsElement>(null);
-  const currentLabel =
-    options.find((option) => option.value === value)?.label ?? placeholder;
-
-  function handleOptionClick(nextValue: string) {
-    onChange(nextValue);
-    if (detailsRef.current) detailsRef.current.open = false;
-  }
-
   return (
-    <details
-      ref={detailsRef}
-      className={clsx(
-        "dropdown w-full",
-        disabled && "pointer-events-none opacity-50",
-      )}
-    >
-      <summary className="select select-bordered select-xs flex h-8 min-h-8 w-full cursor-pointer list-none items-center justify-between px-3 text-sm font-normal [&::-webkit-details-marker]:hidden">
-        <span className={clsx("truncate", !value && "text-base-content/50")}>
-          {currentLabel}
-        </span>
-        <span className="icon-[material-symbols--expand-more] shrink-0 text-base" />
-      </summary>
-      <ul className="dropdown-content border-base-300 bg-base-100 rounded-box mt-1 max-h-56 w-full overflow-y-auto border p-1 shadow-sm">
-        {options.map((option) => (
-          <li key={option.value}>
-            <button
-              type="button"
-              className={clsx(
-                "hover:bg-base-200 w-full rounded-md px-2 py-1.5 text-left text-sm",
-                value === option.value && "bg-base-200 font-semibold",
-              )}
-              onClick={() => handleOptionClick(option.value)}
-            >
-              {option.label}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </details>
+    <SelectDropdown
+      value={value}
+      onChange={onChange}
+      options={options}
+      placeholder={placeholder}
+      className={clsx("w-full", disabled && "pointer-events-none opacity-50")}
+      triggerClassName="w-full"
+    />
   );
 }
 

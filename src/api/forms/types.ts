@@ -315,14 +315,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Link belongs to another user */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Link not found OR User not found */
+      /** @description User not found OR Link not found */
       404: {
         headers: {
           [name: string]: unknown;

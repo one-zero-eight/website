@@ -1,6 +1,7 @@
-import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
-import clsx from "clsx";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
+import { ReturnToChecksLink } from "@/components/schedule-assistant/checks/ReturnToChecksLink.tsx";
 import {
   getScheduleSections,
   useConfig,
@@ -8,6 +9,7 @@ import {
   useUpdateCourseMutation,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { useToast } from "@/components/toast";
+import clsx from "clsx";
 import {
   createContext,
   memo,
@@ -15,6 +17,7 @@ import {
   useContext,
   useDeferredValue,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -27,23 +30,48 @@ import {
   TimetableLayoutSelector,
   type TimetableLayoutMode,
 } from "./TimetableLayoutSelector.tsx";
-import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
 import {
   canRestoreMeeting,
   parseMeetingInstanceId,
   restoreMeetingInCourse,
 } from "./meetingEditUtils.ts";
+import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
 import { computeDetailPanel } from "./scheduleAssistantDetailPanel.tsx";
-import { buildCalendarGrid } from "./timetableCalendarModel.ts";
 import {
-  type BuiltGrid,
-  type Column,
-  type Meeting,
-  type MergedRow,
-  type Selection,
-  type WeekRange,
+  buildCalendarGrid,
+  formatCalendarWeekRange,
+} from "./timetableCalendarModel.ts";
+import {
+  GROUPS_CELL_PAD,
+  GROUPS_COL_WIDTH,
+  GROUPS_DAY_ROW_INNER_CLASS,
+  GROUPS_DAY_ROW_STICKY_STYLE,
+  GROUPS_GRID_HEADER_HEIGHT_DEFAULT,
+  GROUPS_HEAD_PAD,
+  GROUPS_MEETING_BODY_CLASS,
+  GROUPS_MEETING_CLASS,
+  GROUPS_MEETING_FOOTER_CLASS,
+  GROUPS_MEETING_LINE_CLASS,
+  GROUPS_MEETING_TITLE_CLASS,
+  GROUPS_SLOT_ROW_CLASS,
+  GROUPS_SLOT_TIME_PAD,
+  GROUPS_TABLE_CLASS,
+  GROUPS_TABLE_HEAD_CLASS,
+  GROUPS_TIME_COL_WIDTH,
+} from "./timetableGroupsGridLayout.ts";
+import { scrollMeetingIntoCenter } from "./timetableMeetingScroll.ts";
+import {
+  isTodayWeekdayInDisplayedWeek,
+  todayGroupsDayRowClass,
+  todayGroupsSlotCellClass,
+  todayGroupsSlotTimeClass,
+} from "./timetableTodayHighlight.ts";
+import {
+  WEEK_RELATIVE_BADGE_CLASS,
+  WEEK_RELATIVE_LABELS,
   buildColumns,
   buildCourseColors,
+  buildCoursesToSections,
   buildGrid,
   buildGroupSizeMap,
   buildMeetings,
@@ -53,18 +81,23 @@ import {
   colorBySubject,
   columnsForTab,
   dayKey as dayKeyFromModel,
+  instructorDetailTooltip,
   meetingRoomLoadLabel,
   meetingRoomLoadOverCapacity,
   meetingSelectionKey,
   mergedMeetingsForCell,
   roomFillPercent,
   scheduleAssistantDetailTooltips,
-  buildCoursesToSections,
   todayIsoDate,
   weekIndexForDate,
-  WEEK_RELATIVE_LABELS,
-  WEEK_RELATIVE_BADGE_CLASS,
   weekRelativeToToday,
+  weekdayLabelRu,
+  type BuiltGrid,
+  type Column,
+  type Meeting,
+  type MergedRow,
+  type Selection,
+  type WeekRange,
   type WeekRelativePosition,
 } from "./timetableViewerModel.ts";
 
@@ -179,6 +212,7 @@ function useMeetingHighlightBits(m: Meeting): number {
 type MeetingCardProps = {
   row: MergedRow;
   grid: BuiltGrid;
+  span?: number;
   selectMeeting: (valueKey: string, course: string) => void;
   selectInstructorCell: (name: string) => void;
   selectRoomCell: (room: string) => void;
@@ -191,6 +225,7 @@ function meetingCardPropsEqual(
   prev: MeetingCardProps,
   next: MeetingCardProps,
 ): boolean {
+  if ((prev.span ?? 1) !== (next.span ?? 1)) return false;
   if (prev.row.sign !== next.row.sign || prev.row.count !== next.row.count)
     return false;
   const pm = prev.row.sample;
@@ -237,7 +272,15 @@ function utilizationMeetingCardPropsEqual(
   return meetingCardPropsEqual(prev, next);
 }
 
-function TimetableWorkspaceInner() {
+function TimetableWorkspaceInner({
+  focusMeetingId,
+  onFocusMeetingHandled,
+  returnFromChecks,
+}: {
+  focusMeetingId?: string;
+  onFocusMeetingHandled?: () => void;
+  returnFromChecks?: boolean;
+}) {
   const { config } = useConfig();
   const [msg, setMsg] = useState("");
   const [weeks, setWeeks] = useState<WeekRange[]>([]);
@@ -256,6 +299,9 @@ function TimetableWorkspaceInner() {
     Record<string, number | null | undefined>
   >({});
   const [isMiddleDragScrolling, setIsMiddleDragScrolling] = useState(false);
+  const [scrollToMeetingId, setScrollToMeetingId] = useState<string | null>(
+    null,
+  );
   const gridWrapRef = useRef<HTMLDivElement | null>(null);
   const dragScrollStateRef = useRef<{
     startX: number;
@@ -265,6 +311,7 @@ function TimetableWorkspaceInner() {
     horizontalScrollEl: HTMLElement;
   } | null>(null);
   const activeWeekStartRef = useRef<string | null>(null);
+  const appliedFocusMeetingIdRef = useRef<string | null>(null);
 
   const selectionStore = useMemo(() => createSelectionStore(), []);
 
@@ -447,6 +494,44 @@ function TimetableWorkspaceInner() {
     return buildCalendarGrid(config, allMeetings, weeks, activeTab);
   }, [config, allMeetings, weeks, activeTab]);
 
+  useLayoutEffect(() => {
+    if (layoutMode === "calendar") return;
+
+    const wrap = gridWrapRef.current;
+    if (!wrap) return;
+
+    const syncGridHeaderHeight = () => {
+      const thead = wrap.querySelector<HTMLElement>("#table thead");
+      if (!thead) return;
+      const height = thead.offsetHeight;
+      if (height <= 0) return;
+      wrap.style.setProperty("--sa-grid-header-height", `${height}px`);
+    };
+
+    syncGridHeaderHeight();
+    const rafId = requestAnimationFrame(syncGridHeaderHeight);
+
+    const thead = wrap.querySelector<HTMLElement>("#table thead");
+    const observer = thead ? new ResizeObserver(syncGridHeaderHeight) : null;
+    if (thead) observer?.observe(thead);
+    window.addEventListener("resize", syncGridHeaderHeight);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      observer?.disconnect();
+      window.removeEventListener("resize", syncGridHeaderHeight);
+    };
+  }, [
+    layoutMode,
+    activeTab,
+    columns,
+    grid,
+    allMeetings,
+    weeks,
+    weekIndex,
+    isUtilizationTab,
+  ]);
+
   useEffect(() => {
     if (layoutMode !== "calendar" || !calendarGrid) return;
     const currentWeekRow = gridWrapRef.current?.querySelector(
@@ -517,6 +602,72 @@ function TimetableWorkspaceInner() {
   }, [selectionStore]);
 
   useEffect(() => {
+    if (!focusMeetingId) {
+      appliedFocusMeetingIdRef.current = null;
+      return;
+    }
+    if (!allMeetings.length || !weeks.length) return;
+    if (appliedFocusMeetingIdRef.current === focusMeetingId) return;
+
+    const meeting = allMeetings.find(
+      (entry) => entry.instance_id === focusMeetingId,
+    );
+    if (!meeting) return;
+
+    appliedFocusMeetingIdRef.current = focusMeetingId;
+    setWeekIndex(weekIndexForDate(weeks, meeting.date));
+    if (meeting.sections[0]) {
+      setActiveTab(meeting.sections[0]);
+    }
+    selectionStore.setSelection({
+      type: "meeting",
+      value: meeting.instance_id,
+      course: meeting.course,
+    });
+    setScrollToMeetingId(meeting.instance_id);
+  }, [allMeetings, focusMeetingId, selectionStore, weeks]);
+
+  useEffect(() => {
+    if (!scrollToMeetingId) return;
+
+    let cancelled = false;
+    let attempts = 0;
+
+    const tryScroll = () => {
+      if (cancelled) return;
+      const scrolled = scrollMeetingIntoCenter(
+        gridWrapRef.current,
+        scrollToMeetingId,
+      );
+      if (scrolled) {
+        setScrollToMeetingId(null);
+        onFocusMeetingHandled?.();
+        return;
+      }
+      attempts += 1;
+      if (attempts < 12) {
+        requestAnimationFrame(tryScroll);
+      } else {
+        setScrollToMeetingId(null);
+        onFocusMeetingHandled?.();
+      }
+    };
+
+    requestAnimationFrame(tryScroll);
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    scrollToMeetingId,
+    grid,
+    calendarGrid,
+    weekIndex,
+    activeTab,
+    layoutMode,
+    onFocusMeetingHandled,
+  ]);
+
+  useEffect(() => {
     const onDocClick = (ev: MouseEvent) => {
       const t = ev.target;
       if (!(t instanceof Element)) return;
@@ -551,7 +702,7 @@ function TimetableWorkspaceInner() {
 
   const weekLabel = !weeks.length
     ? "Нет недель"
-    : `Нед. ${weekIndex + 1}/${weeks.length}: ${weeks[weekIndex]!.start} — ${weeks[weekIndex]!.end}`;
+    : `Нед. ${weekIndex + 1}/${weeks.length}: ${formatCalendarWeekRange(weeks[weekIndex]!.start, weeks[weekIndex]!.end)}`;
   const weekRelative: WeekRelativePosition | null = weeks[weekIndex]
     ? weekRelativeToToday(weeks[weekIndex]!)
     : null;
@@ -559,138 +710,164 @@ function TimetableWorkspaceInner() {
 
   return (
     <SelectionStoreContext.Provider value={selectionStore}>
-      <div className="font-rubik text-base-content flex h-full min-h-0 flex-1 flex-col leading-[1.45] antialiased">
-        <div className="mx-auto mt-0 flex h-full min-h-0 w-full max-w-none flex-1 flex-row items-stretch gap-0 p-0 max-[1200px]:flex-col">
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            {msg ? (
-              <div className="alert alert-error alert-soft mx-2 mt-2 shrink-0 py-2 text-sm">
-                {msg}
-              </div>
-            ) : null}
-
-            <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 px-2 py-1.5 text-sm">
-              {layoutMode === "groups" ? (
-                <div className="flex shrink-0 items-center gap-1.5">
-                  <div className="join">
-                    <button
-                      type="button"
-                      className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                      title="Предыдущая неделя"
-                      disabled={weekIndex <= 0 || !weeks.length}
-                      onClick={() => {
-                        if (weekIndex > 0) setWeekIndex((i) => i - 1);
-                      }}
-                    >
-                      ‹
-                    </button>
-                    <span
-                      className="join-item btn btn-xs btn-ghost no-animation text-base-content inline-flex h-auto min-h-8 max-w-[min(100vw-8rem,28rem)] min-w-[10.5rem] cursor-default items-center justify-center px-2 py-1 text-center text-sm leading-tight font-normal whitespace-nowrap normal-case"
-                      role="status"
-                    >
-                      {weekLabel}
-                    </span>
-                    <button
-                      type="button"
-                      className="btn btn-xs join-item min-h-8 min-w-8 px-0"
-                      title="Следующая неделя"
-                      disabled={weekIndex >= weeks.length - 1 || !weeks.length}
-                      onClick={() => {
-                        if (weekIndex < weeks.length - 1)
-                          setWeekIndex((i) => i + 1);
-                      }}
-                    >
-                      ›
-                    </button>
-                  </div>
-                  {weekRelative ? (
-                    <span
-                      className={clsx(
-                        "badge badge-xs shrink-0",
-                        weekRelativeBadgeClass[weekRelative],
-                      )}
-                    >
-                      {WEEK_RELATIVE_LABELS[weekRelative]} неделя
-                    </span>
-                  ) : null}
+      <div className="font-rubik text-base-content flex min-h-0 flex-1 flex-col leading-[1.45] antialiased">
+        <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-3 p-4">
+          <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_360px] xl:grid-rows-[minmax(0,1fr)]">
+            <div className="-mt-2 -ml-4 flex min-h-0 min-w-0 flex-col overflow-hidden">
+              {msg ? (
+                <div className="alert alert-error alert-soft mx-2 mt-2 shrink-0 py-2 text-sm">
+                  {msg}
                 </div>
               ) : null}
-              <div className="ml-auto flex shrink-0 items-center gap-2">
-                <TimetableLayoutSelector
-                  layoutMode={layoutMode}
-                  onLayoutModeChange={setLayoutMode}
-                  calendarDisabled={isUtilizationTab}
-                />
-                <TimetableTabSelector
-                  config={config}
-                  activeTab={activeTab}
-                  onTabChange={applyTabChange}
-                />
+
+              <div
+                id="tableStage"
+                className="rounded-tr-box relative flex min-h-0 flex-1 flex-col overflow-hidden border border-[#d8dfeb] bg-white"
+              >
+                <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 border-b border-[#d8dfeb] px-2 py-1 text-sm">
+                  {returnFromChecks ? <ReturnToChecksLink /> : null}
+                  {layoutMode !== "calendar" ? (
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <div className="join">
+                        <button
+                          type="button"
+                          className="btn btn-xs join-item min-h-8 min-w-8 px-0"
+                          title="Предыдущая неделя"
+                          disabled={weekIndex <= 0 || !weeks.length}
+                          onClick={() => {
+                            if (weekIndex > 0) setWeekIndex((i) => i - 1);
+                          }}
+                        >
+                          ‹
+                        </button>
+                        <span
+                          className="join-item btn btn-xs btn-ghost no-animation text-base-content inline-flex h-auto min-h-8 max-w-[min(100vw-8rem,28rem)] min-w-[10.5rem] cursor-default items-center justify-center px-2 py-1 text-center text-sm leading-tight font-normal whitespace-nowrap normal-case"
+                          role="status"
+                        >
+                          {weekLabel}
+                        </span>
+                        <button
+                          type="button"
+                          className="btn btn-xs join-item min-h-8 min-w-8 px-0"
+                          title="Следующая неделя"
+                          disabled={
+                            weekIndex >= weeks.length - 1 || !weeks.length
+                          }
+                          onClick={() => {
+                            if (weekIndex < weeks.length - 1)
+                              setWeekIndex((i) => i + 1);
+                          }}
+                        >
+                          ›
+                        </button>
+                      </div>
+                      {weekRelative ? (
+                        <span
+                          className={clsx(
+                            "badge badge-xs shrink-0",
+                            weekRelativeBadgeClass[weekRelative],
+                          )}
+                        >
+                          {WEEK_RELATIVE_LABELS[weekRelative]} неделя
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  <div className="ml-auto flex shrink-0 items-center gap-2">
+                    <TimetableLayoutSelector
+                      layoutMode={layoutMode}
+                      onLayoutModeChange={setLayoutMode}
+                      calendarDisabled={isUtilizationTab}
+                    />
+                    <TimetableTabSelector
+                      config={config}
+                      activeTab={activeTab}
+                      onTabChange={applyTabChange}
+                    />
+                  </div>
+                </div>
+
+                <div
+                  id="gridWrap"
+                  ref={gridWrapRef}
+                  className={clsx(
+                    "min-h-0 flex-1 overflow-auto overscroll-x-contain bg-white pb-4 [overflow-anchor:none]",
+                    isMiddleDragScrolling ? "cursor-grabbing" : "cursor-auto",
+                  )}
+                  style={
+                    {
+                      "--sa-time-col-width": "130px",
+                      "--sa-grid-header-height":
+                        GROUPS_GRID_HEADER_HEIGHT_DEFAULT,
+                    } as React.CSSProperties
+                  }
+                >
+                  <TimetableMainGrid
+                    layoutMode={layoutMode}
+                    isUtilizationTab={isUtilizationTab}
+                    calendarGrid={calendarGrid}
+                    grid={grid}
+                    activeWeek={weeks[weekIndex] ?? null}
+                    columns={columns}
+                    activeTab={activeTab}
+                    allMeetings={allMeetings}
+                    config={config}
+                    courseColors={courseColors}
+                    roomCapacityById={roomCapacityById}
+                    groupSizeById={groupSizeById}
+                    selectMeeting={selectMeeting}
+                    selectInstructorCell={selectInstructorCell}
+                    selectRoomCell={selectRoomCell}
+                    selectInstructorHeader={selectInstructorHeader}
+                    selectRoomHeader={selectRoomHeader}
+                    selectProgram={selectProgram}
+                    selectGroup={selectGroup}
+                    clearSelection={clearSelection}
+                  />
+                </div>
               </div>
             </div>
 
-            <div
-              id="tableStage"
-              className="relative flex min-h-0 min-h-[280px] flex-1 flex-col"
+            <aside
+              className="detail border-base-300 bg-base-100 rounded-box sticky top-4 flex max-h-[calc(100vh-2rem)] min-h-0 w-full flex-col self-start overflow-hidden border p-3 xl:col-start-2 xl:h-[calc(100vh-2rem)]"
+              id="detail"
             >
-              <div
-                id="gridWrap"
-                ref={gridWrapRef}
-                className={clsx(
-                  "rounded-tr-box min-h-80 flex-1 border border-t-0 border-[#d8dfeb] bg-white [overflow-anchor:none]",
-                  layoutMode === "calendar" && !isUtilizationTab
-                    ? "overflow-x-hidden overflow-y-auto overscroll-y-contain"
-                    : "overflow-auto overscroll-x-contain",
-                  isMiddleDragScrolling ? "cursor-grabbing" : "cursor-auto",
-                )}
-              >
-                <TimetableMainGrid
-                  layoutMode={layoutMode}
-                  isUtilizationTab={isUtilizationTab}
-                  calendarGrid={calendarGrid}
-                  grid={grid}
-                  columns={columns}
-                  activeTab={activeTab}
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto">
+                <TimetableDetailPanel
                   allMeetings={allMeetings}
+                  columns={columns}
                   config={config}
-                  courseColors={courseColors}
                   roomCapacityById={roomCapacityById}
                   groupSizeById={groupSizeById}
-                  selectMeeting={selectMeeting}
-                  selectInstructorCell={selectInstructorCell}
-                  selectRoomCell={selectRoomCell}
-                  selectInstructorHeader={selectInstructorHeader}
-                  selectRoomHeader={selectRoomHeader}
-                  selectProgram={selectProgram}
-                  selectGroup={selectGroup}
+                  weeks={weeks}
+                  weekIndex={weekIndex}
                   clearSelection={clearSelection}
                 />
               </div>
-            </div>
+            </aside>
           </div>
-
-          <aside
-            className="detail border-base-300 bg-base-100 rounded-box mt-4 mr-4 mb-4 ml-3 flex min-h-0 w-[360px] shrink-0 flex-col self-stretch overflow-y-auto border p-3 max-[1200px]:m-0 max-[1200px]:mt-2 max-[1200px]:min-h-0 max-[1200px]:w-full max-[1200px]:flex-1"
-            id="detail"
-          >
-            <TimetableDetailPanel
-              allMeetings={allMeetings}
-              columns={columns}
-              config={config}
-              roomCapacityById={roomCapacityById}
-              groupSizeById={groupSizeById}
-              weeks={weeks}
-              weekIndex={weekIndex}
-              clearSelection={clearSelection}
-            />
-          </aside>
         </div>
       </div>
     </SelectionStoreContext.Provider>
   );
 }
 
-export function TimetableWorkspace() {
-  return <TimetableWorkspaceInner />;
+export function TimetableWorkspace({
+  focusMeetingId,
+  onFocusMeetingHandled,
+  returnFromChecks,
+}: {
+  focusMeetingId?: string;
+  onFocusMeetingHandled?: () => void;
+  returnFromChecks?: boolean;
+} = {}) {
+  return (
+    <TimetableWorkspaceInner
+      focusMeetingId={focusMeetingId}
+      onFocusMeetingHandled={onFocusMeetingHandled}
+      returnFromChecks={returnFromChecks}
+    />
+  );
 }
 
 function TimetableMainGrid({
@@ -698,6 +875,7 @@ function TimetableMainGrid({
   isUtilizationTab,
   calendarGrid,
   grid,
+  activeWeek,
   columns,
   activeTab,
   allMeetings,
@@ -718,6 +896,7 @@ function TimetableMainGrid({
   isUtilizationTab: boolean;
   calendarGrid: ReturnType<typeof buildCalendarGrid>;
   grid: BuiltGrid | null;
+  activeWeek: WeekRange | null;
   columns: Column[];
   activeTab: InnerTab;
   allMeetings: Meeting[];
@@ -741,6 +920,7 @@ function TimetableMainGrid({
     return (
       <TimetableCalendarTable
         calendarGrid={calendarGrid}
+        courseColors={courseColors}
         selection={selection}
         selectMeeting={selectMeeting}
         clearSelection={clearSelection}
@@ -755,6 +935,7 @@ function TimetableMainGrid({
       key={activeTab}
       tabMode={activeTab}
       grid={grid}
+      activeWeek={activeWeek}
       columns={columns}
       allMeetings={allMeetings}
       config={config}
@@ -782,7 +963,6 @@ function TimetableTabSelector({
   activeTab: InnerTab;
   onTabChange: (tab: InnerTab) => void;
 }) {
-  const detailsRef = useRef<HTMLDetailsElement>(null);
   const sections = getScheduleSections(config);
   const options: { value: InnerTab; label: string }[] = [
     ...sections.map((section) => ({
@@ -792,45 +972,25 @@ function TimetableTabSelector({
     { value: "instructor", label: "По преподавателям" },
     { value: "room", label: "По аудиториям" },
   ];
-  const currentLabel =
-    options.find((option) => option.value === activeTab)?.label ??
-    options[0]?.label ??
-    "Режим таблицы";
-
-  function handleOptionClick(nextTab: InnerTab) {
-    onTabChange(nextTab);
-    if (detailsRef.current) detailsRef.current.open = false;
-  }
 
   return (
-    <details ref={detailsRef} className="dropdown dropdown-end shrink-0">
-      <summary className="select select-bordered select-xs flex h-8 min-h-8 w-[10.5rem] cursor-pointer list-none items-center justify-between px-3 text-sm font-normal [&::-webkit-details-marker]:hidden">
-        <span className="truncate">{currentLabel}</span>
-        <span className="icon-[material-symbols--expand-more] shrink-0 text-base" />
-      </summary>
-      <ul className="dropdown-content border-base-300 bg-base-100 rounded-box mt-1 w-[12rem] border p-1 shadow-sm">
-        {options.map((option, i) => (
-          <li key={i}>
-            <button
-              type="button"
-              className={clsx(
-                "hover:bg-base-200 w-full rounded-md px-2 py-1.5 text-left text-sm",
-                activeTab === option.value && "bg-base-200 font-semibold",
-              )}
-              onClick={() => handleOptionClick(option.value)}
-            >
-              {option.label}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </details>
+    <SelectDropdown
+      value={activeTab}
+      onChange={onTabChange}
+      options={options}
+      placeholder="Режим таблицы"
+      triggerClassName="w-[10.5rem]"
+      menuClassName="min-w-[12rem]"
+      placement="bottom-end"
+      matchTriggerWidth={false}
+    />
   );
 }
 
 type TimetableTableProps = {
   tabMode: InnerTab;
   grid: BuiltGrid;
+  activeWeek: WeekRange | null;
   columns: Column[];
   allMeetings: Meeting[];
   config: SchemaScheduleConfig;
@@ -850,6 +1010,7 @@ type TimetableTableProps = {
 function TimetableTable({
   tabMode,
   grid,
+  activeWeek,
   columns,
   allMeetings,
   config,
@@ -866,10 +1027,7 @@ function TimetableTable({
   clearSelection,
 }: TimetableTableProps) {
   return (
-    <table
-      id="table"
-      className="isolate w-max min-w-[980px] table-fixed border-separate border-spacing-0"
-    >
+    <table id="table" className={GROUPS_TABLE_CLASS}>
       {tabMode === "instructor" || tabMode === "room"
         ? renderUtilizationRows({
             mode: tabMode === "instructor" ? "instructor" : "room",
@@ -885,6 +1043,7 @@ function TimetableTable({
           })
         : renderCoreRows({
             grid,
+            activeWeek,
             columns,
             allMeetings,
             config,
@@ -1073,15 +1232,15 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
 
   return (
     <>
-      <div className="mb-1.5 flex items-center justify-between gap-2">
+      <div className="mb-1.5 flex flex-col gap-2">
         <div
-          className="detail-title min-w-0 flex-1 pr-1 text-base leading-snug font-semibold [overflow-wrap:anywhere] text-[#243957]"
+          className="detail-title min-w-0 text-base leading-snug font-semibold [overflow-wrap:anywhere] text-[#243957]"
           id="detailTitle"
         >
           {detail.detailTitle}
         </div>
         {!editModalOpen ? (
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             {canEditSelectedMeeting ? (
               <button
                 className="btn btn-primary btn-xs"
@@ -1151,7 +1310,8 @@ const CoreYearHeadCell = memo(function CoreYearHeadCell({
   return (
     <th
       className={clsx(
-        "year-head z-[8] cursor-pointer border-t border-r border-b border-[#d8dfeb] bg-[#1f5fae] p-2 text-center [vertical-align:top] text-[0.875rem] font-bold text-white",
+        "year-head z-[8] cursor-pointer border-t border-r border-b border-[#d8dfeb] bg-[#1f5fae] text-center align-top font-bold text-white",
+        GROUPS_HEAD_PAD,
         programSelected && "shadow-[inset_0_-3px_0_#ffd54f]",
       )}
       colSpan={colSpan}
@@ -1182,7 +1342,9 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
   return (
     <th
       className={clsx(
-        "group-head z-[8] w-[170px] max-w-[170px] min-w-[170px] cursor-pointer border-r border-b border-[#d8dfeb] bg-[#2d77cc] p-2 text-center [vertical-align:top] text-[0.75rem] font-semibold text-white",
+        "group-head z-[8] cursor-pointer border-r border-b border-[#d8dfeb] bg-[#2d77cc] text-center align-top font-semibold text-white",
+        GROUPS_COL_WIDTH,
+        GROUPS_HEAD_PAD,
         highlight && "shadow-[inset_0_-3px_0_#ffd54f]",
       )}
       onClick={() => onSelectGroup(groupId)}
@@ -1212,7 +1374,9 @@ const UtilResourceHeadCell = memo(function UtilResourceHeadCell({
   return (
     <th
       className={clsx(
-        "group-head z-[8] w-[170px] max-w-[170px] min-w-[170px] cursor-pointer border-r border-b border-[#d8dfeb] bg-[#2d77cc] p-2 text-center [vertical-align:top] text-[0.75rem] font-semibold text-white",
+        "group-head z-[8] cursor-pointer border-r border-b border-[#d8dfeb] bg-[#2d77cc] text-center align-top font-semibold text-white",
+        GROUPS_COL_WIDTH,
+        GROUPS_HEAD_PAD,
         selected && "shadow-[inset_0_-3px_0_#ffd54f]",
       )}
       onClick={() => onSelectResource(resourceKey)}
@@ -1240,6 +1404,8 @@ type CorePreparedRow =
   | {
       kind: "slot";
       key: string;
+      day: string;
+      slotStart: string;
       slotLabel: string;
       rowHasMeetings: boolean;
       cells: CorePreparedCell[];
@@ -1320,6 +1486,8 @@ function buildCorePrepared(
       rows.push({
         kind: "slot",
         key: `slot-${day}-${slot.start}`,
+        day,
+        slotStart: slot.start,
         slotLabel: slot.label,
         rowHasMeetings,
         cells,
@@ -1332,6 +1500,7 @@ function buildCorePrepared(
 
 function renderCoreRows(args: {
   grid: BuiltGrid;
+  activeWeek: WeekRange | null;
   columns: Column[];
   allMeetings: Meeting[];
   config: SchemaScheduleConfig;
@@ -1348,6 +1517,7 @@ function renderCoreRows(args: {
 }) {
   const {
     grid,
+    activeWeek,
     columns: baseColumns,
     allMeetings,
     config,
@@ -1372,12 +1542,17 @@ function renderCoreRows(args: {
   if (!visibleColumns.length) return null;
 
   const prepared = buildCorePrepared(grid, visibleColumns);
+  const lastSlotStart = grid.slots.at(-1)?.start;
 
   const thead = (
-    <thead className="sticky top-0 z-[20]">
+    <thead className={GROUPS_TABLE_HEAD_CLASS}>
       <tr key="h1">
         <th
-          className="left-head sticky left-0 z-[25] w-[130px] min-w-[130px] border border-[#d8dfeb] bg-[#1f5fae] p-2 text-center [vertical-align:top] text-[0.8125rem] font-bold text-white"
+          className={clsx(
+            "left-head sticky left-0 z-[25] border border-[#d8dfeb] bg-[#1f5fae] text-center align-top font-bold text-white",
+            GROUPS_TIME_COL_WIDTH,
+            GROUPS_HEAD_PAD,
+          )}
           rowSpan={2}
         >
           День / время
@@ -1411,14 +1586,22 @@ function renderCoreRows(args: {
 
   for (const preparedRow of prepared.rows) {
     if (preparedRow.kind === "day") {
+      const isTodayDay = isTodayWeekdayInDisplayedWeek(
+        preparedRow.day,
+        activeWeek,
+      );
       rows.push(
         <tr key={preparedRow.key} className="day-row">
           <td
-            className="sticky top-[66px] z-[6] border-r border-b border-l border-[#d8dfeb] bg-[#edf4ff] p-2 [vertical-align:top] text-[0.875rem] font-bold tracking-[0.4px] text-[#1d3f70] uppercase"
+            className={clsx(
+              GROUPS_DAY_ROW_INNER_CLASS,
+              todayGroupsDayRowClass(isTodayDay),
+            )}
+            style={GROUPS_DAY_ROW_STICKY_STYLE}
             colSpan={preparedRow.colSpan}
           >
-            <span className="day-label sticky left-[9px] z-[7] inline-block bg-[#edf4ff] pr-1">
-              {preparedRow.day}
+            <span className="day-label sticky left-[9px] z-[7] inline-block bg-inherit pr-1">
+              {weekdayLabelRu(preparedRow.day)}
             </span>
           </td>
         </tr>,
@@ -1426,54 +1609,65 @@ function renderCoreRows(args: {
       continue;
     }
 
-    const cells = preparedRow.cells.map((cell) => (
+    const isTodayDay = isTodayWeekdayInDisplayedWeek(
+      preparedRow.day,
+      activeWeek,
+    );
+    const isLastSlot = preparedRow.slotStart === lastSlotStart;
+
+    const cells = preparedRow.cells.map((cell, cellIndex) => (
       <td
         key={cell.key}
         className={clsx(
-          "link-cell relative w-[170px] max-w-[170px] min-w-[170px] border-r border-b border-[#d8dfeb] p-2 [vertical-align:top] align-top text-[0.75rem]",
+          "link-cell relative border-r border-b border-[#d8dfeb] align-top",
+          GROUPS_CELL_PAD,
+          cell.span > 1 ? null : GROUPS_COL_WIDTH,
           cell.isProgramEmptyAtSlot && "bg-[#eef1f6] [&_.empty]:bg-[#e9edf3]",
+          todayGroupsSlotCellClass(
+            isTodayDay,
+            cellIndex === preparedRow.cells.length - 1,
+            isLastSlot,
+          ),
         )}
         colSpan={cell.span > 1 ? cell.span : undefined}
       >
         {!cell.mergedRows.length ? (
           <div
-            className="empty h-full min-h-0 min-h-[78px] rounded-lg bg-[#fafcff]"
+            className="empty h-full min-h-0 min-h-[64px] rounded bg-[#fafcff]"
             onClick={clearSelection}
           />
         ) : (
-          <>
-            {renderConnectors(cell.mergedRows, cell.span, grid, courseColors)}
-            <div className="flex h-full min-h-0 flex-col gap-1.5">
-              {cell.mergedRows.map((row) => {
-                return (
-                  <MeetingCard
-                    key={row.sign}
-                    row={row}
-                    grid={grid}
-                    selectMeeting={selectMeeting}
-                    selectInstructorCell={selectInstructorCell}
-                    selectRoomCell={selectRoomCell}
-                    courseColors={courseColors}
-                    roomCapacityById={roomCapacityById}
-                    groupSizeById={groupSizeById}
-                  />
-                );
-              })}
-            </div>
-          </>
+          <div className="flex h-full min-h-0 flex-col gap-1">
+            {cell.mergedRows.map((row) => {
+              return (
+                <MeetingCard
+                  key={row.sign}
+                  span={cell.span}
+                  row={row}
+                  grid={grid}
+                  selectMeeting={selectMeeting}
+                  selectInstructorCell={selectInstructorCell}
+                  selectRoomCell={selectRoomCell}
+                  courseColors={courseColors}
+                  roomCapacityById={roomCapacityById}
+                  groupSizeById={groupSizeById}
+                />
+              );
+            })}
+          </div>
         )}
       </td>
     ));
 
     rows.push(
-      <tr
-        key={preparedRow.key}
-        className="slot-row [&_.empty]:h-full [&_.empty]:min-h-[78px] [&_.meeting]:h-full [&_.meeting]:min-h-[86px] [&_td]:h-[116px]"
-      >
+      <tr key={preparedRow.key} className={GROUPS_SLOT_ROW_CLASS}>
         <td
           className={clsx(
-            "slot-cell sticky left-0 z-[4] border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] p-2 text-center [vertical-align:top] text-[0.75rem] font-bold",
+            "slot-cell sticky left-0 z-[4] border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] align-top text-[#1d3f70]",
+            GROUPS_TIME_COL_WIDTH,
+            GROUPS_SLOT_TIME_PAD,
             !preparedRow.rowHasMeetings && "bg-[#e3e8f1] text-[#5e6673]",
+            todayGroupsSlotTimeClass(isTodayDay, isLastSlot),
           )}
         >
           {preparedRow.slotLabel}
@@ -1483,27 +1677,6 @@ function renderCoreRows(args: {
     );
   }
 
-  rows.push(
-    <tr
-      key="scroll-pad-core"
-      className="slot-row [&_.empty]:h-full [&_.empty]:min-h-[78px] [&_.meeting]:h-full [&_.meeting]:min-h-[86px] [&_td]:h-[116px]"
-      aria-hidden
-    >
-      <td className="slot-cell sticky left-0 z-[4] border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] p-2 text-center [vertical-align:top] text-[0.75rem] font-bold" />
-      {prepared.visibleColumns.map((col) => (
-        <td
-          key={`scroll-pad-core-${col.groupId}`}
-          className="link-cell relative w-[170px] max-w-[170px] min-w-[170px] border-r border-b border-[#d8dfeb] bg-[#eef1f6] p-2 [vertical-align:top] align-top text-[0.75rem] [&_.empty]:bg-[#e9edf3]"
-        >
-          <div
-            className="empty h-full min-h-0 min-h-[78px] rounded-lg bg-[#fafcff]"
-            onClick={clearSelection}
-          />
-        </td>
-      ))}
-    </tr>,
-  );
-
   return (
     <>
       {thead}
@@ -1512,53 +1685,10 @@ function renderCoreRows(args: {
   );
 }
 
-function renderConnectors(
-  mergedRows: MergedRow[],
-  span: number,
-  grid: BuiltGrid,
-  courseColors: Record<string, { bg: string; border: string }>,
-) {
-  const hasSource = mergedRows.some((r) =>
-    grid.backToBackSources?.has(r.sample.instance_id),
-  );
-  const hasTarget = mergedRows.some((r) =>
-    grid.backToBackTargets?.has(r.sample.instance_id),
-  );
-  if (!hasSource && !hasTarget) return null;
-  const direction = hasSource && hasTarget ? "both" : hasSource ? "down" : "up";
-  const markers = Math.max(1, span);
-  const sampleColor = colorBySubject(
-    mergedRows[0]?.sample?.course || "",
-    courseColors,
-  ).border;
-  const els: React.ReactNode[] = [];
-  for (let mk = 0; mk < markers; mk++) {
-    const leftPct = `${((mk + 0.5) / markers) * 100}%`;
-    els.push(
-      <div
-        key={mk}
-        className={clsx(
-          "cell-connector pointer-events-none absolute z-[1] w-0.5 rounded-full shadow-[0_0_0_1px_rgba(80,92,110,0.15)]",
-          direction === "down" && "bottom-[-7px] h-3.5 -translate-x-1/2",
-          direction === "up" && "top-[-7px] h-3.5 -translate-x-1/2",
-          direction === "both" &&
-            "top-1/2 h-5 -translate-x-1/2 -translate-y-1/2",
-        )}
-        style={
-          {
-            left: leftPct,
-            backgroundColor: sampleColor,
-          } as React.CSSProperties
-        }
-      />,
-    );
-  }
-  return <>{els}</>;
-}
-
 const MeetingCard = memo(function MeetingCard({
   row,
-  grid,
+  grid: _grid,
+  span = 1,
   selectMeeting,
   selectInstructorCell,
   selectRoomCell,
@@ -1592,23 +1722,120 @@ const MeetingCard = memo(function MeetingCard({
       : "text-[#4f5c6d] hover:text-[#303a47] hover:decoration-solid",
   );
 
+  const isWideCell = span > 1;
+  const instructorNames =
+    typeof m.instructors === "string"
+      ? m.instructors
+        ? [m.instructors]
+        : []
+      : (m.instructors ?? []);
+
+  const meetingHighlightClass = clsx(
+    isSelected &&
+      isRelated &&
+      "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2),0_2px_10px_rgba(0,0,0,0.12)] ring-2 ring-inset ring-[#1d3f70]",
+    isSelected &&
+      !isRelated &&
+      "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2)] ring-2 ring-inset ring-[#1d3f70]",
+    !isSelected &&
+      isRelated &&
+      "shadow-[inset_0_0_0_1px_rgba(29,63,112,0.14)] ring-1 ring-inset ring-dashed ring-[rgba(29,63,112,0.55)]",
+  );
+
+  const body = (
+    <div className={GROUPS_MEETING_BODY_CLASS}>
+      <div className="subject flex min-h-0 min-w-0 gap-1 overflow-hidden">
+        <div
+          className={GROUPS_MEETING_TITLE_CLASS}
+          title={`${courseTitle} (${m.tag})${count > 1 ? ` x${count}` : ""}`}
+        >
+          {courseTitle} ({m.tag}){count > 1 ? ` x${count}` : ""}
+        </div>
+        <span className="flex shrink-0 flex-col items-end gap-0.5">
+          <MeetingOverrideFieldBadge
+            field="weekday"
+            fields={m.override_fields}
+          />
+          <MeetingOverrideFieldBadge field="time" fields={m.override_fields} />
+        </span>
+      </div>
+      <div className={GROUPS_MEETING_FOOTER_CLASS}>
+        <div
+          className={clsx(
+            GROUPS_MEETING_LINE_CLASS,
+            isWideCell
+              ? "overflow-hidden whitespace-normal"
+              : "overflow-hidden text-ellipsis whitespace-nowrap",
+          )}
+          title={instructorNames.join(" / ")}
+        >
+          <span className="inline-flex max-w-full flex-wrap items-center gap-1">
+            <span className={clsx("min-w-0", !isWideCell && "truncate")}>
+              {instructorNames.length
+                ? instructorNames.map((name, idx) => (
+                    <span key={name}>
+                      <span
+                        className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
+                        title={instructorDetailTooltip(name)}
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          selectInstructorCell(name);
+                        }}
+                      >
+                        {name}
+                      </span>
+                      {idx < instructorNames.length - 1 ? " / " : null}
+                    </span>
+                  ))
+                : "-"}
+            </span>
+            <MeetingOverrideFieldBadge
+              field="instructor"
+              fields={m.override_fields}
+            />
+          </span>
+        </div>
+        <div
+          className={clsx(
+            GROUPS_MEETING_LINE_CLASS,
+            "overflow-hidden text-ellipsis whitespace-nowrap",
+            overCap ? "font-bold text-[#b42318]" : null,
+          )}
+          title={roomLoadLabel}
+        >
+          <span className="inline-flex max-w-full items-center gap-1">
+            {roomIdTrim ? (
+              <span
+                className={clsx(roomClickableClass, "inline min-w-0 truncate")}
+                title={scheduleAssistantDetailTooltips.room}
+                onClick={(ev) => {
+                  ev.stopPropagation();
+                  selectRoomCell(m.room);
+                }}
+              >
+                {roomLoadLabel}
+              </span>
+            ) : (
+              <span className="min-w-0 truncate">{roomLoadLabel}</span>
+            )}
+            <MeetingOverrideFieldBadge
+              field="room"
+              fields={m.override_fields}
+            />
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div
+      data-meeting-id={m.instance_id}
       className={clsx(
-        "meeting relative z-[2] mb-1.5 flex min-h-[86px] cursor-pointer flex-col gap-1 overflow-hidden rounded-lg border p-[7px] pb-2 [contain:style] last:mb-0",
-        "mb-0 h-full min-h-0",
-        isSelected &&
-          isRelated &&
-          "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2),0_2px_10px_rgba(0,0,0,0.12)] outline outline-2 outline-[#1d3f70]",
-        isSelected &&
-          !isRelated &&
-          "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2)] outline outline-2 outline-[#1d3f70]",
-        !isSelected &&
-          isRelated &&
-          "shadow-[inset_0_0_0_1px_rgba(29,63,112,0.14)] outline outline-1 outline-[rgba(29,63,112,0.55)] outline-dashed",
-        (grid.backToBackSources?.has(m.instance_id) ||
-          grid.backToBackTargets?.has(m.instance_id)) &&
-          "ring-1 ring-[#1d3f70]/25",
+        "meeting relative z-[2] rounded-lg",
+        GROUPS_MEETING_CLASS,
+        isWideCell ? "overflow-visible" : "overflow-hidden",
+        meetingHighlightClass,
       )}
       style={{
         backgroundColor: colors.bg,
@@ -1618,86 +1845,19 @@ const MeetingCard = memo(function MeetingCard({
         selectMeeting(meetingSelectionKey(m), m.course || courseTitle);
       }}
     >
-      <div
-        className="subject line-clamp-3 min-w-0 text-[0.8125rem] leading-[1.08] font-bold [overflow-wrap:anywhere] text-[#1a2332]"
-        title={`${courseTitle} (${m.tag})${count > 1 ? ` x${count}` : ""}`}
-      >
-        <span className="inline-flex max-w-full flex-wrap items-center gap-1">
-          <span className="min-w-0">
-            {courseTitle} ({m.tag}){count > 1 ? ` x${count}` : ""}
-          </span>
-          <MeetingOverrideFieldBadge
-            field="weekday"
-            fields={m.override_fields}
-          />
-          <MeetingOverrideFieldBadge field="time" fields={m.override_fields} />
-        </span>
-      </div>
-      <div className="min-h-0 flex-1" />
-      <div
-        className="line w-full min-w-0 overflow-hidden text-[0.75rem] leading-[1.25] text-ellipsis whitespace-nowrap text-[#313b49]"
-        title={(typeof m.instructors === "string"
-          ? [m.instructors]
-          : m.instructors
-        ).join(" / ")}
-      >
-        <span className="inline-flex max-w-full items-center gap-1">
-          <span className="min-w-0 truncate">
-            {(typeof m.instructors === "string"
-              ? [m.instructors]
-              : m.instructors
-            ).length
-              ? (typeof m.instructors === "string"
-                  ? [m.instructors]
-                  : m.instructors
-                ).map((name, idx) => (
-                  <span key={name}>
-                    <span
-                      className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
-                      title={scheduleAssistantDetailTooltips.instructor}
-                      onClick={(ev) => {
-                        ev.stopPropagation();
-                        selectInstructorCell(name);
-                      }}
-                    >
-                      {name}
-                    </span>
-                    {idx < (m.instructors?.length ?? 0) - 1 ? " / " : null}
-                  </span>
-                ))
-              : "-"}
-          </span>
-          <MeetingOverrideFieldBadge
-            field="instructor"
-            fields={m.override_fields}
-          />
-        </span>
-      </div>
-      <div
-        className={clsx(
-          "line w-full min-w-0 overflow-hidden text-[0.75rem] leading-[1.25] text-ellipsis whitespace-nowrap",
-          overCap ? "font-bold text-[#b42318]" : "text-[#313b49]",
-        )}
-        title={roomLoadLabel}
-      >
-        <span className="inline-flex max-w-full items-center gap-1">
-          {roomIdTrim ? (
-            <span
-              className={clsx(roomClickableClass, "inline min-w-0 truncate")}
-              title={scheduleAssistantDetailTooltips.room}
-              onClick={(ev) => {
-                ev.stopPropagation();
-                selectRoomCell(m.room);
-              }}
-            >
-              {roomLoadLabel}
-            </span>
-          ) : (
-            <span className="min-w-0 truncate">{roomLoadLabel}</span>
-          )}
-          <MeetingOverrideFieldBadge field="room" fields={m.override_fields} />
-        </span>
-      </div>
+      {isWideCell ? (
+        <div
+          className="sticky z-[1] inline-flex h-full max-h-full w-max max-w-full flex-col gap-0.5 self-start overflow-hidden"
+          style={{
+            left: "calc(var(--sa-time-col-width, 130px) + 4px)",
+            backgroundColor: colors.bg,
+          }}
+        >
+          {body}
+        </div>
+      ) : (
+        body
+      )}
     </div>
   );
 }, meetingCardPropsEqual);
@@ -1748,16 +1908,23 @@ function renderUtilizationRows(args: {
 
   const rows: React.ReactNode[] = [];
   const thead = (
-    <thead className="sticky top-0 z-[20]">
+    <thead className={GROUPS_TABLE_HEAD_CLASS}>
       <tr key="uh1">
         <th
-          className="left-head sticky left-0 z-[25] w-[130px] min-w-[130px] border border-[#d8dfeb] bg-[#1f5fae] p-2 text-center [vertical-align:top] text-[0.8125rem] font-bold text-white"
+          className={clsx(
+            "left-head sticky left-0 z-[25] border border-[#d8dfeb] bg-[#1f5fae] text-center align-top font-bold text-white",
+            GROUPS_TIME_COL_WIDTH,
+            GROUPS_HEAD_PAD,
+          )}
           rowSpan={2}
         >
           День / время
         </th>
         <th
-          className="year-head z-[8] border-t border-r border-b border-[#d8dfeb] bg-[#1f5fae] p-2 text-center [vertical-align:top] text-[0.875rem] font-bold text-white"
+          className={clsx(
+            "year-head z-[8] border-t border-r border-b border-[#d8dfeb] bg-[#1f5fae] text-center align-top font-bold text-white",
+            GROUPS_HEAD_PAD,
+          )}
           colSpan={Math.max(1, resourceCols.length)}
         >
           {headerTitle}
@@ -1786,11 +1953,12 @@ function renderUtilizationRows(args: {
     rows.push(
       <tr key={`ud-${day}`} className="day-row">
         <td
-          className="sticky top-[66px] z-[6] border-r border-b border-l border-[#d8dfeb] bg-[#edf4ff] p-2 [vertical-align:top] text-[0.875rem] font-bold tracking-[0.4px] text-[#1d3f70] uppercase"
+          className={GROUPS_DAY_ROW_INNER_CLASS}
+          style={GROUPS_DAY_ROW_STICKY_STYLE}
           colSpan={resourceCols.length + 1}
         >
-          <span className="day-label sticky left-[9px] z-[7] inline-block bg-[#edf4ff] pr-1">
-            {day}
+          <span className="day-label sticky left-[9px] z-[7] inline-block bg-inherit pr-1">
+            {weekdayLabelRu(day)}
           </span>
         </td>
       </tr>,
@@ -1814,46 +1982,29 @@ function renderUtilizationRows(args: {
           return (
             <td
               key={resource}
-              className="link-cell relative w-[170px] max-w-[170px] min-w-[170px] border-r border-b border-[#d8dfeb] p-2 [vertical-align:top] align-top text-[0.75rem]"
+              className={clsx(
+                "link-cell relative border-r border-b border-[#d8dfeb] align-top",
+                GROUPS_COL_WIDTH,
+                GROUPS_CELL_PAD,
+              )}
             >
-              <div className="empty h-full min-h-0 rounded-lg bg-[#fafcff]" />
+              <div className="empty h-full min-h-0 min-h-[64px] rounded bg-[#fafcff]" />
             </td>
           );
         }
 
         const merged = mergedMeetingsForCell(matches);
-        const hasSource = merged.some((r) =>
-          grid.backToBackSources?.has(r.sample.instance_id),
-        );
-        const hasTarget = merged.some((r) =>
-          grid.backToBackTargets?.has(r.sample.instance_id),
-        );
-
-        const connDir =
-          hasSource && hasTarget ? "both" : hasSource ? "down" : "up";
-        const connColor = colorBySubject(
-          merged[0]?.sample?.course || "",
-          courseColors,
-        ).border;
 
         return (
           <td
             key={resource}
-            className="link-cell relative w-[170px] max-w-[170px] min-w-[170px] border-r border-b border-[#d8dfeb] p-2 [vertical-align:top] align-top text-[0.75rem]"
+            className={clsx(
+              "link-cell relative border-r border-b border-[#d8dfeb] align-top",
+              GROUPS_COL_WIDTH,
+              GROUPS_CELL_PAD,
+            )}
           >
-            {hasSource || hasTarget ? (
-              <div
-                className={clsx(
-                  "cell-connector pointer-events-none absolute left-1/2 z-[1] w-0.5 rounded-full shadow-[0_0_0_1px_rgba(80,92,110,0.15)]",
-                  connDir === "down" && "bottom-[-7px] h-3.5 -translate-x-1/2",
-                  connDir === "up" && "top-[-7px] h-3.5 -translate-x-1/2",
-                  connDir === "both" &&
-                    "top-1/2 h-5 -translate-x-1/2 -translate-y-1/2",
-                )}
-                style={{ backgroundColor: connColor }}
-              />
-            ) : null}
-            <div className="flex h-full min-h-0 flex-col gap-1.5">
+            <div className="flex h-full min-h-0 flex-col gap-1">
               {merged.map((row) => {
                 return (
                   <UtilizationMeetingCard
@@ -1876,11 +2027,14 @@ function renderUtilizationRows(args: {
       });
 
       rows.push(
-        <tr
-          key={`us-${day}-${slot.start}`}
-          className="slot-row [&_.empty]:h-full [&_.empty]:min-h-[78px] [&_.meeting]:h-full [&_.meeting]:min-h-[86px] [&_td]:h-[116px]"
-        >
-          <td className="slot-cell sticky left-0 z-[4] border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] p-2 text-center [vertical-align:top] text-[0.75rem] font-bold">
+        <tr key={`us-${day}-${slot.start}`} className={GROUPS_SLOT_ROW_CLASS}>
+          <td
+            className={clsx(
+              "slot-cell sticky left-0 z-[4] border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] align-top text-[#1d3f70]",
+              GROUPS_TIME_COL_WIDTH,
+              GROUPS_SLOT_TIME_PAD,
+            )}
+          >
             {slot.label}
           </td>
           {cells}
@@ -1888,25 +2042,6 @@ function renderUtilizationRows(args: {
       );
     }
   }
-
-  const utilColCount = Math.max(1, resourceCols.length);
-  rows.push(
-    <tr
-      key="scroll-pad-util"
-      className="slot-row [&_.empty]:h-full [&_.empty]:min-h-[78px] [&_.meeting]:h-full [&_.meeting]:min-h-[86px] [&_td]:h-[116px]"
-      aria-hidden
-    >
-      <td className="slot-cell sticky left-0 z-[4] border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] p-2 text-center [vertical-align:top] text-[0.75rem] font-bold" />
-      {Array.from({ length: utilColCount }, (_, i) => (
-        <td
-          key={`scroll-pad-util-${resourceCols[i] ?? i}`}
-          className="link-cell relative w-[170px] max-w-[170px] min-w-[170px] border-r border-b border-[#d8dfeb] bg-[#eef1f6] p-2 [vertical-align:top] align-top text-[0.75rem] [&_.empty]:bg-[#e9edf3]"
-        >
-          <div className="empty h-full min-h-0 min-h-[78px] rounded-lg bg-[#fafcff]" />
-        </td>
-      ))}
-    </tr>,
-  );
 
   return (
     <>
@@ -1919,7 +2054,7 @@ function renderUtilizationRows(args: {
 const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
   row,
   mode,
-  grid,
+  grid: _grid,
   selectMeeting,
   selectInstructorCell,
   selectRoomCell,
@@ -1949,21 +2084,19 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
 
   return (
     <div
+      data-meeting-id={m.instance_id}
       className={clsx(
-        "meeting relative z-[2] mb-1.5 flex min-h-[86px] cursor-pointer flex-col gap-1 overflow-hidden rounded-lg border p-[7px] pb-2 [contain:style] last:mb-0",
-        "mb-0 h-full min-h-0",
+        "meeting relative z-[2] overflow-hidden rounded-lg",
+        GROUPS_MEETING_CLASS,
         isSelected &&
           isRelated &&
-          "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2),0_2px_10px_rgba(0,0,0,0.12)] outline outline-2 outline-[#1d3f70]",
+          "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2),0_2px_10px_rgba(0,0,0,0.12)] ring-2 ring-[#1d3f70] ring-inset",
         isSelected &&
           !isRelated &&
-          "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2)] outline outline-2 outline-[#1d3f70]",
+          "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2)] ring-2 ring-[#1d3f70] ring-inset",
         !isSelected &&
           isRelated &&
-          "shadow-[inset_0_0_0_1px_rgba(29,63,112,0.14)] outline outline-1 outline-[rgba(29,63,112,0.55)] outline-dashed",
-        (grid.backToBackSources?.has(m.instance_id) ||
-          grid.backToBackTargets?.has(m.instance_id)) &&
-          "ring-1 ring-[#1d3f70]/25",
+          "ring-dashed shadow-[inset_0_0_0_1px_rgba(29,63,112,0.14)] ring-1 ring-[rgba(29,63,112,0.55)] ring-inset",
       )}
       style={{
         backgroundColor: colors.bg,
@@ -1973,87 +2106,94 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
         selectMeeting(meetingSelectionKey(m), m.course || courseTitle);
       }}
     >
-      <div
-        className="subject line-clamp-3 min-w-0 text-[0.8125rem] leading-[1.08] font-bold [overflow-wrap:anywhere] text-[#1a2332]"
-        title={`${courseTitle} (${m.tag})${row.count > 1 ? ` x${row.count}` : ""}`}
-      >
-        {courseTitle} ({m.tag}){row.count > 1 ? ` x${row.count}` : ""}
-      </div>
-      <div className="min-h-0 flex-1" />
-      <div
-        className={clsx(
-          "line w-full min-w-0 overflow-hidden text-[0.75rem] leading-[1.25] text-ellipsis whitespace-nowrap",
-          overCap
-            ? "!font-bold !text-[#b42318] [&_.clickable]:!text-[#b42318] [&_.clickable]:decoration-[#b42318]"
-            : "text-[#313b49]",
-        )}
-        title={
-          mode === "instructor"
-            ? `${m.groups.join(", ")} | ${roomLoad}`
-            : `${m.groups.join(", ")} | ${roomLoad} | заполн. ${roomFillPercent(m, roomCapacityById, groupSizeById)} | ${(typeof m.instructors === "string" ? [m.instructors] : m.instructors).join(" / ")}`
-        }
-      >
-        {mode === "instructor" ? (
-          <>
-            {m.groups.join(", ")} |{" "}
-            {roomIdTrim ? (
-              <span
-                className={clsx(roomClickableClass, "inline")}
-                title={scheduleAssistantDetailTooltips.room}
-                onClick={(ev) => {
-                  ev.stopPropagation();
-                  selectRoomCell(m.room);
-                }}
-              >
-                {roomLoad}
-              </span>
-            ) : (
-              roomLoad
+      <div className={GROUPS_MEETING_BODY_CLASS}>
+        <div className="flex min-h-0 min-w-0 overflow-hidden">
+          <div
+            className={GROUPS_MEETING_TITLE_CLASS}
+            title={`${courseTitle} (${m.tag})${row.count > 1 ? ` x${row.count}` : ""}`}
+          >
+            {courseTitle} ({m.tag}){row.count > 1 ? ` x${row.count}` : ""}
+          </div>
+        </div>
+        <div className={GROUPS_MEETING_FOOTER_CLASS}>
+          <div
+            className={clsx(
+              GROUPS_MEETING_LINE_CLASS,
+              "overflow-hidden text-ellipsis whitespace-nowrap",
+              overCap
+                ? "!font-bold !text-[#b42318] [&_.clickable]:!text-[#b42318] [&_.clickable]:decoration-[#b42318]"
+                : null,
             )}
-          </>
-        ) : (
-          <>
-            {m.groups.join(", ")} |{" "}
-            {roomIdTrim ? (
-              <span
-                className={clsx(roomClickableClass, "inline")}
-                title={scheduleAssistantDetailTooltips.room}
-                onClick={(ev) => {
-                  ev.stopPropagation();
-                  selectRoomCell(m.room);
-                }}
-              >
-                {roomLoad}
-              </span>
+            title={
+              mode === "instructor"
+                ? `${m.groups.join(", ")} | ${roomLoad}`
+                : `${m.groups.join(", ")} | ${roomLoad} | заполн. ${roomFillPercent(m, roomCapacityById, groupSizeById)} | ${(typeof m.instructors === "string" ? [m.instructors] : m.instructors).join(" / ")}`
+            }
+          >
+            {mode === "instructor" ? (
+              <>
+                {m.groups.join(", ")} |{" "}
+                {roomIdTrim ? (
+                  <span
+                    className={clsx(roomClickableClass, "inline")}
+                    title={scheduleAssistantDetailTooltips.room}
+                    onClick={(ev) => {
+                      ev.stopPropagation();
+                      selectRoomCell(m.room);
+                    }}
+                  >
+                    {roomLoad}
+                  </span>
+                ) : (
+                  roomLoad
+                )}
+              </>
             ) : (
-              roomLoad
-            )}{" "}
-            | заполн. {roomFillPercent(m, roomCapacityById, groupSizeById)} |{" "}
-            {(typeof m.instructors === "string"
-              ? [m.instructors]
-              : m.instructors
-            ).length
-              ? (typeof m.instructors === "string"
+              <>
+                {m.groups.join(", ")} |{" "}
+                {roomIdTrim ? (
+                  <span
+                    className={clsx(roomClickableClass, "inline")}
+                    title={scheduleAssistantDetailTooltips.room}
+                    onClick={(ev) => {
+                      ev.stopPropagation();
+                      selectRoomCell(m.room);
+                    }}
+                  >
+                    {roomLoad}
+                  </span>
+                ) : (
+                  roomLoad
+                )}{" "}
+                | заполн. {roomFillPercent(m, roomCapacityById, groupSizeById)}{" "}
+                |{" "}
+                {(typeof m.instructors === "string"
                   ? [m.instructors]
                   : m.instructors
-                ).map((name, idx) => (
-                  <span key={name}>
-                    {idx > 0 ? " / " : null}
-                    <span
-                      className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
-                      title={scheduleAssistantDetailTooltips.instructor}
-                      onClick={(ev) => {
-                        ev.stopPropagation();
-                        selectInstructorCell(name);
-                      }}
-                    >
-                      {name}
-                    </span>
-                  </span>
-                ))
-              : "-"}
-          </>
-        )}
+                ).length
+                  ? (typeof m.instructors === "string"
+                      ? [m.instructors]
+                      : m.instructors
+                    ).map((name, idx) => (
+                      <span key={name}>
+                        {idx > 0 ? " / " : null}
+                        <span
+                          className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
+                          title={instructorDetailTooltip(name)}
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            selectInstructorCell(name);
+                          }}
+                        >
+                          {name}
+                        </span>
+                      </span>
+                    ))
+                  : "-"}
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

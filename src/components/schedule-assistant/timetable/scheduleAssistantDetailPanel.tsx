@@ -14,6 +14,7 @@ import {
   meetingSelectionKey,
   roomFillPercent,
   scheduleAssistantDetailTooltips,
+  instructorDetailTooltip,
   workloadHistogramHtml,
 } from "./timetableViewerModel.ts";
 import { canRestoreMeeting } from "./meetingEditUtils.ts";
@@ -97,7 +98,7 @@ function DetailInstructorLinks({
           <span
             className={clsx(CLICK, "instructor-link inline")}
             data-inst={encodeURIComponent(name)}
-            title={scheduleAssistantDetailTooltips.instructor}
+            title={instructorDetailTooltip(name)}
           >
             {name}
           </span>

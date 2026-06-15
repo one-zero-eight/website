@@ -72,26 +72,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/telegram/messages": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Save Or Update Message
-     * @description Determining whether to save the message or overwrite it
-     */
-    post: operations["telegram_save_or_update_message"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/moodle/courses/grouped-by-semester": {
     parameters: {
       query?: never;
@@ -316,15 +296,26 @@ export interface components {
        * Search Responses
        * @description Responses to the search query.
        */
-      search_responses: components["schemas"]["SearchResponse-Output"][];
+      search_responses: components["schemas"]["SearchResponse"][];
       /**
        * Messages
        * @description Chat history for llm (do not show on frontend).
        */
       messages: unknown[];
     };
+    /** Body_ask_act_by_query */
+    Body_ask_act_by_query: {
+      /** Query */
+      query: string;
+    };
+    /** Body_ask_ask_by_query */
+    Body_ask_ask_by_query: {
+      /** Query */
+      query: string;
+      chat_id?: components["schemas"]["PydanticObjectId"] | null;
+    };
     /** CampusLifeSource */
-    "CampusLifeSource-Input": {
+    CampusLifeSource: {
       /**
        * Display Name
        * @default -
@@ -338,7 +329,7 @@ export interface components {
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      type: CampusLifeSourceInputType;
+      type: CampusLifeSourceType;
       /**
        * Breadcrumbs
        * @default [
@@ -347,43 +338,8 @@ export interface components {
        */
       breadcrumbs: string[];
     };
-    /** CampusLifeSource */
-    "CampusLifeSource-Output": {
-      /**
-       * Display Name
-       * @default -
-       */
-      display_name: string;
-      /** Url */
-      url: string;
-      /** Preview Text */
-      preview_text: string;
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: CampusLifeSourceOutputType;
-      /**
-       * Breadcrumbs
-       * @default [
-       *       "Campus life"
-       *     ]
-       */
-      breadcrumbs: string[];
-    };
-    /** Chat */
-    Chat: {
-      /** Id */
-      id: number;
-      /** Type */
-      type: string;
-      /** Title */
-      title: string;
-      /** Username */
-      username: string;
-    };
     /** ClubsSource */
-    "ClubsSource-Input": {
+    ClubsSource: {
       /**
        * Display Name
        * @default -
@@ -397,7 +353,7 @@ export interface components {
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      type: ClubsSourceInputType;
+      type: ClubsSourceType;
       /**
        * Breadcrumbs
        * @default [
@@ -406,54 +362,8 @@ export interface components {
        */
       breadcrumbs: string[];
     };
-    /** ClubsSource */
-    "ClubsSource-Output": {
-      /**
-       * Display Name
-       * @default -
-       */
-      display_name: string;
-      /** Url */
-      url: string;
-      /** Preview Text */
-      preview_text: string;
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: ClubsSourceOutputType;
-      /**
-       * Breadcrumbs
-       * @default [
-       *       "Clubs"
-       *     ]
-       */
-      breadcrumbs: string[];
-    };
-    /** DBMessageSchema */
-    DBMessageSchema: {
-      /** Message Id */
-      message_id: number;
-      /**
-       * Date
-       * Format: date-time
-       */
-      date: string;
-      /** Chat Id */
-      chat_id: number;
-      /** Chat Title */
-      chat_title: string;
-      /** Chat Username */
-      chat_username: string;
-      /** Text */
-      text: string | null;
-      /** Caption */
-      caption: string | null;
-      /** Link */
-      link: string;
-    };
     /** EduwikiSource */
-    "EduwikiSource-Input": {
+    EduwikiSource: {
       /**
        * Display Name
        * @default -
@@ -467,31 +377,7 @@ export interface components {
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      type: EduwikiSourceInputType;
-      /**
-       * Breadcrumbs
-       * @default [
-       *       "EduWiki"
-       *     ]
-       */
-      breadcrumbs: string[];
-    };
-    /** EduwikiSource */
-    "EduwikiSource-Output": {
-      /**
-       * Display Name
-       * @default -
-       */
-      display_name: string;
-      /** Url */
-      url: string;
-      /** Preview Text */
-      preview_text: string;
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: EduwikiSourceOutputType;
+      type: EduwikiSourceType;
       /**
        * Breadcrumbs
        * @default [
@@ -501,17 +387,7 @@ export interface components {
       breadcrumbs: string[];
     };
     /** FlattenInContentsWithPresignedUrl */
-    "FlattenInContentsWithPresignedUrl-Input": {
-      /** Course Id */
-      course_id: number;
-      /** Module Id */
-      module_id: number;
-      content: components["schemas"]["MoodleContentSchema-Input"];
-      /** Presigned Url */
-      presigned_url: string;
-    };
-    /** FlattenInContentsWithPresignedUrl */
-    "FlattenInContentsWithPresignedUrl-Output": {
+    FlattenInContentsWithPresignedUrl: {
       /** Course Id */
       course_id: number;
       /** Module Id */
@@ -526,7 +402,7 @@ export interface components {
       detail?: components["schemas"]["ValidationError"][];
     };
     /** HotelSource */
-    "HotelSource-Input": {
+    HotelSource: {
       /**
        * Display Name
        * @default -
@@ -540,31 +416,7 @@ export interface components {
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      type: HotelSourceInputType;
-      /**
-       * Breadcrumbs
-       * @default [
-       *       "Hotel"
-       *     ]
-       */
-      breadcrumbs: string[];
-    };
-    /** HotelSource */
-    "HotelSource-Output": {
-      /**
-       * Display Name
-       * @default -
-       */
-      display_name: string;
-      /** Url */
-      url: string;
-      /** Preview Text */
-      preview_text: string;
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: HotelSourceOutputType;
+      type: HotelSourceType;
       /**
        * Breadcrumbs
        * @default [
@@ -646,7 +498,7 @@ export interface components {
      */
     InfoSources: InfoSources;
     /** MapsSource */
-    "MapsSource-Input": {
+    MapsSource: {
       /**
        * Display Name
        * @default -
@@ -660,7 +512,7 @@ export interface components {
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      type: MapsSourceInputType;
+      type: MapsSourceType;
       /**
        * Breadcrumbs
        * @default [
@@ -668,46 +520,6 @@ export interface components {
        *     ]
        */
       breadcrumbs: string[];
-    };
-    /** MapsSource */
-    "MapsSource-Output": {
-      /**
-       * Display Name
-       * @default -
-       */
-      display_name: string;
-      /** Url */
-      url: string;
-      /** Preview Text */
-      preview_text: string;
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: MapsSourceOutputType;
-      /**
-       * Breadcrumbs
-       * @default [
-       *       "Maps"
-       *     ]
-       */
-      breadcrumbs: string[];
-    };
-    /** MessageSchema */
-    MessageSchema: {
-      /** Id */
-      id: number;
-      sender_chat: components["schemas"]["Chat"];
-      /**
-       * Date
-       * Format: date-time
-       */
-      date: string;
-      chat: components["schemas"]["Chat"];
-      /** Text */
-      text: string | null;
-      /** Caption */
-      caption: string | null;
     };
     /** MoodleContentSchema */
     "MoodleContentSchema-Input": {
@@ -742,22 +554,7 @@ export interface components {
       uploaded: boolean;
     };
     /** MoodleCourse */
-    "MoodleCourse-Input": {
-      /** @description MongoDB document ObjectID */
-      _id?: components["schemas"]["PydanticObjectId"];
-      /** Course Id */
-      course_id: number;
-      /** Fullname */
-      fullname: string;
-      /** Startdate */
-      startdate: number;
-      /** Enddate */
-      enddate: number;
-      /** Coursecategory */
-      coursecategory: string;
-    };
-    /** MoodleCourse */
-    "MoodleCourse-Output": {
+    MoodleCourse: {
       /**
        * Format: objectid
        * @description MongoDB document ObjectID
@@ -776,28 +573,7 @@ export interface components {
       coursecategory: string;
     };
     /** MoodleEntry */
-    "MoodleEntry-Input": {
-      /** @description MongoDB document ObjectID */
-      _id?: components["schemas"]["PydanticObjectId"];
-      /** Course Id */
-      course_id: number;
-      /** Course Fullname */
-      course_fullname: string;
-      /** Section Id */
-      section_id: number;
-      /** Section Summary */
-      section_summary: string;
-      /** Module Id */
-      module_id: number;
-      /** Module Name */
-      module_name: string;
-      /** Module Modname */
-      module_modname: string;
-      /** Contents */
-      contents: components["schemas"]["MoodleContentSchema-Input"][];
-    };
-    /** MoodleEntry */
-    "MoodleEntry-Output": {
+    MoodleEntry: {
       /**
        * Format: objectid
        * @description MongoDB document ObjectID
@@ -822,7 +598,7 @@ export interface components {
       contents: components["schemas"]["MoodleContentSchema-Output"][];
     };
     /** MoodleFileSource */
-    "MoodleFileSource-Input": {
+    MoodleFileSource: {
       /**
        * Display Name
        * @description Display name of the resource.
@@ -846,45 +622,7 @@ export interface components {
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      type: MoodleFileSourceInputType;
-      /**
-       * Resource Preview Url
-       * @description URL to get the preview of the resource.
-       */
-      resource_preview_url?: string | null;
-      /**
-       * Resource Download Url
-       * @description URL to download the resource.
-       */
-      resource_download_url?: string | null;
-      preview_location?: components["schemas"]["PdfLocation"] | null;
-    };
-    /** MoodleFileSource */
-    "MoodleFileSource-Output": {
-      /**
-       * Display Name
-       * @description Display name of the resource.
-       * @default -
-       */
-      display_name: string;
-      /**
-       * Breadcrumbs
-       * @description Breadcrumbs to the resource.
-       * @default [
-       *       "Moodle"
-       *     ]
-       */
-      breadcrumbs: string[];
-      /**
-       * Link
-       * @description Anchor URL to the resource on Moodle.
-       */
-      link: string;
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: MoodleFileSourceOutputType;
+      type: MoodleFileSourceType;
       /**
        * Resource Preview Url
        * @description URL to get the preview of the resource.
@@ -898,7 +636,7 @@ export interface components {
       preview_location: components["schemas"]["PdfLocation"] | null;
     };
     /** MoodleUnknownSource */
-    "MoodleUnknownSource-Input": {
+    MoodleUnknownSource: {
       /**
        * Display Name
        * @description Display name of the resource.
@@ -922,37 +660,10 @@ export interface components {
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      type: MoodleUnknownSourceInputType;
-    };
-    /** MoodleUnknownSource */
-    "MoodleUnknownSource-Output": {
-      /**
-       * Display Name
-       * @description Display name of the resource.
-       * @default -
-       */
-      display_name: string;
-      /**
-       * Breadcrumbs
-       * @description Breadcrumbs to the resource.
-       * @default [
-       *       "Moodle"
-       *     ]
-       */
-      breadcrumbs: string[];
-      /**
-       * Link
-       * @description Anchor URL to the resource on Moodle.
-       */
-      link: string;
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: MoodleUnknownSourceOutputType;
+      type: MoodleUnknownSourceType;
     };
     /** MoodleUrlSource */
-    "MoodleUrlSource-Input": {
+    MoodleUrlSource: {
       /**
        * Display Name
        * @description Display name of the resource.
@@ -976,39 +687,7 @@ export interface components {
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      type: MoodleUrlSourceInputType;
-      /**
-       * Url
-       * @description URL of the resource
-       */
-      url: string;
-    };
-    /** MoodleUrlSource */
-    "MoodleUrlSource-Output": {
-      /**
-       * Display Name
-       * @description Display name of the resource.
-       * @default -
-       */
-      display_name: string;
-      /**
-       * Breadcrumbs
-       * @description Breadcrumbs to the resource.
-       * @default [
-       *       "Moodle"
-       *     ]
-       */
-      breadcrumbs: string[];
-      /**
-       * Link
-       * @description Anchor URL to the resource on Moodle.
-       */
-      link: string;
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: MoodleUrlSourceOutputType;
+      type: MoodleUrlSourceType;
       /**
        * Url
        * @description URL of the resource
@@ -1026,7 +705,7 @@ export interface components {
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
     /** ResidentsSource */
-    "ResidentsSource-Input": {
+    ResidentsSource: {
       /**
        * Display Name
        * @default -
@@ -1040,31 +719,7 @@ export interface components {
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      type: ResidentsSourceInputType;
-      /**
-       * Breadcrumbs
-       * @default [
-       *       "Residents"
-       *     ]
-       */
-      breadcrumbs: string[];
-    };
-    /** ResidentsSource */
-    "ResidentsSource-Output": {
-      /**
-       * Display Name
-       * @default -
-       */
-      display_name: string;
-      /** Url */
-      url: string;
-      /** Preview Text */
-      preview_text: string;
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: ResidentsSourceOutputType;
+      type: ResidentsSourceType;
       /**
        * Breadcrumbs
        * @default [
@@ -1079,7 +734,7 @@ export interface components {
      */
     Resources: Resources;
     /** ResourcesSource */
-    "ResourcesSource-Input": {
+    ResourcesSource: {
       /**
        * Display Name
        * @default -
@@ -1093,32 +748,7 @@ export interface components {
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      type: ResourcesSourceInputType;
-      resource_type: components["schemas"]["Resources"];
-      /**
-       * Breadcrumbs
-       * @default [
-       *       "Resources"
-       *     ]
-       */
-      breadcrumbs: string[];
-    };
-    /** ResourcesSource */
-    "ResourcesSource-Output": {
-      /**
-       * Display Name
-       * @default -
-       */
-      display_name: string;
-      /** Url */
-      url: string;
-      /** Preview Text */
-      preview_text: string;
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: ResourcesSourceOutputType;
+      type: ResourcesSourceType;
       resource_type: components["schemas"]["Resources"];
       /**
        * Breadcrumbs
@@ -1129,31 +759,7 @@ export interface components {
       breadcrumbs: string[];
     };
     /** SearchResponse */
-    "SearchResponse-Input": {
-      /**
-       * Score
-       * @description Score of the search response. Multiple scores if was an aggregation of multiple chunks. Optional.
-       */
-      score?: number | number[] | null;
-      /**
-       * Source
-       * @description Relevant source for the search.
-       */
-      source:
-        | components["schemas"]["EduwikiSource-Input"]
-        | components["schemas"]["CampusLifeSource-Input"]
-        | components["schemas"]["HotelSource-Input"]
-        | components["schemas"]["ClubsSource-Input"]
-        | components["schemas"]["MapsSource-Input"]
-        | components["schemas"]["MoodleFileSource-Input"]
-        | components["schemas"]["MoodleUrlSource-Input"]
-        | components["schemas"]["MoodleUnknownSource-Input"]
-        | components["schemas"]["TelegramSource-Input"]
-        | components["schemas"]["ResidentsSource-Input"]
-        | components["schemas"]["ResourcesSource-Input"];
-    };
-    /** SearchResponse */
-    "SearchResponse-Output": {
+    SearchResponse: {
       /**
        * Score
        * @description Score of the search response. Multiple scores if was an aggregation of multiple chunks. Optional.
@@ -1164,17 +770,16 @@ export interface components {
        * @description Relevant source for the search.
        */
       source:
-        | components["schemas"]["EduwikiSource-Output"]
-        | components["schemas"]["CampusLifeSource-Output"]
-        | components["schemas"]["HotelSource-Output"]
-        | components["schemas"]["ClubsSource-Output"]
-        | components["schemas"]["MapsSource-Output"]
-        | components["schemas"]["MoodleFileSource-Output"]
-        | components["schemas"]["MoodleUrlSource-Output"]
-        | components["schemas"]["MoodleUnknownSource-Output"]
-        | components["schemas"]["TelegramSource-Output"]
-        | components["schemas"]["ResidentsSource-Output"]
-        | components["schemas"]["ResourcesSource-Output"];
+        | components["schemas"]["EduwikiSource"]
+        | components["schemas"]["CampusLifeSource"]
+        | components["schemas"]["HotelSource"]
+        | components["schemas"]["ClubsSource"]
+        | components["schemas"]["MapsSource"]
+        | components["schemas"]["MoodleFileSource"]
+        | components["schemas"]["MoodleUrlSource"]
+        | components["schemas"]["MoodleUnknownSource"]
+        | components["schemas"]["ResidentsSource"]
+        | components["schemas"]["ResourcesSource"];
     };
     /** SearchResponses */
     SearchResponses: {
@@ -1187,93 +792,9 @@ export interface components {
        * Responses
        * @description Responses to the search query.
        */
-      responses: components["schemas"]["SearchResponse-Output"][];
+      responses: components["schemas"]["SearchResponse"][];
       /** @description Assigned search query index */
       search_query_id: components["schemas"]["PydanticObjectId"] | null;
-    };
-    /** TelegramSource */
-    "TelegramSource-Input": {
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: TelegramSourceInputType;
-      /**
-       * Display Name
-       * @description Display name of the resource.
-       * @default -
-       */
-      display_name: string;
-      /**
-       * Breadcrumbs
-       * @description Breadcrumbs to the resource.
-       * @default [
-       *       "Telegram"
-       *     ]
-       */
-      breadcrumbs: string[];
-      /**
-       * Chat Username
-       * @description Username of the chat, channel, group
-       */
-      chat_username: string;
-      /**
-       * Chat Title
-       * @description Title of the chat, channel, group
-       */
-      chat_title: string;
-      /**
-       * Message Id
-       * @description Message ID in the chat
-       */
-      message_id: number;
-      /**
-       * Link
-       * @description Link to the message
-       */
-      link: string;
-    };
-    /** TelegramSource */
-    "TelegramSource-Output": {
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      type: TelegramSourceOutputType;
-      /**
-       * Display Name
-       * @description Display name of the resource.
-       * @default -
-       */
-      display_name: string;
-      /**
-       * Breadcrumbs
-       * @description Breadcrumbs to the resource.
-       * @default [
-       *       "Telegram"
-       *     ]
-       */
-      breadcrumbs: string[];
-      /**
-       * Chat Username
-       * @description Username of the chat, channel, group
-       */
-      chat_username: string;
-      /**
-       * Chat Title
-       * @description Title of the chat, channel, group
-       */
-      chat_title: string;
-      /**
-       * Message Id
-       * @description Message ID in the chat
-       */
-      message_id: number;
-      /**
-       * Link
-       * @description Link to the message
-       */
-      link: string;
     };
     /** ValidationError */
     ValidationError: {
@@ -1283,17 +804,10 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
-    };
-    /** Body_ask_act_by_query */
-    fastapi___compat__v2__Body_ask_act_by_query: {
-      /** Query */
-      query: string;
-    };
-    /** Body_ask_ask_by_query */
-    fastapi___compat__v2__Body_ask_ask_by_query: {
-      /** Query */
-      query: string;
-      chat_id?: components["schemas"]["PydanticObjectId"] | null;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
     };
   };
   responses: never;
@@ -1304,28 +818,18 @@ export interface components {
 }
 export type SchemaActResponses = components["schemas"]["ActResponses"];
 export type SchemaAskResponses = components["schemas"]["AskResponses"];
-export type SchemaCampusLifeSourceInput =
-  components["schemas"]["CampusLifeSource-Input"];
-export type SchemaCampusLifeSourceOutput =
-  components["schemas"]["CampusLifeSource-Output"];
-export type SchemaChat = components["schemas"]["Chat"];
-export type SchemaClubsSourceInput = components["schemas"]["ClubsSource-Input"];
-export type SchemaClubsSourceOutput =
-  components["schemas"]["ClubsSource-Output"];
-export type SchemaDbMessageSchema = components["schemas"]["DBMessageSchema"];
-export type SchemaEduwikiSourceInput =
-  components["schemas"]["EduwikiSource-Input"];
-export type SchemaEduwikiSourceOutput =
-  components["schemas"]["EduwikiSource-Output"];
-export type SchemaFlattenInContentsWithPresignedUrlInput =
-  components["schemas"]["FlattenInContentsWithPresignedUrl-Input"];
-export type SchemaFlattenInContentsWithPresignedUrlOutput =
-  components["schemas"]["FlattenInContentsWithPresignedUrl-Output"];
+export type SchemaBodyAskActByQuery =
+  components["schemas"]["Body_ask_act_by_query"];
+export type SchemaBodyAskAskByQuery =
+  components["schemas"]["Body_ask_ask_by_query"];
+export type SchemaCampusLifeSource = components["schemas"]["CampusLifeSource"];
+export type SchemaClubsSource = components["schemas"]["ClubsSource"];
+export type SchemaEduwikiSource = components["schemas"]["EduwikiSource"];
+export type SchemaFlattenInContentsWithPresignedUrl =
+  components["schemas"]["FlattenInContentsWithPresignedUrl"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
-export type SchemaHotelSourceInput = components["schemas"]["HotelSource-Input"];
-export type SchemaHotelSourceOutput =
-  components["schemas"]["HotelSource-Output"];
+export type SchemaHotelSource = components["schemas"]["HotelSource"];
 export type SchemaInContent = components["schemas"]["InContent"];
 export type SchemaInContents = components["schemas"]["InContents"];
 export type SchemaInCourse = components["schemas"]["InCourse"];
@@ -1333,56 +837,24 @@ export type SchemaInCourses = components["schemas"]["InCourses"];
 export type SchemaInModule = components["schemas"]["InModule"];
 export type SchemaInSection = components["schemas"]["InSection"];
 export type SchemaInSections = components["schemas"]["InSections"];
-export type SchemaMapsSourceInput = components["schemas"]["MapsSource-Input"];
-export type SchemaMapsSourceOutput = components["schemas"]["MapsSource-Output"];
-export type SchemaMessageSchema = components["schemas"]["MessageSchema"];
+export type SchemaMapsSource = components["schemas"]["MapsSource"];
 export type SchemaMoodleContentSchemaInput =
   components["schemas"]["MoodleContentSchema-Input"];
 export type SchemaMoodleContentSchemaOutput =
   components["schemas"]["MoodleContentSchema-Output"];
-export type SchemaMoodleCourseInput =
-  components["schemas"]["MoodleCourse-Input"];
-export type SchemaMoodleCourseOutput =
-  components["schemas"]["MoodleCourse-Output"];
-export type SchemaMoodleEntryInput = components["schemas"]["MoodleEntry-Input"];
-export type SchemaMoodleEntryOutput =
-  components["schemas"]["MoodleEntry-Output"];
-export type SchemaMoodleFileSourceInput =
-  components["schemas"]["MoodleFileSource-Input"];
-export type SchemaMoodleFileSourceOutput =
-  components["schemas"]["MoodleFileSource-Output"];
-export type SchemaMoodleUnknownSourceInput =
-  components["schemas"]["MoodleUnknownSource-Input"];
-export type SchemaMoodleUnknownSourceOutput =
-  components["schemas"]["MoodleUnknownSource-Output"];
-export type SchemaMoodleUrlSourceInput =
-  components["schemas"]["MoodleUrlSource-Input"];
-export type SchemaMoodleUrlSourceOutput =
-  components["schemas"]["MoodleUrlSource-Output"];
+export type SchemaMoodleCourse = components["schemas"]["MoodleCourse"];
+export type SchemaMoodleEntry = components["schemas"]["MoodleEntry"];
+export type SchemaMoodleFileSource = components["schemas"]["MoodleFileSource"];
+export type SchemaMoodleUnknownSource =
+  components["schemas"]["MoodleUnknownSource"];
+export type SchemaMoodleUrlSource = components["schemas"]["MoodleUrlSource"];
 export type SchemaPdfLocation = components["schemas"]["PdfLocation"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
-export type SchemaResidentsSourceInput =
-  components["schemas"]["ResidentsSource-Input"];
-export type SchemaResidentsSourceOutput =
-  components["schemas"]["ResidentsSource-Output"];
-export type SchemaResourcesSourceInput =
-  components["schemas"]["ResourcesSource-Input"];
-export type SchemaResourcesSourceOutput =
-  components["schemas"]["ResourcesSource-Output"];
-export type SchemaSearchResponseInput =
-  components["schemas"]["SearchResponse-Input"];
-export type SchemaSearchResponseOutput =
-  components["schemas"]["SearchResponse-Output"];
+export type SchemaResidentsSource = components["schemas"]["ResidentsSource"];
+export type SchemaResourcesSource = components["schemas"]["ResourcesSource"];
+export type SchemaSearchResponse = components["schemas"]["SearchResponse"];
 export type SchemaSearchResponses = components["schemas"]["SearchResponses"];
-export type SchemaTelegramSourceInput =
-  components["schemas"]["TelegramSource-Input"];
-export type SchemaTelegramSourceOutput =
-  components["schemas"]["TelegramSource-Output"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
-export type SchemaFastapiCompatV2BodyAskActByQuery =
-  components["schemas"]["fastapi___compat__v2__Body_ask_act_by_query"];
-export type SchemaFastapiCompatV2BodyAskAskByQuery =
-  components["schemas"]["fastapi___compat__v2__Body_ask_ask_by_query"];
 export type $defs = Record<string, never>;
 export interface operations {
   search_search_by_query: {
@@ -1469,7 +941,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["fastapi___compat__v2__Body_ask_ask_by_query"];
+        "application/json": components["schemas"]["Body_ask_ask_by_query"];
       };
     };
     responses: {
@@ -1516,7 +988,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["fastapi___compat__v2__Body_ask_act_by_query"];
+        "application/json": components["schemas"]["Body_ask_act_by_query"];
       };
     };
     responses: {
@@ -1551,39 +1023,6 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
-      };
-    };
-  };
-  telegram_save_or_update_message: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MessageSchema"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["DBMessageSchema"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
       };
     };
   };
@@ -1641,17 +1080,16 @@ export interface operations {
         };
         content: {
           "application/json": (
-            | components["schemas"]["EduwikiSource-Output"]
-            | components["schemas"]["CampusLifeSource-Output"]
-            | components["schemas"]["HotelSource-Output"]
-            | components["schemas"]["ClubsSource-Output"]
-            | components["schemas"]["MapsSource-Output"]
-            | components["schemas"]["MoodleFileSource-Output"]
-            | components["schemas"]["MoodleUrlSource-Output"]
-            | components["schemas"]["MoodleUnknownSource-Output"]
-            | components["schemas"]["TelegramSource-Output"]
-            | components["schemas"]["ResidentsSource-Output"]
-            | components["schemas"]["ResourcesSource-Output"]
+            | components["schemas"]["EduwikiSource"]
+            | components["schemas"]["CampusLifeSource"]
+            | components["schemas"]["HotelSource"]
+            | components["schemas"]["ClubsSource"]
+            | components["schemas"]["MapsSource"]
+            | components["schemas"]["MoodleFileSource"]
+            | components["schemas"]["MoodleUrlSource"]
+            | components["schemas"]["MoodleUnknownSource"]
+            | components["schemas"]["ResidentsSource"]
+            | components["schemas"]["ResourcesSource"]
           )[];
         };
       };
@@ -1750,7 +1188,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["MoodleCourse-Output"][];
+          "application/json": components["schemas"]["MoodleCourse"][];
         };
       };
     };
@@ -1803,7 +1241,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["MoodleEntry-Output"][];
+          "application/json": components["schemas"]["MoodleEntry"][];
         };
       };
     };
@@ -1860,7 +1298,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["FlattenInContentsWithPresignedUrl-Output"][];
+          "application/json": components["schemas"]["FlattenInContentsWithPresignedUrl"][];
         };
       };
       /** @description Validation Error */
@@ -1930,6 +1368,20 @@ export interface operations {
           "application/json": unknown;
         };
       };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -1950,28 +1402,16 @@ export enum PathsSearchSearchSearch_query_idFeedbackPostParametersQueryFeedback 
   like = "like",
   dislike = "dislike",
 }
-export enum CampusLifeSourceInputType {
+export enum CampusLifeSourceType {
   campuslife = "campuslife",
 }
-export enum CampusLifeSourceOutputType {
-  campuslife = "campuslife",
-}
-export enum ClubsSourceInputType {
+export enum ClubsSourceType {
   clubs = "clubs",
 }
-export enum ClubsSourceOutputType {
-  clubs = "clubs",
-}
-export enum EduwikiSourceInputType {
+export enum EduwikiSourceType {
   eduwiki = "eduwiki",
 }
-export enum EduwikiSourceOutputType {
-  eduwiki = "eduwiki",
-}
-export enum HotelSourceInputType {
-  hotel = "hotel",
-}
-export enum HotelSourceOutputType {
+export enum HotelSourceType {
   hotel = "hotel",
 }
 export enum InfoSources {
@@ -1984,34 +1424,19 @@ export enum InfoSources {
   residents = "residents",
   resources = "resources",
 }
-export enum MapsSourceInputType {
+export enum MapsSourceType {
   maps = "maps",
 }
-export enum MapsSourceOutputType {
-  maps = "maps",
-}
-export enum MoodleFileSourceInputType {
+export enum MoodleFileSourceType {
   moodle_file = "moodle-file",
 }
-export enum MoodleFileSourceOutputType {
-  moodle_file = "moodle-file",
-}
-export enum MoodleUnknownSourceInputType {
+export enum MoodleUnknownSourceType {
   moodle_unknown = "moodle-unknown",
 }
-export enum MoodleUnknownSourceOutputType {
-  moodle_unknown = "moodle-unknown",
-}
-export enum MoodleUrlSourceInputType {
+export enum MoodleUrlSourceType {
   moodle_url = "moodle-url",
 }
-export enum MoodleUrlSourceOutputType {
-  moodle_url = "moodle-url",
-}
-export enum ResidentsSourceInputType {
-  residents = "residents",
-}
-export enum ResidentsSourceOutputType {
+export enum ResidentsSourceType {
   residents = "residents",
 }
 export enum Resources {
@@ -2023,15 +1448,6 @@ export enum Resources {
   university_events = "university_events",
   university_store = "university_store",
 }
-export enum ResourcesSourceInputType {
+export enum ResourcesSourceType {
   resources = "resources",
-}
-export enum ResourcesSourceOutputType {
-  resources = "resources",
-}
-export enum TelegramSourceInputType {
-  telegram = "telegram",
-}
-export enum TelegramSourceOutputType {
-  telegram = "telegram",
 }

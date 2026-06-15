@@ -18,6 +18,7 @@ import {
   renameStudentGroupInCourses,
   renameStudentGroupInTerm,
 } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
+import { getNormalizedTrack } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
@@ -225,7 +226,10 @@ export function useTrack(
     sectionCode,
     programIndex,
   );
-  const track = program?.tracks[trackIndex];
+  const track = useMemo(
+    () => getNormalizedTrack(program, trackIndex),
+    [program, trackIndex],
+  );
 
   return {
     track,

@@ -2,6 +2,7 @@ import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 
 import {
   DAY_NAMES,
+  WEEKDAY_LABEL_RU,
   add90m,
   filterMeetingsByTab,
   normalizedTermDays,
@@ -11,16 +12,6 @@ import {
   type WeekRange,
   type WeekRelativePosition,
 } from "./timetableViewerModel.ts";
-
-const DAY_HEADER_RU: Record<(typeof DAY_NAMES)[number], string> = {
-  Mon: "Понедельник",
-  Tue: "Вторник",
-  Wed: "Среда",
-  Thu: "Четверг",
-  Fri: "Пятница",
-  Sat: "Суббота",
-  Sun: "Воскресенье",
-};
 
 export type CalendarDayColumn = {
   key: string;
@@ -77,6 +68,10 @@ function formatCalendarDate(dateStr: string) {
   });
 }
 
+export function formatCalendarWeekRange(start: string, end: string) {
+  return `${formatCalendarDate(start)} — ${formatCalendarDate(end)}`;
+}
+
 export const MEETING_CALENDAR_GROUPS_LIMIT = 3;
 
 export function meetingCalendarMainLabel(meeting: Meeting) {
@@ -89,7 +84,7 @@ export function meetingCalendarMainLabel(meeting: Meeting) {
 
 export function meetingCalendarGroupsLabel(
   meeting: Meeting,
-  limit = MEETING_CALENDAR_GROUPS_LIMIT,
+  limit: number | null = MEETING_CALENDAR_GROUPS_LIMIT,
 ) {
   const list = (meeting.groups || []).filter(Boolean);
   if (!list.length) return null;
@@ -102,13 +97,16 @@ export function meetingCalendarGroupsLabel(
     if (onlyGroup === shortName) return null;
   }
 
-  if (list.length <= limit) return list.join(", ");
+  if (limit === null || list.length <= limit) return list.join(", ");
   return `${list.slice(0, limit).join(", ")}, ...`;
 }
 
-export function meetingCalendarCellLabel(meeting: Meeting) {
+export function meetingCalendarCellLabel(
+  meeting: Meeting,
+  groupsLimit: number | null = MEETING_CALENDAR_GROUPS_LIMIT,
+) {
   const mainLabel = meetingCalendarMainLabel(meeting);
-  const groupsLabel = meetingCalendarGroupsLabel(meeting);
+  const groupsLabel = meetingCalendarGroupsLabel(meeting, groupsLimit);
   if (!groupsLabel) return mainLabel;
   return `${mainLabel} (${groupsLabel})`;
 }
@@ -166,7 +164,7 @@ export function buildCalendarGrid(
     key: week.key,
     weekNumber: index + 1,
     weekLabel: `Неделя ${index + 1}`,
-    weekRangeLabel: `${week.start} — ${week.end}`,
+    weekRangeLabel: formatCalendarWeekRange(week.start, week.end),
     weekRelative: weekRelativeToToday(week, today),
     days: allowedDays.map((day) => {
       const date = dateForWeekDay(week.start, day);
@@ -174,7 +172,7 @@ export function buildCalendarGrid(
         key: `${week.key}-${date}`,
         day,
         date,
-        headerLabel: DAY_HEADER_RU[day],
+        headerLabel: WEEKDAY_LABEL_RU[day],
         dateLabel: formatCalendarDate(date),
         isToday: date === today,
       };

@@ -700,6 +700,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/me/linked/hide": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Hide Linked Calendar
+     * @description Hide linked calendar from current user
+     */
+    post: operations["users_hide_linked_calendar"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/me/{target}/hide": {
     parameters: {
       query?: never;
@@ -734,10 +754,18 @@ export interface paths {
      * @description Add linked calendar to current user
      */
     post: operations["users_link_calendar"];
-    delete?: never;
+    /**
+     * Delete Linked Calendar
+     * @description Delete linked calendar from current user
+     */
+    delete: operations["users_delete_linked_calendar"];
     options?: never;
     head?: never;
-    patch?: never;
+    /**
+     * Update Linked Calendar
+     * @description Update linked calendar for current user
+     */
+    patch: operations["users_update_linked_calendar"];
     trace?: never;
   };
   "/users/me/get-schedule-access-key": {
@@ -863,10 +891,7 @@ export interface components {
     };
     /** Body_event_groups_set_event_group_ics */
     Body_event_groups_set_event_group_ics: {
-      /**
-       * Ics File
-       * Format: binary
-       */
+      /** Ics File */
       ics_file: string;
     };
     /** Body_tags_batch_create_tags */
@@ -1033,6 +1058,24 @@ export interface components {
        * @default true
        */
       is_active: boolean;
+    };
+    /**
+     * LinkedCalendarUpdate
+     * @description Represents a linked calendar instance to be updated.
+     */
+    LinkedCalendarUpdate: {
+      /** Alias */
+      alias?: string | null;
+      /** Url */
+      url?: string | null;
+      /** Name */
+      name?: string | null;
+      /** Description */
+      description?: string | null;
+      /** Color */
+      color?: string | null;
+      /** Is Active */
+      is_active?: boolean | null;
     };
     /**
      * LinkedCalendarView
@@ -1239,6 +1282,8 @@ export type SchemaJsonPredefinedUsers =
 export type SchemaLinenChangeEntry = components["schemas"]["LinenChangeEntry"];
 export type SchemaLinkedCalendarCreate =
   components["schemas"]["LinkedCalendarCreate"];
+export type SchemaLinkedCalendarUpdate =
+  components["schemas"]["LinkedCalendarUpdate"];
 export type SchemaLinkedCalendarView =
   components["schemas"]["LinkedCalendarView"];
 export type SchemaListEventGroupsResponse =
@@ -2233,6 +2278,13 @@ export interface operations {
           "text/calendar": string;
         };
       };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Event group not found */
       404: {
         headers: {
@@ -2807,6 +2859,52 @@ export interface operations {
       };
     };
   };
+  users_hide_linked_calendar: {
+    parameters: {
+      query: {
+        alias: string;
+        hide?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Linked calendar hidden */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ViewUser"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   users_hide_target: {
     parameters: {
       query?: {
@@ -2871,6 +2969,107 @@ export interface operations {
       };
       /** @description Unable to verify credentials OR Credentials not provided */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Calendar with this alias already exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  users_delete_linked_calendar: {
+    parameters: {
+      query: {
+        alias: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Linked calendar deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ViewUser"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  users_update_linked_calendar: {
+    parameters: {
+      query: {
+        alias: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LinkedCalendarUpdate"];
+      };
+    };
+    responses: {
+      /** @description Linked calendar updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LinkedCalendarView"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };

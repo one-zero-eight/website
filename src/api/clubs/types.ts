@@ -261,7 +261,7 @@ export interface components {
     /** Club */
     Club: {
       /** @description MongoDB document ObjectID */
-      id: components["schemas"]["PydanticObjectId"] | null;
+      id: components["schemas"]["PydanticObjectId"];
       /**
        * Is Active
        * @description False if the club is closed

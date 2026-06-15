@@ -59,10 +59,11 @@ export function InstructorsTabContent() {
     <div className="flex flex-col gap-2">
       {items.length ? (
         <div className="flex flex-col gap-2">
-          {items.map((item) => (
+          {items.map((item, index) => (
             <button
               key={item.id}
               type="button"
+              data-instructor-id={instructors?.[index]?.id ?? ""}
               className={clsx(
                 "btn btn-ghost rounded-box border-base-300 hover:bg-base-200 h-auto min-h-0 w-full flex-col items-start border px-3 py-2 text-left normal-case",
                 selectedSelectionId === getSettingsSelectionKey(item.selection)

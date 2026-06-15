@@ -72,9 +72,8 @@ export interface components {
       /**
        * People
        * @description List of people for this area
-       * @default []
        */
-      people: string[];
+      people?: string[];
       /**
        * Prioritized
        * @description Priority for multi-floor areas
@@ -135,15 +134,13 @@ export interface components {
       /**
        * Legend
        * @description Legend of the scene
-       * @default []
        */
-      legend: components["schemas"]["LegendEntry"][];
+      legend?: components["schemas"]["LegendEntry"][];
       /**
        * Areas
        * @description Areas of the scene
-       * @default []
        */
-      areas: components["schemas"]["Area"][];
+      areas?: components["schemas"]["Area"][];
     };
     /** SearchResult */
     SearchResult: {
@@ -161,6 +158,10 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
     };
   };
   responses: never;

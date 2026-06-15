@@ -38,6 +38,11 @@ import {
   courseComponentsYamlLintExtensions,
   validateCourseComponentsYaml,
 } from "@/components/schedule-assistant/settings/courses/courseComponentsYamlLint.ts";
+import {
+  mutateNormalizedTrackGroups,
+  normalizeTracksFromSectionProgram,
+  programUsesExplicitTracks,
+} from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 import { InstructorPreferenceGrid } from "@/components/schedule-assistant/settings/instructors/InstructorPreferenceGrid.tsx";
 import { useRegisterSettingsDirty } from "@/components/schedule-assistant/settings/settingsSaveStatus.tsx";
 import { useBlurSaveField } from "@/components/schedule-assistant/settings/useBlurSaveField.ts";
@@ -82,7 +87,8 @@ const detailTimeSlotsTextareaClass =
   "textarea textarea-bordered min-h-[2.75rem] w-full resize-none overflow-hidden px-3 py-2 text-sm font-normal leading-normal [color-scheme:inherit]";
 
 /** Общая оболочка формы деталей настроек (программа, трек, группа, аудитория, преподаватель). */
-const settingsDetailShellClass = "flex min-h-0 flex-1 flex-col gap-3";
+const settingsDetailShellClass =
+  "flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto";
 
 /** Заголовок секции + кнопка добавления + прокручиваемый список (треки программы, группы трека). */
 function SettingsDetailNestedList({
@@ -741,12 +747,12 @@ export function ProgramDetails({
   const kind = program && "kind" in program ? String(program.kind ?? "") : "";
   const language = String(program?.language ?? "");
   const year = program?.year != null ? String(program.year) : "";
-  const tracks = (Array.isArray(program?.tracks) ? program.tracks : []).map(
-    (track, trackIdx: number) => ({
-      id: String(trackIdx),
-      title: String(track?.name || "Track"),
-    }),
-  );
+  const tracks = (
+    program ? normalizeTracksFromSectionProgram(program) : []
+  ).map((track, trackIdx) => ({
+    id: String(trackIdx),
+    title: String(track?.name || "Track"),
+  }));
   const nameField = useBlurSaveField(name, (value) =>
     updateProgram((target) => {
       target.name = value;
@@ -921,7 +927,12 @@ export function TrackDetails({
   });
   const nameField = useBlurSaveField(name, (value) =>
     updateProgram((target) => {
-      target.tracks[trackIndex].name = value;
+      if (programUsesExplicitTracks(target)) {
+        target.tracks[trackIndex].name = value;
+        return;
+      }
+      if (trackIndex !== 0) return;
+      target.code = value;
     }),
   );
   const codeField = useBlurSaveField(code, (value) =>
@@ -982,7 +993,10 @@ export function TrackDetails({
                   },
                 );
               updateProgram((target) => {
-                target.tracks[trackIndex].groups.push(newGroupId);
+                mutateNormalizedTrackGroups(target, trackIndex, (groups) => [
+                  ...groups,
+                  newGroupId,
+                ]);
               });
               createStudentGroup({
                 body: {
@@ -1009,7 +1023,11 @@ export function TrackDetails({
                     const [moved] = reordered.splice(index, 1);
                     reordered.splice(index - 1, 0, moved);
                     updateProgram((target) => {
-                      target.tracks[trackIndex].groups = reordered;
+                      mutateNormalizedTrackGroups(
+                        target,
+                        trackIndex,
+                        () => reordered,
+                      );
                     });
                   }}
                   onMoveDown={() => {
@@ -1018,7 +1036,11 @@ export function TrackDetails({
                     const [moved] = reordered.splice(index, 1);
                     reordered.splice(index + 1, 0, moved);
                     updateProgram((target) => {
-                      target.tracks[trackIndex].groups = reordered;
+                      mutateNormalizedTrackGroups(
+                        target,
+                        trackIndex,
+                        () => reordered,
+                      );
                     });
                   }}
                   onDelete={() => {
@@ -1124,15 +1146,10 @@ export function InstructorDetails({
             <span className={detailLabelUpperClass}>Должность</span>
             <input className={detailInputClass} {...positionField} />
           </label>
-          <div className={`${detailControlClass} min-h-0 shrink-0`}>
+          <div className={`${detailControlClass} min-h-0 min-w-0 shrink-0`}>
             <span className={detailLabelUpperClass}>
-              Предпочтения по слотам
+              Предпочтения по времени
             </span>
-            <p className="text-base-content/60 mb-2 text-xs">
-              Клик по ячейке: нейтрально → предпочтительно → нежелательно →
-              запрещено. Запрещённые слоты — жёсткое ограничение; нежелательные
-              учитываются при оптимизации.
-            </p>
             <InstructorPreferenceGrid
               term={term}
               preferences={instructor?.slot_preferences ?? []}
