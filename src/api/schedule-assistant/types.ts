@@ -553,6 +553,11 @@ export interface components {
        * @default true
        */
       check_instructor_id: boolean;
+      /**
+       * Check Instructor Preference
+       * @default true
+       */
+      check_instructor_preference: boolean;
     };
     /** CheckResults */
     CheckResults: {
@@ -819,6 +824,36 @@ export interface components {
        * @description Staff position from roster (for example, Professor, Visiting)
        */
       position?: string | null;
+      /**
+       * Slot Preferences
+       * @description Sparse weekday+slot preference grid; omitted cells are neutral
+       */
+      slot_preferences?: components["schemas"]["InstructorSlotPreferenceEntry"][];
+    };
+    /**
+     * InstructorBannedSlotIssue
+     * @description Занятие назначено преподавателю в запрещённую ячейку сетки weekday+slot.
+     */
+    InstructorBannedSlotIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: InstructorBannedSlotIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Instructor Id */
+      instructor_id: string;
+      weekday: components["schemas"]["Weekday"];
+      /**
+       * Start Time
+       * Format: time
+       */
+      start_time: string;
+      meeting: components["schemas"]["ScheduledMeeting"];
     };
     /**
      * InstructorIdIssue
@@ -838,6 +873,51 @@ export interface components {
       /** Instructor Id */
       instructor_id: string;
     };
+    /**
+     * InstructorPreferenceIssue
+     * @description Занятие назначено преподавателю в нежелательную (discouraged) ячейку сетки.
+     */
+    InstructorPreferenceIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: InstructorPreferenceIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Instructor Id */
+      instructor_id: string;
+      weekday: components["schemas"]["Weekday"];
+      /**
+       * Start Time
+       * Format: time
+       */
+      start_time: string;
+      /** Penalty Weight */
+      penalty_weight: number;
+      meeting: components["schemas"]["ScheduledMeeting"];
+    };
+    /** InstructorSlotPreferenceEntry */
+    InstructorSlotPreferenceEntry: {
+      /** @description Teaching weekday for this preference cell */
+      weekday: components["schemas"]["Weekday"];
+      /**
+       * Start Time
+       * Format: time
+       * @description Slot start time; must match a term time_slots entry
+       */
+      start_time: string;
+      /** @description Preference level for this weekday+slot cell */
+      level: components["schemas"]["InstructorSlotPreferenceLevel"];
+    };
+    /**
+     * InstructorSlotPreferenceLevel
+     * @enum {string}
+     */
+    InstructorSlotPreferenceLevel: InstructorSlotPreferenceLevel;
     Issue:
       | components["schemas"]["CapacityIssue"]
       | components["schemas"]["RoomIssue"]
@@ -848,7 +928,9 @@ export interface components {
       | components["schemas"]["UnbookedIssue"]
       | components["schemas"]["GroupIssue"]
       | components["schemas"]["StudentIssue"]
-      | components["schemas"]["PerWeekIssue"];
+      | components["schemas"]["PerWeekIssue"]
+      | components["schemas"]["InstructorBannedSlotIssue"]
+      | components["schemas"]["InstructorPreferenceIssue"];
     /**
      * Item
      * @description Represents a parsed location string with optional modifiers and nested locations.
@@ -1723,8 +1805,14 @@ export type SchemaGroupIssue = components["schemas"]["GroupIssue"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaInstructor = components["schemas"]["Instructor"];
+export type SchemaInstructorBannedSlotIssue =
+  components["schemas"]["InstructorBannedSlotIssue"];
 export type SchemaInstructorIdIssue =
   components["schemas"]["InstructorIdIssue"];
+export type SchemaInstructorPreferenceIssue =
+  components["schemas"]["InstructorPreferenceIssue"];
+export type SchemaInstructorSlotPreferenceEntry =
+  components["schemas"]["InstructorSlotPreferenceEntry"];
 export type SchemaIssue = components["schemas"]["Issue"];
 export type SchemaItem = components["schemas"]["Item"];
 export type SchemaOccurrencePlacement =
@@ -2898,8 +2986,20 @@ export enum ConfigChangeEventSummaryResources {
 export enum GroupIssueIssue_type {
   group = "group",
 }
+export enum InstructorBannedSlotIssueIssue_type {
+  instructor_banned_slot = "instructor_banned_slot",
+}
 export enum InstructorIdIssueIssue_type {
   instructor_id = "instructor_id",
+}
+export enum InstructorPreferenceIssueIssue_type {
+  instructor_preference = "instructor_preference",
+}
+export enum InstructorSlotPreferenceLevel {
+  preferred = "preferred",
+  neutral = "neutral",
+  discouraged = "discouraged",
+  banned = "banned",
 }
 export enum OccurrencePlacementKind {
   occurrence = "occurrence",

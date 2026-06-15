@@ -41,7 +41,13 @@ function buildCourseUsageRows(
         .filter(Boolean);
       return {
         id: `course-${index}`,
-        title: String(course?.name || `Курс #${index + 1}`),
+        title:
+          String(
+            course?.name_ru ||
+              course?.name ||
+              course?.short_name_ru ||
+              course?.short_name,
+          ) || `Курс #${index + 1}`,
         subtitle: components.length ? components.join(", ") : "—",
         selection: { kind: "course", courseIndex: index },
         courseIndex: index,

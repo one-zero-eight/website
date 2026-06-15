@@ -38,6 +38,7 @@ import {
   courseComponentsYamlLintExtensions,
   validateCourseComponentsYaml,
 } from "@/components/schedule-assistant/settings/courses/courseComponentsYamlLint.ts";
+import { InstructorPreferenceGrid } from "@/components/schedule-assistant/settings/instructors/InstructorPreferenceGrid.tsx";
 import { useRegisterSettingsDirty } from "@/components/schedule-assistant/settings/settingsSaveStatus.tsx";
 import { useBlurSaveField } from "@/components/schedule-assistant/settings/useBlurSaveField.ts";
 import { useSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
@@ -420,7 +421,13 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const componentTags = components
     .map((comp: { tag?: string }) => comp?.tag)
     .filter(Boolean);
-  const headingTitle = String(course?.name || `Курс #${courseIndex + 1}`);
+  const headingTitle =
+    String(
+      course?.name_ru ||
+        course?.name ||
+        course?.short_name_ru ||
+        course?.short_name,
+    ) || `Курс #${courseIndex + 1}`;
   const headingSubtitle = componentTags.length ? componentTags.join(", ") : "—";
   const knownStudentGroupIds = useMemo(
     () => collectKnownStudentGroupIds(config),
@@ -1059,6 +1066,7 @@ export function InstructorDetails({
   const { instructor, instructorId, isPending, isError, error } =
     useInstructor(instructorIndex);
   const { patchInstructor } = usePatchInstructorMutation(instructorId);
+  const { term } = useSemesterSettings();
   const { mutate: deleteInstructor, isPending: isDeleting } =
     useDeleteInstructorMutation();
   const { deselectItem } = useSelection();
@@ -1116,6 +1124,23 @@ export function InstructorDetails({
             <span className={detailLabelUpperClass}>Должность</span>
             <input className={detailInputClass} {...positionField} />
           </label>
+          <div className={`${detailControlClass} min-h-0 shrink-0`}>
+            <span className={detailLabelUpperClass}>
+              Предпочтения по слотам
+            </span>
+            <p className="text-base-content/60 mb-2 text-xs">
+              Клик по ячейке: нейтрально → предпочтительно → нежелательно →
+              запрещено. Запрещённые слоты — жёсткое ограничение; нежелательные
+              учитываются при оптимизации.
+            </p>
+            <InstructorPreferenceGrid
+              term={term}
+              preferences={instructor?.slot_preferences ?? []}
+              onChange={(slot_preferences) =>
+                patchInstructor({ slot_preferences })
+              }
+            />
+          </div>
           <SettingsDetailDeleteButton
             label="Удалить преподавателя"
             onClick={() => {
