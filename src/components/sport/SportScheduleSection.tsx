@@ -1,15 +1,11 @@
 import { $sport } from "@/api/sport";
-import type {
-  SchemaTrainingInfoPersonalSchema,
-  SchemaTrainingInfoSchema,
-} from "@/api/sport/types.ts";
+import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { SportTrainingModal } from "@/components/sport/SportTrainingModal.tsx";
 import {
   endOfSportWeekMoscow,
   formatDayHeaderMoscow,
-  formatSportWeekRangeLabel,
   formatTimeRangeMoscow,
   moscowDateKey,
   startOfSportWeekMoscow,
@@ -17,9 +13,7 @@ import {
 } from "@/components/sport/sport-week-utils.ts";
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
-
-type ScheduleView = "listWeek" | "timeGridDay";
+import { useMemo, useState } from "react";
 
 const legacyGroupColors = [
   "#1f77b4",
@@ -69,8 +63,6 @@ export function SportScheduleSection({
   const queryClient = useQueryClient();
   const { showError, showSuccess } = useToast();
   const [weekAnchor, setWeekAnchor] = useState(() => new Date());
-  const [selectedSportId, setSelectedSportId] = useState<number | null>(null);
-  const [view, setView] = useState<ScheduleView>("listWeek");
   const [pendingTrainingId, setPendingTrainingId] = useState<number | null>(
     null,
   );
@@ -85,44 +77,16 @@ export function SportScheduleSection({
     [weekAnchor],
   );
   const sundayEnd = useMemo(() => endOfSportWeekMoscow(monday), [monday]);
+  const visibleDayIndexes = useMemo(
+    () => getVisibleDayIndexesForWeek(monday),
+    [monday],
+  );
 
   const {
-    data: sports,
-    isPending: sportsPending,
-    isError: sportsError,
-  } = $sport.useQuery("get", "/sports", {}, { enabled });
-
-  useEffect(() => {
-    if (selectedSportId != null || !sports?.length) {
-      return;
-    }
-
-    setSelectedSportId(sports.find((sport) => sport.groups.length)?.id ?? null);
-  }, [selectedSportId, sports]);
-
-  const selectedSport = sports?.find((sport) => sport.id === selectedSportId);
-  const selectedDayIndex = useMemo(() => getTodayIndexInWeek(monday), [monday]);
-
-  const {
-    data: schedule,
+    data: personalSchedule,
     isPending,
     isError,
   } = $sport.useQuery(
-    "get",
-    "/sports/{sport_id}/schedule",
-    {
-      params: {
-        path: { sport_id: Number(selectedSportId) },
-        query: {
-          start: toScheduleApiDateTime(monday),
-          end: toScheduleApiDateTime(sundayEnd),
-        },
-      },
-    },
-    { enabled: enabled && selectedSportId != null },
-  );
-
-  const { data: personalSchedule } = $sport.useQuery(
     "get",
     "/users/me/schedule",
     {
@@ -190,17 +154,21 @@ export function SportScheduleSection({
   );
 
   const filteredSchedule = useMemo(() => {
-    return (schedule ?? []).toSorted(
-      (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
-    );
-  }, [schedule]);
+    return (personalSchedule ?? [])
+      .filter((row) => row.training.max_checkins > 0)
+      .toSorted(
+        (a, b) =>
+          new Date(a.training.start).getTime() -
+          new Date(b.training.start).getTime(),
+      );
+  }, [personalSchedule]);
 
   const groupColorMap = useMemo(() => {
     const map = new Map<string, string>();
     let colorIndex = 0;
 
-    for (const training of schedule ?? []) {
-      const key = getTrainingColorKey(training);
+    for (const row of personalSchedule ?? []) {
+      const key = getTrainingColorKey(row.training);
       if (map.has(key)) {
         continue;
       }
@@ -213,22 +181,24 @@ export function SportScheduleSection({
     }
 
     return map;
-  }, [schedule]);
+  }, [personalSchedule]);
 
   const byDay = useMemo(() => {
-    const map = new Map<string, SchemaTrainingInfoSchema[]>();
+    const map = new Map<string, SchemaTrainingInfoPersonalSchema[]>();
 
-    for (const training of filteredSchedule) {
-      const key = moscowDateKey(training.start);
-      map.set(key, [...(map.get(key) ?? []), training]);
+    for (const row of filteredSchedule) {
+      const key = moscowDateKey(row.training.start);
+      map.set(key, [...(map.get(key) ?? []), row]);
     }
 
     return map;
   }, [filteredSchedule]);
-
-  const rangeLabel = formatSportWeekRangeLabel(monday, sundayEnd);
-  const visibleDayIndexes =
-    view === "timeGridDay" ? [selectedDayIndex] : scheduleDays;
+  const visibleTrainingCount = useMemo(() => {
+    return visibleDayIndexes.reduce((count, dayIndex) => {
+      const key = moscowDateKey(addDays(monday, dayIndex).toISOString());
+      return count + (byDay.get(key)?.length ?? 0);
+    }, 0);
+  }, [byDay, monday, visibleDayIndexes]);
 
   function shiftWeek(delta: number) {
     setWeekAnchor((d) => {
@@ -237,7 +207,10 @@ export function SportScheduleSection({
     });
   }
 
-  function handleCheckin(training: SchemaTrainingInfoSchema, checkin: boolean) {
+  function handleCheckin(
+    training: SchemaTrainingInfoPersonalSchema["training"],
+    checkin: boolean,
+  ) {
     setPendingTrainingId(training.id);
     setCheckin({
       params: {
@@ -257,72 +230,39 @@ export function SportScheduleSection({
             </div>
           </div>
 
-          <div className="grid grid-cols-[1fr_auto] items-start gap-3 @md/content:grid-cols-[1fr_auto_1fr]">
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={() => setWeekAnchor(new Date())}
+            >
+              today
+            </button>
             <div className="join">
               <button
                 type="button"
-                className={cn(
-                  "btn btn-outline btn-primary btn-sm join-item",
-                  view === "listWeek" && "btn-active",
-                )}
-                onClick={() => setView("listWeek")}
+                className="btn btn-outline btn-primary btn-sm join-item"
+                onClick={() => shiftWeek(-1)}
               >
-                list
+                <span className="icon-[material-symbols--chevron-left] text-lg" />
               </button>
               <button
                 type="button"
-                className={cn(
-                  "btn btn-outline btn-primary btn-sm join-item",
-                  view === "timeGridDay" && "btn-active",
-                )}
-                onClick={() => setView("timeGridDay")}
+                className="btn btn-outline btn-primary btn-sm join-item"
+                onClick={() => shiftWeek(1)}
               >
-                day
+                <span className="icon-[material-symbols--chevron-right] text-lg" />
               </button>
-            </div>
-
-            <div className="col-span-2 flex min-w-0 flex-wrap items-center justify-end gap-2 @md/content:col-span-1 @md/content:col-start-3">
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={() => setWeekAnchor(new Date())}
-              >
-                today
-              </button>
-              <div className="join">
-                <button
-                  type="button"
-                  className="btn btn-outline btn-primary btn-sm join-item"
-                  onClick={() => shiftWeek(-1)}
-                >
-                  <span className="icon-[material-symbols--chevron-left] text-lg" />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline btn-primary btn-sm join-item"
-                  onClick={() => shiftWeek(1)}
-                >
-                  <span className="icon-[material-symbols--chevron-right] text-lg" />
-                </button>
-              </div>
             </div>
           </div>
 
-          <h3 className="text-center text-3xl leading-tight font-medium">
-            {rangeLabel}
-          </h3>
-
-          {sportsPending || isPending ? (
+          {isPending ? (
             <div className="skeleton h-96 w-full" />
-          ) : sportsError || isError ? (
+          ) : isError ? (
             <div className="alert alert-error">
               Schedule could not be loaded.
             </div>
-          ) : !selectedSport ? (
-            <div className="text-base-content/70 rounded-box border-base-300 border p-4">
-              Choose a sport to view schedule.
-            </div>
-          ) : filteredSchedule.length === 0 ? (
+          ) : visibleTrainingCount === 0 ? (
             <div className="text-base-content/70 rounded-box border-base-300 border p-4">
               No trainings match the selected filters.
             </div>
@@ -334,15 +274,11 @@ export function SportScheduleSection({
               groupColorMap={groupColorMap}
               checkedTrainingIds={checkedTrainingIds}
               pendingTrainingId={pendingTrainingId}
-              onSelect={(training) =>
+              onSelect={(row) =>
                 setSelected(
-                  toPersonalTraining(
-                    training,
-                    checkedTrainingIds.has(training.id),
-                    isTrainingCheckInAllowed(
-                      training,
-                      checkedTrainingIds.has(training.id),
-                    ),
+                  toSelectedTrainingRow(
+                    row,
+                    checkedTrainingIds.has(row.training.id),
                   ),
                 )
               }
@@ -374,14 +310,17 @@ function SportScheduleList({
   onSelect,
   onCheckin,
 }: {
-  byDay: Map<string, SchemaTrainingInfoSchema[]>;
+  byDay: Map<string, SchemaTrainingInfoPersonalSchema[]>;
   monday: Date;
   visibleDayIndexes: readonly number[];
   groupColorMap: Map<string, string>;
   checkedTrainingIds: Set<number>;
   pendingTrainingId: number | null;
-  onSelect: (training: SchemaTrainingInfoSchema) => void;
-  onCheckin: (training: SchemaTrainingInfoSchema, checkin: boolean) => void;
+  onSelect: (row: SchemaTrainingInfoPersonalSchema) => void;
+  onCheckin: (
+    training: SchemaTrainingInfoPersonalSchema["training"],
+    checkin: boolean,
+  ) => void;
 }) {
   return (
     <div className="border-base-300 overflow-hidden border">
@@ -393,7 +332,7 @@ function SportScheduleList({
 
         return (
           <section key={key}>
-            <div className="border-base-300 bg-base-200 flex min-h-11 items-center justify-between gap-3 border-b px-4 py-2">
+            <div className="border-base-300 bg-base-200 flex min-h-9 items-center justify-between gap-3 border-b px-3 py-1.5">
               <span className="text-base font-bold">{header.weekday}</span>
               <span className="text-base font-bold">
                 {formatOriginalDate(date)}
@@ -402,19 +341,17 @@ function SportScheduleList({
 
             {rows.length ? (
               <ul>
-                {rows.map((training) => {
+                {rows.map((row) => {
+                  const training = row.training;
                   const checkedIn = checkedTrainingIds.has(training.id);
                   const availablePlaces = getAvailablePlaces(training);
-                  const canCheckIn = isTrainingCheckInAllowed(
-                    training,
-                    checkedIn,
-                  );
+                  const canCheckIn = checkedIn || row.can_check_in;
                   const isPending = pendingTrainingId === training.id;
 
                   return (
                     <li key={training.id}>
                       <div
-                        className="grid min-h-12 w-full grid-cols-[9.5rem_minmax(0,1fr)_auto] items-center gap-3 border-b border-white/30 px-4 py-2 text-left text-base font-bold text-white @max-md/content:grid-cols-[8.5rem_minmax(0,1fr)] @max-sm/content:grid-cols-1 @max-sm/content:gap-2"
+                        className="grid min-h-10 w-full grid-cols-[9.5rem_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/30 px-3 py-1 text-left text-base font-bold text-white @max-md/content:grid-cols-[8.5rem_minmax(0,1fr)] @max-sm/content:grid-cols-1"
                         style={{
                           backgroundColor: getTrainingColor(
                             training,
@@ -426,15 +363,15 @@ function SportScheduleList({
                       >
                         <button
                           type="button"
-                          className="text-left tabular-nums"
-                          onClick={() => onSelect(training)}
+                          className="flex min-h-8 items-center text-left tabular-nums"
+                          onClick={() => onSelect(row)}
                         >
                           {formatTimeRangeMoscow(training.start, training.end)}
                         </button>
                         <button
                           type="button"
-                          className="min-w-0 text-left wrap-break-word"
-                          onClick={() => onSelect(training)}
+                          className="flex min-h-8 min-w-0 items-center text-left wrap-break-word"
+                          onClick={() => onSelect(row)}
                         >
                           {sportTrainingTitle({ training })}
                           {training.is_paid ? (
@@ -453,7 +390,9 @@ function SportScheduleList({
                               "btn btn-xs min-w-24",
                               checkedIn
                                 ? "border-error bg-base-200 text-error hover:border-error hover:bg-base-300"
-                                : "bg-white/90 text-black hover:bg-white",
+                                : !canCheckIn
+                                  ? "bg-white/90 text-gray-400 hover:bg-white hover:text-gray-400"
+                                  : "bg-white/90 text-black hover:bg-white",
                             )}
                             disabled={isPending || (!checkedIn && !canCheckIn)}
                             onClick={() => onCheckin(training, !checkedIn)}
@@ -462,6 +401,8 @@ function SportScheduleList({
                               <span className="loading loading-spinner loading-sm" />
                             ) : checkedIn ? (
                               "Check out"
+                            ) : !canCheckIn ? (
+                              "Unavailable"
                             ) : (
                               "Check-in"
                             )}
@@ -484,21 +425,20 @@ function SportScheduleList({
   );
 }
 
-function toPersonalTraining(
-  training: SchemaTrainingInfoSchema,
+function toSelectedTrainingRow(
+  row: SchemaTrainingInfoPersonalSchema,
   checkedIn: boolean,
-  canCheckIn: boolean,
 ): SchemaTrainingInfoPersonalSchema {
   return {
-    training,
+    ...row,
     checked_in: checkedIn,
-    can_check_in: canCheckIn,
-    can_grade: false,
-    can_edit: false,
+    can_check_in: checkedIn || row.can_check_in,
   };
 }
 
-function getTrainingColorKey(training: SchemaTrainingInfoSchema): string {
+function getTrainingColorKey(
+  training: SchemaTrainingInfoPersonalSchema["training"],
+): string {
   return String(training.group_id || training.display_name || training.id);
 }
 
@@ -508,7 +448,7 @@ function getGeneratedColor(index: number): string {
 }
 
 function getTrainingColor(
-  training: SchemaTrainingInfoSchema,
+  training: SchemaTrainingInfoPersonalSchema["training"],
   groupColorMap: Map<string, string>,
   checkedIn: boolean,
   canCheckIn: boolean,
@@ -526,22 +466,11 @@ function getTrainingColor(
   );
 }
 
-function getAvailablePlaces(training: SchemaTrainingInfoSchema): number {
+function getAvailablePlaces(
+  training: SchemaTrainingInfoPersonalSchema["training"],
+): number {
   const places = training.max_checkins - training.checkins_count;
   return Math.max(0, places);
-}
-
-function isTrainingCheckInAllowed(
-  training: SchemaTrainingInfoSchema,
-  checkedIn: boolean,
-): boolean {
-  if (checkedIn) {
-    return true;
-  }
-
-  return (
-    getAvailablePlaces(training) > 0 && new Date(training.start) > new Date()
-  );
 }
 
 function addDays(date: Date, days: number): Date {
@@ -557,11 +486,24 @@ function formatOriginalDate(date: Date): string {
   });
 }
 
-function getTodayIndexInWeek(monday: Date): number {
-  const today = moscowDateKey(new Date().toISOString());
-  const index = scheduleDays.findIndex(
-    (day) => moscowDateKey(addDays(monday, day).toISOString()) === today,
+function getVisibleDayIndexesForWeek(monday: Date): readonly number[] {
+  const currentWeekMonday = startOfSportWeekMoscow(new Date());
+
+  if (
+    moscowDateKey(monday.toISOString()) !==
+    moscowDateKey(currentWeekMonday.toISOString())
+  ) {
+    return scheduleDays;
+  }
+
+  const todayKey = moscowDateKey(new Date().toISOString());
+  const todayIndex = scheduleDays.findIndex(
+    (day) => moscowDateKey(addDays(monday, day).toISOString()) === todayKey,
   );
 
-  return index === -1 ? 0 : index;
+  if (todayIndex === -1) {
+    return scheduleDays;
+  }
+
+  return scheduleDays.slice(todayIndex);
 }
