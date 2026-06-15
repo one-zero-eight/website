@@ -87,6 +87,19 @@ export function SportTrainingModal({
     },
   );
 
+  const inlineDescription = row ? getTrainingDescription(row) : null;
+  const groupId = row?.training.group_id;
+  const {
+    data: group,
+    isPending: groupPending,
+    isError: groupError,
+  } = $sport.useQuery(
+    "get",
+    "/sport-groups/{group_id}",
+    { params: { path: { group_id: Number(groupId) } } },
+    { enabled: groupId != null && !inlineDescription },
+  );
+
   if (!isMounted || !row) {
     return null;
   }
@@ -104,6 +117,7 @@ export function SportTrainingModal({
 
   const placesFree = Math.max(0, t.max_checkins - t.checkins_count);
   const isFull = t.checkins_count >= t.max_checkins;
+  const description = inlineDescription || group?.sport_description?.trim();
 
   return (
     <FloatingPortal>
@@ -163,6 +177,30 @@ export function SportTrainingModal({
                       {timeStr}, {dateStr}
                     </dd>
                   </div>
+                  {groupPending && !description ? (
+                    <div>
+                      <dt className="text-base-content/60 font-semibold">
+                        Description
+                      </dt>
+                      <dd className="skeleton h-12 w-full" />
+                    </div>
+                  ) : groupError && !description ? (
+                    <div>
+                      <dt className="text-base-content/60 font-semibold">
+                        Description
+                      </dt>
+                      <dd className="text-error">
+                        Description could not be loaded.
+                      </dd>
+                    </div>
+                  ) : description ? (
+                    <div>
+                      <dt className="text-base-content/60 font-semibold">
+                        Description
+                      </dt>
+                      <dd className="whitespace-pre-wrap">{description}</dd>
+                    </div>
+                  ) : null}
                   <div>
                     <dt className="text-base-content/60 font-semibold">
                       Places
@@ -239,4 +277,21 @@ export function SportTrainingModal({
       </FloatingOverlay>
     </FloatingPortal>
   );
+}
+
+function getTrainingDescription(
+  row: SchemaTrainingInfoPersonalSchema,
+): string | null {
+  const training =
+    row.training as SchemaTrainingInfoPersonalSchema["training"] & {
+      description?: string | null;
+      sport_description?: string | null;
+      training_description?: string | null;
+    };
+  const description =
+    training.description ??
+    training.training_description ??
+    training.sport_description;
+
+  return description?.trim() || null;
 }
