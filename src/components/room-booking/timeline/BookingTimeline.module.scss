@@ -4,7 +4,6 @@
 
 $timebox-width: 50px;
 $timebox-height: 20px;
-$button-height: 50px;
 
 @mixin text-sm {
   font-size: 0.875rem;
@@ -539,29 +538,4 @@ $button-height: 50px;
   & .newBookingTimeboxesWrapper {
     visibility: hidden;
   }
-}
-
-.buttons {
-  display: flex;
-  gap: 8px;
-
-  & button {
-    @include text-md();
-    @include effects.shadow-2();
-    height: $button-height;
-    flex: 1 0 auto;
-    border-radius: borders.$radius-md;
-  }
-}
-
-.buttonSecondary {
-  color: var(--c-text-muted);
-  background: var(--c-bg-items);
-  border: 1px solid var(--c-borders);
-}
-
-.buttonPrimary {
-  color: var(--c-textbox-text-purple);
-  background: var(--c-textbox-bg-purple);
-  border: 1px solid var(--c-textbox-borders-purple);
 }
