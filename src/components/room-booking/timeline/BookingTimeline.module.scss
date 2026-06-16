@@ -1,0 +1,567 @@
+@use "./styles/_colors.scss" as colors;
+@use "./styles/_effects.scss" as effects;
+@use "./styles/_borders.scss" as borders;
+
+$timebox-width: 50px;
+$timebox-height: 20px;
+$button-height: 50px;
+
+@mixin text-sm {
+  font-size: 0.875rem;
+  line-height: 1.0625rem;
+}
+@mixin text-md {
+  font-size: 1rem;
+  line-height: 1.3125rem;
+}
+
+@mixin booking {
+  padding: 6px 2px;
+  user-select: none;
+  white-space: nowrap;
+
+  & > div {
+    @include effects.shadow-1;
+
+    width: 100%;
+    height: 100%;
+    padding: 0 6px 0 12px;
+    display: flex;
+    align-items: center;
+    border-radius: borders.$radius-sm;
+  }
+}
+
+@mixin timebox(
+  $text-color,
+  $bg-color: transparent,
+  $border-color: transparent
+) {
+  @include text-sm;
+  width: $timebox-width;
+  height: $timebox-height;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  color: $text-color;
+  background: $bg-color;
+  border: 1px solid $border-color;
+  border-radius: borders.$radius-xs;
+}
+
+@mixin skeleton {
+  background: var(--c-skeleton-bg);
+  color: transparent;
+  border-radius: borders.$radius-md;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.root {
+  --c-bg-items: var(--color-base-150);
+  --c-borders: var(--color-mauve-200);
+  --c-text: var(--color-base-content);
+  --c-text-muted: var(--color-mauve-500);
+  --c-text-muted-2: var(--color-mauve-700);
+  --c-textbox-bg-red: var(--color-red-400);
+  --c-textbox-text-red: var(--color-red-900);
+  --c-textbox-borders-red: var(--color-red-600);
+  --c-textbox-bg-purple: var(--color-primary);
+  --c-textbox-text-purple: var(--color-primary-content);
+  --c-textbox-borders-purple: var(--color-purple-600);
+  --c-textbox-bg-green: var(--color-green-400);
+  --c-textbox-text-green: var(--color-green-900);
+  --c-textbox-borders-green: var(--color-green-500);
+  --c-ruler-now: var(--color-red-600);
+  --c-ruler-new: var(--color-purple-600);
+  --c-skeleton-bg: var(--color-gray-300);
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+:global([data-theme="dark"]) {
+  .root {
+    --c-bg-items: var(--color-base-150);
+    --c-borders: var(--color-mauve-800);
+    --c-text: var(--color-base-content);
+    --c-text-muted: var(--color-mauve-400);
+    --c-text-muted-2: var(--color-mauve-600);
+    --c-textbox-bg-red: var(--color-red-900);
+    --c-textbox-text-red: var(--color-red-500);
+    --c-textbox-borders-red: var(--color-red-800);
+    --c-textbox-bg-purple: var(--color-purple-800);
+    --c-textbox-text-purple: var(--color-primary-content);
+    --c-textbox-borders-purple: var(--color-purple-700);
+    --c-textbox-bg-green: var(--color-green-800);
+    --c-textbox-text-green: var(--color-green-500);
+    --c-textbox-borders-green: var(--color-green-700);
+    --c-ruler-now: var(--color-red-800);
+    --c-ruler-new: var(--color-purple-800);
+    --c-skeleton-bg: var(--color-mauve-800);
+  }
+}
+
+.timeline {
+  position: relative;
+  overflow: hidden;
+
+  &[data-has-new] {
+    cursor: crosshair !important;
+  }
+}
+
+.corner {
+  @include text-md;
+
+  position: absolute;
+  top: 0;
+  z-index: 5;
+  width: var(--sidebar-width);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  background: var(--c-bg-items);
+  color: var(--c-text);
+
+  border-color: var(--c-borders);
+  border-style: solid;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+.overlay {
+  @include effects.shadow-inset-2;
+
+  position: absolute;
+  left: var(--sidebar-width);
+  top: var(--header-height);
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.scroller {
+  position: relative;
+  overflow: auto;
+  overscroll-behavior: none;
+  max-height: 100%;
+
+  &::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--total-width);
+    height: 1px;
+    pointer-events: none;
+  }
+}
+
+.wrapper {
+  position: sticky;
+  left: 0;
+  width: 100%;
+  min-height: calc(var(--header-height) + var(--body-height));
+}
+
+.spacer {
+  display: none;
+}
+
+.header {
+  @include text-md;
+
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: block;
+  width: calc(100% - var(--sidebar-width));
+  height: var(--header-height);
+  margin-left: var(--sidebar-width);
+  border-bottom: 1px solid var(--c-borders);
+  overflow: hidden;
+
+  background: var(--c-bg-items);
+  color: var(--c-text-muted);
+}
+
+.headerItem {
+  position: absolute;
+  left: var(--day-offset);
+  top: 0;
+  height: 100%;
+  width: calc(var(--ppm) * 60px * 24);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.headerItemDay {
+  padding-left: 12px;
+  padding-top: 6px;
+  align-self: flex-start;
+  position: sticky;
+  left: 0;
+}
+
+.headerItemHours {
+  display: flex;
+  align-items: center;
+
+  & > span {
+    width: calc(var(--ppm) * 60px);
+
+    & > span {
+      @include timebox(var(--c-text-muted-2));
+      transform: translate(-50%, 1px);
+    }
+  }
+}
+
+.body {
+  @include text-md;
+  position: relative;
+  height: var(--body-height);
+}
+
+.roomList {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  position: absolute;
+  left: 0;
+  top: var(--header-height);
+  height: calc(var(--container-height) - var(--header-height));
+  z-index: 4;
+  background: var(--c-bg-items);
+  overflow: hidden;
+}
+
+.roomListInner {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.bookingsLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+
+  & > * {
+    pointer-events: auto;
+  }
+}
+
+.row {
+  height: var(--row-height);
+  display: flex;
+  align-items: stretch;
+
+  &:not(:last-child) {
+    .rowHeader {
+      border-bottom-width: 1px;
+    }
+  }
+}
+
+.rowHeader {
+  width: var(--sidebar-width);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--c-bg-items);
+  color: var(--c-text-muted);
+
+  border-color: var(--c-borders);
+  border-style: solid;
+  border-right-width: 1px;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10%;
+    height: 80%;
+    border-left: 2px solid var(--row-border-color, var(--c-borders));
+  }
+
+  & > a {
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &.placeholder > a {
+    @include skeleton;
+    width: 100%;
+  }
+}
+
+.rulersSvg {
+  display: block;
+  position: absolute;
+  top: var(--header-height);
+  left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+  height: var(--body-height);
+  pointer-events: none;
+  z-index: 0;
+
+  & pattern rect {
+    fill: var(--c-borders);
+  }
+}
+
+.nowTimeboxWrapper {
+  position: sticky;
+  top: 0;
+  height: 0;
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  overflow: visible;
+
+  &::before,
+  &::after {
+    content: "";
+    display: block;
+  }
+
+  &::before {
+    flex: 0 0 calc(var(--now-x) + var(--sidebar-width) - ($timebox-width / 2));
+  }
+
+  &::after {
+    flex-grow: 1;
+  }
+}
+
+.nowTimebox {
+  @include timebox(
+    var(--c-textbox-text-red),
+    var(--c-textbox-bg-red),
+    var(--c-textbox-borders-red)
+  );
+  position: sticky;
+  right: 0;
+  left: var(--sidebar-width);
+  transform: translateY(var(--header-height));
+  cursor: pointer;
+}
+
+.nowRuler {
+  z-index: 1;
+  position: absolute;
+  height: calc(var(--header-height) + var(--body-height));
+  width: 1px;
+  background: var(--c-ruler-now);
+  left: calc(var(--sidebar-width) + var(--now-x));
+  top: 0;
+}
+
+.booking {
+  @include booking;
+
+  position: absolute;
+  left: calc(var(--sidebar-width) + var(--left));
+  top: calc(var(--row-index) * var(--row-height));
+  width: var(--width);
+  height: var(--row-height);
+
+  &.myBooking > div {
+    border: 1px solid var(--c-textbox-borders-green);
+    background: var(--c-textbox-bg-green);
+    color: var(--c-textbox-text-green);
+  }
+
+  & > div {
+    background: var(--c-bg-items);
+    color: var(--c-text);
+
+    :global([data-theme="dark"]) & {
+      border: 1px solid var(--c-borders);
+    }
+  }
+
+  &:not(.placeholder) > div {
+    cursor: pointer;
+
+    & > span {
+      position: sticky;
+      left: calc(var(--sidebar-width) + 6px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &.placeholder > div {
+    opacity: 0.5;
+  }
+
+  &.placeholder {
+    left: 0;
+    width: var(--visible-width);
+
+    & > div {
+      padding: 8px;
+
+      & > span {
+        @include skeleton;
+        position: relative;
+        width: 100%;
+      }
+    }
+  }
+}
+
+.newBooking {
+  @include booking;
+
+  z-index: 1;
+  position: absolute;
+  left: calc(var(--sidebar-width) + var(--new-x));
+  top: calc(var(--header-height) + var(--new-y));
+  width: var(--new-length);
+  height: var(--row-height);
+
+  & > div {
+    position: relative;
+    padding: 0;
+    justify-content: center;
+    border: 1px solid var(--c-textbox-borders-purple);
+    background: var(--c-textbox-bg-purple);
+    color: var(--c-textbox-text-purple);
+  }
+}
+
+.timeline[data-new-touched] .newBooking > div {
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 80%;
+    top: 50%;
+    border-radius: 100px;
+    background: var(--c-textbox-borders-purple);
+  }
+
+  &::before {
+    left: 0;
+    transform: translate(-50%, -50%);
+  }
+  &::after {
+    right: 0;
+    transform: translate(50%, -50%);
+  }
+}
+
+.newBookingTimeboxesWrapper {
+  position: sticky;
+  top: 0;
+  height: 0;
+  z-index: 4;
+  overflow: visible;
+}
+
+.newBookingTimeboxesContainer {
+  position: absolute;
+  left: calc(var(--sidebar-width) + var(--new-x) + (var(--new-length) / 2));
+  top: var(--header-height);
+  width: calc(max($timebox-width, var(--new-length)) + $timebox-width);
+  transform: translate(-50%, -100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.newBookingTimeboxStart,
+.newBookingTimeboxEnd {
+  @include timebox(
+    var(--c-textbox-text-purple),
+    var(--c-textbox-bg-purple),
+    var(--c-textbox-borders-purple)
+  );
+}
+.newBookingTimeboxStart {
+  margin-right: auto;
+}
+.newBookingTimeboxEnd {
+  margin-left: auto;
+}
+
+.newBookingRulerStart,
+.newBookingRulerEnd {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  height: calc(var(--header-height) + var(--body-height));
+  width: 1px;
+  background: var(--c-ruler-new);
+}
+.newBookingRulerStart {
+  left: calc(var(--sidebar-width) + var(--new-x));
+}
+.newBookingRulerEnd {
+  left: calc(var(--sidebar-width) + var(--new-x) + var(--new-length));
+}
+
+.timeline:not([data-new-pressed]) .newBookingRulerEnd,
+.timeline:not([data-new-pressed]) .newBookingTimeboxEnd {
+  visibility: hidden;
+}
+
+.timeline:not([data-has-new]) {
+  & .newBooking,
+  & .newBookingRulerStart,
+  & .newBookingRulerEnd,
+  & .newBookingTimeboxesWrapper {
+    visibility: hidden;
+  }
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+
+  & button {
+    @include text-md();
+    @include effects.shadow-2();
+    height: $button-height;
+    flex: 1 0 auto;
+    border-radius: borders.$radius-md;
+  }
+}
+
+.buttonSecondary {
+  color: var(--c-text-muted);
+  background: var(--c-bg-items);
+  border: 1px solid var(--c-borders);
+}
+
+.buttonPrimary {
+  color: var(--c-textbox-text-purple);
+  background: var(--c-textbox-bg-purple);
+  border: 1px solid var(--c-textbox-borders-purple);
+}
