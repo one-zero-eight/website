@@ -8,22 +8,14 @@ import { T } from "@/lib/utils/dates.ts";
 import { getRouteApi } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { getTimeRangeForWeek } from "../utils.ts";
-import {
-  type Booking,
-  schemaToBooking,
-  type ScrollToOptions,
-  type Slot,
-} from "./types.ts";
+import { type Booking, schemaToBooking, type Slot } from "./types.ts";
+import type { BookingTimelineRef } from "./BookingTimeline.tsx";
 
-const BookingTimeline = lazy(
-  () => import("@/components/room-booking/timeline/BookingTimeline.tsx"),
+const BookingTimeline = lazy(() =>
+  import("@/components/room-booking/timeline/BookingTimeline.tsx").then(
+    (m) => ({ default: m.BookingTimeline }),
+  ),
 );
-
-type TimelineRef = {
-  __veauryVueRef__: {
-    scrollTo: (options: ScrollToOptions) => void;
-  };
-};
 
 const routeApi = getRouteApi("/_with_menu/room-booking/");
 
@@ -32,17 +24,17 @@ export function RoomBookingPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [newBookingSlot, setNewBookingSlot] = useState<Slot>();
   const [bookingDetails, setBookingDetails] = useState<Booking>();
-  const timelineRef = useRef<TimelineRef | null>(null);
+  const timelineRef = useRef<BookingTimelineRef | null>(null);
   const [timelineLoaded, setTimelineLoaded] = useState(false);
 
-  const setTimelineRef = (x: TimelineRef) => {
+  const setTimelineRef = (x: BookingTimelineRef | null) => {
     timelineRef.current = x;
-    setTimelineLoaded(true);
+    setTimelineLoaded(!!x);
   };
 
   useEffect(() => {
     if (timelineLoaded && search.d) {
-      timelineRef.current?.__veauryVueRef__.scrollTo({
+      timelineRef.current?.scrollTo({
         to: new Date(search.d),
         behavior: "smooth",
         offsetMs: -T.Min * 20,
