@@ -1,292 +1,204 @@
-import { FormEvent, useMemo, useState } from "react";
-import { Modal } from "@/components/common/Modal.tsx";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { $when2meet } from "@/api/when2meet";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
+import { EditEventModal } from "./EditEventModal.tsx";
+import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
+import { RoomSuggestionModal } from "./RoomSuggestionModal.tsx";
+import type { AvailabilityType, MeetingUser } from "./types.ts";
+import {
+  backendSlotToSlotKey,
+  createBackendSlotLookup,
+  parseBackendSlots,
+  slotKeysToBackendSlots,
+} from "./utils/api-slots.ts";
+import {
+  formatDateRangeLabel,
+  formatMeetingDates,
+  formatSlotSummary,
+  getSlotKey,
+} from "./utils/slots.ts";
+import {
+  clearPendingSetup,
+  clearStoredAllowedSlots,
+  getStoredAllowedSlots,
+  isPendingSetup,
+  storeAllowedSlots,
+} from "./utils/setup-slots.ts";
+import {
+  getLocalEventRole,
+  removeLocalEvent,
+  trackParticipation,
+  updateLocalEventStats,
+} from "./utils/local-events.ts";
 
-type MeetingDate = {
-  id: string;
-  monthDay: string;
-  weekDay: string;
-};
+const SETUP_USER_ID = "__setup__";
 
-type MeetingUser = {
-  id: string;
-  name: string;
-  slots: Set<string>;
-};
-
-const MEETING_DATES: MeetingDate[] = [
-  { id: "2026-06-16", monthDay: "Jun 16", weekDay: "Tue" },
-  { id: "2026-06-17", monthDay: "Jun 17", weekDay: "Wed" },
-  { id: "2026-06-18", monthDay: "Jun 18", weekDay: "Thu" },
-  { id: "2026-06-19", monthDay: "Jun 19", weekDay: "Fri" },
-  { id: "2026-06-26", monthDay: "Jun 26", weekDay: "Fri" },
-];
-
-const TIME_SLOTS = [
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-  "15:30",
-  "16:00",
-  "16:30",
-];
-
-const AVAILABLE_ROOMS = [
-  { room: "108", capacity: 12, building: "Main building" },
-  { room: "303", capacity: 18, building: "Main building" },
-  { room: "VK Zone", capacity: 24, building: "Coworking" },
-];
-
-function getSlotKey(dateId: string, time: string) {
-  return `${dateId}_${time}`;
-}
-
-function getInitialUsers(): MeetingUser[] {
-  return [
-    {
-      id: "u-1",
-      name: "Mikhail",
-      slots: new Set([
-        getSlotKey("2026-06-17", "11:30"),
-        getSlotKey("2026-06-17", "12:00"),
-        getSlotKey("2026-06-17", "12:30"),
-        getSlotKey("2026-06-17", "13:00"),
-        getSlotKey("2026-06-17", "13:30"),
-        getSlotKey("2026-06-18", "11:00"),
-        getSlotKey("2026-06-18", "11:30"),
-        getSlotKey("2026-06-18", "12:00"),
-        getSlotKey("2026-06-18", "12:30"),
-        getSlotKey("2026-06-18", "13:00"),
-        getSlotKey("2026-06-18", "14:00"),
-      ]),
-    },
-    {
-      id: "u-2",
-      name: "Anna",
-      slots: new Set([
-        getSlotKey("2026-06-18", "10:30"),
-        getSlotKey("2026-06-18", "11:00"),
-        getSlotKey("2026-06-18", "11:30"),
-        getSlotKey("2026-06-18", "12:00"),
-        getSlotKey("2026-06-18", "12:30"),
-        getSlotKey("2026-06-18", "13:00"),
-        getSlotKey("2026-06-19", "11:00"),
-        getSlotKey("2026-06-19", "11:30"),
-        getSlotKey("2026-06-19", "12:00"),
-        getSlotKey("2026-06-19", "13:30"),
-        getSlotKey("2026-06-19", "14:30"),
-      ]),
-    },
-    {
-      id: "u-3",
-      name: "Daniil",
-      slots: new Set([
-        getSlotKey("2026-06-18", "12:00"),
-        getSlotKey("2026-06-18", "12:30"),
-        getSlotKey("2026-06-18", "13:00"),
-        getSlotKey("2026-06-18", "13:30"),
-        getSlotKey("2026-06-19", "11:30"),
-        getSlotKey("2026-06-19", "12:00"),
-        getSlotKey("2026-06-19", "12:30"),
-        getSlotKey("2026-06-19", "13:00"),
-        getSlotKey("2026-06-19", "13:30"),
-        getSlotKey("2026-06-19", "14:00"),
-      ]),
-    },
-  ];
-}
-
-function getSlotTone(count: number, maxCount: number) {
-  if (count === 0) {
-    return "bg-base-100 hover:bg-primary/10";
-  }
-
-  const ratio = count / maxCount;
-
-  if (ratio >= 1) {
-    return "bg-secondary text-secondary-content hover:bg-secondary/90";
-  }
-
-  if (ratio >= 0.67) {
-    return "bg-secondary/70 hover:bg-secondary/80";
-  }
-
-  if (ratio >= 0.34) {
-    return "bg-secondary/45 hover:bg-secondary/55";
-  }
-
-  return "bg-secondary/20 hover:bg-secondary/30";
-}
-
-function formatSlotSummary(slots: Set<string>) {
-  if (slots.size === 0) {
-    return "No time selected";
-  }
-
-  const firstSlot = [...slots].sort()[0];
-  const [dateId, time] = firstSlot.split("_");
-  const date = MEETING_DATES.find((meetingDate) => meetingDate.id === dateId);
-
-  return `${date?.monthDay ?? dateId}, ${time} and ${slots.size - 1} more`;
-}
-
-function MeetingHeatmap({
-  dates,
-  users,
-  viewedUserIds,
-  activeUserId,
-  onToggleSlot,
-}: {
-  dates: MeetingDate[];
-  users: MeetingUser[];
-  viewedUserIds: Set<string>;
-  activeUserId: string;
-  onToggleSlot: (dateId: string, time: string) => void;
-}) {
-  const viewedUsers = users.filter((user) => viewedUserIds.has(user.id));
-  const activeUser = users.find((user) => user.id === activeUserId);
-  const maxCount = Math.max(1, viewedUsers.length);
-
-  function getSlotCount(dateId: string, time: string) {
-    const slotKey = getSlotKey(dateId, time);
-    return viewedUsers.filter((user) => user.slots.has(slotKey)).length;
-  }
-
-  return (
-    <div className="overflow-x-auto">
-      <div
-        className={cn(
-          "grid min-w-[700px] grid-cols-[4.25rem_repeat(5,minmax(7rem,1fr))]",
-          dates.length === 3 &&
-            "min-w-[420px] grid-cols-[3.75rem_repeat(3,minmax(5.5rem,1fr))]",
-        )}
-      >
-        <div />
-        {dates.map((date) => (
-          <div key={date.id} className="pb-3 text-center">
-            <div className="text-base-content/70 text-sm md:text-base">
-              {date.monthDay}
-            </div>
-            <div className="text-xl font-medium md:text-3xl">
-              {date.weekDay}
-            </div>
-          </div>
-        ))}
-
-        {TIME_SLOTS.map((time) => (
-          <div key={time} className="contents">
-            <div
-              className={cn(
-                "text-base-content/80 h-8 pr-2 text-right text-sm md:text-xl",
-                time.endsWith(":30") && "text-transparent",
-              )}
-            >
-              {time}
-            </div>
-            {dates.map((date) => {
-              const slotKey = getSlotKey(date.id, time);
-              const slotCount = getSlotCount(date.id, time);
-              const isActiveUserSlot = activeUser?.slots.has(slotKey);
-
-              return (
-                <button
-                  key={slotKey}
-                  type="button"
-                  className={cn(
-                    "border-base-300 h-8 border-t border-r border-dashed transition-colors first:border-l",
-                    time.endsWith(":00") && "border-solid",
-                    getSlotTone(slotCount, maxCount),
-                    isActiveUserSlot &&
-                      "ring-primary ring-2 ring-offset-0 ring-inset",
-                  )}
-                  title={`${date.monthDay}, ${time}: ${slotCount} responses`}
-                  onClick={() => onToggleSlot(date.id, time)}
-                />
-              );
-            })}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function RoomsModal({
-  open,
-  onOpenChange,
-  selectedSlot,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  selectedSlot: string;
-}) {
-  return (
-    <Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Available rooms"
-      containerClassName="max-w-md"
-    >
-      <div className="text-base-content/70 text-sm">
-        Mock rooms for {selectedSlot}. Booking is not connected yet.
-      </div>
-      <div className="grid gap-2">
-        {AVAILABLE_ROOMS.map((room) => (
-          <div
-            key={room.room}
-            className="border-base-300 bg-base-100 rounded-box flex items-center justify-between border p-3"
-          >
-            <div>
-              <div className="font-semibold">Room {room.room}</div>
-              <div className="text-base-content/60 text-sm">
-                {room.building}
-              </div>
-            </div>
-            <div className="badge badge-primary">{room.capacity} seats</div>
-          </div>
-        ))}
-      </div>
-    </Modal>
-  );
+function participantsToUsers(
+  participants: { name: string; availability: string[] }[],
+) {
+  return participants.map((participant) => ({
+    id: participant.name,
+    name: participant.name,
+    slots: new Set(participant.availability.map(backendSlotToSlotKey)),
+    ifNeededSlots: new Set<string>(),
+  }));
 }
 
 export function MeetingPage({
   meetingId,
   initialName,
+  setupSlots,
 }: {
   meetingId: string;
   initialName?: string;
+  setupSlots?: boolean;
 }) {
-  const { showSuccess } = useToast();
-  const [users, setUsers] = useState(getInitialUsers);
-  const [viewedUserIds, setViewedUserIds] = useState(
-    new Set(getInitialUsers().map((user) => user.id)),
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { showSuccess, showError, showConfirm } = useToast();
+  const [viewedUserIds, setViewedUserIds] = useState<Set<string>>(new Set());
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [draftSlots, setDraftSlots] = useState<Set<string>>(new Set());
+  const [draftIfNeededSlots, setDraftIfNeededSlots] = useState<Set<string>>(
+    new Set(),
   );
-  const [activeUserId, setActiveUserId] = useState("u-1");
+  const [availabilityType, setAvailabilityType] =
+    useState<AvailabilityType>("available");
   const [newUserName, setNewUserName] = useState("");
-  const [dateOffset, setDateOffset] = useState(0);
+  const [participantSearch, setParticipantSearch] = useState("");
   const [roomsOpen, setRoomsOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [isDeletingMeeting, setIsDeletingMeeting] = useState(false);
+  const [pendingParticipants, setPendingParticipants] = useState<MeetingUser[]>(
+    [],
+  );
+  const [storedAllowedSlotKeys, setStoredAllowedSlotKeys] =
+    useState<Set<string> | null>(() => getStoredAllowedSlots(meetingId));
 
-  const meetingName = initialName ?? "Project sync - Innohassle";
-  const mobileDates = MEETING_DATES.slice(dateOffset, dateOffset + 3);
-  const selectedSlot = useMemo(() => {
-    let bestSlot = getSlotKey(MEETING_DATES[0].id, TIME_SLOTS[0]);
+  const configuredAllowedSlots =
+    storedAllowedSlotKeys ?? getStoredAllowedSlots(meetingId);
+
+  const needsSetup =
+    !configuredAllowedSlots?.size &&
+    (setupSlots === true || isPendingSetup(meetingId));
+
+  const {
+    data: event,
+    isPending,
+    isError,
+    error,
+  } = $when2meet.useQuery("get", "/events/{event_id}", {
+    params: { path: { event_id: meetingId } },
+  });
+
+  useEffect(() => {
+    if (!needsSetup || !event) {
+      return;
+    }
+
+    setEditingUserId(SETUP_USER_ID);
+    setDraftSlots(new Set());
+    setDraftIfNeededSlots(new Set());
+  }, [needsSetup, event]);
+
+  useEffect(() => {
+    if (!event?.id) {
+      return;
+    }
+
+    updateLocalEventStats(event.id, {
+      name: event.name,
+      description: event.description,
+      participantsCount: event.participants.length,
+    });
+  }, [event?.id, event?.name, event?.description, event?.participants.length]);
+
+  const { mutate: saveParticipant, isPending: isSaving } =
+    $when2meet.useMutation("put", "/events/{event_id}/participants", {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: $when2meet.queryOptions("get", "/events/{event_id}", {
+            params: { path: { event_id: meetingId } },
+          }).queryKey,
+        });
+      },
+      onError: (saveError) => {
+        showError("Error", formatApiErrorMessage(saveError));
+      },
+    });
+
+  const parsedSlots = useMemo(
+    () => (event ? parseBackendSlots(event.slots) : null),
+    [event],
+  );
+
+  const backendSlotLookup = useMemo(
+    () => (event ? createBackendSlotLookup(event.slots) : new Map()),
+    [event],
+  );
+
+  const formattedDates = useMemo(
+    () => formatMeetingDates(parsedSlots?.dates ?? []),
+    [parsedSlots],
+  );
+
+  const timeSlots = useMemo(() => parsedSlots?.timeSlots ?? [], [parsedSlots]);
+  const canvasSlots = useMemo(
+    () => new Set(parsedSlots?.slotKeys ?? []),
+    [parsedSlots],
+  );
+
+  const allowedSlots = useMemo(() => {
+    if (needsSetup) {
+      return canvasSlots;
+    }
+
+    const stored = storedAllowedSlotKeys ?? getStoredAllowedSlots(meetingId);
+
+    if (stored && stored.size > 0) {
+      return stored;
+    }
+
+    return canvasSlots;
+  }, [needsSetup, canvasSlots, storedAllowedSlotKeys, meetingId]);
+
+  const savedUsers = useMemo(
+    () => (event ? participantsToUsers(event.participants) : []),
+    [event],
+  );
+
+  const users = useMemo(() => {
+    const savedNames = new Set(savedUsers.map((user) => user.name));
+    const unsaved = pendingParticipants.filter(
+      (participant) => !savedNames.has(participant.name),
+    );
+    return [...savedUsers, ...unsaved];
+  }, [savedUsers, pendingParticipants]);
+
+  const meetingName = event?.name ?? initialName ?? "Meeting";
+  const meetingDescription = event?.description;
+
+  const { bestSlotKey, selectedSlotLabel } = useMemo(() => {
+    if (formattedDates.length === 0 || timeSlots.length === 0) {
+      return { bestSlotKey: null, selectedSlotLabel: "No times yet" };
+    }
+
+    let bestSlot = getSlotKey(formattedDates[0].id, timeSlots[0]);
     let bestCount = 0;
 
-    MEETING_DATES.forEach((date) => {
-      TIME_SLOTS.forEach((time) => {
+    formattedDates.forEach((date) => {
+      timeSlots.forEach((time) => {
         const slotKey = getSlotKey(date.id, time);
+
+        if (!allowedSlots.has(slotKey)) {
+          return;
+        }
+
         const count = users.filter((user) => user.slots.has(slotKey)).length;
 
         if (count > bestCount) {
@@ -297,31 +209,111 @@ export function MeetingPage({
     });
 
     const [dateId, time] = bestSlot.split("_");
-    const date = MEETING_DATES.find((meetingDate) => meetingDate.id === dateId);
-
-    return `${date?.monthDay ?? dateId}, ${time}`;
-  }, [users]);
-
-  function handleToggleSlot(dateId: string, time: string) {
-    const slotKey = getSlotKey(dateId, time);
-
-    setUsers((currentUsers) =>
-      currentUsers.map((user) => {
-        if (user.id !== activeUserId) {
-          return user;
-        }
-
-        const nextSlots = new Set(user.slots);
-
-        if (nextSlots.has(slotKey)) {
-          nextSlots.delete(slotKey);
-        } else {
-          nextSlots.add(slotKey);
-        }
-
-        return { ...user, slots: nextSlots };
-      }),
+    const date = formattedDates.find(
+      (meetingDate) => meetingDate.id === dateId,
     );
+
+    return {
+      bestSlotKey: bestSlot,
+      selectedSlotLabel: `${date?.monthDay ?? dateId}, ${time}`,
+    };
+  }, [formattedDates, timeSlots, users, allowedSlots]);
+
+  const filteredUsers = useMemo(() => {
+    const trimmedSearch = participantSearch.trim().toLowerCase();
+
+    if (!trimmedSearch) {
+      return users;
+    }
+
+    return users.filter((user) =>
+      user.name.toLowerCase().includes(trimmedSearch),
+    );
+  }, [users, participantSearch]);
+
+  function handleStartEditing(userId: string) {
+    const user = users.find((entry) => entry.id === userId);
+
+    if (!user) {
+      return;
+    }
+
+    setEditingUserId(userId);
+    setDraftSlots(new Set(user.slots));
+    setDraftIfNeededSlots(new Set(user.ifNeededSlots ?? []));
+    setAvailabilityType("available");
+  }
+
+  function handleCancelEditing() {
+    setEditingUserId(null);
+    setDraftSlots(new Set());
+    setDraftIfNeededSlots(new Set());
+  }
+
+  function handleSaveEditing(userId: string) {
+    const user = users.find((entry) => entry.id === userId);
+
+    if (!user) {
+      return;
+    }
+
+    saveParticipant(
+      {
+        params: { path: { event_id: meetingId } },
+        body: {
+          name: user.name,
+          availability: slotKeysToBackendSlots(draftSlots, backendSlotLookup),
+        },
+      },
+      {
+        onSuccess: () => {
+          setPendingParticipants((currentParticipants) =>
+            currentParticipants.filter(
+              (participant) => participant.name !== user.name,
+            ),
+          );
+          setEditingUserId(null);
+          setDraftSlots(new Set());
+          setDraftIfNeededSlots(new Set());
+          trackParticipation({
+            id: meetingId,
+            name: meetingName,
+            description: meetingDescription,
+            participantsCount: users.length,
+          });
+          showSuccess(
+            "Availability saved",
+            `${user.name}'s timeslots were saved successfully.`,
+          );
+        },
+      },
+    );
+  }
+
+  function handleApplySlot(
+    dateId: string,
+    time: string,
+    mode: "add" | "remove",
+    type: AvailabilityType,
+  ) {
+    if (!editingUserId) {
+      return;
+    }
+
+    const slotKey = getSlotKey(dateId, time);
+    const setter = type === "if_needed" ? setDraftIfNeededSlots : setDraftSlots;
+
+    setter((currentSlots) => {
+      const nextSlots = new Set(currentSlots);
+
+      if (mode === "add") {
+        nextSlots.add(slotKey);
+      } else {
+        nextSlots.delete(slotKey);
+      }
+
+      return nextSlots;
+    });
   }
 
   function handleToggleViewedUser(userId: string) {
@@ -339,8 +331,17 @@ export function MeetingPage({
   }
 
   function handleDeleteUser(userId: string) {
-    setUsers((currentUsers) =>
-      currentUsers.filter((user) => user.id !== userId),
+    const isPending = pendingParticipants.some(
+      (participant) => participant.id === userId,
+    );
+
+    if (!isPending) {
+      showError("Error", "Saved participants cannot be removed yet.");
+      return;
+    }
+
+    setPendingParticipants((currentParticipants) =>
+      currentParticipants.filter((participant) => participant.id !== userId),
     );
     setViewedUserIds((currentUserIds) => {
       const nextUserIds = new Set(currentUserIds);
@@ -348,14 +349,15 @@ export function MeetingPage({
       return nextUserIds;
     });
 
-    if (activeUserId === userId) {
-      const nextUser = users.find((user) => user.id !== userId);
-      setActiveUserId(nextUser?.id ?? "");
+    if (editingUserId === userId) {
+      handleCancelEditing();
     }
+
+    showSuccess("Participant removed", "Unsaved participant was removed.");
   }
 
-  function handleAddUser(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function handleAddUser(formEvent: FormEvent<HTMLFormElement>) {
+    formEvent.preventDefault();
 
     const trimmedName = newUserName.trim();
 
@@ -363,224 +365,435 @@ export function MeetingPage({
       return;
     }
 
+    if (users.some((user) => user.name === trimmedName)) {
+      showError("Error", "Participant with this name already exists.");
+      return;
+    }
+
     const newUser = {
-      id: `u-${Date.now().toString(36)}`,
+      id: trimmedName,
       name: trimmedName,
       slots: new Set<string>(),
+      ifNeededSlots: new Set<string>(),
     };
 
-    setUsers((currentUsers) => [...currentUsers, newUser]);
+    setPendingParticipants((currentParticipants) => [
+      ...currentParticipants,
+      newUser,
+    ]);
     setViewedUserIds((currentUserIds) =>
       new Set(currentUserIds).add(newUser.id),
     );
-    setActiveUserId(newUser.id);
     setNewUserName("");
+    setEditingUserId(trimmedName);
+    setDraftSlots(new Set());
+    setDraftIfNeededSlots(new Set());
+    setAvailabilityType("available");
+    showSuccess(
+      "Participant added",
+      `${trimmedName} was added to the meeting.`,
+    );
   }
+
+  function handleSaveSetup() {
+    if (draftSlots.size === 0) {
+      showError("Error", "Choose at least one timeslot.");
+      return;
+    }
+
+    const nextAllowedSlots = [...draftSlots];
+    storeAllowedSlots(meetingId, nextAllowedSlots);
+    clearPendingSetup(meetingId);
+    setStoredAllowedSlotKeys(new Set(nextAllowedSlots));
+    setEditingUserId(null);
+    setDraftSlots(new Set());
+    setDraftIfNeededSlots(new Set());
+    showSuccess(
+      "Timeslots saved",
+      "Participants can now add their availability.",
+    );
+    navigate({
+      to: "/when2meet/$meetingId",
+      params: { meetingId },
+      search: { name: initialName },
+    });
+  }
+
+  const canDeleteMeeting = getLocalEventRole(meetingId) !== "participant";
+
+  async function handleShareLink() {
+    const shareUrl = window.location.href;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+
+      showSuccess("Link copied", "Meeting link copied to clipboard.");
+    } catch {
+      showError("Error", "Could not copy link to clipboard.");
+    }
+  }
+
+  async function handleDeleteMeeting() {
+    const confirmed = await showConfirm({
+      title: "Delete meeting",
+      message: `Are you sure you want to delete "${meetingName}"? It will be removed from your meetings list.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "error",
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeletingMeeting(true);
+    removeLocalEvent(meetingId);
+    clearStoredAllowedSlots(meetingId);
+    clearPendingSetup(meetingId);
+    queryClient.removeQueries({
+      queryKey: $when2meet.queryOptions("get", "/events/{event_id}", {
+        params: { path: { event_id: meetingId } },
+      }).queryKey,
+    });
+    showSuccess("Meeting deleted", `"${meetingName}" was removed.`);
+    navigate({ to: "/when2meet" });
+  }
+
+  if (isPending) {
+    return (
+      <div className="mx-auto w-full max-w-[1400px] px-4 py-8">
+        <div className="skeleton h-10 w-64" />
+        <div className="skeleton mt-6 h-[420px] w-full" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="mx-auto w-full max-w-[1400px] px-4 py-8">
+        <div className="alert alert-error">
+          <span>{formatApiErrorMessage(error)}</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!event || formattedDates.length === 0) {
+    return (
+      <div className="mx-auto w-full max-w-[1400px] px-4 py-8">
+        <div className="alert alert-error">
+          <span>Meeting not found or has no configured dates.</span>
+        </div>
+      </div>
+    );
+  }
+
+  const activeViewedUserIds =
+    viewedUserIds.size > 0
+      ? viewedUserIds
+      : new Set(users.map((user) => user.id));
 
   return (
     <>
-      <div className="mx-auto mb-20 grid w-full max-w-[1400px] gap-5 px-4 py-4">
+      <div className="mx-auto mb-20 grid w-full max-w-[1400px] gap-5 px-4 py-4 md:mb-4">
+        <Link
+          to="/when2meet"
+          className="text-base-content/70 hover:text-base-content inline-flex w-fit items-center gap-1 text-sm font-medium"
+        >
+          <span className="icon-[material-symbols--arrow-back] text-lg" />
+          All meetings
+        </Link>
+
         <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h1 className="text-2xl font-semibold md:text-3xl">
                 {meetingName}
               </h1>
-              <a
-                href={`/when2meet/${meetingId}`}
+              <button
+                type="button"
                 className="link link-primary text-sm font-medium"
+                onClick={() => setEditOpen(true)}
               >
                 Edit event
-              </a>
+              </button>
             </div>
+            {meetingDescription && (
+              <p className="text-base-content/70 mt-2 max-w-3xl text-sm md:text-base">
+                {meetingDescription}
+              </p>
+            )}
             <div className="text-base-content/70 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-              <span>Jun 16 - Jun 26</span>
+              <span>{formatDateRangeLabel(formattedDates)}</span>
               <span>{users.length} responses</span>
-              <span>Best time: {selectedSlot}</span>
+              <span>Best time: {selectedSlotLabel}</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              onClick={() =>
-                showSuccess(
-                  "Link copied",
-                  "Mock share link is ready for the clipboard flow.",
-                )
-              }
-            >
-              <span className="icon-[material-symbols--ios-share-outline] text-lg" />
-              Share link
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              onClick={() => setRoomsOpen(true)}
-            >
-              <span className="icon-[mdi--door-open] text-lg" />
-              Book room
-            </button>
+          <div className="hidden flex-wrap gap-2 md:flex">
+            {needsSetup ? (
+              <button
+                type="button"
+                className="btn btn-primary btn-md gap-2"
+                onClick={handleSaveSetup}
+              >
+                Save timeslots
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-md gap-2"
+                  onClick={handleShareLink}
+                >
+                  <span className="icon-[material-symbols--share-outline] text-xl" />
+                  Share link
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-md gap-2"
+                  onClick={() => setRoomsOpen(true)}
+                >
+                  <span className="icon-[mdi--door-open] text-xl" />
+                  Book room
+                </button>
+                {canDeleteMeeting && (
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-error btn-md btn-square"
+                    disabled={isDeletingMeeting}
+                    onClick={handleDeleteMeeting}
+                  >
+                    {isDeletingMeeting ? (
+                      <span className="loading loading-spinner loading-sm" />
+                    ) : (
+                      <span className="icon-[material-symbols--delete-outline] text-xl" />
+                    )}
+                  </button>
+                )}
+              </>
+            )}
           </div>
         </section>
 
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="bg-base-100 border-base-300 rounded-box border p-3 md:p-5">
-            <div className="mb-3 flex items-center justify-between md:hidden">
-              <div className="text-sm font-medium">
-                {mobileDates[0].monthDay} -{" "}
-                {mobileDates[mobileDates.length - 1].monthDay}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  className="btn btn-circle btn-outline btn-sm"
-                  disabled={dateOffset === 0}
-                  onClick={() =>
-                    setDateOffset((offset) => Math.max(0, offset - 1))
-                  }
-                >
-                  <span className="icon-[material-symbols--chevron-left] text-xl" />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-circle btn-outline btn-sm"
-                  disabled={dateOffset >= MEETING_DATES.length - 3}
-                  onClick={() =>
-                    setDateOffset((offset) =>
-                      Math.min(MEETING_DATES.length - 3, offset + 1),
-                    )
-                  }
-                >
-                  <span className="icon-[material-symbols--chevron-right] text-xl" />
-                </button>
-              </div>
-            </div>
+        {needsSetup && (
+          <div className="alert alert-warning">
+            <span>
+              Select the timeslots that participants can choose, then click Save
+              timeslots.
+            </span>
+          </div>
+        )}
 
+        <section
+          className={cn(
+            "grid gap-5",
+            needsSetup ? "" : "xl:grid-cols-[minmax(0,1fr)_360px]",
+          )}
+        >
+          <div className="bg-base-100 border-base-300 rounded-box min-w-0 border p-3 md:p-5">
             <div className="md:hidden">
-              <MeetingHeatmap
-                dates={mobileDates}
+              <AvailabilitySelector
+                dates={formattedDates}
+                timeSlots={timeSlots}
                 users={users}
-                viewedUserIds={viewedUserIds}
-                activeUserId={activeUserId}
-                onToggleSlot={handleToggleSlot}
+                viewedUserIds={activeViewedUserIds}
+                editingUserId={needsSetup ? SETUP_USER_ID : editingUserId}
+                draftSlots={draftSlots}
+                draftIfNeededSlots={draftIfNeededSlots}
+                onApplySlot={handleApplySlot}
+                onAvailabilityTypeChange={setAvailabilityType}
+                availabilityType={availabilityType}
+                allowedSlots={allowedSlots}
+                selectionOnly={needsSetup}
+                hideLegend={needsSetup}
+                isPhone
               />
             </div>
             <div className="hidden md:block">
-              <MeetingHeatmap
-                dates={MEETING_DATES}
+              <AvailabilitySelector
+                dates={formattedDates}
+                timeSlots={timeSlots}
                 users={users}
-                viewedUserIds={viewedUserIds}
-                activeUserId={activeUserId}
-                onToggleSlot={handleToggleSlot}
+                viewedUserIds={activeViewedUserIds}
+                editingUserId={needsSetup ? SETUP_USER_ID : editingUserId}
+                draftSlots={draftSlots}
+                draftIfNeededSlots={draftIfNeededSlots}
+                onApplySlot={handleApplySlot}
+                onAvailabilityTypeChange={setAvailabilityType}
+                availabilityType={availabilityType}
+                allowedSlots={allowedSlots}
+                selectionOnly={needsSetup}
+                hideLegend={needsSetup}
               />
             </div>
           </div>
 
-          <aside className="grid gap-4">
-            <div className="bg-base-100 border-base-300 rounded-box border p-4">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <h2 className="text-lg font-semibold">Responses</h2>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs"
-                  onClick={() =>
-                    setViewedUserIds(new Set(users.map((user) => user.id)))
-                  }
-                >
-                  View all
-                </button>
-              </div>
+          {!needsSetup && (
+            <aside className="grid gap-3">
+              <div className="bg-base-100 border-base-300 rounded-box flex flex-col border p-4">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <h2 className="text-lg font-semibold">Responses</h2>
+                  <button
+                    type="button"
+                    className="btn btn-link btn-sm"
+                    onClick={() =>
+                      setViewedUserIds(new Set(users.map((user) => user.id)))
+                    }
+                  >
+                    View all
+                  </button>
+                </div>
 
-              <div className="grid gap-2">
-                {users.map((user) => {
-                  const isViewed = viewedUserIds.has(user.id);
-                  const isActive = activeUserId === user.id;
+                <label className="input input-bordered mb-3 w-full rounded-xl focus:outline-none">
+                  <span className="icon-[material-symbols--search] text-base-content/50" />
+                  <input
+                    type="text"
+                    className="grow"
+                    placeholder="Search participants..."
+                    value={participantSearch}
+                    onChange={(event) =>
+                      setParticipantSearch(event.target.value)
+                    }
+                  />
+                </label>
 
-                  return (
-                    <div
-                      key={user.id}
-                      className={cn(
-                        "border-base-300 rounded-box grid gap-2 border p-3",
-                        isActive && "border-primary bg-primary/10",
-                      )}
-                    >
-                      <button
-                        type="button"
-                        className="grid min-w-0 text-left"
-                        onClick={() => handleToggleViewedUser(user.id)}
-                      >
-                        <span className="flex min-w-0 items-center gap-2">
-                          <span
-                            className={cn(
-                              "h-2.5 w-2.5 shrink-0 rounded-full",
-                              isViewed ? "bg-secondary" : "bg-base-300",
-                            )}
-                          />
-                          <span className="truncate font-medium">
-                            {user.name}
-                          </span>
-                        </span>
-                        <span className="text-base-content/60 truncate text-sm">
-                          {formatSlotSummary(user.slots)}
-                        </span>
-                      </button>
-
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          className={cn(
-                            "btn btn-xs grow",
-                            isActive ? "btn-primary" : "btn-outline",
-                          )}
-                          onClick={() => setActiveUserId(user.id)}
-                        >
-                          Edit time
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-outline btn-error btn-xs"
-                          onClick={() => handleDeleteUser(user.id)}
-                        >
-                          <span className="icon-[material-symbols--delete-outline] text-lg" />
-                        </button>
-                      </div>
+                <div className="grid max-h-[min(50vh,420px)] gap-2 overflow-y-auto pr-1">
+                  {filteredUsers.length === 0 ? (
+                    <div className="text-base-content/50 py-6 text-center text-sm">
+                      No participants found.
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                  ) : (
+                    filteredUsers.map((user) => {
+                      const isViewed = activeViewedUserIds.has(user.id);
+                      const isEditing = editingUserId === user.id;
 
-            <form
-              onSubmit={handleAddUser}
-              className="bg-base-100 border-base-300 rounded-box grid gap-3 border p-4"
-            >
-              <h2 className="text-lg font-semibold">Add user</h2>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                placeholder="Participant name"
-                value={newUserName}
-                onChange={(event) => setNewUserName(event.target.value)}
-              />
-              <button type="submit" className="btn btn-primary">
-                <span className="icon-[material-symbols--person-add-outline] text-lg" />
-                Add user
-              </button>
-              <p className="text-base-content/60 text-sm">
-                Click cells in the heatmap to change the editing user&apos;s
-                time.
-              </p>
-            </form>
-          </aside>
+                      return (
+                        <div
+                          key={user.id}
+                          className={cn(
+                            "border-base-300 rounded-box grid gap-2 border p-3",
+                            isEditing && "border-primary bg-primary/10",
+                          )}
+                        >
+                          <button
+                            type="button"
+                            className="grid min-w-0 text-left"
+                            onClick={() => handleToggleViewedUser(user.id)}
+                          >
+                            <span className="flex min-w-0 items-center gap-2">
+                              <span
+                                className={cn(
+                                  "h-2.5 w-2.5 shrink-0 rounded-full",
+                                  isViewed ? "bg-primary" : "bg-base-300",
+                                )}
+                              />
+                              <span className="truncate font-medium">
+                                {user.name}
+                              </span>
+                            </span>
+                            <span className="text-base-content/60 truncate text-sm">
+                              {formatSlotSummary(user.slots, formattedDates)}
+                            </span>
+                          </button>
+
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className={cn(
+                                "btn btn-xs grow",
+                                isEditing ? "btn-primary" : "btn-outline",
+                              )}
+                              disabled={isSaving}
+                              onClick={() => {
+                                if (isEditing) {
+                                  handleSaveEditing(user.id);
+                                  return;
+                                }
+
+                                if (
+                                  editingUserId &&
+                                  editingUserId !== user.id
+                                ) {
+                                  handleCancelEditing();
+                                }
+
+                                handleStartEditing(user.id);
+                              }}
+                            >
+                              {isEditing && isSaving ? (
+                                <span className="loading loading-spinner loading-xs" />
+                              ) : isEditing ? (
+                                "Save timeslots"
+                              ) : (
+                                "Edit timeslots"
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-outline btn-error btn-xs"
+                              onClick={() => handleDeleteUser(user.id)}
+                            >
+                              <span className="icon-[material-symbols--delete-outline] text-lg" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+              <div>
+                <form
+                  onSubmit={handleAddUser}
+                  className="bg-base-100 border-base-300 rounded-box grid gap-2 border p-3 md:gap-3 md:p-3"
+                >
+                  <h2 className="text-base font-semibold md:text-lg">
+                    Add participant
+                  </h2>
+                  <input
+                    type="text"
+                    className="input input-bordered w-full"
+                    placeholder="Participant name"
+                    value={newUserName}
+                    onChange={(event) => setNewUserName(event.target.value)}
+                  />
+                  <button type="submit" className="btn btn-primary">
+                    <span className="icon-[material-symbols--person-add-outline] text-lg" />
+                    Add participant
+                  </button>
+                </form>
+              </div>
+            </aside>
+          )}
         </section>
       </div>
 
-      <RoomsModal
+      <MeetingMobileBar
+        onShare={handleShareLink}
+        onBookRoom={() => setRoomsOpen(true)}
+        onDelete={
+          !needsSetup && canDeleteMeeting ? handleDeleteMeeting : undefined
+        }
+        isDeleting={isDeletingMeeting}
+        onSaveSetup={needsSetup ? handleSaveSetup : undefined}
+      />
+
+      <RoomSuggestionModal
         open={roomsOpen}
         onOpenChange={setRoomsOpen}
-        selectedSlot={selectedSlot}
+        slotKey={bestSlotKey}
+        meetingName={meetingName}
+      />
+
+      <EditEventModal
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        meetingName={meetingName}
+        meetingDates={parsedSlots?.dates ?? []}
+        description={event.description}
       />
     </>
   );

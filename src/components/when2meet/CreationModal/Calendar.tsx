@@ -1,4 +1,10 @@
-import { HTMLAttributes, useEffect, useRef, useState } from "react";
+import {
+  HTMLAttributes,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "@/lib/ui/cn";
 import { CalendarItem, generateCalendarMonth } from "../utils/dates.ts";
 
@@ -38,6 +44,9 @@ export function Calendar({
   const isDraggingRef = useRef(false);
   const isDeletingRef = useRef(false);
   const lastSelectedIndexRef = useRef<number | null>(null);
+  const calendarRef = useRef(calendar);
+  calendarRef.current = calendar;
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     onDatesChange(selectedDates.current);
@@ -60,8 +69,14 @@ export function Calendar({
     });
   }
 
-  function handleSelect(index: number) {
-    if (!isDraggingRef.current || !isSelectable(calendar[index])) {
+  const handleSelect = useCallback((index: number) => {
+    if (!isDraggingRef.current) {
+      return;
+    }
+
+    const day = calendarRef.current[index];
+
+    if (!day || !isSelectable(day)) {
       return;
     }
 
@@ -78,12 +93,14 @@ export function Calendar({
       const end = Math.max(lastSelectedIndexRef.current, index);
 
       for (let i = start; i <= end; i++) {
-        toggleDateSelection(i, shouldInclude);
+        if (isSelectable(calendarRef.current[i])) {
+          toggleDateSelection(i, shouldInclude);
+        }
       }
     }
 
     lastSelectedIndexRef.current = index;
-  }
+  }, []);
 
   function updateCalendar() {
     setCalendar(
@@ -119,7 +136,7 @@ export function Calendar({
     const day = calendar[index];
 
     return cn(
-      "my-0.5 flex aspect-square cursor-pointer items-center justify-center transition-colors",
+      "my-0.5 flex aspect-square cursor-pointer items-center justify-center transition-colors touch-manipulation",
       isSameDay(day.date, new Date()) &&
         !day.selected &&
         "border-primary rounded-full border-2",
@@ -152,25 +169,33 @@ export function Calendar({
     );
   }
 
+  function getCellIndexFromPoint(x: number, y: number) {
+    const element = document.elementFromPoint(x, y);
+    const cell = element?.closest("[data-index]");
+    const indexAttribute = cell?.getAttribute("data-index");
+
+    if (!indexAttribute) {
+      return null;
+    }
+
+    return Number(indexAttribute);
+  }
+
   useEffect(() => {
-    function handleMove(x: number, y: number) {
+    function handlePointerMove(event: PointerEvent) {
       if (!isDraggingRef.current) {
         return;
       }
 
-      const element = document.elementFromPoint(x, y);
-      const indexAttribute = element?.getAttribute("data-index");
+      event.preventDefault();
 
-      if (!indexAttribute) {
+      const index = getCellIndexFromPoint(event.clientX, event.clientY);
+
+      if (index === null) {
         return;
       }
 
-      handleSelect(Number(indexAttribute));
-    }
-
-    function handlePointerMove(event: PointerEvent) {
-      event.preventDefault();
-      handleMove(event.clientX, event.clientY);
+      handleSelect(index);
     }
 
     function handlePointerUp() {
@@ -182,12 +207,14 @@ export function Calendar({
       passive: false,
     });
     window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
 
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
     };
-  });
+  }, [handleSelect]);
 
   return (
     <div className={cn("flex flex-col items-center", className)} {...props}>
@@ -234,9 +261,12 @@ export function Calendar({
         </button>
       </div>
 
-      <div className="relative z-0 grid w-full max-w-md min-w-xs touch-manipulation grid-cols-7 select-none">
+      <div
+        ref={gridRef}
+        className="relative z-0 grid w-full max-w-md min-w-0 touch-none grid-cols-7 select-none"
+      >
         {WEEK_DAYS.map((day) => (
-          <div key={day} className="mb-2 text-center font-semibold">
+          <div key={day} className="mb-2 text-center text-sm font-semibold">
             {day}
           </div>
         ))}
@@ -246,12 +276,18 @@ export function Calendar({
             key={item.date.toISOString()}
             data-index={index}
             onPointerDown={(event) => {
+              if (!isSelectable(item)) {
+                return;
+              }
+
               event.preventDefault();
+              gridRef.current?.setPointerCapture(event.pointerId);
+              event.currentTarget.setPointerCapture(event.pointerId);
               isDraggingRef.current = true;
               isDeletingRef.current = calendar[index].selected;
+              lastSelectedIndexRef.current = null;
               handleSelect(index);
             }}
-            onPointerEnter={() => handleSelect(index)}
             className={getDayCellClasses(index)}
           >
             {item.date.getDate()}

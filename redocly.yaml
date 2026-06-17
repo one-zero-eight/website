@@ -34,6 +34,11 @@ apis:
     x-openapi-ts:
       output: ./src/api/workshops/types.ts
       #  --root-types --enum
+  when2meet:
+    root: https://api.innohassle.ru/when2meet/v0/openapi.json
+    x-openapi-ts:
+      output: ./src/api/when2meet/types.ts
+      #  --root-types --enum
   guard:
     root: https://api.innohassle.ru/guard/staging-v0/openapi.json
     x-openapi-ts:

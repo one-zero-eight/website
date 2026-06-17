@@ -6,8 +6,11 @@ export function CreateMeetingButton({
   className,
   children,
   onClick,
+  onCreated,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement>) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  onCreated?: () => void;
+}) {
   const [creationDialogOpen, setCreationDialogOpen] = useState(false);
 
   function handleClick(event: MouseEvent<HTMLButtonElement>) {
@@ -35,6 +38,7 @@ export function CreateMeetingButton({
       <CreationDialog
         open={creationDialogOpen}
         onOpenChange={setCreationDialogOpen}
+        onCreated={onCreated}
       />
     </>
   );

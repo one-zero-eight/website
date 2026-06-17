@@ -5,16 +5,22 @@ import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_with_menu/when2meet/$meetingId")({
   component: RouteComponent,
-  validateSearch: (search: Record<string, unknown>): { name?: string } => {
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { name?: string; setupSlots?: boolean } => {
     return {
       name: search.name ? search.name.toString() : undefined,
+      setupSlots:
+        search.setupSlots === true || search.setupSlots === "true"
+          ? true
+          : undefined,
     };
   },
 });
 
 function RouteComponent() {
   const { meetingId } = Route.useParams();
-  const { name } = Route.useSearch();
+  const { name, setupSlots } = Route.useSearch();
 
   return (
     <>
@@ -27,7 +33,11 @@ function RouteComponent() {
       </Helmet>
 
       <Topbar title="When2Meet" hideOnMobile={true} />
-      <MeetingPage meetingId={meetingId} initialName={name} />
+      <MeetingPage
+        meetingId={meetingId}
+        initialName={name}
+        setupSlots={setupSlots}
+      />
     </>
   );
 }

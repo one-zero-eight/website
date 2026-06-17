@@ -1,0 +1,83 @@
+import { generateTimeSlots, getSlotKey, parseSlotKey } from "./slots.ts";
+
+export function slotKeyToBackend(slotKey: string) {
+  const { dateId, time } = parseSlotKey(slotKey);
+  return `${dateId}T${time}:00Z`;
+}
+
+export function createBackendSlotLookup(slots: string[]) {
+  const lookup = new Map<string, string>();
+
+  for (const slot of slots) {
+    lookup.set(backendSlotToSlotKey(slot), slot);
+  }
+
+  return lookup;
+}
+
+export function slotKeysToBackendSlots(
+  slotKeys: Iterable<string>,
+  lookup: Map<string, string>,
+) {
+  return [...slotKeys]
+    .map((slotKey) => lookup.get(slotKey) ?? slotKeyToBackend(slotKey))
+    .sort();
+}
+
+export function backendSlotToSlotKey(slot: string) {
+  if (slot.includes("_")) {
+    return slot;
+  }
+
+  if (slot.includes("T")) {
+    const [datePart, timePart] = slot.split("T");
+    const time = timePart.slice(0, 5);
+    return getSlotKey(datePart, time);
+  }
+
+  const parsedDate = new Date(slot);
+
+  if (!Number.isNaN(parsedDate.getTime())) {
+    const dateId = parsedDate.toLocaleDateString("en-CA");
+    const hours = parsedDate.getHours().toString().padStart(2, "0");
+    const minutes = parsedDate.getMinutes().toString().padStart(2, "0");
+    return getSlotKey(dateId, `${hours}:${minutes}`);
+  }
+
+  return slot;
+}
+
+export function parseBackendSlots(slots: string[]) {
+  const slotKeys = slots.map(backendSlotToSlotKey);
+  const dates = new Set<string>();
+  const times = new Set<string>();
+
+  for (const slotKey of slotKeys) {
+    const { dateId, time } = parseSlotKey(slotKey);
+    dates.add(dateId);
+    times.add(time);
+  }
+
+  return {
+    slotKeys,
+    dates: [...dates].sort(),
+    timeSlots: [...times].sort(),
+  };
+}
+
+export function buildSlotsFromDatesAndRange(
+  dates: Set<string>,
+  start: string,
+  end: string,
+) {
+  const times = generateTimeSlots(start, end);
+  const slots: string[] = [];
+
+  for (const dateId of dates) {
+    for (const time of times) {
+      slots.push(slotKeyToBackend(getSlotKey(dateId, time)));
+    }
+  }
+
+  return slots.sort();
+}
