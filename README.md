@@ -63,7 +63,7 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 
 1. Install [Node.js 20+](https://nodejs.org), [pnpm](https://pnpm.io)
 2. Install dependencies: `pnpm install`
-3. Start development server: `pnpm run dev --host`
+3. Start development server: `pnpm run dev`
 4. Open in the browser: https://local.innohassle.ru:3000
    > The page will be reloaded when you edit the code
 
