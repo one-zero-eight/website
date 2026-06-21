@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { $when2meet } from "@/api/when2meet";
-import { useMe } from "@/api/accounts/user.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
@@ -34,13 +33,10 @@ import {
   trackParticipation,
   updateLocalEventStats,
 } from "./utils/local-events.ts";
-
-// FIXME: get user name on a backend
-function getParticipantName(
-  me: { name?: string | null; email?: string } | undefined,
-) {
-  return me?.name?.trim() || me?.email || "";
-}
+import {
+  getStoredParticipantName,
+  storeParticipantName,
+} from "./utils/participant-identity.ts";
 
 const SETUP_USER_ID = "__setup__";
 
@@ -66,7 +62,6 @@ export function MeetingPage({
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { me } = useMe();
   const { showSuccess, showError, showConfirm } = useToast();
   const [viewedUserIds, setViewedUserIds] = useState<Set<string>>(new Set());
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -76,13 +71,15 @@ export function MeetingPage({
   );
   const [availabilityType, setAvailabilityType] =
     useState<AvailabilityType>("available");
+  const [joinName, setJoinName] = useState("");
   const [participantSearch, setParticipantSearch] = useState("");
   const [minParticipants, setMinParticipants] = useState(1);
   const [isDeletingMeeting, setIsDeletingMeeting] = useState(false);
   const [storedAllowedSlotKeys, setStoredAllowedSlotKeys] =
     useState<Set<string> | null>(() => getStoredAllowedSlots(meetingId));
-
-  const myName = getParticipantName(me);
+  const [myName, setMyName] = useState(
+    () => getStoredParticipantName(meetingId) ?? "",
+  );
 
   const needsSetup =
     !storedAllowedSlotKeys?.size &&
@@ -183,15 +180,12 @@ export function MeetingPage({
   );
 
   useEffect(() => {
-    if (needsSetup || !myName || editingUserId || myUser) {
+    if (needsSetup || !myName || !myUser) {
       return;
     }
 
-    setEditingUserId(myName);
-    setDraftSlots(new Set());
-    setDraftIfNeededSlots(new Set());
-    setAvailabilityType("available");
-  }, [needsSetup, myName, myUser, editingUserId]);
+    setViewedUserIds((current) => new Set(current).add(myUser.id));
+  }, [needsSetup, myName, myUser]);
 
   useEffect(() => {
     if (viewedUserIds.size > 0 || users.length === 0) {
@@ -317,6 +311,21 @@ export function MeetingPage({
     });
   }
 
+  function handleJoin(formEvent: FormEvent<HTMLFormElement>) {
+    formEvent.preventDefault();
+
+    const trimmedName = joinName.trim();
+
+    if (!trimmedName) {
+      return;
+    }
+
+    storeParticipantName(meetingId, trimmedName);
+    setMyName(trimmedName);
+    setJoinName("");
+    handleStartEditing(trimmedName);
+  }
+
   function handleSaveSetup() {
     if (draftSlots.size === 0) {
       showError("Error", "Choose at least one timeslot.");
@@ -421,8 +430,10 @@ export function MeetingPage({
       : new Set(users.map((user) => user.id));
 
   const isEditingSelf = editingUserId === myName;
+  const showJoinForm = !needsSetup && !myName && !editingUserId;
+  const showContinueAs =
+    !needsSetup && myName && !myUser && !isEditingSelf && !editingUserId;
   const showMyAvailability = !needsSetup && myName && myUser && !isEditingSelf;
-  const missingParticipantName = !needsSetup && !myName;
 
   return (
     <>
@@ -541,9 +552,42 @@ export function MeetingPage({
           </div>
         )}
 
-        {missingParticipantName && (
-          <div className="alert alert-warning text-sm">
-            <span>Sign in to mark your availability.</span>
+        {showJoinForm && (
+          <form
+            onSubmit={handleJoin}
+            className="bg-base-100 border-base-300 rounded-box border p-4"
+          >
+            <h2 className="mb-1 text-sm font-medium">Add your availability</h2>
+            <p className="text-base-content/60 mb-3 text-sm">
+              Enter your name, then mark when you are free on the grid below.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                type="text"
+                className="input input-bordered w-full sm:max-w-xs"
+                placeholder="Your name"
+                value={joinName}
+                onChange={(event) => setJoinName(event.target.value)}
+              />
+              <button type="submit" className="btn btn-primary">
+                Continue
+              </button>
+            </div>
+          </form>
+        )}
+
+        {showContinueAs && (
+          <div className="bg-base-100 border-base-300 rounded-box flex flex-wrap items-center justify-between gap-3 border p-4 text-sm">
+            <span>
+              Continue as <span className="font-medium">{myName}</span>
+            </span>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => handleStartEditing(myName)}
+            >
+              Mark availability
+            </button>
           </div>
         )}
 
