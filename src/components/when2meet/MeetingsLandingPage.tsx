@@ -46,17 +46,9 @@ function filterMeetings<
 
 export function MeetingsLandingPage() {
   const [search, setSearch] = useState("");
-  const [refreshKey, setRefreshKey] = useState(0);
 
-  const ownedMeetings = useMemo(() => {
-    void refreshKey;
-    return getOwnedEvents();
-  }, [refreshKey]);
-
-  const participatingMeetings = useMemo(() => {
-    void refreshKey;
-    return getParticipatingEvents();
-  }, [refreshKey]);
+  const ownedMeetings = useMemo(() => getOwnedEvents(), []);
+  const participatingMeetings = useMemo(() => getParticipatingEvents(), []);
 
   const filteredOwnedMeetings = useMemo(
     () => filterMeetings(ownedMeetings, search),
@@ -78,10 +70,7 @@ export function MeetingsLandingPage() {
         <section className="mb-8">
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-xl font-semibold">My meetings</h2>
-            <CreateMeetingButton
-              className="hidden md:inline-flex"
-              onCreated={() => setRefreshKey((value) => value + 1)}
-            >
+            <CreateMeetingButton className="hidden md:inline-flex">
               Create meeting
             </CreateMeetingButton>
           </div>
@@ -115,9 +104,7 @@ export function MeetingsLandingPage() {
         </section>
       </div>
 
-      <MeetingsMobileBar
-        onCreated={() => setRefreshKey((value) => value + 1)}
-      />
+      <MeetingsMobileBar />
     </>
   );
 }

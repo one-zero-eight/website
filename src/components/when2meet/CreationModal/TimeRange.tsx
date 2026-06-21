@@ -15,7 +15,7 @@ function TimePicker({
   return (
     <select
       className={cn(
-        "bg-base-200 text-base-content focus:border-base-300 focus:bg-base-100 w-32 cursor-pointer rounded-lg border border-transparent px-3.5 py-1.5 text-center transition-colors focus:outline-none",
+        "bg-base-200 text-base-content focus:border-base-300 focus:bg-base-100 w-28 cursor-pointer rounded-lg border border-transparent px-3 py-1.5 text-center transition-colors focus:outline-none",
         disabled && "cursor-not-allowed opacity-50",
       )}
       value={value}
@@ -69,25 +69,21 @@ export function TimeRange({
   }
 
   return (
-    <div className={cn("flex items-center justify-between gap-1.5", className)}>
-      <span className="icon-[material-symbols--schedule-outline] text-base-content/70" />
+    <div className={cn("flex items-center gap-3", className)}>
+      <span className="icon-[material-symbols--schedule-outline] text-base-content/70 text-xl" />
       <div
         className={cn(
-          "grid grid-cols-[1fr_auto_1fr] items-center gap-1.5",
+          "flex flex-wrap items-center gap-2",
           disabled && "opacity-50",
         )}
       >
+        <span className="text-base-content/60 text-sm">from</span>
         <TimePicker
           value={startHour}
           disabled={disabled}
           onChange={handleStartTimeChange}
         />
-        <span
-          className={cn(
-            "icon-[material-symbols--arrow-forward] text-xl transition-colors",
-            disabled ? "text-base-content/40" : "text-base-content/60",
-          )}
-        />
+        <span className="text-base-content/60 text-sm">to</span>
         <TimePicker
           value={endHour}
           disabled={disabled}

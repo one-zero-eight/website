@@ -129,7 +129,10 @@ export function generateCalendarMonth(
     });
   }
 
-  while (calendar.length < 35) {
+  const cellsNeeded = startWeekday + daysInMonth;
+  const targetLength = Math.ceil(cellsNeeded / 7) * 7;
+
+  while (calendar.length < targetLength) {
     const nextDay: number = calendar.length - (startWeekday + daysInMonth) + 1;
     const date = new Date(year, month + 1, nextDay);
     calendar.push({

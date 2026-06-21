@@ -1,45 +1,21 @@
 import { cn } from "@/lib/ui/cn";
-import { ButtonHTMLAttributes, MouseEvent, useState } from "react";
-import { CreationDialog } from "./CreationModal/CreationDialog.tsx";
+import { Link } from "@tanstack/react-router";
 
 export function CreateMeetingButton({
   className,
   children,
-  onClick,
-  onCreated,
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
-  onCreated?: () => void;
+}: {
+  className?: string;
+  children?: string;
 }) {
-  const [creationDialogOpen, setCreationDialogOpen] = useState(false);
-
-  function handleClick(event: MouseEvent<HTMLButtonElement>) {
-    onClick?.(event);
-
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    setCreationDialogOpen(true);
-  }
-
   return (
-    <>
-      <button
-        type="button"
-        className={cn("btn btn-primary gap-1.5", children && "pr-3", className)}
-        title="Create new meeting"
-        onClick={handleClick}
-        {...props}
-      >
-        <span className="icon-[material-symbols--add] shrink-0 text-xl" />
-        {children ?? "Create meeting"}
-      </button>
-      <CreationDialog
-        open={creationDialogOpen}
-        onOpenChange={setCreationDialogOpen}
-        onCreated={onCreated}
-      />
-    </>
+    <Link
+      to="/when2meet/new"
+      className={cn("btn btn-primary gap-1.5", className)}
+      title="Create new meeting"
+    >
+      <span className="icon-[material-symbols--add] shrink-0 text-xl" />
+      {children ?? "Create meeting"}
+    </Link>
   );
 }

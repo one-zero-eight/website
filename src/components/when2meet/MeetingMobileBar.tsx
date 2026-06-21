@@ -1,22 +1,26 @@
+import { Link } from "@tanstack/react-router";
+
 export function MeetingMobileBar({
   onShare,
-  onBookRoom,
+  meetingId,
+  meetingName,
   onDelete,
   onSaveSetup,
   isDeleting,
 }: {
   onShare: () => void;
-  onBookRoom: () => void;
+  meetingId: string;
+  meetingName: string;
   onDelete?: () => void;
   onSaveSetup?: () => void;
   isDeleting?: boolean;
 }) {
   if (onSaveSetup) {
     return (
-      <div className="border-base-300 bg-base-200 fixed bottom-12 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b p-4 md:hidden">
+      <div className="border-base-300 bg-base-200 fixed bottom-12 flex w-full flex-col gap-2 rounded-t-xl border-b p-3 md:hidden">
         <button
           type="button"
-          className="btn btn-primary w-full gap-2"
+          className="btn btn-primary w-full"
           onClick={onSaveSetup}
         >
           Save timeslots
@@ -26,23 +30,22 @@ export function MeetingMobileBar({
   }
 
   return (
-    <div className="border-base-300 bg-base-200 fixed bottom-12 flex h-fit w-full flex-row gap-2 rounded-t-xl border-b p-4 md:hidden">
+    <div className="border-base-300 bg-base-200 fixed bottom-12 flex w-full flex-row gap-2 rounded-t-xl border-b p-3 md:hidden">
       <button
         type="button"
-        className="btn btn-outline min-w-0 flex-1 gap-2"
+        className="btn btn-outline min-w-0 flex-1"
         onClick={onShare}
       >
-        <span className="icon-[material-symbols--share-outline] text-lg" />
         Share link
       </button>
-      <button
-        type="button"
-        className="btn btn-primary min-w-0 flex-1 gap-2"
-        onClick={onBookRoom}
+      <Link
+        to="/when2meet/$meetingId/book-room"
+        params={{ meetingId }}
+        search={{ name: meetingName }}
+        className="btn btn-primary min-w-0 flex-1"
       >
-        <span className="icon-[mdi--door-open] text-lg" />
         Book room
-      </button>
+      </Link>
       {onDelete && (
         <button
           type="button"
@@ -51,7 +54,7 @@ export function MeetingMobileBar({
           onClick={onDelete}
         >
           {isDeleting ? (
-            <span className="loading loading-spinner loading-sm" />
+            <span className="loading loading-spinner" />
           ) : (
             <span className="icon-[material-symbols--delete-outline] text-xl" />
           )}
