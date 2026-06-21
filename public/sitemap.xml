@@ -156,6 +156,16 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://innohassle.ru/when2meet</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/when2meet/new</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://innohassle.ru/workshops</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

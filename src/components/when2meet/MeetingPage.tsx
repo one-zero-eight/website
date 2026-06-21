@@ -1,15 +1,14 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { $when2meet } from "@/api/when2meet";
+import { useMe } from "@/api/accounts/user.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
-import { EditEventModal } from "./EditEventModal.tsx";
 import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
-import { RoomSuggestionModal } from "./RoomSuggestionModal.tsx";
-import type { AvailabilityType, MeetingUser } from "./types.ts";
+import type { AvailabilityType } from "./types.ts";
 import {
   backendSlotToSlotKey,
   createBackendSlotLookup,
@@ -36,6 +35,13 @@ import {
   updateLocalEventStats,
 } from "./utils/local-events.ts";
 
+// FIXME: get user name on a backend
+function getParticipantName(
+  me: { name?: string | null; email?: string } | undefined,
+) {
+  return me?.name?.trim() || me?.email || "";
+}
+
 const SETUP_USER_ID = "__setup__";
 
 function participantsToUsers(
@@ -60,6 +66,7 @@ export function MeetingPage({
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { me } = useMe();
   const { showSuccess, showError, showConfirm } = useToast();
   const [viewedUserIds, setViewedUserIds] = useState<Set<string>>(new Set());
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -69,22 +76,17 @@ export function MeetingPage({
   );
   const [availabilityType, setAvailabilityType] =
     useState<AvailabilityType>("available");
-  const [newUserName, setNewUserName] = useState("");
   const [participantSearch, setParticipantSearch] = useState("");
-  const [roomsOpen, setRoomsOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
+  const [minParticipants, setMinParticipants] = useState(1);
   const [isDeletingMeeting, setIsDeletingMeeting] = useState(false);
-  const [pendingParticipants, setPendingParticipants] = useState<MeetingUser[]>(
-    [],
-  );
   const [storedAllowedSlotKeys, setStoredAllowedSlotKeys] =
     useState<Set<string> | null>(() => getStoredAllowedSlots(meetingId));
 
-  const configuredAllowedSlots =
-    storedAllowedSlotKeys ?? getStoredAllowedSlots(meetingId);
+  const myName = getParticipantName(me);
 
   const needsSetup =
-    !configuredAllowedSlots?.size &&
+    !storedAllowedSlotKeys?.size &&
+    !getStoredAllowedSlots(meetingId)?.size &&
     (setupSlots === true || isPendingSetup(meetingId));
 
   const {
@@ -167,57 +169,37 @@ export function MeetingPage({
     return canvasSlots;
   }, [needsSetup, canvasSlots, storedAllowedSlotKeys, meetingId]);
 
-  const savedUsers = useMemo(
+  const users = useMemo(
     () => (event ? participantsToUsers(event.participants) : []),
     [event],
   );
 
-  const users = useMemo(() => {
-    const savedNames = new Set(savedUsers.map((user) => user.name));
-    const unsaved = pendingParticipants.filter(
-      (participant) => !savedNames.has(participant.name),
-    );
-    return [...savedUsers, ...unsaved];
-  }, [savedUsers, pendingParticipants]);
-
   const meetingName = event?.name ?? initialName ?? "Meeting";
   const meetingDescription = event?.description;
 
-  const { bestSlotKey, selectedSlotLabel } = useMemo(() => {
-    if (formattedDates.length === 0 || timeSlots.length === 0) {
-      return { bestSlotKey: null, selectedSlotLabel: "No times yet" };
+  const myUser = useMemo(
+    () => users.find((user) => user.name === myName) ?? null,
+    [users, myName],
+  );
+
+  useEffect(() => {
+    if (needsSetup || !myName || editingUserId || myUser) {
+      return;
     }
 
-    let bestSlot = getSlotKey(formattedDates[0].id, timeSlots[0]);
-    let bestCount = 0;
+    setEditingUserId(myName);
+    setDraftSlots(new Set());
+    setDraftIfNeededSlots(new Set());
+    setAvailabilityType("available");
+  }, [needsSetup, myName, myUser, editingUserId]);
 
-    formattedDates.forEach((date) => {
-      timeSlots.forEach((time) => {
-        const slotKey = getSlotKey(date.id, time);
+  useEffect(() => {
+    if (viewedUserIds.size > 0 || users.length === 0) {
+      return;
+    }
 
-        if (!allowedSlots.has(slotKey)) {
-          return;
-        }
-
-        const count = users.filter((user) => user.slots.has(slotKey)).length;
-
-        if (count > bestCount) {
-          bestSlot = slotKey;
-          bestCount = count;
-        }
-      });
-    });
-
-    const [dateId, time] = bestSlot.split("_");
-    const date = formattedDates.find(
-      (meetingDate) => meetingDate.id === dateId,
-    );
-
-    return {
-      bestSlotKey: bestSlot,
-      selectedSlotLabel: `${date?.monthDay ?? dateId}, ${time}`,
-    };
-  }, [formattedDates, timeSlots, users, allowedSlots]);
+    setViewedUserIds(new Set(users.map((user) => user.id)));
+  }, [users, viewedUserIds.size]);
 
   const filteredUsers = useMemo(() => {
     const trimmedSearch = participantSearch.trim().toLowerCase();
@@ -231,10 +213,22 @@ export function MeetingPage({
     );
   }, [users, participantSearch]);
 
+  const maxMinParticipants = Math.max(1, users.length);
+
+  useEffect(() => {
+    if (minParticipants > maxMinParticipants) {
+      setMinParticipants(maxMinParticipants);
+    }
+  }, [maxMinParticipants, minParticipants]);
+
   function handleStartEditing(userId: string) {
     const user = users.find((entry) => entry.id === userId);
 
     if (!user) {
+      setEditingUserId(userId);
+      setDraftSlots(new Set());
+      setDraftIfNeededSlots(new Set());
+      setAvailabilityType("available");
       return;
     }
 
@@ -251,27 +245,18 @@ export function MeetingPage({
   }
 
   function handleSaveEditing(userId: string) {
-    const user = users.find((entry) => entry.id === userId);
-
-    if (!user) {
-      return;
-    }
+    const userName = users.find((entry) => entry.id === userId)?.name ?? userId;
 
     saveParticipant(
       {
         params: { path: { event_id: meetingId } },
         body: {
-          name: user.name,
+          name: userName,
           availability: slotKeysToBackendSlots(draftSlots, backendSlotLookup),
         },
       },
       {
         onSuccess: () => {
-          setPendingParticipants((currentParticipants) =>
-            currentParticipants.filter(
-              (participant) => participant.name !== user.name,
-            ),
-          );
           setEditingUserId(null);
           setDraftSlots(new Set());
           setDraftIfNeededSlots(new Set());
@@ -279,11 +264,11 @@ export function MeetingPage({
             id: meetingId,
             name: meetingName,
             description: meetingDescription,
-            participantsCount: users.length,
+            participantsCount: users.length + (myUser ? 0 : 1),
           });
           showSuccess(
             "Availability saved",
-            `${user.name}'s timeslots were saved successfully.`,
+            "Your times were saved successfully.",
           );
         },
       },
@@ -294,16 +279,15 @@ export function MeetingPage({
     dateId: string,
     time: string,
     mode: "add" | "remove",
-    type: AvailabilityType,
+    _type: AvailabilityType,
   ) {
     if (!editingUserId) {
       return;
     }
 
     const slotKey = getSlotKey(dateId, time);
-    const setter = type === "if_needed" ? setDraftIfNeededSlots : setDraftSlots;
 
-    setter((currentSlots) => {
+    setDraftSlots((currentSlots) => {
       const nextSlots = new Set(currentSlots);
 
       if (mode === "add") {
@@ -314,6 +298,9 @@ export function MeetingPage({
 
       return nextSlots;
     });
+
+    // if_needed support is disabled for now
+    // const setter = type === "if_needed" ? setDraftIfNeededSlots : setDraftSlots;
   }
 
   function handleToggleViewedUser(userId: string) {
@@ -328,71 +315,6 @@ export function MeetingPage({
 
       return nextUserIds;
     });
-  }
-
-  function handleDeleteUser(userId: string) {
-    const isPending = pendingParticipants.some(
-      (participant) => participant.id === userId,
-    );
-
-    if (!isPending) {
-      showError("Error", "Saved participants cannot be removed yet.");
-      return;
-    }
-
-    setPendingParticipants((currentParticipants) =>
-      currentParticipants.filter((participant) => participant.id !== userId),
-    );
-    setViewedUserIds((currentUserIds) => {
-      const nextUserIds = new Set(currentUserIds);
-      nextUserIds.delete(userId);
-      return nextUserIds;
-    });
-
-    if (editingUserId === userId) {
-      handleCancelEditing();
-    }
-
-    showSuccess("Participant removed", "Unsaved participant was removed.");
-  }
-
-  function handleAddUser(formEvent: FormEvent<HTMLFormElement>) {
-    formEvent.preventDefault();
-
-    const trimmedName = newUserName.trim();
-
-    if (!trimmedName) {
-      return;
-    }
-
-    if (users.some((user) => user.name === trimmedName)) {
-      showError("Error", "Participant with this name already exists.");
-      return;
-    }
-
-    const newUser = {
-      id: trimmedName,
-      name: trimmedName,
-      slots: new Set<string>(),
-      ifNeededSlots: new Set<string>(),
-    };
-
-    setPendingParticipants((currentParticipants) => [
-      ...currentParticipants,
-      newUser,
-    ]);
-    setViewedUserIds((currentUserIds) =>
-      new Set(currentUserIds).add(newUser.id),
-    );
-    setNewUserName("");
-    setEditingUserId(trimmedName);
-    setDraftSlots(new Set());
-    setDraftIfNeededSlots(new Set());
-    setAvailabilityType("available");
-    showSuccess(
-      "Participant added",
-      `${trimmedName} was added to the meeting.`,
-    );
   }
 
   function handleSaveSetup() {
@@ -410,7 +332,7 @@ export function MeetingPage({
     setDraftIfNeededSlots(new Set());
     showSuccess(
       "Timeslots saved",
-      "Participants can now add their availability.",
+      "Share the link so participants can add their availability.",
     );
     navigate({
       to: "/when2meet/$meetingId",
@@ -429,7 +351,10 @@ export function MeetingPage({
         await navigator.clipboard.writeText(shareUrl);
       }
 
-      showSuccess("Link copied", "Meeting link copied to clipboard.");
+      showSuccess(
+        "Link copied",
+        "Share this link so others can add their time.",
+      );
     } catch {
       showError("Error", "Could not copy link to clipboard.");
     }
@@ -463,16 +388,16 @@ export function MeetingPage({
 
   if (isPending) {
     return (
-      <div className="mx-auto w-full max-w-[1400px] px-4 py-8">
-        <div className="skeleton h-10 w-64" />
-        <div className="skeleton mt-6 h-[420px] w-full" />
+      <div className="mx-auto w-full max-w-[1200px] px-4 py-8">
+        <div className="skeleton h-8 w-48" />
+        <div className="skeleton mt-6 h-[360px] w-full" />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="mx-auto w-full max-w-[1400px] px-4 py-8">
+      <div className="mx-auto w-full max-w-[1200px] px-4 py-8">
         <div className="alert alert-error">
           <span>{formatApiErrorMessage(error)}</span>
         </div>
@@ -482,7 +407,7 @@ export function MeetingPage({
 
   if (!event || formattedDates.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-[1400px] px-4 py-8">
+      <div className="mx-auto w-full max-w-[1200px] px-4 py-8">
         <div className="alert alert-error">
           <span>Meeting not found or has no configured dates.</span>
         </div>
@@ -495,40 +420,42 @@ export function MeetingPage({
       ? viewedUserIds
       : new Set(users.map((user) => user.id));
 
+  const isEditingSelf = editingUserId === myName;
+  const showMyAvailability = !needsSetup && myName && myUser && !isEditingSelf;
+  const missingParticipantName = !needsSetup && !myName;
+
   return (
     <>
-      <div className="mx-auto mb-20 grid w-full max-w-[1400px] gap-5 px-4 py-4 md:mb-4">
+      <div className="mx-auto mb-20 grid w-full max-w-[1200px] gap-4 px-4 py-4 md:mb-4">
         <Link
           to="/when2meet"
-          className="text-base-content/70 hover:text-base-content inline-flex w-fit items-center gap-1 text-sm font-medium"
+          className="text-base-content/70 hover:text-base-content inline-flex w-fit items-center gap-1 text-sm"
         >
-          <span className="icon-[material-symbols--arrow-back] text-lg" />
+          <span className="icon-[material-symbols--arrow-back]" />
           All meetings
         </Link>
 
-        <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <section className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <h1 className="text-2xl font-semibold md:text-3xl">
-                {meetingName}
-              </h1>
-              <button
-                type="button"
-                className="link link-primary text-sm font-medium"
-                onClick={() => setEditOpen(true)}
+              <h1 className="text-xl font-semibold">{meetingName}</h1>
+              <Link
+                to="/when2meet/$meetingId/details"
+                params={{ meetingId }}
+                search={{ name: meetingName }}
+                className="link link-primary text-sm"
               >
-                Edit event
-              </button>
+                Details
+              </Link>
             </div>
             {meetingDescription && (
-              <p className="text-base-content/70 mt-2 max-w-3xl text-sm md:text-base">
+              <p className="text-base-content/70 mt-1 max-w-2xl text-sm">
                 {meetingDescription}
               </p>
             )}
-            <div className="text-base-content/70 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+            <div className="text-base-content/70 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
               <span>{formatDateRangeLabel(formattedDates)}</span>
               <span>{users.length} responses</span>
-              <span>Best time: {selectedSlotLabel}</span>
             </div>
           </div>
 
@@ -536,7 +463,7 @@ export function MeetingPage({
             {needsSetup ? (
               <button
                 type="button"
-                className="btn btn-primary btn-md gap-2"
+                className="btn btn-primary"
                 onClick={handleSaveSetup}
               >
                 Save timeslots
@@ -545,29 +472,28 @@ export function MeetingPage({
               <>
                 <button
                   type="button"
-                  className="btn btn-outline btn-md gap-2"
+                  className="btn btn-outline"
                   onClick={handleShareLink}
                 >
-                  <span className="icon-[material-symbols--share-outline] text-xl" />
                   Share link
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-md gap-2"
-                  onClick={() => setRoomsOpen(true)}
+                <Link
+                  to="/when2meet/$meetingId/book-room"
+                  params={{ meetingId }}
+                  search={{ name: meetingName }}
+                  className="btn btn-primary"
                 >
-                  <span className="icon-[mdi--door-open] text-xl" />
                   Book room
-                </button>
+                </Link>
                 {canDeleteMeeting && (
                   <button
                     type="button"
-                    className="btn btn-outline btn-error btn-md btn-square"
+                    className="btn btn-outline btn-error btn-square"
                     disabled={isDeletingMeeting}
                     onClick={handleDeleteMeeting}
                   >
                     {isDeletingMeeting ? (
-                      <span className="loading loading-spinner loading-sm" />
+                      <span className="loading loading-spinner" />
                     ) : (
                       <span className="icon-[material-symbols--delete-outline] text-xl" />
                     )}
@@ -579,21 +505,105 @@ export function MeetingPage({
         </section>
 
         {needsSetup && (
-          <div className="alert alert-warning">
+          <div className="alert alert-warning text-sm">
             <span>
-              Select the timeslots that participants can choose, then click Save
-              timeslots.
+              Select the timeslots that participants can choose, then save.
             </span>
+          </div>
+        )}
+
+        {!needsSetup && (
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <label className="flex items-center gap-2">
+              <span className="text-base-content/70">
+                Show slots with at least
+              </span>
+              <input
+                type="number"
+                className="input input-bordered w-16"
+                min={1}
+                max={maxMinParticipants}
+                value={minParticipants}
+                onChange={(event) => {
+                  const value = Number(event.target.value);
+
+                  if (Number.isNaN(value)) {
+                    return;
+                  }
+
+                  setMinParticipants(
+                    Math.min(maxMinParticipants, Math.max(1, value)),
+                  );
+                }}
+              />
+              <span className="text-base-content/70">people</span>
+            </label>
+          </div>
+        )}
+
+        {missingParticipantName && (
+          <div className="alert alert-warning text-sm">
+            <span>Sign in to mark your availability.</span>
+          </div>
+        )}
+
+        {showMyAvailability && (
+          <div className="bg-base-100 border-base-300 rounded-box flex flex-wrap items-center justify-between gap-3 border p-4 text-sm">
+            <div>
+              <span className="font-medium">{myName}</span>
+              <span className="text-base-content/60">
+                {" "}
+                —{" "}
+                {formatSlotSummary(myUser?.slots ?? new Set(), formattedDates)}
+              </span>
+            </div>
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={() => handleStartEditing(myName)}
+            >
+              Edit my times
+            </button>
+          </div>
+        )}
+
+        {isEditingSelf && myName && (
+          <div className="bg-primary/5 border-primary/30 rounded-box flex flex-wrap items-center justify-between gap-3 border p-4 text-sm">
+            <span>
+              Editing availability for{" "}
+              <span className="font-medium">{myName}</span>
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={handleCancelEditing}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={isSaving}
+                onClick={() => handleSaveEditing(myName)}
+              >
+                {isSaving ? (
+                  <span className="loading loading-spinner" />
+                ) : (
+                  "Save"
+                )}
+              </button>
+            </div>
           </div>
         )}
 
         <section
           className={cn(
-            "grid gap-5",
-            needsSetup ? "" : "xl:grid-cols-[minmax(0,1fr)_360px]",
+            "grid gap-4",
+            needsSetup ? "" : "xl:grid-cols-[minmax(0,1fr)_280px]",
           )}
         >
-          <div className="bg-base-100 border-base-300 rounded-box min-w-0 border p-3 md:p-5">
+          <div className="bg-base-100 border-base-300 rounded-box min-w-0 border p-3 md:p-4">
             <div className="md:hidden">
               <AvailabilitySelector
                 dates={formattedDates}
@@ -609,6 +619,7 @@ export function MeetingPage({
                 allowedSlots={allowedSlots}
                 selectionOnly={needsSetup}
                 hideLegend={needsSetup}
+                minParticipants={needsSetup ? 0 : minParticipants}
                 isPhone
               />
             </div>
@@ -627,144 +638,82 @@ export function MeetingPage({
                 allowedSlots={allowedSlots}
                 selectionOnly={needsSetup}
                 hideLegend={needsSetup}
+                minParticipants={needsSetup ? 0 : minParticipants}
               />
             </div>
           </div>
 
           {!needsSetup && (
-            <aside className="grid gap-3">
-              <div className="bg-base-100 border-base-300 rounded-box flex flex-col border p-4">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <h2 className="text-lg font-semibold">Responses</h2>
-                  <button
-                    type="button"
-                    className="btn btn-link btn-sm"
-                    onClick={() =>
-                      setViewedUserIds(new Set(users.map((user) => user.id)))
-                    }
-                  >
-                    View all
-                  </button>
-                </div>
-
-                <label className="input input-bordered mb-3 w-full rounded-xl focus:outline-none">
-                  <span className="icon-[material-symbols--search] text-base-content/50" />
-                  <input
-                    type="text"
-                    className="grow"
-                    placeholder="Search participants..."
-                    value={participantSearch}
-                    onChange={(event) =>
-                      setParticipantSearch(event.target.value)
-                    }
-                  />
-                </label>
-
-                <div className="grid max-h-[min(50vh,420px)] gap-2 overflow-y-auto pr-1">
-                  {filteredUsers.length === 0 ? (
-                    <div className="text-base-content/50 py-6 text-center text-sm">
-                      No participants found.
-                    </div>
-                  ) : (
-                    filteredUsers.map((user) => {
-                      const isViewed = activeViewedUserIds.has(user.id);
-                      const isEditing = editingUserId === user.id;
-
-                      return (
-                        <div
-                          key={user.id}
-                          className={cn(
-                            "border-base-300 rounded-box grid gap-2 border p-3",
-                            isEditing && "border-primary bg-primary/10",
-                          )}
-                        >
-                          <button
-                            type="button"
-                            className="grid min-w-0 text-left"
-                            onClick={() => handleToggleViewedUser(user.id)}
-                          >
-                            <span className="flex min-w-0 items-center gap-2">
-                              <span
-                                className={cn(
-                                  "h-2.5 w-2.5 shrink-0 rounded-full",
-                                  isViewed ? "bg-primary" : "bg-base-300",
-                                )}
-                              />
-                              <span className="truncate font-medium">
-                                {user.name}
-                              </span>
-                            </span>
-                            <span className="text-base-content/60 truncate text-sm">
-                              {formatSlotSummary(user.slots, formattedDates)}
-                            </span>
-                          </button>
-
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              className={cn(
-                                "btn btn-xs grow",
-                                isEditing ? "btn-primary" : "btn-outline",
-                              )}
-                              disabled={isSaving}
-                              onClick={() => {
-                                if (isEditing) {
-                                  handleSaveEditing(user.id);
-                                  return;
-                                }
-
-                                if (
-                                  editingUserId &&
-                                  editingUserId !== user.id
-                                ) {
-                                  handleCancelEditing();
-                                }
-
-                                handleStartEditing(user.id);
-                              }}
-                            >
-                              {isEditing && isSaving ? (
-                                <span className="loading loading-spinner loading-xs" />
-                              ) : isEditing ? (
-                                "Save timeslots"
-                              ) : (
-                                "Edit timeslots"
-                              )}
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-outline btn-error btn-xs"
-                              onClick={() => handleDeleteUser(user.id)}
-                            >
-                              <span className="icon-[material-symbols--delete-outline] text-lg" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-              <div>
-                <form
-                  onSubmit={handleAddUser}
-                  className="bg-base-100 border-base-300 rounded-box grid gap-2 border p-3 md:gap-3 md:p-3"
+            <aside className="bg-base-100 border-base-300 rounded-box border p-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h2 className="text-sm font-medium">Responses</h2>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() =>
+                    setViewedUserIds(new Set(users.map((user) => user.id)))
+                  }
                 >
-                  <h2 className="text-base font-semibold md:text-lg">
-                    Add participant
-                  </h2>
-                  <input
-                    type="text"
-                    className="input input-bordered w-full"
-                    placeholder="Participant name"
-                    value={newUserName}
-                    onChange={(event) => setNewUserName(event.target.value)}
-                  />
-                  <button type="submit" className="btn btn-primary">
-                    <span className="icon-[material-symbols--person-add-outline] text-lg" />
-                    Add participant
-                  </button>
-                </form>
+                  Show all
+                </button>
+              </div>
+
+              <label className="input input-bordered mb-3 w-full text-sm focus:outline-none">
+                <span className="icon-[material-symbols--search] text-base-content/50" />
+                <input
+                  type="text"
+                  className="grow"
+                  placeholder="Search..."
+                  value={participantSearch}
+                  onChange={(event) => setParticipantSearch(event.target.value)}
+                />
+              </label>
+
+              <div className="grid max-h-[min(50vh,400px)] gap-1 overflow-y-auto">
+                {filteredUsers.length === 0 ? (
+                  <div className="text-base-content/50 py-6 text-center text-sm">
+                    No responses yet. Share the link to collect availability.
+                  </div>
+                ) : (
+                  filteredUsers.map((user) => {
+                    const isViewed = activeViewedUserIds.has(user.id);
+                    const isMe = user.name === myName;
+
+                    return (
+                      <button
+                        key={user.id}
+                        type="button"
+                        className={cn(
+                          "hover:bg-base-200 flex w-full items-start gap-2 rounded-lg p-2 text-left text-sm",
+                          isMe && "bg-primary/5",
+                        )}
+                        onClick={() => handleToggleViewedUser(user.id)}
+                      >
+                        <span
+                          className={cn(
+                            "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                            isViewed ? "bg-primary" : "bg-base-300",
+                          )}
+                        />
+                        <span className="min-w-0">
+                          <span className="flex items-center gap-1.5">
+                            <span className="truncate font-medium">
+                              {user.name}
+                            </span>
+                            {isMe && (
+                              <span className="badge badge-primary badge-xs">
+                                you
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-base-content/60 block truncate">
+                            {formatSlotSummary(user.slots, formattedDates)}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </aside>
           )}
@@ -773,27 +722,13 @@ export function MeetingPage({
 
       <MeetingMobileBar
         onShare={handleShareLink}
-        onBookRoom={() => setRoomsOpen(true)}
+        meetingId={meetingId}
+        meetingName={meetingName}
         onDelete={
           !needsSetup && canDeleteMeeting ? handleDeleteMeeting : undefined
         }
         isDeleting={isDeletingMeeting}
         onSaveSetup={needsSetup ? handleSaveSetup : undefined}
-      />
-
-      <RoomSuggestionModal
-        open={roomsOpen}
-        onOpenChange={setRoomsOpen}
-        slotKey={bestSlotKey}
-        meetingName={meetingName}
-      />
-
-      <EditEventModal
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        meetingName={meetingName}
-        meetingDates={parsedSlots?.dates ?? []}
-        description={event.description}
       />
     </>
   );
