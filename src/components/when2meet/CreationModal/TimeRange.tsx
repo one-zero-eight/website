@@ -17,9 +17,7 @@ function TimePicker({
   return (
     <select
       className={cn(
-        "select select-bordered select-sm bg-base-100 h-9 w-full min-w-0",
-        "text-base-content text-sm font-medium tabular-nums",
-        "hover:border-base-content/25 focus:border-primary focus:outline-none",
+        "bg-base-300 text-base-content focus:border-base-300 focus:bg-base-200 w-32 cursor-pointer rounded-lg border border-transparent px-3.5 py-1.5 text-center transition-colors focus:outline-none",
         disabled && "cursor-not-allowed opacity-50",
         className,
       )}
@@ -74,10 +72,11 @@ export function TimeRange({
   }
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("flex items-center justify-between gap-1.5", className)}>
+      {/*<span className="icon-[material-symbols--schedule-outline] text-base-content/70" />*/}
       <div
         className={cn(
-          "bg-base-150 flex items-center gap-2 rounded-lg",
+          "grid grid-cols-[1fr_auto_1fr] items-center gap-1.5",
           disabled && "opacity-50",
         )}
       >
@@ -91,6 +90,12 @@ export function TimeRange({
           className={cn(
             "icon-[material-symbols--arrow-forward] shrink-0 text-lg",
             disabled ? "text-base-content/40" : "text-base-content/50",
+          )}
+        />
+        <span
+          className={cn(
+            "icon-[material-symbols--arrow-forward] text-xl transition-colors",
+            disabled ? "text-base-content/40" : "text-base-content/60",
           )}
         />
         <TimePicker

@@ -136,7 +136,7 @@ export function Calendar({
     const day = calendar[index];
 
     return cn(
-      "my-1 flex aspect-square cursor-pointer items-center justify-center transition-colors touch-manipulation",
+      "my-0.5 flex aspect-square cursor-pointer items-center justify-center transition-colors touch-manipulation",
       isSameDay(day.date, new Date()) &&
         !day.selected &&
         "border-primary rounded-full border-2",
@@ -148,7 +148,7 @@ export function Calendar({
               ? "bg-primary/80 hover:bg-primary"
               : "bg-primary hover:bg-primary/80",
           )
-        : "hover:bg-base-300 rounded-full",
+        : "hover:bg-base-300 hover:rounded-full",
       day.selected &&
         ((index > 0 && !calendar[index - 1].selected) || index % 7 === 0) &&
         "rounded-l-full hover:rounded-l-full",
