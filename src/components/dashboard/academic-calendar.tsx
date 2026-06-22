@@ -11,14 +11,6 @@ export type AcademicCalendar = {
 
 // prettier-ignore
 export const academicCalendar: AcademicCalendar[] = [{
-    groupPrefix: "B23",
-    startDate: "2026-06-15",
-    endDate: "2026-07-27",
-    Title: () => <p>[B23] Semester Sum26: <span className="font-normal">June 15 - July 27</span></p>,
-    Details: () => <>
-      <p><span className="font-semibold">Exams:</span> July 27</p>
-    </>,
-}, {
     groupPrefix: "B24",
     startDate: "2026-06-01",
     endDate: "2026-07-30",
