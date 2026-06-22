@@ -1,5 +1,5 @@
 import { Topbar } from "@/components/layout/Topbar.tsx";
-import { CreateMeetingPage } from "@/components/when2meet/CreateMeetingPage.tsx";
+import { CreationPage } from "@/components/when2meet/CreationPage";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -14,12 +14,12 @@ function RouteComponent() {
         <title>New meeting | When2Meet</title>
         <meta
           name="description"
-          content="Create a meeting and share a link for participants to mark their availability."
+          content="Create a new meeting and find free time easily."
         />
       </Helmet>
 
       <Topbar title="When2Meet" hideOnMobile={true} />
-      <CreateMeetingPage />
+      <CreationPage />
     </>
   );
 }

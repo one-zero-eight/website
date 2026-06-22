@@ -21,7 +21,7 @@ export function MeetingItem({ meeting }: { meeting: LocalWhen2MeetEvent }) {
 
         <div className="text-base-content/70 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <div className="flex items-center gap-2">
-            <span className="icon-[mdi--account-group-outline] text-primary shrink-0 text-xl" />
+            <span className="icon-[mdi--account-group-outline] text-primary shrink-0 text-lg" />
             <span>{meeting.participantsCount ?? 0} participants</span>
           </div>
         </div>

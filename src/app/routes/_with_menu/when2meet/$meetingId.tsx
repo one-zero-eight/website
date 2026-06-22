@@ -28,7 +28,7 @@ function RouteComponent() {
         <title>{name ?? "Meeting"} | When2Meet</title>
         <meta
           name="description"
-          content="View meeting responses and mark your availability."
+          content="View meeting responses and choose the best time."
         />
       </Helmet>
 

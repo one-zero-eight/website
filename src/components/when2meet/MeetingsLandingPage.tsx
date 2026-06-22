@@ -76,7 +76,7 @@ export function MeetingsLandingPage() {
           </div>
 
           {filteredOwnedMeetings.length === 0 ? (
-            <div className="text-base-content/50 py-8 text-center text-lg">
+            <div className="text-base-content/50 py-8 text-center text-sm">
               You have not created any meetings yet.
             </div>
           ) : (
@@ -91,7 +91,7 @@ export function MeetingsLandingPage() {
         <section>
           <h2 className="mb-4 text-xl font-semibold">Participating in</h2>
           {filteredParticipatingMeetings.length === 0 ? (
-            <div className="text-base-content/50 py-8 text-center text-lg">
+            <div className="text-base-content/50 py-8 text-center text-sm">
               You are not participating in any meetings yet.
             </div>
           ) : (
