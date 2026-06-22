@@ -6,7 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { cn } from "@/lib/ui/cn";
-import type { AvailabilityType, MeetingDate, MeetingUser } from "./types.ts";
+import type { MeetingDate, MeetingUser } from "./types.ts";
 import { getSlotKey, getSlotTone, parseSlotKey } from "./utils/slots.ts";
 
 type DragMode = "add" | "remove";
@@ -35,7 +35,7 @@ function DateNavigationButton({
     >
       <span
         className={cn(
-          "text-xl",
+          "text-lg",
           direction === "prev"
             ? "icon-[material-symbols--chevron-left]"
             : "icon-[material-symbols--chevron-right]",
@@ -52,15 +52,12 @@ export function AvailabilitySelector({
   viewedUserIds,
   editingUserId,
   draftSlots,
-  draftIfNeededSlots: _draftIfNeededSlots,
   onApplySlot,
-  onAvailabilityTypeChange: _onAvailabilityTypeChange,
-  availabilityType: _availabilityType = "available",
   isPhone = false,
   allowedSlots,
   selectionOnly = false,
   hideLegend = false,
-  minParticipants = 0,
+  hideHint = false,
 }: {
   dates: MeetingDate[];
   timeSlots: string[];
@@ -68,26 +65,17 @@ export function AvailabilitySelector({
   viewedUserIds: Set<string>;
   editingUserId: string | null;
   draftSlots: Set<string>;
-  draftIfNeededSlots: Set<string>;
-  onApplySlot: (
-    dateId: string,
-    time: string,
-    mode: DragMode,
-    type: AvailabilityType,
-  ) => void;
-  onAvailabilityTypeChange?: (type: AvailabilityType) => void;
-  availabilityType?: AvailabilityType;
+  onApplySlot: (dateId: string, time: string, mode: DragMode) => void;
   isPhone?: boolean;
   allowedSlots?: Set<string>;
   selectionOnly?: boolean;
   hideLegend?: boolean;
-  minParticipants?: number;
+  hideHint?: boolean;
 }) {
   const daysPerPage = isPhone ? 3 : 7;
   const [dateOffset, setDateOffset] = useState(0);
   const isDraggingRef = useRef(false);
   const dragModeRef = useRef<DragMode>("add");
-  const dragTypeRef = useRef<AvailabilityType>("available");
   const visitedSlotsRef = useRef(new Set<string>());
   const allowedSlotsRef = useRef(allowedSlots);
   allowedSlotsRef.current = allowedSlots;
@@ -124,14 +112,6 @@ export function AvailabilitySelector({
     return draftSlots;
   }
 
-  // function getDisplayIfNeededSlots(user: MeetingUser) {
-  //   if (user.id !== editingUserId) {
-  //     return user.ifNeededSlots ?? new Set<string>();
-  //   }
-  //
-  //   return draftIfNeededSlots;
-  // }
-
   function getAvailableCount(dateId: string, time: string) {
     if (selectionOnly) {
       return 0;
@@ -143,46 +123,14 @@ export function AvailabilitySelector({
       .length;
   }
 
-  // function getIfNeededCount(dateId: string, time: string) {
-  //   if (selectionOnly) {
-  //     return 0;
-  //   }
-  //
-  //   const slotKey = getSlotKey(dateId, time);
-  //
-  //   return viewedUsers.filter(
-  //     (user) =>
-  //       getDisplayIfNeededSlots(user).has(slotKey) &&
-  //       !getDisplaySlots(user).has(slotKey),
-  //   ).length;
-  // }
-
-  function meetsMinParticipants(dateId: string, time: string) {
-    if (minParticipants <= 0 || selectionOnly) {
-      return true;
-    }
-
-    return getAvailableCount(dateId, time) >= minParticipants;
-  }
-
   function getHeatmapTone(dateId: string, time: string) {
     const availableCount = getAvailableCount(dateId, time);
 
-    if (!meetsMinParticipants(dateId, time)) {
-      return "bg-base-200/60";
-    }
-
     if (availableCount > 0) {
-      return getSlotTone(availableCount, maxCount, "available");
+      return getSlotTone(availableCount, maxCount);
     }
 
-    // if_needed heatmap is disabled for now
-    // const ifNeededCount = getIfNeededCount(dateId, time);
-    // if (ifNeededCount > 0) {
-    //   return getSlotTone(ifNeededCount, maxCount, "if_needed");
-    // }
-
-    return "bg-base-100";
+    return "bg-base-100 hover:bg-primary/10";
   }
 
   function isEditingUserSlot(dateId: string, time: string) {
@@ -192,14 +140,6 @@ export function AvailabilitySelector({
 
     return draftSlots.has(getSlotKey(dateId, time));
   }
-
-  // function isEditingUserIfNeededSlot(dateId: string, time: string) {
-  //   if (!editingUser || availabilityType !== "available" || selectionOnly) {
-  //     return false;
-  //   }
-  //
-  //   return draftIfNeededSlots.has(getSlotKey(dateId, time));
-  // }
 
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -218,15 +158,9 @@ export function AvailabilitySelector({
 
     const slotKey = getSlotKey(dateId, time);
     dragModeRef.current = draftSlots.has(slotKey) ? "remove" : "add";
-    dragTypeRef.current = "available";
     isDraggingRef.current = true;
     visitedSlotsRef.current = new Set([slotKey]);
-    onApplySlotRef.current(
-      dateId,
-      time,
-      dragModeRef.current,
-      dragTypeRef.current,
-    );
+    onApplySlotRef.current(dateId, time, dragModeRef.current);
   }
 
   const getSlotKeyFromPoint = useCallback((x: number, y: number) => {
@@ -259,12 +193,7 @@ export function AvailabilitySelector({
         return;
       }
 
-      onApplySlotRef.current(
-        dateId,
-        time,
-        dragModeRef.current,
-        dragTypeRef.current,
-      );
+      onApplySlotRef.current(dateId, time, dragModeRef.current);
     }
 
     function handlePointerUp() {
@@ -286,8 +215,8 @@ export function AvailabilitySelector({
   }, [editingUserId, getSlotKeyFromPoint]);
 
   const gridTemplateColumns = isPhone
-    ? `2.5rem repeat(${visibleDates.length}, minmax(0, 1fr))`
-    : `3rem repeat(${visibleDates.length}, minmax(0, 1fr))`;
+    ? `2.25rem repeat(${visibleDates.length}, minmax(0, 1fr))`
+    : `3.5rem repeat(${visibleDates.length}, minmax(0, 1fr))`;
 
   function handlePrevPage() {
     setDateOffset((offset) => Math.max(0, offset - 1));
@@ -303,14 +232,15 @@ export function AvailabilitySelector({
       className={cn(
         "grid w-full min-w-0 touch-manipulation select-none",
         isEditing && "touch-none",
+        !isEditing && !selectionOnly && "opacity-95",
       )}
       style={{ gridTemplateColumns }}
     >
       <div />
       {visibleDates.map((date) => (
         <div key={date.id} className="pb-2 text-center">
-          <div className="text-base-content/60 text-xs">{date.monthDay}</div>
-          <div className="text-sm font-medium">{date.weekDay}</div>
+          <div className="text-base-content/70 text-sm">{date.monthDay}</div>
+          <div className="text-base font-medium">{date.weekDay}</div>
         </div>
       ))}
 
@@ -318,7 +248,7 @@ export function AvailabilitySelector({
         <div key={time} className="contents">
           <div
             className={cn(
-              "text-base-content/60 flex h-7 items-center justify-end pr-1 text-xs",
+              "text-base-content/80 flex h-7 items-center justify-end pr-1 text-sm md:h-8 md:pr-2",
               time.endsWith(":30") && "text-transparent",
             )}
           >
@@ -329,10 +259,6 @@ export function AvailabilitySelector({
             const slotAllowed = isSlotAllowed(date.id, time);
             const availableCount = getAvailableCount(date.id, time);
             const isSelected = isEditingUserSlot(date.id, time);
-            const belowMin =
-              !selectionOnly &&
-              minParticipants > 0 &&
-              !meetsMinParticipants(date.id, time);
 
             return (
               <button
@@ -340,18 +266,17 @@ export function AvailabilitySelector({
                 type="button"
                 data-slot-key={slotKey}
                 className={cn(
-                  "border-base-300 h-7 border-t border-r border-dashed transition-colors first:border-l",
+                  "border-base-300 h-7 border-t border-r border-dashed transition-colors first:border-l md:h-8",
                   time.endsWith(":00") && "border-solid",
                   !slotAllowed &&
                     "bg-base-200/80 cursor-not-allowed opacity-40",
-                  slotAllowed && belowMin && !isEditing && "opacity-30",
                   slotAllowed &&
                     (selectionOnly
                       ? isSelected
                         ? "bg-primary text-primary-content"
                         : "bg-base-100 hover:bg-primary/10"
                       : getHeatmapTone(date.id, time)),
-                  isSelected && "ring-primary ring-2 ring-inset",
+                  isSelected && "ring-primary ring-2 ring-offset-0 ring-inset",
                   isEditing && slotAllowed
                     ? "cursor-pointer"
                     : "cursor-default",
@@ -371,12 +296,12 @@ export function AvailabilitySelector({
   return (
     <div className="w-full min-w-0">
       {showPagination && isPhone && (
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-sm">
-            {visibleDates[0]?.monthDay} –{" "}
+        <div className="mb-3 flex items-center justify-between md:hidden">
+          <div className="text-sm font-medium">
+            {visibleDates[0]?.monthDay} -{" "}
             {visibleDates[visibleDates.length - 1]?.monthDay}
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             <DateNavigationButton
               direction="prev"
               disabled={!hasPrevPage}
@@ -391,18 +316,16 @@ export function AvailabilitySelector({
         </div>
       )}
 
-      {/* If needed availability toggle is disabled for now
-      {isEditing && onAvailabilityTypeChange && !selectionOnly && (
-        <div className="mb-3 flex gap-2">
-          ...
-        </div>
+      {!isEditing && !hideHint && (
+        <p className="text-base-content/60 mb-3 text-sm">
+          Select a participant and click Edit timeslots to update availability.
+        </p>
       )}
-      */}
 
       <div className={cn("w-full min-w-0", isEditing && "touch-none")}>
         {showPagination && !isPhone ? (
           <div className="flex items-start gap-2">
-            <div className="hidden shrink-0 pt-6 md:block">
+            <div className="hidden shrink-0 pt-8 md:block">
               <DateNavigationButton
                 direction="prev"
                 disabled={!hasPrevPage}
@@ -410,7 +333,7 @@ export function AvailabilitySelector({
               />
             </div>
             <div className="min-w-0 flex-1">{gridContent}</div>
-            <div className="hidden shrink-0 pt-6 md:block">
+            <div className="hidden shrink-0 pt-8 md:block">
               <DateNavigationButton
                 direction="next"
                 disabled={!hasNextPage}
@@ -424,14 +347,15 @@ export function AvailabilitySelector({
       </div>
 
       {!hideLegend && (
-        <div className="text-base-content/60 mt-3 flex flex-wrap items-center gap-3 text-xs">
-          <div className="flex items-center gap-1.5">
-            <div className="bg-primary h-2.5 w-2.5 rounded-sm" />
-            <span>Available</span>
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="bg-primary h-3 w-3 rounded" />
+            <span className="text-base-content/70">Available</span>
           </div>
-          {minParticipants > 0 && !selectionOnly && (
-            <span>Dimmed slots have fewer than {minParticipants} people</span>
-          )}
+          <div className="flex items-center gap-2">
+            <div className="bg-base-100 border-base-300 h-3 w-3 rounded border border-dashed" />
+            <span className="text-base-content/70">Empty</span>
+          </div>
         </div>
       )}
     </div>

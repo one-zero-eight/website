@@ -190,32 +190,12 @@ export function formatSlotSummary(slots: Set<string>, dates: MeetingDate[]) {
   return `${date?.monthDay ?? dateId}, ${time} and ${slots.size - 1} more`;
 }
 
-export function getSlotTone(
-  count: number,
-  maxCount: number,
-  type: "available" | "if_needed" = "available",
-) {
+export function getSlotTone(count: number, maxCount: number) {
   if (count === 0) {
     return "bg-base-100 hover:bg-primary/10";
   }
 
   const ratio = count / maxCount;
-
-  if (type === "if_needed") {
-    if (ratio >= 1) {
-      return "bg-warning text-warning-content hover:bg-warning/90";
-    }
-
-    if (ratio >= 0.67) {
-      return "bg-warning/70 hover:bg-warning/80";
-    }
-
-    if (ratio >= 0.34) {
-      return "bg-warning/45 hover:bg-warning/55";
-    }
-
-    return "bg-warning/20 hover:bg-warning/30";
-  }
 
   if (ratio >= 1) {
     return "bg-primary text-primary-content hover:bg-primary/90";

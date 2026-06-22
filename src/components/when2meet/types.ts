@@ -8,7 +8,4 @@ export type MeetingUser = {
   id: string;
   name: string;
   slots: Set<string>;
-  ifNeededSlots?: Set<string>;
 };
-
-export type AvailabilityType = "available" | "if_needed";
