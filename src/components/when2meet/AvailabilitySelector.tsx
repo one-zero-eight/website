@@ -316,15 +316,9 @@ export function AvailabilitySelector({
         </div>
       )}
 
-      {!hideHint && !isEditing && (
+      {!isEditing && !hideHint && (
         <p className="text-base-content/60 mb-3 text-sm">
           Select a participant and click Edit timeslots to update availability.
-        </p>
-      )}
-
-      {!hideHint && isEditing && (
-        <p className="text-base-content/60 mb-3 text-sm">
-          Click timeslots on the grid to mark your availability.
         </p>
       )}
 

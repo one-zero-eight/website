@@ -31,7 +31,7 @@ export function MeetingItem({
           )}
           <div className="flex items-center gap-2">
             <span className="icon-[mdi--account-group-outline] text-primary shrink-0 text-lg" />
-            <span>{meeting.participants_count} participants</span>
+            <span>{meeting.participantsCount ?? 0} participants</span>
           </div>
         </div>
       </div>
