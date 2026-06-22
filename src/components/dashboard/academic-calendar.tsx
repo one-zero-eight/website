@@ -12,20 +12,20 @@ export type AcademicCalendar = {
 // prettier-ignore
 export const academicCalendar: AcademicCalendar[] = [{
     groupPrefix: "B23",
-    startDate: "2026-01-19",
-    endDate: "2026-05-25",
-    Title: () => <p>[B23] Semester S26: <span className="font-normal">January 19 - May 23</span></p>,
+    startDate: "2026-06-15",
+    endDate: "2026-07-27",
+    Title: () => <p>[B23] Semester Sum26: <span className="font-normal">June 15 - July 27</span></p>,
     Details: () => <>
-      <p><span className="font-semibold">Exams:</span> May 7 - May 23</p>
+      <p><span className="font-semibold">Exams:</span> July 27</p>
     </>,
 }, {
     groupPrefix: "B24",
-    startDate: "2026-01-19",
-    endDate: "2026-05-25",
-    Title: () => <p>[B24] Semester S26: <span className="font-normal">January 19 - May 23</span></p>,
+    startDate: "2026-06-01",
+    endDate: "2026-07-30",
+    Title: () => <p>[B24] Semester Sum26: <span className="font-normal">June 01 - July 30</span></p>,
     Details: () => <>
-      <p><span className="font-semibold">Exams:</span> May 7 - May 23</p>
-      <p><span className="font-semibold">Spring break:</span> May 24 - May 31</p>
+      <p><span className="font-semibold">Exams:</span> July 21 - July 30</p>
+      <p><span className="font-semibold">Summer break:</span> July 31 - August 23</p>
     </>,
 }, {
     groupPrefix: "B25-AI360",
@@ -38,21 +38,21 @@ export const academicCalendar: AcademicCalendar[] = [{
     </>,
 }, {
     groupPrefix: "B25",
-    startDate: "2026-01-19",
-    endDate: "2026-05-25",
-    Title: () => <p>[B25] Semester S26: <span className="font-normal">January 19 - May 24</span></p>,
+    startDate: "2026-06-01",
+    endDate: "2026-08-02",
+    Title: () => <p>[B25] Semester Sum26: <span className="font-normal">June 01 - August 02</span></p>,
     Details: () => <>
-      <p><span className="font-semibold">Exams:</span> May 7 - May 24</p>
-      <p><span className="font-semibold">Spring break:</span> May 25 - May 31</p>
+      <p><span className="font-semibold">Exams:</span> July 21 - August 02</p>
+      <p><span className="font-semibold">Summer break:</span> August 03 - August 30</p>
     </>,
 },{
     groupPrefix: "M25",
-    startDate: "2026-01-19",
-    endDate: "2026-05-25",
-    Title: () => <p>[M25] Semester S26: <span className="font-normal">January 19 - May 24</span></p>,
+    startDate: "2026-06-01",
+    endDate: "2026-08-02",
+    Title: () => <p>[M25] Semester Sum26: <span className="font-normal">June 01 - August 02</span></p>,
     Details: () => <>
-      <p><span className="font-semibold">Exams:</span> May 7 - May 24</p>
-      <p><span className="font-semibold">Spring break:</span> May 25 - May 31</p>
+      <p><span className="font-semibold">Exams:</span> July 21 - August 02</p>
+      <p><span className="font-semibold">Summer break:</span> August 03 - August 30</p>
     </>,
 }];
 
