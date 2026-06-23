@@ -1,3 +1,4 @@
+import { $accounts } from "@/api/accounts";
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
 import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types.ts";
@@ -24,6 +25,9 @@ type TimelineRef = {
 };
 
 const routeApi = getRouteApi("/_with_menu/room-booking/");
+
+/** Set to true to preview the Outlook-down screen without fetching bookings. */
+const showOutlookDownScreen = true;
 
 export function RoomBookingPage() {
   const search = routeApi.useSearch();
@@ -52,10 +56,9 @@ export function RoomBookingPage() {
   const { startDate, endDate } = getTimeRangeForWeek(0, 7);
 
   const { me } = useMe();
-  const { data: myAccessList } = $roomBooking.useQuery(
-    "get",
-    "/rooms/my-access-list",
-  );
+  const { isFetched: isMeFetched } = $accounts.useQuery("get", "/users/me");
+  const { data: myAccessList, isFetched: isAccessListFetched } =
+    $roomBooking.useQuery("get", "/rooms/my-access-list");
   const myAccessListRoomIds = myAccessList?.map((room) => room.id) ?? [];
 
   const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
@@ -76,10 +79,18 @@ export function RoomBookingPage() {
         myAccessListRoomIds.includes(room.id),
     ) ?? [];
 
+  const areBookingsDepsReady =
+    !isRoomsPending && !!rooms && isAccessListFetched && isMeFetched;
+
+  const bookingsQueryEnabled =
+    !showOutlookDownScreen && areBookingsDepsReady && roomsToShow.length > 0;
+
   const {
     data: rawBookings,
     isPending: isBookingsPending,
+    isFetched: isBookingsFetched,
     status: bookingsStatus,
+    error: bookingsError,
   } = $roomBooking.useQuery(
     "get",
     "/bookings/",
@@ -93,11 +104,31 @@ export function RoomBookingPage() {
       },
     },
     {
+      enabled: bookingsQueryEnabled,
       refetchInterval: 5 * T.Min,
-      retry: 3,
+      retry: (failureCount, error) => {
+        const httpCode =
+          typeof error === "object" &&
+          error !== null &&
+          "httpCode" in error &&
+          typeof error.httpCode === "number"
+            ? error.httpCode
+            : null;
+        if (httpCode !== null && (httpCode === 429 || httpCode >= 500)) {
+          return false;
+        }
+        return failureCount < 3;
+      },
       retryDelay: 3 * T.Sec,
     },
   );
+
+  const bookingsFetchFailed =
+    showOutlookDownScreen ||
+    (bookingsQueryEnabled &&
+      isBookingsFetched &&
+      bookingsStatus === "error" &&
+      !!bookingsError);
 
   const bookings = rawBookings?.map((schema) => schemaToBooking(schema));
 
@@ -105,9 +136,9 @@ export function RoomBookingPage() {
     <>
       <div className="grow overflow-hidden">
         <Suspense>
-          {bookingsStatus !== "error" ? (
+          {!bookingsFetchFailed ? (
             <BookingTimeline
-              className={`h-full ${bookingsStatus === "pending" ? "pointer-events-none select-none" : ""}`}
+              className={`h-full ${!areBookingsDepsReady || !bookingsQueryEnabled || isBookingsPending ? "pointer-events-none select-none" : ""}`}
               startDate={startDate}
               endDate={endDate}
               rooms={roomsToShow}
@@ -140,7 +171,7 @@ export function RoomBookingPage() {
                 <span className="block">
                   Our kittens are working on resolving this problem
                 </span>
-                <span className="block">₍^. .^₎⟆</span>
+                <span className="block font-sans">₍^.&nbsp;&nbsp;.^₎⟆</span>
               </p>
             </div>
           )}
