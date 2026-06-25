@@ -27,7 +27,7 @@ type TimelineRef = {
 const routeApi = getRouteApi("/_with_menu/room-booking/");
 
 /** Set to true to preview the Outlook-down screen without fetching bookings. */
-const showOutlookDownScreen = true;
+const showOutlookDownScreen = false;
 
 export function RoomBookingPage() {
   const search = routeApi.useSearch();
