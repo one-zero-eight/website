@@ -1,12 +1,15 @@
+import type { when2meetTypes } from "@/api/when2meet";
 import { Link } from "@tanstack/react-router";
-import type { LocalWhen2MeetEvent } from "./utils/local-events.ts";
 
-export function MeetingItem({ meeting }: { meeting: LocalWhen2MeetEvent }) {
+export function MeetingItem({
+  meeting,
+}: {
+  meeting: when2meetTypes.SchemaEventSummary;
+}) {
   return (
     <Link
       to="/when2meet/$meetingId"
-      params={{ meetingId: meeting.id }}
-      search={{ name: meeting.name }}
+      params={{ meetingId: meeting.slug }}
       className="card card-border bg-base-200 hover:border-primary/30 flex h-full cursor-pointer flex-col transition"
     >
       <div className="card-body flex grow flex-col gap-3 p-4">
@@ -20,9 +23,15 @@ export function MeetingItem({ meeting }: { meeting: LocalWhen2MeetEvent }) {
         </div>
 
         <div className="text-base-content/70 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          {meeting.date_range_label && (
+            <div className="flex items-center gap-2">
+              <span className="icon-[mdi--calendar-outline] text-primary shrink-0 text-lg" />
+              <span>{meeting.date_range_label}</span>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <span className="icon-[mdi--account-group-outline] text-primary shrink-0 text-lg" />
-            <span>{meeting.participantsCount ?? 0} participants</span>
+            <span>{meeting.participants_count} participants</span>
           </div>
         </div>
       </div>

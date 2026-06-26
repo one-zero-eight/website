@@ -5,7 +5,6 @@ import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { buildSlotsFromDatesAndRange } from "./utils/api-slots.ts";
-import { trackCreatedEvent } from "./utils/local-events.ts";
 import { markPendingSetup } from "./utils/setup-slots.ts";
 import { Calendar } from "./CreationModal/Calendar.tsx";
 import { TimeRange } from "./CreationModal/TimeRange.tsx";
@@ -37,7 +36,7 @@ function TimeSetupOption({
         selected && "border-primary bg-primary/5",
       )}
     >
-      <div className="card-body gap-0 p-3">
+      <div className="card-body gap-0 p-4">
         <label className="label cursor-pointer justify-start gap-3 p-0">
           <input
             type="radio"
@@ -58,7 +57,7 @@ export function CreationPage() {
   const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
   const [meetingName, setMeetingName] = useState("");
-  // const [description, setDescription] = useState("");
+  const [description, setDescription] = useState("");
   const [selectedDates, setSelectedDates] = useState<Set<string>>(new Set());
   const [timeRange, setTimeRange] = useState<TimeRangeSelection>({
     start: "09:00",
@@ -122,6 +121,12 @@ export function CreationPage() {
           name: trimmedName,
           description: description.trim() || undefined,
           slots,
+          timezone: "Europe/Moscow",
+          specific_time: isManualSlots,
+          time_range:
+            timeSetupMode === "daily_range"
+              ? { start: timeRange.start, end: timeRange.end }
+              : undefined,
         },
       },
       {
@@ -132,14 +137,8 @@ export function CreationPage() {
           }
 
           if (isManualSlots) {
-            markPendingSetup(createdEvent.id);
+            markPendingSetup(createdEvent.slug);
           }
-
-          trackCreatedEvent({
-            id: createdEvent.id,
-            name: trimmedName,
-            description: description.trim() || createdEvent.description,
-          });
 
           showSuccess(
             "Meeting created",
@@ -149,9 +148,8 @@ export function CreationPage() {
           );
           navigate({
             to: "/when2meet/$meetingId",
-            params: { meetingId: createdEvent.id },
+            params: { meetingId: createdEvent.slug },
             search: {
-              name: trimmedName,
               setupSlots: isManualSlots ? true : undefined,
             },
           });
@@ -170,11 +168,11 @@ export function CreationPage() {
         All meetings
       </Link>
 
-      <h1 className="mb-6 text-xl font-semibold">New meeting</h1>
+      <h1 className="mb-6 text-2xl font-semibold">New meeting</h1>
 
       <form
         onSubmit={handleSubmit}
-        className="bg-base-100 border-base-300 rounded-box border p-4 lg:p-6"
+        className="bg-base-100 border-base-300 rounded-box"
       >
         <div className="grid grid-cols-2 lg:flex-row">
           <Calendar
@@ -212,7 +210,7 @@ export function CreationPage() {
                   </p>
                 )}
               </label>
-              {/*<label className="mt-3 block min-w-0">
+              <label className="mt-3 block min-w-0">
                 <span className="text-sm">Description</span>
                 <textarea
                   className="textarea textarea-bordered mt-1 h-full w-full resize-none focus:outline-none"
@@ -221,9 +219,9 @@ export function CreationPage() {
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                 />
-              </label>*/}
+              </label>
               {datesError && (
-                <p className="text-error mb-3 hidden text-sm font-medium lg:block">
+                <p className="text-error my-3 hidden text-sm font-medium lg:block">
                   {datesError}
                 </p>
               )}
@@ -266,7 +264,7 @@ export function CreationPage() {
                 </div>
               </label>
             </div>
-            <footer className="flex justify-end gap-2 border-t pt-4 lg:pt-6">
+            <footer className="flex justify-end gap-2 pt-4">
               <Link to="/when2meet" className="btn btn-ghost">
                 Cancel
               </Link>

@@ -81,3 +81,11 @@ export function buildSlotsFromDatesAndRange(
 
   return slots.sort();
 }
+
+export function slotKeyToDateRange(slotKey: string, durationMinutes = 60) {
+  const backendSlot = slotKeyToBackend(slotKey);
+  const start = new Date(backendSlot);
+  const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+
+  return { start, end, scrollTimestamp: start.getTime() };
+}

@@ -11,7 +11,11 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Get My Events
+     * @description Get events owned by the authenticated user.
+     */
+    get: operations["events_get_my_events"];
     put?: never;
     /**
      * Create Event
@@ -24,7 +28,27 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/events/{event_id}": {
+  "/events/participating": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Participating Events
+     * @description Get events where the authenticated user is a participant.
+     */
+    get: operations["events_get_participating_events"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{event_ref}": {
     parameters: {
       query?: never;
       header?: never;
@@ -38,13 +62,21 @@ export interface paths {
     get: operations["events_get_event"];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Delete Event
+     * @description Delete an event (owner only).
+     */
+    delete: operations["events_delete_event"];
     options?: never;
     head?: never;
-    patch?: never;
+    /**
+     * Update Event
+     * @description Update event details (owner only).
+     */
+    patch: operations["events_update_event"];
     trace?: never;
   };
-  "/events/{event_id}/participants": {
+  "/events/{event_ref}/participants": {
     parameters: {
       query?: never;
       header?: never;
@@ -64,28 +96,30 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/events/{event_ref}/participants/{user_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Participant
+     * @description Remove a participant from an event (owner or the participant themselves).
+     */
+    delete: operations["events_delete_participant"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** Event */
-    Event: {
-      /** @description MongoDB document ObjectID */
-      id: components["schemas"]["PydanticObjectId"] | null;
-      /** Name */
-      name: string;
-      /** Description */
-      description: string | null;
-      /** Slots */
-      slots: string[];
-      /** Participants */
-      participants: components["schemas"]["Participant"][];
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at: string;
-    };
     /** EventCreate */
     EventCreate: {
       /**
@@ -103,32 +137,182 @@ export interface components {
        * @description All possible slots for the event
        */
       slots: string[];
+      /**
+       * Timezone
+       * @description IANA timezone name
+       * @default UTC
+       */
+      timezone: string;
+      /**
+       * Specific Time
+       * @description Whether the event has specific time slots
+       * @default false
+       */
+      specific_time: boolean;
+      /** @description Optional metadata for display/edit */
+      time_range?: components["schemas"]["TimeRange"] | null;
+    };
+    /** EventSummary */
+    EventSummary: {
+      /** @description Event ID */
+      id: components["schemas"]["PydanticObjectId"];
+      /**
+       * Slug
+       * @description Short URL-safe public event reference
+       */
+      slug: string;
+      /**
+       * Name
+       * @description Name of the event
+       */
+      name: string;
+      /**
+       * Description
+       * @description Description of the event
+       */
+      description?: string | null;
+      /**
+       * Created At
+       * Format: date-time
+       * @description Time when the event was created
+       */
+      created_at: string;
+      /**
+       * Participants Count
+       * @description Number of participants in the event
+       */
+      participants_count: number;
+      /**
+       * Date Range Label
+       * @description Optional; frontend can derive from slots
+       */
+      date_range_label?: string | null;
+    };
+    /** EventUpdate */
+    EventUpdate: {
+      /**
+       * Name
+       * @description Name of the event
+       */
+      name?: string | null;
+      /**
+       * Description
+       * @description Description of the event
+       */
+      description?: string | null;
+      /**
+       * Slots
+       * @description All possible slots for the event
+       */
+      slots?: string[] | null;
+      /**
+       * Timezone
+       * @description IANA timezone name
+       */
+      timezone?: string | null;
+      /**
+       * Specific Time
+       * @description Whether the event has specific time slots
+       */
+      specific_time?: boolean | null;
+      /** @description Optional metadata for display/edit */
+      time_range?: components["schemas"]["TimeRange"] | null;
+    };
+    /** EventView */
+    EventView: {
+      /** @description Event ID */
+      id: components["schemas"]["PydanticObjectId"];
+      /**
+       * Slug
+       * @description Short URL-safe public event reference
+       */
+      slug: string;
+      /**
+       * Name
+       * @description Name of the event
+       */
+      name: string;
+      /**
+       * Description
+       * @description Description of the event
+       */
+      description?: string | null;
+      /**
+       * Slots
+       * @description All possible slots for the event
+       */
+      slots: string[];
+      /**
+       * Participants
+       * @description Participants with profile data and availability
+       */
+      participants: components["schemas"]["ParticipantView"][];
+      /**
+       * Created At
+       * Format: date-time
+       * @description Time when the event was created
+       */
+      created_at: string;
+      /**
+       * Timezone
+       * @description IANA timezone name
+       * @default UTC
+       */
+      timezone: string;
+      /**
+       * Owner Id
+       * @description ID of the user who created the event
+       */
+      owner_id?: string | null;
+      /**
+       * Specific Time
+       * @description Whether the event has specific time slots
+       * @default false
+       */
+      specific_time: boolean;
+      /** @description Optional metadata for display/edit */
+      time_range?: components["schemas"]["TimeRange"] | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
-    /** Participant */
-    Participant: {
-      /**
-       * Name
-       * @description Name of the participant
-       */
-      name: string;
+    /** ParticipantUpdate */
+    ParticipantUpdate: {
       /**
        * Availability
        * @description List of slots the participant is available for
        */
       availability: string[];
     };
-    /** ParticipantUpdate */
-    ParticipantUpdate: {
+    /** ParticipantView */
+    ParticipantView: {
       /**
-       * Name
-       * @description Name of the participant
+       * User Id
+       * @description InNoHassle Accounts user ID
        */
-      name: string;
+      user_id: string;
+      /**
+       * Email
+       * @description Innopolis email
+       */
+      email?: string | null;
+      /**
+       * First Name
+       * @description Participant first name
+       */
+      first_name?: string | null;
+      /**
+       * Last Name
+       * @description Participant last name
+       */
+      last_name?: string | null;
+      /**
+       * Telegram
+       * @description Telegram @username if linked
+       */
+      telegram?: string | null;
       /**
        * Availability
        * @description List of slots the participant is available for
@@ -137,6 +321,13 @@ export interface components {
     };
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
+    /** TimeRange */
+    TimeRange: {
+      /** Start */
+      start: string;
+      /** End */
+      end: string;
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -157,17 +348,47 @@ export interface components {
   headers: never;
   pathItems: never;
 }
-export type SchemaEvent = components["schemas"]["Event"];
 export type SchemaEventCreate = components["schemas"]["EventCreate"];
+export type SchemaEventSummary = components["schemas"]["EventSummary"];
+export type SchemaEventUpdate = components["schemas"]["EventUpdate"];
+export type SchemaEventView = components["schemas"]["EventView"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
-export type SchemaParticipant = components["schemas"]["Participant"];
 export type SchemaParticipantUpdate =
   components["schemas"]["ParticipantUpdate"];
+export type SchemaParticipantView = components["schemas"]["ParticipantView"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
+export type SchemaTimeRange = components["schemas"]["TimeRange"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
+  events_get_my_events: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of events owned by the user */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventSummary"][];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   events_create_event: {
     parameters: {
       query?: never;
@@ -187,8 +408,15 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Event"];
+          "application/json": components["schemas"]["EventView"];
         };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Validation Error */
       422: {
@@ -201,12 +429,39 @@ export interface operations {
       };
     };
   };
+  events_get_participating_events: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of events where the user is a participant */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventSummary"][];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   events_get_event: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        event_id: components["schemas"]["PydanticObjectId"];
+        event_ref: string;
       };
       cookie?: never;
     };
@@ -218,8 +473,128 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Event"];
+          "application/json": components["schemas"]["EventView"];
         };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Event not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  events_delete_event: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        event_ref: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Event deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not an owner */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Event not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  events_update_event: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        event_ref: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EventUpdate"];
+      };
+    };
+    responses: {
+      /** @description Event updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventView"];
+        };
+      };
+      /** @description Participant {p.user_id} has availability at {slot} which is not in the new slots */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not an owner */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       /** @description Event not found */
       404: {
@@ -244,7 +619,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        event_id: components["schemas"]["PydanticObjectId"];
+        event_ref: string;
       };
       cookie?: never;
     };
@@ -260,7 +635,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Event"];
+          "application/json": components["schemas"]["EventView"];
         };
       };
       /** @description Invalid availability slots */
@@ -270,7 +645,67 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Event not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  events_delete_participant: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        event_ref: string;
+        user_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Participant removed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventView"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not allowed to remove this participant */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Event or participant not found */
       404: {
         headers: {
           [name: string]: unknown;

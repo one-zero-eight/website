@@ -3,18 +3,12 @@ import { $roomBooking } from "@/api/room-booking";
 import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { useToast } from "@/components/toast";
 import { Link } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { slotKeyToBackend } from "./utils/api-slots.ts";
+import { slotKeyToDateRange } from "./utils/api-slots.ts";
 import { parseSlotKey } from "./utils/slots.ts";
-
-function slotKeyToDateRange(slotKey: string) {
-  const backendSlot = slotKeyToBackend(slotKey);
-  const start = new Date(backendSlot);
-  const end = new Date(start.getTime() + 30 * 60 * 1000);
-
-  return { start, end, scrollTimestamp: start.getTime() };
-}
 
 function bookingsOverlap(
   bookingStart: string,
@@ -39,9 +33,11 @@ export function RoomSuggestionModal({
   slotKey: string | null;
   meetingName: string;
 }) {
+  const queryClient = useQueryClient();
   const { me } = useMe();
+  const { showSuccess, showError } = useToast();
   const slotRange = useMemo(
-    () => (slotKey ? slotKeyToDateRange(slotKey) : null),
+    () => (slotKey ? slotKeyToDateRange(slotKey, 30) : null),
     [slotKey],
   );
   const { dateId, time } = slotKey
@@ -103,6 +99,26 @@ export function RoomSuggestionModal({
     },
   );
 
+  const { mutate: createBooking, isPending: isBookingRoom } =
+    $roomBooking.useMutation("post", "/bookings/", {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: $roomBooking.queryOptions("get", "/bookings/").queryKey,
+        });
+        queryClient.invalidateQueries({
+          queryKey: $roomBooking.queryOptions("get", "/bookings/my").queryKey,
+        });
+        showSuccess(
+          "Room booked",
+          "Booking was created and will appear in your calendar.",
+        );
+        onOpenChange(false);
+      },
+      onError: (bookingError) => {
+        showError("Error", formatApiErrorMessage(bookingError));
+      },
+    });
+
   const availableRooms = useMemo(() => {
     if (!slotRange || !bookings) {
       return [];
@@ -131,6 +147,22 @@ export function RoomSuggestionModal({
   const error = roomsError ?? bookingsError;
 
   const slotLabel = slotKey ? `${dateId}, ${time}` : "No time selected";
+
+  function handleBookRoom(roomId: string) {
+    if (!slotRange) {
+      return;
+    }
+
+    createBooking({
+      body: {
+        room_id: roomId,
+        title: meetingName,
+        start: slotRange.start.toISOString(),
+        end: slotRange.end.toISOString(),
+        participant_emails: null,
+      },
+    });
+  }
 
   return (
     <Modal
@@ -166,14 +198,14 @@ export function RoomSuggestionModal({
           ) : (
             <div className="grid gap-2">
               {availableRooms.map((room) => (
-                <Link
+                <button
                   key={room.id}
-                  to="/room-booking/"
-                  search={{ d: slotRange?.scrollTimestamp }}
+                  type="button"
                   className="border-base-300 bg-base-100 hover:border-primary/30 rounded-box flex items-center justify-between border p-3 transition"
-                  onClick={() => onOpenChange(false)}
+                  disabled={isBookingRoom}
+                  onClick={() => handleBookRoom(room.id)}
                 >
-                  <div>
+                  <div className="text-left">
                     <div className="font-semibold">{room.title}</div>
                     {room.capacity && (
                       <div className="text-base-content/60 text-sm">
@@ -181,16 +213,20 @@ export function RoomSuggestionModal({
                       </div>
                     )}
                   </div>
-                  <span className="badge badge-primary badge-outline">
-                    Book
-                  </span>
-                </Link>
+                  {isBookingRoom ? (
+                    <span className="loading loading-spinner loading-sm" />
+                  ) : (
+                    <span className="badge badge-primary badge-outline">
+                      Book
+                    </span>
+                  )}
+                </button>
               ))}
             </div>
           )}
 
           <Link
-            to="/room-booking/"
+            to="/room-booking"
             search={{ d: slotRange?.scrollTimestamp }}
             className="btn btn-outline mt-3 w-full"
             onClick={() => onOpenChange(false)}

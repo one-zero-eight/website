@@ -1,6 +1,7 @@
 import { $events, eventsTypes } from "@/api/events";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { URLType } from "@/components/calendar/CalendarViewer.tsx";
+import { useWhen2MeetCalendarEvents } from "@/components/calendar/useWhen2MeetCalendarEvents.ts";
 import {
   getICSLink,
   getMyMoodleLink,
@@ -15,12 +16,14 @@ export function CalendarPage() {
   const { data: eventsUser } = $events.useQuery("get", "/users/me");
   const { data: eventGroups } = $events.useQuery("get", "/event-groups/");
   const { data: predefined } = $events.useQuery("get", "/users/me/predefined");
+  const when2MeetEvents = useWhen2MeetCalendarEvents();
 
   const initialWidth = useRef(window.innerWidth);
 
   return (
     <div className="grow overflow-hidden">
       <Calendar
+        extraEvents={when2MeetEvents}
         urls={
           eventsUser?.favorite_event_groups === undefined ||
           eventsUser?.hidden_event_groups === undefined ||
