@@ -4,7 +4,6 @@ export function MeetingMobileBar({
   onDelete,
   onSaveSetup,
   isDeleting,
-  isSavingSetup,
   canBookRoom,
 }: {
   onShare: () => void;
@@ -12,7 +11,6 @@ export function MeetingMobileBar({
   onDelete?: () => void;
   onSaveSetup?: () => void;
   isDeleting?: boolean;
-  isSavingSetup?: boolean;
   canBookRoom?: boolean;
 }) {
   if (onSaveSetup) {
@@ -50,6 +48,7 @@ export function MeetingMobileBar({
       <button
         type="button"
         className="btn btn-primary min-w-0 flex-1 gap-2"
+        disabled={!canBookRoom}
         onClick={onBookRoom}
       >
         <span className="icon-[mdi--door-open] text-lg" />

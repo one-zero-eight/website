@@ -85,38 +85,9 @@ export function buildSlotsFromDatesAndRange(
   return slots.sort();
 }
 
-export const FULL_DAY_TIME_RANGE = {
-  start: "00:00",
-  end: "24:00",
-} as const;
-
-export function getFullDayTimeSlots() {
-  return generateTimeSlots(FULL_DAY_TIME_RANGE.start, FULL_DAY_TIME_RANGE.end);
-}
-
-export function buildFullDaySlotsFromDates(dates: Set<string>) {
-  return buildSlotsFromDatesAndRange(
-    dates,
-    FULL_DAY_TIME_RANGE.start,
-    FULL_DAY_TIME_RANGE.end,
-  );
-}
-
-export function buildFullDaySlotKeys(dates: string[]) {
-  const slotKeys = new Set<string>();
-
-  for (const dateId of dates) {
-    for (const time of getFullDayTimeSlots()) {
-      slotKeys.add(getSlotKey(dateId, time));
-    }
-  }
-
-  return slotKeys;
-}
-
 export function slotKeyToDateRange(slotKey: string, durationMinutes = 60) {
-  const { dateId, time } = parseSlotKey(slotKey);
-  const start = new Date(`${dateId}T${time}:00${WHEN2MEET_TIMEZONE_OFFSET}`);
+  const backendSlot = slotKeyToBackend(slotKey);
+  const start = new Date(backendSlot);
   const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
 
   return { start, end, scrollTimestamp: start.getTime() };
