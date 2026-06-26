@@ -11,6 +11,7 @@ import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
 import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
 import { RoomSuggestionModal } from "./RoomSuggestionModal.tsx";
 import {
+  buildFullDaySlotKeys,
   createBackendSlotLookup,
   getFullDayTimeSlots,
   parseBackendSlots,
@@ -158,7 +159,13 @@ export function MeetingPage({
     [parsedSlots],
   );
 
-  const allowedSlots = canvasSlots;
+  const allowedSlots = useMemo(() => {
+    if (needsSetup && parsedSlots) {
+      return buildFullDaySlotKeys(parsedSlots.dates);
+    }
+
+    return canvasSlots;
+  }, [needsSetup, parsedSlots, canvasSlots]);
 
   const users = useMemo(
     () => (event ? participantsToUsers(event.participants) : []),
