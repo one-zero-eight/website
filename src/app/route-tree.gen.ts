@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
+import { Route as Find108RouteImport } from "./routes/find-108";
 import { Route as ScheduleAssistantRouteRouteImport } from "./routes/schedule-assistant/route";
 import { Route as With_menuRouteRouteImport } from "./routes/_with_menu/route";
 import { Route as IndexRouteImport } from "./routes/index";
@@ -72,6 +73,11 @@ import { Route as With_menuEventsIdEditRouteImport } from "./routes/_with_menu/e
 import { Route as With_menuClubsSlugEditRouteImport } from "./routes/_with_menu/clubs/$slug.edit";
 import { Route as GuardGoogleFilesSlugJoinRouteImport } from "./routes/guard.google.files.$slug.join";
 
+const Find108Route = Find108RouteImport.update({
+  id: "/find-108",
+  path: "/find-108",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const ScheduleAssistantRouteRoute = ScheduleAssistantRouteRouteImport.update({
   id: "/schedule-assistant",
   path: "/schedule-assistant",
@@ -404,6 +410,7 @@ const GuardGoogleFilesSlugJoinRoute =
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/schedule-assistant": typeof ScheduleAssistantRouteRouteWithChildren;
+  "/find-108": typeof Find108Route;
   "/42": typeof With_menu42Route;
   "/about": typeof With_menuAboutRoute;
   "/calendar": typeof With_menuCalendarRoute;
@@ -466,6 +473,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/find-108": typeof Find108Route;
   "/42": typeof With_menu42Route;
   "/about": typeof With_menuAboutRoute;
   "/calendar": typeof With_menuCalendarRoute;
@@ -531,6 +539,7 @@ export interface FileRoutesById {
   "/": typeof IndexRoute;
   "/_with_menu": typeof With_menuRouteRouteWithChildren;
   "/schedule-assistant": typeof ScheduleAssistantRouteRouteWithChildren;
+  "/find-108": typeof Find108Route;
   "/_with_menu/42": typeof With_menu42Route;
   "/_with_menu/about": typeof With_menuAboutRoute;
   "/_with_menu/calendar": typeof With_menuCalendarRoute;
@@ -596,6 +605,7 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/schedule-assistant"
+    | "/find-108"
     | "/42"
     | "/about"
     | "/calendar"
@@ -658,6 +668,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
+    | "/find-108"
     | "/42"
     | "/about"
     | "/calendar"
@@ -722,6 +733,7 @@ export interface FileRouteTypes {
     | "/"
     | "/_with_menu"
     | "/schedule-assistant"
+    | "/find-108"
     | "/_with_menu/42"
     | "/_with_menu/about"
     | "/_with_menu/calendar"
@@ -787,6 +799,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   With_menuRouteRoute: typeof With_menuRouteRouteWithChildren;
   ScheduleAssistantRouteRoute: typeof ScheduleAssistantRouteRouteWithChildren;
+  Find108Route: typeof Find108Route;
   FormsSubmitRoute: typeof FormsSubmitRoute;
   RoomsRoomRoute: typeof RoomsRoomRoute;
   GuardGoogleFilesSlugJoinRoute: typeof GuardGoogleFilesSlugJoinRoute;
@@ -794,6 +807,13 @@ export interface RootRouteChildren {
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/find-108": {
+      id: "/find-108";
+      path: "/find-108";
+      fullPath: "/find-108";
+      preLoaderRoute: typeof Find108RouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/schedule-assistant": {
       id: "/schedule-assistant";
       path: "/schedule-assistant";
@@ -1386,6 +1406,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   With_menuRouteRoute: With_menuRouteRouteWithChildren,
   ScheduleAssistantRouteRoute: ScheduleAssistantRouteRouteWithChildren,
+  Find108Route: Find108Route,
   FormsSubmitRoute: FormsSubmitRoute,
   RoomsRoomRoute: RoomsRoomRoute,
   GuardGoogleFilesSlugJoinRoute: GuardGoogleFilesSlugJoinRoute,
