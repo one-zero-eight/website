@@ -1,5 +1,8 @@
 import { generateTimeSlots, getSlotKey, parseSlotKey } from "./slots.ts";
 
+/** When2Meet uses Europe/Moscow wall-clock times (see CreationPage timezone field). */
+const WHEN2MEET_TIMEZONE_OFFSET = "+03:00";
+
 export function slotKeyToBackend(slotKey: string) {
   const { dateId, time } = parseSlotKey(slotKey);
   return `${dateId}T${time}:00Z`;
@@ -83,8 +86,8 @@ export function buildSlotsFromDatesAndRange(
 }
 
 export function slotKeyToDateRange(slotKey: string, durationMinutes = 60) {
-  const backendSlot = slotKeyToBackend(slotKey);
-  const start = new Date(backendSlot);
+  const { dateId, time } = parseSlotKey(slotKey);
+  const start = new Date(`${dateId}T${time}:00${WHEN2MEET_TIMEZONE_OFFSET}`);
   const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
 
   return { start, end, scrollTimestamp: start.getTime() };
