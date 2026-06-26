@@ -8,7 +8,6 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
-import { EditEventModal } from "./EditEventModal.tsx";
 import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
 import { RoomSuggestionModal } from "./RoomSuggestionModal.tsx";
 import {
@@ -25,13 +24,7 @@ import {
   formatSlotSummary,
   getSlotKey,
 } from "./utils/slots.ts";
-import {
-  clearPendingSetup,
-  clearStoredAllowedSlots,
-  getStoredAllowedSlots,
-  isPendingSetup,
-  storeAllowedSlots,
-} from "./utils/setup-slots.ts";
+import { clearPendingSetup, isPendingSetup } from "./utils/setup-slots.ts";
 
 const SETUP_USER_ID = "__setup__";
 
@@ -53,18 +46,10 @@ export function MeetingPage({
   const [draftSlots, setDraftSlots] = useState<Set<string>>(new Set());
   const [participantSearch, setParticipantSearch] = useState("");
   const [roomsOpen, setRoomsOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [storedAllowedSlotKeys, setStoredAllowedSlotKeys] =
-    useState<Set<string> | null>(() => getStoredAllowedSlots(meetingId));
 
   const eventQueryKey = $when2meet.queryOptions("get", "/events/{event_ref}", {
     params: { path: { event_ref: meetingId } },
   }).queryKey;
-
-  const needsSetup =
-    !storedAllowedSlotKeys?.size &&
-    !getStoredAllowedSlots(meetingId)?.size &&
-    (setupSlots === true || isPendingSetup(meetingId));
 
   const {
     data: event,
@@ -77,6 +62,9 @@ export function MeetingPage({
 
   const isOwner = !!me?.id && event?.owner_id === me.id;
   const currentUserId = me?.id;
+
+  const needsSetup =
+    isOwner && (setupSlots === true || isPendingSetup(meetingId));
 
   useEffect(() => {
     if (!needsSetup || !event) {
@@ -123,7 +111,6 @@ export function MeetingPage({
   const { mutate: deleteEvent, isPending: isDeletingMeeting } =
     $when2meet.useMutation("delete", "/events/{event_ref}", {
       onSuccess: () => {
-        clearStoredAllowedSlots(meetingId);
         clearPendingSetup(meetingId);
         queryClient.invalidateQueries({
           queryKey: $when2meet.queryOptions("get", "/events/").queryKey,
@@ -134,6 +121,13 @@ export function MeetingPage({
       },
       onError: (deleteError) => {
         showError("Error", formatApiErrorMessage(deleteError));
+      },
+    });
+
+  const { mutate: updateEvent, isPending: isSavingSetup } =
+    $when2meet.useMutation("patch", "/events/{event_ref}", {
+      onError: (updateError) => {
+        showError("Error", formatApiErrorMessage(updateError));
       },
     });
 
@@ -164,13 +158,7 @@ export function MeetingPage({
     [parsedSlots],
   );
 
-  const allowedSlots = useMemo(() => {
-    if (needsSetup && parsedSlots) {
-      return buildFullDaySlotKeys(parsedSlots.dates);
-    }
-
-    return canvasSlots;
-  }, [needsSetup, parsedSlots, canvasSlots]);
+  const allowedSlots = canvasSlots;
 
   const users = useMemo(
     () => (event ? participantsToUsers(event.participants) : []),
@@ -321,20 +309,33 @@ export function MeetingPage({
       return;
     }
 
-    const nextAllowedSlots = [...draftSlots];
-    storeAllowedSlots(meetingId, nextAllowedSlots);
-    clearPendingSetup(meetingId);
-    setStoredAllowedSlotKeys(new Set(nextAllowedSlots));
-    setEditingUserId(null);
-    setDraftSlots(new Set());
-    showSuccess(
-      "Timeslots saved",
-      "Participants can now add their availability.",
+    updateEvent(
+      {
+        params: { path: { event_ref: meetingId } },
+        body: {
+          slots: slotKeysToBackendSlots(draftSlots, backendSlotLookup),
+        },
+      },
+      {
+        onSuccess: () => {
+          clearPendingSetup(meetingId);
+          queryClient.invalidateQueries({ queryKey: eventQueryKey });
+          queryClient.invalidateQueries({
+            queryKey: $when2meet.queryOptions("get", "/events/").queryKey,
+          });
+          setEditingUserId(null);
+          setDraftSlots(new Set());
+          showSuccess(
+            "Timeslots saved",
+            "Participants can now add their availability.",
+          );
+          navigate({
+            to: "/when2meet/$meetingId",
+            params: { meetingId: meetingSlug },
+          });
+        },
+      },
     );
-    navigate({
-      to: "/when2meet/$meetingId",
-      params: { meetingId: meetingSlug },
-    });
   }
 
   async function handleShareLink() {
@@ -422,14 +423,16 @@ export function MeetingPage({
           <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <h1 className="text-xl font-semibold">{meetingName}</h1>
-                <button
-                  type="button"
-                  className="link link-primary text-sm font-medium"
-                  onClick={() => setEditOpen(true)}
-                >
-                  Edit event
-                </button>
+                <h1 className="text-2xl font-semibold">{meetingName}</h1>
+                {isOwner && (
+                  <Link
+                    to="/when2meet/$meetingId/edit"
+                    params={{ meetingId: meetingSlug }}
+                    className="link link-primary text-sm font-medium"
+                  >
+                    Edit event
+                  </Link>
+                )}
               </div>
               {meetingDescription && (
                 <p className="text-base-content/70 mt-2 max-w-3xl text-sm">
@@ -443,35 +446,40 @@ export function MeetingPage({
               </div>
             </div>
 
-            <div className="hidden flex-wrap gap-2 md:flex">
-              {needsSetup ? (
-                <button
-                  type="button"
-                  className="btn btn-primary gap-2"
-                  onClick={handleSaveSetup}
-                >
-                  Save timeslots
-                </button>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    className="btn btn-outline gap-2"
-                    onClick={handleShareLink}
-                  >
-                    <span className="icon-[material-symbols--share-outline] text-lg" />
-                    Share link
-                  </button>
+            {isOwner && (
+              <div className="hidden flex-wrap gap-2 md:flex">
+                {needsSetup ? (
                   <button
                     type="button"
                     className="btn btn-primary gap-2"
-                    disabled={!bestSlotKey}
-                    onClick={() => setRoomsOpen(true)}
+                    disabled={isSavingSetup}
+                    onClick={handleSaveSetup}
                   >
-                    <span className="icon-[mdi--door-open] text-lg" />
-                    Book room
+                    {isSavingSetup ? (
+                      <span className="loading loading-spinner loading-sm" />
+                    ) : (
+                      "Save timeslots"
+                    )}
                   </button>
-                  {isOwner && (
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-outline gap-2"
+                      onClick={handleShareLink}
+                    >
+                      <span className="icon-[material-symbols--share-outline] text-lg" />
+                      Share link
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary gap-2"
+                      disabled={!bestSlotKey}
+                      onClick={() => setRoomsOpen(true)}
+                    >
+                      <span className="icon-[mdi--door-open] text-lg" />
+                      Book room
+                    </button>
                     <button
                       type="button"
                       className="btn btn-outline btn-error btn-square"
@@ -484,10 +492,10 @@ export function MeetingPage({
                         <span className="icon-[material-symbols--delete-outline] text-lg" />
                       )}
                     </button>
-                  )}
-                </>
-              )}
-            </div>
+                  </>
+                )}
+              </div>
+            )}
           </section>
 
           {needsSetup && (
@@ -518,6 +526,7 @@ export function MeetingPage({
                   allowedSlots={allowedSlots}
                   selectionOnly={needsSetup}
                   hideLegend={needsSetup}
+                  hideHint={isEditingSelf || !isOwner}
                   isPhone
                 />
               </div>
@@ -533,6 +542,7 @@ export function MeetingPage({
                   allowedSlots={allowedSlots}
                   selectionOnly={needsSetup}
                   hideLegend={needsSetup}
+                  hideHint={isEditingSelf || !isOwner}
                 />
               </div>
             </div>
@@ -542,15 +552,19 @@ export function MeetingPage({
                 <div className="bg-base-100 border-base-300 rounded-box flex flex-col border p-4">
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <h2 className="text-lg font-semibold">Responses</h2>
-                    <button
-                      type="button"
-                      className="btn btn-link"
-                      onClick={() =>
-                        setViewedUserIds(new Set(users.map((user) => user.id)))
-                      }
-                    >
-                      View all
-                    </button>
+                    {users.length > 1 && (
+                      <button
+                        type="button"
+                        className="btn btn-link"
+                        onClick={() =>
+                          setViewedUserIds(
+                            new Set(users.map((user) => user.id)),
+                          )
+                        }
+                      >
+                        View all
+                      </button>
+                    )}
                   </div>
 
                   <label className="input input-bordered mb-3 w-full rounded-xl focus:outline-none">
@@ -666,34 +680,36 @@ export function MeetingPage({
                 </div>
 
                 {currentUserId && !currentUser && (
-                  <div className="bg-base-100 border-base-300 rounded-box grid gap-2 border p-4">
-                    <h2 className="text-base font-semibold">
-                      Mark your availability
-                    </h2>
-                    <p className="text-base-content/70 text-sm">
-                      You have not responded to this meeting yet.
-                    </p>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => handleStartEditing(currentUserId)}
-                    >
-                      Add my timeslots
-                    </button>
-                    {isEditingSelf && (
+                  <div>
+                    <div className="bg-base-100 border-base-300 rounded-box grid gap-2 border p-4">
+                      <h2 className="text-base font-semibold">
+                        Mark your availability
+                      </h2>
+                      <p className="text-base-content/70 text-sm">
+                        You have not responded to this meeting yet.
+                      </p>
                       <button
                         type="button"
-                        className="btn btn-outline"
+                        className="btn btn-primary"
                         disabled={isSaving}
-                        onClick={handleSaveEditing}
+                        onClick={() => {
+                          if (isEditingSelf) {
+                            handleSaveEditing();
+                            return;
+                          }
+
+                          handleStartEditing(currentUserId);
+                        }}
                       >
-                        {isSaving ? (
+                        {isEditingSelf && isSaving ? (
                           <span className="loading loading-spinner loading-sm" />
-                        ) : (
+                        ) : isEditingSelf ? (
                           "Save timeslots"
+                        ) : (
+                          "Add my timeslots"
                         )}
                       </button>
-                    )}
+                    </div>
                   </div>
                 )}
               </aside>
@@ -701,29 +717,26 @@ export function MeetingPage({
           </section>
         </div>
 
-        <MeetingMobileBar
-          onShare={handleShareLink}
-          onBookRoom={() => setRoomsOpen(true)}
-          onDelete={!needsSetup && isOwner ? handleDeleteMeeting : undefined}
-          isDeleting={isDeletingMeeting}
-          onSaveSetup={needsSetup ? handleSaveSetup : undefined}
-          canBookRoom={!!bestSlotKey}
-        />
+        {isOwner && (
+          <MeetingMobileBar
+            onShare={!needsSetup ? handleShareLink : undefined}
+            onBookRoom={!needsSetup ? () => setRoomsOpen(true) : undefined}
+            onDelete={!needsSetup ? handleDeleteMeeting : undefined}
+            isDeleting={isDeletingMeeting}
+            onSaveSetup={needsSetup ? handleSaveSetup : undefined}
+            isSavingSetup={isSavingSetup}
+            canBookRoom={!!bestSlotKey}
+          />
+        )}
 
-        <RoomSuggestionModal
-          open={roomsOpen}
-          onOpenChange={setRoomsOpen}
-          slotKey={bestSlotKey}
-          meetingName={meetingName}
-        />
-
-        <EditEventModal
-          open={editOpen}
-          onOpenChange={setEditOpen}
-          meetingName={meetingName}
-          meetingDates={parsedSlots?.dates ?? []}
-          description={event.description}
-        />
+        {isOwner && (
+          <RoomSuggestionModal
+            open={roomsOpen}
+            onOpenChange={setRoomsOpen}
+            slotKey={bestSlotKey}
+            meetingName={meetingName}
+          />
+        )}
       </>
     </RequireAuth>
   );

@@ -37,7 +37,7 @@ export function RoomSuggestionModal({
   const { me } = useMe();
   const { showSuccess, showError } = useToast();
   const slotRange = useMemo(
-    () => (slotKey ? slotKeyToDateRange(slotKey, 30) : null),
+    () => (slotKey ? slotKeyToDateRange(slotKey) : null),
     [slotKey],
   );
   const { dateId, time } = slotKey
