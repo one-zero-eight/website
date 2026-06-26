@@ -92,26 +92,26 @@ export function MeetingsLandingPage() {
             <MeetingsSearchBar search={search} onSearchChange={setSearch} />
           </div>
 
-          {filteredOwnedMeetings.length === 0 ? (
-            <div className="text-base-content/50 py-8 text-center text-sm">
-              You have not created any meetings yet.
+          <section className="mb-8">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-xl font-semibold">My meetings</h2>
+              <CreateMeetingButton className="hidden md:inline-flex">
+                Create meeting
+              </CreateMeetingButton>
             </div>
 
-        <section>
-          <h2 className="mb-4 text-xl font-semibold">Participating in</h2>
-          {filteredParticipatingMeetings.length === 0 ? (
-            <div className="text-base-content/50 py-8 text-center text-sm">
-              You are not participating in any meetings yet.
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredParticipatingMeetings.map((meeting) => (
-                <MeetingItem key={meeting.id} meeting={meeting} />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+            {isOwnedError && (
+              <div className="alert alert-error mb-4">
+                <span>{formatApiErrorMessage(ownedError)}</span>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  onClick={() => refetchOwned()}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
 
             {isPending ? (
               <MeetingsSkeletonGrid />
