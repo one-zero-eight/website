@@ -13,7 +13,10 @@ import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { buildSlotsFromDatesAndRange } from "./utils/api-slots.ts";
+import {
+  buildFullDaySlotsFromDates,
+  buildSlotsFromDatesAndRange,
+} from "./utils/api-slots.ts";
 import { markPendingSetup } from "./utils/setup-slots.ts";
 import { Calendar } from "./CreationModal/Calendar.tsx";
 import { TimeRange } from "./CreationModal/TimeRange.tsx";
@@ -212,13 +215,15 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
       return;
     }
 
-    const slots = buildSlotsFromDatesAndRange(
-      selectedDates,
-      timeRange.start,
-      timeRange.end,
-    );
-
     const isManualSlots = timeSetupMode === "manual_slots";
+
+    const slots = isManualSlots
+      ? buildFullDaySlotsFromDates(selectedDates)
+      : buildSlotsFromDatesAndRange(
+          selectedDates,
+          timeRange.start,
+          timeRange.end,
+        );
 
     createEvent(
       {
