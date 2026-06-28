@@ -69,6 +69,11 @@ apis:
     x-openapi-ts:
       output: ./src/api/tabletennis/types.ts
       #  --root-types --enum
+  board-games:
+    root: http://localhost:8016/openapi.json
+    x-openapi-ts:
+      output: ./src/api/board-games/types.ts
+      #  --root-types --enum
   sport:
     root: https://sport.innopolis.university/api/openapi.json
     x-openapi-ts:

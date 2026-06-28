@@ -43,6 +43,7 @@ import { Route as With_menuMusicRoomIndexRouteImport } from "./routes/_with_menu
 import { Route as With_menuGuardIndexRouteImport } from "./routes/_with_menu/guard/index";
 import { Route as With_menuEventsIndexRouteImport } from "./routes/_with_menu/events/index";
 import { Route as With_menuClubsIndexRouteImport } from "./routes/_with_menu/clubs/index";
+import { Route as With_menuBoardGamesIndexRouteImport } from "./routes/_with_menu/board-games/index";
 import { Route as With_menuAccountIndexRouteImport } from "./routes/_with_menu/account/index";
 import { Route as ScheduleAssistantSettingsSettingsTabRouteImport } from "./routes/schedule-assistant/settings/$settingsTab";
 import { Route as With_menuWhen2meetNewRouteImport } from "./routes/_with_menu/when2meet/new";
@@ -257,6 +258,12 @@ const With_menuClubsIndexRoute = With_menuClubsIndexRouteImport.update({
   path: "/clubs/",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuBoardGamesIndexRoute =
+  With_menuBoardGamesIndexRouteImport.update({
+    id: "/board-games/",
+    path: "/board-games/",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
 const With_menuAccountIndexRoute = With_menuAccountIndexRouteImport.update({
   id: "/account/",
   path: "/account/",
@@ -522,6 +529,7 @@ export interface FileRoutesByFullPath {
   "/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
   "/account/": typeof With_menuAccountIndexRoute;
+  "/board-games/": typeof With_menuBoardGamesIndexRoute;
   "/clubs/": typeof With_menuClubsIndexRoute;
   "/events/": typeof With_menuEventsIndexRoute;
   "/guard/": typeof With_menuGuardIndexRoute;
@@ -595,6 +603,7 @@ export interface FileRoutesByTo {
   "/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
   "/account": typeof With_menuAccountIndexRoute;
+  "/board-games": typeof With_menuBoardGamesIndexRoute;
   "/clubs": typeof With_menuClubsIndexRoute;
   "/events": typeof With_menuEventsIndexRoute;
   "/guard": typeof With_menuGuardIndexRoute;
@@ -671,6 +680,7 @@ export interface FileRoutesById {
   "/_with_menu/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
   "/_with_menu/account/": typeof With_menuAccountIndexRoute;
+  "/_with_menu/board-games/": typeof With_menuBoardGamesIndexRoute;
   "/_with_menu/clubs/": typeof With_menuClubsIndexRoute;
   "/_with_menu/events/": typeof With_menuEventsIndexRoute;
   "/_with_menu/guard/": typeof With_menuGuardIndexRoute;
@@ -747,6 +757,7 @@ export interface FileRouteTypes {
     | "/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
     | "/account/"
+    | "/board-games/"
     | "/clubs/"
     | "/events/"
     | "/guard/"
@@ -820,6 +831,7 @@ export interface FileRouteTypes {
     | "/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
     | "/account"
+    | "/board-games"
     | "/clubs"
     | "/events"
     | "/guard"
@@ -895,6 +907,7 @@ export interface FileRouteTypes {
     | "/_with_menu/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
     | "/_with_menu/account/"
+    | "/_with_menu/board-games/"
     | "/_with_menu/clubs/"
     | "/_with_menu/events/"
     | "/_with_menu/guard/"
@@ -1167,6 +1180,13 @@ declare module "@tanstack/react-router" {
       path: "/clubs";
       fullPath: "/clubs/";
       preLoaderRoute: typeof With_menuClubsIndexRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/board-games/": {
+      id: "/_with_menu/board-games/";
+      path: "/board-games";
+      fullPath: "/board-games/";
+      preLoaderRoute: typeof With_menuBoardGamesIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/account/": {
@@ -1487,6 +1507,7 @@ interface With_menuRouteRouteChildren {
   With_menuTabletennisTournamentsRoute: typeof With_menuTabletennisTournamentsRoute;
   With_menuWhen2meetNewRoute: typeof With_menuWhen2meetNewRoute;
   With_menuAccountIndexRoute: typeof With_menuAccountIndexRoute;
+  With_menuBoardGamesIndexRoute: typeof With_menuBoardGamesIndexRoute;
   With_menuClubsIndexRoute: typeof With_menuClubsIndexRoute;
   With_menuEventsIndexRoute: typeof With_menuEventsIndexRoute;
   With_menuGuardIndexRoute: typeof With_menuGuardIndexRoute;
@@ -1551,6 +1572,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuTabletennisTournamentsRoute: With_menuTabletennisTournamentsRoute,
   With_menuWhen2meetNewRoute: With_menuWhen2meetNewRoute,
   With_menuAccountIndexRoute: With_menuAccountIndexRoute,
+  With_menuBoardGamesIndexRoute: With_menuBoardGamesIndexRoute,
   With_menuClubsIndexRoute: With_menuClubsIndexRoute,
   With_menuEventsIndexRoute: With_menuEventsIndexRoute,
   With_menuGuardIndexRoute: With_menuGuardIndexRoute,
