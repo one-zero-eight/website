@@ -1,4 +1,5 @@
 export const EVENTS_API_URL = import.meta.env.VITE_EVENTS_API_URL!;
+export const WORKSHOPS_API_URL = import.meta.env.VITE_WORKSHOPS_API_URL!;
 
 export function getICSLink(
   groupAlias: string,
@@ -12,6 +13,10 @@ export function getICSLink(
 
 export function getMusicRoomLink() {
   return `${EVENTS_API_URL}/music-room.ics`;
+}
+
+export function getWorkshopsLink() {
+  return `${WORKSHOPS_API_URL}/workshops.ics`;
 }
 
 export function getMyMusicRoomLink() {
