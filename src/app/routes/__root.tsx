@@ -1,6 +1,6 @@
 import { AutoSignIn } from "@/api/accounts/sign-in.tsx";
 import { BottomNavigation } from "@/components/layout/BottomNavigation.tsx";
-import OfflineNotification from "@/components/layout/Offline.tsx";
+import { ConnectivityNotification } from "@/components/layout/Offline.tsx";
 import Sidebar from "@/components/layout/Sidebar.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import {
@@ -93,7 +93,7 @@ function RouteComponent() {
         <link rel="canonical" href={canonical} />
       </Helmet>
 
-      <OfflineNotification />
+      <ConnectivityNotification />
       <AutoSignIn />
       <Outlet />
     </>
