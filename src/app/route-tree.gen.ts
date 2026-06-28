@@ -34,6 +34,7 @@ import { Route as With_menuAboutRouteImport } from "./routes/_with_menu/about";
 import { Route as With_menu42RouteImport } from "./routes/_with_menu/42";
 import { Route as ScheduleAssistantSettingsIndexRouteImport } from "./routes/schedule-assistant/settings/index";
 import { Route as With_menuWhen2meetIndexRouteImport } from "./routes/_with_menu/when2meet/index";
+import { Route as With_menuTabletennisIndexRouteImport } from "./routes/_with_menu/tabletennis/index";
 import { Route as With_menuStudentAffairsIndexRouteImport } from "./routes/_with_menu/student-affairs/index";
 import { Route as With_menuSearchIndexRouteImport } from "./routes/_with_menu/search/index";
 import { Route as With_menuScheduleIndexRouteImport } from "./routes/_with_menu/schedule/index";
@@ -198,6 +199,12 @@ const With_menuWhen2meetIndexRoute = With_menuWhen2meetIndexRouteImport.update({
   path: "/when2meet/",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuTabletennisIndexRoute =
+  With_menuTabletennisIndexRouteImport.update({
+    id: "/tabletennis/",
+    path: "/tabletennis/",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
 const With_menuStudentAffairsIndexRoute =
   With_menuStudentAffairsIndexRouteImport.update({
     id: "/student-affairs/",
@@ -451,6 +458,7 @@ export interface FileRoutesByFullPath {
   "/schedule/": typeof With_menuScheduleIndexRoute;
   "/search/": typeof With_menuSearchIndexRoute;
   "/student-affairs/": typeof With_menuStudentAffairsIndexRoute;
+  "/tabletennis/": typeof With_menuTabletennisIndexRoute;
   "/when2meet/": typeof With_menuWhen2meetIndexRoute;
   "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
@@ -513,6 +521,7 @@ export interface FileRoutesByTo {
   "/schedule": typeof With_menuScheduleIndexRoute;
   "/search": typeof With_menuSearchIndexRoute;
   "/student-affairs": typeof With_menuStudentAffairsIndexRoute;
+  "/tabletennis": typeof With_menuTabletennisIndexRoute;
   "/when2meet": typeof With_menuWhen2meetIndexRoute;
   "/schedule-assistant/settings": typeof ScheduleAssistantSettingsIndexRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
@@ -578,6 +587,7 @@ export interface FileRoutesById {
   "/_with_menu/schedule/": typeof With_menuScheduleIndexRoute;
   "/_with_menu/search/": typeof With_menuSearchIndexRoute;
   "/_with_menu/student-affairs/": typeof With_menuStudentAffairsIndexRoute;
+  "/_with_menu/tabletennis/": typeof With_menuTabletennisIndexRoute;
   "/_with_menu/when2meet/": typeof With_menuWhen2meetIndexRoute;
   "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/_with_menu/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
@@ -643,6 +653,7 @@ export interface FileRouteTypes {
     | "/schedule/"
     | "/search/"
     | "/student-affairs/"
+    | "/tabletennis/"
     | "/when2meet/"
     | "/schedule-assistant/settings/"
     | "/clubs/$slug/edit"
@@ -705,6 +716,7 @@ export interface FileRouteTypes {
     | "/schedule"
     | "/search"
     | "/student-affairs"
+    | "/tabletennis"
     | "/when2meet"
     | "/schedule-assistant/settings"
     | "/clubs/$slug/edit"
@@ -769,6 +781,7 @@ export interface FileRouteTypes {
     | "/_with_menu/schedule/"
     | "/_with_menu/search/"
     | "/_with_menu/student-affairs/"
+    | "/_with_menu/tabletennis/"
     | "/_with_menu/when2meet/"
     | "/schedule-assistant/settings/"
     | "/_with_menu/clubs/$slug/edit"
@@ -967,6 +980,13 @@ declare module "@tanstack/react-router" {
       path: "/when2meet";
       fullPath: "/when2meet/";
       preLoaderRoute: typeof With_menuWhen2meetIndexRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/tabletennis/": {
+      id: "/_with_menu/tabletennis/";
+      path: "/tabletennis";
+      fullPath: "/tabletennis/";
+      preLoaderRoute: typeof With_menuTabletennisIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/student-affairs/": {
@@ -1291,6 +1311,7 @@ interface With_menuRouteRouteChildren {
   With_menuScheduleIndexRoute: typeof With_menuScheduleIndexRoute;
   With_menuSearchIndexRoute: typeof With_menuSearchIndexRoute;
   With_menuStudentAffairsIndexRoute: typeof With_menuStudentAffairsIndexRoute;
+  With_menuTabletennisIndexRoute: typeof With_menuTabletennisIndexRoute;
   With_menuWhen2meetIndexRoute: typeof With_menuWhen2meetIndexRoute;
   With_menuClubsSlugEditRoute: typeof With_menuClubsSlugEditRoute;
   With_menuEventsIdEditRoute: typeof With_menuEventsIdEditRoute;
@@ -1344,6 +1365,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuScheduleIndexRoute: With_menuScheduleIndexRoute,
   With_menuSearchIndexRoute: With_menuSearchIndexRoute,
   With_menuStudentAffairsIndexRoute: With_menuStudentAffairsIndexRoute,
+  With_menuTabletennisIndexRoute: With_menuTabletennisIndexRoute,
   With_menuWhen2meetIndexRoute: With_menuWhen2meetIndexRoute,
   With_menuClubsSlugEditRoute: With_menuClubsSlugEditRoute,
   With_menuEventsIdEditRoute: With_menuEventsIdEditRoute,
