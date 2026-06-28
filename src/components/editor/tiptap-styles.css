@@ -1,0 +1,166 @@
+@reference '../../app/styles.css';
+
+.tiptap {
+  @apply focus:outline-none;
+
+  /* Use Tailwind Typography for styling: https://github.com/tailwindlabs/tailwindcss-typography */
+  @apply prose dark:prose-invert prose-headings:my-0 prose-h1:text-3xl prose-quoteless prose-pre:bg-base-200 prose-pre:text-base-content prose-blockquote:border-l-primary prose-a:text-primary prose-a:underline max-w-none;
+
+  /* Change color of selection */
+  ::selection {
+    @apply bg-primary/30;
+  }
+
+  /* Placeholder. Show on each empty line */
+  .is-empty::before {
+    content: attr(data-placeholder);
+    color: var(--color-base-content);
+    opacity: 0.3;
+    float: left;
+    height: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    font-style: italic;
+  }
+  /* Show placeholder only in leaf nodes */
+  .is-empty:has(.is-empty)::before {
+    content: unset;
+  }
+
+  /* Toggle/Details/Collapsible styling */
+  [data-type="details"] {
+    @apply rounded-field my-0 flex p-0;
+
+    summary {
+      /* We use custom button for showing/hiding, hide browser's icon */
+      @apply marker:content-[""];
+    }
+
+    & > button {
+      @apply btn btn-square btn-xs btn-ghost mr-1 p-0 text-3xl;
+      &:before {
+        @apply icon-[material-symbols--arrow-right] text-base-content text-4xl transition-transform content-[""];
+      }
+    }
+    &.is-open > button:before {
+      @apply rotate-90;
+    }
+  }
+
+  /* Table styling */
+  table {
+    @apply rounded-field my-4 w-full table-fixed overflow-hidden;
+
+    tbody {
+      @apply border-base-300 rounded-field border-collapse border;
+    }
+
+    td,
+    th {
+      @apply border-base-300 relative min-w-[100px] border px-4 py-2 align-top;
+      & > * {
+        @apply mb-0;
+      }
+    }
+
+    th {
+      @apply bg-base-200 font-semibold;
+    }
+
+    .selectedCell:after {
+      @apply bg-primary/5 pointer-events-none absolute inset-0 content-[""];
+      z-index: 2;
+    }
+
+    .column-resize-handle {
+      @apply bg-primary;
+      bottom: -2px;
+      pointer-events: none;
+      position: absolute;
+      right: -2px;
+      top: 0;
+      width: 4px;
+    }
+  }
+
+  .tableWrapper {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  &.resize-cursor {
+    cursor: ew-resize;
+  }
+
+  /* Image with caption styling */
+  figure.image-with-caption {
+    @apply my-4 flex flex-col gap-2;
+
+    img {
+      @apply rounded-field bg-base-200 m-0 block h-auto max-w-full;
+    }
+
+    figcaption {
+      @apply text-base-content/70 px-2 py-1 text-center text-sm outline-none;
+
+      &.is-empty::before {
+        content: attr(data-placeholder);
+        @apply text-base-content/30 italic;
+      }
+
+      &:focus {
+        @apply ring-primary rounded-sm ring-1;
+      }
+    }
+
+    /* Image resize handles styling */
+    [data-resize-container] {
+      @apply inline-block;
+
+      &[data-resize-state="true"] {
+        touch-action: none;
+      }
+
+      [data-resize-wrapper] {
+        @apply relative inline-block;
+      }
+
+      [data-resize-handle] {
+        @apply bg-primary border-base-100/50 absolute z-10 cursor-ew-resize rounded border-2;
+        pointer-events: all;
+        touch-action: none;
+        transition: opacity 0.2s;
+        opacity: 0;
+
+        &[data-resize-handle="left"] {
+          @apply top-1/2! -left-1! h-8 w-3 -translate-y-1/2;
+        }
+
+        &[data-resize-handle="right"] {
+          @apply top-1/2! -right-1! h-8 w-3 -translate-y-1/2;
+        }
+      }
+
+      /* Show handles on hover or while resizing */
+      &:hover [data-resize-handle],
+      &[data-resize-state="true"] [data-resize-handle] {
+        @apply opacity-100;
+      }
+
+      /* Show handles when image is selected (ProseMirror adds .ProseMirror-selectednode) */
+      &.ProseMirror-selectednode [data-resize-handle],
+      &:has(.ProseMirror-selectednode) [data-resize-handle] {
+        @apply opacity-100;
+      }
+    }
+
+    &.tiptap-readonly [data-resize-handle] {
+      @apply hidden;
+    }
+  }
+
+  /* Highlight/Mark styling */
+  mark {
+    @apply rounded-sm bg-(--mark-color) px-1.5 py-0.5 text-inherit dark:bg-(--mark-color-dark);
+  }
+}

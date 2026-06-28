@@ -9,7 +9,8 @@ export const authMiddleware: Middleware = {
     // Check the requested URL to add token only to our API
     if (
       !request.url.startsWith("https://api.innohassle.ru/") &&
-      !request.url.startsWith("http://localhost")
+      !request.url.startsWith("http://localhost") &&
+      !request.url.startsWith("https://local.innohassle.ru:3000/")
     )
       return;
 
@@ -25,7 +26,8 @@ export const authMiddleware: Middleware = {
     // Check the final URL to ensure we are handling only our API
     if (
       !response.url.startsWith("https://api.innohassle.ru/") &&
-      !response.url.startsWith("http://localhost")
+      !response.url.startsWith("http://localhost") &&
+      !response.url.startsWith("https://local.innohassle.ru:3000/")
     )
       return;
 

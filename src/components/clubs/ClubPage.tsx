@@ -1,6 +1,8 @@
 import { $clubs } from "@/api/clubs";
+import { getDescriptionImageUrl } from "@/api/clubs/links.ts";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 import {
@@ -96,13 +98,14 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
                 <span className="icon-[material-symbols--article-outline-rounded] size-6" />
                 About
               </h2>
-              {club.description ? (
-                <p className="text-base-content/50">{club.description}</p>
-              ) : (
-                <p className="text-base-content/50 italic">
-                  No detailed description yet.
-                </p>
-              )}
+
+              <div className="-mx-6 -mb-6">
+                <DescriptionViewer
+                  className="px-6 pb-6"
+                  content={club.description}
+                  imageHandlers={{ resolveImageUrl: getDescriptionImageUrl }}
+                />
+              </div>
             </div>
           </div>
 

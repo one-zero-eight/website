@@ -4,6 +4,46 @@
  */
 
 export interface paths {
+  "/users/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Me
+     * @description Get current user's information with related clubs if authenticated.
+     */
+    get: operations["get_me_users_me_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/change_role": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Change Role
+     * @description Change role of user by email.
+     */
+    post: operations["change_role_users_change_role_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/clubs/": {
     parameters: {
       query?: never;
@@ -104,7 +144,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/users/me": {
+  "/clubs/description-images/{image_id}": {
     parameters: {
       query?: never;
       header?: never;
@@ -112,10 +152,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Me
-     * @description Get current user's information with related clubs if authenticated.
+     * Get Description Image
+     * @description Get a club description image.
      */
-    get: operations["get_me_users_me_get"];
+    get: operations["get_description_image_clubs_description_images__image_id__get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -124,7 +164,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/users/change_role": {
+  "/clubs/by-id/{id}/description-images": {
     parameters: {
       query?: never;
       header?: never;
@@ -134,10 +174,10 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Change Role
-     * @description Change role of user by email.
+     * Upload Description Image
+     * @description Upload an image for use in club description.
      */
-    post: operations["change_role_users_change_role_post"];
+    post: operations["upload_description_image_clubs_by_id__id__description_images_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -210,20 +250,18 @@ export interface components {
   schemas: {
     /** Body_set_club_logo_clubs_by_id__id__logo_post */
     Body_set_club_logo_clubs_by_id__id__logo_post: {
-      /**
-       * Logo File
-       * Format: binary
-       */
+      /** Logo File */
       logo_file: string;
+    };
+    /** Body_upload_description_image_clubs_by_id__id__description_images_post */
+    Body_upload_description_image_clubs_by_id__id__description_images_post: {
+      /** Image File */
+      image_file: string;
     };
     /** Club */
     Club: {
-      /**
-       * Format: objectid
-       * @description MongoDB document ObjectID
-       * @example 5eb7cf5a86d9755df3a6c593
-       */
-      id: string;
+      /** @description MongoDB document ObjectID */
+      id: components["schemas"]["PydanticObjectId"] | null;
       /**
        * Is Active
        * @description False if the club is closed
@@ -328,6 +366,14 @@ export interface components {
        * @description ID of sport type in InnoSport system (None if the club is not sport)
        */
       sport_id?: string | null;
+    };
+    /** DescriptionImageUploadResponse */
+    DescriptionImageUploadResponse: {
+      /**
+       * Image Id
+       * @description File ID to reference in club description
+       */
+      image_id: string;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -459,6 +505,10 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
     };
   };
   responses: never;
@@ -469,8 +519,12 @@ export interface components {
 }
 export type SchemaBodySetClubLogoClubsByIdIdLogoPost =
   components["schemas"]["Body_set_club_logo_clubs_by_id__id__logo_post"];
+export type SchemaBodyUploadDescriptionImageClubsByIdIdDescriptionImagesPost =
+  components["schemas"]["Body_upload_description_image_clubs_by_id__id__description_images_post"];
 export type SchemaClub = components["schemas"]["Club"];
 export type SchemaCreateClub = components["schemas"]["CreateClub"];
+export type SchemaDescriptionImageUploadResponse =
+  components["schemas"]["DescriptionImageUploadResponse"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaLeader = components["schemas"]["Leader"];
@@ -481,6 +535,86 @@ export type SchemaUserWithClubs = components["schemas"]["UserWithClubs"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
+  get_me_users_me_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current user info */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UserWithClubs"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  change_role_users_change_role_post: {
+    parameters: {
+      query: {
+        role: components["schemas"]["UserRole"];
+        user_to_change_email: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Role changed successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only superadmins can change role */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description User not found in InNoHassle Accounts */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   get_clubs_list_clubs__get: {
     parameters: {
       query?: never;
@@ -779,21 +913,12 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
-        id: string;
+        id: components["schemas"]["PydanticObjectId"];
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
       /** @description Redirect to the club logo */
       307: {
         headers: {
@@ -875,69 +1000,81 @@ export interface operations {
       };
     };
   };
-  get_me_users_me_get: {
+  get_description_image_clubs_description_images__image_id__get: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        image_id: string;
+      };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description Current user info */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UserWithClubs"];
-        };
-      };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
+      /** @description Redirect to the description image */
+      307: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Image not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
     };
   };
-  change_role_users_change_role_post: {
+  upload_description_image_clubs_by_id__id__description_images_post: {
     parameters: {
-      query: {
-        role: components["schemas"]["UserRole"];
-        user_to_change_email: string;
-      };
+      query?: never;
       header?: never;
-      path?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_upload_description_image_clubs_by_id__id__description_images_post"];
+      };
+    };
     responses: {
-      /** @description Role changed successfully */
+      /** @description Description image uploaded successfully */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": unknown;
+          "application/json": components["schemas"]["DescriptionImageUploadResponse"];
         };
       };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
+      /** @description Invalid content type */
+      400: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Only superadmins can change role */
+      /** @description Only club leader or admin can upload description images */
       403: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description User not found in InNoHassle Accounts */
+      /** @description Club not found */
       404: {
         headers: {
           [name: string]: unknown;

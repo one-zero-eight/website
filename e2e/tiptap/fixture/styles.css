@@ -1,0 +1,2 @@
+@import "@/app/styles.css";
+@source "../../../src/**/*.{ts,tsx,vue}";

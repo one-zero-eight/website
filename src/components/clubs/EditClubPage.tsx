@@ -1,12 +1,18 @@
 import { $clubs, clubsTypes } from "@/api/clubs";
+import { getDescriptionImageUrl } from "@/api/clubs/links.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { ClubLogo } from "@/components/clubs/ClubLogo.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/ui/cn";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Link, useBlocker, useNavigate } from "@tanstack/react-router";
 import { getClubTypeLabel } from "./constants.ts";
+import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
+import { DescriptionEditor } from "@/components/editor/DescriptionEditor.tsx";
+import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
+import type { EditorImageHandlers } from "@/components/editor/types";
+import { Modal } from "@/components/common/Modal.tsx";
 
 export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const navigate = useNavigate();
@@ -24,7 +30,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
   const [shortDescription, setShortDescription] = useState("");
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState<any>(null); // JSON object
   const [isActive, setIsActive] = useState(true);
   const [type, setType] = useState<clubsTypes.ClubType>(
     clubsTypes.ClubType.tech,
@@ -36,6 +42,8 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const [links, setLinks] = useState<clubsTypes.SchemaLinkSchema[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const editorRef = useRef<TiptapEditorRef | null>(null);
 
   // Track initial form state to detect changes
   const initialFormStateRef = useRef<{
@@ -66,7 +74,19 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       setSlug(club.slug);
       setTitle(club.title);
       setShortDescription(club.short_description);
-      setDescription(club.description);
+      // Parse description JSON if it's a string, otherwise use as-is
+      try {
+        const parsedDescription =
+          typeof club.description === "string"
+            ? club.description
+              ? JSON.parse(club.description)
+              : null
+            : club.description;
+        setDescription(parsedDescription);
+      } catch {
+        // If parsing fails, treat as empty
+        setDescription(null);
+      }
       setIsActive(club.is_active);
       setType(club.type);
       setIsSport(!!club.sport_id);
@@ -84,11 +104,24 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   // Initialize initial form state after club data is loaded
   useEffect(() => {
     if (club) {
+      // Parse description JSON if it's a string, otherwise use as-is
+      let parsedDescription: any = null;
+      try {
+        parsedDescription =
+          typeof club.description === "string"
+            ? club.description
+              ? JSON.parse(club.description)
+              : null
+            : club.description;
+      } catch {
+        parsedDescription = null;
+      }
+
       initialFormStateRef.current = {
         slug: club.slug,
         title: club.title,
         shortDescription: club.short_description,
-        description: club.description,
+        description: parsedDescription,
         isActive: club.is_active,
         type: club.type,
         leaderEmail: clubLeader?.email || leaderEmail || "",
@@ -103,12 +136,15 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const hasUnsavedChanges = useCallback(() => {
     if (!initialFormStateRef.current) return false;
 
+    const initialDescriptionJSON = initialFormStateRef.current.description;
+    const currentDescriptionJSON = editorRef.current?.getJSON() || null;
+
     const initial = initialFormStateRef.current;
     const current = {
       slug,
       title,
       shortDescription,
-      description,
+      description: currentDescriptionJSON,
       isActive,
       type,
       leaderEmail,
@@ -121,7 +157,8 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       initial.slug !== current.slug ||
       initial.title !== current.title ||
       initial.shortDescription !== current.shortDescription ||
-      initial.description !== current.description ||
+      JSON.stringify(initialDescriptionJSON) !==
+        JSON.stringify(currentDescriptionJSON) ||
       initial.isActive !== current.isActive ||
       initial.type !== current.type ||
       initial.leaderEmail !== current.leaderEmail ||
@@ -134,7 +171,6 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     slug,
     title,
     shortDescription,
-    description,
     isActive,
     type,
     leaderEmail,
@@ -175,11 +211,13 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         });
         // Reset initial form state after successful save
         if (club) {
+          const currentDescriptionJSON = editorRef.current?.getJSON() || null;
+          setDescription(currentDescriptionJSON); // Sync ref to state
           initialFormStateRef.current = {
             slug,
             title,
             shortDescription,
-            description,
+            description: currentDescriptionJSON,
             isActive,
             type,
             leaderEmail: clubLeader?.email || leaderEmail || "",
@@ -222,6 +260,35 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     },
   );
 
+  const { mutateAsync: uploadDescriptionImage } = $clubs.useMutation(
+    "post",
+    "/clubs/by-id/{id}/description-images",
+  );
+
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const descriptionImageHandlers = useMemo(():
+    | EditorImageHandlers
+    | undefined => {
+    if (!club?.id) {
+      return undefined;
+    }
+
+    return {
+      resolveImageUrl: getDescriptionImageUrl,
+      uploadImage: async (file: File) => {
+        const formData = new FormData();
+        formData.append("image_file", file);
+
+        const response = await uploadDescriptionImage({
+          params: { path: { id: club.id! } },
+          body: formData as any,
+        });
+
+        return response.image_id;
+      },
+    };
+  }, [club?.id, uploadDescriptionImage]);
+
   const { data: eventsUser } = $clubs.useQuery("get", "/users/me");
 
   useEffect(() => {
@@ -237,18 +304,23 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Convert to JSON string for API
+    const descriptionJSON = editorRef.current?.getJSON() || null;
+    const descriptionString = descriptionJSON
+      ? JSON.stringify(descriptionJSON)
+      : "";
+
     const updateData: clubsTypes.SchemaUpdateClub = {
       ...club,
       slug,
       title,
       short_description: shortDescription,
-      description,
+      description: descriptionString,
       is_active: isActive,
       type,
       sport_id: isSport ? sportId || null : null,
       links: links.length > 0 ? links : undefined,
     };
-    console.log(showChangeLeader, leaderEmail, clubLeader?.email);
     if (showChangeLeader && leaderEmail && leaderEmail !== clubLeader?.email) {
       updateData.new_leader_email = leaderEmail;
     }
@@ -541,20 +613,33 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 placeholder="Brief description for cards"
               />
             </div>
+          </div>
+        </div>
 
-            {/* Description */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text text-base-content font-medium">
-                  Full Description
-                </span>
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={8}
-                className="textarea textarea-bordered w-full"
-                placeholder="Detailed description of the club"
+        {/* Description */}
+        <div className="card card-border">
+          <div className="card-body">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="card-title">
+                <span className="icon-[material-symbols--article-outline-rounded] size-6" />
+                About
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowPreview(true)}
+                className="btn btn-outline btn-primary btn-sm"
+              >
+                <span className="icon-[mdi--eye] size-5" />
+                Preview
+              </button>
+            </div>
+
+            <div className="-mx-6 -mb-6">
+              <DescriptionEditor
+                ref={editorRef}
+                className="px-6 pb-6"
+                initialContent={description}
+                imageHandlers={descriptionImageHandlers}
               />
             </div>
           </div>
@@ -867,6 +952,21 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
           </div>
         </div>
       </form>
+
+      {/* Preview Dialog */}
+      <Modal
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        title="Description Preview"
+        containerClassName="bg-base-100 max-w-4xl"
+      >
+        <div className="max-h-[70vh] overflow-y-auto">
+          <DescriptionViewer
+            content={editorRef.current?.getJSON() || description}
+            imageHandlers={descriptionImageHandlers}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

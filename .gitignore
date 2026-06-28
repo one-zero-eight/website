@@ -28,4 +28,10 @@ yarn-error.log*
 
 # misc
 .DS_Store
+
+# playwright
+/playwright-report/
+/test-results/
+/blob-report/
+/playwright/.cache/
 .
