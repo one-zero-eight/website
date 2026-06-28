@@ -69,7 +69,7 @@ export function ConnectivityNotification() {
   }
 
   return (
-    <div className="fixed right-2 bottom-2 z-50 w-[calc(100%-1rem)] max-w-md">
+    <div className="fixed top-2 right-2 z-50 w-[calc(100%-1rem)] max-w-md sm:top-auto sm:bottom-2">
       <div className="rounded-box bg-warning text-error-content shadow-lg">
         <div className="flex items-start gap-2">
           <button
