@@ -16,7 +16,7 @@ export function getMusicRoomLink() {
 }
 
 export function getWorkshopsLink() {
-  return `${WORKSHOPS_API_URL}/workshops.ics`;
+  return `${EVENTS_API_URL}/workshops.ics`;
 }
 
 export function getMyMusicRoomLink() {
