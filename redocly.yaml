@@ -64,6 +64,11 @@ apis:
     x-openapi-ts:
       output: ./src/api/printers/types.ts
       #  --root-types --enum
+  tabletennis:
+    root: http://127.0.0.1:8023/openapi.json
+    x-openapi-ts:
+      output: ./src/api/tabletennis/types.ts
+      #  --root-types --enum
   sport:
     root: https://sport.innopolis.university/api/openapi.json
     x-openapi-ts:
