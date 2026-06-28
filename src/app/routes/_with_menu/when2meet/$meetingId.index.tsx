@@ -3,7 +3,7 @@ import { MeetingPage } from "@/components/when2meet/MeetingPage";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_with_menu/when2meet/$meetingId")({
+export const Route = createFileRoute("/_with_menu/when2meet/$meetingId/")({
   component: RouteComponent,
   validateSearch: (
     search: Record<string, unknown>,
@@ -28,7 +28,7 @@ function RouteComponent() {
         <title>{name ?? "Meeting"} | When2Meet</title>
         <meta
           name="description"
-          content="View meeting responses and mark your availability."
+          content="View meeting responses and choose the best time."
         />
       </Helmet>
 

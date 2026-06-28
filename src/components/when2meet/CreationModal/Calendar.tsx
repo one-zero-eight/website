@@ -2,7 +2,6 @@ import {
   HTMLAttributes,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -10,7 +9,6 @@ import { cn } from "@/lib/ui/cn";
 import { CalendarItem, generateCalendarMonth } from "../utils/dates.ts";
 
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const MONTHS_AHEAD = 6;
 
 function isSameDay(firstDate: Date, secondDate: Date) {
   return (
@@ -27,23 +25,6 @@ function isSelectable(item: CalendarItem) {
   return item.date >= today || isSameDay(item.date, today);
 }
 
-function buildMonthOptions() {
-  const options: { year: number; month: number; label: string }[] = [];
-  const date = new Date();
-  date.setDate(1);
-
-  for (let index = 0; index < MONTHS_AHEAD; index++) {
-    options.push({
-      year: date.getFullYear(),
-      month: date.getMonth(),
-      label: `${date.getFullYear()}, ${date.toLocaleString("en", { month: "short" })}`,
-    });
-    date.setMonth(date.getMonth() + 1);
-  }
-
-  return options;
-}
-
 export function Calendar({
   className,
   onDatesChange,
@@ -51,13 +32,14 @@ export function Calendar({
 }: HTMLAttributes<HTMLDivElement> & {
   onDatesChange: (calendar: Set<string>) => void;
 }) {
-  const monthOptions = useMemo(() => buildMonthOptions(), []);
-  const [monthIndex, setMonthIndex] = useState(0);
+  const currentMonthRef = useRef(new Date());
   const selectedDates = useRef<Set<string>>(new Set());
-  const [calendar, setCalendar] = useState<CalendarItem[]>(() => {
-    const firstMonth = monthOptions[0];
-    return generateCalendarMonth(firstMonth.year, firstMonth.month);
-  });
+  const [calendar, setCalendar] = useState<CalendarItem[]>(
+    generateCalendarMonth(
+      currentMonthRef.current.getFullYear(),
+      currentMonthRef.current.getMonth(),
+    ),
+  );
 
   const isDraggingRef = useRef(false);
   const isDeletingRef = useRef(false);
@@ -65,8 +47,6 @@ export function Calendar({
   const calendarRef = useRef(calendar);
   calendarRef.current = calendar;
   const gridRef = useRef<HTMLDivElement>(null);
-
-  const activeMonth = monthOptions[monthIndex];
 
   useEffect(() => {
     onDatesChange(selectedDates.current);
@@ -122,38 +102,44 @@ export function Calendar({
     lastSelectedIndexRef.current = index;
   }, []);
 
-  function updateCalendar(year: number, month: number) {
-    setCalendar(generateCalendarMonth(year, month, selectedDates.current));
-  }
-
-  function handleMonthIndexChange(nextIndex: number) {
-    setMonthIndex(nextIndex);
-    const option = monthOptions[nextIndex];
-    updateCalendar(option.year, option.month);
+  function updateCalendar() {
+    setCalendar(
+      generateCalendarMonth(
+        currentMonthRef.current.getFullYear(),
+        currentMonthRef.current.getMonth(),
+        selectedDates.current,
+      ),
+    );
   }
 
   function handlePreviousMonthClick() {
-    if (monthIndex === 0) {
-      return;
-    }
-
-    handleMonthIndexChange(monthIndex - 1);
+    currentMonthRef.current.setMonth(currentMonthRef.current.getMonth() - 1);
+    updateCalendar();
   }
 
   function handleNextMonthClick() {
-    if (monthIndex >= monthOptions.length - 1) {
+    const year = currentMonthRef.current.getFullYear();
+    const month = currentMonthRef.current.getMonth();
+
+    if (
+      year === new Date().getFullYear() + 2 &&
+      month === new Date().getMonth()
+    ) {
       return;
     }
 
-    handleMonthIndexChange(monthIndex + 1);
+    currentMonthRef.current.setMonth(month + 1);
+    updateCalendar();
   }
 
-  function getDayCellClasses(day: CalendarItem) {
+  function getDayCellClasses(index: number) {
+    const day = calendar[index];
+
     return cn(
-      "flex h-10 w-full cursor-pointer items-center justify-center rounded-md transition-colors touch-manipulation",
+      "my-1 flex aspect-square cursor-pointer items-center justify-center transition-colors touch-manipulation",
       isSameDay(day.date, new Date()) &&
         !day.selected &&
-        "border-primary border-2",
+        "border-primary rounded-full border-2",
       (!isSelectable(day) || day.hidden) && "text-base-content/40",
       day.selected
         ? cn(
@@ -162,7 +148,24 @@ export function Calendar({
               ? "bg-primary/80 hover:bg-primary"
               : "bg-primary hover:bg-primary/80",
           )
-        : "hover:bg-base-300",
+        : "hover:bg-base-300 rounded-full",
+      day.selected &&
+        ((index > 0 && !calendar[index - 1].selected) || index % 7 === 0) &&
+        "rounded-l-full hover:rounded-l-full",
+      day.selected &&
+        ((index < calendar.length - 1 && !calendar[index + 1].selected) ||
+          (index + 1) % 7 === 0) &&
+        "rounded-r-full hover:rounded-r-full",
+      day.hidden &&
+        index < calendar.length - 1 &&
+        calendar[index + 1].selected &&
+        !calendar[index + 1].hidden &&
+        "border-base-100 border-r-2",
+      day.hidden &&
+        index > 0 &&
+        calendar[index - 1].selected &&
+        !calendar[index - 1].hidden &&
+        "border-base-100 border-l-2",
     );
   }
 
@@ -214,38 +217,48 @@ export function Calendar({
   }, [handleSelect]);
 
   return (
-    <div className={cn("flex w-full flex-col", className)} {...props}>
-      <div className="bg-base-200 mb-4 flex w-full items-center justify-between rounded-xl p-2">
+    <div className={cn("flex flex-col items-center", className)} {...props}>
+      <div className="bg-base-200 relative z-20 mb-4 flex w-full items-center justify-between rounded-full p-1.5">
         <button
           type="button"
-          className="bg-base-100 text-base-content/70 hover:bg-base-300 flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg transition"
-          disabled={monthIndex === 0}
+          className="bg-base-100 text-base-content/70 hover:bg-base-300 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full transition"
           onClick={handlePreviousMonthClick}
         >
           <span className="icon-[material-symbols--chevron-left] text-xl" />
         </button>
 
-        <label className="text-base-content/70 relative flex min-w-0 items-center gap-1 text-sm font-semibold">
+        <div className="text-base-content/70 flex items-center text-sm font-semibold">
           <select
-            className="cursor-pointer appearance-none bg-transparent pr-5 text-sm font-semibold focus:outline-none"
-            value={monthIndex}
-            onChange={(event) =>
-              handleMonthIndexChange(Number(event.target.value))
-            }
+            className="relative z-30 h-7 cursor-pointer appearance-none bg-transparent pr-1 text-sm font-semibold hover:underline focus:z-50 focus:outline-none"
+            value={currentMonthRef.current.getFullYear()}
+            onChange={(event) => {
+              currentMonthRef.current.setFullYear(Number(event.target.value));
+              updateCalendar();
+            }}
           >
-            {monthOptions.map((option, index) => (
-              <option key={option.label} value={index}>
-                {option.label}
-              </option>
-            ))}
+            {[0, 1, 2].map((index) => {
+              const year = new Date().getFullYear() + index;
+
+              return (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              );
+            })}
           </select>
-          <span className="icon-[material-symbols--arrow-drop-down] pointer-events-none absolute right-0 text-xl" />
-        </label>
+          <span>,&nbsp;</span>
+          <span>
+            {new Date(
+              currentMonthRef.current.getFullYear(),
+              currentMonthRef.current.getMonth(),
+              1,
+            ).toLocaleString("en", { month: "long" })}
+          </span>
+        </div>
 
         <button
           type="button"
-          className="bg-base-100 text-base-content/70 hover:bg-base-300 flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg transition"
-          disabled={monthIndex >= monthOptions.length - 1}
+          className="bg-base-100 text-base-content/70 hover:bg-base-300 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full transition"
           onClick={handleNextMonthClick}
         >
           <span className="icon-[material-symbols--chevron-right] text-xl" />
@@ -254,17 +267,17 @@ export function Calendar({
 
       <div
         ref={gridRef}
-        className="relative grid w-full min-w-0 touch-none grid-cols-7 gap-x-1 gap-y-0.5 pb-1 select-none"
+        className="relative z-0 grid w-full max-w-md min-w-0 touch-none grid-cols-7 select-none"
       >
         {WEEK_DAYS.map((day) => (
-          <div key={day} className="mb-2 text-center text-sm font-medium">
+          <div key={day} className="mb-2 text-center text-sm font-semibold">
             {day}
           </div>
         ))}
 
         {calendar.map((item, index) => (
           <div
-            key={`${activeMonth.year}-${activeMonth.month}-${item.date.toISOString()}`}
+            key={item.date.toISOString()}
             data-index={index}
             onPointerDown={(event) => {
               if (!isSelectable(item)) {
@@ -279,7 +292,7 @@ export function Calendar({
               lastSelectedIndexRef.current = null;
               handleSelect(index);
             }}
-            className={getDayCellClasses(item)}
+            className={getDayCellClasses(index)}
           >
             {item.date.getDate()}
           </div>

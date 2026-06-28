@@ -1,51 +1,66 @@
-import { Link } from "@tanstack/react-router";
-
 export function MeetingMobileBar({
   onShare,
-  meetingId,
-  meetingName,
+  onBookRoom,
   onDelete,
   onSaveSetup,
   isDeleting,
+  isSavingSetup,
+  canBookRoom,
 }: {
-  onShare: () => void;
-  meetingId: string;
-  meetingName: string;
+  onShare?: () => void;
+  onBookRoom?: () => void;
   onDelete?: () => void;
   onSaveSetup?: () => void;
   isDeleting?: boolean;
+  isSavingSetup?: boolean;
+  canBookRoom?: boolean;
 }) {
   if (onSaveSetup) {
     return (
-      <div className="border-base-300 bg-base-200 fixed bottom-12 flex w-full flex-col gap-2 rounded-t-xl border-b p-3 md:hidden">
+      <div className="border-base-300 bg-base-200 fixed bottom-12 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b p-4 md:hidden">
         <button
           type="button"
-          className="btn btn-primary w-full"
+          className="btn btn-primary w-full gap-2"
+          disabled={isSavingSetup}
           onClick={onSaveSetup}
         >
-          Save timeslots
+          {isSavingSetup ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : (
+            "Save timeslots"
+          )}
         </button>
       </div>
     );
   }
 
+  if (!onShare && !onBookRoom && !onDelete) {
+    return null;
+  }
+
   return (
-    <div className="border-base-300 bg-base-200 fixed bottom-12 flex w-full flex-row gap-2 rounded-t-xl border-b p-3 md:hidden">
-      <button
-        type="button"
-        className="btn btn-outline min-w-0 flex-1"
-        onClick={onShare}
-      >
-        Share link
-      </button>
-      <Link
-        to="/when2meet/$meetingId/book-room"
-        params={{ meetingId }}
-        search={{ name: meetingName }}
-        className="btn btn-primary min-w-0 flex-1"
-      >
-        Book room
-      </Link>
+    <div className="border-base-300 bg-base-200 fixed bottom-12 flex h-fit w-full flex-row gap-2 rounded-t-xl border-b p-4 md:hidden">
+      {onShare && (
+        <button
+          type="button"
+          className="btn btn-outline min-w-0 flex-1 gap-2"
+          onClick={onShare}
+        >
+          <span className="icon-[material-symbols--share-outline] text-lg" />
+          Share link
+        </button>
+      )}
+      {onBookRoom && (
+        <button
+          type="button"
+          className="btn btn-primary min-w-0 flex-1 gap-2"
+          disabled={!canBookRoom}
+          onClick={onBookRoom}
+        >
+          <span className="icon-[mdi--door-open] text-lg" />
+          Book room
+        </button>
+      )}
       {onDelete && (
         <button
           type="button"
@@ -54,7 +69,7 @@ export function MeetingMobileBar({
           onClick={onDelete}
         >
           {isDeleting ? (
-            <span className="loading loading-spinner" />
+            <span className="loading loading-spinner loading-sm" />
           ) : (
             <span className="icon-[material-symbols--delete-outline] text-xl" />
           )}

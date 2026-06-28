@@ -1,3 +1,4 @@
+import type { EventInput } from "@fullcalendar/core";
 import { eventsTypes } from "@/api/events";
 import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
 import { ConfigCalendarDialog } from "@/components/calendar/ConfigCalendarDialog.tsx";
@@ -21,6 +22,7 @@ import moment from "moment/moment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import iCalendarPlugin from "./iCalendarPlugin";
+import { WHEN2MEET_EVENT_ID_PREFIX } from "./when2meet-events.ts";
 import "./styles-calendar.css";
 
 export type URLType =
@@ -35,11 +37,13 @@ export type URLType =
 
 export default function CalendarViewer({
   urls,
+  extraEvents = [],
   initialView = "listMonth",
   viewId = "",
   isFullPage = false,
 }: {
   urls: URLType[];
+  extraEvents?: EventInput[];
   initialView?: string;
   viewId?: string;
   isFullPage?: boolean;
@@ -361,6 +365,41 @@ export default function CalendarViewer({
       }
     });
   }, [urls, isFullPage]);
+
+  useEffect(() => {
+    const calendarApi = calendarRef.current?.getApi();
+    if (!calendarApi) {
+      return;
+    }
+
+    setTimeout(() => {
+      const prevEvents = calendarApi.getEvents();
+      const nextEventIds = new Set(
+        extraEvents.map((event) => event.id).filter(Boolean) as string[],
+      );
+
+      for (const event of prevEvents) {
+        if (
+          event.id?.startsWith(WHEN2MEET_EVENT_ID_PREFIX) &&
+          !nextEventIds.has(event.id)
+        ) {
+          event.remove();
+        }
+      }
+
+      for (const eventInput of extraEvents) {
+        const existingEvent = eventInput.id
+          ? calendarApi.getEventById(eventInput.id)
+          : null;
+
+        if (existingEvent) {
+          existingEvent.remove();
+        }
+
+        calendarApi.addEvent(eventInput);
+      }
+    });
+  }, [extraEvents, isFullPage]);
 
   return (
     <div

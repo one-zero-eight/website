@@ -7,16 +7,21 @@ function TimePicker({
   value,
   disabled,
   onChange,
+  className,
 }: {
   value: number;
   disabled?: boolean;
   onChange: (value: number) => void;
+  className?: string;
 }) {
   return (
     <select
       className={cn(
-        "bg-base-200 text-base-content focus:border-base-300 focus:bg-base-100 w-28 cursor-pointer rounded-lg border border-transparent px-3 py-1.5 text-center transition-colors focus:outline-none",
+        "select select-bordered select-sm bg-base-100 h-9 w-full min-w-0",
+        "text-base-content text-sm font-medium tabular-nums",
+        "hover:border-base-content/25 focus:border-primary focus:outline-none",
         disabled && "cursor-not-allowed opacity-50",
+        className,
       )}
       value={value}
       disabled={disabled}
@@ -69,25 +74,30 @@ export function TimeRange({
   }
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
-      <span className="icon-[material-symbols--schedule-outline] text-base-content/70 text-xl" />
+    <div className={cn("w-full", className)}>
       <div
         className={cn(
-          "flex flex-wrap items-center gap-2",
+          "bg-base-150 flex items-center gap-2 rounded-lg",
           disabled && "opacity-50",
         )}
       >
-        <span className="text-base-content/60 text-sm">from</span>
         <TimePicker
           value={startHour}
           disabled={disabled}
           onChange={handleStartTimeChange}
+          className="flex-1"
         />
-        <span className="text-base-content/60 text-sm">to</span>
+        <span
+          className={cn(
+            "icon-[material-symbols--arrow-forward] shrink-0 text-lg",
+            disabled ? "text-base-content/40" : "text-base-content/50",
+          )}
+        />
         <TimePicker
           value={endHour}
           disabled={disabled}
           onChange={handleEndTimeChange}
+          className="flex-1"
         />
       </div>
     </div>
