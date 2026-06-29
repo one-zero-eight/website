@@ -47,6 +47,10 @@ import { Route as With_menuAccountIndexRouteImport } from "./routes/_with_menu/a
 import { Route as ScheduleAssistantSettingsSettingsTabRouteImport } from "./routes/schedule-assistant/settings/$settingsTab";
 import { Route as With_menuWhen2meetNewRouteImport } from "./routes/_with_menu/when2meet/new";
 import { Route as With_menuWhen2meetMeetingIdRouteImport } from "./routes/_with_menu/when2meet/$meetingId";
+import { Route as With_menuTabletennisTournamentsRouteImport } from "./routes/_with_menu/tabletennis/tournaments";
+import { Route as With_menuTabletennisPlayersRouteImport } from "./routes/_with_menu/tabletennis/players";
+import { Route as With_menuTabletennisMatchesRouteImport } from "./routes/_with_menu/tabletennis/matches";
+import { Route as With_menuTabletennisEventsRouteImport } from "./routes/_with_menu/tabletennis/events";
 import { Route as With_menuStudentAffairsSignOutRouteImport } from "./routes/_with_menu/student-affairs/sign-out";
 import { Route as With_menuStudentAffairsSignInRouteImport } from "./routes/_with_menu/student-affairs/sign-in";
 import { Route as With_menuSearchAskRouteImport } from "./routes/_with_menu/search/ask";
@@ -269,6 +273,30 @@ const With_menuWhen2meetMeetingIdRoute =
     path: "/when2meet/$meetingId",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
+const With_menuTabletennisTournamentsRoute =
+  With_menuTabletennisTournamentsRouteImport.update({
+    id: "/tabletennis/tournaments",
+    path: "/tabletennis/tournaments",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuTabletennisPlayersRoute =
+  With_menuTabletennisPlayersRouteImport.update({
+    id: "/tabletennis/players",
+    path: "/tabletennis/players",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuTabletennisMatchesRoute =
+  With_menuTabletennisMatchesRouteImport.update({
+    id: "/tabletennis/matches",
+    path: "/tabletennis/matches",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuTabletennisEventsRoute =
+  With_menuTabletennisEventsRouteImport.update({
+    id: "/tabletennis/events",
+    path: "/tabletennis/events",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
 const With_menuStudentAffairsSignOutRoute =
   With_menuStudentAffairsSignOutRouteImport.update({
     id: "/student-affairs/sign-out",
@@ -446,6 +474,10 @@ export interface FileRoutesByFullPath {
   "/search/ask": typeof With_menuSearchAskRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
+  "/tabletennis/events": typeof With_menuTabletennisEventsRoute;
+  "/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
+  "/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
+  "/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
   "/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdRouteWithChildren;
   "/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
@@ -509,6 +541,10 @@ export interface FileRoutesByTo {
   "/search/ask": typeof With_menuSearchAskRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
+  "/tabletennis/events": typeof With_menuTabletennisEventsRoute;
+  "/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
+  "/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
+  "/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
   "/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdRouteWithChildren;
   "/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
@@ -575,6 +611,10 @@ export interface FileRoutesById {
   "/_with_menu/search/ask": typeof With_menuSearchAskRoute;
   "/_with_menu/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/_with_menu/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
+  "/_with_menu/tabletennis/events": typeof With_menuTabletennisEventsRoute;
+  "/_with_menu/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
+  "/_with_menu/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
+  "/_with_menu/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
   "/_with_menu/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdRouteWithChildren;
   "/_with_menu/when2meet/new": typeof With_menuWhen2meetNewRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
@@ -641,6 +681,10 @@ export interface FileRouteTypes {
     | "/search/ask"
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
+    | "/tabletennis/events"
+    | "/tabletennis/matches"
+    | "/tabletennis/players"
+    | "/tabletennis/tournaments"
     | "/when2meet/$meetingId"
     | "/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
@@ -704,6 +748,10 @@ export interface FileRouteTypes {
     | "/search/ask"
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
+    | "/tabletennis/events"
+    | "/tabletennis/matches"
+    | "/tabletennis/players"
+    | "/tabletennis/tournaments"
     | "/when2meet/$meetingId"
     | "/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
@@ -769,6 +817,10 @@ export interface FileRouteTypes {
     | "/_with_menu/search/ask"
     | "/_with_menu/student-affairs/sign-in"
     | "/_with_menu/student-affairs/sign-out"
+    | "/_with_menu/tabletennis/events"
+    | "/_with_menu/tabletennis/matches"
+    | "/_with_menu/tabletennis/players"
+    | "/_with_menu/tabletennis/tournaments"
     | "/_with_menu/when2meet/$meetingId"
     | "/_with_menu/when2meet/new"
     | "/schedule-assistant/settings/$settingsTab"
@@ -1073,6 +1125,34 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuWhen2meetMeetingIdRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/tabletennis/tournaments": {
+      id: "/_with_menu/tabletennis/tournaments";
+      path: "/tabletennis/tournaments";
+      fullPath: "/tabletennis/tournaments";
+      preLoaderRoute: typeof With_menuTabletennisTournamentsRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/tabletennis/players": {
+      id: "/_with_menu/tabletennis/players";
+      path: "/tabletennis/players";
+      fullPath: "/tabletennis/players";
+      preLoaderRoute: typeof With_menuTabletennisPlayersRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/tabletennis/matches": {
+      id: "/_with_menu/tabletennis/matches";
+      path: "/tabletennis/matches";
+      fullPath: "/tabletennis/matches";
+      preLoaderRoute: typeof With_menuTabletennisMatchesRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/tabletennis/events": {
+      id: "/_with_menu/tabletennis/events";
+      path: "/tabletennis/events";
+      fullPath: "/tabletennis/events";
+      preLoaderRoute: typeof With_menuTabletennisEventsRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/student-affairs/sign-out": {
       id: "/_with_menu/student-affairs/sign-out";
       path: "/student-affairs/sign-out";
@@ -1300,6 +1380,10 @@ interface With_menuRouteRouteChildren {
   With_menuSearchAskRoute: typeof With_menuSearchAskRoute;
   With_menuStudentAffairsSignInRoute: typeof With_menuStudentAffairsSignInRoute;
   With_menuStudentAffairsSignOutRoute: typeof With_menuStudentAffairsSignOutRoute;
+  With_menuTabletennisEventsRoute: typeof With_menuTabletennisEventsRoute;
+  With_menuTabletennisMatchesRoute: typeof With_menuTabletennisMatchesRoute;
+  With_menuTabletennisPlayersRoute: typeof With_menuTabletennisPlayersRoute;
+  With_menuTabletennisTournamentsRoute: typeof With_menuTabletennisTournamentsRoute;
   With_menuWhen2meetMeetingIdRoute: typeof With_menuWhen2meetMeetingIdRouteWithChildren;
   With_menuWhen2meetNewRoute: typeof With_menuWhen2meetNewRoute;
   With_menuAccountIndexRoute: typeof With_menuAccountIndexRoute;
@@ -1353,6 +1437,10 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuSearchAskRoute: With_menuSearchAskRoute,
   With_menuStudentAffairsSignInRoute: With_menuStudentAffairsSignInRoute,
   With_menuStudentAffairsSignOutRoute: With_menuStudentAffairsSignOutRoute,
+  With_menuTabletennisEventsRoute: With_menuTabletennisEventsRoute,
+  With_menuTabletennisMatchesRoute: With_menuTabletennisMatchesRoute,
+  With_menuTabletennisPlayersRoute: With_menuTabletennisPlayersRoute,
+  With_menuTabletennisTournamentsRoute: With_menuTabletennisTournamentsRoute,
   With_menuWhen2meetMeetingIdRoute:
     With_menuWhen2meetMeetingIdRouteWithChildren,
   With_menuWhen2meetNewRoute: With_menuWhen2meetNewRoute,

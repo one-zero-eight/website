@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { TabletennisPage } from "@/components/tabletennis/TabletennisPage";
 import { TabletennisTabs } from "@/components/tabletennis/TabletennisTabs";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 
-export const Route = createFileRoute("/_with_menu/tabletennis/")({
+export const Route = createFileRoute("/_with_menu/tabletennis/tournaments")({
   component: RouteComponent,
 });
 
@@ -18,7 +17,6 @@ function RouteComponent() {
 
       <Topbar title="Table tennis club" />
       <TabletennisTabs />
-      <TabletennisPage />
     </>
   );
 }
