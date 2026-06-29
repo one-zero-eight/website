@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { TabletennisTabs } from "@/components/tabletennis/TabletennisTabs";
 import { Topbar } from "@/components/layout/Topbar.tsx";
+import { TabletennisPlayersTop } from "@/components/tabletennis/TabletennisPlayersTop";
 
 export const Route = createFileRoute("/_with_menu/tabletennis/players")({
   component: RouteComponent,
@@ -17,6 +18,7 @@ function RouteComponent() {
 
       <Topbar title="Table tennis club" />
       <TabletennisTabs />
+      <TabletennisPlayersTop />
     </>
   );
 }
