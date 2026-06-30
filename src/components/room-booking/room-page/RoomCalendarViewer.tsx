@@ -478,8 +478,6 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const handleModalClose = useCallback((open: boolean) => {
     setBookingModalOpen(open);
     if (!open) {
-      setSelectedSlot(undefined);
-      setSelectedBookingDetails(undefined);
       bookingDraftRef.current = null;
       setDraftPhase(null);
       const calendarApi = calendarRef.current?.getApi();
