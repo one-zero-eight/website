@@ -81,12 +81,20 @@ export function formatApiErrorMessage(
     typeof (error as { httpCode: unknown }).httpCode === "number"
   ) {
     const apiError = error as { body?: unknown; httpCode: number };
-    const detail = (
-      apiError.body as { detail?: unknown } | undefined
-    )?.detail?.toString();
+    const detail = (apiError.body as { detail?: unknown } | undefined)?.detail;
     const code = apiError.httpCode.toString();
     if (detail) {
-      return `Error ${code}: ${detail}`;
+      if (typeof detail === "string") {
+        return `Error ${code}: ${detail}`;
+      }
+      if (
+        typeof detail === "object" &&
+        detail !== null &&
+        "message" in detail
+      ) {
+        return `Error ${code}: ${detail.message as string}`;
+      }
+      return `Error ${code}: ${JSON.stringify(detail)}`;
     }
     return `Error ${code}`;
   }
