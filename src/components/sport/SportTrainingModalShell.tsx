@@ -16,6 +16,7 @@ export function SportTrainingModalShell({
   title,
   titleBadges,
   closeDisabled,
+  onBack,
   children,
 }: {
   open: boolean;
@@ -23,6 +24,7 @@ export function SportTrainingModalShell({
   title: string;
   titleBadges?: ReactNode;
   closeDisabled?: boolean;
+  onBack?: () => void;
   children: ReactNode;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -53,11 +55,23 @@ export function SportTrainingModalShell({
           >
             <div className="bg-base-200 rounded-box flex max-h-full w-full flex-col overflow-hidden">
               <div className="border-b-base-300 flex shrink-0 items-start justify-between gap-2 border-b p-4">
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <h2 className="text-lg font-semibold wrap-break-word">
-                    {title}
-                  </h2>
-                  {titleBadges}
+                <div className="flex min-w-0 flex-1 items-start gap-2">
+                  {onBack ? (
+                    <button
+                      type="button"
+                      className="text-base-content/50 hover:bg-base-300/50 hover:text-base-content/75 rounded-box flex h-10 w-10 shrink-0 items-center justify-center"
+                      onClick={onBack}
+                      disabled={closeDisabled}
+                    >
+                      <span className="icon-[material-symbols--arrow-back] text-2xl" />
+                    </button>
+                  ) : null}
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <h2 className="text-lg font-semibold wrap-break-word">
+                      {title}
+                    </h2>
+                    {titleBadges}
+                  </div>
                 </div>
                 <button
                   ref={closeRef}
