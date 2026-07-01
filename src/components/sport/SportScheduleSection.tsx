@@ -2,31 +2,30 @@ import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
-import { SportTrainingModal } from "@/components/sport/SportTrainingModal.tsx";
+import { SportStudentTrainingModal } from "@/components/sport/SportStudentTrainingModal.tsx";
+import { SportTrainerTrainingModal } from "@/components/sport/SportTrainerTrainingModal.tsx";
 import {
-  endOfSportWeekMoscow,
   formatDayHeaderMoscow,
   formatTimeRangeMoscow,
+  getSchedulePeriodBounds,
   moscowDateKey,
-  startOfSportWeekMoscow,
   toScheduleApiDateTime,
 } from "@/components/sport/sport-week-utils.ts";
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
+import {
+  canShowCheckInButton,
+  isCheckInUnavailable,
+  isTrainerTraining,
+} from "@/components/sport/sport-checkin-utils.ts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
-const legacyGroupColors = [
-  "#1f77b4",
-  "#ff7f0e",
-  "#2ca02c",
-  "#d62728",
-  "#9467bd",
-  "#8c564b",
-  "#b4005a",
-  "#7f7f7f",
-  "#7b7c1f",
-  "#157786",
-] as const;
+const scheduleTrainingColors = {
+  trainer: "#EF7B20",
+  studentUnavailable: "#C73D40",
+  studentCheckedIn: "#42932A",
+  studentCanCheckIn: "#306EFD",
+} as const;
 
 const scheduleDays = [0, 1, 2, 3, 4, 5, 6] as const;
 
@@ -56,13 +55,15 @@ function invalidateStudentHours(
 export function SportScheduleSection({
   enabled,
   studentId,
+  trainerGroupIds,
 }: {
   enabled: boolean;
   studentId: number;
+  trainerGroupIds: ReadonlySet<number>;
 }) {
   const queryClient = useQueryClient();
   const { showError, showSuccess } = useToast();
-  const [weekAnchor, setWeekAnchor] = useState(() => new Date());
+  const [periodOffset, setPeriodOffset] = useState(0);
   const [pendingTrainingId, setPendingTrainingId] = useState<number | null>(
     null,
   );
@@ -72,14 +73,9 @@ export function SportScheduleSection({
   const [selected, setSelected] =
     useState<SchemaTrainingInfoPersonalSchema | null>(null);
 
-  const monday = useMemo(
-    () => startOfSportWeekMoscow(weekAnchor),
-    [weekAnchor],
-  );
-  const sundayEnd = useMemo(() => endOfSportWeekMoscow(monday), [monday]);
-  const visibleDayIndexes = useMemo(
-    () => getVisibleDayIndexesForWeek(monday),
-    [monday],
+  const { start: periodStart, end: periodEnd } = useMemo(
+    () => getSchedulePeriodBounds(periodOffset),
+    [periodOffset],
   );
 
   const {
@@ -92,8 +88,8 @@ export function SportScheduleSection({
     {
       params: {
         query: {
-          start: toScheduleApiDateTime(monday),
-          end: toScheduleApiDateTime(sundayEnd),
+          start: toScheduleApiDateTime(periodStart),
+          end: toScheduleApiDateTime(periodEnd),
         },
       },
     },
@@ -163,26 +159,6 @@ export function SportScheduleSection({
       );
   }, [personalSchedule]);
 
-  const groupColorMap = useMemo(() => {
-    const map = new Map<string, string>();
-    let colorIndex = 0;
-
-    for (const row of personalSchedule ?? []) {
-      const key = getTrainingColorKey(row.training);
-      if (map.has(key)) {
-        continue;
-      }
-
-      map.set(
-        key,
-        legacyGroupColors[colorIndex] ?? getGeneratedColor(colorIndex),
-      );
-      colorIndex += 1;
-    }
-
-    return map;
-  }, [personalSchedule]);
-
   const byDay = useMemo(() => {
     const map = new Map<string, SchemaTrainingInfoPersonalSchema[]>();
 
@@ -194,17 +170,14 @@ export function SportScheduleSection({
     return map;
   }, [filteredSchedule]);
   const visibleTrainingCount = useMemo(() => {
-    return visibleDayIndexes.reduce((count, dayIndex) => {
-      const key = moscowDateKey(addDays(monday, dayIndex).toISOString());
+    return scheduleDays.reduce((count: number, dayIndex) => {
+      const key = moscowDateKey(addDays(periodStart, dayIndex).toISOString());
       return count + (byDay.get(key)?.length ?? 0);
     }, 0);
-  }, [byDay, monday, visibleDayIndexes]);
+  }, [byDay, periodStart]);
 
-  function shiftWeek(delta: number) {
-    setWeekAnchor((d) => {
-      const weekStart = startOfSportWeekMoscow(d);
-      return new Date(weekStart.getTime() + delta * 7 * 24 * 3600 * 1000);
-    });
+  function shiftPeriod(delta: number) {
+    setPeriodOffset((offset) => offset + delta);
   }
 
   function handleCheckin(
@@ -218,6 +191,36 @@ export function SportScheduleSection({
         query: { checkin },
       },
     });
+  }
+
+  function handleTrainingModalOpenChange(open: boolean) {
+    if (!open) setSelected(null);
+  }
+
+  function renderSelectedTrainingModal() {
+    if (!selected) {
+      return null;
+    }
+
+    if (isTrainerTraining(selected, trainerGroupIds)) {
+      return (
+        <SportTrainerTrainingModal
+          open
+          onOpenChange={handleTrainingModalOpenChange}
+          row={selected}
+        />
+      );
+    }
+
+    return (
+      <SportStudentTrainingModal
+        open
+        onOpenChange={handleTrainingModalOpenChange}
+        row={selected}
+        studentId={studentId}
+        trainerGroupIds={trainerGroupIds}
+      />
+    );
   }
 
   return (
@@ -234,7 +237,7 @@ export function SportScheduleSection({
             <button
               type="button"
               className="btn btn-primary btn-sm"
-              onClick={() => setWeekAnchor(new Date())}
+              onClick={() => setPeriodOffset(0)}
             >
               today
             </button>
@@ -242,14 +245,14 @@ export function SportScheduleSection({
               <button
                 type="button"
                 className="btn btn-outline btn-primary btn-sm join-item"
-                onClick={() => shiftWeek(-1)}
+                onClick={() => shiftPeriod(-1)}
               >
                 <span className="icon-[material-symbols--chevron-left] text-lg" />
               </button>
               <button
                 type="button"
                 className="btn btn-outline btn-primary btn-sm join-item"
-                onClick={() => shiftWeek(1)}
+                onClick={() => shiftPeriod(1)}
               >
                 <span className="icon-[material-symbols--chevron-right] text-lg" />
               </button>
@@ -269,9 +272,8 @@ export function SportScheduleSection({
           ) : (
             <SportScheduleList
               byDay={byDay}
-              monday={monday}
-              visibleDayIndexes={visibleDayIndexes}
-              groupColorMap={groupColorMap}
+              periodStart={periodStart}
+              trainerGroupIds={trainerGroupIds}
               checkedTrainingIds={checkedTrainingIds}
               pendingTrainingId={pendingTrainingId}
               onSelect={(row) =>
@@ -288,32 +290,23 @@ export function SportScheduleSection({
         </div>
       </div>
 
-      <SportTrainingModal
-        open={!!selected}
-        onOpenChange={(open) => {
-          if (!open) setSelected(null);
-        }}
-        row={selected}
-        studentId={studentId}
-      />
+      {renderSelectedTrainingModal()}
     </>
   );
 }
 
 function SportScheduleList({
   byDay,
-  monday,
-  visibleDayIndexes,
-  groupColorMap,
+  periodStart,
+  trainerGroupIds,
   checkedTrainingIds,
   pendingTrainingId,
   onSelect,
   onCheckin,
 }: {
   byDay: Map<string, SchemaTrainingInfoPersonalSchema[]>;
-  monday: Date;
-  visibleDayIndexes: readonly number[];
-  groupColorMap: Map<string, string>;
+  periodStart: Date;
+  trainerGroupIds: ReadonlySet<number>;
   checkedTrainingIds: Set<number>;
   pendingTrainingId: number | null;
   onSelect: (row: SchemaTrainingInfoPersonalSchema) => void;
@@ -323,16 +316,16 @@ function SportScheduleList({
   ) => void;
 }) {
   return (
-    <div className="border-base-300 overflow-hidden border">
-      {visibleDayIndexes.map((index) => {
-        const date = addDays(monday, index);
+    <div className="border-base-300 overflow-hidden border dark:border-white">
+      {scheduleDays.map((index) => {
+        const date = addDays(periodStart, index);
         const key = moscowDateKey(date.toISOString());
         const rows = byDay.get(key) ?? [];
         const header = formatDayHeaderMoscow(date.toISOString());
 
         return (
           <section key={key}>
-            <div className="border-base-300 bg-base-200 flex min-h-9 items-center justify-between gap-3 border-b px-3 py-1.5">
+            <div className="border-base-300 bg-base-200 flex min-h-9 items-center justify-between gap-3 border-b px-3 py-1.5 dark:border-white">
               <span className="text-base font-bold">{header.weekday}</span>
               <span className="text-base font-bold">
                 {formatOriginalDate(date)}
@@ -344,26 +337,36 @@ function SportScheduleList({
                 {rows.map((row) => {
                   const training = row.training;
                   const checkedIn = checkedTrainingIds.has(training.id);
-                  const availablePlaces = getAvailablePlaces(training);
-                  const canCheckIn = checkedIn || row.can_check_in;
+                  const canCheckIn = canShowCheckInButton(
+                    row,
+                    checkedIn,
+                    trainerGroupIds,
+                  );
                   const isPending = pendingTrainingId === training.id;
+                  const trainingColor = getTrainingColor(
+                    row,
+                    checkedIn,
+                    trainerGroupIds,
+                  );
 
                   return (
                     <li key={training.id}>
                       <div
-                        className="grid min-h-10 w-full grid-cols-[9.5rem_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/30 px-3 py-1 text-left text-base font-bold text-white @max-md/content:grid-cols-[8.5rem_minmax(0,1fr)] @max-sm/content:grid-cols-1"
-                        style={{
-                          backgroundColor: getTrainingColor(
-                            training,
-                            groupColorMap,
-                            checkedIn,
-                            canCheckIn,
-                          ),
-                        }}
+                        className={cn(
+                          "group grid min-h-10 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b px-3 py-1 text-left text-base font-bold",
+                          "border-white/30 text-white transition-colors hover:!bg-[#8D4CF6]",
+                          "dark:border-white dark:!bg-black dark:text-[color:var(--training-accent)] dark:hover:!bg-[#181419] dark:hover:!text-[#8D4CF6]",
+                        )}
+                        style={
+                          {
+                            "--training-accent": trainingColor,
+                            backgroundColor: trainingColor,
+                          } as CSSProperties
+                        }
                       >
                         <button
                           type="button"
-                          className="flex min-h-8 items-center text-left tabular-nums"
+                          className="flex min-h-8 shrink-0 items-center text-left tabular-nums"
                           onClick={() => onSelect(row)}
                         >
                           {formatTimeRangeMoscow(training.start, training.end)}
@@ -380,41 +383,46 @@ function SportScheduleList({
                             </span>
                           ) : null}
                         </button>
-                        <div className="flex shrink-0 items-center justify-end gap-2 @max-md/content:col-span-2 @max-md/content:justify-start @max-sm/content:col-span-1">
-                          <span className="text-sm whitespace-nowrap">
-                            {availablePlaces}/{training.max_checkins}
-                          </span>
+                        {canCheckIn ? (
                           <button
                             type="button"
                             className={cn(
-                              "btn btn-xs min-w-24",
+                              "btn btn-xs min-w-24 shrink-0 border-2 transition-colors",
                               checkedIn
-                                ? "border-error bg-base-200 text-error hover:border-error hover:bg-base-300"
-                                : !canCheckIn
-                                  ? "bg-white/90 text-gray-400 hover:bg-white hover:text-gray-400"
-                                  : "bg-white/90 text-black hover:bg-white",
+                                ? cn(
+                                    "border-white bg-[#42932A] text-white group-hover:border-white group-hover:bg-[#8D4CF6] group-hover:text-white hover:border-white hover:bg-[#8D4CF6] hover:text-white",
+                                    "dark:!border-[#C73D40] dark:!bg-[#100F11] dark:!text-[#C73D40] dark:group-hover:!border-[#8D4CF6] dark:group-hover:!bg-[#181419] dark:group-hover:!text-[#8D4CF6] dark:hover:!border-[#8D4CF6] dark:hover:!bg-[#181419] dark:hover:!text-[#8D4CF6]",
+                                  )
+                                : cn(
+                                    "border-white bg-[#306EFD] text-white group-hover:border-white group-hover:bg-[#8D4CF6] group-hover:text-white hover:border-white hover:bg-[#8D4CF6] hover:text-white",
+                                    "dark:!border-[#306EFD] dark:!bg-[#100F11] dark:!text-[#306EFD] dark:group-hover:!border-[#8D4CF6] dark:group-hover:!bg-[#181419] dark:group-hover:!text-[#8D4CF6] dark:hover:!border-[#8D4CF6] dark:hover:!bg-[#181419] dark:hover:!text-[#8D4CF6]",
+                                  ),
                             )}
-                            disabled={isPending || (!checkedIn && !canCheckIn)}
+                            disabled={isPending}
                             onClick={() => onCheckin(training, !checkedIn)}
                           >
                             {isPending ? (
                               <span className="loading loading-spinner loading-sm" />
                             ) : checkedIn ? (
                               "Check out"
-                            ) : !canCheckIn ? (
-                              "Unavailable"
                             ) : (
                               "Check-in"
                             )}
                           </button>
-                        </div>
+                        ) : null}
+                        {/*
+                        <span className="text-sm whitespace-nowrap">
+                          {training.max_checkins - training.checkins_count}/
+                          {training.max_checkins}
+                        </span>
+                        */}
                       </div>
                     </li>
                   );
                 })}
               </ul>
             ) : (
-              <div className="text-base-content/50 border-base-300 border-b px-3 py-3 text-sm">
+              <div className="text-base-content/50 border-base-300 border-b px-3 py-3 text-sm dark:border-white">
                 No trainings
               </div>
             )}
@@ -436,41 +444,24 @@ function toSelectedTrainingRow(
   };
 }
 
-function getTrainingColorKey(
-  training: SchemaTrainingInfoPersonalSchema["training"],
-): string {
-  return String(training.group_id || training.display_name || training.id);
-}
-
-function getGeneratedColor(index: number): string {
-  const hue = (index * 137) % 360;
-  return `hsl(${hue} 62% 42%)`;
-}
-
 function getTrainingColor(
-  training: SchemaTrainingInfoPersonalSchema["training"],
-  groupColorMap: Map<string, string>,
+  row: SchemaTrainingInfoPersonalSchema,
   checkedIn: boolean,
-  canCheckIn: boolean,
+  trainerGroupIds: ReadonlySet<number>,
 ): string {
+  if (isTrainerTraining(row, trainerGroupIds)) {
+    return scheduleTrainingColors.trainer;
+  }
+
   if (checkedIn) {
-    return "#28a745";
+    return scheduleTrainingColors.studentCheckedIn;
   }
 
-  if (!canCheckIn) {
-    return "#dc3545";
+  if (isCheckInUnavailable(row, checkedIn)) {
+    return scheduleTrainingColors.studentUnavailable;
   }
 
-  return (
-    groupColorMap.get(getTrainingColorKey(training)) ?? legacyGroupColors[0]
-  );
-}
-
-function getAvailablePlaces(
-  training: SchemaTrainingInfoPersonalSchema["training"],
-): number {
-  const places = training.max_checkins - training.checkins_count;
-  return Math.max(0, places);
+  return scheduleTrainingColors.studentCanCheckIn;
 }
 
 function addDays(date: Date, days: number): Date {
@@ -484,26 +475,4 @@ function formatOriginalDate(date: Date): string {
     year: "numeric",
     timeZone: "Europe/Moscow",
   });
-}
-
-function getVisibleDayIndexesForWeek(monday: Date): readonly number[] {
-  const currentWeekMonday = startOfSportWeekMoscow(new Date());
-
-  if (
-    moscowDateKey(monday.toISOString()) !==
-    moscowDateKey(currentWeekMonday.toISOString())
-  ) {
-    return scheduleDays;
-  }
-
-  const todayKey = moscowDateKey(new Date().toISOString());
-  const todayIndex = scheduleDays.findIndex(
-    (day) => moscowDateKey(addDays(monday, day).toISOString()) === todayKey,
-  );
-
-  if (todayIndex === -1) {
-    return scheduleDays;
-  }
-
-  return scheduleDays.slice(todayIndex);
 }

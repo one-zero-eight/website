@@ -44,6 +44,32 @@ function moscowStartOfDay(y: number, m: number, day: number): Date {
   return new Date(`${y}-${pad2(m)}-${pad2(day)}T00:00:00${MSK_OFFSET}`);
 }
 
+/** Today 00:00 MSK. */
+export function startOfTodayMoscow(): Date {
+  const { y, m, day } = moscowYmd(new Date());
+  return moscowStartOfDay(y, m, day);
+}
+
+/** 23:59:59 MSK on the same calendar day as `dayStart` (00:00 MSK). */
+export function endOfMoscowDay(dayStart: Date): Date {
+  const { y, m, day } = moscowYmd(dayStart);
+  return new Date(`${y}-${pad2(m)}-${pad2(day)}T23:59:59${MSK_OFFSET}`);
+}
+
+const MSK_DAY_MS = 24 * 3600 * 1000;
+
+/** Rolling 7-day window: offset 0 = today…today+6, 1 = today+7…today+13, etc. */
+export function getSchedulePeriodBounds(periodOffset: number): {
+  start: Date;
+  end: Date;
+} {
+  const start = new Date(
+    startOfTodayMoscow().getTime() + periodOffset * 7 * MSK_DAY_MS,
+  );
+  const end = endOfMoscowDay(new Date(start.getTime() + 6 * MSK_DAY_MS));
+  return { start, end };
+}
+
 /** Monday 00:00 MSK for the week that contains `anchor`. */
 export function startOfSportWeekMoscow(anchor: Date): Date {
   let d = new Date(anchor);
