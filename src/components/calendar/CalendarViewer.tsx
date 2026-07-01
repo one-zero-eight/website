@@ -9,6 +9,7 @@ import {
   DayHeaderContentArg,
   EventApi,
   EventContentArg,
+  EventInput,
 } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -16,6 +17,7 @@ import listPlugin from "@fullcalendar/list";
 import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import { isSportCalendarEventId } from "@/components/sport/sport-calendar-events.ts";
 import { cn } from "@/lib/ui/cn";
 import moment from "moment/moment";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -38,11 +40,15 @@ export default function CalendarViewer({
   initialView = "listMonth",
   viewId = "",
   isFullPage = false,
+  sportEvents = [],
+  onVisibleRangeChange,
 }: {
   urls: URLType[];
   initialView?: string;
   viewId?: string;
   isFullPage?: boolean;
+  sportEvents?: EventInput[];
+  onVisibleRangeChange?: (range: { start: Date; end: Date }) => void;
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
   const academicCalendarRef = useRef(academicCalendar);
@@ -82,6 +88,34 @@ export default function CalendarViewer({
   }, [calendarView, setStoredCalendarView]);
 
   const calendarRef = useRef<FullCalendar>(null);
+  const visibleRangeKeyRef = useRef<string | null>(null);
+
+  const handleDatesSet = useCallback(
+    ({
+      view,
+      start,
+      end,
+    }: {
+      view: { type: string };
+      start: Date;
+      end: Date;
+    }) => {
+      setCalendarView(view.type);
+
+      if (!onVisibleRangeChange) {
+        return;
+      }
+
+      const key = `${start.getTime()}-${end.getTime()}`;
+      if (visibleRangeKeyRef.current === key) {
+        return;
+      }
+
+      visibleRangeKeyRef.current = key;
+      onVisibleRangeChange({ start, end });
+    },
+    [onVisibleRangeChange],
+  );
 
   const calendarComponent = useMemo(
     () => (
@@ -113,7 +147,7 @@ export default function CalendarViewer({
             typeof input.start === "string" &&
             input.start.length === 10
           ) {
-            return input; // It is an all-day event, no need to transform
+            return input;
           }
 
           // Dates have Europe/Moscow timezone,
@@ -142,15 +176,11 @@ export default function CalendarViewer({
           }
 
           if (input.start instanceof Date) {
-            input.start = new Date(
-              Number(input.start) - input.start.getTimezoneOffset() * 60 * 1000,
-            );
+            input.start = toCalendarSpace(input.start);
           }
 
           if (input.end instanceof Date) {
-            input.end = new Date(
-              Number(input.end) - input.end.getTimezoneOffset() * 60 * 1000,
-            );
+            input.end = toCalendarSpace(input.end);
           }
 
           return input;
@@ -247,7 +277,7 @@ export default function CalendarViewer({
         }}
         allDayText="" // Remove text in all day row
         // displayEventEnd={true} // Display end time
-        nowIndicator={true} // Display current time as line
+        nowIndicator
         nowIndicatorContent={(arg) => {
           if (
             arg.date.getUTCHours() === 0 &&
@@ -304,14 +334,32 @@ export default function CalendarViewer({
         // slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
         scrollTimeReset={false} // Do not reset scroll on date switch
-        noEventsContent={() => "No events this month"} // Custom message
-        datesSet={({ view }) => setCalendarView(view.type)}
+        noEventsContent={() => "No events this month"}
+        datesSet={handleDatesSet}
         loading={setIsLoading}
       />
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [calendarView, handleDatesSet, initialView, isFullPage],
   );
+
+  useEffect(() => {
+    const calendarApi = calendarRef.current?.getApi();
+    if (!calendarApi) return;
+
+    const timeout = setTimeout(() => {
+      for (const event of calendarApi.getEvents()) {
+        if (isSportCalendarEventId(String(event.id))) {
+          event.remove();
+        }
+      }
+
+      for (const event of sportEvents) {
+        calendarApi.addEvent(event);
+      }
+    }, 0);
+
+    return () => clearTimeout(timeout);
+  }, [sportEvents]);
 
   useEffect(() => {
     const calendarApi = calendarRef.current?.getApi();
@@ -507,4 +555,8 @@ function calculateWeek(
 
   const weekLength = 7 * 24 * 60 * 60 * 1000; // 7 days
   return Math.floor((time - semesterStart) / weekLength) + 1;
+}
+
+function toCalendarSpace(date: Date): Date {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
 }

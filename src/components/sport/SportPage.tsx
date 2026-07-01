@@ -3,23 +3,14 @@ import { $sport } from "@/api/sport";
 import { useMySportAccessToken } from "@/api/helpers/sport-access-token.ts";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { SportFaqSection } from "@/components/sport/SportFaqSection.tsx";
-import {
-  SportOverviewSection,
-  SportProgressSection,
-  SportSemesterHistorySection,
-} from "@/components/sport/SportOverviewSection.tsx";
+import { SportProgressSection } from "@/components/sport/SportOverviewSection.tsx";
+import { SportPersonalCalendarSection } from "@/components/sport/SportPersonalCalendarSection.tsx";
 import { SportScheduleSection } from "@/components/sport/SportScheduleSection.tsx";
-import { Link, ValidateLinkOptions } from "@tanstack/react-router";
+import { SportTabs } from "@/components/sport/SportTabs.tsx";
+import { SportTrainerSection } from "@/components/sport/SportTrainerSection.tsx";
 import { useMemo } from "react";
 
-type SportTab = "dashboard" | "history" | "faq";
-type SportRoute = "/sport" | "/sport/history" | "/sport/faq";
-
-const sportTabs: { id: SportTab; title: string; to: SportRoute }[] = [
-  { id: "dashboard", title: "Calendar", to: "/sport" },
-  { id: "history", title: "History", to: "/sport/history" },
-  { id: "faq", title: "FAQ", to: "/sport/faq" },
-];
+type SportTab = "schedule" | "calendar" | "trainer" | "faq";
 
 export function SportPage({ activeTab }: { activeTab: SportTab }) {
   const { me } = useMe();
@@ -43,7 +34,7 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
   );
 
   const studentId = profile?.user_id;
-  const isStudent = !!profile?.student_info;
+  const isTrainer = (profile?.trainer_info?.groups.length ?? 0) > 0;
   const trainerGroupIds = useMemo(
     () => new Set(profile?.trainer_info?.groups.map((group) => group.id) ?? []),
     [profile?.trainer_info?.groups],
@@ -61,13 +52,6 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
     "/semesters/current",
     {},
     { enabled: canQuerySport && !!profile },
-  );
-
-  const { data: semesterHistory, isPending: historyPending } = $sport.useQuery(
-    "get",
-    "/students/{student_id}/semester-history",
-    { params: { path: { student_id: Number(studentId) } } },
-    { enabled: canQuerySport && studentId != null && isStudent },
   );
 
   if (!me) {
@@ -143,17 +127,10 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-4">
-      <div className="border-base-300 -my-4 flex shrink-0 flex-row gap-1 overflow-x-auto border-b whitespace-nowrap">
-        {sportTabs.map((tab) => (
-          <SportTabLink key={tab.id} to={tab.to}>
-            {tab.title}
-          </SportTabLink>
-        ))}
-      </div>
+      <SportTabs isTrainer={isTrainer} />
 
-      {activeTab === "dashboard" ? (
+      {activeTab === "schedule" ? (
         <>
-          <SportOverviewSection profile={profile} />
           <SportProgressSection
             hours={hours}
             currentSemester={currentSemester}
@@ -168,12 +145,20 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
         </>
       ) : null}
 
-      {activeTab === "history" ? (
-        <SportSemesterHistorySection
-          semesterHistory={semesterHistory}
-          currentSemester={currentSemester}
-          historyPending={historyPending}
+      {activeTab === "calendar" && studentId != null ? (
+        <SportPersonalCalendarSection
+          enabled={canQuerySport}
+          studentId={Number(studentId)}
+          trainerGroupIds={trainerGroupIds}
         />
+      ) : null}
+
+      {activeTab === "trainer" && isTrainer ? <SportTrainerSection /> : null}
+
+      {activeTab === "trainer" && !isTrainer ? (
+        <div className="text-base-content/70 rounded-box border-base-300 border p-6 text-center text-sm">
+          You are not registered as a sport trainer.
+        </div>
       ) : null}
 
       {activeTab === "faq" ? <SportFaqSection enabled={canQuerySport} /> : null}
@@ -182,16 +167,5 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
         Other questions? Contact your sport course curator or the sport office.
       </p>
     </div>
-  );
-}
-
-function SportTabLink(props: ValidateLinkOptions) {
-  return (
-    <Link
-      className="px-2 py-1"
-      activeOptions={{ exact: true, includeSearch: true }}
-      activeProps={{ className: "border-b-2 border-b-primary" }}
-      {...props}
-    />
   );
 }

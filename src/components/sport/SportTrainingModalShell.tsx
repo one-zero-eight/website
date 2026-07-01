@@ -59,7 +59,7 @@ export function SportTrainingModalShell({
                   {onBack ? (
                     <button
                       type="button"
-                      className="text-base-content/50 hover:bg-base-300/50 hover:text-base-content/75 rounded-box flex h-10 w-10 shrink-0 items-center justify-center"
+                      className="text-base-content/50 hover:bg-base-300/50 hover:text-base-content/75 rounded-box flex h-10 w-10 shrink-0 items-center justify-center active:border active:border-[#8D4CF6] active:text-[#8D4CF6]"
                       onClick={onBack}
                       disabled={closeDisabled}
                     >
@@ -76,7 +76,7 @@ export function SportTrainingModalShell({
                 <button
                   ref={closeRef}
                   type="button"
-                  className="text-base-content/50 hover:bg-base-300/50 hover:text-base-content/75 rounded-box flex h-10 w-10 shrink-0 items-center justify-center"
+                  className="text-base-content/50 hover:bg-base-300/50 hover:text-base-content/75 rounded-box flex h-10 w-10 shrink-0 items-center justify-center active:border active:border-[#8D4CF6] active:text-[#8D4CF6]"
                   onClick={() => onOpenChange(false)}
                   disabled={closeDisabled}
                 >
