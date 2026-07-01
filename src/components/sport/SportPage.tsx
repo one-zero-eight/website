@@ -10,6 +10,7 @@ import {
 } from "@/components/sport/SportOverviewSection.tsx";
 import { SportScheduleSection } from "@/components/sport/SportScheduleSection.tsx";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
+import { useMemo } from "react";
 
 type SportTab = "dashboard" | "history" | "faq";
 type SportRoute = "/sport" | "/sport/history" | "/sport/faq";
@@ -43,6 +44,10 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
 
   const studentId = profile?.user_id;
   const isStudent = !!profile?.student_info;
+  const trainerGroupIds = useMemo(
+    () => new Set(profile?.trainer_info?.groups.map((group) => group.id) ?? []),
+    [profile?.trainer_info?.groups],
+  );
 
   const { data: hours } = $sport.useQuery(
     "get",
@@ -157,6 +162,7 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
             <SportScheduleSection
               enabled={canQuerySport}
               studentId={Number(studentId)}
+              trainerGroupIds={trainerGroupIds}
             />
           ) : null}
         </>
