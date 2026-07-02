@@ -309,9 +309,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     const descriptionString = descriptionJSON
       ? JSON.stringify(descriptionJSON)
       : "";
+    const { id: _clubId, ...clubUpdateFields } = club;
 
     const updateData: clubsTypes.SchemaUpdateClub = {
-      ...club,
+      ...clubUpdateFields,
       slug,
       title,
       short_description: shortDescription,
