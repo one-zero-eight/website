@@ -350,6 +350,10 @@ function SportScheduleList({
                     trainerGroupIds,
                   );
                   const isPending = pendingTrainingId === training.id;
+                  const isDefaultTraining =
+                    !checkedIn &&
+                    !isTrainerTraining(row, trainerGroupIds) &&
+                    !isCheckInUnavailable(row, checkedIn);
                   const trainingColor = getTrainingColor(
                     row,
                     checkedIn,
@@ -360,14 +364,19 @@ function SportScheduleList({
                     <li key={training.id}>
                       <div
                         className={cn(
-                          "group grid min-h-10 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b px-3 py-1 text-left text-base font-bold",
-                          "border-white/30 text-white transition-colors hover:!bg-[#8D4CF6]",
-                          "dark:border-white dark:!bg-black dark:text-[color:var(--training-accent)] dark:hover:!bg-[#181419] dark:hover:!text-[#8D4CF6]",
+                          "group grid min-h-10 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b px-3 py-1 text-left text-base",
+                          "border-white/30 transition-colors hover:!bg-[#8D4CF6]",
+                          "dark:text-color:var(--training-accent) dark:border-white dark:bg-black! dark:hover:bg-[#181419]! dark:hover:text-[#8D4CF6]!",
+                          isDefaultTraining
+                            ? "bg-base-100 text-base-content"
+                            : "text-white",
                         )}
                         style={
                           {
                             "--training-accent": trainingColor,
-                            backgroundColor: trainingColor,
+                            backgroundColor: isDefaultTraining
+                              ? undefined
+                              : trainingColor,
                           } as CSSProperties
                         }
                       >
@@ -401,8 +410,8 @@ function SportScheduleList({
                                     "dark:!border-[#C73D40] dark:!bg-[#100F11] dark:!text-[#C73D40] dark:group-hover:!border-[#8D4CF6] dark:group-hover:!bg-[#181419] dark:group-hover:!text-[#8D4CF6] dark:hover:!border-[#8D4CF6] dark:hover:!bg-[#181419] dark:hover:!text-[#8D4CF6]",
                                   )
                                 : cn(
-                                    "border-white bg-[#306EFD] text-white group-hover:border-white group-hover:bg-[#8D4CF6] group-hover:text-white hover:border-white hover:bg-[#8D4CF6] hover:text-white",
-                                    "dark:!border-[#306EFD] dark:!bg-[#100F11] dark:!text-[#306EFD] dark:group-hover:!border-[#8D4CF6] dark:group-hover:!bg-[#181419] dark:group-hover:!text-[#8D4CF6] dark:hover:!border-[#8D4CF6] dark:hover:!bg-[#181419] dark:hover:!text-[#8D4CF6]",
+                                    "btn-primary",
+                                    "dark:!border-primary dark:!bg-primary dark:!text-primary-content",
                                   ),
                             )}
                             disabled={isPending}
