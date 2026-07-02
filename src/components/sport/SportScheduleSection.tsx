@@ -5,7 +5,6 @@ import { cn } from "@/lib/ui/cn";
 import { SportStudentTrainingModal } from "@/components/sport/SportStudentTrainingModal.tsx";
 import { SportTrainerTrainingModal } from "@/components/sport/SportTrainerTrainingModal.tsx";
 import {
-  formatDayHeaderMoscow,
   formatTimeRangeMoscow,
   getSchedulePeriodBounds,
   moscowDateKey,
@@ -321,14 +320,22 @@ function SportScheduleList({
         const date = addDays(periodStart, index);
         const key = moscowDateKey(date.toISOString());
         const rows = byDay.get(key) ?? [];
-        const header = formatDayHeaderMoscow(date.toISOString());
+        const dayHeader = formatScheduleDayHeader(date);
+        const isToday = key === moscowDateKey(new Date().toISOString());
 
         return (
           <section key={key}>
             <div className="border-base-300 bg-base-200 flex min-h-9 items-center justify-between gap-3 border-b px-3 py-1.5 dark:border-white">
-              <span className="text-base font-bold">{header.weekday}</span>
               <span className="text-base font-bold">
-                {formatOriginalDate(date)}
+                {dayHeader.weekday}{" "}
+                <span
+                  className={cn(
+                    "inline-flex w-fit items-center justify-center rounded-md",
+                    isToday && "bg-red-500 px-1 text-white",
+                  )}
+                >
+                  {dayHeader.day}
+                </span>
               </span>
             </div>
 
@@ -468,11 +475,15 @@ function addDays(date: Date, days: number): Date {
   return new Date(date.getTime() + days * 24 * 3600 * 1000);
 }
 
-function formatOriginalDate(date: Date): string {
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "Europe/Moscow",
-  });
+function formatScheduleDayHeader(date: Date): { weekday: string; day: string } {
+  return {
+    weekday: date.toLocaleDateString("en-US", {
+      weekday: "short",
+      timeZone: "Europe/Moscow",
+    }),
+    day: date.toLocaleDateString("en-US", {
+      day: "numeric",
+      timeZone: "Europe/Moscow",
+    }),
+  };
 }
