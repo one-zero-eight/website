@@ -1,4 +1,7 @@
+import type { roomBookingTypes } from "@/api/room-booking";
+
 export type MeetingRoomBooking = {
+  id?: string;
   slotKey: string;
   roomId: string;
   roomNumber?: string;
@@ -40,4 +43,20 @@ export function saveMeetingRoomBooking(
 
 export function clearMeetingRoomBooking(meetingId: string) {
   localStorage.removeItem(getStorageKey(meetingId));
+}
+
+export function isStoredMeetingRoomBookingActive(
+  storedBooking: MeetingRoomBooking,
+  bookings: Pick<
+    roomBookingTypes.SchemaBooking,
+    "id" | "room_id" | "start" | "end"
+  >[],
+) {
+  return bookings.some(
+    (booking) =>
+      (storedBooking.id && booking.id === storedBooking.id) ||
+      (booking.room_id === storedBooking.roomId &&
+        booking.start === storedBooking.start &&
+        booking.end === storedBooking.end),
+  );
 }

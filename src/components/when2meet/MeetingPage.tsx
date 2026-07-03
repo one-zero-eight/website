@@ -1,7 +1,14 @@
 import { useMe } from "@/api/accounts/user.ts";
+import { $roomBooking } from "@/api/room-booking";
+import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types.ts";
 import { $when2meet } from "@/api/when2meet";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
+import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
+import type {
+  Booking,
+  Slot,
+} from "@/components/room-booking/timeline/types.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -9,6 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
 import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
+import { useWhen2MeetRoomBookings } from "./useWhen2MeetRoomBookings.ts";
 import {
   buildFullDaySlotKeys,
   createBackendSlotLookup,
@@ -19,9 +27,15 @@ import {
 import { getIntersectionAtMinParticipants } from "./utils/best-slot.ts";
 import {
   clearMeetingRoomBooking,
+  isStoredMeetingRoomBookingActive,
   loadMeetingRoomBooking,
+  saveMeetingRoomBooking,
   type MeetingRoomBooking,
 } from "./utils/meeting-room-booking.ts";
+import {
+  getAvailableRoomsForSlotKeys,
+  getSlotKeysRange,
+} from "./utils/room-booking-utils.ts";
 import {
   getParticipantsWithExplicitSlot,
   getUserDisplaySlots,
@@ -62,6 +76,16 @@ export function MeetingPage({
     () => loadMeetingRoomBooking(meetingId),
   );
   const [minParticipants, setMinParticipants] = useState(1);
+  const [isBookingMode, setIsBookingMode] = useState(false);
+  const [bookingSlots, setBookingSlots] = useState<Set<string>>(new Set());
+  const [bookingSelectionKeys, setBookingSelectionKeys] = useState<string[]>(
+    [],
+  );
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [pendingBookingOpen, setPendingBookingOpen] = useState(false);
+  const [selectedBookingRoomId, setSelectedBookingRoomId] = useState<
+    string | null
+  >(null);
   const hasAutoStartedEditingRef = useRef(false);
 
   const eventQueryKey = $when2meet.queryOptions("get", "/events/{event_ref}", {
@@ -206,6 +230,44 @@ export function MeetingPage({
     setRoomBooking(loadMeetingRoomBooking(meetingSlug));
   }, [meetingSlug]);
 
+  const { data: storedBookingLookup, isSuccess: isStoredBookingLookupSuccess } =
+    $roomBooking.useQuery(
+      "get",
+      "/bookings/",
+      {
+        params: {
+          query: {
+            start: roomBooking?.start ?? "",
+            end: roomBooking?.end ?? "",
+            room_ids: roomBooking ? [roomBooking.roomId] : [],
+          },
+        },
+      },
+      {
+        enabled: !!roomBooking && !needsSetup,
+      },
+    );
+
+  useEffect(() => {
+    if (!roomBooking || !isStoredBookingLookupSuccess) {
+      return;
+    }
+
+    if (
+      isStoredMeetingRoomBookingActive(roomBooking, storedBookingLookup ?? [])
+    ) {
+      return;
+    }
+
+    clearMeetingRoomBooking(meetingSlug);
+    setRoomBooking(null);
+  }, [
+    roomBooking,
+    storedBookingLookup,
+    isStoredBookingLookupSuccess,
+    meetingSlug,
+  ]);
+
   const currentUser = useMemo(
     () => users.find((user) => user.id === currentUserId),
     [users, currentUserId],
@@ -275,6 +337,129 @@ export function MeetingPage({
 
   const highlightBestIntersection =
     minParticipants > 1 && !needsSetup && slotAvailability.slotKeys.size > 0;
+
+  const bookingRange = useMemo(
+    () => getSlotKeysRange(bookingSelectionKeys),
+    [bookingSelectionKeys],
+  );
+
+  const { data: myAccessList } = $roomBooking.useQuery(
+    "get",
+    "/rooms/my-access-list",
+    {},
+    { enabled: isOwner && !needsSetup },
+  );
+
+  const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
+    "get",
+    "/rooms/",
+    { params: { query: { include_red: true } } },
+    { enabled: isOwner && !needsSetup },
+  );
+
+  const bookableRooms = useMemo(() => {
+    const myAccessListRoomIds = myAccessList?.map((room) => room.id) ?? [];
+
+    return (
+      rooms?.filter(
+        (room) =>
+          room.access_level === RoomAccess_levelAnyOf0.yellow ||
+          (room.access_level === RoomAccess_levelAnyOf0.red &&
+            me?.innopolis_info?.is_staff) ||
+          myAccessListRoomIds.includes(room.id),
+      ) ?? []
+    );
+  }, [rooms, me?.innopolis_info?.is_staff, myAccessList]);
+
+  const { bookings, isPending: isBookingsPending } = useWhen2MeetRoomBookings({
+    bookableRooms,
+    start: bookingRange?.start.toISOString(),
+    end: bookingRange?.end.toISOString(),
+    enabled:
+      (bookingModalOpen || pendingBookingOpen) &&
+      !!bookingRange &&
+      bookableRooms.length > 0 &&
+      isOwner &&
+      !needsSetup,
+  });
+
+  const availableBookingRooms = useMemo(() => {
+    if (bookingSelectionKeys.length === 0) {
+      return [];
+    }
+
+    return getAvailableRoomsForSlotKeys(
+      bookingSelectionKeys,
+      bookings ?? [],
+      bookableRooms,
+    ).sort((leftRoom, rightRoom) =>
+      leftRoom.title.localeCompare(rightRoom.title, undefined, {
+        numeric: true,
+      }),
+    );
+  }, [bookingSelectionKeys, bookings, bookableRooms]);
+
+  const bookingNewSlot = useMemo((): Slot | undefined => {
+    if (!bookingRange || !bookingModalOpen) {
+      return undefined;
+    }
+
+    const room =
+      availableBookingRooms.find(
+        (bookableRoom) => bookableRoom.id === selectedBookingRoomId,
+      ) ??
+      availableBookingRooms[0] ??
+      bookableRooms[0];
+
+    if (!room) {
+      return undefined;
+    }
+
+    return {
+      room: { ...room, idx: 0 },
+      start: bookingRange.start,
+      end: bookingRange.end,
+    };
+  }, [
+    bookingRange,
+    bookingModalOpen,
+    availableBookingRooms,
+    selectedBookingRoomId,
+    bookableRooms,
+  ]);
+
+  useEffect(() => {
+    if (!pendingBookingOpen || bookingSelectionKeys.length === 0) {
+      return;
+    }
+
+    if (isBookingsPending || isRoomsPending) {
+      return;
+    }
+
+    setPendingBookingOpen(false);
+    setBookingModalOpen(true);
+  }, [
+    pendingBookingOpen,
+    bookingSelectionKeys.length,
+    isBookingsPending,
+    isRoomsPending,
+  ]);
+
+  useEffect(() => {
+    if (!bookingModalOpen || availableBookingRooms.length === 0) {
+      return;
+    }
+
+    if (
+      selectedBookingRoomId &&
+      availableBookingRooms.some((room) => room.id === selectedBookingRoomId)
+    ) {
+      return;
+    }
+
+    setSelectedBookingRoomId(availableBookingRooms[0]?.id ?? null);
+  }, [bookingModalOpen, availableBookingRooms, selectedBookingRoomId]);
 
   useEffect(() => {
     if (slotAvailability.maxCount === 0) {
@@ -561,6 +746,79 @@ export function MeetingPage({
     );
   }
 
+  function handleToggleBookingMode() {
+    if (isBookingMode) {
+      setIsBookingMode(false);
+      setBookingSlots(new Set());
+      return;
+    }
+
+    if (editingUserId) {
+      handleCancelEditing();
+    }
+
+    setIsBookingMode(true);
+    setBookingSlots(new Set());
+  }
+
+  function handleBookingSlotsChange(slotKeys: string[]) {
+    setBookingSlots(new Set(slotKeys));
+  }
+
+  function handleBookingSelectionEnd(slotKeys: string[]) {
+    if (slotKeys.length === 0) {
+      return;
+    }
+
+    setBookingSelectionKeys([...slotKeys].sort());
+    setIsBookingMode(false);
+    setBookingSlots(new Set());
+    setPendingBookingOpen(true);
+  }
+
+  function handleBookingModalOpenChange(open: boolean) {
+    setBookingModalOpen(open);
+    setPendingBookingOpen(false);
+
+    if (open) {
+      return;
+    }
+
+    setBookingSelectionKeys([]);
+    setSelectedBookingRoomId(null);
+  }
+
+  function handleBookingCreated(createdBooking: Booking) {
+    if (bookingSelectionKeys.length === 0) {
+      return;
+    }
+
+    const room = availableBookingRooms.find(
+      (bookableRoom) => bookableRoom.id === selectedBookingRoomId,
+    );
+
+    if (!room) {
+      return;
+    }
+
+    const savedBooking: MeetingRoomBooking = {
+      id: createdBooking.id,
+      slotKey: bookingSelectionKeys[0] ?? "",
+      roomId: room.id,
+      roomTitle: room.title,
+      start: createdBooking.startsAt.toISOString(),
+      end: createdBooking.endsAt.toISOString(),
+    };
+
+    saveMeetingRoomBooking(meetingSlug, savedBooking);
+    setRoomBooking(savedBooking);
+    showSuccess(
+      "Room booked",
+      `${room.title} · ${formatSlotKeyLabel(savedBooking.slotKey, formattedDates)}`,
+    );
+    handleBookingModalOpenChange(false);
+  }
+
   async function handleShareLink() {
     const shareUrl = `${window.location.origin}/when2meet/${meetingSlug}`;
 
@@ -762,7 +1020,13 @@ export function MeetingPage({
                   timeSlots={timeSlots}
                   users={listUsers}
                   viewedUserIds={activeViewedUserIds}
-                  editingUserId={needsSetup ? SETUP_USER_ID : editingUserId}
+                  editingUserId={
+                    needsSetup
+                      ? SETUP_USER_ID
+                      : isBookingMode
+                        ? null
+                        : editingUserId
+                  }
                   draftSlots={draftSlots}
                   onApplySlots={handleApplySlots}
                   allowedSlots={allowedSlots}
@@ -773,6 +1037,10 @@ export function MeetingPage({
                   bestIntersectionCount={minParticipants}
                   hoveredSlotKey={hoveredSlotKey}
                   onHoveredSlotKeyChange={setHoveredSlotKey}
+                  bookingMode={isBookingMode}
+                  bookingSlots={bookingSlots}
+                  onBookingSlotsChange={handleBookingSlotsChange}
+                  onBookingSelectionEnd={handleBookingSelectionEnd}
                   isPhone
                 />
               </div>
@@ -782,7 +1050,13 @@ export function MeetingPage({
                   timeSlots={timeSlots}
                   users={listUsers}
                   viewedUserIds={activeViewedUserIds}
-                  editingUserId={needsSetup ? SETUP_USER_ID : editingUserId}
+                  editingUserId={
+                    needsSetup
+                      ? SETUP_USER_ID
+                      : isBookingMode
+                        ? null
+                        : editingUserId
+                  }
                   draftSlots={draftSlots}
                   onApplySlots={handleApplySlots}
                   allowedSlots={allowedSlots}
@@ -793,6 +1067,10 @@ export function MeetingPage({
                   bestIntersectionCount={minParticipants}
                   hoveredSlotKey={hoveredSlotKey}
                   onHoveredSlotKeyChange={setHoveredSlotKey}
+                  bookingMode={isBookingMode}
+                  bookingSlots={bookingSlots}
+                  onBookingSlotsChange={handleBookingSlotsChange}
+                  onBookingSelectionEnd={handleBookingSelectionEnd}
                 />
               </div>
             </div>
@@ -846,14 +1124,23 @@ export function MeetingPage({
                           </div>
                         </div>
                       )}
-                      <Link
-                        to="/when2meet/$meetingId/book"
-                        params={{ meetingId: meetingSlug }}
-                        className="btn btn-primary gap-2"
+                      {pendingBookingOpen && (
+                        <p className="text-base-content/60 text-sm">
+                          <span className="loading loading-spinner loading-xs mr-2" />
+                          Loading room availability...
+                        </p>
+                      )}
+                      <button
+                        type="button"
+                        className={cn(
+                          "btn gap-2",
+                          isBookingMode ? "btn-secondary" : "btn-primary",
+                        )}
+                        onClick={handleToggleBookingMode}
                       >
                         <span className="icon-[mdi--door-open] text-lg" />
-                        Book room
-                      </Link>
+                        {isBookingMode ? "Cancel booking" : "Book room"}
+                      </button>
                       <div className="grid w-full grid-cols-2 gap-2">
                         <Link
                           to="/when2meet/$meetingId/edit"
@@ -1008,6 +1295,17 @@ export function MeetingPage({
             isSavingSetup={isSavingSetup}
           />
         )}
+
+        <BookingModal
+          newSlot={bookingNewSlot}
+          open={bookingModalOpen}
+          onOpenChange={handleBookingModalOpenChange}
+          onBookingCreated={handleBookingCreated}
+          roomOptions={availableBookingRooms}
+          selectedRoomId={selectedBookingRoomId}
+          onSelectedRoomIdChange={setSelectedBookingRoomId}
+          fixedSchedule
+        />
       </>
     </RequireAuth>
   );
