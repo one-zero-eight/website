@@ -65,10 +65,10 @@ export function AvailabilitySelector({
   selectionOnly = false,
   hideLegend = false,
   hideHint = false,
-  onHoveredSlotKeyChange,
-  showBestIntersection = false,
   bestIntersectionSlotKeys,
   bestIntersectionCount = 0,
+  hoveredSlotKey = null,
+  onHoveredSlotKeyChange,
 }: {
   dates: MeetingDate[];
   timeSlots: string[];
@@ -82,10 +82,10 @@ export function AvailabilitySelector({
   selectionOnly?: boolean;
   hideLegend?: boolean;
   hideHint?: boolean;
-  onHoveredSlotKeyChange?: (slotKey: string | null) => void;
-  showBestIntersection?: boolean;
   bestIntersectionSlotKeys?: Set<string>;
   bestIntersectionCount?: number;
+  hoveredSlotKey?: string | null;
+  onHoveredSlotKeyChange?: (slotKey: string | null) => void;
 }) {
   const daysPerPage = isPhone ? 3 : 7;
   const [dateOffset, setDateOffset] = useState(0);
@@ -103,12 +103,18 @@ export function AvailabilitySelector({
   const onApplySlotsRef = useRef(onApplySlots);
   onApplySlotsRef.current = onApplySlots;
 
+  const isEditing = editingUserId !== null;
+  const showSelectionVisual = selectionOnly || isEditing;
+  const highlightBestIntersection =
+    !showSelectionVisual &&
+    !!bestIntersectionSlotKeys &&
+    bestIntersectionSlotKeys.size > 0;
+
   const visibleDates = dates.slice(dateOffset, dateOffset + daysPerPage);
   visibleDateIdsRef.current = visibleDates.map((date) => date.id);
   const hasPrevPage = dateOffset > 0;
   const hasNextPage = dateOffset + daysPerPage < dates.length;
   const showPagination = dates.length > daysPerPage;
-  const isEditing = editingUserId !== null;
 
   useEffect(() => {
     setDateOffset(0);
@@ -119,22 +125,6 @@ export function AvailabilitySelector({
       onHoveredSlotKeyChange?.(null);
     }
   }, [isEditing, onHoveredSlotKeyChange, selectionOnly]);
-
-  function handleSlotMouseEnter(slotKey: string) {
-    if (isDraggingRef.current || isEditing || selectionOnly) {
-      return;
-    }
-
-    onHoveredSlotKeyChange?.(slotKey);
-  }
-
-  function handleGridMouseLeave() {
-    if (isEditing || selectionOnly) {
-      return;
-    }
-
-    onHoveredSlotKeyChange?.(null);
-  }
 
   function isSlotAllowed(dateId: string, time: string) {
     if (!allowedSlots) {
@@ -166,6 +156,31 @@ export function AvailabilitySelector({
         maxCount = Math.max(maxCount, getAvailableCount(date.id, time));
       }
     }
+  }
+
+  function handleSlotMouseEnter(slotKey: string, dateId: string, time: string) {
+    if (isDraggingRef.current || isEditing || selectionOnly) {
+      return;
+    }
+
+    if (
+      highlightBestIntersection &&
+      isSlotAllowed(dateId, time) &&
+      bestIntersectionSlotKeys &&
+      !bestIntersectionSlotKeys.has(slotKey)
+    ) {
+      return;
+    }
+
+    onHoveredSlotKeyChange?.(slotKey);
+  }
+
+  function handleGridMouseLeave() {
+    if (isEditing || selectionOnly) {
+      return;
+    }
+
+    onHoveredSlotKeyChange?.(null);
   }
 
   function isEditingUserSlot(dateId: string, time: string) {
@@ -306,7 +321,10 @@ export function AvailabilitySelector({
     setDateOffset((offset) => Math.min(dates.length - daysPerPage, offset + 1));
   }
 
-  const showSelectionVisual = selectionOnly || isEditing;
+  const fadeNonBestSlots =
+    highlightBestIntersection &&
+    !!bestIntersectionSlotKeys &&
+    bestIntersectionSlotKeys.size > 0;
 
   const gridContent = (
     <div
@@ -342,18 +360,31 @@ export function AvailabilitySelector({
             const availableCount = getAvailableCount(date.id, time);
             const isSelected = isEditingUserSlot(date.id, time);
             const isBestIntersection =
-              showBestIntersection &&
-              !!bestIntersectionSlotKeys?.has(slotKey) &&
-              availableCount > 0;
-            const heatmapAppearance =
-              slotAllowed && !showSelectionVisual
-                ? showBestIntersection
-                  ? getSlotHeatmapAppearanceColorblindSafe(
-                      availableCount,
-                      maxCount,
-                    )
-                  : getSlotHeatmapAppearance(availableCount, maxCount)
-                : undefined;
+              fadeNonBestSlots && bestIntersectionSlotKeys.has(slotKey);
+            const isFilteredOut =
+              fadeNonBestSlots && slotAllowed && !isBestIntersection;
+            const isFullSlot =
+              slotAllowed &&
+              !showSelectionVisual &&
+              !isFilteredOut &&
+              availableCount > 0 &&
+              availableCount >= maxCount;
+            const isHovered = hoveredSlotKey === slotKey;
+            const showHoverRing =
+              isHovered &&
+              (!fadeNonBestSlots || isBestIntersection || !slotAllowed);
+            const showFullSlotHover = showHoverRing && isFullSlot;
+            const showPartialSlotHover = showHoverRing && !isFullSlot;
+            const showHeatmapFill =
+              slotAllowed && !showSelectionVisual && !isFilteredOut;
+            const heatmapAppearance = showHeatmapFill
+              ? highlightBestIntersection
+                ? getSlotHeatmapAppearanceColorblindSafe(
+                    availableCount,
+                    maxCount,
+                  )
+                : getSlotHeatmapAppearance(availableCount, maxCount)
+              : undefined;
 
             return (
               <button
@@ -371,9 +402,13 @@ export function AvailabilitySelector({
                       ? isSelected
                         ? "bg-primary text-primary-content"
                         : "bg-base-100"
-                      : heatmapAppearance?.className),
-                  isBestIntersection &&
+                      : isFilteredOut
+                        ? "bg-base-100 pointer-events-none"
+                        : heatmapAppearance?.className),
+                  showPartialSlotHover &&
                     "ring-primary shadow-[inset_0_0_0_2px_var(--color-primary)]",
+                  showFullSlotHover &&
+                    "shadow-[inset_0_0_0_2px_var(--color-base-300)]/80",
                   showSelectionVisual &&
                     slotAllowed &&
                     "touch-none select-none",
@@ -382,21 +417,17 @@ export function AvailabilitySelector({
                     : "cursor-default",
                 )}
                 title={
-                  isBestIntersection
-                    ? `${date.monthDay}, ${time}: ${availableCount} available — best intersection`
+                  !slotAllowed
+                    ? `${date.monthDay}, ${time}: not available for this meeting`
                     : `${date.monthDay}, ${time}: ${availableCount} available`
                 }
-                onMouseEnter={() => handleSlotMouseEnter(slotKey)}
+                onMouseEnter={() =>
+                  handleSlotMouseEnter(slotKey, date.id, time)
+                }
                 onPointerDown={(event) =>
                   handleSlotPointerDown(date.id, time, event)
                 }
-              >
-                {isBestIntersection && (
-                  <span className="text-primary absolute inset-0 flex items-center justify-center text-[10px] leading-none font-bold md:text-xs">
-                    {availableCount}
-                  </span>
-                )}
-              </button>
+              />
             );
           })}
         </div>
@@ -469,7 +500,7 @@ export function AvailabilitySelector({
 
       {!hideLegend && (
         <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
-          {showBestIntersection ? (
+          {highlightBestIntersection ? (
             <>
               <div className="flex items-center gap-2">
                 <div className="border-base-300 bg-primary/45 h-3 w-3 rounded border" />
@@ -482,10 +513,9 @@ export function AvailabilitySelector({
               <div className="flex items-center gap-2">
                 <div className="ring-primary bg-primary/70 h-3 w-3 rounded shadow-[inset_0_0_0_2px_var(--color-primary)]" />
                 <span className="text-base-content/70">
-                  Best intersection
                   {bestIntersectionCount > 0
-                    ? ` (${bestIntersectionCount})`
-                    : ""}
+                    ? `≥${bestIntersectionCount} participant${bestIntersectionCount === 1 ? "" : "s"}`
+                    : "Matching times"}
                 </span>
               </div>
             </>

@@ -7,6 +7,7 @@ import {
 import { getBestIntersection } from "./best-slot.ts";
 import {
   countExplicitSlotAvailability,
+  getParticipantsWithExplicitSlot,
   userHasExplicitAvailability,
 } from "./participants.ts";
 
@@ -154,6 +155,21 @@ assert(
     new Set(),
   ) === 2,
   "slot count ignores participants without explicit availability",
+);
+
+const explicitParticipants = getParticipantsWithExplicitSlot(
+  usersWithNonResponder,
+  "2026-07-16_09:00",
+  null,
+  new Set(),
+);
+assert(
+  explicitParticipants.length === 2,
+  "slot detail includes only participants with explicit availability",
+);
+assert(
+  explicitParticipants.every((user) => user.id === "a" || user.id === "b"),
+  "slot detail lists the correct participant names",
 );
 
 const dates = ["2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19"];
