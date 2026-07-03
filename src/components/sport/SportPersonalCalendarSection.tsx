@@ -14,6 +14,7 @@ import { cn } from "@/lib/ui/cn";
 import { Link } from "@tanstack/react-router";
 import moment from "moment/moment";
 import { useMemo, useState } from "react";
+import "@/components/calendar/fullcalendar-list-styles.ts";
 import "@/components/calendar/styles-calendar.css";
 
 export function SportPersonalCalendarSection({
@@ -106,7 +107,7 @@ export function SportPersonalCalendarSection({
       {isPending ? (
         <div className="skeleton h-64 w-full" />
       ) : (
-        <div className="fc fc-media-screen">
+        <div className="fc fc-direction-ltr fc-theme-standard fc-media-screen">
           <div className="fc-view fc-list">
             <div className="fc-scroller">
               <table className="fc-list-table border-base-300 border">
