@@ -15,6 +15,16 @@ export function parseSlotKey(slotKey: string) {
   return { dateId, time };
 }
 
+export function areConsecutiveDateIds(
+  previousDateId: string,
+  nextDateId: string,
+) {
+  const dayAfterPrevious = new Date(`${previousDateId}T12:00:00`);
+  dayAfterPrevious.setDate(dayAfterPrevious.getDate() + 1);
+
+  return dayAfterPrevious.toLocaleDateString("en-CA") === nextDateId;
+}
+
 export function getSlotKeysBetween(
   fromSlotKey: string,
   toSlotKey: string,

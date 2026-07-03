@@ -10,6 +10,7 @@ import { cn } from "@/lib/ui/cn";
 import type { MeetingDate, MeetingUser } from "./types.ts";
 import { countExplicitSlotAvailability } from "./utils/participants.ts";
 import {
+  areConsecutiveDateIds,
   getSlotHeatmapAppearance,
   getSlotHeatmapAppearanceColorblindSafe,
   getSlotKey,
@@ -142,6 +143,7 @@ export function AvailabilitySelector({
 
   const visibleDates = dates.slice(dateOffset, dateOffset + daysPerPage);
   visibleDateIdsRef.current = visibleDates.map((date) => date.id);
+  const todayDateId = new Date().toLocaleDateString("en-CA");
   const hasPrevPage = dateOffset > 0;
   const hasNextPage = dateOffset + daysPerPage < dates.length;
   const showPagination = dates.length > daysPerPage;
@@ -412,6 +414,22 @@ export function AvailabilitySelector({
     !!bestIntersectionSlotKeys &&
     bestIntersectionSlotKeys.size > 0;
 
+  function getDateColumnGapClassName(dateIndex: number) {
+    const date = dates[dateIndex];
+
+    if (!date) {
+      return "";
+    }
+
+    const gapBefore =
+      dateIndex > 0 && !areConsecutiveDateIds(dates[dateIndex - 1].id, date.id);
+    const gapAfter =
+      dateIndex < dates.length - 1 &&
+      !areConsecutiveDateIds(date.id, dates[dateIndex + 1].id);
+
+    return cn(gapBefore && "ml-2", gapAfter && "mr-2");
+  }
+
   const gridContent = (
     <div
       ref={gridRef}
@@ -423,12 +441,32 @@ export function AvailabilitySelector({
       style={{ gridTemplateColumns }}
     >
       <div />
-      {visibleDates.map((date) => (
-        <div key={date.id} className="pb-2 text-center">
-          <div className="text-base-content/70 text-sm">{date.monthDay}</div>
-          <div className="text-base font-medium">{date.weekDay}</div>
-        </div>
-      ))}
+      {visibleDates.map((date, visibleIndex) => {
+        const dateIndex = dateOffset + visibleIndex;
+        const dateColumnGapClassName = getDateColumnGapClassName(dateIndex);
+        const isToday = date.id === todayDateId;
+        const dayNumber = Number(date.id.split("-")[2]);
+
+        return (
+          <div
+            key={date.id}
+            className={cn("pb-2 text-center", dateColumnGapClassName)}
+          >
+            <div className="flex items-center justify-center gap-1.5 text-base font-medium">
+              <span>{date.weekDay}</span>
+              <span
+                className={cn(
+                  "inline-flex min-w-6 items-center justify-center tabular-nums",
+                  isToday &&
+                    "bg-error text-error-content rounded-md px-1.5 py-0.5",
+                )}
+              >
+                {dayNumber}
+              </span>
+            </div>
+          </div>
+        );
+      })}
 
       {timeSlots.map((time) => (
         <div key={time} className="contents">
@@ -440,7 +478,9 @@ export function AvailabilitySelector({
           >
             {time}
           </div>
-          {visibleDates.map((date) => {
+          {visibleDates.map((date, visibleIndex) => {
+            const dateIndex = dateOffset + visibleIndex;
+            const dateColumnGapClassName = getDateColumnGapClassName(dateIndex);
             const slotKey = getSlotKey(date.id, time);
             const slotAllowed = isSlotAllowed(date.id, time);
             const availableCount = getAvailableCount(date.id, time);
@@ -485,6 +525,7 @@ export function AvailabilitySelector({
                 }
                 className={cn(
                   "border-base-300 relative h-7 border-t border-r border-dashed first:border-l md:h-8",
+                  dateColumnGapClassName,
                   time.endsWith(":00") && "border-solid",
                   !slotAllowed &&
                     "bg-base-200/80 cursor-not-allowed opacity-40",
