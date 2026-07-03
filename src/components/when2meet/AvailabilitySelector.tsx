@@ -7,8 +7,10 @@ import {
 } from "react";
 import { cn } from "@/lib/ui/cn";
 import type { MeetingDate, MeetingUser } from "./types.ts";
+import { countExplicitSlotAvailability } from "./utils/participants.ts";
 import {
   getSlotHeatmapAppearance,
+  getSlotHeatmapAppearanceColorblindSafe,
   getSlotKey,
   getSlotKeysBetween,
   parseSlotKey,
@@ -64,6 +66,9 @@ export function AvailabilitySelector({
   hideLegend = false,
   hideHint = false,
   onHoveredSlotKeyChange,
+  showBestIntersection = false,
+  bestIntersectionSlotKeys,
+  bestIntersectionCount = 0,
 }: {
   dates: MeetingDate[];
   timeSlots: string[];
@@ -78,6 +83,9 @@ export function AvailabilitySelector({
   hideLegend?: boolean;
   hideHint?: boolean;
   onHoveredSlotKeyChange?: (slotKey: string | null) => void;
+  showBestIntersection?: boolean;
+  bestIntersectionSlotKeys?: Set<string>;
+  bestIntersectionCount?: number;
 }) {
   const daysPerPage = isPhone ? 3 : 7;
   const [dateOffset, setDateOffset] = useState(0);
@@ -94,9 +102,6 @@ export function AvailabilitySelector({
 
   const onApplySlotsRef = useRef(onApplySlots);
   onApplySlotsRef.current = onApplySlots;
-
-  const viewedUsers = users.filter((user) => viewedUserIds.has(user.id));
-  const maxCount = Math.max(1, viewedUsers.length);
 
   const visibleDates = dates.slice(dateOffset, dateOffset + daysPerPage);
   visibleDateIdsRef.current = visibleDates.map((date) => date.id);
@@ -139,23 +144,28 @@ export function AvailabilitySelector({
     return allowedSlots.has(getSlotKey(dateId, time));
   }
 
-  function getDisplaySlots(user: MeetingUser) {
-    if (user.id !== editingUserId) {
-      return user.slots;
-    }
-
-    return draftSlots;
-  }
-
   function getAvailableCount(dateId: string, time: string) {
     if (selectionOnly) {
       return 0;
     }
 
-    const slotKey = getSlotKey(dateId, time);
+    return countExplicitSlotAvailability(
+      users,
+      viewedUserIds,
+      getSlotKey(dateId, time),
+      editingUserId,
+      draftSlots,
+    );
+  }
 
-    return viewedUsers.filter((user) => getDisplaySlots(user).has(slotKey))
-      .length;
+  let maxCount = 1;
+
+  if (!selectionOnly) {
+    for (const date of dates) {
+      for (const time of timeSlots) {
+        maxCount = Math.max(maxCount, getAvailableCount(date.id, time));
+      }
+    }
   }
 
   function isEditingUserSlot(dateId: string, time: string) {
@@ -331,9 +341,18 @@ export function AvailabilitySelector({
             const slotAllowed = isSlotAllowed(date.id, time);
             const availableCount = getAvailableCount(date.id, time);
             const isSelected = isEditingUserSlot(date.id, time);
+            const isBestIntersection =
+              showBestIntersection &&
+              !!bestIntersectionSlotKeys?.has(slotKey) &&
+              availableCount > 0;
             const heatmapAppearance =
               slotAllowed && !showSelectionVisual
-                ? getSlotHeatmapAppearance(availableCount, maxCount)
+                ? showBestIntersection
+                  ? getSlotHeatmapAppearanceColorblindSafe(
+                      availableCount,
+                      maxCount,
+                    )
+                  : getSlotHeatmapAppearance(availableCount, maxCount)
                 : undefined;
 
             return (
@@ -343,7 +362,7 @@ export function AvailabilitySelector({
                 data-slot-key={slotKey}
                 style={heatmapAppearance?.style}
                 className={cn(
-                  "border-base-300 h-7 border-t border-r border-dashed first:border-l md:h-8",
+                  "border-base-300 relative h-7 border-t border-r border-dashed first:border-l md:h-8",
                   time.endsWith(":00") && "border-solid",
                   !slotAllowed &&
                     "bg-base-200/80 cursor-not-allowed opacity-40",
@@ -353,6 +372,8 @@ export function AvailabilitySelector({
                         ? "bg-primary text-primary-content"
                         : "bg-base-100"
                       : heatmapAppearance?.className),
+                  isBestIntersection &&
+                    "ring-primary shadow-[inset_0_0_0_2px_var(--color-primary)]",
                   showSelectionVisual &&
                     slotAllowed &&
                     "touch-none select-none",
@@ -360,12 +381,22 @@ export function AvailabilitySelector({
                     ? "cursor-pointer"
                     : "cursor-default",
                 )}
-                title={`${date.monthDay}, ${time}: ${availableCount} available`}
+                title={
+                  isBestIntersection
+                    ? `${date.monthDay}, ${time}: ${availableCount} available — best intersection`
+                    : `${date.monthDay}, ${time}: ${availableCount} available`
+                }
                 onMouseEnter={() => handleSlotMouseEnter(slotKey)}
                 onPointerDown={(event) =>
                   handleSlotPointerDown(date.id, time, event)
                 }
-              />
+              >
+                {isBestIntersection && (
+                  <span className="text-primary absolute inset-0 flex items-center justify-center text-[10px] leading-none font-bold md:text-xs">
+                    {availableCount}
+                  </span>
+                )}
+              </button>
             );
           })}
         </div>
@@ -438,14 +469,38 @@ export function AvailabilitySelector({
 
       {!hideLegend && (
         <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary h-3 w-3 rounded" />
-            <span className="text-base-content/70">Available</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="bg-base-100 border-base-300 h-3 w-3 rounded border border-dashed" />
-            <span className="text-base-content/70">Empty</span>
-          </div>
+          {showBestIntersection ? (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="border-base-300 bg-primary/45 h-3 w-3 rounded border" />
+                <span className="text-base-content/70">Fewer participants</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="bg-primary h-3 w-3 rounded" />
+                <span className="text-base-content/70">More participants</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="ring-primary bg-primary/70 h-3 w-3 rounded shadow-[inset_0_0_0_2px_var(--color-primary)]" />
+                <span className="text-base-content/70">
+                  Best intersection
+                  {bestIntersectionCount > 0
+                    ? ` (${bestIntersectionCount})`
+                    : ""}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="bg-primary h-3 w-3 rounded" />
+                <span className="text-base-content/70">Available</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="bg-base-100 border-base-300 h-3 w-3 rounded border border-dashed" />
+                <span className="text-base-content/70">Empty</span>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

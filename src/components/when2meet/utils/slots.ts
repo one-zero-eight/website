@@ -264,3 +264,32 @@ export function getSlotHeatmapAppearance(
     },
   };
 }
+
+export function getSlotHeatmapAppearanceColorblindSafe(
+  count: number,
+  maxCount: number,
+): { className?: string; style?: CSSProperties } {
+  if (count <= 0) {
+    return { className: "bg-base-100" };
+  }
+
+  const ratio = getSlotAvailabilityRatio(count, maxCount);
+
+  if (ratio >= 1) {
+    return { className: "bg-primary text-primary-content" };
+  }
+
+  if (ratio >= 0.75) {
+    return { className: "bg-primary/70" };
+  }
+
+  if (ratio >= 0.5) {
+    return { className: "bg-primary/45" };
+  }
+
+  if (ratio >= 0.25) {
+    return { className: "bg-primary/25" };
+  }
+
+  return { className: "bg-primary/10" };
+}

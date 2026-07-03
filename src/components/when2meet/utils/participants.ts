@@ -54,6 +54,48 @@ export function participantsToUsers(
   }));
 }
 
+export function getUserDisplaySlots(
+  user: MeetingUser,
+  editingUserId: string | null,
+  draftSlots: Set<string>,
+) {
+  if (user.id === editingUserId) {
+    return draftSlots;
+  }
+
+  return user.slots;
+}
+
+export function userHasExplicitAvailability(
+  user: MeetingUser,
+  editingUserId: string | null,
+  draftSlots: Set<string>,
+) {
+  return getUserDisplaySlots(user, editingUserId, draftSlots).size > 0;
+}
+
+export function countExplicitSlotAvailability(
+  users: MeetingUser[],
+  viewedUserIds: Set<string>,
+  slotKey: string,
+  editingUserId: string | null,
+  draftSlots: Set<string>,
+) {
+  return users.filter((user) => {
+    if (!viewedUserIds.has(user.id)) {
+      return false;
+    }
+
+    const displaySlots = getUserDisplaySlots(user, editingUserId, draftSlots);
+
+    if (displaySlots.size === 0) {
+      return false;
+    }
+
+    return displaySlots.has(slotKey);
+  }).length;
+}
+
 export function sortUsersWithCurrentUserFirst(
   users: MeetingUser[],
   currentUserId?: string | null,

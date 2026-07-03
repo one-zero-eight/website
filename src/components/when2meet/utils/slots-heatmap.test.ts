@@ -1,8 +1,14 @@
 import {
   getSlotAvailabilityRatio,
   getSlotHeatmapAppearance,
+  getSlotHeatmapAppearanceColorblindSafe,
   getSlotKeysBetween,
 } from "./slots.ts";
+import { getBestIntersection } from "./best-slot.ts";
+import {
+  countExplicitSlotAvailability,
+  userHasExplicitAvailability,
+} from "./participants.ts";
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -57,6 +63,97 @@ const partialAppearance = getSlotHeatmapAppearance(12, 25);
 assert(
   !partialAppearance.className,
   "partial availability does not force primary content text color",
+);
+
+assert(
+  getSlotHeatmapAppearanceColorblindSafe(0, 10).className === "bg-base-100",
+  "colorblind-safe empty slot uses base background",
+);
+assert(
+  !getSlotHeatmapAppearanceColorblindSafe(0, 10).style,
+  "colorblind-safe empty slot has no inline style",
+);
+assert(
+  getSlotHeatmapAppearanceColorblindSafe(3, 10).className === "bg-primary/25",
+  "colorblind-safe low availability uses stepped class",
+);
+assert(
+  getSlotHeatmapAppearanceColorblindSafe(10, 10).className ===
+    "bg-primary text-primary-content",
+  "colorblind-safe full availability uses solid primary",
+);
+
+const users = [
+  { id: "a", name: "A", slots: new Set(["2026-07-16_09:00"]) },
+  {
+    id: "b",
+    name: "B",
+    slots: new Set(["2026-07-16_09:00", "2026-07-16_10:00"]),
+  },
+  { id: "c", name: "C", slots: new Set(["2026-07-16_10:00"]) },
+];
+const allowedSlots = new Set([
+  "2026-07-16_09:00",
+  "2026-07-16_09:30",
+  "2026-07-16_10:00",
+]);
+const viewedUserIds = new Set(["a", "b", "c"]);
+const bestIntersection = getBestIntersection(
+  users,
+  ["2026-07-16"],
+  ["09:00", "09:30", "10:00"],
+  allowedSlots,
+  viewedUserIds,
+);
+
+assert(bestIntersection.maxCount === 2, "best intersection count is 2");
+assert(
+  bestIntersection.slotKeys.has("2026-07-16_09:00"),
+  "09:00 is tied for best intersection",
+);
+assert(
+  bestIntersection.slotKeys.has("2026-07-16_10:00"),
+  "10:00 is tied for best intersection",
+);
+assert(
+  bestIntersection.slotKeys.size === 2,
+  "only tied slots are marked as best intersection",
+);
+
+const usersWithNonResponder = [
+  ...users,
+  { id: "d", name: "D", slots: new Set<string>() },
+];
+const bestIntersectionWithoutNonResponder = getBestIntersection(
+  usersWithNonResponder,
+  ["2026-07-16"],
+  ["09:00", "09:30", "10:00"],
+  allowedSlots,
+  new Set(["a", "b", "c", "d"]),
+);
+
+assert(
+  bestIntersectionWithoutNonResponder.maxCount === bestIntersection.maxCount,
+  "participants without explicit slots do not increase intersection counts",
+);
+
+assert(
+  !userHasExplicitAvailability(
+    { id: "d", name: "D", slots: new Set() },
+    null,
+    new Set(),
+  ),
+  "empty availability is not explicit",
+);
+assert(
+  countExplicitSlotAvailability(
+    usersWithNonResponder,
+    new Set(["a", "b", "c", "d"]),
+    "2026-07-16_09:00",
+    null,
+    new Set(),
+  ) === 2,
+  "slot count ignores participants without explicit availability",
 );
 
 const dates = ["2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19"];
