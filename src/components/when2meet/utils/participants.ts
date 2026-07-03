@@ -1,6 +1,27 @@
+import type { accountsTypes } from "@/api/accounts";
 import type { when2meetTypes } from "@/api/when2meet";
 import type { MeetingUser } from "../types.ts";
 import { backendSlotToSlotKey } from "./api-slots.ts";
+
+export function getAccountDisplayName(me?: accountsTypes.SchemaViewUser) {
+  const innopolisName = me?.innopolis_info?.name?.trim();
+
+  if (innopolisName) {
+    return innopolisName;
+  }
+
+  const telegramUsername = me?.telegram_info?.username?.trim();
+
+  if (telegramUsername) {
+    return telegramUsername;
+  }
+
+  if (me?.id) {
+    return me.id;
+  }
+
+  return "You";
+}
 
 export function getParticipantDisplayName(
   participant: when2meetTypes.SchemaParticipantView,
@@ -31,4 +52,24 @@ export function participantsToUsers(
     name: getParticipantDisplayName(participant),
     slots: new Set(participant.availability.map(backendSlotToSlotKey)),
   }));
+}
+
+export function sortUsersWithCurrentUserFirst(
+  users: MeetingUser[],
+  currentUserId?: string | null,
+) {
+  if (!currentUserId) {
+    return users;
+  }
+
+  const currentUserIndex = users.findIndex((user) => user.id === currentUserId);
+
+  if (currentUserIndex <= 0) {
+    return users;
+  }
+
+  const sortedUsers = [...users];
+  const [currentUser] = sortedUsers.splice(currentUserIndex, 1);
+
+  return [currentUser, ...sortedUsers];
 }

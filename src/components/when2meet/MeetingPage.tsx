@@ -6,7 +6,7 @@ import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
 import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
 import { RoomSuggestionModal } from "./RoomSuggestionModal.tsx";
@@ -18,14 +18,14 @@ import {
   slotKeysToBackendSlots,
 } from "./utils/api-slots.ts";
 import { getBestMeetingSlotKey } from "./utils/best-slot.ts";
-import { participantsToUsers } from "./utils/participants.ts";
 import {
-  formatDateRangeLabel,
-  formatMeetingDates,
-  formatSlotSummary,
-  getSlotKey,
-} from "./utils/slots.ts";
+  participantsToUsers,
+  sortUsersWithCurrentUserFirst,
+  getAccountDisplayName,
+} from "./utils/participants.ts";
+import { formatDateRangeLabel, formatMeetingDates } from "./utils/slots.ts";
 import { clearPendingSetup, isPendingSetup } from "./utils/setup-slots.ts";
+import type { MeetingUser } from "./types.ts";
 
 const SETUP_USER_ID = "__setup__";
 
@@ -42,11 +42,13 @@ export function MeetingPage({
   const queryClient = useQueryClient();
   const { me } = useMe();
   const { showSuccess, showError, showConfirm } = useToast();
-  const [viewedUserIds, setViewedUserIds] = useState<Set<string>>(new Set());
+  const [viewedUserIds, setViewedUserIds] = useState<Set<string> | null>(null);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [draftSlots, setDraftSlots] = useState<Set<string>>(new Set());
   const [participantSearch, setParticipantSearch] = useState("");
+  const [hoveredSlotKey, setHoveredSlotKey] = useState<string | null>(null);
   const [roomsOpen, setRoomsOpen] = useState(false);
+  const hasAutoStartedEditingRef = useRef(false);
 
   const eventQueryKey = $when2meet.queryOptions("get", "/events/{event_ref}", {
     params: { path: { event_ref: meetingId } },
@@ -168,8 +170,14 @@ export function MeetingPage({
   }, [needsSetup, parsedSlots, canvasSlots]);
 
   const users = useMemo(
-    () => (event ? participantsToUsers(event.participants) : []),
-    [event],
+    () =>
+      event
+        ? sortUsersWithCurrentUserFirst(
+            participantsToUsers(event.participants),
+            currentUserId,
+          )
+        : [],
+    [event, currentUserId],
   );
 
   const meetingName = event?.name ?? initialName ?? "Meeting";
@@ -196,29 +204,73 @@ export function MeetingPage({
     return `${date?.monthDay ?? dateId}, ${time}`;
   }, [bestSlotKey, formattedDates, timeSlots.length]);
 
-  const filteredUsers = useMemo(() => {
-    const trimmedSearch = participantSearch.trim().toLowerCase();
-
-    if (!trimmedSearch) {
-      return users;
-    }
-
-    return users.filter((user) =>
-      user.name.toLowerCase().includes(trimmedSearch),
-    );
-  }, [users, participantSearch]);
-
   const currentUser = useMemo(
     () => users.find((user) => user.id === currentUserId),
     [users, currentUserId],
   );
+
+  const listUsers = useMemo(() => {
+    if (!currentUserId || currentUser) {
+      return users;
+    }
+
+    const draftUser: MeetingUser = {
+      id: currentUserId,
+      name: getAccountDisplayName(me),
+      slots: new Set(),
+    };
+
+    return [draftUser, ...users];
+  }, [users, currentUserId, currentUser, me]);
+
+  const filteredUsers = useMemo(() => {
+    const trimmedSearch = participantSearch.trim().toLowerCase();
+
+    if (!trimmedSearch) {
+      return listUsers;
+    }
+
+    return listUsers.filter((user) =>
+      user.name.toLowerCase().includes(trimmedSearch),
+    );
+  }, [listUsers, participantSearch]);
+
+  const isHoveringSlot = hoveredSlotKey !== null && editingUserId === null;
+
+  function userHasHoveredSlot(user: MeetingUser) {
+    if (!hoveredSlotKey) {
+      return false;
+    }
+
+    if (user.id === editingUserId) {
+      return draftSlots.has(hoveredSlotKey);
+    }
+
+    return user.slots.has(hoveredSlotKey);
+  }
+
+  useEffect(() => {
+    if (
+      !currentUserId ||
+      !event ||
+      needsSetup ||
+      currentUser ||
+      hasAutoStartedEditingRef.current
+    ) {
+      return;
+    }
+
+    hasAutoStartedEditingRef.current = true;
+    setEditingUserId(currentUserId);
+    setDraftSlots(new Set());
+  }, [currentUser, currentUserId, event, needsSetup]);
 
   function handleStartEditing(userId: string) {
     if (userId !== currentUserId) {
       return;
     }
 
-    const user = users.find((entry) => entry.id === userId);
+    const user = listUsers.find((entry) => entry.id === userId);
 
     setEditingUserId(userId);
     setDraftSlots(new Set(user?.slots ?? []));
@@ -226,6 +278,14 @@ export function MeetingPage({
 
   function handleCancelEditing() {
     setEditingUserId(null);
+    setDraftSlots(new Set());
+  }
+
+  function handleClearAllSlots() {
+    if (editingUserId !== currentUserId) {
+      return;
+    }
+
     setDraftSlots(new Set());
   }
 
@@ -254,28 +314,24 @@ export function MeetingPage({
     );
   }
 
-  function handleApplySlot(
-    dateId: string,
-    time: string,
-    mode: "add" | "remove",
-  ) {
-    if (!editingUserId) {
-      return;
-    }
-
-    const slotKey = getSlotKey(dateId, time);
-
-    if (!allowedSlots.has(slotKey)) {
+  function handleApplySlots(slotKeys: string[], mode: "add" | "remove") {
+    if (!editingUserId || slotKeys.length === 0) {
       return;
     }
 
     setDraftSlots((currentSlots) => {
       const nextSlots = new Set(currentSlots);
 
-      if (mode === "add") {
-        nextSlots.add(slotKey);
-      } else {
-        nextSlots.delete(slotKey);
+      for (const slotKey of slotKeys) {
+        if (!allowedSlots.has(slotKey)) {
+          continue;
+        }
+
+        if (mode === "add") {
+          nextSlots.add(slotKey);
+        } else {
+          nextSlots.delete(slotKey);
+        }
       }
 
       return nextSlots;
@@ -284,16 +340,35 @@ export function MeetingPage({
 
   function handleToggleViewedUser(userId: string) {
     setViewedUserIds((currentUserIds) => {
-      const nextUserIds = new Set(currentUserIds);
+      const activeIds =
+        currentUserIds === null
+          ? new Set(listUsers.map((user) => user.id))
+          : new Set(currentUserIds);
 
-      if (nextUserIds.has(userId)) {
-        nextUserIds.delete(userId);
+      if (activeIds.has(userId)) {
+        activeIds.delete(userId);
       } else {
-        nextUserIds.add(userId);
+        activeIds.add(userId);
       }
 
-      return nextUserIds;
+      return activeIds;
     });
+  }
+
+  function handleToggleViewAllUsers() {
+    const viewedIds =
+      viewedUserIds === null
+        ? new Set(listUsers.map((user) => user.id))
+        : viewedUserIds;
+    const allViewed =
+      listUsers.length > 0 && listUsers.every((user) => viewedIds.has(user.id));
+
+    if (allViewed) {
+      setViewedUserIds(new Set());
+      return;
+    }
+
+    setViewedUserIds(null);
   }
 
   function handleDeleteParticipant(userId: string) {
@@ -409,9 +484,13 @@ export function MeetingPage({
   }
 
   const activeViewedUserIds =
-    viewedUserIds.size > 0
-      ? viewedUserIds
-      : new Set(users.map((user) => user.id));
+    viewedUserIds === null
+      ? new Set(listUsers.map((user) => user.id))
+      : viewedUserIds;
+
+  const allUsersViewed =
+    listUsers.length > 0 &&
+    listUsers.every((user) => activeViewedUserIds.has(user.id));
 
   const isEditingSelf = editingUserId === currentUserId;
 
@@ -520,20 +599,21 @@ export function MeetingPage({
               needsSetup ? "" : "xl:grid-cols-[minmax(0,1fr)_360px]",
             )}
           >
-            <div className="bg-base-100 border-base-300 rounded-box min-w-0 border p-3 md:p-5">
+            <div className="bg-base-100 border-base-300 rounded-box min-w-0 border p-4 md:p-5">
               <div className="md:hidden">
                 <AvailabilitySelector
                   dates={formattedDates}
                   timeSlots={timeSlots}
-                  users={users}
+                  users={listUsers}
                   viewedUserIds={activeViewedUserIds}
                   editingUserId={needsSetup ? SETUP_USER_ID : editingUserId}
                   draftSlots={draftSlots}
-                  onApplySlot={handleApplySlot}
+                  onApplySlots={handleApplySlots}
                   allowedSlots={allowedSlots}
                   selectionOnly={needsSetup}
                   hideLegend={needsSetup}
-                  hideHint={isEditingSelf || !isOwner}
+                  hideHint={!!currentUser && (isEditingSelf || !isOwner)}
+                  onHoveredSlotKeyChange={setHoveredSlotKey}
                   isPhone
                 />
               </div>
@@ -541,15 +621,16 @@ export function MeetingPage({
                 <AvailabilitySelector
                   dates={formattedDates}
                   timeSlots={timeSlots}
-                  users={users}
+                  users={listUsers}
                   viewedUserIds={activeViewedUserIds}
                   editingUserId={needsSetup ? SETUP_USER_ID : editingUserId}
                   draftSlots={draftSlots}
-                  onApplySlot={handleApplySlot}
+                  onApplySlots={handleApplySlots}
                   allowedSlots={allowedSlots}
                   selectionOnly={needsSetup}
                   hideLegend={needsSetup}
-                  hideHint={isEditingSelf || !isOwner}
+                  hideHint={!!currentUser && (isEditingSelf || !isOwner)}
+                  onHoveredSlotKeyChange={setHoveredSlotKey}
                 />
               </div>
             </div>
@@ -559,17 +640,13 @@ export function MeetingPage({
                 <div className="bg-base-100 border-base-300 rounded-box flex flex-col border p-4">
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <h2 className="text-lg font-semibold">Responses</h2>
-                    {users.length > 1 && (
+                    {listUsers.length > 1 && (
                       <button
                         type="button"
                         className="btn btn-link"
-                        onClick={() =>
-                          setViewedUserIds(
-                            new Set(users.map((user) => user.id)),
-                          )
-                        }
+                        onClick={handleToggleViewAllUsers}
                       >
-                        View all
+                        {allUsersViewed ? "Hide all" : "View all"}
                       </button>
                     )}
                   </div>
@@ -594,52 +671,61 @@ export function MeetingPage({
                       </div>
                     ) : (
                       filteredUsers.map((user) => {
-                        const isViewed = activeViewedUserIds.has(user.id);
                         const isEditing = editingUserId === user.id;
                         const isCurrentUser = user.id === currentUserId;
                         const canDelete = isOwner || user.id === currentUserId;
+                        const isSlotResponder =
+                          isHoveringSlot && userHasHoveredSlot(user);
 
                         return (
                           <div
                             key={user.id}
                             className={cn(
-                              "border-base-300 rounded-box grid gap-2 border p-3",
+                              "border-base-300 rounded-box grid gap-2 border p-3 transition-colors",
                               isEditing && "border-primary bg-primary/10",
+                              isSlotResponder &&
+                                !isEditing &&
+                                "border-primary bg-primary/10",
                             )}
                           >
                             <button
                               type="button"
-                              className="grid min-w-0 text-left"
+                              className="flex min-w-0 items-center gap-2 text-left"
                               onClick={() => handleToggleViewedUser(user.id)}
                             >
-                              <span className="flex min-w-0 items-center gap-2">
-                                <span
-                                  className={cn(
-                                    "h-2.5 w-2.5 shrink-0 rounded-full",
-                                    isViewed ? "bg-primary" : "bg-base-300",
-                                  )}
-                                />
-                                <span className="truncate font-medium">
-                                  {user.name}
-                                  {isCurrentUser && (
-                                    <span className="text-base-content/60 ml-1 text-sm font-normal">
-                                      (you)
-                                    </span>
-                                  )}
-                                </span>
-                              </span>
-                              <span className="text-base-content/60 truncate text-sm">
-                                {formatSlotSummary(user.slots, formattedDates)}
+                              <span
+                                className={cn(
+                                  "h-2.5 w-2.5 shrink-0 rounded-full",
+                                  "bg-primary",
+                                )}
+                              />
+                              <span className="truncate font-medium">
+                                {user.name}
+                                {isCurrentUser && (
+                                  <span className="text-base-content/60 ml-1 text-sm font-normal">
+                                    (you)
+                                  </span>
+                                )}
                               </span>
                             </button>
 
                             {isCurrentUser && (
                               <div className="flex gap-2">
+                                {isEditing && (
+                                  <button
+                                    type="button"
+                                    className="btn btn-outline"
+                                    disabled={isSaving || draftSlots.size === 0}
+                                    onClick={handleClearAllSlots}
+                                  >
+                                    Clear all
+                                  </button>
+                                )}
                                 <button
                                   type="button"
                                   className={cn(
                                     "btn grow",
-                                    isEditing ? "btn-primary" : "btn-outline",
+                                    isEditing ? "btn-primary" : "",
                                   )}
                                   disabled={isSaving}
                                   onClick={() => {
@@ -685,40 +771,6 @@ export function MeetingPage({
                     )}
                   </div>
                 </div>
-
-                {currentUserId && !currentUser && (
-                  <div>
-                    <div className="bg-base-100 border-base-300 rounded-box grid gap-2 border p-4">
-                      <h2 className="text-base font-semibold">
-                        Mark your availability
-                      </h2>
-                      <p className="text-base-content/70 text-sm">
-                        You have not responded to this meeting yet.
-                      </p>
-                      <button
-                        type="button"
-                        className="btn btn-primary"
-                        disabled={isSaving}
-                        onClick={() => {
-                          if (isEditingSelf) {
-                            handleSaveEditing();
-                            return;
-                          }
-
-                          handleStartEditing(currentUserId);
-                        }}
-                      >
-                        {isEditingSelf && isSaving ? (
-                          <span className="loading loading-spinner loading-sm" />
-                        ) : isEditingSelf ? (
-                          "Save timeslots"
-                        ) : (
-                          "Add my timeslots"
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
               </aside>
             )}
           </section>
