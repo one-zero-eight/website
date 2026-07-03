@@ -127,6 +127,16 @@ export function formatDateRangeLabel(dates: MeetingDate[]) {
   return `${dates[0].monthDay} - ${dates[dates.length - 1].monthDay}`;
 }
 
+export function formatSlotKeyLabel(
+  slotKey: string,
+  formattedDates: MeetingDate[],
+) {
+  const { dateId, time } = parseSlotKey(slotKey);
+  const date = formattedDates.find((meetingDate) => meetingDate.id === dateId);
+
+  return `${date?.monthDay ?? dateId}, ${time}`;
+}
+
 export function slotKeysToAvailability(slotKeys: Iterable<string>) {
   const slotsByDate = new Map<string, string[]>();
 

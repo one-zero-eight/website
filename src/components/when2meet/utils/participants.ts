@@ -96,6 +96,23 @@ export function countExplicitSlotAvailability(
   }).length;
 }
 
+export function getParticipantsWithExplicitSlot(
+  users: MeetingUser[],
+  slotKey: string,
+  editingUserId: string | null,
+  draftSlots: Set<string>,
+) {
+  return users.filter((user) => {
+    const displaySlots = getUserDisplaySlots(user, editingUserId, draftSlots);
+
+    if (displaySlots.size === 0) {
+      return false;
+    }
+
+    return displaySlots.has(slotKey);
+  });
+}
+
 export function sortUsersWithCurrentUserFirst(
   users: MeetingUser[],
   currentUserId?: string | null,
