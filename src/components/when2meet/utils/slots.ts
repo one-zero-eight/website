@@ -15,6 +15,69 @@ export function parseSlotKey(slotKey: string) {
   return { dateId, time };
 }
 
+export function getSlotKeysBetween(
+  fromSlotKey: string,
+  toSlotKey: string,
+  dateIds: string[],
+  timeSlotsList: string[],
+) {
+  if (fromSlotKey === toSlotKey) {
+    return [toSlotKey];
+  }
+
+  const from = parseSlotKey(fromSlotKey);
+  const to = parseSlotKey(toSlotKey);
+  const startDateIndex = dateIds.indexOf(from.dateId);
+  const startTimeIndex = timeSlotsList.indexOf(from.time);
+  const endDateIndex = dateIds.indexOf(to.dateId);
+  const endTimeIndex = timeSlotsList.indexOf(to.time);
+
+  if (
+    startDateIndex < 0 ||
+    startTimeIndex < 0 ||
+    endDateIndex < 0 ||
+    endTimeIndex < 0
+  ) {
+    return [toSlotKey];
+  }
+
+  const slotKeys: string[] = [];
+  let dateIndex = startDateIndex;
+  let timeIndex = startTimeIndex;
+  const deltaX = Math.abs(endDateIndex - startDateIndex);
+  const deltaY = Math.abs(endTimeIndex - startTimeIndex);
+  const stepX = startDateIndex < endDateIndex ? 1 : -1;
+  const stepY = startTimeIndex < endTimeIndex ? 1 : -1;
+  let error = deltaX - deltaY;
+
+  while (true) {
+    const dateId = dateIds[dateIndex];
+    const time = timeSlotsList[timeIndex];
+
+    if (dateId && time) {
+      slotKeys.push(getSlotKey(dateId, time));
+    }
+
+    if (dateIndex === endDateIndex && timeIndex === endTimeIndex) {
+      break;
+    }
+
+    const doubleError = 2 * error;
+
+    if (doubleError > -deltaY) {
+      error -= deltaY;
+      dateIndex += stepX;
+    }
+
+    if (doubleError < deltaX) {
+      error += deltaX;
+      timeIndex += stepY;
+    }
+  }
+
+  return slotKeys;
+}
+
 export function generateTimeSlots(
   start: string,
   end: string,
@@ -173,22 +236,6 @@ function minutesToTime(totalMinutes: number) {
   const hour = Math.floor(totalMinutes / 60);
   const minute = totalMinutes % 60;
   return formatHour(hour, minute);
-}
-
-export function formatSlotSummary(slots: Set<string>, dates: MeetingDate[]) {
-  if (slots.size === 0) {
-    return "No time selected";
-  }
-
-  const firstSlot = [...slots].sort()[0];
-  const { dateId, time } = parseSlotKey(firstSlot);
-  const date = dates.find((meetingDate) => meetingDate.id === dateId);
-
-  if (slots.size === 1) {
-    return `${date?.monthDay ?? dateId}, ${time}`;
-  }
-
-  return `${date?.monthDay ?? dateId}, ${time} and ${slots.size - 1} more`;
 }
 
 export function getSlotAvailabilityRatio(count: number, maxCount: number) {

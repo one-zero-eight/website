@@ -1,4 +1,8 @@
-import { getSlotAvailabilityRatio, getSlotHeatmapAppearance } from "./slots.ts";
+import {
+  getSlotAvailabilityRatio,
+  getSlotHeatmapAppearance,
+  getSlotKeysBetween,
+} from "./slots.ts";
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -53,6 +57,40 @@ const partialAppearance = getSlotHeatmapAppearance(12, 25);
 assert(
   !partialAppearance.className,
   "partial availability does not force primary content text color",
+);
+
+const dates = ["2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19"];
+const times = ["09:00", "09:30", "10:00", "10:30"];
+
+assert(
+  getSlotKeysBetween("2026-07-16_09:00", "2026-07-16_09:00", dates, times).join(
+    ",",
+  ) === "2026-07-16_09:00",
+  "same slot returns itself",
+);
+
+assert(
+  getSlotKeysBetween("2026-07-16_09:00", "2026-07-18_09:00", dates, times).join(
+    ",",
+  ) === "2026-07-16_09:00,2026-07-17_09:00,2026-07-18_09:00",
+  "horizontal drag fills skipped date cells",
+);
+
+assert(
+  getSlotKeysBetween("2026-07-16_09:00", "2026-07-16_10:30", dates, times).join(
+    ",",
+  ) === "2026-07-16_09:00,2026-07-16_09:30,2026-07-16_10:00,2026-07-16_10:30",
+  "vertical drag fills skipped time cells",
+);
+
+assert(
+  getSlotKeysBetween(
+    "2026-07-16_09:00",
+    "2026-07-18_10:30",
+    dates,
+    times,
+  ).includes("2026-07-17_09:30"),
+  "diagonal drag fills intermediate cells",
 );
 
 console.log("when2meet heatmap opacity tests passed");
