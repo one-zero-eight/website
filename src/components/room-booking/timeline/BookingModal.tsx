@@ -122,12 +122,20 @@ export function BookingModal({
   open,
   onOpenChange,
   onBookingCreated,
+  roomOptions,
+  selectedRoomId,
+  onSelectedRoomIdChange,
+  fixedSchedule = false,
 }: {
   newSlot?: Slot;
   detailsBooking?: Booking;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onBookingCreated?: (data: Booking) => void;
+  roomOptions?: roomBookingTypes.SchemaRoom[];
+  selectedRoomId?: string | null;
+  onSelectedRoomIdChange?: (roomId: string) => void;
+  fixedSchedule?: boolean;
 }) {
   const queryClient = useQueryClient();
   const { me } = useMe();
@@ -248,8 +256,19 @@ export function BookingModal({
     resetDeleteBooking,
   ]);
 
+  const getRoomById = (roomId: string | undefined) => {
+    return roomId ? rooms?.find((room) => room.id === roomId) : undefined;
+  };
+
+  const selectableRoom =
+    roomOptions?.find((room) => room.id === selectedRoomId) ??
+    roomOptions?.[0] ??
+    null;
+
+  const activeNewBookingRoom = selectableRoom ?? newSlot?.room;
+
   const submitBooking = useCallback(() => {
-    if (!newSlot) return;
+    if (!newSlot || !activeNewBookingRoom) return;
     if (!title.trim()) {
       titleInputRef.current?.focus();
       return;
@@ -258,7 +277,7 @@ export function BookingModal({
     mutateCreateBooking(
       {
         body: {
-          room_id: newSlot.room.id,
+          room_id: activeNewBookingRoom.id,
           title: title.trim(),
           start: (start ?? newSlot.start).toISOString(),
           end: (end ?? newSlot.end).toISOString(),
@@ -285,6 +304,7 @@ export function BookingModal({
     );
   }, [
     newSlot,
+    activeNewBookingRoom,
     title,
     mutateCreateBooking,
     resetCreateBooking,
@@ -382,11 +402,7 @@ export function BookingModal({
     onBookingCreated,
   ]);
 
-  const getRoomById = (roomId: string | undefined) => {
-    return roomId ? rooms?.find((room) => room.id === roomId) : undefined;
-  };
-
-  const room = newSlot?.room ?? getRoomById(detailsBooking?.room_id);
+  const room = activeNewBookingRoom ?? getRoomById(detailsBooking?.room_id);
 
   const { data: canBookData, isPending: canBookPending } =
     $roomBooking.useQuery(
@@ -448,6 +464,24 @@ export function BookingModal({
         </div>
       </div>
     ))
+  ) : roomOptions && roomOptions.length > 0 && newSlot ? (
+    <div className="text-base-content/75 flex flex-row items-start gap-2 text-base">
+      <div className="mt-2 flex h-fit w-6">
+        <span className="icon-[material-symbols--location-on-outline] text-xl" />
+      </div>
+      <select
+        className="select select-bordered bg-base-100 w-full text-base"
+        value={selectedRoomId ?? roomOptions[0]?.id ?? ""}
+        onChange={(event) => onSelectedRoomIdChange?.(event.target.value)}
+      >
+        {roomOptions.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.title}
+            {option.capacity ? ` (capacity: ${option.capacity} people)` : ""}
+          </option>
+        ))}
+      </select>
+    </div>
   ) : room ? (
     <div className="text-base-content/75 flex flex-row items-start gap-2 text-base">
       <div className="mt-1.5 flex h-fit w-6">
@@ -483,7 +517,7 @@ export function BookingModal({
     end &&
     (start.getMonth() !== end.getMonth() || start.getDate() !== end.getDate());
 
-  const BookingDateTime = (
+  const BookingDateTime = fixedSchedule ? null : (
     <div className="my-1">
       <label htmlFor="start" className="text-base-content/75 text-base">
         Start
@@ -513,6 +547,13 @@ export function BookingModal({
       />
     </div>
   );
+
+  const NoRoomsWarning =
+    newSlot && roomOptions && roomOptions.length === 0 ? (
+      <div className="alert alert-warning px-4 py-2 text-base">
+        <span>No rooms are free for the selected time.</span>
+      </div>
+    ) : null;
 
   const BookingDate = (
     <div className="text-base-content/75 flex flex-row items-center gap-2 text-base">
@@ -602,7 +643,11 @@ export function BookingModal({
       <button
         type="submit"
         className="btn btn-primary grow"
-        disabled={isBookingCreationPending}
+        disabled={
+          isBookingCreationPending ||
+          !activeNewBookingRoom ||
+          (roomOptions !== undefined && roomOptions.length === 0)
+        }
       >
         Confirm
       </button>
@@ -725,6 +770,7 @@ export function BookingModal({
             {BookingDateTime}
             {attendees && Attendees}
 
+            {NoRoomsWarning}
             {NewBookingWarning}
             {NewBookingError}
 

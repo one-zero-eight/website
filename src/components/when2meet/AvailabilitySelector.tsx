@@ -3,6 +3,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { cn } from "@/lib/ui/cn";
@@ -17,6 +18,15 @@ import {
 } from "./utils/slots.ts";
 
 type DragMode = "add" | "remove";
+
+function getBookingSelectionStyle(heatmapStyle?: CSSProperties): CSSProperties {
+  return {
+    ...heatmapStyle,
+    backgroundImage:
+      "linear-gradient(color-mix(in oklch, var(--color-secondary) 65%, transparent), color-mix(in oklch, var(--color-secondary) 65%, transparent))",
+    boxShadow: "inset 0 0 0 2px var(--color-secondary)",
+  };
+}
 
 function DateNavigationButton({
   direction,
@@ -69,6 +79,10 @@ export function AvailabilitySelector({
   bestIntersectionCount = 0,
   hoveredSlotKey = null,
   onHoveredSlotKeyChange,
+  bookingMode = false,
+  bookingSlots,
+  onBookingSlotsChange,
+  onBookingSelectionEnd,
 }: {
   dates: MeetingDate[];
   timeSlots: string[];
@@ -86,6 +100,10 @@ export function AvailabilitySelector({
   bestIntersectionCount?: number;
   hoveredSlotKey?: string | null;
   onHoveredSlotKeyChange?: (slotKey: string | null) => void;
+  bookingMode?: boolean;
+  bookingSlots?: Set<string>;
+  onBookingSlotsChange?: (slotKeys: string[]) => void;
+  onBookingSelectionEnd?: (slotKeys: string[]) => void;
 }) {
   const daysPerPage = isPhone ? 3 : 7;
   const [dateOffset, setDateOffset] = useState(0);
@@ -103,10 +121,22 @@ export function AvailabilitySelector({
   const onApplySlotsRef = useRef(onApplySlots);
   onApplySlotsRef.current = onApplySlots;
 
+  const onBookingSlotsChangeRef = useRef(onBookingSlotsChange);
+  onBookingSlotsChangeRef.current = onBookingSlotsChange;
+
+  const onBookingSelectionEndRef = useRef(onBookingSelectionEnd);
+  onBookingSelectionEndRef.current = onBookingSelectionEnd;
+
+  const bookingSlotsRef = useRef(bookingSlots);
+  bookingSlotsRef.current = bookingSlots;
+
+  const bookingAnchorDateRef = useRef<string | null>(null);
+  const bookingDragStartRef = useRef<string | null>(null);
+
   const isEditing = editingUserId !== null;
-  const showSelectionVisual = selectionOnly || isEditing;
+  const showEditingVisual = selectionOnly || isEditing;
   const highlightBestIntersection =
-    !showSelectionVisual &&
+    !showEditingVisual &&
     !!bestIntersectionSlotKeys &&
     bestIntersectionSlotKeys.size > 0;
 
@@ -183,6 +213,21 @@ export function AvailabilitySelector({
     onHoveredSlotKeyChange?.(null);
   }
 
+  function getBookingSlotKeysBetween(fromSlotKey: string, toSlotKey: string) {
+    const anchorDateId = bookingAnchorDateRef.current;
+
+    if (!anchorDateId) {
+      return [toSlotKey];
+    }
+
+    return getSlotKeysBetween(
+      fromSlotKey,
+      toSlotKey,
+      visibleDateIdsRef.current,
+      timeSlotsRef.current,
+    ).filter((slotKey) => parseSlotKey(slotKey).dateId === anchorDateId);
+  }
+
   function isEditingUserSlot(dateId: string, time: string) {
     if (!isEditing) {
       return false;
@@ -198,6 +243,23 @@ export function AvailabilitySelector({
     time: string,
     event: ReactPointerEvent<HTMLButtonElement>,
   ) {
+    if (bookingMode) {
+      if (!isSlotAllowed(dateId, time)) {
+        return;
+      }
+
+      event.preventDefault();
+      gridRef.current?.setPointerCapture(event.pointerId);
+      event.currentTarget.setPointerCapture(event.pointerId);
+
+      const slotKey = getSlotKey(dateId, time);
+      bookingAnchorDateRef.current = dateId;
+      bookingDragStartRef.current = slotKey;
+      isDraggingRef.current = true;
+      onBookingSlotsChangeRef.current?.([slotKey]);
+      return;
+    }
+
     if (!editingUserId || !isSlotAllowed(dateId, time)) {
       return;
     }
@@ -246,7 +308,7 @@ export function AvailabilitySelector({
 
   useEffect(() => {
     function handlePointerMove(event: PointerEvent) {
-      if (!isDraggingRef.current || !editingUserId) {
+      if (!isDraggingRef.current) {
         return;
       }
 
@@ -255,6 +317,24 @@ export function AvailabilitySelector({
       const slotKey = getSlotKeyFromPoint(event.clientX, event.clientY);
 
       if (!slotKey) {
+        return;
+      }
+
+      if (bookingDragStartRef.current) {
+        const dragStart = bookingDragStartRef.current;
+
+        if (slotKey === dragStart) {
+          onBookingSlotsChangeRef.current?.([dragStart]);
+          return;
+        }
+
+        onBookingSlotsChangeRef.current?.(
+          getBookingSlotKeysBetween(dragStart, slotKey),
+        );
+        return;
+      }
+
+      if (!editingUserId) {
         return;
       }
 
@@ -291,9 +371,15 @@ export function AvailabilitySelector({
     }
 
     function handlePointerUp() {
+      if (bookingDragStartRef.current && bookingSlotsRef.current?.size) {
+        onBookingSelectionEndRef.current?.([...bookingSlotsRef.current]);
+      }
+
       isDraggingRef.current = false;
       visitedSlotsRef.current.clear();
       lastVisitedSlotKeyRef.current = null;
+      bookingAnchorDateRef.current = null;
+      bookingDragStartRef.current = null;
     }
 
     window.addEventListener("pointermove", handlePointerMove, {
@@ -307,7 +393,7 @@ export function AvailabilitySelector({
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerUp);
     };
-  }, [editingUserId, getSlotKeyFromPoint]);
+  }, [editingUserId, getSlotKeyFromPoint, bookingMode]);
 
   const gridTemplateColumns = isPhone
     ? `2.25rem repeat(${visibleDates.length}, minmax(0, 1fr))`
@@ -359,13 +445,14 @@ export function AvailabilitySelector({
             const slotAllowed = isSlotAllowed(date.id, time);
             const availableCount = getAvailableCount(date.id, time);
             const isSelected = isEditingUserSlot(date.id, time);
+            const isBookingSelected = bookingSlots?.has(slotKey) ?? false;
             const isBestIntersection =
               fadeNonBestSlots && bestIntersectionSlotKeys.has(slotKey);
             const isFilteredOut =
               fadeNonBestSlots && slotAllowed && !isBestIntersection;
             const isFullSlot =
               slotAllowed &&
-              !showSelectionVisual &&
+              !showEditingVisual &&
               !isFilteredOut &&
               availableCount > 0 &&
               availableCount >= maxCount;
@@ -376,7 +463,7 @@ export function AvailabilitySelector({
             const showFullSlotHover = showHoverRing && isFullSlot;
             const showPartialSlotHover = showHoverRing && !isFullSlot;
             const showHeatmapFill =
-              slotAllowed && !showSelectionVisual && !isFilteredOut;
+              slotAllowed && !showEditingVisual && !isFilteredOut;
             const heatmapAppearance = showHeatmapFill
               ? highlightBestIntersection
                 ? getSlotHeatmapAppearanceColorblindSafe(
@@ -391,28 +478,37 @@ export function AvailabilitySelector({
                 key={slotKey}
                 type="button"
                 data-slot-key={slotKey}
-                style={heatmapAppearance?.style}
+                style={
+                  isBookingSelected
+                    ? getBookingSelectionStyle(heatmapAppearance?.style)
+                    : heatmapAppearance?.style
+                }
                 className={cn(
                   "border-base-300 relative h-7 border-t border-r border-dashed first:border-l md:h-8",
                   time.endsWith(":00") && "border-solid",
                   !slotAllowed &&
                     "bg-base-200/80 cursor-not-allowed opacity-40",
                   slotAllowed &&
-                    (showSelectionVisual
+                    (showEditingVisual
                       ? isSelected
                         ? "bg-primary text-primary-content"
                         : "bg-base-100"
                       : isFilteredOut
-                        ? "bg-base-100 pointer-events-none"
+                        ? cn(
+                            "bg-base-100",
+                            !bookingMode && "pointer-events-none",
+                          )
                         : heatmapAppearance?.className),
                   showPartialSlotHover &&
+                    !isBookingSelected &&
                     "ring-primary shadow-[inset_0_0_0_2px_var(--color-primary)]",
                   showFullSlotHover &&
+                    !isBookingSelected &&
                     "shadow-[inset_0_0_0_2px_var(--color-base-300)]/80",
-                  showSelectionVisual &&
+                  (showEditingVisual || bookingMode) &&
                     slotAllowed &&
                     "touch-none select-none",
-                  isEditing && slotAllowed
+                  (isEditing || bookingMode) && slotAllowed
                     ? "cursor-pointer"
                     : "cursor-default",
                 )}
@@ -464,7 +560,13 @@ export function AvailabilitySelector({
         </div>
       )}
 
-      {!hideHint && isEditing && (
+      {!hideHint && bookingMode && (
+        <p className="text-base-content/60 mb-3 text-sm">
+          Drag on the grid to select a time interval for booking.
+        </p>
+      )}
+
+      {!hideHint && isEditing && !bookingMode && (
         <p className="text-base-content/60 mb-3 text-sm">
           Click timeslots on the grid to mark your availability.
         </p>
