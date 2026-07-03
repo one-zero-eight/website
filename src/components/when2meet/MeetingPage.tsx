@@ -634,6 +634,23 @@ export function MeetingPage({
     );
   }
 
+  function handleToggleAvailability() {
+    if (!currentUserId) {
+      return;
+    }
+
+    if (editingUserId === currentUserId) {
+      handleSaveEditing();
+      return;
+    }
+
+    if (editingUserId && editingUserId !== currentUserId) {
+      handleCancelEditing();
+    }
+
+    handleStartEditing(currentUserId);
+  }
+
   function handleApplySlots(slotKeys: string[], mode: "add" | "remove") {
     if (!editingUserId || slotKeys.length === 0) {
       return;
@@ -950,7 +967,7 @@ export function MeetingPage({
                     </button>
                   )}
                   {currentUserId && (
-                    <>
+                    <div className="hidden flex-wrap gap-2 md:flex">
                       {isEditingSelf && (
                         <button
                           type="button"
@@ -965,21 +982,7 @@ export function MeetingPage({
                         type="button"
                         className="btn btn-primary gap-2"
                         disabled={isSaving}
-                        onClick={() => {
-                          if (isEditingSelf) {
-                            handleSaveEditing();
-                            return;
-                          }
-
-                          if (
-                            editingUserId &&
-                            editingUserId !== currentUserId
-                          ) {
-                            handleCancelEditing();
-                          }
-
-                          handleStartEditing(currentUserId);
-                        }}
+                        onClick={handleToggleAvailability}
                       >
                         {isEditingSelf && isSaving ? (
                           <span className="loading loading-spinner loading-sm" />
@@ -989,7 +992,7 @@ export function MeetingPage({
                           "Change my availability"
                         )}
                       </button>
-                    </>
+                    </div>
                   )}
                 </>
               )}
@@ -1124,22 +1127,26 @@ export function MeetingPage({
                           </div>
                         </div>
                       )}
-                      {pendingBookingOpen && (
-                        <p className="text-base-content/60 text-sm">
-                          <span className="loading loading-spinner loading-xs mr-2" />
-                          Loading room availability...
-                        </p>
-                      )}
                       <button
                         type="button"
                         className={cn(
                           "btn gap-2",
                           isBookingMode ? "btn-secondary" : "btn-primary",
                         )}
+                        disabled={pendingBookingOpen}
                         onClick={handleToggleBookingMode}
                       >
-                        <span className="icon-[mdi--door-open] text-lg" />
-                        {isBookingMode ? "Cancel booking" : "Book room"}
+                        {pendingBookingOpen ? (
+                          <>
+                            <span className="loading loading-spinner loading-sm" />
+                            Loading room availability...
+                          </>
+                        ) : (
+                          <>
+                            <span className="icon-[mdi--door-open] text-lg" />
+                            {isBookingMode ? "Cancel booking" : "Book room"}
+                          </>
+                        )}
                       </button>
                       <div className="grid w-full grid-cols-2 gap-2">
                         <Link
@@ -1288,11 +1295,22 @@ export function MeetingPage({
           </section>
         </div>
 
-        {isOwner && (
+        {(isOwner || currentUserId) && (
           <MeetingMobileBar
-            onShare={!needsSetup ? handleShareLink : undefined}
-            onSaveSetup={needsSetup ? handleSaveSetup : undefined}
+            onShare={isOwner && !needsSetup ? handleShareLink : undefined}
+            onSaveSetup={isOwner && needsSetup ? handleSaveSetup : undefined}
             isSavingSetup={isSavingSetup}
+            onToggleAvailability={
+              currentUserId && !needsSetup
+                ? handleToggleAvailability
+                : undefined
+            }
+            onClearAvailability={
+              currentUserId && !needsSetup ? handleClearAllSlots : undefined
+            }
+            isEditingAvailability={isEditingSelf}
+            isSavingAvailability={isSaving}
+            canClearAvailability={draftSlots.size > 0}
           />
         )}
 
