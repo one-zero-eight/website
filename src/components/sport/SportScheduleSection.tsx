@@ -365,11 +365,14 @@ function SportScheduleList({
                       <div
                         className={cn(
                           "group grid min-h-10 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b px-3 py-1 text-left text-base",
-                          "border-white/30 transition-colors hover:!bg-[#8D4CF6]",
-                          "dark:text-color:var(--training-accent) dark:border-white dark:bg-black! dark:hover:bg-[#181419]! dark:hover:text-[#8D4CF6]!",
+                          "border-white/30 transition-colors",
                           isDefaultTraining
-                            ? "bg-base-100 text-base-content"
-                            : "text-white",
+                            ? "bg-base-100 text-base-content hover:!text-[#8D4CF6]"
+                            : "text-white hover:!text-[#8D4CF6]",
+                          "dark:border-white dark:!bg-black",
+                          isDefaultTraining
+                            ? "dark:text-base-content dark:hover:!text-[#8D4CF6]"
+                            : "dark:text-[color:var(--training-accent)] dark:hover:!text-[#8D4CF6]",
                         )}
                         style={
                           {
