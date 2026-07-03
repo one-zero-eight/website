@@ -9,7 +9,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
 import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
-import { RoomSuggestionModal } from "./RoomSuggestionModal.tsx";
 import {
   buildFullDaySlotKeys,
   createBackendSlotLookup,
@@ -17,16 +16,25 @@ import {
   parseBackendSlots,
   slotKeysToBackendSlots,
 } from "./utils/api-slots.ts";
+import { getIntersectionAtMinParticipants } from "./utils/best-slot.ts";
 import {
-  getBestIntersection,
-  getBestMeetingSlotKey,
-} from "./utils/best-slot.ts";
+  clearMeetingRoomBooking,
+  loadMeetingRoomBooking,
+  type MeetingRoomBooking,
+} from "./utils/meeting-room-booking.ts";
 import {
+  getParticipantsWithExplicitSlot,
+  getUserDisplaySlots,
   participantsToUsers,
   sortUsersWithCurrentUserFirst,
   getAccountDisplayName,
 } from "./utils/participants.ts";
-import { formatDateRangeLabel, formatMeetingDates } from "./utils/slots.ts";
+import {
+  formatDateRangeLabel,
+  formatMeetingDates,
+  formatSlotKeyLabel,
+  parseSlotKey,
+} from "./utils/slots.ts";
 import { clearPendingSetup, isPendingSetup } from "./utils/setup-slots.ts";
 import type { MeetingUser } from "./types.ts";
 
@@ -50,8 +58,10 @@ export function MeetingPage({
   const [draftSlots, setDraftSlots] = useState<Set<string>>(new Set());
   const [participantSearch, setParticipantSearch] = useState("");
   const [hoveredSlotKey, setHoveredSlotKey] = useState<string | null>(null);
-  const [roomsOpen, setRoomsOpen] = useState(false);
-  const [showBestIntersection, setShowBestIntersection] = useState(false);
+  const [roomBooking, setRoomBooking] = useState<MeetingRoomBooking | null>(
+    () => loadMeetingRoomBooking(meetingId),
+  );
+  const [minParticipants, setMinParticipants] = useState(1);
   const hasAutoStartedEditingRef = useRef(false);
 
   const eventQueryKey = $when2meet.queryOptions("get", "/events/{event_ref}", {
@@ -84,8 +94,8 @@ export function MeetingPage({
 
   const { mutate: saveParticipant, isPending: isSaving } =
     $when2meet.useMutation("put", "/events/{event_ref}/participants", {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: eventQueryKey });
+      onSuccess: (updatedEvent) => {
+        queryClient.setQueryData(eventQueryKey, updatedEvent);
         queryClient.invalidateQueries({
           queryKey: $when2meet.queryOptions("get", "/events/participating")
             .queryKey,
@@ -101,8 +111,8 @@ export function MeetingPage({
       "delete",
       "/events/{event_ref}/participants/{user_id}",
       {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: eventQueryKey });
+        onSuccess: (updatedEvent) => {
+          queryClient.setQueryData(eventQueryKey, updatedEvent);
           queryClient.invalidateQueries({
             queryKey: $when2meet.queryOptions("get", "/events/participating")
               .queryKey,
@@ -119,6 +129,7 @@ export function MeetingPage({
     $when2meet.useMutation("delete", "/events/{event_ref}", {
       onSuccess: () => {
         clearPendingSetup(meetingId);
+        clearMeetingRoomBooking(meetingSlug);
         queryClient.invalidateQueries({
           queryKey: $when2meet.queryOptions("get", "/events/").queryKey,
         });
@@ -133,6 +144,9 @@ export function MeetingPage({
 
   const { mutate: updateEvent, isPending: isSavingSetup } =
     $when2meet.useMutation("patch", "/events/{event_ref}", {
+      onSuccess: (updatedEvent) => {
+        queryClient.setQueryData(eventQueryKey, updatedEvent);
+      },
       onError: (updateError) => {
         showError("Error", formatApiErrorMessage(updateError));
       },
@@ -188,25 +202,9 @@ export function MeetingPage({
   const meetingDescription = event?.description;
   const meetingSlug = event?.slug ?? meetingId;
 
-  const bestSlotKey = useMemo(
-    () => (event ? getBestMeetingSlotKey(event, allowedSlots) : null),
-    [event, allowedSlots],
-  );
-
-  const selectedSlotLabel = useMemo(() => {
-    if (!bestSlotKey) {
-      return formattedDates.length === 0 || timeSlots.length === 0
-        ? "No times yet"
-        : "No responses yet";
-    }
-
-    const [dateId, time] = bestSlotKey.split("_");
-    const date = formattedDates.find(
-      (meetingDate) => meetingDate.id === dateId,
-    );
-
-    return `${date?.monthDay ?? dateId}, ${time}`;
-  }, [bestSlotKey, formattedDates, timeSlots.length]);
+  useEffect(() => {
+    setRoomBooking(loadMeetingRoomBooking(meetingSlug));
+  }, [meetingSlug]);
 
   const currentUser = useMemo(
     () => users.find((user) => user.id === currentUserId),
@@ -227,6 +225,14 @@ export function MeetingPage({
     return [draftUser, ...users];
   }, [users, currentUserId, currentUser, me]);
 
+  const bookedSlotLabel = useMemo(() => {
+    if (!roomBooking) {
+      return null;
+    }
+
+    return formatSlotKeyLabel(roomBooking.slotKey, formattedDates);
+  }, [roomBooking, formattedDates]);
+
   const activeViewedUserIds = useMemo(
     () =>
       viewedUserIds === null
@@ -235,31 +241,55 @@ export function MeetingPage({
     [viewedUserIds, listUsers],
   );
 
-  const bestIntersection = useMemo(() => {
-    if (!showBestIntersection || needsSetup || !parsedSlots) {
+  const allParticipantIds = useMemo(
+    () => new Set(listUsers.map((user) => user.id)),
+    [listUsers],
+  );
+
+  const slotAvailability = useMemo(() => {
+    if (needsSetup || !parsedSlots) {
       return { slotKeys: new Set<string>(), maxCount: 0 };
     }
 
-    return getBestIntersection(
+    return getIntersectionAtMinParticipants(
       listUsers,
       parsedSlots.dates,
       timeSlots,
       allowedSlots,
-      activeViewedUserIds,
+      allParticipantIds,
+      minParticipants,
       editingUserId,
       draftSlots,
     );
   }, [
-    showBestIntersection,
     needsSetup,
     parsedSlots,
     listUsers,
     timeSlots,
     allowedSlots,
-    activeViewedUserIds,
+    allParticipantIds,
+    minParticipants,
     editingUserId,
     draftSlots,
   ]);
+
+  const highlightBestIntersection =
+    minParticipants > 1 && !needsSetup && slotAvailability.slotKeys.size > 0;
+
+  useEffect(() => {
+    if (slotAvailability.maxCount === 0) {
+      return;
+    }
+
+    if (minParticipants < 1) {
+      setMinParticipants(1);
+      return;
+    }
+
+    if (minParticipants > slotAvailability.maxCount) {
+      setMinParticipants(slotAvailability.maxCount);
+    }
+  }, [slotAvailability.maxCount, minParticipants]);
 
   const filteredUsers = useMemo(() => {
     const trimmedSearch = participantSearch.trim().toLowerCase();
@@ -273,20 +303,101 @@ export function MeetingPage({
     );
   }, [listUsers, participantSearch]);
 
-  const isHoveringSlot = hoveredSlotKey !== null && editingUserId === null;
+  const hoveredSlotLabel = useMemo(() => {
+    if (!hoveredSlotKey) {
+      return "";
+    }
+
+    const { dateId, time } = parseSlotKey(hoveredSlotKey);
+    const date = formattedDates.find(
+      (meetingDate) => meetingDate.id === dateId,
+    );
+
+    return `${date?.monthDay ?? dateId}, ${time}`;
+  }, [hoveredSlotKey, formattedDates]);
+
+  const hoveredSlotParticipants = useMemo(() => {
+    if (!hoveredSlotKey) {
+      return [];
+    }
+
+    return getParticipantsWithExplicitSlot(
+      listUsers,
+      hoveredSlotKey,
+      editingUserId,
+      draftSlots,
+    );
+  }, [hoveredSlotKey, listUsers, editingUserId, draftSlots]);
+
+  const isHoveredSlotDisabled = useMemo(() => {
+    if (!hoveredSlotKey) {
+      return false;
+    }
+
+    return !allowedSlots.has(hoveredSlotKey);
+  }, [hoveredSlotKey, allowedSlots]);
+
+  const isHoveringSlot =
+    hoveredSlotKey !== null && editingUserId === null && !needsSetup;
+
+  const isHoveringAllowedSlot = isHoveringSlot && !isHoveredSlotDisabled;
 
   function userHasHoveredSlot(user: MeetingUser) {
     if (!hoveredSlotKey) {
       return false;
     }
 
-    const displaySlots = user.id === editingUserId ? draftSlots : user.slots;
+    const displaySlots = getUserDisplaySlots(user, editingUserId, draftSlots);
 
     if (displaySlots.size === 0) {
       return false;
     }
 
     return displaySlots.has(hoveredSlotKey);
+  }
+
+  useEffect(() => {
+    if (editingUserId !== null || needsSetup) {
+      setHoveredSlotKey(null);
+    }
+  }, [editingUserId, needsSetup]);
+
+  useEffect(() => {
+    if (!highlightBestIntersection || !hoveredSlotKey) {
+      return;
+    }
+
+    if (!allowedSlots.has(hoveredSlotKey)) {
+      return;
+    }
+
+    if (slotAvailability.slotKeys.has(hoveredSlotKey)) {
+      return;
+    }
+
+    setHoveredSlotKey(null);
+  }, [
+    highlightBestIntersection,
+    hoveredSlotKey,
+    slotAvailability.slotKeys,
+    allowedSlots,
+  ]);
+
+  function handleStartEditing(userId: string) {
+    if (userId !== currentUserId) {
+      return;
+    }
+
+    setHoveredSlotKey(null);
+    const user = listUsers.find((entry) => entry.id === userId);
+
+    setEditingUserId(userId);
+    setDraftSlots(new Set(user?.slots ?? []));
+  }
+
+  function handleCancelEditing() {
+    setEditingUserId(null);
+    setDraftSlots(new Set());
   }
 
   useEffect(() => {
@@ -304,22 +415,6 @@ export function MeetingPage({
     setEditingUserId(currentUserId);
     setDraftSlots(new Set());
   }, [currentUser, currentUserId, event, needsSetup]);
-
-  function handleStartEditing(userId: string) {
-    if (userId !== currentUserId) {
-      return;
-    }
-
-    const user = listUsers.find((entry) => entry.id === userId);
-
-    setEditingUserId(userId);
-    setDraftSlots(new Set(user?.slots ?? []));
-  }
-
-  function handleCancelEditing() {
-    setEditingUserId(null);
-    setDraftSlots(new Set());
-  }
 
   function handleClearAllSlots() {
     if (editingUserId !== currentUserId) {
@@ -391,6 +486,13 @@ export function MeetingPage({
         activeIds.add(userId);
       }
 
+      if (
+        listUsers.length > 0 &&
+        listUsers.every((user) => activeIds.has(user.id))
+      ) {
+        return null;
+      }
+
       return activeIds;
     });
   }
@@ -441,7 +543,6 @@ export function MeetingPage({
       {
         onSuccess: () => {
           clearPendingSetup(meetingId);
-          queryClient.invalidateQueries({ queryKey: eventQueryKey });
           queryClient.invalidateQueries({
             queryKey: $when2meet.queryOptions("get", "/events/").queryKey,
           });
@@ -545,15 +646,6 @@ export function MeetingPage({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <h1 className="text-2xl font-semibold">{meetingName}</h1>
-                {isOwner && (
-                  <Link
-                    to="/when2meet/$meetingId/edit"
-                    params={{ meetingId: meetingSlug }}
-                    className="link link-primary text-sm font-medium"
-                  >
-                    Edit event
-                  </Link>
-                )}
               </div>
               {meetingDescription && (
                 <p className="text-base-content/70 mt-2 max-w-3xl text-sm">
@@ -563,13 +655,17 @@ export function MeetingPage({
               <div className="text-base-content/70 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                 <span>{formatDateRangeLabel(formattedDates)}</span>
                 <span>{users.length} responses</span>
-                <span>Best time: {selectedSlotLabel}</span>
+                {roomBooking && bookedSlotLabel && (
+                  <span className="text-primary">
+                    Booked: {roomBooking.roomTitle} · {bookedSlotLabel}
+                  </span>
+                )}
               </div>
             </div>
 
-            {isOwner && (
-              <div className="hidden flex-wrap gap-2 md:flex">
-                {needsSetup ? (
+            <div className="flex flex-wrap gap-2">
+              {needsSetup ? (
+                isOwner && (
                   <button
                     type="button"
                     className="btn btn-primary gap-2"
@@ -582,41 +678,64 @@ export function MeetingPage({
                       "Save timeslots"
                     )}
                   </button>
-                ) : (
-                  <>
+                )
+              ) : (
+                <>
+                  {isOwner && (
                     <button
                       type="button"
-                      className="btn btn-outline gap-2"
+                      className="btn btn-outline hidden gap-2 md:inline-flex"
                       onClick={handleShareLink}
                     >
                       <span className="icon-[material-symbols--share-outline] text-lg" />
                       Share link
                     </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary gap-2"
-                      disabled={!bestSlotKey}
-                      onClick={() => setRoomsOpen(true)}
-                    >
-                      <span className="icon-[mdi--door-open] text-lg" />
-                      Book room
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline btn-error btn-square"
-                      disabled={isDeletingMeeting}
-                      onClick={handleDeleteMeeting}
-                    >
-                      {isDeletingMeeting ? (
-                        <span className="loading loading-spinner loading-sm" />
-                      ) : (
-                        <span className="icon-[material-symbols--delete-outline] text-lg" />
+                  )}
+                  {currentUserId && (
+                    <>
+                      {isEditingSelf && (
+                        <button
+                          type="button"
+                          className="btn btn-outline"
+                          disabled={isSaving || draftSlots.size === 0}
+                          onClick={handleClearAllSlots}
+                        >
+                          Clear all
+                        </button>
                       )}
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
+                      <button
+                        type="button"
+                        className="btn btn-primary gap-2"
+                        disabled={isSaving}
+                        onClick={() => {
+                          if (isEditingSelf) {
+                            handleSaveEditing();
+                            return;
+                          }
+
+                          if (
+                            editingUserId &&
+                            editingUserId !== currentUserId
+                          ) {
+                            handleCancelEditing();
+                          }
+
+                          handleStartEditing(currentUserId);
+                        }}
+                      >
+                        {isEditingSelf && isSaving ? (
+                          <span className="loading loading-spinner loading-sm" />
+                        ) : isEditingSelf ? (
+                          "Save timeslots"
+                        ) : (
+                          "Change my availability"
+                        )}
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
           </section>
 
           {needsSetup && (
@@ -631,31 +750,12 @@ export function MeetingPage({
           <section
             className={cn(
               "grid gap-5",
-              needsSetup ? "" : "xl:grid-cols-[minmax(0,1fr)_360px]",
+              needsSetup
+                ? ""
+                : "xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start",
             )}
           >
             <div className="bg-base-100 border-base-300 rounded-box min-w-0 border p-4 md:p-5">
-              {!needsSetup && (
-                <label className="label mb-3 cursor-pointer justify-start gap-3 p-0">
-                  <input
-                    type="checkbox"
-                    className="toggle toggle-primary toggle-sm"
-                    checked={showBestIntersection}
-                    onChange={(event) =>
-                      setShowBestIntersection(event.target.checked)
-                    }
-                  />
-                  <span className="label-text text-sm font-medium">
-                    Show best intersection
-                  </span>
-                  {showBestIntersection && bestIntersection.maxCount > 0 && (
-                    <span className="text-base-content/60 text-sm">
-                      {bestIntersection.maxCount} participant
-                      {bestIntersection.maxCount === 1 ? "" : "s"}
-                    </span>
-                  )}
-                </label>
-              )}
               <div className="md:hidden">
                 <AvailabilitySelector
                   dates={formattedDates}
@@ -669,10 +769,10 @@ export function MeetingPage({
                   selectionOnly={needsSetup}
                   hideLegend={needsSetup}
                   hideHint={!!currentUser && (isEditingSelf || !isOwner)}
+                  bestIntersectionSlotKeys={slotAvailability.slotKeys}
+                  bestIntersectionCount={minParticipants}
+                  hoveredSlotKey={hoveredSlotKey}
                   onHoveredSlotKeyChange={setHoveredSlotKey}
-                  showBestIntersection={showBestIntersection}
-                  bestIntersectionSlotKeys={bestIntersection.slotKeys}
-                  bestIntersectionCount={bestIntersection.maxCount}
                   isPhone
                 />
               </div>
@@ -689,16 +789,114 @@ export function MeetingPage({
                   selectionOnly={needsSetup}
                   hideLegend={needsSetup}
                   hideHint={!!currentUser && (isEditingSelf || !isOwner)}
+                  bestIntersectionSlotKeys={slotAvailability.slotKeys}
+                  bestIntersectionCount={minParticipants}
+                  hoveredSlotKey={hoveredSlotKey}
                   onHoveredSlotKeyChange={setHoveredSlotKey}
-                  showBestIntersection={showBestIntersection}
-                  bestIntersectionSlotKeys={bestIntersection.slotKeys}
-                  bestIntersectionCount={bestIntersection.maxCount}
                 />
               </div>
             </div>
 
             {!needsSetup && (
-              <aside className="grid gap-3">
+              <aside className="grid h-fit w-full gap-3 self-start">
+                <div className="bg-base-100 border-base-300 rounded-box flex h-fit flex-col self-start border p-4">
+                  <h2 className="mb-3 text-lg font-semibold">Options</h2>
+                  <div className="mb-3 grid gap-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-base font-medium">
+                        Minimum participants
+                      </span>
+                      <span className="text-base-content/70 text-base tabular-nums">
+                        {minParticipants}+
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={1}
+                      max={Math.max(slotAvailability.maxCount, 1)}
+                      step={1}
+                      value={Math.min(
+                        minParticipants,
+                        Math.max(slotAvailability.maxCount, 1),
+                      )}
+                      disabled={slotAvailability.maxCount === 0}
+                      className="range range-primary range-sm w-full"
+                      onChange={(event) =>
+                        setMinParticipants(Number(event.target.value))
+                      }
+                    />
+                    <div className="text-base-content/60 flex justify-between text-sm tabular-nums">
+                      <span>1 (all)</span>
+                      <span>{slotAvailability.maxCount || 1}</span>
+                    </div>
+                  </div>
+
+                  {isOwner && (
+                    <div className="grid gap-2">
+                      {roomBooking && bookedSlotLabel && (
+                        <div className="border-base-300 bg-primary/5 rounded-box border p-3 text-sm">
+                          <div className="text-base-content/60">
+                            Booked room
+                          </div>
+                          <div className="font-semibold">
+                            {roomBooking.roomTitle}
+                          </div>
+                          <div className="text-base-content/70">
+                            {bookedSlotLabel}
+                          </div>
+                        </div>
+                      )}
+                      <Link
+                        to="/when2meet/$meetingId/book"
+                        params={{ meetingId: meetingSlug }}
+                        className="btn btn-primary gap-2"
+                      >
+                        <span className="icon-[mdi--door-open] text-lg" />
+                        Book room
+                      </Link>
+                      <div className="grid w-full grid-cols-2 gap-2">
+                        <Link
+                          to="/when2meet/$meetingId/edit"
+                          params={{ meetingId: meetingSlug }}
+                          className="btn grow gap-2"
+                        >
+                          <span className="icon-[material-symbols--edit-outline] text-lg" />
+                          Edit event
+                        </Link>
+                        <button
+                          type="button"
+                          className="btn btn-link btn-error grow gap-2 no-underline"
+                          disabled={isDeletingMeeting}
+                          onClick={handleDeleteMeeting}
+                        >
+                          {isDeletingMeeting ? (
+                            <span className="loading loading-spinner loading-sm" />
+                          ) : (
+                            <>
+                              <span className="icon-[material-symbols--delete-outline] text-lg" />
+                              Delete event
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-base-content/70 mt-3 flex h-4 items-center text-sm">
+                    {isHoveringSlot ? (
+                      <>
+                        {hoveredSlotLabel}
+                        {isHoveredSlotDisabled
+                          ? " — No one is allowed here"
+                          : hoveredSlotParticipants.length === 0
+                            ? " — No one is available"
+                            : ` — ${hoveredSlotParticipants.length} available`}
+                      </>
+                    ) : (
+                      <div className="border-base-content/70 mt-1.5 w-full border-b border-dashed" />
+                    )}
+                  </p>
+                </div>
+
                 <div className="bg-base-100 border-base-300 rounded-box flex flex-col border p-4">
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <h2 className="text-lg font-semibold">Responses</h2>
@@ -726,7 +924,7 @@ export function MeetingPage({
                     />
                   </label>
 
-                  <div className="grid max-h-[min(50vh,420px)] gap-2 overflow-y-auto pr-1">
+                  <div className="grid max-h-[min(50vh,420px)] gap-0.5 overflow-y-auto pr-1">
                     {filteredUsers.length === 0 ? (
                       <div className="text-base-content/50 py-6 text-center text-sm">
                         No participants found.
@@ -735,97 +933,62 @@ export function MeetingPage({
                       filteredUsers.map((user) => {
                         const isEditing = editingUserId === user.id;
                         const isCurrentUser = user.id === currentUserId;
-                        const canDelete = isOwner || user.id === currentUserId;
+                        const canDeleteOther = isOwner && !isCurrentUser;
                         const isSlotResponder =
-                          isHoveringSlot && userHasHoveredSlot(user);
+                          isHoveringAllowedSlot && userHasHoveredSlot(user);
+                        const isDimmed =
+                          isHoveringAllowedSlot &&
+                          !isSlotResponder &&
+                          !isEditing;
+
+                        const isViewed =
+                          viewedUserIds === null || viewedUserIds.has(user.id);
 
                         return (
                           <div
                             key={user.id}
                             className={cn(
-                              "border-base-300 rounded-box grid gap-2 border p-3 transition-colors",
-                              isEditing && "border-primary bg-primary/10",
-                              isSlotResponder &&
-                                !isEditing &&
-                                "border-primary bg-primary/10",
+                              "flex min-w-0 items-center gap-1 rounded-lg py-0.5 transition-colors",
+                              isEditing && "bg-primary/10",
+                              isSlotResponder && !isEditing && "bg-primary/10",
+                              isDimmed && "opacity-40",
                             )}
                           >
                             <button
                               type="button"
-                              className="flex min-w-0 items-center gap-2 text-left"
+                              className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left"
                               onClick={() => handleToggleViewedUser(user.id)}
                             >
                               <span
                                 className={cn(
-                                  "h-2.5 w-2.5 shrink-0 rounded-full",
-                                  "bg-primary",
+                                  "h-2.5 w-2.5 shrink-0 rounded-full transition-colors",
+                                  isViewed ? "bg-primary" : "bg-base-300",
                                 )}
                               />
-                              <span className="truncate font-medium">
+                              <span className="truncate text-sm font-medium">
                                 {user.name}
                                 {isCurrentUser && (
-                                  <span className="text-base-content/60 ml-1 text-sm font-normal">
+                                  <span className="text-base-content/60 ml-1 font-normal">
                                     (you)
                                   </span>
                                 )}
                               </span>
                             </button>
-
-                            {isCurrentUser && (
-                              <div className="flex gap-2">
-                                {isEditing && (
-                                  <button
-                                    type="button"
-                                    className="btn btn-outline"
-                                    disabled={isSaving || draftSlots.size === 0}
-                                    onClick={handleClearAllSlots}
-                                  >
-                                    Clear all
-                                  </button>
-                                )}
-                                <button
-                                  type="button"
-                                  className={cn(
-                                    "btn grow",
-                                    isEditing ? "btn-primary" : "",
-                                  )}
-                                  disabled={isSaving}
-                                  onClick={() => {
-                                    if (isEditing) {
-                                      handleSaveEditing();
-                                      return;
-                                    }
-
-                                    if (
-                                      editingUserId &&
-                                      editingUserId !== user.id
-                                    ) {
-                                      handleCancelEditing();
-                                    }
-
-                                    handleStartEditing(user.id);
-                                  }}
-                                >
-                                  {isEditing && isSaving ? (
-                                    <span className="loading loading-spinner loading-xs" />
-                                  ) : isEditing ? (
-                                    "Save timeslots"
-                                  ) : (
-                                    "Edit my timeslots"
-                                  )}
-                                </button>
-                              </div>
-                            )}
-
-                            {canDelete && !isCurrentUser && isOwner && (
+                            {canDeleteOther ? (
                               <button
                                 type="button"
-                                className="btn btn-outline btn-error btn-sm"
+                                className="btn btn-ghost btn-xs btn-square text-error shrink-0"
                                 disabled={isDeletingParticipant}
                                 onClick={() => handleDeleteParticipant(user.id)}
                               >
-                                Remove participant
+                                {isDeletingParticipant ? (
+                                  <span className="loading loading-spinner loading-xs" />
+                                ) : (
+                                  <span className="icon-[material-symbols--delete-outline] text-base" />
+                                )}
                               </button>
+                            ) : (
+                              <span className="w-7 shrink-0" />
                             )}
                           </div>
                         );
@@ -841,21 +1004,8 @@ export function MeetingPage({
         {isOwner && (
           <MeetingMobileBar
             onShare={!needsSetup ? handleShareLink : undefined}
-            onBookRoom={!needsSetup ? () => setRoomsOpen(true) : undefined}
-            onDelete={!needsSetup ? handleDeleteMeeting : undefined}
-            isDeleting={isDeletingMeeting}
             onSaveSetup={needsSetup ? handleSaveSetup : undefined}
             isSavingSetup={isSavingSetup}
-            canBookRoom={!!bestSlotKey}
-          />
-        )}
-
-        {isOwner && (
-          <RoomSuggestionModal
-            open={roomsOpen}
-            onOpenChange={setRoomsOpen}
-            slotKey={bestSlotKey}
-            meetingName={meetingName}
           />
         )}
       </>

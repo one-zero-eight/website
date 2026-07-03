@@ -12,7 +12,7 @@ export type BestIntersectionResult = {
   maxCount: number;
 };
 
-export function getBestIntersection(
+function getSlotAvailabilityCounts(
   users: MeetingUser[],
   dates: string[],
   timeSlots: string[],
@@ -20,7 +20,7 @@ export function getBestIntersection(
   viewedUserIds: Set<string>,
   editingUserId: string | null = null,
   draftSlots: Set<string> = new Set(),
-): BestIntersectionResult {
+) {
   let maxCount = 0;
   const counts = new Map<string, number>();
 
@@ -45,6 +45,28 @@ export function getBestIntersection(
     }
   }
 
+  return { counts, maxCount };
+}
+
+export function getBestIntersection(
+  users: MeetingUser[],
+  dates: string[],
+  timeSlots: string[],
+  allowedSlots: Set<string>,
+  viewedUserIds: Set<string>,
+  editingUserId: string | null = null,
+  draftSlots: Set<string> = new Set(),
+): BestIntersectionResult {
+  const { counts, maxCount } = getSlotAvailabilityCounts(
+    users,
+    dates,
+    timeSlots,
+    allowedSlots,
+    viewedUserIds,
+    editingUserId,
+    draftSlots,
+  );
+
   const slotKeys = new Set<string>();
 
   if (maxCount > 0) {
@@ -56,6 +78,59 @@ export function getBestIntersection(
   }
 
   return { slotKeys, maxCount };
+}
+
+export function getIntersectionAtMinParticipants(
+  users: MeetingUser[],
+  dates: string[],
+  timeSlots: string[],
+  allowedSlots: Set<string>,
+  viewedUserIds: Set<string>,
+  minParticipants: number,
+  editingUserId: string | null = null,
+  draftSlots: Set<string> = new Set(),
+): BestIntersectionResult {
+  const { counts, maxCount } = getSlotAvailabilityCounts(
+    users,
+    dates,
+    timeSlots,
+    allowedSlots,
+    viewedUserIds,
+    editingUserId,
+    draftSlots,
+  );
+
+  const slotKeys = new Set<string>();
+
+  if (minParticipants <= 1) {
+    return { slotKeys: new Set(), maxCount };
+  }
+
+  for (const [slotKey, count] of counts) {
+    if (count >= minParticipants) {
+      slotKeys.add(slotKey);
+    }
+  }
+
+  return { slotKeys, maxCount };
+}
+
+export function getMeetingBookingIntersection(
+  users: MeetingUser[],
+  dates: string[],
+  timeSlots: string[],
+  allowedSlots: Set<string>,
+) {
+  const viewedUserIds = new Set(users.map((user) => user.id));
+  const { slotKeys, maxCount } = getBestIntersection(
+    users,
+    dates,
+    timeSlots,
+    allowedSlots,
+    viewedUserIds,
+  );
+
+  return { slotKeys: [...slotKeys].sort(), maxCount };
 }
 
 export function getBestMeetingSlotKey(
