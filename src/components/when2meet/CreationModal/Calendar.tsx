@@ -52,19 +52,34 @@ export function Calendar({
     onDatesChange(selectedDates.current);
   }, [calendar, onDatesChange]);
 
-  function toggleDateSelection(index: number, include: boolean) {
+  function applyDateSelection(indices: number[], include: boolean) {
     setCalendar((previousCalendar) => {
       const nextCalendar = [...previousCalendar];
-      const dateTimestamp =
-        nextCalendar[index].date.toLocaleDateString("en-CA");
+      let hasChanges = false;
 
-      if (include) {
-        selectedDates.current.add(dateTimestamp);
-      } else {
-        selectedDates.current.delete(dateTimestamp);
+      for (const index of indices) {
+        const day = nextCalendar[index];
+
+        if (!day || !isSelectable(day) || day.selected === include) {
+          continue;
+        }
+
+        const dateTimestamp = day.date.toLocaleDateString("en-CA");
+
+        if (include) {
+          selectedDates.current.add(dateTimestamp);
+        } else {
+          selectedDates.current.delete(dateTimestamp);
+        }
+
+        nextCalendar[index] = { ...day, selected: include };
+        hasChanges = true;
       }
 
-      nextCalendar[index] = { ...nextCalendar[index], selected: include };
+      if (!hasChanges) {
+        return previousCalendar;
+      }
+
       return nextCalendar;
     });
   }
@@ -85,20 +100,20 @@ export function Calendar({
     }
 
     const shouldInclude = !isDeletingRef.current;
+    const indices: number[] = [];
 
     if (lastSelectedIndexRef.current === null) {
-      toggleDateSelection(index, shouldInclude);
+      indices.push(index);
     } else {
       const start = Math.min(lastSelectedIndexRef.current, index);
       const end = Math.max(lastSelectedIndexRef.current, index);
 
-      for (let i = start; i <= end; i++) {
-        if (isSelectable(calendarRef.current[i])) {
-          toggleDateSelection(i, shouldInclude);
-        }
+      for (let currentIndex = start; currentIndex <= end; currentIndex++) {
+        indices.push(currentIndex);
       }
     }
 
+    applyDateSelection(indices, shouldInclude);
     lastSelectedIndexRef.current = index;
   }, []);
 
@@ -136,7 +151,7 @@ export function Calendar({
     const day = calendar[index];
 
     return cn(
-      "my-1 flex aspect-square cursor-pointer items-center justify-center transition-colors touch-manipulation",
+      "my-1 flex aspect-square cursor-pointer touch-none select-none items-center justify-center",
       isSameDay(day.date, new Date()) &&
         !day.selected &&
         "border-primary rounded-full border-2",
@@ -267,7 +282,7 @@ export function Calendar({
 
       <div
         ref={gridRef}
-        className="relative z-0 grid w-full max-w-md min-w-0 touch-none grid-cols-7 select-none"
+        className="relative z-0 grid w-full max-w-md min-w-0 grid-cols-7"
       >
         {WEEK_DAYS.map((day) => (
           <div key={day} className="mb-2 text-center text-sm font-semibold">

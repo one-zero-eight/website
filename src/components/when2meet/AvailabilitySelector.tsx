@@ -10,6 +10,7 @@ import type { MeetingDate, MeetingUser } from "./types.ts";
 import {
   getSlotHeatmapAppearance,
   getSlotKey,
+  getSlotKeysBetween,
   parseSlotKey,
 } from "./utils/slots.ts";
 
@@ -56,12 +57,13 @@ export function AvailabilitySelector({
   viewedUserIds,
   editingUserId,
   draftSlots,
-  onApplySlot,
+  onApplySlots,
   isPhone = false,
   allowedSlots,
   selectionOnly = false,
   hideLegend = false,
   hideHint = false,
+  onHoveredSlotKeyChange,
 }: {
   dates: MeetingDate[];
   timeSlots: string[];
@@ -69,28 +71,35 @@ export function AvailabilitySelector({
   viewedUserIds: Set<string>;
   editingUserId: string | null;
   draftSlots: Set<string>;
-  onApplySlot: (dateId: string, time: string, mode: DragMode) => void;
+  onApplySlots: (slotKeys: string[], mode: DragMode) => void;
   isPhone?: boolean;
   allowedSlots?: Set<string>;
   selectionOnly?: boolean;
   hideLegend?: boolean;
   hideHint?: boolean;
+  onHoveredSlotKeyChange?: (slotKey: string | null) => void;
 }) {
   const daysPerPage = isPhone ? 3 : 7;
   const [dateOffset, setDateOffset] = useState(0);
   const isDraggingRef = useRef(false);
   const dragModeRef = useRef<DragMode>("add");
   const visitedSlotsRef = useRef(new Set<string>());
+  const lastVisitedSlotKeyRef = useRef<string | null>(null);
   const allowedSlotsRef = useRef(allowedSlots);
   allowedSlotsRef.current = allowedSlots;
 
-  const onApplySlotRef = useRef(onApplySlot);
-  onApplySlotRef.current = onApplySlot;
+  const visibleDateIdsRef = useRef<string[]>([]);
+  const timeSlotsRef = useRef(timeSlots);
+  timeSlotsRef.current = timeSlots;
+
+  const onApplySlotsRef = useRef(onApplySlots);
+  onApplySlotsRef.current = onApplySlots;
 
   const viewedUsers = users.filter((user) => viewedUserIds.has(user.id));
   const maxCount = Math.max(1, viewedUsers.length);
 
   const visibleDates = dates.slice(dateOffset, dateOffset + daysPerPage);
+  visibleDateIdsRef.current = visibleDates.map((date) => date.id);
   const hasPrevPage = dateOffset > 0;
   const hasNextPage = dateOffset + daysPerPage < dates.length;
   const showPagination = dates.length > daysPerPage;
@@ -99,6 +108,28 @@ export function AvailabilitySelector({
   useEffect(() => {
     setDateOffset(0);
   }, [dates.length]);
+
+  useEffect(() => {
+    if (isEditing || selectionOnly) {
+      onHoveredSlotKeyChange?.(null);
+    }
+  }, [isEditing, onHoveredSlotKeyChange, selectionOnly]);
+
+  function handleSlotMouseEnter(slotKey: string) {
+    if (isDraggingRef.current || isEditing || selectionOnly) {
+      return;
+    }
+
+    onHoveredSlotKeyChange?.(slotKey);
+  }
+
+  function handleGridMouseLeave() {
+    if (isEditing || selectionOnly) {
+      return;
+    }
+
+    onHoveredSlotKeyChange?.(null);
+  }
 
   function isSlotAllowed(dateId: string, time: string) {
     if (!allowedSlots) {
@@ -154,7 +185,32 @@ export function AvailabilitySelector({
     dragModeRef.current = draftSlots.has(slotKey) ? "remove" : "add";
     isDraggingRef.current = true;
     visitedSlotsRef.current = new Set([slotKey]);
-    onApplySlotRef.current(dateId, time, dragModeRef.current);
+    lastVisitedSlotKeyRef.current = slotKey;
+    onApplySlotsRef.current([slotKey], dragModeRef.current);
+  }
+
+  function collectDragSlotKeys(slotKeys: string[]) {
+    const applicableSlotKeys: string[] = [];
+
+    for (const slotKey of slotKeys) {
+      if (visitedSlotsRef.current.has(slotKey)) {
+        continue;
+      }
+
+      const { dateId, time } = parseSlotKey(slotKey);
+      const slotAllowed =
+        !allowedSlotsRef.current ||
+        allowedSlotsRef.current.has(getSlotKey(dateId, time));
+
+      if (!slotAllowed) {
+        continue;
+      }
+
+      visitedSlotsRef.current.add(slotKey);
+      applicableSlotKeys.push(slotKey);
+    }
+
+    return applicableSlotKeys;
   }
 
   const getSlotKeyFromPoint = useCallback((x: number, y: number) => {
@@ -173,26 +229,46 @@ export function AvailabilitySelector({
 
       const slotKey = getSlotKeyFromPoint(event.clientX, event.clientY);
 
-      if (!slotKey || visitedSlotsRef.current.has(slotKey)) {
+      if (!slotKey) {
         return;
       }
 
-      visitedSlotsRef.current.add(slotKey);
-      const { dateId, time } = parseSlotKey(slotKey);
-      const slotAllowed =
-        !allowedSlotsRef.current ||
-        allowedSlotsRef.current.has(getSlotKey(dateId, time));
+      const lastSlotKey = lastVisitedSlotKeyRef.current;
 
-      if (!slotAllowed) {
+      if (!lastSlotKey) {
+        lastVisitedSlotKeyRef.current = slotKey;
+        const applicableSlotKeys = collectDragSlotKeys([slotKey]);
+
+        if (applicableSlotKeys.length > 0) {
+          onApplySlotsRef.current(applicableSlotKeys, dragModeRef.current);
+        }
+
         return;
       }
 
-      onApplySlotRef.current(dateId, time, dragModeRef.current);
+      if (slotKey === lastSlotKey) {
+        return;
+      }
+
+      const slotsInPath = getSlotKeysBetween(
+        lastSlotKey,
+        slotKey,
+        visibleDateIdsRef.current,
+        timeSlotsRef.current,
+      );
+      const applicableSlotKeys = collectDragSlotKeys(slotsInPath);
+
+      if (applicableSlotKeys.length > 0) {
+        onApplySlotsRef.current(applicableSlotKeys, dragModeRef.current);
+      }
+
+      lastVisitedSlotKeyRef.current = slotKey;
     }
 
     function handlePointerUp() {
       isDraggingRef.current = false;
       visitedSlotsRef.current.clear();
+      lastVisitedSlotKeyRef.current = null;
     }
 
     window.addEventListener("pointermove", handlePointerMove, {
@@ -220,12 +296,14 @@ export function AvailabilitySelector({
     setDateOffset((offset) => Math.min(dates.length - daysPerPage, offset + 1));
   }
 
+  const showSelectionVisual = selectionOnly || isEditing;
+
   const gridContent = (
     <div
       ref={gridRef}
+      onMouseLeave={handleGridMouseLeave}
       className={cn(
-        "grid w-full min-w-0 touch-manipulation select-none",
-        isEditing && "touch-none",
+        "grid w-full min-w-0",
         !isEditing && !selectionOnly && "opacity-95",
       )}
       style={{ gridTemplateColumns }}
@@ -254,7 +332,7 @@ export function AvailabilitySelector({
             const availableCount = getAvailableCount(date.id, time);
             const isSelected = isEditingUserSlot(date.id, time);
             const heatmapAppearance =
-              slotAllowed && !selectionOnly
+              slotAllowed && !showSelectionVisual
                 ? getSlotHeatmapAppearance(availableCount, maxCount)
                 : undefined;
 
@@ -265,22 +343,25 @@ export function AvailabilitySelector({
                 data-slot-key={slotKey}
                 style={heatmapAppearance?.style}
                 className={cn(
-                  "border-base-300 h-7 border-t border-r border-dashed transition-colors first:border-l md:h-8",
+                  "border-base-300 h-7 border-t border-r border-dashed first:border-l md:h-8",
                   time.endsWith(":00") && "border-solid",
                   !slotAllowed &&
                     "bg-base-200/80 cursor-not-allowed opacity-40",
                   slotAllowed &&
-                    (selectionOnly
+                    (showSelectionVisual
                       ? isSelected
                         ? "bg-primary text-primary-content"
-                        : "bg-base-100 hover:bg-primary/10"
+                        : "bg-base-100"
                       : heatmapAppearance?.className),
-                  isSelected && "ring-primary ring-2 ring-offset-0 ring-inset",
+                  showSelectionVisual &&
+                    slotAllowed &&
+                    "touch-none select-none",
                   isEditing && slotAllowed
                     ? "cursor-pointer"
                     : "cursor-default",
                 )}
                 title={`${date.monthDay}, ${time}: ${availableCount} available`}
+                onMouseEnter={() => handleSlotMouseEnter(slotKey)}
                 onPointerDown={(event) =>
                   handleSlotPointerDown(date.id, time, event)
                 }
@@ -295,30 +376,30 @@ export function AvailabilitySelector({
   return (
     <div className="w-full min-w-0">
       {showPagination && isPhone && (
-        <div className="mb-3 flex items-center justify-between md:hidden">
+        <div className="mb-3 flex items-center justify-between gap-2 md:hidden">
           <div className="text-sm font-medium">
             {visibleDates[0]?.monthDay} -{" "}
             {visibleDates[visibleDates.length - 1]?.monthDay}
           </div>
-          <div className="flex gap-2">
-            <DateNavigationButton
-              direction="prev"
-              disabled={!hasPrevPage}
-              onClick={handlePrevPage}
-            />
-            <DateNavigationButton
-              direction="next"
-              disabled={!hasNextPage}
-              onClick={handleNextPage}
-            />
-          </div>
+          {(hasPrevPage || hasNextPage) && (
+            <div className="flex gap-2">
+              {hasPrevPage && (
+                <DateNavigationButton
+                  direction="prev"
+                  disabled={false}
+                  onClick={handlePrevPage}
+                />
+              )}
+              {hasNextPage && (
+                <DateNavigationButton
+                  direction="next"
+                  disabled={false}
+                  onClick={handleNextPage}
+                />
+              )}
+            </div>
+          )}
         </div>
-      )}
-
-      {!hideHint && !isEditing && (
-        <p className="text-base-content/60 mb-3 text-sm">
-          Select a participant and click Edit timeslots to update availability.
-        </p>
       )}
 
       {!hideHint && isEditing && (
@@ -327,24 +408,28 @@ export function AvailabilitySelector({
         </p>
       )}
 
-      <div className={cn("w-full min-w-0", isEditing && "touch-none")}>
+      <div className="w-full min-w-0">
         {showPagination && !isPhone ? (
           <div className="flex items-start gap-2">
-            <div className="hidden shrink-0 pt-8 md:block">
-              <DateNavigationButton
-                direction="prev"
-                disabled={!hasPrevPage}
-                onClick={handlePrevPage}
-              />
-            </div>
+            {hasPrevPage && (
+              <div className="hidden shrink-0 pt-8 md:block">
+                <DateNavigationButton
+                  direction="prev"
+                  disabled={false}
+                  onClick={handlePrevPage}
+                />
+              </div>
+            )}
             <div className="min-w-0 flex-1">{gridContent}</div>
-            <div className="hidden shrink-0 pt-8 md:block">
-              <DateNavigationButton
-                direction="next"
-                disabled={!hasNextPage}
-                onClick={handleNextPage}
-              />
-            </div>
+            {hasNextPage && (
+              <div className="hidden shrink-0 pt-8 md:block">
+                <DateNavigationButton
+                  direction="next"
+                  disabled={false}
+                  onClick={handleNextPage}
+                />
+              </div>
+            )}
           </div>
         ) : (
           gridContent
