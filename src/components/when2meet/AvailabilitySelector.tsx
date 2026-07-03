@@ -7,7 +7,11 @@ import {
 } from "react";
 import { cn } from "@/lib/ui/cn";
 import type { MeetingDate, MeetingUser } from "./types.ts";
-import { getSlotKey, getSlotTone, parseSlotKey } from "./utils/slots.ts";
+import {
+  getSlotHeatmapAppearance,
+  getSlotKey,
+  parseSlotKey,
+} from "./utils/slots.ts";
 
 type DragMode = "add" | "remove";
 
@@ -121,16 +125,6 @@ export function AvailabilitySelector({
 
     return viewedUsers.filter((user) => getDisplaySlots(user).has(slotKey))
       .length;
-  }
-
-  function getHeatmapTone(dateId: string, time: string) {
-    const availableCount = getAvailableCount(dateId, time);
-
-    if (availableCount > 0) {
-      return getSlotTone(availableCount, maxCount);
-    }
-
-    return "bg-base-100 hover:bg-primary/10";
   }
 
   function isEditingUserSlot(dateId: string, time: string) {
@@ -259,12 +253,17 @@ export function AvailabilitySelector({
             const slotAllowed = isSlotAllowed(date.id, time);
             const availableCount = getAvailableCount(date.id, time);
             const isSelected = isEditingUserSlot(date.id, time);
+            const heatmapAppearance =
+              slotAllowed && !selectionOnly
+                ? getSlotHeatmapAppearance(availableCount, maxCount)
+                : undefined;
 
             return (
               <button
                 key={slotKey}
                 type="button"
                 data-slot-key={slotKey}
+                style={heatmapAppearance?.style}
                 className={cn(
                   "border-base-300 h-7 border-t border-r border-dashed transition-colors first:border-l md:h-8",
                   time.endsWith(":00") && "border-solid",
@@ -275,7 +274,7 @@ export function AvailabilitySelector({
                       ? isSelected
                         ? "bg-primary text-primary-content"
                         : "bg-base-100 hover:bg-primary/10"
-                      : getHeatmapTone(date.id, time)),
+                      : heatmapAppearance?.className),
                   isSelected && "ring-primary ring-2 ring-offset-0 ring-inset",
                   isEditing && slotAllowed
                     ? "cursor-pointer"

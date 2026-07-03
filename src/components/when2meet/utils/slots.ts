@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { Availability, TimeRangeSelection } from "./dates.ts";
 import { formatHour, groupDatesByYearMonth, parseHour } from "./dates.ts";
 import type { MeetingDate } from "../types.ts";
@@ -190,24 +191,29 @@ export function formatSlotSummary(slots: Set<string>, dates: MeetingDate[]) {
   return `${date?.monthDay ?? dateId}, ${time} and ${slots.size - 1} more`;
 }
 
-export function getSlotTone(count: number, maxCount: number) {
-  if (count === 0) {
-    return "bg-base-100 hover:bg-primary/10";
+export function getSlotAvailabilityRatio(count: number, maxCount: number) {
+  if (count <= 0 || maxCount <= 0) {
+    return 0;
   }
 
-  const ratio = count / maxCount;
+  return Math.min(1, count / maxCount);
+}
 
-  if (ratio >= 1) {
-    return "bg-primary text-primary-content hover:bg-primary/90";
+export function getSlotHeatmapAppearance(
+  count: number,
+  maxCount: number,
+): { className?: string; style?: CSSProperties } {
+  if (count <= 0) {
+    return { className: "bg-base-100 hover:bg-primary/10" };
   }
 
-  if (ratio >= 0.67) {
-    return "bg-primary/70 hover:bg-primary/80";
-  }
+  const ratio = getSlotAvailabilityRatio(count, maxCount);
+  const percent = Math.round(ratio * 100);
 
-  if (ratio >= 0.34) {
-    return "bg-primary/45 hover:bg-primary/55";
-  }
-
-  return "bg-primary/20 hover:bg-primary/30";
+  return {
+    className: ratio >= 1 ? "text-primary-content" : undefined,
+    style: {
+      backgroundColor: `color-mix(in oklch, var(--color-primary) ${percent}%, transparent)`,
+    },
+  };
 }
