@@ -84,6 +84,9 @@ export function AvailabilitySelector({
   bookingSlots,
   onBookingSlotsChange,
   onBookingSelectionEnd,
+  showCalendarOverlay = false,
+  calendarSlotEvents,
+  calendarConflictSlotKeys,
 }: {
   dates: MeetingDate[];
   timeSlots: string[];
@@ -105,6 +108,9 @@ export function AvailabilitySelector({
   bookingSlots?: Set<string>;
   onBookingSlotsChange?: (slotKeys: string[]) => void;
   onBookingSelectionEnd?: (slotKeys: string[]) => void;
+  showCalendarOverlay?: boolean;
+  calendarSlotEvents?: Map<string, string[]>;
+  calendarConflictSlotKeys?: Set<string>;
 }) {
   const daysPerPage = isPhone ? 3 : 7;
   const [dateOffset, setDateOffset] = useState(0);
@@ -153,10 +159,15 @@ export function AvailabilitySelector({
   }, [dates.length]);
 
   useEffect(() => {
-    if (isEditing || selectionOnly) {
+    if (selectionOnly) {
+      onHoveredSlotKeyChange?.(null);
+      return;
+    }
+
+    if (isEditing && !showCalendarOverlay) {
       onHoveredSlotKeyChange?.(null);
     }
-  }, [isEditing, onHoveredSlotKeyChange, selectionOnly]);
+  }, [isEditing, onHoveredSlotKeyChange, selectionOnly, showCalendarOverlay]);
 
   function isSlotAllowed(dateId: string, time: string) {
     if (!allowedSlots) {
@@ -191,7 +202,16 @@ export function AvailabilitySelector({
   }
 
   function handleSlotMouseEnter(slotKey: string, dateId: string, time: string) {
-    if (isDraggingRef.current || isEditing || selectionOnly) {
+    if (isDraggingRef.current || selectionOnly) {
+      return;
+    }
+
+    if (isEditing) {
+      if (!showCalendarOverlay) {
+        return;
+      }
+
+      onHoveredSlotKeyChange?.(slotKey);
       return;
     }
 
@@ -208,7 +228,11 @@ export function AvailabilitySelector({
   }
 
   function handleGridMouseLeave() {
-    if (isEditing || selectionOnly) {
+    if (selectionOnly) {
+      return;
+    }
+
+    if (isEditing && !showCalendarOverlay) {
       return;
     }
 
@@ -486,6 +510,15 @@ export function AvailabilitySelector({
             const availableCount = getAvailableCount(date.id, time);
             const isSelected = isEditingUserSlot(date.id, time);
             const isBookingSelected = bookingSlots?.has(slotKey) ?? false;
+            const calendarEventTitles =
+              showCalendarOverlay && calendarSlotEvents?.has(slotKey)
+                ? calendarSlotEvents.get(slotKey)
+                : undefined;
+            const hasCalendarEvent = !!calendarEventTitles?.length;
+            const hasCalendarConflict =
+              isSelected &&
+              !!calendarConflictSlotKeys?.has(slotKey) &&
+              hasCalendarEvent;
             const isBestIntersection =
               fadeNonBestSlots && bestIntersectionSlotKeys.has(slotKey);
             const isFilteredOut =
@@ -540,6 +573,11 @@ export function AvailabilitySelector({
                             !bookingMode && "pointer-events-none",
                           )
                         : heatmapAppearance?.className),
+                  hasCalendarEvent &&
+                    "bg-[repeating-linear-gradient(-45deg,color-mix(in_oklch,var(--color-accent)_24%,transparent),color-mix(in_oklch,var(--color-accent)_24%,transparent)_4px,transparent_4px,transparent_8px)]",
+                  isSelected &&
+                    hasCalendarConflict &&
+                    "shadow-[inset_0_0_0_2px_var(--color-warning)]",
                   showPartialSlotHover &&
                     !isBookingSelected &&
                     "ring-primary shadow-[inset_0_0_0_2px_var(--color-primary)]",
@@ -556,7 +594,9 @@ export function AvailabilitySelector({
                 title={
                   !slotAllowed
                     ? `${date.monthDay}, ${time}: not available for this meeting`
-                    : `${date.monthDay}, ${time}: ${availableCount} available`
+                    : calendarEventTitles?.length
+                      ? `${date.monthDay}, ${time}: ${availableCount} available · ${calendarEventTitles.join(", ")}`
+                      : `${date.monthDay}, ${time}: ${availableCount} available`
                 }
                 onMouseEnter={() =>
                   handleSlotMouseEnter(slotKey, date.id, time)
@@ -672,6 +712,21 @@ export function AvailabilitySelector({
                 <div className="bg-base-100 border-base-300 h-3 w-3 rounded border border-dashed" />
                 <span className="text-base-content/70">Empty</span>
               </div>
+              {showCalendarOverlay && (
+                <div className="flex items-center gap-2">
+                  <div className="border-base-300 h-3 w-3 rounded border bg-[repeating-linear-gradient(-45deg,color-mix(in_oklch,var(--color-accent)_24%,transparent),color-mix(in_oklch,var(--color-accent)_24%,transparent)_2px,transparent_2px,transparent_4px)]" />
+                  <span className="text-base-content/70">Your calendar</span>
+                </div>
+              )}
+              {calendarConflictSlotKeys &&
+                calendarConflictSlotKeys.size > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div className="ring-warning bg-primary h-3 w-3 rounded ring-2 ring-inset" />
+                    <span className="text-base-content/70">
+                      Calendar conflict
+                    </span>
+                  </div>
+                )}
             </>
           )}
         </div>

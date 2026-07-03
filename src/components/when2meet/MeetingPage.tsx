@@ -16,6 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
 import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
+import { useWhen2MeetPersonalCalendarOverlay } from "./useWhen2MeetPersonalCalendarOverlay.ts";
 import { useWhen2MeetRoomBookings } from "./useWhen2MeetRoomBookings.ts";
 import {
   buildFullDaySlotKeys,
@@ -24,6 +25,7 @@ import {
   parseBackendSlots,
   slotKeysToBackendSlots,
 } from "./utils/api-slots.ts";
+import { getCalendarConflictSlotKeys } from "./utils/calendar-overlay.ts";
 import { getIntersectionAtMinParticipants } from "./utils/best-slot.ts";
 import {
   clearMeetingRoomBooking,
@@ -338,6 +340,28 @@ export function MeetingPage({
   const highlightBestIntersection =
     minParticipants > 1 && !needsSetup && slotAvailability.slotKeys.size > 0;
 
+  const meetingDateIds = useMemo(() => parsedSlots?.dates ?? [], [parsedSlots]);
+
+  const isEditingSelf = editingUserId === currentUserId;
+
+  const { slotEvents: calendarSlotEvents, hasCalendarData } =
+    useWhen2MeetPersonalCalendarOverlay({
+      dateIds: meetingDateIds,
+      timeSlots,
+      allowedSlots,
+      enabled: isEditingSelf && !needsSetup && formattedDates.length > 0,
+    });
+
+  const showCalendarOverlay = isEditingSelf && hasCalendarData && !needsSetup;
+
+  const calendarConflictSlotKeys = useMemo(() => {
+    if (!showCalendarOverlay) {
+      return new Set<string>();
+    }
+
+    return getCalendarConflictSlotKeys(draftSlots, calendarSlotEvents);
+  }, [showCalendarOverlay, draftSlots, calendarSlotEvents]);
+
   const bookingRange = useMemo(
     () => getSlotKeysRange(bookingSelectionKeys),
     [bookingSelectionKeys],
@@ -525,7 +549,18 @@ export function MeetingPage({
   const isHoveringSlot =
     hoveredSlotKey !== null && editingUserId === null && !needsSetup;
 
+  const isHoveringCalendarSlot =
+    isEditingSelf && hoveredSlotKey !== null && showCalendarOverlay;
+
   const isHoveringAllowedSlot = isHoveringSlot && !isHoveredSlotDisabled;
+
+  const hoveredCalendarEvents = useMemo(() => {
+    if (!hoveredSlotKey || !showCalendarOverlay) {
+      return [];
+    }
+
+    return calendarSlotEvents.get(hoveredSlotKey) ?? [];
+  }, [hoveredSlotKey, showCalendarOverlay, calendarSlotEvents]);
 
   function userHasHoveredSlot(user: MeetingUser) {
     if (!hoveredSlotKey) {
@@ -542,10 +577,10 @@ export function MeetingPage({
   }
 
   useEffect(() => {
-    if (editingUserId !== null || needsSetup) {
+    if (needsSetup) {
       setHoveredSlotKey(null);
     }
-  }, [editingUserId, needsSetup]);
+  }, [needsSetup]);
 
   useEffect(() => {
     if (!highlightBestIntersection || !hoveredSlotKey) {
@@ -903,8 +938,6 @@ export function MeetingPage({
     listUsers.length > 0 &&
     listUsers.every((user) => activeViewedUserIds.has(user.id));
 
-  const isEditingSelf = editingUserId === currentUserId;
-
   return (
     <RequireAuth>
       <>
@@ -1044,6 +1077,13 @@ export function MeetingPage({
                   bookingSlots={bookingSlots}
                   onBookingSlotsChange={handleBookingSlotsChange}
                   onBookingSelectionEnd={handleBookingSelectionEnd}
+                  showCalendarOverlay={showCalendarOverlay}
+                  calendarSlotEvents={calendarSlotEvents}
+                  calendarConflictSlotKeys={
+                    editingUserId === currentUserId
+                      ? calendarConflictSlotKeys
+                      : undefined
+                  }
                   isPhone
                 />
               </div>
@@ -1074,13 +1114,20 @@ export function MeetingPage({
                   bookingSlots={bookingSlots}
                   onBookingSlotsChange={handleBookingSlotsChange}
                   onBookingSelectionEnd={handleBookingSelectionEnd}
+                  showCalendarOverlay={showCalendarOverlay}
+                  calendarSlotEvents={calendarSlotEvents}
+                  calendarConflictSlotKeys={
+                    editingUserId === currentUserId
+                      ? calendarConflictSlotKeys
+                      : undefined
+                  }
                 />
               </div>
             </div>
 
             {!needsSetup && (
-              <aside className="grid h-fit w-full gap-3 self-start">
-                <div className="bg-base-100 border-base-300 rounded-box flex h-fit flex-col self-start border p-4">
+              <aside className="grid h-fit w-full min-w-0 gap-3">
+                <div className="bg-base-100 border-base-300 rounded-box flex h-fit w-full min-w-0 flex-col border p-4">
                   <h2 className="mb-3 text-lg font-semibold">Options</h2>
                   <div className="mb-3 grid gap-2">
                     <div className="flex items-center justify-between gap-2">
@@ -1175,20 +1222,38 @@ export function MeetingPage({
                       </div>
                     </div>
                   )}
-                  <p className="text-base-content/70 mt-3 flex h-4 items-center text-sm">
+                  <div
+                    className={cn(
+                      "text-base-content/70 mt-3 flex min-w-0 flex-col justify-center text-sm",
+                      editingUserId !== null ? "h-9" : "h-4",
+                    )}
+                  >
                     {isHoveringSlot ? (
                       <>
-                        {hoveredSlotLabel}
-                        {isHoveredSlotDisabled
-                          ? " — No one is allowed here"
-                          : hoveredSlotParticipants.length === 0
-                            ? " — No one is available"
-                            : ` — ${hoveredSlotParticipants.length} available`}
+                        <span className="block">
+                          {hoveredSlotLabel}
+                          {isHoveredSlotDisabled
+                            ? " — No one is allowed here"
+                            : hoveredSlotParticipants.length === 0
+                              ? " — No one is available"
+                              : ` — ${hoveredSlotParticipants.length} available`}
+                        </span>
+                      </>
+                    ) : isHoveringCalendarSlot ? (
+                      <>
+                        <span className="block">{hoveredSlotLabel}</span>
+                        {hoveredCalendarEvents.length > 0 && (
+                          <>
+                            <span className="block w-full min-w-0 truncate">
+                              {hoveredCalendarEvents.join(", ")}
+                            </span>
+                          </>
+                        )}
                       </>
                     ) : (
                       <div className="border-base-content/70 mt-1.5 w-full border-b border-dashed" />
                     )}
-                  </p>
+                  </div>
                 </div>
 
                 <div className="bg-base-100 border-base-300 rounded-box flex flex-col border p-4">
