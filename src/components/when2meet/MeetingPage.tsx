@@ -17,7 +17,10 @@ import {
   parseBackendSlots,
   slotKeysToBackendSlots,
 } from "./utils/api-slots.ts";
-import { getBestMeetingSlotKey } from "./utils/best-slot.ts";
+import {
+  getBestIntersection,
+  getBestMeetingSlotKey,
+} from "./utils/best-slot.ts";
 import {
   participantsToUsers,
   sortUsersWithCurrentUserFirst,
@@ -48,6 +51,7 @@ export function MeetingPage({
   const [participantSearch, setParticipantSearch] = useState("");
   const [hoveredSlotKey, setHoveredSlotKey] = useState<string | null>(null);
   const [roomsOpen, setRoomsOpen] = useState(false);
+  const [showBestIntersection, setShowBestIntersection] = useState(false);
   const hasAutoStartedEditingRef = useRef(false);
 
   const eventQueryKey = $when2meet.queryOptions("get", "/events/{event_ref}", {
@@ -223,6 +227,40 @@ export function MeetingPage({
     return [draftUser, ...users];
   }, [users, currentUserId, currentUser, me]);
 
+  const activeViewedUserIds = useMemo(
+    () =>
+      viewedUserIds === null
+        ? new Set(listUsers.map((user) => user.id))
+        : viewedUserIds,
+    [viewedUserIds, listUsers],
+  );
+
+  const bestIntersection = useMemo(() => {
+    if (!showBestIntersection || needsSetup || !parsedSlots) {
+      return { slotKeys: new Set<string>(), maxCount: 0 };
+    }
+
+    return getBestIntersection(
+      listUsers,
+      parsedSlots.dates,
+      timeSlots,
+      allowedSlots,
+      activeViewedUserIds,
+      editingUserId,
+      draftSlots,
+    );
+  }, [
+    showBestIntersection,
+    needsSetup,
+    parsedSlots,
+    listUsers,
+    timeSlots,
+    allowedSlots,
+    activeViewedUserIds,
+    editingUserId,
+    draftSlots,
+  ]);
+
   const filteredUsers = useMemo(() => {
     const trimmedSearch = participantSearch.trim().toLowerCase();
 
@@ -242,11 +280,13 @@ export function MeetingPage({
       return false;
     }
 
-    if (user.id === editingUserId) {
-      return draftSlots.has(hoveredSlotKey);
+    const displaySlots = user.id === editingUserId ? draftSlots : user.slots;
+
+    if (displaySlots.size === 0) {
+      return false;
     }
 
-    return user.slots.has(hoveredSlotKey);
+    return displaySlots.has(hoveredSlotKey);
   }
 
   useEffect(() => {
@@ -483,11 +523,6 @@ export function MeetingPage({
     );
   }
 
-  const activeViewedUserIds =
-    viewedUserIds === null
-      ? new Set(listUsers.map((user) => user.id))
-      : viewedUserIds;
-
   const allUsersViewed =
     listUsers.length > 0 &&
     listUsers.every((user) => activeViewedUserIds.has(user.id));
@@ -600,6 +635,27 @@ export function MeetingPage({
             )}
           >
             <div className="bg-base-100 border-base-300 rounded-box min-w-0 border p-4 md:p-5">
+              {!needsSetup && (
+                <label className="label mb-3 cursor-pointer justify-start gap-3 p-0">
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-primary toggle-sm"
+                    checked={showBestIntersection}
+                    onChange={(event) =>
+                      setShowBestIntersection(event.target.checked)
+                    }
+                  />
+                  <span className="label-text text-sm font-medium">
+                    Show best intersection
+                  </span>
+                  {showBestIntersection && bestIntersection.maxCount > 0 && (
+                    <span className="text-base-content/60 text-sm">
+                      {bestIntersection.maxCount} participant
+                      {bestIntersection.maxCount === 1 ? "" : "s"}
+                    </span>
+                  )}
+                </label>
+              )}
               <div className="md:hidden">
                 <AvailabilitySelector
                   dates={formattedDates}
@@ -614,6 +670,9 @@ export function MeetingPage({
                   hideLegend={needsSetup}
                   hideHint={!!currentUser && (isEditingSelf || !isOwner)}
                   onHoveredSlotKeyChange={setHoveredSlotKey}
+                  showBestIntersection={showBestIntersection}
+                  bestIntersectionSlotKeys={bestIntersection.slotKeys}
+                  bestIntersectionCount={bestIntersection.maxCount}
                   isPhone
                 />
               </div>
@@ -631,6 +690,9 @@ export function MeetingPage({
                   hideLegend={needsSetup}
                   hideHint={!!currentUser && (isEditingSelf || !isOwner)}
                   onHoveredSlotKeyChange={setHoveredSlotKey}
+                  showBestIntersection={showBestIntersection}
+                  bestIntersectionSlotKeys={bestIntersection.slotKeys}
+                  bestIntersectionCount={bestIntersection.maxCount}
                 />
               </div>
             </div>
