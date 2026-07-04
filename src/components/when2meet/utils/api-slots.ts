@@ -3,6 +3,46 @@ import { generateTimeSlots, getSlotKey, parseSlotKey } from "./slots.ts";
 /** When2Meet uses Europe/Moscow wall-clock times (see CreationPage timezone field). */
 const WHEN2MEET_TIMEZONE_OFFSET = "+03:00";
 
+import { formatHour } from "./dates.ts";
+
+const DEFAULT_DERIVED_TIME_RANGE = {
+  start: "08:00",
+  end: "19:00",
+} as const;
+
+const SLOT_INTERVAL_MINUTES = 30;
+
+function parseTimeToMinutes(value: string) {
+  const [hours, minutes = "0"] = value.split(":");
+  return Number(hours) * 60 + Number(minutes);
+}
+
+function minutesToTimeEnd(minutes: number) {
+  if (minutes >= 24 * 60) {
+    return "24:00";
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  return formatHour(hours, remainingMinutes);
+}
+
+export function deriveTimeRangeFromSlots(timeSlots: string[]) {
+  if (timeSlots.length === 0) {
+    return { ...DEFAULT_DERIVED_TIME_RANGE };
+  }
+
+  const sortedTimes = [...timeSlots].sort();
+  const start = sortedTimes[0];
+  const end = minutesToTimeEnd(
+    parseTimeToMinutes(sortedTimes[sortedTimes.length - 1]) +
+      SLOT_INTERVAL_MINUTES,
+  );
+
+  return { start, end };
+}
+
 export function slotKeyToBackend(slotKey: string) {
   const { dateId, time } = parseSlotKey(slotKey);
   return `${dateId}T${time}:00Z`;

@@ -15,7 +15,10 @@ function RouteComponent() {
     <>
       <Helmet>
         <title>Edit meeting | When2Meet</title>
-        <meta name="description" content="Edit meeting name and description." />
+        <meta
+          name="description"
+          content="Edit meeting name, dates, times, and availability setup."
+        />
       </Helmet>
 
       <Topbar title="When2Meet" hideOnMobile={true} />
