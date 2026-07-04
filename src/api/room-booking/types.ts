@@ -185,6 +185,24 @@ export interface paths {
     get: operations["bookings_get_booking_by_entry_id"];
     put?: never;
     post?: never;
+    /** Delete Booking By Entry Id */
+    delete: operations["bookings_delete_booking_by_entry_id"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bookings/cancel-extra": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Cancel Extra Booking */
+    post: operations["bookings_cancel_extra_booking"];
     delete?: never;
     options?: never;
     head?: never;
@@ -219,6 +237,95 @@ export interface paths {
     };
     /** Get User Bookings */
     get: operations["bookings_get_user_bookings"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bmp/auto-bookings/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Auto Bookings */
+    get: operations["bmp_specialist_list_auto_bookings"];
+    put?: never;
+    /** Create Auto Booking */
+    post: operations["bmp_specialist_create_auto_booking"];
+    /** Cancel All Auto Bookings */
+    delete: operations["bmp_specialist_cancel_all_auto_bookings"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bmp/items/{item_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Bmp Item Test */
+    get: operations["bmp_specialist_get_bmp_item_test"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bmp/auto-bookings/{outlook_booking_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Auto Booking */
+    get: operations["bmp_specialist_get_auto_booking"];
+    put?: never;
+    post?: never;
+    /** Delete Auto Booking */
+    delete: operations["bmp_specialist_delete_auto_booking"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/bmp/auto-bookings/batch": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Batch Auto Bookings */
+    post: operations["bmp_specialist_batch_auto_bookings"];
+    /** Batch Cancel Auto Bookings */
+    delete: operations["bmp_specialist_batch_cancel_auto_bookings"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Status */
+    get: operations["get_status"];
     put?: never;
     post?: never;
     delete?: never;
@@ -268,6 +375,29 @@ export interface components {
       /** Is College */
       is_college: boolean;
     };
+    /** BmpBatchCancelRequest */
+    BmpBatchCancelRequest: {
+      /** Outlook Booking Ids */
+      outlook_booking_ids: string[];
+    };
+    /** BmpBatchItemResult */
+    BmpBatchItemResult: {
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: BmpBatchItemResultStatus;
+      booking?: components["schemas"]["Booking"] | null;
+      /** Error */
+      error?: string | null;
+      /** Message Body */
+      message_body?: string | null;
+    };
+    /** BmpBatchRequest */
+    BmpBatchRequest: {
+      /** Bookings */
+      bookings: components["schemas"]["CreateBookingRequest"][];
+    };
     /** Booking */
     Booking: {
       /** Room Id */
@@ -290,6 +420,10 @@ export interface components {
       outlook_entry_id: string | null;
       /** Attendees */
       attendees: components["schemas"]["Attendee"][] | null;
+      /** Categories */
+      categories?: string[] | null;
+      /** Recurrence */
+      recurrence?: string | null;
       /** Related To Me */
       related_to_me?: boolean | null;
       /**
@@ -306,6 +440,36 @@ export interface components {
       can_book: boolean;
       /** Reason Why Cannot */
       reason_why_cannot: string;
+    };
+    /** CancelAllAutoBookingsResult */
+    CancelAllAutoBookingsResult: {
+      /** Cancelled */
+      cancelled: string[];
+      /** Failed */
+      failed: {
+        [key: string]: string;
+      };
+    };
+    /** CancelExtraBookingRequest */
+    CancelExtraBookingRequest: {
+      /** Room Id */
+      room_id: string;
+      /**
+       * Start
+       * Format: date-time
+       */
+      start: string;
+      /**
+       * End
+       * Format: date-time
+       */
+      end: string;
+      /** Title */
+      title: string;
+      /** Outlook Booking Id */
+      outlook_booking_id?: string | null;
+      /** Outlook Entry Id */
+      outlook_entry_id?: string | null;
     };
     /** CreateBookingRequest */
     CreateBookingRequest: {
@@ -325,6 +489,11 @@ export interface components {
       end: string;
       /** Participant Emails */
       participant_emails: string[] | null;
+      recurrence?: components["schemas"]["RecurrencePattern"] | null;
+      /** Categories */
+      categories?: string[] | null;
+      /** Description */
+      description?: string | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -339,6 +508,31 @@ export interface components {
       start: string | null;
       /** End */
       end: string | null;
+    };
+    /** WeeklyUntilPattern */
+    RecurrencePattern: {
+      /**
+       * Kind
+       * @default weekly_until
+       * @constant
+       */
+      kind: "weekly_until";
+      weekday: components["schemas"]["Weekday"];
+      /**
+       * Start Date
+       * Format: date
+       */
+      start_date: string;
+      /**
+       * Until Date
+       * Format: date
+       */
+      until_date: string;
+      /**
+       * Interval
+       * @default 1
+       */
+      interval: number;
     };
     /**
      * Room
@@ -377,6 +571,20 @@ export interface components {
        */
       restrict_daytime: boolean;
     };
+    /** Status */
+    Status: {
+      /** Status */
+      status: number;
+      /** Time */
+      time: string;
+      /** Ping */
+      ping: number | null;
+    };
+    /** UptimeSchema */
+    UptimeSchema: {
+      /** Uptime */
+      uptime: components["schemas"]["Status"][];
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -390,6 +598,11 @@ export interface components {
       /** Context */
       ctx?: Record<string, never>;
     };
+    /**
+     * Weekday
+     * @enum {string}
+     */
+    Weekday: Weekday;
   };
   responses: never;
   parameters: never;
@@ -400,15 +613,28 @@ export interface components {
 export type SchemaAccessToRoom = components["schemas"]["AccessToRoom"];
 export type SchemaAttendee = components["schemas"]["Attendee"];
 export type SchemaAttendeeDetails = components["schemas"]["AttendeeDetails"];
+export type SchemaBmpBatchCancelRequest =
+  components["schemas"]["BmpBatchCancelRequest"];
+export type SchemaBmpBatchItemResult =
+  components["schemas"]["BmpBatchItemResult"];
+export type SchemaBmpBatchRequest = components["schemas"]["BmpBatchRequest"];
 export type SchemaBooking = components["schemas"]["Booking"];
 export type SchemaCanBookResponse = components["schemas"]["CanBookResponse"];
+export type SchemaCancelAllAutoBookingsResult =
+  components["schemas"]["CancelAllAutoBookingsResult"];
+export type SchemaCancelExtraBookingRequest =
+  components["schemas"]["CancelExtraBookingRequest"];
 export type SchemaCreateBookingRequest =
   components["schemas"]["CreateBookingRequest"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaPatchBookingRequest =
   components["schemas"]["PatchBookingRequest"];
+export type SchemaRecurrencePattern =
+  components["schemas"]["RecurrencePattern"];
 export type SchemaRoom = components["schemas"]["Room"];
+export type SchemaStatus = components["schemas"]["Status"];
+export type SchemaUptimeSchema = components["schemas"]["UptimeSchema"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
@@ -715,14 +941,14 @@ export interface operations {
           "application/json": components["schemas"]["Booking"];
         };
       };
-      /** @description Start must be before end */
+      /** @description Start must be before end or invalid recurrence */
       400: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Room declined the booking OR Invalid user */
+      /** @description Room declined the booking OR Invalid user OR Recurrence not allowed */
       403: {
         headers: {
           [name: string]: unknown;
@@ -893,6 +1119,114 @@ export interface operations {
         content?: never;
       };
       /** @description Booking not found OR Room attendee not found in booking attendees */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bookings_delete_booking_by_entry_id: {
+    parameters: {
+      query: {
+        room_id: string;
+      };
+      header?: never;
+      path: {
+        outlook_entry_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Canceled successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description You are not the participant of the booking */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking not found OR Room not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bookings_cancel_extra_booking: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancelExtraBookingRequest"];
+      };
+    };
+    responses: {
+      /** @description Canceled successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description You are not the participant of the booking */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking not found OR Room not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1148,6 +1482,507 @@ export interface operations {
       };
     };
   };
+  bmp_specialist_list_auto_bookings: {
+    parameters: {
+      query?: {
+        start?: string | null;
+        end?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Booking"][];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking or calendar item not found (unknown id, already cancelled, or not a calendar item) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bmp_specialist_create_auto_booking: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateBookingRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Booking"];
+        };
+      };
+      /** @description Start must be before end or invalid recurrence */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room not found, booking was removed, or room attendee not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bmp_specialist_cancel_all_auto_bookings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CancelAllAutoBookingsResult"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking or calendar item not found (unknown id, already cancelled, or not a calendar item) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bmp_specialist_get_bmp_item_test: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        item_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/plain": string;
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bmp_specialist_get_auto_booking: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        outlook_booking_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Booking"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bmp_specialist_delete_auto_booking: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        outlook_booking_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bmp_specialist_batch_auto_bookings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BmpBatchRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: components["schemas"]["BmpBatchItemResult"];
+          };
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking or calendar item not found (unknown id, already cancelled, or not a calendar item) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  bmp_specialist_batch_cancel_auto_bookings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BmpBatchCancelRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CancelAllAutoBookingsResult"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room declined the booking OR Recurrence not allowed */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Booking or calendar item not found (unknown id, already cancelled, or not a calendar item) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description EWS error, probably Outlook is down */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_status: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["UptimeSchema"];
+        };
+      };
+    };
+  };
+}
+export enum BmpBatchItemResultStatus {
+  ok = "ok",
+  error = "error",
 }
 export enum BookingStatus {
   Accept = "Accept",
@@ -1159,4 +1994,13 @@ export enum RoomAccess_levelAnyOf0 {
   yellow = "yellow",
   red = "red",
   special = "special",
+}
+export enum Weekday {
+  monday = "monday",
+  tuesday = "tuesday",
+  wednesday = "wednesday",
+  thursday = "thursday",
+  friday = "friday",
+  saturday = "saturday",
+  sunday = "sunday",
 }
