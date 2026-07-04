@@ -19,7 +19,7 @@ import {
   deriveTimeRangeFromSlots,
   parseBackendSlots,
 } from "./utils/api-slots.ts";
-import { markPendingSetup } from "./utils/setup-slots.ts";
+import { markPendingSetup, saveSetupSlotPrefill } from "./utils/setup-slots.ts";
 import { Calendar } from "./CreationModal/Calendar.tsx";
 import { TimeRange } from "./CreationModal/TimeRange.tsx";
 import { parseHour, TimeRangeSelection } from "./utils/dates.ts";
@@ -206,6 +206,11 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
         return;
       }
 
+      const setupSlotPrefill =
+        isManualSlots && event.specific_time
+          ? parseBackendSlots(event.slots).slotKeys
+          : [];
+
       updateEvent(
         {
           params: { path: { event_ref: meetingId } },
@@ -231,6 +236,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
 
             if (isManualSlots) {
               markPendingSetup(updatedEvent.slug);
+              saveSetupSlotPrefill(updatedEvent.slug, setupSlotPrefill);
               showSuccess(
                 "Meeting updated",
                 "Choose allowed timeslots on the meeting page.",
