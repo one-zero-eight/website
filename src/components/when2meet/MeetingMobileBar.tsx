@@ -5,6 +5,7 @@ export function MeetingMobileBar({
   onBookRoom,
   onDelete,
   onSaveSetup,
+  onClearSetup,
   onToggleAvailability,
   onClearAvailability,
   isDeleting,
@@ -12,12 +13,14 @@ export function MeetingMobileBar({
   isEditingAvailability,
   isSavingAvailability,
   canClearAvailability,
+  canClearSetup,
   canBookRoom,
 }: {
   onShare?: () => void;
   onBookRoom?: () => void;
   onDelete?: () => void;
   onSaveSetup?: () => void;
+  onClearSetup?: () => void;
   onToggleAvailability?: () => void;
   onClearAvailability?: () => void;
   isDeleting?: boolean;
@@ -25,11 +28,22 @@ export function MeetingMobileBar({
   isEditingAvailability?: boolean;
   isSavingAvailability?: boolean;
   canClearAvailability?: boolean;
+  canClearSetup?: boolean;
   canBookRoom?: boolean;
 }) {
   if (onSaveSetup) {
     return (
       <div className="border-base-300 bg-base-200 fixed bottom-12 flex h-fit w-full flex-col gap-2 rounded-t-xl border-b p-4 md:hidden">
+        {onClearSetup && (
+          <button
+            type="button"
+            className="btn btn-outline w-full"
+            disabled={!canClearSetup || isSavingSetup}
+            onClick={onClearSetup}
+          >
+            Clear all
+          </button>
+        )}
         <button
           type="button"
           className="btn btn-primary w-full gap-2"

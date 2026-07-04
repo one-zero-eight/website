@@ -51,7 +51,11 @@ import {
   formatSlotKeyLabel,
   parseSlotKey,
 } from "./utils/slots.ts";
-import { clearPendingSetup, isPendingSetup } from "./utils/setup-slots.ts";
+import {
+  clearPendingSetup,
+  consumeSetupSlotPrefill,
+  isPendingSetup,
+} from "./utils/setup-slots.ts";
 import type { MeetingUser } from "./types.ts";
 
 const SETUP_USER_ID = "__setup__";
@@ -89,6 +93,7 @@ export function MeetingPage({
     string | null
   >(null);
   const hasAutoStartedEditingRef = useRef(false);
+  const hasInitializedSetupRef = useRef(false);
 
   const eventQueryKey = $when2meet.queryOptions("get", "/events/{event_ref}", {
     params: { path: { event_ref: meetingId } },
@@ -108,15 +113,6 @@ export function MeetingPage({
 
   const needsSetup =
     isOwner && (setupSlots === true || isPendingSetup(meetingId));
-
-  useEffect(() => {
-    if (!needsSetup || !event) {
-      return;
-    }
-
-    setEditingUserId(SETUP_USER_ID);
-    setDraftSlots(new Set());
-  }, [needsSetup, event]);
 
   const { mutate: saveParticipant, isPending: isSaving } =
     $when2meet.useMutation("put", "/events/{event_ref}/participants", {
@@ -212,6 +208,45 @@ export function MeetingPage({
 
     return canvasSlots;
   }, [needsSetup, parsedSlots, canvasSlots]);
+
+  useEffect(() => {
+    if (!needsSetup) {
+      hasInitializedSetupRef.current = false;
+      return;
+    }
+
+    if (!event || !parsedSlots || hasInitializedSetupRef.current) {
+      return;
+    }
+
+    hasInitializedSetupRef.current = true;
+    setEditingUserId(SETUP_USER_ID);
+
+    const fullDayKeys = buildFullDaySlotKeys(parsedSlots.dates);
+    let prefillKeys = consumeSetupSlotPrefill(event.slug ?? meetingId);
+
+    if (prefillKeys.length === 0 && event.specific_time) {
+      const currentSlotKeys = parsedSlots.slotKeys.filter((slotKey) =>
+        fullDayKeys.has(slotKey),
+      );
+
+      if (
+        currentSlotKeys.length > 0 &&
+        currentSlotKeys.length < fullDayKeys.size
+      ) {
+        prefillKeys = currentSlotKeys;
+      }
+    }
+
+    if (prefillKeys.length === 0) {
+      setDraftSlots(new Set());
+      return;
+    }
+
+    setDraftSlots(
+      new Set(prefillKeys.filter((slotKey) => fullDayKeys.has(slotKey))),
+    );
+  }, [needsSetup, event, parsedSlots, meetingId]);
 
   const users = useMemo(
     () =>
@@ -764,6 +799,14 @@ export function MeetingPage({
     }
   }
 
+  function handleClearSetupSlots() {
+    if (!needsSetup) {
+      return;
+    }
+
+    setDraftSlots(new Set());
+  }
+
   function handleSaveSetup() {
     if (draftSlots.size === 0) {
       showError("Error", "Choose at least one timeslot.");
@@ -974,18 +1017,28 @@ export function MeetingPage({
             <div className="flex flex-wrap gap-2">
               {needsSetup ? (
                 isOwner && (
-                  <button
-                    type="button"
-                    className="btn btn-primary gap-2"
-                    disabled={isSavingSetup}
-                    onClick={handleSaveSetup}
-                  >
-                    {isSavingSetup ? (
-                      <span className="loading loading-spinner loading-sm" />
-                    ) : (
-                      "Save timeslots"
-                    )}
-                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      disabled={draftSlots.size === 0}
+                      onClick={handleClearSetupSlots}
+                    >
+                      Clear all
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary gap-2"
+                      disabled={isSavingSetup}
+                      onClick={handleSaveSetup}
+                    >
+                      {isSavingSetup ? (
+                        <span className="loading loading-spinner loading-sm" />
+                      ) : (
+                        "Save timeslots"
+                      )}
+                    </button>
+                  </div>
                 )
               ) : (
                 <>
@@ -1364,6 +1417,10 @@ export function MeetingPage({
           <MeetingMobileBar
             onShare={isOwner && !needsSetup ? handleShareLink : undefined}
             onSaveSetup={isOwner && needsSetup ? handleSaveSetup : undefined}
+            onClearSetup={
+              isOwner && needsSetup ? handleClearSetupSlots : undefined
+            }
+            canClearSetup={draftSlots.size > 0}
             isSavingSetup={isSavingSetup}
             onToggleAvailability={
               currentUserId && !needsSetup
