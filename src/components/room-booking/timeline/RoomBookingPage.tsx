@@ -3,6 +3,7 @@ import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
 import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types.ts";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
+import { OutlookDownScreen } from "@/components/room-booking/timeline/OutlookDownScreen.tsx";
 import { T } from "@/lib/utils/dates.ts";
 import { getRouteApi } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
@@ -25,9 +26,6 @@ type TimelineRef = {
 };
 
 const routeApi = getRouteApi("/_with_menu/room-booking/");
-
-/** Set to true to preview the Outlook-down screen without fetching bookings. */
-const showOutlookDownScreen = false;
 
 export function RoomBookingPage() {
   const search = routeApi.useSearch();
@@ -61,6 +59,14 @@ export function RoomBookingPage() {
     $roomBooking.useQuery("get", "/rooms/my-access-list");
   const myAccessListRoomIds = myAccessList?.map((room) => room.id) ?? [];
 
+  const { data: statusData, isFetched: isStatusFetched } =
+    $roomBooking.useQuery("get", "/status", undefined, {
+      refetchInterval: T.Min,
+      retry: 3,
+    });
+  const lastStatus = statusData?.uptime?.[statusData.uptime.length - 1];
+  const isOutlookDown = isStatusFetched && lastStatus?.status !== 1;
+
   const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
     "get",
     "/rooms/",
@@ -83,7 +89,7 @@ export function RoomBookingPage() {
     !isRoomsPending && !!rooms && isAccessListFetched && isMeFetched;
 
   const bookingsQueryEnabled =
-    !showOutlookDownScreen && areBookingsDepsReady && roomsToShow.length > 0;
+    !isOutlookDown && areBookingsDepsReady && roomsToShow.length > 0;
 
   const {
     data: rawBookings,
@@ -124,7 +130,7 @@ export function RoomBookingPage() {
   );
 
   const bookingsFetchFailed =
-    showOutlookDownScreen ||
+    isOutlookDown ||
     (bookingsQueryEnabled &&
       isBookingsFetched &&
       bookingsStatus === "error" &&
@@ -159,19 +165,17 @@ export function RoomBookingPage() {
               }}
               ref={setTimelineRef}
             />
+          ) : isOutlookDown && statusData?.uptime?.length ? (
+            <OutlookDownScreen />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center">
-              <h1 className="m-4 text-center text-lg">
-                Most probably Outlook API is down
+            <div className="flex h-full flex-col items-center justify-center p-4 text-center">
+              <span className="icon-[material-symbols--cloud-off] text-error mb-2 text-5xl" />
+              <h1 className="text-lg font-semibold">
+                Outlook API is currently unavailable
               </h1>
-              <p className="text-base-content/70 mx-4 text-center text-sm">
-                Try to Reload this page.
-              </p>
-              <p className="text-base-content/15 mx-4 py-3 text-center text-sm">
-                <span className="block">
-                  Our kittens are working on resolving this problem
-                </span>
-                <span className="block font-sans">₍^.&nbsp;&nbsp;.^₎⟆</span>
+              <p className="text-base-content/70 mt-1 max-w-sm text-sm">
+                Room booking relies on the Outlook calendar service, which
+                appears to be down right now. We have been notified about this.
               </p>
             </div>
           )}

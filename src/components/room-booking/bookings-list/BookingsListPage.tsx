@@ -1,6 +1,7 @@
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import Tooltip from "@/components/common/Tooltip.tsx";
+import { OutlookDownScreen } from "@/components/room-booking/timeline/OutlookDownScreen.tsx";
 import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
 import { useNowMS } from "@/lib/utils/use-now.ts";
 import { Link } from "@tanstack/react-router";
@@ -9,11 +10,21 @@ import { BookingModal } from "../timeline/BookingModal";
 import { schemaToBooking } from "../timeline/types";
 
 export function BookingsListPage() {
+  const { data: statusData, isFetched: isStatusFetched } =
+    $roomBooking.useQuery("get", "/status", undefined, {
+      refetchInterval: 60000,
+      retry: 3,
+    });
+  const lastStatus = statusData?.uptime?.[statusData.uptime.length - 1];
+  const isOutlookDown = isStatusFetched && lastStatus?.status !== 1;
+
   const {
     data: bookings,
     status,
     error,
-  } = $roomBooking.useQuery("get", "/bookings/my");
+  } = $roomBooking.useQuery("get", "/bookings/my", undefined, {
+    enabled: !isOutlookDown,
+  });
 
   const now = useNowMS(true, 30 * 1000);
   const notFinishedBookings = useMemo(() => {
@@ -33,7 +44,9 @@ export function BookingsListPage() {
       );
   }, [bookings, now]);
 
-  return status === "pending" ? (
+  return isOutlookDown ? (
+    <OutlookDownScreen />
+  ) : status === "pending" ? (
     <div className="flex w-full max-w-lg flex-col gap-4 self-center p-4">
       {Array(3)
         .fill(0)
