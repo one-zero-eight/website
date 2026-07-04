@@ -25,19 +25,36 @@ function isSelectable(item: CalendarItem) {
   return item.date >= today || isSameDay(item.date, today);
 }
 
+function getInitialMonth(selectedDates: Set<string>) {
+  const sortedDates = [...selectedDates].sort();
+
+  if (sortedDates.length === 0) {
+    return new Date();
+  }
+
+  const [year, month] = sortedDates[0].split("-").map(Number);
+
+  return new Date(year, month - 1, 1);
+}
+
 export function Calendar({
   className,
   onDatesChange,
+  defaultSelectedDates,
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
   onDatesChange: (calendar: Set<string>) => void;
+  defaultSelectedDates?: Iterable<string>;
 }) {
-  const currentMonthRef = useRef(new Date());
-  const selectedDates = useRef<Set<string>>(new Set());
+  const initialSelectedDates = useRef(new Set(defaultSelectedDates ?? []));
+  const initialMonth = useRef(getInitialMonth(initialSelectedDates.current));
+  const currentMonthRef = useRef(initialMonth.current);
+  const selectedDates = useRef<Set<string>>(initialSelectedDates.current);
   const [calendar, setCalendar] = useState<CalendarItem[]>(
     generateCalendarMonth(
       currentMonthRef.current.getFullYear(),
       currentMonthRef.current.getMonth(),
+      selectedDates.current,
     ),
   );
 
@@ -60,7 +77,11 @@ export function Calendar({
       for (const index of indices) {
         const day = nextCalendar[index];
 
-        if (!day || !isSelectable(day) || day.selected === include) {
+        if (!day || day.selected === include) {
+          continue;
+        }
+
+        if (include && !isSelectable(day)) {
           continue;
         }
 

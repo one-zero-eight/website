@@ -16,6 +16,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   buildFullDaySlotsFromDates,
   buildSlotsFromDatesAndRange,
+  deriveTimeRangeFromSlots,
+  parseBackendSlots,
 } from "./utils/api-slots.ts";
 import { markPendingSetup } from "./utils/setup-slots.ts";
 import { Calendar } from "./CreationModal/Calendar.tsx";
@@ -111,8 +113,15 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
       return;
     }
 
+    const parsedSlots = parseBackendSlots(event.slots);
+
     setMeetingName(event.name);
     setDescription(event.description ?? "");
+    setSelectedDates(new Set(parsedSlots.dates));
+    setTimeSetupMode(event.specific_time ? "manual_slots" : "daily_range");
+    setTimeRange(
+      event.time_range ?? deriveTimeRangeFromSlots(parsedSlots.timeSlots),
+    );
     setIsFormInitialized(true);
   }, [isEditMode, event, isFormInitialized]);
 
@@ -167,40 +176,6 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
         ? "Meeting name should contain at least 3 symbols."
         : undefined;
 
-    setNameError(nextNameError);
-
-    if (isEditMode) {
-      if (nextNameError || !meetingId) {
-        return;
-      }
-
-      updateEvent(
-        {
-          params: { path: { event_ref: meetingId } },
-          body: {
-            name: trimmedName,
-            description: description.trim() || null,
-          },
-        },
-        {
-          onSuccess: (updatedEvent) => {
-            if (eventQueryKey) {
-              queryClient.invalidateQueries({ queryKey: eventQueryKey });
-            }
-            queryClient.invalidateQueries({
-              queryKey: $when2meet.queryOptions("get", "/events/").queryKey,
-            });
-            showSuccess("Meeting updated", `"${trimmedName}" was saved.`);
-            navigate({
-              to: "/when2meet/$meetingId",
-              params: { meetingId: updatedEvent.slug },
-            });
-          },
-        },
-      );
-      return;
-    }
-
     const nextDatesError =
       selectedDates.size === 0 ? "Choose at least one date." : undefined;
     const nextTimeError =
@@ -208,6 +183,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
         ? "End time must be later than start time."
         : undefined;
 
+    setNameError(nextNameError);
     setDatesError(nextDatesError);
     setTimeError(nextTimeError);
 
@@ -224,6 +200,61 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
           timeRange.start,
           timeRange.end,
         );
+
+    if (isEditMode) {
+      if (!meetingId || !event) {
+        return;
+      }
+
+      updateEvent(
+        {
+          params: { path: { event_ref: meetingId } },
+          body: {
+            name: trimmedName,
+            description: description.trim() || null,
+            slots,
+            timezone: event.timezone ?? "Europe/Moscow",
+            specific_time: isManualSlots,
+            time_range: isManualSlots
+              ? null
+              : { start: timeRange.start, end: timeRange.end },
+          },
+        },
+        {
+          onSuccess: (updatedEvent) => {
+            if (eventQueryKey) {
+              queryClient.invalidateQueries({ queryKey: eventQueryKey });
+            }
+            queryClient.invalidateQueries({
+              queryKey: $when2meet.queryOptions("get", "/events/").queryKey,
+            });
+
+            if (isManualSlots) {
+              markPendingSetup(updatedEvent.slug);
+              showSuccess(
+                "Meeting updated",
+                "Choose allowed timeslots on the meeting page.",
+              );
+              navigate({
+                to: "/when2meet/$meetingId",
+                params: { meetingId: updatedEvent.slug },
+                search: {
+                  setupSlots: true,
+                },
+              });
+              return;
+            }
+
+            showSuccess("Meeting updated", `"${trimmedName}" was saved.`);
+            navigate({
+              to: "/when2meet/$meetingId",
+              params: { meetingId: updatedEvent.slug },
+            });
+          },
+        },
+      );
+      return;
+    }
 
     createEvent(
       {
@@ -398,6 +429,60 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
     </button>
   );
 
+  const saveSubmitButton = (
+    <button
+      type="submit"
+      className="btn btn-primary min-w-0 flex-1 lg:flex-none"
+      disabled={isSubmitting}
+    >
+      {isSubmitting ? (
+        <span className="loading loading-spinner loading-sm" />
+      ) : (
+        "Save"
+      )}
+    </button>
+  );
+
+  const formFields = (
+    <>
+      <div className="flex flex-col gap-4 lg:flex-row">
+        <div className="order-1 flex flex-col lg:order-2 lg:flex-1 lg:border-l lg:pl-6">
+          {metadataFields}
+          {timeSetupFields}
+          {datesError && (
+            <p className="text-error mt-1 hidden text-sm font-medium lg:block">
+              {datesError}
+            </p>
+          )}
+        </div>
+
+        <div className="order-2 lg:order-1 lg:flex-1 lg:pr-6">
+          {(!isEditMode || isFormInitialized) && (
+            <Calendar
+              key={isEditMode ? `${meetingId}-initialized` : "create"}
+              defaultSelectedDates={selectedDates}
+              onDatesChange={handleDatesChange}
+              className="w-full"
+            />
+          )}
+          {isEditMode && !isFormInitialized && (
+            <div className="skeleton h-64 w-full" />
+          )}
+          {datesError && (
+            <p className="text-error mt-2 text-sm font-medium lg:hidden">
+              {datesError}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <footer className="border-base-300 bg-base-200 fixed bottom-12 left-0 flex w-full gap-2 rounded-t-xl border-b p-4 lg:static lg:justify-end lg:border-0 lg:bg-transparent lg:p-0 lg:pt-4">
+        {cancelLink}
+        {isEditMode ? saveSubmitButton : createSubmitButton}
+      </footer>
+    </>
+  );
+
   return (
     <RequireAuth>
       <div className="mx-auto mb-20 w-full max-w-[900px] px-4 py-4 md:mb-4">
@@ -425,61 +510,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
         </h1>
 
         <form onSubmit={handleSubmit} className="bg-base-100 p-2 md:p-0">
-          {isEditMode ? (
-            <div className="flex flex-col gap-4">
-              {metadataFields}
-              <footer className="flex justify-end gap-2 pt-2">
-                {cancelLink}
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <span className="loading loading-spinner loading-sm" />
-                  ) : (
-                    "Save"
-                  )}
-                </button>
-              </footer>
-            </div>
-          ) : (
-            <>
-              <div className="flex flex-col gap-4 lg:flex-row">
-                <div className="order-1 flex flex-col lg:order-2 lg:flex-1 lg:border-l lg:pl-6">
-                  {metadataFields}
-                  {timeSetupFields}
-                  {datesError && (
-                    <p className="text-error mt-1 hidden text-sm font-medium lg:block">
-                      {datesError}
-                    </p>
-                  )}
-                </div>
-
-                <div className="order-2 lg:order-1 lg:flex-1 lg:pr-6">
-                  <Calendar
-                    onDatesChange={handleDatesChange}
-                    className="w-full"
-                  />
-                  {datesError && (
-                    <p className="text-error mt-2 text-sm font-medium lg:hidden">
-                      {datesError}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <footer className="border-base-300 bg-base-200 fixed bottom-12 left-0 flex w-full gap-2 rounded-t-xl border-b p-4 lg:static lg:justify-end lg:border-0 lg:bg-transparent lg:p-0 lg:pt-4">
-                <Link
-                  to="/when2meet"
-                  className="btn btn-outline min-w-0 flex-1 lg:flex-none"
-                >
-                  Cancel
-                </Link>
-                {createSubmitButton}
-              </footer>
-            </>
-          )}
+          {formFields}
         </form>
       </div>
     </RequireAuth>
