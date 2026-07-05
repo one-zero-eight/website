@@ -818,7 +818,7 @@ export function TabletennisPlayersTop() {
       </div>
 
       {/* Filters row */}
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex items-center gap-2">
           <label className="text-base-content/70 text-sm">Rating:</label>
           <input
