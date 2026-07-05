@@ -137,8 +137,8 @@ export interface paths {
     put?: never;
     /**
      * Finish Game
-     * @description Admin endpoint to record a single match result.
-     *     Calculates chess Elo (MMR), updates player statistics, statuses, and apply custom league protections.
+     * @description Admin endpoint to record a match result using game_id and tour_id.
+     *     Calculates Elo, updates player stats, and synchronizes scores inside the tournament.
      */
     post: operations["table_tennis_finish_game"];
     delete?: never;
@@ -157,6 +157,8 @@ export interface components {
       id: components["schemas"]["PydanticObjectId"] | null;
       /** Tour Id */
       tour_id: string;
+      /** Game Id */
+      game_id: string;
       /** Player1 Id */
       player1_id: string;
       /** Player2 Id */
@@ -187,6 +189,10 @@ export interface components {
        * @default 1000
        */
       rating: number;
+      /** Ratings */
+      ratings: {
+        [key: string]: number;
+      };
       /**
        * Wins
        * @default 0
@@ -369,6 +375,13 @@ export interface operations {
           "application/json": components["schemas"]["Player"];
         };
       };
+      /** @description Nickname must be between 2 and 20 characters long! */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
@@ -469,7 +482,7 @@ export interface operations {
           };
         };
       };
-      /** @description A player cannot play a match against themselves! OR One or both players are not in this tournament's player list */
+      /** @description One or both players are not in this tournament's player list OR A player cannot play a match against themselves! */
       400: {
         headers: {
           [name: string]: unknown;
@@ -483,7 +496,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Tournament not found OR One or both players are not registered in the system (/reg) OR One or both users not found in InNoHassle Accounts */
+      /** @description One or both users not found in InNoHassle Accounts OR Tournament not found OR One or both players are not registered in the system (/reg) */
       404: {
         headers: {
           [name: string]: unknown;
@@ -504,11 +517,10 @@ export interface operations {
   table_tennis_finish_game: {
     parameters: {
       query: {
-        email1: string;
-        email2: string;
+        game_id: string;
         s1: number;
         s2: number;
-        tour_id?: string | null;
+        tour_id: string;
       };
       header?: never;
       path?: never;
@@ -527,7 +539,7 @@ export interface operations {
           };
         };
       };
-      /** @description A player cannot play a match against themselves! OR Draws are not allowed in table tennis! */
+      /** @description Draws are not allowed in table tennis! */
       400: {
         headers: {
           [name: string]: unknown;
@@ -541,7 +553,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description One or both players are not registered in the system (/reg) OR One or both users not found in InNoHassle Accounts */
+      /** @description Game not found in this tournament OR One or both players from this game are not registered (/reg) OR Tournament not found */
       404: {
         headers: {
           [name: string]: unknown;
