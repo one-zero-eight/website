@@ -266,6 +266,13 @@ export function getSlotAvailabilityRatio(count: number, maxCount: number) {
   return Math.min(1, count / maxCount);
 }
 
+/**
+ * Maximum opacity for heatmap slot fills. Kept below 100% so the current
+ * user's slot outline (full --color-primary) is always brighter than the
+ * brightest heatmap slot.
+ */
+export const MAX_HEATMAP_OPACITY_PERCENT = 75;
+
 export function getSlotHeatmapAppearance(
   count: number,
   maxCount: number,
@@ -275,7 +282,7 @@ export function getSlotHeatmapAppearance(
   }
 
   const ratio = getSlotAvailabilityRatio(count, maxCount);
-  const percent = Math.round(ratio * 100);
+  const percent = Math.round(ratio * MAX_HEATMAP_OPACITY_PERCENT);
 
   return {
     className: ratio >= 1 ? "text-primary-content" : undefined,
@@ -296,19 +303,19 @@ export function getSlotHeatmapAppearanceColorblindSafe(
   const ratio = getSlotAvailabilityRatio(count, maxCount);
 
   if (ratio >= 1) {
-    return { className: "bg-primary text-primary-content" };
+    return { className: "bg-primary/75 text-primary-content" };
   }
 
   if (ratio >= 0.75) {
-    return { className: "bg-primary/70" };
+    return { className: "bg-primary/55" };
   }
 
   if (ratio >= 0.5) {
-    return { className: "bg-primary/45" };
+    return { className: "bg-primary/35" };
   }
 
   if (ratio >= 0.25) {
-    return { className: "bg-primary/25" };
+    return { className: "bg-primary/20" };
   }
 
   return { className: "bg-primary/10" };
