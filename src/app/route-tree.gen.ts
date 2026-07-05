@@ -55,6 +55,7 @@ import { Route as With_menuRoomBookingListRouteImport } from "./routes/_with_men
 import { Route as With_menuMusicRoomInstructionsRouteImport } from "./routes/_with_menu/music-room.instructions";
 import { Route as With_menuEventsCalendarRouteImport } from "./routes/_with_menu/events/calendar";
 import { Route as With_menuEventsArchiveRouteImport } from "./routes/_with_menu/events/archive";
+import { Route as With_menuEventsApprovalRouteImport } from "./routes/_with_menu/events/approval";
 import { Route as With_menuEventsAdminRouteImport } from "./routes/_with_menu/events/admin";
 import { Route as With_menuClubsNewRouteImport } from "./routes/_with_menu/clubs/new";
 import { Route as With_menuClubsLeagueRouteImport } from "./routes/_with_menu/clubs/league";
@@ -312,6 +313,11 @@ const With_menuEventsArchiveRoute = With_menuEventsArchiveRouteImport.update({
   path: "/events/archive",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuEventsApprovalRoute = With_menuEventsApprovalRouteImport.update({
+  id: "/events/approval",
+  path: "/events/approval",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuEventsAdminRoute = With_menuEventsAdminRouteImport.update({
   id: "/events/admin",
   path: "/events/admin",
@@ -429,6 +435,7 @@ export interface FileRoutesByFullPath {
   "/clubs/league": typeof With_menuClubsLeagueRoute;
   "/clubs/new": typeof With_menuClubsNewRoute;
   "/events/admin": typeof With_menuEventsAdminRoute;
+  "/events/approval": typeof With_menuEventsApprovalRoute;
   "/events/archive": typeof With_menuEventsArchiveRoute;
   "/events/calendar": typeof With_menuEventsCalendarRoute;
   "/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
@@ -491,6 +498,7 @@ export interface FileRoutesByTo {
   "/clubs/league": typeof With_menuClubsLeagueRoute;
   "/clubs/new": typeof With_menuClubsNewRoute;
   "/events/admin": typeof With_menuEventsAdminRoute;
+  "/events/approval": typeof With_menuEventsApprovalRoute;
   "/events/archive": typeof With_menuEventsArchiveRoute;
   "/events/calendar": typeof With_menuEventsCalendarRoute;
   "/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
@@ -556,6 +564,7 @@ export interface FileRoutesById {
   "/_with_menu/clubs/league": typeof With_menuClubsLeagueRoute;
   "/_with_menu/clubs/new": typeof With_menuClubsNewRoute;
   "/_with_menu/events/admin": typeof With_menuEventsAdminRoute;
+  "/_with_menu/events/approval": typeof With_menuEventsApprovalRoute;
   "/_with_menu/events/archive": typeof With_menuEventsArchiveRoute;
   "/_with_menu/events/calendar": typeof With_menuEventsCalendarRoute;
   "/_with_menu/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
@@ -621,6 +630,7 @@ export interface FileRouteTypes {
     | "/clubs/league"
     | "/clubs/new"
     | "/events/admin"
+    | "/events/approval"
     | "/events/archive"
     | "/events/calendar"
     | "/music-room/instructions"
@@ -683,6 +693,7 @@ export interface FileRouteTypes {
     | "/clubs/league"
     | "/clubs/new"
     | "/events/admin"
+    | "/events/approval"
     | "/events/archive"
     | "/events/calendar"
     | "/music-room/instructions"
@@ -747,6 +758,7 @@ export interface FileRouteTypes {
     | "/_with_menu/clubs/league"
     | "/_with_menu/clubs/new"
     | "/_with_menu/events/admin"
+    | "/_with_menu/events/approval"
     | "/_with_menu/events/archive"
     | "/_with_menu/events/calendar"
     | "/_with_menu/music-room/instructions"
@@ -1115,6 +1127,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuEventsArchiveRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/events/approval": {
+      id: "/_with_menu/events/approval";
+      path: "/events/approval";
+      fullPath: "/events/approval";
+      preLoaderRoute: typeof With_menuEventsApprovalRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/events/admin": {
       id: "/_with_menu/events/admin";
       path: "/events/admin";
@@ -1252,6 +1271,7 @@ interface With_menuRouteRouteChildren {
   With_menuClubsLeagueRoute: typeof With_menuClubsLeagueRoute;
   With_menuClubsNewRoute: typeof With_menuClubsNewRoute;
   With_menuEventsAdminRoute: typeof With_menuEventsAdminRoute;
+  With_menuEventsApprovalRoute: typeof With_menuEventsApprovalRoute;
   With_menuEventsArchiveRoute: typeof With_menuEventsArchiveRoute;
   With_menuEventsCalendarRoute: typeof With_menuEventsCalendarRoute;
   With_menuMusicRoomInstructionsRoute: typeof With_menuMusicRoomInstructionsRoute;
@@ -1306,6 +1326,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuClubsLeagueRoute: With_menuClubsLeagueRoute,
   With_menuClubsNewRoute: With_menuClubsNewRoute,
   With_menuEventsAdminRoute: With_menuEventsAdminRoute,
+  With_menuEventsApprovalRoute: With_menuEventsApprovalRoute,
   With_menuEventsArchiveRoute: With_menuEventsArchiveRoute,
   With_menuEventsCalendarRoute: With_menuEventsCalendarRoute,
   With_menuMusicRoomInstructionsRoute: With_menuMusicRoomInstructionsRoute,

@@ -1,4 +1,5 @@
 import { EventItem } from "./EventItem";
+import { filterEventsForList } from "./utils";
 import { cn } from "@/lib/ui/cn";
 import { useMemo } from "react";
 import {
@@ -18,11 +19,8 @@ export function EventForDate({
   const date = new Date(isoDate);
 
   const filteredEvents = useMemo(
-    () =>
-      options.filterDraftsAndInactive
-        ? events.filter((event) => !event.is_draft && event.is_active)
-        : events,
-    [events, options.filterDraftsAndInactive],
+    () => filterEventsForList(events, options),
+    [events, options.filterDraftsAndInactive, options.filterUnapproved],
   );
 
   if (filteredEvents.length === 0) return null;

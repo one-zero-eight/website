@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { groupEvents, hasBadges } from "./utils";
+import { groupEvents, hasBadges, filterEventsForList } from "./utils";
 import { EventForDate, ItemsList } from "./EventForDate";
 
 import { eventBadges } from "./EventBadges";
@@ -151,8 +151,8 @@ export function EventsList({
   );
 
   const userFiltered = useMemo(
-    () => displayEvents.filter((event) => !event.is_draft && event.is_active),
-    [displayEvents],
+    () => filterEventsForList(displayEvents, options),
+    [displayEvents, options.filterDraftsAndInactive, options.filterUnapproved],
   );
 
   const hasEvents = displayEvents.length > 0;

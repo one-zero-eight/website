@@ -20,6 +20,8 @@ export interface EventListOptions {
   showPreviousEvents?: boolean;
   /** Filter out drafts and inactive events (default: true) */
   filterDraftsAndInactive?: boolean;
+  /** Filter out unapproved events (default: true) */
+  filterUnapproved?: boolean;
   /** Show edit button on all events (admin) (default: false) */
   isEditable?: boolean;
   /** Club IDs the user leads; events with any of these clubs as host are editable (for club leaders)
@@ -39,6 +41,7 @@ export const DEFAULT_EVENT_LIST_OPTIONS: Required<
   showMyCheckins: true,
   showPreviousEvents: false,
   filterDraftsAndInactive: true,
+  filterUnapproved: true,
   isEditable: false,
   editableClubIds: [],
   onlyShowDraftsFromEditableClubs: false,

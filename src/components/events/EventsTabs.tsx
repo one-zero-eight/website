@@ -9,6 +9,10 @@ type EventsTab = {
 const listTab: EventsTab = { link: "/events", title: "List" };
 const calendarTab: EventsTab = { link: "/events/calendar", title: "Calendar" };
 const manageTab: EventsTab = { link: "/events/admin", title: "Manage" };
+const approvalTab: EventsTab = {
+  link: "/events/approval",
+  title: "Event approval",
+};
 const archiveTab: EventsTab = { link: "/events/archive", title: "Archive" };
 
 export function EventsTabs() {
@@ -17,6 +21,7 @@ export function EventsTabs() {
   const eventsTabs = [
     listTab,
     calendarTab,
+    ...(isAdmin ? [approvalTab] : []),
     ...(isAdmin || isClubLeader ? [manageTab, archiveTab] : []),
   ];
 

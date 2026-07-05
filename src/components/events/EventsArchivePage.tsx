@@ -32,6 +32,7 @@ export function EventsArchivePage() {
     showMyCheckins: false,
     showPreviousEvents: false,
     filterDraftsAndInactive: false,
+    filterUnapproved: false,
     isEditable: isAdmin,
     editableClubIds: leaderClubIds,
     onlyShowDraftsFromEditableClubs: !isAdmin && leaderClubIds.length > 0,

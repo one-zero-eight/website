@@ -10,7 +10,7 @@ import {
   HostType,
 } from "@/api/workshops/types";
 import { MAX_CAPACITY } from "../constants";
-import { EventFormState } from "../types";
+import { EventFormState, EventListOptions } from "../types";
 
 /**
  * Normalize host from API/storage (loosely typed) into SchemaHost[].
@@ -120,6 +120,38 @@ export const eventLanguage = (
  */
 export function imageLink(eventId: string) {
   return `${import.meta.env.VITE_WORKSHOPS_API_URL}/workshops/${eventId}/image`;
+}
+
+export function isEventPendingApproval(event: SchemaWorkshop): boolean {
+  return !event.is_approved && !event.is_draft && event.is_active;
+}
+
+export function isEventVisibleInPublicList(event: SchemaWorkshop): boolean {
+  return !event.is_draft && event.is_active && event.is_approved;
+}
+
+export function filterEventsForList<T extends SchemaWorkshop>(
+  events: T[],
+  options: Pick<
+    EventListOptions,
+    "filterDraftsAndInactive" | "filterUnapproved"
+  >,
+): T[] {
+  if (!options.filterDraftsAndInactive) {
+    return events;
+  }
+
+  return events.filter((event) => {
+    if (event.is_draft || !event.is_active) {
+      return false;
+    }
+
+    if (options.filterUnapproved !== false && !event.is_approved) {
+      return false;
+    }
+
+    return true;
+  });
 }
 
 /**
