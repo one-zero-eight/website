@@ -1,11 +1,16 @@
 import { cn } from "@/lib/ui/cn";
 import { useMemo, useState, useEffect } from "react";
+import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
+import {
+  formatApiErrorMessage,
+  isApiHttpError,
+} from "@/api/helpers/create-query-client";
 
 type PlayerEntry = {
   place: number;
   name: string;
   rating: number;
-  status: "beginner" | "advanced";
+  status: string;
   visible: boolean;
 };
 
@@ -22,708 +27,7 @@ type Filters = {
   sortDir: SortDir;
 };
 
-const mockPlayers: PlayerEntry[] = [
-  {
-    place: 1,
-    name: "Ivan Petrov",
-    rating: 1500,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 2,
-    name: "Maria Sidorova",
-    rating: 1420,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 3,
-    name: "Alexey Smirnov",
-    rating: 1350,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 4,
-    name: "Elena Kuznetsova",
-    rating: 1280,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 5,
-    name: "Dmitry Ivanov",
-    rating: 1240,
-    status: "advanced",
-    visible: false,
-  },
-  {
-    place: 6,
-    name: "Olga Popova",
-    rating: 1180,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 7,
-    name: "Sergey Vasiliev",
-    rating: 1120,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 8,
-    name: "Anna Novikova",
-    rating: 1080,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 9,
-    name: "Mikhail Fedorov",
-    rating: 1050,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 10,
-    name: "Tatiana Morozova",
-    rating: 1020,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 11,
-    name: "Andrey Volkov",
-    rating: 980,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 12,
-    name: "Natalia Pavlova",
-    rating: 950,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 13,
-    name: "Viktor Semenov",
-    rating: 920,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 14,
-    name: "Irina Zaitseva",
-    rating: 880,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 15,
-    name: "Pavel Mikhailov",
-    rating: 850,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 16,
-    name: "Ekaterina Belova",
-    rating: 820,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 17,
-    name: "Roman Gusev",
-    rating: 780,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 18,
-    name: "Svetlana Titova",
-    rating: 750,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 19,
-    name: "Denis Sorokin",
-    rating: 720,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 20,
-    name: "Yulia Krylova",
-    rating: 680,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 21,
-    name: "Artem Kozlov",
-    rating: 990,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 22,
-    name: "Daria Fomina",
-    rating: 1030,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 23,
-    name: "Nikita Orlov",
-    rating: 1150,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 24,
-    name: "Polina Grigorieva",
-    rating: 890,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 25,
-    name: "Maxim Lebedev",
-    rating: 1070,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 26,
-    name: "Alina Nikolaeva",
-    rating: 1210,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 27,
-    name: "Gleb Solovyov",
-    rating: 940,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 28,
-    name: "Veronika Zakharova",
-    rating: 1110,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 29,
-    name: "Timur Morozov",
-    rating: 870,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 30,
-    name: "Ksenia Belyaeva",
-    rating: 1000,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 31,
-    name: "Vladimir Kovalev",
-    rating: 1190,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 32,
-    name: "Anastasia Sokolova",
-    rating: 960,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 33,
-    name: "Egor Petukhov",
-    rating: 770,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 34,
-    name: "Sofia Rybakova",
-    rating: 1140,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 35,
-    name: "Boris Chernov",
-    rating: 860,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 36,
-    name: "Margarita Frolova",
-    rating: 1220,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 37,
-    name: "Daniil Kiselev",
-    rating: 910,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 38,
-    name: "Evgenia Ponomareva",
-    rating: 1040,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 39,
-    name: "Yaroslav Loginov",
-    rating: 1170,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 40,
-    name: "Ulyana Kozlova",
-    rating: 930,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 41,
-    name: "Konstantin Baranov",
-    rating: 810,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 42,
-    name: "Lilia Sergeeva",
-    rating: 1060,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 43,
-    name: "Stepan Vorobyov",
-    rating: 1230,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 44,
-    name: "Zlata Egorova",
-    rating: 760,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 45,
-    name: "Filipp Sorokin",
-    rating: 1090,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 46,
-    name: "Varvara Timofeeva",
-    rating: 1160,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 47,
-    name: "Petr Grigoriev",
-    rating: 840,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 48,
-    name: "Kira Zhukova",
-    rating: 1100,
-    status: "advanced",
-    visible: false,
-  },
-  {
-    place: 49,
-    name: "Makar Lazarev",
-    rating: 900,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 50,
-    name: "Vladislava Kuzmina",
-    rating: 1250,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 51,
-    name: "Ilya Borisov",
-    rating: 790,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 52,
-    name: "Olesya Makarova",
-    rating: 1010,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 53,
-    name: "Grigory Shevchenko",
-    rating: 1200,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 54,
-    name: "Lada Zaitseva",
-    rating: 880,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 55,
-    name: "Vsevolod Markov",
-    rating: 1130,
-    status: "advanced",
-    visible: false,
-  },
-  {
-    place: 56,
-    name: "Tamara Pavlova",
-    rating: 970,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 57,
-    name: "Valentin Kuznetsov",
-    rating: 740,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 58,
-    name: "Raisa Vinogradova",
-    rating: 1080,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 59,
-    name: "German Tarasov",
-    rating: 1180,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 60,
-    name: "Regina Fedoseeva",
-    rating: 700,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 61,
-    name: "Arkady Yakovlev",
-    rating: 1270,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 62,
-    name: "Maya Voronova",
-    rating: 850,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 63,
-    name: "Rostislav Belov",
-    rating: 1050,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 64,
-    name: "Elizaveta Medvedeva",
-    rating: 1140,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 65,
-    name: "Savely Alekseev",
-    rating: 830,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 66,
-    name: "Vasilisa Andreeva",
-    rating: 1000,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 67,
-    name: "Platon Korolev",
-    rating: 1210,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 68,
-    name: "Milana Nikitina",
-    rating: 910,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 69,
-    name: "Anton Karpov",
-    rating: 730,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 70,
-    name: "Alevtina Sazonova",
-    rating: 1090,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 71,
-    name: "Leonid Komarov",
-    rating: 1260,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 72,
-    name: "Agata Golubeva",
-    rating: 890,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 73,
-    name: "Miron Fadeev",
-    rating: 700,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 74,
-    name: "Karina Kalinina",
-    rating: 1030,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 75,
-    name: "Vitaly Pavlov",
-    rating: 1150,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 76,
-    name: "Diana Rodionova",
-    rating: 950,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 77,
-    name: "Luka Gorshkov",
-    rating: 810,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 78,
-    name: "Nina Danilova",
-    rating: 1070,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 79,
-    name: "Evdokim Melnikov",
-    rating: 1200,
-    status: "advanced",
-    visible: false,
-  },
-  {
-    place: 80,
-    name: "Larisa Denisova",
-    rating: 860,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 81,
-    name: "Semyon Kolesnikov",
-    rating: 1110,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 82,
-    name: "Eleonora Gerasimova",
-    rating: 780,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 83,
-    name: "Ignat Volodin",
-    rating: 980,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 84,
-    name: "Emma Prokhorova",
-    rating: 1120,
-    status: "advanced",
-    visible: false,
-  },
-  {
-    place: 85,
-    name: "Demyan Stepanov",
-    rating: 940,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 86,
-    name: "Vera Filippova",
-    rating: 1060,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 87,
-    name: "Modest Rumyantsev",
-    rating: 1170,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 88,
-    name: "Inna Soboleva",
-    rating: 820,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 89,
-    name: "Kuzma Tikhomirov",
-    rating: 1010,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 90,
-    name: "Eva Mironova",
-    rating: 1190,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 91,
-    name: "Akim Guryanov",
-    rating: 870,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 92,
-    name: "Praskovya Filippova",
-    rating: 1040,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 93,
-    name: "Evstafy Ermakov",
-    rating: 1220,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 94,
-    name: "Klavdia Veselova",
-    rating: 760,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 95,
-    name: "Venedikt Zubov",
-    rating: 1100,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 96,
-    name: "Kapitolina Sysoeva",
-    rating: 920,
-    status: "beginner",
-    visible: false,
-  },
-  {
-    place: 97,
-    name: "Nazar Artemyev",
-    rating: 1130,
-    status: "advanced",
-    visible: true,
-  },
-  {
-    place: 98,
-    name: "Feodora Lazareva",
-    rating: 840,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 99,
-    name: "Prokhor Nikonov",
-    rating: 1050,
-    status: "beginner",
-    visible: true,
-  },
-  {
-    place: 100,
-    name: "Avdotya Samsonova",
-    rating: 1160,
-    status: "advanced",
-    visible: true,
-  },
-];
+type SchemaPlayer = tabletennisTypes.SchemaPlayer;
 
 function SortArrow({
   sortKey,
@@ -749,7 +53,25 @@ const INITIAL_FILTERS: Filters = {
   sortDir: "desc",
 };
 
+function toPlayerEntry(
+  p: SchemaPlayer & { is_active: boolean },
+  place: number,
+): PlayerEntry {
+  return {
+    place,
+    name: p.nickname,
+    rating: p.rating,
+    status: p.status ?? "",
+    visible: p.is_active,
+  };
+}
+
 export function TabletennisPlayersTop() {
+  const { data, isPending, isError, error } = $tabletennis.useQuery(
+    "get",
+    "/players",
+  );
+
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
   const [debounced, setDebounced] = useState<Filters>(INITIAL_FILTERS);
 
@@ -764,11 +86,23 @@ export function TabletennisPlayersTop() {
     setVisibleCount(20);
   }, [debounced]);
 
+  const entries = useMemo(() => {
+    if (!data) return [];
+    const raw = data as unknown as {
+      total: number;
+      players: (SchemaPlayer & { is_active: boolean })[];
+    };
+    const sorted = [...raw.players].sort((a, b) => b.rating - a.rating);
+    return sorted.map((p, i) => toPlayerEntry(p, i + 1));
+  }, [data]);
+
   const results = useMemo(() => {
-    const filtered = mockPlayers
+    const filtered = entries
       .filter((p) => debounced.showHidden || p.visible)
       .filter(
-        (p) => debounced.status === "all" || p.status === debounced.status,
+        (p) =>
+          debounced.status === "all" ||
+          p.status.toLowerCase() === debounced.status,
       )
       .filter(
         (p) =>
@@ -786,7 +120,7 @@ export function TabletennisPlayersTop() {
     });
 
     return sorted;
-  }, [debounced]);
+  }, [entries, debounced]);
 
   const visibleResults = results.slice(0, visibleCount);
 
@@ -796,6 +130,32 @@ export function TabletennisPlayersTop() {
       sortKey: key,
       sortDir: prev.sortKey === key && prev.sortDir === "desc" ? "asc" : "desc",
     }));
+  }
+
+  if (isPending) return <div className="skeleton h-48 w-full" />;
+
+  if (isError && isApiHttpError(error) && error.httpCode === 401) {
+    return (
+      <div className="py-10 text-center">
+        <p className="text-base-content/70 mb-2">
+          Register to see the players list.
+        </p>
+        <a
+          href="/tabletennis"
+          className="rounded-xl border-2 border-[#712BB2] bg-[#712BB2] px-6 py-2 text-xs font-medium text-white transition-all duration-150 hover:bg-[#712BB2]/90 md:px-8 md:py-3 md:text-sm"
+        >
+          Go to profile
+        </a>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <p className="text-error py-8 text-center">
+        {formatApiErrorMessage(error)}
+      </p>
+    );
   }
 
   return (
@@ -922,7 +282,9 @@ export function TabletennisPlayersTop() {
                   <span
                     className={cn(
                       "badge badge-sm",
-                      p.status === "advanced" ? "badge-primary" : "badge-ghost",
+                      p.status.toLowerCase() === "active"
+                        ? "badge-primary"
+                        : "badge-ghost",
                     )}
                   >
                     {p.status}
