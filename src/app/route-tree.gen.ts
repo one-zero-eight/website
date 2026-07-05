@@ -21,7 +21,6 @@ import { Route as With_menuWorkshopsRouteImport } from "./routes/_with_menu/work
 import { Route as With_menuTimerRouteImport } from "./routes/_with_menu/timer";
 import { Route as With_menuSportRouteImport } from "./routes/_with_menu/sport";
 import { Route as With_menuScholarshipRouteImport } from "./routes/_with_menu/scholarship";
-import { Route as With_menuPrintersRouteImport } from "./routes/_with_menu/printers";
 import { Route as With_menuMenuRouteImport } from "./routes/_with_menu/menu";
 import { Route as With_menuMapsRouteImport } from "./routes/_with_menu/maps";
 import { Route as With_menuGuardRouteImport } from "./routes/_with_menu/guard";
@@ -38,6 +37,7 @@ import { Route as With_menuStudentAffairsIndexRouteImport } from "./routes/_with
 import { Route as With_menuSearchIndexRouteImport } from "./routes/_with_menu/search/index";
 import { Route as With_menuScheduleIndexRouteImport } from "./routes/_with_menu/schedule/index";
 import { Route as With_menuRoomBookingIndexRouteImport } from "./routes/_with_menu/room-booking/index";
+import { Route as With_menuPrintersIndexRouteImport } from "./routes/_with_menu/printers/index";
 import { Route as With_menuMusicRoomIndexRouteImport } from "./routes/_with_menu/music-room.index";
 import { Route as With_menuEventsIndexRouteImport } from "./routes/_with_menu/events/index";
 import { Route as With_menuClubsIndexRouteImport } from "./routes/_with_menu/clubs/index";
@@ -52,6 +52,8 @@ import { Route as With_menuSearchActRouteImport } from "./routes/_with_menu/sear
 import { Route as With_menuScheduleCategoryRouteImport } from "./routes/_with_menu/schedule/$category";
 import { Route as With_menuRoomBookingRulesRouteImport } from "./routes/_with_menu/room-booking/rules";
 import { Route as With_menuRoomBookingListRouteImport } from "./routes/_with_menu/room-booking/list";
+import { Route as With_menuPrintersScanRouteImport } from "./routes/_with_menu/printers/scan";
+import { Route as With_menuPrintersPrintRouteImport } from "./routes/_with_menu/printers/print";
 import { Route as With_menuMusicRoomInstructionsRouteImport } from "./routes/_with_menu/music-room.instructions";
 import { Route as With_menuEventsArchiveRouteImport } from "./routes/_with_menu/events/archive";
 import { Route as With_menuEventsAdminRouteImport } from "./routes/_with_menu/events/admin";
@@ -127,11 +129,6 @@ const With_menuSportRoute = With_menuSportRouteImport.update({
 const With_menuScholarshipRoute = With_menuScholarshipRouteImport.update({
   id: "/scholarship",
   path: "/scholarship",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
-const With_menuPrintersRoute = With_menuPrintersRouteImport.update({
-  id: "/printers",
-  path: "/printers",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menuMenuRoute = With_menuMenuRouteImport.update({
@@ -217,6 +214,11 @@ const With_menuRoomBookingIndexRoute =
     path: "/room-booking/",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
+const With_menuPrintersIndexRoute = With_menuPrintersIndexRouteImport.update({
+  id: "/printers/",
+  path: "/printers/",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuMusicRoomIndexRoute = With_menuMusicRoomIndexRouteImport.update({
   id: "/music-room/",
   path: "/music-room/",
@@ -294,6 +296,16 @@ const With_menuRoomBookingListRoute =
     path: "/room-booking/list",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
+const With_menuPrintersScanRoute = With_menuPrintersScanRouteImport.update({
+  id: "/printers/scan",
+  path: "/printers/scan",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
+const With_menuPrintersPrintRoute = With_menuPrintersPrintRouteImport.update({
+  id: "/printers/print",
+  path: "/printers/print",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuMusicRoomInstructionsRoute =
   With_menuMusicRoomInstructionsRouteImport.update({
     id: "/music-room/instructions",
@@ -394,7 +406,6 @@ export interface FileRoutesByFullPath {
   "/guard": typeof With_menuGuardRoute;
   "/maps": typeof With_menuMapsRoute;
   "/menu": typeof With_menuMenuRoute;
-  "/printers": typeof With_menuPrintersRoute;
   "/scholarship": typeof With_menuScholarshipRoute;
   "/sport": typeof With_menuSportRoute;
   "/timer": typeof With_menuTimerRoute;
@@ -412,6 +423,8 @@ export interface FileRoutesByFullPath {
   "/events/admin": typeof With_menuEventsAdminRoute;
   "/events/archive": typeof With_menuEventsArchiveRoute;
   "/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
+  "/printers/print": typeof With_menuPrintersPrintRoute;
+  "/printers/scan": typeof With_menuPrintersScanRoute;
   "/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
@@ -421,24 +434,25 @@ export interface FileRoutesByFullPath {
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
   "/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
-  "/account": typeof With_menuAccountIndexRoute;
-  "/catalogue": typeof With_menuCatalogueIndexRoute;
-  "/clubs": typeof With_menuClubsIndexRoute;
-  "/events": typeof With_menuEventsIndexRoute;
-  "/music-room": typeof With_menuMusicRoomIndexRoute;
-  "/room-booking": typeof With_menuRoomBookingIndexRoute;
-  "/schedule": typeof With_menuScheduleIndexRoute;
-  "/search": typeof With_menuSearchIndexRoute;
-  "/student-affairs": typeof With_menuStudentAffairsIndexRoute;
-  "/when2meet": typeof With_menuWhen2meetIndexRoute;
-  "/schedule-assistant/settings": typeof ScheduleAssistantSettingsIndexRoute;
+  "/account/": typeof With_menuAccountIndexRoute;
+  "/catalogue/": typeof With_menuCatalogueIndexRoute;
+  "/clubs/": typeof With_menuClubsIndexRoute;
+  "/events/": typeof With_menuEventsIndexRoute;
+  "/music-room/": typeof With_menuMusicRoomIndexRoute;
+  "/printers/": typeof With_menuPrintersIndexRoute;
+  "/room-booking/": typeof With_menuRoomBookingIndexRoute;
+  "/schedule/": typeof With_menuScheduleIndexRoute;
+  "/search/": typeof With_menuSearchIndexRoute;
+  "/student-affairs/": typeof With_menuStudentAffairsIndexRoute;
+  "/when2meet/": typeof With_menuWhen2meetIndexRoute;
+  "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/events/$id/edit": typeof With_menuEventsIdEditRoute;
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
-  "/clubs/$slug": typeof With_menuClubsSlugIndexRoute;
-  "/events/$id": typeof With_menuEventsIdIndexRoute;
-  "/room-booking/rooms": typeof With_menuRoomBookingRoomsIndexRoute;
+  "/clubs/$slug/": typeof With_menuClubsSlugIndexRoute;
+  "/events/$id/": typeof With_menuEventsIdIndexRoute;
+  "/room-booking/rooms/": typeof With_menuRoomBookingRoomsIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
 }
 export interface FileRoutesByTo {
@@ -453,7 +467,6 @@ export interface FileRoutesByTo {
   "/guard": typeof With_menuGuardRoute;
   "/maps": typeof With_menuMapsRoute;
   "/menu": typeof With_menuMenuRoute;
-  "/printers": typeof With_menuPrintersRoute;
   "/scholarship": typeof With_menuScholarshipRoute;
   "/sport": typeof With_menuSportRoute;
   "/timer": typeof With_menuTimerRoute;
@@ -471,6 +484,8 @@ export interface FileRoutesByTo {
   "/events/admin": typeof With_menuEventsAdminRoute;
   "/events/archive": typeof With_menuEventsArchiveRoute;
   "/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
+  "/printers/print": typeof With_menuPrintersPrintRoute;
+  "/printers/scan": typeof With_menuPrintersScanRoute;
   "/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
@@ -485,6 +500,7 @@ export interface FileRoutesByTo {
   "/clubs": typeof With_menuClubsIndexRoute;
   "/events": typeof With_menuEventsIndexRoute;
   "/music-room": typeof With_menuMusicRoomIndexRoute;
+  "/printers": typeof With_menuPrintersIndexRoute;
   "/room-booking": typeof With_menuRoomBookingIndexRoute;
   "/schedule": typeof With_menuScheduleIndexRoute;
   "/search": typeof With_menuSearchIndexRoute;
@@ -515,7 +531,6 @@ export interface FileRoutesById {
   "/_with_menu/guard": typeof With_menuGuardRoute;
   "/_with_menu/maps": typeof With_menuMapsRoute;
   "/_with_menu/menu": typeof With_menuMenuRoute;
-  "/_with_menu/printers": typeof With_menuPrintersRoute;
   "/_with_menu/scholarship": typeof With_menuScholarshipRoute;
   "/_with_menu/sport": typeof With_menuSportRoute;
   "/_with_menu/timer": typeof With_menuTimerRoute;
@@ -533,6 +548,8 @@ export interface FileRoutesById {
   "/_with_menu/events/admin": typeof With_menuEventsAdminRoute;
   "/_with_menu/events/archive": typeof With_menuEventsArchiveRoute;
   "/_with_menu/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
+  "/_with_menu/printers/print": typeof With_menuPrintersPrintRoute;
+  "/_with_menu/printers/scan": typeof With_menuPrintersScanRoute;
   "/_with_menu/room-booking/list": typeof With_menuRoomBookingListRoute;
   "/_with_menu/room-booking/rules": typeof With_menuRoomBookingRulesRoute;
   "/_with_menu/schedule/$category": typeof With_menuScheduleCategoryRoute;
@@ -547,6 +564,7 @@ export interface FileRoutesById {
   "/_with_menu/clubs/": typeof With_menuClubsIndexRoute;
   "/_with_menu/events/": typeof With_menuEventsIndexRoute;
   "/_with_menu/music-room/": typeof With_menuMusicRoomIndexRoute;
+  "/_with_menu/printers/": typeof With_menuPrintersIndexRoute;
   "/_with_menu/room-booking/": typeof With_menuRoomBookingIndexRoute;
   "/_with_menu/schedule/": typeof With_menuScheduleIndexRoute;
   "/_with_menu/search/": typeof With_menuSearchIndexRoute;
@@ -577,7 +595,6 @@ export interface FileRouteTypes {
     | "/guard"
     | "/maps"
     | "/menu"
-    | "/printers"
     | "/scholarship"
     | "/sport"
     | "/timer"
@@ -595,6 +612,8 @@ export interface FileRouteTypes {
     | "/events/admin"
     | "/events/archive"
     | "/music-room/instructions"
+    | "/printers/print"
+    | "/printers/scan"
     | "/room-booking/list"
     | "/room-booking/rules"
     | "/schedule/$category"
@@ -604,24 +623,25 @@ export interface FileRouteTypes {
     | "/student-affairs/sign-out"
     | "/when2meet/$meetingId"
     | "/schedule-assistant/settings/$settingsTab"
-    | "/account"
-    | "/catalogue"
-    | "/clubs"
-    | "/events"
-    | "/music-room"
-    | "/room-booking"
-    | "/schedule"
-    | "/search"
-    | "/student-affairs"
-    | "/when2meet"
-    | "/schedule-assistant/settings"
+    | "/account/"
+    | "/catalogue/"
+    | "/clubs/"
+    | "/events/"
+    | "/music-room/"
+    | "/printers/"
+    | "/room-booking/"
+    | "/schedule/"
+    | "/search/"
+    | "/student-affairs/"
+    | "/when2meet/"
+    | "/schedule-assistant/settings/"
     | "/clubs/$slug/edit"
     | "/events/$id/edit"
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
-    | "/clubs/$slug"
-    | "/events/$id"
-    | "/room-booking/rooms"
+    | "/clubs/$slug/"
+    | "/events/$id/"
+    | "/room-booking/rooms/"
     | "/guard/google/files/$slug/join";
   fileRoutesByTo: FileRoutesByTo;
   to:
@@ -636,7 +656,6 @@ export interface FileRouteTypes {
     | "/guard"
     | "/maps"
     | "/menu"
-    | "/printers"
     | "/scholarship"
     | "/sport"
     | "/timer"
@@ -654,6 +673,8 @@ export interface FileRouteTypes {
     | "/events/admin"
     | "/events/archive"
     | "/music-room/instructions"
+    | "/printers/print"
+    | "/printers/scan"
     | "/room-booking/list"
     | "/room-booking/rules"
     | "/schedule/$category"
@@ -668,6 +689,7 @@ export interface FileRouteTypes {
     | "/clubs"
     | "/events"
     | "/music-room"
+    | "/printers"
     | "/room-booking"
     | "/schedule"
     | "/search"
@@ -697,7 +719,6 @@ export interface FileRouteTypes {
     | "/_with_menu/guard"
     | "/_with_menu/maps"
     | "/_with_menu/menu"
-    | "/_with_menu/printers"
     | "/_with_menu/scholarship"
     | "/_with_menu/sport"
     | "/_with_menu/timer"
@@ -715,6 +736,8 @@ export interface FileRouteTypes {
     | "/_with_menu/events/admin"
     | "/_with_menu/events/archive"
     | "/_with_menu/music-room/instructions"
+    | "/_with_menu/printers/print"
+    | "/_with_menu/printers/scan"
     | "/_with_menu/room-booking/list"
     | "/_with_menu/room-booking/rules"
     | "/_with_menu/schedule/$category"
@@ -729,6 +752,7 @@ export interface FileRouteTypes {
     | "/_with_menu/clubs/"
     | "/_with_menu/events/"
     | "/_with_menu/music-room/"
+    | "/_with_menu/printers/"
     | "/_with_menu/room-booking/"
     | "/_with_menu/schedule/"
     | "/_with_menu/search/"
@@ -766,7 +790,7 @@ declare module "@tanstack/react-router" {
     "/_with_menu": {
       id: "/_with_menu";
       path: "";
-      fullPath: "";
+      fullPath: "/";
       preLoaderRoute: typeof With_menuRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
@@ -838,13 +862,6 @@ declare module "@tanstack/react-router" {
       path: "/scholarship";
       fullPath: "/scholarship";
       preLoaderRoute: typeof With_menuScholarshipRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
-    "/_with_menu/printers": {
-      id: "/_with_menu/printers";
-      path: "/printers";
-      fullPath: "/printers";
-      preLoaderRoute: typeof With_menuPrintersRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/menu": {
@@ -920,77 +937,84 @@ declare module "@tanstack/react-router" {
     "/schedule-assistant/settings/": {
       id: "/schedule-assistant/settings/";
       path: "/settings";
-      fullPath: "/schedule-assistant/settings";
+      fullPath: "/schedule-assistant/settings/";
       preLoaderRoute: typeof ScheduleAssistantSettingsIndexRouteImport;
       parentRoute: typeof ScheduleAssistantRouteRoute;
     };
     "/_with_menu/when2meet/": {
       id: "/_with_menu/when2meet/";
       path: "/when2meet";
-      fullPath: "/when2meet";
+      fullPath: "/when2meet/";
       preLoaderRoute: typeof With_menuWhen2meetIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/student-affairs/": {
       id: "/_with_menu/student-affairs/";
       path: "/student-affairs";
-      fullPath: "/student-affairs";
+      fullPath: "/student-affairs/";
       preLoaderRoute: typeof With_menuStudentAffairsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/search/": {
       id: "/_with_menu/search/";
       path: "/search";
-      fullPath: "/search";
+      fullPath: "/search/";
       preLoaderRoute: typeof With_menuSearchIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/schedule/": {
       id: "/_with_menu/schedule/";
       path: "/schedule";
-      fullPath: "/schedule";
+      fullPath: "/schedule/";
       preLoaderRoute: typeof With_menuScheduleIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/room-booking/": {
       id: "/_with_menu/room-booking/";
       path: "/room-booking";
-      fullPath: "/room-booking";
+      fullPath: "/room-booking/";
       preLoaderRoute: typeof With_menuRoomBookingIndexRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/printers/": {
+      id: "/_with_menu/printers/";
+      path: "/printers";
+      fullPath: "/printers/";
+      preLoaderRoute: typeof With_menuPrintersIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/music-room/": {
       id: "/_with_menu/music-room/";
       path: "/music-room";
-      fullPath: "/music-room";
+      fullPath: "/music-room/";
       preLoaderRoute: typeof With_menuMusicRoomIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/events/": {
       id: "/_with_menu/events/";
       path: "/events";
-      fullPath: "/events";
+      fullPath: "/events/";
       preLoaderRoute: typeof With_menuEventsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/clubs/": {
       id: "/_with_menu/clubs/";
       path: "/clubs";
-      fullPath: "/clubs";
+      fullPath: "/clubs/";
       preLoaderRoute: typeof With_menuClubsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/catalogue/": {
       id: "/_with_menu/catalogue/";
       path: "/catalogue";
-      fullPath: "/catalogue";
+      fullPath: "/catalogue/";
       preLoaderRoute: typeof With_menuCatalogueIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/account/": {
       id: "/_with_menu/account/";
       path: "/account";
-      fullPath: "/account";
+      fullPath: "/account/";
       preLoaderRoute: typeof With_menuAccountIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
@@ -1057,6 +1081,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuRoomBookingListRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/printers/scan": {
+      id: "/_with_menu/printers/scan";
+      path: "/printers/scan";
+      fullPath: "/printers/scan";
+      preLoaderRoute: typeof With_menuPrintersScanRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/printers/print": {
+      id: "/_with_menu/printers/print";
+      path: "/printers/print";
+      fullPath: "/printers/print";
+      preLoaderRoute: typeof With_menuPrintersPrintRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/music-room/instructions": {
       id: "/_with_menu/music-room/instructions";
       path: "/music-room/instructions";
@@ -1116,21 +1154,21 @@ declare module "@tanstack/react-router" {
     "/_with_menu/room-booking/rooms/": {
       id: "/_with_menu/room-booking/rooms/";
       path: "/room-booking/rooms";
-      fullPath: "/room-booking/rooms";
+      fullPath: "/room-booking/rooms/";
       preLoaderRoute: typeof With_menuRoomBookingRoomsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/events/$id/": {
       id: "/_with_menu/events/$id/";
       path: "/events/$id";
-      fullPath: "/events/$id";
+      fullPath: "/events/$id/";
       preLoaderRoute: typeof With_menuEventsIdIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/clubs/$slug/": {
       id: "/_with_menu/clubs/$slug/";
       path: "/clubs/$slug";
-      fullPath: "/clubs/$slug";
+      fullPath: "/clubs/$slug/";
       preLoaderRoute: typeof With_menuClubsSlugIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
@@ -1183,7 +1221,6 @@ interface With_menuRouteRouteChildren {
   With_menuGuardRoute: typeof With_menuGuardRoute;
   With_menuMapsRoute: typeof With_menuMapsRoute;
   With_menuMenuRoute: typeof With_menuMenuRoute;
-  With_menuPrintersRoute: typeof With_menuPrintersRoute;
   With_menuScholarshipRoute: typeof With_menuScholarshipRoute;
   With_menuSportRoute: typeof With_menuSportRoute;
   With_menuTimerRoute: typeof With_menuTimerRoute;
@@ -1196,6 +1233,8 @@ interface With_menuRouteRouteChildren {
   With_menuEventsAdminRoute: typeof With_menuEventsAdminRoute;
   With_menuEventsArchiveRoute: typeof With_menuEventsArchiveRoute;
   With_menuMusicRoomInstructionsRoute: typeof With_menuMusicRoomInstructionsRoute;
+  With_menuPrintersPrintRoute: typeof With_menuPrintersPrintRoute;
+  With_menuPrintersScanRoute: typeof With_menuPrintersScanRoute;
   With_menuRoomBookingListRoute: typeof With_menuRoomBookingListRoute;
   With_menuRoomBookingRulesRoute: typeof With_menuRoomBookingRulesRoute;
   With_menuScheduleCategoryRoute: typeof With_menuScheduleCategoryRoute;
@@ -1209,6 +1248,7 @@ interface With_menuRouteRouteChildren {
   With_menuClubsIndexRoute: typeof With_menuClubsIndexRoute;
   With_menuEventsIndexRoute: typeof With_menuEventsIndexRoute;
   With_menuMusicRoomIndexRoute: typeof With_menuMusicRoomIndexRoute;
+  With_menuPrintersIndexRoute: typeof With_menuPrintersIndexRoute;
   With_menuRoomBookingIndexRoute: typeof With_menuRoomBookingIndexRoute;
   With_menuScheduleIndexRoute: typeof With_menuScheduleIndexRoute;
   With_menuSearchIndexRoute: typeof With_menuSearchIndexRoute;
@@ -1234,7 +1274,6 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuGuardRoute: With_menuGuardRoute,
   With_menuMapsRoute: With_menuMapsRoute,
   With_menuMenuRoute: With_menuMenuRoute,
-  With_menuPrintersRoute: With_menuPrintersRoute,
   With_menuScholarshipRoute: With_menuScholarshipRoute,
   With_menuSportRoute: With_menuSportRoute,
   With_menuTimerRoute: With_menuTimerRoute,
@@ -1247,6 +1286,8 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuEventsAdminRoute: With_menuEventsAdminRoute,
   With_menuEventsArchiveRoute: With_menuEventsArchiveRoute,
   With_menuMusicRoomInstructionsRoute: With_menuMusicRoomInstructionsRoute,
+  With_menuPrintersPrintRoute: With_menuPrintersPrintRoute,
+  With_menuPrintersScanRoute: With_menuPrintersScanRoute,
   With_menuRoomBookingListRoute: With_menuRoomBookingListRoute,
   With_menuRoomBookingRulesRoute: With_menuRoomBookingRulesRoute,
   With_menuScheduleCategoryRoute: With_menuScheduleCategoryRoute,
@@ -1260,6 +1301,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuClubsIndexRoute: With_menuClubsIndexRoute,
   With_menuEventsIndexRoute: With_menuEventsIndexRoute,
   With_menuMusicRoomIndexRoute: With_menuMusicRoomIndexRoute,
+  With_menuPrintersIndexRoute: With_menuPrintersIndexRoute,
   With_menuRoomBookingIndexRoute: With_menuRoomBookingIndexRoute,
   With_menuScheduleIndexRoute: With_menuScheduleIndexRoute,
   With_menuSearchIndexRoute: With_menuSearchIndexRoute,
