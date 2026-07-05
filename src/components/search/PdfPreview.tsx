@@ -2,7 +2,7 @@ import { searchTypes } from "@/api/search";
 import { usePreviewFile } from "@/api/search/use-preview-file.ts";
 import { useElementHeight, useElementWidth } from "@/lib/ui/use-element-size";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import workerSrc from "pdfjs-dist/build/pdf.worker?worker&url";
+import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { useCallback, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import PreviewBottomButton from "./PreviewBottomButton";
