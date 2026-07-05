@@ -62,7 +62,8 @@ jobs:
 
   deploy:
     # Only on manual trigger or push to main
-    if: github.repository_owner == 'one-zero-eight' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+    if: false # disable for now
+    # if: github.repository_owner == 'one-zero-eight' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     name: ⚡️ Deploy to server for ${{ github.event.inputs.environment || 'staging' }}
     needs: build
     runs-on: [self-hosted, innohassle]
