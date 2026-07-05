@@ -1,7 +1,10 @@
 import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
 
-function parseDate(dateStr: string): Date {
+export function parseDate(dateStr: string): Date {
+  if (dateStr.includes("-")) {
+    return new Date(dateStr + "T00:00:00Z");
+  }
   const [day, month, year] = dateStr.split(".").map(Number);
   return new Date(2000 + year, month - 1, day);
 }
@@ -24,7 +27,7 @@ function downsampleData(data: RatingPoint[], maxPoints: number): RatingPoint[] {
   );
 }
 
-type RatingPoint = {
+export type RatingPoint = {
   date: string;
   score: number;
 };
@@ -194,55 +197,24 @@ function RatingChart({ data }: { data: RatingPoint[] }) {
   );
 }
 
-export function ScoreTable() {
+export function ScoreTable({ data = [] }: { data?: RatingPoint[] }) {
   const [period, setPeriod] = useState<"month" | "year" | "all">("all");
 
-  const testData: RatingPoint[] = [
-    { date: "01.09.24", score: 85 },
-    { date: "05.09.24", score: 92 },
-    { date: "10.09.24", score: 78 },
-    { date: "15.09.24", score: 105 },
-    { date: "20.09.24", score: 98 },
-    { date: "25.09.24", score: 115 },
-    { date: "04.12.24", score: 175 },
-    { date: "10.12.24", score: 190 },
-    { date: "16.12.24", score: 185 },
-    { date: "22.12.24", score: 200 },
-    { date: "28.12.24", score: 195 },
-    { date: "05.01.25", score: 210 },
-    { date: "10.01.25", score: 205 },
-    { date: "16.01.25", score: 220 },
-    { date: "22.01.25", score: 215 },
-    { date: "28.01.25", score: 230 },
-    { date: "03.02.25", score: 225 },
-    { date: "09.02.25", score: 240 },
-    { date: "14.02.25", score: 235 },
-    { date: "20.02.25", score: 250 },
-    { date: "25.02.25", score: 245 },
-    { date: "02.03.25", score: 260 },
-    { date: "08.03.25", score: 255 },
-    { date: "14.03.25", score: 270 },
-    { date: "19.03.25", score: 265 },
-    { date: "25.03.25", score: 280 },
-    { date: "30.03.25", score: 275 },
-    { date: "04.04.25", score: 290 },
-    { date: "10.04.25", score: 285 },
-    { date: "16.04.25", score: 300 },
-    { date: "22.04.25", score: 295 },
-    { date: "28.04.25", score: 310 },
-    { date: "03.05.25", score: 305 },
-    { date: "09.05.25", score: 320 },
-    { date: "15.05.25", score: 315 },
-    { date: "21.05.25", score: 330 },
-    { date: "27.05.25", score: 325 },
-    { date: "01.06.25", score: 340 },
-    { date: "07.06.25", score: 335 },
-    { date: "19.06.25", score: 100 },
-  ];
-
-  const sorted = [...testData].sort(
+  const sorted = [...data].sort(
     (a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime(),
   );
+
+  if (sorted.length === 0) {
+    return (
+      <div className="bg-base-200 rounded-lg px-10 py-7">
+        <h3 className="text-base-content text-xl font-light md:text-2xl">
+          Score Timeline
+        </h3>
+        <p className="text-base-content/50 mt-4 text-center text-sm">No data</p>
+      </div>
+    );
+  }
+
   const now = parseDate(sorted[sorted.length - 1]!.date);
 
   let filteredData: RatingPoint[];

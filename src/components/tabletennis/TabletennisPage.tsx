@@ -5,7 +5,7 @@ import {
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
-import { ScoreTable } from "./DrawTable";
+import { ScoreTable, type RatingPoint } from "./DrawTable";
 
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
 
@@ -170,6 +170,9 @@ function ProfileInfo({
 
 function InfoTiles({ player }: { player: SchemaPlayer }) {
   const totalGames = player.wins + player.losses;
+  const ratingsData: RatingPoint[] = Object.entries(player.ratings ?? {}).map(
+    ([date, score]) => ({ date, score }),
+  );
 
   return (
     <div className="mx-5 columns-1 gap-4 md:columns-2">
@@ -183,7 +186,7 @@ function InfoTiles({ player }: { player: SchemaPlayer }) {
         />
       </div>
       <div className="mb-4 break-inside-avoid">
-        <ScoreTable />
+        <ScoreTable data={ratingsData} />
       </div>
     </div>
   );
