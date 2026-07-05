@@ -4,31 +4,18 @@
  */
 
 export interface paths {
-  "/players/": {
+  "/get_player": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** List Players */
-    get: operations["table_tennis_list_players"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/players/{player_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Player */
+    /**
+     * Get Player
+     * @description Returns the current player's data with name from InNoHassle Accounts
+     *     and calculated activity status.
+     */
     get: operations["table_tennis_get_player"];
     put?: never;
     post?: never;
@@ -38,15 +25,19 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/games/": {
+  "/players": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** List Games */
-    get: operations["table_tennis_list_games"];
+    /**
+     * List Players
+     * @description Returns a list of all registered players with their names from InNoHassle Accounts
+     *     and their calculated activity status.
+     */
+    get: operations["table_tennis_list_players"];
     put?: never;
     post?: never;
     delete?: never;
@@ -55,17 +46,101 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/games/{game_id}": {
+  "/ping": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get Game */
-    get: operations["table_tennis_get_game"];
+    /**
+     * Ping
+     * @description To check that all is good.
+     */
+    get: operations["table_tennis_ping"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/reg": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Register Player
+     * @description To register/rename player.
+     */
+    post: operations["table_tennis_register_player"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/reg_tour": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Register Tour
+     * @description Creates a new tournament with a list of participating players.
+     */
+    post: operations["table_tennis_register_tour"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/reg_game": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Register Game
+     * @description Creates a new game in tournament with start score 0:0.
+     */
+    post: operations["table_tennis_register_game"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/game": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Finish Game
+     * @description Admin endpoint to record a single match result.
+     *     Calculates chess Elo (MMR), updates player statistics, statuses, and apply custom league protections.
+     */
+    post: operations["table_tennis_finish_game"];
     delete?: never;
     options?: never;
     head?: never;
@@ -78,16 +153,18 @@ export interface components {
   schemas: {
     /** Game */
     Game: {
-      /** Id */
-      id: string;
+      /** @description MongoDB document ObjectID */
+      id: components["schemas"]["PydanticObjectId"] | null;
+      /** Tour Id */
+      tour_id: string;
       /** Player1 Id */
       player1_id: string;
       /** Player2 Id */
       player2_id: string;
-      /** Score Player1 */
-      score_player1: number;
-      /** Score Player2 */
-      score_player2: number;
+      /** Player1 Score */
+      player1_score: number;
+      /** Player2 Score */
+      player2_score: number;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -96,15 +173,60 @@ export interface components {
     };
     /** Player */
     Player: {
-      /** Id */
-      id: string;
-      /** Name */
-      name: string;
+      /** @description MongoDB document ObjectID */
+      id: components["schemas"]["PydanticObjectId"] | null;
+      /** Innohassle Id */
+      innohassle_id: string;
+      /**
+       * Nickname
+       * @default nouname
+       */
+      nickname: string;
       /**
        * Rating
        * @default 1000
        */
       rating: number;
+      /**
+       * Wins
+       * @default 0
+       */
+      wins: number;
+      /**
+       * Losses
+       * @default 0
+       */
+      losses: number;
+      /**
+       * Last Game
+       * Format: date-time
+       */
+      last_game: string;
+      /**
+       * Status
+       * @default Beginner
+       */
+      status: string;
+    };
+    /** @example 5eb7cf5a86d9755df3a6c593 */
+    PydanticObjectId: string;
+    /** Tournament */
+    Tournament: {
+      /** Id */
+      _id: string;
+      /** Name */
+      name: string;
+      /** Players */
+      players: string[];
+      /** Val Games */
+      val_games: components["schemas"]["Game"][] | null;
+      /** Cval Games */
+      cval_games: components["schemas"]["Game"][] | null;
+      /**
+       * Date
+       * Format: date-time
+       */
+      date: string;
     };
     /** ValidationError */
     ValidationError: {
@@ -130,9 +252,47 @@ export type SchemaGame = components["schemas"]["Game"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaPlayer = components["schemas"]["Player"];
+export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
+export type SchemaTournament = components["schemas"]["Tournament"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
+  table_tennis_get_player: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Player not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   table_tennis_list_players: {
     parameters: {
       query?: never;
@@ -148,7 +308,9 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Player"][];
+          "application/json": {
+            [key: string]: unknown;
+          };
         };
       };
       /** @description Unable to verify credentials OR Credentials not provided */
@@ -160,13 +322,40 @@ export interface operations {
       };
     };
   };
-  table_tennis_get_player: {
+  table_tennis_ping: {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        player_id: string;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
       };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  table_tennis_register_player: {
+    parameters: {
+      query?: {
+        nick?: string | null;
+      };
+      header?: never;
+      path?: never;
       cookie?: never;
     };
     requestBody?: never;
@@ -187,7 +376,57 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Player not found */
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  table_tennis_register_tour: {
+    parameters: {
+      query: {
+        name: string;
+        date?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": string[];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Tournament"];
+        };
+      };
+      /** @description Player {email} must register via /reg first! OR A tournament must have at least 2 players! */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not a Table Tennis administrator/coach! */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description User {email} not found in InNoHassle Accounts */
       404: {
         headers: {
           [name: string]: unknown;
@@ -205,9 +444,14 @@ export interface operations {
       };
     };
   };
-  table_tennis_list_games: {
+  table_tennis_register_game: {
     parameters: {
-      query?: never;
+      query: {
+        tour_id: string;
+        tip: PathsReg_gamePostParametersQueryTip;
+        email1: string;
+        email2: string;
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -220,46 +464,26 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Game"][];
+          "application/json": {
+            [key: string]: unknown;
+          };
         };
       };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
+      /** @description A player cannot play a match against themselves! OR One or both players are not in this tournament's player list */
+      400: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-    };
-  };
-  table_tennis_get_game: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        game_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Game"];
-        };
-      };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
+      /** @description You are not a Table Tennis administrator/coach! */
+      403: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Game not found */
+      /** @description Tournament not found OR One or both players are not registered in the system (/reg) OR One or both users not found in InNoHassle Accounts */
       404: {
         headers: {
           [name: string]: unknown;
@@ -277,4 +501,66 @@ export interface operations {
       };
     };
   };
+  table_tennis_finish_game: {
+    parameters: {
+      query: {
+        email1: string;
+        email2: string;
+        s1: number;
+        s2: number;
+        tour_id?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description A player cannot play a match against themselves! OR Draws are not allowed in table tennis! */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not a Table Tennis administrator/coach! */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description One or both players are not registered in the system (/reg) OR One or both users not found in InNoHassle Accounts */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+}
+export enum PathsReg_gamePostParametersQueryTip {
+  val = "val",
+  cval = "cval",
 }
