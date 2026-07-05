@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -69,15 +70,14 @@ export function AvailabilitySelector({
   users,
   viewedUserIds,
   editingUserId,
+  currentUserId,
   draftSlots,
   onApplySlots,
   isPhone = false,
   allowedSlots,
   selectionOnly = false,
-  hideLegend = false,
   hideHint = false,
   bestIntersectionSlotKeys,
-  bestIntersectionCount = 0,
   hoveredSlotKey = null,
   onHoveredSlotKeyChange,
   bookingMode = false,
@@ -93,15 +93,14 @@ export function AvailabilitySelector({
   users: MeetingUser[];
   viewedUserIds: Set<string>;
   editingUserId: string | null;
+  currentUserId?: string;
   draftSlots: Set<string>;
   onApplySlots: (slotKeys: string[], mode: DragMode) => void;
   isPhone?: boolean;
   allowedSlots?: Set<string>;
   selectionOnly?: boolean;
-  hideLegend?: boolean;
   hideHint?: boolean;
   bestIntersectionSlotKeys?: Set<string>;
-  bestIntersectionCount?: number;
   hoveredSlotKey?: string | null;
   onHoveredSlotKeyChange?: (slotKey: string | null) => void;
   bookingMode?: boolean;
@@ -146,6 +145,14 @@ export function AvailabilitySelector({
     !showEditingVisual &&
     !!bestIntersectionSlotKeys &&
     bestIntersectionSlotKeys.size > 0;
+
+  const mySlots = useMemo(() => {
+    if (!currentUserId) {
+      return null;
+    }
+
+    return users.find((user) => user.id === currentUserId)?.slots ?? null;
+  }, [users, currentUserId]);
 
   const visibleDates = dates.slice(dateOffset, dateOffset + daysPerPage);
   visibleDateIdsRef.current = visibleDates.map((date) => date.id);
@@ -438,6 +445,68 @@ export function AvailabilitySelector({
     !!bestIntersectionSlotKeys &&
     bestIntersectionSlotKeys.size > 0;
 
+  const filledSlotKeys = useMemo(() => {
+    const set = new Set<string>();
+
+    for (const date of dates) {
+      for (const time of timeSlots) {
+        const slotKey = getSlotKey(date.id, time);
+
+        if (allowedSlots && !allowedSlots.has(slotKey)) {
+          continue;
+        }
+
+        if (bookingMode) {
+          if (bookingSlots?.has(slotKey)) {
+            set.add(slotKey);
+          }
+          continue;
+        }
+
+        if (showEditingVisual) {
+          if (draftSlots.has(slotKey)) {
+            set.add(slotKey);
+          }
+          continue;
+        }
+
+        if (fadeNonBestSlots) {
+          if (bestIntersectionSlotKeys?.has(slotKey)) {
+            set.add(slotKey);
+          }
+          continue;
+        }
+
+        if (
+          countExplicitSlotAvailability(
+            users,
+            viewedUserIds,
+            slotKey,
+            editingUserId,
+            draftSlots,
+          ) > 0
+        ) {
+          set.add(slotKey);
+        }
+      }
+    }
+
+    return set;
+  }, [
+    dates,
+    timeSlots,
+    allowedSlots,
+    bookingMode,
+    bookingSlots,
+    showEditingVisual,
+    draftSlots,
+    fadeNonBestSlots,
+    bestIntersectionSlotKeys,
+    users,
+    viewedUserIds,
+    editingUserId,
+  ]);
+
   function getDateColumnGapClassName(dateIndex: number) {
     const date = dates[dateIndex];
 
@@ -492,7 +561,7 @@ export function AvailabilitySelector({
         );
       })}
 
-      {timeSlots.map((time) => (
+      {timeSlots.map((time, timeIndex) => (
         <div key={time} className="contents">
           <div
             className={cn(
@@ -509,7 +578,36 @@ export function AvailabilitySelector({
             const slotAllowed = isSlotAllowed(date.id, time);
             const availableCount = getAvailableCount(date.id, time);
             const isSelected = isEditingUserSlot(date.id, time);
+            const isMySlot =
+              !!mySlots && mySlots.has(slotKey) && !showEditingVisual;
             const isBookingSelected = bookingSlots?.has(slotKey) ?? false;
+            const isFilled = filledSlotKeys.has(slotKey);
+            const prevTime = timeIndex > 0 ? timeSlots[timeIndex - 1] : null;
+            const nextTime =
+              timeIndex < timeSlots.length - 1
+                ? timeSlots[timeIndex + 1]
+                : null;
+            const nextDate =
+              visibleIndex < visibleDates.length - 1
+                ? visibleDates[visibleIndex + 1]
+                : null;
+            const mergeUp =
+              isFilled &&
+              !!prevTime &&
+              filledSlotKeys.has(getSlotKey(date.id, prevTime));
+            const mergeRight =
+              isFilled &&
+              !!nextDate &&
+              areConsecutiveDateIds(date.id, nextDate.id) &&
+              filledSlotKeys.has(getSlotKey(nextDate.id, time));
+            const mySlotAbove =
+              !!mySlots &&
+              !!prevTime &&
+              mySlots.has(getSlotKey(date.id, prevTime));
+            const mySlotBelow =
+              !!mySlots &&
+              !!nextTime &&
+              mySlots.has(getSlotKey(date.id, nextTime));
             const calendarEventTitles =
               showCalendarOverlay && calendarSlotEvents?.has(slotKey)
                 ? calendarSlotEvents.get(slotKey)
@@ -557,9 +655,16 @@ export function AvailabilitySelector({
                     : heatmapAppearance?.style
                 }
                 className={cn(
-                  "border-base-300 relative h-7 border-t border-r border-dashed first:border-l md:h-8",
+                  "border-base-300 relative h-7 md:h-8",
                   dateColumnGapClassName,
-                  time.endsWith(":00") && "border-solid",
+                  mergeUp
+                    ? "border-t-transparent"
+                    : cn(
+                        "border-t",
+                        time.endsWith(":00") ? "border-solid" : "border-dashed",
+                      ),
+                  mergeRight ? "border-r-transparent" : "border-r",
+                  visibleIndex === 0 && "border-l",
                   !slotAllowed &&
                     "bg-base-200/80 cursor-not-allowed opacity-40",
                   slotAllowed &&
@@ -604,7 +709,17 @@ export function AvailabilitySelector({
                 onPointerDown={(event) =>
                   handleSlotPointerDown(date.id, time, event)
                 }
-              />
+              >
+                {isMySlot && !isBookingSelected && (
+                  <span
+                    className={cn(
+                      "border-l-primary border-r-primary pointer-events-none absolute inset-0 border-r-2 border-l-2",
+                      !mySlotAbove && "border-t-primary border-t-2",
+                      !mySlotBelow && "border-b-primary border-b-2",
+                    )}
+                  />
+                )}
+              </button>
             );
           })}
         </div>
@@ -680,57 +795,6 @@ export function AvailabilitySelector({
           gridContent
         )}
       </div>
-
-      {!hideLegend && (
-        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
-          {highlightBestIntersection ? (
-            <>
-              <div className="flex items-center gap-2">
-                <div className="border-base-300 bg-primary/45 h-3 w-3 rounded border" />
-                <span className="text-base-content/70">Fewer participants</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-primary h-3 w-3 rounded" />
-                <span className="text-base-content/70">More participants</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="ring-primary bg-primary/70 h-3 w-3 rounded shadow-[inset_0_0_0_2px_var(--color-primary)]" />
-                <span className="text-base-content/70">
-                  {bestIntersectionCount > 0
-                    ? `≥${bestIntersectionCount} participant${bestIntersectionCount === 1 ? "" : "s"}`
-                    : "Matching times"}
-                </span>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center gap-2">
-                <div className="bg-primary h-3 w-3 rounded" />
-                <span className="text-base-content/70">Available</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-base-100 border-base-300 h-3 w-3 rounded border border-dashed" />
-                <span className="text-base-content/70">Empty</span>
-              </div>
-              {showCalendarOverlay && (
-                <div className="flex items-center gap-2">
-                  <div className="border-base-300 h-3 w-3 rounded border bg-[repeating-linear-gradient(-45deg,color-mix(in_oklch,var(--color-accent)_24%,transparent),color-mix(in_oklch,var(--color-accent)_24%,transparent)_2px,transparent_2px,transparent_4px)]" />
-                  <span className="text-base-content/70">Your calendar</span>
-                </div>
-              )}
-              {calendarConflictSlotKeys &&
-                calendarConflictSlotKeys.size > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="ring-warning bg-primary h-3 w-3 rounded ring-2 ring-inset" />
-                    <span className="text-base-content/70">
-                      Calendar conflict
-                    </span>
-                  </div>
-                )}
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

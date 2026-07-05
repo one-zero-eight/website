@@ -20,7 +20,9 @@ import { useWhen2MeetPersonalCalendarOverlay } from "./useWhen2MeetPersonalCalen
 import { useWhen2MeetRoomBookings } from "./useWhen2MeetRoomBookings.ts";
 import {
   buildFullDaySlotKeys,
+  collapseHalfHourSlotKeysToHourly,
   createBackendSlotLookup,
+  expandHourlySlotKeysToHalfHour,
   getFullDayTimeSlots,
   parseBackendSlots,
   slotKeysToBackendSlots,
@@ -226,9 +228,9 @@ export function MeetingPage({
     let prefillKeys = consumeSetupSlotPrefill(event.slug ?? meetingId);
 
     if (prefillKeys.length === 0 && event.specific_time) {
-      const currentSlotKeys = parsedSlots.slotKeys.filter((slotKey) =>
-        fullDayKeys.has(slotKey),
-      );
+      const currentSlotKeys = [
+        ...collapseHalfHourSlotKeysToHourly(parsedSlots.slotKeys),
+      ].filter((slotKey) => fullDayKeys.has(slotKey));
 
       if (
         currentSlotKeys.length > 0 &&
@@ -244,7 +246,11 @@ export function MeetingPage({
     }
 
     setDraftSlots(
-      new Set(prefillKeys.filter((slotKey) => fullDayKeys.has(slotKey))),
+      new Set(
+        [...collapseHalfHourSlotKeysToHourly(prefillKeys)].filter((slotKey) =>
+          fullDayKeys.has(slotKey),
+        ),
+      ),
     );
   }, [needsSetup, event, parsedSlots, meetingId]);
 
@@ -384,10 +390,10 @@ export function MeetingPage({
       dateIds: meetingDateIds,
       timeSlots,
       allowedSlots,
-      enabled: isEditingSelf && !needsSetup && formattedDates.length > 0,
+      enabled: (isEditingSelf || needsSetup) && formattedDates.length > 0,
     });
 
-  const showCalendarOverlay = isEditingSelf && hasCalendarData && !needsSetup;
+  const showCalendarOverlay = (isEditingSelf || needsSetup) && hasCalendarData;
 
   const calendarConflictSlotKeys = useMemo(() => {
     if (!showCalendarOverlay) {
@@ -817,7 +823,10 @@ export function MeetingPage({
       {
         params: { path: { event_ref: meetingId } },
         body: {
-          slots: slotKeysToBackendSlots(draftSlots, backendSlotLookup),
+          slots: slotKeysToBackendSlots(
+            expandHourlySlotKeysToHalfHour(draftSlots),
+            backendSlotLookup,
+          ),
         },
       },
       {
@@ -1020,8 +1029,8 @@ export function MeetingPage({
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
-                      className="btn btn-outline"
-                      disabled={draftSlots.size === 0}
+                      className="btn btn-error"
+                      disabled={draftSlots.size === 0 || isSavingSetup}
                       onClick={handleClearSetupSlots}
                     >
                       Clear all
@@ -1055,14 +1064,24 @@ export function MeetingPage({
                   {currentUserId && (
                     <div className="hidden flex-wrap gap-2 md:flex">
                       {isEditingSelf && (
-                        <button
-                          type="button"
-                          className="btn btn-outline"
-                          disabled={isSaving || draftSlots.size === 0}
-                          onClick={handleClearAllSlots}
-                        >
-                          Clear all
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className="btn btn-ghost"
+                            disabled={isSaving}
+                            onClick={handleCancelEditing}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-error"
+                            disabled={isSaving || draftSlots.size === 0}
+                            onClick={handleClearAllSlots}
+                          >
+                            Clear all
+                          </button>
+                        </>
                       )}
                       <button
                         type="button"
@@ -1116,14 +1135,13 @@ export function MeetingPage({
                         ? null
                         : editingUserId
                   }
+                  currentUserId={currentUserId}
                   draftSlots={draftSlots}
                   onApplySlots={handleApplySlots}
                   allowedSlots={allowedSlots}
                   selectionOnly={needsSetup}
-                  hideLegend={needsSetup}
                   hideHint={!!currentUser && (isEditingSelf || !isOwner)}
                   bestIntersectionSlotKeys={slotAvailability.slotKeys}
-                  bestIntersectionCount={minParticipants}
                   hoveredSlotKey={hoveredSlotKey}
                   onHoveredSlotKeyChange={setHoveredSlotKey}
                   bookingMode={isBookingMode}
@@ -1153,14 +1171,13 @@ export function MeetingPage({
                         ? null
                         : editingUserId
                   }
+                  currentUserId={currentUserId}
                   draftSlots={draftSlots}
                   onApplySlots={handleApplySlots}
                   allowedSlots={allowedSlots}
                   selectionOnly={needsSetup}
-                  hideLegend={needsSetup}
                   hideHint={!!currentUser && (isEditingSelf || !isOwner)}
                   bestIntersectionSlotKeys={slotAvailability.slotKeys}
-                  bestIntersectionCount={minParticipants}
                   hoveredSlotKey={hoveredSlotKey}
                   onHoveredSlotKeyChange={setHoveredSlotKey}
                   bookingMode={isBookingMode}
@@ -1303,9 +1320,7 @@ export function MeetingPage({
                           </>
                         )}
                       </>
-                    ) : (
-                      <div className="border-base-content/70 mt-1.5 w-full border-b border-dashed" />
-                    )}
+                    ) : null}
                   </div>
                 </div>
 
@@ -1429,6 +1444,9 @@ export function MeetingPage({
             }
             onClearAvailability={
               currentUserId && !needsSetup ? handleClearAllSlots : undefined
+            }
+            onCancelAvailability={
+              currentUserId && !needsSetup ? handleCancelEditing : undefined
             }
             isEditingAvailability={isEditingSelf}
             isSavingAvailability={isSaving}

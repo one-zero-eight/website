@@ -8,6 +8,7 @@ export function MeetingMobileBar({
   onClearSetup,
   onToggleAvailability,
   onClearAvailability,
+  onCancelAvailability,
   isDeleting,
   isSavingSetup,
   isEditingAvailability,
@@ -23,6 +24,7 @@ export function MeetingMobileBar({
   onClearSetup?: () => void;
   onToggleAvailability?: () => void;
   onClearAvailability?: () => void;
+  onCancelAvailability?: () => void;
   isDeleting?: boolean;
   isSavingSetup?: boolean;
   isEditingAvailability?: boolean;
@@ -37,7 +39,7 @@ export function MeetingMobileBar({
         {onClearSetup && (
           <button
             type="button"
-            className="btn btn-outline w-full"
+            className="btn btn-error w-full"
             disabled={!canClearSetup || isSavingSetup}
             onClick={onClearSetup}
           >
@@ -122,15 +124,29 @@ export function MeetingMobileBar({
           </button>
         )}
       </div>
-      {isEditingAvailability && onClearAvailability && (
-        <button
-          type="button"
-          className="btn btn-outline w-full"
-          disabled={!canClearAvailability || isSavingAvailability}
-          onClick={onClearAvailability}
-        >
-          Clear all
-        </button>
+      {isEditingAvailability && (
+        <div className="flex w-full flex-row gap-2">
+          {onCancelAvailability && (
+            <button
+              type="button"
+              className="btn btn-ghost flex-1"
+              disabled={isSavingAvailability}
+              onClick={onCancelAvailability}
+            >
+              Cancel
+            </button>
+          )}
+          {onClearAvailability && (
+            <button
+              type="button"
+              className="btn btn-error flex-1"
+              disabled={!canClearAvailability || isSavingAvailability}
+              onClick={onClearAvailability}
+            >
+              Clear all
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
