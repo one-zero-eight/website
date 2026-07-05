@@ -545,7 +545,7 @@ export interface components {
       printer_state_reasons:
         | [
             components["schemas"]["PrinterStateReasonEnum"] | string,
-            JobAttributesPrinter_state_reasons | null,
+            "error" | "warning" | "report" | null,
           ][]
         | null;
       /**
@@ -950,12 +950,12 @@ export interface components {
        * Sides
        * @description One-sided or double-sided printing
        */
-      sides?: PrintingOptionsSides | null;
+      sides?: PrintingOptionsSidesAnyOf0 | null;
       /**
        * Number-Up
        * @description Count of pages on a list
        */
-      "number-up"?: PrintingOptionsNumberUp | null;
+      "number-up"?: PrintingOptionsNumberUpAnyOf0 | null;
     };
     /** Scanner */
     Scanner: {
@@ -1902,11 +1902,6 @@ export interface operations {
     };
   };
 }
-export enum JobAttributesPrinter_state_reasons {
-  error = "error",
-  warning = "warning",
-  report = "report",
-}
 export enum JobStateEnum {
   Value3 = 3,
   Value4 = 4,
@@ -1932,11 +1927,11 @@ export enum PrinterStateReasonEnum {
   marker_supply_empty = "marker-supply-empty",
   input_tray_missing = "input-tray-missing",
 }
-export enum PrintingOptionsSides {
+export enum PrintingOptionsSidesAnyOf0 {
   one_sided = "one-sided",
   two_sided_long_edge = "two-sided-long-edge",
 }
-export enum PrintingOptionsNumberUp {
+export enum PrintingOptionsNumberUpAnyOf0 {
   Value1 = "1",
   Value2 = "2",
   Value4 = "4",
