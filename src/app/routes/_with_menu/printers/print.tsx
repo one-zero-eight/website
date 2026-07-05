@@ -13,14 +13,14 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>Print — Inno Web Print</title>
+        <title>Print — Printers</title>
         <meta
           name="description"
           content="Print documents on Innopolis University printers from your browser."
         />
       </Helmet>
 
-      <Topbar title="Inno Web Print" />
+      <Topbar title="Printers" />
       <WebPrintTabs />
       <RequireAuth>
         <PrintPage />
