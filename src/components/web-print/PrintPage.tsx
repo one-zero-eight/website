@@ -6,24 +6,27 @@ import {
   calcPrintJobActualPapersCount,
   resolvePreviewPageRanges,
 } from "@/components/web-print/print-utils.ts";
-import { useWebPrintFiles } from "@/components/web-print/useWebPrintFiles.ts";
+import {
+  requestStopPrintJobPolling,
+  resetStopPrintJobPolling,
+  shouldStopPrintJobPolling,
+} from "@/components/web-print/print-session.ts";
+import { usePrintSession } from "@/components/web-print/usePrintSession.ts";
 import {
   JobStateEnum,
-  PrintingOptionsNumberUpAnyOf0,
   PrintingOptionsSidesAnyOf0,
 } from "@/api/printers/types.ts";
 import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
 
 export function PrintPage() {
   const [alert, setAlert] = useState<ReactNode>();
-  const stopJobsRef = useRef(false);
+  const [pageRangesError, setPageRangesError] = useState<ReactNode>();
 
   function showPopupWithExceptionDetail(prefix: string, exception: unknown) {
     const detail =
@@ -40,31 +43,25 @@ export function PrintPage() {
     );
   }
 
+  const { session, setSession, prepareFile, getFile, isFileProcessing } =
+    usePrintSession(showPopupWithExceptionDetail);
+
   const {
+    printerName,
+    copiesCount,
+    sides,
+    pages,
+    pageRangesInput,
+    numberUp,
+    jobId,
+    isPrinting,
+    originalFileName,
     preparedFile,
     fileBlob,
     preparedFileName,
     downloadFileName,
     preparedFilePagesCount,
-    isFileProcessing,
-    prepareFile,
-    getFile,
-  } = useWebPrintFiles(showPopupWithExceptionDetail);
-
-  const [printerName, setPrinterName] = useState("");
-  const [copiesCount, setCopiesCount] = useState(1);
-  const [sides, setSides] = useState<PrintingOptionsSidesAnyOf0>(
-    PrintingOptionsSidesAnyOf0.two_sided_long_edge,
-  );
-  const [pages, setPages] = useState<string | null>(null);
-  const [pageRangesInput, setPageRangesInput] = useState("");
-  const [numberUp, setNumberUp] = useState<PrintingOptionsNumberUpAnyOf0>(
-    PrintingOptionsNumberUpAnyOf0.Value1,
-  );
-  const [jobId, setJobId] = useState<number>();
-  const [isPrinting, setIsPrinting] = useState(false);
-  const [pageRangesError, setPageRangesError] = useState<ReactNode>();
-  const [originalFileName, setOriginalFileName] = useState<string>();
+  } = session;
 
   const { data: rawPrinters } = $printers.useQuery(
     "get",
@@ -87,9 +84,9 @@ export function PrintPage() {
 
   useEffect(() => {
     if (rawPrinters?.length && !printerName) {
-      setPrinterName(rawPrinters[0].cups_name);
+      setSession({ printerName: rawPrinters[0].cups_name });
     }
-  }, [rawPrinters, printerName]);
+  }, [rawPrinters, printerName, setSession]);
 
   const actualPapersCount = preparedFilePagesCount
     ? calcPrintJobActualPapersCount(
@@ -104,8 +101,7 @@ export function PrintPage() {
   const handlePageRangesBlur = () => {
     const value = pageRangesInput.replace(/\s/g, "");
     if (!value) {
-      setPages(null);
-      setPageRangesInput("");
+      setSession({ pages: null, pageRangesInput: "" });
       return;
     }
     if (
@@ -119,12 +115,10 @@ export function PrintPage() {
           </p>
         </>,
       );
-      setPages(null);
-      setPageRangesInput("");
+      setSession({ pages: null, pageRangesInput: "" });
       return;
     }
-    setPages(value);
-    setPageRangesInput(value);
+    setSession({ pages: value, pageRangesInput: value });
   };
 
   const handleStartPrint = useCallback(async () => {
@@ -149,9 +143,8 @@ export function PrintPage() {
           },
         },
       });
-      setJobId(newJobId);
-      stopJobsRef.current = false;
-      setIsPrinting(true);
+      resetStopPrintJobPolling();
+      setSession({ jobId: newJobId, isPrinting: true });
     } catch (exception: unknown) {
       showPopupWithExceptionDetail("Start problem", exception);
     }
@@ -162,6 +155,7 @@ export function PrintPage() {
     preparedFileName,
     print,
     printerName,
+    setSession,
     sides,
   ]);
 
@@ -176,10 +170,12 @@ export function PrintPage() {
       preparedFilePagesCount,
     );
 
+    let cancelled = false;
+
     async function waitTillThePrintingEnd() {
       const startTime = performance.now();
       while (performance.now() - startTime < papersCount * 30 * 1000) {
-        if (stopJobsRef.current) break;
+        if (cancelled || shouldStopPrintJobPolling()) break;
         let jobStatus;
         try {
           jobStatus = await getJobStatus({
@@ -199,13 +195,14 @@ export function PrintPage() {
             JobStateEnum.Value8,
           ].includes(jobStatus.job_state)
         ) {
-          setJobId(undefined);
-          setIsPrinting(false);
+          setSession({ jobId: undefined, isPrinting: false });
           if (preparedFile) await prepareFile(preparedFile);
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
+      if (cancelled || shouldStopPrintJobPolling()) return;
+
       try {
         await cancelJob({ params: { query: { job_id: jobId! } } });
       } catch (exception: unknown) {
@@ -214,7 +211,7 @@ export function PrintPage() {
           exception,
         );
       }
-      if (!stopJobsRef.current) {
+      if (!shouldStopPrintJobPolling()) {
         setAlert(
           <>
             <p className="font-bold">The job has timed out!</p>
@@ -222,12 +219,15 @@ export function PrintPage() {
           </>,
         );
       }
-      setJobId(undefined);
-      setIsPrinting(false);
+      setSession({ jobId: undefined, isPrinting: false });
       if (preparedFile) await prepareFile(preparedFile);
     }
 
     waitTillThePrintingEnd();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     cancelJob,
     copiesCount,
@@ -239,18 +239,18 @@ export function PrintPage() {
     prepareFile,
     preparedFile,
     preparedFilePagesCount,
+    setSession,
     sides,
   ]);
 
   function handleCancelPrint() {
-    stopJobsRef.current = true;
-    setIsPrinting(false);
-    setJobId(undefined);
+    requestStopPrintJobPolling();
+    setSession({ isPrinting: false, jobId: undefined });
   }
 
   function handleCopiesDecrease() {
     if (copiesCount <= 1) return;
-    setCopiesCount(copiesCount - 1);
+    setSession({ copiesCount: copiesCount - 1 });
   }
 
   function handleCopiesIncrease() {
@@ -263,7 +263,7 @@ export function PrintPage() {
       );
       return;
     }
-    setCopiesCount(copiesCount + 1);
+    setSession({ copiesCount: copiesCount + 1 });
   }
 
   function handleCopiesChange(raw: string) {
@@ -276,7 +276,7 @@ export function PrintPage() {
         </p>,
       );
     }
-    setCopiesCount(value);
+    setSession({ copiesCount: value });
   }
 
   const jobInProgress = isPrinting || isPrintStarting || isFileProcessing;
@@ -311,8 +311,8 @@ export function PrintPage() {
                 <FileDropzone
                   variant="print"
                   fileProcess={async (file) => {
-                    setOriginalFileName(file.name);
-                    await getFile(await prepareFile(file), false, file.name);
+                    setSession({ originalFileName: file.name });
+                    await getFile(await prepareFile(file), file.name);
                   }}
                   isFileProcessing={isFileProcessing}
                   blobPreviewURL={fileBlob}
@@ -354,7 +354,9 @@ export function PrintPage() {
                       <select
                         className="select select-bordered w-full"
                         value={printerName}
-                        onChange={(e) => setPrinterName(e.target.value)}
+                        onChange={(e) =>
+                          setSession({ printerName: e.target.value })
+                        }
                       >
                         <option value="" disabled>
                           Select a printer
@@ -417,11 +419,11 @@ export function PrintPage() {
                         sides === PrintingOptionsSidesAnyOf0.two_sided_long_edge
                       }
                       onChange={(e) =>
-                        setSides(
-                          e.target.checked
+                        setSession({
+                          sides: e.target.checked
                             ? PrintingOptionsSidesAnyOf0.two_sided_long_edge
                             : PrintingOptionsSidesAnyOf0.one_sided,
-                        )
+                        })
                       }
                     />
                   </FormField>
@@ -432,13 +434,18 @@ export function PrintPage() {
                       className="input input-bordered w-full"
                       placeholder="e.g. 1-5,8,16-20 (empty = all)"
                       value={pageRangesInput}
-                      onChange={(e) => setPageRangesInput(e.target.value)}
+                      onChange={(e) =>
+                        setSession({ pageRangesInput: e.target.value })
+                      }
                       onBlur={handlePageRangesBlur}
                     />
                   </FormField>
 
                   <FormField label="Layout">
-                    <LayoutSelector value={numberUp} onChange={setNumberUp} />
+                    <LayoutSelector
+                      value={numberUp}
+                      onChange={(value) => setSession({ numberUp: value })}
+                    />
                   </FormField>
 
                   <div className="mt-2 flex flex-col gap-2">
