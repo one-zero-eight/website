@@ -87,6 +87,21 @@ export function formatApiErrorMessage(
       if (typeof detail === "string") {
         return `Error ${code}: ${detail}`;
       }
+      if (Array.isArray(detail)) {
+        const messages = detail
+          .map((item) => {
+            if (typeof item === "object" && item !== null && "msg" in item) {
+              return String(item.msg)
+                .replace(/^Value error,\s*/i, "")
+                .replace(/`/g, "");
+            }
+            return null;
+          })
+          .filter((msg): msg is string => Boolean(msg));
+        if (messages.length > 0) {
+          return messages.join("; ");
+        }
+      }
       if (
         typeof detail === "object" &&
         detail !== null &&

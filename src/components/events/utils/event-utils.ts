@@ -1,5 +1,5 @@
 import { workshopsTypes } from "@/api/workshops";
-import { getDate, isWorkshopPast } from "./date-utils";
+import { getDate, isWorkshopPast, parseMoscowDate } from "./date-utils";
 import {
   CheckInType,
   SchemaBadge,
@@ -195,7 +195,7 @@ export const getInactiveStatusText = (
   }
 
   if (new Date(event.check_in_opens).getTime() > Date.now()) {
-    return `Check in opens ${event.check_in_opens.split("T")[0]}`;
+    return `Check in opens ${parseMoscowDate(event.check_in_opens)}`;
   }
 
   if (!event.is_registrable) {

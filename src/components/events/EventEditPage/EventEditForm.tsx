@@ -20,7 +20,15 @@ import {
   normalizeHostForForm,
   normalizeLink,
 } from "@/components/events/utils/event-utils";
-import { getDate, parseTime } from "@/components/events/utils/date-utils";
+import {
+  ALWAYS_OPEN_CHECK_IN_SENTINEL,
+  getDate,
+  isAlwaysOpenCheckInStored,
+  parseMoscowDate,
+  parseMoscowTime,
+  parseTime,
+  toMoscowIso,
+} from "@/components/events/utils/date-utils";
 import { MAX_CAPACITY } from "../constants.ts";
 import NameDescription from "./NameDescription.tsx";
 import ImageUpload from "./ImageUpload.tsx";
@@ -72,6 +80,10 @@ export function EventEditForm({
         type: h.host_type,
         name: h.name,
       }));
+      const alwaysOpen =
+        initialEvent.check_in_type === CheckInType.on_innohassle &&
+        initialEvent.check_in_opens != null &&
+        isAlwaysOpenCheckInStored(initialEvent.check_in_opens);
       return {
         ...baseEventFormState,
         ...initialEvent,
@@ -85,13 +97,15 @@ export function EventEditForm({
           ? MAX_CAPACITY
           : initialEvent.capacity || MAX_CAPACITY,
         remain_places: initialEvent.remain_places,
-        check_in_date: initialEvent.check_in_opens
-          ? initialEvent.check_in_opens.split("T")[0]
-          : "",
-        check_in_opens: initialEvent.check_in_opens
-          ? initialEvent.check_in_opens.split("T")[1].slice(0, 5)
-          : "",
-        check_in_on_open: shouldBeAlwaysOpen ? true : false,
+        check_in_date:
+          alwaysOpen || !initialEvent.check_in_opens
+            ? ""
+            : parseMoscowDate(initialEvent.check_in_opens),
+        check_in_opens:
+          alwaysOpen || !initialEvent.check_in_opens
+            ? ""
+            : parseMoscowTime(initialEvent.check_in_opens),
+        check_in_on_open: shouldBeAlwaysOpen || alwaysOpen,
         links: links,
       };
     }
@@ -148,6 +162,7 @@ export function EventEditForm({
     etime: null,
     links: null,
     checkInLinkError: null,
+    checkInOpensError: null,
   });
 
   const clearSavedData = () => {
@@ -208,8 +223,8 @@ export function EventEditForm({
     const dtend = `${endDate}T${eventForm.dtend}:00+03:00`;
 
     let check_in_opens: string | null = eventForm.check_in_on_open
-      ? new Date().toISOString()
-      : `${eventForm.check_in_date}T${eventForm.check_in_opens}:00+03:00`;
+      ? ALWAYS_OPEN_CHECK_IN_SENTINEL
+      : toMoscowIso(eventForm.check_in_date, eventForm.check_in_opens);
 
     // Handle links
     const links: SchemaLink[] = [];
@@ -579,6 +594,26 @@ export function EventEditForm({
       }
     }
 
+    if (
+      eventForm.check_in_type === CheckInType.on_innohassle &&
+      !eventForm.check_in_on_open &&
+      eventForm.check_in_date &&
+      eventForm.check_in_opens &&
+      eventForm.date &&
+      eventForm.dtstart
+    ) {
+      const checkInOpens = toMoscowIso(
+        eventForm.check_in_date,
+        eventForm.check_in_opens,
+      );
+      const dtstart = toMoscowIso(eventForm.date, eventForm.dtstart);
+      if (checkInOpens > dtstart) {
+        newErrors.checkInOpensError =
+          "Check-in open time must be at or before event start time";
+        showError("Validation Error", newErrors.checkInOpensError);
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -588,6 +623,7 @@ export function EventEditForm({
   const handleCheckIn = (e: ChangeEvent<HTMLInputElement>) => {
     const [date, time] = e.target.value.split("T");
     setEventForm({ ...eventForm, check_in_date: date, check_in_opens: time });
+    setErrors((prev) => ({ ...prev, checkInOpensError: null }));
   };
 
   const handleNextButton = () => {
@@ -770,12 +806,13 @@ export function EventEditForm({
                   type="checkbox"
                   className="toggle"
                   checked={eventForm.check_in_on_open}
-                  onChange={() =>
+                  onChange={() => {
                     setEventForm({
                       ...eventForm,
                       check_in_on_open: !eventForm.check_in_on_open,
-                    })
-                  }
+                    });
+                    setErrors((prev) => ({ ...prev, checkInOpensError: null }));
+                  }}
                 />
                 Always open
               </label>
@@ -785,7 +822,10 @@ export function EventEditForm({
                     <label className="mr-2">Open check-in at:</label>
                     <input
                       type="datetime-local"
-                      className="input"
+                      className={cn(
+                        "input",
+                        errors.checkInOpensError && "input-error",
+                      )}
                       value={
                         eventForm.check_in_date && eventForm.check_in_opens
                           ? `${eventForm.check_in_date}T${eventForm.check_in_opens}`
@@ -794,6 +834,11 @@ export function EventEditForm({
                       onChange={handleCheckIn}
                     />
                   </div>
+                  {errors.checkInOpensError && (
+                    <p className="mt-1 text-sm text-red-500 dark:text-red-400">
+                      {errors.checkInOpensError}
+                    </p>
+                  )}
                 </>
               )}
             </>

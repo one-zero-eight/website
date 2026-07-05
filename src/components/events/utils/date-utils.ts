@@ -97,3 +97,45 @@ export const isWorkshopPast = (dtstart: string): boolean => {
 export const getWeekdayName = (date: string) => {
   return new Date(date).toLocaleString("en", { weekday: "short" });
 };
+
+const MOSCOW_TIMEZONE = "Europe/Moscow";
+export const ALWAYS_OPEN_CHECK_IN_SENTINEL = "1970-01-01T00:00:00+03:00";
+
+/**
+ * Extracts the date part (YYYY-MM-DD) in Europe/Moscow timezone
+ */
+export const parseMoscowDate = (iso: string): string => {
+  return new Date(iso).toLocaleDateString("en-CA", {
+    timeZone: MOSCOW_TIMEZONE,
+  });
+};
+
+/**
+ * Extracts time in HH:mm format in Europe/Moscow timezone
+ */
+export const parseMoscowTime = (iso: string): string => {
+  return new Date(iso).toLocaleTimeString("en-GB", {
+    timeZone: MOSCOW_TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+};
+
+/**
+ * Builds an ISO datetime string with +03:00 offset from date and time parts
+ */
+export const toMoscowIso = (date: string, time: string): string => {
+  return `${date}T${time}:00+03:00`;
+};
+
+/**
+ * Detects if stored check_in_opens represents "always open" check-in
+ */
+export const isAlwaysOpenCheckInStored = (checkInOpens: string): boolean => {
+  if (checkInOpens.startsWith("1970-01-01")) {
+    return true;
+  }
+
+  return !/\+03:00|\+0300/.test(checkInOpens);
+};

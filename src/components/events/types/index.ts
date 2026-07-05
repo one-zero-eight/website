@@ -90,6 +90,7 @@ export interface EventFormErrors {
   etime?: string | null;
   links?: string | null;
   checkInLinkError?: string | null;
+  checkInOpensError?: string | null;
 }
 
 export type SearchFormState = GenericBadgeFormScheme & {

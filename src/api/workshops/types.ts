@@ -118,6 +118,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/workshops/{workshop_id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Approve Workshop */
+    post: operations["approve_workshop_workshops__workshop_id__approve_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/workshops/{workshop_id}/checkin": {
     parameters: {
       query?: never;
@@ -405,6 +422,11 @@ export interface components {
        * @default false
        */
       is_draft: boolean;
+      /**
+       * Is Approved
+       * @default false
+       */
+      is_approved: boolean;
       /** Image File Id */
       image_file_id: string | null;
       /**
@@ -794,6 +816,58 @@ export interface operations {
         content?: never;
       };
       /** @description Not authorized (admin required) */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Workshop not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  approve_workshop_workshops__workshop_id__approve_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workshop_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Workshop approved successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Workshop"];
+        };
+      };
+      /** @description Not authenticated */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only superadmin can approve workshops */
       403: {
         headers: {
           [name: string]: unknown;
