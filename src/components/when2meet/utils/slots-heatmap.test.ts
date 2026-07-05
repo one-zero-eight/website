@@ -42,17 +42,17 @@ assert(
 );
 assert(!emptyAppearance.style, "empty slot has no inline style");
 
-expectPercent(1, 1, 100);
-expectPercent(1, 2, 50);
-expectPercent(1, 3, 33);
-expectPercent(1, 10, 10);
-expectPercent(3, 10, 30);
-expectPercent(5, 10, 50);
-expectPercent(7, 10, 70);
-expectPercent(10, 10, 100);
-expectPercent(3, 7, 43);
-expectPercent(50, 100, 50);
-expectPercent(99, 100, 99);
+expectPercent(1, 1, 75);
+expectPercent(1, 2, 38);
+expectPercent(1, 3, 25);
+expectPercent(1, 10, 8);
+expectPercent(3, 10, 23);
+expectPercent(5, 10, 38);
+expectPercent(7, 10, 53);
+expectPercent(10, 10, 75);
+expectPercent(3, 7, 32);
+expectPercent(50, 100, 38);
+expectPercent(99, 100, 74);
 
 const fullAppearance = getSlotHeatmapAppearance(25, 25);
 assert(
@@ -75,13 +75,13 @@ assert(
   "colorblind-safe empty slot has no inline style",
 );
 assert(
-  getSlotHeatmapAppearanceColorblindSafe(3, 10).className === "bg-primary/25",
+  getSlotHeatmapAppearanceColorblindSafe(3, 10).className === "bg-primary/20",
   "colorblind-safe low availability uses stepped class",
 );
 assert(
   getSlotHeatmapAppearanceColorblindSafe(10, 10).className ===
-    "bg-primary text-primary-content",
-  "colorblind-safe full availability uses solid primary",
+    "bg-primary/75 text-primary-content",
+  "colorblind-safe full availability uses capped primary opacity",
 );
 
 const users = [

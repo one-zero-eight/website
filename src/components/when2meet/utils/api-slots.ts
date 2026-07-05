@@ -130,8 +130,14 @@ export const FULL_DAY_TIME_RANGE = {
   end: "24:00",
 } as const;
 
+export const FULL_DAY_SLOT_INTERVAL_MINUTES = 60;
+
 export function getFullDayTimeSlots() {
-  return generateTimeSlots(FULL_DAY_TIME_RANGE.start, FULL_DAY_TIME_RANGE.end);
+  return generateTimeSlots(
+    FULL_DAY_TIME_RANGE.start,
+    FULL_DAY_TIME_RANGE.end,
+    FULL_DAY_SLOT_INTERVAL_MINUTES,
+  );
 }
 
 export function buildFullDaySlotsFromDates(dates: Set<string>) {
@@ -152,6 +158,53 @@ export function buildFullDaySlotKeys(dates: string[]) {
   }
 
   return slotKeys;
+}
+
+/**
+ * Setup screen uses 1-hour blocks for easier selection, but the meeting view
+ * keeps 30-minute granularity. Expand each selected hourly slot key into its
+ * two half-hour companions so saved data stays at 30-min resolution.
+ */
+export function expandHourlySlotKeysToHalfHour(slotKeys: Iterable<string>) {
+  const expanded = new Set<string>();
+
+  for (const slotKey of slotKeys) {
+    const { dateId, time } = parseSlotKey(slotKey);
+    const [hours, minutes = "0"] = time.split(":");
+    const totalMinutes = Number(hours) * 60 + Number(minutes);
+
+    expanded.add(slotKey);
+
+    const companionMinutes =
+      totalMinutes % 60 === 0 ? totalMinutes + 30 : totalMinutes - 30;
+
+    if (companionMinutes >= 0 && companionMinutes < 24 * 60) {
+      expanded.add(
+        getSlotKey(
+          dateId,
+          formatHour(Math.floor(companionMinutes / 60), companionMinutes % 60),
+        ),
+      );
+    }
+  }
+
+  return expanded;
+}
+
+/**
+ * Inverse of expandHourlySlotKeysToHalfHour: collapse 30-min slot keys back to
+ * their hourly parent so they can be matched against the 1-hour setup grid.
+ */
+export function collapseHalfHourSlotKeysToHourly(slotKeys: Iterable<string>) {
+  const collapsed = new Set<string>();
+
+  for (const slotKey of slotKeys) {
+    const { dateId, time } = parseSlotKey(slotKey);
+    const [hours] = time.split(":");
+    collapsed.add(getSlotKey(dateId, formatHour(Number(hours), 0)));
+  }
+
+  return collapsed;
 }
 
 export function slotKeyToDateRange(slotKey: string, durationMinutes = 60) {
