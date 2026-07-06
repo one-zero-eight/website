@@ -236,7 +236,7 @@ export function HowToCreateClubPage() {
                 <li>Leader's contact information</li>
               </ul>
               <a
-                href="https://forms.yandex.ru/u/68aeb40ceb614608b252337e"
+                href="https://forms.yandex.ru/u/6a4b86f402848f003229d7d5"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-primary mt-4"
