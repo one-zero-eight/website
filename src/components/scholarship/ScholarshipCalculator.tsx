@@ -32,38 +32,29 @@ export default function ScholarshipCalculator() {
   const marksTextAreaRef = createRef<HTMLTextAreaElement>();
   const { width: windowWidth } = useWindowSize();
 
-  useEffect(() => {
-    const courseStored = window.localStorage.getItem("scholarship-course");
-    const course =
-      courseStored === '"B23"'
-        ? "B23"
-        : courseStored === '"B24"'
-          ? "B24"
-          : courseStored === '"M25"'
-            ? "M25"
-            : "B25";
-    setCourse(course);
-
-    const marks = window.localStorage.getItem("scholarship-marks");
-    if (!marks) return;
-    try {
-      const parsed = JSON.parse(marks);
-      if (typeof parsed === "object") {
-        const newMarks: Mark[] = [];
-        for (const m of parsed) {
-          if (m in MARK_MAPPING) {
-            newMarks.push(MARK_MAPPING[m]);
-          }
-        }
-        onMarksChange(newMarks.join(""), course);
-      }
-    } catch {
-      // Accept any error
+  function updateTextAreaHeight(target?: HTMLTextAreaElement | null) {
+    if (target) {
+      target.style.height = "auto";
+      target.style.height = `${target.scrollHeight}px`;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }
 
-  const onMarksChange = (v: string, course: Courses) => {
+  function updateTextAreaContent(
+    target?: HTMLTextAreaElement | null,
+    marks?: Mark[],
+  ) {
+    if (target && marks) {
+      const selectionStart = target.selectionStart;
+      const selectionEnd = target.selectionEnd;
+      target.value = marks.join("");
+      if (document.activeElement === target) {
+        target.selectionStart = selectionStart;
+        target.selectionEnd = selectionEnd;
+      }
+    }
+  }
+
+  function onMarksChange(v: string, course: Courses) {
     setCourse(course);
     setStorageCourse(course);
 
@@ -101,39 +92,44 @@ export default function ScholarshipCalculator() {
     setDisplayScholarship(newScholarship.toString());
     setErrorGPA(false);
     setErrorScholarship(false);
-  };
+  }
 
-  // Update text area properties when marks change
+  useEffect(() => {
+    const courseStored = window.localStorage.getItem("scholarship-course");
+    const storedCourse =
+      courseStored === '"B23"'
+        ? "B23"
+        : courseStored === '"B24"'
+          ? "B24"
+          : courseStored === '"M25"'
+            ? "M25"
+            : "B25";
+    setCourse(storedCourse);
+
+    const marks = window.localStorage.getItem("scholarship-marks");
+    if (!marks) return;
+    try {
+      const parsed = JSON.parse(marks);
+      if (typeof parsed === "object") {
+        const newMarks: Mark[] = [];
+        for (const m of parsed) {
+          if (m in MARK_MAPPING) {
+            newMarks.push(MARK_MAPPING[m]);
+          }
+        }
+        onMarksChange(newMarks.join(""), storedCourse);
+      }
+    } catch {
+      // Accept any error
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     updateTextAreaContent(marksTextAreaRef.current, marks);
     updateTextAreaHeight(marksTextAreaRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [marksTextAreaRef.current, marks, windowWidth]);
-
-  // Update text area height after marks change
-  const updateTextAreaHeight = (target?: HTMLTextAreaElement | null) => {
-    if (target) {
-      target.style.height = "auto";
-      target.style.height = `${target.scrollHeight}px`;
-    }
-  };
-
-  // Update text area content when marks change
-  // Keeping caret position
-  const updateTextAreaContent = (
-    target?: HTMLTextAreaElement | null,
-    marks?: Mark[],
-  ) => {
-    if (target && marks) {
-      const selectionStart = target.selectionStart;
-      const selectionEnd = target.selectionEnd;
-      target.value = marks.join("");
-      if (document.activeElement === target) {
-        target.selectionStart = selectionStart;
-        target.selectionEnd = selectionEnd;
-      }
-    }
-  };
+  }, [marks, windowWidth]);
 
   const onGPAChange = (v: string, course: Courses) => {
     setCourse(course);
