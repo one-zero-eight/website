@@ -475,7 +475,7 @@ export const useTimer = ({
     }
 
     showSuccess("Time is up!");
-  }, [wakeLock]);
+  }, [wakeLock, setShowTimeUpMessage, showSuccess]);
 
   const formatTime = useCallback(
     (totalSeconds: number) => {

@@ -30,7 +30,10 @@ export function EventsList({
   events = [],
   options: optionsProp,
 }: EventsListProps) {
-  const options = { ...DEFAULT_EVENT_LIST_OPTIONS, ...optionsProp };
+  const options = useMemo(
+    () => ({ ...DEFAULT_EVENT_LIST_OPTIONS, ...optionsProp }),
+    [optionsProp],
+  );
   const { data: myCheckins } = $workshops.useQuery("get", "/users/my_checkins");
   const { data: clubsList = [] } = $clubs.useQuery("get", "/clubs/");
 
@@ -152,7 +155,7 @@ export function EventsList({
 
   const userFiltered = useMemo(
     () => filterEventsForList(displayEvents, options),
-    [displayEvents, options.filterDraftsAndInactive, options.filterUnapproved],
+    [displayEvents, options],
   );
 
   const hasEvents = displayEvents.length > 0;

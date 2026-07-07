@@ -15,12 +15,15 @@ export function EventForDate({
   myCheckins,
   clubsList,
 }: EventForDateProps) {
-  const options = { ...DEFAULT_EVENT_LIST_OPTIONS, ...optionsProp };
+  const options = useMemo(
+    () => ({ ...DEFAULT_EVENT_LIST_OPTIONS, ...optionsProp }),
+    [optionsProp],
+  );
   const date = new Date(isoDate);
 
   const filteredEvents = useMemo(
     () => filterEventsForList(events, options),
-    [events, options.filterDraftsAndInactive, options.filterUnapproved],
+    [events, options],
   );
 
   if (filteredEvents.length === 0) return null;
