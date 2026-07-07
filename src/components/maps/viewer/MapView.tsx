@@ -105,7 +105,7 @@ export function MapView({
               ) : (
                 <span className="icon-[material-symbols--description-outline] text-2xl" />
               )}
-              <span className="text-sm font-medium">Export PDF</span>
+              <span className="text-base font-thin">Export PDF</span>
             </button>
             <button
               type="button"

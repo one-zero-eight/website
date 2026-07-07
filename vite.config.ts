@@ -49,10 +49,8 @@ export default defineConfig({
 
     // Offline mode via PWA
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       workbox: {
-        clientsClaim: true,
-        skipWaiting: true,
         globPatterns: ["**/*.{js,css,html,json,svg,png,woff2}"],
         navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/assets\//],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
