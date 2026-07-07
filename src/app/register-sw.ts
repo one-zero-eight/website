@@ -1,9 +1,20 @@
 import { registerSW } from "virtual:pwa-register";
 import { repairPoisonedPrecache } from "./sw-cache-repair.ts";
 
+export const appUpdateAvailableEvent = "app-update-available";
+
 export function registerServiceWorker() {
   // Enable offline support via PWA service worker
-  registerSW({
+  const updateServiceWorker = registerSW({
+    onNeedRefresh() {
+      window.dispatchEvent(
+        new CustomEvent(appUpdateAvailableEvent, {
+          detail: {
+            reload: () => updateServiceWorker(true),
+          },
+        }),
+      );
+    },
     onRegisteredSW(swUrl, r) {
       if (r === undefined) return;
 
