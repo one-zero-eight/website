@@ -41,8 +41,7 @@ export function ConnectivityNotification() {
   }, [isAccountsApiUnavailable]);
 
   const issue = useMemo(() => {
-    // if (isOffline)
-    {
+    if (isOffline) {
       return {
         title: "You are offline",
         description: "Connect to the internet to keep using InNoHassle.",
