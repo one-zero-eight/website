@@ -23,7 +23,7 @@ jobs:
       pull-requests: write
       security-events: write
 
-    environment: ${{ github.event.inputs.environment || 'staging' }}
+    environment: ${{ github.event.inputs.environment || 'pre' }}
     steps:
       - name: 👾 Checkout repository
         uses: actions/checkout@v6
@@ -61,19 +61,15 @@ jobs:
           if-no-files-found: error
 
   deploy:
-    # Only on manual trigger or push to main
-    if: false # disable for now
-    # if: github.repository_owner == 'one-zero-eight' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
-    name: ⚡️ Deploy to server for ${{ github.event.inputs.environment || 'staging' }}
+    if: github.repository_owner == 'one-zero-eight' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+    name: ⚡️ Deploy to server for ${{ github.event.inputs.environment || 'pre' }}
     needs: build
-    runs-on: [self-hosted, innohassle]
+    runs-on: ubuntu-latest
     environment:
-      # Set the environment name and URL to be displayed in GitHub
-      name: ${{ github.event.inputs.environment || 'staging' }}
+      name: ${{ github.event.inputs.environment || 'pre' }}
       url: ${{ vars.DEPLOY_URL }}
     concurrency:
-      # Set the concurrency group to prevent multiple deployments at once
-      group: ${{ github.event.inputs.environment || 'staging' }}
+      group: ${{ github.event.inputs.environment || 'pre' }}
       cancel-in-progress: false
     steps:
       - uses: actions/download-artifact@v8
@@ -81,15 +77,42 @@ jobs:
           name: static-files
           path: dist
 
-      - name: Copy files via SSH
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
-          source: "./dist/*"
-          target: ${{ secrets.SSH_TARGET_DIR }}
-          strip_components: 1
-          overwrite: true
-          rm: true
+      - name: Deploy via deployer API
+        env:
+          DEPLOYER_URL: ${{ secrets.DEPLOYER_PRODUCTION_URL }}
+          WEBHOOK_SECRET: ${{ secrets.DEPLOYER_PRODUCTION_WEBHOOK_SECRET }}
+          DEPLOYER_PROXY: ${{ secrets.DEPLOYER_PROXY }}
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref_name }}
+          ENVIRONMENT: ${{ github.event.inputs.environment || 'pre' }}
+        run: |
+          set -euo pipefail
+
+          deploy_log="$(mktemp)"
+          archive="$(mktemp --suffix=.tar.xz)"
+          trap 'rm -f "$deploy_log" "$archive"' EXIT
+
+          tar -cJf "$archive" -C dist .
+
+          curl_args=(
+            -fNSs
+            --no-progress-meter
+            --connect-timeout 10
+            -H "Authorization: Bearer ${WEBHOOK_SECRET}"
+            -X POST
+            -F "ref=${REF}"
+            -F "archive=@${archive}"
+          )
+
+          if [[ -n "${DEPLOYER_PROXY:-}" ]]; then
+            curl_args+=(--proxy "${DEPLOYER_PROXY}")
+          fi
+
+          curl "${curl_args[@]}" \
+            "${DEPLOYER_URL}/deploy-static?repository=${REPOSITORY}&environment=${ENVIRONMENT}" \
+            | tee "$deploy_log"
+
+          if ! grep -q 'Static deploy completed successfully' "$deploy_log"; then
+            echo "Deployment did not complete successfully" >&2
+            exit 1
+          fi
