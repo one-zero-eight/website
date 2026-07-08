@@ -1,5 +1,9 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
-import { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import {
+  SchemaScheduleConfig,
+  Weekday,
+} from "@/api/schedule-assistant/types.ts";
+import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import { ReturnToChecksLink } from "@/components/schedule-assistant/checks/ReturnToChecksLink.tsx";
 import {
@@ -24,6 +28,11 @@ import {
   useSyncExternalStore,
 } from "react";
 
+import { CreateClassModal } from "./CreateClassModal.tsx";
+import {
+  dateForWeekdayInWeekRange,
+  type CreateMeetingCellContext,
+} from "./createMeetingUtils.ts";
 import { EditClassModal } from "./EditClassModal.tsx";
 import { TimetableCalendarTable } from "./TimetableCalendarTable.tsx";
 import {
@@ -601,6 +610,18 @@ function TimetableWorkspaceInner({
     selectionStore.setSelection(null);
   }, [selectionStore]);
 
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createCellContext, setCreateCellContext] =
+    useState<CreateMeetingCellContext | null>(null);
+
+  const handleEmptyCellClick = useCallback(
+    (context: CreateMeetingCellContext) => {
+      setCreateCellContext(context);
+      setCreateModalOpen(true);
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!focusMeetingId) {
       appliedFocusMeetingIdRef.current = null;
@@ -823,6 +844,9 @@ function TimetableWorkspaceInner({
                     selectProgram={selectProgram}
                     selectGroup={selectGroup}
                     clearSelection={clearSelection}
+                    onEmptyCellClick={
+                      isUtilizationTab ? undefined : handleEmptyCellClick
+                    }
                   />
                 </div>
               </div>
@@ -848,6 +872,12 @@ function TimetableWorkspaceInner({
           </div>
         </div>
       </div>
+      <CreateClassModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        cellContext={createCellContext}
+        config={config}
+      />
     </SelectionStoreContext.Provider>
   );
 }
@@ -891,6 +921,7 @@ function TimetableMainGrid({
   selectProgram,
   selectGroup,
   clearSelection,
+  onEmptyCellClick,
 }: {
   layoutMode: TimetableLayoutMode;
   isUtilizationTab: boolean;
@@ -912,6 +943,7 @@ function TimetableMainGrid({
   selectProgram: (yearLabel: string) => void;
   selectGroup: (groupId: string) => void;
   clearSelection: () => void;
+  onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 }) {
   const selection = useSelectionSnapshot();
 
@@ -924,6 +956,7 @@ function TimetableMainGrid({
         selection={selection}
         selectMeeting={selectMeeting}
         clearSelection={clearSelection}
+        onEmptyCellClick={onEmptyCellClick}
       />
     );
   }
@@ -950,6 +983,7 @@ function TimetableMainGrid({
       selectProgram={selectProgram}
       selectGroup={selectGroup}
       clearSelection={clearSelection}
+      onEmptyCellClick={onEmptyCellClick}
     />
   );
 }
@@ -1005,6 +1039,7 @@ type TimetableTableProps = {
   selectProgram: (yearLabel: string) => void;
   selectGroup: (groupId: string) => void;
   clearSelection: () => void;
+  onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 };
 
 function TimetableTable({
@@ -1025,6 +1060,7 @@ function TimetableTable({
   selectProgram,
   selectGroup,
   clearSelection,
+  onEmptyCellClick,
 }: TimetableTableProps) {
   return (
     <table id="table" className={GROUPS_TABLE_CLASS}>
@@ -1057,6 +1093,7 @@ function TimetableTable({
             selectProgram,
             selectGroup,
             clearSelection,
+            onEmptyCellClick,
           })}
     </table>
   );
@@ -1514,6 +1551,7 @@ function renderCoreRows(args: {
   selectProgram: (yearLabel: string) => void;
   selectGroup: (groupId: string) => void;
   clearSelection: () => void;
+  onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 }) {
   const {
     grid,
@@ -1531,7 +1569,10 @@ function renderCoreRows(args: {
     selectProgram,
     selectGroup,
     clearSelection,
+    onEmptyCellClick,
   } = args;
+
+  const startingDay = config.term.starting_day ?? Weekday.MONDAY;
 
   const visibleColumns = columnsForTab(
     activeTab,
@@ -1633,8 +1674,29 @@ function renderCoreRows(args: {
       >
         {!cell.mergedRows.length ? (
           <div
-            className="empty h-full min-h-0 min-h-[64px] rounded bg-[#fafcff]"
-            onClick={clearSelection}
+            className={clsx(
+              "empty h-full min-h-0 min-h-[64px] rounded bg-[#fafcff]",
+              onEmptyCellClick &&
+                activeWeek &&
+                "cursor-pointer hover:bg-[#eef4ff]",
+            )}
+            onClick={(event) => {
+              event.stopPropagation();
+              if (!onEmptyCellClick || !activeWeek) {
+                clearSelection();
+                return;
+              }
+              onEmptyCellClick({
+                weekday: preparedRow.day as TermWeekdayKey,
+                time: preparedRow.slotStart,
+                date: dateForWeekdayInWeekRange(
+                  activeWeek,
+                  preparedRow.day as TermWeekdayKey,
+                  startingDay,
+                ),
+                groupId: cell.groupId,
+              });
+            }}
           />
         ) : (
           <div className="flex h-full min-h-0 flex-col gap-1">

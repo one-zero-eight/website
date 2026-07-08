@@ -12,12 +12,25 @@ import clsx from "clsx";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import {
+  EditClassAudienceModal,
+  EditClassAudienceSummaryRow,
+} from "./EditClassAudienceModal.tsx";
+import {
+  buildAudienceSelectorTree,
+  minimizeAudienceTokens,
+} from "./audienceSelectorTree.ts";
+import {
   applyMeetingEditsToCourse,
+  formatAudienceTokensCompact,
+  formatAudienceTokensLabel,
   getWeeklySlotFromMeeting,
+  isMeetingAudienceOverridden,
+  meetingAudienceEqual,
+  meetingEditOriginalValues,
   meetingInstructorsLabel,
-  meetingOriginalValues,
   meetingPatternBaseValues,
   parseMeetingInstanceId,
+  perGroupAudienceOptions,
   timeOptionsForConfig,
   weekdayOptionsForConfig,
   type EditClassScope,
@@ -52,6 +65,7 @@ function EditClassDropdown({
       onChange={onChange}
       options={options}
       placeholder={placeholder}
+      searchable
       className={clsx("w-full", disabled && "pointer-events-none opacity-50")}
       triggerClassName="w-full"
     />
@@ -62,15 +76,19 @@ function EditClassField({
   label,
   changed,
   originalLabel,
+  onRestoreOriginal,
   overridden,
   patternLabel,
+  infoLabel,
   children,
 }: {
   label: string;
   changed: boolean;
   originalLabel: string;
+  onRestoreOriginal?: () => void;
   overridden?: boolean;
   patternLabel?: string;
+  infoLabel?: string;
   children: ReactNode;
 }) {
   return (
@@ -93,13 +111,23 @@ function EditClassField({
       </div>
       {changed ? (
         <div className="text-base-content/60 text-xs">
-          Было: {originalLabel}
+          Было:{" "}
+          <button
+            type="button"
+            className="text-base-content/80 hover:text-base-content cursor-pointer underline decoration-dotted underline-offset-2"
+            onClick={onRestoreOriginal}
+          >
+            {originalLabel}
+          </button>
         </div>
       ) : null}
       {!changed && overridden && patternLabel ? (
         <div className="text-base-content/60 text-xs">
           В шаблоне: {patternLabel}
         </div>
+      ) : null}
+      {infoLabel ? (
+        <div className="text-base-content/60 text-xs">{infoLabel}</div>
       ) : null}
       {children}
     </div>
@@ -112,6 +140,7 @@ function buildFieldEdits(
   timeValue: string,
   weekdayValue: string,
   instructorValue: string,
+  audienceValue: string[],
   cancelChecked: boolean,
 ): MeetingFieldEdits {
   if (cancelChecked) return { cancel: true };
@@ -124,6 +153,9 @@ function buildFieldEdits(
   if (instructorValue !== originals.instructor) {
     edits.instructor = instructorValue;
   }
+  if (!meetingAudienceEqual(audienceValue, originals.audience)) {
+    edits.audience = audienceValue;
+  }
   return edits;
 }
 
@@ -133,7 +165,8 @@ function hasMeetingEdits(edits: MeetingFieldEdits) {
     edits.room !== undefined ||
     edits.time !== undefined ||
     edits.weekday !== undefined ||
-    edits.instructor !== undefined
+    edits.instructor !== undefined ||
+    edits.audience !== undefined
   );
 }
 
@@ -156,17 +189,37 @@ export function EditClassModal({
   const [timeValue, setTimeValue] = useState("");
   const [weekdayValue, setWeekdayValue] = useState("");
   const [instructorValue, setInstructorValue] = useState("");
+  const [audienceValue, setAudienceValue] = useState<string[]>([]);
   const [cancelChecked, setCancelChecked] = useState(false);
+  const [audienceModalOpen, setAudienceModalOpen] = useState(false);
 
   const meetingRef = useMemo(
     () => (meeting ? parseMeetingInstanceId(meeting.instance_id) : null),
     [meeting],
   );
 
-  const originals = useMemo(
-    () => (meeting ? meetingOriginalValues(meeting) : null),
-    [meeting],
-  );
+  const meetingComponent = useMemo(() => {
+    if (!meeting || !courses || !meetingRef) return null;
+    const course = courses.find((item) => item.name === meeting.course);
+    return course?.components?.[meetingRef.componentIdx] ?? null;
+  }, [courses, meeting, meetingRef]);
+
+  const meetingSeries = useMemo(() => {
+    if (!meetingComponent || !meetingRef) return null;
+    return meetingComponent.sessions?.[meetingRef.seriesIdx] ?? null;
+  }, [meetingComponent, meetingRef]);
+
+  const originals = useMemo(() => {
+    if (!meeting) return null;
+    return meetingEditOriginalValues(meeting, meetingComponent, meetingSeries);
+  }, [meeting, meetingComponent, meetingSeries]);
+
+  const perGroup = meetingComponent?.per_group ?? false;
+
+  const perGroupOptions = useMemo(() => {
+    if (!meetingComponent) return [];
+    return perGroupAudienceOptions(config, meetingComponent);
+  }, [config, meetingComponent]);
 
   const timeOptions = useMemo(() => timeOptionsForConfig(config), [config]);
   const weekdayOptions = useMemo(
@@ -223,11 +276,18 @@ export function EditClassModal({
     setTimeValue(originals.time);
     setWeekdayValue(originals.weekday);
     setInstructorValue(originals.instructor);
+    setAudienceValue(
+      minimizeAudienceTokens(
+        [...originals.audience],
+        buildAudienceSelectorTree(config),
+      ),
+    );
     setCancelChecked(false);
   }, [meeting, open, originals]);
 
   function handleClose() {
     if (isPending) return;
+    setAudienceModalOpen(false);
     onOpenChange(false);
   }
 
@@ -245,6 +305,7 @@ export function EditClassModal({
       timeValue,
       weekdayValue,
       instructorValue,
+      audienceValue,
       cancelChecked,
     );
 
@@ -268,6 +329,13 @@ export function EditClassModal({
       }
       if (!instructorValue.trim()) {
         showError("Ошибка", "Выберите преподавателя.");
+        return;
+      }
+      if (!audienceValue.length) {
+        showError(
+          "Ошибка",
+          perGroup ? "Выберите группу." : "Укажите хотя бы одну группу.",
+        );
         return;
       }
     }
@@ -312,6 +380,8 @@ export function EditClassModal({
   const weekdayChanged = !cancelChecked && weekdayValue !== originals.weekday;
   const instructorChanged =
     !cancelChecked && instructorValue !== originals.instructor;
+  const audienceChanged =
+    !cancelChecked && !meetingAudienceEqual(audienceValue, originals.audience);
 
   const originalRoomLabel = originals.room || "—";
   const originalTimeLabel =
@@ -325,6 +395,11 @@ export function EditClassModal({
     instructorOptions.find((item) => item.id === originals.instructor)?.label ||
     originals.instructor ||
     "—";
+  const originalAudienceLabel = formatAudienceTokensLabel(
+    config,
+    originals.audience,
+  );
+  const audienceDisplayLabel = formatAudienceTokensLabel(config, audienceValue);
 
   const fieldEdits = buildFieldEdits(
     originals,
@@ -332,6 +407,7 @@ export function EditClassModal({
     timeValue,
     weekdayValue,
     instructorValue,
+    audienceValue,
     cancelChecked,
   );
   const canSave = hasMeetingEdits(fieldEdits);
@@ -372,6 +448,19 @@ export function EditClassModal({
     );
   }
 
+  function patternAudienceLabel() {
+    if (!meetingComponent) return "";
+    return formatAudienceTokensCompact(meetingComponent.student_groups || []);
+  }
+
+  const groupsOverridden = isMeetingAudienceOverridden(
+    config,
+    meetingComponent,
+    meetingSeries,
+  );
+
+  const componentAudienceLabel = patternAudienceLabel();
+
   return (
     <Modal
       open={open}
@@ -380,7 +469,7 @@ export function EditClassModal({
         else onOpenChange(next);
       }}
       title="Редактировать занятие"
-      closeOnOutsidePress={!isPending}
+      closeOnOutsidePress={!isPending && !audienceModalOpen}
       containerClassName="max-w-xl"
     >
       <div className="flex flex-col gap-3">
@@ -396,11 +485,71 @@ export function EditClassModal({
           </div>
         </div>
 
+        {perGroup ? null : (
+          <>
+            <EditClassAudienceSummaryRow
+              displayLabel={audienceDisplayLabel}
+              disabled={cancelChecked}
+              changed={audienceChanged}
+              originalLabel={originalAudienceLabel}
+              onRestoreOriginal={() =>
+                setAudienceValue(
+                  minimizeAudienceTokens(
+                    [...originals.audience],
+                    buildAudienceSelectorTree(config),
+                  ),
+                )
+              }
+              overridden={groupsOverridden}
+              patternLabel={componentAudienceLabel}
+              onEdit={() => setAudienceModalOpen(true)}
+            />
+            <EditClassAudienceModal
+              open={audienceModalOpen}
+              onOpenChange={setAudienceModalOpen}
+              config={config}
+              tokens={audienceValue}
+              originalTokens={originals.audience}
+              originalLabel={originalAudienceLabel}
+              onSave={setAudienceValue}
+            />
+          </>
+        )}
+
         <div className="flex flex-col gap-3">
+          {perGroup ? (
+            <EditClassField
+              label="Группа"
+              changed={audienceChanged}
+              originalLabel={originalAudienceLabel}
+              onRestoreOriginal={() =>
+                setAudienceValue(
+                  minimizeAudienceTokens(
+                    [...originals.audience],
+                    buildAudienceSelectorTree(config),
+                  ),
+                )
+              }
+              infoLabel={
+                componentAudienceLabel
+                  ? `В компоненте: ${componentAudienceLabel}`
+                  : undefined
+              }
+            >
+              <EditClassDropdown
+                value={audienceValue[0] || ""}
+                onChange={(group) => setAudienceValue(group ? [group] : [])}
+                placeholder="Выберите группу"
+                disabled={cancelChecked}
+                options={perGroupOptions}
+              />
+            </EditClassField>
+          ) : null}
           <EditClassField
             label="Аудитория"
             changed={roomChanged}
             originalLabel={originalRoomLabel}
+            onRestoreOriginal={() => setRoomValue(originals.room)}
             overridden={isFieldOverridden("room")}
             patternLabel={patternRoomLabel()}
           >
@@ -420,6 +569,7 @@ export function EditClassModal({
             label="Время"
             changed={timeChanged}
             originalLabel={originalTimeLabel}
+            onRestoreOriginal={() => setTimeValue(originals.time)}
             overridden={isFieldOverridden("time")}
             patternLabel={patternTimeLabel()}
           >
@@ -439,6 +589,7 @@ export function EditClassModal({
             label="День недели"
             changed={weekdayChanged}
             originalLabel={originalWeekdayLabel}
+            onRestoreOriginal={() => setWeekdayValue(originals.weekday)}
             overridden={isFieldOverridden("weekday")}
             patternLabel={patternWeekdayLabel()}
           >
@@ -458,6 +609,7 @@ export function EditClassModal({
             label="Преподаватель"
             changed={instructorChanged}
             originalLabel={originalInstructorLabel}
+            onRestoreOriginal={() => setInstructorValue(originals.instructor)}
             overridden={isFieldOverridden("instructor")}
             patternLabel={patternInstructorLabel()}
           >

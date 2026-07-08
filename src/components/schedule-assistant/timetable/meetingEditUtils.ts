@@ -6,10 +6,20 @@ import type {
   SchemaWeeklyPatternSlotEdit,
 } from "@/api/schedule-assistant/types.ts";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
+import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
+import {
+  expandStudentGroupSelectors,
+  isStudentGroupSelector,
+} from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
+import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 import {
   termWeekdayKeyToWeekday,
   type TermWeekdayKey,
 } from "@/components/schedule-assistant/settings/weekdays.ts";
+import {
+  buildAudienceSelectorTree,
+  minimizeAudienceTokens,
+} from "./audienceSelectorTree.ts";
 import {
   add90m,
   dayKey,
@@ -57,6 +67,7 @@ export type MeetingFieldEdits = {
   time?: string;
   weekday?: TermWeekdayKey;
   instructor?: string | string[] | null;
+  audience?: string[];
   cancel?: boolean;
 };
 
@@ -65,7 +76,210 @@ export type MeetingOriginalValues = {
   time: string;
   weekday: TermWeekdayKey;
   instructor: string;
+  audience: string[];
 };
+
+export function meetingAudienceEqual(a: string[], b: string[]) {
+  const normalize = (items: string[]) =>
+    [...new Set(items.map((item) => String(item || "").trim()).filter(Boolean))]
+      .sort()
+      .join("|");
+  return normalize(a) === normalize(b);
+}
+
+export function parseAudienceTokensInput(value: string) {
+  return value
+    .split(",")
+    .map((token) => token.trim())
+    .filter(Boolean);
+}
+
+export function serializeAudienceTokens(tokens: string[]) {
+  return tokens
+    .map((token) => String(token || "").trim())
+    .filter(Boolean)
+    .join(", ");
+}
+
+export function resolveMeetingAudienceTokens(
+  component:
+    | { student_groups?: string[]; per_group?: boolean }
+    | null
+    | undefined,
+  series: { audience?: string[] } | null | undefined,
+  meetingGroups?: string[],
+) {
+  const explicit = series?.audience || [];
+  if (explicit.length) return [...explicit];
+  if (component?.per_group && meetingGroups?.length) {
+    return [String(meetingGroups[0] || "").trim()].filter(Boolean);
+  }
+  return [...(component?.student_groups || [])];
+}
+
+export function audienceTokensEquivalent(
+  config: SchemaScheduleConfig,
+  a: string[],
+  b: string[],
+) {
+  if (meetingAudienceEqual(a, b)) return true;
+  const expandedA = [...new Set(expandStudentGroupSelectors(config, a))].sort();
+  const expandedB = [...new Set(expandStudentGroupSelectors(config, b))].sort();
+  if (!expandedA.length || !expandedB.length) return false;
+  return expandedA.join("|") === expandedB.join("|");
+}
+
+export function isMeetingAudienceOverridden(
+  config: SchemaScheduleConfig,
+  component:
+    | { student_groups?: string[]; per_group?: boolean }
+    | null
+    | undefined,
+  series: { audience?: string[] } | null | undefined,
+) {
+  if (!component || component.per_group) return false;
+  const explicit = series?.audience || [];
+  if (!explicit.length) return false;
+  return !audienceTokensEquivalent(
+    config,
+    explicit,
+    component.student_groups || [],
+  );
+}
+
+function studentGroupNameByCode(config: SchemaScheduleConfig) {
+  return new Map(
+    (config.students_groups ?? []).map((group) => [
+      String(group.code || "").trim(),
+      String(group.name || group.code || "").trim(),
+    ]),
+  );
+}
+
+export function formatAudienceTokenLabel(
+  config: SchemaScheduleConfig,
+  token: string,
+) {
+  const trimmed = String(token || "").trim();
+  if (!trimmed) return "";
+  if (isStudentGroupSelector(trimmed)) return trimmed;
+  const name = studentGroupNameByCode(config).get(trimmed);
+  if (name && name !== trimmed) return `${name} (${trimmed})`;
+  return trimmed;
+}
+
+export function formatAudienceTokensCompact(tokens: string[]) {
+  if (!tokens.length) return "—";
+  return tokens
+    .map((token) => String(token || "").trim())
+    .filter(Boolean)
+    .join(", ");
+}
+
+export function formatAudienceTokensLabel(
+  config: SchemaScheduleConfig,
+  tokens: string[],
+) {
+  if (!tokens.length) return "—";
+  return tokens
+    .map((token) => formatAudienceTokenLabel(config, token))
+    .filter(Boolean)
+    .join(", ");
+}
+
+export function audienceTokenHints(
+  config: SchemaScheduleConfig,
+  component: { student_groups?: string[] } | null | undefined,
+): { value: string; label: string }[] {
+  const seen = new Set<string>();
+  const hints: { value: string; label: string }[] = [];
+
+  function push(value: string, label: string) {
+    const trimmed = value.trim();
+    if (!trimmed || seen.has(trimmed)) return;
+    seen.add(trimmed);
+    hints.push({ value: trimmed, label });
+  }
+
+  for (const token of component?.student_groups || []) {
+    push(token, formatAudienceTokenLabel(config, token));
+  }
+
+  for (const section of getScheduleSections(config)) {
+    for (const program of section.programs || []) {
+      const code = String(program.code || "").trim();
+      if (!code) continue;
+      const title = String(program.name || code).trim();
+      push(`@${code}`, `@${code}${title !== code ? ` (${title})` : ""}`);
+      for (const track of normalizeTracksFromSectionProgram(program)) {
+        const trackRef = String(track.code || track.name || "").trim();
+        if (!trackRef) continue;
+        push(`@${code}/${trackRef}`, `@${code}/${trackRef}`);
+      }
+    }
+  }
+
+  for (const group of config.students_groups || []) {
+    const code = String(group.code || "").trim();
+    if (!code) continue;
+    push(code, formatAudienceTokenLabel(config, code));
+  }
+
+  return hints.sort((a, b) => a.value.localeCompare(b.value, "ru"));
+}
+
+export function meetingEditOriginalValues(
+  meeting: Meeting,
+  component:
+    | { student_groups?: string[]; per_group?: boolean }
+    | null
+    | undefined,
+  series: { audience?: string[] } | null | undefined,
+): MeetingOriginalValues {
+  const instructors =
+    typeof meeting.instructors === "string"
+      ? meeting.instructors
+      : meeting.instructors?.[0] || "";
+  return {
+    room: String(meeting.room || "").trim(),
+    time: String(meeting.start || "").slice(0, 5),
+    weekday: currentMeetingWeekday(meeting),
+    instructor: String(instructors || "").trim(),
+    audience: resolveMeetingAudienceTokens(component, series, meeting.groups),
+  };
+}
+
+/** @deprecated Use formatAudienceTokensLabel */
+export function formatMeetingGroupsLabel(
+  config: SchemaScheduleConfig,
+  groupCodes: string[],
+) {
+  return formatAudienceTokensLabel(config, groupCodes);
+}
+
+/** @deprecated Use meetingAudienceEqual */
+export function meetingGroupsEqual(a: string[], b: string[]) {
+  return meetingAudienceEqual(a, b);
+}
+
+export function componentStudentGroupPool(
+  config: SchemaScheduleConfig,
+  component: { student_groups?: string[] },
+) {
+  return expandStudentGroupSelectors(config, component.student_groups || []);
+}
+
+export function perGroupAudienceOptions(
+  config: SchemaScheduleConfig,
+  component: { student_groups?: string[] },
+) {
+  return componentStudentGroupPool(config, component)
+    .map((code) => ({
+      value: code,
+      label: formatAudienceTokenLabel(config, code),
+    }))
+    .sort((a, b) => a.value.localeCompare(b.value, "ru"));
+}
 
 export function meetingOriginalValues(meeting: Meeting): MeetingOriginalValues {
   const instructors =
@@ -77,6 +291,9 @@ export function meetingOriginalValues(meeting: Meeting): MeetingOriginalValues {
     time: String(meeting.start || "").slice(0, 5),
     weekday: currentMeetingWeekday(meeting),
     instructor: String(instructors || "").trim(),
+    audience: [...(meeting.groups || [])].sort((a, b) =>
+      a.localeCompare(b, "ru"),
+    ),
   };
 }
 
@@ -365,6 +582,16 @@ export function applyMeetingEditsToCourse(
 ): SchemaCourseConfig | null {
   const nextCourse = structuredClone(course);
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
+
+  if (edits.audience !== undefined) {
+    const component = nextCourse.components?.[ref.componentIdx];
+    const series = component?.sessions?.[ref.seriesIdx];
+    if (!component || !series) return null;
+    series.audience = minimizeAudienceTokens(
+      edits.audience.map((token) => String(token || "").trim()).filter(Boolean),
+      buildAudienceSelectorTree(config),
+    );
+  }
 
   if (ref.kind === "occ") {
     const ctx = getOccurrenceContext(nextCourse, ref);
