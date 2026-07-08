@@ -18,6 +18,7 @@ import {
   type Meeting,
   type Selection,
 } from "./timetableViewerModel.ts";
+import type { CreateMeetingCellContext } from "./createMeetingUtils.ts";
 
 const CALENDAR_TIME_COL_WIDTH = "w-[130px] min-w-[130px] max-w-[130px]";
 const CALENDAR_DAY_COL_WIDTH = "w-[170px] min-w-[170px] max-w-[170px]";
@@ -124,6 +125,7 @@ function CalendarWeekTable({
   selection,
   selectMeeting,
   clearSelection,
+  onEmptyCellClick,
 }: {
   week: CalendarWeekBlock;
   calendarGrid: BuiltCalendarGrid;
@@ -131,6 +133,7 @@ function CalendarWeekTable({
   selection: Selection;
   selectMeeting: (valueKey: string, course: string) => void;
   clearSelection: () => void;
+  onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 }) {
   return (
     <table className={CALENDAR_TABLE_CLASS}>
@@ -165,8 +168,23 @@ function CalendarWeekTable({
                     CALENDAR_DAY_COL_WIDTH,
                     "link-cell relative border-r border-b border-[#d8dfeb] bg-white p-0.5 align-top text-[0.6875rem] leading-tight",
                     todayCalendarColumnBodyClass(day.isToday, isLastSlot),
+                    !cellMeetings.length &&
+                      onEmptyCellClick &&
+                      "cursor-pointer hover:bg-[#eef4ff]",
                   )}
-                  onClick={cellMeetings.length ? undefined : clearSelection}
+                  onClick={(event) => {
+                    if (cellMeetings.length) return;
+                    event.stopPropagation();
+                    if (!onEmptyCellClick) {
+                      clearSelection();
+                      return;
+                    }
+                    onEmptyCellClick({
+                      weekday: day.day,
+                      time: slot.start,
+                      date: day.date,
+                    });
+                  }}
                 >
                   {cellMeetings.length ? (
                     <div className="flex flex-col gap-px">
@@ -199,12 +217,14 @@ function CalendarStackedTable({
   selection,
   selectMeeting,
   clearSelection,
+  onEmptyCellClick,
 }: {
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
   selection: Selection;
   selectMeeting: (valueKey: string, course: string) => void;
   clearSelection: () => void;
+  onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 }) {
   return (
     <div id="calendar-table" className="flex w-max min-w-full flex-col">
@@ -217,6 +237,7 @@ function CalendarStackedTable({
             selection={selection}
             selectMeeting={selectMeeting}
             clearSelection={clearSelection}
+            onEmptyCellClick={onEmptyCellClick}
           />
           {weekIndex < calendarGrid.weeks.length - 1 ? (
             <div className="h-px shrink-0 bg-[#d8dfeb]" />
@@ -233,12 +254,14 @@ export const TimetableCalendarTable = memo(function TimetableCalendarTable({
   selection,
   selectMeeting,
   clearSelection,
+  onEmptyCellClick,
 }: {
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
   selection: Selection;
   selectMeeting: (valueKey: string, course: string) => void;
   clearSelection: () => void;
+  onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 }) {
   if (!calendarGrid.weeks.length) return null;
 
@@ -249,6 +272,7 @@ export const TimetableCalendarTable = memo(function TimetableCalendarTable({
       selection={selection}
       selectMeeting={selectMeeting}
       clearSelection={clearSelection}
+      onEmptyCellClick={onEmptyCellClick}
     />
   );
 });
