@@ -70,7 +70,7 @@ export function ConnectivityNotification() {
 
   return (
     <div className="pointer-events-none fixed top-[calc(3rem+env(safe-area-inset-bottom)+0.75rem)] right-4 left-4 z-50 flex justify-center sm:top-4 sm:bottom-auto sm:left-auto sm:justify-end">
-      <div className="rounded-box bg-warning text-error-content shadow-lg">
+      <div className="rounded-box bg-warning text-error-content pointer-events-auto shadow-lg">
         <div className="flex items-start gap-2">
           <button
             type="button"
