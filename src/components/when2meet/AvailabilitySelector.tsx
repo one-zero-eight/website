@@ -743,7 +743,7 @@ export function AvailabilitySelector({
                           )
                         : heatmapAppearance?.className),
                   hasCalendarEvent &&
-                    "bg-[repeating-linear-gradient(-45deg,color-mix(in_oklch,var(--color-accent)_24%,transparent),color-mix(in_oklch,var(--color-accent)_24%,transparent)_4px,transparent_4px,transparent_8px)]",
+                    "bg-[repeating-linear-gradient(-45deg,color-mix(in_oklch,var(--color-accent)_24%,transparent),color-mix(in_oklch,var(--color-accent)_24%,transparent)_8px,transparent_8px,transparent_16px)]",
                   isSelected &&
                     hasCalendarConflict &&
                     "shadow-[inset_0_0_0_2px_var(--color-warning)]",
@@ -779,7 +779,7 @@ export function AvailabilitySelector({
                 }
               >
                 {hasCalendarEvent && (
-                  <span className="text-base-content/80 pointer-events-none absolute inset-x-0 top-0.5 truncate px-0.5 text-[10px] leading-none md:text-[11px] dark:text-[#f5f0d8]">
+                  <span className="text-base-content/80 pointer-events-none absolute inset-0 flex items-center justify-center truncate px-0.5 text-center text-[10px] leading-none md:text-[11px] dark:text-[#f5f0d8]">
                     {calendarEventLabel}
                   </span>
                 )}

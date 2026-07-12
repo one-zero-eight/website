@@ -1192,7 +1192,7 @@ export function MeetingPage({
                         )}
                       </>
                     ) : (
-                      <div className="border-t-base-content/50 mt-1 h-1 w-full border-t border-dashed" />
+                      <span className="block">No slot selected</span>
                     )}
                   </div>
                 </div>
@@ -1265,7 +1265,7 @@ export function MeetingPage({
                                   isViewed ? "bg-primary" : "bg-base-300",
                                 )}
                               />
-                              <span className="truncate text-sm font-medium">
+                              <span className="truncate text-sm">
                                 {user.name}
                                 {isCurrentUser && (
                                   <span className="text-base-content/60 ml-1 font-normal">
