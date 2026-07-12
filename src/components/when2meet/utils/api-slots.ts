@@ -207,10 +207,96 @@ export function collapseHalfHourSlotKeysToHourly(slotKeys: Iterable<string>) {
   return collapsed;
 }
 
+function getTimeSlotDurationMinutes(timeSlots: string[]) {
+  const sortedTimes = [...timeSlots].sort();
+
+  for (let index = 1; index < sortedTimes.length; index++) {
+    const previousMinutes = parseTimeToMinutes(sortedTimes[index - 1]);
+    const currentMinutes = parseTimeToMinutes(sortedTimes[index]);
+    const durationMinutes = currentMinutes - previousMinutes;
+
+    if (durationMinutes > 0) {
+      return durationMinutes;
+    }
+  }
+
+  return SLOT_INTERVAL_MINUTES;
+}
+
 export function slotKeyToDateRange(slotKey: string, durationMinutes = 60) {
   const { dateId, time } = parseSlotKey(slotKey);
   const start = new Date(`${dateId}T${time}:00${WHEN2MEET_TIMEZONE_OFFSET}`);
   const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
 
   return { start, end, scrollTimestamp: start.getTime() };
+}
+
+export function slotKeysToMeetingTime(
+  slotKeys: Iterable<string>,
+  timeSlots: string[],
+) {
+  const durationMinutes = getTimeSlotDurationMinutes(timeSlots);
+  let minStart = Number.POSITIVE_INFINITY;
+  let maxEnd = Number.NEGATIVE_INFINITY;
+
+  for (const slotKey of slotKeys) {
+    const { start, end } = slotKeyToDateRange(slotKey, durationMinutes);
+    minStart = Math.min(minStart, start.getTime());
+    maxEnd = Math.max(maxEnd, end.getTime());
+  }
+
+  if (!Number.isFinite(minStart) || !Number.isFinite(maxEnd)) {
+    return null;
+  }
+
+  return {
+    start: new Date(minStart).toISOString(),
+    end: new Date(maxEnd).toISOString(),
+  };
+}
+
+function intervalsOverlap(
+  leftStart: Date,
+  leftEnd: Date,
+  rightStart: Date,
+  rightEnd: Date,
+) {
+  return leftStart < rightEnd && leftEnd > rightStart;
+}
+
+export function meetingTimeToSlotKeys(
+  meetingTime: { start: string; end: string },
+  dateIds: string[],
+  timeSlots: string[],
+  allowedSlots?: Set<string>,
+) {
+  const selectedStart = new Date(meetingTime.start);
+  const selectedEnd = new Date(meetingTime.end);
+  const durationMinutes = getTimeSlotDurationMinutes(timeSlots);
+  const selectedSlotKeys = new Set<string>();
+
+  if (
+    Number.isNaN(selectedStart.getTime()) ||
+    Number.isNaN(selectedEnd.getTime())
+  ) {
+    return selectedSlotKeys;
+  }
+
+  for (const dateId of dateIds) {
+    for (const time of timeSlots) {
+      const slotKey = getSlotKey(dateId, time);
+
+      if (allowedSlots && !allowedSlots.has(slotKey)) {
+        continue;
+      }
+
+      const { start, end } = slotKeyToDateRange(slotKey, durationMinutes);
+
+      if (intervalsOverlap(start, end, selectedStart, selectedEnd)) {
+        selectedSlotKeys.add(slotKey);
+      }
+    }
+  }
+
+  return selectedSlotKeys;
 }

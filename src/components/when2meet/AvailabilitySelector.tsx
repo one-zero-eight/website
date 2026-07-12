@@ -4,7 +4,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { cn } from "@/lib/ui/cn";
@@ -21,13 +20,29 @@ import {
 
 type DragMode = "add" | "remove";
 
-function getBookingSelectionStyle(heatmapStyle?: CSSProperties): CSSProperties {
-  return {
-    ...heatmapStyle,
-    backgroundImage:
-      "linear-gradient(color-mix(in oklch, var(--color-secondary) 65%, transparent), color-mix(in oklch, var(--color-secondary) 65%, transparent))",
-    boxShadow: "inset 0 0 0 2px var(--color-secondary)",
-  };
+function getMeetingTimeOverlayClassName({
+  continuesAbove,
+  continuesBelow,
+  overlapsAvailability,
+}: {
+  continuesAbove: boolean;
+  continuesBelow: boolean;
+  overlapsAvailability: boolean;
+}) {
+  return cn(
+    "pointer-events-none absolute inset-0 border-r-2 border-l-2",
+    overlapsAvailability
+      ? "border-success bg-success/35"
+      : "border-secondary bg-secondary/15",
+    !continuesAbove &&
+      (overlapsAvailability
+        ? "border-t-success border-t-2"
+        : "border-t-secondary border-t-2"),
+    !continuesBelow &&
+      (overlapsAvailability
+        ? "border-b-success border-b-2"
+        : "border-b-secondary border-b-2"),
+  );
 }
 
 function DateNavigationButton({
@@ -80,10 +95,11 @@ export function AvailabilitySelector({
   bestIntersectionSlotKeys,
   hoveredSlotKey = null,
   onHoveredSlotKeyChange,
-  bookingMode = false,
-  bookingSlots,
-  onBookingSlotsChange,
-  onBookingSelectionEnd,
+  intervalSelectionMode = false,
+  intervalSelectionSlots,
+  onIntervalSelectionSlotsChange,
+  onIntervalSelectionEnd,
+  selectedMeetingSlotKeys,
   showCalendarOverlay = false,
   calendarSlotEvents,
   calendarConflictSlotKeys,
@@ -103,10 +119,11 @@ export function AvailabilitySelector({
   bestIntersectionSlotKeys?: Set<string>;
   hoveredSlotKey?: string | null;
   onHoveredSlotKeyChange?: (slotKey: string | null) => void;
-  bookingMode?: boolean;
-  bookingSlots?: Set<string>;
-  onBookingSlotsChange?: (slotKeys: string[]) => void;
-  onBookingSelectionEnd?: (slotKeys: string[]) => void;
+  intervalSelectionMode?: boolean;
+  intervalSelectionSlots?: Set<string>;
+  onIntervalSelectionSlotsChange?: (slotKeys: string[]) => void;
+  onIntervalSelectionEnd?: (slotKeys: string[]) => void;
+  selectedMeetingSlotKeys?: Set<string>;
   showCalendarOverlay?: boolean;
   calendarSlotEvents?: Map<string, string[]>;
   calendarConflictSlotKeys?: Set<string>;
@@ -127,17 +144,19 @@ export function AvailabilitySelector({
   const onApplySlotsRef = useRef(onApplySlots);
   onApplySlotsRef.current = onApplySlots;
 
-  const onBookingSlotsChangeRef = useRef(onBookingSlotsChange);
-  onBookingSlotsChangeRef.current = onBookingSlotsChange;
+  const onIntervalSelectionSlotsChangeRef = useRef(
+    onIntervalSelectionSlotsChange,
+  );
+  onIntervalSelectionSlotsChangeRef.current = onIntervalSelectionSlotsChange;
 
-  const onBookingSelectionEndRef = useRef(onBookingSelectionEnd);
-  onBookingSelectionEndRef.current = onBookingSelectionEnd;
+  const onIntervalSelectionEndRef = useRef(onIntervalSelectionEnd);
+  onIntervalSelectionEndRef.current = onIntervalSelectionEnd;
 
-  const bookingSlotsRef = useRef(bookingSlots);
-  bookingSlotsRef.current = bookingSlots;
+  const intervalSelectionSlotsRef = useRef(intervalSelectionSlots);
+  intervalSelectionSlotsRef.current = intervalSelectionSlots;
 
-  const bookingAnchorDateRef = useRef<string | null>(null);
-  const bookingDragStartRef = useRef<string | null>(null);
+  const intervalAnchorDateRef = useRef<string | null>(null);
+  const intervalDragStartRef = useRef<string | null>(null);
 
   const isEditing = editingUserId !== null;
   const showEditingVisual = selectionOnly || isEditing;
@@ -246,8 +265,8 @@ export function AvailabilitySelector({
     onHoveredSlotKeyChange?.(null);
   }
 
-  function getBookingSlotKeysBetween(fromSlotKey: string, toSlotKey: string) {
-    const anchorDateId = bookingAnchorDateRef.current;
+  function getIntervalSlotKeysBetween(fromSlotKey: string, toSlotKey: string) {
+    const anchorDateId = intervalAnchorDateRef.current;
 
     if (!anchorDateId) {
       return [toSlotKey];
@@ -276,7 +295,7 @@ export function AvailabilitySelector({
     time: string,
     event: ReactPointerEvent<HTMLButtonElement>,
   ) {
-    if (bookingMode) {
+    if (intervalSelectionMode) {
       if (!isSlotAllowed(dateId, time)) {
         return;
       }
@@ -286,10 +305,10 @@ export function AvailabilitySelector({
       event.currentTarget.setPointerCapture(event.pointerId);
 
       const slotKey = getSlotKey(dateId, time);
-      bookingAnchorDateRef.current = dateId;
-      bookingDragStartRef.current = slotKey;
+      intervalAnchorDateRef.current = dateId;
+      intervalDragStartRef.current = slotKey;
       isDraggingRef.current = true;
-      onBookingSlotsChangeRef.current?.([slotKey]);
+      onIntervalSelectionSlotsChangeRef.current?.([slotKey]);
       return;
     }
 
@@ -353,16 +372,16 @@ export function AvailabilitySelector({
         return;
       }
 
-      if (bookingDragStartRef.current) {
-        const dragStart = bookingDragStartRef.current;
+      if (intervalDragStartRef.current) {
+        const dragStart = intervalDragStartRef.current;
 
         if (slotKey === dragStart) {
-          onBookingSlotsChangeRef.current?.([dragStart]);
+          onIntervalSelectionSlotsChangeRef.current?.([dragStart]);
           return;
         }
 
-        onBookingSlotsChangeRef.current?.(
-          getBookingSlotKeysBetween(dragStart, slotKey),
+        onIntervalSelectionSlotsChangeRef.current?.(
+          getIntervalSlotKeysBetween(dragStart, slotKey),
         );
         return;
       }
@@ -404,15 +423,20 @@ export function AvailabilitySelector({
     }
 
     function handlePointerUp() {
-      if (bookingDragStartRef.current && bookingSlotsRef.current?.size) {
-        onBookingSelectionEndRef.current?.([...bookingSlotsRef.current]);
+      if (
+        intervalDragStartRef.current &&
+        intervalSelectionSlotsRef.current?.size
+      ) {
+        onIntervalSelectionEndRef.current?.([
+          ...intervalSelectionSlotsRef.current,
+        ]);
       }
 
       isDraggingRef.current = false;
       visitedSlotsRef.current.clear();
       lastVisitedSlotKeyRef.current = null;
-      bookingAnchorDateRef.current = null;
-      bookingDragStartRef.current = null;
+      intervalAnchorDateRef.current = null;
+      intervalDragStartRef.current = null;
     }
 
     window.addEventListener("pointermove", handlePointerMove, {
@@ -426,7 +450,7 @@ export function AvailabilitySelector({
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerUp);
     };
-  }, [editingUserId, getSlotKeyFromPoint, bookingMode]);
+  }, [editingUserId, getSlotKeyFromPoint, intervalSelectionMode]);
 
   const gridTemplateColumns = isPhone
     ? `2.25rem repeat(${visibleDates.length}, minmax(0, 1fr))`
@@ -456,8 +480,8 @@ export function AvailabilitySelector({
           continue;
         }
 
-        if (bookingMode) {
-          if (bookingSlots?.has(slotKey)) {
+        if (intervalSelectionMode) {
+          if (intervalSelectionSlots?.has(slotKey)) {
             set.add(slotKey);
           }
           continue;
@@ -496,8 +520,8 @@ export function AvailabilitySelector({
     dates,
     timeSlots,
     allowedSlots,
-    bookingMode,
-    bookingSlots,
+    intervalSelectionMode,
+    intervalSelectionSlots,
     showEditingVisual,
     draftSlots,
     fadeNonBestSlots,
@@ -521,6 +545,19 @@ export function AvailabilitySelector({
       !areConsecutiveDateIds(date.id, dates[dateIndex + 1].id);
 
     return cn(gapBefore && "ml-2", gapAfter && "mr-2");
+  }
+
+  function getDateColumnGapBorderClassName(dateIndex: number) {
+    const date = dates[dateIndex];
+
+    if (!date) {
+      return "";
+    }
+
+    const gapBefore =
+      dateIndex > 0 && !areConsecutiveDateIds(dates[dateIndex - 1].id, date.id);
+
+    return gapBefore ? "border-l border-base-300" : "";
   }
 
   const gridContent = (
@@ -574,13 +611,19 @@ export function AvailabilitySelector({
           {visibleDates.map((date, visibleIndex) => {
             const dateIndex = dateOffset + visibleIndex;
             const dateColumnGapClassName = getDateColumnGapClassName(dateIndex);
+            const dateColumnGapBorderClassName =
+              getDateColumnGapBorderClassName(dateIndex);
             const slotKey = getSlotKey(date.id, time);
             const slotAllowed = isSlotAllowed(date.id, time);
             const availableCount = getAvailableCount(date.id, time);
             const isSelected = isEditingUserSlot(date.id, time);
             const isMySlot =
               !!mySlots && mySlots.has(slotKey) && !showEditingVisual;
-            const isBookingSelected = bookingSlots?.has(slotKey) ?? false;
+            const isIntervalSelected =
+              intervalSelectionSlots?.has(slotKey) ?? false;
+            const isSelectedMeetingSlot =
+              !intervalSelectionMode &&
+              (selectedMeetingSlotKeys?.has(slotKey) ?? false);
             const isFilled = filledSlotKeys.has(slotKey);
             const prevTime = timeIndex > 0 ? timeSlots[timeIndex - 1] : null;
             const nextTime =
@@ -608,11 +651,35 @@ export function AvailabilitySelector({
               !!mySlots &&
               !!nextTime &&
               mySlots.has(getSlotKey(date.id, nextTime));
+            const selectedMeetingSlotAbove =
+              !!selectedMeetingSlotKeys &&
+              !!prevTime &&
+              selectedMeetingSlotKeys.has(getSlotKey(date.id, prevTime));
+            const selectedMeetingSlotBelow =
+              !!selectedMeetingSlotKeys &&
+              !!nextTime &&
+              selectedMeetingSlotKeys.has(getSlotKey(date.id, nextTime));
+            const intervalSelectionAbove =
+              isIntervalSelected &&
+              !!prevTime &&
+              intervalSelectionSlots?.has(getSlotKey(date.id, prevTime));
+            const intervalSelectionBelow =
+              isIntervalSelected &&
+              !!nextTime &&
+              intervalSelectionSlots?.has(getSlotKey(date.id, nextTime));
+            const meetingTimeOverlapsAvailability =
+              (isSelectedMeetingSlot || isIntervalSelected) &&
+              !showEditingVisual &&
+              availableCount > 0;
             const calendarEventTitles =
               showCalendarOverlay && calendarSlotEvents?.has(slotKey)
                 ? calendarSlotEvents.get(slotKey)
                 : undefined;
             const hasCalendarEvent = !!calendarEventTitles?.length;
+            const calendarEventLabel =
+              calendarEventTitles && calendarEventTitles.length > 1
+                ? `${calendarEventTitles[0]} +${calendarEventTitles.length - 1}`
+                : (calendarEventTitles?.[0] ?? "");
             const hasCalendarConflict =
               isSelected &&
               !!calendarConflictSlotKeys?.has(slotKey) &&
@@ -649,14 +716,12 @@ export function AvailabilitySelector({
                 key={slotKey}
                 type="button"
                 data-slot-key={slotKey}
-                style={
-                  isBookingSelected
-                    ? getBookingSelectionStyle(heatmapAppearance?.style)
-                    : heatmapAppearance?.style
-                }
+                style={heatmapAppearance?.style}
                 className={cn(
                   "border-base-300 relative h-7 md:h-8",
                   dateColumnGapClassName,
+                  dateColumnGapBorderClassName,
+                  visibleIndex === 0 && "border-l",
                   mergeUp
                     ? "border-t-transparent"
                     : cn(
@@ -664,7 +729,6 @@ export function AvailabilitySelector({
                         time.endsWith(":00") ? "border-solid" : "border-dashed",
                       ),
                   mergeRight ? "border-r-transparent" : "border-r",
-                  visibleIndex === 0 && "border-l",
                   !slotAllowed &&
                     "bg-base-200/80 cursor-not-allowed opacity-40",
                   slotAllowed &&
@@ -675,7 +739,7 @@ export function AvailabilitySelector({
                       : isFilteredOut
                         ? cn(
                             "bg-base-100",
-                            !bookingMode && "pointer-events-none",
+                            !intervalSelectionMode && "pointer-events-none",
                           )
                         : heatmapAppearance?.className),
                   hasCalendarEvent &&
@@ -684,24 +748,28 @@ export function AvailabilitySelector({
                     hasCalendarConflict &&
                     "shadow-[inset_0_0_0_2px_var(--color-warning)]",
                   showPartialSlotHover &&
-                    !isBookingSelected &&
+                    !isIntervalSelected &&
                     "ring-primary shadow-[inset_0_0_0_2px_var(--color-primary)]",
                   showFullSlotHover &&
-                    !isBookingSelected &&
+                    !isIntervalSelected &&
                     "shadow-[inset_0_0_0_2px_var(--color-base-300)]/80",
-                  (showEditingVisual || bookingMode) &&
+                  (showEditingVisual || intervalSelectionMode) &&
                     slotAllowed &&
                     "touch-none select-none",
-                  (isEditing || bookingMode) && slotAllowed
+                  (isEditing || intervalSelectionMode) && slotAllowed
                     ? "cursor-pointer"
                     : "cursor-default",
                 )}
                 title={
                   !slotAllowed
                     ? `${date.monthDay}, ${time}: not available for this meeting`
-                    : calendarEventTitles?.length
-                      ? `${date.monthDay}, ${time}: ${availableCount} available · ${calendarEventTitles.join(", ")}`
-                      : `${date.monthDay}, ${time}: ${availableCount} available`
+                    : isIntervalSelected
+                      ? `${date.monthDay}, ${time}: selecting meeting time`
+                      : isSelectedMeetingSlot
+                        ? `${date.monthDay}, ${time}: selected meeting time`
+                        : calendarEventTitles?.length
+                          ? `${date.monthDay}, ${time}: ${availableCount} available · ${calendarEventTitles.join(", ")}`
+                          : `${date.monthDay}, ${time}: ${availableCount} available`
                 }
                 onMouseEnter={() =>
                   handleSlotMouseEnter(slotKey, date.id, time)
@@ -710,13 +778,36 @@ export function AvailabilitySelector({
                   handleSlotPointerDown(date.id, time, event)
                 }
               >
-                {isMySlot && !isBookingSelected && (
+                {hasCalendarEvent && (
+                  <span className="text-base-content/80 pointer-events-none absolute inset-x-0 top-0.5 truncate px-0.5 text-[10px] leading-none md:text-[11px] dark:text-[#f5f0d8]">
+                    {calendarEventLabel}
+                  </span>
+                )}
+                {isMySlot && !isIntervalSelected && (
                   <span
                     className={cn(
                       "border-l-primary border-r-primary pointer-events-none absolute inset-0 border-r-2 border-l-2",
                       !mySlotAbove && "border-t-primary border-t-2",
                       !mySlotBelow && "border-b-primary border-b-2",
                     )}
+                  />
+                )}
+                {isSelectedMeetingSlot && !isIntervalSelected && (
+                  <span
+                    className={getMeetingTimeOverlayClassName({
+                      continuesAbove: !!selectedMeetingSlotAbove,
+                      continuesBelow: !!selectedMeetingSlotBelow,
+                      overlapsAvailability: meetingTimeOverlapsAvailability,
+                    })}
+                  />
+                )}
+                {isIntervalSelected && (
+                  <span
+                    className={getMeetingTimeOverlayClassName({
+                      continuesAbove: !!intervalSelectionAbove,
+                      continuesBelow: !!intervalSelectionBelow,
+                      overlapsAvailability: meetingTimeOverlapsAvailability,
+                    })}
                   />
                 )}
               </button>
@@ -756,13 +847,13 @@ export function AvailabilitySelector({
         </div>
       )}
 
-      {!hideHint && bookingMode && (
+      {!hideHint && intervalSelectionMode && (
         <p className="text-base-content/60 mb-3 text-sm">
-          Drag on the grid to select a time interval for booking.
+          Drag on the grid to select the meeting time.
         </p>
       )}
 
-      {!hideHint && isEditing && !bookingMode && (
+      {!hideHint && isEditing && !intervalSelectionMode && (
         <p className="text-base-content/60 mb-3 text-sm">
           Click timeslots on the grid to mark your availability.
         </p>
@@ -795,6 +886,27 @@ export function AvailabilitySelector({
           gridContent
         )}
       </div>
+
+      {!selectionOnly && (
+        <div className="text-base-content/70 mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
+            Participant availability
+          </span>
+          {currentUserId && (
+            <span className="inline-flex items-center gap-1.5">
+              <span className="border-primary h-3 w-5 rounded-sm border-2" />
+              Your timeslots
+            </span>
+          )}
+          {(selectedMeetingSlotKeys?.size || intervalSelectionMode) && (
+            <span className="inline-flex items-center gap-1.5">
+              <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-2" />
+              Chosen meeting time
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,6 @@ import { cn } from "@/lib/ui/cn";
 
 export function MeetingMobileBar({
   onShare,
-  onBookRoom,
   onDelete,
   onSaveSetup,
   onClearSetup,
@@ -15,10 +14,8 @@ export function MeetingMobileBar({
   isSavingAvailability,
   canClearAvailability,
   canClearSetup,
-  canBookRoom,
 }: {
   onShare?: () => void;
-  onBookRoom?: () => void;
   onDelete?: () => void;
   onSaveSetup?: () => void;
   onClearSetup?: () => void;
@@ -31,7 +28,6 @@ export function MeetingMobileBar({
   isSavingAvailability?: boolean;
   canClearAvailability?: boolean;
   canClearSetup?: boolean;
-  canBookRoom?: boolean;
 }) {
   if (onSaveSetup) {
     return (
@@ -62,7 +58,7 @@ export function MeetingMobileBar({
     );
   }
 
-  if (!onShare && !onBookRoom && !onDelete && !onToggleAvailability) {
+  if (!onShare && !onDelete && !onToggleAvailability) {
     return null;
   }
 
@@ -96,17 +92,6 @@ export function MeetingMobileBar({
             ) : (
               "Change my availability"
             )}
-          </button>
-        )}
-        {onBookRoom && (
-          <button
-            type="button"
-            className="btn btn-primary min-w-0 flex-1 gap-2"
-            disabled={!canBookRoom}
-            onClick={onBookRoom}
-          >
-            <span className="icon-[mdi--door-open] text-lg" />
-            Book room
           </button>
         )}
         {onDelete && (
