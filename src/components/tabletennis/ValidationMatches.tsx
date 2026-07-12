@@ -1,50 +1,123 @@
 import { useState, useEffect, Fragment } from "react";
 import { cn } from "@/lib/ui/cn";
+import { $tabletennis } from "@/api/tabletennis";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { useToast } from "@/components/toast";
 
-type Match = {
-  player1_id: string;
-  player2_id: string;
+type GamePlayer = {
+  innohassle_id: string;
+  nickname: string;
+  rating: number;
+  registered: boolean;
+  score: number;
 };
 
-type CompletedMatch = Match & {
-  score_player1: number;
-  score_player2: number;
+type GameData = {
+  game_id: string;
+  tour_id: string;
+  tournament_name: string;
+  finished: boolean;
+  player1: GamePlayer;
+  player2: GamePlayer;
 };
 
-function matchKey(m: Match) {
-  return [m.player1_id, m.player2_id].sort().join("-");
+function matchKey(a: string, b: string) {
+  return [a, b].sort().join("-");
 }
 
 export function ValidationMatches({
   players,
+  tourId,
+  validationGames,
   onStatsUpdate,
 }: {
   players: { name: string; id: string }[];
+  tourId: string;
+  validationGames: GameData[];
   onStatsUpdate?: (
     stats: { playerId: string; wins: number; played: number }[],
   ) => void;
 }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [ongoingMatches, setOngoingMatches] = useState<Match[]>([]);
-  const [completedMatches, setCompletedMatches] = useState<CompletedMatch[]>(
-    [],
-  );
+  const [ongoingMatches, setOngoingMatches] = useState<
+    { game_id: string; player1_id: string; player2_id: string }[]
+  >([]);
+  const [completedMatches, setCompletedMatches] = useState<
+    {
+      game_id: string;
+      player1_id: string;
+      player2_id: string;
+      score_player1: number;
+      score_player2: number;
+    }[]
+  >([]);
   const [localScores, setLocalScores] = useState<
     Record<string, [number, number]>
   >({});
-  const [editingKey, setEditingKey] = useState<string | null>(null);
   const [activeCompletedKey, setActiveCompletedKey] = useState<string | null>(
     null,
   );
+  const [creating, setCreating] = useState(false);
+  const [finishing, setFinishing] = useState<string | null>(null);
+  const { showError } = useToast();
+
+  const { mutateAsync: createGame } = $tabletennis.useMutation(
+    "post",
+    "/reg-game",
+    {
+      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+    },
+  );
+
+  const { mutateAsync: finishGame } = $tabletennis.useMutation(
+    "post",
+    "/finish-game",
+    {
+      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+    },
+  );
+
+  useEffect(() => {
+    for (const game of validationGames) {
+      const p1Id = game.player1.innohassle_id;
+      const p2Id = game.player2.innohassle_id;
+      const key = matchKey(p1Id, p2Id);
+      if (game.finished || game.player1.score > 0 || game.player2.score > 0) {
+        setCompletedMatches((prev) => {
+          if (prev.some((m) => m.game_id === game.game_id)) return prev;
+          return [
+            ...prev,
+            {
+              game_id: game.game_id,
+              player1_id: p1Id,
+              player2_id: p2Id,
+              score_player1: game.player1.score,
+              score_player2: game.player2.score,
+            },
+          ];
+        });
+      } else {
+        setOngoingMatches((prev) => {
+          if (prev.some((m) => matchKey(m.player1_id, m.player2_id) === key))
+            return prev;
+          return [
+            ...prev,
+            {
+              game_id: game.game_id,
+              player1_id: p1Id,
+              player2_id: p2Id,
+            },
+          ];
+        });
+      }
+    }
+  }, [validationGames]);
 
   const ongoingIds = ongoingMatches.flatMap((m) => [
     m.player1_id,
     m.player2_id,
   ]);
-  const unavailableIds = ongoingIds;
-  const availablePlayers = players.filter(
-    (p) => !unavailableIds.includes(p.id),
-  );
+  const availablePlayers = players.filter((p) => !ongoingIds.includes(p.id));
 
   useEffect(() => {
     if (!onStatsUpdate) return;
@@ -70,52 +143,102 @@ export function ValidationMatches({
     });
   }
 
-  function handleStartGame() {
+  async function handleStartGame() {
     if (selectedIds.length !== 2) return;
-    const match: Match = {
-      player1_id: selectedIds[0]!,
-      player2_id: selectedIds[1]!,
-    };
-    setOngoingMatches((prev) => [...prev, match]);
-    setLocalScores((prev) => ({ ...prev, [matchKey(match)]: [0, 0] }));
-    setSelectedIds([]);
+    setCreating(true);
+    try {
+      const result = await createGame({
+        params: {
+          query: {
+            tour_id: tourId,
+            tip: "val" as const,
+            player1_id: selectedIds[0],
+            player2_id: selectedIds[1],
+          },
+        },
+      } as any);
+
+      const gameId =
+        (result as any)?.id ??
+        (result as any)?._id ??
+        (result as any)?.game_id ??
+        "";
+      setOngoingMatches((prev) => [
+        ...prev,
+        {
+          game_id: gameId,
+          player1_id: selectedIds[0]!,
+          player2_id: selectedIds[1]!,
+        },
+      ]);
+      setLocalScores((prev) => ({
+        ...prev,
+        [matchKey(selectedIds[0]!, selectedIds[1]!)]: [0, 0],
+      }));
+      setSelectedIds([]);
+    } catch {
+      // error handled by onError callback
+    } finally {
+      setCreating(false);
+    }
   }
 
-  function handleComplete(match: Match) {
-    const key = matchKey(match);
+  async function handleComplete(match: {
+    game_id: string;
+    player1_id: string;
+    player2_id: string;
+  }) {
+    const key = matchKey(match.player1_id, match.player2_id);
     const scores = localScores[key] ?? [0, 0];
-    const completed: CompletedMatch = {
-      ...match,
-      score_player1: scores[0],
-      score_player2: scores[1],
-    };
-    setCompletedMatches((prev) => [...prev, completed]);
-    setOngoingMatches((prev) => prev.filter((m) => matchKey(m) !== key));
-  }
+    setFinishing(match.game_id);
+    try {
+      await finishGame({
+        params: {
+          query: {
+            game_id: match.game_id,
+            s1: scores[0],
+            s2: scores[1],
+            tour_id: tourId,
+          },
+        },
+      } as any);
 
-  function handleEdit(key: string) {
-    setEditingKey(key);
-    setActiveCompletedKey(key);
-  }
-
-  function handleSaveEdit(key: string, score1: number, score2: number) {
-    setCompletedMatches((prev) =>
-      prev.map((m) => {
-        if (matchKey(m) !== key) return m;
-        return { ...m, score_player1: score1, score_player2: score2 };
-      }),
-    );
-    setEditingKey(null);
+      setCompletedMatches((prev) => [
+        ...prev,
+        {
+          game_id: match.game_id,
+          player1_id: match.player1_id,
+          player2_id: match.player2_id,
+          score_player1: scores[0],
+          score_player2: scores[1],
+        },
+      ]);
+      setOngoingMatches((prev) =>
+        prev.filter((m) => m.game_id !== match.game_id),
+      );
+    } catch {
+      // error handled by onError callback
+    } finally {
+      setFinishing(null);
+    }
   }
 
   function handleDelete(key: string) {
-    setCompletedMatches((prev) => prev.filter((m) => matchKey(m) !== key));
-    if (editingKey === key) setEditingKey(null);
-    if (activeCompletedKey === key) setActiveCompletedKey(null);
+    setCompletedMatches((prev) =>
+      prev.filter((m) => matchKey(m.player1_id, m.player2_id) !== key),
+    );
+    setOngoingMatches((prev) =>
+      prev.filter((m) => matchKey(m.player1_id, m.player2_id) !== key),
+    );
+    setActiveCompletedKey((prev) => (prev === key ? null : prev));
   }
 
-  function handleScoreChange(match: Match, player: 1 | 2, value: string) {
-    const key = matchKey(match);
+  function handleScoreChange(
+    match: { player1_id: string; player2_id: string },
+    player: 1 | 2,
+    value: string,
+  ) {
+    const key = matchKey(match.player1_id, match.player2_id);
     setLocalScores((prev) => {
       const current = prev[key] ?? [0, 0];
       const next: [number, number] =
@@ -130,137 +253,18 @@ export function ValidationMatches({
     return players.find((p) => p.id === id)?.name ?? id;
   }
 
-  function MatchCard({
+  function getKey(match: { player1_id: string; player2_id: string }) {
+    return matchKey(match.player1_id, match.player2_id);
+  }
+
+  function OngoingCard({
     match,
-    isCompleted,
   }: {
-    match: Match | CompletedMatch;
-    isCompleted: boolean;
+    match: { game_id: string; player1_id: string; player2_id: string };
   }) {
-    const key = matchKey(match);
-    const scores =
-      "score_player1" in match
-        ? [match.score_player1, match.score_player2]
-        : (localScores[key] ?? [0, 0]);
-
-    const isEditing = isCompleted && editingKey === key;
-    const [tempScore1, setTempScore1] = useState(0);
-    const [tempScore2, setTempScore2] = useState(0);
-
-    useEffect(() => {
-      if (isEditing) {
-        setTempScore1(scores[0]);
-        setTempScore2(scores[1]);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isEditing]);
-
-    const showActions = isCompleted && activeCompletedKey === key;
-
-    if (isCompleted) {
-      if (isEditing) {
-        return (
-          <div className="bg-base-200 rounded-box border border-[#712BB2]/30 p-3">
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs font-medium md:text-sm">
-              <span className="truncate text-left">
-                {getPlayerName(match.player1_id)}
-              </span>
-              <div className="flex items-center justify-center gap-1.5">
-                <input
-                  type="number"
-                  min={0}
-                  value={tempScore1}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) =>
-                    setTempScore1(Math.max(0, Number(e.target.value) || 0))
-                  }
-                  className="input input-xs bg-base-100 w-10 rounded-lg text-center"
-                />
-                <span className="text-base-content/50">:</span>
-                <input
-                  type="number"
-                  min={0}
-                  value={tempScore2}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) =>
-                    setTempScore2(Math.max(0, Number(e.target.value) || 0))
-                  }
-                  className="input input-xs bg-base-100 w-10 rounded-lg text-center"
-                />
-              </div>
-              <span className="truncate text-right">
-                {getPlayerName(match.player2_id)}
-              </span>
-            </div>
-            <div className="mt-2 flex justify-end gap-2">
-              <button
-                type="button"
-                className="rounded-lg border border-[#712BB2] px-2 py-1 text-[10px] text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 md:text-xs"
-                onClick={() => handleSaveEdit(key, tempScore1, tempScore2)}
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                className="border-base-content/30 text-base-content/50 hover:bg-base-content/10 rounded-lg border px-2 py-1 text-[10px] transition-colors md:text-xs"
-                onClick={() => setEditingKey(null)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        );
-      }
-
-      return (
-        <div
-          className="bg-base-200 rounded-box cursor-pointer border border-[#712BB2]/30 p-3"
-          onClick={() =>
-            setActiveCompletedKey((prev) => (prev === key ? null : key))
-          }
-        >
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs font-medium md:text-sm">
-            <span className="truncate text-left">
-              {getPlayerName(match.player1_id)}
-            </span>
-            <div className="flex items-center justify-center gap-1.5 md:gap-3">
-              <span className="tabular-nums">{scores[0]}</span>
-              <span className="text-base-content/50">:</span>
-              <span className="tabular-nums">{scores[1]}</span>
-            </div>
-            <span className="truncate text-right">
-              {getPlayerName(match.player2_id)}
-            </span>
-          </div>
-          {showActions && (
-            <div className="mt-2 flex justify-end gap-2">
-              <button
-                type="button"
-                className="rounded-lg border border-[#712BB2] px-2 py-1 text-[10px] text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 md:text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit(key);
-                }}
-              >
-                <span className="icon-[mdi--pencil] mr-0.5" />
-                Edit
-              </button>
-              <button
-                type="button"
-                className="rounded-lg border border-red-400 px-2 py-1 text-[10px] text-red-400 transition-colors hover:bg-red-400/10 md:text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(key);
-                }}
-              >
-                <span className="icon-[mdi--delete] mr-0.5" />
-                Delete
-              </button>
-            </div>
-          )}
-        </div>
-      );
-    }
+    const key = getKey(match);
+    const scores = localScores[key] ?? [0, 0];
+    const isFinishing = finishing === match.game_id;
 
     return (
       <div className="bg-base-200 rounded-box flex flex-col gap-2 border border-[#712BB2]/30 p-3">
@@ -272,9 +276,10 @@ export function ValidationMatches({
             type="number"
             min={0}
             value={scores[0]}
+            disabled={isFinishing}
             onFocus={(e) => e.target.select()}
             onChange={(e) => handleScoreChange(match, 1, e.target.value)}
-            className="input input-xs bg-base-100 w-10 shrink-0 rounded-lg text-center"
+            className="input input-xs bg-base-100 w-10 shrink-0 rounded-lg text-center disabled:opacity-30"
           />
         </div>
         <div className="flex items-center justify-between gap-2">
@@ -285,18 +290,32 @@ export function ValidationMatches({
             type="number"
             min={0}
             value={scores[1]}
+            disabled={isFinishing}
             onFocus={(e) => e.target.select()}
             onChange={(e) => handleScoreChange(match, 2, e.target.value)}
-            className="input input-xs bg-base-100 w-10 shrink-0 rounded-lg text-center"
+            className="input input-xs bg-base-100 w-10 shrink-0 rounded-lg text-center disabled:opacity-30"
           />
         </div>
-        <div className="mt-1 flex justify-end">
+        <div className="mt-1 flex justify-end gap-2">
           <button
             type="button"
-            className="rounded-lg border border-[#712BB2] px-2 py-1 text-[10px] text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 md:text-xs"
+            disabled={isFinishing}
+            className="rounded-lg border border-[#712BB2] px-2 py-1 text-[10px] text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 disabled:opacity-40"
             onClick={() => handleComplete(match)}
           >
-            Complete
+            {isFinishing ? (
+              <span className="loading loading-spinner loading-xs" />
+            ) : (
+              "Complete"
+            )}
+          </button>
+          <button
+            type="button"
+            className="rounded-lg border border-red-400 px-2 py-1 text-[10px] text-red-400 transition-colors hover:bg-red-400/10"
+            onClick={() => handleDelete(getKey(match))}
+          >
+            <span className="icon-[mdi--delete] mr-0.5" />
+            Delete
           </button>
         </div>
       </div>
@@ -336,16 +355,20 @@ export function ValidationMatches({
       <div>
         <button
           type="button"
-          disabled={selectedIds.length !== 2}
+          disabled={selectedIds.length !== 2 || creating}
           className={cn(
             "rounded-xl border-2 border-[#712BB2] px-4 py-2 text-xs font-medium transition-all duration-150 md:px-6 md:py-3 md:text-sm",
-            selectedIds.length === 2
+            selectedIds.length === 2 && !creating
               ? "bg-[#712BB2] text-white hover:bg-[#712BB2]/90"
               : "text-base-content/30 border-base-content/30 cursor-not-allowed",
           )}
           onClick={handleStartGame}
         >
-          Start game
+          {creating ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : (
+            "Start game"
+          )}
         </button>
       </div>
 
@@ -356,11 +379,7 @@ export function ValidationMatches({
           </h3>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {ongoingMatches.map((m, i) => (
-              <MatchCard
-                key={matchKey(m) + "-" + i}
-                match={m}
-                isCompleted={false}
-              />
+              <OngoingCard key={m.game_id || `${getKey(m)}-${i}`} match={m} />
             ))}
           </div>
         </div>
@@ -372,13 +391,48 @@ export function ValidationMatches({
             Completed matches
           </h3>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {completedMatches.map((m, i) => (
-              <MatchCard
-                key={matchKey(m) + "-" + i}
-                match={m}
-                isCompleted={true}
-              />
-            ))}
+            {completedMatches.map((m, i) => {
+              const key = getKey(m);
+              const isActive = activeCompletedKey === key;
+              return (
+                <div
+                  key={m.game_id || `${key}-${i}`}
+                  className="bg-base-200 rounded-box cursor-pointer border border-[#712BB2]/30 p-3"
+                  onClick={() =>
+                    setActiveCompletedKey((prev) => (prev === key ? null : key))
+                  }
+                >
+                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs font-medium md:text-sm">
+                    <span className="truncate text-left">
+                      {getPlayerName(m.player1_id)}
+                    </span>
+                    <div className="flex items-center justify-center gap-1.5 md:gap-3">
+                      <span className="tabular-nums">{m.score_player1}</span>
+                      <span className="text-base-content/50">:</span>
+                      <span className="tabular-nums">{m.score_player2}</span>
+                    </div>
+                    <span className="truncate text-right">
+                      {getPlayerName(m.player2_id)}
+                    </span>
+                  </div>
+                  {isActive && (
+                    <div className="mt-2 flex justify-end gap-2">
+                      <button
+                        type="button"
+                        className="rounded-lg border border-red-400 px-2 py-1 text-[10px] text-red-400 transition-colors hover:bg-red-400/10 md:text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(key);
+                        }}
+                      >
+                        <span className="icon-[mdi--delete] mr-0.5" />
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

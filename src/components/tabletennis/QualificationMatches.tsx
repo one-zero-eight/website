@@ -1,10 +1,31 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { cn } from "@/lib/ui/cn";
+import { $tabletennis } from "@/api/tabletennis";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { useToast } from "@/components/toast";
 
 type Player = { name: string; id: string };
 
+type GamePlayer = {
+  innohassle_id: string;
+  nickname: string;
+  rating: number;
+  registered: boolean;
+  score: number;
+};
+
+type GameData = {
+  game_id: string;
+  tour_id: string;
+  tournament_name: string;
+  finished: boolean;
+  player1: GamePlayer;
+  player2: GamePlayer;
+};
+
 type MatchSlot = {
   id: string;
+  game_id?: string;
   round: number;
   poolLabel: string;
   player1_id: string | null;
@@ -21,6 +42,10 @@ type EliminatedPlayer = {
   round: number;
   bracketType: "winners" | "consolation";
 };
+
+function matchKey(a: string, b: string) {
+  return [a, b].sort().join("-");
+}
 
 function sortBySeed(ids: string[], seedOrder: Map<string, number>): string[] {
   return [...ids].sort(
@@ -48,12 +73,35 @@ function getWinner(
 export function QualificationMatches({
   players,
   validationStats,
+  tourId,
+  qualificationGames,
 }: {
   players: Player[];
   validationStats?: { playerId: string; wins: number; played: number }[];
+  tourId: string;
+  qualificationGames: GameData[];
 }) {
+  const { showError } = useToast();
+
+  const { mutateAsync: createGame } = $tabletennis.useMutation(
+    "post",
+    "/reg-game",
+    {
+      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+    },
+  );
+
+  const { mutateAsync: finishGame } = $tabletennis.useMutation(
+    "post",
+    "/finish-game",
+    {
+      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+    },
+  );
   const [seeded, setSeeded] = useState<Player[]>([]);
   const [started, setStarted] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [finishingId, setFinishingId] = useState<string | null>(null);
 
   const [currentRound, setCurrentRound] = useState(1);
 
@@ -73,6 +121,8 @@ export function QualificationMatches({
   scoresRef.current = scores;
   const eliminatedRef = useRef(eliminated);
   eliminatedRef.current = eliminated;
+  const startedRef = useRef(started);
+  startedRef.current = started;
 
   useEffect(() => {
     if (players.length > 0 && players[0]?.id) {
@@ -85,6 +135,47 @@ export function QualificationMatches({
       setSeeded(sorted);
     }
   }, [players, validationStats]);
+
+  useEffect(() => {
+    if (
+      !started &&
+      !starting &&
+      seeded.length > 0 &&
+      qualificationGames.length > 0
+    ) {
+      const ids = seeded.map((p) => p.id);
+      const gameByPair = new Map<string, GameData>();
+      for (const g of qualificationGames) {
+        gameByPair.set(
+          matchKey(g.player1.innohassle_id, g.player2.innohassle_id),
+          g,
+        );
+      }
+
+      setStarted(true);
+      setCurrentRound(1);
+      setMatches([]);
+      setScores({});
+      setEliminated([]);
+
+      const { newMatches, newScores } = createMatchSlots(
+        ids,
+        [],
+        1,
+        [],
+        gameByPair,
+      );
+      const allMatches = [...newMatches];
+      setMatches(allMatches);
+      setScores(newScores);
+
+      setTimeout(
+        () => advanceRestoreRound(allMatches, ids, [], 1, [], gameByPair),
+        0,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seeded, qualificationGames, started, starting]);
 
   function handleMoveUp(index: number) {
     if (index === 0) return;
@@ -102,6 +193,223 @@ export function QualificationMatches({
       [next[index]!, next[index + 1]!] = [next[index + 1]!, next[index]!];
       return next;
     });
+  }
+
+  function createMatchSlots(
+    winners: string[],
+    consolation: string[],
+    round: number,
+    currentMatches: MatchSlot[],
+    gameByPair: Map<string, GameData>,
+  ): { newMatches: MatchSlot[]; newScores: Record<string, [number, number]> } {
+    const newMatches: MatchSlot[] = [];
+    const newScores: Record<string, [number, number]> = {};
+    let idx = currentMatches.length;
+
+    if (winners.length > 1) {
+      const wSorted = sortBySeed(winners, seedOrder);
+      const pairs = pairFromSeed(wSorted);
+      for (const [p1, p2] of pairs) {
+        idx++;
+        const id = `r${round}_m${idx}`;
+        const key = matchKey(p1, p2);
+        const game = gameByPair.get(key);
+        newMatches.push({
+          id,
+          game_id: game?.game_id,
+          round,
+          poolLabel: "Winners",
+          player1_id: p1,
+          player2_id: p2,
+          score_player1: game?.player1?.score ?? 0,
+          score_player2: game?.player2?.score ?? 0,
+          completed: game
+            ? (game.finished ?? false) ||
+              (game.player1.score ?? 0) > 0 ||
+              (game.player2.score ?? 0) > 0
+            : false,
+          isPlacement: false,
+          placeLabel: null,
+        });
+        newScores[id] = [game?.player1?.score ?? 0, game?.player2?.score ?? 0];
+      }
+      if (wSorted.length % 2 !== 0) {
+        idx++;
+        const byeId = `r${round}_bye${idx}`;
+        newMatches.push({
+          id: byeId,
+          round,
+          poolLabel: "Winners",
+          player1_id: wSorted[Math.floor(wSorted.length / 2)]!,
+          player2_id: null,
+          score_player1: 0,
+          score_player2: 0,
+          completed: true,
+          isPlacement: false,
+          placeLabel: null,
+        });
+        newScores[byeId] = [0, 0];
+      }
+    } else if (
+      winners.length === 1 &&
+      !currentMatches.some((m) => m.poolLabel === "Champion")
+    ) {
+      idx++;
+      const id = `r${round}_champ`;
+      newMatches.push({
+        id,
+        round,
+        poolLabel: "Champion",
+        player1_id: winners[0]!,
+        player2_id: null,
+        score_player1: 0,
+        score_player2: 0,
+        completed: true,
+        isPlacement: true,
+        placeLabel: "1st place",
+      });
+      newScores[id] = [0, 0];
+    }
+
+    if (consolation.length > 1) {
+      const cSorted = sortBySeed(consolation, seedOrder);
+      const pairs = pairFromSeed(cSorted);
+      for (const [p1, p2] of pairs) {
+        idx++;
+        const id = `r${round}_m${idx}`;
+        const key = matchKey(p1, p2);
+        const game = gameByPair.get(key);
+        newMatches.push({
+          id,
+          game_id: game?.game_id,
+          round,
+          poolLabel: "Consolation",
+          player1_id: p1,
+          player2_id: p2,
+          score_player1: game?.player1?.score ?? 0,
+          score_player2: game?.player2?.score ?? 0,
+          completed: game
+            ? (game.finished ?? false) ||
+              (game.player1.score ?? 0) > 0 ||
+              (game.player2.score ?? 0) > 0
+            : false,
+          isPlacement: false,
+          placeLabel: null,
+        });
+        newScores[id] = [game?.player1?.score ?? 0, game?.player2?.score ?? 0];
+      }
+      if (cSorted.length % 2 !== 0) {
+        idx++;
+        const byeId = `r${round}_cbye${idx}`;
+        newMatches.push({
+          id: byeId,
+          round,
+          poolLabel: "Consolation",
+          player1_id: cSorted[Math.floor(cSorted.length / 2)]!,
+          player2_id: null,
+          score_player1: 0,
+          score_player2: 0,
+          completed: true,
+          isPlacement: false,
+          placeLabel: null,
+        });
+        newScores[byeId] = [0, 0];
+      }
+    }
+
+    // Compute placements if tournament is done
+    const championExists = currentMatches.some(
+      (m) => m.poolLabel === "Champion",
+    );
+    const creatingChampion = newMatches.some((m) => m.poolLabel === "Champion");
+    const hasChampion = championExists || creatingChampion;
+    const tournamentDone =
+      winners.length <= 1 && consolation.length <= 1 && hasChampion;
+    if (
+      tournamentDone &&
+      !currentMatches.some((m) => m.poolLabel === "Final placement")
+    ) {
+      const placementMatches = computePlacements(
+        eliminatedRef.current,
+        seeded,
+        [...currentMatches, ...newMatches],
+      );
+      newMatches.push(...placementMatches);
+    }
+
+    return { newMatches, newScores };
+  }
+
+  function advanceFromRound(
+    roundMatches: MatchSlot[],
+    round: number,
+    eliminatedSoFar: EliminatedPlayer[],
+  ): {
+    nextWinners: string[];
+    nextConsolation: string[];
+    newEliminated: EliminatedPlayer[];
+  } | null {
+    const allDone = roundMatches.every((m) => m.completed);
+    if (!allDone) return null;
+
+    const winnersMatches = roundMatches.filter(
+      (m) => m.poolLabel === "Winners",
+    );
+    const consolationMatches = roundMatches.filter(
+      (m) => m.poolLabel === "Consolation",
+    );
+
+    const wWinners: string[] = [];
+    const wLosers: string[] = [];
+    const cWinners: string[] = [];
+    const cLosers: string[] = [];
+
+    for (const m of winnersMatches) {
+      if (!m.player2_id) {
+        wWinners.push(m.player1_id!);
+      } else {
+        const sc: [number, number] = [m.score_player1, m.score_player2];
+        const [winner, loser] = getWinner(sc, m.player1_id!, m.player2_id!);
+        wWinners.push(winner);
+        wLosers.push(loser);
+      }
+    }
+
+    for (const m of consolationMatches) {
+      if (!m.player2_id) {
+        cWinners.push(m.player1_id!);
+      } else {
+        const sc: [number, number] = [m.score_player1, m.score_player2];
+        const [winner, loser] = getWinner(sc, m.player1_id!, m.player2_id!);
+        cWinners.push(winner);
+        cLosers.push(loser);
+      }
+    }
+
+    const newEliminated: EliminatedPlayer[] = [
+      ...cLosers.map((id) => ({
+        playerId: id,
+        round,
+        bracketType: "consolation" as const,
+      })),
+    ];
+    const combinedEliminated = [...eliminatedSoFar, ...newEliminated];
+
+    const nextWinners = wWinners;
+    const isFinalWinnersRound =
+      wWinners.length === 1 &&
+      wLosers.length === 1 &&
+      winnersMatches.some((m) => m.player2_id);
+    const nextConsolation = [
+      ...(isFinalWinnersRound ? [] : wLosers),
+      ...cWinners,
+    ];
+
+    return {
+      nextWinners,
+      nextConsolation,
+      newEliminated: combinedEliminated,
+    };
   }
 
   function computePlacements(
@@ -240,151 +548,105 @@ export function QualificationMatches({
     return placementMatches;
   }
 
-  function handleStart() {
+  async function handleStart() {
     const ids = seeded.map((p) => p.id);
+    setStarting(true);
     setCurrentRound(1);
     setMatches([]);
     setScores({});
     setEliminated([]);
     setStarted(true);
 
-    generateRound(ids, [], 1, []);
+    // Determine which games need to be created in backend
+    const wSorted = sortBySeed(ids, seedOrder);
+    const pairs = pairFromSeed(wSorted);
+    const gameByPair = new Map<string, string>();
+    const pairsToCreate = pairs.filter(([p1, p2]) => p1 && p2);
+    await Promise.all(
+      pairsToCreate.map(async ([p1, p2]) => {
+        try {
+          const result = await createGame({
+            params: {
+              query: {
+                tour_id: tourId,
+                tip: "cval" as const,
+                player1_id: p1,
+                player2_id: p2,
+              },
+            },
+          } as any);
+          const gid = (result as any)?.id ?? "";
+          if (gid) gameByPair.set(matchKey(p1, p2), gid);
+        } catch {
+          // onError shows toast
+        }
+      }),
+    );
+
+    // Build match slots with game_ids from backend
+    const { newMatches, newScores } = createMatchSlots(
+      ids,
+      [],
+      1,
+      [],
+      new Map(),
+    );
+    const matchesWithIds = newMatches.map((m) => {
+      if (m.player1_id && m.player2_id && !m.game_id) {
+        const gid = gameByPair.get(matchKey(m.player1_id, m.player2_id));
+        return { ...m, game_id: gid ?? m.game_id };
+      }
+      return m;
+    });
+
+    setMatches(matchesWithIds);
+    setScores(newScores);
+    setStarting(false);
   }
 
-  function generateRound(
+  function advanceRestoreRound(
+    currentMatches: MatchSlot[],
     winners: string[],
     consolation: string[],
     round: number,
-    currentEliminated: EliminatedPlayer[],
-    latestMatches?: MatchSlot[],
+    eliminatedSoFar: EliminatedPlayer[],
+    gameByPair: Map<string, GameData>,
   ) {
-    const newMatches: MatchSlot[] = [];
-    const newScores: Record<string, [number, number]> = {};
-    const matchesSnapshot = latestMatches ?? matches;
-    let idx = matchesSnapshot.length;
+    const roundMatches = currentMatches.filter((m) => m.round === round);
+    if (roundMatches.length === 0) return;
 
-    const championExists = matchesSnapshot.some(
-      (m) => m.poolLabel === "Champion",
+    const result = advanceFromRound(roundMatches, round, eliminatedSoFar);
+    if (!result) return;
+
+    setEliminated(result.newEliminated);
+    const nextRound = round + 1;
+    setCurrentRound(nextRound);
+
+    const { newMatches, newScores } = createMatchSlots(
+      result.nextWinners,
+      result.nextConsolation,
+      nextRound,
+      currentMatches,
+      gameByPair,
     );
 
-    if (winners.length > 1) {
-      const wSorted = sortBySeed(winners, seedOrder);
-      const pairs = pairFromSeed(wSorted);
-      const hasBye = wSorted.length % 2 !== 0;
+    if (newMatches.length > 0) {
+      setMatches((prev) => [...prev, ...newMatches]);
+      setScores((prev) => ({ ...prev, ...newScores }));
 
-      for (const [p1, p2] of pairs) {
-        idx++;
-        const id = `r${round}_m${idx}`;
-        newMatches.push({
-          id,
-          round,
-          poolLabel: "Winners",
-          player1_id: p1,
-          player2_id: p2,
-          score_player1: 0,
-          score_player2: 0,
-          completed: false,
-          isPlacement: false,
-          placeLabel: null,
-        });
-        newScores[id] = [0, 0];
-      }
-
-      if (hasBye) {
-        idx++;
-        const byeId = `r${round}_bye${idx}`;
-        newMatches.push({
-          id: byeId,
-          round,
-          poolLabel: "Winners",
-          player1_id: wSorted[Math.floor(wSorted.length / 2)]!,
-          player2_id: null,
-          score_player1: 0,
-          score_player2: 0,
-          completed: true,
-          isPlacement: false,
-          placeLabel: null,
-        });
-        newScores[byeId] = [0, 0];
-      }
-    } else if (winners.length === 1 && !championExists) {
-      idx++;
-      const id = `r${round}_champ`;
-      newMatches.push({
-        id,
-        round,
-        poolLabel: "Champion",
-        player1_id: winners[0]!,
-        player2_id: null,
-        score_player1: 0,
-        score_player2: 0,
-        completed: true,
-        isPlacement: true,
-        placeLabel: "1st place",
-      });
-      newScores[id] = [0, 0];
+      setTimeout(
+        () =>
+          advanceRestoreRound(
+            [...currentMatches, ...newMatches],
+            result.nextWinners,
+            result.nextConsolation,
+            nextRound,
+            result.newEliminated,
+            gameByPair,
+          ),
+        0,
+      );
     }
-
-    if (consolation.length > 1) {
-      const cSorted = sortBySeed(consolation, seedOrder);
-      const pairs = pairFromSeed(cSorted);
-      const hasBye = cSorted.length % 2 !== 0;
-
-      for (const [p1, p2] of pairs) {
-        idx++;
-        const id = `r${round}_m${idx}`;
-        newMatches.push({
-          id,
-          round,
-          poolLabel: "Consolation",
-          player1_id: p1,
-          player2_id: p2,
-          score_player1: 0,
-          score_player2: 0,
-          completed: false,
-          isPlacement: false,
-          placeLabel: null,
-        });
-        newScores[id] = [0, 0];
-      }
-
-      if (hasBye) {
-        idx++;
-        const byeId = `r${round}_cbye${idx}`;
-        newMatches.push({
-          id: byeId,
-          round,
-          poolLabel: "Consolation",
-          player1_id: cSorted[Math.floor(cSorted.length / 2)]!,
-          player2_id: null,
-          score_player1: 0,
-          score_player2: 0,
-          completed: true,
-          isPlacement: false,
-          placeLabel: null,
-        });
-        newScores[byeId] = [0, 0];
-      }
-    }
-
-    // If tournament is done (both brackets converged), compute final placements
-    const alreadyHasPlacements = matchesSnapshot.some(
-      (m) => m.poolLabel === "Final placement",
-    );
-    const creatingChampion = newMatches.some((m) => m.poolLabel === "Champion");
-    const hasChampion = championExists || creatingChampion;
-    const tournamentDone =
-      winners.length <= 1 && consolation.length <= 1 && hasChampion;
-    if (tournamentDone && !alreadyHasPlacements) {
-      const placementMatches = computePlacements(currentEliminated, seeded, [
-        ...matchesSnapshot,
-        ...newMatches,
-      ]);
-      newMatches.push(...placementMatches);
-    }
-
-    setMatches((prev) => [...prev, ...newMatches]);
-    setScores((prev) => ({ ...prev, ...newScores }));
   }
 
   function getPlayerName(id: string | null): string {
@@ -407,104 +669,73 @@ export function QualificationMatches({
     });
   }
 
-  function handleComplete(matchId: string) {
-    setMatches((prev) => {
-      const match = prev.find((m) => m.id === matchId);
-      if (!match || match.completed) return prev;
+  async function handleComplete(matchId: string) {
+    const match = matches.find((m) => m.id === matchId);
+    if (!match || match.completed) return;
+    setFinishingId(matchId);
 
-      const ms = scoresRef.current[matchId] ?? [0, 0];
+    const ms = scoresRef.current[matchId] ?? [0, 0];
 
-      const updated = prev.map((m) =>
-        m.id === matchId
-          ? {
-              ...m,
-              score_player1: ms[0],
-              score_player2: ms[1],
-              completed: true,
-            }
-          : m,
-      );
-
-      const round = currentRound;
-      const roundMatches = updated.filter((m) => m.round === round);
-      const allDone = roundMatches.every((m) => m.completed);
-
-      if (!allDone) return updated;
-
-      const winnersMatches = roundMatches.filter(
-        (m) => m.poolLabel === "Winners",
-      );
-      const consolationMatches = roundMatches.filter(
-        (m) => m.poolLabel === "Consolation",
-      );
-
-      const wWinners: string[] = [];
-      const wLosers: string[] = [];
-      const cWinners: string[] = [];
-      const cLosers: string[] = [];
-
-      for (const m of winnersMatches) {
-        if (!m.player2_id) {
-          wWinners.push(m.player1_id!);
-        } else {
-          const sc =
-            m.id === matchId ? ms : (scoresRef.current[m.id] ?? [0, 0]);
-          const [winner, loser] = getWinner(sc, m.player1_id!, m.player2_id!);
-          wWinners.push(winner);
-          wLosers.push(loser);
-        }
+    // Finish game in backend
+    if (match.game_id) {
+      try {
+        await finishGame({
+          params: {
+            query: {
+              game_id: match.game_id,
+              s1: ms[0],
+              s2: ms[1],
+              tour_id: tourId,
+            },
+          },
+        } as any);
+      } catch {
+        setFinishingId(null);
+        return;
       }
+    }
 
-      for (const m of consolationMatches) {
-        if (!m.player2_id) {
-          cWinners.push(m.player1_id!);
-        } else {
-          const sc =
-            m.id === matchId ? ms : (scoresRef.current[m.id] ?? [0, 0]);
-          const [winner, loser] = getWinner(sc, m.player1_id!, m.player2_id!);
-          cWinners.push(winner);
-          cLosers.push(loser);
-        }
-      }
+    // Update match state
+    const updated = matches.map((m) =>
+      m.id === matchId
+        ? {
+            ...m,
+            score_player1: ms[0],
+            score_player2: ms[1],
+            completed: true,
+          }
+        : m,
+    );
+    setMatches(updated);
 
-      const newEliminated: EliminatedPlayer[] = [
-        ...cLosers.map((id) => ({
-          playerId: id,
-          round,
-          bracketType: "consolation" as const,
-        })),
-      ];
-      const combinedEliminated = [...eliminatedRef.current, ...newEliminated];
+    // Check for round advancement
+    const round = currentRound;
+    const roundMatches = updated.filter((m) => m.round === round);
+    const result = advanceFromRound(roundMatches, round, eliminated);
 
-      const nextWinners = wWinners;
+    if (!result) {
+      setFinishingId(null);
+      return;
+    }
 
-      // Last loser in winners bracket (final match) gets 2nd place, doesn't go to consolation
-      const isFinalWinnersRound =
-        wWinners.length === 1 &&
-        wLosers.length === 1 &&
-        winnersMatches.some((m) => m.player2_id);
-      const nextConsolation = [
-        ...(isFinalWinnersRound ? [] : wLosers),
-        ...cWinners,
-      ];
+    const nextRound = round + 1;
+    setCurrentRound(nextRound);
+    setEliminated(result.newEliminated);
 
-      const nextRound = round + 1;
+    const { newMatches, newScores } = createMatchSlots(
+      result.nextWinners,
+      result.nextConsolation,
+      nextRound,
+      updated,
+      new Map(),
+    );
 
-      setCurrentRound(nextRound);
-      setEliminated(combinedEliminated);
+    if (newMatches.length > 0) {
+      setMatches((prev) => [...prev, ...newMatches]);
+      setScores((prev) => ({ ...prev, ...newScores }));
+    }
 
-      setTimeout(() => {
-        generateRound(
-          nextWinners,
-          nextConsolation,
-          nextRound,
-          combinedEliminated,
-          updated,
-        );
-      }, 0);
-
-      return updated;
-    });
+    setFinishingId(null);
   }
 
   const rounds = useMemo(() => {
@@ -563,10 +794,15 @@ export function QualificationMatches({
         <div>
           <button
             type="button"
-            className="rounded-xl border-2 border-[#712BB2] bg-[#712BB2] px-6 py-2 text-xs font-medium text-white transition-all duration-150 hover:bg-[#712BB2]/90 md:px-8 md:py-3 md:text-sm"
+            className="rounded-xl border-2 border-[#712BB2] bg-[#712BB2] px-6 py-2 text-xs font-medium text-white transition-all duration-150 hover:bg-[#712BB2]/90 disabled:cursor-not-allowed disabled:opacity-40 md:px-8 md:py-3 md:text-sm"
             onClick={handleStart}
+            disabled={starting}
           >
-            Start qualification
+            {starting ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              "Start qualification"
+            )}
           </button>
         </div>
       </div>
@@ -715,10 +951,15 @@ export function QualificationMatches({
                             <div className="mt-1 flex justify-end">
                               <button
                                 type="button"
-                                className="rounded-lg border border-[#712BB2] px-2 py-1 text-[10px] text-[#712BB2] transition-colors hover:bg-[#712BB2]/10"
+                                className="rounded-lg border border-[#712BB2] px-2 py-1 text-[10px] text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 disabled:opacity-40"
                                 onClick={() => handleComplete(m.id)}
+                                disabled={finishingId === m.id}
                               >
-                                Complete
+                                {finishingId === m.id ? (
+                                  <span className="loading loading-spinner loading-xs" />
+                                ) : (
+                                  "Complete"
+                                )}
                               </button>
                             </div>
                           )}
