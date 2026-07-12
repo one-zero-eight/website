@@ -1,14 +1,8 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
-import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types.ts";
-import { $when2meet } from "@/api/when2meet";
+import { $when2meet, type when2meetTypes } from "@/api/when2meet";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
-import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
-import type {
-  Booking,
-  Slot,
-} from "@/components/room-booking/timeline/types.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -16,30 +10,22 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AvailabilitySelector } from "./AvailabilitySelector.tsx";
 import { MeetingMobileBar } from "./MeetingMobileBar.tsx";
+import { MeetingRoomModal } from "./MeetingRoomModal.tsx";
 import { useWhen2MeetPersonalCalendarOverlay } from "./useWhen2MeetPersonalCalendarOverlay.ts";
-import { useWhen2MeetRoomBookings } from "./useWhen2MeetRoomBookings.ts";
 import {
   buildFullDaySlotKeys,
   collapseHalfHourSlotKeysToHourly,
   createBackendSlotLookup,
   expandHourlySlotKeysToHalfHour,
   getFullDayTimeSlots,
+  meetingTimeToSlotKeys,
   parseBackendSlots,
   slotKeysToBackendSlots,
+  slotKeysToMeetingTime,
 } from "./utils/api-slots.ts";
 import { getCalendarConflictSlotKeys } from "./utils/calendar-overlay.ts";
 import { getIntersectionAtMinParticipants } from "./utils/best-slot.ts";
-import {
-  clearMeetingRoomBooking,
-  isStoredMeetingRoomBookingActive,
-  loadMeetingRoomBooking,
-  saveMeetingRoomBooking,
-  type MeetingRoomBooking,
-} from "./utils/meeting-room-booking.ts";
-import {
-  getAvailableRoomsForSlotKeys,
-  getSlotKeysRange,
-} from "./utils/room-booking-utils.ts";
+import { formatMeetingTimeRange } from "./utils/meeting-time.ts";
 import {
   getParticipantsWithExplicitSlot,
   getUserDisplaySlots,
@@ -50,7 +36,6 @@ import {
 import {
   formatDateRangeLabel,
   formatMeetingDates,
-  formatSlotKeyLabel,
   parseSlotKey,
 } from "./utils/slots.ts";
 import {
@@ -80,34 +65,32 @@ export function MeetingPage({
   const [draftSlots, setDraftSlots] = useState<Set<string>>(new Set());
   const [participantSearch, setParticipantSearch] = useState("");
   const [hoveredSlotKey, setHoveredSlotKey] = useState<string | null>(null);
-  const [roomBooking, setRoomBooking] = useState<MeetingRoomBooking | null>(
-    () => loadMeetingRoomBooking(meetingId),
-  );
   const [minParticipants, setMinParticipants] = useState(1);
-  const [isBookingMode, setIsBookingMode] = useState(false);
-  const [bookingSlots, setBookingSlots] = useState<Set<string>>(new Set());
-  const [bookingSelectionKeys, setBookingSelectionKeys] = useState<string[]>(
-    [],
-  );
-  const [bookingModalOpen, setBookingModalOpen] = useState(false);
-  const [pendingBookingOpen, setPendingBookingOpen] = useState(false);
-  const [selectedBookingRoomId, setSelectedBookingRoomId] = useState<
-    string | null
-  >(null);
+  const [isChoosingMeetingTime, setIsChoosingMeetingTime] = useState(false);
+  const [meetingTimeSelectionSlots, setMeetingTimeSelectionSlots] = useState<
+    Set<string>
+  >(new Set());
+  const [pendingMeetingTime, setPendingMeetingTime] =
+    useState<when2meetTypes.SchemaMeetingTime | null>(null);
+  const [roomModalOpen, setRoomModalOpen] = useState(false);
   const hasAutoStartedEditingRef = useRef(false);
   const hasInitializedSetupRef = useRef(false);
 
-  const eventQueryKey = $when2meet.queryOptions("get", "/events/{event_ref}", {
-    params: { path: { event_ref: meetingId } },
-  }).queryKey;
+  const meetingQueryKey = $when2meet.queryOptions(
+    "get",
+    "/meetings/{meeting_ref}",
+    {
+      params: { path: { meeting_ref: meetingId } },
+    },
+  ).queryKey;
 
   const {
     data: event,
     isPending,
     isError,
     error,
-  } = $when2meet.useQuery("get", "/events/{event_ref}", {
-    params: { path: { event_ref: meetingId } },
+  } = $when2meet.useQuery("get", "/meetings/{meeting_ref}", {
+    params: { path: { meeting_ref: meetingId } },
   });
 
   const isOwner = !!me?.id && event?.owner_id === me.id;
@@ -117,11 +100,11 @@ export function MeetingPage({
     isOwner && (setupSlots === true || isPendingSetup(meetingId));
 
   const { mutate: saveParticipant, isPending: isSaving } =
-    $when2meet.useMutation("put", "/events/{event_ref}/participants", {
+    $when2meet.useMutation("put", "/meetings/{meeting_ref}/participants", {
       onSuccess: (updatedEvent) => {
-        queryClient.setQueryData(eventQueryKey, updatedEvent);
+        queryClient.setQueryData(meetingQueryKey, updatedEvent);
         queryClient.invalidateQueries({
-          queryKey: $when2meet.queryOptions("get", "/events/participating")
+          queryKey: $when2meet.queryOptions("get", "/meetings/participating")
             .queryKey,
         });
       },
@@ -133,12 +116,12 @@ export function MeetingPage({
   const { mutate: deleteParticipant, isPending: isDeletingParticipant } =
     $when2meet.useMutation(
       "delete",
-      "/events/{event_ref}/participants/{user_id}",
+      "/meetings/{meeting_ref}/participants/{user_id}",
       {
         onSuccess: (updatedEvent) => {
-          queryClient.setQueryData(eventQueryKey, updatedEvent);
+          queryClient.setQueryData(meetingQueryKey, updatedEvent);
           queryClient.invalidateQueries({
-            queryKey: $when2meet.queryOptions("get", "/events/participating")
+            queryKey: $when2meet.queryOptions("get", "/meetings/participating")
               .queryKey,
           });
           showSuccess("Participant removed", "Participant was removed.");
@@ -150,14 +133,13 @@ export function MeetingPage({
     );
 
   const { mutate: deleteEvent, isPending: isDeletingMeeting } =
-    $when2meet.useMutation("delete", "/events/{event_ref}", {
+    $when2meet.useMutation("delete", "/meetings/{meeting_ref}", {
       onSuccess: () => {
         clearPendingSetup(meetingId);
-        clearMeetingRoomBooking(meetingSlug);
         queryClient.invalidateQueries({
-          queryKey: $when2meet.queryOptions("get", "/events/").queryKey,
+          queryKey: $when2meet.queryOptions("get", "/meetings/").queryKey,
         });
-        queryClient.removeQueries({ queryKey: eventQueryKey });
+        queryClient.removeQueries({ queryKey: meetingQueryKey });
         showSuccess("Meeting deleted", `"${meetingName}" was removed.`);
         navigate({ to: "/when2meet" });
       },
@@ -166,10 +148,10 @@ export function MeetingPage({
       },
     });
 
-  const { mutate: updateEvent, isPending: isSavingSetup } =
-    $when2meet.useMutation("patch", "/events/{event_ref}", {
+  const { mutate: updateEvent, isPending: isUpdatingMeeting } =
+    $when2meet.useMutation("patch", "/meetings/{meeting_ref}", {
       onSuccess: (updatedEvent) => {
-        queryClient.setQueryData(eventQueryKey, updatedEvent);
+        queryClient.setQueryData(meetingQueryKey, updatedEvent);
       },
       onError: (updateError) => {
         showError("Error", formatApiErrorMessage(updateError));
@@ -269,47 +251,40 @@ export function MeetingPage({
   const meetingDescription = event?.description;
   const meetingSlug = event?.slug ?? meetingId;
 
-  useEffect(() => {
-    setRoomBooking(loadMeetingRoomBooking(meetingSlug));
-  }, [meetingSlug]);
+  const selectedTimeLabel = formatMeetingTimeRange(event?.selected_time);
+  const hasBookedRoom = !!event?.booked_room?.room_id;
+  const canChangeMeetingTime = isOwner && !hasBookedRoom;
 
-  const { data: storedBookingLookup, isSuccess: isStoredBookingLookupSuccess } =
-    $roomBooking.useQuery(
-      "get",
-      "/bookings/",
-      {
-        params: {
-          query: {
-            start: roomBooking?.start ?? "",
-            end: roomBooking?.end ?? "",
-            room_ids: roomBooking ? [roomBooking.roomId] : [],
-          },
-        },
+  const { data: bookedRoomDetails } = $roomBooking.useQuery(
+    "get",
+    "/room/{id}",
+    {
+      params: {
+        path: { id: event?.booked_room?.room_id ?? "" },
       },
-      {
-        enabled: !!roomBooking && !needsSetup,
-      },
+    },
+    {
+      enabled: !!event?.booked_room?.room_id && !needsSetup,
+    },
+  );
+
+  const bookedRoomTitle =
+    bookedRoomDetails?.title ?? event?.booked_room?.room_id ?? null;
+
+  const selectedMeetingSlotKeys = useMemo(() => {
+    if (!event?.selected_time || !parsedSlots) {
+      return new Set<string>();
+    }
+
+    return meetingTimeToSlotKeys(
+      event.selected_time,
+      parsedSlots.dates,
+      timeSlots,
+      allowedSlots,
     );
+  }, [event?.selected_time, parsedSlots, timeSlots, allowedSlots]);
 
-  useEffect(() => {
-    if (!roomBooking || !isStoredBookingLookupSuccess) {
-      return;
-    }
-
-    if (
-      isStoredMeetingRoomBookingActive(roomBooking, storedBookingLookup ?? [])
-    ) {
-      return;
-    }
-
-    clearMeetingRoomBooking(meetingSlug);
-    setRoomBooking(null);
-  }, [
-    roomBooking,
-    storedBookingLookup,
-    isStoredBookingLookupSuccess,
-    meetingSlug,
-  ]);
+  const pendingMeetingTimeLabel = formatMeetingTimeRange(pendingMeetingTime);
 
   const currentUser = useMemo(
     () => users.find((user) => user.id === currentUserId),
@@ -329,14 +304,6 @@ export function MeetingPage({
 
     return [draftUser, ...users];
   }, [users, currentUserId, currentUser, me]);
-
-  const bookedSlotLabel = useMemo(() => {
-    if (!roomBooking) {
-      return null;
-    }
-
-    return formatSlotKeyLabel(roomBooking.slotKey, formattedDates);
-  }, [roomBooking, formattedDates]);
 
   const activeViewedUserIds = useMemo(
     () =>
@@ -402,129 +369,6 @@ export function MeetingPage({
 
     return getCalendarConflictSlotKeys(draftSlots, calendarSlotEvents);
   }, [showCalendarOverlay, draftSlots, calendarSlotEvents]);
-
-  const bookingRange = useMemo(
-    () => getSlotKeysRange(bookingSelectionKeys),
-    [bookingSelectionKeys],
-  );
-
-  const { data: myAccessList } = $roomBooking.useQuery(
-    "get",
-    "/rooms/my-access-list",
-    {},
-    { enabled: isOwner && !needsSetup },
-  );
-
-  const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
-    "get",
-    "/rooms/",
-    { params: { query: { include_red: true } } },
-    { enabled: isOwner && !needsSetup },
-  );
-
-  const bookableRooms = useMemo(() => {
-    const myAccessListRoomIds = myAccessList?.map((room) => room.id) ?? [];
-
-    return (
-      rooms?.filter(
-        (room) =>
-          room.access_level === RoomAccess_levelAnyOf0.yellow ||
-          (room.access_level === RoomAccess_levelAnyOf0.red &&
-            me?.innopolis_info?.is_staff) ||
-          myAccessListRoomIds.includes(room.id),
-      ) ?? []
-    );
-  }, [rooms, me?.innopolis_info?.is_staff, myAccessList]);
-
-  const { bookings, isPending: isBookingsPending } = useWhen2MeetRoomBookings({
-    bookableRooms,
-    start: bookingRange?.start.toISOString(),
-    end: bookingRange?.end.toISOString(),
-    enabled:
-      (bookingModalOpen || pendingBookingOpen) &&
-      !!bookingRange &&
-      bookableRooms.length > 0 &&
-      isOwner &&
-      !needsSetup,
-  });
-
-  const availableBookingRooms = useMemo(() => {
-    if (bookingSelectionKeys.length === 0) {
-      return [];
-    }
-
-    return getAvailableRoomsForSlotKeys(
-      bookingSelectionKeys,
-      bookings ?? [],
-      bookableRooms,
-    ).sort((leftRoom, rightRoom) =>
-      leftRoom.title.localeCompare(rightRoom.title, undefined, {
-        numeric: true,
-      }),
-    );
-  }, [bookingSelectionKeys, bookings, bookableRooms]);
-
-  const bookingNewSlot = useMemo((): Slot | undefined => {
-    if (!bookingRange || !bookingModalOpen) {
-      return undefined;
-    }
-
-    const room =
-      availableBookingRooms.find(
-        (bookableRoom) => bookableRoom.id === selectedBookingRoomId,
-      ) ??
-      availableBookingRooms[0] ??
-      bookableRooms[0];
-
-    if (!room) {
-      return undefined;
-    }
-
-    return {
-      room: { ...room, idx: 0 },
-      start: bookingRange.start,
-      end: bookingRange.end,
-    };
-  }, [
-    bookingRange,
-    bookingModalOpen,
-    availableBookingRooms,
-    selectedBookingRoomId,
-    bookableRooms,
-  ]);
-
-  useEffect(() => {
-    if (!pendingBookingOpen || bookingSelectionKeys.length === 0) {
-      return;
-    }
-
-    if (isBookingsPending || isRoomsPending) {
-      return;
-    }
-
-    setPendingBookingOpen(false);
-    setBookingModalOpen(true);
-  }, [
-    pendingBookingOpen,
-    bookingSelectionKeys.length,
-    isBookingsPending,
-    isRoomsPending,
-  ]);
-
-  useEffect(() => {
-    if (!bookingModalOpen || availableBookingRooms.length === 0) {
-      return;
-    }
-
-    if (
-      selectedBookingRoomId &&
-      availableBookingRooms.some((room) => room.id === selectedBookingRoomId)
-    ) {
-      return;
-    }
-
-    setSelectedBookingRoomId(availableBookingRooms[0]?.id ?? null);
-  }, [bookingModalOpen, availableBookingRooms, selectedBookingRoomId]);
 
   useEffect(() => {
     if (slotAvailability.maxCount === 0) {
@@ -644,6 +488,19 @@ export function MeetingPage({
     allowedSlots,
   ]);
 
+  function handleMeetingUpdated(
+    updatedMeeting: when2meetTypes.SchemaEventView,
+  ) {
+    queryClient.setQueryData(meetingQueryKey, updatedMeeting);
+    queryClient.invalidateQueries({
+      queryKey: $when2meet.queryOptions("get", "/meetings/").queryKey,
+    });
+    queryClient.invalidateQueries({
+      queryKey: $when2meet.queryOptions("get", "/meetings/participating")
+        .queryKey,
+    });
+  }
+
   function handleStartEditing(userId: string) {
     if (userId !== currentUserId) {
       return;
@@ -692,7 +549,7 @@ export function MeetingPage({
 
     saveParticipant(
       {
-        params: { path: { event_ref: meetingId } },
+        params: { path: { meeting_ref: meetingId } },
         body: {
           availability: slotKeysToBackendSlots(draftSlots, backendSlotLookup),
         },
@@ -722,6 +579,10 @@ export function MeetingPage({
 
     if (editingUserId && editingUserId !== currentUserId) {
       handleCancelEditing();
+    }
+
+    if (isChoosingMeetingTime) {
+      handleCancelChoosingMeetingTime();
     }
 
     handleStartEditing(currentUserId);
@@ -791,13 +652,28 @@ export function MeetingPage({
     setViewedUserIds(null);
   }
 
-  function handleDeleteParticipant(userId: string) {
+  async function handleDeleteParticipant(userId: string) {
     if (!isOwner && userId !== currentUserId) {
       return;
     }
 
+    if (isOwner && userId !== currentUserId) {
+      const participant = listUsers.find((user) => user.id === userId);
+      const confirmed = await showConfirm({
+        title: "Remove participant",
+        message: `Remove ${participant?.name ?? "this participant"} from the meeting?`,
+        confirmText: "Remove",
+        cancelText: "Cancel",
+        type: "warning",
+      });
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
     deleteParticipant({
-      params: { path: { event_ref: meetingId, user_id: userId } },
+      params: { path: { meeting_ref: meetingId, user_id: userId } },
     });
 
     if (editingUserId === userId) {
@@ -821,7 +697,7 @@ export function MeetingPage({
 
     updateEvent(
       {
-        params: { path: { event_ref: meetingId } },
+        params: { path: { meeting_ref: meetingId } },
         body: {
           slots: slotKeysToBackendSlots(
             expandHourlySlotKeysToHalfHour(draftSlots),
@@ -833,7 +709,7 @@ export function MeetingPage({
         onSuccess: () => {
           clearPendingSetup(meetingId);
           queryClient.invalidateQueries({
-            queryKey: $when2meet.queryOptions("get", "/events/").queryKey,
+            queryKey: $when2meet.queryOptions("get", "/meetings/").queryKey,
           });
           setEditingUserId(null);
           setDraftSlots(new Set());
@@ -850,10 +726,14 @@ export function MeetingPage({
     );
   }
 
-  function handleToggleBookingMode() {
-    if (isBookingMode) {
-      setIsBookingMode(false);
-      setBookingSlots(new Set());
+  function handleCancelChoosingMeetingTime() {
+    setIsChoosingMeetingTime(false);
+    setMeetingTimeSelectionSlots(new Set());
+    setPendingMeetingTime(null);
+  }
+
+  function handleStartChoosingMeetingTime() {
+    if (!canChangeMeetingTime) {
       return;
     }
 
@@ -861,66 +741,52 @@ export function MeetingPage({
       handleCancelEditing();
     }
 
-    setIsBookingMode(true);
-    setBookingSlots(new Set());
+    setIsChoosingMeetingTime(true);
+    setMeetingTimeSelectionSlots(new Set());
+    setPendingMeetingTime(null);
   }
 
-  function handleBookingSlotsChange(slotKeys: string[]) {
-    setBookingSlots(new Set(slotKeys));
+  function handleMeetingTimeSlotsChange(slotKeys: string[]) {
+    setMeetingTimeSelectionSlots(new Set(slotKeys));
   }
 
-  function handleBookingSelectionEnd(slotKeys: string[]) {
+  function handleMeetingTimeSelectionEnd(slotKeys: string[]) {
     if (slotKeys.length === 0) {
+      setPendingMeetingTime(null);
       return;
     }
 
-    setBookingSelectionKeys([...slotKeys].sort());
-    setIsBookingMode(false);
-    setBookingSlots(new Set());
-    setPendingBookingOpen(true);
+    setPendingMeetingTime(slotKeysToMeetingTime(slotKeys, timeSlots));
   }
 
-  function handleBookingModalOpenChange(open: boolean) {
-    setBookingModalOpen(open);
-    setPendingBookingOpen(false);
-
-    if (open) {
+  function handleSaveMeetingTime() {
+    if (!pendingMeetingTime) {
+      showError("Error", "Choose a meeting time on the grid first.");
       return;
     }
 
-    setBookingSelectionKeys([]);
-    setSelectedBookingRoomId(null);
-  }
-
-  function handleBookingCreated(createdBooking: Booking) {
-    if (bookingSelectionKeys.length === 0) {
-      return;
-    }
-
-    const room = availableBookingRooms.find(
-      (bookableRoom) => bookableRoom.id === selectedBookingRoomId,
+    updateEvent(
+      {
+        params: { path: { meeting_ref: meetingId } },
+        body: { selected_time: pendingMeetingTime },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: $when2meet.queryOptions("get", "/meetings/").queryKey,
+          });
+          queryClient.invalidateQueries({
+            queryKey: $when2meet.queryOptions("get", "/meetings/participating")
+              .queryKey,
+          });
+          handleCancelChoosingMeetingTime();
+          showSuccess(
+            "Meeting time saved",
+            "Everyone can now see the chosen meeting time.",
+          );
+        },
+      },
     );
-
-    if (!room) {
-      return;
-    }
-
-    const savedBooking: MeetingRoomBooking = {
-      id: createdBooking.id,
-      slotKey: bookingSelectionKeys[0] ?? "",
-      roomId: room.id,
-      roomTitle: room.title,
-      start: createdBooking.startsAt.toISOString(),
-      end: createdBooking.endsAt.toISOString(),
-    };
-
-    saveMeetingRoomBooking(meetingSlug, savedBooking);
-    setRoomBooking(savedBooking);
-    showSuccess(
-      "Room booked",
-      `${room.title} · ${formatSlotKeyLabel(savedBooking.slotKey, formattedDates)}`,
-    );
-    handleBookingModalOpenChange(false);
   }
 
   async function handleShareLink() {
@@ -951,7 +817,7 @@ export function MeetingPage({
     }
 
     deleteEvent({
-      params: { path: { event_ref: meetingId } },
+      params: { path: { meeting_ref: meetingId } },
     });
   }
 
@@ -990,6 +856,36 @@ export function MeetingPage({
     listUsers.length > 0 &&
     listUsers.every((user) => activeViewedUserIds.has(user.id));
 
+  const availabilitySelectorProps = {
+    dates: formattedDates,
+    timeSlots,
+    users: listUsers,
+    viewedUserIds: activeViewedUserIds,
+    editingUserId: needsSetup
+      ? SETUP_USER_ID
+      : isChoosingMeetingTime
+        ? null
+        : editingUserId,
+    currentUserId,
+    draftSlots,
+    onApplySlots: handleApplySlots,
+    allowedSlots,
+    selectionOnly: needsSetup,
+    hideHint: !!currentUser && (isEditingSelf || !isOwner),
+    bestIntersectionSlotKeys: slotAvailability.slotKeys,
+    hoveredSlotKey,
+    onHoveredSlotKeyChange: setHoveredSlotKey,
+    intervalSelectionMode: isChoosingMeetingTime,
+    intervalSelectionSlots: meetingTimeSelectionSlots,
+    onIntervalSelectionSlotsChange: handleMeetingTimeSlotsChange,
+    onIntervalSelectionEnd: handleMeetingTimeSelectionEnd,
+    selectedMeetingSlotKeys,
+    showCalendarOverlay,
+    calendarSlotEvents,
+    calendarConflictSlotKeys:
+      editingUserId === currentUserId ? calendarConflictSlotKeys : undefined,
+  };
+
   return (
     <RequireAuth>
       <>
@@ -1015,10 +911,13 @@ export function MeetingPage({
               <div className="text-base-content/70 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                 <span>{formatDateRangeLabel(formattedDates)}</span>
                 <span>{users.length} responses</span>
-                {roomBooking && bookedSlotLabel && (
-                  <span className="text-primary">
-                    Booked: {roomBooking.roomTitle} · {bookedSlotLabel}
+                {selectedTimeLabel && (
+                  <span className="text-secondary">
+                    Meeting time: {selectedTimeLabel}
                   </span>
+                )}
+                {bookedRoomTitle && (
+                  <span className="text-primary">Room: {bookedRoomTitle}</span>
                 )}
               </div>
             </div>
@@ -1030,7 +929,7 @@ export function MeetingPage({
                     <button
                       type="button"
                       className="btn btn-error"
-                      disabled={draftSlots.size === 0 || isSavingSetup}
+                      disabled={draftSlots.size === 0 || isUpdatingMeeting}
                       onClick={handleClearSetupSlots}
                     >
                       Clear all
@@ -1038,10 +937,10 @@ export function MeetingPage({
                     <button
                       type="button"
                       className="btn btn-primary gap-2"
-                      disabled={isSavingSetup}
+                      disabled={isUpdatingMeeting}
                       onClick={handleSaveSetup}
                     >
-                      {isSavingSetup ? (
+                      {isUpdatingMeeting ? (
                         <span className="loading loading-spinner loading-sm" />
                       ) : (
                         "Save timeslots"
@@ -1086,7 +985,7 @@ export function MeetingPage({
                       <button
                         type="button"
                         className="btn btn-primary gap-2"
-                        disabled={isSaving}
+                        disabled={isSaving || isChoosingMeetingTime}
                         onClick={handleToggleAvailability}
                       >
                         {isEditingSelf && isSaving ? (
@@ -1123,75 +1022,10 @@ export function MeetingPage({
           >
             <div className="bg-base-100 border-base-300 rounded-box min-w-0 border p-4 md:p-5">
               <div className="md:hidden">
-                <AvailabilitySelector
-                  dates={formattedDates}
-                  timeSlots={timeSlots}
-                  users={listUsers}
-                  viewedUserIds={activeViewedUserIds}
-                  editingUserId={
-                    needsSetup
-                      ? SETUP_USER_ID
-                      : isBookingMode
-                        ? null
-                        : editingUserId
-                  }
-                  currentUserId={currentUserId}
-                  draftSlots={draftSlots}
-                  onApplySlots={handleApplySlots}
-                  allowedSlots={allowedSlots}
-                  selectionOnly={needsSetup}
-                  hideHint={!!currentUser && (isEditingSelf || !isOwner)}
-                  bestIntersectionSlotKeys={slotAvailability.slotKeys}
-                  hoveredSlotKey={hoveredSlotKey}
-                  onHoveredSlotKeyChange={setHoveredSlotKey}
-                  bookingMode={isBookingMode}
-                  bookingSlots={bookingSlots}
-                  onBookingSlotsChange={handleBookingSlotsChange}
-                  onBookingSelectionEnd={handleBookingSelectionEnd}
-                  showCalendarOverlay={showCalendarOverlay}
-                  calendarSlotEvents={calendarSlotEvents}
-                  calendarConflictSlotKeys={
-                    editingUserId === currentUserId
-                      ? calendarConflictSlotKeys
-                      : undefined
-                  }
-                  isPhone
-                />
+                <AvailabilitySelector {...availabilitySelectorProps} isPhone />
               </div>
               <div className="hidden md:block">
-                <AvailabilitySelector
-                  dates={formattedDates}
-                  timeSlots={timeSlots}
-                  users={listUsers}
-                  viewedUserIds={activeViewedUserIds}
-                  editingUserId={
-                    needsSetup
-                      ? SETUP_USER_ID
-                      : isBookingMode
-                        ? null
-                        : editingUserId
-                  }
-                  currentUserId={currentUserId}
-                  draftSlots={draftSlots}
-                  onApplySlots={handleApplySlots}
-                  allowedSlots={allowedSlots}
-                  selectionOnly={needsSetup}
-                  hideHint={!!currentUser && (isEditingSelf || !isOwner)}
-                  bestIntersectionSlotKeys={slotAvailability.slotKeys}
-                  hoveredSlotKey={hoveredSlotKey}
-                  onHoveredSlotKeyChange={setHoveredSlotKey}
-                  bookingMode={isBookingMode}
-                  bookingSlots={bookingSlots}
-                  onBookingSlotsChange={handleBookingSlotsChange}
-                  onBookingSelectionEnd={handleBookingSelectionEnd}
-                  showCalendarOverlay={showCalendarOverlay}
-                  calendarSlotEvents={calendarSlotEvents}
-                  calendarConflictSlotKeys={
-                    editingUserId === currentUserId
-                      ? calendarConflictSlotKeys
-                      : undefined
-                  }
-                />
+                <AvailabilitySelector {...availabilitySelectorProps} />
               </div>
             </div>
 
@@ -1219,8 +1053,8 @@ export function MeetingPage({
                       )}
                       disabled={slotAvailability.maxCount === 0}
                       className="range range-primary range-sm w-full"
-                      onChange={(event) =>
-                        setMinParticipants(Number(event.target.value))
+                      onChange={(rangeEvent) =>
+                        setMinParticipants(Number(rangeEvent.target.value))
                       }
                     />
                     <div className="text-base-content/60 flex justify-between text-sm tabular-nums">
@@ -1229,42 +1063,83 @@ export function MeetingPage({
                     </div>
                   </div>
 
+                  {selectedTimeLabel && (
+                    <div className="border-base-300 bg-secondary/5 rounded-box mb-3 border p-3 text-sm">
+                      <div className="text-base-content/60">Meeting time</div>
+                      <div className="font-semibold">{selectedTimeLabel}</div>
+                    </div>
+                  )}
+
+                  {bookedRoomTitle && (
+                    <div className="border-base-300 bg-primary/5 rounded-box mb-3 border p-3 text-sm">
+                      <div className="text-base-content/60">Booked room</div>
+                      <div className="font-semibold">{bookedRoomTitle}</div>
+                    </div>
+                  )}
+
                   {isOwner && (
                     <div className="grid gap-2">
-                      {roomBooking && bookedSlotLabel && (
-                        <div className="border-base-300 bg-primary/5 rounded-box border p-3 text-sm">
-                          <div className="text-base-content/60">
-                            Booked room
-                          </div>
-                          <div className="font-semibold">
-                            {roomBooking.roomTitle}
-                          </div>
-                          <div className="text-base-content/70">
-                            {bookedSlotLabel}
-                          </div>
-                        </div>
+                      {isChoosingMeetingTime ? (
+                        <>
+                          {pendingMeetingTimeLabel && (
+                            <div className="text-base-content/70 text-sm">
+                              Selected: {pendingMeetingTimeLabel}
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            className="btn btn-primary gap-2"
+                            disabled={!pendingMeetingTime || isUpdatingMeeting}
+                            onClick={handleSaveMeetingTime}
+                          >
+                            {isUpdatingMeeting ? (
+                              <span className="loading loading-spinner loading-sm" />
+                            ) : (
+                              <>
+                                <span className="icon-[material-symbols--schedule-outline] text-lg" />
+                                Save meeting time
+                              </>
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-ghost"
+                            disabled={isUpdatingMeeting}
+                            onClick={handleCancelChoosingMeetingTime}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {canChangeMeetingTime && (
+                            <button
+                              type="button"
+                              className="btn btn-secondary gap-2"
+                              onClick={handleStartChoosingMeetingTime}
+                            >
+                              <span className="icon-[material-symbols--schedule-outline] text-lg" />
+                              Choose meeting time
+                            </button>
+                          )}
+                          {hasBookedRoom && (
+                            <p className="text-base-content/60 text-xs">
+                              Cancel the room booking before changing the
+                              meeting time.
+                            </p>
+                          )}
+                          {event.selected_time && (
+                            <button
+                              type="button"
+                              className="btn btn-primary gap-2"
+                              onClick={() => setRoomModalOpen(true)}
+                            >
+                              <span className="icon-[mdi--door-open] text-lg" />
+                              {hasBookedRoom ? "Change room" : "Book room"}
+                            </button>
+                          )}
+                        </>
                       )}
-                      <button
-                        type="button"
-                        className={cn(
-                          "btn gap-2",
-                          isBookingMode ? "btn-secondary" : "btn-primary",
-                        )}
-                        disabled={pendingBookingOpen}
-                        onClick={handleToggleBookingMode}
-                      >
-                        {pendingBookingOpen ? (
-                          <>
-                            <span className="loading loading-spinner loading-sm" />
-                            Loading room availability...
-                          </>
-                        ) : (
-                          <>
-                            <span className="icon-[mdi--door-open] text-lg" />
-                            {isBookingMode ? "Cancel booking" : "Book room"}
-                          </>
-                        )}
-                      </button>
                       <div className="grid w-full grid-cols-2 gap-2">
                         <Link
                           to="/when2meet/$meetingId/edit"
@@ -1299,28 +1174,26 @@ export function MeetingPage({
                     )}
                   >
                     {isHoveringSlot ? (
-                      <>
-                        <span className="block">
-                          {hoveredSlotLabel}
-                          {isHoveredSlotDisabled
-                            ? " — No one is allowed here"
-                            : hoveredSlotParticipants.length === 0
-                              ? " — No one is available"
-                              : ` — ${hoveredSlotParticipants.length} available`}
-                        </span>
-                      </>
+                      <span className="block">
+                        {hoveredSlotLabel}
+                        {isHoveredSlotDisabled
+                          ? " — No one is allowed here"
+                          : hoveredSlotParticipants.length === 0
+                            ? " — No one is available"
+                            : ` — ${hoveredSlotParticipants.length} available`}
+                      </span>
                     ) : isHoveringCalendarSlot ? (
                       <>
                         <span className="block">{hoveredSlotLabel}</span>
                         {hoveredCalendarEvents.length > 0 && (
-                          <>
-                            <span className="block w-full min-w-0 truncate">
-                              {hoveredCalendarEvents.join(", ")}
-                            </span>
-                          </>
+                          <span className="block w-full min-w-0 truncate">
+                            {hoveredCalendarEvents.join(", ")}
+                          </span>
                         )}
                       </>
-                    ) : null}
+                    ) : (
+                      <div className="border-t-base-content/50 mt-1 h-1 w-full border-t border-dashed" />
+                    )}
                   </div>
                 </div>
 
@@ -1345,8 +1218,8 @@ export function MeetingPage({
                       className="grow"
                       placeholder="Search participants..."
                       value={participantSearch}
-                      onChange={(event) =>
-                        setParticipantSearch(event.target.value)
+                      onChange={(searchEvent) =>
+                        setParticipantSearch(searchEvent.target.value)
                       }
                     />
                   </label>
@@ -1388,7 +1261,7 @@ export function MeetingPage({
                             >
                               <span
                                 className={cn(
-                                  "h-2.5 w-2.5 shrink-0 rounded-full transition-colors",
+                                  "ml-2.5 h-2.5 w-2.5 shrink-0 rounded-full transition-colors",
                                   isViewed ? "bg-primary" : "bg-base-300",
                                 )}
                               />
@@ -1436,7 +1309,7 @@ export function MeetingPage({
               isOwner && needsSetup ? handleClearSetupSlots : undefined
             }
             canClearSetup={draftSlots.size > 0}
-            isSavingSetup={isSavingSetup}
+            isSavingSetup={isUpdatingMeeting}
             onToggleAvailability={
               currentUserId && !needsSetup
                 ? handleToggleAvailability
@@ -1454,16 +1327,16 @@ export function MeetingPage({
           />
         )}
 
-        <BookingModal
-          newSlot={bookingNewSlot}
-          open={bookingModalOpen}
-          onOpenChange={handleBookingModalOpenChange}
-          onBookingCreated={handleBookingCreated}
-          roomOptions={availableBookingRooms}
-          selectedRoomId={selectedBookingRoomId}
-          onSelectedRoomIdChange={setSelectedBookingRoomId}
-          fixedSchedule
-        />
+        {isOwner && (
+          <MeetingRoomModal
+            meetingRef={meetingId}
+            open={roomModalOpen}
+            onOpenChange={setRoomModalOpen}
+            bookedRoom={event.booked_room}
+            selectedTimeLabel={selectedTimeLabel}
+            onMeetingUpdated={handleMeetingUpdated}
+          />
+        )}
       </>
     </RequireAuth>
   );

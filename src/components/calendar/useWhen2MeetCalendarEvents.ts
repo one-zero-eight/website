@@ -10,14 +10,14 @@ export function useWhen2MeetCalendarEvents() {
 
   const { data: ownedMeetings = [] } = $when2meet.useQuery(
     "get",
-    "/events/",
+    "/meetings/",
     {},
     { enabled: isEnabled },
   );
 
   const { data: participatingMeetings = [] } = $when2meet.useQuery(
     "get",
-    "/events/participating",
+    "/meetings/participating",
     {},
     { enabled: isEnabled },
   );
@@ -34,8 +34,8 @@ export function useWhen2MeetCalendarEvents() {
 
   const meetingQueries = useQueries({
     queries: meetingSummaries.map((meeting) => ({
-      ...$when2meet.queryOptions("get", "/events/{event_ref}", {
-        params: { path: { event_ref: meeting.slug } },
+      ...$when2meet.queryOptions("get", "/meetings/{meeting_ref}", {
+        params: { path: { meeting_ref: meeting.slug } },
       }),
       enabled: isEnabled,
     })),

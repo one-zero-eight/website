@@ -62,7 +62,7 @@ export function MeetingsLandingPage() {
     isError: isOwnedError,
     error: ownedError,
     refetch: refetchOwned,
-  } = $when2meet.useQuery("get", "/events/");
+  } = $when2meet.useQuery("get", "/meetings/");
 
   const {
     data: participatingMeetings = [],
@@ -70,7 +70,7 @@ export function MeetingsLandingPage() {
     isError: isParticipatingError,
     error: participatingError,
     refetch: refetchParticipating,
-  } = $when2meet.useQuery("get", "/events/participating");
+  } = $when2meet.useQuery("get", "/meetings/participating");
 
   const filteredOwnedMeetings = useMemo(
     () => filterMeetings(ownedMeetings, search),
