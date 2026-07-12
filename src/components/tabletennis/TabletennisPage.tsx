@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
 import {
   formatApiErrorMessage,
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
-import { useToast } from "@/components/toast";
+import { SignInButton } from "@/components/common/SignInButton";
+import { Registration } from "./Registration";
 import { ScoreTable, type RatingPoint } from "./DrawTable";
 
 type SchemaPlayer = tabletennisTypes.SchemaPlayer;
@@ -12,13 +12,25 @@ type SchemaPlayer = tabletennisTypes.SchemaPlayer;
 export function TabletennisPage() {
   const { data, isPending, isError, error, refetch } = $tabletennis.useQuery(
     "get",
-    "/get_player",
+    "/get-player",
   );
 
   if (isPending) return <div className="skeleton h-48 w-full" />;
 
+  if (isError && isApiHttpError(error) && error.httpCode === 401) {
+    return (
+      <div className="px-4 py-12">
+        <h2 className="mb-4 text-3xl font-medium">Sign in to get access</h2>
+        <p className="text-base-content/75 mb-4 text-lg">
+          Use your Innopolis account to access table tennis features.
+        </p>
+        <SignInButton />
+      </div>
+    );
+  }
+
   if (isError && isApiHttpError(error) && error.httpCode === 404) {
-    return <RegisterForm onRegistered={() => refetch()} />;
+    return <Registration onRegistered={() => refetch()} />;
   }
 
   if (isError) {
@@ -36,57 +48,6 @@ export function TabletennisPage() {
       <ProfileName name={player.nickname} />
       <div>
         <InfoTiles player={player} />
-      </div>
-    </div>
-  );
-}
-
-function RegisterForm({ onRegistered }: { onRegistered: () => void }) {
-  const [nick, setNick] = useState("");
-  const { showError } = useToast();
-  const { mutate, isPending } = $tabletennis.useMutation("post", "/reg", {
-    onSuccess: () => onRegistered(),
-    onError: (error) => showError("Error", formatApiErrorMessage(error)),
-  });
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (nick.trim()) {
-      mutate({ params: { query: { nick: nick.trim() } } });
-    }
-  }
-
-  return (
-    <div className="flex min-h-[40vh] items-center justify-center">
-      <div className="bg-base-200 mx-4 w-full max-w-md rounded-lg p-8">
-        <h2 className="mb-4 text-2xl font-semibold">
-          Register as Table Tennis Player
-        </h2>
-        <p className="text-base-content/70 mb-4">
-          You need to register with a nickname to use the table tennis features.
-        </p>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <input
-            type="text"
-            value={nick}
-            onChange={(e) => setNick(e.target.value)}
-            placeholder="Enter your nickname"
-            className="input input-bordered w-full"
-            maxLength={50}
-            required
-          />
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={isPending || !nick.trim()}
-          >
-            {isPending ? (
-              <span className="loading loading-spinner loading-sm" />
-            ) : (
-              "Register"
-            )}
-          </button>
-        </form>
       </div>
     </div>
   );

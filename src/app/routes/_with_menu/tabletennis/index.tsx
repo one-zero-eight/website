@@ -9,6 +9,7 @@ import {
   formatApiErrorMessage,
 } from "@/api/helpers/create-query-client";
 import { Registration } from "@/components/tabletennis/Registration";
+import { SignInButton } from "@/components/common/SignInButton";
 
 export const Route = createFileRoute("/_with_menu/tabletennis/")({
   component: RouteComponent,
@@ -17,10 +18,22 @@ export const Route = createFileRoute("/_with_menu/tabletennis/")({
 function RouteComponent() {
   const { isPending, isError, error, refetch } = $tabletennis.useQuery(
     "get",
-    "/get_player",
+    "/get-player",
   );
 
   if (isPending) return <div className="skeleton h-48 w-full" />;
+
+  if (isError && isApiHttpError(error) && error.httpCode === 401) {
+    return (
+      <div className="px-4 py-12">
+        <h2 className="mb-4 text-3xl font-medium">Sign in to get access</h2>
+        <p className="text-base-content/75 mb-4 text-lg">
+          Use your Innopolis account to access table tennis features.
+        </p>
+        <SignInButton />
+      </div>
+    );
+  }
 
   if (isError && isApiHttpError(error) && error.httpCode === 404) {
     return <Registration onRegistered={() => refetch()} />;
