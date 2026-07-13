@@ -43,9 +43,6 @@ export function ScanPage() {
   const [scanProgress, setScanProgress] = useState(0);
   const [previewToolbarHost, setPreviewToolbarHost] =
     useState<HTMLDivElement | null>(null);
-  const [discardReason, setDiscardReason] = useState<
-    "discard" | "new-document" | null
-  >(null);
   const [removeLastPageModalOpen, setRemoveLastPageModalOpen] = useState(false);
 
   function showPopupWithExceptionDetail(prefix: string, exception: unknown) {
@@ -67,7 +64,6 @@ export function ScanPage() {
     crop,
     documentName,
     hasScanResult,
-    hasDownloadedScan,
     isScanning,
     preparedFile,
     fileBlob,
@@ -262,10 +258,6 @@ export function ScanPage() {
     });
   }
 
-  const previewFileName = documentName.trim()
-    ? `${documentName.trim()}.pdf`
-    : "document.pdf";
-
   async function discardCurrentDocument() {
     const { preparedFileName } = getScanSessionState();
     if (preparedFileName) {
@@ -289,23 +281,10 @@ export function ScanPage() {
       documentName: "",
     });
     setScanError(undefined);
-    setDiscardReason(null);
     setShowResultPanel(true);
   }
 
-  function requestDiscard(reason: "discard" | "new-document") {
-    if (hasDownloadedScan) {
-      void discardCurrentDocument();
-      return;
-    }
-    setDiscardReason(reason);
-  }
-
-  function handleMarkDownloaded() {
-    setSession({ hasDownloadedScan: true });
-  }
-
-  function handleDownloadAndDiscard() {
+  function handleDownloadAndFinish() {
     const { fileBlob: blob } = getScanSessionState();
     const fileName = documentName.trim()
       ? `${documentName.trim()}.pdf`
@@ -368,6 +347,12 @@ export function ScanPage() {
     .filter(Boolean)
     .join(" · ");
 
+  const showResultView = hasScanResult && !scanInProgress && showResultPanel;
+  // Mobile stepped flow: settings → preview (scanning) → result + preview.
+  // Desktop (@4xl) always shows both columns.
+  const hidePreviewOnMobile = !scanInProgress && !showResultView;
+  const hideSettingsOnMobile = scanInProgress;
+
   return (
     <>
       <div className="@container/content mx-auto w-full max-w-[1200px] px-4 py-6">
@@ -376,6 +361,8 @@ export function ScanPage() {
             className={cn(
               "card card-border w-full min-w-0 @4xl/content:flex-1",
               !(fileBlob && !scanInProgress) && "min-h-80",
+              hidePreviewOnMobile && "hidden @4xl/content:block",
+              showResultView && "order-2 @4xl/content:order-none",
             )}
           >
             <div className="card-body flex flex-col gap-4">
@@ -407,24 +394,20 @@ export function ScanPage() {
             </div>
           </div>
 
-          <div className="card card-border w-full shrink-0 @4xl/content:w-[26rem]">
+          <div
+            className={cn(
+              "card card-border w-full shrink-0 @4xl/content:w-[26rem]",
+              hideSettingsOnMobile && "hidden @4xl/content:block",
+              showResultView && "order-1 @4xl/content:order-none",
+            )}
+          >
             <div className="card-body gap-4">
               <h2 className="card-title text-base">
                 <span className="icon-[material-symbols--adf-scanner-rounded]" />
-                {hasScanResult && !scanInProgress && showResultPanel
-                  ? "Scan result"
-                  : "Scan settings"}
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm ml-auto"
-                  disabled={!hasScanResult || scanInProgress}
-                  onClick={() => requestDiscard("discard")}
-                >
-                  Finish
-                </button>
+                {showResultView ? "Scan result" : "Scan settings"}
               </h2>
 
-              {hasScanResult && !scanInProgress && showResultPanel ? (
+              {showResultView ? (
                 <div className="flex flex-col gap-4">
                   <div className="bg-base-200 rounded-box flex items-center gap-3 px-3 py-2.5">
                     <span className="icon-[material-symbols--picture-as-pdf-rounded] text-primary shrink-0 text-4xl" />
@@ -450,17 +433,6 @@ export function ScanPage() {
                         </p>
                       )}
                     </div>
-                    {fileBlob && (
-                      <a
-                        href={fileBlob}
-                        download={previewFileName ?? downloadFileName}
-                        className="btn btn-ghost btn-square shrink-0"
-                        title="Download PDF"
-                        onClick={handleMarkDownloaded}
-                      >
-                        <span className="icon-[material-symbols--download-rounded] text-2xl" />
-                      </a>
-                    )}
                   </div>
 
                   {scanError && (
@@ -472,42 +444,31 @@ export function ScanPage() {
                   <button
                     type="button"
                     className="btn btn-primary w-full"
+                    disabled={!fileBlob}
+                    onClick={handleDownloadAndFinish}
+                  >
+                    Download & Finish
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-outline w-full"
                     disabled={selectedScannerOffline}
-                    onClick={() => {
-                      setSession({ hasDownloadedScan: false });
-                      setShowResultPanel(false);
-                    }}
+                    onClick={() => setShowResultPanel(false)}
                   >
                     Scan next page
                   </button>
 
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {(preparedFilePagesCount ?? 0) > 1 && (
                     <button
                       type="button"
-                      className="btn btn-ghost"
-                      disabled={
-                        !preparedFile ||
-                        isFileProcessing ||
-                        !preparedFilePagesCount
-                      }
-                      onClick={() => {
-                        if (preparedFilePagesCount === 1) {
-                          requestDiscard("discard");
-                          return;
-                        }
-                        setRemoveLastPageModalOpen(true);
-                      }}
+                      className="btn btn-ghost w-full"
+                      disabled={!preparedFile || isFileProcessing}
+                      onClick={() => setRemoveLastPageModalOpen(true)}
                     >
                       Remove last page
                     </button>
-                    <button
-                      type="button"
-                      className="btn btn-ghost"
-                      onClick={() => requestDiscard("new-document")}
-                    >
-                      Scan new document
-                    </button>
-                  </div>
+                  )}
                 </div>
               ) : (
                 <fieldset
@@ -523,7 +484,7 @@ export function ScanPage() {
                             key={scanner.name}
                             title={scanner.display_name}
                             selected={scannerName === scanner.name}
-                            disabled={offline}
+                            disabled={offline || hasScanResult}
                             onClick={() => {
                               setSession({ scannerName: scanner.name });
                               setScanError(undefined);
@@ -761,60 +722,6 @@ export function ScanPage() {
             }}
           >
             Remove
-          </button>
-        </div>
-      </Modal>
-
-      <Modal
-        open={discardReason !== null}
-        onOpenChange={(open) => {
-          if (!open) setDiscardReason(null);
-        }}
-        title={
-          discardReason === "new-document" ? (
-            <div className="flex items-center gap-3">
-              <span className="icon-[material-symbols--warning-rounded] text-warning text-2xl" />
-              Discard current document?
-            </div>
-          ) : (
-            "Finish scanning?"
-          )
-        }
-      >
-        <p className="text-base-content/75 mb-6 leading-relaxed">
-          {discardReason === "new-document"
-            ? "Starting a new scan will discard the current document. Download it first if you want to keep a copy."
-            : "Download the document first if you want to keep a copy before finishing."}
-        </p>
-        <div className="flex flex-wrap justify-end gap-2">
-          <button
-            type="button"
-            className="btn"
-            onClick={() => setDiscardReason(null)}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "btn",
-              discardReason === "new-document"
-                ? "btn-outline btn-warning"
-                : "btn-outline",
-            )}
-            onClick={() => void discardCurrentDocument()}
-          >
-            {discardReason === "new-document" ? "Discard" : "Finish"}
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={!fileBlob}
-            onClick={handleDownloadAndDiscard}
-          >
-            {discardReason === "new-document"
-              ? "Download and discard"
-              : "Download and finish"}
           </button>
         </div>
       </Modal>
