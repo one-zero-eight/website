@@ -420,7 +420,7 @@ export function ScanPage() {
                   disabled={!hasScanResult || scanInProgress}
                   onClick={() => requestDiscard("discard")}
                 >
-                  Discard
+                  Finish
                 </button>
               </h2>
 
@@ -771,16 +771,20 @@ export function ScanPage() {
           if (!open) setDiscardReason(null);
         }}
         title={
-          <div className="flex items-center gap-3">
-            <span className="icon-[material-symbols--warning-rounded] text-warning text-2xl" />
-            Discard current document?
-          </div>
+          discardReason === "new-document" ? (
+            <div className="flex items-center gap-3">
+              <span className="icon-[material-symbols--warning-rounded] text-warning text-2xl" />
+              Discard current document?
+            </div>
+          ) : (
+            "Finish scanning?"
+          )
         }
       >
         <p className="text-base-content/75 mb-6 leading-relaxed">
           {discardReason === "new-document"
             ? "Starting a new scan will discard the current document. Download it first if you want to keep a copy."
-            : "This will discard the current scanned document. Download it first if you want to keep a copy."}
+            : "Download the document first if you want to keep a copy before finishing."}
         </p>
         <div className="flex flex-wrap justify-end gap-2">
           <button
@@ -792,10 +796,15 @@ export function ScanPage() {
           </button>
           <button
             type="button"
-            className="btn btn-outline btn-warning"
+            className={cn(
+              "btn",
+              discardReason === "new-document"
+                ? "btn-outline btn-warning"
+                : "btn-outline",
+            )}
             onClick={() => void discardCurrentDocument()}
           >
-            Discard
+            {discardReason === "new-document" ? "Discard" : "Finish"}
           </button>
           <button
             type="button"
@@ -803,7 +812,9 @@ export function ScanPage() {
             disabled={!fileBlob}
             onClick={handleDownloadAndDiscard}
           >
-            Download and discard
+            {discardReason === "new-document"
+              ? "Download and discard"
+              : "Download and finish"}
           </button>
         </div>
       </Modal>
