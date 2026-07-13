@@ -1,7 +1,13 @@
 import { Modal } from "@/components/common/Modal.tsx";
 import { PdfDocumentPreview } from "@/components/web-print/PdfDocumentPreview.tsx";
 import { cn } from "@/lib/ui/cn";
-import { useCallback, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 
 const ACCEPTABLE_FILE_EXTENSIONS =
   ".pdf,.doc,.xls,.docx,.xlsx,.png,.txt,.md,.jpg,.jpeg,.bmp,.odt,.ods";
@@ -71,38 +77,35 @@ function formatFileSize(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+export { formatFileSize };
+
 export function FileDropzone({
   fileProcess,
   isFileProcessing,
   blobPreviewURL,
   downloadFileName,
-  displayFileName,
   isFunctional,
   label = "Drag & drop a file here",
   variant = "default",
-  pageCount,
-  fileSize,
-  totalPageCount,
   previewPages,
   loadingLabel = "Processing…",
+  filePickerRef,
 }: {
   fileProcess: (file: File) => void;
   isFileProcessing: boolean;
   blobPreviewURL: string | undefined;
   downloadFileName: string | undefined;
-  displayFileName?: string;
   isFunctional: boolean;
   label?: string;
   variant?: "default" | "print" | "scan";
-  pageCount?: number;
-  totalPageCount?: number;
-  fileSize?: number;
   previewPages?: number[];
   loadingLabel?: string;
+  filePickerRef?: RefObject<HTMLInputElement | null>;
 }) {
   const [alert, setAlert] = useState<ReactNode>();
   const [isDragOver, setIsDragOver] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const localInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = filePickerRef ?? localInputRef;
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -162,50 +165,18 @@ export function FileDropzone({
       </div>
     );
 
-    const fileLabel = displayFileName ?? downloadFileName;
-
     return (
       <>
-        <div className="flex max-h-[calc(100vh-11rem)] min-h-80 flex-1 flex-col gap-3 overflow-hidden">
-          {hasDocument && (
-            <div className="bg-base-200 rounded-box flex shrink-0 items-center gap-3 px-3 py-2.5">
-              <span
-                className={cn(
-                  "shrink-0 text-2xl",
-                  isScan
-                    ? "icon-[material-symbols--picture-as-pdf-rounded] text-primary"
-                    : "icon-[material-symbols--description-rounded] text-primary",
-                )}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">
-                  {fileLabel ?? (isScan ? "Scan result" : "Document")}
-                </p>
-                <p className="text-base-content/50 text-xs">
-                  {[
-                    pageCount
-                      ? totalPageCount && pageCount < totalPageCount
-                        ? `${pageCount} of ${totalPageCount} pages`
-                        : `${pageCount} page${pageCount !== 1 ? "s" : ""}`
-                      : null,
-                    fileSize ? formatFileSize(fileSize) : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-              </div>
-              {pageCount ? (
-                <span className="badge badge-primary badge-sm shrink-0">
-                  {pageCount} pg
-                </span>
-              ) : null}
-            </div>
+        <div
+          className={cn(
+            "flex w-full flex-col gap-3",
+            !hasDocument && "min-h-80",
           )}
-
+        >
           {hasDocument ? (
             <div
               className={cn(
-                "border-base-300 rounded-box relative flex min-h-0 flex-1 flex-col overflow-hidden border-2 border-dashed",
+                "border-base-300 rounded-box relative w-full overflow-hidden border-2 border-dashed",
                 isFunctional && isDragOver && "border-primary bg-primary/5",
               )}
               onDragOver={handleDragOver}
@@ -218,100 +189,70 @@ export function FileDropzone({
           ) : (
             <>
               {isScan ? (
-                <div
-                  className={cn(
-                    "border-base-300 bg-base-200/50 rounded-box relative min-h-0 flex-1 overflow-hidden border-2 border-dashed",
-                  )}
-                >
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center">
-                    {isFileProcessing ? (
-                      <>
-                        <span className="loading loading-spinner loading-lg text-primary" />
-                        <p className="text-base-content/50 text-sm">
-                          {loadingLabel}
+                <div className="border-base-300 bg-base-200/50 rounded-box grid min-h-80 place-items-center border-2 border-dashed p-8 text-center">
+                  {isFileProcessing ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <span className="loading loading-spinner loading-lg text-primary" />
+                      <p className="text-base-content/50 text-sm">
+                        {loadingLabel}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3">
+                      <span className="icon-[material-symbols--adf-scanner-rounded] text-base-content/20 text-6xl" />
+                      <div>
+                        <p className="font-medium">No scan yet</p>
+                        <p className="text-base-content/50 mt-1 text-sm">
+                          Configure settings and start scanning — preview will
+                          appear here
                         </p>
-                      </>
-                    ) : (
-                      <>
-                        <span className="icon-[material-symbols--adf-scanner-rounded] text-base-content/20 text-6xl" />
-                        <div>
-                          <p className="font-medium">No scan yet</p>
-                          <p className="text-base-content/50 mt-1 text-sm">
-                            Configure settings and start scanning — preview will
-                            appear here
-                          </p>
-                        </div>
-                      </>
-                    )}
-                  </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <label
                   className={cn(
-                    "border-base-300 rounded-box relative min-h-0 flex-1 cursor-pointer overflow-hidden border-2 border-dashed transition-colors",
+                    "border-base-300 rounded-box relative flex min-h-80 cursor-pointer flex-col items-center justify-center overflow-hidden border-2 border-dashed p-8 text-center transition-colors",
                     isFunctional && isDragOver && "border-primary bg-primary/5",
                   )}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                 >
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center">
-                    {isFileProcessing ? (
-                      <>
-                        <span className="loading loading-spinner loading-lg text-primary" />
-                        <p className="text-base-content/50 text-sm">
-                          {loadingLabel}
+                  {isFileProcessing ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <span className="loading loading-spinner loading-lg text-primary" />
+                      <p className="text-base-content/50 text-sm">
+                        {loadingLabel}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3">
+                      <span className="icon-[material-symbols--cloud-upload-rounded] text-base-content/25 text-6xl" />
+                      <div>
+                        <p className="font-medium">Drop your file here</p>
+                        <p className="text-base-content/50 mt-1 text-sm">
+                          or click to browse
                         </p>
-                      </>
-                    ) : (
-                      <>
-                        <span className="icon-[material-symbols--cloud-upload-rounded] text-base-content/25 text-6xl" />
-                        <div>
-                          <p className="font-medium">Drop your file here</p>
-                          <p className="text-base-content/50 mt-1 text-sm">
-                            or click to browse
-                          </p>
-                        </div>
-                        {isFunctional && (
-                          <span className="btn btn-primary btn-wide mt-1">
-                            Choose file
-                          </span>
-                        )}
-                        <p className="text-base-content/40 mt-2 max-w-xs text-xs">
-                          PDF, Word, Excel, images, and more · max 20 MB
-                        </p>
-                      </>
-                    )}
-                  </div>
+                      </div>
+                      {isFunctional && (
+                        <span className="btn btn-primary btn-wide mt-1">
+                          Choose file
+                        </span>
+                      )}
+                      <p className="text-base-content/40 mt-2 max-w-xs text-xs">
+                        PDF, Word, Excel, images, and more · max 20 MB
+                      </p>
+                    </div>
+                  )}
                   {fileInput}
                 </label>
               )}
             </>
           )}
 
-          {hasDocument && isFunctional && (
-            <button
-              type="button"
-              className="btn btn-primary btn-sm w-full self-center"
-              disabled={isFileProcessing}
-              onClick={() => inputRef.current?.click()}
-            >
-              Replace file
-            </button>
-          )}
-
           {hasDocument && isFunctional && fileInput}
-
-          {hasDocument && !isFunctional && blobPreviewURL && (
-            <a
-              href={blobPreviewURL}
-              download={fileLabel ?? downloadFileName}
-              className="btn btn-outline btn-sm self-start"
-            >
-              <span className="icon-[material-symbols--download-rounded]" />
-              Download PDF
-            </a>
-          )}
         </div>
 
         <Modal

@@ -1,4 +1,3 @@
-import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import { WebPrintLandingPage } from "@/components/web-print/WebPrintLandingPage.tsx";
 import { WebPrintTabs } from "@/components/web-print/WebPrintTabs.tsx";
@@ -16,15 +15,13 @@ function RouteComponent() {
         <title>Printers</title>
         <meta
           name="description"
-          content="Quickly print & scan your documents on Innopolis University printers right from your browser."
+          content="Print and scan documents on Innopolis University printers from your browser or Telegram."
         />
       </Helmet>
 
       <Topbar title="Printers" />
       <WebPrintTabs />
-      <RequireAuth>
-        <WebPrintLandingPage />
-      </RequireAuth>
+      <WebPrintLandingPage />
     </>
   );
 }

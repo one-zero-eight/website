@@ -57,9 +57,13 @@ export default function Tooltip({
 
   return (
     <>
-      <div ref={refs.setReference} {...getReferenceProps()}>
+      <span
+        ref={refs.setReference}
+        className="inline-flex items-center leading-none"
+        {...getReferenceProps()}
+      >
         {children}
-      </div>
+      </span>
 
       {isMounted && (
         <FloatingPortal>

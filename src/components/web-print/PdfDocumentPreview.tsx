@@ -103,7 +103,7 @@ export function PdfDocumentPreview({
   }
 
   return (
-    <div className="bg-base-200/40 flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="bg-base-200/40 flex w-full flex-col">
       <div className="border-base-300 bg-base-100 flex shrink-0 items-center justify-center gap-2 border-b px-3 py-2">
         <button
           type="button"
@@ -155,7 +155,7 @@ export function PdfDocumentPreview({
 
       <div
         ref={viewerRef}
-        className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto p-4"
+        className="flex w-full items-start justify-center p-4"
       >
         <Document
           file={url}
