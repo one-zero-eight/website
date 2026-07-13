@@ -1,9 +1,13 @@
-import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Document, Page, pdfjs } from "react-pdf";
+import PdfJsWorker from "pdfjs-dist/build/pdf.worker.min.mjs?worker";
 
-pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+// Vite serves the worker via a blob URL, avoiding broken .mjs MIME on prod
+// (Angie/nginx often returns application/octet-stream for *.mjs).
+if (!pdfjs.GlobalWorkerOptions.workerPort) {
+  pdfjs.GlobalWorkerOptions.workerPort = new PdfJsWorker();
+}
 
 export function PdfDocumentPreview({
   url,
