@@ -1,3 +1,4 @@
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $printers } from "@/api/printers";
 import { Modal } from "@/components/common/Modal.tsx";
 import {
@@ -8,12 +9,13 @@ import {
   FileDropzone,
   formatFileSize,
 } from "@/components/web-print/FileDropzone.tsx";
-import { LayoutSelector } from "@/components/web-print/LayoutSelector.tsx";
+// import { LayoutSelector } from "@/components/web-print/LayoutSelector.tsx";
 import {
   calcPrintJobActualPapersCount,
   resolvePreviewPageRanges,
 } from "@/components/web-print/print-utils.ts";
 import {
+  getPrintSessionState,
   requestStopPrintJobPolling,
   resetStopPrintJobPolling,
   shouldStopPrintJobPolling,
@@ -24,6 +26,7 @@ import {
   PrintingOptionsSidesAnyOf0,
 } from "@/api/printers/types.ts";
 import { cn } from "@/lib/ui/cn";
+import { Link } from "@tanstack/react-router";
 import {
   useCallback,
   useEffect,
@@ -33,22 +36,45 @@ import {
   type ReactNode,
 } from "react";
 
+const PRINTER_MAP_LINKS: Record<
+  string,
+  { scene: string; area: string; label: string }
+> = {
+  "319": {
+    scene: "university-floor-3",
+    area: "printer-319",
+    label: "Show 319 on map",
+  },
+  "vk-zone": {
+    scene: "university-floor-5",
+    area: "printer-5f",
+    label: "Show VK Zone on map",
+  },
+};
+
+function resolvePrinterMapLink(cupsName: string, displayName?: string) {
+  const haystack = `${cupsName} ${displayName ?? ""}`.toLowerCase();
+  if (haystack.includes("319")) return PRINTER_MAP_LINKS["319"];
+  if (
+    haystack.includes("vk") ||
+    haystack.includes("5f") ||
+    haystack.includes("5-f")
+  )
+    return PRINTER_MAP_LINKS["vk-zone"];
+  return null;
+}
+
 export function PrintPage() {
   const [alert, setAlert] = useState<ReactNode>();
   const [pageRangesError, setPageRangesError] = useState<ReactNode>();
+  const [previewToolbarHost, setPreviewToolbarHost] =
+    useState<HTMLDivElement | null>(null);
   const filePickerRef = useRef<HTMLInputElement>(null);
 
   function showPopupWithExceptionDetail(prefix: string, exception: unknown) {
-    const detail =
-      exception &&
-      typeof exception === "object" &&
-      "detail" in exception &&
-      exception.detail
-        ? String(exception.detail)
-        : "Unknown error. Service is unavailable";
     setAlert(
       <p>
-        {prefix}: {detail}
+        {prefix}: {formatApiErrorMessage(exception)}
       </p>,
     );
   }
@@ -65,6 +91,7 @@ export function PrintPage() {
     numberUp,
     jobId,
     isPrinting,
+    printResultPrinterName,
     originalFileName,
     preparedFile,
     fileBlob,
@@ -174,7 +201,11 @@ export function PrintPage() {
         },
       });
       resetStopPrintJobPolling();
-      setSession({ jobId: newJobId, isPrinting: true });
+      setSession({
+        jobId: newJobId,
+        isPrinting: true,
+        printResultPrinterName: undefined,
+      });
     } catch (exception: unknown) {
       showPopupWithExceptionDetail("Start problem", exception);
     }
@@ -189,26 +220,43 @@ export function PrintPage() {
     sides,
   ]);
 
-  useEffect(() => {
-    if (!preparedFilePagesCount || !jobId || !isPrinting) return;
+  const getJobStatusRef = useRef(getJobStatus);
+  getJobStatusRef.current = getJobStatus;
+  const cancelJobRef = useRef(cancelJob);
+  cancelJobRef.current = cancelJob;
 
-    const papersCount = calcPrintJobActualPapersCount(
-      pages,
-      copiesCount,
-      numberUp,
-      sides,
-      preparedFilePagesCount,
-    );
+  useEffect(() => {
+    if (!jobId || !isPrinting) return;
 
     let cancelled = false;
 
     async function waitTillThePrintingEnd() {
+      const {
+        pages: currentPages,
+        copiesCount: currentCopies,
+        numberUp: currentNumberUp,
+        sides: currentSides,
+        preparedFilePagesCount: pageCount,
+        printerName: currentPrinter,
+      } = getPrintSessionState();
+
+      if (!pageCount) return;
+
+      const papersCount = calcPrintJobActualPapersCount(
+        currentPages,
+        currentCopies,
+        currentNumberUp,
+        currentSides,
+        pageCount,
+      );
+
       const startTime = performance.now();
       while (performance.now() - startTime < papersCount * 30 * 1000) {
         if (cancelled || shouldStopPrintJobPolling()) break;
+
         let jobStatus;
         try {
-          jobStatus = await getJobStatus({
+          jobStatus = await getJobStatusRef.current({
             params: { query: { job_id: jobId! } },
           });
         } catch (exception: unknown) {
@@ -216,8 +264,10 @@ export function PrintPage() {
             `[web-print] Error during status retrieval for job ${jobId}`,
             exception,
           );
+          await new Promise((resolve) => setTimeout(resolve, 500));
           continue;
         }
+
         if (
           [
             JobStateEnum.Value9,
@@ -225,22 +275,31 @@ export function PrintPage() {
             JobStateEnum.Value8,
           ].includes(jobStatus.job_state)
         ) {
-          setSession({ jobId: undefined, isPrinting: false });
-          if (preparedFile) await prepareFile(preparedFile);
+          const completed = jobStatus.job_state === JobStateEnum.Value9;
+          setSession({
+            jobId: undefined,
+            isPrinting: false,
+            ...(completed
+              ? { printResultPrinterName: currentPrinter }
+              : { printResultPrinterName: undefined }),
+          });
           return;
         }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
+
       if (cancelled || shouldStopPrintJobPolling()) return;
 
       try {
-        await cancelJob({ params: { query: { job_id: jobId! } } });
+        await cancelJobRef.current({ params: { query: { job_id: jobId! } } });
       } catch (exception: unknown) {
         console.log(
           `[web-print] Error during cancellation of job ${jobId}`,
           exception,
         );
       }
+
       if (!shouldStopPrintJobPolling()) {
         setAlert(
           <>
@@ -249,33 +308,46 @@ export function PrintPage() {
           </>,
         );
       }
-      setSession({ jobId: undefined, isPrinting: false });
-      if (preparedFile) await prepareFile(preparedFile);
+
+      setSession({
+        jobId: undefined,
+        isPrinting: false,
+        printResultPrinterName: undefined,
+      });
     }
 
-    waitTillThePrintingEnd();
+    void waitTillThePrintingEnd();
 
     return () => {
       cancelled = true;
     };
-  }, [
-    cancelJob,
-    copiesCount,
-    getJobStatus,
-    isPrinting,
-    jobId,
-    numberUp,
-    pages,
-    prepareFile,
-    preparedFile,
-    preparedFilePagesCount,
-    setSession,
-    sides,
-  ]);
+  }, [jobId, isPrinting, setSession]);
 
   function handleCancelPrint() {
     requestStopPrintJobPolling();
-    setSession({ isPrinting: false, jobId: undefined });
+    setSession({
+      isPrinting: false,
+      jobId: undefined,
+      printResultPrinterName: undefined,
+    });
+  }
+
+  function handleResetPrint() {
+    setSession({
+      originalFileName: undefined,
+      preparedFile: undefined,
+      fileBlob: undefined,
+      preparedFileName: undefined,
+      downloadFileName: undefined,
+      preparedFilePagesCount: undefined,
+      pages: null,
+      pageRangesInput: "",
+      printResultPrinterName: undefined,
+    });
+  }
+
+  function handleDismissPrintResult() {
+    setSession({ printResultPrinterName: undefined });
   }
 
   function handleCopiesChange(raw: string) {
@@ -336,11 +408,16 @@ export function PrintPage() {
               <h2 className="card-title shrink-0 text-base">
                 <span className="icon-[material-symbols--picture-as-pdf-rounded]" />
                 Preview
-                {!fileBlob && !isFileProcessing && (
-                  <span className="badge badge-ghost badge-sm ml-auto font-normal">
-                    Required
-                  </span>
-                )}
+                <div
+                  ref={setPreviewToolbarHost}
+                  className="ml-auto flex items-center"
+                >
+                  {!fileBlob && !isFileProcessing && (
+                    <span className="badge badge-ghost badge-sm font-normal">
+                      Required
+                    </span>
+                  )}
+                </div>
               </h2>
               <FileDropzone
                 variant="print"
@@ -353,6 +430,7 @@ export function PrintPage() {
                 blobPreviewURL={fileBlob}
                 downloadFileName={downloadFileName}
                 previewPages={previewPages}
+                previewToolbarHost={previewToolbarHost}
                 isFunctional={!isPrinting}
               />
             </div>
@@ -362,7 +440,27 @@ export function PrintPage() {
             <div className="card-body gap-4">
               <h2 className="card-title text-base">
                 <span className="icon-[material-symbols--print-rounded]" />
-                Print settings
+                {printResultPrinterName
+                  ? "Print result"
+                  : isPrinting
+                    ? "Printing"
+                    : "Print settings"}
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm ml-auto"
+                  disabled={
+                    isPrinting ||
+                    isFileProcessing ||
+                    (!fileBlob && !printResultPrinterName)
+                  }
+                  onClick={
+                    printResultPrinterName
+                      ? handleDismissPrintResult
+                      : handleResetPrint
+                  }
+                >
+                  {printResultPrinterName ? "Done" : "Cancel"}
+                </button>
               </h2>
 
               {isPrinting ? (
@@ -377,13 +475,24 @@ export function PrintPage() {
                     Cancel
                   </button>
                 </div>
+              ) : printResultPrinterName ? (
+                <PrintResultPanel
+                  printerCupsName={printResultPrinterName}
+                  printerDisplayName={
+                    rawPrinters?.find(
+                      (printer) => printer.cups_name === printResultPrinterName,
+                    )?.display_name
+                  }
+                  fileLabel={fileLabel}
+                  onPrintAnother={handleDismissPrintResult}
+                />
               ) : (
                 <div className="flex flex-col gap-4">
                   {fileBlob && (
                     <div className="bg-base-200 rounded-box flex items-center gap-3 px-3 py-2.5">
                       <span className="icon-[material-symbols--picture-as-pdf-rounded] text-primary shrink-0 text-4xl" />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm">
+                        <p className="truncate text-base">
                           {fileLabel || "Document"}
                         </p>
                         {fileMeta && (
@@ -399,7 +508,7 @@ export function PrintPage() {
                         title="Replace file"
                         onClick={() => filePickerRef.current?.click()}
                       >
-                        <span className="icon-[material-symbols--upload-file-rounded] text-3xl" />
+                        <span className="icon-[material-symbols--cached-rounded] text-2xl" />
                       </button>
                     </div>
                   )}
@@ -499,12 +608,15 @@ export function PrintPage() {
                     />
                   </FormField>
 
+                  {/* Layout selector is hidden for now: number-up currently works
+                      unintuitively / doesn't work reliably for users.
                   <FormField label="Layout">
                     <LayoutSelector
                       value={numberUp}
                       onChange={(value) => setSession({ numberUp: value })}
                     />
                   </FormField>
+                  */}
 
                   <button
                     type="button"
@@ -545,6 +657,60 @@ export function PrintPage() {
         {pageRangesError}
       </Modal>
     </>
+  );
+}
+
+function PrintResultPanel({
+  printerCupsName,
+  printerDisplayName,
+  fileLabel,
+  onPrintAnother,
+}: {
+  printerCupsName: string;
+  printerDisplayName?: string;
+  fileLabel?: string;
+  onPrintAnother: () => void;
+}) {
+  const mapLink = resolvePrinterMapLink(printerCupsName, printerDisplayName);
+  const printerLabel = printerDisplayName || printerCupsName;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="bg-success/10 text-success rounded-box flex items-start gap-3 px-3 py-3">
+        <span className="icon-[material-symbols--check-circle-rounded] shrink-0 text-3xl" />
+        <div className="min-w-0">
+          <p className="text-base">Printed successfully</p>
+          <p className="text-success/80 mt-0.5 text-sm">
+            {fileLabel
+              ? `${fileLabel} was sent to the printer`
+              : "Your document was sent to the printer"}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-base-200 rounded-box flex flex-col gap-1 px-3 py-2.5">
+        <p className="text-base-content/50 text-sm">Printer</p>
+        <p className="text-base">{printerLabel}</p>
+        {mapLink && (
+          <Link
+            to="/maps"
+            search={{ scene: mapLink.scene, area: mapLink.area }}
+            className="text-primary mt-1 inline-flex items-center gap-1 text-sm hover:underline"
+          >
+            <span className="icon-[material-symbols--map-rounded] text-base" />
+            {mapLink.label}
+          </Link>
+        )}
+      </div>
+
+      <button
+        type="button"
+        className="btn btn-primary w-full"
+        onClick={onPrintAnother}
+      >
+        Print another
+      </button>
+    </div>
   );
 }
 

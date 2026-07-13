@@ -18,6 +18,7 @@ export type PrintSessionState = {
   preparedFilePagesCount?: number;
   jobId?: number;
   isPrinting: boolean;
+  printResultPrinterName?: string;
 };
 
 const defaultState: PrintSessionState = {

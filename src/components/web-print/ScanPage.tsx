@@ -21,10 +21,32 @@ import {
 import { cn } from "@/lib/ui/cn";
 import { useEffect, useState, type ReactNode } from "react";
 
+/** Fake scan duration: ~6.5s per 100 dpi + optional warmup. */
+const SCAN_FAKE_MS_PER_100_DPI = 6500;
+const SCAN_FAKE_WARMUP_MS = 5_000;
+const SCAN_FAKE_COLD_AFTER_MS = 1 * 60 * 1000;
+
+function estimateScanDurationMs(
+  dpi: string | number,
+  { needsWarmup }: { needsWarmup: boolean },
+) {
+  return (
+    (Number(dpi) / 100) * SCAN_FAKE_MS_PER_100_DPI +
+    (needsWarmup ? SCAN_FAKE_WARMUP_MS : 0)
+  );
+}
+
 export function ScanPage() {
   const [alert, setAlert] = useState<ReactNode>();
   const [scanError, setScanError] = useState<string>();
-  const [discardModalOpen, setDiscardModalOpen] = useState(false);
+  const [showResultPanel, setShowResultPanel] = useState(true);
+  const [scanProgress, setScanProgress] = useState(0);
+  const [previewToolbarHost, setPreviewToolbarHost] =
+    useState<HTMLDivElement | null>(null);
+  const [discardReason, setDiscardReason] = useState<
+    "discard" | "new-document" | null
+  >(null);
+  const [removeLastPageModalOpen, setRemoveLastPageModalOpen] = useState(false);
 
   function showPopupWithExceptionDetail(prefix: string, exception: unknown) {
     setAlert(
@@ -45,6 +67,7 @@ export function ScanPage() {
     crop,
     documentName,
     hasScanResult,
+    hasDownloadedScan,
     isScanning,
     preparedFile,
     fileBlob,
@@ -118,7 +141,9 @@ export function ScanPage() {
     setScanError(undefined);
     setSession({
       isScanning: true,
-      hasScanResult: false,
+      ...(startNewScan
+        ? { hasScanResult: false }
+        : { hasDownloadedScan: false }),
     });
 
     let jobId;
@@ -209,7 +234,12 @@ export function ScanPage() {
           console.log("[web-print] cancellation error");
         }
         await reloadScanPreview(scanResult.filename);
-        setSession({ hasScanResult: true, isScanning: false });
+        setShowResultPanel(true);
+        setSession({
+          hasScanResult: true,
+          isScanning: false,
+          lastScanCompletedAt: Date.now(),
+        });
         return;
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -249,6 +279,7 @@ export function ScanPage() {
     }
     setSession({
       hasScanResult: false,
+      hasDownloadedScan: false,
       isNewScan: true,
       preparedFile: undefined,
       fileBlob: undefined,
@@ -258,7 +289,20 @@ export function ScanPage() {
       documentName: "",
     });
     setScanError(undefined);
-    setDiscardModalOpen(false);
+    setDiscardReason(null);
+    setShowResultPanel(true);
+  }
+
+  function requestDiscard(reason: "discard" | "new-document") {
+    if (hasDownloadedScan) {
+      void discardCurrentDocument();
+      return;
+    }
+    setDiscardReason(reason);
+  }
+
+  function handleMarkDownloaded() {
+    setSession({ hasDownloadedScan: true });
   }
 
   function handleDownloadAndDiscard() {
@@ -279,6 +323,41 @@ export function ScanPage() {
 
   const scanInProgress =
     isScanning || isScanStarting || isScanWaiting || isScanCancelling;
+
+  useEffect(() => {
+    if (!scanInProgress) {
+      setScanProgress(0);
+      return;
+    }
+
+    const {
+      isNewScan: startingNewDocument,
+      preparedFilePagesCount: existingPages,
+      lastScanCompletedAt: lastCompletedAt,
+    } = getScanSessionState();
+
+    const isFirstPage = startingNewDocument || !existingPages;
+    const isCold =
+      lastCompletedAt == null ||
+      Date.now() - lastCompletedAt > SCAN_FAKE_COLD_AFTER_MS;
+    const needsWarmup = isFirstPage || isCold;
+
+    const durationMs = estimateScanDurationMs(quality, { needsWarmup });
+    const startedAt = performance.now();
+    let frameId = 0;
+
+    function tick(now: number) {
+      const elapsed = now - startedAt;
+      const t = Math.min(1, elapsed / durationMs);
+      // Ease-out toward 95% so the bar never finishes before the real scan.
+      const eased = 1 - (1 - t) * (1 - t);
+      setScanProgress(Math.min(95, eased * 95));
+      if (t < 1) frameId = requestAnimationFrame(tick);
+    }
+
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [scanInProgress, quality]);
 
   const fileMeta = [
     preparedFilePagesCount
@@ -303,21 +382,26 @@ export function ScanPage() {
               <h2 className="card-title shrink-0 text-base">
                 <span className="icon-[material-symbols--picture-as-pdf-rounded]" />
                 Preview
-                {!fileBlob && !scanInProgress && (
-                  <span className="badge badge-ghost badge-sm ml-auto font-normal">
-                    Waiting
-                  </span>
-                )}
+                <div
+                  ref={setPreviewToolbarHost}
+                  className="ml-auto flex items-center"
+                >
+                  {!fileBlob && !scanInProgress && (
+                    <span className="badge badge-ghost badge-sm font-normal">
+                      Waiting
+                    </span>
+                  )}
+                </div>
               </h2>
               <FileDropzone
                 variant="scan"
                 fileProcess={() => {}}
                 isFileProcessing={isFileProcessing || scanInProgress}
                 loadingLabel={scanInProgress ? "Scanning…" : "Processing…"}
-                blobPreviewURL={
-                  scanInProgress && !hasScanResult ? undefined : fileBlob
-                }
+                loadingProgress={scanInProgress ? scanProgress : undefined}
+                blobPreviewURL={fileBlob}
                 downloadFileName={downloadFileName}
+                previewToolbarHost={previewToolbarHost}
                 isFunctional={false}
               />
             </div>
@@ -327,27 +411,36 @@ export function ScanPage() {
             <div className="card-body gap-4">
               <h2 className="card-title text-base">
                 <span className="icon-[material-symbols--adf-scanner-rounded]" />
-                {hasScanResult && !scanInProgress
+                {hasScanResult && !scanInProgress && showResultPanel
                   ? "Scan result"
                   : "Scan settings"}
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm ml-auto"
+                  disabled={!hasScanResult || scanInProgress}
+                  onClick={() => requestDiscard("discard")}
+                >
+                  Discard
+                </button>
               </h2>
 
-              {hasScanResult && !scanInProgress ? (
+              {hasScanResult && !scanInProgress && showResultPanel ? (
                 <div className="flex flex-col gap-4">
                   <div className="bg-base-200 rounded-box flex items-center gap-3 px-3 py-2.5">
                     <span className="icon-[material-symbols--picture-as-pdf-rounded] text-primary shrink-0 text-4xl" />
-                    <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 items-baseline">
                         <input
                           type="text"
-                          className="input input-bordered input-sm min-w-0 flex-1"
+                          className="text-base-content placeholder:text-base-content/40 field-sizing-content max-w-full min-w-0 bg-transparent p-0 text-base outline-none"
                           placeholder="document"
                           value={documentName}
+                          size={Math.max(documentName.length, 1)}
                           onChange={(e) =>
                             handleDocumentNameChange(e.target.value)
                           }
                         />
-                        <span className="text-base-content/50 shrink-0 text-sm">
+                        <span className="text-base-content/50 shrink-0 text-base">
                           .pdf
                         </span>
                       </div>
@@ -363,8 +456,9 @@ export function ScanPage() {
                         download={previewFileName ?? downloadFileName}
                         className="btn btn-ghost btn-square shrink-0"
                         title="Download PDF"
+                        onClick={handleMarkDownloaded}
                       >
-                        <span className="icon-[material-symbols--download-rounded] text-4xl" />
+                        <span className="icon-[material-symbols--download-rounded] text-2xl" />
                       </a>
                     )}
                   </div>
@@ -379,12 +473,15 @@ export function ScanPage() {
                     type="button"
                     className="btn btn-primary w-full"
                     disabled={selectedScannerOffline}
-                    onClick={() => scanAndWait(false)}
+                    onClick={() => {
+                      setSession({ hasDownloadedScan: false });
+                      setShowResultPanel(false);
+                    }}
                   >
                     Scan next page
                   </button>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <button
                       type="button"
                       className="btn btn-ghost"
@@ -393,8 +490,12 @@ export function ScanPage() {
                         isFileProcessing ||
                         !preparedFilePagesCount
                       }
-                      onClick={async () => {
-                        await reloadScanPreview(await removeLastPage());
+                      onClick={() => {
+                        if (preparedFilePagesCount === 1) {
+                          requestDiscard("discard");
+                          return;
+                        }
+                        setRemoveLastPageModalOpen(true);
                       }}
                     >
                       Remove last page
@@ -402,7 +503,7 @@ export function ScanPage() {
                     <button
                       type="button"
                       className="btn btn-ghost"
-                      onClick={() => setDiscardModalOpen(true)}
+                      onClick={() => requestDiscard("new-document")}
                     >
                       Scan new document
                     </button>
@@ -573,16 +674,36 @@ export function ScanPage() {
                     />
                   </FormField>
 
-                  <button
-                    type="button"
-                    className="btn btn-primary mt-2"
-                    disabled={
-                      !scannerName || selectedScannerOffline || scanInProgress
-                    }
-                    onClick={() => scanAndWait(true)}
+                  <div
+                    className={cn(
+                      "mt-2 flex gap-2",
+                      hasScanResult ? "flex-row" : "flex-col",
+                    )}
                   >
-                    Scan
-                  </button>
+                    {hasScanResult && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost flex-1"
+                        disabled={scanInProgress}
+                        onClick={() => setShowResultPanel(true)}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className={cn(
+                        "btn btn-primary",
+                        hasScanResult ? "flex-1" : "w-full",
+                      )}
+                      disabled={
+                        !scannerName || selectedScannerOffline || scanInProgress
+                      }
+                      onClick={() => scanAndWait(!hasScanResult)}
+                    >
+                      {hasScanResult ? "Scan next page" : "Scan"}
+                    </button>
+                  </div>
 
                   {scanError && (
                     <div className="alert alert-error alert-soft text-sm">
@@ -605,8 +726,50 @@ export function ScanPage() {
       </Modal>
 
       <Modal
-        open={discardModalOpen}
-        onOpenChange={setDiscardModalOpen}
+        open={removeLastPageModalOpen}
+        onOpenChange={setRemoveLastPageModalOpen}
+        title={
+          <div className="flex items-center gap-3">
+            <span className="icon-[material-symbols--warning-rounded] text-warning text-2xl" />
+            Remove last page?
+          </div>
+        }
+      >
+        <p className="text-base-content/75 mb-6 leading-relaxed">
+          This will permanently remove the last scanned page from the document.
+          Are you sure?
+        </p>
+        <div className="flex flex-wrap justify-end gap-2">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => setRemoveLastPageModalOpen(false)}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline btn-warning"
+            disabled={isFileProcessing}
+            onClick={async () => {
+              setRemoveLastPageModalOpen(false);
+              if (preparedFilePagesCount === 1) {
+                await discardCurrentDocument();
+                return;
+              }
+              await reloadScanPreview(await removeLastPage());
+            }}
+          >
+            Remove
+          </button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={discardReason !== null}
+        onOpenChange={(open) => {
+          if (!open) setDiscardReason(null);
+        }}
         title={
           <div className="flex items-center gap-3">
             <span className="icon-[material-symbols--warning-rounded] text-warning text-2xl" />
@@ -615,14 +778,15 @@ export function ScanPage() {
         }
       >
         <p className="text-base-content/75 mb-6 leading-relaxed">
-          Starting a new scan will discard the current document. Download it
-          first if you want to keep a copy.
+          {discardReason === "new-document"
+            ? "Starting a new scan will discard the current document. Download it first if you want to keep a copy."
+            : "This will discard the current scanned document. Download it first if you want to keep a copy."}
         </p>
         <div className="flex flex-wrap justify-end gap-2">
           <button
             type="button"
             className="btn"
-            onClick={() => setDiscardModalOpen(false)}
+            onClick={() => setDiscardReason(null)}
           >
             Cancel
           </button>

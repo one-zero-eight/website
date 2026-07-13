@@ -9,33 +9,34 @@ import {
   type RefObject,
 } from "react";
 
-const ACCEPTABLE_FILE_EXTENSIONS =
-  ".pdf,.doc,.xls,.docx,.xlsx,.png,.txt,.md,.jpg,.jpeg,.bmp,.odt,.ods";
+const ALLOWED_EXTENSIONS = [
+  ".pdf",
+  ".doc",
+  ".xls",
+  ".docx",
+  ".xlsx",
+  ".png",
+  ".txt",
+  ".md",
+  ".jpg",
+  ".jpeg",
+  ".bmp",
+  ".odt",
+  ".ods",
+] as const;
 
-const ACCEPTABLE_FILE_TYPES =
-  "application/pdf,application/msword,application/vnd.ms-excel," +
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document," +
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet," +
-  "image/png,text/plain,text/markdown,image/jpeg,image/bmp," +
-  "application/vnd.oasis.opendocument.text," +
-  "application/vnd.oasis.opendocument.spreadsheet";
+const ACCEPTABLE_FILE_EXTENSIONS = ALLOWED_EXTENSIONS.join(",");
 
-const ACCEPTABLE_FILE_SIGNATURES = [
-  [0x25, 0x50, 0x44, 0x46, 0x2d],
-  [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1],
-  [0x50, 0x4b, 0x03, 0x04],
-  [0x50, 0x4b, 0x03, 0x04],
-  [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
-  [0xef, 0xbb, 0xbf],
-  [0xff, 0xfe],
-  [0xfe, 0xff],
-  [0xff, 0xfe, 0x00, 0x00],
-  [0x00, 0x00, 0xfe, 0xff],
-  [0xff, 0xd8, 0xff],
-  [0xff, 0xd8, 0xff],
-  [0x42, 0x4d],
-  [0x50, 0x4b, 0x03, 0x04],
-];
+function getFileExtension(filename: string) {
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex < 0) return "";
+  return filename.slice(dotIndex).toLowerCase();
+}
+
+function isAllowedExtension(filename: string) {
+  const ext = getFileExtension(filename);
+  return (ALLOWED_EXTENSIONS as readonly string[]).includes(ext);
+}
 
 async function validateFile(file: File): Promise<ReactNode | null> {
   if (file.size > 20 * 1024 * 1024) {
@@ -49,17 +50,12 @@ async function validateFile(file: File): Promise<ReactNode | null> {
     );
   }
 
-  const bytes = new Uint8Array(await file.slice(0, 8).arrayBuffer());
-  const signatureMatch = ACCEPTABLE_FILE_SIGNATURES.some((signature) =>
-    signature.every((byte, i) => byte === bytes[i]),
-  );
-
-  if (!ACCEPTABLE_FILE_TYPES.includes(file.type) || !signatureMatch) {
+  if (!isAllowedExtension(file.name)) {
     return (
       <>
         <p>Such file is not supported!</p>
         <div className="mt-2 grid grid-cols-3 gap-1 text-sm">
-          {ACCEPTABLE_FILE_EXTENSIONS.split(",").map((ext) => (
+          {ALLOWED_EXTENSIONS.map((ext) => (
             <span key={ext} className="badge badge-ghost badge-sm">
               {ext}
             </span>
@@ -89,7 +85,9 @@ export function FileDropzone({
   variant = "default",
   previewPages,
   loadingLabel = "Processing…",
+  loadingProgress,
   filePickerRef,
+  previewToolbarHost,
 }: {
   fileProcess: (file: File) => void;
   isFileProcessing: boolean;
@@ -100,7 +98,9 @@ export function FileDropzone({
   variant?: "default" | "print" | "scan";
   previewPages?: number[];
   loadingLabel?: string;
+  loadingProgress?: number;
   filePickerRef?: RefObject<HTMLInputElement | null>;
+  previewToolbarHost?: HTMLElement | null;
 }) {
   const [alert, setAlert] = useState<ReactNode>();
   const [isDragOver, setIsDragOver] = useState(false);
@@ -158,10 +158,28 @@ export function FileDropzone({
     const hasDocument = !!blobPreviewURL;
     const isScan = variant === "scan";
 
+    const showProgress = loadingProgress != null;
+    const progressValue = Math.round(loadingProgress ?? 0);
+
+    const processingContent = (
+      <div className="flex w-full max-w-xs flex-col items-center gap-3 px-4">
+        <span className="loading loading-spinner loading-lg text-primary" />
+        <p className="text-base-content/50 text-sm">
+          {showProgress ? `${loadingLabel} ${progressValue}%` : loadingLabel}
+        </p>
+        {showProgress && (
+          <progress
+            className="progress progress-primary w-full"
+            value={progressValue}
+            max={100}
+          />
+        )}
+      </div>
+    );
+
     const processingOverlay = isFileProcessing && (
       <div className="bg-base-100 absolute inset-0 flex flex-col items-center justify-center gap-2">
-        <span className="loading loading-spinner loading-lg text-primary" />
-        <p className="text-base-content/50 text-sm">{loadingLabel}</p>
+        {processingContent}
       </div>
     );
 
@@ -176,14 +194,19 @@ export function FileDropzone({
           {hasDocument ? (
             <div
               className={cn(
-                "border-base-300 rounded-box relative w-full overflow-hidden border-2 border-dashed",
-                isFunctional && isDragOver && "border-primary bg-primary/5",
+                "relative w-full overflow-hidden",
+                isFunctional && isDragOver && "bg-primary/5 rounded-box",
               )}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
-              <PdfDocumentPreview url={blobPreviewURL} pages={previewPages} />
+              <PdfDocumentPreview
+                url={blobPreviewURL}
+                pages={previewPages}
+                toolbarHost={previewToolbarHost}
+                openOnLastPage={isScan}
+              />
               {processingOverlay}
             </div>
           ) : (
@@ -191,12 +214,7 @@ export function FileDropzone({
               {isScan ? (
                 <div className="border-base-300 bg-base-200/50 rounded-box grid min-h-80 place-items-center border-2 border-dashed p-8 text-center">
                   {isFileProcessing ? (
-                    <div className="flex flex-col items-center gap-3">
-                      <span className="loading loading-spinner loading-lg text-primary" />
-                      <p className="text-base-content/50 text-sm">
-                        {loadingLabel}
-                      </p>
-                    </div>
+                    processingContent
                   ) : (
                     <div className="flex flex-col items-center gap-3">
                       <span className="icon-[material-symbols--adf-scanner-rounded] text-base-content/20 text-6xl" />

@@ -13,8 +13,10 @@ export type ScanSessionState = {
   crop: ScanningOptionsCrop;
   documentName: string;
   hasScanResult: boolean;
+  hasDownloadedScan: boolean;
   isNewScan: boolean;
   isScanning: boolean;
+  lastScanCompletedAt?: number;
   preparedFile?: File;
   fileBlob?: string;
   preparedFileName?: string;
@@ -26,10 +28,11 @@ const defaultState: ScanSessionState = {
   scannerName: "",
   mode: ScanningOptionsInput_source.Platen,
   scanSides: ScanningOptionsSides.false,
-  quality: ScanningOptionsQuality.Value200,
+  quality: ScanningOptionsQuality.Value300,
   crop: ScanningOptionsCrop.false,
   documentName: "",
   hasScanResult: false,
+  hasDownloadedScan: false,
   isNewScan: true,
   isScanning: false,
 };
