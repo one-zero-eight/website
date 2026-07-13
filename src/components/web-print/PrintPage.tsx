@@ -1,6 +1,13 @@
 import { $printers } from "@/api/printers";
 import { Modal } from "@/components/common/Modal.tsx";
-import { FileDropzone } from "@/components/web-print/FileDropzone.tsx";
+import {
+  DeviceOption,
+  DeviceOptionList,
+} from "@/components/web-print/DeviceOptionList.tsx";
+import {
+  FileDropzone,
+  formatFileSize,
+} from "@/components/web-print/FileDropzone.tsx";
 import { LayoutSelector } from "@/components/web-print/LayoutSelector.tsx";
 import {
   calcPrintJobActualPapersCount,
@@ -16,10 +23,12 @@ import {
   JobStateEnum,
   PrintingOptionsSidesAnyOf0,
 } from "@/api/printers/types.ts";
+import { cn } from "@/lib/ui/cn";
 import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -27,6 +36,7 @@ import {
 export function PrintPage() {
   const [alert, setAlert] = useState<ReactNode>();
   const [pageRangesError, setPageRangesError] = useState<ReactNode>();
+  const filePickerRef = useRef<HTMLInputElement>(null);
 
   function showPopupWithExceptionDetail(prefix: string, exception: unknown) {
     const detail =
@@ -82,11 +92,31 @@ export function PrintPage() {
     "/print/cancel",
   );
 
+  function getPrinterStatus(cupsName: string) {
+    return rawStatuses?.find((status) => status.printer.cups_name === cupsName);
+  }
+
+  function isPrinterOffline(cupsName: string) {
+    return getPrinterStatus(cupsName)?.offline === true;
+  }
+
   useEffect(() => {
-    if (rawPrinters?.length && !printerName) {
-      setSession({ printerName: rawPrinters[0].cups_name });
-    }
-  }, [rawPrinters, printerName, setSession]);
+    if (!rawPrinters?.length) return;
+
+    const selectedIsUsable =
+      !!printerName &&
+      rawPrinters.some((printer) => printer.cups_name === printerName) &&
+      !isPrinterOffline(printerName);
+
+    if (selectedIsUsable) return;
+
+    const firstOnline = rawPrinters.find(
+      (printer) => !isPrinterOffline(printer.cups_name),
+    );
+    setSession({
+      printerName: (firstOnline ?? rawPrinters[0]).cups_name,
+    });
+  }, [rawPrinters, rawStatuses, printerName, setSession]);
 
   const actualPapersCount = preparedFilePagesCount
     ? calcPrintJobActualPapersCount(
@@ -248,27 +278,14 @@ export function PrintPage() {
     setSession({ isPrinting: false, jobId: undefined });
   }
 
-  function handleCopiesDecrease() {
-    if (copiesCount <= 1) return;
-    setSession({ copiesCount: copiesCount - 1 });
-  }
-
-  function handleCopiesIncrease() {
-    if (copiesCount >= 50) {
-      setAlert(
-        <p>
-          You can print at most <span className="font-bold">50 copies</span>{" "}
-          (and not less than 1).
-        </p>,
-      );
+  function handleCopiesChange(raw: string) {
+    const parsed = parseInt(raw, 10);
+    if (Number.isNaN(parsed)) {
+      setSession({ copiesCount: 1 });
       return;
     }
-    setSession({ copiesCount: copiesCount + 1 });
-  }
-
-  function handleCopiesChange(raw: string) {
-    const value = Math.max(1, Math.min(50, parseInt(raw) || 1));
-    if (value !== parseInt(raw)) {
+    const value = Math.max(1, Math.min(50, parsed));
+    if (value !== parsed) {
       setAlert(
         <p>
           You can print at most <span className="font-bold">50 copies</span>{" "}
@@ -291,44 +308,57 @@ export function PrintPage() {
   }, [pageRangesInput, pages, preparedFilePagesCount]);
 
   const previewPageCount = previewPages?.length ?? preparedFilePagesCount;
+  const fileLabel = originalFileName ?? downloadFileName;
+  const fileMeta = [
+    previewPageCount
+      ? preparedFilePagesCount && previewPageCount < preparedFilePagesCount
+        ? `${previewPageCount} of ${preparedFilePagesCount} pages`
+        : `${previewPageCount} page${previewPageCount !== 1 ? "s" : ""}`
+      : null,
+    preparedFile?.size ? formatFileSize(preparedFile.size) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const selectedPrinterOffline = !!printerName && isPrinterOffline(printerName);
 
   return (
     <>
       <div className="@container/content mx-auto w-full max-w-[1200px] px-4 py-6">
-        <div className="grid grid-cols-1 gap-6 @lg/content:grid-cols-2 @lg/content:items-stretch">
-          <div className="card card-border flex max-h-[calc(100vh-10rem)] flex-col overflow-hidden">
-            <div className="card-body flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
+        <div className="flex flex-col gap-6 @4xl/content:flex-row @4xl/content:items-start">
+          <div
+            className={cn(
+              "card card-border w-full min-w-0 @4xl/content:flex-1",
+              !fileBlob && "min-h-80",
+            )}
+          >
+            <div className="card-body flex flex-col gap-4">
               <h2 className="card-title shrink-0 text-base">
-                <span className="icon-[material-symbols--upload-file-rounded]" />
-                Document
+                <span className="icon-[material-symbols--picture-as-pdf-rounded]" />
+                Preview
                 {!fileBlob && !isFileProcessing && (
                   <span className="badge badge-ghost badge-sm ml-auto font-normal">
                     Required
                   </span>
                 )}
               </h2>
-              <div className="flex min-h-0 flex-1 flex-col">
-                <FileDropzone
-                  variant="print"
-                  fileProcess={async (file) => {
-                    setSession({ originalFileName: file.name });
-                    await getFile(await prepareFile(file), file.name);
-                  }}
-                  isFileProcessing={isFileProcessing}
-                  blobPreviewURL={fileBlob}
-                  downloadFileName={downloadFileName}
-                  displayFileName={originalFileName ?? downloadFileName}
-                  pageCount={previewPageCount}
-                  totalPageCount={preparedFilePagesCount}
-                  previewPages={previewPages}
-                  fileSize={preparedFile?.size}
-                  isFunctional={!isPrinting}
-                />
-              </div>
+              <FileDropzone
+                variant="print"
+                filePickerRef={filePickerRef}
+                fileProcess={async (file) => {
+                  setSession({ originalFileName: file.name });
+                  await getFile(await prepareFile(file), file.name);
+                }}
+                isFileProcessing={isFileProcessing}
+                blobPreviewURL={fileBlob}
+                downloadFileName={downloadFileName}
+                previewPages={previewPages}
+                isFunctional={!isPrinting}
+              />
             </div>
           </div>
 
-          <div className="card card-border">
+          <div className="card card-border w-full shrink-0 @4xl/content:w-[26rem]">
             <div className="card-body gap-4">
               <h2 className="card-title text-base">
                 <span className="icon-[material-symbols--print-rounded]" />
@@ -349,66 +379,94 @@ export function PrintPage() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
-                  <FormField label="Printer">
-                    {rawPrinters ? (
-                      <select
-                        className="select select-bordered w-full"
-                        value={printerName}
-                        onChange={(e) =>
-                          setSession({ printerName: e.target.value })
-                        }
-                      >
-                        <option value="" disabled>
-                          Select a printer
-                        </option>
-                        {rawPrinters.map((printer, i) => (
-                          <option
-                            key={printer.cups_name}
-                            value={printer.cups_name}
-                          >
-                            {printer.display_name}
-                            {rawStatuses?.[i]?.offline
-                              ? " (offline)"
-                              : rawStatuses?.[i]?.paper_percentage
-                                ? " (has paper)"
-                                : " (no paper)"}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <div className="skeleton h-12 w-full" />
-                    )}
-                  </FormField>
-
-                  <FormField label="Copies">
-                    <div className="border-base-300 bg-base-100 rounded-field flex h-12 w-full items-stretch overflow-hidden border">
+                  {fileBlob && (
+                    <div className="bg-base-200 rounded-box flex items-center gap-3 px-3 py-2.5">
+                      <span className="icon-[material-symbols--picture-as-pdf-rounded] text-primary shrink-0 text-4xl" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm">
+                          {fileLabel || "Document"}
+                        </p>
+                        {fileMeta && (
+                          <p className="text-base-content/50 text-xs">
+                            {fileMeta}
+                          </p>
+                        )}
+                      </div>
                       <button
                         type="button"
-                        className="btn btn-ghost hover:bg-base-200 h-full min-h-0 w-12 shrink-0 rounded-none"
-                        disabled={copiesCount <= 1}
-                        onClick={handleCopiesDecrease}
+                        className="btn btn-ghost btn-square shrink-0"
+                        disabled={isFileProcessing}
+                        title="Replace file"
+                        onClick={() => filePickerRef.current?.click()}
                       >
-                        <span className="icon-[material-symbols--remove-rounded] text-xl" />
-                      </button>
-                      <div className="bg-base-300 w-px shrink-0 self-stretch" />
-                      <input
-                        type="number"
-                        className="min-w-0 flex-1 [appearance:textfield] bg-transparent px-2 text-center text-base font-medium tabular-nums outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        min={1}
-                        max={50}
-                        value={copiesCount}
-                        onChange={(e) => handleCopiesChange(e.target.value)}
-                      />
-                      <div className="bg-base-300 w-px shrink-0 self-stretch" />
-                      <button
-                        type="button"
-                        className="btn btn-ghost hover:bg-base-200 h-full min-h-0 w-12 shrink-0 rounded-none"
-                        disabled={copiesCount >= 50}
-                        onClick={handleCopiesIncrease}
-                      >
-                        <span className="icon-[material-symbols--add-rounded] text-xl" />
+                        <span className="icon-[material-symbols--upload-file-rounded] text-3xl" />
                       </button>
                     </div>
+                  )}
+
+                  <DeviceOptionList label="Printer">
+                    {rawPrinters ? (
+                      rawPrinters.map((printer) => {
+                        const status = getPrinterStatus(printer.cups_name);
+                        const offline = status?.offline === true;
+                        const selected = printerName === printer.cups_name;
+
+                        return (
+                          <DeviceOption
+                            key={printer.cups_name}
+                            title={printer.display_name}
+                            selected={selected}
+                            disabled={offline}
+                            onClick={() =>
+                              setSession({ printerName: printer.cups_name })
+                            }
+                            meta={
+                              status ? (
+                                <span className="text-base-content/50">
+                                  <span
+                                    className={cn(
+                                      offline ? "text-error" : "text-success",
+                                    )}
+                                  >
+                                    {offline ? "Offline" : "Online"}
+                                  </span>
+                                  {!offline && (
+                                    <>
+                                      {" · "}
+                                      {status.paper_percentage != null
+                                        ? `Paper ${status.paper_percentage}%`
+                                        : "Paper unknown"}
+                                      {status.toner_percentage != null &&
+                                        ` · Toner ${status.toner_percentage}%`}
+                                    </>
+                                  )}
+                                </span>
+                              ) : (
+                                <span className="text-base-content/50">
+                                  Status unknown
+                                </span>
+                              )
+                            }
+                          />
+                        );
+                      })
+                    ) : (
+                      <>
+                        <div className="skeleton h-14 w-full" />
+                        <div className="skeleton h-14 w-full" />
+                      </>
+                    )}
+                  </DeviceOptionList>
+
+                  <FormField label="Copies">
+                    <input
+                      type="number"
+                      className="input input-bordered w-full"
+                      min={1}
+                      max={50}
+                      value={copiesCount}
+                      onChange={(e) => handleCopiesChange(e.target.value)}
+                    />
                   </FormField>
 
                   <FormField label="Print on both sides">
@@ -448,25 +506,22 @@ export function PrintPage() {
                     />
                   </FormField>
 
-                  <div className="mt-2 flex flex-col gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-primary w-full"
-                      disabled={jobInProgress || !preparedFileName}
-                      onClick={handleStartPrint}
-                    >
-                      {isPrintStarting ? (
-                        <span className="loading loading-spinner loading-sm" />
-                      ) : (
-                        "Start printing"
-                      )}
-                    </button>
-                    {actualPapersCount > 0 && (
-                      <p className="text-base-content/50 text-center text-sm">
-                        ~{actualPapersCount} sheets
-                      </p>
+                  <button
+                    type="button"
+                    className="btn btn-primary mt-2 w-full"
+                    disabled={
+                      jobInProgress ||
+                      !preparedFileName ||
+                      selectedPrinterOffline
+                    }
+                    onClick={handleStartPrint}
+                  >
+                    {isPrintStarting ? (
+                      <span className="loading loading-spinner loading-sm" />
+                    ) : (
+                      `Print ${actualPapersCount || 1} sheet${(actualPapersCount || 1) === 1 ? "" : "s"}`
                     )}
-                  </div>
+                  </button>
                 </div>
               )}
             </div>
@@ -502,7 +557,7 @@ function FormField({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-base-content/70 text-sm font-medium">{label}</span>
+      <span className="text-base-content/70 text-sm">{label}</span>
       {children}
     </div>
   );

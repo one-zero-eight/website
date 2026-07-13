@@ -1,5 +1,6 @@
 import { PrintingOptionsNumberUpAnyOf0 } from "@/api/printers/types.ts";
 import { cn } from "@/lib/ui/cn";
+import { useEffect, useRef, useState } from "react";
 
 const LAYOUT_OPTIONS = [
   {
@@ -53,33 +54,80 @@ export function LayoutSelector({
   value: PrintingOptionsNumberUpAnyOf0;
   onChange: (value: PrintingOptionsNumberUpAnyOf0) => void;
 }) {
-  return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-      {LAYOUT_OPTIONS.map((option) => {
-        const isSelected = value === option.value;
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const selected =
+    LAYOUT_OPTIONS.find((option) => option.value === value) ??
+    LAYOUT_OPTIONS[0];
 
-        return (
-          <button
-            key={option.value}
-            type="button"
-            className={cn(
-              "rounded-box flex flex-col items-center gap-2 border p-3 transition-colors",
-              isSelected
-                ? "border-primary bg-primary/10 ring-primary ring-2 ring-inset"
-                : "border-base-300 bg-base-100 hover:bg-base-200",
-            )}
-            onClick={() => onChange(option.value)}
-          >
-            <LayoutSheetPreview cols={option.cols} rows={option.rows} />
-            <div className="text-center">
-              <div className="text-sm font-semibold">{option.label}</div>
-              <div className="text-base-content/60 text-xs">
-                {option.subtitle}
-              </div>
-            </div>
-          </button>
-        );
-      })}
+  useEffect(() => {
+    if (!open) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className="relative flex flex-col gap-2">
+      <button
+        type="button"
+        className={cn(
+          "rounded-field border-base-content/20 flex w-full items-center gap-3 border-2 px-3 py-2.5 text-left transition-colors",
+          open ? "border-primary bg-primary/5" : "hover:border-base-content/40",
+        )}
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <LayoutSheetPreview cols={selected.cols} rows={selected.rows} />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm">{selected.label}</p>
+          <p className="text-base-content/50 text-sm">{selected.subtitle}</p>
+        </div>
+        <span
+          className={cn(
+            "icon-[material-symbols--expand-more-rounded] text-base-content/50 shrink-0 text-xl transition-transform",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="grid grid-cols-3 gap-2">
+          {LAYOUT_OPTIONS.map((option) => {
+            const isSelected = value === option.value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                className={cn(
+                  "rounded-field border-base-content/20 flex flex-col items-center gap-1.5 border-2 px-2 py-2.5 transition-colors",
+                  isSelected
+                    ? "border-primary bg-primary/5"
+                    : "hover:border-base-content/40",
+                )}
+                onClick={() => {
+                  onChange(option.value);
+                  setOpen(false);
+                }}
+              >
+                <LayoutSheetPreview cols={option.cols} rows={option.rows} />
+                <div className="text-center">
+                  <p className="text-sm">{option.label}</p>
+                  <p className="text-base-content/50 text-xs">
+                    {option.subtitle}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -88,7 +136,7 @@ function LayoutSheetPreview({ cols, rows }: { cols: number; rows: number }) {
   const pageCount = cols * rows;
 
   return (
-    <div className="border-base-content/25 bg-base-200 aspect-210/297 w-16 shrink-0 overflow-hidden rounded-sm border p-1 shadow-sm">
+    <div className="border-base-content/25 bg-base-200 aspect-210/297 w-10 shrink-0 overflow-hidden rounded-sm border p-0.5">
       <div
         className="grid h-full min-h-0 w-full min-w-0 gap-px"
         style={{
