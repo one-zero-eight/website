@@ -445,22 +445,15 @@ export function PrintPage() {
                   : isPrinting
                     ? "Printing"
                     : "Print settings"}
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm ml-auto"
-                  disabled={
-                    isPrinting ||
-                    isFileProcessing ||
-                    (!fileBlob && !printResultPrinterName)
-                  }
-                  onClick={
-                    printResultPrinterName
-                      ? handleDismissPrintResult
-                      : handleResetPrint
-                  }
-                >
-                  {printResultPrinterName ? "Done" : "Cancel"}
-                </button>
+                {printResultPrinterName && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm ml-auto"
+                    onClick={handleDismissPrintResult}
+                  >
+                    Done
+                  </button>
+                )}
               </h2>
 
               {isPrinting ? (
@@ -505,10 +498,10 @@ export function PrintPage() {
                         type="button"
                         className="btn btn-ghost btn-square shrink-0"
                         disabled={isFileProcessing}
-                        title="Replace file"
-                        onClick={() => filePickerRef.current?.click()}
+                        title="Remove file"
+                        onClick={handleResetPrint}
                       >
-                        <span className="icon-[material-symbols--cached-rounded] text-2xl" />
+                        <span className="icon-[material-symbols--close-rounded] text-2xl" />
                       </button>
                     </div>
                   )}
