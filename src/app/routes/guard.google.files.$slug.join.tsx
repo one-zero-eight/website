@@ -69,7 +69,6 @@ function RouteComponent() {
       <>
         <Helmet>
           <title>Sign In - Join InNoHassle Guard File</title>
-          {/* Do not scan this page */}
           <meta name="robots" content="noindex, follow" />
         </Helmet>
         <div className="flex h-full items-center justify-center">
@@ -83,10 +82,9 @@ function RouteComponent() {
     <div className="flex grow items-center justify-center p-5">
       <Helmet>
         <title>Join InNoHassle Guard File</title>
-        {/* Do not scan this page */}
         <meta name="robots" content="noindex, follow" />
       </Helmet>
-      <div className="bg-base-200 w-full max-w-xl rounded-xl p-10 shadow-lg">
+      <div className="bg-base-200 rounded-box w-full max-w-xl p-8 sm:p-10">
         <h1 className="mb-2 text-center text-3xl font-bold">
           Join InNoHassle Guard File
         </h1>
@@ -95,14 +93,9 @@ function RouteComponent() {
         </p>
 
         {!isSuccess ? (
-          <form onSubmit={handleSubmit}>
-            <div className="mb-5">
-              <label
-                htmlFor="gmail"
-                className="text-base-content/80 mb-1 block font-medium"
-              >
-                Gmail Address:
-              </label>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Gmail Address</legend>
               <input
                 type="email"
                 id="gmail"
@@ -111,50 +104,48 @@ function RouteComponent() {
                 value={gmail}
                 onChange={(e) => setGmail(e.target.value)}
                 placeholder="your.email@gmail.com"
-                className="border-base-content/20 bg-base-200/5 focus:border-primary focus:bg-base-200/10 rounded-field w-full border-2 px-3 py-3 text-base outline-hidden transition-colors"
+                className="input input-bordered w-full"
                 disabled={isPending}
               />
-            </div>
+            </fieldset>
 
             <button
               type="submit"
               disabled={isPending || !gmail.trim()}
-              className="bg-primary rounded-field w-full py-4 text-base font-medium text-white transition-colors hover:bg-[#6600CC] disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn btn-primary w-full"
             >
-              {isPending ? "Adding you to the file..." : "Join File"}
+              {isPending ? (
+                <>
+                  <span className="loading loading-spinner loading-sm" />
+                  Adding you to the file...
+                </>
+              ) : (
+                "Join File"
+              )}
             </button>
           </form>
         ) : null}
 
-        {isPending && (
-          <div className="text-primary mt-5 text-center">
-            <div className="mb-2 inline-block">
-              <span className="loading loading-spinner loading-6xl" />
-            </div>
-            <p>Adding you to the file...</p>
-          </div>
-        )}
-
         {isSuccess && (
-          <div className="rounded-field mt-5 border border-green-200 bg-green-100 p-4 text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300">
-            <div className="mb-2 text-center">
-              <strong>✅ Success!</strong>
+          <div className="alert alert-success alert-soft mt-5">
+            <div className="w-full text-center">
+              <p className="font-semibold">Success!</p>
+              <p className="mt-1">
+                <strong>{gmail}</strong> has been added to the spreadsheet.
+              </p>
+              <p className="mt-3">
+                Redirecting to spreadsheet in{" "}
+                <strong className="text-xl">{countdown}</strong> seconds...
+              </p>
             </div>
-            <p className="text-center">
-              <strong>{gmail}</strong> has been added to the spreadsheet.
-            </p>
-            <p className="mt-3 text-center">
-              Redirecting to spreadsheet in{" "}
-              <strong className="text-xl">{countdown}</strong> seconds...
-            </p>
           </div>
         )}
 
         {error && (
-          <div className="rounded-field mt-5 border border-red-200 bg-red-100 p-4 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300">
-            <strong>❌ Error:</strong>
-            <br />
-            {errorMessage}
+          <div className="alert alert-error alert-soft mt-5">
+            <span>
+              <strong>Error:</strong> {errorMessage}
+            </span>
           </div>
         )}
       </div>

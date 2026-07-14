@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { buildJoinLink, parseSlugFromJoinLink, formatDate } from "./utils";
+import { buildJoinLink, formatDate, parseSlugFromJoinLink } from "./utils";
 import { CopyLinkButton } from "./CopyLinkButton";
 
 type FileItem = {
@@ -10,13 +10,15 @@ type FileItem = {
   default_role: string;
 };
 
-interface FilesListProps {
+export function FilesList({
+  files,
+  search,
+  onShowDetails,
+}: {
   files: FileItem[];
   search: string;
   onShowDetails: (slug: string) => void;
-}
-
-export function FilesList({ files, search, onShowDetails }: FilesListProps) {
+}) {
   const normalizedSearch = search.trim().toLowerCase();
 
   const searchSlug = useMemo(() => {
@@ -35,42 +37,56 @@ export function FilesList({ files, search, onShowDetails }: FilesListProps) {
   }, [files, normalizedSearch, searchSlug]);
 
   if (files.length === 0) {
-    return <div className="text-base-content/60">No files found.</div>;
+    return <p className="text-base-content/60">No files found.</p>;
+  }
+
+  if (filtered.length === 0) {
+    return <p className="text-base-content/60">No files match your search.</p>;
   }
 
   return (
     <div className="flex flex-col gap-3">
       {filtered.map((file) => (
-        <FileItem key={file.slug} file={file} onShowDetails={onShowDetails} />
+        <FileItemCard
+          key={file.slug}
+          file={file}
+          onShowDetails={onShowDetails}
+        />
       ))}
     </div>
   );
 }
 
-interface FileItemProps {
+function FileItemCard({
+  file,
+  onShowDetails,
+}: {
   file: FileItem;
   onShowDetails: (slug: string) => void;
-}
-
-function FileItem({ file, onShowDetails }: FileItemProps) {
+}) {
   return (
-    <div className="border-base-content/20 bg-base-200/5 rounded-field flex items-center justify-between border-2 px-4 py-3">
+    <div
+      onClick={() => onShowDetails(file.slug)}
+      className="bg-base-200 hover:bg-base-300 rounded-box flex cursor-pointer flex-col gap-3 px-4 py-3 transition-colors sm:flex-row sm:items-center sm:justify-between"
+    >
       <div className="min-w-0">
         <div className="truncate font-medium">{file.title || "Untitled"}</div>
-        <div className="text-base-content/60 flex items-center gap-2 truncate text-sm">
-          {file.default_role}, {file.sso_joins_count}{" "}
-          {file.sso_joins_count === 1 ? "join" : "joins"}, created at{" "}
-          {formatDate(file.created_at)}
+        <div className="text-base-content/60 flex items-center gap-3 text-sm">
+          <span className="flex items-center gap-1">
+            <span className="icon-[material-symbols--group-outline-rounded] text-base" />
+            {file.sso_joins_count}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="icon-[material-symbols--schedule-outline-rounded] text-base" />
+            {formatDate(file.created_at)}
+          </span>
         </div>
       </div>
-      <div className="ml-4 flex shrink-0 items-center gap-2">
-        <button
-          onClick={() => onShowDetails(file.slug)}
-          className="border-base-content/20 hover:border-base-content/40 rounded-field border-2 px-3 py-2 text-sm font-medium"
-        >
-          Show more
-        </button>
-        <CopyLinkButton text={buildJoinLink(file.slug)} variant="primary" />
+      <div
+        className="flex shrink-0 items-center gap-2"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <CopyLinkButton text={buildJoinLink(file.slug)} />
       </div>
     </div>
   );
