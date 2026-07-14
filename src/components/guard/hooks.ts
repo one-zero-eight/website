@@ -25,7 +25,7 @@ export function useServiceAccountEmail() {
   const query = $guard.useQuery("get", "/google/service-account-email");
   return {
     serviceEmail: query.data?.email || "",
-    isLoading: query.isLoading,
+    isPending: query.isPending,
   };
 }
 
@@ -37,7 +37,7 @@ export function useGuardFiles() {
 
   return {
     files: query.data || [],
-    isLoading: query.isLoading,
+    isPending: query.isPending,
     error: query.error,
   };
 }
@@ -59,7 +59,7 @@ export function useGuardFile(slug: string | null) {
 
   return {
     file: query.data,
-    isLoading: query.isLoading,
+    isPending: query.isPending,
   };
 }
 

@@ -1,17 +1,14 @@
 import { useState } from "react";
 import { MESSAGES } from "./consts";
-
-interface CopyLinkButtonProps {
-  text: string;
-  variant?: "primary" | "secondary";
-  size?: "sm" | "md" | "lg";
-}
+import { cn } from "@/lib/ui/cn";
 
 export function CopyLinkButton({
   text,
-  variant = "primary",
-  size = "md",
-}: CopyLinkButtonProps) {
+  className,
+}: {
+  text: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -24,28 +21,17 @@ export function CopyLinkButton({
     }
   };
 
-  const baseClasses = "rounded-field font-medium transition-all";
-  const sizeClasses = {
-    sm: "px-2.5 py-1.5 text-xs",
-    md: "px-3.5 py-2.5 text-sm",
-    lg: "px-4 py-3 text-base",
-  };
-  const variantClasses = {
-    primary: copied
-      ? "bg-green-500 text-white"
-      : "bg-primary text-white hover:bg-[#6600CC]",
-    secondary: copied
-      ? "bg-green-500 text-white"
-      : "border-2 border-base-content/20 hover:border-base-content/40",
-  };
-
   return (
     <button
+      type="button"
       onClick={handleCopy}
-      className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]}`}
-      title="Copy join link"
+      className={cn(
+        "btn btn-sm",
+        copied ? "btn-success" : "btn-primary",
+        className,
+      )}
     >
-      {copied ? MESSAGES.copySuccess : "Copy Join link"}
+      {copied ? MESSAGES.copySuccess : "Copy join link"}
     </button>
   );
 }

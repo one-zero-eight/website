@@ -23,7 +23,6 @@ import { Route as With_menuSportRouteImport } from "./routes/_with_menu/sport";
 import { Route as With_menuScholarshipRouteImport } from "./routes/_with_menu/scholarship";
 import { Route as With_menuMenuRouteImport } from "./routes/_with_menu/menu";
 import { Route as With_menuMapsRouteImport } from "./routes/_with_menu/maps";
-import { Route as With_menuGuardRouteImport } from "./routes/_with_menu/guard";
 import { Route as With_menuFormsRouteImport } from "./routes/_with_menu/forms";
 import { Route as With_menuExtensionRouteImport } from "./routes/_with_menu/extension";
 import { Route as With_menuDormsRouteImport } from "./routes/_with_menu/dorms";
@@ -39,6 +38,7 @@ import { Route as With_menuScheduleIndexRouteImport } from "./routes/_with_menu/
 import { Route as With_menuRoomBookingIndexRouteImport } from "./routes/_with_menu/room-booking/index";
 import { Route as With_menuPrintersIndexRouteImport } from "./routes/_with_menu/printers/index";
 import { Route as With_menuMusicRoomIndexRouteImport } from "./routes/_with_menu/music-room.index";
+import { Route as With_menuGuardIndexRouteImport } from "./routes/_with_menu/guard/index";
 import { Route as With_menuEventsIndexRouteImport } from "./routes/_with_menu/events/index";
 import { Route as With_menuClubsIndexRouteImport } from "./routes/_with_menu/clubs/index";
 import { Route as With_menuCatalogueIndexRouteImport } from "./routes/_with_menu/catalogue/index";
@@ -55,6 +55,9 @@ import { Route as With_menuRoomBookingListRouteImport } from "./routes/_with_men
 import { Route as With_menuPrintersScanRouteImport } from "./routes/_with_menu/printers/scan";
 import { Route as With_menuPrintersPrintRouteImport } from "./routes/_with_menu/printers/print";
 import { Route as With_menuMusicRoomInstructionsRouteImport } from "./routes/_with_menu/music-room.instructions";
+import { Route as With_menuGuardFilesRouteImport } from "./routes/_with_menu/guard/files";
+import { Route as With_menuGuardCreateRouteImport } from "./routes/_with_menu/guard/create";
+import { Route as With_menuGuardCopyRouteImport } from "./routes/_with_menu/guard/copy";
 import { Route as With_menuEventsCalendarRouteImport } from "./routes/_with_menu/events/calendar";
 import { Route as With_menuEventsArchiveRouteImport } from "./routes/_with_menu/events/archive";
 import { Route as With_menuEventsApprovalRouteImport } from "./routes/_with_menu/events/approval";
@@ -145,11 +148,6 @@ const With_menuMapsRoute = With_menuMapsRouteImport.update({
   path: "/maps",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
-const With_menuGuardRoute = With_menuGuardRouteImport.update({
-  id: "/guard",
-  path: "/guard",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
 const With_menuFormsRoute = With_menuFormsRouteImport.update({
   id: "/forms",
   path: "/forms",
@@ -226,6 +224,11 @@ const With_menuPrintersIndexRoute = With_menuPrintersIndexRouteImport.update({
 const With_menuMusicRoomIndexRoute = With_menuMusicRoomIndexRouteImport.update({
   id: "/music-room/",
   path: "/music-room/",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
+const With_menuGuardIndexRoute = With_menuGuardIndexRouteImport.update({
+  id: "/guard/",
+  path: "/guard/",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menuEventsIndexRoute = With_menuEventsIndexRouteImport.update({
@@ -315,6 +318,21 @@ const With_menuMusicRoomInstructionsRoute =
     path: "/music-room/instructions",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
+const With_menuGuardFilesRoute = With_menuGuardFilesRouteImport.update({
+  id: "/guard/files",
+  path: "/guard/files",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
+const With_menuGuardCreateRoute = With_menuGuardCreateRouteImport.update({
+  id: "/guard/create",
+  path: "/guard/create",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
+const With_menuGuardCopyRoute = With_menuGuardCopyRouteImport.update({
+  id: "/guard/copy",
+  path: "/guard/copy",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuEventsCalendarRoute = With_menuEventsCalendarRouteImport.update({
   id: "/events/calendar",
   path: "/events/calendar",
@@ -428,7 +446,6 @@ export interface FileRoutesByFullPath {
   "/dorms": typeof With_menuDormsRoute;
   "/extension": typeof With_menuExtensionRoute;
   "/forms": typeof With_menuFormsRoute;
-  "/guard": typeof With_menuGuardRoute;
   "/maps": typeof With_menuMapsRoute;
   "/menu": typeof With_menuMenuRoute;
   "/scholarship": typeof With_menuScholarshipRoute;
@@ -449,6 +466,9 @@ export interface FileRoutesByFullPath {
   "/events/approval": typeof With_menuEventsApprovalRoute;
   "/events/archive": typeof With_menuEventsArchiveRoute;
   "/events/calendar": typeof With_menuEventsCalendarRoute;
+  "/guard/copy": typeof With_menuGuardCopyRoute;
+  "/guard/create": typeof With_menuGuardCreateRoute;
+  "/guard/files": typeof With_menuGuardFilesRoute;
   "/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
   "/printers/print": typeof With_menuPrintersPrintRoute;
   "/printers/scan": typeof With_menuPrintersScanRoute;
@@ -465,6 +485,7 @@ export interface FileRoutesByFullPath {
   "/catalogue/": typeof With_menuCatalogueIndexRoute;
   "/clubs/": typeof With_menuClubsIndexRoute;
   "/events/": typeof With_menuEventsIndexRoute;
+  "/guard/": typeof With_menuGuardIndexRoute;
   "/music-room/": typeof With_menuMusicRoomIndexRoute;
   "/printers/": typeof With_menuPrintersIndexRoute;
   "/room-booking/": typeof With_menuRoomBookingIndexRoute;
@@ -493,7 +514,6 @@ export interface FileRoutesByTo {
   "/dorms": typeof With_menuDormsRoute;
   "/extension": typeof With_menuExtensionRoute;
   "/forms": typeof With_menuFormsRoute;
-  "/guard": typeof With_menuGuardRoute;
   "/maps": typeof With_menuMapsRoute;
   "/menu": typeof With_menuMenuRoute;
   "/scholarship": typeof With_menuScholarshipRoute;
@@ -514,6 +534,9 @@ export interface FileRoutesByTo {
   "/events/approval": typeof With_menuEventsApprovalRoute;
   "/events/archive": typeof With_menuEventsArchiveRoute;
   "/events/calendar": typeof With_menuEventsCalendarRoute;
+  "/guard/copy": typeof With_menuGuardCopyRoute;
+  "/guard/create": typeof With_menuGuardCreateRoute;
+  "/guard/files": typeof With_menuGuardFilesRoute;
   "/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
   "/printers/print": typeof With_menuPrintersPrintRoute;
   "/printers/scan": typeof With_menuPrintersScanRoute;
@@ -530,6 +553,7 @@ export interface FileRoutesByTo {
   "/catalogue": typeof With_menuCatalogueIndexRoute;
   "/clubs": typeof With_menuClubsIndexRoute;
   "/events": typeof With_menuEventsIndexRoute;
+  "/guard": typeof With_menuGuardIndexRoute;
   "/music-room": typeof With_menuMusicRoomIndexRoute;
   "/printers": typeof With_menuPrintersIndexRoute;
   "/room-booking": typeof With_menuRoomBookingIndexRoute;
@@ -561,7 +585,6 @@ export interface FileRoutesById {
   "/_with_menu/dorms": typeof With_menuDormsRoute;
   "/_with_menu/extension": typeof With_menuExtensionRoute;
   "/_with_menu/forms": typeof With_menuFormsRoute;
-  "/_with_menu/guard": typeof With_menuGuardRoute;
   "/_with_menu/maps": typeof With_menuMapsRoute;
   "/_with_menu/menu": typeof With_menuMenuRoute;
   "/_with_menu/scholarship": typeof With_menuScholarshipRoute;
@@ -582,6 +605,9 @@ export interface FileRoutesById {
   "/_with_menu/events/approval": typeof With_menuEventsApprovalRoute;
   "/_with_menu/events/archive": typeof With_menuEventsArchiveRoute;
   "/_with_menu/events/calendar": typeof With_menuEventsCalendarRoute;
+  "/_with_menu/guard/copy": typeof With_menuGuardCopyRoute;
+  "/_with_menu/guard/create": typeof With_menuGuardCreateRoute;
+  "/_with_menu/guard/files": typeof With_menuGuardFilesRoute;
   "/_with_menu/music-room/instructions": typeof With_menuMusicRoomInstructionsRoute;
   "/_with_menu/printers/print": typeof With_menuPrintersPrintRoute;
   "/_with_menu/printers/scan": typeof With_menuPrintersScanRoute;
@@ -598,6 +624,7 @@ export interface FileRoutesById {
   "/_with_menu/catalogue/": typeof With_menuCatalogueIndexRoute;
   "/_with_menu/clubs/": typeof With_menuClubsIndexRoute;
   "/_with_menu/events/": typeof With_menuEventsIndexRoute;
+  "/_with_menu/guard/": typeof With_menuGuardIndexRoute;
   "/_with_menu/music-room/": typeof With_menuMusicRoomIndexRoute;
   "/_with_menu/printers/": typeof With_menuPrintersIndexRoute;
   "/_with_menu/room-booking/": typeof With_menuRoomBookingIndexRoute;
@@ -629,7 +656,6 @@ export interface FileRouteTypes {
     | "/dorms"
     | "/extension"
     | "/forms"
-    | "/guard"
     | "/maps"
     | "/menu"
     | "/scholarship"
@@ -650,6 +676,9 @@ export interface FileRouteTypes {
     | "/events/approval"
     | "/events/archive"
     | "/events/calendar"
+    | "/guard/copy"
+    | "/guard/create"
+    | "/guard/files"
     | "/music-room/instructions"
     | "/printers/print"
     | "/printers/scan"
@@ -666,6 +695,7 @@ export interface FileRouteTypes {
     | "/catalogue/"
     | "/clubs/"
     | "/events/"
+    | "/guard/"
     | "/music-room/"
     | "/printers/"
     | "/room-booking/"
@@ -694,7 +724,6 @@ export interface FileRouteTypes {
     | "/dorms"
     | "/extension"
     | "/forms"
-    | "/guard"
     | "/maps"
     | "/menu"
     | "/scholarship"
@@ -715,6 +744,9 @@ export interface FileRouteTypes {
     | "/events/approval"
     | "/events/archive"
     | "/events/calendar"
+    | "/guard/copy"
+    | "/guard/create"
+    | "/guard/files"
     | "/music-room/instructions"
     | "/printers/print"
     | "/printers/scan"
@@ -731,6 +763,7 @@ export interface FileRouteTypes {
     | "/catalogue"
     | "/clubs"
     | "/events"
+    | "/guard"
     | "/music-room"
     | "/printers"
     | "/room-booking"
@@ -761,7 +794,6 @@ export interface FileRouteTypes {
     | "/_with_menu/dorms"
     | "/_with_menu/extension"
     | "/_with_menu/forms"
-    | "/_with_menu/guard"
     | "/_with_menu/maps"
     | "/_with_menu/menu"
     | "/_with_menu/scholarship"
@@ -782,6 +814,9 @@ export interface FileRouteTypes {
     | "/_with_menu/events/approval"
     | "/_with_menu/events/archive"
     | "/_with_menu/events/calendar"
+    | "/_with_menu/guard/copy"
+    | "/_with_menu/guard/create"
+    | "/_with_menu/guard/files"
     | "/_with_menu/music-room/instructions"
     | "/_with_menu/printers/print"
     | "/_with_menu/printers/scan"
@@ -798,6 +833,7 @@ export interface FileRouteTypes {
     | "/_with_menu/catalogue/"
     | "/_with_menu/clubs/"
     | "/_with_menu/events/"
+    | "/_with_menu/guard/"
     | "/_with_menu/music-room/"
     | "/_with_menu/printers/"
     | "/_with_menu/room-booking/"
@@ -927,13 +963,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuMapsRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/guard": {
-      id: "/_with_menu/guard";
-      path: "/guard";
-      fullPath: "/guard";
-      preLoaderRoute: typeof With_menuGuardRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
     "/_with_menu/forms": {
       id: "/_with_menu/forms";
       path: "/forms";
@@ -1037,6 +1066,13 @@ declare module "@tanstack/react-router" {
       path: "/music-room";
       fullPath: "/music-room/";
       preLoaderRoute: typeof With_menuMusicRoomIndexRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/guard/": {
+      id: "/_with_menu/guard/";
+      path: "/guard";
+      fullPath: "/guard/";
+      preLoaderRoute: typeof With_menuGuardIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/events/": {
@@ -1149,6 +1185,27 @@ declare module "@tanstack/react-router" {
       path: "/music-room/instructions";
       fullPath: "/music-room/instructions";
       preLoaderRoute: typeof With_menuMusicRoomInstructionsRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/guard/files": {
+      id: "/_with_menu/guard/files";
+      path: "/guard/files";
+      fullPath: "/guard/files";
+      preLoaderRoute: typeof With_menuGuardFilesRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/guard/create": {
+      id: "/_with_menu/guard/create";
+      path: "/guard/create";
+      fullPath: "/guard/create";
+      preLoaderRoute: typeof With_menuGuardCreateRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/guard/copy": {
+      id: "/_with_menu/guard/copy";
+      path: "/guard/copy";
+      fullPath: "/guard/copy";
+      preLoaderRoute: typeof With_menuGuardCopyRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/events/calendar": {
@@ -1295,7 +1352,6 @@ interface With_menuRouteRouteChildren {
   With_menuDormsRoute: typeof With_menuDormsRoute;
   With_menuExtensionRoute: typeof With_menuExtensionRoute;
   With_menuFormsRoute: typeof With_menuFormsRoute;
-  With_menuGuardRoute: typeof With_menuGuardRoute;
   With_menuMapsRoute: typeof With_menuMapsRoute;
   With_menuMenuRoute: typeof With_menuMenuRoute;
   With_menuScholarshipRoute: typeof With_menuScholarshipRoute;
@@ -1311,6 +1367,9 @@ interface With_menuRouteRouteChildren {
   With_menuEventsApprovalRoute: typeof With_menuEventsApprovalRoute;
   With_menuEventsArchiveRoute: typeof With_menuEventsArchiveRoute;
   With_menuEventsCalendarRoute: typeof With_menuEventsCalendarRoute;
+  With_menuGuardCopyRoute: typeof With_menuGuardCopyRoute;
+  With_menuGuardCreateRoute: typeof With_menuGuardCreateRoute;
+  With_menuGuardFilesRoute: typeof With_menuGuardFilesRoute;
   With_menuMusicRoomInstructionsRoute: typeof With_menuMusicRoomInstructionsRoute;
   With_menuPrintersPrintRoute: typeof With_menuPrintersPrintRoute;
   With_menuPrintersScanRoute: typeof With_menuPrintersScanRoute;
@@ -1326,6 +1385,7 @@ interface With_menuRouteRouteChildren {
   With_menuCatalogueIndexRoute: typeof With_menuCatalogueIndexRoute;
   With_menuClubsIndexRoute: typeof With_menuClubsIndexRoute;
   With_menuEventsIndexRoute: typeof With_menuEventsIndexRoute;
+  With_menuGuardIndexRoute: typeof With_menuGuardIndexRoute;
   With_menuMusicRoomIndexRoute: typeof With_menuMusicRoomIndexRoute;
   With_menuPrintersIndexRoute: typeof With_menuPrintersIndexRoute;
   With_menuRoomBookingIndexRoute: typeof With_menuRoomBookingIndexRoute;
@@ -1352,7 +1412,6 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuDormsRoute: With_menuDormsRoute,
   With_menuExtensionRoute: With_menuExtensionRoute,
   With_menuFormsRoute: With_menuFormsRoute,
-  With_menuGuardRoute: With_menuGuardRoute,
   With_menuMapsRoute: With_menuMapsRoute,
   With_menuMenuRoute: With_menuMenuRoute,
   With_menuScholarshipRoute: With_menuScholarshipRoute,
@@ -1368,6 +1427,9 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuEventsApprovalRoute: With_menuEventsApprovalRoute,
   With_menuEventsArchiveRoute: With_menuEventsArchiveRoute,
   With_menuEventsCalendarRoute: With_menuEventsCalendarRoute,
+  With_menuGuardCopyRoute: With_menuGuardCopyRoute,
+  With_menuGuardCreateRoute: With_menuGuardCreateRoute,
+  With_menuGuardFilesRoute: With_menuGuardFilesRoute,
   With_menuMusicRoomInstructionsRoute: With_menuMusicRoomInstructionsRoute,
   With_menuPrintersPrintRoute: With_menuPrintersPrintRoute,
   With_menuPrintersScanRoute: With_menuPrintersScanRoute,
@@ -1383,6 +1445,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuCatalogueIndexRoute: With_menuCatalogueIndexRoute,
   With_menuClubsIndexRoute: With_menuClubsIndexRoute,
   With_menuEventsIndexRoute: With_menuEventsIndexRoute,
+  With_menuGuardIndexRoute: With_menuGuardIndexRoute,
   With_menuMusicRoomIndexRoute: With_menuMusicRoomIndexRoute,
   With_menuPrintersIndexRoute: With_menuPrintersIndexRoute,
   With_menuRoomBookingIndexRoute: With_menuRoomBookingIndexRoute,
