@@ -190,7 +190,7 @@ export function AboutPage() {
           <AboutAsideSection
             aside={
               <a
-                href="https://t.me/one_zero_eight"
+                href="https://telegram.me/one_zero_eight"
                 className={aboutActionButtonClass}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -234,7 +234,7 @@ export function AboutPage() {
             aside={
               <div className="flex w-full flex-col items-center gap-2">
                 <a
-                  href="https://t.me/one_zero_eight_bot"
+                  href="https://telegram.me/one_zero_eight_bot"
                   className={aboutActionButtonClass}
                   target="_blank"
                   rel="noopener noreferrer"

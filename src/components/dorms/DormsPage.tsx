@@ -39,7 +39,7 @@ export function DormsPage() {
           </div>
         </div>
         <a
-          href="https://t.me/IURoomsBot"
+          href="https://telegram.me/IURoomsBot"
           target="_blank"
           className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
         >
@@ -57,7 +57,7 @@ export function DormsPage() {
           </div>
         </a>
         <a
-          href="https://t.me/maximf3"
+          href="https://telegram.me/maximf3"
           target="_blank"
           className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
         >

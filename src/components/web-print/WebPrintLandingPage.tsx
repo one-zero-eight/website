@@ -81,7 +81,7 @@ export function WebPrintLandingPage() {
       </section>
 
       <a
-        href="https://t.me/InnoPrintBot"
+        href="https://telegram.me/InnoPrintBot"
         target="_blank"
         rel="noopener noreferrer"
         className="bg-base-200 hover:bg-base-300 rounded-field flex items-center gap-3 px-4 py-3.5 transition-colors"

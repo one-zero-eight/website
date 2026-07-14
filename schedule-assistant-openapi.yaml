@@ -8,7 +8,7 @@ info:
 
 
     This is the API for Schedule Builder project in InNoHassle ecosystem developed
-    by [one-zero-eight](https://t.me/one_zero_eight) community.
+    by [one-zero-eight](https://telegram.me/one_zero_eight) community.
 
 
     Using this API you can build academic schedules and manage room bookings at Innopolis
@@ -32,7 +32,7 @@ info:
     '
   contact:
     name: one-zero-eight (Telegram)
-    url: https://t.me/one_zero_eight
+    url: https://telegram.me/one_zero_eight
   license:
     name: MIT License
     identifier: MIT

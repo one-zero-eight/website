@@ -261,7 +261,7 @@ export function HowToCreateClubPage() {
         <div className="text-base-content">
           <p className="text-lg font-semibold">Timofey Konovalov</p>
           <a
-            href="https://t.me/T_Konovalov"
+            href="https://telegram.me/T_Konovalov"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary inline-flex items-center gap-1 text-lg hover:underline"

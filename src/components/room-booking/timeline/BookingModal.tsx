@@ -81,7 +81,7 @@ function Attendee({
             className="text-base hover:underline"
             href={
               attendeeDetails.telegram_username
-                ? `https://t.me/${attendeeDetails.telegram_username}`
+                ? `https://telegram.me/${attendeeDetails.telegram_username}`
                 : undefined
             }
             target="_blank"

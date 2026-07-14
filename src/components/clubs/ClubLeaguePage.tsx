@@ -65,7 +65,7 @@ export function ClubLeaguePage() {
               <li>
                 In controversial situations decision is made by{" "}
                 <a
-                  href="https://t.me/T_Konovalov"
+                  href="https://telegram.me/T_Konovalov"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
@@ -200,7 +200,7 @@ export function ClubLeaguePage() {
                   activities of the club, you have to write a justification for
                   the purchase and send it to{" "}
                   <a
-                    href="https://t.me/T_Konovalov"
+                    href="https://telegram.me/T_Konovalov"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:underline"
@@ -278,7 +278,7 @@ export function ClubLeaguePage() {
         <div className="text-base-content">
           <p className="text-lg font-semibold">Timofey Konovalov</p>
           <a
-            href="https://t.me/T_Konovalov"
+            href="https://telegram.me/T_Konovalov"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary inline-flex items-center gap-1 text-lg hover:underline"

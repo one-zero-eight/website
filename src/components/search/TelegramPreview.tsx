@@ -17,7 +17,7 @@ export default function TelegramPreview({ source }: TelegramPreviewProps) {
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.setAttribute(
       "data-telegram-post",
-      source.link.split("https://t.me/")[1],
+      source.link.split("https://telegram.me/")[1],
     );
     script.setAttribute("data-width", "100%");
     if (isDarkMode) {
