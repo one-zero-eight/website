@@ -14,7 +14,7 @@ export function MusicRoomPage() {
         <div className="my-4 grid grid-cols-1 gap-4 @xl/content:grid-cols-2">
           <div className="flex flex-col gap-4">
             <a
-              href="https://t.me/InnoMusicRoomBot"
+              href="https://telegram.me/InnoMusicRoomBot"
               className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
             >
               <div className="w-12">
@@ -102,13 +102,13 @@ export function MusicRoomPage() {
         urls={[
           {
             url: getMusicRoomLink(),
-            sourceLink: "https://t.me/InnoMusicRoomBot",
+            sourceLink: "https://telegram.me/InnoMusicRoomBot",
             updatedAt: new Date().toISOString(),
           },
           {
             url: getMyMusicRoomLink(),
             color: "seagreen",
-            sourceLink: "https://t.me/InnoMusicRoomBot",
+            sourceLink: "https://telegram.me/InnoMusicRoomBot",
             updatedAt: new Date().toISOString(),
           },
         ]}

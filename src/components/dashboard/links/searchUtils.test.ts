@@ -28,7 +28,7 @@ const testScenarios: TestScenario[] = [
       "https://moodle.innopolis.university/my/": 3,
       "https://baam.tatar/s": 3,
       "https://my.innopolis.university/event": 3,
-      "https://t.me/IUSportBot": 3,
+      "https://telegram.me/IUSportBot": 3,
       "https://my.innopolis.university/store": 3,
       "https://eduwiki.innopolis.university/index.php/Main_Page": 3,
       "https://psychologist.innopolis.university/appointment/new": 3,
@@ -49,17 +49,17 @@ const testScenarios: TestScenario[] = [
     userFrequencies: {},
     relevanceScores: {
       "https://sport.innopolis.university/profile/": 3,
-      "https://t.me/IUSportBot": 2,
+      "https://telegram.me/IUSportBot": 2,
     },
   },
   {
     name: "Sports but with userFrequency",
     searchQuery: "sport",
     userFrequencies: {
-      "https://t.me/IUSportBot": 1,
+      "https://telegram.me/IUSportBot": 1,
     },
     relevanceScores: {
-      "https://t.me/IUSportBot": 3,
+      "https://telegram.me/IUSportBot": 3,
       "https://sport.innopolis.university/profile/": 2,
     },
   },

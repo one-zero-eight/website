@@ -77,7 +77,7 @@ export function SportsWidget() {
           ({daysLeft} days left)
         </p>
         <a
-          href="https://t.me/IUSportBot"
+          href="https://telegram.me/IUSportBot"
           className="text-base-content/75 w-fit hover:underline"
         >
           Check in for sports in the{" "}

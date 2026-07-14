@@ -13,7 +13,7 @@ export function SportPage() {
         <div className="my-4 grid grid-cols-1 gap-4 @xl/content:grid-cols-2">
           <div className="flex flex-col gap-4">
             <a
-              href="https://t.me/IUSportBot"
+              href="https://telegram.me/IUSportBot"
               className="group bg-base-200 hover:bg-base-300 rounded-box flex flex-row gap-4 px-4 py-6"
             >
               <div className="w-12">

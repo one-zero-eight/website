@@ -175,7 +175,7 @@ export default function Participants({
                       {p.telegram_username && (
                         <div className="">
                           <a
-                            href={`https://t.me/${p.telegram_username}`}
+                            href={`https://telegram.me/${p.telegram_username}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:text-primary/80"

@@ -136,7 +136,7 @@ function TeamMemberCard({
 
               {member.telegram && (
                 <a
-                  href={`https://t.me/${safeDecode(member.telegram)}`}
+                  href={`https://telegram.me/${safeDecode(member.telegram)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group hover:bg-base-100/50 flex items-center justify-center rounded-md p-1.5 transition-colors"

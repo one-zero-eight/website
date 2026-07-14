@@ -50,13 +50,13 @@ const targetTypes: Record<
   { href: string; iconClassName: string; tooltip: string }
 > = {
   [TargetForExport.sport]: {
-    href: "https://t.me/IUSportBot",
+    href: "https://telegram.me/IUSportBot",
     iconClassName:
       "icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70 mb-1",
     tooltip: "Open Telegram bot",
   },
   [TargetForExport.music_room]: {
-    href: "https://t.me/InnoMusicRoomBot",
+    href: "https://telegram.me/InnoMusicRoomBot",
     iconClassName:
       "icon-[mdi--robot-excited-outline] text-[#F0B132] dark:text-[#F0B132]/70 mb-1",
     tooltip: "Open Telegram bot",

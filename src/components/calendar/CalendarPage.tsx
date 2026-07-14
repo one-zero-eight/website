@@ -80,7 +80,7 @@ function getCalendarsToShow(
     toShow.push({
       url: getMyMusicRoomLink(),
       color: "seagreen",
-      sourceLink: "https://t.me/InnoMusicRoomBot",
+      sourceLink: "https://telegram.me/InnoMusicRoomBot",
       updatedAt: new Date().toISOString(),
     });
   }

@@ -49,7 +49,7 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
             <a
               href={
                 clubLeader.telegram_alias
-                  ? `https://t.me/${clubLeader.telegram_alias}`
+                  ? `https://telegram.me/${clubLeader.telegram_alias}`
                   : undefined
               }
               target="_blank"

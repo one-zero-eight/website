@@ -328,7 +328,7 @@ export const normalizeLink = (link: string): string => {
 
   if (trimmed.startsWith("@")) {
     const username = trimmed.slice(1).trim();
-    return username ? `https://t.me/${username}` : link;
+    return username ? `https://telegram.me/${username}` : link;
   }
 
   if (/^https?:\/\//i.test(trimmed)) {

@@ -130,7 +130,7 @@ export const resourcesList: ResourceType[] = [
 
   // > InNoHassle >
   {
-    url: "https://t.me/IUSportBot",
+    url: "https://telegram.me/IUSportBot",
     resource: "InNoHassle",
     title: "Sport bot",
     description: "Conveniently check in for sports in Telegram.",
@@ -139,7 +139,7 @@ export const resourcesList: ResourceType[] = [
     frequency: INNOHASSLE_FREQUENCY,
   },
   {
-    url: "https://t.me/InnoPrintBot",
+    url: "https://telegram.me/InnoPrintBot",
     resource: "InNoHassle",
     title: "Inno Print Bot",
     description: "Quickly print & scan on university printers.",
@@ -148,7 +148,7 @@ export const resourcesList: ResourceType[] = [
     frequency: INNOHASSLE_FREQUENCY,
   },
   {
-    url: "https://t.me/InnoMusicRoomBot",
+    url: "https://telegram.me/InnoMusicRoomBot",
     resource: "InNoHassle",
     title: "Music room",
     description: "Access the music room with musical equipment.",
@@ -157,7 +157,7 @@ export const resourcesList: ResourceType[] = [
     frequency: INNOHASSLE_FREQUENCY,
   },
   {
-    url: "https://t.me/IURoomsBot",
+    url: "https://telegram.me/IURoomsBot",
     resource: "InNoHassle",
     title: "Dorms bot",
     description:
@@ -287,7 +287,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 18,
   },
   {
-    url: "https://t.me/campus_info",
+    url: "https://telegram.me/campus_info",
     resource: "Dormitory",
     title: "Information channel",
     description:
@@ -297,7 +297,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 15,
   },
   {
-    url: "https://t.me/hoteluni",
+    url: "https://telegram.me/hoteluni",
     resource: "Dormitory",
     title: "Administration",
     description:
@@ -307,7 +307,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 9,
   },
   {
-    url: "https://t.me/Inno_dorm",
+    url: "https://telegram.me/Inno_dorm",
     resource: "Dormitory",
     title: "Student support",
     description: "Get assistance and support for dormitory-related issues.",
@@ -369,7 +369,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 8,
   },
   {
-    url: "https://t.me/iuithelp",
+    url: "https://telegram.me/iuithelp",
     resource: "IT help",
     title: "Contact for urgent messages",
     description:
@@ -410,7 +410,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 21,
   },
   {
-    url: "https://t.me/InnaHelpBot",
+    url: "https://telegram.me/InnaHelpBot",
     resource: "Inna",
     title: "Bus schedule",
     description:
@@ -420,7 +420,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 10,
   },
   {
-    url: "https://t.me/+H0MsiY00PoI4Yzcy",
+    url: "https://telegram.me/+H0MsiY00PoI4Yzcy",
     resource: "Library",
     title: "Information channel",
     description:
@@ -439,7 +439,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 22,
   },
   {
-    url: "https://t.me/innobus",
+    url: "https://telegram.me/innobus",
     resource: "Bus",
     title: "Information channel",
     description: "View news about the current bus location in Telegram.",
@@ -448,7 +448,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 5,
   },
   {
-    url: "https://t.me/innolinks",
+    url: "https://telegram.me/innolinks",
     resource: "Chat with chats",
     title: null,
     description: "Explore links to many Telegram channels and chats.",
@@ -466,7 +466,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 11,
   },
   {
-    url: "https://t.me/InnoChatCleanerBot",
+    url: "https://telegram.me/InnoChatCleanerBot",
     resource: "Chat cleaner",
     title: null,
     description:
@@ -485,7 +485,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 13,
   },
   {
-    url: "https://t.me/opportunitiesforyou",
+    url: "https://telegram.me/opportunitiesforyou",
     resource: "Opportunities For You",
     title: null,
     description:
@@ -495,7 +495,7 @@ export const resourcesList: ResourceType[] = [
     frequency: 0,
   },
   {
-    url: "https://t.me/StudentAffairs_bot",
+    url: "https://telegram.me/StudentAffairs_bot",
     resource: "Student Affairs bot",
     title: null,
     description: "Bot for communication with 319 and DoE.",

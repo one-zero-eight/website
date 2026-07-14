@@ -40,7 +40,7 @@ const processTextNode = (text: string): (string | React.JSX.Element)[] => {
       result.push(
         <a
           className="text-primary hover:text-primary/80 break-all"
-          href={`https://t.me/${username.slice(1)}`}
+          href={`https://telegram.me/${username.slice(1)}`}
           target="_blank"
           rel="noopener noreferrer"
           key={`tg-${i}`}
