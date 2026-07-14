@@ -1,28 +1,22 @@
+import { guardTypes } from "@/api/guard";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useState } from "react";
-import {
-  useServiceAccountEmail,
-  useGuardFiles,
-  useGuardFile,
-  useGuardMutations,
-} from "./hooks";
-import { SetupContainer } from "./SetupContainer";
-import { FilesSection } from "./FilesSection";
-import { FilesList } from "./FilesList";
 import { FileDetails } from "./FileDetails";
+import { FilesList } from "./FilesList";
+import { FilesSection } from "./FilesSection";
+import { useGuardFile, useGuardFiles, useGuardMutations } from "./hooks";
 
-export function GuardPage() {
+export function FilesPage() {
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [filesSearch, setFilesSearch] = useState("");
   const [detailsSearch, setDetailsSearch] = useState("");
 
-  const { serviceEmail } = useServiceAccountEmail();
   const {
     files,
-    isLoading: isLoadingFiles,
+    isPending: isLoadingFiles,
     error: filesError,
   } = useGuardFiles();
-  const { file: selectedFile, isLoading: isLoadingFile } =
+  const { file: selectedFile, isPending: isLoadingFile } =
     useGuardFile(selectedSlug);
   const mutations = useGuardMutations();
 
@@ -85,7 +79,7 @@ export function GuardPage() {
 
     await mutations.updateDefaultRole.mutateAsync({
       params: { path: { slug: selectedSlug } },
-      body: { role: role as any },
+      body: { role: role as guardTypes.UpdateDefaultRoleRequestRole },
     });
 
     mutations.invalidateFile(selectedSlug);
@@ -97,54 +91,54 @@ export function GuardPage() {
 
     await mutations.updateUserRole.mutateAsync({
       params: { path: { slug: selectedSlug, user_id: userId } },
-      body: { role: role as any },
+      body: { role: role as guardTypes.UpdateUserRoleRequestRole },
     });
 
     mutations.invalidateFile(selectedSlug);
   };
 
   return (
-    <div className="flex grow flex-col gap-4 p-4">
-      <div className="w-full max-w-2xl self-center">
-        <SetupContainer serviceEmail={serviceEmail} />
-
-        <hr className="border-base-content/20 my-6" />
-
-        {selectedSlug ? (
-          <FileDetails
-            slug={selectedSlug}
-            file={selectedFile}
-            isLoading={isLoadingFile}
-            search={detailsSearch}
-            onSearchChange={setDetailsSearch}
-            onBack={handleBack}
-            onDelete={handleDelete}
-            onUpdateTitle={handleUpdateTitle}
-            onBan={handleBan}
-            onUnban={handleUnban}
-            onUpdateDefaultRole={handleUpdateDefaultRole}
-            onUpdateUserRole={handleUpdateUserRole}
-          />
-        ) : (
-          <FilesSection search={filesSearch} onSearchChange={setFilesSearch}>
-            {isLoadingFiles ? (
-              <div className="text-base-content/70">Loading...</div>
-            ) : filesError ? (
-              <div className="rounded-sm border-2 border-red-400 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-600 dark:bg-red-900/20 dark:text-red-200">
+    <div className="@container/content mx-auto flex w-full max-w-[720px] flex-col gap-4 px-4 py-8">
+      {selectedSlug ? (
+        <FileDetails
+          slug={selectedSlug}
+          file={selectedFile}
+          isLoading={isLoadingFile}
+          search={detailsSearch}
+          onSearchChange={setDetailsSearch}
+          onBack={handleBack}
+          onDelete={handleDelete}
+          onUpdateTitle={handleUpdateTitle}
+          onBan={handleBan}
+          onUnban={handleUnban}
+          onUpdateDefaultRole={handleUpdateDefaultRole}
+          onUpdateUserRole={handleUpdateUserRole}
+        />
+      ) : (
+        <FilesSection search={filesSearch} onSearchChange={setFilesSearch}>
+          {isLoadingFiles ? (
+            <div className="flex flex-col gap-3">
+              <div className="skeleton h-16 w-full" />
+              <div className="skeleton h-16 w-full" />
+              <div className="skeleton h-16 w-full" />
+            </div>
+          ) : filesError ? (
+            <div className="alert alert-error alert-soft">
+              <span>
                 Error loading files: {formatApiErrorMessage(filesError)}
-              </div>
-            ) : files.length > 0 ? (
-              <FilesList
-                files={files}
-                search={filesSearch}
-                onShowDetails={handleShowDetails}
-              />
-            ) : (
-              <div className="text-base-content/60">No files found.</div>
-            )}
-          </FilesSection>
-        )}
-      </div>
+              </span>
+            </div>
+          ) : files.length > 0 ? (
+            <FilesList
+              files={files}
+              search={filesSearch}
+              onShowDetails={handleShowDetails}
+            />
+          ) : (
+            <p className="text-base-content/60">No files found.</p>
+          )}
+        </FilesSection>
+      )}
     </div>
   );
 }
