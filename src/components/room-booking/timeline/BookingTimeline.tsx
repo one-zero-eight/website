@@ -21,7 +21,7 @@ import {
   type MouseEvent,
 } from "react";
 import { useMediaQuery } from "usehooks-ts";
-import styles from "./BookingTimeline.module.scss";
+import styles from "./BookingTimeline.module.css";
 import {
   accessLevelTooltip,
   buildNewBookingData,
@@ -467,7 +467,7 @@ export const BookingTimeline = forwardRef<
   const roomsToRender = roomsLoading ? PLACEHOLDER_ROOMS : actualRooms;
 
   return (
-    <div className={cn(styles.root, className)}>
+    <div className={cn("flex flex-col items-stretch gap-2", className)}>
       <div
         className={styles.timeline}
         style={timelineStyle}
@@ -479,7 +479,7 @@ export const BookingTimeline = forwardRef<
         }
         data-new-touched={newBookingTouched ? "" : undefined}
       >
-        <div className={styles.corner}>
+        <div className={cn(styles.corner, "text-base")}>
           {!compactModeEnabled && <h2>Timeline</h2>}
         </div>
 
@@ -531,7 +531,7 @@ export const BookingTimeline = forwardRef<
             <div className={styles.nowTimeboxWrapper} style={nowRulerCssVars}>
               <button
                 type="button"
-                className={styles.nowTimebox}
+                className={cn(styles.nowTimebox, "text-sm")}
                 onClick={() => scrollToNow({ position: "center" })}
               >
                 {clockTime(now)}
@@ -551,21 +551,23 @@ export const BookingTimeline = forwardRef<
                 className={styles.newBookingTimeboxesContainer}
                 style={newBookingData?.cssVars}
               >
-                <span className={styles.newBookingTimeboxStart}>
+                <span className={cn(styles.newBookingTimeboxStart, "text-sm")}>
                   {newBookingData?.startTime}
                 </span>
-                <span className={styles.newBookingTimeboxEnd}>
+                <span className={cn(styles.newBookingTimeboxEnd, "text-sm")}>
                   {newBookingData?.endTime}
                 </span>
               </div>
             </div>
             <div className={styles.newBooking} style={newBookingData?.cssVars}>
-              <div id={NEW_BOOKING_BOX_ID}>
-                <span>{newBookingData?.durationText}</span>
+              <div id={NEW_BOOKING_BOX_ID} className={styles.newBookingInner}>
+                <span className="pointer-events-none px-2">
+                  {newBookingData?.durationText}
+                </span>
               </div>
             </div>
 
-            <div className={styles.header}>
+            <div className={cn(styles.header, "text-base text-mauve-500")}>
               {visibleDates.map((day) => (
                 <div
                   key={day.toString()}
@@ -585,7 +587,9 @@ export const BookingTimeline = forwardRef<
                   <div className={styles.headerItemHours}>
                     {HOURS_TIMES.map((h) => (
                       <span key={h}>
-                        <span>{h}</span>
+                        <span className="text-sm text-mauve-700 dark:text-mauve-600">
+                          {h}
+                        </span>
                       </span>
                     ))}
                   </div>
@@ -593,7 +597,7 @@ export const BookingTimeline = forwardRef<
               ))}
             </div>
 
-            <div className={styles.body}>
+            <div className={cn(styles.body, "text-base")}>
               {!roomsLoading && !bookingsLoading ? (
                 <div className={styles.bookingsLayer}>
                   {actualRooms.map((room) =>
@@ -605,10 +609,7 @@ export const BookingTimeline = forwardRef<
                     ).map((booking) => (
                       <div
                         key={booking.id}
-                        className={cn(
-                          styles.booking,
-                          booking.related_to_me && styles.myBooking,
-                        )}
+                        className={styles.booking}
                         style={
                           {
                             "--left": px(
@@ -623,6 +624,10 @@ export const BookingTimeline = forwardRef<
                         }
                       >
                         <div
+                          className={cn(
+                            styles.bookingInner,
+                            booking.related_to_me && styles.bookingInnerMy,
+                          )}
                           title={booking.title}
                           data-booking-id={booking.id}
                           onClick={handleBookingClick}
@@ -648,8 +653,10 @@ export const BookingTimeline = forwardRef<
                         } as CSSProperties
                       }
                     >
-                      <div>
-                        <span>PLACEHOLDER</span>
+                      <div className={styles.bookingInner}>
+                        <span className="skeleton rounded-md text-transparent">
+                          PLACEHOLDER
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -670,16 +677,13 @@ export const BookingTimeline = forwardRef<
                 className={styles.row}
               >
                 <div
-                  className={cn(
-                    styles.rowHeader,
-                    room === "placeholder" && styles.placeholder,
-                  )}
+                  className={styles.rowHeader}
                   style={
                     {
                       "--row-border-color":
                         room !== "placeholder" && room.access_level
                           ? accessLevelColors[room.access_level]
-                          : "var(--c-borders)",
+                          : undefined,
                     } as CSSProperties
                   }
                   title={
@@ -689,7 +693,9 @@ export const BookingTimeline = forwardRef<
                   }
                 >
                   {room === "placeholder" ? (
-                    <a href="#">xxx</a>
+                    <a href="#" className="skeleton w-full rounded-md">
+                      xxx
+                    </a>
                   ) : (
                     <Link
                       to="/room-booking/rooms/$room"

@@ -1,0 +1,484 @@
+/* Layout & positioning for the booking timeline.
+   Colors / typography / shadows live as Tailwind classes in BookingTimeline.tsx. */
+
+.timeline {
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline[data-has-new] {
+  cursor: crosshair !important;
+}
+
+.corner {
+  position: absolute;
+  top: 0;
+  z-index: 5;
+  width: var(--sidebar-width);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  border-style: solid;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+  border-color: var(--color-base-300);
+  background: var(--color-base-150);
+  color: var(--color-base-content);
+}
+
+.overlay {
+  position: absolute;
+  left: var(--sidebar-width);
+  top: var(--header-height);
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  box-shadow: inset 0px 2px 4px 1px rgba(0, 0, 0, 20%);
+}
+
+.scroller {
+  position: relative;
+  overflow: auto;
+  overscroll-behavior: none;
+  max-height: 100%;
+}
+
+.scroller::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--total-width);
+  height: 1px;
+  pointer-events: none;
+}
+
+.wrapper {
+  position: sticky;
+  left: 0;
+  width: 100%;
+  min-height: calc(var(--header-height) + var(--body-height));
+}
+
+.spacer {
+  display: none;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: block;
+  width: calc(100% - var(--sidebar-width));
+  height: var(--header-height);
+  margin-left: var(--sidebar-width);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: var(--color-base-300);
+  overflow: hidden;
+  background: var(--color-base-150);
+}
+
+.headerItem {
+  position: absolute;
+  left: var(--day-offset);
+  top: 0;
+  height: 100%;
+  width: calc(var(--ppm) * 60px * 24);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.headerItemDay {
+  padding-left: 12px;
+  padding-top: 6px;
+  align-self: flex-start;
+  position: sticky;
+  left: 0;
+}
+
+.headerItemHours {
+  display: flex;
+  align-items: center;
+}
+
+.headerItemHours > span {
+  width: calc(var(--ppm) * 60px);
+}
+
+.headerItemHours > span > span {
+  width: var(--timebox-width, 50px);
+  height: var(--timebox-height, 20px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  border-radius: 2px;
+  transform: translate(-50%, 1px);
+}
+
+.body {
+  position: relative;
+  height: var(--body-height);
+}
+
+.roomList {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  position: absolute;
+  left: 0;
+  top: var(--header-height);
+  height: calc(var(--container-height) - var(--header-height));
+  z-index: 4;
+  overflow: hidden;
+  background: var(--color-base-150);
+}
+
+.roomListInner {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.bookingsLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.bookingsLayer > * {
+  pointer-events: auto;
+}
+
+.row {
+  height: var(--row-height);
+  display: flex;
+  align-items: stretch;
+}
+
+.row:not(:last-child) .rowHeader {
+  border-bottom-width: 1px;
+}
+
+.rowHeader {
+  width: var(--sidebar-width);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-style: solid;
+  border-right-width: 1px;
+  border-color: var(--color-base-300);
+  background: var(--color-base-150);
+  color: color-mix(in srgb, var(--color-base-content) 55%, transparent);
+  position: relative;
+}
+
+.rowHeader::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10%;
+  height: 80%;
+  border-left: 2px solid var(--row-border-color, var(--color-base-300));
+}
+
+.rowHeader > a {
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.rowHeader > a:hover {
+  text-decoration: underline;
+}
+
+.rulersSvg {
+  display: block;
+  position: absolute;
+  top: var(--header-height);
+  left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+  height: var(--body-height);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.rulersSvg pattern rect {
+  fill: var(--color-base-300);
+}
+
+.nowTimeboxWrapper {
+  position: sticky;
+  top: 0;
+  height: 0;
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  overflow: visible;
+}
+
+.nowTimeboxWrapper::before,
+.nowTimeboxWrapper::after {
+  content: "";
+  display: block;
+}
+
+.nowTimeboxWrapper::before {
+  flex: 0 0
+    calc(var(--now-x) + var(--sidebar-width) - (var(--timebox-width, 50px) / 2));
+}
+
+.nowTimeboxWrapper::after {
+  flex-grow: 1;
+}
+
+.nowTimebox {
+  width: var(--timebox-width, 50px);
+  height: var(--timebox-height, 20px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  border-color: #dc2626;
+  background: color-mix(in srgb, #dc2626 20%, var(--color-base-100));
+  color: var(--color-base-content);
+  position: sticky;
+  right: 0;
+  left: var(--sidebar-width);
+  transform: translateY(var(--header-height));
+  cursor: pointer;
+}
+
+:global([data-theme="dark"]) .nowTimebox {
+  border-color: #ef4444;
+  background: color-mix(in srgb, #ef4444 20%, var(--color-base-100));
+}
+
+.nowRuler {
+  z-index: 1;
+  position: absolute;
+  height: calc(var(--header-height) + var(--body-height));
+  width: 1px;
+  left: calc(var(--sidebar-width) + var(--now-x));
+  top: 0;
+  background: #dc2626;
+}
+
+:global([data-theme="dark"]) .nowRuler {
+  background: #991b1b;
+}
+
+.booking,
+.newBooking {
+  padding: 6px 2px;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.booking {
+  position: absolute;
+  left: calc(var(--sidebar-width) + var(--left));
+  top: calc(var(--row-index) * var(--row-height));
+  width: var(--width);
+  height: var(--row-height);
+}
+
+.bookingInner {
+  width: 100%;
+  height: 100%;
+  padding: 0 6px 0 12px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: var(--color-base-150);
+  color: var(--color-base-content);
+  box-shadow:
+    0px 1px 2px 0px rgba(0, 0, 0, 24%),
+    0px 1px 3px 0px rgba(0, 0, 0, 12%);
+}
+
+:global([data-theme="dark"]) .bookingInner {
+  border-color: var(--color-base-300);
+}
+
+.bookingInnerMy {
+  border-color: var(--color-secondary);
+  background: var(--color-secondary);
+  color: var(--color-secondary-content);
+}
+
+.booking:not(.placeholder) .bookingInner {
+  cursor: pointer;
+}
+
+.booking:not(.placeholder) .bookingInner > span {
+  position: sticky;
+  left: calc(var(--sidebar-width) + 6px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.booking.placeholder {
+  left: 0;
+  width: var(--visible-width);
+}
+
+.booking.placeholder .bookingInner {
+  padding: 8px;
+  opacity: 0.5;
+}
+
+.booking.placeholder .bookingInner > span {
+  position: relative;
+  width: 100%;
+}
+
+.newBooking {
+  z-index: 3;
+  position: absolute;
+  left: calc(var(--sidebar-width) + var(--new-x));
+  top: calc(var(--header-height) + var(--new-y));
+  width: var(--new-length);
+  height: var(--row-height);
+}
+
+.newBookingInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 6px;
+  border-color: var(--color-primary);
+  background: color-mix(
+    in srgb,
+    var(--color-primary) 20%,
+    var(--color-base-100)
+  );
+  color: var(--color-base-content);
+  font-size: 0.75rem;
+}
+
+/* Touch drag handles — same idea as room calendar (top/bottom),
+   but left/right because the timeline is horizontal. */
+.timeline[data-new-touched] .newBookingInner::before,
+.timeline[data-new-touched] .newBookingInner::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 50%;
+  top: 50%;
+  background: var(--color-primary);
+}
+
+.timeline[data-new-touched] .newBookingInner::before {
+  left: 0;
+  transform: translateY(-50%);
+  border-radius: 0 9999px 9999px 0;
+}
+
+.timeline[data-new-touched] .newBookingInner::after {
+  right: 0;
+  transform: translateY(-50%);
+  border-radius: 9999px 0 0 9999px;
+}
+
+.newBookingTimeboxesWrapper {
+  position: sticky;
+  top: 0;
+  height: 0;
+  z-index: 4;
+  overflow: visible;
+}
+
+.newBookingTimeboxesContainer {
+  position: absolute;
+  left: calc(var(--sidebar-width) + var(--new-x) + (var(--new-length) / 2));
+  top: var(--header-height);
+  width: calc(
+    max(var(--timebox-width, 50px), var(--new-length)) +
+      var(--timebox-width, 50px)
+  );
+  transform: translate(-50%, -100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.newBookingTimeboxStart,
+.newBookingTimeboxEnd {
+  width: var(--timebox-width, 50px);
+  height: var(--timebox-height, 20px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  border-color: var(--color-primary);
+  background: color-mix(
+    in srgb,
+    var(--color-primary) 20%,
+    var(--color-base-100)
+  );
+  color: var(--color-base-content);
+}
+
+.newBookingTimeboxStart {
+  margin-right: auto;
+}
+
+.newBookingTimeboxEnd {
+  margin-left: auto;
+}
+
+.newBookingRulerStart,
+.newBookingRulerEnd {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  height: calc(var(--header-height) + var(--body-height));
+  width: 1px;
+  background: var(--color-primary);
+}
+
+.newBookingRulerStart {
+  left: calc(var(--sidebar-width) + var(--new-x));
+}
+
+.newBookingRulerEnd {
+  left: calc(var(--sidebar-width) + var(--new-x) + var(--new-length));
+}
+
+.timeline:not([data-new-pressed]) .newBookingRulerEnd,
+.timeline:not([data-new-pressed]) .newBookingTimeboxEnd {
+  visibility: hidden;
+}
+
+.timeline:not([data-has-new]) .newBooking,
+.timeline:not([data-has-new]) .newBookingRulerStart,
+.timeline:not([data-has-new]) .newBookingRulerEnd,
+.timeline:not([data-has-new]) .newBookingTimeboxesWrapper {
+  visibility: hidden;
+}
