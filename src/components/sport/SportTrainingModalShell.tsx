@@ -66,11 +66,15 @@ export function SportTrainingModalShell({
                       <span className="icon-[material-symbols--arrow-back] text-2xl" />
                     </button>
                   ) : null}
-                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <div className="flex min-w-0 flex-col gap-1">
                     <h2 className="text-lg font-semibold wrap-break-word">
                       {title}
                     </h2>
-                    {titleBadges}
+                    {titleBadges ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {titleBadges}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
                 <button
