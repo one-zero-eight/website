@@ -24,6 +24,27 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/me/avatar.jpg": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Avatar
+     * @description Get current user's Telegram avatar. We proxy the request through our server
+     *     because Telegram CDN URLs may be blocked in some networks.
+     */
+    get: operations["get_avatar_users_me_avatar_jpg_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/suggest-user-on-typing": {
     parameters: {
       query?: never;
@@ -390,6 +411,57 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/rooms/start-device-flow": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Start Device Flow */
+    post: operations["start_device_flow_rooms_start_device_flow_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/rooms/approve-device-flow": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Approve Device Flow */
+    post: operations["approve_device_flow_rooms_approve_device_flow_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/rooms/device-flow-token": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Get Device Flow Token */
+    post: operations["get_device_flow_token_rooms_device_flow_token_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -399,6 +471,20 @@ export interface components {
      * @enum {string}
      */
     AvailableScopes: AvailableScopes;
+    /** DeviceFlowContainer */
+    DeviceFlowContainer: {
+      /**
+       * At
+       * Format: date-time
+       */
+      at: string;
+      /** Secret String */
+      secret_string: string;
+      /** Room Id */
+      room_id: string | null;
+      /** Token */
+      token: string | null;
+    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -433,6 +519,13 @@ export interface components {
     };
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
+    /** StartDeviceFlowResponse */
+    StartDeviceFlowResponse: {
+      /** Code */
+      code: string;
+      /** Secret String */
+      secret_string: string;
+    };
     /** TelegramInfo */
     TelegramInfo: {
       /** Id */
@@ -571,10 +664,14 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaDeviceFlowContainer =
+  components["schemas"]["DeviceFlowContainer"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaInnopolisInfo = components["schemas"]["InnopolisInfo"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
+export type SchemaStartDeviceFlowResponse =
+  components["schemas"]["StartDeviceFlowResponse"];
 export type SchemaTelegramInfo = components["schemas"]["TelegramInfo"];
 export type SchemaTelegramLoginResponse =
   components["schemas"]["TelegramLoginResponse"];
@@ -608,6 +705,41 @@ export interface operations {
       };
       /** @description User does not have a session cookie or `uid` in the session */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  get_avatar_users_me_avatar_jpg_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Avatar for the current user */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+          "image/*": unknown;
+        };
+      };
+      /** @description User does not have a session cookie or `uid` in the session */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object with such properties not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -1366,6 +1498,120 @@ export interface operations {
       };
       /** @description Not enough permissions */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  start_device_flow_rooms_start_device_flow_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Code and secret string */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StartDeviceFlowResponse"];
+        };
+      };
+    };
+  };
+  approve_device_flow_rooms_approve_device_flow_post: {
+    parameters: {
+      query: {
+        code: string;
+        room_id: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Approved */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DeviceFlowContainer"];
+        };
+      };
+      /** @description User does not have a session cookie or `uid` in the session */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not enough permissions */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_device_flow_token_rooms_device_flow_token_post: {
+    parameters: {
+      query: {
+        code: string;
+        secret_string: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Token */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json":
+            | components["schemas"]["DeviceFlowContainer"]
+            | null;
+        };
+      };
+      /** @description Incorrect secret string */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Device flow code not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };
