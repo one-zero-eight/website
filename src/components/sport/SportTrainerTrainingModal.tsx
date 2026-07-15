@@ -2,10 +2,17 @@ import { $sport } from "@/api/sport";
 import type {
   SchemaAttendanceStudentGradeSchema,
   SchemaAttendanceSuggestionSchema,
-  SchemaBadGradeReportSchema,
   SchemaTrainingInfoPersonalSchema,
 } from "@/api/sport/types.ts";
+import { SportTrainerBaamImportButton } from "@/components/sport/SportTrainerBaamImportButton.tsx";
 import { SportTrainingModalShell } from "@/components/sport/SportTrainingModalShell.tsx";
+import {
+  formatStudentName,
+  handleAttendanceResponse,
+  invalidateAttendance,
+  sportTrainerMenuBtn,
+  sportTrainerMenuBtnActive,
+} from "@/components/sport/sport-trainer-utils.ts";
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
@@ -17,11 +24,6 @@ type HoursFilter = 0 | 1 | 2;
 
 const ALL_HOURS_FILTERS: HoursFilter[] = [0, 1, 2];
 const HOLD_ALL_ZERO_MS = 3000;
-
-const sportTrainerMenuBtn =
-  "btn btn-outline border-2 hover:border-[#8D4CF6] hover:bg-transparent hover:text-[#8D4CF6] active:border-[#8D4CF6] active:bg-transparent active:text-[#8D4CF6]";
-const sportTrainerMenuBtnActive =
-  "border-[#8D4CF6] bg-transparent text-[#8D4CF6] hover:border-[#8D4CF6] hover:bg-transparent hover:text-[#8D4CF6] active:border-[#8D4CF6] active:bg-transparent active:text-[#8D4CF6]";
 
 export function SportTrainerTrainingModal({
   open,
@@ -99,9 +101,7 @@ function SportTrainerTrainingModalMain({
         groupId={groupId}
       />
 
-      <button type="button" className={cn(sportTrainerMenuBtn, "w-full")}>
-        Add csv
-      </button>
+      <SportTrainerBaamImportButton trainingId={trainingId} groupId={groupId} />
 
       <button
         type="button"
@@ -366,7 +366,7 @@ function SportTrainerTrainingModalAttendees({
   );
 }
 
-function SportTrainerStudentAddField({
+export function SportTrainerStudentAddField({
   open,
   trainingId,
   groupId,
@@ -533,7 +533,7 @@ function SportTrainerStudentAddField({
   );
 }
 
-function SportTrainerAttendanceRow({
+export function SportTrainerAttendanceRow({
   grade,
   disabled,
   onHoursChange,
@@ -572,36 +572,4 @@ function SportTrainerAttendanceRow({
       </div>
     </li>
   );
-}
-
-function formatStudentName(student: { first_name: string; last_name: string }) {
-  return `${student.first_name} ${student.last_name}`.trim();
-}
-
-function invalidateAttendance(
-  client: ReturnType<typeof useQueryClient>,
-  trainingId: number,
-) {
-  client.invalidateQueries({
-    queryKey: $sport.queryOptions(
-      "get",
-      "/trainings/{training_id}/attendance",
-      {
-        params: { path: { training_id: trainingId } },
-      },
-    ).queryKey,
-  });
-}
-
-function handleAttendanceResponse(
-  data: { email: string; hours: number }[] | SchemaBadGradeReportSchema,
-  showSuccess: ReturnType<typeof useToast>["showSuccess"],
-  showWarning: ReturnType<typeof useToast>["showWarning"],
-) {
-  if (Array.isArray(data)) {
-    showSuccess("Attendance updated", "Hours have been saved.");
-    return;
-  }
-
-  showWarning("Attendance issue", data.description);
 }
