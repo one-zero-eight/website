@@ -2,7 +2,19 @@ import {
   getMyAccessToken,
   invalidateMyAccessToken,
 } from "@/api/helpers/access-token.ts";
+import {
+  getRoomTvAccessToken,
+  invalidateRoomTvAccessToken,
+  isRoomTvPage,
+} from "@/api/helpers/room-tv-auth.ts";
 import { Middleware } from "@/api/helpers/create-fetch-client";
+
+function getAccessTokenForRequest() {
+  if (isRoomTvPage()) {
+    return getRoomTvAccessToken();
+  }
+  return getMyAccessToken();
+}
 
 export const authMiddleware: Middleware = {
   async onRequest({ request }) {
@@ -14,7 +26,7 @@ export const authMiddleware: Middleware = {
     )
       return;
 
-    const token = getMyAccessToken();
+    const token = getAccessTokenForRequest();
     if (token) {
       const newRequest = request.clone();
       newRequest.headers.set("Authorization", `Bearer ${token}`);
@@ -32,8 +44,17 @@ export const authMiddleware: Middleware = {
       return;
 
     if (response.status === 401 && request.headers.has("Authorization")) {
-      console.log("[auth] Got 401, invalidating access token");
-      invalidateMyAccessToken();
+      const authHeader = request.headers.get("Authorization");
+      const roomTvToken = getRoomTvAccessToken();
+      if (roomTvToken && authHeader === `Bearer ${roomTvToken}`) {
+        console.log(
+          "[room-tv-auth] Got 401, invalidating room TV access token",
+        );
+        invalidateRoomTvAccessToken();
+      } else {
+        console.log("[auth] Got 401, invalidating access token");
+        invalidateMyAccessToken();
+      }
       throw new Error("Unauthorized");
     }
     return response;

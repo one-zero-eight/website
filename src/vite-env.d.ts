@@ -2,3 +2,4 @@
 /// <reference types="vite-plugin-pwa/vanillajs" />
 /// <reference types="vite-plugin-pwa/react" />
 declare module "*.vue";
+declare module "qrcode";
