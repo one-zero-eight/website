@@ -8,7 +8,7 @@
     "dev": "vite dev --port 3000 --host",
     "build": "pnpm gen:sitemap && vite build",
     "preview": "vite build && vite preview --port 3000 --host 0.0.0.0",
-    "gen:sitemap": "node scripts/generate-sitemap.mjs --exclude=/42,/account/,/catalogue,/clubs/admin,/events/admin,/forms/submit,/student-affairs/,/schedule-assistant,/schedule-assistant/ ",
+    "gen:sitemap": "node scripts/generate-sitemap.mjs --exclude=/42,/account/,/catalogue,/clubs/admin,/events/admin,/forms/submit,/student-affairs/,/schedule-assistant,/schedule-assistant/,/tv ",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "typecheck": "tsc --build --noEmit",
