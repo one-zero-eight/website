@@ -153,7 +153,13 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
         />
       ) : null}
 
-      {activeTab === "trainer" && isTrainer ? <SportTrainerSection /> : null}
+      {activeTab === "trainer" && isTrainer && studentId != null ? (
+        <SportTrainerSection
+          enabled={canQuerySport}
+          studentId={Number(studentId)}
+          trainerGroupIds={trainerGroupIds}
+        />
+      ) : null}
 
       {activeTab === "trainer" && !isTrainer ? (
         <div className="text-base-content/70 rounded-box border-base-300 border p-6 text-center text-sm">

@@ -13,7 +13,6 @@ import {
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import {
   canShowCheckInButton,
-  isCheckInUnavailable,
   isTrainerTraining,
 } from "@/components/sport/sport-checkin-utils.ts";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,9 +20,6 @@ import { useMemo, useState, type CSSProperties } from "react";
 
 const scheduleTrainingColors = {
   trainer: "#EF7B20",
-  studentUnavailable: "#C73D40",
-  studentCheckedIn: "#42932A",
-  studentCanCheckIn: "#306EFD",
 } as const;
 
 const scheduleDays = [0, 1, 2, 3, 4, 5, 6] as const;
@@ -226,12 +222,6 @@ export function SportScheduleSection({
     <>
       <div className="border-base-300 bg-base-100 border-t pt-4">
         <div className="flex flex-col gap-2">
-          <div className="flex flex-row items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h2 className="text-3xl font-medium">Schedule</h2>
-            </div>
-          </div>
-
           <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
             <button
               type="button"
@@ -350,36 +340,28 @@ function SportScheduleList({
                     trainerGroupIds,
                   );
                   const isPending = pendingTrainingId === training.id;
-                  const isDefaultTraining =
-                    !checkedIn &&
-                    !isTrainerTraining(row, trainerGroupIds) &&
-                    !isCheckInUnavailable(row, checkedIn);
-                  const trainingColor = getTrainingColor(
-                    row,
-                    checkedIn,
-                    trainerGroupIds,
-                  );
+                  const isTrainer = isTrainerTraining(row, trainerGroupIds);
 
                   return (
                     <li key={training.id}>
                       <div
                         className={cn(
                           "group grid min-h-10 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b px-3 py-1 text-left text-base",
-                          "border-white/30 transition-colors",
-                          isDefaultTraining
-                            ? "bg-base-100 text-base-content hover:!text-[#8D4CF6]"
-                            : "text-white hover:!text-[#8D4CF6]",
-                          "dark:border-white dark:!bg-black",
-                          isDefaultTraining
-                            ? "dark:text-base-content dark:hover:!text-[#8D4CF6]"
-                            : "dark:text-[color:var(--training-accent)] dark:hover:!text-[#8D4CF6]",
+                          "border-white/30 transition-colors hover:!text-[#8D4CF6]",
+                          isTrainer
+                            ? "text-white"
+                            : "bg-base-100 text-base-content",
+                          "dark:border-white dark:!bg-black dark:hover:!text-[#8D4CF6]",
+                          isTrainer
+                            ? "dark:text-[color:var(--training-accent)]"
+                            : "dark:text-base-content",
                         )}
                         style={
                           {
-                            "--training-accent": trainingColor,
-                            backgroundColor: isDefaultTraining
-                              ? undefined
-                              : trainingColor,
+                            "--training-accent": scheduleTrainingColors.trainer,
+                            backgroundColor: isTrainer
+                              ? scheduleTrainingColors.trainer
+                              : undefined,
                           } as CSSProperties
                         }
                       >
@@ -461,26 +443,6 @@ function toSelectedTrainingRow(
     checked_in: checkedIn,
     can_check_in: checkedIn || row.can_check_in,
   };
-}
-
-function getTrainingColor(
-  row: SchemaTrainingInfoPersonalSchema,
-  checkedIn: boolean,
-  trainerGroupIds: ReadonlySet<number>,
-): string {
-  if (isTrainerTraining(row, trainerGroupIds)) {
-    return scheduleTrainingColors.trainer;
-  }
-
-  if (checkedIn) {
-    return scheduleTrainingColors.studentCheckedIn;
-  }
-
-  if (isCheckInUnavailable(row, checkedIn)) {
-    return scheduleTrainingColors.studentUnavailable;
-  }
-
-  return scheduleTrainingColors.studentCanCheckIn;
 }
 
 function addDays(date: Date, days: number): Date {
