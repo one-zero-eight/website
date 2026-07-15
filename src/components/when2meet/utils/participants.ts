@@ -26,11 +26,8 @@ export function getAccountDisplayName(me?: accountsTypes.SchemaViewUser) {
 export function getParticipantDisplayName(
   participant: when2meetTypes.SchemaParticipantView,
 ) {
-  const fullName =
-    `${participant.first_name ?? ""} ${participant.last_name ?? ""}`.trim();
-
-  if (fullName) {
-    return fullName;
+  if (participant.name) {
+    return participant.name;
   }
 
   if (participant.email) {

@@ -2,16 +2,23 @@ import { clubsTypes } from "@/api/clubs";
 import { preprocessText } from "@/lib/utils/searchUtils.ts";
 import Fuse from "fuse.js";
 
+type ClubWithLeaderType = clubsTypes.SchemaClub & {
+  leader: clubsTypes.SchemaLeader | undefined;
+};
+
 export function createFuseInstance(
   clubsList: clubsTypes.SchemaClub[],
   clubLeaders?: { [key: string]: clubsTypes.SchemaLeader | null },
 ) {
-  const clubsWithLeaders = clubsList.map((club) => ({
-    ...club,
-    leader: club.leader_innohassle_id
-      ? (clubLeaders?.[club.leader_innohassle_id] ?? undefined)
-      : undefined,
-  }));
+  const clubsWithLeaders = clubsList.map(
+    (club) =>
+      ({
+        ...club,
+        leader: club.leader_innohassle_id
+          ? (clubLeaders?.[club.leader_innohassle_id] ?? undefined)
+          : undefined,
+      }) satisfies ClubWithLeaderType,
+  );
   return new Fuse(clubsWithLeaders, {
     includeScore: true,
     keys: [
@@ -27,7 +34,7 @@ export function createFuseInstance(
 }
 
 export function searchClubs(
-  fuse: Fuse<clubsTypes.SchemaClub>,
+  fuse: Fuse<ClubWithLeaderType>,
   searchQuery: string,
 ) {
   if (!searchQuery) return [];
@@ -35,7 +42,7 @@ export function searchClubs(
   const processedSearchTerms = preprocessText(searchQuery);
   const rankedClubs = new Map<
     clubsTypes.SchemaClub["id"],
-    { club: clubsTypes.SchemaClub; score: number; firstIndex: number }
+    { club: ClubWithLeaderType; score: number; firstIndex: number }
   >();
 
   processedSearchTerms.forEach((term) => {

@@ -30,6 +30,7 @@ export function PdfDocumentPreview({
     if (!viewerEl) return;
 
     function updateWidth() {
+      if (!viewerEl) return;
       setViewerWidth(viewerEl.clientWidth);
     }
 

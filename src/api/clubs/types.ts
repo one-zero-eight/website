@@ -184,6 +184,66 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/clubs/pending-updates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Pending Updates
+     * @description Get list of clubs with pending updates.
+     */
+    get: operations["get_pending_updates_clubs_pending_updates_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/clubs/by-id/{id}/approve-update": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve Club Update
+     * @description Approve a pending club update.
+     */
+    post: operations["approve_club_update_clubs_by_id__id__approve_update_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/clubs/by-id/{id}/reject-update": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject Club Update
+     * @description Reject a pending club update.
+     */
+    post: operations["reject_club_update_clubs_by_id__id__reject_update_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/leaders/": {
     parameters: {
       query?: never;
@@ -261,7 +321,7 @@ export interface components {
     /** Club */
     Club: {
       /** @description MongoDB document ObjectID */
-      id: components["schemas"]["PydanticObjectId"];
+      id: components["schemas"]["PydanticObjectId"] | null;
       /**
        * Is Active
        * @description False if the club is closed
@@ -310,6 +370,8 @@ export interface components {
        * @description ID of sport type in InnoSport system (None if the club is not sport)
        */
       sport_id: string | null;
+      /** @description Pending update proposed by the club leader, waiting for admin approval */
+      pending_update: components["schemas"]["PendingClubUpdate"] | null;
     };
     /**
      * ClubType
@@ -366,6 +428,8 @@ export interface components {
        * @description ID of sport type in InnoSport system (None if the club is not sport)
        */
       sport_id?: string | null;
+      /** @description Pending update proposed by the club leader, waiting for admin approval */
+      pending_update?: components["schemas"]["PendingClubUpdate"] | null;
     };
     /** DescriptionImageUploadResponse */
     DescriptionImageUploadResponse: {
@@ -419,6 +483,24 @@ export interface components {
      * @enum {string}
      */
     LinkType: LinkType;
+    /** PendingClubUpdate */
+    PendingClubUpdate: {
+      /** Title */
+      title?: string | null;
+      /** Short Description */
+      short_description?: string | null;
+      /** Description */
+      description?: string | null;
+      /** Logo File Id */
+      logo_file_id?: string | null;
+      type?: components["schemas"]["ClubType"] | null;
+      /** Links */
+      links?: components["schemas"]["LinkSchema"][] | null;
+      /** Leader Innohassle Id */
+      leader_innohassle_id?: string | null;
+      /** Sport Id */
+      sport_id?: string | null;
+    };
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
     /** UpdateClub */
@@ -471,6 +553,8 @@ export interface components {
        * @description ID of sport type in InnoSport system (None if the club is not sport)
        */
       sport_id?: string | null;
+      /** @description Pending update proposed by the club leader, waiting for admin approval */
+      pending_update?: components["schemas"]["PendingClubUpdate"] | null;
       /** New Leader Email */
       new_leader_email?: string | null;
     };
@@ -529,6 +613,8 @@ export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaLeader = components["schemas"]["Leader"];
 export type SchemaLinkSchema = components["schemas"]["LinkSchema"];
+export type SchemaPendingClubUpdate =
+  components["schemas"]["PendingClubUpdate"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaUpdateClub = components["schemas"]["UpdateClub"];
 export type SchemaUserWithClubs = components["schemas"]["UserWithClubs"];
@@ -744,7 +830,14 @@ export interface operations {
           "application/json": components["schemas"]["Club"];
         };
       };
-      /** @description Only admin can change club info */
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only admin or leader can change club info */
       403: {
         headers: {
           [name: string]: unknown;
@@ -883,7 +976,14 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Only admin can change club info */
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only admin or leader can change club info */
       403: {
         headers: {
           [name: string]: unknown;
@@ -975,7 +1075,14 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Only admin can change club logo */
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only admin or leader can change club logo */
       403: {
         headers: {
           [name: string]: unknown;
@@ -1068,6 +1175,123 @@ export interface operations {
         content?: never;
       };
       /** @description Only club leader or admin can upload description images */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Club not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_pending_updates_clubs_pending_updates_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of clubs with pending updates */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Club"][];
+        };
+      };
+      /** @description Only admin can view all pending updates */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  approve_club_update_clubs_by_id__id__approve_update_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Approved pending update */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Club"];
+        };
+      };
+      /** @description Only admin can approve updates */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Club not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reject_club_update_clubs_by_id__id__reject_update_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Rejected pending update */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Club"];
+        };
+      };
+      /** @description Only admin can reject updates */
       403: {
         headers: {
           [name: string]: unknown;

@@ -23,7 +23,7 @@ export default function IframePreviewCard({
   source,
   onClose,
 }: {
-  source: searchTypes.SchemaSearchResponseOutput["source"];
+  source: searchTypes.SchemaSearchResponse["source"];
   onClose: () => void;
 }) {
   const [hasError, setHasError] = useState(false);

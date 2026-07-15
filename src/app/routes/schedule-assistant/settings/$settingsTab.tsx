@@ -12,10 +12,15 @@ const SETTINGS_SUB_TABS = new Set<SettingsSubTab>([
   "semester",
 ]);
 
+type SearchParams = {
+  instructor?: string | undefined;
+  from?: string | undefined;
+};
+
 export const Route = createFileRoute(
   "/schedule-assistant/settings/$settingsTab",
 )({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): SearchParams => ({
     instructor:
       typeof search.instructor === "string" && search.instructor.trim()
         ? search.instructor.trim()

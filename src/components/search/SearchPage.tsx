@@ -19,7 +19,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
   const didInit = useRef<boolean>(false);
 
   const [previewSource, setPreviewSource] =
-    useState<searchTypes.SchemaSearchResponseOutput["source"]>();
+    useState<searchTypes.SchemaSearchResponse["source"]>();
 
   const initialFiltersState = {
     fileType: {
@@ -218,8 +218,7 @@ export function SearchPage({ searchQuery }: { searchQuery: string }) {
             !isMobile &&
             (previewSource.type === "moodle-file" ||
               previewSource.type === "moodle-url" ||
-              previewSource.type === "moodle-unknown" ||
-              previewSource.type === "telegram") ? (
+              previewSource.type === "moodle-unknown") ? (
               <PreviewCard
                 source={previewSource}
                 onClose={() => setPreviewSource(undefined)}

@@ -27,7 +27,7 @@ export function MapsPage({
 
   const requestedArea = scenes
     ?.flatMap((scene) => scene.areas)
-    .find((area) => area.svg_polygon_id === areaId);
+    .find((area) => area?.svg_polygon_id === areaId);
   const requestedAreas = requestedArea ? [requestedArea] : undefined;
 
   useEffect(() => {

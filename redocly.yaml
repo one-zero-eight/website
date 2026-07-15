@@ -70,7 +70,7 @@ apis:
       output: ./src/api/sport/types.ts
       #  --root-types --enum
   schedule-assistant:
-    root: schedule-assistant-openapi.yaml
+    root: https://api.innohassle.ru/schedule-builder/staging-v0/openapi.json
     x-openapi-ts:
       output: ./src/api/schedule-assistant/types.ts
       #  --root-types --enum

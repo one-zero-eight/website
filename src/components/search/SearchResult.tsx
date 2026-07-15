@@ -8,7 +8,7 @@ export default function SearchResult({
   isMobile,
   select,
 }: {
-  response: searchTypes.SchemaSearchResponseOutput;
+  response: searchTypes.SchemaSearchResponse;
   isSelected: boolean;
   isMobile: boolean;
   select: () => void;
@@ -39,10 +39,6 @@ export default function SearchResult({
           <span
             className={`icon-[material-symbols--school-outline] ${base} text-[#F27F22]`}
           />
-        );
-      case "telegram":
-        return (
-          <span className={`icon-[uil--telegram-alt] ${base} text-[#27A7E7]`} />
         );
       case "campuslife":
         return (

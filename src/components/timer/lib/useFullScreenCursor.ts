@@ -4,7 +4,7 @@ export const useFullscreenCursor = (
   containerRef: React.RefObject<HTMLDivElement | null>,
   hideDelay = 12000,
 ) => {
-  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const timeoutRef = useRef<number>(undefined);
 
   useEffect(() => {
     const handleFullscreenChange = () => {

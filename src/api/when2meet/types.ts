@@ -387,13 +387,11 @@ export interface components {
     MeetingTime: {
       /**
        * Start
-       * Format: date-time
        * @description Selected meeting start time
        */
       start: string;
       /**
        * End
-       * Format: date-time
        * @description Selected meeting end time
        */
       end: string;

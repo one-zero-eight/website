@@ -10,16 +10,16 @@ const TruncatableMarkdown = ({
 }: {
   text: string;
   sourse_type:
-    | searchTypes.EduwikiSourceOutputType
-    | searchTypes.CampusLifeSourceOutputType
-    | searchTypes.HotelSourceOutputType
-    | searchTypes.MapsSourceOutputType
-    | searchTypes.MoodleFileSourceOutputType
-    | searchTypes.MoodleUrlSourceOutputType
-    | searchTypes.MoodleUnknownSourceOutputType
-    | searchTypes.TelegramSourceOutputType
-    | searchTypes.ResidentsSourceOutputType
-    | searchTypes.ResourcesSourceOutputType;
+    | searchTypes.EduwikiSourceType
+    | searchTypes.CampusLifeSourceType
+    | searchTypes.HotelSourceType
+    | searchTypes.ClubsSourceType
+    | searchTypes.MapsSourceType
+    | searchTypes.MoodleFileSourceType
+    | searchTypes.MoodleUrlSourceType
+    | searchTypes.MoodleUnknownSourceType
+    | searchTypes.ResidentsSourceType
+    | searchTypes.ResourcesSourceType;
   isSelected: boolean;
 }) => {
   const shouldTruncate = sourse_type !== "maps";

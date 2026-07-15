@@ -21,7 +21,7 @@ function highlightPattern(text: string, pattern: string) {
 }
 
 export declare type PdfPreviewProps = {
-  source: searchTypes.SchemaMoodleFileSourceOutput;
+  source: searchTypes.SchemaMoodleFileSource;
   searchText: string;
 };
 

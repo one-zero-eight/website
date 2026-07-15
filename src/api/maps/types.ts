@@ -38,6 +38,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Export Pdf */
+    get: operations["scenes_export_pdf"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -96,23 +113,14 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
-    /** LegendEntry */
-    LegendEntry: {
+    /** PdfExport */
+    PdfExport: {
       /**
-       * Legend Id
-       * @description ID of the legend
+       * Orientation
+       * @description Orientation of the PDF page (horizontal or vertical)
+       * @default horizontal
        */
-      legend_id: string;
-      /**
-       * Color
-       * @description Color of the legend
-       */
-      color?: string | null;
-      /**
-       * Legend
-       * @description Description of the legend (may contain multiple lines)
-       */
-      legend?: string | null;
+      orientation: string;
     };
     /** Scene */
     Scene: {
@@ -131,11 +139,8 @@ export interface components {
        * @description Path to the SVG file in /static
        */
       svg_file: string;
-      /**
-       * Legend
-       * @description Legend of the scene
-       */
-      legend?: components["schemas"]["LegendEntry"][];
+      /** @description PDF export layout settings */
+      pdf_export?: components["schemas"]["PdfExport"];
       /**
        * Areas
        * @description Areas of the scene
@@ -173,7 +178,7 @@ export interface components {
 export type SchemaArea = components["schemas"]["Area"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
-export type SchemaLegendEntry = components["schemas"]["LegendEntry"];
+export type SchemaPdfExport = components["schemas"]["PdfExport"];
 export type SchemaScene = components["schemas"]["Scene"];
 export type SchemaSearchResult = components["schemas"]["SearchResult"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
@@ -226,6 +231,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  scenes_export_pdf: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
         };
       };
     };
