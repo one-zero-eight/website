@@ -6,7 +6,6 @@ import {
 } from "@/api/workshops/types";
 import { SchemaClub, SchemaUserWithClubs } from "@/api/clubs/types";
 import { GenericBadgeFormScheme } from "../EventEditPage/TagsSelector";
-import type { UUID } from "crypto";
 
 export enum EventCreationType {
   DEFAULT,
@@ -50,13 +49,13 @@ export const DEFAULT_EVENT_LIST_OPTIONS: Required<
 };
 
 export type EventLink = {
-  id: UUID;
+  id: string;
   title: string;
   url: string;
 };
 
 export type EventHostSelection = {
-  id: UUID;
+  id: string;
   type: HostType;
   name: string;
 };

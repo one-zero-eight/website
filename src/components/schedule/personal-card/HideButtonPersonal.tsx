@@ -1,5 +1,5 @@
 import Tooltip from "@/components/common/Tooltip";
-import { $events, eventsTypes } from "@/api/events";
+import { $events } from "@/api/events";
 import { TargetForExport } from "@/api/events/types.ts";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -34,7 +34,7 @@ export default function HideButtonPersonal({
       console.log(params);
       queryClient.setQueryData(
         $events.queryOptions("get", "/users/me").queryKey,
-        (prev: eventsTypes.SchemaViewUser) => {
+        (prev) => {
           if (prev === undefined) return prev;
           const patch: {
             sports_hidden?: boolean;

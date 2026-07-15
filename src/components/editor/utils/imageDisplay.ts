@@ -48,18 +48,20 @@ export function applyImageDisplayStyles(
   }
 }
 
-export function buildImageSizeAttrs(options: {
+export function buildImageSizeAttrs({
+  naturalWidth,
+  naturalHeight,
+  width,
+}: {
   naturalWidth: number;
   naturalHeight: number;
   width?: number | null;
 }): ImageSizeAttrs {
-  const { naturalWidth, naturalHeight, width = naturalWidth } = options;
-
   return {
     originalWidth: naturalWidth,
     originalHeight: naturalHeight,
-    width,
-    height: getHeightForWidth(width, {
+    width: width ?? naturalWidth,
+    height: getHeightForWidth(width ?? naturalWidth, {
       originalWidth: naturalWidth,
       originalHeight: naturalHeight,
     }),

@@ -109,7 +109,7 @@ export function DetailsPopup({
               </p>
             </div>
           )}
-          {area.people.length >= 1 && (
+          {area.people && area.people.length >= 1 && (
             <div className="flex flex-row gap-2">
               <div className="w-6">
                 <span className="icon-[material-symbols--user-attributes-rounded] text-2xl" />

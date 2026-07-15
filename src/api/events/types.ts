@@ -407,6 +407,27 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/workshops.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Workshops Schedule
+     * @description Get schedule in ICS format for workshops.
+     *     By default, returns only active non-draft workshops.
+     */
+    get: operations["ics_get_workshops_schedule"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/{event_group_alias}.ics": {
     parameters: {
       query?: never;
@@ -1751,6 +1772,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Object not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   ics_get_user_schedule: {
@@ -2253,6 +2281,45 @@ export interface operations {
       };
     };
   };
+  ics_get_workshops_schedule: {
+    parameters: {
+      query?: {
+        only_published?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description ICS file with all workshops */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+          "text/calendar": string;
+        };
+      };
+      /** @description Workshops are not configured */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   ics_get_event_group_ics_by_alias: {
     parameters: {
       query: {
@@ -2696,6 +2763,13 @@ export interface operations {
       };
       /** @description Unable to verify credentials OR Credentials not provided */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Object not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };

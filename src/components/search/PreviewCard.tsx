@@ -1,5 +1,4 @@
 import { searchTypes } from "@/api/search";
-import TelegramPreview from "@/components/search/TelegramPreview";
 import { cn } from "@/lib/ui/cn";
 import React, { lazy, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -11,7 +10,7 @@ const PdfPreview = lazy(() =>
 );
 
 export declare type PreviewCardProps = {
-  source: searchTypes.SchemaSearchResponseOutput["source"];
+  source: searchTypes.SchemaSearchResponse["source"];
   onClose: () => void;
 };
 
@@ -49,8 +48,6 @@ export default function PreviewCard({ source, onClose }: PreviewCardProps) {
           <Suspense>
             <PdfPreview source={source} searchText="" />
           </Suspense>
-        ) : source.type === "telegram" ? (
-          <TelegramPreview source={source} />
         ) : source.type === "moodle-url" ? (
           <MoodleUrlPreview source={source} />
         ) : source.type === "moodle-unknown" ? (

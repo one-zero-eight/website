@@ -12,10 +12,10 @@ export interface paths {
       cookie?: never;
     };
     /** Get Links */
-    get: operations["get_links_links_get"];
+    get: operations["links_get_links"];
     put?: never;
     /** Create Link */
-    post: operations["create_link_links_post"];
+    post: operations["links_create_link"];
     delete?: never;
     options?: never;
     head?: never;
@@ -30,11 +30,11 @@ export interface paths {
       cookie?: never;
     };
     /** Resolve Link */
-    get: operations["resolve_link_links__slug__get"];
+    get: operations["links_resolve_link"];
     put?: never;
     post?: never;
     /** Delete Link */
-    delete: operations["delete_link_links__slug__delete"];
+    delete: operations["links_delete_link"];
     options?: never;
     head?: never;
     patch?: never;
@@ -50,27 +50,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Verify Link Signature */
-    post: operations["verify_link_signature_links_verify_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/user/me": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get Me
-     * @description Get current user info if authenticated
-     */
-    get: operations["get_me_user_me_get"];
-    put?: never;
-    post?: never;
+    post: operations["links_verify_link_signature"];
     delete?: never;
     options?: never;
     head?: never;
@@ -99,47 +79,6 @@ export interface components {
       fio: string;
       /** Telegram */
       telegram: string;
-    };
-    /** TelegramWidgetData */
-    TelegramWidgetData: {
-      /** Id */
-      id: number;
-      /** Auth Date */
-      auth_date: number;
-      /** First Name */
-      first_name: string;
-      /** Last Name */
-      last_name?: string | null;
-      /** Username */
-      username?: string | null;
-      /** Photo Url */
-      photo_url?: string | null;
-    };
-    /** UserInfoFromSSO */
-    UserInfoFromSSO: {
-      /** Email */
-      email: string;
-      /** Name */
-      name?: string | null;
-      /** Issued At */
-      issued_at?: string | null;
-      /**
-       * Is Student
-       * @default false
-       */
-      is_student: boolean;
-      /**
-       * Is Staff
-       * @default false
-       */
-      is_staff: boolean;
-      /** Group */
-      group?: string | null;
-    };
-    /** UserSchema */
-    UserSchema: {
-      telegram: components["schemas"]["TelegramWidgetData"] | null;
-      innopolis_sso: components["schemas"]["UserInfoFromSSO"] | null;
     };
     /** ValidationError */
     ValidationError: {
@@ -200,10 +139,6 @@ export type SchemaCreateLink = components["schemas"]["CreateLink"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaSignaturePayload = components["schemas"]["SignaturePayload"];
-export type SchemaTelegramWidgetData =
-  components["schemas"]["TelegramWidgetData"];
-export type SchemaUserInfoFromSso = components["schemas"]["UserInfoFromSSO"];
-export type SchemaUserSchema = components["schemas"]["UserSchema"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type SchemaVerifySignatureRequest =
   components["schemas"]["VerifySignatureRequest"];
@@ -214,7 +149,7 @@ export type SchemaViewLinksItem = components["schemas"]["ViewLinksItem"];
 export type SchemaViewResolvedLink = components["schemas"]["ViewResolvedLink"];
 export type $defs = Record<string, never>;
 export interface operations {
-  get_links_links_get: {
+  links_get_links: {
     parameters: {
       query?: never;
       header?: never;
@@ -241,7 +176,7 @@ export interface operations {
       };
     };
   };
-  create_link_links_post: {
+  links_create_link: {
     parameters: {
       query?: never;
       header?: never;
@@ -288,7 +223,7 @@ export interface operations {
       };
     };
   };
-  resolve_link_links__slug__get: {
+  links_resolve_link: {
     parameters: {
       query?: never;
       header?: never;
@@ -315,7 +250,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description User not found OR Link not found */
+      /** @description Link not found OR User not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -333,7 +268,7 @@ export interface operations {
       };
     };
   };
-  delete_link_links__slug__delete: {
+  links_delete_link: {
     parameters: {
       query?: never;
       header?: never;
@@ -378,7 +313,7 @@ export interface operations {
       };
     };
   };
-  verify_link_signature_links_verify_post: {
+  links_verify_link_signature: {
     parameters: {
       query?: never;
       header?: never;
@@ -408,40 +343,6 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
-      };
-    };
-  };
-  get_me_user_me_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Current user info */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["UserSchema"];
-        };
-      };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description User not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
       };
     };
   };

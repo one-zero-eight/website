@@ -15,7 +15,7 @@ export function useEventGroup(group_id: number) {
     onMutate: ({ params }) => {
       queryClient.setQueryData(
         $events.queryOptions("get", "/users/me").queryKey,
-        (oldData: eventsTypes.SchemaViewUser) => {
+        (oldData) => {
           if (oldData === undefined) return oldData;
           return {
             ...oldData,
@@ -33,7 +33,7 @@ export function useEventGroup(group_id: number) {
     onMutate: ({ params }) => {
       queryClient.setQueryData(
         $events.queryOptions("get", "/users/me").queryKey,
-        (prev: eventsTypes.SchemaViewUser) => {
+        (prev) => {
           if (prev === undefined) return prev;
           return {
             ...prev,
@@ -50,7 +50,7 @@ export function useEventGroup(group_id: number) {
     onMutate: ({ params }) => {
       queryClient.setQueryData(
         $events.queryOptions("get", "/users/me").queryKey,
-        (prev: eventsTypes.SchemaViewUser) => {
+        (prev) => {
           if (prev === undefined) return prev;
           if (params.query.hide) {
             return {
