@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/ui/cn";
 import { $tabletennis, tabletennisTypes } from "@/api/tabletennis";
 import {
@@ -46,6 +46,40 @@ type GetGamesByIdResponse = {
   missing_ids: string[];
 };
 
+function getPlacementData(tourId: string):
+  | {
+      playerId: string;
+      placeLabel: string;
+    }[]
+  | null {
+  try {
+    const raw = localStorage.getItem(`tt-bracket-${tourId}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as {
+      matches: {
+        bracket: string;
+        player1_id: string | null;
+        placeLabel: string | null;
+        completed: boolean;
+      }[];
+    };
+    const placements = parsed.matches.filter(
+      (m) =>
+        m.bracket === "placement" &&
+        m.completed &&
+        m.player1_id &&
+        m.placeLabel,
+    );
+    if (placements.length === 0) return null;
+    return placements.map((m) => ({
+      playerId: m.player1_id!,
+      placeLabel: m.placeLabel!,
+    }));
+  } catch {
+    return null;
+  }
+}
+
 function parsePlayersInput(raw: string): {
   player_ids: string[];
   emails: string[];
@@ -73,11 +107,13 @@ export function TabletennisTournaments() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAddPlayers, setShowAddPlayers] = useState(false);
   const [addPlayersInput, setAddPlayersInput] = useState("");
+  const [qualificationLocked, setQualificationLocked] = useState(false);
   const [name, setName] = useState("");
   const [playersInput, setPlayersInput] = useState("");
-  const [validationStats, setValidationStats] = useState<
-    { playerId: string; wins: number; played: number }[]
-  >([]);
+  const [showPlayerSuggestions, setShowPlayerSuggestions] = useState(false);
+  const [showCreateSuggestions, setShowCreateSuggestions] = useState(false);
+  const addInputRef = useRef<HTMLInputElement>(null);
+  const createInputRef = useRef<HTMLTextAreaElement>(null);
   const { showError } = useToast();
 
   const {
@@ -85,6 +121,8 @@ export function TabletennisTournaments() {
     isPending: toursPending,
     refetch: refetchTours,
   } = $tabletennis.useQuery("get", "/active-tours");
+
+  const { data: allToursData } = $tabletennis.useQuery("get", "/get-tours");
 
   const { data: playersData } = $tabletennis.useQuery("get", "/players");
 
@@ -139,6 +177,15 @@ export function TabletennisTournaments() {
     return tours.length > 0 ? tours[0]! : null;
   }, [toursData]);
 
+  const completedTours = useMemo(() => {
+    if (!allToursData) return [];
+    const activeIds = new Set(
+      ((toursData as unknown as TourData[]) ?? []).map((t) => t.id),
+    );
+    const all = allToursData as unknown as TourData[];
+    return all.filter((t) => !activeIds.has(t.id));
+  }, [allToursData, toursData]);
+
   const gameIds = useMemo(() => {
     if (!activeTour) return [];
     return [
@@ -156,15 +203,13 @@ export function TabletennisTournaments() {
 
   const playersList = useMemo(() => {
     if (!playersData || !activeTour) return [];
-    console.log("[playersList] raw playersData:", playersData);
-    console.log("[playersList] activeTour.players:", activeTour.players);
     const raw = playersData as unknown as {
       total: number;
       players: (SchemaPlayer & { is_active: boolean })[];
     };
     const list = Array.isArray(raw) ? raw : raw.players;
     const tourPlayerIds = new Set(activeTour.players);
-    const result = (list ?? [])
+    return (list ?? [])
       .filter(
         (p) =>
           tourPlayerIds.has(p.id ?? "") || tourPlayerIds.has(p.innohassle_id),
@@ -173,9 +218,82 @@ export function TabletennisTournaments() {
         name: p.nickname,
         id: p.innohassle_id,
       }));
-    console.log("[playersList] filtered result:", result);
-    return result;
   }, [playersData, activeTour]);
+
+  const playerNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (!playersData) return map;
+    const raw = playersData as unknown as {
+      total: number;
+      players: (SchemaPlayer & { is_active: boolean })[];
+    };
+    const list = Array.isArray(raw) ? raw : raw.players;
+    for (const p of list ?? []) {
+      map.set(p.innohassle_id, p.nickname);
+    }
+    return map;
+  }, [playersData]);
+
+  const allPlayers = useMemo(() => {
+    if (!playersData) return [];
+    const raw = playersData as unknown as {
+      total: number;
+      players: (SchemaPlayer & { is_active: boolean })[];
+    };
+    const list = Array.isArray(raw) ? raw : raw.players;
+    return (list ?? []).map((p) => ({
+      name: p.nickname,
+      id: p.innohassle_id,
+    }));
+  }, [playersData]);
+
+  const addablePlayers = useMemo(() => {
+    if (!playersData || !activeTour) return [];
+    const raw = playersData as unknown as {
+      total: number;
+      players: (SchemaPlayer & { is_active: boolean })[];
+    };
+    const list = Array.isArray(raw) ? raw : raw.players;
+    const tourPlayerIds = new Set(activeTour.players);
+    return (list ?? []).filter(
+      (p) =>
+        !tourPlayerIds.has(p.id ?? "") && !tourPlayerIds.has(p.innohassle_id),
+    );
+  }, [playersData, activeTour]);
+
+  const addInputToken = useMemo(() => {
+    const tokens = addPlayersInput.split(/[\n,]+/);
+    return tokens[tokens.length - 1]?.trim() ?? "";
+  }, [addPlayersInput]);
+
+  const addSuggestions = useMemo(() => {
+    if (!addInputToken || addInputToken.length < 1) return [];
+    const lower = addInputToken.toLowerCase();
+    return addablePlayers
+      .filter(
+        (p) =>
+          p.nickname.toLowerCase().includes(lower) ||
+          p.innohassle_id.toLowerCase().includes(lower),
+      )
+      .slice(0, 10);
+  }, [addablePlayers, addInputToken]);
+
+  const createInputToken = useMemo(() => {
+    const tokens = playersInput.split(/[\n,]+/);
+    return tokens[tokens.length - 1]?.trim() ?? "";
+  }, [playersInput]);
+
+  const createSuggestions = useMemo(() => {
+    if (!createInputToken || createInputToken.length < 1) return [];
+    const lower = createInputToken.toLowerCase();
+    return allPlayers
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(lower) ||
+          p.id.toLowerCase().includes(lower),
+      )
+      .slice(0, 10);
+  }, [allPlayers, createInputToken]);
 
   const allGames = useMemo(() => {
     if (!gamesByIdData) return [];
@@ -195,12 +313,38 @@ export function TabletennisTournaments() {
     return allGames.filter((g) => ids.has(g.game_id));
   }, [allGames, activeTour]);
 
-  const handleStatsUpdate = useCallback(
-    (stats: { playerId: string; wins: number; played: number }[]) => {
-      setValidationStats(stats);
-    },
-    [],
-  );
+  const valTop = useMemo(() => {
+    return (activeTour as unknown as Record<string, unknown>)?.val_top as
+      | Record<string, string>
+      | undefined;
+  }, [activeTour]);
+
+  const handleAddOutsideClick = useCallback((e: MouseEvent) => {
+    if (
+      addInputRef.current &&
+      !addInputRef.current.parentElement?.contains(e.target as Node)
+    ) {
+      setShowPlayerSuggestions(false);
+    }
+  }, []);
+
+  const handleCreateOutsideClick = useCallback((e: MouseEvent) => {
+    if (
+      createInputRef.current &&
+      !createInputRef.current.parentElement?.contains(e.target as Node)
+    ) {
+      setShowCreateSuggestions(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleAddOutsideClick);
+    document.addEventListener("mousedown", handleCreateOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleAddOutsideClick);
+      document.removeEventListener("mousedown", handleCreateOutsideClick);
+    };
+  }, [handleAddOutsideClick, handleCreateOutsideClick]);
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -261,13 +405,15 @@ export function TabletennisTournaments() {
             <span className="text-base-content/50 hidden text-xs md:inline">
               {activeTour.name}
             </span>
-            <button
-              type="button"
-              className="border-base-content/30 text-base-content/50 hover:text-base-content hover:bg-base-content/10 rounded-lg border px-2 py-1 text-[10px] transition-colors md:text-xs"
-              onClick={() => setShowAddPlayers(true)}
-            >
-              Add players
-            </button>
+            {!qualificationLocked && (
+              <button
+                type="button"
+                className="border-base-content/30 text-base-content/50 hover:text-base-content hover:bg-base-content/10 rounded-lg border px-2 py-1 text-[10px] transition-colors md:text-xs"
+                onClick={() => setShowAddPlayers(true)}
+              >
+                Add players
+              </button>
+            )}
             <button
               type="button"
               className="border-base-content/30 text-base-content/50 hover:text-base-content hover:bg-base-content/10 rounded-lg border px-2 py-1 text-[10px] transition-colors md:text-xs"
@@ -283,15 +429,46 @@ export function TabletennisTournaments() {
           </div>
         </div>
 
-        {showAddPlayers && (
+        {showAddPlayers && !qualificationLocked && (
           <div className="border-base-300 flex items-center gap-2 border-b px-4 py-3">
-            <input
-              type="text"
-              value={addPlayersInput}
-              onChange={(e) => setAddPlayersInput(e.target.value)}
-              placeholder="Player emails or IDs (comma or newline separated)"
-              className="input input-bordered input-sm flex-1"
-            />
+            <div className="relative flex-1">
+              <input
+                ref={addInputRef}
+                type="text"
+                value={addPlayersInput}
+                onChange={(e) => setAddPlayersInput(e.target.value)}
+                onFocus={() => setShowPlayerSuggestions(true)}
+                placeholder="Player emails or IDs (comma or newline separated)"
+                className="input input-bordered input-sm w-full"
+              />
+              {showPlayerSuggestions && addSuggestions.length > 0 && (
+                <div className="bg-base-100 rounded-box absolute top-full right-0 left-0 z-10 mt-1 max-h-48 overflow-y-auto border shadow-lg">
+                  {addSuggestions.map((p) => (
+                    <button
+                      key={p.innohassle_id}
+                      type="button"
+                      className="hover:bg-base-200 w-full px-3 py-2 text-left text-xs transition-colors"
+                      onClick={() => {
+                        const tokens = addPlayersInput.split(/[\n,]+/);
+                        const lastToken = tokens[tokens.length - 1] ?? "";
+                        const prefix = addPlayersInput.slice(
+                          0,
+                          addPlayersInput.length - lastToken.length,
+                        );
+                        setAddPlayersInput(prefix + p.innohassle_id + ",\n");
+                        setShowPlayerSuggestions(false);
+                        addInputRef.current?.focus();
+                      }}
+                    >
+                      <span className="font-medium">{p.nickname}</span>
+                      <span className="text-base-content/50 ml-2 text-[10px]">
+                        {p.innohassle_id}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               type="button"
               className="rounded-lg border border-[#712BB2] px-3 py-1 text-xs text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 disabled:opacity-40"
@@ -323,17 +500,67 @@ export function TabletennisTournaments() {
             players={playersList}
             tourId={activeTour.id}
             validationGames={validationGames}
-            onStatsUpdate={handleStatsUpdate}
           />
         )}
         {mode === "qualification" && (
           <QualificationMatches
             key={`qualification-${activeTour.id}`}
             players={playersList}
-            validationStats={validationStats}
+            validationGames={validationGames}
+            valTop={valTop}
             tourId={activeTour.id}
             qualificationGames={qualificationGames}
+            onTourRefetch={refetchTours}
+            onLock={() => setQualificationLocked(true)}
           />
+        )}
+
+        {completedTours.length > 0 && (
+          <div className="mt-8 border-t px-2 pt-6">
+            <h2 className="text-base-content mb-4 px-5 text-lg font-light">
+              Completed tournaments
+            </h2>
+            <div className="flex flex-col gap-4">
+              {completedTours.map((tour) => {
+                const placements = getPlacementData(tour.id);
+                return (
+                  <div
+                    key={tour.id}
+                    className="bg-base-200 rounded-box mx-5 p-4"
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-sm font-medium">{tour.name}</span>
+                    </div>
+                    {placements ? (
+                      <div className="flex flex-col gap-1">
+                        {[...placements]
+                          .sort((a, b) =>
+                            a.placeLabel.localeCompare(b.placeLabel),
+                          )
+                          .map((p, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center justify-between"
+                            >
+                              <span className="text-xs font-medium">
+                                {playerNameMap.get(p.playerId) ?? p.playerId}
+                              </span>
+                              <span className="text-base-content/50 text-[10px]">
+                                {p.placeLabel}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <p className="text-base-content/50 text-xs">
+                        No placement data
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
     );
@@ -357,13 +584,44 @@ export function TabletennisTournaments() {
               maxLength={100}
               required
             />
-            <textarea
-              value={playersInput}
-              onChange={(e) => setPlayersInput(e.target.value)}
-              placeholder="Player emails or IDs (comma or newline separated)"
-              className="textarea textarea-bordered h-24 w-full"
-              required
-            />
+            <div className="relative">
+              <textarea
+                ref={createInputRef}
+                value={playersInput}
+                onChange={(e) => setPlayersInput(e.target.value)}
+                onFocus={() => setShowCreateSuggestions(true)}
+                placeholder="Player emails or IDs (comma or newline separated)"
+                className="textarea textarea-bordered h-24 w-full"
+                required
+              />
+              {showCreateSuggestions && createSuggestions.length > 0 && (
+                <div className="bg-base-100 rounded-box absolute top-full right-0 left-0 z-10 mt-1 max-h-48 overflow-y-auto border shadow-lg">
+                  {createSuggestions.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className="hover:bg-base-200 w-full px-3 py-2 text-left text-xs transition-colors"
+                      onClick={() => {
+                        const tokens = playersInput.split(/[\n,]+/);
+                        const lastToken = tokens[tokens.length - 1] ?? "";
+                        const prefix = playersInput.slice(
+                          0,
+                          playersInput.length - lastToken.length,
+                        );
+                        setPlayersInput(prefix + p.id + ",\n");
+                        setShowCreateSuggestions(false);
+                        createInputRef.current?.focus();
+                      }}
+                    >
+                      <span className="font-medium">{p.name}</span>
+                      <span className="text-base-content/50 ml-2 text-[10px]">
+                        {p.id}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="flex justify-end gap-2">
               <button
                 type="button"
