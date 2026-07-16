@@ -6,82 +6,124 @@ import { useToast } from "@/components/toast";
 
 type Player = { name: string; id: string };
 
-type GamePlayer = {
-  innohassle_id: string;
-  nickname: string;
-  rating: number;
-  registered: boolean;
-  score: number;
-};
-
 type GameData = {
   game_id: string;
   tour_id: string;
   tournament_name: string;
   finished: boolean;
-  player1: GamePlayer;
-  player2: GamePlayer;
+  player1: {
+    innohassle_id: string;
+    nickname: string;
+    rating: number;
+    registered: boolean;
+    score: number;
+  };
+  player2: {
+    innohassle_id: string;
+    nickname: string;
+    rating: number;
+    registered: boolean;
+    score: number;
+  };
 };
+
+type Bracket = "winners" | "consolation" | "placement";
 
 type MatchSlot = {
   id: string;
   game_id?: string;
   round: number;
-  poolLabel: string;
+  bracket: Bracket;
   player1_id: string | null;
   player2_id: string | null;
   score_player1: number;
   score_player2: number;
   completed: boolean;
-  isPlacement: boolean;
-  placeLabel: string | null;
+  placeLabel?: string | null;
 };
 
-type EliminatedPlayer = {
-  playerId: string;
-  round: number;
-  bracketType: "winners" | "consolation";
+type PlayerStats = {
+  id: string;
+  name: string;
+  wins: number;
+  played: number;
 };
 
-function matchKey(a: string, b: string) {
-  return [a, b].sort().join("-");
+type BracketState = {
+  matches: MatchSlot[];
+  scores: Record<string, [number, number]>;
+  seededIds: string[];
+};
+
+function localStorageKey(tourId: string) {
+  return `tt-bracket-${tourId}`;
 }
 
-function sortBySeed(ids: string[], seedOrder: Map<string, number>): string[] {
-  return [...ids].sort(
-    (a, b) => (seedOrder.get(a) ?? 999) - (seedOrder.get(b) ?? 999),
-  );
-}
-
-function pairFromSeed(sortedIds: string[]): [string, string][] {
-  const pairs: [string, string][] = [];
-  const n = sortedIds.length;
-  for (let i = 0; i < Math.floor(n / 2); i++) {
-    pairs.push([sortedIds[i]!, sortedIds[n - 1 - i]!]);
+function computeStats(players: Player[], games: GameData[]): PlayerStats[] {
+  const wins = new Map<string, number>();
+  const played = new Map<string, number>();
+  for (const p of players) {
+    wins.set(p.id, 0);
+    played.set(p.id, 0);
   }
-  return pairs;
+  for (const g of games) {
+    const p1 = g.player1.innohassle_id;
+    const p2 = g.player2.innohassle_id;
+    const s1 = g.player1.score;
+    const s2 = g.player2.score;
+    const finished = g.finished || s1 > 0 || s2 > 0;
+    if (!finished) continue;
+    played.set(p1, (played.get(p1) ?? 0) + 1);
+    played.set(p2, (played.get(p2) ?? 0) + 1);
+    if (s1 > s2) wins.set(p1, (wins.get(p1) ?? 0) + 1);
+    else if (s2 > s1) wins.set(p2, (wins.get(p2) ?? 0) + 1);
+  }
+  return players
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      wins: wins.get(p.id) ?? 0,
+      played: played.get(p.id) ?? 0,
+    }))
+    .sort((a, b) => {
+      const rateA = a.played > 0 ? a.wins / a.played : 0;
+      const rateB = b.played > 0 ? b.wins / b.played : 0;
+      if (rateB !== rateA) return rateB - rateA;
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      if (b.played !== a.played) return b.played - a.played;
+      return a.name.localeCompare(b.name);
+    });
 }
 
 function getWinner(
-  sc: [number, number],
+  scores: [number, number],
   p1: string,
   p2: string,
-): [string, string] {
-  return sc[0] > sc[1] ? [p1, p2] : [p2, p1];
+): { winner: string; loser: string } {
+  return scores[0] > scores[1]
+    ? { winner: p1, loser: p2 }
+    : { winner: p2, loser: p1 };
 }
 
 export function QualificationMatches({
   players,
-  validationStats,
+  validationGames,
+  valTop,
   tourId,
   qualificationGames,
+  onTourRefetch,
+  onLock,
 }: {
-  players: Player[];
-  validationStats?: { playerId: string; wins: number; played: number }[];
+  players: { name: string; id: string }[];
+  validationGames: GameData[];
+  valTop?: Record<string, string>;
   tourId: string;
   qualificationGames: GameData[];
+  onTourRefetch: () => void;
+  onLock: () => void;
 }) {
   const { showError } = useToast();
+  const scoresRef = useRef<Record<string, [number, number]>>({});
 
   const { mutateAsync: createGame } = $tabletennis.useMutation(
     "post",
@@ -90,7 +132,6 @@ export function QualificationMatches({
       onError: (error) => showError("Error", formatApiErrorMessage(error)),
     },
   );
-
   const { mutateAsync: finishGame } = $tabletennis.useMutation(
     "post",
     "/finish-game",
@@ -98,88 +139,163 @@ export function QualificationMatches({
       onError: (error) => showError("Error", formatApiErrorMessage(error)),
     },
   );
-  const [seeded, setSeeded] = useState<Player[]>([]);
-  const [started, setStarted] = useState(false);
-  const [starting, setStarting] = useState(false);
-  const [finishingId, setFinishingId] = useState<string | null>(null);
+  const { mutateAsync: changeQualTop } = $tabletennis.useMutation(
+    "post",
+    "/reg-tour/change-qual-top",
+    {
+      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+    },
+  );
 
-  const [currentRound, setCurrentRound] = useState(1);
+  // ── seeding from validation stats or valTop ─────────────────
+  const rankedStats = useMemo(
+    () => computeStats(players, validationGames),
+    [players, validationGames],
+  );
 
+  const initialSeeded = useMemo(() => {
+    if (valTop && Object.keys(valTop).length > 0) {
+      const ordered: Player[] = [];
+      const used = new Set<string>();
+      const places = Object.entries(valTop).sort(
+        ([a], [b]) => Number(a) - Number(b),
+      );
+      for (const [, playerId] of places) {
+        const p = players.find((pp) => pp.id === playerId);
+        if (p) {
+          ordered.push(p);
+          used.add(p.id);
+        }
+      }
+      for (const p of players) {
+        if (!used.has(p.id)) ordered.push(p);
+      }
+      return ordered;
+    }
+    return rankedStats.map((s) => ({ id: s.id, name: s.name }));
+  }, [valTop, rankedStats, players]);
+
+  const [seededPlayers, setSeededPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<MatchSlot[]>([]);
   const [scores, setScores] = useState<Record<string, [number, number]>>({});
-  const [eliminated, setEliminated] = useState<EliminatedPlayer[]>([]);
-
-  const seedOrder = useMemo(
-    () => new Map(seeded.map((p, i) => [p.id, i])),
-    [seeded],
-  );
-  const playerMap = useMemo(
-    () => new Map(seeded.map((p) => [p.id, p])),
-    [seeded],
-  );
-  const scoresRef = useRef(scores);
-  scoresRef.current = scores;
-  const eliminatedRef = useRef(eliminated);
-  eliminatedRef.current = eliminated;
-  const startedRef = useRef(started);
-  startedRef.current = started;
-
+  const [finishingId, setFinishingId] = useState<string | null>(null);
+  const [locked, setLocked] = useState(() => qualificationGames.length > 0);
+  // keep scoresRef in sync
   useEffect(() => {
-    if (players.length > 0 && players[0]?.id) {
-      const winsMap = new Map(
-        (validationStats ?? []).map((s) => [s.playerId, s.wins]),
-      );
-      const sorted = [...players].sort(
-        (a, b) => (winsMap.get(b.id) ?? 0) - (winsMap.get(a.id) ?? 0),
-      );
-      setSeeded(sorted);
-    }
-  }, [players, validationStats]);
+    scoresRef.current = scores;
+  }, [scores]);
 
+  // ── map from id → player name ──────────────────────────────
+  const playerMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const p of players) m.set(p.id, p.name);
+    return m;
+  }, [players]);
+
+  function getPlayerName(id: string | null): string {
+    if (!id) return "TBD";
+    return playerMap.get(id) ?? id;
+  }
+
+  // ── load from localStorage and sync from backend ───────────
   useEffect(() => {
-    if (
-      !started &&
-      !starting &&
-      seeded.length > 0 &&
-      qualificationGames.length > 0
-    ) {
-      const ids = seeded.map((p) => p.id);
-      const gameByPair = new Map<string, GameData>();
-      for (const g of qualificationGames) {
-        gameByPair.set(
-          matchKey(g.player1.innohassle_id, g.player2.innohassle_id),
-          g,
+    if (seededPlayers.length > 0) return;
+    if (initialSeeded.length === 0) return;
+    setSeededPlayers(initialSeeded);
+
+    const KEY = localStorageKey(tourId);
+    const saved = localStorage.getItem(KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as BracketState;
+        setMatches(parsed.matches);
+        setScores(parsed.scores);
+        setSeededPlayers(
+          parsed.seededIds.length > 0
+            ? parsed.seededIds
+                .map((id) => players.find((p) => p.id === id))
+                .filter((p): p is Player => !!p)
+            : initialSeeded,
         );
+        return;
+      } catch {
+        /* corrupted */
       }
-
-      setStarted(true);
-      setCurrentRound(1);
-      setMatches([]);
-      setScores({});
-      setEliminated([]);
-
-      const { newMatches, newScores } = createMatchSlots(
-        ids,
-        [],
-        1,
-        [],
-        gameByPair,
-      );
-      const allMatches = [...newMatches];
-      setMatches(allMatches);
-      setScores(newScores);
-
-      setTimeout(
-        () => advanceRestoreRound(allMatches, ids, [], 1, [], gameByPair),
-        0,
-      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seeded, qualificationGames, started, starting]);
 
+    // restore from backend qualification games
+    if (qualificationGames.length > 0) {
+      const restored: MatchSlot[] = [];
+      const restoredScores: Record<string, [number, number]> = {};
+      qualificationGames.forEach((g, i) => {
+        const p1 = g.player1.innohassle_id;
+        const p2 = g.player2.innohassle_id;
+        const id = `r1_m${i}`;
+        const finished =
+          g.finished || g.player1.score > 0 || g.player2.score > 0;
+        restored.push({
+          id,
+          game_id: g.game_id,
+          round: 1,
+          bracket: "winners",
+          player1_id: p1,
+          player2_id: p2,
+          score_player1: g.player1.score,
+          score_player2: g.player2.score,
+          completed: finished,
+        });
+        restoredScores[id] = [g.player1.score, g.player2.score];
+      });
+      setMatches(restored);
+      setScores(restoredScores);
+      saveBracketState(restored, restoredScores, initialSeeded);
+    }
+  }, [tourId, initialSeeded, qualificationGames, players]);
+
+  function saveBracketState(
+    m: MatchSlot[],
+    sc: Record<string, [number, number]>,
+    seeded?: Player[],
+  ) {
+    const state: BracketState = {
+      matches: m,
+      scores: sc,
+      seededIds: seeded
+        ? seeded.map((p) => p.id)
+        : seededPlayers.map((p) => p.id),
+    };
+    localStorage.setItem(localStorageKey(tourId), JSON.stringify(state));
+  }
+
+  // ── derived lists ──────────────────────────────────────────
+  const activeMatches = useMemo(
+    () =>
+      matches
+        .filter((m) => !m.completed && m.bracket !== "placement")
+        .sort((a, b) => a.round - b.round),
+    [matches],
+  );
+
+  const completedMatches = useMemo(
+    () =>
+      matches
+        .filter((m) => m.completed && m.bracket !== "placement")
+        .sort((a, b) => a.round - b.round || a.id.localeCompare(b.id)),
+    [matches],
+  );
+
+  const placementMatches = useMemo(
+    () =>
+      matches
+        .filter((m) => m.bracket === "placement" && m.completed)
+        .sort((a, b) => (a.placeLabel ?? "").localeCompare(b.placeLabel ?? "")),
+    [matches],
+  );
+
+  // ── seeding reorder ────────────────────────────────────────
   function handleMoveUp(index: number) {
     if (index === 0) return;
-    setSeeded((prev) => {
+    setSeededPlayers((prev) => {
       const next = [...prev];
       [next[index - 1]!, next[index]!] = [next[index]!, next[index - 1]!];
       return next;
@@ -187,502 +303,118 @@ export function QualificationMatches({
   }
 
   function handleMoveDown(index: number) {
-    if (index >= seeded.length - 1) return;
-    setSeeded((prev) => {
+    if (index >= seededPlayers.length - 1) return;
+    setSeededPlayers((prev) => {
       const next = [...prev];
       [next[index]!, next[index + 1]!] = [next[index + 1]!, next[index]!];
       return next;
     });
   }
 
-  function createMatchSlots(
-    winners: string[],
-    consolation: string[],
-    round: number,
-    currentMatches: MatchSlot[],
-    gameByPair: Map<string, GameData>,
-  ): { newMatches: MatchSlot[]; newScores: Record<string, [number, number]> } {
+  function buildBracketMatches(seeded: Player[]) {
     const newMatches: MatchSlot[] = [];
     const newScores: Record<string, [number, number]> = {};
-    let idx = currentMatches.length;
-
-    if (winners.length > 1) {
-      const wSorted = sortBySeed(winners, seedOrder);
-      const pairs = pairFromSeed(wSorted);
-      for (const [p1, p2] of pairs) {
-        idx++;
-        const id = `r${round}_m${idx}`;
-        const key = matchKey(p1, p2);
-        const game = gameByPair.get(key);
+    let i = 0;
+    let j = seeded.length - 1;
+    let matchIdx = 0;
+    while (i <= j) {
+      if (i === j) {
+        const id = `r1_bye_${matchIdx}`;
         newMatches.push({
           id,
-          game_id: game?.game_id,
-          round,
-          poolLabel: "Winners",
-          player1_id: p1,
-          player2_id: p2,
-          score_player1: game?.player1?.score ?? 0,
-          score_player2: game?.player2?.score ?? 0,
-          completed: game
-            ? (game.finished ?? false) ||
-              (game.player1.score ?? 0) > 0 ||
-              (game.player2.score ?? 0) > 0
-            : false,
-          isPlacement: false,
-          placeLabel: null,
-        });
-        newScores[id] = [game?.player1?.score ?? 0, game?.player2?.score ?? 0];
-      }
-      if (wSorted.length % 2 !== 0) {
-        idx++;
-        const byeId = `r${round}_bye${idx}`;
-        newMatches.push({
-          id: byeId,
-          round,
-          poolLabel: "Winners",
-          player1_id: wSorted[Math.floor(wSorted.length / 2)]!,
+          round: 1,
+          bracket: "winners",
+          player1_id: seeded[i]!.id,
           player2_id: null,
           score_player1: 0,
           score_player2: 0,
           completed: true,
-          isPlacement: false,
-          placeLabel: null,
         });
-        newScores[byeId] = [0, 0];
+        newScores[id] = [0, 0];
+        matchIdx++;
+        break;
       }
-    } else if (
-      winners.length === 1 &&
-      !currentMatches.some((m) => m.poolLabel === "Champion")
-    ) {
-      idx++;
-      const id = `r${round}_champ`;
+      const id = `r1_m${matchIdx}`;
       newMatches.push({
         id,
-        round,
-        poolLabel: "Champion",
-        player1_id: winners[0]!,
-        player2_id: null,
+        round: 1,
+        bracket: "winners",
+        player1_id: seeded[i]!.id,
+        player2_id: seeded[j]!.id,
         score_player1: 0,
         score_player2: 0,
-        completed: true,
-        isPlacement: true,
-        placeLabel: "1st place",
+        completed: false,
       });
       newScores[id] = [0, 0];
+      matchIdx++;
+      i++;
+      j--;
     }
-
-    if (consolation.length > 1) {
-      const cSorted = sortBySeed(consolation, seedOrder);
-      const pairs = pairFromSeed(cSorted);
-      for (const [p1, p2] of pairs) {
-        idx++;
-        const id = `r${round}_m${idx}`;
-        const key = matchKey(p1, p2);
-        const game = gameByPair.get(key);
-        newMatches.push({
-          id,
-          game_id: game?.game_id,
-          round,
-          poolLabel: "Consolation",
-          player1_id: p1,
-          player2_id: p2,
-          score_player1: game?.player1?.score ?? 0,
-          score_player2: game?.player2?.score ?? 0,
-          completed: game
-            ? (game.finished ?? false) ||
-              (game.player1.score ?? 0) > 0 ||
-              (game.player2.score ?? 0) > 0
-            : false,
-          isPlacement: false,
-          placeLabel: null,
-        });
-        newScores[id] = [game?.player1?.score ?? 0, game?.player2?.score ?? 0];
-      }
-      if (cSorted.length % 2 !== 0) {
-        idx++;
-        const byeId = `r${round}_cbye${idx}`;
-        newMatches.push({
-          id: byeId,
-          round,
-          poolLabel: "Consolation",
-          player1_id: cSorted[Math.floor(cSorted.length / 2)]!,
-          player2_id: null,
-          score_player1: 0,
-          score_player2: 0,
-          completed: true,
-          isPlacement: false,
-          placeLabel: null,
-        });
-        newScores[byeId] = [0, 0];
-      }
-    }
-
-    // Compute placements if tournament is done
-    const championExists = currentMatches.some(
-      (m) => m.poolLabel === "Champion",
-    );
-    const creatingChampion = newMatches.some((m) => m.poolLabel === "Champion");
-    const hasChampion = championExists || creatingChampion;
-    const tournamentDone =
-      winners.length <= 1 && consolation.length <= 1 && hasChampion;
-    if (
-      tournamentDone &&
-      !currentMatches.some((m) => m.poolLabel === "Final placement")
-    ) {
-      const placementMatches = computePlacements(
-        eliminatedRef.current,
-        seeded,
-        [...currentMatches, ...newMatches],
-      );
-      newMatches.push(...placementMatches);
-    }
-
-    return { newMatches, newScores };
+    return { matches: newMatches, scores: newScores };
   }
 
-  function advanceFromRound(
-    roundMatches: MatchSlot[],
-    round: number,
-    eliminatedSoFar: EliminatedPlayer[],
-  ): {
-    nextWinners: string[];
-    nextConsolation: string[];
-    newEliminated: EliminatedPlayer[];
-  } | null {
-    const allDone = roundMatches.every((m) => m.completed);
-    if (!allDone) return null;
-
-    const winnersMatches = roundMatches.filter(
-      (m) => m.poolLabel === "Winners",
-    );
-    const consolationMatches = roundMatches.filter(
-      (m) => m.poolLabel === "Consolation",
-    );
-
-    const wWinners: string[] = [];
-    const wLosers: string[] = [];
-    const cWinners: string[] = [];
-    const cLosers: string[] = [];
-
-    for (const m of winnersMatches) {
-      if (!m.player2_id) {
-        wWinners.push(m.player1_id!);
-      } else {
-        const sc: [number, number] = [m.score_player1, m.score_player2];
-        const [winner, loser] = getWinner(sc, m.player1_id!, m.player2_id!);
-        wWinners.push(winner);
-        wLosers.push(loser);
-      }
-    }
-
-    for (const m of consolationMatches) {
-      if (!m.player2_id) {
-        cWinners.push(m.player1_id!);
-      } else {
-        const sc: [number, number] = [m.score_player1, m.score_player2];
-        const [winner, loser] = getWinner(sc, m.player1_id!, m.player2_id!);
-        cWinners.push(winner);
-        cLosers.push(loser);
-      }
-    }
-
-    const newEliminated: EliminatedPlayer[] = [
-      ...cLosers.map((id) => ({
-        playerId: id,
-        round,
-        bracketType: "consolation" as const,
-      })),
-    ];
-    const combinedEliminated = [...eliminatedSoFar, ...newEliminated];
-
-    const nextWinners = wWinners;
-    const isFinalWinnersRound =
-      wWinners.length === 1 &&
-      wLosers.length === 1 &&
-      winnersMatches.some((m) => m.player2_id);
-    const nextConsolation = [
-      ...(isFinalWinnersRound ? [] : wLosers),
-      ...cWinners,
-    ];
-
-    return {
-      nextWinners,
-      nextConsolation,
-      newEliminated: combinedEliminated,
-    };
-  }
-
-  function computePlacements(
-    currentEliminated: EliminatedPlayer[],
-    allPlayers: Player[],
-    currentMatches: MatchSlot[],
-  ): MatchSlot[] {
-    const totalPlayers = allPlayers.length;
-    const placementMatches: MatchSlot[] = [];
-
-    const placements: {
-      playerId: string;
-      place: number;
-      placeLabel: string;
-    }[] = [];
-
-    const champMatch = currentMatches.find((m) => m.poolLabel === "Champion");
-    if (champMatch?.player1_id) {
-      const alreadyPlaced = currentMatches.some(
-        (m) =>
-          m.isPlacement &&
-          m.placeLabel === "1st place" &&
-          m.player1_id === champMatch.player1_id,
-      );
-      if (!alreadyPlaced) {
-        placements.push({
-          playerId: champMatch.player1_id,
-          place: 1,
-          placeLabel: "1st place",
-        });
-      }
-    }
-
-    const wbFinal = currentMatches.filter(
-      (m) =>
-        m.poolLabel === "Winners" &&
-        m.round ===
-          Math.max(
-            ...currentMatches
-              .filter((mm) => mm.poolLabel === "Winners")
-              .map((mm) => mm.round),
-          ),
-    );
-    const lastWBMatch = wbFinal.filter((m) => m.completed && m.player2_id);
-    if (lastWBMatch.length > 0) {
-      const finalMatch = lastWBMatch[lastWBMatch.length - 1]!;
-      const sc = scoresRef.current[finalMatch.id] ?? [0, 0];
-      const loser =
-        sc[0] > sc[1] ? finalMatch.player2_id : finalMatch.player1_id;
-      if (loser && !placements.some((p) => p.playerId === loser)) {
-        placements.push({
-          playerId: loser,
-          place: 2,
-          placeLabel: "2nd place",
-        });
-      }
-    }
-
-    const cbFinal = currentMatches.filter(
-      (m) =>
-        m.poolLabel === "Consolation" &&
-        m.round ===
-          Math.max(
-            ...currentMatches
-              .filter((mm) => mm.poolLabel === "Consolation")
-              .map((mm) => mm.round),
-          ),
-    );
-    const lastCBMatch = cbFinal.filter((m) => m.completed && m.player2_id);
-    if (lastCBMatch.length > 0) {
-      const finalMatch = lastCBMatch[lastCBMatch.length - 1]!;
-      const sc = scoresRef.current[finalMatch.id] ?? [0, 0];
-      const winner =
-        sc[0] > sc[1] ? finalMatch.player1_id : finalMatch.player2_id;
-      const loser =
-        sc[0] > sc[1] ? finalMatch.player2_id : finalMatch.player1_id;
-      if (winner && !placements.some((p) => p.playerId === winner)) {
-        placements.push({
-          playerId: winner,
-          place: 3,
-          placeLabel: "3rd place",
-        });
-      }
-      if (loser && !placements.some((p) => p.playerId === loser)) {
-        placements.push({
-          playerId: loser,
-          place: 4,
-          placeLabel: "4th place",
-        });
-      }
-    }
-
-    const eliminatedByRound = [...currentEliminated].sort((a, b) => {
-      if (a.round !== b.round) return b.round - a.round;
-      return a.bracketType === "consolation" ? -1 : 1;
-    });
-
-    let nextPlace = 5;
-    for (const ep of eliminatedByRound) {
-      if (placements.some((p) => p.playerId === ep.playerId)) continue;
-      if (nextPlace > totalPlayers) break;
-
-      const ordinal =
-        nextPlace === 5
-          ? "5th"
-          : nextPlace === 6
-            ? "6th"
-            : nextPlace === 7
-              ? "7th"
-              : nextPlace === 8
-                ? "8th"
-                : `${nextPlace}th`;
-      placements.push({
-        playerId: ep.playerId,
-        place: nextPlace,
-        placeLabel: `${ordinal} place`,
-      });
-      nextPlace++;
-    }
-
-    for (const p of placements) {
-      placementMatches.push({
-        id: `placement_${p.place}`,
-        round: 999,
-        poolLabel: "Final placement",
-        player1_id: p.playerId,
-        player2_id: null,
-        score_player1: 0,
-        score_player2: 0,
-        completed: true,
-        isPlacement: true,
-        placeLabel: p.placeLabel,
-      });
-    }
-
-    return placementMatches;
-  }
-
-  async function handleStart() {
-    const ids = seeded.map((p) => p.id);
-    setStarting(true);
-    setCurrentRound(1);
-    setMatches([]);
-    setScores({});
-    setEliminated([]);
-    setStarted(true);
-
-    // Determine which games need to be created in backend
-    const wSorted = sortBySeed(ids, seedOrder);
-    const pairs = pairFromSeed(wSorted);
-    const gameByPair = new Map<string, string>();
-    const pairsToCreate = pairs.filter(([p1, p2]) => p1 && p2);
-    await Promise.all(
-      pairsToCreate.map(async ([p1, p2]) => {
-        try {
-          const result = await createGame({
-            params: {
-              query: {
-                tour_id: tourId,
-                tip: "cval" as const,
-                player1_id: p1,
-                player2_id: p2,
-              },
-            },
-          } as any);
-          const gid = (result as any)?.id ?? "";
-          if (gid) gameByPair.set(matchKey(p1, p2), gid);
-        } catch {
-          // onError shows toast
-        }
-      }),
-    );
-
-    // Build match slots with game_ids from backend
-    const { newMatches, newScores } = createMatchSlots(
-      ids,
-      [],
-      1,
-      [],
-      new Map(),
-    );
-    const matchesWithIds = newMatches.map((m) => {
-      if (m.player1_id && m.player2_id && !m.game_id) {
-        const gid = gameByPair.get(matchKey(m.player1_id, m.player2_id));
-        return { ...m, game_id: gid ?? m.game_id };
-      }
-      return m;
-    });
-
-    setMatches(matchesWithIds);
-    setScores(newScores);
-    setStarting(false);
-  }
-
-  function advanceRestoreRound(
-    currentMatches: MatchSlot[],
-    winners: string[],
-    consolation: string[],
-    round: number,
-    eliminatedSoFar: EliminatedPlayer[],
-    gameByPair: Map<string, GameData>,
-  ) {
-    const roundMatches = currentMatches.filter((m) => m.round === round);
-    if (roundMatches.length === 0) return;
-
-    const result = advanceFromRound(roundMatches, round, eliminatedSoFar);
-    if (!result) return;
-
-    setEliminated(result.newEliminated);
-    const nextRound = round + 1;
-    setCurrentRound(nextRound);
-
-    const { newMatches, newScores } = createMatchSlots(
-      result.nextWinners,
-      result.nextConsolation,
-      nextRound,
-      currentMatches,
-      gameByPair,
-    );
-
-    if (newMatches.length > 0) {
-      setMatches((prev) => [...prev, ...newMatches]);
-      setScores((prev) => ({ ...prev, ...newScores }));
-
-      setTimeout(
-        () =>
-          advanceRestoreRound(
-            [...currentMatches, ...newMatches],
-            result.nextWinners,
-            result.nextConsolation,
-            nextRound,
-            result.newEliminated,
-            gameByPair,
-          ),
-        0,
-      );
-    }
-  }
-
-  function getPlayerName(id: string | null): string {
-    if (!id) return "TBD";
-    return playerMap.get(id)?.name ?? id;
-  }
-
-  function isResolved(id: string | null): boolean {
-    return !!id && playerMap.has(id);
-  }
-
+  // ── score change ──────────────────────────────────────────
   function handleScoreChange(matchId: string, player: 1 | 2, value: string) {
     setScores((prev) => {
       const cur = prev[matchId] ?? [0, 0];
       const v = Math.max(0, Number(value) || 0);
-      return {
-        ...prev,
-        [matchId]: player === 1 ? [v, cur[1]] : [cur[0], v],
-      };
+      const next: [number, number] = player === 1 ? [v, cur[1]] : [cur[0], v];
+      return { ...prev, [matchId]: next };
     });
   }
 
+  // ── lock seeding + generate bracket ──────────────────────
+  function handleLock() {
+    if (locked || seededPlayers.length < 2) return;
+    setLocked(true);
+    if (matches.length === 0) {
+      const { matches: newMatches, scores: newScores } =
+        buildBracketMatches(seededPlayers);
+      setMatches(newMatches);
+      setScores(newScores);
+      saveBracketState(newMatches, newScores);
+    }
+    onLock();
+  }
+
+  // ── complete match + auto-advance ─────────────────────────
   async function handleComplete(matchId: string) {
     const match = matches.find((m) => m.id === matchId);
     if (!match || match.completed) return;
+    const ms = scoresRef.current[matchId] ?? [0, 0];
+    if (ms[0] === ms[1]) {
+      showError("Draw", "Draws are not allowed in table tennis");
+      return;
+    }
     setFinishingId(matchId);
 
-    const ms = scoresRef.current[matchId] ?? [0, 0];
+    let gameId = match.game_id;
+    if (!gameId && match.player1_id && match.player2_id) {
+      try {
+        const res = await createGame({
+          params: {
+            query: {
+              tour_id: tourId,
+              tip: "cval" as const,
+              player1_id: match.player1_id,
+              player2_id: match.player2_id,
+            },
+          },
+        } as any);
+        gameId =
+          (res as any)?.id ?? (res as any)?._id ?? (res as any)?.game_id ?? "";
+      } catch {
+        setFinishingId(null);
+        return;
+      }
+    }
 
-    // Finish game in backend
-    if (match.game_id) {
+    if (gameId) {
       try {
         await finishGame({
           params: {
             query: {
-              game_id: match.game_id,
+              game_id: gameId,
               s1: ms[0],
               s2: ms[1],
               tour_id: tourId,
@@ -695,11 +427,11 @@ export function QualificationMatches({
       }
     }
 
-    // Update match state
     const updated = matches.map((m) =>
       m.id === matchId
         ? {
             ...m,
+            game_id: gameId ?? m.game_id,
             score_player1: ms[0],
             score_player2: ms[1],
             completed: true,
@@ -707,101 +439,422 @@ export function QualificationMatches({
         : m,
     );
     setMatches(updated);
-
-    // Check for round advancement
-    const round = currentRound;
-    const roundMatches = updated.filter((m) => m.round === round);
-    const result = advanceFromRound(roundMatches, round, eliminated);
-
-    if (!result) {
-      setFinishingId(null);
-      return;
-    }
-
-    const nextRound = round + 1;
-    setCurrentRound(nextRound);
-    setEliminated(result.newEliminated);
-
-    const { newMatches, newScores } = createMatchSlots(
-      result.nextWinners,
-      result.nextConsolation,
-      nextRound,
-      updated,
-      new Map(),
-    );
-
-    if (newMatches.length > 0) {
-      setMatches((prev) => [...prev, ...newMatches]);
-      setScores((prev) => ({ ...prev, ...newScores }));
-    }
-
+    const newScores = { ...scoresRef.current, [matchId]: ms };
+    setScores(newScores);
+    saveBracketState(updated, newScores);
     setFinishingId(null);
+    onTourRefetch?.();
+
+    // try auto-advance
+    const advanced = tryAdvance(updated, newScores);
+    if (advanced) {
+      setMatches(advanced.matches);
+      setScores(advanced.scores);
+      saveBracketState(advanced.matches, advanced.scores);
+      syncQualTop(advanced.matches);
+    }
   }
 
-  const rounds = useMemo(() => {
-    const groups = new Map<number, MatchSlot[]>();
-    for (const m of matches) {
-      const list = groups.get(m.round) ?? [];
-      list.push(m);
-      groups.set(m.round, list);
+  async function syncQualTop(currentMatches: MatchSlot[]) {
+    const placements = currentMatches
+      .filter((m) => m.bracket === "placement" && m.completed && m.placeLabel)
+      .sort((a, b) => (a.placeLabel ?? "").localeCompare(b.placeLabel ?? ""));
+
+    if (placements.length === 0) return;
+
+    const top: Record<string, string> = {};
+    for (const m of placements) {
+      const placeStr = (m.placeLabel ?? "").replace(/\D/g, "");
+      if (placeStr && m.player1_id) {
+        top[placeStr] = m.player1_id;
+      }
     }
-    return Array.from(groups.entries()).sort((a, b) => a[0] - b[0]);
-  }, [matches]);
 
-  if (!started) {
+    if (Object.keys(top).length === 0) return;
+
+    try {
+      await changeQualTop({
+        params: { query: { tour_id: tourId } },
+        body: top,
+      } as any);
+    } catch {
+      /* error toast from onError */
+    }
+  }
+
+  // ── auto-advance logic ────────────────────────────────────
+  function tryAdvance(
+    currentMatches: MatchSlot[],
+    currentScores: Record<string, [number, number]>,
+  ): { matches: MatchSlot[]; scores: Record<string, [number, number]> } | null {
+    // find the highest round where ALL non-placement matches are completed
+    const allRounds = [...new Set(currentMatches.map((m) => m.round))].sort(
+      (a, b) => a - b,
+    );
+    let maxCompleteRound = -1;
+    for (const round of allRounds) {
+      const ms = currentMatches.filter(
+        (m) => m.round === round && m.bracket !== "placement",
+      );
+      if (ms.length > 0 && ms.every((m) => m.completed)) {
+        maxCompleteRound = round;
+      } else break;
+    }
+    if (maxCompleteRound < 0) return null;
+
+    const nextRound = maxCompleteRound + 1;
+    // next round already exists — nothing to create
+    if (currentMatches.some((m) => m.round === nextRound)) return null;
+
+    const currentRound = maxCompleteRound;
+    const roundMatches = currentMatches.filter(
+      (m) => m.round === currentRound && m.bracket !== "placement",
+    );
+
+    // collect results
+    const winnersWinners: string[] = [];
+    const winnersLosers: string[] = [];
+    const consWinners: string[] = [];
+    const consLosers: string[] = [];
+
+    for (const m of roundMatches) {
+      if (m.bracket === "winners") {
+        if (!m.player2_id) {
+          winnersWinners.push(m.player1_id!);
+        } else {
+          const sc = currentScores[m.id] ?? [m.score_player1, m.score_player2];
+          const { winner, loser } = getWinner(sc, m.player1_id!, m.player2_id!);
+          winnersWinners.push(winner);
+          winnersLosers.push(loser);
+        }
+      } else if (m.bracket === "consolation") {
+        if (!m.player2_id) {
+          consWinners.push(m.player1_id!);
+        } else {
+          const sc = currentScores[m.id] ?? [m.score_player1, m.score_player2];
+          const { winner, loser } = getWinner(sc, m.player1_id!, m.player2_id!);
+          consWinners.push(winner);
+          consLosers.push(loser);
+        }
+      }
+    }
+
+    const hasResolved = currentMatches.some((m) => m.id === "placement_1st");
+
+    const newMatches: MatchSlot[] = [];
+    const newScores: Record<string, [number, number]> = {};
+    let idx = currentMatches.length;
+
+    // eliminated from consolation → placements (always run, even with existing placements)
+    if (consLosers.length > 0) {
+      const existingPlaces = currentMatches.filter(
+        (m) => m.bracket === "placement" && m.completed,
+      ).length;
+      consLosers.forEach((playerId, i) => {
+        const place = existingPlaces + i + 4; // start at 4th
+        const ordinal = place === 4 ? "4th" : `${place}th`;
+        idx++;
+        const id = `placement_${place}`;
+        newMatches.push({
+          id,
+          round: nextRound,
+          bracket: "placement",
+          player1_id: playerId,
+          player2_id: null,
+          score_player1: 0,
+          score_player2: 0,
+          completed: true,
+          placeLabel: `${ordinal} place`,
+        });
+        newScores[id] = [0, 0];
+      });
+    }
+
+    // if champion already resolved, only add consolation loser placements and stop
+    if (hasResolved) {
+      if (newMatches.length === 0) return null;
+      return {
+        matches: [...currentMatches, ...newMatches],
+        scores: { ...currentScores, ...newScores },
+      };
+    }
+
+    const isFinalWinners =
+      winnersWinners.length === 1 &&
+      winnersLosers.length === 1 &&
+      currentRound > 1;
+
+    // winners bracket: winners go up
+    if (winnersWinners.length > 1) {
+      for (let i = 0; i < winnersWinners.length; i += 2) {
+        if (i + 1 < winnersWinners.length) {
+          idx++;
+          const id = `r${nextRound}_w${idx}`;
+          newMatches.push({
+            id,
+            round: nextRound,
+            bracket: "winners",
+            player1_id: winnersWinners[i]!,
+            player2_id: winnersWinners[i + 1]!,
+            score_player1: 0,
+            score_player2: 0,
+            completed: false,
+          });
+          newScores[id] = [0, 0];
+        } else {
+          idx++;
+          const id = `r${nextRound}_wbye${idx}`;
+          newMatches.push({
+            id,
+            round: nextRound,
+            bracket: "winners",
+            player1_id: winnersWinners[i]!,
+            player2_id: null,
+            score_player1: 0,
+            score_player2: 0,
+            completed: true,
+          });
+          newScores[id] = [0, 0];
+        }
+      }
+    } else if (winnersWinners.length === 1 && currentRound > 0) {
+      // champion
+      idx++;
+      const id = `placement_1st`;
+      newMatches.push({
+        id,
+        round: nextRound,
+        bracket: "placement",
+        player1_id: winnersWinners[0]!,
+        player2_id: null,
+        score_player1: 0,
+        score_player2: 0,
+        completed: true,
+        placeLabel: "1st place",
+      });
+      newScores[id] = [0, 0];
+    }
+
+    // consolation bracket: losers from winners + winners from consolation
+    // unless it's the final winners round (then loser goes to 2nd)
+    const nextConsPlayers = isFinalWinners
+      ? consWinners
+      : [...winnersLosers, ...consWinners];
+
+    if (nextConsPlayers.length > 1) {
+      for (let i = 0; i < nextConsPlayers.length; i += 2) {
+        if (i + 1 < nextConsPlayers.length) {
+          idx++;
+          const id = `r${nextRound}_c${idx}`;
+          newMatches.push({
+            id,
+            round: nextRound,
+            bracket: "consolation",
+            player1_id: nextConsPlayers[i]!,
+            player2_id: nextConsPlayers[i + 1]!,
+            score_player1: 0,
+            score_player2: 0,
+            completed: false,
+          });
+          newScores[id] = [0, 0];
+        } else {
+          idx++;
+          const id = `r${nextRound}_cbye${idx}`;
+          newMatches.push({
+            id,
+            round: nextRound,
+            bracket: "consolation",
+            player1_id: nextConsPlayers[i]!,
+            player2_id: null,
+            score_player1: 0,
+            score_player2: 0,
+            completed: true,
+          });
+          newScores[id] = [0, 0];
+        }
+      }
+    } else if (nextConsPlayers.length === 1 && nextRound > 1) {
+      idx++;
+      const isSecond = !isFinalWinners && winnersWinners.length === 1;
+      const label = isSecond ? "2nd place" : "3rd place";
+      newMatches.push({
+        id: `placement_3rd`,
+        round: nextRound,
+        bracket: "placement",
+        player1_id: nextConsPlayers[0]!,
+        player2_id: null,
+        score_player1: 0,
+        score_player2: 0,
+        completed: true,
+        placeLabel: label,
+      });
+      newScores[`placement_3rd`] = [0, 0];
+    } else if (nextConsPlayers.length === 1 && nextRound <= 1) {
+      idx++;
+      newMatches.push({
+        id: `placement_3rd`,
+        round: nextRound,
+        bracket: "placement",
+        player1_id: nextConsPlayers[0]!,
+        player2_id: null,
+        score_player1: 0,
+        score_player2: 0,
+        completed: true,
+        placeLabel: "3rd place",
+      });
+      newScores[`placement_3rd`] = [0, 0];
+    }
+
+    // 2nd place: if final winners round loser didn't go to consolation
+    if (isFinalWinners && winnersLosers.length === 1) {
+      idx++;
+      newMatches.push({
+        id: `placement_2nd`,
+        round: nextRound,
+        bracket: "placement",
+        player1_id: winnersLosers[0]!,
+        player2_id: null,
+        score_player1: 0,
+        score_player2: 0,
+        completed: true,
+        placeLabel: "2nd place",
+      });
+      newScores[`placement_2nd`] = [0, 0];
+    }
+
+    if (newMatches.length === 0) return null;
+
+    return {
+      matches: [...currentMatches, ...newMatches],
+      scores: { ...currentScores, ...newScores },
+    };
+  }
+
+  // ── render: seeding ───────────────────────────────────────
+  function renderSeeding() {
     return (
-      <div className="flex flex-col gap-6 px-7 py-5">
-        <h2 className="text-base-content text-xl font-light">Player seeding</h2>
-        <p className="text-base-content/70 text-xs md:text-sm">
-          Arrange players by strength (strongest at top). The bracket pairs
-          strongest vs weakest.
-        </p>
-
-        <div className="flex max-w-md flex-col gap-2">
-          {seeded.map((p, i) => (
-            <div
-              key={p.id}
-              className="bg-base-200 rounded-box flex items-center gap-3 px-4 py-2"
-            >
-              <span className="text-base-content/50 w-5 text-xs tabular-nums">
-                #{i + 1}
-              </span>
-              <span className="flex-1 truncate text-sm font-medium">
-                {p.name}
-              </span>
-              <div className="flex gap-1">
-                <button
-                  type="button"
-                  onClick={() => handleMoveUp(i)}
-                  disabled={i === 0}
-                  className="btn btn-xs btn-ghost btn-square disabled:opacity-20"
-                >
-                  <span className="icon-[mdi--chevron-up] text-lg" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleMoveDown(i)}
-                  disabled={i >= seeded.length - 1}
-                  className="btn btn-xs btn-ghost btn-square disabled:opacity-20"
-                >
-                  <span className="icon-[mdi--chevron-down] text-lg" />
-                </button>
+      <div>
+        <h3 className="text-base-content mb-3 text-sm font-semibold">
+          Seeded players
+          <span className="text-base-content/50 ml-2 text-[10px] font-normal">
+            (based on validation results)
+          </span>
+          {locked && (
+            <span className="icon-[mdi--lock] text-base-content/30 ml-1 align-middle text-xs" />
+          )}
+        </h3>
+        <div className="flex flex-col gap-1">
+          {seededPlayers.map((p, i) => {
+            const stats = rankedStats.find((s) => s.id === p.id);
+            return (
+              <div
+                key={p.id}
+                className="bg-base-200 rounded-box flex items-center gap-2 px-3 py-2"
+              >
+                <span className="text-base-content/50 w-5 text-center text-xs tabular-nums">
+                  {i + 1}
+                </span>
+                <span className="flex-1 truncate text-sm">{p.name}</span>
+                {stats && (
+                  <span className="text-base-content/50 text-[10px] tabular-nums">
+                    {stats.wins}W / {stats.played}P
+                    {stats.played > 0 &&
+                      ` (${Math.round((stats.wins / stats.played) * 100)}%)`}
+                  </span>
+                )}
+                {!locked && (
+                  <>
+                    <button
+                      type="button"
+                      className="hover:text-base-content text-base-content/30 transition-colors disabled:opacity-10"
+                      disabled={i === 0}
+                      onClick={() => handleMoveUp(i)}
+                    >
+                      <span className="icon-[mdi--chevron-up] text-lg" />
+                    </button>
+                    <button
+                      type="button"
+                      className="hover:text-base-content text-base-content/30 transition-colors disabled:opacity-10"
+                      disabled={i >= seededPlayers.length - 1}
+                      onClick={() => handleMoveDown(i)}
+                    >
+                      <span className="icon-[mdi--chevron-down] text-lg" />
+                    </button>
+                  </>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-
-        <div>
+        {!locked && seededPlayers.length >= 2 && (
           <button
             type="button"
-            className="rounded-xl border-2 border-[#712BB2] bg-[#712BB2] px-6 py-2 text-xs font-medium text-white transition-all duration-150 hover:bg-[#712BB2]/90 disabled:cursor-not-allowed disabled:opacity-40 md:px-8 md:py-3 md:text-sm"
-            onClick={handleStart}
-            disabled={starting}
+            className="btn btn-soft btn-primary mt-3"
+            onClick={handleLock}
           >
-            {starting ? (
-              <span className="loading loading-spinner loading-sm" />
+            Lock seeding
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // ── render: active match card ──────────────────────────────
+  function renderActiveCard(m: MatchSlot) {
+    const ms = scores[m.id] ?? [m.score_player1, m.score_player2];
+    const isFinishing = finishingId === m.id;
+    return (
+      <div
+        key={m.id}
+        className="bg-base-200 rounded-box border border-[#712BB2]/30 p-3"
+      >
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-base-content/50 text-[10px]">
+            Round {m.round}
+            {m.bracket === "consolation" && " (Consolation)"}
+          </span>
+        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className="truncate text-xs font-medium">
+              {getPlayerName(m.player1_id)}
+            </span>
+            <input
+              type="number"
+              min={0}
+              value={ms[0]}
+              disabled={isFinishing}
+              onFocus={(e) => e.target.select()}
+              onChange={(e) => handleScoreChange(m.id, 1, e.target.value)}
+              className="input input-xs bg-base-100 w-10 shrink-0 rounded-lg text-center disabled:opacity-30"
+            />
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="truncate text-xs font-medium">
+              {getPlayerName(m.player2_id)}
+            </span>
+            <input
+              type="number"
+              min={0}
+              value={ms[1]}
+              disabled={isFinishing}
+              onFocus={(e) => e.target.select()}
+              onChange={(e) => handleScoreChange(m.id, 2, e.target.value)}
+              className="input input-xs bg-base-100 w-10 shrink-0 rounded-lg text-center disabled:opacity-30"
+            />
+          </div>
+        </div>
+        <div className="mt-2 flex justify-end">
+          <button
+            type="button"
+            className="rounded-lg border border-[#712BB2] px-3 py-1 text-[10px] text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 disabled:opacity-40"
+            disabled={isFinishing}
+            onClick={() => handleComplete(m.id)}
+          >
+            {isFinishing ? (
+              <span className="loading loading-spinner loading-xs" />
             ) : (
-              "Start qualification"
+              "Complete"
             )}
           </button>
         </div>
@@ -809,197 +862,148 @@ export function QualificationMatches({
     );
   }
 
+  // ── render: completed match row ────────────────────────────
+  function renderCompletedMatch(m: MatchSlot) {
+    const p1 = getPlayerName(m.player1_id);
+    const p2 = getPlayerName(m.player2_id);
+    const s1 = m.score_player1;
+    const s2 = m.score_player2;
+    const p1Won = s1 > s2;
+    return (
+      <div
+        key={m.id}
+        className="bg-base-200 rounded-box flex items-center gap-2 px-3 py-2"
+      >
+        <span className="text-[10px] font-medium tabular-nums">
+          <span className={cn(p1Won && "text-green-500")}>{p1}</span>
+          <span className="text-base-content/30 mx-1.5">
+            {s1}:{s2}
+          </span>
+          <span className={cn(!p1Won && "text-green-500")}>{p2}</span>
+        </span>
+        <span className="text-base-content/30 ml-auto text-[10px]">
+          R{m.round}
+          {m.bracket === "consolation" && "C"}
+        </span>
+      </div>
+    );
+  }
+
+  // ── group active by round ─────────────────────────────────
+  const activeByRound = useMemo(() => {
+    const groups = new Map<
+      number,
+      { bracket: Bracket; matches: MatchSlot[] }[]
+    >();
+    for (const m of activeMatches) {
+      if (!groups.has(m.round)) groups.set(m.round, []);
+      const roundGroups = groups.get(m.round)!;
+      let bg = roundGroups.find((g) => g.bracket === m.bracket);
+      if (!bg) {
+        bg = { bracket: m.bracket, matches: [] };
+        roundGroups.push(bg);
+      }
+      bg.matches.push(m);
+    }
+    return groups;
+  }, [activeMatches]);
+
+  // ── group completed by round ───────────────────────────────
+  const completedByRound = useMemo(() => {
+    const groups = new Map<
+      number,
+      { bracket: Bracket; matches: MatchSlot[] }[]
+    >();
+    for (const m of completedMatches) {
+      if (!groups.has(m.round)) groups.set(m.round, []);
+      const roundGroups = groups.get(m.round)!;
+      let bg = roundGroups.find((g) => g.bracket === m.bracket);
+      if (!bg) {
+        bg = { bracket: m.bracket, matches: [] };
+        roundGroups.push(bg);
+      }
+      bg.matches.push(m);
+    }
+    return groups;
+  }, [completedMatches]);
+
+  const hasActive = activeMatches.length > 0;
+  const hasCompleted = completedMatches.length > 0;
+  const hasPlacements = placementMatches.length > 0;
+
   return (
     <div className="flex flex-col gap-6 px-7 py-5">
-      <h2 className="text-base-content text-xl font-light">Finnish bracket</h2>
+      {renderSeeding()}
 
-      <div className="flex gap-6 overflow-x-auto pb-4">
-        {rounds.map(([round, roundMatchList]) => (
-          <div key={round} className="flex min-w-[200px] flex-col gap-4">
-            <h3 className="text-base-content sticky left-0 text-sm font-semibold">
-              Round {round}
-            </h3>
+      {!hasActive &&
+        !hasCompleted &&
+        !hasPlacements &&
+        seededPlayers.length < 2 && (
+          <p className="text-base-content/50 text-center text-sm">
+            Not enough players for qualification bracket.
+          </p>
+        )}
 
-            {(() => {
-              const poolGroups = new Map<string, MatchSlot[]>();
-              for (const m of roundMatchList) {
-                const list = poolGroups.get(m.poolLabel) ?? [];
-                list.push(m);
-                poolGroups.set(m.poolLabel, list);
-              }
-
-              return Array.from(poolGroups.entries()).map(
-                ([poolLabel, poolMatchList]) => (
-                  <div key={poolLabel} className="flex flex-col gap-2">
-                    <p className="text-base-content/50 text-[10px] font-medium tracking-wider uppercase md:text-xs">
-                      {poolLabel}
-                    </p>
-                    {poolMatchList.map((m) => {
-                      const ms = scores[m.id] ?? [0, 0];
-                      const bothFilled =
-                        m.completed ||
-                        (isResolved(m.player1_id) && isResolved(m.player2_id));
-
-                      if (!m.player2_id) {
-                        return (
-                          <div
-                            key={m.id}
-                            className={cn(
-                              "rounded-box border p-3",
-                              m.completed
-                                ? "bg-base-200 border-green-500/40"
-                                : "bg-base-200/50 border-base-content/20 border-dashed",
-                            )}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span
-                                className={cn(
-                                  "text-xs",
-                                  m.completed
-                                    ? "font-semibold"
-                                    : "text-base-content/50 font-medium",
-                                )}
-                              >
-                                {getPlayerName(m.player1_id)}
-                                {m.completed && !m.placeLabel && (
-                                  <span className="text-base-content/50 ml-1">
-                                    (bye)
-                                  </span>
-                                )}
-                              </span>
-                              {m.placeLabel && (
-                                <span className="text-base-content/50 text-[10px]">
-                                  {m.placeLabel}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <div
-                          key={m.id}
-                          className={cn(
-                            "bg-base-200 rounded-box flex min-w-[180px] flex-col gap-2 border p-3",
-                            m.completed
-                              ? "border-green-500/40"
-                              : "border-[#712BB2]/30",
-                          )}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span
-                              className={cn(
-                                "truncate text-xs",
-                                m.completed && ms[0] > ms[1]
-                                  ? "font-semibold"
-                                  : "text-base-content/70 font-medium",
-                              )}
-                            >
-                              {getPlayerName(m.player1_id)}
-                            </span>
-                            {m.completed ? (
-                              <span className="shrink-0 text-xs tabular-nums">
-                                {m.score_player1}
-                              </span>
-                            ) : (
-                              <input
-                                type="number"
-                                min={0}
-                                value={ms[0]}
-                                disabled={!bothFilled}
-                                onFocus={(e) => e.target.select()}
-                                onChange={(e) =>
-                                  handleScoreChange(m.id, 1, e.target.value)
-                                }
-                                className="input input-xs bg-base-100 w-10 shrink-0 rounded-lg text-center disabled:opacity-30"
-                              />
-                            )}
-                          </div>
-
-                          <div className="flex items-center justify-between gap-2">
-                            <span
-                              className={cn(
-                                "truncate text-xs",
-                                m.completed && ms[1] > ms[0]
-                                  ? "font-semibold"
-                                  : "text-base-content/70 font-medium",
-                              )}
-                            >
-                              {getPlayerName(m.player2_id)}
-                            </span>
-                            {m.completed ? (
-                              <span className="shrink-0 text-xs tabular-nums">
-                                {m.score_player2}
-                              </span>
-                            ) : (
-                              <input
-                                type="number"
-                                min={0}
-                                value={ms[1]}
-                                disabled={!bothFilled}
-                                onFocus={(e) => e.target.select()}
-                                onChange={(e) =>
-                                  handleScoreChange(m.id, 2, e.target.value)
-                                }
-                                className="input input-xs bg-base-100 w-10 shrink-0 rounded-lg text-center disabled:opacity-30"
-                              />
-                            )}
-                          </div>
-
-                          {!m.completed && bothFilled && (
-                            <div className="mt-1 flex justify-end">
-                              <button
-                                type="button"
-                                className="rounded-lg border border-[#712BB2] px-2 py-1 text-[10px] text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 disabled:opacity-40"
-                                onClick={() => handleComplete(m.id)}
-                                disabled={finishingId === m.id}
-                              >
-                                {finishingId === m.id ? (
-                                  <span className="loading loading-spinner loading-xs" />
-                                ) : (
-                                  "Complete"
-                                )}
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+      {hasActive && (
+        <div>
+          <h3 className="text-base-content mb-3 text-sm font-semibold">
+            Active matches
+          </h3>
+          <div className="flex flex-col gap-4">
+            {[...activeByRound.entries()]
+              .sort(([a], [b]) => a - b)
+              .map(([round, groups]) => (
+                <div key={round}>
+                  <p className="text-base-content/50 mb-2 text-[10px]">
+                    Round {round}
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    {groups.map((g) => g.matches.map(renderActiveCard))}
                   </div>
-                ),
-              );
-            })()}
+                </div>
+              ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
-      {matches.filter((m) => m.isPlacement).length > 0 && (
-        <div className="mt-4">
+      {hasCompleted && (
+        <div>
+          <h3 className="text-base-content mb-3 text-sm font-semibold">
+            Completed matches
+          </h3>
+          <div className="flex flex-col gap-4">
+            {[...completedByRound.entries()]
+              .sort(([a], [b]) => a - b)
+              .map(([round, groups]) => (
+                <div key={round}>
+                  <p className="text-base-content/50 mb-2 text-[10px]">
+                    Round {round}
+                  </p>
+                  <div className="flex flex-col gap-1">
+                    {groups.map((g) => g.matches.map(renderCompletedMatch))}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {hasPlacements && (
+        <div>
           <h3 className="text-base-content mb-3 text-sm font-semibold">
             Final placements
           </h3>
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-            {matches
-              .filter((m) => m.isPlacement)
-              .sort((a, b) => {
-                const pa = a.placeLabel ? parseInt(a.placeLabel) : 999;
-                const pb = b.placeLabel ? parseInt(b.placeLabel) : 999;
-                return pa - pb;
-              })
-              .map((m) => (
-                <div
-                  key={m.id}
-                  className="bg-base-200 rounded-box flex items-center justify-between border border-green-500/40 p-3"
-                >
-                  <span className="text-xs font-semibold">
-                    {getPlayerName(m.player1_id)}
-                  </span>
-                  <span className="text-base-content/50 text-[10px]">
-                    {m.placeLabel ?? "Last place"}
-                  </span>
-                </div>
-              ))}
+          <div className="bg-base-200 rounded-box flex flex-col gap-1 p-3">
+            {placementMatches.map((m) => (
+              <div key={m.id} className="flex items-center justify-between">
+                <span className="text-xs font-medium">
+                  {getPlayerName(m.player1_id)}
+                </span>
+                <span className="text-base-content/50 text-[10px]">
+                  {m.placeLabel}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}

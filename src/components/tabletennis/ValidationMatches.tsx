@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, useMemo, Fragment } from "react";
 import { cn } from "@/lib/ui/cn";
 import { $tabletennis } from "@/api/tabletennis";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
@@ -23,6 +23,42 @@ type GameData = {
 
 function matchKey(a: string, b: string) {
   return [a, b].sort().join("-");
+}
+
+function computeValStandings(
+  players: { name: string; id: string }[],
+  games: {
+    player1_id: string;
+    player2_id: string;
+    score_player1: number;
+    score_player2: number;
+  }[],
+): { id: string; name: string; wins: number; played: number }[] {
+  const map = new Map<string, { name: string; wins: number; played: number }>();
+  for (const p of players) {
+    map.set(p.id, { name: p.name, wins: 0, played: 0 });
+  }
+  for (const g of games) {
+    const p1 = map.get(g.player1_id);
+    const p2 = map.get(g.player2_id);
+    if (p1) {
+      p1.played += 1;
+      if (g.score_player1 > g.score_player2) p1.wins += 1;
+    }
+    if (p2) {
+      p2.played += 1;
+      if (g.score_player2 > g.score_player1) p2.wins += 1;
+    }
+  }
+  return Array.from(map.entries())
+    .map(([id, s]) => ({ id, ...s }))
+    .sort((a, b) => {
+      const wpa = a.played ? a.wins / a.played : 0;
+      const wpb = b.played ? b.wins / b.played : 0;
+      if (wpb !== wpa) return wpb - wpa;
+      if (b.played !== a.played) return b.played - a.played;
+      return a.name.localeCompare(b.name);
+    });
 }
 
 export function ValidationMatches({
@@ -76,6 +112,13 @@ export function ValidationMatches({
       onError: (error) => showError("Error", formatApiErrorMessage(error)),
     },
   );
+  const { mutateAsync: changeValTop } = $tabletennis.useMutation(
+    "post",
+    "/reg-tour/change-val-top",
+    {
+      onError: (error) => showError("Error", formatApiErrorMessage(error)),
+    },
+  );
 
   useEffect(() => {
     for (const game of validationGames) {
@@ -119,6 +162,14 @@ export function ValidationMatches({
   ]);
   const availablePlayers = players.filter((p) => !ongoingIds.includes(p.id));
 
+  const alreadyPlayedKeys = useMemo(() => {
+    const keys = new Set<string>();
+    for (const m of completedMatches) {
+      keys.add(matchKey(m.player1_id, m.player2_id));
+    }
+    return keys;
+  }, [completedMatches]);
+
   useEffect(() => {
     if (!onStatsUpdate) return;
     const stats = players.map((p) => {
@@ -139,6 +190,8 @@ export function ValidationMatches({
     setSelectedIds((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id);
       if (prev.length >= 2) return prev;
+      if (prev.length === 1 && alreadyPlayedKeys.has(matchKey(prev[0]!, id)))
+        return prev;
       return [...prev, id];
     });
   }
@@ -203,34 +256,33 @@ export function ValidationMatches({
         },
       } as any);
 
-      setCompletedMatches((prev) => [
-        ...prev,
-        {
-          game_id: match.game_id,
-          player1_id: match.player1_id,
-          player2_id: match.player2_id,
-          score_player1: scores[0],
-          score_player2: scores[1],
-        },
-      ]);
+      const newCompleted = {
+        game_id: match.game_id,
+        player1_id: match.player1_id,
+        player2_id: match.player2_id,
+        score_player1: scores[0],
+        score_player2: scores[1],
+      };
+      setCompletedMatches((prev) => [...prev, newCompleted]);
       setOngoingMatches((prev) =>
         prev.filter((m) => m.game_id !== match.game_id),
       );
+      // Sync standings to server
+      const allCompleted = [...completedMatches, newCompleted];
+      const standings = computeValStandings(players, allCompleted);
+      const valTopBody: Record<string, string> = {};
+      standings.forEach(({ id }, idx) => {
+        valTopBody[String(idx + 1)] = id;
+      });
+      await changeValTop({
+        params: { query: { tour_id: tourId } },
+        body: valTopBody,
+      } as any);
     } catch {
       // error handled by onError callback
     } finally {
       setFinishing(null);
     }
-  }
-
-  function handleDelete(key: string) {
-    setCompletedMatches((prev) =>
-      prev.filter((m) => matchKey(m.player1_id, m.player2_id) !== key),
-    );
-    setOngoingMatches((prev) =>
-      prev.filter((m) => matchKey(m.player1_id, m.player2_id) !== key),
-    );
-    setActiveCompletedKey((prev) => (prev === key ? null : prev));
   }
 
   function handleScoreChange(
@@ -309,14 +361,6 @@ export function ValidationMatches({
               "Complete"
             )}
           </button>
-          <button
-            type="button"
-            className="rounded-lg border border-red-400 px-2 py-1 text-[10px] text-red-400 transition-colors hover:bg-red-400/10"
-            onClick={() => handleDelete(getKey(match))}
-          >
-            <span className="icon-[mdi--delete] mr-0.5" />
-            Delete
-          </button>
         </div>
       </div>
     );
@@ -329,21 +373,34 @@ export function ValidationMatches({
       </h2>
 
       <div className="flex flex-wrap gap-3">
-        {availablePlayers.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            onClick={() => handleToggle(p.id)}
-            className={cn(
-              "rounded-xl border-2 px-3 py-1.5 text-xs font-medium transition-all duration-150 md:px-4 md:py-2 md:text-sm",
-              selectedIds.includes(p.id)
-                ? "border-[#712BB2] bg-[#712BB2] text-white"
-                : "border-[#712BB2] hover:bg-[#712BB2]/10",
-            )}
-          >
-            {p.name}
-          </button>
-        ))}
+        {availablePlayers.map((p) => {
+          const alreadyPlayed =
+            selectedIds.length === 1 &&
+            alreadyPlayedKeys.has(matchKey(selectedIds[0]!, p.id));
+          return (
+            <button
+              key={p.id}
+              type="button"
+              disabled={alreadyPlayed}
+              title={
+                alreadyPlayed
+                  ? `Already played with ${getPlayerName(selectedIds[0]!)}`
+                  : undefined
+              }
+              onClick={() => handleToggle(p.id)}
+              className={cn(
+                "rounded-xl border-2 px-3 py-1.5 text-xs font-medium transition-all duration-150 md:px-4 md:py-2 md:text-sm",
+                selectedIds.includes(p.id)
+                  ? "border-[#712BB2] bg-[#712BB2] text-white"
+                  : alreadyPlayed
+                    ? "border-base-content/20 text-base-content/20 cursor-not-allowed"
+                    : "border-[#712BB2] hover:bg-[#712BB2]/10",
+              )}
+            >
+              {p.name}
+            </button>
+          );
+        })}
       </div>
 
       {selectedIds.length > 0 && (
@@ -415,21 +472,7 @@ export function ValidationMatches({
                       {getPlayerName(m.player2_id)}
                     </span>
                   </div>
-                  {isActive && (
-                    <div className="mt-2 flex justify-end gap-2">
-                      <button
-                        type="button"
-                        className="rounded-lg border border-red-400 px-2 py-1 text-[10px] text-red-400 transition-colors hover:bg-red-400/10 md:text-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(key);
-                        }}
-                      >
-                        <span className="icon-[mdi--delete] mr-0.5" />
-                        Delete
-                      </button>
-                    </div>
-                  )}
+                  {isActive && <div className="mt-2 flex justify-end gap-2" />}
                 </div>
               );
             })}

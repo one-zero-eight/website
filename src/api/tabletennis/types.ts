@@ -259,6 +259,50 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/reg-tour/change-val-top": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Change Val Top
+     * @description Admin endpoint to fully overwrite a tournament's val_top (final-stage standings).
+     *     This is NOT a patch - the frontend sends the complete standings each time and it
+     *     replaces whatever was stored before. Every player in the mapping must already be
+     *     a participant of the tournament, and each player may occupy only one place.
+     */
+    post: operations["table_tennis_change_val_top"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/reg-tour/change-qual-top": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Change Qual Top
+     * @description Admin endpoint to fully overwrite a tournament's qual_top (qualification-stage standings).
+     *     Same semantics as change-val-top: full overwrite, not a patch.
+     */
+    post: operations["table_tennis_change_qual_top"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/finish-tour": {
     parameters: {
       query?: never;
@@ -897,6 +941,112 @@ export interface operations {
       };
     };
   };
+  table_tennis_change_val_top: {
+    parameters: {
+      query: {
+        tour_id: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          [key: string]: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description You are not a Table Tennis administrator/coach! */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Tournament not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  table_tennis_change_qual_top: {
+    parameters: {
+      query: {
+        tour_id: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          [key: string]: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description You are not a Table Tennis administrator/coach! */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Tournament not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   table_tennis_finish_tournament: {
     parameters: {
       query: {
@@ -971,7 +1121,7 @@ export interface operations {
           };
         };
       };
-      /** @description A player cannot play a match against themselves! OR One or both players are not in this tournament's player list */
+      /** @description One or both players are not in this tournament's player list OR A player cannot play a match against themselves! */
       400: {
         headers: {
           [name: string]: unknown;
