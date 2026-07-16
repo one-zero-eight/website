@@ -148,19 +148,17 @@ export const items: ItemType[] = [
   },
   { type: "separator" },
   // Informational pages about our services on external platforms: bots, extensions, etc.:
-  ...((import.meta.env.VITE_PRODUCTION && []) || [
-    {
-      type: "local",
-      title: "Printers",
-      to: "/printers",
-      badge: (
-        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
-          DEV
-        </span>
-      ),
-      icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
-    },
-  ]),
+  {
+    type: "local",
+    title: "Printers",
+    to: "/printers",
+    badge: (
+      <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
+        NEW
+      </span>
+    ),
+    icon: <span className="icon-[material-symbols--print-outline-rounded]" />,
+  },
   {
     type: "local",
     title: "Dorms",
