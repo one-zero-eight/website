@@ -1,20 +1,23 @@
-import { $events, eventsTypes } from "@/api/events/index.ts";
+import { $schedule, scheduleTypes } from "@/api/schedule/index.ts";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function useEventGroup(group_id: number) {
   const queryClient = useQueryClient();
-  const { data: eventsUser } = $events.useQuery("get", "/users/me");
-  const { data: predefined } = $events.useQuery("get", "/users/me/predefined");
+  const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
+  const { data: predefined } = $schedule.useQuery(
+    "get",
+    "/users/me/predefined",
+  );
 
   const onSettled = () =>
     queryClient.invalidateQueries({
-      queryKey: $events.queryOptions("get", "/users/me").queryKey,
+      queryKey: $schedule.queryOptions("get", "/users/me").queryKey,
     });
 
-  const add = $events.useMutation("post", "/users/me/favorites", {
+  const add = $schedule.useMutation("post", "/users/me/favorites", {
     onMutate: ({ params }) => {
       queryClient.setQueryData(
-        $events.queryOptions("get", "/users/me").queryKey,
+        $schedule.queryOptions("get", "/users/me").queryKey,
         (oldData) => {
           if (oldData === undefined) return oldData;
           return {
@@ -29,10 +32,10 @@ export function useEventGroup(group_id: number) {
     },
     onSettled,
   });
-  const remove = $events.useMutation("delete", "/users/me/favorites", {
+  const remove = $schedule.useMutation("delete", "/users/me/favorites", {
     onMutate: ({ params }) => {
       queryClient.setQueryData(
-        $events.queryOptions("get", "/users/me").queryKey,
+        $schedule.queryOptions("get", "/users/me").queryKey,
         (prev) => {
           if (prev === undefined) return prev;
           return {
@@ -46,10 +49,10 @@ export function useEventGroup(group_id: number) {
     },
     onSettled,
   });
-  const hide = $events.useMutation("post", "/users/me/favorites/hide", {
+  const hide = $schedule.useMutation("post", "/users/me/favorites/hide", {
     onMutate: ({ params }) => {
       queryClient.setQueryData(
-        $events.queryOptions("get", "/users/me").queryKey,
+        $schedule.queryOptions("get", "/users/me").queryKey,
         (prev) => {
           if (prev === undefined) return prev;
           if (params.query.hide) {
@@ -74,9 +77,10 @@ export function useEventGroup(group_id: number) {
     onSettled,
   });
 
-  const isFavorite = eventsUser?.favorite_event_groups?.includes(group_id);
+  const isFavorite = scheduleUser?.favorite_event_groups?.includes(group_id);
   const isPredefined = predefined?.event_groups?.includes(group_id) ?? false;
-  const isHidden = eventsUser?.hidden_event_groups?.includes(group_id) ?? false;
+  const isHidden =
+    scheduleUser?.hidden_event_groups?.includes(group_id) ?? false;
 
   const addToFavorites = () => {
     if (isPredefined) return;
@@ -127,7 +131,7 @@ export function useEventGroup(group_id: number) {
 }
 
 export function getFirstTagByType(
-  event_group: eventsTypes.SchemaViewEventGroup,
+  event_group: scheduleTypes.SchemaViewEventGroup,
   tag_type: string,
 ) {
   if (event_group.tags === undefined) return undefined;
@@ -135,7 +139,7 @@ export function getFirstTagByType(
 }
 
 export function getAllTagsByType(
-  event_group: eventsTypes.SchemaViewEventGroup,
+  event_group: scheduleTypes.SchemaViewEventGroup,
   tag_type: string,
 ) {
   if (event_group.tags === undefined) return [];
@@ -143,7 +147,7 @@ export function getAllTagsByType(
 }
 
 export function useMyMusicRoom() {
-  return $events.useQuery("get", "/users/me/music-room.ics", {
+  return $schedule.useQuery("get", "/users/me/music-room.ics", {
     parseAs: "text",
   });
 }

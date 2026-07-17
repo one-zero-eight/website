@@ -1,4 +1,4 @@
-import { $events } from "@/api/events";
+import { $schedule } from "@/api/schedule";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { getPersonalCalendarIcsUrls } from "./utils/personal-calendar-urls.ts";
@@ -19,19 +19,19 @@ export function useWhen2MeetPersonalCalendarOverlay({
   allowedSlots?: Set<string>;
   enabled: boolean;
 }) {
-  const { data: eventsUser } = $events.useQuery(
+  const { data: eventsUser } = $schedule.useQuery(
     "get",
     "/users/me",
     {},
     { enabled },
   );
-  const { data: eventGroups } = $events.useQuery(
+  const { data: eventGroups } = $schedule.useQuery(
     "get",
     "/event-groups/",
     {},
     { enabled },
   );
-  const { data: predefined } = $events.useQuery(
+  const { data: predefined } = $schedule.useQuery(
     "get",
     "/users/me/predefined",
     {},

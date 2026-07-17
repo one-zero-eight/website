@@ -1,6 +1,6 @@
 import Tooltip from "@/components/common/Tooltip";
-import { $events } from "@/api/events";
-import { TargetForExport } from "@/api/events/types.ts";
+import { $schedule } from "@/api/schedule";
+import { TargetForExport } from "@/api/schedule/types.ts";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function HideButtonPersonal({
@@ -9,31 +9,31 @@ export default function HideButtonPersonal({
   target: TargetForExport;
 }) {
   const queryClient = useQueryClient();
-  const { data: eventsUser } = $events.useQuery("get", "/users/me");
+  const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
 
   const onSettled = () =>
     queryClient.invalidateQueries({
-      queryKey: $events.queryOptions("get", "/users/me").queryKey,
+      queryKey: $schedule.queryOptions("get", "/users/me").queryKey,
     });
 
   let isHidden = false;
   if (target === TargetForExport.sport) {
-    isHidden = eventsUser?.sports_hidden ?? false;
+    isHidden = scheduleUser?.sports_hidden ?? false;
   } else if (target === TargetForExport.moodle) {
-    isHidden = eventsUser?.moodle_hidden ?? false;
+    isHidden = scheduleUser?.moodle_hidden ?? false;
   } else if (target === TargetForExport.music_room) {
-    isHidden = eventsUser?.music_room_hidden ?? false;
+    isHidden = scheduleUser?.music_room_hidden ?? false;
   } else if (target === TargetForExport.workshops) {
-    isHidden = eventsUser?.workshops_hidden ?? false;
+    isHidden = scheduleUser?.workshops_hidden ?? false;
   } else if (target === TargetForExport.room_bookings) {
-    isHidden = eventsUser?.room_bookings_hidden ?? false;
+    isHidden = scheduleUser?.room_bookings_hidden ?? false;
   }
 
-  const hide = $events.useMutation("post", "/users/me/{target}/hide", {
+  const hide = $schedule.useMutation("post", "/users/me/{target}/hide", {
     onMutate: ({ params }) => {
       console.log(params);
       queryClient.setQueryData(
-        $events.queryOptions("get", "/users/me").queryKey,
+        $schedule.queryOptions("get", "/users/me").queryKey,
         (prev) => {
           if (prev === undefined) return prev;
           const patch: {

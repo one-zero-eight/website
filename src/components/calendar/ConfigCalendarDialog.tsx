@@ -1,10 +1,10 @@
-import { $events } from "@/api/events";
+import { $schedule } from "@/api/schedule";
 import { Modal } from "@/components/common/Modal.tsx";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
 import { PersonalCard } from "@/components/schedule/group-card/PersonalCard.tsx";
-import { useMyMusicRoom } from "@/api/events/event-group.ts";
+import { useMyMusicRoom } from "@/api/schedule/event-group.ts";
 import { Link } from "@tanstack/react-router";
-import { TargetForExport } from "@/api/events/types.ts";
+import { TargetForExport } from "@/api/schedule/types.ts";
 import { useState } from "react";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
 
@@ -15,8 +15,11 @@ export function ConfigCalendarDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data: eventsUser } = $events.useQuery("get", "/users/me");
-  const { data: predefined } = $events.useQuery("get", "/users/me/predefined");
+  const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
+  const { data: predefined } = $schedule.useQuery(
+    "get",
+    "/users/me/predefined",
+  );
 
   const { isSuccess: musicRoomIsSuccess } = useMyMusicRoom();
 
@@ -45,7 +48,7 @@ export function ConfigCalendarDialog({
           />
         ))}
 
-        {eventsUser?.favorite_event_groups?.map((v) => (
+        {scheduleUser?.favorite_event_groups?.map((v) => (
           <GroupCardById
             key={v}
             groupId={v}

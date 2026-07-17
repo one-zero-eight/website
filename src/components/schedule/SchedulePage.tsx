@@ -1,10 +1,10 @@
-import { $events, eventsTypes } from "@/api/events";
+import { $schedule, scheduleTypes } from "@/api/schedule";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { CategoryContainer } from "@/components/schedule/CategoryContainer.tsx";
 import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 import SearchBar from "@/components/schedule/SearchBar";
 import { GroupCardTagSkeleton } from "@/components/schedule/skeletons/GroupCardTagSkeleton";
-import { getFirstTagByType } from "@/api/events/event-group.ts";
+import { getFirstTagByType } from "@/api/schedule/event-group.ts";
 import {
   getCategoryInfoBySlug,
   viewConfig,
@@ -14,7 +14,7 @@ import { Link } from "@tanstack/react-router";
 import Fuse from "fuse.js";
 import React, { useEffect, useMemo, useState } from "react";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
-import { TargetForExport } from "@/api/events/types.ts";
+import { TargetForExport } from "@/api/schedule/types.ts";
 
 export default function SchedulePage({
   category,
@@ -22,7 +22,7 @@ export default function SchedulePage({
   category: string | null;
 }) {
   const categoryInfo = getCategoryInfoBySlug(category ?? "");
-  const { data, isPending, error, refetch } = $events.useQuery(
+  const { data, isPending, error, refetch } = $schedule.useQuery(
     "get",
     "/event-groups/",
   );
@@ -96,7 +96,7 @@ export default function SchedulePage({
         acc[tag].push(v);
         return acc;
       },
-      {} as { [key: string]: eventsTypes.SchemaViewEventGroup[] },
+      {} as { [key: string]: scheduleTypes.SchemaViewEventGroup[] },
     );
 
   const [exportModalOpen, setExportModalOpen] = useState(false);

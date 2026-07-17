@@ -1,10 +1,10 @@
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
-import { getMusicRoomLink, getMyMusicRoomLink } from "@/api/events/links.ts";
+import { getMusicRoomLink, getMyMusicRoomLink } from "@/api/schedule/links.ts";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
-import { TargetForExport } from "@/api/events/types.ts";
+import { TargetForExport } from "@/api/schedule/types.ts";
 
 export function MusicRoomPage() {
   const [exportModalOpen, setExportModalOpen] = useState(false);

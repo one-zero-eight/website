@@ -4,10 +4,10 @@ apis:
     x-openapi-ts:
       output: ./src/api/accounts/types.ts
       #  --root-types --enum
-  events:
-    root: https://api.innohassle.ru/events/staging-v0/openapi.json
+  schedule:
+    root: https://api.innohassle.ru/schedule/staging-v0/openapi.json
     x-openapi-ts:
-      output: ./src/api/events/types.ts
+      output: ./src/api/schedule/types.ts
       #  --root-types --enum
   maps:
     root: https://api.innohassle.ru/maps/staging-v0/openapi.json

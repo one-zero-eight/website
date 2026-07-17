@@ -1,5 +1,5 @@
-import { getWorkshopsLink } from "@/api/events/links.ts";
-import { TargetForExport } from "@/api/events/types.ts";
+import { getWorkshopsLink } from "@/api/schedule/links.ts";
+import { TargetForExport } from "@/api/schedule/types.ts";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
