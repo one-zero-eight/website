@@ -127,7 +127,7 @@ export function ConnectTelegramPage() {
             const searchParams = new URLSearchParams(searchStr);
             const bot = searchParams.get("bot");
             if (bot) {
-              window.location.replace(`https://t.me/${bot}`);
+              window.location.replace(`https://telegram.me/${bot}`);
             } else {
               navigate({ to: "/dashboard" });
             }

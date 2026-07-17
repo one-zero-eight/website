@@ -51,7 +51,17 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://innohassle.ru/events/approval</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://innohassle.ru/events/archive</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/events/calendar</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -67,6 +77,21 @@
   </url>
   <url>
     <loc>https://innohassle.ru/guard</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/guard/copy</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/guard/create</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/guard/files</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -92,6 +117,16 @@
   </url>
   <url>
     <loc>https://innohassle.ru/printers</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/printers/print</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://innohassle.ru/printers/scan</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

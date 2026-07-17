@@ -2,65 +2,101 @@ import { Link } from "@tanstack/react-router";
 
 export function WebPrintLandingPage() {
   return (
-    <div className="@container/content mx-auto w-full max-w-[1200px] px-4 py-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-base-content mb-2 text-2xl font-bold md:text-3xl">
-          Inno Web Print
-        </h1>
-        <p className="text-base-content/50 mx-auto max-w-xl">
-          Print and scan documents on Innopolis University printers directly
-          from your browser.
+    <div className="@container/content mx-auto flex w-full max-w-[720px] flex-col gap-8 px-4 py-8">
+      <section className="flex flex-col gap-3">
+        <p className="text-base leading-relaxed">
+          Print and scan on university printers from your browser — upload a
+          file or place a document on the glass, choose a device, and go.
         </p>
-      </div>
+        <ul className="text-base-content/70 flex flex-col gap-2 text-base leading-relaxed">
+          <li className="flex gap-2">
+            <span className="icon-[material-symbols--sync-rounded] text-primary mt-0.5 shrink-0 text-xl" />
+            Automatic conversion of PDF, Word, Excel, images, and more for
+            printing
+          </li>
+          <li className="flex gap-2">
+            <span className="icon-[material-symbols--crop-rounded] text-primary mt-0.5 shrink-0 text-xl" />
+            Smart crop that detects document edges when scanning
+          </li>
+        </ul>
+      </section>
 
-      <div className="grid grid-cols-1 gap-6 @lg/content:grid-cols-2">
+      <div className="flex flex-col gap-3">
         <Link
           to="/printers/print"
-          className="card card-border bg-base-100 hover:border-primary/40 transition-colors"
+          className="bg-base-200 hover:bg-base-300 rounded-field flex items-center gap-3 px-4 py-3.5 transition-colors"
         >
-          <div className="card-body items-center text-center">
-            <span className="icon-[material-symbols--print-rounded] text-primary text-5xl" />
-            <h2 className="card-title">Print</h2>
-            <p className="text-base-content/50">
-              Upload a document, choose a printer and options, then send it to
-              print.
+          <span className="icon-[material-symbols--upload-file-rounded] text-primary shrink-0 text-3xl" />
+          <div className="min-w-0">
+            <p className="text-base font-medium">Print</p>
+            <p className="text-base-content/60 text-base">
+              Upload a file, pick a printer, send the job
             </p>
-            <div className="card-actions mt-2 w-full">
-              <span className="btn btn-primary btn-sm w-full">Open print</span>
-            </div>
           </div>
         </Link>
 
         <Link
           to="/printers/scan"
-          className="card card-border bg-base-100 hover:border-primary/40 transition-colors"
+          className="bg-base-200 hover:bg-base-300 rounded-field flex items-center gap-3 px-4 py-3.5 transition-colors"
         >
-          <div className="card-body items-center text-center">
-            <span className="icon-[material-symbols--adf-scanner-rounded] text-primary text-5xl" />
-            <h2 className="card-title">Scan</h2>
-            <p className="text-base-content/50">
-              Scan pages from a university scanner and download the result as a
-              PDF.
+          <span className="icon-[material-symbols--adf-scanner-rounded] text-primary shrink-0 text-3xl" />
+          <div className="min-w-0">
+            <p className="text-base font-medium">Scan</p>
+            <p className="text-base-content/60 text-base">
+              Scan pages and download a PDF
             </p>
-            <div className="card-actions mt-2 w-full">
-              <span className="btn btn-primary btn-sm w-full">Open scan</span>
-            </div>
           </div>
         </Link>
       </div>
 
-      <div className="card card-border mt-8">
-        <div className="card-body">
-          <h2 className="card-title text-base">
-            <span className="icon-[material-symbols--info-outline-rounded]" />
-            Supported file formats
-          </h2>
-          <p className="text-base-content/50 text-sm">
-            PDF, Word, Excel, OpenDocument, images (PNG, JPG, BMP), and plain
-            text. Maximum file size is 20 MB.
+      <section className="flex flex-col gap-3">
+        <h2 className="text-base-content text-xl font-semibold">Locations</h2>
+        <p className="text-base-content/70 text-base leading-relaxed">
+          Two printers are available on campus right now:
+        </p>
+        <ul className="text-base-content/70 flex flex-col gap-2 text-base leading-relaxed">
+          <li>
+            <span className="text-base-content">319</span>
+            <span className="text-base-content/70"> — 3rd floor · </span>
+            <Link
+              to="/maps"
+              search={{ scene: "university-floor-3", area: "printer-319" }}
+              className="text-primary hover:underline"
+            >
+              Show on map
+            </Link>
+          </li>
+          <li>
+            <span className="text-base-content">VK Zone</span>
+            <span className="text-base-content/70"> — 5th floor · </span>
+            <Link
+              to="/maps"
+              search={{ scene: "university-floor-5", area: "printer-5f" }}
+              className="text-primary hover:underline"
+            >
+              Show on map
+            </Link>
+          </li>
+        </ul>
+      </section>
+
+      <a
+        href="https://telegram.me/InnoPrintBot"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="bg-base-200 hover:bg-base-300 rounded-field flex items-center gap-3 px-4 py-3.5 transition-colors"
+      >
+        <span className="icon-[mdi--robot-excited-outline] text-primary shrink-0 text-3xl" />
+        <div className="min-w-0">
+          <p className="flex items-center gap-1 text-base font-medium">
+            Telegram bot
+            <span className="icon-[material-symbols--open-in-new-rounded] text-base-content/50 text-base" />
+          </p>
+          <p className="text-base-content/60 text-base">
+            Print and scan via @InnoPrintBot
           </p>
         </div>
-      </div>
+      </a>
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
-import { formatDate, filterByFields } from "./utils";
-import { MESSAGES } from "./consts";
+import { useToast } from "@/components/toast";
+import { useMemo, useState } from "react";
+import { filterByFields, formatDate } from "./utils";
 
 type BannedItem = {
   user_id: string;
@@ -9,26 +9,41 @@ type BannedItem = {
   banned_at: string;
 };
 
-interface BannedListProps {
+export function BannedList({
+  banned,
+  search,
+  onUnban,
+}: {
   banned: BannedItem[];
   search: string;
   onUnban: (userId: string) => Promise<void>;
-}
-
-export function BannedList({ banned, search, onUnban }: BannedListProps) {
+}) {
   const filtered = useMemo(
     () => filterByFields(banned, search, ["gmail", "innomail"]),
     [banned, search],
   );
 
   if (!banned || banned.length === 0) {
-    return <div className="text-base-content/60">No banned users.</div>;
+    return (
+      <div className="bg-base-200/50 text-base-content/60 rounded-box flex flex-col items-center gap-2 px-4 py-10 text-center">
+        <span className="icon-[material-symbols--person-off-outline-rounded] text-3xl" />
+        <p>No banned users</p>
+      </div>
+    );
+  }
+
+  if (filtered.length === 0) {
+    return (
+      <p className="text-base-content/60 py-6 text-center text-sm">
+        No banned users match your search
+      </p>
+    );
   }
 
   return (
-    <div className="flex max-h-80 flex-col gap-3 overflow-auto">
+    <div className="flex max-h-96 flex-col gap-2 overflow-auto">
       {filtered.map((bannedUser) => (
-        <BannedItem
+        <BannedItemCard
           key={bannedUser.user_id}
           banned={bannedUser}
           onUnban={onUnban}
@@ -38,42 +53,62 @@ export function BannedList({ banned, search, onUnban }: BannedListProps) {
   );
 }
 
-interface BannedItemProps {
+function BannedItemCard({
+  banned,
+  onUnban,
+}: {
   banned: BannedItem;
   onUnban: (userId: string) => Promise<void>;
-}
-
-function BannedItem({ banned, onUnban }: BannedItemProps) {
+}) {
   return (
-    <div className="border-base-content/20 bg-base-200/5 rounded-field flex items-center justify-between border-2 px-4 py-3">
+    <div className="bg-base-200 rounded-box flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col">
           <Email email={banned.gmail} />
           <Email email={banned.innomail} />
         </div>
         <div className="text-base-content/50 text-xs">
-          banned at {formatDate(banned.banned_at)}
+          banned {formatDate(banned.banned_at)}
         </div>
       </div>
-      <UnbanButton onClick={() => onUnban(banned.user_id)} />
+      <UnbanButton
+        email={banned.gmail || banned.innomail}
+        onClick={() => onUnban(banned.user_id)}
+      />
     </div>
   );
 }
 
 function Email({ email }: { email: string }) {
+  const [local, domain] = email.split("@");
   return (
-    <span>
-      {email.split("@")[0]}
-      <span className="text-base-content/50">@{email.split("@")[1]}</span>
+    <span className="truncate text-sm">
+      {local}
+      <span className="text-base-content/50">@{domain}</span>
     </span>
   );
 }
 
-function UnbanButton({ onClick }: { onClick: () => Promise<void> }) {
+function UnbanButton({
+  onClick,
+  email,
+}: {
+  onClick: () => Promise<void>;
+  email: string;
+}) {
+  const { showConfirm } = useToast();
   const [pending, setPending] = useState(false);
 
   const handleClick = async () => {
-    if (!confirm(MESSAGES.unbanConfirm)) return;
+    const confirmed = await showConfirm({
+      title: "Unban user",
+      message: `Unban ${email}? They will be able to join this sheet again via the join link.`,
+      confirmText: "Unban",
+      cancelText: "Cancel",
+      type: "info",
+    });
+    if (!confirmed) return;
+
     setPending(true);
     try {
       await onClick();
@@ -84,12 +119,17 @@ function UnbanButton({ onClick }: { onClick: () => Promise<void> }) {
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={pending}
-      className="rounded-field ml-4 shrink-0 border-2 border-green-500 px-3 py-2 text-sm font-medium text-green-500 hover:bg-green-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-      title="Unban user"
+      className="btn btn-ghost btn-sm shrink-0 gap-1"
     >
-      {pending ? "Unbanning..." : "Unban"}
+      {pending ? (
+        <span className="loading loading-spinner loading-sm" />
+      ) : (
+        <span className="icon-[material-symbols--undo-rounded] text-lg" />
+      )}
+      Unban
     </button>
   );
 }

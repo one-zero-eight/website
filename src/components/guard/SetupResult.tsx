@@ -1,10 +1,12 @@
-// import { useState } from "react";
-import { buildSheetsUrl, buildDocsUrl } from "./utils";
+import { buildDocsUrl, buildSheetsUrl } from "./utils";
 import { CopyLinkButton } from "./CopyLinkButton";
 import { useServiceAccountEmail } from "./hooks";
 import { ServiceAccountEmail } from "./Instructions";
 
-interface SetupResultProps {
+export function SetupResult({
+  result,
+  onDismiss,
+}: {
   result: {
     title: string;
     fileId: string;
@@ -14,20 +16,7 @@ interface SetupResultProps {
     joinLink: string;
   };
   onDismiss?: () => void;
-}
-
-export function SetupResult({ result, onDismiss }: SetupResultProps) {
-  // const [copied, setCopied] = useState(false);
-
-  // const handleCopy = async () => {
-  //   try {
-  //     await navigator.clipboard.writeText(result.joinLink);
-  //     setCopied(true);
-  //     setTimeout(() => setCopied(false), 2000);
-  //   } catch (_) {
-  //     console.log("Failed to copy to clipboard");
-  //   }
-  // };
+}) {
   const { serviceEmail } = useServiceAccountEmail();
 
   const fileUrl =
@@ -36,41 +25,34 @@ export function SetupResult({ result, onDismiss }: SetupResultProps) {
       : buildDocsUrl(result.fileId);
 
   return (
-    <div className="rounded-field mt-4 border-2 border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
-      {/* <div className="mb-4 text-center text-5xl"></div> */}
-      <h3 className="mb-2 text-center text-xl font-semibold text-green-800 dark:text-green-300">
-        ✅ Setup Complete!
-      </h3>
-
+    <div className="alert alert-success alert-soft flex-col items-stretch gap-3">
       <div>
-        <p className="text-base-content/80 mb-2 text-center font-medium">
+        <h3 className="text-lg font-semibold">Setup complete</h3>
+        <p className="mt-1 text-sm">
           New file was created under{" "}
-          <ServiceAccountEmail email={serviceEmail} /> ownership
-          <br />
-          You was added to the file with editor role
+          <ServiceAccountEmail email={serviceEmail} /> ownership. You were added
+          with editor role.
         </p>
-        <p className="text-base-content/60 mt-4">
-          You can edit spreadsheet or share join link with the students!
+        <p className="text-base-content/70 mt-2 text-sm">
+          Edit the spreadsheet or share the join link with students.
         </p>
       </div>
 
-      <div className="mt-2 flex items-center justify-between dark:border-green-800">
-        <div className="flex gap-2">
-          <CopyLinkButton text={result.joinLink} variant="primary" />
-
-          <a
-            href={fileUrl}
-            // disabled={!file?.file_id}
-            className="border-base-content/20 hover:border-base-content/40 rounded-field border-2 px-3.5 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Open spreadsheet
-          </a>
-        </div>
-
+      <div className="flex flex-wrap items-center gap-2">
+        <CopyLinkButton text={result.joinLink} />
+        <a
+          href={fileUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn btn-outline btn-sm"
+        >
+          Open spreadsheet
+        </a>
         {onDismiss ? (
           <button
+            type="button"
             onClick={onDismiss}
-            className="border-base-content/20 hover:border-base-content/40 rounded-field border-2 px-3 py-2 text-sm font-medium"
+            className="btn btn-ghost btn-sm ml-auto"
           >
             Dismiss
           </button>

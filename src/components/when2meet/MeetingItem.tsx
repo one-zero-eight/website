@@ -1,11 +1,14 @@
 import type { when2meetTypes } from "@/api/when2meet";
 import { Link } from "@tanstack/react-router";
+import { formatMeetingTimeRange } from "./utils/meeting-time.ts";
 
 export function MeetingItem({
   meeting,
 }: {
   meeting: when2meetTypes.SchemaEventSummary;
 }) {
+  const selectedTimeLabel = formatMeetingTimeRange(meeting.selected_time);
+
   return (
     <Link
       to="/when2meet/$meetingId"
@@ -33,6 +36,12 @@ export function MeetingItem({
             <span className="icon-[mdi--account-group-outline] text-primary shrink-0 text-lg" />
             <span>{meeting.participants_count} participants</span>
           </div>
+          {selectedTimeLabel && (
+            <div className="flex items-center gap-2">
+              <span className="icon-[material-symbols--schedule-outline] text-secondary shrink-0 text-lg" />
+              <span>{selectedTimeLabel}</span>
+            </div>
+          )}
         </div>
       </div>
     </Link>

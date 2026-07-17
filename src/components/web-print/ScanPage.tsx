@@ -1,65 +1,75 @@
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $printers } from "@/api/printers";
 import { Modal } from "@/components/common/Modal.tsx";
 import Tooltip from "@/components/common/Tooltip.tsx";
-import { FileDropzone } from "@/components/web-print/FileDropzone.tsx";
-import { useWebPrintFiles } from "@/components/web-print/useWebPrintFiles.ts";
+import {
+  DeviceOption,
+  DeviceOptionList,
+} from "@/components/web-print/DeviceOptionList.tsx";
+import {
+  FileDropzone,
+  formatFileSize,
+} from "@/components/web-print/FileDropzone.tsx";
+import { getScanSessionState } from "@/components/web-print/scan-session.ts";
+import { useScanSession } from "@/components/web-print/useScanSession.ts";
 import {
   ScanningOptionsCrop,
   ScanningOptionsInput_source,
   ScanningOptionsQuality,
   ScanningOptionsSides,
 } from "@/api/printers/types.ts";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { cn } from "@/lib/ui/cn";
+import { useEffect, useState, type ReactNode } from "react";
+
+/** Fake scan duration: ~6.5s per 100 dpi + optional warmup. */
+const SCAN_FAKE_MS_PER_100_DPI = 6500;
+const SCAN_FAKE_WARMUP_MS = 5_000;
+const SCAN_FAKE_COLD_AFTER_MS = 1 * 60 * 1000;
+
+function estimateScanDurationMs(
+  dpi: string | number,
+  { needsWarmup }: { needsWarmup: boolean },
+) {
+  return (
+    (Number(dpi) / 100) * SCAN_FAKE_MS_PER_100_DPI +
+    (needsWarmup ? SCAN_FAKE_WARMUP_MS : 0)
+  );
+}
 
 export function ScanPage() {
   const [alert, setAlert] = useState<ReactNode>();
-  const newScan = useRef(false);
+  const [scanError, setScanError] = useState<string>();
+  const [showResultPanel, setShowResultPanel] = useState(true);
+  const [scanProgress, setScanProgress] = useState(0);
+  const [previewToolbarHost, setPreviewToolbarHost] =
+    useState<HTMLDivElement | null>(null);
+  const [removeLastPageModalOpen, setRemoveLastPageModalOpen] = useState(false);
 
   function showPopupWithExceptionDetail(prefix: string, exception: unknown) {
-    const detail =
-      exception &&
-      typeof exception === "object" &&
-      "detail" in exception &&
-      exception.detail
-        ? String(exception.detail)
-        : "Unknown error. Service is unavailable";
     setAlert(
       <p>
-        {prefix}: {detail}
+        {prefix}: {formatApiErrorMessage(exception)}
       </p>,
     );
   }
 
+  const { session, setSession, removeLastPage, getFile, isFileProcessing } =
+    useScanSession(showPopupWithExceptionDetail);
+
   const {
+    scannerName,
+    mode,
+    scanSides,
+    quality,
+    crop,
+    documentName,
+    hasScanResult,
+    isScanning,
     preparedFile,
     fileBlob,
-    preparedFileName,
     downloadFileName,
     preparedFilePagesCount,
-    isFileProcessing,
-    prepareFile,
-    getFile,
-    setDownloadFileName,
-    setPreparedFileName,
-    setPreparedFilePagesCount,
-  } = useWebPrintFiles(showPopupWithExceptionDetail);
-
-  const [scannerName, setScannerName] = useState("");
-  const [mode, setMode] = useState<ScanningOptionsInput_source>(
-    ScanningOptionsInput_source.Platen,
-  );
-  const [scanSides, setScanSides] = useState<ScanningOptionsSides>(
-    ScanningOptionsSides.false,
-  );
-  const [quality, setQuality] = useState<ScanningOptionsQuality>(
-    ScanningOptionsQuality.Value200,
-  );
-  const [crop, setCrop] = useState<ScanningOptionsCrop>(
-    ScanningOptionsCrop.false,
-  );
-  const [isScanning, setIsScanning] = useState(false);
-  const [hasScanResult, setHasScanResult] = useState(false);
-  const [documentName, setDocumentName] = useState("");
+  } = session;
 
   const { data: rawScanners } = $printers.useQuery("get", "/scan/get_scanners");
   const { data: rawStatuses } = $printers.useQuery(
@@ -77,28 +87,60 @@ export function ScanPage() {
     "/scan/manual/delete_file",
   );
 
-  useEffect(() => {
-    if (rawScanners?.length && !scannerName) {
-      setScannerName(rawScanners[0].name);
-    }
-  }, [rawScanners, scannerName]);
+  function isScannerOffline(name: string) {
+    return (
+      rawStatuses?.find((status) => status.scanner.name === name)?.offline ===
+      true
+    );
+  }
 
-  function getScanDisplayFileName(serverFilename: string) {
+  useEffect(() => {
+    if (!rawScanners?.length) return;
+
+    const selectedIsUsable =
+      !!scannerName &&
+      rawScanners.some((scanner) => scanner.name === scannerName) &&
+      !isScannerOffline(scannerName);
+
+    if (selectedIsUsable) return;
+
+    const firstOnline = rawScanners.find(
+      (scanner) => !isScannerOffline(scanner.name),
+    );
+    setSession({ scannerName: (firstOnline ?? rawScanners[0]).name });
+  }, [rawScanners, rawStatuses, scannerName, setSession]);
+
+  const selectedScannerOffline = !!scannerName && isScannerOffline(scannerName);
+
+  function getScanDisplayFileName() {
     const trimmed = documentName.trim();
-    return trimmed ? `${trimmed}.pdf` : serverFilename;
+    return trimmed ? `${trimmed}.pdf` : "document.pdf";
   }
 
   async function reloadScanPreview(serverFilename: string) {
-    await getFile(serverFilename, true, getScanDisplayFileName(serverFilename));
+    await getFile(serverFilename, getScanDisplayFileName());
     if (!documentName.trim()) {
-      setDocumentName(serverFilename.replace(/\.pdf$/i, ""));
+      setSession({
+        documentName: "document",
+        downloadFileName: "document.pdf",
+      });
     }
   }
 
-  async function scanAndWait(isNewScan: boolean) {
-    if (isNewScan) newScan.current = true;
-    setIsScanning(true);
-    setHasScanResult(false);
+  async function scanAndWait(startNewScan: boolean) {
+    if (isScannerOffline(scannerName)) {
+      setScanError("Selected scanner is offline");
+      return;
+    }
+
+    if (startNewScan) setSession({ isNewScan: true });
+    setScanError(undefined);
+    setSession({
+      isScanning: true,
+      ...(startNewScan
+        ? { hasScanResult: false }
+        : { hasDownloadedScan: false }),
+    });
 
     let jobId;
     try {
@@ -114,51 +156,72 @@ export function ScanPage() {
         },
       });
     } catch (exception: unknown) {
-      showPopupWithExceptionDetail("Start problem", exception);
-      setIsScanning(false);
+      setScanError(formatApiErrorMessage(exception));
+      setSession({ isScanning: false });
       return;
     }
 
     if (!jobId) {
-      setIsScanning(false);
+      setSession({ isScanning: false });
       return;
     }
 
     const startTime = performance.now();
+    const { isNewScan: isNewScanJob, preparedFileName: prevFilename } =
+      getScanSessionState();
     const promisedScan = waitTillTheEnd({
       params: {
         query: {
           scanner_name: scannerName,
           job_id: jobId,
-          prev_filename: newScan.current ? null : preparedFileName,
+          prev_filename: isNewScanJob ? null : prevFilename,
         },
       },
     });
-    newScan.current = false;
+    setSession({ isNewScan: false });
 
     let scanWasResolved = false;
-    promisedScan.then(() => {
-      scanWasResolved = true;
-    });
+    let waitError: unknown;
+    promisedScan.then(
+      () => {
+        scanWasResolved = true;
+      },
+      (error: unknown) => {
+        scanWasResolved = true;
+        waitError = error;
+      },
+    );
 
     while (performance.now() - startTime < 60 * 1000) {
       if (scanWasResolved) {
+        if (waitError) {
+          setScanError(formatApiErrorMessage(waitError));
+          try {
+            await cancelScan({
+              params: { query: { scanner_name: scannerName, job_id: jobId } },
+            });
+          } catch {
+            console.log("[web-print] cancellation error");
+          }
+          setSession({ isScanning: false });
+          return;
+        }
+
         const scanResult = await promisedScan;
         if (!scanResult) {
-          setAlert(
-            <>
-              <p className="font-bold">The scanner returned nothing</p>
-              <p>Please try to scan again.</p>
-            </>,
+          setScanError(
+            "The scanner returned nothing. Please try to scan again.",
           );
           await cancelScan({
             params: { query: { scanner_name: scannerName, job_id: jobId } },
           });
-          setIsScanning(false);
+          setSession({ isScanning: false });
           return;
         }
-        setPreparedFileName(scanResult.filename);
-        setPreparedFilePagesCount(scanResult.page_count);
+        setSession({
+          preparedFileName: scanResult.filename,
+          preparedFilePagesCount: scanResult.page_count,
+        });
         try {
           await cancelScan({
             params: { query: { scanner_name: scannerName, job_id: jobId } },
@@ -167,203 +230,342 @@ export function ScanPage() {
           console.log("[web-print] cancellation error");
         }
         await reloadScanPreview(scanResult.filename);
-        setHasScanResult(true);
-        setIsScanning(false);
+        setShowResultPanel(true);
+        setSession({
+          hasScanResult: true,
+          isScanning: false,
+          lastScanCompletedAt: Date.now(),
+        });
         return;
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
-    setAlert(
-      <>
-        <p className="font-bold">The job has timed out!</p>
-        <p>Probably, the scanner is busy — try to reboot it.</p>
-      </>,
+    setScanError(
+      "The job has timed out. Probably, the scanner is busy — try to reboot it.",
     );
     await cancelScan({
       params: { query: { scanner_name: scannerName, job_id: jobId } },
     });
-    setIsScanning(false);
+    setSession({ isScanning: false });
   }
 
   function handleDocumentNameChange(value: string) {
-    setDocumentName(value);
     const trimmed = value.trim();
-    if (trimmed && downloadFileName) {
-      setDownloadFileName(`${trimmed}.pdf`);
-    }
+    setSession({
+      documentName: value,
+      ...(trimmed ? { downloadFileName: `${trimmed}.pdf` } : {}),
+    });
   }
 
-  const previewFileName = documentName.trim()
-    ? `${documentName.trim()}.pdf`
-    : downloadFileName;
-
-  async function handleFinish() {
-    if (preparedFile) {
+  async function discardCurrentDocument() {
+    const { preparedFileName } = getScanSessionState();
+    if (preparedFileName) {
       try {
         await deleteScanFileFromTheServer({
-          params: { query: { filename: preparedFile.name } },
+          params: { query: { filename: preparedFileName } },
         });
-        await prepareFile(preparedFile, false);
       } catch {
         console.log("[web-print] Fail to delete the scan from the servers");
       }
     }
-    setHasScanResult(false);
+    setSession({
+      hasScanResult: false,
+      hasDownloadedScan: false,
+      isNewScan: true,
+      preparedFile: undefined,
+      fileBlob: undefined,
+      preparedFileName: undefined,
+      downloadFileName: undefined,
+      preparedFilePagesCount: undefined,
+      documentName: "",
+    });
+    setScanError(undefined);
+    setShowResultPanel(true);
+  }
+
+  function handleDownloadAndFinish() {
+    const { fileBlob: blob } = getScanSessionState();
+    const fileName = documentName.trim()
+      ? `${documentName.trim()}.pdf`
+      : "document.pdf";
+
+    if (blob) {
+      const link = document.createElement("a");
+      link.href = blob;
+      link.download = fileName;
+      link.click();
+    }
+
+    void discardCurrentDocument();
   }
 
   const scanInProgress =
     isScanning || isScanStarting || isScanWaiting || isScanCancelling;
 
+  useEffect(() => {
+    if (!scanInProgress) {
+      setScanProgress(0);
+      return;
+    }
+
+    const {
+      isNewScan: startingNewDocument,
+      preparedFilePagesCount: existingPages,
+      lastScanCompletedAt: lastCompletedAt,
+    } = getScanSessionState();
+
+    const isFirstPage = startingNewDocument || !existingPages;
+    const isCold =
+      lastCompletedAt == null ||
+      Date.now() - lastCompletedAt > SCAN_FAKE_COLD_AFTER_MS;
+    const needsWarmup = isFirstPage || isCold;
+
+    const durationMs = estimateScanDurationMs(quality, { needsWarmup });
+    const startedAt = performance.now();
+    let frameId = 0;
+
+    function tick(now: number) {
+      const elapsed = now - startedAt;
+      const t = Math.min(1, elapsed / durationMs);
+      // Ease-out toward 95% so the bar never finishes before the real scan.
+      const eased = 1 - (1 - t) * (1 - t);
+      setScanProgress(Math.min(95, eased * 95));
+      if (t < 1) frameId = requestAnimationFrame(tick);
+    }
+
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [scanInProgress, quality]);
+
+  const fileMeta = [
+    preparedFilePagesCount
+      ? `${preparedFilePagesCount} page${preparedFilePagesCount !== 1 ? "s" : ""}`
+      : null,
+    preparedFile?.size ? formatFileSize(preparedFile.size) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const showResultView = hasScanResult && !scanInProgress && showResultPanel;
+  // Mobile stepped flow: settings → preview (scanning) → result + preview.
+  // Desktop (@4xl) always shows both columns.
+  const hidePreviewOnMobile = !scanInProgress && !showResultView;
+  const hideSettingsOnMobile = scanInProgress;
+
   return (
     <>
       <div className="@container/content mx-auto w-full max-w-[1200px] px-4 py-6">
-        <div className="grid grid-cols-1 gap-6 @lg/content:grid-cols-2 @lg/content:items-stretch">
-          <div className="card card-border flex max-h-[calc(100vh-10rem)] flex-col overflow-hidden">
-            <div className="card-body flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
+        <div className="flex flex-col gap-6 @4xl/content:flex-row @4xl/content:items-start">
+          <div
+            className={cn(
+              "card card-border w-full min-w-0 @4xl/content:flex-1",
+              !(fileBlob && !scanInProgress) && "min-h-80",
+              hidePreviewOnMobile && "hidden @4xl/content:block",
+              showResultView && "order-2 @4xl/content:order-none",
+            )}
+          >
+            <div className="card-body flex flex-col gap-4">
               <h2 className="card-title shrink-0 text-base">
                 <span className="icon-[material-symbols--picture-as-pdf-rounded]" />
                 Preview
-                {!fileBlob && !scanInProgress && (
-                  <span className="badge badge-ghost badge-sm ml-auto font-normal">
-                    Waiting
-                  </span>
-                )}
+                <div
+                  ref={setPreviewToolbarHost}
+                  className="ml-auto flex items-center"
+                >
+                  {!fileBlob && !scanInProgress && (
+                    <span className="badge badge-ghost badge-sm font-normal">
+                      Waiting
+                    </span>
+                  )}
+                </div>
               </h2>
-              <div className="flex min-h-0 flex-1 flex-col">
-                <FileDropzone
-                  variant="scan"
-                  fileProcess={() => {}}
-                  isFileProcessing={isFileProcessing || scanInProgress}
-                  loadingLabel={scanInProgress ? "Scanning…" : "Processing…"}
-                  blobPreviewURL={fileBlob}
-                  downloadFileName={downloadFileName}
-                  displayFileName={previewFileName}
-                  pageCount={preparedFilePagesCount}
-                  fileSize={preparedFile?.size}
-                  isFunctional={false}
-                />
-              </div>
+              <FileDropzone
+                variant="scan"
+                fileProcess={() => {}}
+                isFileProcessing={isFileProcessing || scanInProgress}
+                loadingLabel={scanInProgress ? "Scanning…" : "Processing…"}
+                loadingProgress={scanInProgress ? scanProgress : undefined}
+                blobPreviewURL={fileBlob}
+                downloadFileName={downloadFileName}
+                previewToolbarHost={previewToolbarHost}
+                isFunctional={false}
+              />
             </div>
           </div>
 
-          <div className="card card-border">
+          <div
+            className={cn(
+              "card card-border w-full shrink-0 @4xl/content:w-[26rem]",
+              hideSettingsOnMobile && "hidden @4xl/content:block",
+              showResultView && "order-1 @4xl/content:order-none",
+            )}
+          >
             <div className="card-body gap-4">
               <h2 className="card-title text-base">
                 <span className="icon-[material-symbols--adf-scanner-rounded]" />
-                {hasScanResult && !scanInProgress
-                  ? "Scan result"
-                  : "Scan settings"}
+                {showResultView ? "Scan result" : "Scan settings"}
               </h2>
 
-              {scanInProgress ? (
-                <div className="flex flex-col items-center gap-4 py-8">
-                  <span className="loading loading-spinner loading-lg text-primary" />
-                  <p className="text-base-content/50">Scanning in progress…</p>
-                </div>
-              ) : hasScanResult ? (
+              {showResultView ? (
                 <div className="flex flex-col gap-4">
-                  <p className="text-base-content/70 text-sm">
-                    {previewFileName || "Scan complete"}
-                  </p>
-
-                  <button
-                    type="button"
-                    className="btn btn-outline justify-start gap-3"
-                    onClick={() => scanAndWait(false)}
-                  >
-                    <span className="icon-[material-symbols--text-select-move-forward-word-rounded] text-xl" />
-                    Scan one more page
-                  </button>
-
-                  <button
-                    type="button"
-                    className="btn btn-outline justify-start gap-3"
-                    disabled={!preparedFile || isFileProcessing}
-                    onClick={async () => {
-                      await reloadScanPreview(
-                        await prepareFile(preparedFile!, true),
-                      );
-                    }}
-                  >
-                    <span className="icon-[material-symbols--ink-eraser-rounded] text-xl" />
-                    Remove the last page
-                  </button>
-
-                  <FormField label="Download file name">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        className="input input-bordered min-w-0 flex-1"
-                        placeholder="my-scan"
-                        value={documentName}
-                        onChange={(e) =>
-                          handleDocumentNameChange(e.target.value)
-                        }
-                      />
-                      <span className="text-base-content/50 shrink-0 text-sm">
-                        .pdf
-                      </span>
+                  <div className="bg-base-200 rounded-box flex items-center gap-3 px-3 py-2.5">
+                    <span className="icon-[material-symbols--picture-as-pdf-rounded] text-primary shrink-0 text-4xl" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 items-baseline">
+                        <input
+                          type="text"
+                          className="text-base-content placeholder:text-base-content/40 field-sizing-content max-w-full min-w-0 bg-transparent p-0 text-base outline-none"
+                          placeholder="document"
+                          value={documentName}
+                          size={Math.max(documentName.length, 1)}
+                          onChange={(e) =>
+                            handleDocumentNameChange(e.target.value)
+                          }
+                        />
+                        <span className="text-base-content/50 shrink-0 text-base">
+                          .pdf
+                        </span>
+                      </div>
+                      {fileMeta && (
+                        <p className="text-base-content/50 text-xs">
+                          {fileMeta}
+                        </p>
+                      )}
                     </div>
-                  </FormField>
+                  </div>
+
+                  {scanError && (
+                    <div className="alert alert-error alert-soft text-sm">
+                      {scanError}
+                    </div>
+                  )}
 
                   <button
                     type="button"
-                    className="btn btn-primary mt-2"
-                    onClick={handleFinish}
+                    className="btn btn-primary w-full"
+                    disabled={!fileBlob}
+                    onClick={handleDownloadAndFinish}
                   >
-                    Finish
+                    Download & Finish
                   </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-outline w-full"
+                    disabled={selectedScannerOffline}
+                    onClick={() => setShowResultPanel(false)}
+                  >
+                    Scan next page
+                  </button>
+
+                  {(preparedFilePagesCount ?? 0) > 1 && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost w-full"
+                      disabled={!preparedFile || isFileProcessing}
+                      onClick={() => setRemoveLastPageModalOpen(true)}
+                    >
+                      Remove last page
+                    </button>
+                  )}
                 </div>
               ) : (
-                <div className="flex flex-col gap-4">
-                  <FormField label="Scanner">
+                <fieldset
+                  className="flex flex-col gap-4"
+                  disabled={scanInProgress}
+                >
+                  <DeviceOptionList label="Scanner">
                     {rawScanners ? (
-                      <select
-                        className="select select-bordered w-full"
-                        value={scannerName}
-                        onChange={(e) => setScannerName(e.target.value)}
-                      >
-                        <option value="" disabled>
-                          Select a scanner
-                        </option>
-                        {rawScanners.map((scanner, i) => (
-                          <option key={scanner.name} value={scanner.name}>
-                            {scanner.display_name}
-                            {rawStatuses?.[i]?.offline
-                              ? " (offline)"
-                              : " (online)"}
-                          </option>
-                        ))}
-                      </select>
+                      rawScanners.map((scanner) => {
+                        const offline = isScannerOffline(scanner.name);
+                        return (
+                          <DeviceOption
+                            key={scanner.name}
+                            title={scanner.display_name}
+                            selected={scannerName === scanner.name}
+                            disabled={offline || hasScanResult}
+                            onClick={() => {
+                              setSession({ scannerName: scanner.name });
+                              setScanError(undefined);
+                            }}
+                            meta={
+                              rawStatuses ? (
+                                <span
+                                  className={cn(
+                                    offline ? "text-error" : "text-success",
+                                  )}
+                                >
+                                  {offline ? "Offline" : "Online"}
+                                </span>
+                              ) : (
+                                <span className="text-base-content/50">
+                                  Status unknown
+                                </span>
+                              )
+                            }
+                          />
+                        );
+                      })
                     ) : (
-                      <div className="skeleton h-12 w-full" />
+                      <>
+                        <div className="skeleton h-14 w-full" />
+                        <div className="skeleton h-14 w-full" />
+                      </>
                     )}
-                  </FormField>
+                  </DeviceOptionList>
+
+                  {selectedScannerOffline && (
+                    <div className="alert alert-warning alert-soft text-sm">
+                      Selected scanner is offline. Choose another one.
+                    </div>
+                  )}
 
                   <FormField label="Mode">
-                    <Tooltip
-                      content={
-                        mode === ScanningOptionsInput_source.Adf
-                          ? "Scan documents from the automatic feeder on top of the printer"
-                          : "Scan one page at a time on the glass"
-                      }
-                    >
-                      <select
-                        className="select select-bordered w-full"
-                        value={mode}
-                        onChange={(e) =>
-                          setMode(e.target.value as ScanningOptionsInput_source)
-                        }
-                      >
-                        <option value={ScanningOptionsInput_source.Platen}>
-                          Manual scanning (glass)
-                        </option>
-                        <option value={ScanningOptionsInput_source.Adf}>
-                          Automatic scanning (feeder)
-                        </option>
-                      </select>
-                    </Tooltip>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Tooltip content="Scan one page at a time on the glass">
+                        <button
+                          type="button"
+                          className={cn(
+                            "rounded-field border-base-content/20 w-full border-2 px-3 py-2.5 text-left text-sm transition-colors",
+                            mode === ScanningOptionsInput_source.Platen
+                              ? "border-primary bg-primary/5"
+                              : "hover:border-base-content/40",
+                          )}
+                          onClick={() =>
+                            setSession({
+                              mode: ScanningOptionsInput_source.Platen,
+                            })
+                          }
+                        >
+                          Manual
+                          <span className="text-base-content/50 mt-0.5 block text-xs">
+                            Glass
+                          </span>
+                        </button>
+                      </Tooltip>
+                      <Tooltip content="Scan documents from the automatic feeder on top of the printer">
+                        <button
+                          type="button"
+                          className={cn(
+                            "rounded-field border-base-content/20 w-full border-2 px-3 py-2.5 text-left text-sm transition-colors",
+                            mode === ScanningOptionsInput_source.Adf
+                              ? "border-primary bg-primary/5"
+                              : "hover:border-base-content/40",
+                          )}
+                          onClick={() =>
+                            setSession({
+                              mode: ScanningOptionsInput_source.Adf,
+                            })
+                          }
+                        >
+                          Automatic
+                          <span className="text-base-content/50 mt-0.5 block text-xs">
+                            Feeder
+                          </span>
+                        </button>
+                      </Tooltip>
+                    </div>
                   </FormField>
 
                   {mode === ScanningOptionsInput_source.Adf && (
@@ -374,76 +576,102 @@ export function ScanPage() {
                           className="toggle toggle-primary"
                           checked={scanSides === ScanningOptionsSides.true}
                           onChange={(e) =>
-                            setScanSides(
-                              e.target.checked
+                            setSession({
+                              scanSides: e.target.checked
                                 ? ScanningOptionsSides.true
                                 : ScanningOptionsSides.false,
-                            )
+                            })
                           }
                         />
                       </Tooltip>
                     </FormField>
                   )}
 
-                  <FormField label="Quality">
-                    <select
-                      className="select select-bordered w-full"
-                      value={quality}
-                      onChange={(e) =>
-                        setQuality(e.target.value as ScanningOptionsQuality)
-                      }
-                    >
+                  <FormField label={`Quality · ${quality} dpi`}>
+                    <input
+                      type="range"
+                      className="range range-primary w-full"
+                      min={0}
+                      max={Object.values(ScanningOptionsQuality).length - 1}
+                      step={1}
+                      value={Object.values(ScanningOptionsQuality).indexOf(
+                        quality,
+                      )}
+                      onChange={(e) => {
+                        const qualities = Object.values(ScanningOptionsQuality);
+                        setSession({
+                          quality: qualities[Number(e.target.value)],
+                        });
+                      }}
+                    />
+                    <div className="text-base-content/50 mt-1 flex justify-between px-0.5 text-xs">
                       {Object.values(ScanningOptionsQuality).map((q) => (
-                        <option key={q} value={q}>
-                          {q} dpi
-                        </option>
+                        <span key={q}>{q}</span>
                       ))}
-                    </select>
-                  </FormField>
-
-                  <FormField label="AI crop">
-                    <Tooltip content="Automatically fit the resulting PDF page to the scan">
-                      <input
-                        type="checkbox"
-                        className="toggle toggle-primary"
-                        checked={crop === ScanningOptionsCrop.true}
-                        onChange={(e) =>
-                          setCrop(
-                            e.target.checked
-                              ? ScanningOptionsCrop.true
-                              : ScanningOptionsCrop.false,
-                          )
-                        }
-                      />
-                    </Tooltip>
-                  </FormField>
-
-                  <FormField label="Download file name">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        className="input input-bordered min-w-0 flex-1"
-                        placeholder="my-scan"
-                        value={documentName}
-                        onChange={(e) =>
-                          handleDocumentNameChange(e.target.value)
-                        }
-                      />
-                      <span className="text-base-content/50 shrink-0 text-sm">
-                        .pdf
-                      </span>
                     </div>
                   </FormField>
 
-                  <button
-                    type="button"
-                    className="btn btn-primary mt-2"
-                    disabled={!scannerName}
-                    onClick={() => scanAndWait(true)}
+                  <FormField
+                    label={
+                      <>
+                        Smart crop
+                        <Tooltip content="Automatically detects the document edges and crops the PDF to match.">
+                          <span className="icon-[material-symbols--help-outline] text-base-content/40 hover:text-base-content/70 size-[1em]" />
+                        </Tooltip>
+                      </>
+                    }
                   >
-                    Start scanning
-                  </button>
-                </div>
+                    <input
+                      type="checkbox"
+                      className="toggle toggle-primary"
+                      checked={crop === ScanningOptionsCrop.true}
+                      onChange={(e) =>
+                        setSession({
+                          crop: e.target.checked
+                            ? ScanningOptionsCrop.true
+                            : ScanningOptionsCrop.false,
+                        })
+                      }
+                    />
+                  </FormField>
+
+                  <div
+                    className={cn(
+                      "mt-2 flex gap-2",
+                      hasScanResult ? "flex-row" : "flex-col",
+                    )}
+                  >
+                    {hasScanResult && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost flex-1"
+                        disabled={scanInProgress}
+                        onClick={() => setShowResultPanel(true)}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className={cn(
+                        "btn btn-primary",
+                        hasScanResult ? "flex-1" : "w-full",
+                      )}
+                      disabled={
+                        !scannerName || selectedScannerOffline || scanInProgress
+                      }
+                      onClick={() => scanAndWait(!hasScanResult)}
+                    >
+                      {hasScanResult ? "Scan next page" : "Scan"}
+                    </button>
+                  </div>
+
+                  {scanError && (
+                    <div className="alert alert-error alert-soft text-sm">
+                      {scanError}
+                    </div>
+                  )}
+                </fieldset>
               )}
             </div>
           </div>
@@ -457,6 +685,46 @@ export function ScanPage() {
       >
         {alert}
       </Modal>
+
+      <Modal
+        open={removeLastPageModalOpen}
+        onOpenChange={setRemoveLastPageModalOpen}
+        title={
+          <div className="flex items-center gap-3">
+            <span className="icon-[material-symbols--warning-rounded] text-warning text-2xl" />
+            Remove last page?
+          </div>
+        }
+      >
+        <p className="text-base-content/75 mb-6 leading-relaxed">
+          This will permanently remove the last scanned page from the document.
+          Are you sure?
+        </p>
+        <div className="flex flex-wrap justify-end gap-2">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => setRemoveLastPageModalOpen(false)}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline btn-warning"
+            disabled={isFileProcessing}
+            onClick={async () => {
+              setRemoveLastPageModalOpen(false);
+              if (preparedFilePagesCount === 1) {
+                await discardCurrentDocument();
+                return;
+              }
+              await reloadScanPreview(await removeLastPage());
+            }}
+          >
+            Remove
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }
@@ -465,12 +733,14 @@ function FormField({
   label,
   children,
 }: {
-  label: string;
-  children: React.ReactNode;
+  label: ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-base-content/70 text-sm font-medium">{label}</span>
+      <span className="text-base-content/70 flex items-center gap-1 text-sm">
+        {label}
+      </span>
       {children}
     </div>
   );

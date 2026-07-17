@@ -2,22 +2,26 @@ import { searchTypes } from "@/api/search";
 import { usePreviewFile } from "@/api/search/use-preview-file.ts";
 import { useElementHeight, useElementWidth } from "@/lib/ui/use-element-size";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { useCallback, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import PdfJsWorker from "pdfjs-dist/build/pdf.worker.min.mjs?worker";
 import PreviewBottomButton from "./PreviewBottomButton";
 
 import "react-pdf/dist/Page/TextLayer.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 
-pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+// Vite serves the worker via a blob URL, avoiding broken .mjs MIME on prod
+// (Angie/nginx often returns application/octet-stream for *.mjs).
+if (!pdfjs.GlobalWorkerOptions.workerPort) {
+  pdfjs.GlobalWorkerOptions.workerPort = new PdfJsWorker();
+}
 
 function highlightPattern(text: string, pattern: string) {
   return text.replace(pattern, (value: any) => `<mark>${value}</mark>`);
 }
 
 export declare type PdfPreviewProps = {
-  source: searchTypes.SchemaMoodleFileSourceOutput;
+  source: searchTypes.SchemaMoodleFileSource;
   searchText: string;
 };
 

@@ -309,7 +309,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     const descriptionString = descriptionJSON
       ? JSON.stringify(descriptionJSON)
       : "";
-    const { id: _clubId, ...clubUpdateFields } = club;
+    const { id: _clubId, ...clubUpdateFields } = club ?? {};
 
     const updateData: clubsTypes.SchemaUpdateClub = {
       ...clubUpdateFields,
@@ -687,7 +687,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                         Telegram
                       </div>
                       <a
-                        href={`https://t.me/${clubLeader.telegram_alias}`}
+                        href={`https://telegram.me/${clubLeader.telegram_alias}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="link link-hover link-primary"

@@ -26,7 +26,7 @@ export function MorePage() {
         </Tooltip>
         <Tooltip content="Telegram">
           <a
-            href="https://t.me/one_zero_eight"
+            href="https://telegram.me/one_zero_eight"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:bg-base-300 flex items-center justify-center rounded-xl p-2"

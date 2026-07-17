@@ -56,7 +56,7 @@ export function MusicRoomWidget() {
           </span>
         )}
         <a
-          href="https://t.me/InnoMusicRoomBot"
+          href="https://telegram.me/InnoMusicRoomBot"
           className="text-base-content/75 w-fit hover:underline"
         >
           Book more in <span className="text-primary">Music Room bot</span>

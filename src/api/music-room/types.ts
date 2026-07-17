@@ -302,13 +302,13 @@ export interface components {
       /**
        * Time Start
        * Format: date-time
-       * @example 2026-06-01T22:34:00
+       * @example 2026-06-28T16:39:00
        */
       time_start: string;
       /**
        * Time End
        * Format: date-time
-       * @example 2026-06-01T23:34:00
+       * @example 2026-06-28T17:39:00
        */
       time_end: string;
     };
@@ -588,7 +588,7 @@ export interface operations {
   bookings_form_schedule: {
     parameters: {
       query?: {
-        /** @example 2026-06-01 */
+        /** @example 2026-06-22 */
         start_of_week?: string | null;
         from_user_id?: number | null;
       };
@@ -736,7 +736,7 @@ export interface operations {
       query?: {
         /**
          * @description Date for which to get remaining hours (iso format). Default: server-side today
-         * @example 2026-06-01
+         * @example 2026-06-28
          */
         date?: string | null;
       };
@@ -771,7 +771,7 @@ export interface operations {
       query?: {
         /**
          * @description Date for which to get remaining hours (iso format). Default: server-side today
-         * @example 2026-06-01
+         * @example 2026-06-28
          */
         date?: string | null;
       };

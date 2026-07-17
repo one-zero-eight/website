@@ -3,8 +3,13 @@ import { CHECKS_RETURN_FROM } from "@/components/schedule-assistant/checks/check
 import { TimetableWorkspace } from "@/components/schedule-assistant/timetable/TimetableWorkspace.tsx";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
+type SearchParams = {
+  meeting?: string | undefined;
+  from?: string | undefined;
+};
+
 export const Route = createFileRoute("/schedule-assistant/timetable")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): SearchParams => ({
     meeting:
       typeof search.meeting === "string" && search.meeting.trim()
         ? search.meeting.trim()

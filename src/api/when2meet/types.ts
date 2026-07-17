@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  "/events/": {
+  "/meetings/": {
     parameters: {
       query?: never;
       header?: never;
@@ -12,23 +12,23 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get My Events
-     * @description Get events owned by the authenticated user.
+     * Get My Meetings
+     * @description Get meetings owned by the authenticated user.
      */
-    get: operations["events_get_my_events"];
+    get: operations["meetings_get_my_meetings"];
     put?: never;
     /**
-     * Create Event
-     * @description Create a new event with time slots.
+     * Create Meeting
+     * @description Create a new meeting with time slots.
      */
-    post: operations["events_create_event"];
+    post: operations["meetings_create_meeting"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/events/participating": {
+  "/meetings/participating": {
     parameters: {
       query?: never;
       header?: never;
@@ -36,10 +36,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Participating Events
-     * @description Get events where the authenticated user is a participant.
+     * Get Participating Meetings
+     * @description Get meetings where the authenticated user is a participant.
      */
-    get: operations["events_get_participating_events"];
+    get: operations["meetings_get_participating_meetings"];
     put?: never;
     post?: never;
     delete?: never;
@@ -48,7 +48,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/events/{event_ref}": {
+  "/meetings/{meeting_ref}": {
     parameters: {
       query?: never;
       header?: never;
@@ -56,27 +56,27 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Event
-     * @description Get event details and participants' availability.
+     * Get Meeting
+     * @description Get meeting details and participants' availability.
      */
-    get: operations["events_get_event"];
+    get: operations["meetings_get_meeting"];
     put?: never;
     post?: never;
     /**
-     * Delete Event
-     * @description Delete an event (owner only).
+     * Delete Meeting
+     * @description Delete a meeting (owner only).
      */
-    delete: operations["events_delete_event"];
+    delete: operations["meetings_delete_meeting"];
     options?: never;
     head?: never;
     /**
-     * Update Event
-     * @description Update event details (owner only).
+     * Update Meeting
+     * @description Update meeting details (owner only).
      */
-    patch: operations["events_update_event"];
+    patch: operations["meetings_update_meeting"];
     trace?: never;
   };
-  "/events/{event_ref}/participants": {
+  "/meetings/{meeting_ref}/participants": {
     parameters: {
       query?: never;
       header?: never;
@@ -86,9 +86,9 @@ export interface paths {
     get?: never;
     /**
      * Update Participant
-     * @description Add or update a participant's availability for an event.
+     * @description Add or update a participant's availability for a meeting.
      */
-    put: operations["events_update_participant"];
+    put: operations["meetings_update_participant"];
     post?: never;
     delete?: never;
     options?: never;
@@ -96,7 +96,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/events/{event_ref}/participants/{user_id}": {
+  "/meetings/{meeting_ref}/participants/{user_id}": {
     parameters: {
       query?: never;
       header?: never;
@@ -108,9 +108,57 @@ export interface paths {
     post?: never;
     /**
      * Delete Participant
-     * @description Remove a participant from an event (owner or the participant themselves).
+     * @description Remove a participant from a meeting (owner or the participant themselves).
      */
-    delete: operations["events_delete_participant"];
+    delete: operations["meetings_delete_participant"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/meetings/{meeting_ref}/book-room": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Book Room For Meeting
+     * @description Book a room for the meeting's selected time window (owner only).
+     */
+    post: operations["meetings_book_room_for_meeting"];
+    /**
+     * Cancel Room For Meeting
+     * @description Cancel the booked room for a meeting (owner only).
+     */
+    delete: operations["meetings_cancel_room_for_meeting"];
+    options?: never;
+    head?: never;
+    /**
+     * Change Room For Meeting
+     * @description Change the booked room for a meeting (owner only).
+     */
+    patch: operations["meetings_change_room_for_meeting"];
+    trace?: never;
+  };
+  "/meetings/{meeting_ref}/available-rooms": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Available Rooms
+     * @description Get rooms free for the meeting's selected time window.
+     */
+    get: operations["meetings_get_available_rooms"];
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -120,6 +168,55 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** AvailableRoom */
+    AvailableRoom: {
+      /**
+       * Id
+       * @description Room ID
+       */
+      id: string;
+      /**
+       * Name
+       * @description Room name
+       */
+      name: string;
+      /**
+       * Capacity
+       * @description Room capacity
+       */
+      capacity?: number | null;
+      /**
+       * Location
+       * @description Room location label
+       */
+      location: string;
+    };
+    /** BookRoomRequest */
+    BookRoomRequest: {
+      /**
+       * Room Id
+       * @description Room ID to book
+       */
+      room_id: string;
+    };
+    /** BookedRoom */
+    BookedRoom: {
+      /**
+       * Room Id
+       * @description Booked room ID
+       */
+      room_id: string;
+      /**
+       * Outlook Booking Id
+       * @description Room Booking service booking ID
+       */
+      outlook_booking_id?: string | null;
+      /**
+       * Outlook Entry Id
+       * @description Outlook entry ID
+       */
+      outlook_entry_id?: string | null;
+    };
     /** EventCreate */
     EventCreate: {
       /**
@@ -187,6 +284,8 @@ export interface components {
        * @description Optional; frontend can derive from slots
        */
       date_range_label?: string | null;
+      /** @description Final selected meeting time */
+      selected_time?: components["schemas"]["MeetingTime"] | null;
     };
     /** EventUpdate */
     EventUpdate: {
@@ -217,6 +316,8 @@ export interface components {
       specific_time?: boolean | null;
       /** @description Optional metadata for display/edit */
       time_range?: components["schemas"]["TimeRange"] | null;
+      /** @description Final selected meeting time */
+      selected_time?: components["schemas"]["MeetingTime"] | null;
     };
     /** EventView */
     EventView: {
@@ -272,11 +373,28 @@ export interface components {
       specific_time: boolean;
       /** @description Optional metadata for display/edit */
       time_range?: components["schemas"]["TimeRange"] | null;
+      /** @description Final selected meeting time */
+      selected_time?: components["schemas"]["MeetingTime"] | null;
+      /** @description Booked room reference */
+      booked_room?: components["schemas"]["BookedRoom"] | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
+    };
+    /** MeetingTime */
+    MeetingTime: {
+      /**
+       * Start
+       * @description Selected meeting start time
+       */
+      start: string;
+      /**
+       * End
+       * @description Selected meeting end time
+       */
+      end: string;
     };
     /** ParticipantUpdate */
     ParticipantUpdate: {
@@ -299,15 +417,10 @@ export interface components {
        */
       email?: string | null;
       /**
-       * First Name
-       * @description Participant first name
+       * Name
+       * @description Full name of the participant
        */
-      first_name?: string | null;
-      /**
-       * Last Name
-       * @description Participant last name
-       */
-      last_name?: string | null;
+      name?: string | null;
       /**
        * Telegram
        * @description Telegram @username if linked
@@ -348,12 +461,16 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaAvailableRoom = components["schemas"]["AvailableRoom"];
+export type SchemaBookRoomRequest = components["schemas"]["BookRoomRequest"];
+export type SchemaBookedRoom = components["schemas"]["BookedRoom"];
 export type SchemaEventCreate = components["schemas"]["EventCreate"];
 export type SchemaEventSummary = components["schemas"]["EventSummary"];
 export type SchemaEventUpdate = components["schemas"]["EventUpdate"];
 export type SchemaEventView = components["schemas"]["EventView"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaMeetingTime = components["schemas"]["MeetingTime"];
 export type SchemaParticipantUpdate =
   components["schemas"]["ParticipantUpdate"];
 export type SchemaParticipantView = components["schemas"]["ParticipantView"];
@@ -362,7 +479,7 @@ export type SchemaTimeRange = components["schemas"]["TimeRange"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
-  events_get_my_events: {
+  meetings_get_my_meetings: {
     parameters: {
       query?: never;
       header?: never;
@@ -371,7 +488,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description List of events owned by the user */
+      /** @description List of meetings owned by the user */
       200: {
         headers: {
           [name: string]: unknown;
@@ -389,7 +506,7 @@ export interface operations {
       };
     };
   };
-  events_create_event: {
+  meetings_create_meeting: {
     parameters: {
       query?: never;
       header?: never;
@@ -402,7 +519,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description New event is created */
+      /** @description New meeting is created */
       201: {
         headers: {
           [name: string]: unknown;
@@ -429,7 +546,7 @@ export interface operations {
       };
     };
   };
-  events_get_participating_events: {
+  meetings_get_participating_meetings: {
     parameters: {
       query?: never;
       header?: never;
@@ -438,7 +555,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description List of events where the user is a participant */
+      /** @description List of meetings where the user is a participant */
       200: {
         headers: {
           [name: string]: unknown;
@@ -456,18 +573,18 @@ export interface operations {
       };
     };
   };
-  events_get_event: {
+  meetings_get_meeting: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        event_ref: string;
+        meeting_ref: string;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description Event info */
+      /** @description Meeting info */
       200: {
         headers: {
           [name: string]: unknown;
@@ -483,7 +600,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Event not found */
+      /** @description Meeting not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -501,18 +618,18 @@ export interface operations {
       };
     };
   };
-  events_delete_event: {
+  meetings_delete_meeting: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        event_ref: string;
+        meeting_ref: string;
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description Event deleted */
+      /** @description Meeting deleted */
       204: {
         headers: {
           [name: string]: unknown;
@@ -533,8 +650,15 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Event not found */
+      /** @description Meeting not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room booking is already being changed for this meeting */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -551,12 +675,12 @@ export interface operations {
       };
     };
   };
-  events_update_event: {
+  meetings_update_meeting: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        event_ref: string;
+        meeting_ref: string;
       };
       cookie?: never;
     };
@@ -566,7 +690,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description Event updated */
+      /** @description Meeting updated */
       200: {
         headers: {
           [name: string]: unknown;
@@ -575,7 +699,7 @@ export interface operations {
           "application/json": components["schemas"]["EventView"];
         };
       };
-      /** @description Participant {p.user_id} has availability at {slot} which is not in the new slots */
+      /** @description Cannot clear selected meeting time while a room is booked */
       400: {
         headers: {
           [name: string]: unknown;
@@ -596,8 +720,15 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Event not found */
+      /** @description Meeting not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room booking is already being changed for this meeting */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -614,12 +745,12 @@ export interface operations {
       };
     };
   };
-  events_update_participant: {
+  meetings_update_participant: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        event_ref: string;
+        meeting_ref: string;
       };
       cookie?: never;
     };
@@ -638,13 +769,6 @@ export interface operations {
           "application/json": components["schemas"]["EventView"];
         };
       };
-      /** @description Invalid availability slots */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
@@ -652,7 +776,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Event not found */
+      /** @description Meeting not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -670,12 +794,12 @@ export interface operations {
       };
     };
   };
-  events_delete_participant: {
+  meetings_delete_participant: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        event_ref: string;
+        meeting_ref: string;
         user_id: string;
       };
       cookie?: never;
@@ -705,7 +829,265 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Event or participant not found */
+      /** @description Meeting or participant not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  meetings_book_room_for_meeting: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        meeting_ref: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BookRoomRequest"];
+      };
+    };
+    responses: {
+      /** @description Room booked for the meeting */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventView"];
+        };
+      };
+      /** @description Selected meeting time is not set or room is unavailable */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not an owner or room booking is forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Meeting or room not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room is already booked for this meeting */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  meetings_cancel_room_for_meeting: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        meeting_ref: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Booked room canceled for the meeting */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventView"];
+        };
+      };
+      /** @description Room is not booked for this meeting */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not an owner or room booking is forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Meeting or booking not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room booking is already being changed for this meeting */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  meetings_change_room_for_meeting: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        meeting_ref: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BookRoomRequest"];
+      };
+    };
+    responses: {
+      /** @description Booked room changed for the meeting */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventView"];
+        };
+      };
+      /** @description Room is not booked, selected time is not set, or room is unavailable */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not an owner or room booking is forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Meeting, booking, or room not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Room booking is already being changed for this meeting */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  meetings_get_available_rooms: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        meeting_ref: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Rooms available for the selected meeting time */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AvailableRoom"][];
+        };
+      };
+      /** @description Selected meeting time is not set */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Meeting not found */
       404: {
         headers: {
           [name: string]: unknown;

@@ -15,7 +15,7 @@ export interface paths {
      * Health Check
      * @description Health check endpoint to verify service is running.
      */
-    get: operations["health_check_google_health_get"];
+    get: operations["google_health_check"];
     put?: never;
     post?: never;
     delete?: never;
@@ -35,7 +35,7 @@ export interface paths {
      * Get Service Account Email
      * @description Get the service account email address.
      */
-    get: operations["get_service_account_email_google_service_account_email_get"];
+    get: operations["google_get_service_account_email"];
     put?: never;
     post?: never;
     delete?: never;
@@ -55,13 +55,13 @@ export interface paths {
      * Get Files
      * @description Get all files for the user (brief info without joins and banned).
      */
-    get: operations["get_files_google_files_get"];
+    get: operations["google_get_files"];
     put?: never;
     /**
      * Create File
      * @description Create a new Google file (spreadsheet or document) and return join link.
      */
-    post: operations["create_file_google_files_post"];
+    post: operations["google_create_file"];
     delete?: never;
     options?: never;
     head?: never;
@@ -81,7 +81,7 @@ export interface paths {
      * Copy File
      * @description Copy an existing Google file to service account's drive and add it to the system.
      */
-    post: operations["copy_file_google_files_copy_post"];
+    post: operations["google_copy_file"];
     delete?: never;
     options?: never;
     head?: never;
@@ -99,21 +99,21 @@ export interface paths {
      * Get File
      * @description Get full file information including joins and banned users.
      */
-    get: operations["get_file_google_files__slug__get"];
+    get: operations["google_get_file"];
     put?: never;
     post?: never;
     /**
      * Delete File
      * @description Delete a file by slug (author only).
      */
-    delete: operations["delete_file_google_files__slug__delete"];
+    delete: operations["google_delete_file"];
     options?: never;
     head?: never;
     /**
      * Update File
      * @description Update file title (author only).
      */
-    patch: operations["update_file_google_files__slug__patch"];
+    patch: operations["google_update_file"];
     trace?: never;
   };
   "/google/files/{slug}/joins": {
@@ -129,7 +129,7 @@ export interface paths {
      * Join File
      * @description Add user to the file with specified role.
      */
-    post: operations["join_file_google_files__slug__joins_post"];
+    post: operations["google_join_file"];
     delete?: never;
     options?: never;
     head?: never;
@@ -149,7 +149,7 @@ export interface paths {
      * Ban User
      * @description Ban user from the file.
      */
-    post: operations["ban_user_google_files__slug__bans_post"];
+    post: operations["google_ban_user"];
     delete?: never;
     options?: never;
     head?: never;
@@ -170,7 +170,7 @@ export interface paths {
      * Unban User
      * @description Unban user by user_id (author only).
      */
-    delete: operations["unban_user_google_files__slug__bans__user_id__delete"];
+    delete: operations["google_unban_user"];
     options?: never;
     head?: never;
     patch?: never;
@@ -189,7 +189,7 @@ export interface paths {
      * Cleanup File Permissions
      * @description Remove any user permissions that are not present in sso_joins.
      */
-    post: operations["cleanup_file_permissions_google_files__slug__cleanup_post"];
+    post: operations["google_cleanup_file_permissions"];
     delete?: never;
     options?: never;
     head?: never;
@@ -208,7 +208,7 @@ export interface paths {
      * Update User Role
      * @description Update individual user role in the file.
      */
-    put: operations["update_user_role_google_files__slug__joins__user_id__role_put"];
+    put: operations["google_update_user_role"];
     post?: never;
     delete?: never;
     options?: never;
@@ -228,7 +228,7 @@ export interface paths {
      * Update Default Role
      * @description Update default role for the file and update all existing user roles.
      */
-    put: operations["update_default_role_google_files__slug__role_put"];
+    put: operations["google_update_default_role"];
     post?: never;
     delete?: never;
     options?: never;
@@ -242,157 +242,255 @@ export interface components {
   schemas: {
     /** BanUserRequest */
     BanUserRequest: {
+      /** @description User ID to ban */
       user_id: components["schemas"]["PydanticObjectId"];
     };
     /** BanUserResponse */
     BanUserResponse: {
-      /** Message */
+      /**
+       * Message
+       * @description Message
+       */
       message: string;
     };
     /** CleanupResponse */
     CleanupResponse: {
-      /** Removed */
+      /**
+       * Removed
+       * @description Number of permissions removed
+       */
       removed: number;
     };
     /** CopyFileRequest */
     CopyFileRequest: {
-      /** File Id */
+      /**
+       * File Id
+       * @description Existing Google File ID to copy
+       */
       file_id: string;
       /**
        * Default Role
+       * @description Default role for future respondents (writer or reader)
        * @enum {string}
        */
       default_role: CopyFileRequestDefault_role;
-      /** Owner Gmail */
+      /**
+       * Owner Gmail
+       * @description File owner's Gmail address
+       */
       owner_gmail: string;
     };
     /** CopyFileResponse */
     CopyFileResponse: {
-      /** File Id */
+      /**
+       * File Id
+       * @description New Google File ID (copy)
+       */
       file_id: string;
       /**
        * File Type
+       * @description Type of file (spreadsheet or document)
        * @enum {string}
        */
       file_type: CopyFileResponseFile_type;
-      /** Title */
+      /**
+       * Title
+       * @description Title of the file
+       */
       title: string;
       /**
        * Default Role
+       * @description Default role for users (writer or reader)
        * @enum {string}
        */
       default_role: CopyFileResponseDefault_role;
-      /** Join Link */
+      /**
+       * Join Link
+       * @description Join link for users
+       */
       join_link: string;
     };
     /** CreateFileRequest */
     CreateFileRequest: {
       /**
        * File Type
+       * @description Type of file to create (spreadsheet or document)
        * @enum {string}
        */
       file_type: CreateFileRequestFile_type;
-      /** Title */
+      /**
+       * Title
+       * @description Title of the file
+       */
       title: string;
       /**
        * Default Role
+       * @description Default role for users (writer or reader)
        * @enum {string}
        */
       default_role: CreateFileRequestDefault_role;
-      /** Owner Gmail */
+      /**
+       * Owner Gmail
+       * @description File owner's Gmail address
+       */
       owner_gmail: string;
     };
     /** CreateFileResponse */
     CreateFileResponse: {
-      /** File Id */
+      /**
+       * File Id
+       * @description Google File ID
+       */
       file_id: string;
       /**
        * File Type
+       * @description Type of file (spreadsheet or document)
        * @enum {string}
        */
       file_type: CreateFileResponseFile_type;
-      /** Title */
+      /**
+       * Title
+       * @description Title of the file
+       */
       title: string;
       /**
        * Default Role
+       * @description Default role for users (writer or reader)
        * @enum {string}
        */
       default_role: CreateFileResponseDefault_role;
-      /** Join Link */
+      /**
+       * Join Link
+       * @description Join link for users
+       */
       join_link: string;
     };
     /** DeleteFileResponse */
     DeleteFileResponse: {
-      /** Message */
+      /**
+       * Message
+       * @description Message
+       */
       message: string;
     };
     /** GoogleFile */
     GoogleFile: {
+      /** @description Author ID */
       author_id: components["schemas"]["PydanticObjectId"];
       /**
        * Default Role
+       * @description Default role for users (writer or reader)
        * @enum {string}
        */
       default_role: GoogleFileDefault_role;
-      /** Slug */
+      /**
+       * Slug
+       * @description Unique slug for the link
+       */
       slug: string;
-      /** File Id */
+      /**
+       * File Id
+       * @description Google File ID
+       */
       file_id: string;
       /**
        * File Type
+       * @description Type of file (spreadsheet or document)
        * @enum {string}
        */
       file_type: GoogleFileFile_type;
-      /** Title */
+      /**
+       * Title
+       * @description File title
+       */
       title: string;
-      /** Owner Gmail */
+      /**
+       * Owner Gmail
+       * @description File owner's Gmail address
+       */
       owner_gmail: string;
-      /** Owner Permission Id */
+      /**
+       * Owner Permission Id
+       * @description File owner's permission ID
+       */
       owner_permission_id: string;
-      /** Expire At */
+      /**
+       * Expire At
+       * @description Expiration date
+       */
       expire_at?: string | null;
-      /** Sso Joins */
+      /**
+       * Sso Joins
+       * @description List of users who joined via SSO
+       */
       sso_joins?: components["schemas"]["GoogleFileSSOJoinInfo"][] | null;
-      /** Sso Joins Count */
+      /**
+       * Sso Joins Count
+       * @description Count of SSO joins
+       */
       sso_joins_count: number;
-      /** Sso Banned */
+      /**
+       * Sso Banned
+       * @description List of banned users
+       */
       sso_banned?: components["schemas"]["GoogleFileSSOBanInfo"][] | null;
-      /** Sso Banned Count */
+      /**
+       * Sso Banned Count
+       * @description Count of banned users
+       */
       sso_banned_count: number;
       /**
        * Created At
        * Format: date-time
+       * @description Date and time when file was created
        */
       created_at: string;
     };
     /** GoogleFileSSOBanInfo */
     GoogleFileSSOBanInfo: {
+      /** @description User ID */
       user_id: components["schemas"]["PydanticObjectId"];
-      /** Gmail */
+      /**
+       * Gmail
+       * @description Gmail address
+       */
       gmail: string;
-      /** Innomail */
+      /**
+       * Innomail
+       * @description Innopolis email
+       */
       innomail: string;
       /**
        * Banned At
        * Format: date-time
+       * @description Date and time when user was banned
        */
       banned_at: string;
     };
     /** GoogleFileSSOJoinInfo */
     GoogleFileSSOJoinInfo: {
+      /** @description User ID */
       user_id: components["schemas"]["PydanticObjectId"];
-      /** Gmail */
+      /**
+       * Gmail
+       * @description Gmail address
+       */
       gmail: string;
-      /** Innomail */
+      /**
+       * Innomail
+       * @description Innopolis email
+       */
       innomail: string;
       /**
        * Role
+       * @description Role assigned to the user (writer or reader)
        * @enum {string}
        */
       role: GoogleFileSSOJoinInfoRole;
       /**
        * Joined At
        * Format: date-time
+       * @description Date and time when user joined
        */
       joined_at: string;
     };
@@ -403,73 +501,114 @@ export interface components {
     };
     /** HealthCheckResponse */
     HealthCheckResponse: {
-      /** Status */
+      /**
+       * Status
+       * @description Health status
+       */
       status: string;
-      /** Service */
+      /**
+       * Service
+       * @description Service name
+       */
       service: string;
     };
     /** JoinFileRequest */
     JoinFileRequest: {
-      /** Gmail */
+      /**
+       * Gmail
+       * @description Gmail address to add to the file
+       */
       gmail: string;
     };
     /** JoinFileResponse */
     JoinFileResponse: {
-      /** Message */
+      /**
+       * Message
+       * @description Message
+       */
       message: string;
-      /** File Id */
+      /**
+       * File Id
+       * @description Google File ID
+       */
       file_id: string;
     };
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
     /** ServiceAccountEmailResponse */
     ServiceAccountEmailResponse: {
-      /** Email */
+      /**
+       * Email
+       * @description Service account email address
+       */
       email: string;
     };
     /** UnbanUserResponse */
     UnbanUserResponse: {
-      /** Message */
+      /**
+       * Message
+       * @description Message
+       */
       message: string;
     };
     /** UpdateDefaultRoleRequest */
     UpdateDefaultRoleRequest: {
       /**
        * Role
+       * @description New default role for users (writer or reader)
        * @enum {string}
        */
       role: UpdateDefaultRoleRequestRole;
     };
     /** UpdateDefaultRoleResponse */
     UpdateDefaultRoleResponse: {
-      /** Message */
+      /**
+       * Message
+       * @description Success message
+       */
       message: string;
     };
     /** UpdateFileRequest */
     UpdateFileRequest: {
-      /** Title */
+      /**
+       * Title
+       * @description New title for the file
+       */
       title: string;
     };
     /** UpdateFileResponse */
     UpdateFileResponse: {
-      /** File Id */
+      /**
+       * File Id
+       * @description Google File ID
+       */
       file_id: string;
-      /** Title */
+      /**
+       * Title
+       * @description Updated title
+       */
       title: string;
-      /** Message */
+      /**
+       * Message
+       * @description Success message
+       */
       message: string;
     };
     /** UpdateUserRoleRequest */
     UpdateUserRoleRequest: {
       /**
        * Role
+       * @description New role for the user (writer or reader)
        * @enum {string}
        */
       role: UpdateUserRoleRequestRole;
     };
     /** UpdateUserRoleResponse */
     UpdateUserRoleResponse: {
-      /** Message */
+      /**
+       * Message
+       * @description Success message
+       */
       message: string;
     };
     /** ValidationError */
@@ -480,6 +619,10 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
     };
   };
   responses: never;
@@ -530,7 +673,7 @@ export type SchemaUpdateUserRoleResponse =
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
-  health_check_google_health_get: {
+  google_health_check: {
     parameters: {
       query?: never;
       header?: never;
@@ -557,7 +700,7 @@ export interface operations {
       };
     };
   };
-  get_service_account_email_google_service_account_email_get: {
+  google_get_service_account_email: {
     parameters: {
       query?: never;
       header?: never;
@@ -584,7 +727,7 @@ export interface operations {
       };
     };
   };
-  get_files_google_files_get: {
+  google_get_files: {
     parameters: {
       query?: never;
       header?: never;
@@ -602,7 +745,7 @@ export interface operations {
           "application/json": components["schemas"]["GoogleFile"][];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -618,7 +761,7 @@ export interface operations {
       };
     };
   };
-  create_file_google_files_post: {
+  google_create_file: {
     parameters: {
       query?: never;
       header?: never;
@@ -640,7 +783,7 @@ export interface operations {
           "application/json": components["schemas"]["CreateFileResponse"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -665,7 +808,7 @@ export interface operations {
       };
     };
   };
-  copy_file_google_files_copy_post: {
+  google_copy_file: {
     parameters: {
       query?: never;
       header?: never;
@@ -694,7 +837,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -719,7 +862,7 @@ export interface operations {
       };
     };
   };
-  get_file_google_files__slug__get: {
+  google_get_file: {
     parameters: {
       query?: never;
       header?: never;
@@ -739,7 +882,7 @@ export interface operations {
           "application/json": components["schemas"]["GoogleFile"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -771,7 +914,7 @@ export interface operations {
       };
     };
   };
-  delete_file_google_files__slug__delete: {
+  google_delete_file: {
     parameters: {
       query?: never;
       header?: never;
@@ -791,7 +934,7 @@ export interface operations {
           "application/json": components["schemas"]["DeleteFileResponse"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -823,7 +966,7 @@ export interface operations {
       };
     };
   };
-  update_file_google_files__slug__patch: {
+  google_update_file: {
     parameters: {
       query?: never;
       header?: never;
@@ -847,7 +990,7 @@ export interface operations {
           "application/json": components["schemas"]["UpdateFileResponse"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -879,7 +1022,7 @@ export interface operations {
       };
     };
   };
-  join_file_google_files__slug__joins_post: {
+  google_join_file: {
     parameters: {
       query?: never;
       header?: never;
@@ -903,21 +1046,21 @@ export interface operations {
           "application/json": components["schemas"]["JoinFileResponse"];
         };
       };
-      /** @description Gmail {e.gmail} does not exist or is not associated with a Google account OR Gmail {e.gmail} is already used by another user */
+      /** @description Gmail {e.gmail} is already used by another user OR Gmail {e.gmail} does not exist or is not associated with a Google account */
       400: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Permission denied. You are banned from this file. OR Permission denied. Make sure the service account has access to the file. */
+      /** @description Permission denied. Make sure the service account has access to the file. OR Permission denied. You are banned from this file. */
       403: {
         headers: {
           [name: string]: unknown;
@@ -949,7 +1092,7 @@ export interface operations {
       };
     };
   };
-  ban_user_google_files__slug__bans_post: {
+  google_ban_user: {
     parameters: {
       query?: never;
       header?: never;
@@ -973,14 +1116,14 @@ export interface operations {
           "application/json": components["schemas"]["BanUserResponse"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description File not found OR User with user_id {request.user_id} not found in joins */
+      /** @description User with user_id {request.user_id} not found in joins OR File not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1005,7 +1148,7 @@ export interface operations {
       };
     };
   };
-  unban_user_google_files__slug__bans__user_id__delete: {
+  google_unban_user: {
     parameters: {
       query?: never;
       header?: never;
@@ -1033,7 +1176,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -1065,7 +1208,7 @@ export interface operations {
       };
     };
   };
-  cleanup_file_permissions_google_files__slug__cleanup_post: {
+  google_cleanup_file_permissions: {
     parameters: {
       query?: never;
       header?: never;
@@ -1085,7 +1228,7 @@ export interface operations {
           "application/json": components["schemas"]["CleanupResponse"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -1117,7 +1260,7 @@ export interface operations {
       };
     };
   };
-  update_user_role_google_files__slug__joins__user_id__role_put: {
+  google_update_user_role: {
     parameters: {
       query?: never;
       header?: never;
@@ -1142,21 +1285,21 @@ export interface operations {
           "application/json": components["schemas"]["UpdateUserRoleResponse"];
         };
       };
-      /** @description User does not have a permission_id OR Invalid user_id */
+      /** @description Invalid user_id OR User does not have a permission_id */
       400: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description File not found OR User with user_id {user_id} not found in joins */
+      /** @description User with user_id {user_id} not found in joins OR File not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1181,7 +1324,7 @@ export interface operations {
       };
     };
   };
-  update_default_role_google_files__slug__role_put: {
+  google_update_default_role: {
     parameters: {
       query?: never;
       header?: never;
@@ -1205,7 +1348,7 @@ export interface operations {
           "application/json": components["schemas"]["UpdateDefaultRoleResponse"];
         };
       };
-      /** @description No credentials provided OR Invalid token */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;

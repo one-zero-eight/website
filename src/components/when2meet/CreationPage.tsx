@@ -88,8 +88,8 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
   const [isFormInitialized, setIsFormInitialized] = useState(!isEditMode);
 
   const eventQueryKey = meetingId
-    ? $when2meet.queryOptions("get", "/events/{event_ref}", {
-        params: { path: { event_ref: meetingId } },
+    ? $when2meet.queryOptions("get", "/meetings/{meeting_ref}", {
+        params: { path: { meeting_ref: meetingId } },
       }).queryKey
     : null;
 
@@ -100,8 +100,8 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
     error: eventError,
   } = $when2meet.useQuery(
     "get",
-    "/events/{event_ref}",
-    { params: { path: { event_ref: meetingId! } } },
+    "/meetings/{meeting_ref}",
+    { params: { path: { meeting_ref: meetingId! } } },
     { enabled: isEditMode },
   );
 
@@ -139,7 +139,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
 
   const { mutate: createEvent, isPending: isCreating } = $when2meet.useMutation(
     "post",
-    "/events/",
+    "/meetings/",
     {
       onError: (error) => {
         showError("Error", formatApiErrorMessage(error));
@@ -149,7 +149,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
 
   const { mutate: updateEvent, isPending: isUpdating } = $when2meet.useMutation(
     "patch",
-    "/events/{event_ref}",
+    "/meetings/{meeting_ref}",
     {
       onError: (error) => {
         showError("Error", formatApiErrorMessage(error));
@@ -213,7 +213,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
 
       updateEvent(
         {
-          params: { path: { event_ref: meetingId } },
+          params: { path: { meeting_ref: meetingId } },
           body: {
             name: trimmedName,
             description: description.trim() || null,
@@ -231,7 +231,7 @@ export function CreationPage({ meetingId }: { meetingId?: string }) {
               queryClient.invalidateQueries({ queryKey: eventQueryKey });
             }
             queryClient.invalidateQueries({
-              queryKey: $when2meet.queryOptions("get", "/events/").queryKey,
+              queryKey: $when2meet.queryOptions("get", "/meetings/").queryKey,
             });
 
             if (isManualSlots) {

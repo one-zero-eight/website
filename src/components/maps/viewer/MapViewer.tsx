@@ -228,7 +228,7 @@ export const MapViewer = memo(function MapViewer({
           // Find the nearest element with id
           const el = (e.target as HTMLElement | null)?.closest("[id]");
           // Find matching area
-          const area = scene.areas.find((a) => a.svg_polygon_id === el?.id);
+          const area = scene.areas?.find((a) => a.svg_polygon_id === el?.id);
           if (!el || !area) return;
 
           // Follow the scene pointer
@@ -271,7 +271,7 @@ export const MapViewer = memo(function MapViewer({
           // Find the nearest element with id
           const el = (e.target as HTMLElement | null)?.closest("[id]");
           // Find matching area
-          const area = scene.areas.find((a) => a.svg_polygon_id === el?.id);
+          const area = scene.areas?.find((a) => a.svg_polygon_id === el?.id);
           if (!el || !area) return;
 
           // Show popup
@@ -385,13 +385,13 @@ export const MapViewer = memo(function MapViewer({
       </style>
       <style type="text/css">
         {`
-        ${scene.areas.map((a) => `[id="${a.svg_polygon_id}"]`).join(",")} {
+        ${scene.areas?.map((a) => `[id="${a.svg_polygon_id}"]`).join(",")} {
           cursor: ${disablePopup ? "default" : "pointer"};
         }
         ${
           !disablePopup
             ? scene.areas
-                .map((a) => `[id="${a.svg_polygon_id}"]:hover`)
+                ?.map((a) => `[id="${a.svg_polygon_id}"]:hover`)
                 .join(",") +
               ` {
           opacity: 0.2 !important;

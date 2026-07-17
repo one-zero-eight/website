@@ -1,27 +1,26 @@
-interface FilesSectionProps {
-  search: string;
-  onSearchChange: (search: string) => void;
-  children: React.ReactNode;
-}
-
 export function FilesSection({
   search,
   onSearchChange,
   children,
-}: FilesSectionProps) {
+}: {
+  search: string;
+  onSearchChange: (search: string) => void;
+  children: React.ReactNode;
+}) {
   return (
-    <div>
-      <h2 className="mb-3 text-xl font-semibold">Your Files</h2>
+    <div className="flex flex-col gap-4">
+      <h2 className="text-xl font-semibold">Your sheets</h2>
 
-      <div className="mb-4">
+      <label className="input input-bordered flex w-full items-center gap-2">
+        <span className="icon-[material-symbols--search-rounded] text-base-content/50 shrink-0 text-xl" />
         <input
           type="text"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search by title or paste full join link or slug"
-          className="border-base-content/20 bg-base-200/5 focus:border-base-content/40 focus:bg-base-200/10 rounded-field w-full border-2 px-4 py-3 outline-hidden transition-colors"
+          placeholder="Search by title, join link, or slug"
+          className="grow"
         />
-      </div>
+      </label>
 
       {children}
     </div>

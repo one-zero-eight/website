@@ -33,7 +33,7 @@ const CustomTimeModal = ({
       minDateTime: formatForInput(minNow),
       maxDateTime: formatForInput(maxNow),
     };
-  }, [open, MAX_SECONDS]);
+  }, [MAX_SECONDS]);
 
   useEffect(() => {
     if (!selectedDateTime) {

@@ -1,39 +1,44 @@
-import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Document, Page, pdfjs } from "react-pdf";
+import PdfJsWorker from "pdfjs-dist/build/pdf.worker.min.mjs?worker";
 
-pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+// Vite serves the worker via a blob URL, avoiding broken .mjs MIME on prod
+// (Angie/nginx often returns application/octet-stream for *.mjs).
+if (!pdfjs.GlobalWorkerOptions.workerPort) {
+  pdfjs.GlobalWorkerOptions.workerPort = new PdfJsWorker();
+}
 
 export function PdfDocumentPreview({
   url,
   pages,
+  toolbarHost,
+  openOnLastPage = false,
 }: {
   url: string;
   pages?: number[];
+  toolbarHost?: HTMLElement | null;
+  openOnLastPage?: boolean;
 }) {
-  const viewerRef = useRef<HTMLDivElement>(null);
+  const [viewerEl, setViewerEl] = useState<HTMLDivElement | null>(null);
   const [viewerWidth, setViewerWidth] = useState(0);
   const [numPages, setNumPages] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [pageInput, setPageInput] = useState("1");
 
   useEffect(() => {
-    setCurrentIndex(0);
-  }, [url, pages]);
-
-  useEffect(() => {
-    const element = viewerRef.current;
-    if (!element) return;
+    if (!viewerEl) return;
 
     function updateWidth() {
-      setViewerWidth(element!.clientWidth);
+      if (!viewerEl) return;
+      setViewerWidth(viewerEl.clientWidth);
     }
 
     updateWidth();
     const observer = new ResizeObserver(updateWidth);
-    observer.observe(element);
+    observer.observe(viewerEl);
     return () => observer.disconnect();
-  }, []);
+  }, [viewerEl]);
 
   const pagesToShow = useMemo(() => {
     if (!numPages) return [];
@@ -44,10 +49,12 @@ export function PdfDocumentPreview({
   }, [numPages, pages]);
 
   useEffect(() => {
-    if (currentIndex >= pagesToShow.length) {
-      setCurrentIndex(Math.max(0, pagesToShow.length - 1));
+    if (!pagesToShow.length) {
+      setCurrentIndex(0);
+      return;
     }
-  }, [currentIndex, pagesToShow.length]);
+    setCurrentIndex(openOnLastPage ? pagesToShow.length - 1 : 0);
+  }, [url, pages, pagesToShow.length, openOnLastPage]);
 
   const isFiltered =
     pages !== undefined &&
@@ -102,60 +109,68 @@ export function PdfDocumentPreview({
     setCurrentIndex((index) => Math.min(pagesToShow.length - 1, index + 1));
   }
 
-  return (
-    <div className="bg-base-200/40 flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="border-base-300 bg-base-100 flex shrink-0 items-center justify-center gap-2 border-b px-3 py-2">
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm btn-square"
-          disabled={currentIndex <= 0 || !pagesToShow.length}
-          onClick={handlePrevPage}
-        >
-          <span className="icon-[material-symbols--chevron-left-rounded] text-lg" />
-        </button>
+  const toolbar = (
+    <div className="flex items-center gap-1.5">
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm btn-square"
+        disabled={currentIndex <= 0 || !pagesToShow.length}
+        onClick={handlePrevPage}
+      >
+        <span className="icon-[material-symbols--chevron-left-rounded] text-lg" />
+      </button>
 
-        <div className="flex items-center gap-1.5">
-          <span className="text-base-content/70 text-sm">Page</span>
-          <input
-            type="number"
-            className="input input-bordered input-sm w-14 [appearance:textfield] text-center tabular-nums [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            min={1}
-            max={previewTotal || 1}
-            value={pageInput}
-            disabled={!pagesToShow.length}
-            onChange={(event) => setPageInput(event.target.value)}
-            onBlur={handlePageInputCommit}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.currentTarget.blur();
-              }
-            }}
-          />
-          <span className="text-base-content/50 text-sm tabular-nums">
-            / {previewTotal || "—"}
+      <div className="flex items-center gap-1.5">
+        <span className="text-base-content/70 text-sm">Page</span>
+        <input
+          type="number"
+          className="input input-bordered input-sm w-14 [appearance:textfield] text-center tabular-nums [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          min={1}
+          max={previewTotal || 1}
+          value={pageInput}
+          disabled={!pagesToShow.length}
+          onChange={(event) => setPageInput(event.target.value)}
+          onBlur={handlePageInputCommit}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.currentTarget.blur();
+            }
+          }}
+        />
+        <span className="text-base-content/50 text-sm tabular-nums">
+          / {previewTotal || "—"}
+        </span>
+        {isFiltered ? (
+          <span className="text-base-content/40 text-xs">
+            (p. {currentDocumentPage} in file)
           </span>
-          {isFiltered ? (
-            <span className="text-base-content/40 text-xs">
-              (p. {currentDocumentPage} in file)
-            </span>
-          ) : null}
-        </div>
-
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm btn-square"
-          disabled={
-            currentIndex >= pagesToShow.length - 1 || !pagesToShow.length
-          }
-          onClick={handleNextPage}
-        >
-          <span className="icon-[material-symbols--chevron-right-rounded] text-lg" />
-        </button>
+        ) : null}
       </div>
 
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm btn-square"
+        disabled={currentIndex >= pagesToShow.length - 1 || !pagesToShow.length}
+        onClick={handleNextPage}
+      >
+        <span className="icon-[material-symbols--chevron-right-rounded] text-lg" />
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="flex w-full flex-col">
+      {toolbarHost ? (
+        createPortal(toolbar, toolbarHost)
+      ) : (
+        <div className="border-base-300 bg-base-100 flex shrink-0 items-center justify-center gap-2 border-b px-3 py-2">
+          {toolbar}
+        </div>
+      )}
+
       <div
-        ref={viewerRef}
-        className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto p-4"
+        ref={setViewerEl}
+        className="flex w-full items-start justify-center p-4"
       >
         <Document
           file={url}
