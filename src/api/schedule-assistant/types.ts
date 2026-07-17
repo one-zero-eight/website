@@ -4,125 +4,6 @@
  */
 
 export interface paths {
-  "/collisions/check": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Check Timetable Collisions */
-    post: operations["check_timetable_collisions_collisions_check_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/options/set-semester": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Set Semester */
-    post: operations["set_semester_options_set_semester_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/options/semester": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Semester */
-    get: operations["get_semester_options_semester_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/options/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get All Options */
-    get: operations["get_all_options_options__get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/options/set-teachers": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Set Teachers
-     * @description Upload teachers data from TSV (tab-separated values).
-     *
-     *     Expected columns (case-insensitive):
-     *     - Name - teacher's full name in English
-     *     - Russian Name (or ФИО/Имя) - teacher's full name in Russian
-     *     - Alias (or Telegram) - short name or telegram handle
-     *     - Email - email address
-     *     - Student Group (or Student?) - student group code (e.g. "B24-CSE-05", "M25-SE-01")
-     *
-     *     Example:
-     *     ```
-     *     Name        Russian Name    Alias   Email   Student Group
-     *     Ivan Ivanov Иванов Иван Иванович    @ivanov ivanov@example.com
-     *     Petr Petrov Петров Петр Петрович    -       petrov@example.com      B24-CSE-05
-     *     ```
-     */
-    post: operations["set_teachers_options_set_teachers_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/options/teachers": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Teachers */
-    get: operations["get_teachers_options_teachers_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/dev/bookings": {
     parameters: {
       query?: never;
@@ -131,7 +12,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get All Bookings */
-    get: operations["get_all_bookings_dev_bookings_get"];
+    get: operations["bookings_get_all_bookings"];
     put?: never;
     post?: never;
     delete?: never;
@@ -148,7 +29,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get Bookings */
-    get: operations["get_bookings_dev_bookings__room_id__get"];
+    get: operations["bookings_get_bookings"];
     put?: never;
     post?: never;
     delete?: never;
@@ -165,9 +46,26 @@ export interface paths {
       cookie?: never;
     };
     /** Get Rooms */
-    get: operations["get_rooms_dev_rooms_get"];
+    get: operations["bookings_get_rooms"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/issues/check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Check Schedule Issues */
+    post: operations["issues_check_schedule_issues"];
     delete?: never;
     options?: never;
     head?: never;
@@ -184,7 +82,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Parse Location String Route */
-    post: operations["parse_location_string_route_parser_parse_location_string_post"];
+    post: operations["parser_parse_location_string_route"];
     delete?: never;
     options?: never;
     head?: never;
@@ -201,7 +99,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Parse Core Courses Route */
-    post: operations["parse_core_courses_route_parser_parse_core_courses_post"];
+    post: operations["parser_parse_core_courses_route"];
     delete?: never;
     options?: never;
     head?: never;
@@ -218,7 +116,310 @@ export interface paths {
     get?: never;
     put?: never;
     /** Parse Electives Route */
-    post: operations["parse_electives_route_parser_parse_electives_post"];
+    post: operations["parser_parse_electives_route"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule/my-groups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get My Groups */
+    get: operations["schedule_get_my_groups"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule/groups/{group_code}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Group Schedule */
+    get: operations["schedule_get_group_schedule"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule/instructors/{instructor_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Instructor Schedule */
+    get: operations["schedule_get_instructor_schedule"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Schedule Config */
+    get: operations["schedule_config_get_schedule_config"];
+    /** Put Schedule Config */
+    put: operations["schedule_config_put_schedule_config"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/yaml": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Put Schedule Config Yaml */
+    put: operations["schedule_config_put_schedule_config_yaml"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/term": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Term */
+    get: operations["schedule_config_get_term"];
+    /** Put Term */
+    put: operations["schedule_config_put_term"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/courses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Courses */
+    get: operations["schedule_config_list_courses"];
+    put?: never;
+    /** Create Course */
+    post: operations["schedule_config_create_course"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/courses/{course_name}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Course */
+    get: operations["schedule_config_get_course"];
+    /** Update Course */
+    put: operations["schedule_config_update_course"];
+    post?: never;
+    /** Delete Course */
+    delete: operations["schedule_config_delete_course"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/instructors": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Instructors */
+    get: operations["schedule_config_list_instructors"];
+    put?: never;
+    /** Create Instructor */
+    post: operations["schedule_config_create_instructor"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/instructors/{instructor_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Instructor */
+    get: operations["schedule_config_get_instructor"];
+    /** Update Instructor */
+    put: operations["schedule_config_update_instructor"];
+    post?: never;
+    /** Delete Instructor */
+    delete: operations["schedule_config_delete_instructor"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/student-groups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Student Groups */
+    get: operations["schedule_config_list_student_groups"];
+    put?: never;
+    /** Create Student Group */
+    post: operations["schedule_config_create_student_group"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/student-groups/{code}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Student Group */
+    get: operations["schedule_config_get_student_group"];
+    /** Update Student Group */
+    put: operations["schedule_config_update_student_group"];
+    post?: never;
+    /** Delete Student Group */
+    delete: operations["schedule_config_delete_student_group"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/rooms": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Rooms */
+    get: operations["schedule_config_list_rooms"];
+    put?: never;
+    /** Create Room */
+    post: operations["schedule_config_create_room"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/rooms/{room_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Room */
+    get: operations["schedule_config_get_room"];
+    /** Update Room */
+    put: operations["schedule_config_update_room"];
+    post?: never;
+    /** Delete Room */
+    delete: operations["schedule_config_delete_room"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/history/{event_id}/snapshot": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get History Snapshot */
+    get: operations["schedule_config_get_history_snapshot"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/history/{event_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get History Event */
+    get: operations["schedule_config_get_history_event"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/schedule-config/history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List History */
+    get: operations["schedule_config_list_history"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -261,101 +462,475 @@ export interface components {
        * @description End time of booking
        */
       end_time: string;
+      /**
+       * Categories
+       * @description Outlook categories on the calendar item
+       */
+      categories: string[] | null;
+      /**
+       * Recurrence
+       * @description EWS recurrence XML for recurring masters
+       */
+      recurrence: string | null;
+      /**
+       * Outlook Booking Id
+       * @description ID of outlook booking in service account calendar. Only set if we can manage the booking.
+       */
+      outlook_booking_id: string | null;
     };
     /**
      * CapacityIssue
-     * @description Issue when there is not enough places in the room for the lesson.
+     * @description Занятие не помещается в аудиторию: число студентов превышает вместимость комнаты.
      */
     CapacityIssue: {
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      collision_type: CapacityIssueCollision_type;
+      issue_type: CapacityIssueIssue_type;
       /**
-       * Room
-       * @description Room name
+       * Text
+       * @default
        */
-      room: string | string[];
-      /**
-       * Room Capacity
-       * @description Assumed capacity of the room
-       */
+      text: string;
+      /** Room */
+      room: string;
+      /** Room Capacity */
       room_capacity: number | null;
-      /**
-       * Needed Capacity
-       * @description Needed capacity for the lesson (sum of all groups)
-       */
+      /** Needed Capacity */
       needed_capacity: number;
-      lesson: components["schemas"]["Lesson"];
+      meeting: components["schemas"]["ScheduledMeeting"];
     };
     /** CheckParameters */
     CheckParameters: {
       /**
-       * Care About Core Courses
+       * Check Room
        * @default true
        */
-      care_about_core_courses: boolean;
+      check_room: boolean;
       /**
-       * Care About Electives
+       * Check Teacher
        * @default true
        */
-      care_about_electives: boolean;
+      check_teacher: boolean;
       /**
-       * Check Room Collisions
+       * Check Capacity
        * @default true
        */
-      check_room_collisions: boolean;
+      check_capacity: boolean;
       /**
-       * Check Teacher Collisions
+       * Check Group
        * @default true
        */
-      check_teacher_collisions: boolean;
+      check_group: boolean;
       /**
-       * Check Space Collisions
+       * Check Student
        * @default true
        */
-      check_space_collisions: boolean;
+      check_student: boolean;
       /**
-       * Check Outlook Collisions
+       * Check Outlook
+       * @default false
+       */
+      check_outlook: boolean;
+      /**
+       * Check Unbooked
        * @default true
        */
-      check_outlook_collisions: boolean;
+      check_unbooked: boolean;
+      /**
+       * Check Unplaced
+       * @default true
+       */
+      check_unplaced: boolean;
+      /**
+       * Check Per Week
+       * @default true
+       */
+      check_per_week: boolean;
+      /**
+       * Check Instructor Id
+       * @default true
+       */
+      check_instructor_id: boolean;
+      /**
+       * Check Instructor Preference
+       * @default true
+       */
+      check_instructor_preference: boolean;
     };
     /** CheckResults */
     CheckResults: {
       /** Issues */
       issues: components["schemas"]["Issue"][];
     };
+    /** @enum {string} */
+    CommonCourseClassTags: CommonCourseClassTags;
+    /** @enum {string} */
+    CommonCourseTags: CommonCourseTags;
+    /** Component */
+    Component: {
+      /**
+       * Tag
+       * @description Class tag (for example, lec, tut, lab, class)
+       */
+      tag: components["schemas"]["CommonCourseClassTags"] | string;
+      /**
+       * Per Week
+       * @description Number of weekly meetings
+       */
+      per_week?: number | null;
+      /**
+       * Per Semester
+       * @description Total meetings across the semester (for electives and other non-weekly patterns)
+       */
+      per_semester?: number | null;
+      /**
+       * Instructor Pool
+       * @description Candidate instructors; nested list means co-teaching set
+       *
+       *     Example:
+       *     - [nikolay_kudasov] # only nikolay_kudasov can teach this class
+       *     - [nikolay_kudasov, anatoliy_baskakov] # any of them can teach this class
+       *     - [[nikolay_kudasov, anatoliy_baskakov], [alexey_stepanov]] # any of them can teach this class, either nikolay_kudasov with anatoliy_baskakov co-teaching, or alexey_stepanov teaching alone
+       * @default []
+       */
+      instructor_pool: (string | string[])[];
+      /**
+       * Student Groups
+       * @description Who attends: each entry is a group id or an ``@`` selector from ``sections`` hierarchy (union if several).
+       *
+       *     Examples:
+       *     - ``[@BS_Y1_EN]`` — whole program
+       *     - ``[@MS_Y1/AIDE]`` — one track
+       *     - ``[@BS_Y2_EN/Software Development, @BS_Y2_EN/Cybersecurity]`` — union of tracks
+       *     - ``[ENG-eap1]`` or ``[B22-CBS-02]`` — direct group id
+       * @default []
+       */
+      student_groups: string[];
+      /**
+       * Expected Enrollment
+       * @description Expected enrollment used for room sizing, defer from sum(student_group.size for groups in student_groups) if None
+       */
+      expected_enrollment?: number | null;
+      /**
+       * Per Group
+       * @description Whether one class instance should be created per group, if True, then one class instance will be created for each group in student_groups. It is useful for lab classes where each group needs a separate meeting. If false, then one class instance (meeting) will be created for all groups in student_groups, so they will be effectively in same time, same room, same instructor.
+       * @default false
+       */
+      per_group: boolean;
+      /**
+       * Relates To
+       * @description Optional component index or list of indices that this component depends on for same-day/order/back-to-back preferences.
+       */
+      relates_to?: number | number[] | null;
+      /**
+       * Sessions
+       * @description Concrete placed sessions when known (for example, summer electives from spreadsheet dates)
+       */
+      sessions?: components["schemas"]["ComponentSessionSeries"][] | null;
+    };
     /**
-     * Elective
-     * @description How it will be in innohassle event group name: spring26-bs2-ru-ввтус
-     *     - semester alias: spring26
-     *     - sheet name: bs2-ru
-     *     - elective alias: ввтус
+     * ComponentSessionSeries
+     * @description Placed meeting series for a component (electives use calendar dates).
      */
-    Elective: {
-      /** Alias */
-      alias: string;
-      /** Short Name */
-      short_name: string;
-      /** Name */
-      name?: string | null;
-      /** Instructor */
-      instructor?: string | null;
-      /** Elective Type */
-      elective_type?: string | null;
+    ComponentSessionSeries: {
+      /**
+       * Audience
+       * @description Student group ids for this session series (subset of component student_groups)
+       * @default []
+       */
+      audience: string[];
+      /**
+       * Weekly Pattern
+       * @description Fixed weekly slots for core courses
+       */
+      weekly_pattern?: components["schemas"]["WeeklyPatternSlot"][] | null;
+      /**
+       * Occurrences
+       * @description Concrete placed meetings (for electives and other calendar-date series)
+       */
+      occurrences?: components["schemas"]["SessionOccurrence"][] | null;
+    };
+    /** ConfigChangeEvent */
+    ConfigChangeEvent: {
+      /**
+       * Id
+       * @description Unique event id
+       */
+      id: string;
+      /**
+       * Revision
+       * @description Config revision after this event
+       */
+      revision: number;
+      /**
+       * Resources
+       * @description Updated schedule-config resources in this event
+       */
+      resources: ConfigChangeEventResources[];
+      /**
+       * Saved At
+       * @description UTC timestamp in ISO format
+       */
+      saved_at: string;
+      /**
+       * Saved By
+       * @description Moderator email
+       */
+      saved_by: string;
+      /**
+       * Patch
+       * @description RFC 6902 JSON Patch operations on the assembled config
+       */
+      patch: {
+        [key: string]: unknown;
+      }[];
+      /**
+       * Snapshot
+       * @description Gzipped snapshot path relative to the history directory
+       */
+      snapshot: string;
+    };
+    /** ConfigChangeEventSummary */
+    ConfigChangeEventSummary: {
+      /** Id */
+      id: string;
+      /** Revision */
+      revision: number;
+      /** Resources */
+      resources: ConfigChangeEventSummaryResources[];
+      /** Saved At */
+      saved_at: string;
+      /** Saved By */
+      saved_by: string;
+      /**
+       * Change Count
+       * @description Number of JSON Patch operations in this event
+       */
+      change_count: number;
+    };
+    /** CourseConfig */
+    CourseConfig: {
+      /**
+       * Name
+       * @description Course name
+       */
+      name: string;
+      /**
+       * Short Name
+       * @description Short English display name
+       */
+      short_name?: string | null;
+      /**
+       * Name Ru
+       * @description Russian display name
+       */
+      name_ru?: string | null;
+      /**
+       * Short Name Ru
+       * @description Short Russian display name
+       */
+      short_name_ru?: string | null;
+      /**
+       * Course Tags
+       * @description Course tags (for example, core_course / elective / english)
+       * @default []
+       */
+      course_tags: (components["schemas"]["CommonCourseTags"] | string)[];
+      /**
+       * Components
+       * @description Course subparts (lec/tut/lab/…) to schedule
+       */
+      components: components["schemas"]["Component"][];
+    };
+    /** CoursesConfig */
+    CoursesConfig: {
+      /**
+       * Courses
+       * @description All courses to schedule
+       */
+      courses?: components["schemas"]["CourseConfig"][];
+    };
+    /** DateRange */
+    DateRange: {
+      /**
+       * Start Date
+       * Format: date
+       * @description Inclusive range start date in ISO format (YYYY-MM-DD)
+       */
+      start_date: string;
+      /**
+       * End Date
+       * Format: date
+       * @description Inclusive range end date in ISO format (YYYY-MM-DD)
+       */
+      end_date: string;
+    };
+    /**
+     * GroupIssue
+     * @description Одна группа одновременно должна быть на нескольких занятиях.
+     */
+    GroupIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: GroupIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Group */
+      group: string;
+      /** Meetings */
+      meetings: components["schemas"]["ScheduledMeeting"][];
     };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /** Instructor */
+    Instructor: {
+      /**
+       * Id
+       * @description Instructor unique identifier
+       */
+      id: string;
+      /**
+       * Name En
+       * @description English display name
+       */
+      name_en?: string | null;
+      /**
+       * Name Ru
+       * @description Russian display name
+       */
+      name_ru?: string | null;
+      /**
+       * Email
+       * @description Work email when known
+       */
+      email?: string | null;
+      /**
+       * Alias
+       * @description Short handle or Telegram-style alias from staff roster
+       */
+      alias?: string | null;
+      /**
+       * Position
+       * @description Staff position from roster (for example, Professor, Visiting)
+       */
+      position?: string | null;
+      /**
+       * Slot Preferences
+       * @description Sparse weekday+slot preference grid; omitted cells are neutral
+       */
+      slot_preferences?: components["schemas"]["InstructorSlotPreferenceEntry"][];
+    };
+    /**
+     * InstructorBannedSlotIssue
+     * @description Занятие назначено преподавателю в запрещённую ячейку сетки weekday+slot.
+     */
+    InstructorBannedSlotIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: InstructorBannedSlotIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Instructor Id */
+      instructor_id: string;
+      weekday: components["schemas"]["Weekday"];
+      /**
+       * Start Time
+       * Format: time
+       */
+      start_time: string;
+      meeting: components["schemas"]["ScheduledMeeting"];
+    };
+    /**
+     * InstructorIdIssue
+     * @description Идентификатор преподавателя не является корпоративным email Innopolis.
+     */
+    InstructorIdIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: InstructorIdIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Instructor Id */
+      instructor_id: string;
+    };
+    /**
+     * InstructorPreferenceIssue
+     * @description Занятие назначено преподавателю в нежелательную (discouraged) ячейку сетки.
+     */
+    InstructorPreferenceIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: InstructorPreferenceIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Instructor Id */
+      instructor_id: string;
+      weekday: components["schemas"]["Weekday"];
+      /**
+       * Start Time
+       * Format: time
+       */
+      start_time: string;
+      /** Penalty Weight */
+      penalty_weight: number;
+      meeting: components["schemas"]["ScheduledMeeting"];
+    };
+    /** InstructorSlotPreferenceEntry */
+    InstructorSlotPreferenceEntry: {
+      /** @description Teaching weekday for this preference cell */
+      weekday: components["schemas"]["Weekday"];
+      /**
+       * Start Time
+       * Format: time
+       * @description Slot start time; must match a term time_slots entry
+       */
+      start_time: string;
+      /** @description Preference level for this weekday+slot cell */
+      level: components["schemas"]["InstructorSlotPreferenceLevel"];
+    };
+    /**
+     * InstructorSlotPreferenceLevel
+     * @enum {string}
+     */
+    InstructorSlotPreferenceLevel: InstructorSlotPreferenceLevel;
     Issue:
       | components["schemas"]["CapacityIssue"]
       | components["schemas"]["RoomIssue"]
       | components["schemas"]["OutlookIssue"]
-      | components["schemas"]["TeacherIssue"];
+      | components["schemas"]["TeacherIssue"]
+      | components["schemas"]["UnplacedIssue"]
+      | components["schemas"]["InstructorIdIssue"]
+      | components["schemas"]["UnbookedIssue"]
+      | components["schemas"]["GroupIssue"]
+      | components["schemas"]["StudentIssue"]
+      | components["schemas"]["PerWeekIssue"]
+      | components["schemas"]["InstructorBannedSlotIssue"]
+      | components["schemas"]["InstructorPreferenceIssue"];
     /**
      * Item
      * @description Represents a parsed location string with optional modifiers and nested locations.
@@ -509,154 +1084,122 @@ export interface components {
        */
       NEST?: components["schemas"]["Item"][] | null;
     };
-    /** Lesson */
-    Lesson: {
+    /** OccurrencePlacement */
+    OccurrencePlacement: {
       /**
-       * Lesson Name
-       * @description Name of the lesson
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
        */
-      lesson_name: string;
+      kind: OccurrencePlacementKind;
       /**
-       * Lesson Class Type
-       * @description Type of the lesson
+       * Date
+       * Format: date
        */
-      lesson_class_type: LessonLesson_class_typeAnyOf0 | string | null;
-      /**
-       * Source Type
-       * @description Whether the lesson comes from core courses or electives
-       */
-      source_type: LessonSource_typeAnyOf0 | null;
-      /**
-       * Weekday
-       * @description Weekday of a lesson
-       */
-      weekday: string | null;
-      /**
-       * Start Time
-       * Format: time
-       * @description Start time of lesson
-       */
-      start_time: string;
-      /**
-       * End Time
-       * Format: time
-       * @description End time of lesson
-       */
-      end_time: string;
-      /**
-       * Room
-       * @description Room for lesson, None - TBA, if list - multiple rooms simultaneously
-       */
-      room: string | string[] | null;
-      /**
-       * Teacher
-       * @description Teacher on lesson
-       */
-      teacher: string | null;
-      /**
-       * Course Name
-       * @description Name of the course
-       */
-      course_name: string | null;
-      /**
-       * Group Name
-       * @description Name of the group or list of groups
-       */
-      group_name: string | string[] | null;
-      /**
-       * Students Number
-       * @description Number of students in the group
-       */
-      students_number: number | null;
-      /**
-       * Date On
-       * @description Specific dates with lessons
-       */
-      date_on: string[] | null;
-      /**
-       * Date Except
-       * @description Specific dates when there is no lessons
-       */
-      date_except: string[] | null;
-      /**
-       * Date From
-       * @description Date from which the lesson starts
-       */
-      date_from: string | null;
-      /**
-       * Spreadsheet Id
-       * @description Spreadsheet ID
-       */
-      spreadsheet_id: string;
-      /**
-       * Google Sheet Gid
-       * @description Google Spreadsheet ID of the sheet
-       */
-      google_sheet_gid: string;
-      /**
-       * Google Sheet Name
-       * @description Sheet name to which the lesson belongs in Google Spreadsheet
-       */
-      google_sheet_name: string;
-      /**
-       * A1 Range
-       * @description Range of the lesson: may be multiple cells, for example 'A1:A10'
-       */
-      a1_range: string | null;
-    };
-    /** OptionsData */
-    OptionsData: {
-      semester: components["schemas"]["SemesterOptions-Output"] | null;
-      teachers: components["schemas"]["TeachersData"] | null;
+      date: string;
     };
     /**
      * OutlookIssue
-     * @description Issue when there is a Outlook booking in the room at the same time as the lesson. Grouped by Outlook event title.
+     * @description Занятие пересекается по времени с бронированием в Outlook/room-booking.
      */
     OutlookIssue: {
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      collision_type: OutlookIssueCollision_type;
+      issue_type: OutlookIssueIssue_type;
       /**
-       * Outlook Event Title
-       * @description Title of the Outlook event
+       * Text
+       * @default
        */
+      text: string;
+      /** Outlook Event Title */
       outlook_event_title: string;
-      /**
-       * Outlook Info
-       * @description Outlook info about the bookings in the same time
-       */
+      /** Outlook Info */
       outlook_info: components["schemas"]["BookingDTO"][];
-      /**
-       * Lessons
-       * @description Lessons that are in conflict with the Outlook event
-       */
-      lessons: components["schemas"]["Lesson"][];
-    };
-    /** Override */
-    Override: {
-      /** Groups */
-      groups: string[];
-      /** Courses */
-      courses: string[];
-      /**
-       * Start Date
-       * Format: date-time
-       */
-      start_date: string;
-      /**
-       * End Date
-       * Format: date
-       */
-      end_date: string;
+      /** Meetings */
+      meetings: components["schemas"]["ScheduledMeeting"][];
     };
     /** ParseLocationStringResponse */
     ParseLocationStringResponse: {
       location_item: components["schemas"]["Item"];
       /** Description */
       description: string;
+    };
+    /**
+     * PerWeekIssue
+     * @description Число занятий в неделю не совпадает с per_week в конфигурации компонента.
+     */
+    PerWeekIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: PerWeekIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Course Name */
+      course_name: string;
+      /** Component Tag */
+      component_tag: string;
+      /**
+       * Source Kind
+       * @enum {string}
+       */
+      source_kind: PerWeekIssueSource_kind;
+      /**
+       * Student Groups
+       * @default []
+       */
+      student_groups: string[];
+      /** Expected Per Week */
+      expected_per_week: number;
+      /** Actual Per Week */
+      actual_per_week: number;
+    };
+    /** ProgramTrack */
+    ProgramTrack: {
+      /**
+       * Code
+       * @description Track identifier
+       */
+      code: string;
+      /**
+       * Name
+       * @description Track display name
+       */
+      name: string;
+      /**
+       * Kind
+       * @description Track kind marker
+       */
+      kind?: ProgramTrackKindAnyOf0 | string | null;
+      /**
+       * Groups
+       * @description Track groups as plain group codes
+       * @default []
+       */
+      groups: string[];
+    };
+    /** Room */
+    Room: {
+      /**
+       * Id
+       * @description Room identifier used in schedule output
+       */
+      id: string;
+      /**
+       * Name
+       * @description Human-readable room name
+       */
+      name: string;
+      /**
+       * Capacity
+       * @description Maximum room capacity
+       */
+      capacity: number;
     };
     /**
      * RoomDTO
@@ -702,148 +1245,433 @@ export interface components {
     };
     /**
      * RoomIssue
-     * @description Issue when there are multiple lessons in the room at the same time.
+     * @description В одной аудитории одновременно запланированы несколько разных занятий.
      */
     RoomIssue: {
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      collision_type: RoomIssueCollision_type;
+      issue_type: RoomIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Room */
+      room: string;
+      /** Meetings */
+      meetings: components["schemas"]["ScheduledMeeting"][];
+    };
+    /** ScheduleConfig */
+    ScheduleConfig: {
+      /** @description Term-level configuration (sections are nested inside term) */
+      term: components["schemas"]["TermConfig"];
+      /**
+       * Rooms
+       * @description Available rooms
+       */
+      rooms?: components["schemas"]["Room"][];
+      /**
+       * Instructors
+       * @description Available instructors
+       */
+      instructors?: components["schemas"]["Instructor"][];
+      /**
+       * Students Groups
+       * @description Student groups entries
+       */
+      students_groups?: components["schemas"]["StudentsGroups"][];
+      /**
+       * Courses
+       * @description All courses to schedule
+       */
+      courses?: components["schemas"]["CourseConfig"][];
+    };
+    /** ScheduleConfigUpdate */
+    ScheduleConfigUpdate: {
+      /** @description Term-level configuration (sections are nested inside term) */
+      term?: components["schemas"]["TermPartialUpdate"] | null;
+      /**
+       * Rooms
+       * @description Available rooms
+       */
+      rooms?: components["schemas"]["Room"][] | null;
+      /**
+       * Instructors
+       * @description Available instructors
+       */
+      instructors?: components["schemas"]["Instructor"][] | null;
+      /**
+       * Students Groups
+       * @description Student groups entries
+       */
+      students_groups?: components["schemas"]["StudentsGroups"][] | null;
+      /**
+       * Courses
+       * @description All courses to schedule
+       */
+      courses?: components["schemas"]["CourseConfig"][] | null;
+    };
+    /** ScheduledMeeting */
+    ScheduledMeeting: {
+      /** Course Name */
+      course_name: string;
+      /** Component Tag */
+      component_tag: string;
+      /**
+       * Source Kind
+       * @enum {string}
+       */
+      source_kind: ScheduledMeetingSource_kind;
+      /** Placement */
+      placement:
+        | components["schemas"]["OccurrencePlacement"]
+        | components["schemas"]["WeeklyPatternPlacement"];
+      /**
+       * Start Time
+       * Format: time
+       */
+      start_time: string;
+      /**
+       * End Time
+       * Format: time
+       */
+      end_time: string;
+      /** Room */
+      room: string | null;
+      /** Instructor */
+      instructor: string | string[] | null;
+      /**
+       * Groups
+       * @default []
+       */
+      groups: string[];
+      /** Students Number */
+      students_number: number | null;
+    };
+    /** SectionConfig */
+    SectionConfig: {
+      /**
+       * Code
+       * @description Section identifier
+       */
+      code: string;
+      /**
+       * Name
+       * @description Section display name
+       */
+      name: string;
+      /**
+       * Kind
+       * @description Section kind marker (for example, core/english/electives)
+       */
+      kind?: SectionConfigKindAnyOf0 | string | null;
+      /**
+       * Programs
+       * @description Programs inside the section
+       * @default []
+       */
+      programs: components["schemas"]["SectionProgram"][];
+    };
+    /** SectionProgram */
+    SectionProgram: {
+      /**
+       * Code
+       * @description Program identifier
+       */
+      code: string;
+      /**
+       * Name
+       * @description Program display name
+       */
+      name: string;
+      /**
+       * Kind
+       * @description Program kind marker
+       */
+      kind?: SectionProgramKindAnyOf0 | string | null;
+      /**
+       * Degree
+       * @description Optional degree marker (for example, bs/ms/phd)
+       */
+      degree?: string | null;
+      /**
+       * Language
+       * @description Program language marker (en/ru)
+       */
+      language?: SectionProgramLanguageAnyOf0 | null;
+      /**
+       * Year
+       * @description Program year
+       */
+      year?: number | null;
+      /**
+       * Applies To
+       * @description Optional list of entity codes this program applies to (for example, [BS_Y1_EN, BS_Y1_RU])
+       * @default []
+       */
+      applies_to: string[];
+      /**
+       * Tracks
+       * @description Program tracks (optional wrapper when groups are split by track)
+       * @default []
+       */
+      tracks: components["schemas"]["ProgramTrack"][];
+      /**
+       * Groups
+       * @description Program-level groups when tracks are not used (for example, elective bucket ids)
+       * @default []
+       */
+      groups: string[];
+    };
+    /**
+     * SessionOccurrence
+     * @description One concrete placed meeting (date, time, room, instructor).
+     */
+    SessionOccurrence: {
+      /**
+       * Date
+       * Format: date
+       * @description Meeting date (YYYY-MM-DD)
+       */
+      date: string;
+      /**
+       * Start Time
+       * Format: time
+       * @description Meeting start time
+       */
+      start_time: string;
+      /**
+       * End Time
+       * Format: time
+       * @description Meeting end time
+       */
+      end_time: string;
       /**
        * Room
-       * @description Room name
+       * @description Room id (None or empty if unknown)
        */
-      room: string | string[];
+      room?: string | null;
       /**
-       * Lessons
-       * @description Lessons in the room at the same time
+       * Instructor
+       * @description Instructor id(s) for this meeting
        */
-      lessons: components["schemas"]["Lesson"][];
+      instructor?: string | string[] | null;
     };
-    /** SemesterOptions */
-    "SemesterOptions-Input": {
-      /** Name */
-      name: string;
-      /** Core Courses Spreadsheet Id */
-      core_courses_spreadsheet_id?: string | null;
+    /**
+     * StudentIssue
+     * @description Студент из нескольких групп одновременно должен быть на нескольких занятиях.
+     */
+    StudentIssue: {
       /**
-       * Core Courses Targets
-       * @default []
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
        */
-      core_courses_targets: components["schemas"]["Target"][];
-      /** Electives Spreadsheet Id */
-      electives_spreadsheet_id?: string | null;
+      issue_type: StudentIssueIssue_type;
       /**
-       * Electives Targets
-       * @default []
+       * Text
+       * @default
        */
-      electives_targets: components["schemas"]["src__electives__config__Target"][];
-      /**
-       * Electives
-       * @default []
-       */
-      electives: components["schemas"]["Elective"][];
-      /**
-       * Very Same Lessons
-       * @description Groups of lessons that are actually the same lesson (e.g. Russian/English names)
-       * @default []
-       */
-      very_same_lessons: components["schemas"]["VerySameLessonId-Input"][][];
+      text: string;
+      /** Student */
+      student: string;
+      /** Meetings */
+      meetings: components["schemas"]["ScheduledMeeting"][];
     };
-    /** SemesterOptions */
-    "SemesterOptions-Output": {
-      /** Name */
-      name: string;
-      /** Core Courses Spreadsheet Id */
-      core_courses_spreadsheet_id: string | null;
+    /** StudentsGroups */
+    StudentsGroups: {
       /**
-       * Core Courses Targets
+       * Code
+       * @description Student entity code (group/program/selector id)
+       */
+      code: string;
+      /**
+       * Kind
+       * @description Distribution kind (for example, core/english/elective)
+       */
+      kind: string;
+      /**
+       * Name
+       * @description Optional display name
+       */
+      name?: string | null;
+      /**
+       * Estimated Size
+       * @description Expected student count
+       */
+      estimated_size?: number | null;
+      /**
+       * Students
+       * @description Optional explicit student membership list
        * @default []
        */
-      core_courses_targets: components["schemas"]["Target"][];
-      /** Electives Spreadsheet Id */
-      electives_spreadsheet_id: string | null;
-      /**
-       * Electives Targets
-       * @default []
-       */
-      electives_targets: components["schemas"]["src__electives__config__Target"][];
-      /**
-       * Electives
-       * @default []
-       */
-      electives: components["schemas"]["Elective"][];
-      /**
-       * Very Same Lessons
-       * @description Groups of lessons that are actually the same lesson (e.g. Russian/English names)
-       * @default []
-       */
-      very_same_lessons: components["schemas"]["VerySameLessonId-Output"][][];
-    };
-    /** Target */
-    Target: {
-      /** Sheet Name */
-      sheet_name: string;
-      /**
-       * Start Date
-       * Format: date
-       */
-      start_date: string;
-      /**
-       * End Date
-       * Format: date
-       */
-      end_date: string;
-      /** Override */
-      override: components["schemas"]["Override"][];
-    };
-    /** Teacher */
-    Teacher: {
-      /** Name */
-      name: string;
-      /** Russian Name */
-      russian_name: string | null;
-      /** Email */
-      email: string | null;
-      /** Alias */
-      alias: string | null;
-      /** Student Group */
-      student_group: string | null;
+      students: string[];
     };
     /**
      * TeacherIssue
-     * @description Issue when there is a teacher with multiple lessons at the same time, or when teacher study in the same time as the lesson.
+     * @description Преподаватель одновременно ведёт занятие и учится на другом (или ведёт несколько занятий).
      */
     TeacherIssue: {
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
        */
-      collision_type: TeacherIssueCollision_type;
+      issue_type: TeacherIssueIssue_type;
       /**
-       * Teacher
-       * @description Teacher name
+       * Text
+       * @default
        */
-      teacher: string;
-      /**
-       * Teaching Lessons
-       * @description Lessons of the teacher at the same time
-       */
-      teaching_lessons: components["schemas"]["Lesson"][];
-      /**
-       * Studying Lessons
-       * @description Lessons of the teacher as a student at the same time
-       */
-      studying_lessons: components["schemas"]["Lesson"][];
+      text: string;
+      /** Instructor */
+      instructor: string;
+      /** Teaching Meetings */
+      teaching_meetings: components["schemas"]["ScheduledMeeting"][];
+      /** Studying Meetings */
+      studying_meetings: components["schemas"]["ScheduledMeeting"][];
     };
-    /** TeachersData */
-    TeachersData: {
+    /** TermConfig */
+    TermConfig: {
       /**
-       * Data
+       * Name
+       * @description Academic term name (for example, Fall 2025)
+       */
+      name: string;
+      /** @description Single teaching period (start and end dates inclusive) */
+      semester: components["schemas"]["DateRange"];
+      /**
+       * Days
+       * @description Working days used by the scheduler (for example, MONDAY..SATURDAY)
+       * @default [
+       *       "MONDAY",
+       *       "TUESDAY",
+       *       "WEDNESDAY",
+       *       "THURSDAY",
+       *       "FRIDAY",
+       *       "SATURDAY"
+       *     ]
+       */
+      days: components["schemas"]["Weekday"][];
+      /**
+       * @description Starting day of the week (for example, MONDAY)
+       * @default MONDAY
+       */
+      starting_day: components["schemas"]["Weekday"];
+      /**
+       * Time Slots
+       * @description Teaching slots for the term
+       * @default [
+       *       {
+       *         "start_time": "09:00:00",
+       *         "end_time": "10:30:00"
+       *       },
+       *       {
+       *         "start_time": "10:40:00",
+       *         "end_time": "12:10:00"
+       *       },
+       *       {
+       *         "start_time": "12:40:00",
+       *         "end_time": "14:10:00"
+       *       },
+       *       {
+       *         "start_time": "14:20:00",
+       *         "end_time": "15:50:00"
+       *       },
+       *       {
+       *         "start_time": "16:00:00",
+       *         "end_time": "17:30:00"
+       *       },
+       *       {
+       *         "start_time": "17:40:00",
+       *         "end_time": "19:10:00"
+       *       },
+       *       {
+       *         "start_time": "19:20:00",
+       *         "end_time": "20:50:00"
+       *       }
+       *     ]
+       */
+      time_slots: components["schemas"]["TermTimeSlot"][];
+      /**
+       * Sections
+       * @description Section-based hierarchy from dtsn.yaml
+       */
+      sections?: components["schemas"]["SectionConfig"][];
+    };
+    /** TermPartialUpdate */
+    TermPartialUpdate: {
+      /** Name */
+      name?: string | null;
+      semester?: components["schemas"]["DateRange"] | null;
+      /** Days */
+      days?: components["schemas"]["Weekday"][] | null;
+      starting_day?: components["schemas"]["Weekday"] | null;
+      /** Time Slots */
+      time_slots?: components["schemas"]["TermTimeSlot"][] | null;
+      /** Sections */
+      sections?: components["schemas"]["SectionConfig"][] | null;
+    };
+    /** TermTimeSlot */
+    TermTimeSlot: {
+      /**
+       * Start Time
+       * Format: time
+       * @description Slot start time
+       */
+      start_time: string;
+      /**
+       * End Time
+       * Format: time
+       * @description Slot end time
+       */
+      end_time: string;
+    };
+    /**
+     * UnbookedIssue
+     * @description Занятие из конфигурации не имеет соответствующего бронирования в Outlook.
+     */
+    UnbookedIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: UnbookedIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      meeting: components["schemas"]["ScheduledMeeting"];
+    };
+    /**
+     * UnplacedIssue
+     * @description Компонент курса объявлен в конфигурации, но для него не задано расписание.
+     */
+    UnplacedIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: UnplacedIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Course Name */
+      course_name: string;
+      /** Component Tag */
+      component_tag: string;
+      /**
+       * Source Kind
+       * @enum {string}
+       */
+      source_kind: UnplacedIssueSource_kind;
+      /**
+       * Student Groups
        * @default []
        */
-      data: components["schemas"]["Teacher"][];
+      student_groups: string[];
     };
     /** ValidationError */
     ValidationError: {
@@ -858,58 +1686,99 @@ export interface components {
       /** Context */
       ctx?: Record<string, never>;
     };
-    /** VerySameLessonId */
-    "VerySameLessonId-Input": {
+    /**
+     * Weekday
+     * @enum {string}
+     */
+    Weekday: Weekday;
+    /** WeeklyPatternPlacement */
+    WeeklyPatternPlacement: {
       /**
-       * Type
-       * @description Source type of the lesson
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
        */
-      type?: VerySameLessonIdInputTypeAnyOf0 | null;
+      kind: WeeklyPatternPlacementKind;
+      weekday: components["schemas"]["Weekday"];
+      /** Edits */
+      edits: components["schemas"]["WeeklyPatternSlotEdit"][];
+    };
+    /**
+     * WeeklyPatternSlot
+     * @description Fixed weekly day/time for one meeting in a recurring core-course component.
+     */
+    WeeklyPatternSlot: {
+      /** @description Weekday name (for example, MONDAY) */
+      weekday: components["schemas"]["Weekday"];
       /**
-       * Title
-       * @description Lesson name to match
+       * Start Time
+       * Format: time
+       * @description Meeting start time
        */
-      title: string;
+      start_time: string;
+      /**
+       * End Time
+       * Format: time
+       * @description Meeting end time
+       */
+      end_time: string;
+      /**
+       * Room
+       * @description Room id from spreadsheet (for example, 460 or ONLINE)
+       */
+      room?: string | null;
       /**
        * Instructor
-       * @description Instructor name to match (optional)
+       * @description Instructor id, or list of ids for co-teaching
        */
-      instructor?: string | null;
+      instructor?: string | string[] | null;
       /**
-       * Groups
-       * @description Groups to match (optional, any overlap counts)
-       * @default []
+       * Edits
+       * @description Per-week overrides or cancellations keyed by ``select_week``
        */
-      groups: string[];
+      edits?: components["schemas"]["WeeklyPatternSlotEdit"][] | null;
     };
-    /** VerySameLessonId */
-    "VerySameLessonId-Output": {
+    /**
+     * WeeklyPatternSlotEdit
+     * @description Override or cancel one weekly pattern occurrence in a selected week.
+     */
+    WeeklyPatternSlotEdit: {
       /**
-       * Type
-       * @description Source type of the lesson
+       * Select Week
+       * Format: date
+       * @description Date (YYYY-MM-DD) identifying the week (any day in that week)
        */
-      type: VerySameLessonIdOutputTypeAnyOf0 | null;
+      select_week: string;
       /**
-       * Title
-       * @description Lesson name to match
+       * Cancel
+       * @description If true, skip this meeting for the selected week
+       * @default false
        */
-      title: string;
+      cancel: boolean;
+      /**
+       * Date
+       * @description Optional concrete meeting date; defaults to ``weekday`` in that week
+       */
+      date?: string | null;
+      /**
+       * Start Time
+       * @description Optional meeting start; defaults to the pattern start_time
+       */
+      start_time?: string | null;
+      /**
+       * End Time
+       * @description Optional meeting end; defaults to the pattern end_time
+       */
+      end_time?: string | null;
+      /**
+       * Room
+       * @description Optional room id; defaults to the pattern room
+       */
+      room?: string | null;
       /**
        * Instructor
-       * @description Instructor name to match (optional)
+       * @description Optional instructor id(s); defaults to the pattern instructor
        */
-      instructor: string | null;
-      /**
-       * Groups
-       * @description Groups to match (optional, any overlap counts)
-       * @default []
-       */
-      groups: string[];
-    };
-    /** Target */
-    src__electives__config__Target: {
-      /** Sheet Name */
-      sheet_name: string;
+      instructor?: string | string[] | null;
     };
   };
   responses: never;
@@ -922,205 +1791,67 @@ export type SchemaBookingDto = components["schemas"]["BookingDTO"];
 export type SchemaCapacityIssue = components["schemas"]["CapacityIssue"];
 export type SchemaCheckParameters = components["schemas"]["CheckParameters"];
 export type SchemaCheckResults = components["schemas"]["CheckResults"];
-export type SchemaElective = components["schemas"]["Elective"];
+export type SchemaComponent = components["schemas"]["Component"];
+export type SchemaComponentSessionSeries =
+  components["schemas"]["ComponentSessionSeries"];
+export type SchemaConfigChangeEvent =
+  components["schemas"]["ConfigChangeEvent"];
+export type SchemaConfigChangeEventSummary =
+  components["schemas"]["ConfigChangeEventSummary"];
+export type SchemaCourseConfig = components["schemas"]["CourseConfig"];
+export type SchemaCoursesConfig = components["schemas"]["CoursesConfig"];
+export type SchemaDateRange = components["schemas"]["DateRange"];
+export type SchemaGroupIssue = components["schemas"]["GroupIssue"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
+export type SchemaInstructor = components["schemas"]["Instructor"];
+export type SchemaInstructorBannedSlotIssue =
+  components["schemas"]["InstructorBannedSlotIssue"];
+export type SchemaInstructorIdIssue =
+  components["schemas"]["InstructorIdIssue"];
+export type SchemaInstructorPreferenceIssue =
+  components["schemas"]["InstructorPreferenceIssue"];
+export type SchemaInstructorSlotPreferenceEntry =
+  components["schemas"]["InstructorSlotPreferenceEntry"];
 export type SchemaIssue = components["schemas"]["Issue"];
 export type SchemaItem = components["schemas"]["Item"];
-export type SchemaLesson = components["schemas"]["Lesson"];
-export type SchemaOptionsData = components["schemas"]["OptionsData"];
+export type SchemaOccurrencePlacement =
+  components["schemas"]["OccurrencePlacement"];
 export type SchemaOutlookIssue = components["schemas"]["OutlookIssue"];
-export type SchemaOverride = components["schemas"]["Override"];
 export type SchemaParseLocationStringResponse =
   components["schemas"]["ParseLocationStringResponse"];
+export type SchemaPerWeekIssue = components["schemas"]["PerWeekIssue"];
+export type SchemaProgramTrack = components["schemas"]["ProgramTrack"];
+export type SchemaRoom = components["schemas"]["Room"];
 export type SchemaRoomDto = components["schemas"]["RoomDTO"];
 export type SchemaRoomIssue = components["schemas"]["RoomIssue"];
-export type SchemaSemesterOptionsInput =
-  components["schemas"]["SemesterOptions-Input"];
-export type SchemaSemesterOptionsOutput =
-  components["schemas"]["SemesterOptions-Output"];
-export type SchemaTarget = components["schemas"]["Target"];
-export type SchemaTeacher = components["schemas"]["Teacher"];
+export type SchemaScheduleConfig = components["schemas"]["ScheduleConfig"];
+export type SchemaScheduleConfigUpdate =
+  components["schemas"]["ScheduleConfigUpdate"];
+export type SchemaScheduledMeeting = components["schemas"]["ScheduledMeeting"];
+export type SchemaSectionConfig = components["schemas"]["SectionConfig"];
+export type SchemaSectionProgram = components["schemas"]["SectionProgram"];
+export type SchemaSessionOccurrence =
+  components["schemas"]["SessionOccurrence"];
+export type SchemaStudentIssue = components["schemas"]["StudentIssue"];
+export type SchemaStudentsGroups = components["schemas"]["StudentsGroups"];
 export type SchemaTeacherIssue = components["schemas"]["TeacherIssue"];
-export type SchemaTeachersData = components["schemas"]["TeachersData"];
+export type SchemaTermConfig = components["schemas"]["TermConfig"];
+export type SchemaTermPartialUpdate =
+  components["schemas"]["TermPartialUpdate"];
+export type SchemaTermTimeSlot = components["schemas"]["TermTimeSlot"];
+export type SchemaUnbookedIssue = components["schemas"]["UnbookedIssue"];
+export type SchemaUnplacedIssue = components["schemas"]["UnplacedIssue"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
-export type SchemaVerySameLessonIdInput =
-  components["schemas"]["VerySameLessonId-Input"];
-export type SchemaVerySameLessonIdOutput =
-  components["schemas"]["VerySameLessonId-Output"];
-export type SchemaSrcElectivesConfigTarget =
-  components["schemas"]["src__electives__config__Target"];
+export type SchemaWeeklyPatternPlacement =
+  components["schemas"]["WeeklyPatternPlacement"];
+export type SchemaWeeklyPatternSlot =
+  components["schemas"]["WeeklyPatternSlot"];
+export type SchemaWeeklyPatternSlotEdit =
+  components["schemas"]["WeeklyPatternSlotEdit"];
 export type $defs = Record<string, never>;
 export interface operations {
-  check_timetable_collisions_collisions_check_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CheckParameters"];
-      };
-    };
-    responses: {
-      /** @description Timetable collisions */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["CheckResults"];
-        };
-      };
-      /** @description Invalid token OR no credentials provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  set_semester_options_set_semester_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SemesterOptions-Input"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["SemesterOptions-Output"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  get_semester_options_semester_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json":
-            | components["schemas"]["SemesterOptions-Output"]
-            | null;
-        };
-      };
-    };
-  };
-  get_all_options_options__get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["OptionsData"];
-        };
-      };
-    };
-  };
-  set_teachers_options_set_teachers_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "text/tab-separated-values": string;
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["TeachersData"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  get_teachers_options_teachers_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["TeachersData"] | null;
-        };
-      };
-    };
-  };
-  get_all_bookings_dev_bookings_get: {
+  bookings_get_all_bookings: {
     parameters: {
       query?: never;
       header?: never;
@@ -1140,7 +1871,7 @@ export interface operations {
       };
     };
   };
-  get_bookings_dev_bookings__room_id__get: {
+  bookings_get_bookings: {
     parameters: {
       query?: never;
       header?: never;
@@ -1171,7 +1902,7 @@ export interface operations {
       };
     };
   };
-  get_rooms_dev_rooms_get: {
+  bookings_get_rooms: {
     parameters: {
       query?: never;
       header?: never;
@@ -1191,7 +1922,47 @@ export interface operations {
       };
     };
   };
-  parse_location_string_route_parser_parse_location_string_post: {
+  issues_check_schedule_issues: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CheckParameters"];
+      };
+    };
+    responses: {
+      /** @description Schedule issues */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CheckResults"];
+        };
+      };
+      /** @description Invalid token OR no credentials provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  parser_parse_location_string_route: {
     parameters: {
       query: {
         location_string: string;
@@ -1222,7 +1993,7 @@ export interface operations {
       };
     };
   };
-  parse_core_courses_route_parser_parse_core_courses_post: {
+  parser_parse_core_courses_route: {
     parameters: {
       query?: never;
       header?: never;
@@ -1255,7 +2026,7 @@ export interface operations {
       };
     };
   };
-  parse_electives_route_parser_parse_electives_post: {
+  parser_parse_electives_route: {
     parameters: {
       query?: never;
       header?: never;
@@ -1284,45 +2055,1020 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_get_my_groups: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StudentsGroups"][];
+        };
+      };
+    };
+  };
+  schedule_get_group_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        group_code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CoursesConfig"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_get_instructor_schedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        instructor_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CoursesConfig"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_get_schedule_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleConfig"];
+        };
+      };
+    };
+  };
+  schedule_config_put_schedule_config: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScheduleConfigUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleConfig"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_put_schedule_config_yaml: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "text/yaml": string;
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleConfig"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_get_term: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TermConfig"];
+        };
+      };
+    };
+  };
+  schedule_config_put_term: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TermConfig"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TermConfig"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_list_courses: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CourseConfig"][];
+        };
+      };
+    };
+  };
+  schedule_config_create_course: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CourseConfig"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CourseConfig"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_get_course: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        course_name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CourseConfig"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_update_course: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        course_name: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CourseConfig"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CourseConfig"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_delete_course: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        course_name: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_list_instructors: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Instructor"][];
+        };
+      };
+    };
+  };
+  schedule_config_create_instructor: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Instructor"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Instructor"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_get_instructor: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        instructor_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Instructor"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_update_instructor: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        instructor_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Instructor"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Instructor"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_delete_instructor: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        instructor_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_list_student_groups: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StudentsGroups"][];
+        };
+      };
+    };
+  };
+  schedule_config_create_student_group: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StudentsGroups"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StudentsGroups"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_get_student_group: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StudentsGroups"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_update_student_group: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StudentsGroups"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["StudentsGroups"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_delete_student_group: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_list_rooms: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Room"][];
+        };
+      };
+    };
+  };
+  schedule_config_create_room: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Room"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Room"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_get_room: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        room_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Room"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_update_room: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        room_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Room"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Room"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_delete_room: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        room_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_get_history_snapshot: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        event_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleConfig"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_get_history_event: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        event_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConfigChangeEvent"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_list_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConfigChangeEventSummary"][];
         };
       };
     };
   };
 }
-export enum CapacityIssueCollision_type {
+export enum CapacityIssueIssue_type {
   capacity = "capacity",
 }
-export enum LessonLesson_class_typeAnyOf0 {
+export enum CommonCourseClassTags {
   lec = "lec",
   tut = "tut",
   lab = "lab",
-  "лек" = "\u043B\u0435\u043A",
-  "тут" = "\u0442\u0443\u0442",
-  "лаб" = "\u043B\u0430\u0431",
+  class = "class",
 }
-export enum LessonSource_typeAnyOf0 {
+export enum CommonCourseTags {
+  core_course = "core_course",
+  elective = "elective",
+  english = "english",
+}
+export enum ConfigChangeEventResources {
+  term = "term",
+  sections = "sections",
+  courses = "courses",
+  rooms = "rooms",
+  instructors = "instructors",
+}
+export enum ConfigChangeEventSummaryResources {
+  term = "term",
+  sections = "sections",
+  courses = "courses",
+  rooms = "rooms",
+  instructors = "instructors",
+}
+export enum GroupIssueIssue_type {
+  group = "group",
+}
+export enum InstructorBannedSlotIssueIssue_type {
+  instructor_banned_slot = "instructor_banned_slot",
+}
+export enum InstructorIdIssueIssue_type {
+  instructor_id = "instructor_id",
+}
+export enum InstructorPreferenceIssueIssue_type {
+  instructor_preference = "instructor_preference",
+}
+export enum InstructorSlotPreferenceLevel {
+  preferred = "preferred",
+  neutral = "neutral",
+  discouraged = "discouraged",
+  banned = "banned",
+}
+export enum OccurrencePlacementKind {
+  occurrence = "occurrence",
+}
+export enum OutlookIssueIssue_type {
+  outlook = "outlook",
+}
+export enum PerWeekIssueIssue_type {
+  per_week = "per_week",
+}
+export enum PerWeekIssueSource_kind {
   core_course = "core_course",
   elective = "elective",
 }
-export enum OutlookIssueCollision_type {
-  outlook = "outlook",
+export enum ProgramTrackKindAnyOf0 {
+  track = "track",
+  english_program = "english_program",
 }
 export enum RoomDTOAccess_levelAnyOf0 {
   yellow = "yellow",
   red = "red",
   special = "special",
 }
-export enum RoomIssueCollision_type {
+export enum RoomIssueIssue_type {
   room = "room",
 }
-export enum TeacherIssueCollision_type {
+export enum ScheduledMeetingSource_kind {
+  core_course = "core_course",
+  elective = "elective",
+}
+export enum SectionConfigKindAnyOf0 {
+  core = "core",
+  english = "english",
+  electives = "electives",
+}
+export enum SectionProgramKindAnyOf0 {
+  degree_year = "degree_year",
+  english_program = "english_program",
+  elective_bucket = "elective_bucket",
+}
+export enum SectionProgramLanguageAnyOf0 {
+  en = "en",
+  ru = "ru",
+}
+export enum StudentIssueIssue_type {
+  student = "student",
+}
+export enum TeacherIssueIssue_type {
   teacher = "teacher",
 }
-export enum VerySameLessonIdInputTypeAnyOf0 {
+export enum UnbookedIssueIssue_type {
+  unbooked = "unbooked",
+}
+export enum UnplacedIssueIssue_type {
+  unplaced = "unplaced",
+}
+export enum UnplacedIssueSource_kind {
   core_course = "core_course",
   elective = "elective",
 }
-export enum VerySameLessonIdOutputTypeAnyOf0 {
-  core_course = "core_course",
-  elective = "elective",
+export enum Weekday {
+  MONDAY = "MONDAY",
+  TUESDAY = "TUESDAY",
+  WEDNESDAY = "WEDNESDAY",
+  THURSDAY = "THURSDAY",
+  FRIDAY = "FRIDAY",
+  SATURDAY = "SATURDAY",
+  SUNDAY = "SUNDAY",
+}
+export enum WeeklyPatternPlacementKind {
+  weekly_pattern = "weekly_pattern",
 }

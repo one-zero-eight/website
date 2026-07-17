@@ -31,7 +31,10 @@ export function EventsAdminPage() {
   }
 
   const isAdmin = eventsUser?.role === "admin";
-  const leaderClubIds = clubsUser?.leader_in_clubs.map((c) => c.id) ?? [];
+  const leaderClubIds =
+    clubsUser?.leader_in_clubs
+      .map((c) => c.id)
+      .filter((id): id is string => id != null) ?? [];
   const eventListSettings: EventListOptions = {
     showMyCheckins: false,
     showPreviousEvents: false,

@@ -1,4 +1,4 @@
-import { Link as BaseLink } from "@tiptap/extension-link";
+import { Link as BaseLink, type LinkOptions } from "@tiptap/extension-link";
 import type { Editor } from "@tiptap/core";
 import type { MarkType } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
@@ -18,7 +18,7 @@ export const Link = BaseLink.extend({
       protocols: ["http", "https", "mailto", "tel"],
       linkOnPaste: true,
       enableClickSelection: true,
-    };
+    } as LinkOptions;
   },
   addProseMirrorPlugins() {
     return [

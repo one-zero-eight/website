@@ -86,6 +86,7 @@ export const baseEventFormState: EventFormState = {
   check_in_on_open: true,
   is_draft: false,
   is_active: true,
+  is_approved: false,
   links: [],
   image_file_id: null,
   file: null,

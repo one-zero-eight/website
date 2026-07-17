@@ -44,12 +44,10 @@ export function IssuesResults({
       setSelectedIssueType(ALL_ISSUE_TYPES_FILTER);
       return;
     }
-    setSelectedIssueType((current) => {
-      if (current === ALL_ISSUE_TYPES_FILTER) return current;
-      if (issues.some((issue) => issue.issue_type === current)) return current;
-      return ALL_ISSUE_TYPES_FILTER;
-    });
-  }, [issues, setSelectedIssueType]);
+    if (selectedIssueType === ALL_ISSUE_TYPES_FILTER) return;
+    if (issues.some((issue) => issue.issue_type === selectedIssueType)) return;
+    setSelectedIssueType(ALL_ISSUE_TYPES_FILTER);
+  }, [issues, selectedIssueType, setSelectedIssueType]);
 
   const filteredIssues = useMemo(() => {
     if (selectedIssueType === ALL_ISSUE_TYPES_FILTER) {

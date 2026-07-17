@@ -67,7 +67,12 @@ export default function NameForm({
       body: emptyEvent(
         title,
         isClubLeader
-          ? [{ type: HostType.club, name: clubsUser.leader_in_clubs[0].id }]
+          ? [
+              {
+                type: HostType.club,
+                name: clubsUser.leader_in_clubs[0].id ?? "",
+              },
+            ]
           : [],
       ),
     });

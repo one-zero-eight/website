@@ -827,5 +827,6 @@ export function meetingPatternBaseValues(
     time: String(slot.start_time).slice(0, 5),
     weekday: (weekday || "Mon") as TermWeekdayKey,
     instructor: String(instructor ?? "").trim(),
+    audience: [],
   };
 }

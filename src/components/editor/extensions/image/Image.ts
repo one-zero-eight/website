@@ -120,8 +120,11 @@ export const Image = BaseImage.extend({
   draggable: false,
 
   addOptions() {
+    const parent = this.parent?.();
     return {
-      ...this.parent?.(),
+      ...parent,
+      inline: parent?.inline ?? false,
+      HTMLAttributes: parent?.HTMLAttributes ?? {},
       allowBase64: true,
       resize: {
         enabled: true,
@@ -352,14 +355,15 @@ export const Image = BaseImage.extend({
 
   addProseMirrorPlugins() {
     const parentPlugins = this.parent?.() || [];
+    const imageClipboardParserKey = new PluginKey("imageClipboardParser");
 
     return [
       createImageResizeTouchFixPlugin(),
       ...parentPlugins.filter(
-        (plugin: Plugin) => plugin.key !== "imageClipboardParser",
+        (plugin: Plugin) => plugin.spec.key !== imageClipboardParserKey,
       ),
       new Plugin({
-        key: new PluginKey("imageClipboardParser"),
+        key: imageClipboardParserKey,
         props: {
           handlePaste: (view, event) => {
             const items = event.clipboardData?.items;

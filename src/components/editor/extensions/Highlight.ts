@@ -70,8 +70,10 @@ export const highlightColors: Record<HighlightColor, HighlightColorType> = {
  */
 export const Highlight = BaseHighlight.extend({
   addOptions() {
+    const parent = this.parent?.();
     return {
-      ...this.parent?.(),
+      ...parent,
+      HTMLAttributes: parent?.HTMLAttributes ?? {},
       multicolor: true,
     };
   },
