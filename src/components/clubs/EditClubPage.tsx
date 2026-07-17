@@ -370,7 +370,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   };
 
   const handleUploadLogo = () => {
-    if (!logoFile || !club) return;
+    if (!logoFile || !club?.id) return;
 
     const formData = new FormData();
     formData.append("logo_file", logoFile);

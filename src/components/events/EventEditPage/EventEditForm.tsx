@@ -224,7 +224,7 @@ export function EventEditForm({
 
     let check_in_opens: string | null = eventForm.check_in_on_open
       ? ALWAYS_OPEN_CHECK_IN_SENTINEL
-      : toMoscowIso(eventForm.check_in_date, eventForm.check_in_opens);
+      : toMoscowIso(eventForm.check_in_date, eventForm.check_in_opens ?? "");
 
     // Handle links
     const links: SchemaLink[] = [];

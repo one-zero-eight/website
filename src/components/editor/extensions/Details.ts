@@ -7,8 +7,16 @@ import { Details as BaseDetails } from "@tiptap/extension-details";
  */
 export const Details = BaseDetails.extend({
   addOptions() {
+    const parent = this.parent?.();
     return {
-      ...this.parent?.(),
+      ...parent,
+      openClassName: parent?.openClassName ?? "",
+      HTMLAttributes: parent?.HTMLAttributes ?? {},
+      renderToggleButton:
+        parent?.renderToggleButton ??
+        (() => {
+          /* default no-op */
+        }),
       persist: true,
     };
   },

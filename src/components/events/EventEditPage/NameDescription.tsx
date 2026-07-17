@@ -199,7 +199,7 @@ export default function NameDescription({
               Pick a club
             </option>
             {clubs.map((club) => (
-              <option key={club.id} value={club.id}>
+              <option key={club.id ?? club.title} value={club.id ?? ""}>
                 {club.title}
               </option>
             ))}
@@ -228,7 +228,7 @@ export default function NameDescription({
                   .map((h) => h.name)
                   .filter(Boolean);
                 const availableClubs = (clubList ?? []).filter(
-                  (c) => !otherChosenClubIds.includes(c.id),
+                  (c) => c.id && !otherChosenClubIds.includes(c.id),
                 );
                 return (
                   <Fragment
@@ -261,7 +261,10 @@ export default function NameDescription({
                       >
                         <option value="">Pick a club</option>
                         {availableClubs.map((club) => (
-                          <option key={club.id} value={club.id}>
+                          <option
+                            key={club.id ?? club.title}
+                            value={club.id ?? ""}
+                          >
                             {club.title}
                           </option>
                         ))}
