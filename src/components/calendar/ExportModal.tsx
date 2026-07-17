@@ -1,10 +1,10 @@
-import { $events } from "@/api/events";
+import { $schedule } from "@/api/schedule";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 import ScheduleLinkCopy from "@/components/schedule/ScheduleLinkCopy.tsx";
 import { useRef } from "react";
-import { getICSLink, getPersonalLink } from "@/api/events/links.ts";
-import { TargetForExport } from "@/api/events/types.ts";
+import { getICSLink, getPersonalLink } from "@/api/schedule/links.ts";
+import { TargetForExport } from "@/api/schedule/types.ts";
 
 export function ExportModal({
   eventGroupOrTarget,
@@ -23,8 +23,8 @@ export function ExportModal({
     typeof eventGroupOrTarget !== "number" &&
     Object.values(TargetForExport).includes(eventGroupOrTarget)
   );
-  const { data: eventsUser } = $events.useQuery("get", "/users/me");
-  const { data: eventGroup } = $events.useQuery(
+  const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
+  const { data: eventGroup } = $schedule.useQuery(
     "get",
     "/event-groups/{event_group_id}",
     {
@@ -35,13 +35,13 @@ export function ExportModal({
     },
   );
 
-  const { data: scheduleKey } = $events.useQuery(
+  const { data: scheduleKey } = $schedule.useQuery(
     "post",
     "/users/me/get-schedule-access-key",
     {
       params: {
         query: {
-          resource_path: `/users/${eventsUser?.id}/${eventGroupOrTarget}.ics`,
+          resource_path: `/users/${scheduleUser?.id}/${eventGroupOrTarget}.ics`,
         },
       },
     },
@@ -57,7 +57,7 @@ export function ExportModal({
 
   let calendarURL = "";
   if (isEventGroupModal && eventGroup) {
-    calendarURL = getICSLink(eventGroup.alias, eventsUser?.id, "url");
+    calendarURL = getICSLink(eventGroup.alias, scheduleUser?.id, "url");
   }
 
   if (isTargetModal && scheduleKey) {

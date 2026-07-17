@@ -1,4 +1,4 @@
-import type { eventsTypes } from "@/api/events";
+import type { scheduleTypes } from "@/api/schedule";
 import {
   getICSLink,
   getMyMoodleLink,
@@ -6,7 +6,7 @@ import {
   getMyRoomBookingsLink,
   getMySportLink,
   getMyWorkshopsLink,
-} from "@/api/events/links.ts";
+} from "@/api/schedule/links.ts";
 
 export function getPersonalCalendarIcsUrls({
   favorites,
@@ -21,7 +21,7 @@ export function getPersonalCalendarIcsUrls({
   favorites: number[];
   hidden: number[];
   predefined: number[];
-  eventGroups: eventsTypes.SchemaListEventGroupsResponse;
+  eventGroups: scheduleTypes.SchemaListEventGroupsResponse;
   userId: number | undefined;
   musicRoomHidden: boolean;
   sportsHidden: boolean;

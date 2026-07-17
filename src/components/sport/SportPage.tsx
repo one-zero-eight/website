@@ -1,9 +1,9 @@
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
-import { getMySportLink } from "@/api/events/links.ts";
+import { getMySportLink } from "@/api/schedule/links.ts";
 import { useState } from "react";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
-import { TargetForExport } from "@/api/events/types.ts";
+import { TargetForExport } from "@/api/schedule/types.ts";
 
 export function SportPage() {
   const [exportModalOpen, setExportModalOpen] = useState(false);

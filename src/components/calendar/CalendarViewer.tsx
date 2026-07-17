@@ -1,5 +1,5 @@
 import type { EventInput } from "@fullcalendar/core";
-import { eventsTypes } from "@/api/events";
+import { scheduleTypes } from "@/api/schedule";
 import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
 import { ConfigCalendarDialog } from "@/components/calendar/ConfigCalendarDialog.tsx";
 import {
@@ -32,7 +32,7 @@ export type URLType =
       color?: string;
       sourceLink?: string;
       updatedAt?: string;
-      eventGroup?: eventsTypes.SchemaViewEventGroup;
+      eventGroup?: scheduleTypes.SchemaViewEventGroup;
     };
 
 export default function CalendarViewer({

@@ -1,4 +1,4 @@
-import { $events } from "@/api/events";
+import { $schedule } from "@/api/schedule";
 import { ReactElement } from "react";
 
 export type AcademicCalendar = {
@@ -57,11 +57,11 @@ export function findAcademicCalendarByGroups(
 }
 
 export function useMyAcademicCalendar() {
-  const { data: eventGroups, isPending: isPending1 } = $events.useQuery(
+  const { data: eventGroups, isPending: isPending1 } = $schedule.useQuery(
     "get",
     "/event-groups/",
   );
-  const { data: predefined, isPending: isPending2 } = $events.useQuery(
+  const { data: predefined, isPending: isPending2 } = $schedule.useQuery(
     "get",
     "/users/me/predefined",
   );

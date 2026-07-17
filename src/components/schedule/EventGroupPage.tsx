@@ -1,24 +1,24 @@
-import { $events } from "@/api/events";
+import { $schedule } from "@/api/schedule";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
 import { Topbar } from "@/components/layout/Topbar.tsx";
 import ExportButton from "@/components/schedule/ExportButton.tsx";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton.tsx";
-import { getICSLink } from "@/api/events/links.ts";
+import { getICSLink } from "@/api/schedule/links.ts";
 import { useState } from "react";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { useWindowSize } from "usehooks-ts";
 import { Link } from "@tanstack/react-router";
 
 export function EventGroupPage({ alias }: { alias: string }) {
-  const { data: eventsUser } = $events.useQuery("get", "/users/me");
+  const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
   const {
     data: group,
     isLoading,
     isError,
     error,
-  } = $events.useQuery("get", "/event-groups/by-alias", {
+  } = $schedule.useQuery("get", "/event-groups/by-alias", {
     params: { query: { alias } },
   });
   const { width } = useWindowSize();
@@ -92,7 +92,7 @@ export function EventGroupPage({ alias }: { alias: string }) {
       <Calendar
         urls={[
           {
-            url: getICSLink(group.alias, eventsUser?.id),
+            url: getICSLink(group.alias, scheduleUser?.id),
             eventGroup: group,
           },
         ]}

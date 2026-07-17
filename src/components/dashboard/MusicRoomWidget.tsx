@@ -1,4 +1,4 @@
-import { useMyMusicRoom } from "@/api/events/event-group.ts";
+import { useMyMusicRoom } from "@/api/schedule/event-group.ts";
 import { IcalExpander } from "@/components/calendar/iCalendarPlugin/ical-expander/IcalExpander.js";
 import { useNowMS } from "@/lib/utils/use-now.ts";
 import ICAL from "ical.js";

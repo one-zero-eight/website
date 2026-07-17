@@ -289,15 +289,15 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     };
   }, [club?.id, uploadDescriptionImage]);
 
-  const { data: eventsUser } = $clubs.useQuery("get", "/users/me");
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
 
   useEffect(() => {
-    if (eventsUser && eventsUser.role !== "admin") {
+    if (clubsUser && clubsUser.role !== "admin") {
       navigate({ to: "/clubs" });
     }
-  }, [eventsUser, navigate]);
+  }, [clubsUser, navigate]);
 
-  if (eventsUser?.role !== "admin") {
+  if (clubsUser?.role !== "admin") {
     return null;
   }
 

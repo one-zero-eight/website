@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { TargetForExport } from "@/api/events/types.ts";
+import { TargetForExport } from "@/api/schedule/types.ts";
 import HideButtonPersonal from "@/components/schedule/personal-card/HideButtonPersonal.tsx";
 import SimpleExportButton from "@/components/schedule/group-card/SimpleExportButton.tsx";
 import LinkIconButton from "@/components/schedule/group-card/LinkIconButton.tsx";

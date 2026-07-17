@@ -1,17 +1,17 @@
-import { eventsTypes } from "@/api/events";
+import { scheduleTypes } from "@/api/schedule";
 import FavoriteButton from "@/components/schedule/group-card/FavoriteButton";
 import HideButton from "@/components/schedule/group-card/HideButton";
 import {
   getAllTagsByType,
   getFirstTagByType,
-} from "@/api/events/event-group.ts";
+} from "@/api/schedule/event-group.ts";
 import { viewConfig } from "@/components/schedule/view-config.ts";
 import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 import SimpleExportButton from "@/components/schedule/group-card/SimpleExportButton.tsx";
 
 export type GroupCardProps = {
-  group: eventsTypes.SchemaViewEventGroup;
+  group: scheduleTypes.SchemaViewEventGroup;
   canHide?: boolean;
   exportButtonOnClick?: () => void;
 };
