@@ -29,7 +29,7 @@ function TimePicker({
     >
       {HOURS.map((hour) => (
         <option key={hour} value={hour}>
-          {hour === 24 ? "00:00" : `${hour.toString().padStart(2, "0")}:00`}
+          {hour === 24 ? "24:00" : `${hour.toString().padStart(2, "0")}:00`}
         </option>
       ))}
     </select>
@@ -53,7 +53,9 @@ export function TimeRange({
   function updateCallback(start: number, end: number) {
     setValueCallback({
       start: formatHour(start),
-      end: formatHour(end),
+      // A midnight end represents the end of the day (24:00), not 00:00.
+      // Keep it as "24:00" so the range stays valid (e.g. 08:00–24:00).
+      end: end === 24 ? "24:00" : formatHour(end),
     });
   }
 

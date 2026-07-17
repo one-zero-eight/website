@@ -20,6 +20,11 @@ import {
 
 type DragMode = "add" | "remove";
 
+// On touch we defer selecting until a short press-and-hold so a normal swipe
+// scrolls the page instead of accidentally marking slots.
+const LONG_PRESS_MS = 250;
+const TOUCH_MOVE_CANCEL_PX = 10;
+
 function getMeetingTimeOverlayClassName({
   continuesAbove,
   continuesBelow,
@@ -136,6 +141,25 @@ export function AvailabilitySelector({
   const lastVisitedSlotKeyRef = useRef<string | null>(null);
   const allowedSlotsRef = useRef(allowedSlots);
   allowedSlotsRef.current = allowedSlots;
+
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingTouchRef = useRef<{
+    x: number;
+    y: number;
+    dateId: string;
+    time: string;
+    pointerId: number;
+    isInterval: boolean;
+  } | null>(null);
+  const [isTouchDragging, setIsTouchDragging] = useState(false);
+
+  const clearPendingLongPress = useCallback(() => {
+    if (longPressTimerRef.current !== null) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    pendingTouchRef.current = null;
+  }, []);
 
   const visibleDateIdsRef = useRef<string[]>([]);
   const timeSlotsRef = useRef(timeSlots);
@@ -290,35 +314,26 @@ export function AvailabilitySelector({
 
   const gridRef = useRef<HTMLDivElement>(null);
 
-  function handleSlotPointerDown(
-    dateId: string,
-    time: string,
-    event: ReactPointerEvent<HTMLButtonElement>,
-  ) {
-    if (intervalSelectionMode) {
-      if (!isSlotAllowed(dateId, time)) {
-        return;
-      }
-
-      event.preventDefault();
-      gridRef.current?.setPointerCapture(event.pointerId);
-      event.currentTarget.setPointerCapture(event.pointerId);
-
-      const slotKey = getSlotKey(dateId, time);
-      intervalAnchorDateRef.current = dateId;
-      intervalDragStartRef.current = slotKey;
-      isDraggingRef.current = true;
-      onIntervalSelectionSlotsChangeRef.current?.([slotKey]);
-      return;
+  function capturePointer(pointerId: number) {
+    try {
+      gridRef.current?.setPointerCapture(pointerId);
+    } catch {
+      // Pointer may already be released; ignore.
     }
+  }
 
-    if (!editingUserId || !isSlotAllowed(dateId, time)) {
-      return;
-    }
+  function beginIntervalDrag(dateId: string, time: string, pointerId: number) {
+    capturePointer(pointerId);
 
-    event.preventDefault();
-    gridRef.current?.setPointerCapture(event.pointerId);
-    event.currentTarget.setPointerCapture(event.pointerId);
+    const slotKey = getSlotKey(dateId, time);
+    intervalAnchorDateRef.current = dateId;
+    intervalDragStartRef.current = slotKey;
+    isDraggingRef.current = true;
+    onIntervalSelectionSlotsChangeRef.current?.([slotKey]);
+  }
+
+  function beginEditingDrag(dateId: string, time: string, pointerId: number) {
+    capturePointer(pointerId);
 
     const slotKey = getSlotKey(dateId, time);
     dragModeRef.current = draftSlots.has(slotKey) ? "remove" : "add";
@@ -326,6 +341,79 @@ export function AvailabilitySelector({
     visitedSlotsRef.current = new Set([slotKey]);
     lastVisitedSlotKeyRef.current = slotKey;
     onApplySlotsRef.current([slotKey], dragModeRef.current);
+  }
+
+  function handleSlotPointerDown(
+    dateId: string,
+    time: string,
+    event: ReactPointerEvent<HTMLButtonElement>,
+  ) {
+    const isInterval = intervalSelectionMode;
+
+    if (isInterval ? !isSlotAllowed(dateId, time) : !editingUserId) {
+      return;
+    }
+
+    if (!isInterval && !isSlotAllowed(dateId, time)) {
+      return;
+    }
+
+    // Touch: arm a long-press. Don't preventDefault/capture yet so a normal
+    // swipe keeps scrolling the page; selection begins only on hold.
+    if (event.pointerType === "touch") {
+      clearPendingLongPress();
+      pendingTouchRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+        dateId,
+        time,
+        pointerId: event.pointerId,
+        isInterval,
+      };
+
+      longPressTimerRef.current = setTimeout(() => {
+        const pending = pendingTouchRef.current;
+        pendingTouchRef.current = null;
+        longPressTimerRef.current = null;
+
+        if (!pending) {
+          return;
+        }
+
+        setIsTouchDragging(true);
+
+        if (pending.isInterval) {
+          beginIntervalDrag(pending.dateId, pending.time, pending.pointerId);
+        } else {
+          beginEditingDrag(pending.dateId, pending.time, pending.pointerId);
+        }
+      }, LONG_PRESS_MS);
+      return;
+    }
+
+    // Mouse / pen: start immediately.
+    event.preventDefault();
+
+    if (isInterval) {
+      beginIntervalDrag(dateId, time, event.pointerId);
+    } else {
+      beginEditingDrag(dateId, time, event.pointerId);
+    }
+  }
+
+  function handleSlotTap(slotKey: string) {
+    // Phone-only: tapping a slot in view mode reveals who is available there.
+    if (
+      !isPhone ||
+      selectionOnly ||
+      isEditing ||
+      intervalSelectionMode ||
+      isDraggingRef.current
+    ) {
+      return;
+    }
+
+    onHoveredSlotKeyChange?.(hoveredSlotKey === slotKey ? null : slotKey);
   }
 
   function collectDragSlotKeys(slotKeys: string[]) {
@@ -360,6 +448,23 @@ export function AvailabilitySelector({
 
   useEffect(() => {
     function handlePointerMove(event: PointerEvent) {
+      // Still waiting on a long-press: if the finger travels far enough it's a
+      // scroll, so cancel the pending selection and let the page scroll.
+      const pending = pendingTouchRef.current;
+
+      if (pending && event.pointerId === pending.pointerId) {
+        const distance = Math.hypot(
+          event.clientX - pending.x,
+          event.clientY - pending.y,
+        );
+
+        if (distance > TOUCH_MOVE_CANCEL_PX) {
+          clearPendingLongPress();
+        }
+
+        return;
+      }
+
       if (!isDraggingRef.current) {
         return;
       }
@@ -423,6 +528,8 @@ export function AvailabilitySelector({
     }
 
     function handlePointerUp() {
+      clearPendingLongPress();
+
       if (
         intervalDragStartRef.current &&
         intervalSelectionSlotsRef.current?.size
@@ -437,6 +544,15 @@ export function AvailabilitySelector({
       lastVisitedSlotKeyRef.current = null;
       intervalAnchorDateRef.current = null;
       intervalDragStartRef.current = null;
+      setIsTouchDragging(false);
+    }
+
+    // While an active touch selection is in progress, cancel scrolling so the
+    // drag keeps painting slots instead of moving the page.
+    function handleTouchMove(event: TouchEvent) {
+      if (isDraggingRef.current && event.cancelable) {
+        event.preventDefault();
+      }
     }
 
     window.addEventListener("pointermove", handlePointerMove, {
@@ -444,13 +560,20 @@ export function AvailabilitySelector({
     });
     window.addEventListener("pointerup", handlePointerUp);
     window.addEventListener("pointercancel", handlePointerUp);
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerUp);
+      window.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [editingUserId, getSlotKeyFromPoint, intervalSelectionMode]);
+  }, [
+    editingUserId,
+    getSlotKeyFromPoint,
+    intervalSelectionMode,
+    clearPendingLongPress,
+  ]);
 
   const gridTemplateColumns = isPhone
     ? `2.25rem repeat(${visibleDates.length}, minmax(0, 1fr))`
@@ -568,7 +691,12 @@ export function AvailabilitySelector({
         "grid w-full min-w-0",
         !isEditing && !selectionOnly && "opacity-95",
       )}
-      style={{ gridTemplateColumns }}
+      style={{
+        gridTemplateColumns,
+        // Only lock scrolling once a touch drag is actually underway; before
+        // that the page must stay scrollable over the grid.
+        touchAction: isTouchDragging ? "none" : undefined,
+      }}
     >
       <div />
       {visibleDates.map((date, visibleIndex) => {
@@ -602,11 +730,11 @@ export function AvailabilitySelector({
         <div key={time} className="contents">
           <div
             className={cn(
-              "text-base-content/80 flex h-7 items-center justify-end pr-1 text-sm md:h-8 md:pr-2",
+              "text-base-content/80 flex h-7 items-start justify-end pr-1 text-sm md:h-8 md:pr-2",
               time.endsWith(":30") && "text-transparent",
             )}
           >
-            {time}
+            <span className="-translate-y-1/2">{time}</span>
           </div>
           {visibleDates.map((date, visibleIndex) => {
             const dateIndex = dateOffset + visibleIndex;
@@ -755,7 +883,7 @@ export function AvailabilitySelector({
                     "shadow-[inset_0_0_0_2px_var(--color-base-300)]/80",
                   (showEditingVisual || intervalSelectionMode) &&
                     slotAllowed &&
-                    "touch-none select-none",
+                    "select-none",
                   (isEditing || intervalSelectionMode) && slotAllowed
                     ? "cursor-pointer"
                     : "cursor-default",
@@ -777,6 +905,7 @@ export function AvailabilitySelector({
                 onPointerDown={(event) =>
                   handleSlotPointerDown(date.id, time, event)
                 }
+                onClick={() => handleSlotTap(slotKey)}
               >
                 {hasCalendarEvent && (
                   <span className="text-base-content/80 pointer-events-none absolute inset-0 flex items-center justify-center truncate px-0.5 text-center text-[10px] leading-none md:text-[11px] dark:text-[#f5f0d8]">

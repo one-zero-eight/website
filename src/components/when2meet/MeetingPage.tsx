@@ -1023,6 +1023,32 @@ export function MeetingPage({
             <div className="bg-base-100 border-base-300 rounded-box min-w-0 border p-4 md:p-5">
               <div className="md:hidden">
                 <AvailabilitySelector {...availabilitySelectorProps} isPhone />
+                {!needsSetup &&
+                  !isEditingSelf &&
+                  !isChoosingMeetingTime &&
+                  hoveredSlotKey && (
+                    <div className="border-base-300 bg-base-200 rounded-box mt-3 border p-3 text-sm">
+                      <div className="font-medium">{hoveredSlotLabel}</div>
+                      {isHoveredSlotDisabled ? (
+                        <div className="text-base-content/60 mt-1">
+                          No one is allowed here
+                        </div>
+                      ) : hoveredSlotParticipants.length === 0 ? (
+                        <div className="text-base-content/60 mt-1">
+                          No one is available
+                        </div>
+                      ) : (
+                        <div className="mt-1">
+                          <span className="text-base-content/60">
+                            {hoveredSlotParticipants.length} available:{" "}
+                          </span>
+                          {hoveredSlotParticipants
+                            .map((participant) => participant.name)
+                            .join(", ")}
+                        </div>
+                      )}
+                    </div>
+                  )}
               </div>
               <div className="hidden md:block">
                 <AvailabilitySelector {...availabilitySelectorProps} />
@@ -1106,6 +1132,29 @@ export function MeetingPage({
                             className="btn btn-ghost"
                             disabled={isUpdatingMeeting}
                             onClick={handleCancelChoosingMeetingTime}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : isEditingSelf ? (
+                        <>
+                          <button
+                            type="button"
+                            className="btn btn-primary gap-2"
+                            disabled={isSaving}
+                            onClick={handleSaveEditing}
+                          >
+                            {isSaving ? (
+                              <span className="loading loading-spinner loading-sm" />
+                            ) : (
+                              "Save timeslots"
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-ghost"
+                            disabled={isSaving}
+                            onClick={handleCancelEditing}
                           >
                             Cancel
                           </button>
