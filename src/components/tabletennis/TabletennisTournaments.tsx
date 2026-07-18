@@ -192,7 +192,7 @@ export function TabletennisTournaments() {
     ];
   }, [activeTour]);
 
-  const { data: gamesByIdData } = $tabletennis.useQuery(
+  const { data: gamesByIdData, refetch: refetchGames } = $tabletennis.useQuery(
     "get",
     "/get-games-by-id",
     { params: { query: { ids: gameIds } } },
@@ -343,6 +343,13 @@ export function TabletennisTournaments() {
       document.removeEventListener("mousedown", handleCreateOutsideClick);
     };
   }, [handleAddOutsideClick, handleCreateOutsideClick]);
+
+  useEffect(() => {
+    if (mode === "qualification") {
+      refetchTours();
+      refetchGames();
+    }
+  }, [mode, refetchTours, refetchGames]);
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
