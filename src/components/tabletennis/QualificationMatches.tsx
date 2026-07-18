@@ -86,7 +86,6 @@ export function QualificationMatches({
   const [scores, setScores] = useState<Record<string, [number, number]>>({});
   const [finishingId, setFinishingId] = useState<string | null>(null);
   const [locked, setLocked] = useState(() => qualificationGames.length > 0);
-  const reconstructedRef = useRef(false);
 
   useEffect(() => {
     scoresRef.current = scores;
@@ -105,11 +104,8 @@ export function QualificationMatches({
 
   // ── reconstruct bracket from server games ───────────────────
   useEffect(() => {
-    if (reconstructedRef.current) return;
     if (initialSeeded.length === 0) return;
     if (qualificationGames.length === 0 && !locked) return;
-
-    reconstructedRef.current = true;
 
     if (qualificationGames.length > 0) {
       const result = reconstructBracket(initialSeeded, qualificationGames);
