@@ -49,7 +49,6 @@ import { Route as With_menuWhen2meetNewRouteImport } from "./routes/_with_menu/w
 import { Route as With_menuTabletennisTournamentsRouteImport } from "./routes/_with_menu/tabletennis/tournaments";
 import { Route as With_menuTabletennisPlayersRouteImport } from "./routes/_with_menu/tabletennis/players";
 import { Route as With_menuTabletennisMatchesRouteImport } from "./routes/_with_menu/tabletennis/matches";
-import { Route as With_menuTabletennisIndex2RouteImport } from "./routes/_with_menu/tabletennis/index 2";
 import { Route as With_menuTabletennisEventsRouteImport } from "./routes/_with_menu/tabletennis/events";
 import { Route as With_menuStudentAffairsSignOutRouteImport } from "./routes/_with_menu/student-affairs/sign-out";
 import { Route as With_menuStudentAffairsSignInRouteImport } from "./routes/_with_menu/student-affairs/sign-in";
@@ -292,12 +291,6 @@ const With_menuTabletennisMatchesRoute =
     path: "/tabletennis/matches",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
-const With_menuTabletennisIndex2Route =
-  With_menuTabletennisIndex2RouteImport.update({
-    id: "/tabletennis/index 2",
-    path: "/tabletennis/index 2",
-    getParentRoute: () => With_menuRouteRoute,
-  } as any);
 const With_menuTabletennisEventsRoute =
   With_menuTabletennisEventsRouteImport.update({
     id: "/tabletennis/events",
@@ -523,7 +516,6 @@ export interface FileRoutesByFullPath {
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
   "/tabletennis/events": typeof With_menuTabletennisEventsRoute;
-  "/tabletennis/index 2": typeof With_menuTabletennisIndex2Route;
   "/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
   "/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
@@ -597,7 +589,6 @@ export interface FileRoutesByTo {
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
   "/tabletennis/events": typeof With_menuTabletennisEventsRoute;
-  "/tabletennis/index 2": typeof With_menuTabletennisIndex2Route;
   "/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
   "/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
@@ -674,7 +665,6 @@ export interface FileRoutesById {
   "/_with_menu/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/_with_menu/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
   "/_with_menu/tabletennis/events": typeof With_menuTabletennisEventsRoute;
-  "/_with_menu/tabletennis/index 2": typeof With_menuTabletennisIndex2Route;
   "/_with_menu/tabletennis/matches": typeof With_menuTabletennisMatchesRoute;
   "/_with_menu/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/_with_menu/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
@@ -751,7 +741,6 @@ export interface FileRouteTypes {
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
     | "/tabletennis/events"
-    | "/tabletennis/index 2"
     | "/tabletennis/matches"
     | "/tabletennis/players"
     | "/tabletennis/tournaments"
@@ -825,7 +814,6 @@ export interface FileRouteTypes {
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
     | "/tabletennis/events"
-    | "/tabletennis/index 2"
     | "/tabletennis/matches"
     | "/tabletennis/players"
     | "/tabletennis/tournaments"
@@ -901,7 +889,6 @@ export interface FileRouteTypes {
     | "/_with_menu/student-affairs/sign-in"
     | "/_with_menu/student-affairs/sign-out"
     | "/_with_menu/tabletennis/events"
-    | "/_with_menu/tabletennis/index 2"
     | "/_with_menu/tabletennis/matches"
     | "/_with_menu/tabletennis/players"
     | "/_with_menu/tabletennis/tournaments"
@@ -1224,13 +1211,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuTabletennisMatchesRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/tabletennis/index 2": {
-      id: "/_with_menu/tabletennis/index 2";
-      path: "/tabletennis/index 2";
-      fullPath: "/tabletennis/index 2";
-      preLoaderRoute: typeof With_menuTabletennisIndex2RouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
     "/_with_menu/tabletennis/events": {
       id: "/_with_menu/tabletennis/events";
       path: "/tabletennis/events";
@@ -1502,7 +1482,6 @@ interface With_menuRouteRouteChildren {
   With_menuStudentAffairsSignInRoute: typeof With_menuStudentAffairsSignInRoute;
   With_menuStudentAffairsSignOutRoute: typeof With_menuStudentAffairsSignOutRoute;
   With_menuTabletennisEventsRoute: typeof With_menuTabletennisEventsRoute;
-  With_menuTabletennisIndex2Route: typeof With_menuTabletennisIndex2Route;
   With_menuTabletennisMatchesRoute: typeof With_menuTabletennisMatchesRoute;
   With_menuTabletennisPlayersRoute: typeof With_menuTabletennisPlayersRoute;
   With_menuTabletennisTournamentsRoute: typeof With_menuTabletennisTournamentsRoute;
@@ -1567,7 +1546,6 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuStudentAffairsSignInRoute: With_menuStudentAffairsSignInRoute,
   With_menuStudentAffairsSignOutRoute: With_menuStudentAffairsSignOutRoute,
   With_menuTabletennisEventsRoute: With_menuTabletennisEventsRoute,
-  With_menuTabletennisIndex2Route: With_menuTabletennisIndex2Route,
   With_menuTabletennisMatchesRoute: With_menuTabletennisMatchesRoute,
   With_menuTabletennisPlayersRoute: With_menuTabletennisPlayersRoute,
   With_menuTabletennisTournamentsRoute: With_menuTabletennisTournamentsRoute,

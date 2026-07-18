@@ -3,107 +3,16 @@ import { cn } from "@/lib/ui/cn";
 import { $tabletennis } from "@/api/tabletennis";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
-
-type Player = { name: string; id: string };
-
-type GameData = {
-  game_id: string;
-  tour_id: string;
-  tournament_name: string;
-  finished: boolean;
-  player1: {
-    innohassle_id: string;
-    nickname: string;
-    rating: number;
-    registered: boolean;
-    score: number;
-  };
-  player2: {
-    innohassle_id: string;
-    nickname: string;
-    rating: number;
-    registered: boolean;
-    score: number;
-  };
-};
-
-type Bracket = "winners" | "consolation" | "placement";
-
-type MatchSlot = {
-  id: string;
-  game_id?: string;
-  round: number;
-  bracket: Bracket;
-  player1_id: string | null;
-  player2_id: string | null;
-  score_player1: number;
-  score_player2: number;
-  completed: boolean;
-  placeLabel?: string | null;
-};
-
-type PlayerStats = {
-  id: string;
-  name: string;
-  wins: number;
-  played: number;
-};
-
-type BracketState = {
-  matches: MatchSlot[];
-  scores: Record<string, [number, number]>;
-  seededIds: string[];
-};
-
-function localStorageKey(tourId: string) {
-  return `tt-bracket-${tourId}`;
-}
-
-function computeStats(players: Player[], games: GameData[]): PlayerStats[] {
-  const wins = new Map<string, number>();
-  const played = new Map<string, number>();
-  for (const p of players) {
-    wins.set(p.id, 0);
-    played.set(p.id, 0);
-  }
-  for (const g of games) {
-    const p1 = g.player1.innohassle_id;
-    const p2 = g.player2.innohassle_id;
-    const s1 = g.player1.score;
-    const s2 = g.player2.score;
-    const finished = g.finished || s1 > 0 || s2 > 0;
-    if (!finished) continue;
-    played.set(p1, (played.get(p1) ?? 0) + 1);
-    played.set(p2, (played.get(p2) ?? 0) + 1);
-    if (s1 > s2) wins.set(p1, (wins.get(p1) ?? 0) + 1);
-    else if (s2 > s1) wins.set(p2, (wins.get(p2) ?? 0) + 1);
-  }
-  return players
-    .map((p) => ({
-      id: p.id,
-      name: p.name,
-      wins: wins.get(p.id) ?? 0,
-      played: played.get(p.id) ?? 0,
-    }))
-    .sort((a, b) => {
-      const rateA = a.played > 0 ? a.wins / a.played : 0;
-      const rateB = b.played > 0 ? b.wins / b.played : 0;
-      if (rateB !== rateA) return rateB - rateA;
-      if (b.wins !== a.wins) return b.wins - a.wins;
-      if (b.played !== a.played) return b.played - a.played;
-      return a.name.localeCompare(b.name);
-    });
-}
-
-function getWinner(
-  scores: [number, number],
-  p1: string,
-  p2: string,
-): { winner: string; loser: string } {
-  return scores[0] > scores[1]
-    ? { winner: p1, loser: p2 }
-    : { winner: p2, loser: p1 };
-}
+import {
+  type Player,
+  type GameData,
+  type MatchSlot,
+  type Bracket,
+  computeStats,
+  buildBracketMatches,
+  tryAdvance,
+  reconstructBracket,
+} from "./bracket-utils";
 
 export function QualificationMatches({
   players,
@@ -147,12 +56,7 @@ export function QualificationMatches({
     },
   );
 
-  // ── seeding from validation stats or valTop ─────────────────
-  const rankedStats = useMemo(
-    () => computeStats(players, validationGames),
-    [players, validationGames],
-  );
-
+  // ── seeding from valTop only ─────────────────────────────────
   const initialSeeded = useMemo(() => {
     if (valTop && Object.keys(valTop).length > 0) {
       const ordered: Player[] = [];
@@ -172,20 +76,22 @@ export function QualificationMatches({
       }
       return ordered;
     }
-    return rankedStats.map((s) => ({ id: s.id, name: s.name }));
-  }, [valTop, rankedStats, players]);
+    return computeStats(players, validationGames).map((s) => ({
+      id: s.id,
+      name: s.name,
+    }));
+  }, [valTop, validationGames, players]);
 
-  const [seededPlayers, setSeededPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<MatchSlot[]>([]);
   const [scores, setScores] = useState<Record<string, [number, number]>>({});
   const [finishingId, setFinishingId] = useState<string | null>(null);
   const [locked, setLocked] = useState(() => qualificationGames.length > 0);
-  // keep scoresRef in sync
+  const reconstructedRef = useRef(false);
+
   useEffect(() => {
     scoresRef.current = scores;
   }, [scores]);
 
-  // ── map from id → player name ──────────────────────────────
   const playerMap = useMemo(() => {
     const m = new Map<string, string>();
     for (const p of players) m.set(p.id, p.name);
@@ -197,75 +103,21 @@ export function QualificationMatches({
     return playerMap.get(id) ?? id;
   }
 
-  // ── load from localStorage and sync from backend ───────────
+  // ── reconstruct bracket from server games ───────────────────
   useEffect(() => {
-    if (seededPlayers.length > 0) return;
+    if (reconstructedRef.current) return;
     if (initialSeeded.length === 0) return;
-    setSeededPlayers(initialSeeded);
+    if (qualificationGames.length === 0 && !locked) return;
 
-    const KEY = localStorageKey(tourId);
-    const saved = localStorage.getItem(KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as BracketState;
-        setMatches(parsed.matches);
-        setScores(parsed.scores);
-        setSeededPlayers(
-          parsed.seededIds.length > 0
-            ? parsed.seededIds
-                .map((id) => players.find((p) => p.id === id))
-                .filter((p): p is Player => !!p)
-            : initialSeeded,
-        );
-        return;
-      } catch {
-        /* corrupted */
-      }
-    }
+    reconstructedRef.current = true;
 
-    // restore from backend qualification games
     if (qualificationGames.length > 0) {
-      const restored: MatchSlot[] = [];
-      const restoredScores: Record<string, [number, number]> = {};
-      qualificationGames.forEach((g, i) => {
-        const p1 = g.player1.innohassle_id;
-        const p2 = g.player2.innohassle_id;
-        const id = `r1_m${i}`;
-        const finished =
-          g.finished || g.player1.score > 0 || g.player2.score > 0;
-        restored.push({
-          id,
-          game_id: g.game_id,
-          round: 1,
-          bracket: "winners",
-          player1_id: p1,
-          player2_id: p2,
-          score_player1: g.player1.score,
-          score_player2: g.player2.score,
-          completed: finished,
-        });
-        restoredScores[id] = [g.player1.score, g.player2.score];
-      });
-      setMatches(restored);
-      setScores(restoredScores);
-      saveBracketState(restored, restoredScores, initialSeeded);
+      const result = reconstructBracket(initialSeeded, qualificationGames);
+      setMatches(result.matches);
+      setScores(result.scores);
+      setLocked(true);
     }
-  }, [tourId, initialSeeded, qualificationGames, players]);
-
-  function saveBracketState(
-    m: MatchSlot[],
-    sc: Record<string, [number, number]>,
-    seeded?: Player[],
-  ) {
-    const state: BracketState = {
-      matches: m,
-      scores: sc,
-      seededIds: seeded
-        ? seeded.map((p) => p.id)
-        : seededPlayers.map((p) => p.id),
-    };
-    localStorage.setItem(localStorageKey(tourId), JSON.stringify(state));
-  }
+  }, [tourId, initialSeeded, qualificationGames, locked]);
 
   // ── derived lists ──────────────────────────────────────────
   const activeMatches = useMemo(
@@ -292,67 +144,6 @@ export function QualificationMatches({
     [matches],
   );
 
-  // ── seeding reorder ────────────────────────────────────────
-  function handleMoveUp(index: number) {
-    if (index === 0) return;
-    setSeededPlayers((prev) => {
-      const next = [...prev];
-      [next[index - 1]!, next[index]!] = [next[index]!, next[index - 1]!];
-      return next;
-    });
-  }
-
-  function handleMoveDown(index: number) {
-    if (index >= seededPlayers.length - 1) return;
-    setSeededPlayers((prev) => {
-      const next = [...prev];
-      [next[index]!, next[index + 1]!] = [next[index + 1]!, next[index]!];
-      return next;
-    });
-  }
-
-  function buildBracketMatches(seeded: Player[]) {
-    const newMatches: MatchSlot[] = [];
-    const newScores: Record<string, [number, number]> = {};
-    let i = 0;
-    let j = seeded.length - 1;
-    let matchIdx = 0;
-    while (i <= j) {
-      if (i === j) {
-        const id = `r1_bye_${matchIdx}`;
-        newMatches.push({
-          id,
-          round: 1,
-          bracket: "winners",
-          player1_id: seeded[i]!.id,
-          player2_id: null,
-          score_player1: 0,
-          score_player2: 0,
-          completed: true,
-        });
-        newScores[id] = [0, 0];
-        matchIdx++;
-        break;
-      }
-      const id = `r1_m${matchIdx}`;
-      newMatches.push({
-        id,
-        round: 1,
-        bracket: "winners",
-        player1_id: seeded[i]!.id,
-        player2_id: seeded[j]!.id,
-        score_player1: 0,
-        score_player2: 0,
-        completed: false,
-      });
-      newScores[id] = [0, 0];
-      matchIdx++;
-      i++;
-      j--;
-    }
-    return { matches: newMatches, scores: newScores };
-  }
-
   // ── score change ──────────────────────────────────────────
   function handleScoreChange(matchId: string, player: 1 | 2, value: string) {
     setScores((prev) => {
@@ -365,14 +156,13 @@ export function QualificationMatches({
 
   // ── lock seeding + generate bracket ──────────────────────
   function handleLock() {
-    if (locked || seededPlayers.length < 2) return;
+    if (locked || initialSeeded.length < 2) return;
     setLocked(true);
     if (matches.length === 0) {
       const { matches: newMatches, scores: newScores } =
-        buildBracketMatches(seededPlayers);
+        buildBracketMatches(initialSeeded);
       setMatches(newMatches);
       setScores(newScores);
-      saveBracketState(newMatches, newScores);
     }
     onLock();
   }
@@ -441,16 +231,13 @@ export function QualificationMatches({
     setMatches(updated);
     const newScores = { ...scoresRef.current, [matchId]: ms };
     setScores(newScores);
-    saveBracketState(updated, newScores);
     setFinishingId(null);
     onTourRefetch?.();
 
-    // try auto-advance
     const advanced = tryAdvance(updated, newScores);
     if (advanced) {
       setMatches(advanced.matches);
       setScores(advanced.scores);
-      saveBracketState(advanced.matches, advanced.scores);
       syncQualTop(advanced.matches);
     }
   }
@@ -482,254 +269,6 @@ export function QualificationMatches({
     }
   }
 
-  // ── auto-advance logic ────────────────────────────────────
-  function tryAdvance(
-    currentMatches: MatchSlot[],
-    currentScores: Record<string, [number, number]>,
-  ): { matches: MatchSlot[]; scores: Record<string, [number, number]> } | null {
-    // find the highest round where ALL non-placement matches are completed
-    const allRounds = [...new Set(currentMatches.map((m) => m.round))].sort(
-      (a, b) => a - b,
-    );
-    let maxCompleteRound = -1;
-    for (const round of allRounds) {
-      const ms = currentMatches.filter(
-        (m) => m.round === round && m.bracket !== "placement",
-      );
-      if (ms.length > 0 && ms.every((m) => m.completed)) {
-        maxCompleteRound = round;
-      } else break;
-    }
-    if (maxCompleteRound < 0) return null;
-
-    const nextRound = maxCompleteRound + 1;
-    // next round already exists — nothing to create
-    if (currentMatches.some((m) => m.round === nextRound)) return null;
-
-    const currentRound = maxCompleteRound;
-    const roundMatches = currentMatches.filter(
-      (m) => m.round === currentRound && m.bracket !== "placement",
-    );
-
-    // collect results
-    const winnersWinners: string[] = [];
-    const winnersLosers: string[] = [];
-    const consWinners: string[] = [];
-    const consLosers: string[] = [];
-
-    for (const m of roundMatches) {
-      if (m.bracket === "winners") {
-        if (!m.player2_id) {
-          winnersWinners.push(m.player1_id!);
-        } else {
-          const sc = currentScores[m.id] ?? [m.score_player1, m.score_player2];
-          const { winner, loser } = getWinner(sc, m.player1_id!, m.player2_id!);
-          winnersWinners.push(winner);
-          winnersLosers.push(loser);
-        }
-      } else if (m.bracket === "consolation") {
-        if (!m.player2_id) {
-          consWinners.push(m.player1_id!);
-        } else {
-          const sc = currentScores[m.id] ?? [m.score_player1, m.score_player2];
-          const { winner, loser } = getWinner(sc, m.player1_id!, m.player2_id!);
-          consWinners.push(winner);
-          consLosers.push(loser);
-        }
-      }
-    }
-
-    const hasResolved = currentMatches.some((m) => m.id === "placement_1st");
-
-    const newMatches: MatchSlot[] = [];
-    const newScores: Record<string, [number, number]> = {};
-    let idx = currentMatches.length;
-
-    // eliminated from consolation → placements (always run, even with existing placements)
-    if (consLosers.length > 0) {
-      const existingPlaces = currentMatches.filter(
-        (m) => m.bracket === "placement" && m.completed,
-      ).length;
-      consLosers.forEach((playerId, i) => {
-        const place = existingPlaces + i + 4; // start at 4th
-        const ordinal = place === 4 ? "4th" : `${place}th`;
-        idx++;
-        const id = `placement_${place}`;
-        newMatches.push({
-          id,
-          round: nextRound,
-          bracket: "placement",
-          player1_id: playerId,
-          player2_id: null,
-          score_player1: 0,
-          score_player2: 0,
-          completed: true,
-          placeLabel: `${ordinal} place`,
-        });
-        newScores[id] = [0, 0];
-      });
-    }
-
-    // if champion already resolved, only add consolation loser placements and stop
-    if (hasResolved) {
-      if (newMatches.length === 0) return null;
-      return {
-        matches: [...currentMatches, ...newMatches],
-        scores: { ...currentScores, ...newScores },
-      };
-    }
-
-    const isFinalWinners =
-      winnersWinners.length === 1 &&
-      winnersLosers.length === 1 &&
-      currentRound > 1;
-
-    // winners bracket: winners go up
-    if (winnersWinners.length > 1) {
-      for (let i = 0; i < winnersWinners.length; i += 2) {
-        if (i + 1 < winnersWinners.length) {
-          idx++;
-          const id = `r${nextRound}_w${idx}`;
-          newMatches.push({
-            id,
-            round: nextRound,
-            bracket: "winners",
-            player1_id: winnersWinners[i]!,
-            player2_id: winnersWinners[i + 1]!,
-            score_player1: 0,
-            score_player2: 0,
-            completed: false,
-          });
-          newScores[id] = [0, 0];
-        } else {
-          idx++;
-          const id = `r${nextRound}_wbye${idx}`;
-          newMatches.push({
-            id,
-            round: nextRound,
-            bracket: "winners",
-            player1_id: winnersWinners[i]!,
-            player2_id: null,
-            score_player1: 0,
-            score_player2: 0,
-            completed: true,
-          });
-          newScores[id] = [0, 0];
-        }
-      }
-    } else if (winnersWinners.length === 1 && currentRound > 0) {
-      // champion
-      idx++;
-      const id = `placement_1st`;
-      newMatches.push({
-        id,
-        round: nextRound,
-        bracket: "placement",
-        player1_id: winnersWinners[0]!,
-        player2_id: null,
-        score_player1: 0,
-        score_player2: 0,
-        completed: true,
-        placeLabel: "1st place",
-      });
-      newScores[id] = [0, 0];
-    }
-
-    // consolation bracket: losers from winners + winners from consolation
-    // unless it's the final winners round (then loser goes to 2nd)
-    const nextConsPlayers = isFinalWinners
-      ? consWinners
-      : [...winnersLosers, ...consWinners];
-
-    if (nextConsPlayers.length > 1) {
-      for (let i = 0; i < nextConsPlayers.length; i += 2) {
-        if (i + 1 < nextConsPlayers.length) {
-          idx++;
-          const id = `r${nextRound}_c${idx}`;
-          newMatches.push({
-            id,
-            round: nextRound,
-            bracket: "consolation",
-            player1_id: nextConsPlayers[i]!,
-            player2_id: nextConsPlayers[i + 1]!,
-            score_player1: 0,
-            score_player2: 0,
-            completed: false,
-          });
-          newScores[id] = [0, 0];
-        } else {
-          idx++;
-          const id = `r${nextRound}_cbye${idx}`;
-          newMatches.push({
-            id,
-            round: nextRound,
-            bracket: "consolation",
-            player1_id: nextConsPlayers[i]!,
-            player2_id: null,
-            score_player1: 0,
-            score_player2: 0,
-            completed: true,
-          });
-          newScores[id] = [0, 0];
-        }
-      }
-    } else if (nextConsPlayers.length === 1 && nextRound > 1) {
-      idx++;
-      const isSecond = !isFinalWinners && winnersWinners.length === 1;
-      const label = isSecond ? "2nd place" : "3rd place";
-      newMatches.push({
-        id: `placement_3rd`,
-        round: nextRound,
-        bracket: "placement",
-        player1_id: nextConsPlayers[0]!,
-        player2_id: null,
-        score_player1: 0,
-        score_player2: 0,
-        completed: true,
-        placeLabel: label,
-      });
-      newScores[`placement_3rd`] = [0, 0];
-    } else if (nextConsPlayers.length === 1 && nextRound <= 1) {
-      idx++;
-      newMatches.push({
-        id: `placement_3rd`,
-        round: nextRound,
-        bracket: "placement",
-        player1_id: nextConsPlayers[0]!,
-        player2_id: null,
-        score_player1: 0,
-        score_player2: 0,
-        completed: true,
-        placeLabel: "3rd place",
-      });
-      newScores[`placement_3rd`] = [0, 0];
-    }
-
-    // 2nd place: if final winners round loser didn't go to consolation
-    if (isFinalWinners && winnersLosers.length === 1) {
-      idx++;
-      newMatches.push({
-        id: `placement_2nd`,
-        round: nextRound,
-        bracket: "placement",
-        player1_id: winnersLosers[0]!,
-        player2_id: null,
-        score_player1: 0,
-        score_player2: 0,
-        completed: true,
-        placeLabel: "2nd place",
-      });
-      newScores[`placement_2nd`] = [0, 0];
-    }
-
-    if (newMatches.length === 0) return null;
-
-    return {
-      matches: [...currentMatches, ...newMatches],
-      scores: { ...currentScores, ...newScores },
-    };
-  }
-
   // ── render: seeding ───────────────────────────────────────
   function renderSeeding() {
     return (
@@ -744,8 +283,10 @@ export function QualificationMatches({
           )}
         </h3>
         <div className="flex flex-col gap-1">
-          {seededPlayers.map((p, i) => {
-            const stats = rankedStats.find((s) => s.id === p.id);
+          {initialSeeded.map((p, i) => {
+            const stats = computeStats(players, validationGames).find(
+              (s) => s.id === p.id,
+            );
             return (
               <div
                 key={p.id}
@@ -762,31 +303,11 @@ export function QualificationMatches({
                       ` (${Math.round((stats.wins / stats.played) * 100)}%)`}
                   </span>
                 )}
-                {!locked && (
-                  <>
-                    <button
-                      type="button"
-                      className="hover:text-base-content text-base-content/30 transition-colors disabled:opacity-10"
-                      disabled={i === 0}
-                      onClick={() => handleMoveUp(i)}
-                    >
-                      <span className="icon-[mdi--chevron-up] text-lg" />
-                    </button>
-                    <button
-                      type="button"
-                      className="hover:text-base-content text-base-content/30 transition-colors disabled:opacity-10"
-                      disabled={i >= seededPlayers.length - 1}
-                      onClick={() => handleMoveDown(i)}
-                    >
-                      <span className="icon-[mdi--chevron-down] text-lg" />
-                    </button>
-                  </>
-                )}
               </div>
             );
           })}
         </div>
-        {!locked && seededPlayers.length >= 2 && (
+        {!locked && initialSeeded.length >= 2 && (
           <button
             type="button"
             className="btn btn-soft btn-primary mt-3"
@@ -812,6 +333,9 @@ export function QualificationMatches({
           <span className="text-base-content/50 text-[10px]">
             Round {m.round}
             {m.bracket === "consolation" && " (Consolation)"}
+            <span className="ml-1 text-[8px] opacity-50">
+              [{m.rankStart}–{m.rankEnd}]
+            </span>
           </span>
         </div>
         <div className="flex flex-col gap-2">
@@ -938,7 +462,7 @@ export function QualificationMatches({
       {!hasActive &&
         !hasCompleted &&
         !hasPlacements &&
-        seededPlayers.length < 2 && (
+        initialSeeded.length < 2 && (
           <p className="text-base-content/50 text-center text-sm">
             Not enough players for qualification bracket.
           </p>

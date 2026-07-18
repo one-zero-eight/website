@@ -21,6 +21,7 @@ type TourData = {
     cval_game_ids: string[] | null;
     total_count: number;
   };
+  qual_top?: Record<string, string>;
 };
 
 type GamePlayer = {
@@ -46,38 +47,31 @@ type GetGamesByIdResponse = {
   missing_ids: string[];
 };
 
-function getPlacementData(tourId: string):
+function getPlacementData(tour: TourData):
   | {
       playerId: string;
       placeLabel: string;
     }[]
   | null {
-  try {
-    const raw = localStorage.getItem(`tt-bracket-${tourId}`);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as {
-      matches: {
-        bracket: string;
-        player1_id: string | null;
-        placeLabel: string | null;
-        completed: boolean;
-      }[];
-    };
-    const placements = parsed.matches.filter(
-      (m) =>
-        m.bracket === "placement" &&
-        m.completed &&
-        m.player1_id &&
-        m.placeLabel,
-    );
-    if (placements.length === 0) return null;
-    return placements.map((m) => ({
-      playerId: m.player1_id!,
-      placeLabel: m.placeLabel!,
-    }));
-  } catch {
-    return null;
+  const qualTop = tour.qual_top;
+  if (!qualTop || Object.keys(qualTop).length === 0) return null;
+
+  function ordinal(n: number): string {
+    if (n === 1) return "1st";
+    if (n === 2) return "2nd";
+    if (n === 3) return "3rd";
+    return `${n}th`;
   }
+
+  return Object.entries(qualTop)
+    .map(([place, playerId]) => ({
+      playerId,
+      placeLabel: ordinal(Number(place)),
+    }))
+    .sort((a, b) => {
+      const num = (label: string) => Number(label.replace(/\D/g, ""));
+      return num(a.placeLabel) - num(b.placeLabel);
+    });
 }
 
 function parsePlayersInput(raw: string): {
@@ -125,6 +119,10 @@ export function TabletennisTournaments() {
   const { data: allToursData } = $tabletennis.useQuery("get", "/get-tours");
 
   const { data: playersData } = $tabletennis.useQuery("get", "/players");
+
+  const { data: isAdminData } = $tabletennis.useQuery("get", "/isadmin");
+  const isAdmin =
+    (isAdminData as { is_admin?: boolean } | undefined)?.is_admin ?? false;
 
   const { mutate: createTour, isPending: creating } = $tabletennis.useMutation(
     "post",
@@ -514,59 +512,11 @@ export function TabletennisTournaments() {
             onLock={() => setQualificationLocked(true)}
           />
         )}
-
-        {completedTours.length > 0 && (
-          <div className="mt-8 border-t px-2 pt-6">
-            <h2 className="text-base-content mb-4 px-5 text-lg font-light">
-              Completed tournaments
-            </h2>
-            <div className="flex flex-col gap-4">
-              {completedTours.map((tour) => {
-                const placements = getPlacementData(tour.id);
-                return (
-                  <div
-                    key={tour.id}
-                    className="bg-base-200 rounded-box mx-5 p-4"
-                  >
-                    <div className="mb-3 flex items-center justify-between">
-                      <span className="text-sm font-medium">{tour.name}</span>
-                    </div>
-                    {placements ? (
-                      <div className="flex flex-col gap-1">
-                        {[...placements]
-                          .sort((a, b) =>
-                            a.placeLabel.localeCompare(b.placeLabel),
-                          )
-                          .map((p, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center justify-between"
-                            >
-                              <span className="text-xs font-medium">
-                                {playerNameMap.get(p.playerId) ?? p.playerId}
-                              </span>
-                              <span className="text-base-content/50 text-[10px]">
-                                {p.placeLabel}
-                              </span>
-                            </div>
-                          ))}
-                      </div>
-                    ) : (
-                      <p className="text-base-content/50 text-xs">
-                        No placement data
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
     );
   }
 
-  if (showCreateForm) {
+  if (showCreateForm && isAdmin) {
     return (
       <div className="flex items-center justify-center px-7 py-16 md:py-24">
         <form
@@ -649,25 +599,80 @@ export function TabletennisTournaments() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 px-7 py-16 md:py-24">
-      <span className="icon-[mdi--trophy-outline] text-6xl text-[#712BB2]/30 md:text-7xl" />
-      <div className="max-w-md text-center">
-        <h2 className="text-base-content text-2xl font-light">
-          Table tennis tournament
-        </h2>
-        <p className="text-base-content/70 mt-2 text-sm md:text-base">
-          Create a new tournament to start managing validation matches and
-          qualification brackets.
-        </p>
+    <>
+      <div className="flex flex-col items-center gap-6 px-7 py-16 md:py-24">
+        <span className="icon-[mdi--trophy-outline] text-6xl text-[#712BB2]/30 md:text-7xl" />
+        <div className="max-w-md text-center">
+          <h2 className="text-base-content text-2xl font-light">
+            Table tennis tournament
+          </h2>
+          {isAdmin ? (
+            <p className="text-base-content/70 mt-2 text-sm md:text-base">
+              Create a new tournament to start managing validation matches and
+              qualification brackets.
+            </p>
+          ) : (
+            <p className="text-base-content/50 mt-2 text-sm md:text-base">
+              No active tournament at the moment.
+            </p>
+          )}
+        </div>
+        {isAdmin && (
+          <button
+            type="button"
+            className="rounded-xl border-2 border-[#712BB2] bg-[#712BB2] px-8 py-3 text-sm font-medium text-white transition-all duration-150 hover:outline hover:outline-2 hover:outline-[#712BB2]/50 md:px-10 md:py-4 md:text-base"
+            onClick={() => setShowCreateForm(true)}
+          >
+            <span className="icon-[mdi--plus] mr-1.5" />
+            Create tournament
+          </button>
+        )}
       </div>
-      <button
-        type="button"
-        className="rounded-xl border-2 border-[#712BB2] bg-[#712BB2] px-8 py-3 text-sm font-medium text-white transition-all duration-150 hover:outline hover:outline-2 hover:outline-[#712BB2]/50 md:px-10 md:py-4 md:text-base"
-        onClick={() => setShowCreateForm(true)}
-      >
-        <span className="icon-[mdi--plus] mr-1.5" />
-        Create tournament
-      </button>
-    </div>
+
+      {completedTours.length > 0 && (
+        <div className="mt-8 border-t px-2 pt-6">
+          <h2 className="text-base-content mb-4 px-5 text-lg font-light">
+            Completed tournaments
+          </h2>
+          <div className="flex flex-col gap-4">
+            {completedTours.map((tour) => {
+              const placements = getPlacementData(tour);
+              return (
+                <div key={tour.id} className="bg-base-200 rounded-box mx-5 p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-sm font-medium">{tour.name}</span>
+                  </div>
+                  {placements ? (
+                    <div className="flex flex-col gap-1">
+                      {[...placements]
+                        .sort((a, b) =>
+                          a.placeLabel.localeCompare(b.placeLabel),
+                        )
+                        .map((p, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between"
+                          >
+                            <span className="text-xs font-medium">
+                              {playerNameMap.get(p.playerId) ?? p.playerId}
+                            </span>
+                            <span className="text-base-content/50 text-[10px]">
+                              {p.placeLabel}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  ) : (
+                    <p className="text-base-content/50 text-xs">
+                      No placement data
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
