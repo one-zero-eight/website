@@ -2,11 +2,14 @@ import { cn } from "@/lib/ui/cn";
 import { useState } from "react";
 
 export function parseDate(dateStr: string): Date {
+  if (dateStr.includes("T")) {
+    return new Date(dateStr);
+  }
   if (dateStr.includes("-")) {
     return new Date(dateStr + "T00:00:00Z");
   }
   const [day, month, year] = dateStr.split(".").map(Number);
-  return new Date(2000 + year, month - 1, day);
+  return new Date(year > 1000 ? year : 2000 + year, month - 1, day);
 }
 
 function padDate(n: number): string {

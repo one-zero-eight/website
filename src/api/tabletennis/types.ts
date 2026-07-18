@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+  "/isadmin": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Is Admin */
+    get: operations["table_tennis_is_admin"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/get-email": {
     parameters: {
       query?: never;
@@ -473,6 +490,35 @@ export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
 export type $defs = Record<string, never>;
 export interface operations {
+  table_tennis_is_admin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: boolean;
+          };
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   table_tennis_get_email: {
     parameters: {
       query: {
@@ -1135,7 +1181,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description One or both players are not registered in the system (/reg) OR Tournament not found */
+      /** @description Tournament not found OR One or both players are not registered in the system (/reg) */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1178,7 +1224,7 @@ export interface operations {
           };
         };
       };
-      /** @description This game has already been finished. Recalculating rating is not allowed. OR Draws are not allowed in table tennis! */
+      /** @description Draws are not allowed in table tennis! OR This game has already been finished. Recalculating rating is not allowed. */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1192,7 +1238,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Game not found in this tournament OR One or both players from this game are not registered (/reg) OR Tournament not found */
+      /** @description Tournament not found OR Game not found in this tournament OR One or both players from this game are not registered (/reg) */
       404: {
         headers: {
           [name: string]: unknown;
