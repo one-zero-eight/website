@@ -101,9 +101,15 @@ export function TabletennisTournaments() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAddPlayers, setShowAddPlayers] = useState(false);
   const [addPlayersInput, setAddPlayersInput] = useState("");
+  const [addPlayersNickToId, setAddPlayersNickToId] = useState<
+    Map<string, string>
+  >(new Map());
   const [qualificationLocked, setQualificationLocked] = useState(false);
   const [name, setName] = useState("");
   const [playersInput, setPlayersInput] = useState("");
+  const [createNickToId, setCreateNickToId] = useState<Map<string, string>>(
+    new Map(),
+  );
   const [showPlayerSuggestions, setShowPlayerSuggestions] = useState(false);
   const [showCreateSuggestions, setShowCreateSuggestions] = useState(false);
   const addInputRef = useRef<HTMLInputElement>(null);
@@ -133,6 +139,7 @@ export function TabletennisTournaments() {
         setShowCreateForm(false);
         setName("");
         setPlayersInput("");
+        setCreateNickToId(new Map());
       },
       onError: (error) => {
         if (isApiHttpError(error) && error.httpCode === 403) {
@@ -165,6 +172,7 @@ export function TabletennisTournaments() {
         refetchTours();
         setShowAddPlayers(false);
         setAddPlayersInput("");
+        setAddPlayersNickToId(new Map());
       },
       onError: (error) => showError("Error", formatApiErrorMessage(error)),
     });
@@ -354,10 +362,11 @@ export function TabletennisTournaments() {
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     const { player_ids, emails } = parsePlayersInput(playersInput);
-    if (!name.trim() || player_ids.length + emails.length < 2) return;
+    const resolvedIds = player_ids.map((id) => createNickToId.get(id) ?? id);
+    if (!name.trim() || resolvedIds.length + emails.length < 2) return;
     createTour({
       params: { query: { name: name.trim() } },
-      body: { player_ids, emails },
+      body: { player_ids: resolvedIds, emails },
     });
   }
 
@@ -369,10 +378,13 @@ export function TabletennisTournaments() {
   function handleAddPlayers() {
     if (!activeTour) return;
     const { player_ids, emails } = parsePlayersInput(addPlayersInput);
-    if (player_ids.length + emails.length === 0) return;
+    const resolvedIds = player_ids.map(
+      (id) => addPlayersNickToId.get(id) ?? id,
+    );
+    if (resolvedIds.length + emails.length === 0) return;
     addPlayers({
       params: { query: { tour_id: activeTour.id } },
-      body: { player_ids, emails },
+      body: { player_ids: resolvedIds, emails },
     });
   }
 
@@ -460,7 +472,10 @@ export function TabletennisTournaments() {
                           0,
                           addPlayersInput.length - lastToken.length,
                         );
-                        setAddPlayersInput(prefix + p.innohassle_id + ",\n");
+                        setAddPlayersInput(prefix + p.nickname + ",\n");
+                        setAddPlayersNickToId((prev) =>
+                          new Map(prev).set(p.nickname, p.innohassle_id),
+                        );
                         setShowPlayerSuggestions(false);
                         addInputRef.current?.focus();
                       }}
@@ -492,6 +507,7 @@ export function TabletennisTournaments() {
               onClick={() => {
                 setShowAddPlayers(false);
                 setAddPlayersInput("");
+                setAddPlayersNickToId(new Map());
               }}
             >
               Cancel
@@ -565,7 +581,10 @@ export function TabletennisTournaments() {
                           0,
                           playersInput.length - lastToken.length,
                         );
-                        setPlayersInput(prefix + p.id + ",\n");
+                        setPlayersInput(prefix + p.name + ",\n");
+                        setCreateNickToId((prev) =>
+                          new Map(prev).set(p.name, p.id),
+                        );
                         setShowCreateSuggestions(false);
                         createInputRef.current?.focus();
                       }}
@@ -583,7 +602,10 @@ export function TabletennisTournaments() {
               <button
                 type="button"
                 className="btn btn-ghost"
-                onClick={() => setShowCreateForm(false)}
+                onClick={() => {
+                  setShowCreateForm(false);
+                  setCreateNickToId(new Map());
+                }}
               >
                 Cancel
               </button>
