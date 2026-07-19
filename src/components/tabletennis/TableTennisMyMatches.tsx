@@ -102,6 +102,16 @@ function MatchesList({ playerId }: { playerId: string }) {
     return ids;
   }, [toursData]);
 
+  const tourDateMap = useMemo(() => {
+    if (!toursData) return new Map<string, string>();
+    const tours = toursData as unknown as TourData[];
+    const map = new Map<string, string>();
+    for (const t of tours) {
+      map.set(t.id, t.date);
+    }
+    return map;
+  }, [toursData]);
+
   const { data: gamesByIdData, isPending: gamesPending } =
     $tabletennis.useQuery(
       "get",
@@ -128,8 +138,18 @@ function MatchesList({ playerId }: { playerId: string }) {
       if (!map.has(name)) map.set(name, []);
       map.get(name)!.push(m);
     }
-    return map;
-  }, [myMatches]);
+    return [...map.entries()].sort((a, b) => {
+      const gamesA = a[1];
+      const gamesB = b[1];
+      const dateA = gamesA[0]?.tour_id
+        ? (tourDateMap.get(gamesA[0].tour_id) ?? "")
+        : "";
+      const dateB = gamesB[0]?.tour_id
+        ? (tourDateMap.get(gamesB[0].tour_id) ?? "")
+        : "";
+      return dateB.localeCompare(dateA);
+    });
+  }, [myMatches, tourDateMap]);
 
   if (toursPending || (allGameIds.length > 0 && gamesPending)) {
     return <div className="skeleton h-48 w-full" />;
@@ -145,7 +165,7 @@ function MatchesList({ playerId }: { playerId: string }) {
 
   return (
     <div className="flex flex-col gap-6 px-7 py-5">
-      {[...matchesByTournament.entries()].map(([tourName, games]) => (
+      {matchesByTournament.map(([tourName, games]) => (
         <div key={tourName}>
           <h3 className="text-base-content mb-3 text-sm font-semibold">
             {tourName}
