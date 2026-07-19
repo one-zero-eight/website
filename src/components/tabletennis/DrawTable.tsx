@@ -110,7 +110,10 @@ function RatingChart({ data }: { data: RatingPoint[] }) {
 
   return (
     <div className="relative">
-      <svg viewBox={`0 0 ${w} ${h}`} className="h-auto w-full">
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        className="text-base-content h-auto w-full"
+      >
         {Array.from({ length: gridCount + 1 }, (_, i) => {
           const y = pad.top + (ch / gridCount) * i;
           const score = maxScore - (scoreRange / gridCount) * i;
@@ -127,7 +130,7 @@ function RatingChart({ data }: { data: RatingPoint[] }) {
               <text
                 x={pad.left - 8}
                 y={y + 4}
-                fill="white"
+                fill="currentColor"
                 fontSize={10}
                 textAnchor="end"
               >
@@ -151,7 +154,7 @@ function RatingChart({ data }: { data: RatingPoint[] }) {
               <text
                 x={x}
                 y={h - pad.bottom + 16}
-                fill="white"
+                fill="currentColor"
                 fontSize={10}
                 textAnchor="middle"
               >
