@@ -1,6 +1,6 @@
 import { navigateToSignOut } from "@/api/accounts/sign-in.tsx";
 import { useMe } from "@/api/accounts/user.ts";
-import { SignInButtonIcon } from "@/components/common/SignInButton";
+import { SignInButton } from "@/components/common/SignInButton";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import {
   autoUpdate,
@@ -53,7 +53,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   ]);
 
   if (!me) {
-    return <SignInButtonIcon onClick={() => setIsOpen(false)} />;
+    return <SignInButton onClick={() => setIsOpen(false)} />;
   }
 
   return (

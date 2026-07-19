@@ -37,7 +37,9 @@ export function MorePage() {
         <div className="flex grow"></div>
         {/* <ToggleSnowButton /> // Disable snow */}
         <SwitchThemeButton />
-        <UserMenu isMobile={false} isSidebar={false} />
+        <div className="py-2 pr-2">
+          <UserMenu isMobile={false} isSidebar={false} />
+        </div>
       </div>
       <div className="bg-base-content/10 my-1 h-0.5 w-full rounded-full" />
 
