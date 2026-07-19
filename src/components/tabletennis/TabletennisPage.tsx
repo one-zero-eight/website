@@ -136,8 +136,8 @@ function InfoTiles({ player }: { player: SchemaPlayer }) {
   );
 
   return (
-    <div className="mx-5 columns-1 gap-4 md:columns-2">
-      <div className="mb-4 break-inside-avoid">
+    <div className="mx-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="mb-4">
         <ProfileInfo
           status={player.status}
           score={player.rating}
@@ -146,7 +146,7 @@ function InfoTiles({ player }: { player: SchemaPlayer }) {
           place={1}
         />
       </div>
-      <div className="mb-4 break-inside-avoid">
+      <div className="mb-4">
         <ScoreTable data={ratingsData} />
       </div>
     </div>
