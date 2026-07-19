@@ -1,5 +1,4 @@
 import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { OutlookDownScreen } from "@/components/room-booking/timeline/OutlookDownScreen.tsx";
 import { clockTime, durationFormatted, msBetween } from "@/lib/utils/dates.ts";
@@ -10,21 +9,10 @@ import { BookingModal } from "../timeline/BookingModal";
 import { schemaToBooking } from "../timeline/types";
 
 export function BookingsListPage() {
-  const { data: statusData, isFetched: isStatusFetched } =
-    $roomBooking.useQuery("get", "/status", undefined, {
-      refetchInterval: 60000,
-      retry: 3,
-    });
-  const lastStatus = statusData?.uptime?.[statusData.uptime.length - 1];
-  const isOutlookDown = isStatusFetched && lastStatus?.status !== 1;
-
-  const {
-    data: bookings,
-    status,
-    error,
-  } = $roomBooking.useQuery("get", "/bookings/my", undefined, {
-    enabled: !isOutlookDown,
-  });
+  const { data: bookings, status } = $roomBooking.useQuery(
+    "get",
+    "/bookings/my",
+  );
 
   const now = useNowMS(true, 30 * 1000);
   const notFinishedBookings = useMemo(() => {
@@ -44,9 +32,7 @@ export function BookingsListPage() {
       );
   }, [bookings, now]);
 
-  return isOutlookDown ? (
-    <OutlookDownScreen />
-  ) : status === "pending" ? (
+  return status === "pending" ? (
     <div className="flex w-full max-w-lg flex-col gap-4 self-center p-4">
       {Array(3)
         .fill(0)
@@ -55,12 +41,7 @@ export function BookingsListPage() {
         ))}
     </div>
   ) : status === "error" ? (
-    <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
-      <h2 className="text-base-content/70 text-2xl">Error loading bookings</h2>
-      <p className="text-base-content/75 text-lg">
-        {formatApiErrorMessage(error)}
-      </p>
-    </div>
+    <OutlookDownScreen />
   ) : bookings.length === 0 ? (
     <div className="flex h-48 flex-col items-center justify-center gap-4 self-center">
       <h2 className="text-base-content/70 text-2xl">You have no bookings</h2>

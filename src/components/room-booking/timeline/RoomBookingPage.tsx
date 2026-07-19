@@ -51,14 +51,6 @@ export function RoomBookingPage() {
     $roomBooking.useQuery("get", "/rooms/my-access-list");
   const myAccessListRoomIds = myAccessList?.map((room) => room.id) ?? [];
 
-  const { data: statusData, isFetched: isStatusFetched } =
-    $roomBooking.useQuery("get", "/status", undefined, {
-      refetchInterval: T.Min,
-      retry: 3,
-    });
-  const lastStatus = statusData?.uptime?.[statusData.uptime.length - 1];
-  const isOutlookDown = isStatusFetched && lastStatus?.status !== 1;
-
   const { data: rooms, isPending: isRoomsPending } = $roomBooking.useQuery(
     "get",
     "/rooms/",
@@ -80,15 +72,12 @@ export function RoomBookingPage() {
   const areBookingsDepsReady =
     !isRoomsPending && !!rooms && isAccessListFetched && isMeFetched;
 
-  const bookingsQueryEnabled =
-    !isOutlookDown && areBookingsDepsReady && roomsToShow.length > 0;
+  const bookingsQueryEnabled = areBookingsDepsReady && roomsToShow.length > 0;
 
   const {
     data: rawBookings,
     isPending: isBookingsPending,
-    isFetched: isBookingsFetched,
-    status: bookingsStatus,
-    error: bookingsError,
+    isError: isBookingsError,
   } = $roomBooking.useQuery(
     "get",
     "/bookings/",
@@ -121,12 +110,7 @@ export function RoomBookingPage() {
     },
   );
 
-  const bookingsFetchFailed =
-    isOutlookDown ||
-    (bookingsQueryEnabled &&
-      isBookingsFetched &&
-      bookingsStatus === "error" &&
-      !!bookingsError);
+  const bookingsFetchFailed = bookingsQueryEnabled && isBookingsError;
 
   const bookings = rawBookings?.map((schema) => schemaToBooking(schema));
 
@@ -134,7 +118,9 @@ export function RoomBookingPage() {
     <>
       <div className="grow overflow-hidden">
         <Suspense>
-          {!bookingsFetchFailed ? (
+          {bookingsFetchFailed ? (
+            <OutlookDownScreen />
+          ) : (
             <BookingTimeline
               className={`h-full ${!areBookingsDepsReady || !bookingsQueryEnabled || isBookingsPending ? "pointer-events-none select-none" : ""}`}
               startDate={startDate}
@@ -157,19 +143,6 @@ export function RoomBookingPage() {
               }}
               ref={setTimelineRef}
             />
-          ) : isOutlookDown && statusData?.uptime?.length ? (
-            <OutlookDownScreen />
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-              <span className="icon-[material-symbols--cloud-off] text-error mb-2 text-5xl" />
-              <h1 className="text-lg font-semibold">
-                Outlook API is currently unavailable
-              </h1>
-              <p className="text-base-content/70 mt-1 max-w-sm text-sm">
-                Room booking relies on the Outlook calendar service, which
-                appears to be down right now. We have been notified about this.
-              </p>
-            </div>
           )}
         </Suspense>
       </div>
