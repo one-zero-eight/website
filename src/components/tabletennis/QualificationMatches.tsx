@@ -86,10 +86,20 @@ export function QualificationMatches({
   const [scores, setScores] = useState<Record<string, [number, number]>>({});
   const [finishingId, setFinishingId] = useState<string | null>(null);
   const [locked, setLocked] = useState(() => qualificationGames.length > 0);
+  const reconstructedRef = useRef(false);
+  const prevTourIdRef = useRef(tourId);
 
   useEffect(() => {
     scoresRef.current = scores;
   }, [scores]);
+
+  // ── reset bracket guard when tour changes ─────────────────
+  useEffect(() => {
+    if (tourId !== prevTourIdRef.current) {
+      reconstructedRef.current = false;
+      prevTourIdRef.current = tourId;
+    }
+  }, [tourId]);
 
   const playerMap = useMemo(() => {
     const m = new Map<string, string>();
@@ -104,8 +114,11 @@ export function QualificationMatches({
 
   // ── reconstruct bracket from server games ───────────────────
   useEffect(() => {
+    if (reconstructedRef.current) return;
     if (initialSeeded.length === 0) return;
     if (qualificationGames.length === 0 && !locked) return;
+
+    reconstructedRef.current = true;
 
     if (qualificationGames.length > 0) {
       const result = reconstructBracket(initialSeeded, qualificationGames);
