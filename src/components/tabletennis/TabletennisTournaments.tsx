@@ -122,7 +122,8 @@ export function TabletennisTournaments() {
     refetch: refetchTours,
   } = $tabletennis.useQuery("get", "/active-tours");
 
-  const { data: allToursData } = $tabletennis.useQuery("get", "/get-tours");
+  const { data: allToursData, refetch: refetchAllTours } =
+    $tabletennis.useQuery("get", "/get-tours");
 
   const { data: playersData } = $tabletennis.useQuery("get", "/players");
 
@@ -531,7 +532,10 @@ export function TabletennisTournaments() {
             valTop={valTop}
             tourId={activeTour.id}
             qualificationGames={qualificationGames}
-            onTourRefetch={refetchTours}
+            onTourRefetch={() => {
+              refetchTours();
+              refetchAllTours();
+            }}
             onLock={() => setQualificationLocked(true)}
           />
         )}
