@@ -96,13 +96,13 @@ export function ClubLeaguePage() {
               <div className="text-primary mb-1 font-semibold">
                 1st Semester
               </div>
-              <div className="text-base-content/80">June - November</div>
+              <div className="text-base-content/80">August - December</div>
             </div>
             <div className="bg-base-300 rounded-field p-4">
               <div className="text-primary mb-1 font-semibold">
                 2nd Semester
               </div>
-              <div className="text-base-content/80">December - May</div>
+              <div className="text-base-content/80">January - July</div>
             </div>
           </div>
         </div>
