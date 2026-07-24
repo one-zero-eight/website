@@ -6,6 +6,7 @@ import {
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
 import { useToast } from "@/components/toast";
+import { Modal } from "@/components/common/Modal.tsx";
 import { ValidationMatches } from "./ValidationMatches";
 import { QualificationMatches } from "./QualificationMatches";
 
@@ -112,6 +113,7 @@ export function TabletennisTournaments() {
   );
   const [showPlayerSuggestions, setShowPlayerSuggestions] = useState(false);
   const [showCreateSuggestions, setShowCreateSuggestions] = useState(false);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
   const addInputRef = useRef<HTMLInputElement>(null);
   const createInputRef = useRef<HTMLTextAreaElement>(null);
   const { showError } = useToast();
@@ -393,153 +395,190 @@ export function TabletennisTournaments() {
 
   if (activeTour) {
     return (
-      <div>
-        <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
-          <button
-            type="button"
-            className={cn(
-              "px-3 py-2 text-xs font-medium transition-colors md:text-sm",
-              mode === "validation"
-                ? "border-b-2 border-b-[#712BB2]"
-                : "text-base-content/50 hover:text-base-content",
-            )}
-            onClick={() => setMode("validation")}
-          >
-            Validation
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "px-3 py-2 text-xs font-medium transition-colors md:text-sm",
-              mode === "qualification"
-                ? "border-b-2 border-b-[#712BB2]"
-                : "text-base-content/50 hover:text-base-content",
-            )}
-            onClick={() => setMode("qualification")}
-          >
-            Qualification
-          </button>
-          <div className="ml-auto flex items-center gap-2">
-            <span className="text-base-content/50 hidden text-xs md:inline">
-              {activeTour.name}
-            </span>
-            {!qualificationLocked && (
+      <>
+        <div>
+          <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
+            <button
+              type="button"
+              className={cn(
+                "px-3 py-2 text-xs font-medium transition-colors md:text-sm",
+                mode === "validation"
+                  ? "border-b-2 border-b-[#712BB2]"
+                  : "text-base-content/50 hover:text-base-content",
+              )}
+              onClick={() => setMode("validation")}
+            >
+              Validation
+            </button>
+            <button
+              type="button"
+              className={cn(
+                "px-3 py-2 text-xs font-medium transition-colors md:text-sm",
+                mode === "qualification"
+                  ? "border-b-2 border-b-[#712BB2]"
+                  : "text-base-content/50 hover:text-base-content",
+              )}
+              onClick={() => setMode("qualification")}
+            >
+              Qualification
+            </button>
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-base-content/50 hidden text-xs md:inline">
+                {activeTour.name}
+              </span>
+              {!qualificationLocked && (
+                <button
+                  type="button"
+                  className="border-base-content/30 text-base-content/50 hover:text-base-content hover:bg-base-content/10 rounded-lg border px-2 py-1 text-[10px] transition-colors md:text-xs"
+                  onClick={() => setShowAddPlayers(true)}
+                >
+                  Add players
+                </button>
+              )}
               <button
                 type="button"
                 className="border-base-content/30 text-base-content/50 hover:text-base-content hover:bg-base-content/10 rounded-lg border px-2 py-1 text-[10px] transition-colors md:text-xs"
-                onClick={() => setShowAddPlayers(true)}
+                onClick={() => setShowEndConfirm(true)}
+                disabled={finishing}
               >
-                Add players
+                {finishing ? (
+                  <span className="loading loading-spinner loading-sm" />
+                ) : (
+                  "End tournament"
+                )}
               </button>
-            )}
+            </div>
+          </div>
+
+          {showAddPlayers && !qualificationLocked && (
+            <div className="border-base-300 flex items-center gap-2 border-b px-4 py-3">
+              <div className="relative flex-1">
+                <input
+                  ref={addInputRef}
+                  type="text"
+                  value={addPlayersInput}
+                  onChange={(e) => setAddPlayersInput(e.target.value)}
+                  onFocus={() => setShowPlayerSuggestions(true)}
+                  placeholder="Player emails or IDs (comma or newline separated)"
+                  className="input input-bordered input-sm w-full"
+                />
+                {showPlayerSuggestions && addSuggestions.length > 0 && (
+                  <div className="bg-base-100 rounded-box absolute top-full right-0 left-0 z-10 mt-1 max-h-48 overflow-y-auto border shadow-lg">
+                    {addSuggestions.map((p) => (
+                      <button
+                        key={p.innohassle_id}
+                        type="button"
+                        className="hover:bg-base-200 w-full px-3 py-2 text-left text-xs transition-colors"
+                        onClick={() => {
+                          const tokens = addPlayersInput.split(/[\n,]+/);
+                          const lastToken = tokens[tokens.length - 1] ?? "";
+                          const prefix = addPlayersInput.slice(
+                            0,
+                            addPlayersInput.length - lastToken.length,
+                          );
+                          setAddPlayersInput(prefix + p.nickname + ",\n");
+                          setAddPlayersNickToId((prev) =>
+                            new Map(prev).set(p.nickname, p.innohassle_id),
+                          );
+                          setShowPlayerSuggestions(false);
+                          addInputRef.current?.focus();
+                        }}
+                      >
+                        <span className="font-medium">{p.nickname}</span>
+                        <span className="text-base-content/50 ml-2 text-[10px]">
+                          {p.innohassle_id}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                className="rounded-lg border border-[#712BB2] px-3 py-1 text-xs text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 disabled:opacity-40"
+                onClick={handleAddPlayers}
+                disabled={addingPlayers || !addPlayersInput.trim()}
+              >
+                {addingPlayers ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : (
+                  "Add"
+                )}
+              </button>
+              <button
+                type="button"
+                className="text-base-content/50 hover:text-base-content text-xs"
+                onClick={() => {
+                  setShowAddPlayers(false);
+                  setAddPlayersInput("");
+                  setAddPlayersNickToId(new Map());
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {mode === "validation" && (
+            <ValidationMatches
+              key={`validation-${activeTour.id}`}
+              players={playersList}
+              tourId={activeTour.id}
+              validationGames={validationGames}
+            />
+          )}
+          {mode === "qualification" && (
+            <QualificationMatches
+              key={`qualification-${activeTour.id}`}
+              players={playersList}
+              validationGames={validationGames}
+              valTop={valTop}
+              tourId={activeTour.id}
+              qualificationGames={qualificationGames}
+              onTourRefetch={() => {
+                refetchTours();
+                refetchAllTours();
+              }}
+              onLock={() => setQualificationLocked(true)}
+            />
+          )}
+        </div>
+
+        <Modal
+          open={showEndConfirm}
+          onOpenChange={setShowEndConfirm}
+          title="Finish tournament"
+        >
+          <p className="text-base-content/80">
+            Are you sure you want to finish <strong>{activeTour.name}</strong>?
+            This action cannot be undone.
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
             <button
               type="button"
-              className="border-base-content/30 text-base-content/50 hover:text-base-content hover:bg-base-content/10 rounded-lg border px-2 py-1 text-[10px] transition-colors md:text-xs"
-              onClick={handleEndTournament}
+              className="btn btn-ghost"
+              onClick={() => setShowEndConfirm(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                handleEndTournament();
+                setShowEndConfirm(false);
+              }}
               disabled={finishing}
             >
               {finishing ? (
                 <span className="loading loading-spinner loading-sm" />
               ) : (
-                "End tournament"
+                "Confirm"
               )}
             </button>
           </div>
-        </div>
-
-        {showAddPlayers && !qualificationLocked && (
-          <div className="border-base-300 flex items-center gap-2 border-b px-4 py-3">
-            <div className="relative flex-1">
-              <input
-                ref={addInputRef}
-                type="text"
-                value={addPlayersInput}
-                onChange={(e) => setAddPlayersInput(e.target.value)}
-                onFocus={() => setShowPlayerSuggestions(true)}
-                placeholder="Player emails or IDs (comma or newline separated)"
-                className="input input-bordered input-sm w-full"
-              />
-              {showPlayerSuggestions && addSuggestions.length > 0 && (
-                <div className="bg-base-100 rounded-box absolute top-full right-0 left-0 z-10 mt-1 max-h-48 overflow-y-auto border shadow-lg">
-                  {addSuggestions.map((p) => (
-                    <button
-                      key={p.innohassle_id}
-                      type="button"
-                      className="hover:bg-base-200 w-full px-3 py-2 text-left text-xs transition-colors"
-                      onClick={() => {
-                        const tokens = addPlayersInput.split(/[\n,]+/);
-                        const lastToken = tokens[tokens.length - 1] ?? "";
-                        const prefix = addPlayersInput.slice(
-                          0,
-                          addPlayersInput.length - lastToken.length,
-                        );
-                        setAddPlayersInput(prefix + p.nickname + ",\n");
-                        setAddPlayersNickToId((prev) =>
-                          new Map(prev).set(p.nickname, p.innohassle_id),
-                        );
-                        setShowPlayerSuggestions(false);
-                        addInputRef.current?.focus();
-                      }}
-                    >
-                      <span className="font-medium">{p.nickname}</span>
-                      <span className="text-base-content/50 ml-2 text-[10px]">
-                        {p.innohassle_id}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <button
-              type="button"
-              className="rounded-lg border border-[#712BB2] px-3 py-1 text-xs text-[#712BB2] transition-colors hover:bg-[#712BB2]/10 disabled:opacity-40"
-              onClick={handleAddPlayers}
-              disabled={addingPlayers || !addPlayersInput.trim()}
-            >
-              {addingPlayers ? (
-                <span className="loading loading-spinner loading-xs" />
-              ) : (
-                "Add"
-              )}
-            </button>
-            <button
-              type="button"
-              className="text-base-content/50 hover:text-base-content text-xs"
-              onClick={() => {
-                setShowAddPlayers(false);
-                setAddPlayersInput("");
-                setAddPlayersNickToId(new Map());
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-
-        {mode === "validation" && (
-          <ValidationMatches
-            key={`validation-${activeTour.id}`}
-            players={playersList}
-            tourId={activeTour.id}
-            validationGames={validationGames}
-          />
-        )}
-        {mode === "qualification" && (
-          <QualificationMatches
-            key={`qualification-${activeTour.id}`}
-            players={playersList}
-            validationGames={validationGames}
-            valTop={valTop}
-            tourId={activeTour.id}
-            qualificationGames={qualificationGames}
-            onTourRefetch={() => {
-              refetchTours();
-              refetchAllTours();
-            }}
-            onLock={() => setQualificationLocked(true)}
-          />
-        )}
-      </div>
+        </Modal>
+      </>
     );
   }
 
