@@ -5,6 +5,7 @@ import {
   formatApiErrorMessage,
   isApiHttpError,
 } from "@/api/helpers/create-query-client";
+import { PlayerActionMenu } from "./PlayerActionMenu.tsx";
 
 type PlayerEntry = {
   place: number;
@@ -12,6 +13,8 @@ type PlayerEntry = {
   rating: number;
   status: string;
   visible: boolean;
+  innohassle_id: string;
+  raw: SchemaPlayer & { is_active: boolean };
 };
 
 type SortKey = "name" | "rating";
@@ -63,6 +66,8 @@ function toPlayerEntry(
     rating: p.rating,
     status: p.status ?? "",
     visible: p.is_active,
+    innohassle_id: p.innohassle_id,
+    raw: p,
   };
 }
 
@@ -71,6 +76,10 @@ export function TabletennisPlayersTop() {
     "get",
     "/players",
   );
+
+  const { data: isAdminData } = $tabletennis.useQuery("get", "/isadmin");
+  const isAdmin =
+    (isAdminData as { is_admin?: boolean } | undefined)?.is_admin ?? false;
 
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
   const [debounced, setDebounced] = useState<Filters>(INITIAL_FILTERS);
@@ -267,6 +276,7 @@ export function TabletennisPlayersTop() {
               </th>
               <th className="w-24 px-4 py-4">Status</th>
               <th className="w-24 px-4 py-4">Visible</th>
+              {isAdmin && <th className="w-12 px-4 py-4" />}
             </tr>
           </thead>
           <tbody>
@@ -299,6 +309,11 @@ export function TabletennisPlayersTop() {
                     {p.visible ? "visible" : "hidden"}
                   </span>
                 </td>
+                {isAdmin && (
+                  <td className="px-4 py-3">
+                    <PlayerActionMenu player={p.raw} />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
