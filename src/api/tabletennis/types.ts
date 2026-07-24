@@ -210,6 +210,24 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/set-status": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Set Status
+     * @description Sets a player's status by innohassle_id.
+     */
+    post: operations["table_tennis_set_status"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/reg-tour": {
     parameters: {
       query?: never;
@@ -819,6 +837,54 @@ export interface operations {
       };
     };
   };
+  table_tennis_set_status: {
+    parameters: {
+      query: {
+        innohassle_id: string;
+        status: PathsSetStatusPostParametersQueryStatus;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+        };
+      };
+      /** @description You are not a Table Tennis administrator/coach! */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Player not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   table_tennis_register_tour: {
     parameters: {
       query: {
@@ -1167,7 +1233,7 @@ export interface operations {
           };
         };
       };
-      /** @description One or both players are not in this tournament's player list OR A player cannot play a match against themselves! */
+      /** @description A player cannot play a match against themselves! OR One or both players are not in this tournament's player list */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1224,7 +1290,7 @@ export interface operations {
           };
         };
       };
-      /** @description Draws are not allowed in table tennis! OR This game has already been finished. Recalculating rating is not allowed. */
+      /** @description This game has already been finished. Recalculating rating is not allowed. OR Draws are not allowed in table tennis! */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1238,7 +1304,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Tournament not found OR Game not found in this tournament OR One or both players from this game are not registered (/reg) */
+      /** @description One or both players from this game are not registered (/reg) OR Tournament not found OR Game not found in this tournament */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1260,4 +1326,9 @@ export interface operations {
 export enum PathsRegGamePostParametersQueryTip {
   val = "val",
   cval = "cval",
+}
+export enum PathsSetStatusPostParametersQueryStatus {
+  beginner = "beginner",
+  advanced = "advanced",
+  admin = "admin",
 }
