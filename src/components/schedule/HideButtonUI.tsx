@@ -1,16 +1,17 @@
 import Tooltip from "@/components/common/Tooltip";
-import { useEventGroup } from "@/api/schedule/event-group.ts";
+import { MouseEventHandler } from "react";
 
-export default function HideButton({ groupId }: { groupId: number }) {
-  const { isHidden, switchHideFavorite } = useEventGroup(groupId);
+export default function HideButtonUI({
+  isHidden,
+  onClick,
+}: {
+  isHidden: boolean;
+  onClick: MouseEventHandler;
+}) {
   return (
     <Tooltip content={isHidden ? "Hidden from calendar" : "Hide from calendar"}>
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          switchHideFavorite?.();
-        }}
+        onClick={onClick}
         className="hover:bg-base-200 rounded-box flex h-10 w-10 items-center justify-center text-3xl"
       >
         {isHidden ? (
