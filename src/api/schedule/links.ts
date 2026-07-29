@@ -58,3 +58,10 @@ export function getPersonalLink(resourcePath: string, accessKey: string) {
     `${SCHEDULE_API_URL}${resourcePath}?access_key=${accessKey}`,
   );
 }
+
+export function getImportedLink(
+  userId: number | undefined,
+  linkedAlias: string,
+) {
+  return `${SCHEDULE_API_URL}/users/${userId}/linked/${linkedAlias}.ics`;
+}

@@ -14,6 +14,7 @@ interface ICalFeedMeta {
   format: "ics"; // for EventSourceApi
   internalState?: InternalState; // HACK. TODO: use classes in future
   color: string; // Default color for events from this feed
+  ics?: string; // for import
   sourceLink?: string;
   updatedAt?: string;
   eventGroup?: any;
@@ -48,9 +49,17 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
     but we couldn't leverage built-in allDay-guessing, among other things.
     */
     if (!internalState || arg.isRefetch) {
+      const url = /^https?:\/\/api\.innohassle\.ru(\/|$)/i.test(meta.url)
+        ? meta.url
+        : `https://api.innohassle.ru/events/v0/me/check-calendar-url-to-link?${new URLSearchParams(
+            {
+              calendar_url: meta.url,
+            },
+          )}`;
+
       internalState = meta.internalState = {
         response: null,
-        iCalExpanderPromise: fetch(meta.url, {
+        iCalExpanderPromise: fetch(url, {
           method: "GET",
           headers:
             localStorage.getItem("accessToken") &&
