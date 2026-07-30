@@ -2242,7 +2242,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["TermConfig"];
+          "application/json": components["schemas"]["TermConfig"] | null;
         };
       };
     };
