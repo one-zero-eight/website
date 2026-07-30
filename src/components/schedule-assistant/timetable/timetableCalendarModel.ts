@@ -1,9 +1,19 @@
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 
+import {
+  buildGroupToProgramMap,
+  isMeetingOnSlot,
+  nearestSlotStart,
+  normalizeHhmm,
+  programResolvedTimeSlots,
+  termResolvedTimeSlots,
+  toMinutes,
+  unionResolvedTimeSlots,
+} from "./programTimeSlots.ts";
 import {
   DAY_NAMES,
   WEEKDAY_LABEL_RU,
-  add90m,
   filterMeetingsByTab,
   normalizedTermDays,
   todayIsoDate,
@@ -122,18 +132,23 @@ export function buildCalendarGrid(
   const allowedDays = normalizedTermDays(config);
   const today = todayIsoDate();
 
-  const slotStarts = (config.term.time_slots || [])
-    .map((slot) => {
-      if (typeof slot === "string") return String(slot).trim().slice(0, 5);
-      return String(slot.start_time).slice(0, 5);
-    })
-    .filter((slot) => slot.length > 0);
-
-  const slots: CalendarSlot[] = slotStarts.map((start) => ({
-    start,
-    end: add90m(start),
-    label: `${start}–${add90m(start)}`,
+  const termSlots = termResolvedTimeSlots(config);
+  const groupToProgram = buildGroupToProgramMap(config);
+  const slotsResolved = termSlots.length
+    ? termSlots
+    : unionResolvedTimeSlots(
+        getScheduleSections(config).flatMap((section) =>
+          (section.programs || []).map((program) =>
+            programResolvedTimeSlots(program, termSlots),
+          ),
+        ),
+      );
+  const slots: CalendarSlot[] = slotsResolved.map((slot) => ({
+    start: slot.start,
+    end: slot.end,
+    label: `${slot.start}–${slot.end}`,
   }));
+  const slotByStart = new Map(slotsResolved.map((slot) => [slot.start, slot]));
 
   const tabMeetings = filterMeetingsByTab(allMeetings, tabMode, config).filter(
     (meeting) => !meeting.cancelled,
@@ -141,10 +156,45 @@ export function buildCalendarGrid(
 
   const cells = new Map<string, Meeting[]>();
   for (const meeting of tabMeetings) {
-    const slot = String(meeting.start).slice(0, 5);
-    const key = `${meeting.date}|${slot}`;
+    const start = normalizeHhmm(meeting.start);
+    const end = meeting.end ? normalizeHhmm(meeting.end) : undefined;
+    const program = (meeting.groups || [])
+      .map((gid) => groupToProgram.get(gid))
+      .find(Boolean);
+    const programSlots = programResolvedTimeSlots(program, termSlots);
+    const exact = programSlots.find((slot) => slot.start === start);
+    const onProgramSlot = exact ? isMeetingOnSlot(start, end, exact) : false;
+    const onTermRow = slotByStart.has(start);
+    let rowStart = start;
+    let offGrid = false;
+    let offsetMinutes = 0;
+    if (onProgramSlot && onTermRow) {
+      rowStart = start;
+    } else if (onProgramSlot) {
+      const nearest = nearestSlotStart(start, slotsResolved);
+      rowStart = nearest || start;
+    } else {
+      const nearest =
+        nearestSlotStart(start, slotsResolved) ||
+        nearestSlotStart(start, programSlots);
+      if (nearest) {
+        rowStart = nearest;
+        offGrid = true;
+        offsetMinutes = toMinutes(start) - toMinutes(nearest);
+      } else {
+        offGrid = true;
+      }
+    }
+    const placed: Meeting = {
+      ...meeting,
+      start,
+      end,
+      off_grid: offGrid || undefined,
+      off_grid_offset_minutes: offGrid ? offsetMinutes : undefined,
+    };
+    const key = `${meeting.date}|${rowStart}`;
     const current = cells.get(key) || [];
-    current.push(meeting);
+    current.push(placed);
     cells.set(key, current);
   }
 

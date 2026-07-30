@@ -1,6 +1,8 @@
 /** Compact «По группам» grid scale — aligned with «По дням» density. */
+export const GROUPS_TIME_COL_PX = 130;
 export const GROUPS_TIME_COL_WIDTH = "w-[130px] min-w-[130px] max-w-[130px]";
 
+export const GROUPS_COL_PX = 135;
 export const GROUPS_COL_WIDTH = "w-[135px] max-w-[135px] min-w-[135px]";
 
 export const GROUPS_TABLE_CLASS =
@@ -36,7 +38,7 @@ export const GROUPS_MEETING_BODY_CLASS =
   "grid h-full min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-0.5 overflow-hidden";
 
 export const GROUPS_MEETING_TITLE_CLASS =
-  "line-clamp-3 min-h-0 min-w-0 overflow-hidden text-[0.6875rem] leading-tight font-bold break-words text-[#1a2332]";
+  "line-clamp-3 max-h-[calc(1.25em*3)] w-full min-h-0 min-w-0 overflow-hidden text-[0.6875rem] leading-tight font-bold break-words text-[#1a2332]";
 
 export const GROUPS_MEETING_FOOTER_CLASS =
   "flex min-w-0 shrink-0 flex-col gap-0.5";

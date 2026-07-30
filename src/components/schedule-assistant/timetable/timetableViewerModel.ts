@@ -12,6 +12,19 @@ import {
   parseStudentGroupSelector,
 } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
+import {
+  buildGroupToProgramMap,
+  findProgramByNameOrCode,
+  isMeetingOnSlot,
+  nearestSlotStart,
+  normalizeHhmm,
+  programResolvedTimeSlots,
+  resolveProgramTimeColumns,
+  termResolvedTimeSlots,
+  toMinutes as slotToMinutes,
+  unionResolvedTimeSlots,
+  type ResolvedTimeSlot,
+} from "./programTimeSlots.ts";
 
 export const DAY_NAMES = [
   "Mon",
@@ -73,6 +86,8 @@ export type Meeting = {
   groups: string[];
   date: string;
   start: string;
+  /** Meeting end time (HH:MM) when known. */
+  end?: string;
   room: string;
   instructors: string | string[];
   /** Copied from component; used in detail panel. */
@@ -84,12 +99,18 @@ export type Meeting = {
   override_fields?: MeetingOverrideField[];
   /** Weekly-pattern occurrence cancelled via edit.cancel. */
   cancelled?: boolean;
+  /** True when start/end are not on a configured program/term slot. */
+  off_grid?: boolean;
+  /** Minutes offset from the grid row slot start (for off-grid rendering). */
+  off_grid_offset_minutes?: number;
 };
 
 export type Column = {
   yearLabel: string;
   groupId: string;
   groupLabel: string;
+  /** SectionProgram.code when known. */
+  programCode?: string;
 };
 
 export type WeekRange = { key: string; start: string; end: string };
@@ -97,6 +118,13 @@ export type WeekRange = { key: string; start: string; end: string };
 export type BuiltGrid = {
   allowedDays: string[];
   slots: { start: string; end: string; label: string }[];
+  /** Per program-name (yearLabel): slots used for that program's time column labels. */
+  slotsByProgramLabel: Record<
+    string,
+    { start: string; end: string; label: string }[]
+  >;
+  /** True when program slots differ from term.time_slots (needs sticky time subcolumn). */
+  showProgramTimeColumn: Record<string, boolean>;
   map: Map<string, Meeting[]>;
   weekMeetings: Meeting[];
   backToBackSources: Set<string>;
@@ -262,6 +290,7 @@ export function resolveWeeklyMeetingFields(
     return {
       date,
       start: String(slot.start_time).slice(0, 5),
+      end: String(slot.end_time).slice(0, 5),
       room: slot.room ?? "",
       instructors: slot.instructor ?? "",
       cancelled: true,
@@ -272,6 +301,9 @@ export function resolveWeeklyMeetingFields(
   const resolvedStart = edit?.start_time
     ? String(edit.start_time).slice(0, 5)
     : String(slot.start_time).slice(0, 5);
+  const resolvedEnd = edit?.end_time
+    ? String(edit.end_time).slice(0, 5)
+    : String(slot.end_time).slice(0, 5);
   const resolvedRoom =
     edit?.room !== undefined && edit?.room !== null
       ? edit.room
@@ -284,6 +316,7 @@ export function resolveWeeklyMeetingFields(
   return {
     date: resolvedDate,
     start: resolvedStart,
+    end: resolvedEnd,
     room: resolvedRoom || "",
     instructors: resolvedInstructor,
     cancelled: false,
@@ -417,9 +450,12 @@ export function cellSignature(mergedRows: MergedRow[]) {
 export function buildGroupMeta(config: SchemaScheduleConfig) {
   const groupNames: Record<string, string> = {};
   const byProgram: Record<string, Set<string>> = {};
+  const programCodeByLabel: Record<string, string> = {};
   for (const section of getScheduleSections(config)) {
     for (const program of section.programs) {
       const yearLabel = program.name || section.code;
+      const programCode = String(program.code || "").trim();
+      if (programCode) programCodeByLabel[yearLabel] = programCode;
       if (!byProgram[yearLabel]) byProgram[yearLabel] = new Set();
       for (const tr of normalizeTracksFromSectionProgram(program)) {
         for (const g of tr.groups || []) {
@@ -433,7 +469,7 @@ export function buildGroupMeta(config: SchemaScheduleConfig) {
     if (!code) continue;
     groupNames[code] = g.name || code;
   }
-  return { groupNames, byProgram };
+  return { groupNames, byProgram, programCodeByLabel };
 }
 
 export function buildRoomCapacityMap(config: SchemaScheduleConfig) {
@@ -584,6 +620,7 @@ export function buildColumns(config: SchemaScheduleConfig) {
         yearLabel,
         groupId: gid,
         groupLabel: meta.groupNames[gid] || gid,
+        programCode: meta.programCodeByLabel[yearLabel],
       });
     }
   }
@@ -637,6 +674,9 @@ export function buildMeetings(
             groups: audienceGroups,
             date: occurrence.date,
             start: String(occurrence.start_time).slice(0, 5),
+            end: occurrence.end_time
+              ? String(occurrence.end_time).slice(0, 5)
+              : undefined,
             room: occurrence.room ?? "",
             instructors: occurrence.instructor ?? "",
             instructor_pool: component.instructor_pool,
@@ -659,6 +699,7 @@ export function buildMeetings(
                   groups: audienceGroups,
                   date: resolved.date,
                   start: resolved.start,
+                  end: resolved.end,
                   room: resolved.room,
                   instructors: resolved.instructors,
                   instructor_pool: component.instructor_pool,
@@ -680,6 +721,7 @@ export function buildMeetings(
                 groups: audienceGroups,
                 date: resolved.date,
                 start: resolved.start,
+                end: resolved.end,
                 room: resolved.room,
                 instructors: resolved.instructors,
                 instructor_pool: component.instructor_pool,
@@ -879,6 +921,7 @@ export function buildGrid(
   allMeetings: Meeting[],
   weekStart: string,
   tabMode: string,
+  visibleColumns?: Column[],
 ): BuiltGrid {
   const meetings = filterMeetingsByTab(allMeetings, tabMode, config).filter(
     (m) => {
@@ -888,28 +931,110 @@ export function buildGrid(
   );
 
   const allowedDays = normalizedTermDays(config);
-  const slotStarts = config.term.time_slots
-    .map((t) => {
-      if (typeof t === "string") return String(t).trim().slice(0, 5);
-      return String(t.start_time).slice(0, 5);
-    })
-    .filter((t) => t.length > 0);
-  const slots = slotStarts.map((s) => ({
-    start: s,
-    end: add90m(s),
-    label: `${s}-${add90m(s)}`,
-  }));
+  const termSlots = termResolvedTimeSlots(config);
+  const groupToProgram = buildGroupToProgramMap(config);
+
+  const programLabels = new Set<string>();
+  for (const col of visibleColumns || []) {
+    if (col.yearLabel) programLabels.add(col.yearLabel);
+  }
+  if (!programLabels.size) {
+    for (const m of meetings) {
+      for (const gid of m.groups || []) {
+        const program = groupToProgram.get(gid);
+        if (program?.name) programLabels.add(program.name);
+        else if (program?.code) programLabels.add(program.code);
+      }
+    }
+  }
+
+  const slotsByProgramLabel: Record<string, ResolvedTimeSlot[]> = {};
+  const slotLists: ResolvedTimeSlot[][] = [];
+  const orderedLabels = visibleColumns?.length
+    ? [
+        ...new Set(
+          visibleColumns
+            .map((col) => col.yearLabel)
+            .filter((label): label is string => !!label),
+        ),
+      ]
+    : [...programLabels];
+  for (const label of orderedLabels) {
+    const program = findProgramByNameOrCode(config, label);
+    const slots = programResolvedTimeSlots(program, termSlots);
+    slotsByProgramLabel[label] = slots;
+    slotLists.push(slots);
+  }
+  // Extra time column only when slots are incompatible with the nearest time
+  // column to the left (subset/superset share one column and merge to union).
+  const { showProgramTimeColumn } = resolveProgramTimeColumns(
+    orderedLabels,
+    slotsByProgramLabel,
+    termSlots,
+  );
+  if (!slotLists.length) slotLists.push(termSlots);
+
+  // Shared row axis is always term.time_slots. Custom program times (e.g. 09:10)
+  // attach to the nearest term row as off-grid instead of inventing extra rows.
+  const slots = termSlots.length
+    ? termSlots
+    : unionResolvedTimeSlots(slotLists);
+  const slotByStart = new Map(slots.map((slot) => [slot.start, slot]));
+
   const map = new Map<string, Meeting[]>();
   const backToBackSources = new Set<string>();
   const backToBackTargets = new Set<string>();
 
   for (const m of meetings) {
     const d = dayKey(m.date);
-    const slot = String(m.start).slice(0, 5);
+    const start = normalizeHhmm(m.start);
+    const end = m.end ? normalizeHhmm(m.end) : undefined;
     for (const g of m.groups) {
-      const k = `${d}|${slot}|${g}`;
+      const program = groupToProgram.get(g);
+      const programLabel = String(program?.name || program?.code || "").trim();
+      const programSlots =
+        (programLabel && slotsByProgramLabel[programLabel]) ||
+        programResolvedTimeSlots(program, termSlots);
+      const programSlotByStart = new Map(
+        programSlots.map((slot) => [slot.start, slot]),
+      );
+      const exactProgramSlot = programSlotByStart.get(start);
+      const onProgramSlot = exactProgramSlot
+        ? isMeetingOnSlot(start, end, exactProgramSlot)
+        : false;
+      const onTermRow = slotByStart.has(start);
+      let rowStart = start;
+      let offGrid = false;
+      let offsetMinutes = 0;
+      if (onProgramSlot && onTermRow) {
+        rowStart = start;
+      } else if (onProgramSlot) {
+        // Matches program slot but not term row — snap to nearest term row,
+        // no custom-time caption (time equals program timeslot).
+        const nearest = nearestSlotStart(start, slots);
+        rowStart = nearest || start;
+      } else {
+        const nearest =
+          nearestSlotStart(start, slots) ||
+          nearestSlotStart(start, programSlots);
+        if (nearest) {
+          rowStart = nearest;
+          offGrid = true;
+          offsetMinutes = slotToMinutes(start) - slotToMinutes(nearest);
+        } else {
+          offGrid = true;
+        }
+      }
+      const placed: Meeting = {
+        ...m,
+        start,
+        end,
+        off_grid: offGrid || undefined,
+        off_grid_offset_minutes: offGrid ? offsetMinutes : undefined,
+      };
+      const k = `${d}|${rowStart}|${g}`;
       const current = map.get(k) || [];
-      current.push(m);
+      current.push(placed);
       map.set(k, current);
     }
   }
@@ -946,6 +1071,8 @@ export function buildGrid(
   return {
     allowedDays,
     slots,
+    slotsByProgramLabel,
+    showProgramTimeColumn,
     map,
     weekMeetings: meetings,
     backToBackSources,
@@ -1006,6 +1133,10 @@ export function columnsForTab(
             yearLabel: trackLabel,
             groupId: gid,
             groupLabel: baseGroupLabel,
+            programCode:
+              base?.programCode ||
+              String(program.code || "").trim() ||
+              undefined,
           });
           seen.add(gid);
         }
@@ -1019,6 +1150,7 @@ export function columnsForTab(
         yearLabel: trackLabel,
         groupId: gid,
         groupLabel: base?.groupLabel || gid,
+        programCode: base?.programCode,
       });
     }
     return ordered;

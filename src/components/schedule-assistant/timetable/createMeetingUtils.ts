@@ -34,6 +34,7 @@ export type CreateMeetingDraft = {
   date: string;
   weekday: TermWeekdayKey;
   time: string;
+  endTime?: string;
   room: string;
   instructor: string;
   audience: string[];
@@ -187,7 +188,9 @@ export function applyCreateMeetingToCourse(
 
   const series = findOrCreateSessionSeries(nextComponent, audience, config);
   const startTime = normalizeTimeToApi(draft.time);
-  const endTime = resolveEndTimeForStart(config, startTime);
+  const endTime = draft.endTime
+    ? normalizeTimeToApi(draft.endTime)
+    : resolveEndTimeForStart(config, startTime, audience);
   const room = String(draft.room || "").trim() || null;
   const instructor = String(draft.instructor || "").trim() || null;
 

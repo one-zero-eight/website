@@ -4,7 +4,10 @@ import type {
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
-import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
+import {
+  SelectDropdown,
+  type SelectDropdownChangeContext,
+} from "@/components/common/SelectDropdown.tsx";
 import {
   useCoursesQuery,
   useUpdateCourseMutation,
@@ -30,7 +33,11 @@ import {
   type CreateMeetingCellContext,
 } from "./createMeetingUtils.ts";
 import {
+  CUSTOM_TIME_OPTION_VALUE,
+  customTimeOptionLabel,
   formatAudienceTokensLabel,
+  normalizeTypedHhmm,
+  parseTimeRangeQuery,
   perGroupAudienceOptions,
   timeOptionsForConfig,
   weekdayOptionsForConfig,
@@ -42,12 +49,14 @@ function CreateClassDropdown({
   options,
   placeholder,
   disabled,
+  trailingOption,
 }: {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, context?: SelectDropdownChangeContext) => void;
   options: { value: string; label: string }[];
   placeholder: string;
   disabled?: boolean;
+  trailingOption?: (query: string) => { value: string; label: string } | null;
 }) {
   return (
     <SelectDropdown
@@ -56,6 +65,7 @@ function CreateClassDropdown({
       options={options}
       placeholder={placeholder}
       searchable
+      trailingOption={trailingOption}
       className={clsx("w-full", disabled && "pointer-events-none opacity-50")}
       triggerClassName="w-full"
     />
@@ -108,6 +118,8 @@ export function CreateClassModal({
   const [courseComponentKey, setCourseComponentKey] = useState("");
   const [roomValue, setRoomValue] = useState("");
   const [timeValue, setTimeValue] = useState("");
+  const [endTimeValue, setEndTimeValue] = useState("");
+  const [useCustomTime, setUseCustomTime] = useState(false);
   const [weekdayValue, setWeekdayValue] = useState<TermWeekdayKey | "">("");
   const [instructorValue, setInstructorValue] = useState("");
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
@@ -138,7 +150,14 @@ export function CreateClassModal({
     }));
   }, [courses]);
 
-  const timeOptions = useMemo(() => timeOptionsForConfig(config), [config]);
+  const timeOptions = useMemo(
+    () =>
+      timeOptionsForConfig(
+        config,
+        cellContext?.groupId ? [cellContext.groupId] : audienceValue,
+      ),
+    [audienceValue, cellContext, config],
+  );
   const weekdayOptions = useMemo(
     () => weekdayOptionsForConfig(config),
     [config],
@@ -183,12 +202,17 @@ export function CreateClassModal({
     if (!open || !cellContext) return;
     setCourseComponentKey("");
     setRoomValue("");
+    const groups = cellContext.groupId ? [cellContext.groupId] : undefined;
+    const options = timeOptionsForConfig(config, groups);
+    const preset = options.find((slot) => slot.value === cellContext.time);
     setTimeValue(cellContext.time);
+    setEndTimeValue(preset?.end || "");
+    setUseCustomTime(!preset && !!cellContext.time);
     setWeekdayValue(cellContext.weekday);
     setInstructorValue("");
     setAudienceValue(cellContext.groupId ? [cellContext.groupId] : []);
     setAudienceModalOpen(false);
-  }, [cellContext, open]);
+  }, [cellContext, config, open]);
 
   useEffect(() => {
     if (!selectedComponent) return;
@@ -225,6 +249,28 @@ export function CreateClassModal({
       showError("Ошибка", "Выберите время.");
       return;
     }
+    const submitStart = useCustomTime
+      ? normalizeTypedHhmm(timeValue)
+      : timeValue.trim();
+    const submitEnd = useCustomTime
+      ? normalizeTypedHhmm(endTimeValue)
+      : endTimeValue.trim();
+    if (useCustomTime) {
+      if (!submitEnd) {
+        showError("Ошибка", "Укажите время окончания.");
+        return;
+      }
+      if (
+        !/^\d{2}:\d{2}$/.test(submitStart) ||
+        !/^\d{2}:\d{2}$/.test(submitEnd)
+      ) {
+        showError(
+          "Ошибка",
+          "Время должно быть в формате ЧЧ:ММ (например 09:00).",
+        );
+        return;
+      }
+    }
     if (!weekdayValue) {
       showError("Ошибка", "Выберите день недели.");
       return;
@@ -246,7 +292,8 @@ export function CreateClassModal({
       componentIdx: parsedComponent.componentIdx,
       date: cellContext.date,
       weekday: weekdayValue,
-      time: timeValue,
+      time: submitStart,
+      endTime: useCustomTime && submitEnd ? submitEnd : undefined,
       room: roomValue,
       instructor: instructorValue,
       audience: audienceValue,
@@ -366,14 +413,53 @@ export function CreateClassModal({
 
         <CreateClassField label="Время">
           <CreateClassDropdown
-            value={timeValue}
-            onChange={setTimeValue}
+            value={useCustomTime ? CUSTOM_TIME_OPTION_VALUE : timeValue}
+            onChange={(value, context) => {
+              if (value === CUSTOM_TIME_OPTION_VALUE) {
+                setUseCustomTime(true);
+                const parsed = parseTimeRangeQuery(context?.searchQuery ?? "");
+                if (parsed.start) setTimeValue(parsed.start);
+                if (parsed.end) setEndTimeValue(parsed.end);
+                return;
+              }
+              setUseCustomTime(false);
+              setTimeValue(value);
+              const preset = timeOptions.find((slot) => slot.value === value);
+              setEndTimeValue(preset?.end || "");
+            }}
             placeholder="Выберите время"
+            trailingOption={(query) => ({
+              value: CUSTOM_TIME_OPTION_VALUE,
+              label: customTimeOptionLabel(query),
+            })}
             options={timeOptions.map((slot) => ({
               value: slot.value,
               label: slot.label,
             }))}
           />
+          {useCustomTime ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="09:00"
+                className="input input-bordered input-sm w-24 font-mono"
+                value={timeValue}
+                onChange={(event) => setTimeValue(event.target.value)}
+                onBlur={() => setTimeValue(normalizeTypedHhmm(timeValue))}
+              />
+              <span className="text-base-content/50 shrink-0">–</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="14:30"
+                className="input input-bordered input-sm w-24 font-mono"
+                value={endTimeValue}
+                onChange={(event) => setEndTimeValue(event.target.value)}
+                onBlur={() => setEndTimeValue(normalizeTypedHhmm(endTimeValue))}
+              />
+            </div>
+          ) : null}
         </CreateClassField>
 
         <CreateClassField label="День недели">

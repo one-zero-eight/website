@@ -64,10 +64,23 @@ function CalendarMeetingCard({
       style={{
         backgroundColor: colors.bg,
         borderColor: colors.border,
+        marginTop:
+          meeting.off_grid && meeting.off_grid_offset_minutes
+            ? `${Math.max(
+                -8,
+                Math.min(24, Math.round(meeting.off_grid_offset_minutes * 0.4)),
+              )}px`
+            : undefined,
       }}
       onClick={() => onSelectMeeting(key, meeting.course || courseTitle)}
       title={meetingCalendarCellLabel(meeting, null)}
     >
+      {meeting.off_grid ? (
+        <span className="block truncate text-[0.625rem] font-semibold text-[#8a6d3b]">
+          {meeting.start}
+          {meeting.end ? `–${meeting.end}` : ""}
+        </span>
+      ) : null}
       <span className="font-semibold">{mainLabel}</span>
       {groupsLabel ? (
         <span className="font-normal text-[#4f5c6d]"> ({groupsLabel})</span>

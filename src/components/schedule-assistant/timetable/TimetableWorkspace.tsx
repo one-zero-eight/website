@@ -34,6 +34,10 @@ import {
   type CreateMeetingCellContext,
 } from "./createMeetingUtils.ts";
 import { EditClassModal } from "./EditClassModal.tsx";
+import {
+  programSlotLabelForTermRow,
+  resolveProgramTimeColumns,
+} from "./programTimeSlots.ts";
 import { TimetableCalendarTable } from "./TimetableCalendarTable.tsx";
 import {
   TimetableLayoutSelector,
@@ -52,6 +56,7 @@ import {
 } from "./timetableCalendarModel.ts";
 import {
   GROUPS_CELL_PAD,
+  GROUPS_COL_PX,
   GROUPS_COL_WIDTH,
   GROUPS_DAY_ROW_INNER_CLASS,
   GROUPS_DAY_ROW_STICKY_STYLE,
@@ -66,6 +71,7 @@ import {
   GROUPS_SLOT_TIME_PAD,
   GROUPS_TABLE_CLASS,
   GROUPS_TABLE_HEAD_CLASS,
+  GROUPS_TIME_COL_PX,
   GROUPS_TIME_COL_WIDTH,
 } from "./timetableGroupsGridLayout.ts";
 import { scrollMeetingIntoCenter } from "./timetableMeetingScroll.ts";
@@ -245,6 +251,9 @@ function meetingCardPropsEqual(
     pm.tag !== nm.tag ||
     pm.room !== nm.room ||
     pm.start !== nm.start ||
+    pm.end !== nm.end ||
+    pm.off_grid !== nm.off_grid ||
+    pm.off_grid_offset_minutes !== nm.off_grid_offset_minutes ||
     pm.date !== nm.date ||
     (pm.override_fields?.join("\0") ?? "") !==
       (nm.override_fields?.join("\0") ?? "") ||
@@ -495,8 +504,14 @@ function TimetableWorkspaceInner({
     if (!config || !allMeetings.length || !weeks.length) return null;
     const wk = weeks[weekIndex];
     if (!wk) return null;
-    return buildGrid(config, allMeetings, wk.start, activeTab);
-  }, [config, allMeetings, weeks, weekIndex, activeTab]);
+    const visibleColumns = columnsForTab(
+      activeTab,
+      columns,
+      allMeetings,
+      config,
+    );
+    return buildGrid(config, allMeetings, wk.start, activeTab, visibleColumns);
+  }, [config, allMeetings, weeks, weekIndex, activeTab, columns]);
 
   const calendarGrid = useMemo(() => {
     if (!config || !allMeetings.length || !weeks.length) return null;
@@ -1064,37 +1079,39 @@ function TimetableTable({
 }: TimetableTableProps) {
   return (
     <table id="table" className={GROUPS_TABLE_CLASS}>
-      {tabMode === "instructor" || tabMode === "room"
-        ? renderUtilizationRows({
-            mode: tabMode === "instructor" ? "instructor" : "room",
-            grid,
-            courseColors,
-            roomCapacityById,
-            groupSizeById,
-            selectMeeting,
-            selectInstructorCell,
-            selectRoomCell,
-            selectInstructorHeader,
-            selectRoomHeader,
-          })
-        : renderCoreRows({
-            grid,
-            activeWeek,
-            columns,
-            allMeetings,
-            config,
-            activeTab: tabMode,
-            courseColors,
-            roomCapacityById,
-            groupSizeById,
-            selectMeeting,
-            selectInstructorCell,
-            selectRoomCell,
-            selectProgram,
-            selectGroup,
-            clearSelection,
-            onEmptyCellClick,
-          })}
+      {tabMode === "instructor" || tabMode === "room" ? (
+        renderUtilizationRows({
+          mode: tabMode === "instructor" ? "instructor" : "room",
+          grid,
+          courseColors,
+          roomCapacityById,
+          groupSizeById,
+          selectMeeting,
+          selectInstructorCell,
+          selectRoomCell,
+          selectInstructorHeader,
+          selectRoomHeader,
+        })
+      ) : (
+        <CoreGroupsTable
+          grid={grid}
+          activeWeek={activeWeek}
+          columns={columns}
+          allMeetings={allMeetings}
+          config={config}
+          activeTab={tabMode}
+          courseColors={courseColors}
+          roomCapacityById={roomCapacityById}
+          groupSizeById={groupSizeById}
+          selectMeeting={selectMeeting}
+          selectInstructorCell={selectInstructorCell}
+          selectRoomCell={selectRoomCell}
+          selectProgram={selectProgram}
+          selectGroup={selectGroup}
+          clearSelection={clearSelection}
+          onEmptyCellClick={onEmptyCellClick}
+        />
+      )}
     </table>
   );
 }
@@ -1352,6 +1369,7 @@ const CoreYearHeadCell = memo(function CoreYearHeadCell({
         programSelected && "shadow-[inset_0_-3px_0_#ffd54f]",
       )}
       colSpan={colSpan}
+      data-year-label={yearLabel}
       onClick={() => onSelectProgram(yearLabel)}
     >
       <span
@@ -1445,12 +1463,20 @@ type CorePreparedRow =
       slotStart: string;
       slotLabel: string;
       rowHasMeetings: boolean;
+      programSlotLabels: Record<string, string | null>;
       cells: CorePreparedCell[];
     };
 
 type CorePrepared = {
   visibleColumns: Column[];
   columnsByYear: Record<string, Column[]>;
+  yearLabels: string[];
+  /** Extra time col when program slots are incompatible with nearest left time column. */
+  showProgramTimeColumn: Record<string, boolean>;
+  /** Labels for the sticky left time column (union of compatible programs). */
+  stickyLeftSlots: { start: string; end: string; label: string }[];
+  /** 1 sticky term time + sum((time?1:0) + n groups) per program */
+  totalColSpan: number;
   rows: CorePreparedRow[];
 };
 
@@ -1463,6 +1489,18 @@ function buildCorePrepared(
     if (!columnsByYear[col.yearLabel]) columnsByYear[col.yearLabel] = [];
     columnsByYear[col.yearLabel]!.push(col);
   }
+  const yearLabels = Object.keys(columnsByYear);
+  const { showProgramTimeColumn, stickyLeftSlots } = resolveProgramTimeColumns(
+    yearLabels,
+    grid.slotsByProgramLabel,
+    grid.slots,
+  );
+  const totalColSpan =
+    1 +
+    yearLabels.reduce((acc, label) => {
+      const timeCols = showProgramTimeColumn[label] ? 1 : 0;
+      return acc + timeCols + (columnsByYear[label]?.length || 0);
+    }, 0);
 
   const rows: CorePreparedRow[] = [];
 
@@ -1471,23 +1509,40 @@ function buildCorePrepared(
       kind: "day",
       key: `day-${day}`,
       day,
-      colSpan: visibleColumns.length + 1,
+      colSpan: totalColSpan,
     });
 
     for (const slot of grid.slots) {
+      const stickyLabel =
+        programSlotLabelForTermRow(stickyLeftSlots, slot.start) ?? slot.label;
+      const programSlotLabels: Record<string, string | null> = {};
+      for (const yearLabel of yearLabels) {
+        const programSlots = grid.slotsByProgramLabel[yearLabel] || [];
+        if (showProgramTimeColumn[yearLabel]) {
+          programSlotLabels[yearLabel] = programSlotLabelForTermRow(
+            programSlots,
+            slot.start,
+          );
+        } else {
+          const match = programSlots.find((s) => s.start === slot.start);
+          programSlotLabels[yearLabel] = match?.label ?? null;
+        }
+      }
+
       const cellCache = visibleColumns.map((col) => {
         const key = `${day}|${slot.start}|${col.groupId}`;
         const meetings = grid.map.get(key) || [];
         const mergedRows = mergedMeetingsForCell(meetings);
         return {
           groupId: col.groupId,
+          yearLabel: col.yearLabel,
           mergedRows,
           sign: cellSignature(mergedRows),
         };
       });
 
       const yearHasMeetings: Record<string, boolean> = {};
-      for (const yearLabel of Object.keys(columnsByYear)) {
+      for (const yearLabel of yearLabels) {
         const yearColumns = columnsByYear[yearLabel] || [];
         yearHasMeetings[yearLabel] = yearColumns.some((col) => {
           const key = `${day}|${slot.start}|${col.groupId}`;
@@ -1504,7 +1559,8 @@ function buildCorePrepared(
         if (current.sign) {
           while (
             i + span < visibleColumns.length &&
-            cellCache[i + span]!.sign === current.sign
+            cellCache[i + span]!.sign === current.sign &&
+            cellCache[i + span]!.yearLabel === current.yearLabel
           ) {
             span += 1;
           }
@@ -1515,7 +1571,7 @@ function buildCorePrepared(
           groupId: col.groupId,
           span,
           mergedRows: current.mergedRows,
-          isProgramEmptyAtSlot: !yearHasMeetings[col.yearLabel],
+          isProgramEmptyAtSlot: programSlotLabels[col.yearLabel] == null,
         });
         i += span;
       }
@@ -1525,17 +1581,43 @@ function buildCorePrepared(
         key: `slot-${day}-${slot.start}`,
         day,
         slotStart: slot.start,
-        slotLabel: slot.label,
+        slotLabel: stickyLabel,
         rowHasMeetings,
+        programSlotLabels,
         cells,
       });
     }
   }
 
-  return { visibleColumns, columnsByYear, rows };
+  return {
+    visibleColumns,
+    columnsByYear,
+    yearLabels,
+    showProgramTimeColumn,
+    stickyLeftSlots,
+    totalColSpan,
+    rows,
+  };
 }
 
-function renderCoreRows(args: {
+function CoreGroupsTable({
+  grid,
+  activeWeek,
+  columns: baseColumns,
+  allMeetings,
+  config,
+  activeTab,
+  courseColors,
+  roomCapacityById,
+  groupSizeById,
+  selectMeeting,
+  selectInstructorCell,
+  selectRoomCell,
+  selectProgram,
+  selectGroup,
+  clearSelection,
+  onEmptyCellClick,
+}: {
   grid: BuiltGrid;
   activeWeek: WeekRange | null;
   columns: Column[];
@@ -1553,25 +1635,6 @@ function renderCoreRows(args: {
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 }) {
-  const {
-    grid,
-    activeWeek,
-    columns: baseColumns,
-    allMeetings,
-    config,
-    activeTab,
-    courseColors,
-    roomCapacityById,
-    groupSizeById,
-    selectMeeting,
-    selectInstructorCell,
-    selectRoomCell,
-    selectProgram,
-    selectGroup,
-    clearSelection,
-    onEmptyCellClick,
-  } = args;
-
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
 
   const visibleColumns = columnsForTab(
@@ -1580,48 +1643,17 @@ function renderCoreRows(args: {
     allMeetings,
     config,
   );
-  if (!visibleColumns.length) return null;
 
-  const prepared = buildCorePrepared(grid, visibleColumns);
-  const lastSlotStart = grid.slots.at(-1)?.start;
-
-  const thead = (
-    <thead className={GROUPS_TABLE_HEAD_CLASS}>
-      <tr key="h1">
-        <th
-          className={clsx(
-            "left-head sticky left-0 z-[25] border border-[#d8dfeb] bg-[#1f5fae] text-center align-top font-bold text-white",
-            GROUPS_TIME_COL_WIDTH,
-            GROUPS_HEAD_PAD,
-          )}
-          rowSpan={2}
-        >
-          День / время
-        </th>
-        {Object.keys(prepared.columnsByYear).map((yearLabel) => (
-          <CoreYearHeadCell
-            key={yearLabel}
-            yearLabel={yearLabel}
-            colSpan={prepared.columnsByYear[yearLabel]!.length}
-            onSelectProgram={selectProgram}
-          />
-        ))}
-      </tr>
-      <tr key="h2">
-        {Object.keys(prepared.columnsByYear).flatMap((yearLabel) =>
-          prepared.columnsByYear[yearLabel]!.map((col) => (
-            <CoreGroupHeadCell
-              key={col.groupId}
-              groupId={col.groupId}
-              groupLabel={col.groupLabel}
-              yearLabel={yearLabel}
-              onSelectGroup={selectGroup}
-            />
-          )),
-        )}
-      </tr>
-    </thead>
+  const prepared = useMemo(
+    () =>
+      visibleColumns.length ? buildCorePrepared(grid, visibleColumns) : null,
+    [grid, visibleColumns],
   );
+
+  if (!prepared || !visibleColumns.length) return null;
+
+  const yearLabels = prepared.yearLabels;
+  const lastSlotStart = grid.slots.at(-1)?.start;
 
   const rows: React.ReactNode[] = [];
 
@@ -1656,76 +1688,121 @@ function renderCoreRows(args: {
     );
     const isLastSlot = preparedRow.slotStart === lastSlotStart;
 
-    const cells = preparedRow.cells.map((cell, cellIndex) => (
-      <td
-        key={cell.key}
-        className={clsx(
-          "link-cell relative border-r border-b border-[#d8dfeb] align-top",
-          GROUPS_CELL_PAD,
-          cell.span > 1 ? null : GROUPS_COL_WIDTH,
-          cell.isProgramEmptyAtSlot && "bg-[#eef1f6] [&_.empty]:bg-[#e9edf3]",
-          todayGroupsSlotCellClass(
-            isTodayDay,
-            cellIndex === preparedRow.cells.length - 1,
-            isLastSlot,
-          ),
-        )}
-        colSpan={cell.span > 1 ? cell.span : undefined}
-      >
-        {!cell.mergedRows.length ? (
-          <div
+    const groupYear = new Map(
+      visibleColumns.map((col) => [col.groupId, col.yearLabel] as const),
+    );
+
+    const rowCells: React.ReactNode[] = [];
+    let cellIndex = 0;
+    for (const [yearIndex, yearLabel] of yearLabels.entries()) {
+      const programLabel = preparedRow.programSlotLabels[yearLabel];
+      if (prepared.showProgramTimeColumn[yearLabel]) {
+        // Sticky left:0 overlays the term time column when scrolled into view.
+        rowCells.push(
+          <td
+            key={`${yearLabel}-time-${preparedRow.slotStart}`}
             className={clsx(
-              "empty h-full min-h-0 min-h-[64px] rounded bg-[#fafcff]",
-              onEmptyCellClick &&
-                activeWeek &&
-                "cursor-pointer hover:bg-[#eef4ff]",
+              "slot-cell sticky left-0 border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] align-top text-[#1d3f70]",
+              GROUPS_TIME_COL_WIDTH,
+              GROUPS_SLOT_TIME_PAD,
+              (!programLabel || !preparedRow.rowHasMeetings) &&
+                "bg-[#e3e8f1] text-[#5e6673]",
+              todayGroupsSlotTimeClass(isTodayDay, isLastSlot),
             )}
-            onClick={(event) => {
-              event.stopPropagation();
-              if (!onEmptyCellClick || !activeWeek) {
-                clearSelection();
-                return;
-              }
-              onEmptyCellClick({
-                weekday: preparedRow.day as TermWeekdayKey,
-                time: preparedRow.slotStart,
-                date: dateForWeekdayInWeekRange(
-                  activeWeek,
-                  preparedRow.day as TermWeekdayKey,
-                  startingDay,
-                ),
-                groupId: cell.groupId,
-              });
-            }}
-          />
-        ) : (
-          <div className="flex h-full min-h-0 flex-col gap-1">
-            {cell.mergedRows.map((row) => {
-              return (
-                <MeetingCard
-                  key={row.sign}
-                  span={cell.span}
-                  row={row}
-                  grid={grid}
-                  selectMeeting={selectMeeting}
-                  selectInstructorCell={selectInstructorCell}
-                  selectRoomCell={selectRoomCell}
-                  courseColors={courseColors}
-                  roomCapacityById={roomCapacityById}
-                  groupSizeById={groupSizeById}
-                />
-              );
-            })}
-          </div>
-        )}
-      </td>
-    ));
+            style={{ zIndex: 6 + yearIndex }}
+          >
+            {programLabel || ""}
+          </td>,
+        );
+      }
+
+      while (cellIndex < preparedRow.cells.length) {
+        const cell = preparedRow.cells[cellIndex]!;
+        if (groupYear.get(cell.groupId) !== yearLabel) break;
+        const isLastInTable =
+          yearIndex === yearLabels.length - 1 &&
+          cellIndex === preparedRow.cells.length - 1;
+        rowCells.push(
+          <td
+            key={cell.key}
+            className={clsx(
+              "link-cell relative border-r border-b border-[#d8dfeb] align-top",
+              GROUPS_CELL_PAD,
+              cell.span > 1 ? "overflow-hidden" : GROUPS_COL_WIDTH,
+              cell.isProgramEmptyAtSlot &&
+                "bg-[#eef1f6] [&_.empty]:bg-[#e9edf3]",
+              todayGroupsSlotCellClass(isTodayDay, isLastInTable, isLastSlot),
+            )}
+            colSpan={cell.span > 1 ? cell.span : undefined}
+            style={
+              cell.span > 1
+                ? {
+                    width: cell.span * GROUPS_COL_PX,
+                    maxWidth: cell.span * GROUPS_COL_PX,
+                    minWidth: cell.span * GROUPS_COL_PX,
+                  }
+                : undefined
+            }
+          >
+            {!cell.mergedRows.length ? (
+              <div
+                className={clsx(
+                  "empty h-full min-h-0 min-h-[64px] rounded bg-[#fafcff]",
+                  onEmptyCellClick &&
+                    activeWeek &&
+                    programLabel &&
+                    "cursor-pointer hover:bg-[#eef4ff]",
+                )}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (!onEmptyCellClick || !activeWeek || !programLabel) {
+                    clearSelection();
+                    return;
+                  }
+                  onEmptyCellClick({
+                    weekday: preparedRow.day as TermWeekdayKey,
+                    time:
+                      prepared.showProgramTimeColumn[yearLabel] && programLabel
+                        ? programLabel.slice(0, 5)
+                        : preparedRow.slotStart,
+                    date: dateForWeekdayInWeekRange(
+                      activeWeek,
+                      preparedRow.day as TermWeekdayKey,
+                      startingDay,
+                    ),
+                    groupId: cell.groupId,
+                  });
+                }}
+              />
+            ) : (
+              <div className="flex h-full min-h-0 flex-col gap-1">
+                {cell.mergedRows.map((row) => (
+                  <MeetingCard
+                    key={row.sign}
+                    span={cell.span}
+                    row={row}
+                    grid={grid}
+                    selectMeeting={selectMeeting}
+                    selectInstructorCell={selectInstructorCell}
+                    selectRoomCell={selectRoomCell}
+                    courseColors={courseColors}
+                    roomCapacityById={roomCapacityById}
+                    groupSizeById={groupSizeById}
+                  />
+                ))}
+              </div>
+            )}
+          </td>,
+        );
+        cellIndex += 1;
+      }
+    }
 
     rows.push(
       <tr key={preparedRow.key} className={GROUPS_SLOT_ROW_CLASS}>
         <td
           className={clsx(
-            "slot-cell sticky left-0 z-[4] border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] align-top text-[#1d3f70]",
+            "slot-cell sticky left-0 z-[5] border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] align-top text-[#1d3f70]",
             GROUPS_TIME_COL_WIDTH,
             GROUPS_SLOT_TIME_PAD,
             !preparedRow.rowHasMeetings && "bg-[#e3e8f1] text-[#5e6673]",
@@ -1734,14 +1811,107 @@ function renderCoreRows(args: {
         >
           {preparedRow.slotLabel}
         </td>
-        {cells}
+        {rowCells}
       </tr>,
     );
   }
 
   return (
     <>
-      {thead}
+      <colgroup>
+        <col
+          style={{
+            width: GROUPS_TIME_COL_PX,
+            minWidth: GROUPS_TIME_COL_PX,
+          }}
+        />
+        {yearLabels.flatMap((yearLabel) => {
+          const cols: React.ReactNode[] = [];
+          if (prepared.showProgramTimeColumn[yearLabel]) {
+            cols.push(
+              <col
+                key={`${yearLabel}-time`}
+                style={{
+                  width: GROUPS_TIME_COL_PX,
+                  minWidth: GROUPS_TIME_COL_PX,
+                }}
+              />,
+            );
+          }
+          for (const col of prepared.columnsByYear[yearLabel] || []) {
+            cols.push(
+              <col
+                key={col.groupId}
+                style={{
+                  width: GROUPS_COL_PX,
+                  minWidth: GROUPS_COL_PX,
+                }}
+              />,
+            );
+          }
+          return cols;
+        })}
+      </colgroup>
+      <thead className={GROUPS_TABLE_HEAD_CLASS}>
+        <tr key="h1">
+          <th
+            className={clsx(
+              "left-head sticky left-0 z-[25] border border-[#d8dfeb] bg-[#1f5fae] text-center align-top font-bold text-white",
+              GROUPS_TIME_COL_WIDTH,
+              GROUPS_HEAD_PAD,
+            )}
+            rowSpan={2}
+          >
+            День
+          </th>
+          {yearLabels.map((yearLabel) => {
+            const timeCols = prepared.showProgramTimeColumn[yearLabel] ? 1 : 0;
+            return (
+              <CoreYearHeadCell
+                key={yearLabel}
+                yearLabel={yearLabel}
+                colSpan={
+                  timeCols + (prepared.columnsByYear[yearLabel]?.length || 0)
+                }
+                onSelectProgram={selectProgram}
+              />
+            );
+          })}
+        </tr>
+        <tr key="h2">
+          {yearLabels.flatMap((yearLabel, yearIndex) => {
+            const cols = prepared.columnsByYear[yearLabel] || [];
+            const cells: React.ReactNode[] = [];
+            if (prepared.showProgramTimeColumn[yearLabel]) {
+              cells.push(
+                <th
+                  key={`${yearLabel}-time`}
+                  className={clsx(
+                    "sticky left-0 border border-[#d8dfeb] bg-[#1f5fae] text-center text-xs font-semibold text-white",
+                    GROUPS_TIME_COL_WIDTH,
+                    GROUPS_HEAD_PAD,
+                  )}
+                  style={{ zIndex: 26 + yearIndex }}
+                >
+                  Время
+                </th>,
+              );
+            }
+            for (const col of cols) {
+              cells.push(
+                <CoreGroupHeadCell
+                  key={col.groupId}
+                  groupId={col.groupId}
+                  groupLabel={col.groupLabel}
+                  yearLabel={yearLabel}
+                  onSelectGroup={selectGroup}
+                />,
+              );
+            }
+            return cells;
+          })}
+        </tr>
+      </thead>
       <tbody>{rows}</tbody>
     </>
   );
@@ -1807,11 +1977,13 @@ const MeetingCard = memo(function MeetingCard({
   const body = (
     <div className={GROUPS_MEETING_BODY_CLASS}>
       <div className="subject flex min-h-0 min-w-0 gap-1 overflow-hidden">
-        <div
-          className={GROUPS_MEETING_TITLE_CLASS}
-          title={`${courseTitle} (${m.tag})${count > 1 ? ` x${count}` : ""}`}
-        >
-          {courseTitle} ({m.tag}){count > 1 ? ` x${count}` : ""}
+        <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+          <div
+            className={GROUPS_MEETING_TITLE_CLASS}
+            title={`${courseTitle} (${m.tag})${count > 1 ? ` x${count}` : ""}`}
+          >
+            {courseTitle} ({m.tag}){count > 1 ? ` x${count}` : ""}
+          </div>
         </div>
         <span className="flex shrink-0 flex-col items-end gap-0.5">
           <MeetingOverrideFieldBadge
@@ -1821,6 +1993,12 @@ const MeetingCard = memo(function MeetingCard({
           <MeetingOverrideFieldBadge field="time" fields={m.override_fields} />
         </span>
       </div>
+      {m.off_grid ? (
+        <div className="text-[11px] leading-tight font-semibold text-[#8a6d3b]">
+          {m.start}
+          {m.end ? `–${m.end}` : ""}
+        </div>
+      ) : null}
       <div className={GROUPS_MEETING_FOOTER_CLASS}>
         <div
           className={clsx(
@@ -1890,18 +2068,24 @@ const MeetingCard = memo(function MeetingCard({
     </div>
   );
 
+  const offsetMinutes = m.off_grid ? (m.off_grid_offset_minutes ?? 0) : 0;
+  const offsetPx = Math.max(
+    -12,
+    Math.min(48, Math.round(offsetMinutes * 0.55)),
+  );
+
   return (
     <div
       data-meeting-id={m.instance_id}
       className={clsx(
-        "meeting relative z-[2] rounded-lg",
+        "meeting relative z-[2] overflow-hidden rounded-lg",
         GROUPS_MEETING_CLASS,
-        isWideCell ? "overflow-visible" : "overflow-hidden",
         meetingHighlightClass,
       )}
       style={{
         backgroundColor: colors.bg,
         borderColor: colors.border,
+        marginTop: offsetPx !== 0 ? `${offsetPx}px` : undefined,
       }}
       onClick={() => {
         selectMeeting(meetingSelectionKey(m), m.course || courseTitle);
@@ -1909,7 +2093,7 @@ const MeetingCard = memo(function MeetingCard({
     >
       {isWideCell ? (
         <div
-          className="sticky z-[1] inline-flex h-full max-h-full w-max max-w-full flex-col gap-0.5 self-start overflow-hidden"
+          className="sticky z-[1] flex h-full max-h-full w-full max-w-full flex-col gap-0.5 self-start overflow-hidden"
           style={{
             left: "calc(var(--sa-time-col-width, 130px) + 4px)",
             backgroundColor: colors.bg,
@@ -2170,11 +2354,13 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
     >
       <div className={GROUPS_MEETING_BODY_CLASS}>
         <div className="flex min-h-0 min-w-0 overflow-hidden">
-          <div
-            className={GROUPS_MEETING_TITLE_CLASS}
-            title={`${courseTitle} (${m.tag})${row.count > 1 ? ` x${row.count}` : ""}`}
-          >
-            {courseTitle} ({m.tag}){row.count > 1 ? ` x${row.count}` : ""}
+          <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+            <div
+              className={GROUPS_MEETING_TITLE_CLASS}
+              title={`${courseTitle} (${m.tag})${row.count > 1 ? ` x${row.count}` : ""}`}
+            >
+              {courseTitle} ({m.tag}){row.count > 1 ? ` x${row.count}` : ""}
+            </div>
           </div>
         </div>
         <div className={GROUPS_MEETING_FOOTER_CLASS}>

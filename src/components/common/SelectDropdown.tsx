@@ -15,18 +15,57 @@ import {
 import { cn } from "@/lib/ui/cn";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+function timeCompactsFromText(text: string): string[] {
+  const times = text.match(/\d{1,2}:\d{2}/g) || [];
+  const out: string[] = [];
+  for (const time of times) {
+    const [hoursRaw, minutesRaw] = time.split(":");
+    const hours = Number(hoursRaw);
+    const minutes = Number(minutesRaw);
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) continue;
+    if (hours > 23 || minutes > 59) continue;
+    const compact = `${hours}${String(minutes).padStart(2, "0")}`;
+    const padded = `${String(hours).padStart(2, "0")}${String(minutes).padStart(2, "0")}`;
+    out.push(compact, padded);
+  }
+  return out;
+}
+
 function filterSelectOptions<T extends string>(
   options: { value: T; label: string }[],
   query: string,
 ) {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return options;
-  return options.filter(
-    (option) =>
-      option.label.toLowerCase().includes(normalized) ||
-      option.value.toLowerCase().includes(normalized),
-  );
+  const queryDigits = normalized.replace(/\D/g, "");
+
+  return options.filter((option) => {
+    const label = option.label.toLowerCase();
+    const value = option.value.toLowerCase();
+    if (label.includes(normalized) || value.includes(normalized)) return true;
+
+    // "1230" matches "12:30–14:00", "900" matches "09:00–10:30"
+    if (queryDigits.length >= 3) {
+      const compacts = timeCompactsFromText(`${option.label} ${option.value}`);
+      if (
+        compacts.some(
+          (compact) =>
+            compact === queryDigits ||
+            compact.startsWith(queryDigits) ||
+            queryDigits.startsWith(compact),
+        )
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  });
 }
+
+export type SelectDropdownChangeContext = {
+  searchQuery: string;
+};
 
 export function SelectDropdown<T extends string>({
   value,
@@ -41,9 +80,10 @@ export function SelectDropdown<T extends string>({
   isOptionDisabled,
   searchable = false,
   searchPlaceholder = "Поиск…",
+  trailingOption,
 }: {
   value: T | "";
-  onChange: (value: T) => void;
+  onChange: (value: T, context?: SelectDropdownChangeContext) => void;
   options: { value: T; label: string }[];
   placeholder?: string;
   className?: string;
@@ -54,6 +94,8 @@ export function SelectDropdown<T extends string>({
   isOptionDisabled?: (value: T) => boolean;
   searchable?: boolean;
   searchPlaceholder?: string;
+  /** Always appended; label can depend on the current search query. */
+  trailingOption?: (query: string) => { value: T; label: string } | null;
 }) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -101,10 +143,33 @@ export function SelectDropdown<T extends string>({
     role,
   ]);
 
-  const filteredOptions = useMemo(
-    () => (searchable ? filterSelectOptions(options, searchQuery) : options),
-    [options, searchQuery, searchable],
+  const resolvedTrailing = useMemo(
+    () => trailingOption?.(searchQuery) ?? null,
+    [searchQuery, trailingOption],
   );
+
+  const matchedOptions = useMemo(() => {
+    const filtered = searchable
+      ? filterSelectOptions(options, searchQuery)
+      : options;
+    if (!resolvedTrailing) return filtered;
+    return filtered.filter((option) => option.value !== resolvedTrailing.value);
+  }, [options, resolvedTrailing, searchQuery, searchable]);
+
+  /** Matched presets + trailing (always last when present). */
+  const filteredOptions = useMemo(() => {
+    if (!resolvedTrailing) return matchedOptions;
+    return [...matchedOptions, resolvedTrailing];
+  }, [matchedOptions, resolvedTrailing]);
+
+  const allOptionsForLabel = useMemo(() => {
+    const trailing = trailingOption?.("") ?? resolvedTrailing;
+    if (!trailing) return options;
+    if (options.some((option) => option.value === trailing.value)) {
+      return options;
+    }
+    return [...options, { value: trailing.value, label: trailing.label }];
+  }, [options, resolvedTrailing, trailingOption]);
 
   const findEnabledIndex = useCallback(
     (start: number, direction: 1 | -1) => {
@@ -132,10 +197,10 @@ export function SelectDropdown<T extends string>({
   const selectOption = useCallback(
     (optionValue: T) => {
       if (isOptionDisabled?.(optionValue)) return;
-      onChange(optionValue);
+      onChange(optionValue, { searchQuery });
       handleOpenChange(false);
     },
-    [isOptionDisabled, onChange],
+    [isOptionDisabled, onChange, searchQuery],
   );
 
   useEffect(() => {
@@ -218,7 +283,8 @@ export function SelectDropdown<T extends string>({
   }
 
   const currentLabel =
-    options.find((option) => option.value === value)?.label ?? placeholder;
+    allOptionsForLabel.find((option) => option.value === value)?.label ??
+    placeholder;
 
   return (
     <div className={cn("relative shrink-0", className)}>
@@ -263,7 +329,7 @@ export function SelectDropdown<T extends string>({
                 </div>
               ) : null}
               <ul className="min-h-0 flex-1 overflow-y-auto p-1">
-                {filteredOptions.map((option, index) => {
+                {matchedOptions.map((option, index) => {
                   const disabled = isOptionDisabled?.(option.value) ?? false;
                   const highlighted =
                     searchable && activeHighlightedIndex === index;
@@ -292,12 +358,40 @@ export function SelectDropdown<T extends string>({
                     </li>
                   );
                 })}
-                {filteredOptions.length === 0 ? (
+                {matchedOptions.length === 0 && !resolvedTrailing ? (
                   <li className="text-base-content/50 px-2 py-1.5 text-sm">
                     Ничего не найдено
                   </li>
                 ) : null}
               </ul>
+              {resolvedTrailing ? (
+                <div className="border-base-300 shrink-0 border-t p-1">
+                  <button
+                    type="button"
+                    ref={(node) => {
+                      listRef.current[matchedOptions.length] = node;
+                    }}
+                    className={cn(
+                      "hover:bg-base-200 w-full rounded-md px-2 py-1.5 text-left text-sm",
+                      searchable &&
+                        activeHighlightedIndex === matchedOptions.length &&
+                        "bg-primary/12 ring-primary ring-2 ring-inset",
+                      value === resolvedTrailing.value && "font-semibold",
+                      isOptionDisabled?.(resolvedTrailing.value) &&
+                        "cursor-not-allowed opacity-50",
+                    )}
+                    disabled={
+                      isOptionDisabled?.(resolvedTrailing.value) ?? false
+                    }
+                    onClick={() => {
+                      if (isOptionDisabled?.(resolvedTrailing.value)) return;
+                      selectOption(resolvedTrailing.value);
+                    }}
+                  >
+                    {resolvedTrailing.label}
+                  </button>
+                </div>
+              ) : null}
             </div>
           </FloatingFocusManager>
         </FloatingPortal>
