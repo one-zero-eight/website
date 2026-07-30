@@ -1,7 +1,10 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
-import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
+import {
+  SelectDropdown,
+  type SelectDropdownChangeContext,
+} from "@/components/common/SelectDropdown.tsx";
 import {
   useCoursesQuery,
   useUpdateCourseMutation,
@@ -21,6 +24,8 @@ import {
 } from "./audienceSelectorTree.ts";
 import {
   applyMeetingEditsToCourse,
+  CUSTOM_TIME_OPTION_VALUE,
+  customTimeOptionLabel,
   formatAudienceTokensCompact,
   formatAudienceTokensLabel,
   getWeeklySlotFromMeeting,
@@ -29,7 +34,9 @@ import {
   meetingEditOriginalValues,
   meetingInstructorsLabel,
   meetingPatternBaseValues,
+  normalizeTypedHhmm,
   parseMeetingInstanceId,
+  parseTimeRangeQuery,
   perGroupAudienceOptions,
   timeOptionsForConfig,
   weekdayOptionsForConfig,
@@ -52,12 +59,14 @@ function EditClassDropdown({
   options,
   placeholder,
   disabled,
+  trailingOption,
 }: {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, context?: SelectDropdownChangeContext) => void;
   options: { value: string; label: string }[];
   placeholder: string;
   disabled?: boolean;
+  trailingOption?: (query: string) => { value: string; label: string } | null;
 }) {
   return (
     <SelectDropdown
@@ -66,6 +75,7 @@ function EditClassDropdown({
       options={options}
       placeholder={placeholder}
       searchable
+      trailingOption={trailingOption}
       className={clsx("w-full", disabled && "pointer-events-none opacity-50")}
       triggerClassName="w-full"
     />
@@ -138,6 +148,7 @@ function buildFieldEdits(
   originals: MeetingOriginalValues,
   roomValue: string,
   timeValue: string,
+  endTimeValue: string,
   weekdayValue: string,
   instructorValue: string,
   audienceValue: string[],
@@ -147,7 +158,10 @@ function buildFieldEdits(
 
   const edits: MeetingFieldEdits = {};
   if (roomValue !== originals.room) edits.room = roomValue;
-  if (timeValue !== originals.time) edits.time = timeValue;
+  if (timeValue !== originals.time || endTimeValue !== originals.endTime) {
+    edits.time = timeValue;
+    if (endTimeValue) edits.endTime = endTimeValue;
+  }
   if (weekdayValue !== originals.weekday)
     edits.weekday = weekdayValue as TermWeekdayKey;
   if (instructorValue !== originals.instructor) {
@@ -164,6 +178,7 @@ function hasMeetingEdits(edits: MeetingFieldEdits) {
   return (
     edits.room !== undefined ||
     edits.time !== undefined ||
+    edits.endTime !== undefined ||
     edits.weekday !== undefined ||
     edits.instructor !== undefined ||
     edits.audience !== undefined
@@ -187,6 +202,8 @@ export function EditClassModal({
   const [scope, setScope] = useState<EditClassScope>("single");
   const [roomValue, setRoomValue] = useState("");
   const [timeValue, setTimeValue] = useState("");
+  const [endTimeValue, setEndTimeValue] = useState("");
+  const [useCustomTime, setUseCustomTime] = useState(false);
   const [weekdayValue, setWeekdayValue] = useState("");
   const [instructorValue, setInstructorValue] = useState("");
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
@@ -221,7 +238,14 @@ export function EditClassModal({
     return perGroupAudienceOptions(config, meetingComponent);
   }, [config, meetingComponent]);
 
-  const timeOptions = useMemo(() => timeOptionsForConfig(config), [config]);
+  const timeOptions = useMemo(
+    () =>
+      timeOptionsForConfig(
+        config,
+        audienceValue.length ? audienceValue : meeting?.groups,
+      ),
+    [audienceValue, config, meeting?.groups],
+  );
   const weekdayOptions = useMemo(
     () => weekdayOptionsForConfig(config),
     [config],
@@ -274,6 +298,13 @@ export function EditClassModal({
     setScope("single");
     setRoomValue(originals.room);
     setTimeValue(originals.time);
+    setEndTimeValue(originals.endTime);
+    const isPreset = timeOptionsForConfig(config, meeting.groups).some(
+      (slot) =>
+        slot.value === originals.time &&
+        (!originals.endTime || slot.end === originals.endTime),
+    );
+    setUseCustomTime(!isPreset && !!originals.time);
     setWeekdayValue(originals.weekday);
     setInstructorValue(originals.instructor);
     setAudienceValue(
@@ -283,7 +314,7 @@ export function EditClassModal({
       ),
     );
     setCancelChecked(false);
-  }, [meeting, open, originals]);
+  }, [config, meeting, open, originals]);
 
   function handleClose() {
     if (isPending) return;
@@ -299,29 +330,37 @@ export function EditClassModal({
       return;
     }
 
-    const edits = buildFieldEdits(
-      originals,
-      roomValue,
-      timeValue,
-      weekdayValue,
-      instructorValue,
-      audienceValue,
-      cancelChecked,
-    );
-
-    if (!hasMeetingEdits(edits)) {
-      showError("Ошибка", "Нет изменений для сохранения.");
-      return;
-    }
+    const submitStart = useCustomTime
+      ? normalizeTypedHhmm(timeValue)
+      : timeValue.trim();
+    const submitEnd = useCustomTime
+      ? normalizeTypedHhmm(endTimeValue)
+      : endTimeValue.trim();
 
     if (!cancelChecked) {
       if (!roomValue.trim()) {
         showError("Ошибка", "Выберите аудиторию.");
         return;
       }
-      if (!timeValue.trim()) {
+      if (!submitStart) {
         showError("Ошибка", "Выберите время.");
         return;
+      }
+      if (useCustomTime) {
+        if (!submitEnd) {
+          showError("Ошибка", "Укажите время окончания.");
+          return;
+        }
+        if (
+          !/^\d{2}:\d{2}$/.test(submitStart) ||
+          !/^\d{2}:\d{2}$/.test(submitEnd)
+        ) {
+          showError(
+            "Ошибка",
+            "Время должно быть в формате ЧЧ:ММ (например 09:00).",
+          );
+          return;
+        }
       }
       if (!weekdayValue.trim()) {
         showError("Ошибка", "Выберите день недели.");
@@ -338,6 +377,22 @@ export function EditClassModal({
         );
         return;
       }
+    }
+
+    const edits = buildFieldEdits(
+      originals,
+      roomValue,
+      submitStart,
+      submitEnd,
+      weekdayValue,
+      instructorValue,
+      audienceValue,
+      cancelChecked,
+    );
+
+    if (!hasMeetingEdits(edits)) {
+      showError("Ошибка", "Нет изменений для сохранения.");
+      return;
     }
 
     const updatedCourse = applyMeetingEditsToCourse(
@@ -376,7 +431,9 @@ export function EditClassModal({
   const title = `${meeting.course} (${meeting.tag})`;
 
   const roomChanged = !cancelChecked && roomValue !== originals.room;
-  const timeChanged = !cancelChecked && timeValue !== originals.time;
+  const timeChanged =
+    !cancelChecked &&
+    (timeValue !== originals.time || endTimeValue !== originals.endTime);
   const weekdayChanged = !cancelChecked && weekdayValue !== originals.weekday;
   const instructorChanged =
     !cancelChecked && instructorValue !== originals.instructor;
@@ -385,8 +442,14 @@ export function EditClassModal({
 
   const originalRoomLabel = originals.room || "—";
   const originalTimeLabel =
-    timeOptions.find((slot) => slot.value === originals.time)?.label ||
-    originals.time ||
+    timeOptions.find(
+      (slot) =>
+        slot.value === originals.time &&
+        (!originals.endTime || slot.end === originals.endTime),
+    )?.label ||
+    (originals.endTime
+      ? `${originals.time}–${originals.endTime}`
+      : originals.time) ||
     "—";
   const originalWeekdayLabel =
     weekdayOptions.find((day) => day.key === originals.weekday)?.label ||
@@ -405,6 +468,7 @@ export function EditClassModal({
     originals,
     roomValue,
     timeValue,
+    endTimeValue,
     weekdayValue,
     instructorValue,
     audienceValue,
@@ -569,20 +633,72 @@ export function EditClassModal({
             label="Время"
             changed={timeChanged}
             originalLabel={originalTimeLabel}
-            onRestoreOriginal={() => setTimeValue(originals.time)}
+            onRestoreOriginal={() => {
+              setTimeValue(originals.time);
+              setEndTimeValue(originals.endTime);
+              const isPreset = timeOptions.some(
+                (slot) =>
+                  slot.value === originals.time &&
+                  (!originals.endTime || slot.end === originals.endTime),
+              );
+              setUseCustomTime(!isPreset && !!originals.time);
+            }}
             overridden={isFieldOverridden("time")}
             patternLabel={patternTimeLabel()}
           >
             <EditClassDropdown
-              value={timeValue}
-              onChange={setTimeValue}
+              value={useCustomTime ? CUSTOM_TIME_OPTION_VALUE : timeValue}
+              onChange={(value, context) => {
+                if (value === CUSTOM_TIME_OPTION_VALUE) {
+                  setUseCustomTime(true);
+                  const parsed = parseTimeRangeQuery(
+                    context?.searchQuery ?? "",
+                  );
+                  if (parsed.start) setTimeValue(parsed.start);
+                  if (parsed.end) setEndTimeValue(parsed.end);
+                  return;
+                }
+                setUseCustomTime(false);
+                setTimeValue(value);
+                const preset = timeOptions.find((slot) => slot.value === value);
+                setEndTimeValue(preset?.end || "");
+              }}
               placeholder="Выберите время"
               disabled={cancelChecked}
+              trailingOption={(query) => ({
+                value: CUSTOM_TIME_OPTION_VALUE,
+                label: customTimeOptionLabel(query),
+              })}
               options={timeOptions.map((slot) => ({
                 value: slot.value,
                 label: slot.label,
               }))}
             />
+            {useCustomTime && !cancelChecked ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="09:00"
+                  className="input input-bordered input-sm w-24 font-mono"
+                  value={timeValue}
+                  onChange={(event) => setTimeValue(event.target.value)}
+                  onBlur={() => setTimeValue(normalizeTypedHhmm(timeValue))}
+                />
+                <span className="text-base-content/50 shrink-0">–</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="14:30"
+                  className="input input-bordered input-sm w-24 font-mono"
+                  value={endTimeValue}
+                  onChange={(event) => setEndTimeValue(event.target.value)}
+                  onBlur={() =>
+                    setEndTimeValue(normalizeTypedHhmm(endTimeValue))
+                  }
+                />
+              </div>
+            ) : null}
           </EditClassField>
 
           <EditClassField

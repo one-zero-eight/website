@@ -209,6 +209,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/schedule-config/yaml-file": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Put Schedule Config Yaml File */
+    put: operations["schedule_config_put_schedule_config_yaml_file"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/schedule-config/term": {
     parameters: {
       query?: never;
@@ -430,6 +447,14 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** Body_schedule_config_put_schedule_config_yaml_file */
+    Body_schedule_config_put_schedule_config_yaml_file: {
+      /**
+       * File
+       * @description Schedule config YAML file
+       */
+      file: string;
+    };
     /**
      * BookingDTO
      * @description Booking description
@@ -1424,6 +1449,11 @@ export interface components {
        * @default []
        */
       groups: string[];
+      /**
+       * Time Slots
+       * @description Optional custom teaching slots for this program; when set, replaces term.time_slots for this program
+       */
+      time_slots?: components["schemas"]["TermTimeSlot"][] | null;
     };
     /**
      * SessionOccurrence
@@ -1787,6 +1817,8 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaBodyScheduleConfigPutScheduleConfigYamlFile =
+  components["schemas"]["Body_schedule_config_put_schedule_config_yaml_file"];
 export type SchemaBookingDto = components["schemas"]["BookingDTO"];
 export type SchemaCapacityIssue = components["schemas"]["CapacityIssue"];
 export type SchemaCheckParameters = components["schemas"]["CheckParameters"];
@@ -2204,6 +2236,39 @@ export interface operations {
     requestBody: {
       content: {
         "text/yaml": string;
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ScheduleConfig"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_put_schedule_config_yaml_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_schedule_config_put_schedule_config_yaml_file"];
       };
     };
     responses: {

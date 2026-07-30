@@ -29,6 +29,13 @@ import {
   weeklyPatternDayKey,
   type Meeting,
 } from "./timetableViewerModel.ts";
+import {
+  buildGroupToProgramMap,
+  findProgramByNameOrCode,
+  programResolvedTimeSlots,
+  termResolvedTimeSlots,
+  unionResolvedTimeSlots,
+} from "./programTimeSlots.ts";
 
 function formatLocalDate(d: Date) {
   const y = d.getFullYear();
@@ -65,6 +72,8 @@ export type EditClassScope = "single" | "future" | "all";
 export type MeetingFieldEdits = {
   room?: string;
   time?: string;
+  /** Optional explicit end; when set with time, skips slot lookup. */
+  endTime?: string;
   weekday?: TermWeekdayKey;
   instructor?: string | string[] | null;
   audience?: string[];
@@ -74,6 +83,7 @@ export type MeetingFieldEdits = {
 export type MeetingOriginalValues = {
   room: string;
   time: string;
+  endTime: string;
   weekday: TermWeekdayKey;
   instructor: string;
   audience: string[];
@@ -243,6 +253,7 @@ export function meetingEditOriginalValues(
   return {
     room: String(meeting.room || "").trim(),
     time: String(meeting.start || "").slice(0, 5),
+    endTime: String(meeting.end || "").slice(0, 5),
     weekday: currentMeetingWeekday(meeting),
     instructor: String(instructors || "").trim(),
     audience: resolveMeetingAudienceTokens(component, series, meeting.groups),
@@ -289,6 +300,7 @@ export function meetingOriginalValues(meeting: Meeting): MeetingOriginalValues {
   return {
     room: String(meeting.room || "").trim(),
     time: String(meeting.start || "").slice(0, 5),
+    endTime: String(meeting.end || "").slice(0, 5),
     weekday: currentMeetingWeekday(meeting),
     instructor: String(instructors || "").trim(),
     audience: [...(meeting.groups || [])].sort((a, b) =>
@@ -350,20 +362,53 @@ function normalizeTimeToApi(value: string): string {
 export function resolveEndTimeForStart(
   config: SchemaScheduleConfig,
   startTime: string,
+  groupIds?: string[],
 ): string {
   const start5 = String(startTime).slice(0, 5);
-  for (const slot of config.term.time_slots || []) {
-    const slotStart =
-      typeof slot === "string"
-        ? String(slot).trim().slice(0, 5)
-        : String(slot.start_time).slice(0, 5);
-    if (slotStart === start5) {
+  const candidates: { start: string; end: string }[] = [];
+  if (groupIds?.length) {
+    const groupToProgram = buildGroupToProgramMap(config);
+    const termSlots = termResolvedTimeSlots(config);
+    const seen = new Set<string>();
+    const expanded = expandStudentGroupSelectors(config, groupIds);
+    const ids = expanded.length ? expanded : groupIds.map(String);
+    for (const gid of ids) {
+      const program = groupToProgram.get(String(gid));
+      for (const slot of programResolvedTimeSlots(program, termSlots)) {
+        if (seen.has(slot.start)) continue;
+        seen.add(slot.start);
+        candidates.push({ start: slot.start, end: slot.end });
+      }
+    }
+    for (const token of groupIds) {
+      const raw = String(token || "").trim();
+      if (!raw.startsWith("@")) continue;
+      const code = raw.slice(1).split("/")[0]?.trim();
+      if (!code) continue;
+      const program = findProgramByNameOrCode(config, code);
+      if (!program) continue;
+      for (const slot of programResolvedTimeSlots(program, termSlots)) {
+        if (seen.has(slot.start)) continue;
+        seen.add(slot.start);
+        candidates.push({ start: slot.start, end: slot.end });
+      }
+    }
+  }
+  if (!candidates.length) {
+    for (const slot of config.term.time_slots || []) {
+      const slotStart =
+        typeof slot === "string"
+          ? String(slot).trim().slice(0, 5)
+          : String(slot.start_time).slice(0, 5);
       const end =
         typeof slot === "string"
           ? add90m(slotStart)
           : String(slot.end_time).slice(0, 5);
-      return normalizeTimeToApi(end);
+      candidates.push({ start: slotStart, end });
     }
+  }
+  for (const slot of candidates) {
+    if (slot.start === start5) return normalizeTimeToApi(slot.end);
   }
   return normalizeTimeToApi(add90m(start5));
 }
@@ -522,7 +567,9 @@ function buildWeeklySingleEditPatch(
   if (edits.time !== undefined) {
     const start = normalizeTimeToApi(edits.time);
     patch.start_time = start;
-    patch.end_time = resolveEndTimeForStart(config, start);
+    patch.end_time = edits.endTime
+      ? normalizeTimeToApi(edits.endTime)
+      : resolveEndTimeForStart(config, start);
   }
   if (edits.weekday !== undefined) {
     patch.date = dateForWeekdayInWeek(meetingDate, edits.weekday, startingDay);
@@ -540,7 +587,9 @@ function patchSlotFromEdits(
   if (edits.time !== undefined) {
     const start = normalizeTimeToApi(edits.time);
     slot.start_time = start;
-    slot.end_time = resolveEndTimeForStart(config, start);
+    slot.end_time = edits.endTime
+      ? normalizeTimeToApi(edits.endTime)
+      : resolveEndTimeForStart(config, start);
   }
   if (edits.weekday !== undefined) {
     slot.weekday = termWeekdayKeyToWeekday(edits.weekday);
@@ -559,7 +608,9 @@ function patchOccurrenceFromEdits(
   if (edits.time !== undefined) {
     const start = normalizeTimeToApi(edits.time);
     patched.start_time = start;
-    patched.end_time = resolveEndTimeForStart(config, start);
+    patched.end_time = edits.endTime
+      ? normalizeTimeToApi(edits.endTime)
+      : resolveEndTimeForStart(config, start);
   }
   if (edits.weekday !== undefined) {
     patched.date = dateForWeekdayInWeek(
@@ -781,20 +832,115 @@ export function weekdayOptionsForConfig(config: SchemaScheduleConfig) {
   }));
 }
 
-export function timeOptionsForConfig(config: SchemaScheduleConfig) {
-  return (config.term.time_slots || [])
-    .map((slot) => {
-      const start =
-        typeof slot === "string"
-          ? String(slot).trim().slice(0, 5)
-          : String(slot.start_time).slice(0, 5);
-      const end =
-        typeof slot === "string"
-          ? add90m(start)
-          : String(slot.end_time).slice(0, 5);
-      return { value: start, label: `${start}–${end}` };
-    })
+export const CUSTOM_TIME_OPTION_VALUE = "__custom__";
+
+/** Best-effort parse of a single time token: "900", "9", "930", "1330", "9:00". */
+export function parseLooseTimeToken(token: string): string | undefined {
+  const raw = String(token || "").trim();
+  if (!raw) return undefined;
+
+  if (/^\d{1,2}:\d{2}$/.test(raw)) {
+    const normalized = normalizeTypedHhmm(raw);
+    return /^\d{2}:\d{2}$/.test(normalized) ? normalized : undefined;
+  }
+
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return undefined;
+
+  let hours: number;
+  let minutes: number;
+
+  if (digits.length <= 2) {
+    hours = Number(digits);
+    minutes = 0;
+  } else if (digits.length === 3) {
+    hours = Number(digits.slice(0, 1));
+    minutes = Number(digits.slice(1));
+  } else {
+    hours = Number(digits.slice(0, 2));
+    minutes = Number(digits.slice(2, 4));
+  }
+
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return undefined;
+  if (hours > 23 || minutes > 59) return undefined;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+/**
+ * Parse search query into start/end.
+ * Examples: "900" → 09:00; "900 10" → 09:00–10:00; "900-1030" → 09:00–10:30.
+ */
+export function parseTimeRangeQuery(query: string): {
+  start?: string;
+  end?: string;
+} {
+  const raw = String(query || "").trim();
+  if (!raw) return {};
+
+  const parts = raw
+    .split(/[\s\-–—]+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (!parts.length) return {};
+
+  const start = parseLooseTimeToken(parts[0]!);
+  if (!start) return {};
+  if (parts.length === 1) return { start };
+
+  const end = parseLooseTimeToken(parts[1]!);
+  if (!end) return { start };
+  return { start, end };
+}
+
+export function customTimeOptionLabel(query: string): string {
+  const { start, end } = parseTimeRangeQuery(query);
+  if (start && end) return `Другое время (${start}–${end})`;
+  if (start) return `Другое время (${start}-...)`;
+  return "Другое время";
+}
+
+export function timeOptionsForConfig(
+  config: SchemaScheduleConfig,
+  groupIds?: string[],
+) {
+  const termSlots = termResolvedTimeSlots(config);
+  let slots = termSlots;
+  if (groupIds?.length) {
+    const groupToProgram = buildGroupToProgramMap(config);
+    const expanded = expandStudentGroupSelectors(config, groupIds);
+    const ids = expanded.length ? expanded : groupIds.map(String);
+    const lists = ids.map((gid) =>
+      programResolvedTimeSlots(groupToProgram.get(String(gid)), termSlots),
+    );
+    // Also resolve @PROGRAM tokens directly when expansion yields nothing useful.
+    for (const token of groupIds) {
+      const raw = String(token || "").trim();
+      if (!raw.startsWith("@")) continue;
+      const code = raw.slice(1).split("/")[0]?.trim();
+      if (!code) continue;
+      const program = findProgramByNameOrCode(config, code);
+      if (program) lists.push(programResolvedTimeSlots(program, termSlots));
+    }
+    const union = unionResolvedTimeSlots(lists);
+    if (union.length) slots = union;
+  }
+  return slots
+    .map((slot) => ({
+      value: slot.start,
+      end: slot.end,
+      label: `${slot.start}–${slot.end}`,
+    }))
     .filter((slot) => slot.value);
+}
+
+/** Normalize typed HH:mm (allows 9:00 → 09:00). Empty stays empty. */
+export function normalizeTypedHhmm(value: string): string {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  const match = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return raw;
+  return `${match[1]!.padStart(2, "0")}:${match[2]}`;
 }
 
 export function currentMeetingWeekday(meeting: Meeting): TermWeekdayKey {
@@ -825,6 +971,7 @@ export function meetingPatternBaseValues(
   return {
     room: String(slot.room ?? "").trim(),
     time: String(slot.start_time).slice(0, 5),
+    endTime: String(slot.end_time).slice(0, 5),
     weekday: (weekday || "Mon") as TermWeekdayKey,
     instructor: String(instructor ?? "").trim(),
     audience: [],

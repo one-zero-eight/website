@@ -785,6 +785,14 @@ export function ProgramDetails({
       target.year = Number.isFinite(parsed) ? parsed : null;
     }),
   );
+  const timeSlots = formatTermTimeSlots(program?.time_slots ?? undefined);
+  const timeSlotsField = useBlurSaveField(timeSlots, (value) =>
+    updateProgram((target) => {
+      const parsed = parseTermTimeSlotsText(value);
+      target.time_slots = parsed.length ? parsed : null;
+    }),
+  );
+  const timeSlotsTextareaRef = useAutosizeTextareaRef(timeSlotsField.value);
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
@@ -809,6 +817,16 @@ export function ProgramDetails({
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Год</span>
             <input className={detailInputClass} {...yearField} />
+          </label>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Таймслоты программы</span>
+            <textarea
+              ref={timeSlotsTextareaRef}
+              className={detailTimeSlotsTextareaClass}
+              {...timeSlotsField}
+              onKeyDown={handleEscapeBlur}
+              placeholder="Пусто = слоты семестра. Пример: 09:10-10:40, 10:50-12:20"
+            />
           </label>
 
           <SettingsDetailNestedList
