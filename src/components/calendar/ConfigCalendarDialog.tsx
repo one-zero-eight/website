@@ -8,7 +8,7 @@ import { TargetForExport } from "@/api/schedule/types.ts";
 import { useState } from "react";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
 import { LinkedCard } from "@/components/schedule/linked-card/LinkedCard.tsx";
-import { ImportModal } from "@/components/calendar/ImportModal.tsx";
+import { ImportModal } from "@/components/calendar/import";
 
 export function ConfigCalendarDialog({
   open,
@@ -17,7 +17,10 @@ export function ConfigCalendarDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
+  const { data: scheduleUser, refetch } = $schedule.useQuery(
+    "get",
+    "/users/me",
+  );
   const { data: predefined } = $schedule.useQuery(
     "get",
     "/users/me/predefined",
@@ -111,7 +114,8 @@ export function ConfigCalendarDialog({
             <LinkedCard
               key={linkedCalendar?.id}
               name={linkedCalendar?.name}
-              alias={linkedCalendar?.alias || ""}
+              alias={linkedCalendar?.alias}
+              url={linkedCalendar?.url}
               description={linkedCalendar?.description}
             />
           );
@@ -124,7 +128,7 @@ export function ConfigCalendarDialog({
           onClick={() => {
             setImportModalOpen(true);
           }}
-          className="underline"
+          className="underline underline-offset-4"
         >
           import your own calendars
         </button>{" "}
@@ -144,6 +148,10 @@ export function ConfigCalendarDialog({
       <ImportModal
         open={importModalOpen}
         onOpenChange={setImportModalOpen}
+        onSubmit={async () => {
+          setImportModalOpen(false);
+          await refetch();
+        }}
         aboveModal
       />
     </Modal>

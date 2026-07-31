@@ -14,7 +14,6 @@ interface ICalFeedMeta {
   format: "ics"; // for EventSourceApi
   internalState?: InternalState; // HACK. TODO: use classes in future
   color: string; // Default color for events from this feed
-  ics?: string; // for import
   sourceLink?: string;
   updatedAt?: string;
   eventGroup?: any;

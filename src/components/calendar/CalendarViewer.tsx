@@ -81,6 +81,8 @@ export function CalendarViewer({
   EventPopover = CalendarEventPopover,
   views = defaultViews.map(({ id }) => id),
   customViews = [],
+  onEventSourceSuccess,
+  isHidden,
 }: {
   urls: URLType[];
   extraEvents?: EventInput[];
@@ -90,6 +92,11 @@ export function CalendarViewer({
   EventPopover?: ComponentType<ScheduleDialogProps>;
   views?: string[];
   customViews?: CalendarCustomView[];
+  onEventSourceSuccess?: (
+    eventsInput: EventInput[],
+    response?: Response,
+  ) => void;
+  isHidden?: boolean;
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
   const isMobile = useMediaQuery("(max-width: 767px)");
@@ -259,6 +266,7 @@ export function CalendarViewer({
 
           return input;
         }}
+        eventSourceSuccess={onEventSourceSuccess}
         progressiveEventRendering={true}
         timeZone="UTC+0" // Use the same timezone for everyone
         plugins={[
@@ -508,6 +516,7 @@ export function CalendarViewer({
       className={cn(
         isFullPage ? "flex h-full flex-col overflow-clip" : "",
         isLoading && "calendar-loading",
+        isHidden && "hidden",
       )}
     >
       <div className="flex flex-none flex-nowrap items-center justify-between gap-2 overflow-x-auto px-4 pt-3 pb-4">
