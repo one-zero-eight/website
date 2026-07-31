@@ -452,10 +452,9 @@ export function ValidationMatches({
               const key = getKey(m);
               const isActive = activeCompletedKey === key;
               return (
-                <button
-                  type="button"
+                <div
                   key={m.game_id || `${key}-${i}`}
-                  className="bg-base-200 rounded-box cursor-pointer border border-[#712BB2]/30 p-3 text-left"
+                  className="bg-base-200 rounded-box cursor-pointer border border-[#712BB2]/30 p-3"
                   onClick={() =>
                     setActiveCompletedKey((prev) => (prev === key ? null : key))
                   }
@@ -474,7 +473,7 @@ export function ValidationMatches({
                     </span>
                   </div>
                   {isActive && <div className="mt-2 flex justify-end gap-2" />}
-                </button>
+                </div>
               );
             })}
           </div>

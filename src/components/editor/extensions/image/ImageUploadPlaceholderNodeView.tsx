@@ -141,11 +141,6 @@ export function ImageUploadPlaceholderNodeView({
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
         onClick={handleClick}
-        onKeyDown={(e) => {
-          if (e.key !== "Enter" && e.key !== " ") return;
-          e.preventDefault();
-          handleClick();
-        }}
       >
         {isUploading ? (
           <div className="flex flex-col items-center gap-2">

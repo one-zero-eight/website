@@ -380,12 +380,6 @@ const AudienceCheckboxRow = forwardRef(function AudienceCheckboxRow(
         onHighlight();
         onToggle();
       }}
-      onKeyDown={(e) => {
-        if (e.key !== "Enter" && e.key !== " ") return;
-        e.preventDefault();
-        onHighlight();
-        onToggle();
-      }}
     >
       <input
         type="checkbox"

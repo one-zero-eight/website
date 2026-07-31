@@ -82,11 +82,6 @@ export function ClickableDragHandle({ editor }: { editor: Editor }) {
   return (
     <div
       onClick={handleClick}
-      onKeyDown={(e) => {
-        if (e.key !== "Enter" && e.key !== " ") return;
-        e.preventDefault();
-        handleClick(e as unknown as React.MouseEvent);
-      }}
       className="absolute top-4 -left-2 z-10 hidden md:block"
     >
       <DragHandle
