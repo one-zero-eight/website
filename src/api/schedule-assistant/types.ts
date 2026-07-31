@@ -583,6 +583,30 @@ export interface components {
        * @default true
        */
       check_instructor_preference: boolean;
+      /**
+       * Count Touching Room
+       * @description Treat back-to-back room slots that only touch at an endpoint as room conflicts
+       * @default false
+       */
+      count_touching_room: boolean;
+      /**
+       * Count Touching Teacher
+       * @description Treat back-to-back teacher slots that only touch at an endpoint as teacher conflicts
+       * @default false
+       */
+      count_touching_teacher: boolean;
+      /**
+       * Count Touching Group
+       * @description Treat back-to-back group slots that only touch at an endpoint as group conflicts
+       * @default false
+       */
+      count_touching_group: boolean;
+      /**
+       * Count Touching Student
+       * @description Treat back-to-back student slots that only touch at an endpoint as student conflicts
+       * @default false
+       */
+      count_touching_student: boolean;
     };
     /** CheckResults */
     CheckResults: {

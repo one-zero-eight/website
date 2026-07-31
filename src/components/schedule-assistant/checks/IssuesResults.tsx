@@ -10,6 +10,15 @@ import {
   sortIssuesByTypeOrder,
   type IssueTypeFilter,
 } from "@/components/schedule-assistant/checks/checksModel.ts";
+import {
+  buildInstructorsById,
+  buildMeetingInstanceIndex,
+} from "@/components/schedule-assistant/checks/issueMeetings.ts";
+import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
+import {
+  buildCoursesToSections,
+  buildMeetings,
+} from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { useEffect, useMemo } from "react";
 
 export function IssuesResults({
@@ -20,6 +29,19 @@ export function IssuesResults({
   hasRun: boolean;
 }) {
   const { selectedIssueType, setSelectedIssueType } = useChecksSession();
+  const { config } = useConfig();
+
+  const meetingIndex = useMemo(() => {
+    if (!config) return buildMeetingInstanceIndex([]);
+    return buildMeetingInstanceIndex(
+      buildMeetings(config, buildCoursesToSections(config)),
+    );
+  }, [config]);
+
+  const instructorsById = useMemo(
+    () => buildInstructorsById(config?.instructors),
+    [config?.instructors],
+  );
 
   const countsByType = useMemo(() => countIssuesByType(issues), [issues]);
 
@@ -104,7 +126,12 @@ export function IssuesResults({
 
       <div className="flex flex-col">
         {filteredIssues.map((issue, index) => (
-          <IssueListItem key={`${selectedIssueType}-${index}`} issue={issue} />
+          <IssueListItem
+            key={`${selectedIssueType}-${index}`}
+            issue={issue}
+            meetingIndex={meetingIndex}
+            instructorsById={instructorsById}
+          />
         ))}
       </div>
     </div>

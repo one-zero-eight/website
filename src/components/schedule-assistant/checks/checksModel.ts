@@ -15,6 +15,10 @@ export const DEFAULT_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_per_week: true,
   check_instructor_id: true,
   check_instructor_preference: true,
+  count_touching_room: false,
+  count_touching_teacher: false,
+  count_touching_group: false,
+  count_touching_student: false,
 };
 
 export const ALL_CHECK_PARAMETERS: SchemaCheckParameters = {
@@ -29,6 +33,10 @@ export const ALL_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_per_week: true,
   check_instructor_id: true,
   check_instructor_preference: true,
+  count_touching_room: false,
+  count_touching_teacher: false,
+  count_touching_group: false,
+  count_touching_student: false,
 };
 
 export const NO_CHECK_PARAMETERS: SchemaCheckParameters = {
@@ -43,24 +51,38 @@ export const NO_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_per_week: false,
   check_instructor_id: false,
   check_instructor_preference: false,
+  count_touching_room: false,
+  count_touching_teacher: false,
+  count_touching_group: false,
+  count_touching_student: false,
 };
 
 type CheckParameterKey = keyof SchemaCheckParameters;
 
+export type CountTouchingKey =
+  | "count_touching_room"
+  | "count_touching_teacher"
+  | "count_touching_group"
+  | "count_touching_student";
+
 export const CHECK_OPTIONS: {
-  key: CheckParameterKey;
+  key: Exclude<CheckParameterKey, CountTouchingKey>;
   label: string;
   description: string;
+  countTouchingKey?: CountTouchingKey;
+  slow?: boolean;
 }[] = [
   {
     key: "check_room",
     label: "Аудитории",
     description: "Пересечения занятий в одной аудитории",
+    countTouchingKey: "count_touching_room",
   },
   {
     key: "check_teacher",
     label: "Преподаватели",
     description: "Конфликты преподавания и обучения",
+    countTouchingKey: "count_touching_teacher",
   },
   {
     key: "check_capacity",
@@ -71,21 +93,25 @@ export const CHECK_OPTIONS: {
     key: "check_group",
     label: "Группы",
     description: "Пересечения расписания одной группы",
+    countTouchingKey: "count_touching_group",
   },
   {
     key: "check_student",
     label: "Студенты",
     description: "Студент в нескольких группах с пересечениями",
+    countTouchingKey: "count_touching_student",
   },
   {
     key: "check_outlook",
     label: "Outlook",
     description: "Конфликты с бронированиями в Outlook",
+    slow: true,
   },
   {
     key: "check_unbooked",
     label: "Бронирования",
     description: "Занятия без соответствующего бронирования",
+    slow: true,
   },
   {
     key: "check_unplaced",
