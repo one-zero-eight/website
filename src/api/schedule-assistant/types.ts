@@ -443,6 +443,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Me */
+    get: operations["users_get_me"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1176,6 +1193,19 @@ export interface components {
        * @description List of nested Item objects for complex location patterns
        */
       NEST?: components["schemas"]["Item"][] | null;
+    };
+    /** MeResponse */
+    MeResponse: {
+      /**
+       * Email
+       * @description Innopolis email of the authenticated user
+       */
+      email: string;
+      /**
+       * Is Moderator
+       * @description Whether the user may modify schedule-assistant data
+       */
+      is_moderator: boolean;
     };
     /** OccurrencePlacement */
     OccurrencePlacement: {
@@ -1917,6 +1947,7 @@ export type SchemaInstructorSlotPreferenceEntry =
   components["schemas"]["InstructorSlotPreferenceEntry"];
 export type SchemaIssue = components["schemas"]["Issue"];
 export type SchemaItem = components["schemas"]["Item"];
+export type SchemaMeResponse = components["schemas"]["MeResponse"];
 export type SchemaOccurrencePlacement =
   components["schemas"]["OccurrencePlacement"];
 export type SchemaOutlookIssue = components["schemas"]["OutlookIssue"];
@@ -3085,6 +3116,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ConfigChangeEventSummary"][];
+        };
+      };
+    };
+  };
+  users_get_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MeResponse"];
         };
       };
     };
