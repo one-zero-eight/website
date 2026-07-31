@@ -31,7 +31,7 @@ function dateOnly(value: string | null | undefined) {
 }
 
 function groupsKey(groups: string[]) {
-  return [...groups].sort().join("|");
+  return [...groups].sort((a, b) => a.localeCompare(b)).join("|");
 }
 
 export function extractMeetingsFromIssue(

@@ -130,7 +130,10 @@ export function getMeetingBookingIntersection(
     viewedUserIds,
   );
 
-  return { slotKeys: [...slotKeys].sort(), maxCount };
+  return {
+    slotKeys: [...slotKeys].sort((a, b) => a.localeCompare(b)),
+    maxCount,
+  };
 }
 
 export function getBestMeetingSlotKey(
@@ -161,5 +164,5 @@ export function getBestMeetingSlotKey(
     return null;
   }
 
-  return [...slotKeys].sort()[0] ?? null;
+  return [...slotKeys].sort((a, b) => a.localeCompare(b))[0] ?? null;
 }

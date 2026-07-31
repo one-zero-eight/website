@@ -22,7 +22,7 @@ type GameData = {
 };
 
 function matchKey(a: string, b: string) {
-  return [a, b].sort().join("-");
+  return [a, b].sort((a, b) => a.localeCompare(b)).join("-");
 }
 
 function computeValStandings(

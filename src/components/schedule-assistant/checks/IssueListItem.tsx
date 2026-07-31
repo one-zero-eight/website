@@ -31,7 +31,7 @@ function uniqueMeetings(meetings: ReturnType<typeof extractMeetingsFromIssue>) {
         : meeting.placement.weekday,
       meeting.start_time,
       meeting.room ?? "",
-      [...meeting.groups].sort().join(","),
+      [...meeting.groups].sort((a, b) => a.localeCompare(b)).join(","),
     ].join("\0");
     if (seen.has(key)) continue;
     seen.add(key);

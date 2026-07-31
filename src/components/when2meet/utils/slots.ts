@@ -111,18 +111,20 @@ export function generateTimeSlots(
 }
 
 export function formatMeetingDates(dateIds: string[]): MeetingDate[] {
-  return [...dateIds].sort().map((dateId) => {
-    const date = new Date(`${dateId}T12:00:00`);
+  return [...dateIds]
+    .sort((a, b) => a.localeCompare(b))
+    .map((dateId) => {
+      const date = new Date(`${dateId}T12:00:00`);
 
-    return {
-      id: dateId,
-      monthDay: date.toLocaleDateString("en", {
-        month: "short",
-        day: "numeric",
-      }),
-      weekDay: date.toLocaleDateString("en", { weekday: "short" }),
-    };
-  });
+      return {
+        id: dateId,
+        monthDay: date.toLocaleDateString("en", {
+          month: "short",
+          day: "numeric",
+        }),
+        weekDay: date.toLocaleDateString("en", { weekday: "short" }),
+      };
+    });
 }
 
 export function formatDateRangeLabel(dates: MeetingDate[]) {
@@ -160,7 +162,7 @@ export function slotKeysToAvailability(slotKeys: Iterable<string>) {
   const availability: Availability = {};
 
   for (const [dateId, times] of slotsByDate) {
-    const sortedTimes = [...times].sort();
+    const sortedTimes = [...times].sort((a, b) => a.localeCompare(b));
     const ranges: TimeRangeSelection[] = [];
 
     let rangeStart = sortedTimes[0];

@@ -26,7 +26,7 @@ function isSelectable(item: CalendarItem) {
 }
 
 function getInitialMonth(selectedDates: Set<string>) {
-  const sortedDates = [...selectedDates].sort();
+  const sortedDates = [...selectedDates].sort((a, b) => a.localeCompare(b));
 
   if (sortedDates.length === 0) {
     return new Date();
