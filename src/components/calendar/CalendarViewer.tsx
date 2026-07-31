@@ -41,12 +41,19 @@ export default function CalendarViewer({
   initialView = "listMonth",
   viewId = "",
   isFullPage = false,
+  onEventSourceSuccess,
+  isHidden,
 }: {
   urls: URLType[];
   extraEvents?: EventInput[];
   initialView?: string;
   viewId?: string;
   isFullPage?: boolean;
+  onEventSourceSuccess?: (
+    eventsInput: EventInput[],
+    response?: Response,
+  ) => void;
+  isHidden?: boolean;
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
   const academicCalendarRef = useRef(academicCalendar);
@@ -159,6 +166,7 @@ export default function CalendarViewer({
 
           return input;
         }}
+        eventSourceSuccess={onEventSourceSuccess}
         progressiveEventRendering={true}
         timeZone="UTC+0" // Use the same timezone for everyone
         plugins={[
@@ -416,6 +424,7 @@ export default function CalendarViewer({
       className={cn(
         isFullPage ? "h-full overflow-clip" : "",
         isLoading && "calendar-loading",
+        isHidden && "hidden",
       )}
     >
       {calendarComponent}
