@@ -1,5 +1,6 @@
 import { addDays } from "@fullcalendar/core/internal";
 import { IcalExpander } from "@/components/calendar/iCalendarPlugin/ical-expander/IcalExpander";
+import ICAL from "ical.js";
 import { slotKeyToDateRange } from "./api-slots.ts";
 import { getSlotKey } from "./slots.ts";
 
@@ -7,6 +8,15 @@ export type PersonalCalendarEvent = {
   title: string;
   start: Date;
   end: Date;
+};
+
+type IcalExpandedResult = {
+  events: ICAL.Event[];
+  occurrences: {
+    item: ICAL.Event;
+    startDate: ICAL.Time;
+    endDate: ICAL.Time;
+  }[];
 };
 
 function getAuthHeaders() {
@@ -35,7 +45,7 @@ export function getMeetingCalendarRange(dateIds: string[]) {
     return null;
   }
 
-  const sortedDateIds = [...dateIds].sort();
+  const sortedDateIds = [...dateIds].sort((a, b) => a.localeCompare(b));
   const start = new Date(`${sortedDateIds[0]}T00:00:00`);
   const lastDateId = sortedDateIds[sortedDateIds.length - 1];
   const end = new Date(`${lastDateId}T23:59:59`);
@@ -65,7 +75,10 @@ async function fetchEventsFromIcsUrl(
 
   const expandedRangeStart = addDays(rangeStart, -1);
   const expandedRangeEnd = addDays(rangeEnd, 1);
-  const expanded = expander.between(expandedRangeStart, expandedRangeEnd);
+  const expanded = expander.between(
+    expandedRangeStart,
+    expandedRangeEnd,
+  ) as IcalExpandedResult;
   const events: PersonalCalendarEvent[] = [];
 
   for (const event of expanded.events) {
