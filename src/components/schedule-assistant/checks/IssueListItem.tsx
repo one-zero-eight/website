@@ -2,13 +2,12 @@ import type {
   SchemaIssue,
   SchemaInstructor,
 } from "@/api/schedule-assistant/types.ts";
-import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
-  buildInstructorsById,
   extractMeetingsFromIssue,
   formatInstructorLabel,
   formatScheduledMeetingWhen,
   resolveMeetingInstanceId,
+  type MeetingInstanceIndex,
 } from "@/components/schedule-assistant/checks/issueMeetings.ts";
 import {
   getIssueMetric,
@@ -16,14 +15,8 @@ import {
   ISSUE_TYPE_HEADINGS,
 } from "@/components/schedule-assistant/checks/checksModel.ts";
 import { CHECKS_RETURN_FROM } from "@/components/schedule-assistant/checks/checksNavigation.ts";
-import {
-  buildCoursesToSections,
-  buildMeetings,
-  type Meeting,
-} from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { cn } from "@/lib/ui/cn";
 import { useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
 
 function uniqueMeetings(meetings: ReturnType<typeof extractMeetingsFromIssue>) {
   const seen = new Set<string>();
@@ -49,15 +42,15 @@ function uniqueMeetings(meetings: ReturnType<typeof extractMeetingsFromIssue>) {
 
 function MeetingNavigateButton({
   scheduled,
-  allMeetings,
+  meetingIndex,
   instructorsById,
 }: {
   scheduled: ReturnType<typeof extractMeetingsFromIssue>[number];
-  allMeetings: Meeting[];
+  meetingIndex: MeetingInstanceIndex;
   instructorsById: Map<string, SchemaInstructor>;
 }) {
   const navigate = useNavigate();
-  const instanceId = resolveMeetingInstanceId(scheduled, allMeetings);
+  const instanceId = resolveMeetingInstanceId(scheduled, meetingIndex);
   const groupsLabel = scheduled.groups.join(" / ") || "—";
   const instructorLabel = formatInstructorLabel(
     scheduled.instructor,
@@ -122,21 +115,17 @@ function InstructorNavigateButton({ instructorId }: { instructorId: string }) {
   );
 }
 
-export function IssueListItem({ issue }: { issue: SchemaIssue }) {
-  const { config } = useConfig();
+export function IssueListItem({
+  issue,
+  meetingIndex,
+  instructorsById,
+}: {
+  issue: SchemaIssue;
+  meetingIndex: MeetingInstanceIndex;
+  instructorsById: Map<string, SchemaInstructor>;
+}) {
   const severity = getIssueSeverity(issue);
   const metric = getIssueMetric(issue);
-
-  const allMeetings = useMemo(() => {
-    if (!config) return [];
-    return buildMeetings(config, buildCoursesToSections(config));
-  }, [config]);
-
-  const instructorsById = useMemo(
-    () => buildInstructorsById(config?.instructors),
-    [config?.instructors],
-  );
-
   const meetings = uniqueMeetings(extractMeetingsFromIssue(issue));
 
   return (
@@ -172,7 +161,7 @@ export function IssueListItem({ issue }: { issue: SchemaIssue }) {
             <MeetingNavigateButton
               key={`${issue.issue_type}-${index}`}
               scheduled={scheduled}
-              allMeetings={allMeetings}
+              meetingIndex={meetingIndex}
               instructorsById={instructorsById}
             />
           ))}

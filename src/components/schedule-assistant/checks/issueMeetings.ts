@@ -6,6 +6,7 @@ import type {
 import type { Meeting } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import {
   dayKey,
+  everyWeekdayPhraseRu,
   todayIsoDate,
   weekdayLabelRu,
   weeklyPatternDayKey,
@@ -78,22 +79,91 @@ export function scheduledMeetingMatches(
   return dayKey(meeting.date) === weekdayKey;
 }
 
-export function resolveMeetingInstanceId(
-  scheduled: SchemaScheduledMeeting,
-  allMeetings: Meeting[],
-): string | null {
-  const matches = allMeetings.filter(
-    (meeting) =>
-      !meeting.cancelled && scheduledMeetingMatches(meeting, scheduled),
-  );
-  if (!matches.length) return null;
+function meetingIdentityKey(parts: {
+  course: string;
+  tag: string;
+  start: string | null | undefined;
+  room: string | null | undefined;
+  instructor: string | string[] | null | undefined;
+  groups: string[];
+}) {
+  return [
+    parts.course,
+    parts.tag,
+    timeKey(parts.start),
+    String(parts.room || "").trim(),
+    instructorKey(parts.instructor),
+    groupsKey(parts.groups),
+  ].join("\0");
+}
 
+export type MeetingInstanceIndex = Map<string, Meeting[]>;
+
+export function buildMeetingInstanceIndex(
+  allMeetings: Meeting[],
+): MeetingInstanceIndex {
+  const index: MeetingInstanceIndex = new Map();
+  for (const meeting of allMeetings) {
+    if (meeting.cancelled) continue;
+    const key = meetingIdentityKey({
+      course: meeting.course,
+      tag: meeting.tag,
+      start: meeting.start,
+      room: meeting.room,
+      instructor: meeting.instructors,
+      groups: meeting.groups,
+    });
+    const bucket = index.get(key);
+    if (bucket) bucket.push(meeting);
+    else index.set(key, [meeting]);
+  }
+  return index;
+}
+
+function pickInstanceId(matches: Meeting[]): string | null {
+  if (!matches.length) return null;
   const today = todayIsoDate();
   const sorted = [...matches].sort((left, right) =>
     left.date.localeCompare(right.date),
   );
   const upcoming = sorted.find((meeting) => meeting.date >= today);
   return (upcoming ?? sorted[0]).instance_id;
+}
+
+export function resolveMeetingInstanceId(
+  scheduled: SchemaScheduledMeeting,
+  allMeetings: Meeting[] | MeetingInstanceIndex,
+): string | null {
+  if (Array.isArray(allMeetings)) {
+    return pickInstanceId(
+      allMeetings.filter(
+        (meeting) =>
+          !meeting.cancelled && scheduledMeetingMatches(meeting, scheduled),
+      ),
+    );
+  }
+
+  const key = meetingIdentityKey({
+    course: scheduled.course_name,
+    tag: scheduled.component_tag,
+    start: scheduled.start_time,
+    room: scheduled.room,
+    instructor: scheduled.instructor,
+    groups: scheduled.groups,
+  });
+  const candidates = allMeetings.get(key) ?? [];
+  if (scheduled.placement.kind === "occurrence") {
+    const date = dateOnly(scheduled.placement.date);
+    return pickInstanceId(
+      candidates.filter((meeting) => dateOnly(meeting.date) === date),
+    );
+  }
+
+  const weekdayKey = weeklyPatternDayKey(String(scheduled.placement.weekday));
+  if (!weekdayKey) return null;
+  return pickInstanceId(
+    candidates.filter((meeting) => dayKey(meeting.date) === weekdayKey),
+  );
 }
 
 export function formatRuDate(dateStr: string) {
@@ -117,11 +187,9 @@ export function formatScheduledMeetingWhen(scheduled: SchemaScheduledMeeting) {
     return `${weekday} ${formatRuDate(scheduled.placement.date)} ${timeRange}${roomSuffix}`;
   }
 
-  const weekday = weekdayLabelRu(
-    weeklyPatternDayKey(String(scheduled.placement.weekday)) ?? "",
-  );
-  const weekdayLower = weekday.charAt(0).toLowerCase() + weekday.slice(1);
-  return `Каждый ${weekdayLower} ${timeRange}${roomSuffix}`;
+  const weekdayKey =
+    weeklyPatternDayKey(String(scheduled.placement.weekday)) ?? "";
+  return `${everyWeekdayPhraseRu(weekdayKey)} ${timeRange}${roomSuffix}`;
 }
 
 export function formatInstructorLabel(
