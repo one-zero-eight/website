@@ -67,6 +67,11 @@ function FileItemCard({
   return (
     <div
       onClick={() => onShowDetails(file.slug)}
+      onKeyDown={(e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        onShowDetails(file.slug);
+      }}
       className="bg-base-200 hover:bg-base-300 rounded-box flex cursor-pointer flex-col gap-3 px-4 py-3 transition-colors sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="min-w-0">
@@ -85,6 +90,7 @@ function FileItemCard({
       <div
         className="flex shrink-0 items-center gap-2"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <CopyLinkButton text={buildJoinLink(file.slug)} />
       </div>

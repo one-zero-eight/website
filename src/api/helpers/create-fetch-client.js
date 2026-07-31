@@ -453,7 +453,7 @@ export function createPathBasedClient(clientOptions) {
  * @type {import("./create-fetch-client.js").serializePrimitiveParam}
  */
 export function serializePrimitiveParam(name, value, options) {
-  if (value === undefined || value === null) {
+  if (value == null) {
     return "";
   }
   if (typeof value === "object") {
@@ -580,7 +580,7 @@ export function createQuerySerializer(options) {
     if (queryParams && typeof queryParams === "object") {
       for (const name in queryParams) {
         const value = queryParams[name];
-        if (value === undefined || value === null) {
+        if (value == null) {
           continue;
         }
         if (Array.isArray(value)) {

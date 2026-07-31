@@ -50,11 +50,7 @@ export function CalloutTypePicker({ editor }: { editor: Editor }) {
   );
 
   function handleSelect(type: string, index: number) {
-    if (editorState.isCallout) {
-      editor.chain().focus().setCallout({ type }).run();
-    } else {
-      editor.chain().focus().setCallout({ type }).run();
-    }
+    editor.chain().focus().setCallout({ type }).run();
     setIsOpen(false);
     setActiveIndex(index);
   }
