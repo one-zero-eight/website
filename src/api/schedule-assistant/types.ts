@@ -898,6 +898,50 @@ export interface components {
       /** Instructor Id */
       instructor_id: string;
     };
+    /** InstructorListItem */
+    InstructorListItem: {
+      /**
+       * Id
+       * @description Instructor unique identifier
+       */
+      id: string;
+      /**
+       * Name En
+       * @description English display name
+       */
+      name_en?: string | null;
+      /**
+       * Name Ru
+       * @description Russian display name
+       */
+      name_ru?: string | null;
+      /**
+       * Email
+       * @description Work email when known
+       */
+      email?: string | null;
+      /**
+       * Alias
+       * @description Short handle or Telegram-style alias from staff roster
+       */
+      alias?: string | null;
+      /**
+       * Position
+       * @description Staff position from roster (for example, Professor, Visiting)
+       */
+      position?: string | null;
+      /**
+       * Slot Preferences
+       * @description Sparse weekday+slot preference grid; omitted cells are neutral
+       */
+      slot_preferences?: components["schemas"]["InstructorSlotPreferenceEntry"][];
+      /**
+       * Meetings Count
+       * @description Placed meetings in the current term; weekly patterns expand by +1 per week
+       * @default 0
+       */
+      meetings_count: number;
+    };
     /**
      * InstructorPreferenceIssue
      * @description Занятие назначено преподавателю в нежелательную (discouraged) ячейку сетки.
@@ -1841,6 +1885,8 @@ export type SchemaInstructorBannedSlotIssue =
   components["schemas"]["InstructorBannedSlotIssue"];
 export type SchemaInstructorIdIssue =
   components["schemas"]["InstructorIdIssue"];
+export type SchemaInstructorListItem =
+  components["schemas"]["InstructorListItem"];
 export type SchemaInstructorPreferenceIssue =
   components["schemas"]["InstructorPreferenceIssue"];
 export type SchemaInstructorSlotPreferenceEntry =
@@ -2508,7 +2554,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Instructor"][];
+          "application/json": components["schemas"]["InstructorListItem"][];
         };
       };
     };
