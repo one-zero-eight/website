@@ -1,8 +1,9 @@
 import { $schedule } from "@/api/schedule";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import ScheduleLinkInput from "@/components/calendar/ScheduleLinkInput.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
+import { ImportColorsPalette } from "@/components/calendar/import/ColorsPalette.tsx";
 
 function toAliasPart(value: string) {
   return value
@@ -15,50 +16,39 @@ function toAliasPart(value: string) {
 export function ImportModal({
   open,
   onOpenChange,
+  onSubmit,
+  prevAlias,
+  prevName = "",
+  prevDescription,
+  prevUrl,
   aboveModal = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSubmit: () => void;
+  prevAlias?: string | null;
+  prevName?: string | null;
+  prevDescription?: string | null;
+  prevUrl?: string | null;
   aboveModal?: boolean;
 }) {
   const { data: eventsUser } = $schedule.useQuery("get", "/users/me");
   const { mutate: addLink } = $schedule.useMutation("post", "/users/me/linked");
 
-  const colorsMenuRef = useRef<HTMLDivElement>(null);
-  const chooseColorButtonRef = useRef<HTMLButtonElement>(null);
+  const [calendarURL, setCalendarURL] = useState(prevUrl ?? "");
 
-  const [calendarURL, setCalendarURL] = useState("");
-  const [calendarName, setCalendarName] = useState("");
-  const [calendarDescription, setCalendarDescription] = useState("");
+  const [calendarName, setCalendarName] = useState(prevName ?? "");
+  const [calendarDescription, setCalendarDescription] = useState(
+    prevDescription ?? "",
+  );
   const [calendarColor, setCalendarColor] = useState("#9747ff");
+  const [showColors, setShowColors] = useState(false);
+  const [isCalendarChecked, setIsCalendarChecked] = useState(false);
 
   const username = toAliasPart(eventsUser?.email ?? "") || "user";
   const normalizedCalendarName = toAliasPart(calendarName) || "calendar";
 
   const [showPreview, setShowPreview] = useState(true);
-  const [showColors, setShowColors] = useState(false);
-
-  useEffect(() => {
-    const listener = (event: MouseEvent | TouchEvent) => {
-      if (
-        !colorsMenuRef.current ||
-        colorsMenuRef.current.contains(event.target as Node) ||
-        !chooseColorButtonRef.current ||
-        chooseColorButtonRef.current.contains(event.target as Node)
-      ) {
-        return;
-      }
-      setShowColors(false);
-    };
-
-    document.addEventListener("mousedown", listener);
-    document.addEventListener("touchstart", listener);
-
-    return () => {
-      document.removeEventListener("mousedown", listener);
-      document.removeEventListener("touchstart", listener);
-    };
-  }, []);
 
   return (
     <Modal
@@ -73,18 +63,20 @@ export function ImportModal({
         schedule changes.
       </div>
       <form
-        onSubmit={() =>
-          addLink({
+        onSubmit={async (e) => {
+          e.preventDefault();
+          await addLink({
             body: {
-              alias: `${username}_${normalizedCalendarName}`,
+              alias: prevAlias ?? `${username}_${normalizedCalendarName}`,
               url: calendarURL,
               name: calendarName,
               description: calendarDescription,
               color: calendarColor,
               is_active: true,
             },
-          })
-        }
+          });
+          await onSubmit();
+        }}
         className="text-base-content/75"
       >
         <label htmlFor="calendarName" className="ml-1">
@@ -95,7 +87,8 @@ export function ImportModal({
           value={calendarName}
           onChange={(e) => setCalendarName(e.target.value)}
           placeholder="Name for your calendar..."
-          className="bg-base-200 mb-3 w-full grow rounded-xl p-2 focus:outline-none"
+          className="input bg-base-200 mb-3 w-full grow rounded-xl border-0 p-2 text-base outline-none"
+          disabled={!!prevName}
         />
         <label htmlFor="calendarURL" className="ml-1">
           Calendar URL
@@ -103,7 +96,10 @@ export function ImportModal({
         <ScheduleLinkInput
           id="calendarURL"
           url={calendarURL}
-          setURL={setCalendarURL}
+          setURL={(url) => {
+            setCalendarURL(url);
+            setIsCalendarChecked(false);
+          }}
         />
         <label htmlFor="description" className="ml-1">
           Description
@@ -117,37 +113,15 @@ export function ImportModal({
           placeholder="Description for your calendar..."
         />
         <div className="relative">
-          <button
-            type="button"
-            className="mb-7 ml-1"
-            onClick={() => setShowColors((showColors) => !showColors)}
-            ref={chooseColorButtonRef}
-          >
-            Choose color
-          </button>
-          {showColors && (
-            <div
-              ref={colorsMenuRef}
-              className="bg-base-300 absolute -top-45 left-0 z-10 grid w-fit grid-cols-4 rounded-md p-2 shadow-xl md:-top-14 md:left-30 md:grid-cols-6"
-            >
-              {colors.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  className={`m-0.75 h-5 w-5 rounded-full`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => setCalendarColor(color)}
-                >
-                  {color === calendarColor && (
-                    <span className="icon-[mdi--tick] text-sm" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
+          <ImportColorsPalette
+            calendarColor={calendarColor}
+            setCalendarColor={setCalendarColor}
+            showColors={showColors}
+            setShowColors={setShowColors}
+          />
         </div>
         {calendarURL.length > 0 && (
-          <div className="mt-2 flex justify-between px-3">
+          <div className="mt-2 flex items-start justify-between px-3">
             <button
               type="button"
               className="link link-primary text-md no-underline hover:underline"
@@ -155,14 +129,23 @@ export function ImportModal({
             >
               {showPreview ? "Hide preview" : "Show preview"}
             </button>
-            <button type="submit" className="btn btn-primary btn-md">
-              Import
+            <button
+              type="submit"
+              className="btn btn-primary btn-md"
+              disabled={
+                calendarName.length === 0 ||
+                !isCalendarChecked ||
+                (calendarURL === prevUrl &&
+                  prevDescription === calendarDescription)
+              }
+            >
+              Submit
             </button>
           </div>
         )}
       </form>
       {/* Calendar itself */}
-      {showPreview && calendarURL.length > 0 && (
+      {calendarURL.length > 0 && (
         <Calendar
           urls={[
             {
@@ -171,35 +154,10 @@ export function ImportModal({
             },
           ]}
           viewId="popup"
+          onEventSourceSuccess={() => setIsCalendarChecked(true)}
+          isHidden={!showPreview}
         />
       )}
     </Modal>
   );
 }
-
-const colors = [
-  "brown",
-  "cadetblue",
-  "chocolate",
-  "darkcyan",
-  "darkgreen",
-  "darkmagenta",
-  "darkolivegreen",
-  "darkred",
-  "darkslateblue",
-  "darkslategray",
-  "dimgray",
-  "firebrick",
-  "forestgreen",
-  "gray",
-  "indianred",
-  "lightslategray",
-  "maroon",
-  "mediumvioletred",
-  "midnightblue",
-  "indigo",
-  "rebeccapurple",
-  "seagreen",
-  "teal",
-  "#9747ff",
-];
