@@ -28,7 +28,7 @@ const InstructorListRow = memo(function InstructorListRow({
   onSelect,
 }: {
   instructor: InstructorSearchItem;
-  term: ReturnType<typeof useTermQuery>["data"];
+  term: NonNullable<ReturnType<typeof useTermQuery>["data"]> | undefined;
   selected: boolean;
   onSelect: (instructorIndex: number) => void;
 }) {
@@ -83,7 +83,7 @@ function InstructorListSection({
 }: {
   title: string;
   instructors: InstructorSearchItem[];
-  term: ReturnType<typeof useTermQuery>["data"];
+  term: NonNullable<ReturnType<typeof useTermQuery>["data"]> | undefined;
   selectedSelectionId: string;
   onSelect: (instructorIndex: number) => void;
   className?: string;
@@ -126,7 +126,8 @@ export function InstructorsTabContent() {
     isError,
     error,
   } = useInstructorsQuery();
-  const { data: term } = useTermQuery();
+  const { data: termData } = useTermQuery();
+  const term = termData ?? undefined;
   const { mutate: createInstructor, isPending: isCreating } =
     useCreateInstructorMutation();
   const { selectedSelectionId, selectItem } = useSelection();
@@ -146,16 +147,12 @@ export function InstructorsTabContent() {
   );
 
   const visibleInstructors: InstructorSearchItem[] = useMemo(() => {
-    const list = instructors ?? [];
     const trimmed = deferredSearchQuery.trim();
     const indexed = trimmed
       ? searchInstructors(searchIndex, trimmed)
-      : list.map((instructor, instructorIndex) => ({
-          ...instructor,
-          instructorIndex,
-        }));
+      : searchIndex.items;
     return sortInstructors(indexed, sortMode);
-  }, [deferredSearchQuery, instructors, searchIndex, sortMode]);
+  }, [deferredSearchQuery, searchIndex, sortMode]);
 
   const activeInstructors = useMemo(
     () => visibleInstructors.filter((item) => (item.meetings_count ?? 0) > 0),

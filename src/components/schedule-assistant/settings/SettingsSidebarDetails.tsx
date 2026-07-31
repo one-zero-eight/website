@@ -1169,7 +1169,7 @@ export function InstructorDetails({
               Предпочтения по времени
             </span>
             <InstructorPreferenceGrid
-              term={term}
+              term={term ?? undefined}
               preferences={instructor?.slot_preferences ?? []}
               onChange={(slot_preferences) =>
                 patchInstructor({ slot_preferences })
