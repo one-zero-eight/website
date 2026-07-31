@@ -62,6 +62,24 @@ export function weekdayLabelRu(day: string) {
   return WEEKDAY_LABEL_RU[day as (typeof DAY_NAMES)[number]] ?? day;
 }
 
+/** «Каждый понедельник» / «Каждую субботу» / «Каждое воскресенье». */
+const EVERY_WEEKDAY_PHRASE_RU: Record<(typeof DAY_NAMES)[number], string> = {
+  Mon: "Каждый понедельник",
+  Tue: "Каждый вторник",
+  Wed: "Каждую среду",
+  Thu: "Каждый четверг",
+  Fri: "Каждую пятницу",
+  Sat: "Каждую субботу",
+  Sun: "Каждое воскресенье",
+};
+
+export function everyWeekdayPhraseRu(day: string) {
+  return (
+    EVERY_WEEKDAY_PHRASE_RU[day as (typeof DAY_NAMES)[number]] ??
+    `Каждый ${weekdayLabelRu(day).toLowerCase()}`
+  );
+}
+
 /** Один источник текстов `title` для таблицы и для HTML панели деталей. */
 export const scheduleAssistantDetailTooltips = {
   room: "Показать аудиторию в панели деталей",
@@ -611,28 +629,35 @@ export function buildColumns(config: SchemaScheduleConfig) {
   }
 
   const columns: Column[] = [];
-  for (const [yearLabel, groupsSet] of Object.entries(meta.byProgram)) {
-    const groups = Array.from(groupsSet)
-      .filter((g) => usedGroups.has(g))
-      .sort();
-    for (const gid of groups) {
-      columns.push({
-        yearLabel,
-        groupId: gid,
-        groupLabel: meta.groupNames[gid] || gid,
-        programCode: meta.programCodeByLabel[yearLabel],
-      });
+  const known = new Set<string>();
+  for (const section of getScheduleSections(config)) {
+    for (const program of section.programs || []) {
+      const yearLabel = program.name || section.code;
+      const programCode =
+        String(program.code || "").trim() ||
+        meta.programCodeByLabel[yearLabel] ||
+        undefined;
+      for (const track of normalizeTracksFromSectionProgram(program)) {
+        for (const gid of track.groups || []) {
+          if (!usedGroups.has(gid) || known.has(gid)) continue;
+          columns.push({
+            yearLabel,
+            groupId: gid,
+            groupLabel: meta.groupNames[gid] || gid,
+            programCode,
+          });
+          known.add(gid);
+        }
+      }
     }
   }
-  const known = new Set(columns.map((c) => c.groupId));
   for (const gid of Array.from(usedGroups).sort()) {
-    if (!known.has(gid)) {
-      columns.push({
-        yearLabel: "Other",
-        groupId: gid,
-        groupLabel: meta.groupNames[gid] || gid,
-      });
-    }
+    if (known.has(gid)) continue;
+    columns.push({
+      yearLabel: "Other",
+      groupId: gid,
+      groupLabel: meta.groupNames[gid] || gid,
+    });
   }
   return columns;
 }
