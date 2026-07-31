@@ -18,7 +18,6 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type KeyboardEvent,
   type MouseEvent,
 } from "react";
 import { useMediaQuery } from "usehooks-ts";
@@ -450,17 +449,6 @@ export const BookingTimeline = forwardRef<
     else console.warn(`Click on undefined booking with ID "${bookingId}".`);
   }
 
-  function handleBookingKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    event.preventDefault();
-    const bookingId = event.currentTarget.dataset.bookingId;
-    if (!bookingId) return;
-
-    const booking = actualBookings.get(bookingId);
-    if (booking) onBookingClick(booking);
-    else console.warn(`Click on undefined booking with ID "${bookingId}".`);
-  }
-
   const timelineStyle = {
     "--sidebar-width": px(sidebarWidth),
     "--header-height": px(HEADER_HEIGHT),
@@ -643,7 +631,6 @@ export const BookingTimeline = forwardRef<
                           title={booking.title}
                           data-booking-id={booking.id}
                           onClick={handleBookingClick}
-                          onKeyDown={handleBookingKeyDown}
                         >
                           <span>{sanitizeBookingTitle(booking.title)}</span>
                         </div>
