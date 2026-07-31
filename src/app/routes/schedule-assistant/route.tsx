@@ -1,4 +1,6 @@
 import { useMyAccessToken } from "@/api/helpers/access-token.ts";
+import { $scheduleAssistant } from "@/api/schedule-assistant";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { RequireAuth } from "@/components/common/AuthWall.tsx";
 import { ScheduleConfigStatus } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { ChecksSessionProvider } from "@/components/schedule-assistant/checks/checksSession.tsx";
@@ -25,6 +27,49 @@ function RequireAccessToken({ children }: PropsWithChildren) {
   return children;
 }
 
+function ModeratorWall() {
+  return (
+    <div className="flex min-h-0 flex-1 items-center justify-center p-8">
+      <div className="max-w-md text-center">
+        <span className="icon-[material-symbols--lock-outline] text-base-content/40 mx-auto mb-4 block text-5xl" />
+        <h2 className="mb-2 text-2xl font-medium">Нет доступа</h2>
+        <p className="text-base-content/75 text-base">
+          Составление расписания доступно только модераторам.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function RequireModerator({ children }: PropsWithChildren) {
+  const { data, isPending, isError, error } = $scheduleAssistant.useQuery(
+    "get",
+    "/me",
+  );
+
+  if (isPending) {
+    return (
+      <div className="flex min-h-0 flex-1 items-center justify-center p-8">
+        <span className="loading loading-spinner loading-lg" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-0 flex-1 items-center justify-center p-8">
+        <p className="text-error text-center">{formatApiErrorMessage(error)}</p>
+      </div>
+    );
+  }
+
+  if (!data.is_moderator) {
+    return <ModeratorWall />;
+  }
+
+  return children;
+}
+
 function RouteComponent() {
   return (
     <div
@@ -43,15 +88,17 @@ function RouteComponent() {
 
       <RequireAuth>
         <RequireAccessToken>
-          <ScheduleConfigStatus>
-            <ChecksSessionProvider>
-              <div className="bg-base-200/40 relative flex min-h-0 flex-1 flex-col overflow-hidden">
-                <Outlet />
+          <RequireModerator>
+            <ScheduleConfigStatus>
+              <ChecksSessionProvider>
+                <div className="bg-base-200/40 relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                  <Outlet />
 
-                <MainFloatingMenu />
-              </div>
-            </ChecksSessionProvider>
-          </ScheduleConfigStatus>
+                  <MainFloatingMenu />
+                </div>
+              </ChecksSessionProvider>
+            </ScheduleConfigStatus>
+          </RequireModerator>
         </RequireAccessToken>
       </RequireAuth>
     </div>
