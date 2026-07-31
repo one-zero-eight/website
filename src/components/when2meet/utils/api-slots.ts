@@ -33,7 +33,7 @@ export function deriveTimeRangeFromSlots(timeSlots: string[]) {
     return { ...DEFAULT_DERIVED_TIME_RANGE };
   }
 
-  const sortedTimes = [...timeSlots].sort();
+  const sortedTimes = [...timeSlots].sort((a, b) => a.localeCompare(b));
   const start = sortedTimes[0];
   const end = minutesToTimeEnd(
     parseTimeToMinutes(sortedTimes[sortedTimes.length - 1]) +
@@ -64,7 +64,7 @@ export function slotKeysToBackendSlots(
 ) {
   return [...slotKeys]
     .map((slotKey) => lookup.get(slotKey) ?? slotKeyToBackend(slotKey))
-    .sort();
+    .sort((a, b) => a.localeCompare(b));
 }
 
 export function backendSlotToSlotKey(slot: string) {
@@ -103,8 +103,8 @@ export function parseBackendSlots(slots: string[]) {
 
   return {
     slotKeys,
-    dates: [...dates].sort(),
-    timeSlots: [...times].sort(),
+    dates: [...dates].sort((a, b) => a.localeCompare(b)),
+    timeSlots: [...times].sort((a, b) => a.localeCompare(b)),
   };
 }
 
@@ -122,7 +122,7 @@ export function buildSlotsFromDatesAndRange(
     }
   }
 
-  return slots.sort();
+  return slots.sort((a, b) => a.localeCompare(b));
 }
 
 export const FULL_DAY_TIME_RANGE = {
@@ -208,7 +208,7 @@ export function collapseHalfHourSlotKeysToHourly(slotKeys: Iterable<string>) {
 }
 
 function getTimeSlotDurationMinutes(timeSlots: string[]) {
-  const sortedTimes = [...timeSlots].sort();
+  const sortedTimes = [...timeSlots].sort((a, b) => a.localeCompare(b));
 
   for (let index = 1; index < sortedTimes.length; index++) {
     const previousMinutes = parseTimeToMinutes(sortedTimes[index - 1]);

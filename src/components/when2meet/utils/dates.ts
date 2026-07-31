@@ -86,7 +86,7 @@ export function getLatestDate(dates: Set<string>): Date {
     return new Date(Date.now() + 60 * 60 * 1000);
   }
 
-  const latestStr = [...dates].sort().at(-1);
+  const latestStr = [...dates].sort((a, b) => a.localeCompare(b)).at(-1);
   return latestStr
     ? new Date(latestStr)
     : new Date(Date.now() + 60 * 60 * 1000);

@@ -92,7 +92,7 @@ export type MeetingOriginalValues = {
 export function meetingAudienceEqual(a: string[], b: string[]) {
   const normalize = (items: string[]) =>
     [...new Set(items.map((item) => String(item || "").trim()).filter(Boolean))]
-      .sort()
+      .sort((a, b) => a.localeCompare(b))
       .join("|");
   return normalize(a) === normalize(b);
 }
@@ -133,8 +133,12 @@ export function audienceTokensEquivalent(
   b: string[],
 ) {
   if (meetingAudienceEqual(a, b)) return true;
-  const expandedA = [...new Set(expandStudentGroupSelectors(config, a))].sort();
-  const expandedB = [...new Set(expandStudentGroupSelectors(config, b))].sort();
+  const expandedA = [...new Set(expandStudentGroupSelectors(config, a))].sort(
+    (a, b) => a.localeCompare(b),
+  );
+  const expandedB = [...new Set(expandStudentGroupSelectors(config, b))].sort(
+    (a, b) => a.localeCompare(b),
+  );
   if (!expandedA.length || !expandedB.length) return false;
   return expandedA.join("|") === expandedB.join("|");
 }
