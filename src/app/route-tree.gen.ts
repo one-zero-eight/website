@@ -53,8 +53,8 @@ import { Route as With_menuTabletennisEventsRouteImport } from "./routes/_with_m
 import { Route as With_menuStudentAffairsSignOutRouteImport } from "./routes/_with_menu/student-affairs/sign-out";
 import { Route as With_menuStudentAffairsSignInRouteImport } from "./routes/_with_menu/student-affairs/sign-in";
 import { Route as With_menuSportTrainerRouteImport } from "./routes/_with_menu/sport/trainer";
+import { Route as With_menuSportHistoryRouteImport } from "./routes/_with_menu/sport/history";
 import { Route as With_menuSportFaqRouteImport } from "./routes/_with_menu/sport/faq";
-import { Route as With_menuSportCalendarRouteImport } from "./routes/_with_menu/sport/calendar";
 import { Route as With_menuSearchAskRouteImport } from "./routes/_with_menu/search/ask";
 import { Route as With_menuSearchActRouteImport } from "./routes/_with_menu/search/act";
 import { Route as With_menuScheduleCategoryRouteImport } from "./routes/_with_menu/schedule/$category";
@@ -317,14 +317,14 @@ const With_menuSportTrainerRoute = With_menuSportTrainerRouteImport.update({
   path: "/sport/trainer",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuSportHistoryRoute = With_menuSportHistoryRouteImport.update({
+  id: "/sport/history",
+  path: "/sport/history",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
 const With_menuSportFaqRoute = With_menuSportFaqRouteImport.update({
   id: "/sport/faq",
   path: "/sport/faq",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
-const With_menuSportCalendarRoute = With_menuSportCalendarRouteImport.update({
-  id: "/sport/calendar",
-  path: "/sport/calendar",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menuSearchAskRoute = With_menuSearchAskRouteImport.update({
@@ -530,8 +530,8 @@ export interface FileRoutesByFullPath {
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/search/act": typeof With_menuSearchActRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
-  "/sport/calendar": typeof With_menuSportCalendarRoute;
   "/sport/faq": typeof With_menuSportFaqRoute;
+  "/sport/history": typeof With_menuSportHistoryRoute;
   "/sport/trainer": typeof With_menuSportTrainerRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
@@ -606,8 +606,8 @@ export interface FileRoutesByTo {
   "/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/search/act": typeof With_menuSearchActRoute;
   "/search/ask": typeof With_menuSearchAskRoute;
-  "/sport/calendar": typeof With_menuSportCalendarRoute;
   "/sport/faq": typeof With_menuSportFaqRoute;
+  "/sport/history": typeof With_menuSportHistoryRoute;
   "/sport/trainer": typeof With_menuSportTrainerRoute;
   "/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
@@ -685,8 +685,8 @@ export interface FileRoutesById {
   "/_with_menu/schedule/$category": typeof With_menuScheduleCategoryRoute;
   "/_with_menu/search/act": typeof With_menuSearchActRoute;
   "/_with_menu/search/ask": typeof With_menuSearchAskRoute;
-  "/_with_menu/sport/calendar": typeof With_menuSportCalendarRoute;
   "/_with_menu/sport/faq": typeof With_menuSportFaqRoute;
+  "/_with_menu/sport/history": typeof With_menuSportHistoryRoute;
   "/_with_menu/sport/trainer": typeof With_menuSportTrainerRoute;
   "/_with_menu/student-affairs/sign-in": typeof With_menuStudentAffairsSignInRoute;
   "/_with_menu/student-affairs/sign-out": typeof With_menuStudentAffairsSignOutRoute;
@@ -764,8 +764,8 @@ export interface FileRouteTypes {
     | "/schedule/$category"
     | "/search/act"
     | "/search/ask"
-    | "/sport/calendar"
     | "/sport/faq"
+    | "/sport/history"
     | "/sport/trainer"
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
@@ -840,8 +840,8 @@ export interface FileRouteTypes {
     | "/schedule/$category"
     | "/search/act"
     | "/search/ask"
-    | "/sport/calendar"
     | "/sport/faq"
+    | "/sport/history"
     | "/sport/trainer"
     | "/student-affairs/sign-in"
     | "/student-affairs/sign-out"
@@ -918,8 +918,8 @@ export interface FileRouteTypes {
     | "/_with_menu/schedule/$category"
     | "/_with_menu/search/act"
     | "/_with_menu/search/ask"
-    | "/_with_menu/sport/calendar"
     | "/_with_menu/sport/faq"
+    | "/_with_menu/sport/history"
     | "/_with_menu/sport/trainer"
     | "/_with_menu/student-affairs/sign-in"
     | "/_with_menu/student-affairs/sign-out"
@@ -1275,18 +1275,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuSportTrainerRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/sport/history": {
+      id: "/_with_menu/sport/history";
+      path: "/sport/history";
+      fullPath: "/sport/history";
+      preLoaderRoute: typeof With_menuSportHistoryRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/sport/faq": {
       id: "/_with_menu/sport/faq";
       path: "/sport/faq";
       fullPath: "/sport/faq";
       preLoaderRoute: typeof With_menuSportFaqRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
-    "/_with_menu/sport/calendar": {
-      id: "/_with_menu/sport/calendar";
-      path: "/sport/calendar";
-      fullPath: "/sport/calendar";
-      preLoaderRoute: typeof With_menuSportCalendarRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/search/ask": {
@@ -1535,8 +1535,8 @@ interface With_menuRouteRouteChildren {
   With_menuScheduleCategoryRoute: typeof With_menuScheduleCategoryRoute;
   With_menuSearchActRoute: typeof With_menuSearchActRoute;
   With_menuSearchAskRoute: typeof With_menuSearchAskRoute;
-  With_menuSportCalendarRoute: typeof With_menuSportCalendarRoute;
   With_menuSportFaqRoute: typeof With_menuSportFaqRoute;
+  With_menuSportHistoryRoute: typeof With_menuSportHistoryRoute;
   With_menuSportTrainerRoute: typeof With_menuSportTrainerRoute;
   With_menuStudentAffairsSignInRoute: typeof With_menuStudentAffairsSignInRoute;
   With_menuStudentAffairsSignOutRoute: typeof With_menuStudentAffairsSignOutRoute;
@@ -1602,8 +1602,8 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuScheduleCategoryRoute: With_menuScheduleCategoryRoute,
   With_menuSearchActRoute: With_menuSearchActRoute,
   With_menuSearchAskRoute: With_menuSearchAskRoute,
-  With_menuSportCalendarRoute: With_menuSportCalendarRoute,
   With_menuSportFaqRoute: With_menuSportFaqRoute,
+  With_menuSportHistoryRoute: With_menuSportHistoryRoute,
   With_menuSportTrainerRoute: With_menuSportTrainerRoute,
   With_menuStudentAffairsSignInRoute: With_menuStudentAffairsSignInRoute,
   With_menuStudentAffairsSignOutRoute: With_menuStudentAffairsSignOutRoute,

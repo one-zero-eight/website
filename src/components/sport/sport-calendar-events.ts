@@ -1,4 +1,5 @@
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
+import { getTrainingStatusColor } from "@/components/sport/sport-checkin-utils.ts";
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import type { EventInput } from "@fullcalendar/core";
 
@@ -60,4 +61,25 @@ export function trainingScheduleToCalendarEvent(
 
 export function isSportCalendarEventId(id: string | undefined): boolean {
   return id?.startsWith(SPORT_CALENDAR_EVENT_ID_PREFIX) ?? false;
+}
+
+/** Event for the sport calendar list (fc-list) shown inside the Sport section. */
+export function trainingRowToListEvent(
+  row: SchemaTrainingInfoPersonalSchema,
+  trainerGroupIds: ReadonlySet<number>,
+): EventInput {
+  const training = row.training;
+
+  return {
+    id: String(training.id),
+    title: sportTrainingTitle({ training }),
+    start: parseSportEventDateForCalendar(training.start),
+    end: parseSportEventDateForCalendar(training.end),
+    allDay: training.is_all_day,
+    color: getTrainingStatusColor(row, trainerGroupIds),
+    extendedProps: {
+      location: training.training_location?.name ?? "",
+      row,
+    },
+  };
 }

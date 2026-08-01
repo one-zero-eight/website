@@ -1,5 +1,8 @@
 import { $sport } from "@/api/sport";
-import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
+import type {
+  SchemaTrainingInfoPersonalSchema,
+  SchemaTrainerInfoSchema,
+} from "@/api/sport/types.ts";
 import { SportStudentTrainingModal } from "@/components/sport/SportStudentTrainingModal.tsx";
 import { SportTrainerAttendanceModal } from "@/components/sport/SportTrainerAttendanceModal.tsx";
 import { SportTrainingsCalendarList } from "@/components/sport/SportTrainingsCalendarList.tsx";
@@ -11,25 +14,30 @@ import {
 import { useMemo, useState } from "react";
 
 const RECENT_TRAINING_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+const PAST_TRAININGS_LOOKBACK_MS = 8 * 7 * 24 * 60 * 60 * 1000;
 
 export function SportTrainerSection({
   enabled,
   studentId,
   trainerGroupIds,
+  trainerGroups,
 }: {
   enabled: boolean;
   studentId: number;
   trainerGroupIds: ReadonlySet<number>;
+  trainerGroups: SchemaTrainerInfoSchema["groups"];
 }) {
   const [selectedCurrent, setSelectedCurrent] =
     useState<SchemaTrainingInfoPersonalSchema | null>(null);
   const [selectedUpcoming, setSelectedUpcoming] =
     useState<SchemaTrainingInfoPersonalSchema | null>(null);
+  const [selectedPast, setSelectedPast] =
+    useState<SchemaTrainingInfoPersonalSchema | null>(null);
 
   const { start: periodStart, end: periodEnd } = useMemo(() => {
     const { end } = getSchedulePeriodBounds(0);
     const start = new Date(
-      startOfTodayMoscow().getTime() - RECENT_TRAINING_WINDOW_MS,
+      startOfTodayMoscow().getTime() - PAST_TRAININGS_LOOKBACK_MS,
     );
     return { start, end };
   }, []);
@@ -80,16 +88,46 @@ export function SportTrainerSection({
     );
   }, [trainerTrainings]);
 
+  const pastTrainings = useMemo(() => {
+    const now = Date.now();
+
+    return trainerTrainings
+      .filter(
+        (row) =>
+          new Date(row.training.end).getTime() <=
+          now - RECENT_TRAINING_WINDOW_MS,
+      )
+      .toReversed();
+  }, [trainerTrainings]);
+
   if (isError) {
     return (
       <div className="alert alert-error">
-        Trainer calendar could not be loaded.
+        Trainer schedule could not be loaded.
       </div>
     );
   }
 
   return (
     <>
+      {trainerGroups.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          <p className="text-base-content/55 text-xs font-bold tracking-widest uppercase">
+            Teaching groups
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {trainerGroups.map((group) => (
+              <span
+                key={group.id}
+                className="badge h-fit min-h-8 shrink-0 px-3 py-1.5 text-sm font-medium"
+              >
+                {group.display_name}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-3">
         <h2 className="text-3xl font-medium">Current Trainings</h2>
         <p className="text-base-content/60 text-sm">
@@ -103,6 +141,7 @@ export function SportTrainerSection({
             rows={currentTrainings}
             emptyText="No current trainings"
             compactEmpty
+            trainerGroupIds={trainerGroupIds}
             onSelect={setSelectedCurrent}
           />
         )}
@@ -117,7 +156,27 @@ export function SportTrainerSection({
             rows={upcomingTrainings}
             emptyText="No upcoming trainings"
             compactEmpty
+            trainerGroupIds={trainerGroupIds}
             onSelect={setSelectedUpcoming}
+          />
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-3xl font-medium">Past Trainings</h2>
+        <p className="text-base-content/60 text-sm">
+          Finished trainings from the last 8 weeks. Click a training to view or
+          update attendance.
+        </p>
+        {isPending ? (
+          <div className="skeleton h-40 w-full" />
+        ) : (
+          <SportTrainingsCalendarList
+            rows={pastTrainings}
+            emptyText="No past trainings"
+            compactEmpty
+            trainerGroupIds={trainerGroupIds}
+            onSelect={setSelectedPast}
           />
         )}
       </div>
@@ -141,6 +200,16 @@ export function SportTrainerSection({
           row={selectedUpcoming}
           studentId={studentId}
           trainerGroupIds={trainerGroupIds}
+        />
+      ) : null}
+
+      {selectedPast ? (
+        <SportTrainerAttendanceModal
+          open
+          onOpenChange={(open) => {
+            if (!open) setSelectedPast(null);
+          }}
+          row={selectedPast}
         />
       ) : null}
     </>

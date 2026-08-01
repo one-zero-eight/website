@@ -3,14 +3,14 @@ import { $sport } from "@/api/sport";
 import { useMySportAccessToken } from "@/api/helpers/sport-access-token.ts";
 import { AuthWall } from "@/components/common/AuthWall.tsx";
 import { SportFaqSection } from "@/components/sport/SportFaqSection.tsx";
+import { SportHistorySection } from "@/components/sport/SportHistorySection.tsx";
 import { SportProgressSection } from "@/components/sport/SportOverviewSection.tsx";
-import { SportPersonalCalendarSection } from "@/components/sport/SportPersonalCalendarSection.tsx";
 import { SportScheduleSection } from "@/components/sport/SportScheduleSection.tsx";
 import { SportTabs } from "@/components/sport/SportTabs.tsx";
 import { SportTrainerSection } from "@/components/sport/SportTrainerSection.tsx";
 import { useMemo } from "react";
 
-type SportTab = "schedule" | "calendar" | "trainer" | "faq";
+type SportTab = "schedule" | "history" | "trainer" | "faq";
 
 export function SportPage({ activeTab }: { activeTab: SportTab }) {
   const { me } = useMe();
@@ -107,15 +107,6 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
                 rel="noreferrer"
               >
                 Telegram bot
-              </a>{" "}
-              or{" "}
-              <a
-                href="https://sport.innopolis.university"
-                className="text-primary link"
-                target="_blank"
-                rel="noreferrer"
-              >
-                sport.innopolis.university
               </a>
               .
             </p>
@@ -126,7 +117,7 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-4">
+    <div className="flex w-full flex-col gap-6 px-4 py-4">
       <SportTabs isTrainer={isTrainer} />
 
       {activeTab === "schedule" ? (
@@ -134,6 +125,7 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
           <SportProgressSection
             hours={hours}
             currentSemester={currentSemester}
+            medicalGroup={profile.student_info?.medical_group}
           />
           {studentId != null ? (
             <SportScheduleSection
@@ -145,11 +137,10 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
         </>
       ) : null}
 
-      {activeTab === "calendar" && studentId != null ? (
-        <SportPersonalCalendarSection
+      {activeTab === "history" && studentId != null ? (
+        <SportHistorySection
           enabled={canQuerySport}
           studentId={Number(studentId)}
-          trainerGroupIds={trainerGroupIds}
         />
       ) : null}
 
@@ -158,6 +149,7 @@ export function SportPage({ activeTab }: { activeTab: SportTab }) {
           enabled={canQuerySport}
           studentId={Number(studentId)}
           trainerGroupIds={trainerGroupIds}
+          trainerGroups={profile.trainer_info?.groups ?? []}
         />
       ) : null}
 

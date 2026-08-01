@@ -1,5 +1,11 @@
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
 
+export const SPORT_TRAINING_STATUS_COLORS = {
+  trainer: "#F1C40F",
+  registered: "#8D4CF6",
+  unavailable: "#EF4444",
+} as const;
+
 export function isTrainerTraining(
   row: SchemaTrainingInfoPersonalSchema,
   trainerGroupIds: ReadonlySet<number>,
@@ -38,4 +44,28 @@ export function canShowCheckInButton(
   }
 
   return checkedIn || !isCheckInUnavailable(row, checkedIn);
+}
+
+/**
+ * Status color shown as the calendar list event dot:
+ * yellow when you train the group, purple when you're checked in,
+ * red when check-in is unavailable, otherwise the calendar's default color.
+ */
+export function getTrainingStatusColor(
+  row: SchemaTrainingInfoPersonalSchema,
+  trainerGroupIds: ReadonlySet<number>,
+): string | undefined {
+  if (isTrainerTraining(row, trainerGroupIds)) {
+    return SPORT_TRAINING_STATUS_COLORS.trainer;
+  }
+
+  if (row.checked_in) {
+    return SPORT_TRAINING_STATUS_COLORS.registered;
+  }
+
+  if (isCheckInUnavailable(row, row.checked_in)) {
+    return SPORT_TRAINING_STATUS_COLORS.unavailable;
+  }
+
+  return undefined;
 }
