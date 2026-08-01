@@ -1,0 +1,28 @@
+{
+  "name": "scm-commit-msg-from-file",
+  "displayName": "SCM Commit Message",
+  "description": "Copies repo-root .scm-commit-msg into the Source Control commit input.",
+  "version": "0.0.11",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "SCM Providers"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "scmCommitMsg.set",
+        "title": "Set SCM Commit Message from .scm-commit-msg"
+      }
+    ]
+  }
+}
