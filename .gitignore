@@ -28,6 +28,7 @@ yarn-error.log*
 
 # misc
 .DS_Store
+.scm-commit-msg
 
 # playwright
 /playwright-report/
