@@ -36,6 +36,14 @@ Project setup:
 - Lint, check, prettify: `pnpm run lint:fix`, `pnpm run typecheck`, `pnpm run prettify`.
 - Generate API types: `pnpm run gen:api` (most probably it is already generated, do not run it again).
 
+### Cursor Agent — Browser Automation
+
+For Cursor Agent only (Browser Automation / `cursor-ide-browser`):
+
+- Use the Cursor browser tab against https://local.innohassle.ru:3000 (or the route under test).
+- If the app is not authorized (signed-out UI, "Sign in" prompt, or auth-gated content), ask the user to sign in in that browser tab. Do not try to complete SSO/login yourself. This should be done once per session commonly.
+- If automation does not work, most probably user needs to enable it in the Cursor settings (Browser & Network).
+
 ### Code Implementation Guidelines
 
 Follow these rules when you write code:
