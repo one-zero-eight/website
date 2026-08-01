@@ -2,12 +2,12 @@ import {
   getMyAccessToken,
   invalidateMyAccessToken,
 } from "@/api/helpers/access-token.ts";
+import { Middleware } from "@/api/helpers/create-fetch-client";
 import {
   getRoomTvAccessToken,
   invalidateRoomTvAccessToken,
   isRoomTvPage,
 } from "@/api/helpers/room-tv-auth.ts";
-import { Middleware } from "@/api/helpers/create-fetch-client";
 
 function getAccessTokenForRequest() {
   if (isRoomTvPage()) {
@@ -22,7 +22,7 @@ export const authMiddleware: Middleware = {
     if (
       !request.url.startsWith("https://api.innohassle.ru/") &&
       !request.url.startsWith("http://localhost") &&
-      !request.url.startsWith("https://local.innohassle.ru:3000/")
+      !request.url.startsWith("https://local.innohassle.ru")
     )
       return;
 
@@ -39,7 +39,7 @@ export const authMiddleware: Middleware = {
     if (
       !response.url.startsWith("https://api.innohassle.ru/") &&
       !response.url.startsWith("http://localhost") &&
-      !response.url.startsWith("https://local.innohassle.ru:3000/")
+      !response.url.startsWith("https://local.innohassle.ru")
     )
       return;
 

@@ -35,6 +35,7 @@ Project setup:
 - Local development server is available at https://local.innohassle.ru:3000.
 - Lint, check, prettify: `pnpm run lint:fix`, `pnpm run typecheck`, `pnpm run prettify`.
 - Generate API types: `pnpm run gen:api` (most probably it is already generated, do not run it again).
+- For parallel branches / several frontend instances via git worktrees, see [WORKTREE.md](WORKTREE.md).
 
 ### Cursor Agent — Browser Automation
 

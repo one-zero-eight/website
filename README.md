@@ -70,6 +70,10 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 > [!IMPORTANT]
 > You must use HTTPS with domain https://local.innohassle.ru:3000 to access APIs with your account.
 
+### Git worktrees
+
+To work on several branches in parallel and run multiple frontend instances (different ports), see [WORKTREE.md](./WORKTREE.md).
+
 > [!TIP]
 > When the API types change, you can run `pnpm run gen:api` to generate new client types and functions.
 
