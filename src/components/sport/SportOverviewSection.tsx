@@ -6,9 +6,11 @@ import type {
 export function SportProgressSection({
   hours,
   currentSemester,
+  medicalGroup,
 }: {
   hours: SchemaStudentHoursSummarySchema | undefined;
   currentSemester: SchemaSemesterSchema | undefined;
+  medicalGroup?: string | null;
 }) {
   const required = hours?.required_hours ?? currentSemester?.required_hours;
 
@@ -52,6 +54,14 @@ export function SportProgressSection({
             />
           </div>
         </div>
+        {medicalGroup ? (
+          <p className="text-base-content/75 text-center text-sm">
+            Medical group:{" "}
+            <span className="text-base-content font-semibold">
+              {medicalGroup}
+            </span>
+          </p>
+        ) : null}
         {remaining > 0 ? (
           <p className="text-base-content/75 text-center text-sm">
             To pass the sport course you must get{" "}

@@ -3,7 +3,7 @@ import { SportPage } from "@/components/sport/SportPage.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_with_menu/sport/calendar")({
+export const Route = createFileRoute("/_with_menu/sport/history")({
   component: RouteComponent,
 });
 
@@ -11,15 +11,15 @@ function RouteComponent() {
   return (
     <>
       <Helmet>
-        <title>Sport personal calendar</title>
+        <title>Sport history</title>
         <meta
           name="description"
-          content="View sport trainings you are signed up for."
+          content="View your sport hours history across past semesters."
         />
       </Helmet>
 
       <Topbar title="Sport" />
-      <SportPage activeTab="calendar" />
+      <SportPage activeTab="history" />
     </>
   );
 }

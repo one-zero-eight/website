@@ -1,11 +1,13 @@
-import type { EventInput } from "@fullcalendar/core";
 import { scheduleTypes } from "@/api/schedule";
+import {
+  CALENDAR_LIST_EVENT_CLASS_NAMES,
+  CALENDAR_LIST_EVENT_TIME_FORMAT,
+  calculateAcademicWeek,
+  renderCalendarListEventContent,
+} from "@/components/calendar/calendar-list-view.tsx";
 import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
 import { ConfigCalendarDialog } from "@/components/calendar/ConfigCalendarDialog.tsx";
-import {
-  AcademicCalendar,
-  useMyAcademicCalendar,
-} from "@/components/dashboard/academic-calendar.tsx";
+import { useMyAcademicCalendar } from "@/components/dashboard/academic-calendar.tsx";
 import {
   DayHeaderContentArg,
   EventApi,
@@ -200,13 +202,7 @@ export default function CalendarViewer({
           iCalendarPlugin,
         ]}
         initialView={calendarView} // Default view
-        eventTimeFormat={{
-          // Use 24-hour format
-          hour: "2-digit",
-          minute: "2-digit",
-          meridiem: false,
-          hour12: false,
-        }}
+        eventTimeFormat={CALENDAR_LIST_EVENT_TIME_FORMAT}
         slotLabelFormat={{
           // Use 24-hour format
           hour: "2-digit",
@@ -250,7 +246,7 @@ export default function CalendarViewer({
         }}
         views={{
           listMonth: {
-            eventContent: renderEventListMonth,
+            eventContent: renderCalendarListEventContent,
             listDayFormat: (arg) => {
               if (arg.date.year === new Date().getFullYear()) {
                 // Show month, day, weekday
@@ -261,7 +257,7 @@ export default function CalendarViewer({
               }
             },
             listDaySideFormat: (arg) =>
-              `Week ${calculateWeek(academicCalendarRef.current, moment(arg.date).toDate())}`,
+              `Week ${calculateAcademicWeek(academicCalendarRef.current, moment(arg.date).toDate())}`,
           },
           timeGridWeek: {
             eventContent: renderEventTimeGridWeek,
@@ -311,7 +307,7 @@ export default function CalendarViewer({
         weekNumberFormat={{ week: "long" }} // Show "Week 1", not "W1"
         weekNumberClassNames="text-sm week-cell" // Small text size
         weekNumberCalculation={(d) =>
-          calculateWeek(academicCalendarRef.current, d)
+          calculateAcademicWeek(academicCalendarRef.current, d)
         } // Display academic week numbers
         weekNumberContent={(arg) => {
           return (
@@ -324,7 +320,7 @@ export default function CalendarViewer({
         contentHeight={isFullPage ? undefined : "auto"} // Do not add scrollbar on in-page calendars
         eventInteractive={true} // Make event tabbable
         expandRows={true}
-        eventClassNames="cursor-pointer text-sm rounded-md! bg-transparent! border-0! overflow-clip"
+        eventClassNames={CALENDAR_LIST_EVENT_CLASS_NAMES}
         eventClick={(info) => {
           info.jsEvent.preventDefault();
           info.jsEvent.stopPropagation();
@@ -473,17 +469,6 @@ export default function CalendarViewer({
   );
 }
 
-function renderEventListMonth({ event }: EventContentArg) {
-  return (
-    <div className="flex flex-wrap gap-x-1 text-left">
-      {event.title}
-      <span className="text-base-content/30 break-all">
-        {event.extendedProps.location}
-      </span>
-    </div>
-  );
-}
-
 function renderEventTimeGridWeek({
   event,
   borderColor,
@@ -573,27 +558,6 @@ function renderDayHeader({ date }: DayHeaderContentArg) {
       </span>
     </>
   );
-}
-
-function calculateWeek(
-  academicCalendar: AcademicCalendar | undefined,
-  date: Date,
-) {
-  if (!academicCalendar) {
-    return Infinity;
-  }
-
-  // Calculate academic week number
-  const semesterStart = new Date(academicCalendar.startDate).getTime(); // Monday, first day of first week
-  const semesterEnd = new Date(academicCalendar.endDate).getTime(); // Monday, the day after the last week
-
-  const time = date.getTime();
-  if (time < semesterStart || time >= semesterEnd) {
-    return Infinity; // Out of semester
-  }
-
-  const weekLength = 7 * 24 * 60 * 60 * 1000; // 7 days
-  return Math.floor((time - semesterStart) / weekLength) + 1;
 }
 
 function toCalendarSpace(date: Date): Date {
