@@ -1,5 +1,7 @@
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
+import Tooltip from "@/components/common/Tooltip.tsx";
+import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { useToast } from "@/components/toast";
 import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
@@ -10,11 +12,14 @@ import {
   minimizeAudienceTokens,
 } from "./audienceSelectorTree.ts";
 import {
+  formatAudienceTokenLabel,
   formatAudienceTokensLabel,
   meetingAudienceEqual,
 } from "./meetingEditUtils.ts";
 
 export function EditClassAudienceSummaryRow({
+  config,
+  tokens,
   displayLabel,
   disabled,
   changed,
@@ -24,6 +29,8 @@ export function EditClassAudienceSummaryRow({
   patternLabel,
   onEdit,
 }: {
+  config: SchemaScheduleConfig;
+  tokens: string[];
   displayLabel: string;
   disabled?: boolean;
   changed: boolean;
@@ -33,6 +40,21 @@ export function EditClassAudienceSummaryRow({
   patternLabel?: string;
   onEdit: () => void;
 }) {
+  const expandedGroups = useMemo(
+    () => expandStudentGroupSelectors(config, tokens),
+    [config, tokens],
+  );
+  const expandedTooltip = useMemo(() => {
+    if (!expandedGroups.length) return null;
+    return (
+      <div className="flex max-w-xs flex-col gap-0.5">
+        {expandedGroups.map((groupId) => (
+          <span key={groupId}>{formatAudienceTokenLabel(config, groupId)}</span>
+        ))}
+      </div>
+    );
+  }, [config, expandedGroups]);
+
   return (
     <div
       className={clsx(
@@ -43,7 +65,15 @@ export function EditClassAudienceSummaryRow({
     >
       <div className="flex flex-wrap items-start gap-2">
         <div className="text-base-content/70 min-w-0 flex-1 leading-snug wrap-break-word">
-          <span className="text-base-content/50">Группы:</span> {displayLabel}
+          <span className="inline-flex items-center gap-1">
+            <span className="text-base-content/50">Группы:</span>
+            {expandedTooltip ? (
+              <Tooltip content={expandedTooltip}>
+                <span className="icon-[material-symbols--info-outline-rounded] text-base-content/45 hover:text-base-content/70 cursor-help text-sm" />
+              </Tooltip>
+            ) : null}
+          </span>{" "}
+          {displayLabel}
         </div>
         <div className="flex shrink-0 items-center gap-1">
           {changed ? (

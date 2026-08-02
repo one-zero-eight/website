@@ -360,6 +360,8 @@ export function CreateClassModal({
         {selectedComponent && !perGroup ? (
           <>
             <EditClassAudienceSummaryRow
+              config={config}
+              tokens={audienceValue}
               displayLabel={audienceDisplayLabel}
               changed={false}
               originalLabel="—"

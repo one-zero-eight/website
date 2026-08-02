@@ -710,6 +710,40 @@ export function useDeleteProgramFromSection(
   return { deleteProgram, isPending, isError, error };
 }
 
+export function useMoveProgramInSection(sectionCode: string) {
+  const { data: term } = useTermQuery();
+  const {
+    mutate: updateTerm,
+    isPending,
+    isError,
+    error,
+  } = useUpdateTermMutation();
+
+  const moveProgram = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      if (!term || fromIndex === toIndex) return;
+      const nextTerm = structuredClone(term);
+      const section = (nextTerm.sections ?? []).find(
+        (candidate) => candidate.code === sectionCode,
+      );
+      if (!section?.programs) return;
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= section.programs.length ||
+        toIndex >= section.programs.length
+      )
+        return;
+      const [moved] = section.programs.splice(fromIndex, 1);
+      section.programs.splice(toIndex, 0, moved);
+      updateTerm({ body: nextTerm });
+    },
+    [sectionCode, term, updateTerm],
+  );
+
+  return { moveProgram, isPending, isError, error };
+}
+
 export function useRenameStudentGroup() {
   const { data: term } = useTermQuery();
   const { data: courses } = useCoursesQuery();

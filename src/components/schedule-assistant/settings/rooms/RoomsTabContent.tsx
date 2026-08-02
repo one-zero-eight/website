@@ -158,7 +158,7 @@ export function RoomsTabContent() {
           {groups.map((group) => (
             <div
               key={group.floor}
-              className="border-base-300 rounded-box border"
+              className="border-base-300 rounded-box overflow-hidden border"
             >
               <div className="bg-base-200/70 border-base-300 text-base-content/80 border-b px-2.5 py-1.5 text-xs font-semibold tracking-wide uppercase">
                 {group.floor}

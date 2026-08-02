@@ -552,6 +552,8 @@ export function EditClassModal({
         {perGroup ? null : (
           <>
             <EditClassAudienceSummaryRow
+              config={config}
+              tokens={audienceValue}
               displayLabel={audienceDisplayLabel}
               disabled={cancelChecked}
               changed={audienceChanged}

@@ -1,4 +1,7 @@
-import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
+import {
+  normalizeTracksFromSectionProgram,
+  programUsesExplicitTracks,
+} from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 import { resolveCourseUsageTargets } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { buildProgramsGroupsTreeViewSectionTabs } from "@/components/schedule-assistant/settings/groups/programsGroupsTreeView.ts";
 import type {
@@ -13,15 +16,30 @@ export type CourseUsageRow = SettingsListRow & {
   courseIndex: number;
 };
 
+/** Курсы, привязанные к конкретной студенческой группе. */
+export type CourseUsageGroupBucket = {
+  key: string;
+  groupId: string;
+  title: string;
+  courses: CourseUsageRow[];
+};
+
 export type CourseUsageTrackGroup = {
   key: string;
   title: string;
+  /** Курсы с аудиторией на уровне трека (`@program/track`). */
   courses: CourseUsageRow[];
+  /** Курсы с аудиторией — конкретная группа. */
+  groups: CourseUsageGroupBucket[];
 };
 
 export type CourseUsageProgramGroup = {
   key: string;
   title: string;
+  /** True when program has real `tracks[]` (not only top-level groups). */
+  hasExplicitTracks: boolean;
+  /** Курсы с аудиторией на всю программу (`@program`) — общие для треков. */
+  sharedCourses: CourseUsageRow[];
   tracks: CourseUsageTrackGroup[];
 };
 
@@ -30,6 +48,17 @@ export type CourseUsageSectionGroup = {
   title: string;
   programs: CourseUsageProgramGroup[];
 };
+
+type TrackUsageBucket = {
+  courses: CourseUsageRow[];
+  groups: Map<string, { title: string; courses: CourseUsageRow[] }>;
+};
+
+function dedupeCourses(courses: CourseUsageRow[]): CourseUsageRow[] {
+  return Array.from(new Map(courses.map((c) => [c.id, c])).values()).sort(
+    (a, b) => a.title.localeCompare(b.title, "ru"),
+  );
+}
 
 function buildCourseUsageRows(
   config: SchemaScheduleConfig | null,
@@ -56,31 +85,40 @@ function buildCourseUsageRows(
   );
 }
 
-export type CoursesTabSectionsResult = {
-  sections: CourseUsageSectionGroup[];
-  unassigned: CourseUsageRow[];
-};
-
 /** Дерево курсов по секциям конфига — только для UI вкладки «Курсы». */
 export function buildCoursesTabSections(
   config: SchemaScheduleConfig | null,
-): CoursesTabSectionsResult {
+): CourseUsageSectionGroup[] {
   const courseItems = buildCourseUsageRows(config);
-  if (!courseItems.length) return { sections: [], unassigned: [] };
+  if (!courseItems.length) return [];
 
   const courseByIndex = new Map<number, CourseUsageRow>();
   for (const item of courseItems) {
     courseByIndex.set(item.courseIndex, item);
   }
 
+  const groupNameById = new Map<string, string>();
+  for (const group of config?.students_groups || []) {
+    const code = String(group?.code || "").trim();
+    if (!code) continue;
+    groupNameById.set(code, String(group?.name || code));
+  }
+
   const groupToProgramTrack = new Map<
     string,
-    { programId: string; programTitle: string; trackName: string }
+    {
+      programId: string;
+      programTitle: string;
+      trackName: string;
+      groupTitle: string;
+      hasExplicitTracks: boolean;
+    }
   >();
   const programById = new Map<
     string,
-    { title: string; trackNames: string[] }
+    { title: string; trackNames: string[]; hasExplicitTracks: boolean }
   >();
+  const programHasExplicitTracks = new Map<string, boolean>();
 
   for (const section of getScheduleSections(config)) {
     if (!section?.code || !Array.isArray(section.programs)) continue;
@@ -88,22 +126,28 @@ export function buildCoursesTabSections(
     for (const program of section.programs) {
       const programId = String(program?.code || "").trim();
       const programTitle = String(program?.name || programId || sectionCode);
+      const hasExplicitTracks = programUsesExplicitTracks(program);
       const normalizedTracks = normalizeTracksFromSectionProgram(program);
       if (programId) {
+        programHasExplicitTracks.set(programId, hasExplicitTracks);
         programById.set(programId, {
           title: programTitle,
           trackNames: normalizedTracks.map((t) =>
             String(t?.name || "Без направления"),
           ),
+          hasExplicitTracks,
         });
       }
       for (const track of normalizedTracks) {
         const trackName = String(track?.name || "Без направления");
         for (const groupId of track?.groups || []) {
-          groupToProgramTrack.set(String(groupId), {
+          const id = String(groupId);
+          groupToProgramTrack.set(id, {
             programId,
             programTitle,
             trackName,
+            groupTitle: groupNameById.get(id) || id,
+            hasExplicitTracks,
           });
         }
       }
@@ -112,9 +156,34 @@ export function buildCoursesTabSections(
 
   const usageMap = new Map<
     string,
-    { title: string; tracks: Map<string, CourseUsageRow[]> }
+    {
+      title: string;
+      sharedCourses: CourseUsageRow[];
+      tracks: Map<string, TrackUsageBucket>;
+    }
   >();
   const unassigned: CourseUsageRow[] = [];
+
+  function ensureProgram(programId: string, programTitle: string) {
+    if (!usageMap.has(programId))
+      usageMap.set(programId, {
+        title: programTitle,
+        sharedCourses: [],
+        tracks: new Map(),
+      });
+    return usageMap.get(programId)!;
+  }
+
+  function ensureTrack(
+    programId: string,
+    programTitle: string,
+    trackTitle: string,
+  ): TrackUsageBucket {
+    const program = ensureProgram(programId, programTitle);
+    if (!program.tracks.has(trackTitle))
+      program.tracks.set(trackTitle, { courses: [], groups: new Map() });
+    return program.tracks.get(trackTitle)!;
+  }
 
   for (const [courseIndex, course] of (config?.courses || []).entries()) {
     const courseName = String(course?.name || "").trim();
@@ -135,7 +204,13 @@ export function buildCoursesTabSections(
           groupToProgramTrack,
         )) {
           seenTargets.add(
-            `${resolved.programId}|||${resolved.programTitle}|||${resolved.trackTitle}`,
+            [
+              resolved.programId,
+              resolved.programTitle,
+              resolved.trackTitle || "",
+              resolved.groupId || "",
+              resolved.groupTitle || "",
+            ].join("|||"),
           );
         }
       }
@@ -146,13 +221,55 @@ export function buildCoursesTabSections(
       continue;
     }
 
-    for (const target of seenTargets) {
-      const [programId, programTitle, trackTitle] = target.split("|||");
-      if (!usageMap.has(programId))
-        usageMap.set(programId, { title: programTitle, tracks: new Map() });
-      const trackMap = usageMap.get(programId)!.tracks;
-      if (!trackMap.has(trackTitle)) trackMap.set(trackTitle, []);
-      trackMap.get(trackTitle)!.push(courseItem);
+    const resolvedTargets = [...seenTargets].map((target) => {
+      const [programId, programTitle, trackTitle, groupId, groupTitle] =
+        target.split("|||");
+      return { programId, programTitle, trackTitle, groupId, groupTitle };
+    });
+
+    // Prefer broadest audience: program-level hides track/group; track-level hides groups.
+    const programsWithShared = new Set(
+      resolvedTargets
+        .filter((target) => !target.trackTitle)
+        .map((target) => target.programId),
+    );
+    const tracksWithTrackLevel = new Set(
+      resolvedTargets
+        .filter((target) => target.trackTitle && !target.groupId)
+        .map((target) => `${target.programId}|||${target.trackTitle}`),
+    );
+
+    for (const target of resolvedTargets) {
+      if (programsWithShared.has(target.programId) && target.trackTitle) {
+        continue;
+      }
+      if (
+        target.groupId &&
+        tracksWithTrackLevel.has(`${target.programId}|||${target.trackTitle}`)
+      ) {
+        continue;
+      }
+      if (!target.trackTitle) {
+        ensureProgram(target.programId, target.programTitle).sharedCourses.push(
+          courseItem,
+        );
+        continue;
+      }
+      const trackBucket = ensureTrack(
+        target.programId,
+        target.programTitle,
+        target.trackTitle,
+      );
+      if (target.groupId) {
+        if (!trackBucket.groups.has(target.groupId))
+          trackBucket.groups.set(target.groupId, {
+            title: target.groupTitle || target.groupId,
+            courses: [],
+          });
+        trackBucket.groups.get(target.groupId)!.courses.push(courseItem);
+      } else {
+        trackBucket.courses.push(courseItem);
+      }
     }
   }
 
@@ -160,17 +277,42 @@ export function buildCoursesTabSections(
     .map(([programId, payload]) => ({
       key: programId,
       title: payload.title,
+      hasExplicitTracks: programHasExplicitTracks.get(programId) ?? true,
+      sharedCourses: dedupeCourses(payload.sharedCourses),
       tracks: Array.from(payload.tracks.entries())
-        .map(([trackTitle, courses]) => ({
+        .map(([trackTitle, trackBucket]) => ({
           key: `${programId}-${trackTitle}`,
           title: trackTitle,
-          courses: Array.from(
-            new Map(courses.map((c) => [c.id, c])).values(),
-          ).sort((a, b) => a.title.localeCompare(b.title, "ru")),
+          courses: dedupeCourses(trackBucket.courses),
+          groups: Array.from(trackBucket.groups.entries())
+            .map(([groupId, groupBucket]) => ({
+              key: `${programId}-${trackTitle}-${groupId}`,
+              groupId,
+              title: groupBucket.title,
+              courses: dedupeCourses(groupBucket.courses),
+            }))
+            .sort((a, b) => a.title.localeCompare(b.title, "ru")),
         }))
         .sort((a, b) => a.title.localeCompare(b.title, "ru")),
     }))
     .sort((a, b) => a.title.localeCompare(b.title, "ru"));
+
+  if (unassigned.length) {
+    groups.push({
+      key: "unassigned",
+      title: "Без привязки к программе",
+      hasExplicitTracks: false,
+      sharedCourses: [],
+      tracks: [
+        {
+          key: "unassigned-track",
+          title: "Не определено",
+          courses: dedupeCourses(unassigned),
+          groups: [],
+        },
+      ],
+    });
+  }
 
   const sections = buildProgramsGroupsTreeViewSectionTabs(config);
   const sectionToPrograms = new Map<string, CourseUsageProgramGroup[]>();
@@ -198,10 +340,5 @@ export function buildCoursesTabSections(
     section.programs = sectionToPrograms.get(section.key) || [];
   }
 
-  return {
-    sections: orderedSections,
-    unassigned: Array.from(
-      new Map(unassigned.map((c) => [c.id, c])).values(),
-    ).sort((a, b) => a.title.localeCompare(b.title, "ru")),
-  };
+  return orderedSections;
 }

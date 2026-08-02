@@ -17,6 +17,7 @@ import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   useAddProgramToSection,
   useConfig,
+  useMoveProgramInSection,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   SettingsCreateField,
@@ -25,6 +26,7 @@ import {
 import {
   getSettingsSelectionKey,
   useSelection,
+  type SettingsSelection,
 } from "@/components/schedule-assistant/settings/useSelection.tsx";
 
 const STUDENT_GROUPS_SUBTAB_STORAGE_KEY =
@@ -39,9 +41,43 @@ const PROGRAM_KIND_OPTIONS = [
   },
 ] as const;
 
+function remapProgramIndex(
+  index: number,
+  fromIndex: number,
+  toIndex: number,
+): number {
+  if (index === fromIndex) return toIndex;
+  if (fromIndex < toIndex) {
+    if (index > fromIndex && index <= toIndex) return index - 1;
+  } else if (index >= toIndex && index < fromIndex) {
+    return index + 1;
+  }
+  return index;
+}
+
+function remapSelectionAfterProgramMove(
+  selection: SettingsSelection | null,
+  sectionCode: string,
+  fromIndex: number,
+  toIndex: number,
+): SettingsSelection | null {
+  if (!selection) return selection;
+  if (
+    selection.kind !== "program" &&
+    selection.kind !== "track" &&
+    selection.kind !== "group"
+  )
+    return selection;
+  if (selection.sectionCode !== sectionCode) return selection;
+  return {
+    ...selection,
+    programIndex: remapProgramIndex(selection.programIndex, fromIndex, toIndex),
+  };
+}
+
 export function GroupsTabContent() {
   const { config, isPending, isError, error } = useConfig();
-  const { selectedSelectionId, selectItem } = useSelection();
+  const { selectedSelectionId, selectedSelection, selectItem } = useSelection();
   const programsGroupsTreeView = useMemo(
     () => buildProgramsGroupsTreeView(config),
     [config],
@@ -100,6 +136,7 @@ export function GroupsTabContent() {
   }, [activeSectionKey]);
 
   const { addProgram, isPending: isAddingProgram } = useAddProgramToSection();
+  const { moveProgram } = useMoveProgramInSection(activeSectionKey);
   const [createOpen, setCreateOpen] = useState(false);
   const [createSectionCode, setCreateSectionCode] = useState("");
   const [newCode, setNewCode] = useState("");
@@ -138,6 +175,22 @@ export function GroupsTabContent() {
     setNewKind(SectionProgramKindAnyOf0.degree_year);
     setNewDegree("");
     setNewLanguage(SectionProgramLanguageAnyOf0.en);
+  }
+
+  function handleMoveProgram(fromIndex: number, toIndex: number) {
+    moveProgram(fromIndex, toIndex);
+    const nextSelection = remapSelectionAfterProgramMove(
+      selectedSelection,
+      activeSectionKey,
+      fromIndex,
+      toIndex,
+    );
+    if (
+      nextSelection &&
+      getSettingsSelectionKey(nextSelection) !== selectedSelectionId
+    ) {
+      selectItem(nextSelection);
+    }
   }
 
   if (isPending) {
@@ -203,195 +256,185 @@ export function GroupsTabContent() {
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-4">
       <SectionTabsBar
         tabs={sectionMeta}
         activeKey={activeSectionKey}
         onChange={setActiveSectionKey}
         trailing={<NewSectionButton onCreated={setActiveSectionKey} />}
       />
-      <button
-        type="button"
-        className="btn btn-outline btn-secondary btn-sm w-fit shrink-0"
-        onClick={() => {
-          resetCreateForm(activeSectionKey);
-          setCreateOpen(true);
-        }}
-      >
-        Добавить программу
-      </button>
-      {activePrograms.map((program) => (
-        <section key={program.key} className="flex flex-col gap-2">
-          <button
-            type="button"
-            className={clsx(
-              "inline-flex w-fit max-w-full min-w-0 flex-row items-center justify-between gap-2 self-start overflow-hidden rounded-lg px-3 py-1.5 text-left text-sm font-semibold transition-colors",
-              selectedSelectionId === getSettingsSelectionKey(program.selection)
-                ? "bg-primary/12 text-base-content ring-primary ring-2 ring-inset"
-                : "text-base-content/65 hover:bg-base-200/80",
-            )}
-            onClick={() => selectItem(program.selection)}
-          >
-            <span className="min-w-0 truncate">{program.title}</span>
-            <span className="icon-[material-symbols--edit-outline-rounded] text-base-content/45 pointer-events-none shrink-0 text-lg" />
-          </button>
-          {program.tracks.length > 0 ? (
-            <div className="rounded-box border-base-content/15 overflow-hidden border">
-              {program.tracks.map((track, trackIndex) => {
-                const trackBlockHighlighted =
-                  selectedSelectionId ===
-                    getSettingsSelectionKey(track.selection) ||
-                  selectedSelectionId ===
-                    getSettingsSelectionKey(program.selection);
-                const isFirstTrack = trackIndex === 0;
-                const isLastTrack = trackIndex === program.tracks.length - 1;
-                return (
-                  <div
-                    key={track.key}
-                    className={clsx(
-                      "flex flex-col",
-                      !isFirstTrack ? "border-base-content/15 border-t" : "",
-                      trackBlockHighlighted
-                        ? "bg-primary/8 ring-primary ring-2 ring-inset"
-                        : "",
-                      trackBlockHighlighted && isFirstTrack && isLastTrack
-                        ? "rounded-box"
-                        : "",
-                      trackBlockHighlighted && isFirstTrack && !isLastTrack
-                        ? "rounded-t-box"
-                        : "",
-                      trackBlockHighlighted && !isFirstTrack && isLastTrack
-                        ? "rounded-b-box"
-                        : "",
-                    )}
+      <div className="flex flex-col gap-6">
+        {activePrograms.map((program, programListIndex) => {
+          const programSelected =
+            selectedSelectionId === getSettingsSelectionKey(program.selection);
+          return (
+            <div
+              key={program.key}
+              className="border-base-300 rounded-box overflow-hidden border"
+            >
+              <div
+                className={clsx(
+                  "border-base-300 flex items-center border-b",
+                  program.tracks.length === 0 ? "rounded-box" : "rounded-t-box",
+                  programSelected
+                    ? "bg-primary/12 ring-primary ring-2 ring-inset"
+                    : "bg-base-200/70",
+                )}
+              >
+                <button
+                  type="button"
+                  className={clsx(
+                    "flex min-w-0 flex-1 items-center justify-start gap-1 px-3 py-2 text-left text-sm font-semibold",
+                    programSelected ? "" : "hover:bg-base-200",
+                  )}
+                  onClick={() => selectItem(program.selection)}
+                >
+                  <span className="min-w-0 truncate">{program.title}</span>
+                  <span className="icon-[material-symbols--edit-outline-rounded] text-base-content/45 pointer-events-none shrink-0 text-lg" />
+                </button>
+                <div className="join shrink-0 pr-1.5">
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-xs btn-square"
+                    disabled={programListIndex === 0}
+                    onClick={() =>
+                      handleMoveProgram(
+                        program.programIndex,
+                        program.programIndex - 1,
+                      )
+                    }
                   >
-                    <button
-                      type="button"
-                      className={clsx(
-                        "btn inline-flex w-full flex-row items-center justify-start gap-1 overflow-hidden border-0 px-3 text-left",
-                        isFirstTrack && isLastTrack && !track.groups.length
-                          ? "rounded-box"
-                          : clsx(
-                              isFirstTrack
-                                ? "rounded-t-box rounded-b-none"
-                                : "",
-                              !isFirstTrack &&
-                                isLastTrack &&
-                                !track.groups.length
-                                ? "rounded-b-box"
-                                : "",
-                              !isFirstTrack &&
-                                !(isLastTrack && !track.groups.length)
-                                ? "rounded-none"
-                                : "",
-                            ),
-                        trackBlockHighlighted
-                          ? "bg-primary/18 hover:bg-primary/20"
-                          : "",
-                      )}
-                      onClick={() => selectItem(track.selection)}
-                    >
-                      <span className="max-w-[calc(100%-1.625rem)] min-w-0 truncate text-sm font-medium">
-                        {track.name}
-                      </span>
-                      <span className="icon-[material-symbols--edit-outline-rounded] text-base-content/45 pointer-events-none shrink-0 text-lg" />
-                    </button>
-                    {track.groups.map((group, groupRenderIndex) => {
-                      const est = group.estimatedSize;
-                      const stu = group.studentsCount;
-                      const metricsEqual =
-                        (est == null && stu == null) ||
-                        (est != null &&
-                          stu != null &&
-                          String(est) === String(stu));
-                      const sharedDisplay = est ?? stu ?? "?";
-                      const isLastGroupInTrack =
-                        groupRenderIndex === track.groups.length - 1;
-                      const roundGroupBottom =
-                        isLastTrack && isLastGroupInTrack;
-                      const groupOnlySelected =
-                        selectedSelectionId ===
-                        getSettingsSelectionKey(group.selection);
-
-                      return (
+                    <span className="icon-[material-symbols--keyboard-arrow-up-rounded] text-lg" />
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-xs btn-square"
+                    disabled={programListIndex === activePrograms.length - 1}
+                    onClick={() =>
+                      handleMoveProgram(
+                        program.programIndex,
+                        program.programIndex + 1,
+                      )
+                    }
+                  >
+                    <span className="icon-[material-symbols--keyboard-arrow-down-rounded] text-lg" />
+                  </button>
+                </div>
+              </div>
+              {program.tracks.length > 0 ? (
+                <div className="divide-base-300 divide-y">
+                  {program.tracks.map((track, trackIndex) => {
+                    const trackSelected =
+                      selectedSelectionId ===
+                      getSettingsSelectionKey(track.selection);
+                    const isLastTrack =
+                      trackIndex === program.tracks.length - 1;
+                    return (
+                      <div key={track.key}>
                         <button
-                          key={group.key}
                           type="button"
                           className={clsx(
-                            "btn btn-ghost border-base-content/15 w-full rounded-none border-x-0 border-t border-b-0 pr-3 pl-6 text-left",
-                            !groupOnlySelected && roundGroupBottom
+                            "flex w-full items-center justify-start gap-1 px-3 py-1.5 text-left text-sm font-medium",
+                            isLastTrack && track.groups.length === 0
                               ? "rounded-b-box"
                               : "",
-                            groupOnlySelected
-                              ? clsx(
-                                  "btn-active bg-primary/12 ring-primary ring-2 ring-inset",
-                                  roundGroupBottom ? "rounded-b-box" : "",
-                                )
-                              : clsx(
-                                  "bg-transparent",
-                                  trackBlockHighlighted
-                                    ? "hover:bg-primary/14"
-                                    : "hover:bg-base-200/60",
-                                ),
+                            trackSelected
+                              ? "bg-primary/12 ring-primary ring-2 ring-inset"
+                              : "bg-base-200/30 hover:bg-base-200/50",
                           )}
-                          onClick={() => selectItem(group.selection)}
+                          onClick={() => selectItem(track.selection)}
                         >
-                          <div className="flex w-full items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="truncate text-sm font-medium">
-                                {group.groupLabel}
-                              </div>
-                              {group.groupId !== group.groupLabel ? (
-                                <div className="text-base-content/60 mt-0.5 truncate text-xs">
-                                  {group.groupId}
+                          <span className="min-w-0 truncate">{track.name}</span>
+                          <span className="icon-[material-symbols--edit-outline-rounded] text-base-content/45 pointer-events-none shrink-0 text-lg" />
+                        </button>
+                        {track.groups.map((group, groupIndex) => {
+                          const est = group.estimatedSize;
+                          const stu = group.studentsCount;
+                          const metricsEqual =
+                            (est == null && stu == null) ||
+                            (est != null &&
+                              stu != null &&
+                              String(est) === String(stu));
+                          const sharedDisplay = est ?? stu ?? "?";
+                          const groupSelected =
+                            selectedSelectionId ===
+                            getSettingsSelectionKey(group.selection);
+                          const isLastGroup =
+                            isLastTrack &&
+                            groupIndex === track.groups.length - 1;
+
+                          return (
+                            <button
+                              key={group.key}
+                              type="button"
+                              className={clsx(
+                                "border-base-300 flex w-full items-center justify-between gap-3 border-t px-3 py-1 pl-6 text-left",
+                                isLastGroup ? "rounded-b-box" : "",
+                                groupSelected
+                                  ? "bg-primary/12 ring-primary ring-2 ring-inset"
+                                  : "hover:bg-base-200/60",
+                              )}
+                              onClick={() => selectItem(group.selection)}
+                            >
+                              <div className="min-w-0">
+                                <div className="truncate text-sm leading-tight font-medium">
+                                  {group.groupLabel}
                                 </div>
-                              ) : null}
-                            </div>
-                            {metricsEqual ? (
-                              <div className="text-base-content/60 flex shrink-0 items-center justify-end gap-1.5 text-xs tabular-nums">
-                                <div className="flex flex-col items-end gap-0.5">
-                                  <span
-                                    className="icon-[material-symbols--straighten-outline-rounded] inline-block shrink-0 text-sm leading-none"
-                                    title="Предположительный размер"
-                                  />
-                                  <span
-                                    className="icon-[material-symbols--groups-outline-rounded] inline-block shrink-0 text-sm leading-none"
-                                    title="Студентов"
-                                  />
-                                </div>
-                                <span title="Предположительный размер и число студентов совпадают">
-                                  {sharedDisplay}
-                                </span>
+                                {group.groupId !== group.groupLabel ? (
+                                  <div className="text-base-content/60 truncate text-xs leading-tight">
+                                    {group.groupId}
+                                  </div>
+                                ) : null}
                               </div>
-                            ) : (
-                              <div className="text-base-content/60 flex shrink-0 flex-col items-end gap-0.5 text-xs tabular-nums">
-                                <span
-                                  className="inline-flex items-center gap-1.5"
-                                  title="Предположительный размер"
+                              {metricsEqual ? (
+                                <div
+                                  className="text-base-content/60 flex shrink-0 items-center gap-1 text-xs tabular-nums"
+                                  title="Предположительный размер и число студентов совпадают"
                                 >
                                   <span className="icon-[material-symbols--straighten-outline-rounded] shrink-0 text-sm leading-none" />
-                                  <span>{est ?? "?"}</span>
-                                </span>
-                                <span
-                                  className="inline-flex items-center gap-1.5"
-                                  title="Студентов"
-                                >
                                   <span className="icon-[material-symbols--groups-outline-rounded] shrink-0 text-sm leading-none" />
-                                  <span>{stu ?? "—"}</span>
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                );
-              })}
+                                  <span>{sharedDisplay}</span>
+                                </div>
+                              ) : (
+                                <div className="text-base-content/60 flex shrink-0 items-center gap-2 text-xs tabular-nums">
+                                  <span
+                                    className="inline-flex items-center gap-1"
+                                    title="Предположительный размер"
+                                  >
+                                    <span className="icon-[material-symbols--straighten-outline-rounded] shrink-0 text-sm leading-none" />
+                                    <span>{est ?? "?"}</span>
+                                  </span>
+                                  <span
+                                    className="inline-flex items-center gap-1"
+                                    title="Студентов"
+                                  >
+                                    <span className="icon-[material-symbols--groups-outline-rounded] shrink-0 text-sm leading-none" />
+                                    <span>{stu ?? "—"}</span>
+                                  </span>
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </section>
-      ))}
+          );
+        })}
+        <button
+          type="button"
+          className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
+          onClick={() => {
+            resetCreateForm(activeSectionKey);
+            setCreateOpen(true);
+          }}
+        >
+          Добавить программу
+        </button>
+      </div>
       <SettingsCreateModal
         open={createOpen}
         onOpenChange={setCreateOpen}

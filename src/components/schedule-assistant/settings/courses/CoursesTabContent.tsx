@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { AudienceTreeInfoIcon } from "./audienceTreeTooltip.tsx";
 import {
   buildCoursesTabSections,
   type CourseUsageRow,
@@ -25,30 +26,37 @@ import type { SchemaCourseConfig } from "@/api/schedule-assistant/types.ts";
 
 const COURSES_SUBTAB_STORAGE_KEY = "schedule-assistant:settings:courses-subtab";
 
-function CourseCard({
+function CourseRowButton({
   course,
-  selectedSelectionId,
+  selected,
+  isLast,
+  indentClass,
   onSelect,
 }: {
   course: CourseUsageRow;
-  selectedSelectionId: string | null;
-  onSelect: (selection: CourseUsageRow["selection"]) => void;
+  selected: boolean;
+  isLast: boolean;
+  indentClass: string;
+  onSelect: () => void;
 }) {
   return (
     <button
       type="button"
       className={clsx(
-        "btn btn-ghost rounded-box h-auto min-h-0 w-full justify-start border px-3 py-2 text-left normal-case",
-        "border-base-300 hover:bg-base-200",
-        selectedSelectionId === getSettingsSelectionKey(course.selection)
-          ? "btn-active border-primary/40 bg-primary/12 ring-primary ring-2 ring-inset"
-          : "bg-base-100",
+        "border-base-300 flex w-full items-center justify-between gap-3 border-t py-1 text-left",
+        indentClass,
+        isLast ? "rounded-b-box" : "",
+        selected
+          ? "bg-primary/12 ring-primary ring-2 ring-inset"
+          : "hover:bg-base-200/60",
       )}
-      onClick={() => onSelect(course.selection)}
+      onClick={onSelect}
     >
-      <div className="w-full text-left">
-        <div className="text-sm font-semibold">{course.title}</div>
-        <div className="text-base-content/70 text-xs">
+      <div className="min-w-0">
+        <div className="truncate text-sm leading-tight font-medium">
+          {course.title}
+        </div>
+        <div className="text-base-content/60 truncate text-xs leading-tight">
           Компоненты: {course.subtitle ?? "—"}
         </div>
       </div>
@@ -61,10 +69,7 @@ export function CoursesTabContent() {
   const { mutate: createCourse, isPending: isCreating } =
     useCreateCourseMutation();
   const { selectedSelectionId, selectItem } = useSelection();
-  const { sections, unassigned } = useMemo(
-    () => buildCoursesTabSections(config),
-    [config],
-  );
+  const sections = useMemo(() => buildCoursesTabSections(config), [config]);
   const [activeSectionKey, setActiveSectionKey] = useState(() => {
     if (typeof window === "undefined") return "";
     return window.localStorage.getItem(COURSES_SUBTAB_STORAGE_KEY) || "";
@@ -157,20 +162,6 @@ export function CoursesTabContent() {
     </button>
   );
 
-  const unassignedList =
-    unassigned.length > 0 ? (
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-        {unassigned.map((course) => (
-          <CourseCard
-            key={`unassigned-${course.id}`}
-            course={course}
-            selectedSelectionId={selectedSelectionId}
-            onSelect={selectItem}
-          />
-        ))}
-      </div>
-    ) : null;
-
   const createModal = (
     <SettingsCreateModal
       open={createOpen}
@@ -232,14 +223,13 @@ export function CoursesTabContent() {
     );
   }
 
-  if (!sections.length) {
+  if (!config || !sections.length) {
     return (
       <div className="flex flex-col gap-2">
         <div className="text-base-content/70 text-sm">
           В конфигурации отсутствуют sections для табов курсов.
         </div>
         {createButton}
-        {unassignedList}
         {createModal}
       </div>
     );
@@ -247,57 +237,199 @@ export function CoursesTabContent() {
 
   const activeSection =
     sections.find((section) => section.key === activeSectionKey) || null;
-  const groups = activeSection?.programs || [];
+  const programs = activeSection?.programs || [];
   const tabs = sections.map((section) => ({
     key: section.key,
     label: section.title,
   }));
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       <SectionTabsBar
         tabs={tabs}
         activeKey={activeSectionKey}
         onChange={setActiveSectionKey}
         trailing={<NewSectionButton onCreated={setActiveSectionKey} />}
       />
-      {createButton}
-      {unassignedList}
-      {!groups.length && !unassigned.length ? (
-        <div className="text-base-content/70 text-sm">
-          В этом разделе нет курсов.
-        </div>
-      ) : null}
-      {groups.map((program) => (
-        <div
-          key={program.key}
-          className="border-base-300 rounded-box overflow-hidden border"
-        >
-          <div className="bg-base-200/70 border-base-300 border-b px-3 py-2 text-sm font-semibold">
-            {program.title}
+      <div className="flex flex-col gap-6">
+        {!programs.length ? (
+          <div className="text-base-content/70 text-sm">
+            В этом разделе нет курсов.
           </div>
-          <div className="divide-base-300 divide-y">
-            {program.tracks.map((track) => (
-              <div key={track.key}>
-                <div className="bg-base-200/30 px-3 py-1.5 text-sm font-medium">
-                  {track.title}
-                </div>
-                <div className="grid grid-cols-1 gap-2 p-2 sm:grid-cols-2 xl:grid-cols-3">
-                  {track.courses.map((course) => (
-                    <CourseCard
-                      key={`${track.key}-${course.id}`}
-                      course={course}
-                      selectedSelectionId={selectedSelectionId}
-                      onSelect={selectItem}
-                    />
-                  ))}
-                </div>
+        ) : null}
+        {programs.map((program) => {
+          const hasBody =
+            program.sharedCourses.length > 0 || program.tracks.length > 0;
+          const programSelector =
+            program.key !== "unassigned" ? `@${program.key}` : null;
+          const hasTracksAfterShared = program.tracks.length > 0;
+          return (
+            <div
+              key={program.key}
+              className="border-base-300 rounded-box overflow-hidden border"
+            >
+              <div
+                className={clsx(
+                  "border-base-300 bg-base-200/70 flex items-center gap-1 px-3 py-2 text-sm font-semibold",
+                  hasBody ? "border-b" : "",
+                  hasBody ? "rounded-t-box" : "rounded-box",
+                )}
+              >
+                <span className="min-w-0 truncate">{program.title}</span>
+                {programSelector ? (
+                  <AudienceTreeInfoIcon
+                    config={config}
+                    selector={programSelector}
+                    mode="program"
+                  />
+                ) : null}
               </div>
-            ))}
-          </div>
-        </div>
-      ))}
-      {createModal}
+              {hasBody ? (
+                <div className="divide-base-300 divide-y">
+                  {program.sharedCourses.length > 0 ? (
+                    <div>
+                      {program.hasExplicitTracks ? (
+                        <div className="bg-base-200/30 flex items-center gap-1 px-3 py-1.5 text-sm font-medium">
+                          <span>Общие</span>
+                          {programSelector ? (
+                            <AudienceTreeInfoIcon
+                              config={config}
+                              selector={programSelector}
+                              mode="shared"
+                            />
+                          ) : null}
+                        </div>
+                      ) : null}
+                      {program.sharedCourses.map((course, courseIndex) => {
+                        const isLastCourse =
+                          !hasTracksAfterShared &&
+                          courseIndex === program.sharedCourses.length - 1;
+                        return (
+                          <CourseRowButton
+                            key={`${program.key}-shared-${course.id}`}
+                            course={course}
+                            selected={
+                              selectedSelectionId ===
+                              getSettingsSelectionKey(course.selection)
+                            }
+                            isLast={isLastCourse}
+                            indentClass={
+                              program.hasExplicitTracks
+                                ? "px-3 pl-6"
+                                : "px-3 py-1"
+                            }
+                            onSelect={() => selectItem(course.selection)}
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                  {program.tracks.map((track, trackIndex) => {
+                    const isLastTrack =
+                      trackIndex === program.tracks.length - 1;
+                    const trackSelector =
+                      program.key !== "unassigned"
+                        ? `@${program.key}/${track.title}`
+                        : null;
+                    const trackHasContent =
+                      track.courses.length > 0 || track.groups.length > 0;
+
+                    return (
+                      <div key={track.key}>
+                        <div
+                          className={clsx(
+                            "bg-base-200/30 flex items-center gap-1 px-3 py-1.5 text-sm font-medium",
+                            isLastTrack && !trackHasContent
+                              ? "rounded-b-box"
+                              : "",
+                          )}
+                        >
+                          <span className="min-w-0 truncate">
+                            {track.title}
+                          </span>
+                          {trackSelector ? (
+                            <AudienceTreeInfoIcon
+                              config={config}
+                              selector={trackSelector}
+                              mode="track"
+                            />
+                          ) : null}
+                        </div>
+                        {track.courses.map((course, courseIndex) => {
+                          const isLastCourse =
+                            isLastTrack &&
+                            track.groups.length === 0 &&
+                            courseIndex === track.courses.length - 1;
+                          return (
+                            <CourseRowButton
+                              key={`${track.key}-${course.id}`}
+                              course={course}
+                              selected={
+                                selectedSelectionId ===
+                                getSettingsSelectionKey(course.selection)
+                              }
+                              isLast={isLastCourse}
+                              indentClass="px-3 pl-6"
+                              onSelect={() => selectItem(course.selection)}
+                            />
+                          );
+                        })}
+                        {track.groups.map((groupBucket, groupIndex) => {
+                          const isLastGroup =
+                            isLastTrack &&
+                            groupIndex === track.groups.length - 1;
+                          return (
+                            <div key={groupBucket.key}>
+                              <div
+                                className={clsx(
+                                  "border-base-300 text-base-content/80 border-t px-3 py-1 pl-6 text-sm font-medium",
+                                  isLastGroup &&
+                                    groupBucket.courses.length === 0
+                                    ? "rounded-b-box"
+                                    : "",
+                                )}
+                              >
+                                {groupBucket.title}
+                              </div>
+                              {groupBucket.courses.map(
+                                (course, courseIndex) => {
+                                  const isLastCourse =
+                                    isLastGroup &&
+                                    courseIndex ===
+                                      groupBucket.courses.length - 1;
+                                  return (
+                                    <CourseRowButton
+                                      key={`${groupBucket.key}-${course.id}`}
+                                      course={course}
+                                      selected={
+                                        selectedSelectionId ===
+                                        getSettingsSelectionKey(
+                                          course.selection,
+                                        )
+                                      }
+                                      isLast={isLastCourse}
+                                      indentClass="px-3 pl-9"
+                                      onSelect={() =>
+                                        selectItem(course.selection)
+                                      }
+                                    />
+                                  );
+                                },
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+        {createButton}
+        {createModal}
+      </div>
     </div>
   );
 }

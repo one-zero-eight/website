@@ -112,17 +112,33 @@ export function expandStudentGroupSelectors(
 export type ProgramTrackUsageTarget = {
   programId: string;
   programTitle: string;
-  trackTitle: string;
+  /**
+   * Track bucket for `@program/track` or concrete groups.
+   * Omitted for whole-program audience (`@program`) — shared across tracks.
+   */
+  trackTitle?: string;
+  /** Set when audience is a concrete student group, not @program / @program/track. */
+  groupId?: string;
+  groupTitle?: string;
 };
 
 /** Maps a course audience token to program/track buckets for the courses tab tree. */
 export function resolveCourseUsageTargets(
   config: SchemaScheduleConfig | null,
   rawTarget: string,
-  programById: Map<string, { title: string; trackNames: string[] }>,
+  programById: Map<
+    string,
+    { title: string; trackNames: string[]; hasExplicitTracks: boolean }
+  >,
   groupToProgramTrack: Map<
     string,
-    { programId: string; programTitle: string; trackName: string }
+    {
+      programId: string;
+      programTitle: string;
+      trackName: string;
+      groupTitle: string;
+      hasExplicitTracks: boolean;
+    }
   >,
 ): ProgramTrackUsageTarget[] {
   const token = String(rawTarget || "").trim();
@@ -132,20 +148,12 @@ export function resolveCourseUsageTargets(
   if (parsed?.kind === "program") {
     const programMeta = programById.get(parsed.programCode);
     if (!programMeta) return [];
-    if (!programMeta.trackNames.length) {
-      return [
-        {
-          programId: parsed.programCode,
-          programTitle: programMeta.title,
-          trackTitle: "Без направления",
-        },
-      ];
-    }
-    return programMeta.trackNames.map((trackTitle) => ({
-      programId: parsed.programCode,
-      programTitle: programMeta.title,
-      trackTitle: trackTitle || "Без направления",
-    }));
+    return [
+      {
+        programId: parsed.programCode,
+        programTitle: programMeta.title,
+      },
+    ];
   }
 
   if (parsed?.kind === "program_track") {
@@ -162,11 +170,23 @@ export function resolveCourseUsageTargets(
 
   const byGroup = groupToProgramTrack.get(token);
   if (!byGroup) return [];
+  // Programs without explicit tracks (e.g. elective buckets with only top-level
+  // groups) list courses flat under the program — no synthetic track/group chrome.
+  if (!byGroup.hasExplicitTracks) {
+    return [
+      {
+        programId: byGroup.programId,
+        programTitle: byGroup.programTitle,
+      },
+    ];
+  }
   return [
     {
       programId: byGroup.programId,
       programTitle: byGroup.programTitle,
       trackTitle: byGroup.trackName,
+      groupId: token,
+      groupTitle: byGroup.groupTitle || token,
     },
   ];
 }
