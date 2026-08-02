@@ -9,3 +9,7 @@ export function useMe() {
   const { data: me } = $accounts.useQuery("get", "/users/me");
   return { me: me || storedMe || undefined };
 }
+
+export function getMyAvatarUrl() {
+  return `${import.meta.env.VITE_ACCOUNTS_API_URL}/users/me/avatar.jpg`;
+}
