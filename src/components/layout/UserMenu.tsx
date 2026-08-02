@@ -1,5 +1,5 @@
 import { navigateToSignOut } from "@/api/accounts/sign-in.tsx";
-import { useMe } from "@/api/accounts/user.ts";
+import { getMyAvatarUrl, useMe } from "@/api/accounts/user.ts";
 import { SignInButton } from "@/components/common/SignInButton";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import {
@@ -88,7 +88,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                 <div className="bg-base-200 text-base-content/50 flex h-20 w-20 shrink-0 items-center justify-center overflow-clip rounded-full">
                   {me.telegram_info?.photo_url ? (
                     <img
-                      src={me.telegram_info.photo_url}
+                      src={getMyAvatarUrl()}
                       alt="Your avatar"
                       className="border-base-content/50 rounded-full border-2"
                     />
