@@ -510,7 +510,7 @@ function TimetableWorkspaceInner({
   }, []);
 
   const grid: BuiltGrid | null = useMemo(() => {
-    if (!config || !allMeetings.length || !weeks.length) return null;
+    if (!config || !weeks.length) return null;
     const wk = weeks[weekIndex];
     if (!wk) return null;
     const visibleColumns = columnsForTab(
@@ -996,7 +996,7 @@ function TimetableMainGrid({
     );
   }
 
-  if (!grid || !columns.length) return null;
+  if (!grid) return null;
 
   return (
     <TimetableTable
@@ -1663,11 +1663,9 @@ function CoreGroupsTable({
 }) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
 
-  const visibleColumns = columnsForTab(
-    activeTab,
-    baseColumns,
-    allMeetings,
-    config,
+  const visibleColumns = useMemo(
+    () => columnsForTab(activeTab, baseColumns, allMeetings, config),
+    [activeTab, baseColumns, allMeetings, config],
   );
 
   const prepared = useMemo(
@@ -1676,7 +1674,73 @@ function CoreGroupsTable({
     [grid, visibleColumns],
   );
 
-  if (!prepared || !visibleColumns.length) return null;
+  if (!visibleColumns.length) {
+    const lastSlotStart = grid.slots.at(-1)?.start;
+    const timeOnlyRows: React.ReactNode[] = [];
+    for (const day of grid.allowedDays) {
+      const isTodayDay = isTodayWeekdayInDisplayedWeek(day, activeWeek);
+      timeOnlyRows.push(
+        <tr key={`day-${day}`} className="day-row">
+          <td
+            className={clsx(
+              GROUPS_DAY_ROW_INNER_CLASS,
+              todayGroupsDayRowClass(isTodayDay),
+            )}
+            style={GROUPS_DAY_ROW_STICKY_STYLE}
+          >
+            <span className="day-label sticky left-[9px] z-[7] inline-block bg-inherit pr-1">
+              {weekdayLabelRu(day)}
+            </span>
+          </td>
+        </tr>,
+      );
+      for (const slot of grid.slots) {
+        const isLastSlot = slot.start === lastSlotStart;
+        timeOnlyRows.push(
+          <tr key={`${day}-${slot.start}`} className={GROUPS_SLOT_ROW_CLASS}>
+            <td
+              className={clsx(
+                "slot-cell sticky left-0 z-[5] border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] align-top text-[#1d3f70]",
+                GROUPS_TIME_COL_WIDTH,
+                GROUPS_SLOT_TIME_PAD,
+                todayGroupsSlotTimeClass(isTodayDay, isLastSlot),
+              )}
+            >
+              {slot.label}
+            </td>
+          </tr>,
+        );
+      }
+    }
+    return (
+      <>
+        <colgroup>
+          <col
+            style={{
+              width: GROUPS_TIME_COL_PX,
+              minWidth: GROUPS_TIME_COL_PX,
+            }}
+          />
+        </colgroup>
+        <thead className={GROUPS_TABLE_HEAD_CLASS}>
+          <tr>
+            <th
+              className={clsx(
+                "left-head sticky left-0 z-[25] border border-[#d8dfeb] bg-[#1f5fae] text-center align-top font-bold text-white",
+                GROUPS_TIME_COL_WIDTH,
+                GROUPS_HEAD_PAD,
+              )}
+            >
+              День
+            </th>
+          </tr>
+        </thead>
+        <tbody>{timeOnlyRows}</tbody>
+      </>
+    );
+  }
+
+  if (!prepared) return null;
 
   const yearLabels = prepared.yearLabels;
   const lastSlotStart = grid.slots.at(-1)?.start;

@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   SchemaCourseConfig,
@@ -1350,21 +1351,16 @@ export function SemesterDetails() {
           onKeyDown={handleEscapeBlur}
         />
       </label>
-      <div className={`${detailControlClass} shrink-0`}>
-        <span className={detailLabelUpperClass}>
-          Вид таблицы по умолчанию для секций
-        </span>
-        <div className="flex flex-col gap-2">
+      <div className={`${detailControlClass} shrink-0 pb-1`}>
+        <span className={detailLabelUpperClass}>Вид таблицы по умолчанию</span>
+        <div className="grid w-fit grid-cols-[auto_auto] items-center gap-x-2 gap-y-2 p-0.5">
           {(term?.sections ?? []).map((section, sectionIndex) => (
-            <label
-              key={section.code || sectionIndex}
-              className="flex flex-wrap items-center gap-2"
-            >
-              <span className="min-w-28 text-sm font-medium">
+            <Fragment key={section.code || sectionIndex}>
+              <span className="text-sm font-medium whitespace-nowrap">
                 {section.name || section.code}
               </span>
               <select
-                className="select select-bordered select-sm"
+                className="select select-bordered select-sm focus:outline-offset-0"
                 value={section.default_layout ?? ""}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -1382,10 +1378,12 @@ export function SemesterDetails() {
                 <option value="groups">По группам</option>
                 <option value="calendar">По дням</option>
               </select>
-            </label>
+            </Fragment>
           ))}
           {(term?.sections ?? []).length === 0 ? (
-            <div className="text-base-content/60 text-sm">Нет секций</div>
+            <div className="text-base-content/60 col-span-2 text-sm">
+              Нет секций
+            </div>
           ) : null}
         </div>
       </div>
