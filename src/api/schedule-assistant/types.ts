@@ -1805,12 +1805,23 @@ export interface components {
        * @description Section-based hierarchy from dtsn.yaml
        */
       sections?: components["schemas"]["SectionConfig"][];
+      /**
+       * Instructor Roles
+       * @description Allowed instructor position/role values; empty means unrestricted
+       * @default []
+       */
+      instructor_roles?: string[];
     };
     /** TermPartialUpdate */
     TermPartialUpdate: {
       /** Name */
       name?: string | null;
       semester?: components["schemas"]["DateRange"] | null;
+      /**
+       * Instructor Roles
+       * @description Allowed instructor position/role values; empty means unrestricted
+       */
+      instructor_roles?: string[] | null;
       /** Days */
       days?: components["schemas"]["Weekday"][] | null;
       starting_day?: components["schemas"]["Weekday"] | null;

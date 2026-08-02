@@ -6,6 +6,7 @@ import {
   SchemaSectionProgram,
   SectionProgramLanguageAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
+import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import { useToast } from "@/components/toast";
 import {
   nextGroupIdentifiers,
@@ -1289,6 +1290,7 @@ export function InstructorDetails({
   const positionField = useBlurSaveField(instructor?.position ?? "", (value) =>
     patchInstructor({ position: value.trim() || null }),
   );
+  const roleOptions = (term?.instructor_roles ?? []).filter(Boolean);
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
@@ -1314,10 +1316,30 @@ export function InstructorDetails({
             <span className={detailLabelUpperClass}>Алиас Telegram</span>
             <input className={detailInputClass} {...aliasField} />
           </label>
-          <label className={`${detailControlClass} shrink-0`}>
+          <div className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Должность</span>
-            <input className={detailInputClass} {...positionField} />
-          </label>
+            {roleOptions.length > 0 ? (
+              <SelectDropdown
+                value={instructor?.position ?? ""}
+                onChange={(value) =>
+                  patchInstructor({
+                    position: value.trim() || null,
+                  })
+                }
+                options={[
+                  { value: "", label: "Не задано" },
+                  ...roleOptions.map((role) => ({
+                    value: role,
+                    label: role,
+                  })),
+                ]}
+                placeholder="Должность"
+                triggerClassName="w-full"
+              />
+            ) : (
+              <input className={detailInputClass} {...positionField} />
+            )}
+          </div>
           <div className={`${detailControlClass} min-h-0 min-w-0 shrink-0`}>
             <span className={detailLabelUpperClass}>
               Предпочтения по времени
@@ -1532,6 +1554,76 @@ export function SemesterDetails() {
               Нет секций
             </div>
           ) : null}
+        </div>
+      </div>
+      <InstructorRolesEditor
+        roles={term?.instructor_roles ?? []}
+        onChange={(instructor_roles) =>
+          patchTerm((current) => ({ ...current, instructor_roles }))
+        }
+      />
+    </div>
+  );
+}
+
+function InstructorRolesEditor({
+  roles,
+  onChange,
+}: {
+  roles: string[];
+  onChange: (roles: string[]) => void;
+}) {
+  const [draft, setDraft] = useState("");
+  return (
+    <div className={`${detailControlClass} shrink-0`}>
+      <span className={detailLabelUpperClass}>Роли преподавателей</span>
+      <div className="flex flex-col gap-2">
+        {roles.length === 0 ? (
+          <div className="text-base-content/60 text-sm">
+            Список пуст — должность можно вводить свободно.
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-1">
+            {roles.map((role, index) => (
+              <li key={`${role}-${index}`} className="flex items-center gap-2">
+                <span className="bg-base-200 rounded-box px-2 py-1 text-sm">
+                  {role}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs"
+                  onClick={() =>
+                    onChange(
+                      roles.filter((_, roleIndex) => roleIndex !== index),
+                    )
+                  }
+                >
+                  Удалить
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="flex flex-wrap gap-2">
+          <input
+            className={`${detailInputClass} min-w-0 flex-1`}
+            placeholder="Новая роль"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+          />
+          <button
+            type="button"
+            className="btn btn-outline btn-secondary btn-sm"
+            disabled={!draft.trim()}
+            onClick={() => {
+              const next = draft.trim();
+              if (!next || roles.includes(next)) return;
+              onChange([...roles, next]);
+              setDraft("");
+            }}
+          >
+            Добавить
+          </button>
         </div>
       </div>
     </div>
