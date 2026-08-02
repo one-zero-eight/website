@@ -1323,6 +1323,14 @@ export interface components {
        * @description Maximum room capacity
        */
       capacity: number | null;
+      /**
+       * Features
+       * @description Arbitrary room attributes (for example projector, board, outlets); not a fixed enum
+       * @default {}
+       */
+      features?: {
+        [key: string]: boolean | string | number;
+      };
     };
     /**
      * RoomDTO

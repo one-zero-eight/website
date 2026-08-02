@@ -401,6 +401,10 @@ export function RoomDetails({ roomId }: { roomId: string }) {
                 {...capacityField}
               />
             </label>
+            <RoomFeaturesEditor
+              features={room.features ?? {}}
+              onChange={(features) => patchRoom({ features })}
+            />
             <SettingsDetailDeleteButton
               label="Удалить аудиторию"
               onClick={() => {
@@ -415,6 +419,104 @@ export function RoomDetails({ roomId }: { roomId: string }) {
         )}
       </DetailQueryState>
     </SettingsSidebarDetailFrame>
+  );
+}
+
+function roomFeatureValueToInput(value: boolean | string | number): string {
+  if (typeof value === "boolean") return value ? "true" : "false";
+  return String(value);
+}
+
+function parseRoomFeatureValue(raw: string): boolean | string | number {
+  const trimmed = raw.trim();
+  if (trimmed === "true") return true;
+  if (trimmed === "false") return false;
+  if (trimmed !== "" && Number.isFinite(Number(trimmed)))
+    return Number(trimmed);
+  return trimmed;
+}
+
+function RoomFeaturesEditor({
+  features,
+  onChange,
+}: {
+  features: { [key: string]: boolean | string | number };
+  onChange: (features: { [key: string]: boolean | string | number }) => void;
+}) {
+  const [draftKey, setDraftKey] = useState("");
+  const [draftValue, setDraftValue] = useState("true");
+  const entries = Object.entries(features);
+
+  function handleAdd() {
+    const key = draftKey.trim();
+    if (!key) return;
+    onChange({ ...features, [key]: parseRoomFeatureValue(draftValue) });
+    setDraftKey("");
+    setDraftValue("true");
+  }
+
+  return (
+    <div className={`${detailControlClass} shrink-0`}>
+      <span className={detailLabelUpperClass}>Атрибуты</span>
+      <div className="flex flex-col gap-2">
+        {entries.length === 0 ? (
+          <div className="text-base-content/60 text-sm">Нет атрибутов</div>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {entries.map(([key, value]) => (
+              <li key={key} className="flex items-center gap-2">
+                <span className="bg-base-200 rounded-box shrink-0 px-2 py-1 text-sm font-medium">
+                  {key}
+                </span>
+                <input
+                  className={`${detailInputClass} min-w-0 flex-1`}
+                  defaultValue={roomFeatureValueToInput(value)}
+                  onBlur={(e) => {
+                    onChange({
+                      ...features,
+                      [key]: parseRoomFeatureValue(e.target.value),
+                    });
+                  }}
+                />
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs shrink-0"
+                  onClick={() => {
+                    const next = { ...features };
+                    delete next[key];
+                    onChange(next);
+                  }}
+                >
+                  Удалить
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            className={`${detailInputClass} w-28`}
+            placeholder="ключ"
+            value={draftKey}
+            onChange={(e) => setDraftKey(e.target.value)}
+          />
+          <input
+            className={`${detailInputClass} min-w-0 flex-1`}
+            placeholder="значение"
+            value={draftValue}
+            onChange={(e) => setDraftValue(e.target.value)}
+          />
+          <button
+            type="button"
+            className="btn btn-outline btn-secondary btn-sm"
+            disabled={!draftKey.trim()}
+            onClick={handleAdd}
+          >
+            Добавить
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

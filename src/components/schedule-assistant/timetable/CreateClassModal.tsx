@@ -42,6 +42,8 @@ import {
   timeOptionsForConfig,
   weekdayOptionsForConfig,
 } from "./meetingEditUtils.ts";
+import { buildRoomPickerOptions } from "./roomPickerOptions.ts";
+import type { Meeting } from "./timetableViewerModel.ts";
 
 function CreateClassDropdown({
   value,
@@ -105,11 +107,13 @@ export function CreateClassModal({
   onOpenChange,
   cellContext,
   config,
+  meetings,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   cellContext: CreateMeetingCellContext | null;
   config: SchemaScheduleConfig;
+  meetings: Meeting[];
 }) {
   const { data: courses } = useCoursesQuery();
   const { mutate, isPending } = useUpdateCourseMutation();
@@ -164,11 +168,13 @@ export function CreateClassModal({
   );
 
   const roomOptions = useMemo(() => {
-    return (config.rooms || [])
-      .map((room) => String(room.id || "").trim())
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b, "ru"));
-  }, [config.rooms]);
+    if (!cellContext) return [];
+    return buildRoomPickerOptions({
+      config,
+      meetings,
+      date: cellContext.date,
+    });
+  }, [cellContext, config, meetings]);
 
   const instructorOptions = useMemo(() => {
     return (config.instructors || [])
@@ -406,10 +412,7 @@ export function CreateClassModal({
             value={roomValue}
             onChange={setRoomValue}
             placeholder="Выберите аудиторию"
-            options={roomOptions.map((roomId) => ({
-              value: roomId,
-              label: roomId,
-            }))}
+            options={roomOptions}
           />
         </CreateClassField>
 

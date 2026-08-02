@@ -63,16 +63,34 @@ export function RoomsTabContent() {
 
   const groups: RoomsFloorGroup[] = useMemo(() => {
     const roomsItems: RoomListRow[] = (rooms ?? []).map(
-      (room: SchemaRoom, index: number) => ({
-        id: `room-${index}`,
-        title: String(room?.id || ""),
-        subtitle:
+      (room: SchemaRoom, index: number) => {
+        const capacityLabel =
           room?.capacity == null || String(room?.capacity).trim() === ""
             ? "Вместимость: —"
-            : `Вместимость: ${roomCapacityToLabel(room?.capacity)}`,
-        selection: { kind: "room", roomIndex: index },
-        roomIndex: index,
-      }),
+            : `Вместимость: ${roomCapacityToLabel(room?.capacity)}`;
+        const featureEntries = Object.entries(room.features ?? {});
+        const featureLabel =
+          featureEntries.length > 0
+            ? featureEntries
+                .map(([key, value]) =>
+                  value === true
+                    ? key
+                    : value === false
+                      ? `${key}: нет`
+                      : `${key}: ${value}`,
+                )
+                .join(", ")
+            : null;
+        return {
+          id: `room-${index}`,
+          title: String(room?.id || ""),
+          subtitle: featureLabel
+            ? `${capacityLabel} · ${featureLabel}`
+            : capacityLabel,
+          selection: { kind: "room" as const, roomIndex: index },
+          roomIndex: index,
+        };
+      },
     );
     if (!roomsItems.length) return [];
 

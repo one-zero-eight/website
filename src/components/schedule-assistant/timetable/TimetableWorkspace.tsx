@@ -912,6 +912,7 @@ function TimetableWorkspaceInner({
         onOpenChange={setCreateModalOpen}
         cellContext={createCellContext}
         config={config}
+        meetings={allMeetings}
       />
     </SelectionStoreContext.Provider>
   );
@@ -1372,6 +1373,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
         onOpenChange={setEditModalOpen}
         meeting={selectedMeeting}
         config={config}
+        meetings={allMeetings}
       />
     </>
   );

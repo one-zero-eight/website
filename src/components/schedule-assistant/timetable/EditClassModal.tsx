@@ -45,6 +45,7 @@ import {
   type MeetingOriginalValues,
 } from "./meetingEditUtils.ts";
 import { MeetingOverrideIndicator } from "./meetingOverrideIndicator.tsx";
+import { buildRoomPickerOptions } from "./roomPickerOptions.ts";
 import type { Meeting, MeetingOverrideField } from "./timetableViewerModel.ts";
 
 const SCOPE_OPTIONS: { value: EditClassScope; label: string }[] = [
@@ -190,11 +191,13 @@ export function EditClassModal({
   onOpenChange,
   meeting,
   config,
+  meetings,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   meeting: Meeting | null;
   config: SchemaScheduleConfig;
+  meetings: Meeting[];
 }) {
   const { data: courses } = useCoursesQuery();
   const { mutate, isPending } = useUpdateCourseMutation();
@@ -251,13 +254,15 @@ export function EditClassModal({
     [config],
   );
   const roomOptions = useMemo(() => {
-    const ids = (config.rooms || [])
-      .map((room) => String(room.id || "").trim())
-      .filter(Boolean);
-    const currentRoom = String(meeting?.room || "").trim();
-    if (currentRoom && !ids.includes(currentRoom)) ids.push(currentRoom);
-    return ids.sort((a, b) => a.localeCompare(b, "ru"));
-  }, [config.rooms, meeting?.room]);
+    if (!meeting) return [];
+    return buildRoomPickerOptions({
+      config,
+      meetings,
+      date: meeting.date,
+      excludeInstanceId: meeting.instance_id,
+      includeRoomIds: meeting.room ? [meeting.room] : undefined,
+    });
+  }, [config, meeting, meetings]);
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const instructorOptions = useMemo(() => {
     const items = (config.instructors || [])
@@ -624,10 +629,7 @@ export function EditClassModal({
               onChange={setRoomValue}
               placeholder="Выберите аудиторию"
               disabled={cancelChecked}
-              options={roomOptions.map((roomId) => ({
-                value: roomId,
-                label: roomId,
-              }))}
+              options={roomOptions}
             />
           </EditClassField>
 
