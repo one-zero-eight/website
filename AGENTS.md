@@ -41,7 +41,8 @@ Project setup:
 
 For Cursor Agent only (Browser Automation / `cursor-ide-browser`):
 
-- Use the Cursor browser tab against https://local.innohassle.ru:3000 (or the route under test).
+- Use the Cursor browser against https://local.innohassle.ru:3000 (or the worktree port / route under test; see [WORKTREE.md](WORKTREE.md)).
+- When work is parallel (extra worktree, another agent already using the browser, or a non-default port), open a **new** browser tab: call `browser_navigate` with `newTab: true` instead of reusing an existing tab.
 - If the app is not authorized (signed-out UI, "Sign in" prompt, or auth-gated content), ask the user to sign in in that browser tab. Do not try to complete SSO/login yourself. This should be done once per session commonly.
 - If automation does not work, most probably user needs to enable it in the Cursor settings (Browser & Network).
 
@@ -388,5 +389,6 @@ When finishing a task with code changes:
 
 - stage only the relevant changes (not the full working tree / unrelated diffs); do not stage secrets (`.env`, credentials)
 - draft a concise conventional commit message matching recent `git log` style (focus on why). **Always include a scope** (e.g. `feat(schedule): …`); use comma-separated scopes for a few areas (`chore(schedule, maps): …`); use `general` for repo-wide changes (`docs(general): …`)
+- if the change is tied to a GitHub issue, put a trailer in the commit body: `Closes one-zero-eight/monorepo#123` when the commit closes the issue, or `Relates one-zero-eight/monorepo#123` when it only relates to it
 - propose that message to the IDE Source Control input by writing it to `.scm-commit-msg` at the repo root (gitignored — do not stage it). Requires the SCM Commit Message extension in `tools/scm-commit-msg-from-file` (install once per machine into `~/.cursor/extensions/local.scm-commit-msg-from-file-<version>/`, then Reload Window). After an IDE commit the extension clears the SCM input only when it still matches `.scm-commit-msg`, then deletes the file. After a CLI commit, always `rm -f .scm-commit-msg` (the extension then clears the matching SCM input).
 - do **not** run `git commit` unless the user explicitly asks
