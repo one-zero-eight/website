@@ -7,6 +7,7 @@ import {
   buildProgramsGroupsTreeViewSectionTabs,
 } from "@/components/schedule-assistant/settings/groups/programsGroupsTreeView.ts";
 import { SectionTabsBar } from "@/components/schedule-assistant/settings/SectionTabsBar.tsx";
+import { NewSectionButton } from "@/components/schedule-assistant/settings/NewSectionButton.tsx";
 import {
   SchemaSectionProgram,
   SectionProgramKindAnyOf0,
@@ -207,6 +208,7 @@ export function GroupsTabContent() {
         tabs={sectionMeta}
         activeKey={activeSectionKey}
         onChange={setActiveSectionKey}
+        trailing={<NewSectionButton onCreated={setActiveSectionKey} />}
       />
       <button
         type="button"

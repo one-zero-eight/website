@@ -647,6 +647,43 @@ export function useAddProgramToSection() {
   return { addProgram, isPending, isError, error };
 }
 
+export function useAddSection() {
+  const { data: term } = useTermQuery();
+  const {
+    mutate: updateTerm,
+    isPending,
+    isError,
+    error,
+  } = useUpdateTermMutation();
+
+  const addSection = useCallback(
+    (section: { code: string; name: string }, onSuccess?: () => void) => {
+      if (!term) return;
+      const code = section.code.trim();
+      const name = section.name.trim();
+      if (!code || !name) return;
+      if ((term.sections ?? []).some((candidate) => candidate.code === code))
+        return;
+      const nextTerm = structuredClone(term);
+      nextTerm.sections = [
+        ...(nextTerm.sections ?? []),
+        { code, name, kind: null, programs: [] },
+      ];
+      updateTerm(
+        { body: nextTerm },
+        {
+          onSuccess: () => {
+            onSuccess?.();
+          },
+        },
+      );
+    },
+    [term, updateTerm],
+  );
+
+  return { addSection, isPending, isError, error };
+}
+
 export function useDeleteProgramFromSection(
   sectionCode: string,
   programIndex: number,

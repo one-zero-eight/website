@@ -7,6 +7,7 @@ import {
 } from "./coursesTabSections.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { SectionTabsBar } from "@/components/schedule-assistant/settings/SectionTabsBar.tsx";
+import { NewSectionButton } from "@/components/schedule-assistant/settings/NewSectionButton.tsx";
 import {
   SettingsCreateField,
   SettingsCreateModal,
@@ -258,6 +259,7 @@ export function CoursesTabContent() {
         tabs={tabs}
         activeKey={activeSectionKey}
         onChange={setActiveSectionKey}
+        trailing={<NewSectionButton onCreated={setActiveSectionKey} />}
       />
       {createButton}
       {unassignedList}
