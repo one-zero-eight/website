@@ -443,6 +443,58 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/instructor-preferences/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["instructor_preferences_get_my_preferences"];
+    put: operations["instructor_preferences_update_my_preferences"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/instructor-preferences/{instructor_id}/share-link": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: {
+        instructor_id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["instructor_preferences_create_preference_share_link"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/instructor-preferences/link/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    get: operations["instructor_preferences_get_preferences_by_token"];
+    put: operations["instructor_preferences_update_preferences_by_token"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/me": {
     parameters: {
       query?: never;
@@ -1206,6 +1258,21 @@ export interface components {
        * @description Whether the user may modify schedule-assistant data
        */
       is_moderator: boolean;
+    };
+    InstructorPreferenceForm: {
+      instructor_id: string;
+      instructor_name: string;
+      email?: string | null;
+      term: components["schemas"]["TermConfig"];
+      slot_preferences?: components["schemas"]["InstructorSlotPreferenceEntry"][];
+    };
+    InstructorPreferenceUpdate: {
+      slot_preferences?: components["schemas"]["InstructorSlotPreferenceEntry"][];
+    };
+    PreferenceShareLinkResponse: {
+      token: string;
+      /** Format: date-time */
+      expires_at: string;
     };
     /** OccurrencePlacement */
     OccurrencePlacement: {
@@ -3129,6 +3196,121 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ConfigChangeEventSummary"][];
+        };
+      };
+    };
+  };
+
+  instructor_preferences_get_my_preferences: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InstructorPreferenceForm"];
+        };
+      };
+    };
+  };
+  instructor_preferences_update_my_preferences: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InstructorPreferenceUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InstructorPreferenceForm"];
+        };
+      };
+    };
+  };
+  instructor_preferences_create_preference_share_link: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        instructor_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PreferenceShareLinkResponse"];
+        };
+      };
+    };
+  };
+  instructor_preferences_get_preferences_by_token: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InstructorPreferenceForm"];
+        };
+      };
+    };
+  };
+  instructor_preferences_update_preferences_by_token: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InstructorPreferenceUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InstructorPreferenceForm"];
         };
       };
     };

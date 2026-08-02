@@ -6,7 +6,11 @@ import { ScheduleConfigStatus } from "@/components/schedule-assistant/config/use
 import { ChecksSessionProvider } from "@/components/schedule-assistant/checks/checksSession.tsx";
 import { MainFloatingMenu } from "@/components/schedule-assistant/MainFloatingMenu.tsx";
 import { Helmet } from "@dr.pogodin/react-helmet";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  useRouterState,
+} from "@tanstack/react-router";
 import type { PropsWithChildren } from "react";
 
 export const Route = createFileRoute("/schedule-assistant")({
@@ -15,8 +19,6 @@ export const Route = createFileRoute("/schedule-assistant")({
 
 function RequireAccessToken({ children }: PropsWithChildren) {
   const [token] = useMyAccessToken();
-  // Accounts login is cookie-based; schedule-assistant needs the Bearer token
-  // that AuthManager fetches asynchronously after /users/me succeeds.
   if (!token) {
     return (
       <div className="flex min-h-0 flex-1 items-center justify-center p-8">
@@ -70,10 +72,10 @@ function RequireModerator({ children }: PropsWithChildren) {
   return children;
 }
 
-function RouteComponent() {
+function Shell({ children }: PropsWithChildren) {
   return (
     <div
-      data-theme="light" // Always light theme
+      data-theme="light"
       className="font-rubik flex h-screen w-full flex-col text-base leading-normal antialiased [&_.tab]:select-text [&_button]:select-text [&_summary]:select-text"
     >
       <Helmet>
@@ -82,10 +84,50 @@ function RouteComponent() {
           name="description"
           content="Составление расписания в Innopolis University."
         />
-        {/* Do not scan this page */}
         <meta name="robots" content="noindex, follow" />
       </Helmet>
+      {children}
+    </div>
+  );
+}
 
+function RouteComponent() {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+  const isTokenPreferences = /\/schedule-assistant\/preferences\/.+/.test(
+    pathname,
+  );
+  const isSelfPreferences =
+    pathname === "/schedule-assistant/preferences" ||
+    pathname === "/schedule-assistant/preferences/";
+
+  if (isTokenPreferences) {
+    return (
+      <Shell>
+        <div className="bg-base-200/40 relative flex min-h-0 flex-1 flex-col overflow-auto">
+          <Outlet />
+        </div>
+      </Shell>
+    );
+  }
+
+  if (isSelfPreferences) {
+    return (
+      <Shell>
+        <RequireAuth>
+          <RequireAccessToken>
+            <div className="bg-base-200/40 relative flex min-h-0 flex-1 flex-col overflow-auto">
+              <Outlet />
+            </div>
+          </RequireAccessToken>
+        </RequireAuth>
+      </Shell>
+    );
+  }
+
+  return (
+    <Shell>
       <RequireAuth>
         <RequireAccessToken>
           <RequireModerator>
@@ -93,7 +135,6 @@ function RouteComponent() {
               <ChecksSessionProvider>
                 <div className="bg-base-200/40 relative flex min-h-0 flex-1 flex-col overflow-hidden">
                   <Outlet />
-
                   <MainFloatingMenu />
                 </div>
               </ChecksSessionProvider>
@@ -101,6 +142,6 @@ function RouteComponent() {
           </RequireModerator>
         </RequireAccessToken>
       </RequireAuth>
-    </div>
+    </Shell>
   );
 }

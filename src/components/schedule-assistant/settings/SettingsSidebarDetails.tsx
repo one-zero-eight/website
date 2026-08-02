@@ -1,10 +1,12 @@
 import { Fragment } from "react";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { $scheduleAssistant } from "@/api/schedule-assistant";
 import {
   SchemaCourseConfig,
   SchemaSectionProgram,
   SectionProgramLanguageAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
+import { useToast } from "@/components/toast";
 import {
   nextGroupIdentifiers,
   programCodeForGroupIdentifiers,
@@ -1208,6 +1210,48 @@ export function TrackDetails({
   );
 }
 
+function SharePreferenceLinkButton({
+  instructorId,
+}: {
+  instructorId: string | undefined;
+}) {
+  const { showError, showSuccess } = useToast();
+  const { mutate, isPending } = $scheduleAssistant.useMutation(
+    "post",
+    "/instructor-preferences/{instructor_id}/share-link",
+  );
+
+  return (
+    <button
+      type="button"
+      className="btn btn-outline btn-secondary btn-sm mt-2 w-fit"
+      disabled={!instructorId || isPending}
+      onClick={() => {
+        if (!instructorId) return;
+        mutate(
+          { params: { path: { instructor_id: instructorId } } },
+          {
+            onSuccess: async (data) => {
+              const url = `${window.location.origin}/schedule-assistant/preferences/${data.token}`;
+              await navigator.clipboard.writeText(url);
+              showSuccess("Ссылка скопирована", url);
+            },
+            onError: (error) => {
+              showError("Ошибка", formatApiErrorMessage(error));
+            },
+          },
+        );
+      }}
+    >
+      {isPending ? (
+        <span className="loading loading-spinner loading-sm" />
+      ) : (
+        "Скопировать ссылку для преподавателя"
+      )}
+    </button>
+  );
+}
+
 export function InstructorDetails({
   instructorIndex,
 }: {
@@ -1285,6 +1329,7 @@ export function InstructorDetails({
                 patchInstructor({ slot_preferences })
               }
             />
+            <SharePreferenceLinkButton instructorId={instructorId} />
           </div>
           <SettingsDetailDeleteButton
             label="Удалить преподавателя"
