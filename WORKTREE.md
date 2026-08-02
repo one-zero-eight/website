@@ -78,7 +78,7 @@ pnpm run dev
 # → https://local.innohassle.ru:3000
 ```
 
-Use a **different `--port` per worktree** (or per agent). Allowed extra ports: **3001–3005** (main stays on **3000**). Run Vite via `pnpm exec` so flags are not swallowed by pnpm’s `--` separator. Pass `--strictPort` so a busy port exits instead of picking another:
+Use a **different `--port` per worktree** (or per agent). Allowed ports: **3000–3099** (main stays on **3000** by default). Run Vite via `pnpm exec` so flags are not swallowed by pnpm’s `--` separator. Pass `--strictPort` so a busy port exits instead of picking another:
 
 ```bash
 # main worktree
@@ -99,7 +99,7 @@ HTTPS for `local.innohassle.ru` comes from `vite-plugin-mkcert` (same host, any 
 | `website-foo` | `pnpm exec vite dev --port 3001 --host --strictPort` | https://local.innohassle.ru:3001 |
 | `website-bar` | `pnpm exec vite dev --port 3002 --host --strictPort` | https://local.innohassle.ru:3002 |
 
-Pick an unused port from `3001`–`3005` for each extra worktree.
+Pick an unused port from `3001`–`3099` for each extra worktree.
 
 For Android USB preview, reverse the same port you use:
 

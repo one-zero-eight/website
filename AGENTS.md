@@ -32,7 +32,7 @@ The user asks questions about the following coding technologies:
 Project setup:
 
 - We use pnpm as package manager, project runned via `pnpm run dev --host` command (most probably it is already running, do not run it again).
-- Local development server is available at https://local.innohassle.ru:3000.
+- Local development server is available at https://local.innohassle.ru:3000 (default). Allowed ports: **3000–3099** (for parallel worktrees / agents; see [WORKTREE.md](WORKTREE.md)).
 - Lint, check, prettify: `pnpm run lint:fix`, `pnpm run typecheck`, `pnpm run prettify`.
 - Generate API types: `pnpm run gen:api` (most probably it is already generated, do not run it again).
 - For parallel branches / several frontend instances via git worktrees, see [WORKTREE.md](WORKTREE.md).
@@ -41,7 +41,7 @@ Project setup:
 
 For Cursor Agent only (Browser Automation / `cursor-ide-browser`):
 
-- Use the Cursor browser against https://local.innohassle.ru:3000 (or the worktree port / route under test; see [WORKTREE.md](WORKTREE.md)).
+- Use the Cursor browser against https://local.innohassle.ru:3000 (or another port in **3000–3099** / the route under test; see [WORKTREE.md](WORKTREE.md)).
 - When work is parallel (extra worktree, another agent already using the browser, or a non-default port), open a **new** browser tab: call `browser_navigate` with `newTab: true` instead of reusing an existing tab.
 - If the app is not authorized (signed-out UI, "Sign in" prompt, or auth-gated content), ask the user to sign in in that browser tab. Do not try to complete SSO/login yourself. This should be done once per session commonly.
 - If automation does not work, most probably user needs to enable it in the Cursor settings (Browser & Network).
