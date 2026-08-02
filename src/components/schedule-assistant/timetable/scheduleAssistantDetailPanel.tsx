@@ -33,7 +33,7 @@ const CLICK =
 
 function DetailRow({ children }: { children: ReactNode }) {
   return (
-    <div className="border-0 bg-transparent py-0.5 text-xs leading-snug [word-break:break-word] text-[#243957]">
+    <div className="border-base-300/70 text-base-content border-b py-1.5 text-sm leading-snug [word-break:break-word] last:border-b-0">
       {children}
     </div>
   );
@@ -41,7 +41,7 @@ function DetailRow({ children }: { children: ReactNode }) {
 
 function DetailSection({ title }: { title: string }) {
   return (
-    <div className="mt-2 mb-0.5 text-sm font-bold tracking-wide text-[#2d4f80] uppercase">
+    <div className="text-base-content/55 mt-3 mb-1 text-xs font-semibold tracking-wide uppercase">
       {title}
     </div>
   );
@@ -255,15 +255,22 @@ export function computeDetailPanel(input: {
 
   if (!sel) {
     return {
-      detailTitle: "Выбор",
-      detailSummary: "",
+      detailTitle: "Ничего не выбрано",
+      detailSummary:
+        "Выберите занятие, программу, группу, преподавателя или аудиторию в таблице.",
       histogramHtml: "",
       histogramHidden: true,
       listContent: (
-        <DetailRow>
-          Кликните по занятию, программе, группе или преподавателю, чтобы
-          увидеть детали.
-        </DetailRow>
+        <div className="border-base-300 bg-base-200/40 rounded-box flex flex-col items-center gap-3 border border-dashed px-4 py-10 text-center">
+          <span className="icon-[material-symbols--touch-app-outline-rounded] text-base-content/35 text-4xl" />
+          <div className="text-base-content text-sm font-medium">
+            Панель деталей пуста
+          </div>
+          <p className="text-base-content/60 max-w-56 text-xs leading-relaxed">
+            Кликните по ячейке или заголовку в расписании — здесь появятся
+            сводка, загрузка и связанные сущности.
+          </p>
+        </div>
       ),
     };
   }

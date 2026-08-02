@@ -1286,56 +1286,62 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
 
   return (
     <>
-      <div className="mb-1.5 flex flex-col gap-2">
+      <div className="border-base-300 mb-2 flex flex-col gap-2 border-b pb-2">
         <div
-          className="detail-title min-w-0 text-base leading-snug font-semibold [overflow-wrap:anywhere] text-[#243957]"
+          className="detail-title text-base-content min-w-0 text-lg leading-snug font-semibold [overflow-wrap:anywhere]"
           id="detailTitle"
         >
           {detail.detailTitle}
         </div>
         {!editModalOpen ? (
-          <div className="flex flex-wrap items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1.5">
             {canEditSelectedMeeting ? (
               <button
-                className="btn btn-primary btn-xs"
+                className="btn btn-primary btn-sm"
                 type="button"
                 onClick={() => setEditModalOpen(true)}
               >
                 Редактировать
               </button>
             ) : null}
-            <button
-              className="btn btn-outline btn-xs shrink-0"
-              id="clearSelectionBtn"
-              type="button"
-              onClick={clearSelection}
-            >
-              Сбросить
-            </button>
+            {deferredSelection ? (
+              <button
+                className="btn btn-ghost btn-sm shrink-0"
+                id="clearSelectionBtn"
+                type="button"
+                onClick={clearSelection}
+              >
+                Сбросить
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>
-      <div
-        className="detail-summary mb-2 min-h-4 text-[0.8125rem] text-[#4f5c6d]"
-        id="detailSummary"
-      >
-        {detail.detailSummary}
-      </div>
+      {detail.detailSummary ? (
+        <div
+          className="detail-summary text-base-content/70 mb-3 text-sm leading-snug"
+          id="detailSummary"
+        >
+          {detail.detailSummary}
+        </div>
+      ) : (
+        <div id="detailSummary" className="detail-summary mb-0" />
+      )}
       {!detail.histogramHidden ? (
         <div
           id="detailHistogram"
-          className="my-2 flex shrink-0 flex-col gap-2.5"
+          className="border-base-300 bg-base-200/30 rounded-box mb-3 flex shrink-0 flex-col gap-2 border p-2"
           dangerouslySetInnerHTML={{ __html: detail.histogramHtml }}
         />
       ) : (
         <div
           id="detailHistogram"
-          className="my-2 flex shrink-0 flex-col gap-2.5"
+          className="my-0 flex shrink-0 flex-col gap-2.5"
           hidden
         />
       )}
       <div
-        className="grid gap-0.5 text-xs"
+        className="grid min-h-0 flex-1 gap-1 text-sm"
         id="detailList"
         onClick={onDetailListClick}
       >
