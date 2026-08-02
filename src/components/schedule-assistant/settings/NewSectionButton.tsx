@@ -32,7 +32,7 @@ export function NewSectionButton({
     <>
       <button
         type="button"
-        className="text-base-content/45 hover:text-base-content/70 inline-flex shrink-0 items-center gap-0.5 px-2 py-1 text-sm transition-colors"
+        className="tab rounded-btn text-base-content/45 hover:text-base-content/70"
         title="Новая секция"
         onClick={() => {
           setCode("");
@@ -40,8 +40,7 @@ export function NewSectionButton({
           setOpen(true);
         }}
       >
-        <span className="icon-[material-symbols--add] text-base" />
-        Секция
+        +
       </button>
       <SettingsCreateModal
         open={open}
