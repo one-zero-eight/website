@@ -1486,6 +1486,11 @@ export interface components {
        */
       name: string;
       /**
+       * Default Layout
+       * @description Default timetable layout when opening this section (groups or calendar)
+       */
+      default_layout?: ("groups" | "calendar") | null;
+      /**
        * Kind
        * @description Section kind marker (for example, core/english/electives)
        */

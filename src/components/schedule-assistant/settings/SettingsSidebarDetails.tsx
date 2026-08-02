@@ -1350,6 +1350,45 @@ export function SemesterDetails() {
           onKeyDown={handleEscapeBlur}
         />
       </label>
+      <div className={`${detailControlClass} shrink-0`}>
+        <span className={detailLabelUpperClass}>
+          Вид таблицы по умолчанию для секций
+        </span>
+        <div className="flex flex-col gap-2">
+          {(term?.sections ?? []).map((section, sectionIndex) => (
+            <label
+              key={section.code || sectionIndex}
+              className="flex flex-wrap items-center gap-2"
+            >
+              <span className="min-w-28 text-sm font-medium">
+                {section.name || section.code}
+              </span>
+              <select
+                className="select select-bordered select-sm"
+                value={section.default_layout ?? ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  patchTerm((current) => {
+                    const next = structuredClone(current);
+                    const target = next.sections?.[sectionIndex];
+                    if (!target) return current;
+                    target.default_layout =
+                      value === "groups" || value === "calendar" ? value : null;
+                    return next;
+                  });
+                }}
+              >
+                <option value="">Не задано</option>
+                <option value="groups">По группам</option>
+                <option value="calendar">По дням</option>
+              </select>
+            </label>
+          ))}
+          {(term?.sections ?? []).length === 0 ? (
+            <div className="text-base-content/60 text-sm">Нет секций</div>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }

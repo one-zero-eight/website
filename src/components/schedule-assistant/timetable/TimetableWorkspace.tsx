@@ -340,18 +340,27 @@ function TimetableWorkspaceInner({
 
   useEffect(() => {
     if (!config) return;
-    const sectionCodes = getScheduleSections(config).map(
-      (section) => section.code,
-    );
+    const sections = getScheduleSections(config);
+    const sectionCodes = sections.map((section) => section.code);
     if (!sectionCodes.length) return;
     const validTabs = new Set<InnerTab>([
       ...sectionCodes,
       "instructor",
       "room",
     ]);
-    setActiveTab((current) =>
-      validTabs.has(current) ? current : (sectionCodes[0] as InnerTab),
-    );
+    setActiveTab((current) => {
+      const next = validTabs.has(current)
+        ? current
+        : (sectionCodes[0] as InnerTab);
+      if (next !== "instructor" && next !== "room") {
+        const section = sections.find((candidate) => candidate.code === next);
+        const defaultLayout = section?.default_layout;
+        if (defaultLayout === "groups" || defaultLayout === "calendar") {
+          setLayoutMode(defaultLayout);
+        }
+      }
+      return next;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config?.term?.sections]);
 
@@ -568,8 +577,19 @@ function TimetableWorkspaceInner({
     (nextTab: InnerTab) => {
       setActiveTab(nextTab);
       selectionStore.setSelection(null);
+      if (nextTab === "instructor" || nextTab === "room") {
+        setLayoutMode("groups");
+        return;
+      }
+      const section = getScheduleSections(config).find(
+        (candidate) => candidate.code === nextTab,
+      );
+      const defaultLayout = section?.default_layout;
+      if (defaultLayout === "groups" || defaultLayout === "calendar") {
+        setLayoutMode(defaultLayout);
+      }
     },
-    [selectionStore],
+    [config, selectionStore],
   );
 
   const selectMeeting = useCallback(
