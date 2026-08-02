@@ -362,7 +362,14 @@ export function RoomDetails({ roomId }: { roomId: string }) {
     room?.capacity != null ? String(room.capacity) : "",
     (value) => {
       if (!room) return;
-      patchRoom({ capacity: Number(value) || 0 });
+      const trimmed = value.trim();
+      if (trimmed === "") {
+        patchRoom({ capacity: null });
+        return;
+      }
+      const capacity = Number(trimmed);
+      if (!Number.isFinite(capacity)) return;
+      patchRoom({ capacity });
     },
   );
 

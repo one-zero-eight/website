@@ -15,6 +15,11 @@ import {
   type InstructorSortMode,
 } from "@/components/schedule-assistant/settings/instructors/instructorsSearchUtils.ts";
 import {
+  SettingsCreateField,
+  SettingsCreateModal,
+} from "@/components/schedule-assistant/settings/SettingsCreateModal.tsx";
+import { usePendingSettingsSelect } from "@/components/schedule-assistant/settings/usePendingSettingsSelect.ts";
+import {
   getSettingsSelectionKey,
   useSelection,
 } from "@/components/schedule-assistant/settings/useSelection.tsx";
@@ -133,6 +138,13 @@ export function InstructorsTabContent() {
   const { selectedSelectionId, selectItem } = useSelection();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMode, setSortMode] = useState<InstructorSortMode>("meetings");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newId, setNewId] = useState("");
+  const [newNameRu, setNewNameRu] = useState("");
+  const [newNameEn, setNewNameEn] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newAlias, setNewAlias] = useState("");
+  const [newPosition, setNewPosition] = useState("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const handleSelectInstructor = useCallback(
     (instructorIndex: number) => {
@@ -140,6 +152,55 @@ export function InstructorsTabContent() {
     },
     [selectItem],
   );
+  const findInstructorIndexById = useCallback(
+    (items: NonNullable<typeof instructors>, key: string) =>
+      items.findIndex((item) => String(item.id ?? "") === key),
+    [],
+  );
+  const requestSelectCreatedInstructor = usePendingSettingsSelect(
+    instructors,
+    findInstructorIndexById,
+    handleSelectInstructor,
+  );
+
+  function resetCreateForm() {
+    setNewId("");
+    setNewNameRu("");
+    setNewNameEn("");
+    setNewEmail("");
+    setNewAlias("");
+    setNewPosition("");
+  }
+
+  function handleCreateEmailChange(value: string) {
+    setNewEmail(value);
+    setNewId(value.trim());
+  }
+
+  function handleCreateInstructor() {
+    const id = newId.trim();
+    if (!id) return;
+    createInstructor(
+      {
+        body: {
+          id,
+          alias: newAlias.trim() || null,
+          email: newEmail.trim() || null,
+          name_en: newNameEn.trim() || null,
+          name_ru: newNameRu.trim() || null,
+          position: newPosition.trim() || null,
+        },
+      },
+      {
+        onSuccess: () => {
+          setCreateOpen(false);
+          resetCreateForm();
+          setSearchQuery("");
+          requestSelectCreatedInstructor(id);
+        },
+      },
+    );
+  }
 
   const searchIndex = useMemo(
     () => createInstructorsSearchIndex(instructors ?? []),
@@ -216,6 +277,16 @@ export function InstructorsTabContent() {
           </select>
         </div>
       ) : null}
+      <button
+        type="button"
+        className="btn btn-outline btn-secondary btn-sm w-fit shrink-0"
+        onClick={() => {
+          resetCreateForm();
+          setCreateOpen(true);
+        }}
+      >
+        Добавить преподавателя
+      </button>
       <div
         className={clsx("flex flex-col gap-4", isSearchStale && "opacity-60")}
       >
@@ -245,29 +316,65 @@ export function InstructorsTabContent() {
           </div>
         )}
       </div>
-      <button
-        type="button"
-        className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
-        disabled={isCreating}
-        onClick={() =>
-          createInstructor({
-            body: {
-              id: `new-instructor-${(instructors?.length ?? 0) + 1}`,
-              alias: null,
-              email: null,
-              name_en: null,
-              name_ru: null,
-              position: null,
-            },
-          })
-        }
+      <SettingsCreateModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        title="Новый преподаватель"
+        submitLabel="Создать"
+        isPending={isCreating}
+        onSubmit={handleCreateInstructor}
       >
-        {isCreating ? (
-          <span className="loading loading-spinner loading-sm" />
-        ) : (
-          "Добавить преподавателя"
-        )}
-      </button>
+        <SettingsCreateField label="Корпоративная почта">
+          <input
+            type="email"
+            className="input input-bordered input-sm w-full"
+            value={newEmail}
+            placeholder="a.ivanov@innopolis.university"
+            onChange={(e) => handleCreateEmailChange(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="Идентификатор" required>
+          <input
+            className="input input-bordered input-sm w-full"
+            value={newId}
+            required
+            placeholder="a.ivanov@innopolis.university"
+            onChange={(e) => setNewId(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="ФИО">
+          <input
+            className="input input-bordered input-sm w-full"
+            value={newNameRu}
+            placeholder="Иванов Иван Иванович"
+            onChange={(e) => setNewNameRu(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="Name Surname">
+          <input
+            className="input input-bordered input-sm w-full"
+            value={newNameEn}
+            placeholder="Ivan Ivanov"
+            onChange={(e) => setNewNameEn(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="Алиас Telegram">
+          <input
+            className="input input-bordered input-sm w-full"
+            value={newAlias}
+            placeholder="@ivanov"
+            onChange={(e) => setNewAlias(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="Должность">
+          <input
+            className="input input-bordered input-sm w-full"
+            value={newPosition}
+            placeholder="Instructor"
+            onChange={(e) => setNewPosition(e.target.value)}
+          />
+        </SettingsCreateField>
+      </SettingsCreateModal>
     </div>
   );
 }

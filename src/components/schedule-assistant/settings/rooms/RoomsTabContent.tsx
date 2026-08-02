@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import type { SchemaRoom } from "@/api/schedule-assistant/types.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
@@ -7,6 +7,11 @@ import {
   useCreateRoomMutation,
   useRoomsQuery,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
+import {
+  SettingsCreateField,
+  SettingsCreateModal,
+} from "@/components/schedule-assistant/settings/SettingsCreateModal.tsx";
+import { usePendingSettingsSelect } from "@/components/schedule-assistant/settings/usePendingSettingsSelect.ts";
 import {
   getSettingsSelectionKey,
   useSelection,
@@ -35,6 +40,27 @@ export function RoomsTabContent() {
   const { data: rooms, isPending, isError, error } = useRoomsQuery();
   const { mutate: createRoom, isPending: isCreating } = useCreateRoomMutation();
   const { selectedSelectionId, selectItem } = useSelection();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newId, setNewId] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newCapacity, setNewCapacity] = useState("");
+  const handleSelectRoom = useCallback(
+    (roomIndex: number) => {
+      selectItem({ kind: "room", roomIndex });
+    },
+    [selectItem],
+  );
+  const findRoomIndexById = useCallback(
+    (items: NonNullable<typeof rooms>, key: string) =>
+      items.findIndex((item) => String(item.id ?? "") === key),
+    [],
+  );
+  const requestSelectCreatedRoom = usePendingSettingsSelect(
+    rooms,
+    findRoomIndexById,
+    handleSelectRoom,
+  );
+
   const groups: RoomsFloorGroup[] = useMemo(() => {
     const roomsItems: RoomListRow[] = (rooms ?? []).map(
       (room: SchemaRoom, index: number) => ({
@@ -70,6 +96,35 @@ export function RoomsTabContent() {
       });
   }, [rooms]);
 
+  function resetCreateForm() {
+    setNewId("");
+    setNewName("");
+    setNewCapacity("");
+  }
+
+  function handleCreateRoom() {
+    const id = newId.trim();
+    if (!id) return;
+    const capacityRaw = newCapacity.trim();
+    const parsed = capacityRaw === "" ? null : Number(capacityRaw);
+    createRoom(
+      {
+        body: {
+          id,
+          name: newName.trim(),
+          capacity: parsed != null && Number.isFinite(parsed) ? parsed : null,
+        },
+      },
+      {
+        onSuccess: () => {
+          setCreateOpen(false);
+          resetCreateForm();
+          requestSelectCreatedRoom(id);
+        },
+      },
+    );
+  }
+
   if (isPending) {
     return <div className="skeleton h-40 w-full" />;
   }
@@ -84,6 +139,16 @@ export function RoomsTabContent() {
 
   return (
     <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        className="btn btn-outline btn-secondary btn-sm w-fit shrink-0"
+        onClick={() => {
+          resetCreateForm();
+          setCreateOpen(true);
+        }}
+      >
+        Добавить аудиторию
+      </button>
       {!groups.length ? (
         <div className="text-base-content/70 text-sm">
           Нет аудиторий в конфигурации.
@@ -126,26 +191,41 @@ export function RoomsTabContent() {
           ))}
         </div>
       )}
-      <button
-        type="button"
-        className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
-        disabled={isCreating}
-        onClick={() =>
-          createRoom({
-            body: {
-              id: `NEW-${(rooms?.length ?? 0) + 1}`,
-              name: "",
-              capacity: 0,
-            },
-          })
-        }
+      <SettingsCreateModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        title="Новая аудитория"
+        submitLabel="Создать"
+        isPending={isCreating}
+        onSubmit={handleCreateRoom}
       >
-        {isCreating ? (
-          <span className="loading loading-spinner loading-sm" />
-        ) : (
-          "Добавить аудиторию"
-        )}
-      </button>
+        <SettingsCreateField label="Идентификатор" required>
+          <input
+            className="input input-bordered input-sm w-full"
+            value={newId}
+            required
+            placeholder="108"
+            onChange={(e) => setNewId(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="Название">
+          <input
+            className="input input-bordered input-sm w-full"
+            value={newName}
+            placeholder="Аудитория 108"
+            onChange={(e) => setNewName(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="Вместимость">
+          <input
+            type="number"
+            className="input input-bordered input-sm w-full"
+            value={newCapacity}
+            placeholder="30"
+            onChange={(e) => setNewCapacity(e.target.value)}
+          />
+        </SettingsCreateField>
+      </SettingsCreateModal>
     </div>
   );
 }

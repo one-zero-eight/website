@@ -614,7 +614,7 @@ function courseReferencesStudentGroup(
   return false;
 }
 
-export function useAddProgramToSection(sectionCode: string) {
+export function useAddProgramToSection() {
   const { data: term } = useTermQuery();
   const {
     mutate: updateTerm,
@@ -624,7 +624,11 @@ export function useAddProgramToSection(sectionCode: string) {
   } = useUpdateTermMutation();
 
   const addProgram = useCallback(
-    (program: SchemaSectionProgram) => {
+    (
+      sectionCode: string,
+      program: SchemaSectionProgram,
+      options?: { onSuccess?: () => void },
+    ) => {
       if (!term) return;
       const nextTerm = structuredClone(term);
       const section = (nextTerm.sections ?? []).find(
@@ -632,9 +636,12 @@ export function useAddProgramToSection(sectionCode: string) {
       );
       if (!section) return;
       section.programs.push(program);
-      updateTerm({ body: nextTerm });
+      updateTerm(
+        { body: nextTerm },
+        { onSuccess: () => options?.onSuccess?.() },
+      );
     },
-    [sectionCode, term, updateTerm],
+    [term, updateTerm],
   );
 
   return { addProgram, isPending, isError, error };

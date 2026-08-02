@@ -9,6 +9,7 @@ import {
 import { SectionTabsBar } from "@/components/schedule-assistant/settings/SectionTabsBar.tsx";
 import {
   SchemaSectionProgram,
+  SectionProgramKindAnyOf0,
   SectionProgramLanguageAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
@@ -17,12 +18,25 @@ import {
   useConfig,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
+  SettingsCreateField,
+  SettingsCreateModal,
+} from "@/components/schedule-assistant/settings/SettingsCreateModal.tsx";
+import {
   getSettingsSelectionKey,
   useSelection,
 } from "@/components/schedule-assistant/settings/useSelection.tsx";
 
 const STUDENT_GROUPS_SUBTAB_STORAGE_KEY =
   "schedule-assistant:settings:groups-subtab";
+
+const PROGRAM_KIND_OPTIONS = [
+  { value: SectionProgramKindAnyOf0.degree_year, label: "degree_year" },
+  { value: SectionProgramKindAnyOf0.english_program, label: "english_program" },
+  {
+    value: SectionProgramKindAnyOf0.elective_bucket,
+    label: "elective_bucket",
+  },
+] as const;
 
 export function GroupsTabContent() {
   const { config, isPending, isError, error } = useConfig();
@@ -36,24 +50,31 @@ export function GroupsTabContent() {
     [config],
   );
   const sections = programSections;
-  const sectionMeta = sections.map((section) => ({
-    key: section.code,
-    label: section.name,
-  }));
-  const sectionPrograms: Record<string, ProgramTreeProgram[]> = {};
-  const programsByCode = new Map<string, ProgramTreeProgram[]>();
-  for (const program of programsGroupsTreeView) {
-    const key = String(program.code || "").trim();
-    if (!key) continue;
-    programsByCode.set(key, [...(programsByCode.get(key) || []), program]);
-  }
-  for (const section of sections) {
-    const programsForSection: ProgramTreeProgram[] = [];
-    for (const code of section.programCodes) {
-      programsForSection.push(...(programsByCode.get(code) || []));
+  const sectionMeta = useMemo(
+    () =>
+      sections.map((section) => ({
+        key: section.code,
+        label: section.name,
+      })),
+    [sections],
+  );
+  const sectionPrograms = useMemo(() => {
+    const result: Record<string, ProgramTreeProgram[]> = {};
+    const programsByCode = new Map<string, ProgramTreeProgram[]>();
+    for (const program of programsGroupsTreeView) {
+      const key = String(program.code || "").trim();
+      if (!key) continue;
+      programsByCode.set(key, [...(programsByCode.get(key) || []), program]);
     }
-    sectionPrograms[section.code] = programsForSection;
-  }
+    for (const section of sections) {
+      const programsForSection: ProgramTreeProgram[] = [];
+      for (const code of section.programCodes) {
+        programsForSection.push(...(programsByCode.get(code) || []));
+      }
+      result[section.code] = programsForSection;
+    }
+    return result;
+  }, [programsGroupsTreeView, sections]);
   const [activeSectionKey, setActiveSectionKey] = useState(() => {
     if (typeof window === "undefined") return "";
     return window.localStorage.getItem(STUDENT_GROUPS_SUBTAB_STORAGE_KEY) || "";
@@ -77,8 +98,46 @@ export function GroupsTabContent() {
     );
   }, [activeSectionKey]);
 
-  const { addProgram, isPending: isAddingProgram } =
-    useAddProgramToSection(activeSectionKey);
+  const { addProgram, isPending: isAddingProgram } = useAddProgramToSection();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createSectionCode, setCreateSectionCode] = useState("");
+  const [newCode, setNewCode] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newKind, setNewKind] = useState<string>(
+    SectionProgramKindAnyOf0.degree_year,
+  );
+  const [newDegree, setNewDegree] = useState("");
+  const [newLanguage, setNewLanguage] = useState<string>(
+    SectionProgramLanguageAnyOf0.en,
+  );
+  const [pendingCreatedProgram, setPendingCreatedProgram] = useState<{
+    sectionCode: string;
+    code: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!pendingCreatedProgram) return;
+    if (activeSectionKey !== pendingCreatedProgram.sectionCode) {
+      setActiveSectionKey(pendingCreatedProgram.sectionCode);
+      return;
+    }
+    const programs = sectionPrograms[pendingCreatedProgram.sectionCode] ?? [];
+    const match = programs.find(
+      (program) => String(program.code ?? "") === pendingCreatedProgram.code,
+    );
+    if (!match) return;
+    selectItem(match.selection);
+    setPendingCreatedProgram(null);
+  }, [activeSectionKey, pendingCreatedProgram, sectionPrograms, selectItem]);
+
+  function resetCreateForm(sectionCode = activeSectionKey) {
+    setCreateSectionCode(sectionCode);
+    setNewCode("");
+    setNewName("");
+    setNewKind(SectionProgramKindAnyOf0.degree_year);
+    setNewDegree("");
+    setNewLanguage(SectionProgramLanguageAnyOf0.en);
+  }
 
   if (isPending) {
     return <div className="skeleton h-40 w-full" />;
@@ -109,6 +168,39 @@ export function GroupsTabContent() {
 
   const activePrograms = sectionPrograms[activeSectionKey] || [];
 
+  function handleCreateProgram() {
+    const sectionCode = createSectionCode.trim() || activeSectionKey;
+    const code = newCode.trim();
+    const name = newName.trim();
+    if (!sectionCode || !code || !name) return;
+    addProgram(
+      sectionCode,
+      {
+        code,
+        name,
+        kind: newKind.trim() || null,
+        degree: newDegree.trim() || null,
+        language:
+          newLanguage === SectionProgramLanguageAnyOf0.ru
+            ? SectionProgramLanguageAnyOf0.ru
+            : newLanguage === SectionProgramLanguageAnyOf0.en
+              ? SectionProgramLanguageAnyOf0.en
+              : null,
+        year: null,
+        applies_to: [],
+        tracks: [],
+        groups: [],
+      } satisfies SchemaSectionProgram,
+      {
+        onSuccess: () => {
+          setCreateOpen(false);
+          resetCreateForm(sectionCode);
+          setPendingCreatedProgram({ sectionCode, code });
+        },
+      },
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2.5">
       <SectionTabsBar
@@ -116,6 +208,16 @@ export function GroupsTabContent() {
         activeKey={activeSectionKey}
         onChange={setActiveSectionKey}
       />
+      <button
+        type="button"
+        className="btn btn-outline btn-secondary btn-sm w-fit shrink-0"
+        onClick={() => {
+          resetCreateForm(activeSectionKey);
+          setCreateOpen(true);
+        }}
+      >
+        Добавить программу
+      </button>
       {activePrograms.map((program) => (
         <section key={program.key} className="flex flex-col gap-2">
           <button
@@ -288,30 +390,78 @@ export function GroupsTabContent() {
           ) : null}
         </section>
       ))}
-      <button
-        type="button"
-        className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
-        disabled={isAddingProgram}
-        onClick={() =>
-          addProgram({
-            code: `new-program-${(sectionPrograms[activeSectionKey]?.length ?? 0) + 1}`,
-            name: "Новая программа",
-            kind: "degree_year",
-            degree: null,
-            language: SectionProgramLanguageAnyOf0.en,
-            year: null,
-            applies_to: [],
-            tracks: [],
-            groups: [],
-          } satisfies SchemaSectionProgram)
-        }
+      <SettingsCreateModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        title="Новая программа"
+        submitLabel="Создать"
+        isPending={isAddingProgram}
+        onSubmit={handleCreateProgram}
       >
-        {isAddingProgram ? (
-          <span className="loading loading-spinner loading-sm" />
-        ) : (
-          "Добавить программу"
-        )}
-      </button>
+        <SettingsCreateField label="Секция" required>
+          <select
+            className="select select-bordered select-sm w-full"
+            value={createSectionCode}
+            required
+            onChange={(e) => setCreateSectionCode(e.target.value)}
+          >
+            {sectionMeta.map((section) => (
+              <option key={section.key} value={section.key}>
+                {section.label}
+              </option>
+            ))}
+          </select>
+        </SettingsCreateField>
+        <SettingsCreateField label="Код" required>
+          <input
+            className="input input-bordered input-sm w-full"
+            value={newCode}
+            required
+            placeholder="BS_Y1_EN"
+            onChange={(e) => setNewCode(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="Название" required>
+          <input
+            className="input input-bordered input-sm w-full"
+            value={newName}
+            required
+            placeholder="BS - Year 1 (EN)"
+            onChange={(e) => setNewName(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="Тип">
+          <select
+            className="select select-bordered select-sm w-full"
+            value={newKind}
+            onChange={(e) => setNewKind(e.target.value)}
+          >
+            {PROGRAM_KIND_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </SettingsCreateField>
+        <SettingsCreateField label="Степень">
+          <input
+            className="input input-bordered input-sm w-full"
+            value={newDegree}
+            placeholder="bs / ms / phd"
+            onChange={(e) => setNewDegree(e.target.value)}
+          />
+        </SettingsCreateField>
+        <SettingsCreateField label="Язык">
+          <select
+            className="select select-bordered select-sm w-full"
+            value={newLanguage}
+            onChange={(e) => setNewLanguage(e.target.value)}
+          >
+            <option value={SectionProgramLanguageAnyOf0.en}>en</option>
+            <option value={SectionProgramLanguageAnyOf0.ru}>ru</option>
+          </select>
+        </SettingsCreateField>
+      </SettingsCreateModal>
     </div>
   );
 }

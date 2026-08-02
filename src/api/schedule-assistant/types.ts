@@ -1322,7 +1322,7 @@ export interface components {
        * Capacity
        * @description Maximum room capacity
        */
-      capacity: number;
+      capacity: number | null;
     };
     /**
      * RoomDTO
