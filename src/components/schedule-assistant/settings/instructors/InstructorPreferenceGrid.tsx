@@ -229,7 +229,7 @@ export function InstructorPreferenceGrid({
             key={item.level}
             type="button"
             className={cn(
-              "rounded-field h-9 border px-2.5 text-xs sm:h-7 sm:px-2",
+              "rounded-field h-8 border px-2 text-xs sm:h-6 sm:px-1.5",
               item.cellClass,
               activeLevel === item.level && `ring-2 ${item.activeClass}`,
             )}
