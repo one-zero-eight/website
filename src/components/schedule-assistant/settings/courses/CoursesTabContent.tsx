@@ -69,7 +69,10 @@ export function CoursesTabContent() {
   const { mutate: createCourse, isPending: isCreating } =
     useCreateCourseMutation();
   const { selectedSelectionId, selectItem } = useSelection();
-  const sections = useMemo(() => buildCoursesTabSections(config), [config]);
+  const { sections, unassigned } = useMemo(
+    () => buildCoursesTabSections(config),
+    [config],
+  );
   const [activeSectionKey, setActiveSectionKey] = useState(() => {
     if (typeof window === "undefined") return "";
     return window.localStorage.getItem(COURSES_SUBTAB_STORAGE_KEY) || "";
@@ -209,11 +212,35 @@ export function CoursesTabContent() {
     );
   }
 
-  if (!config || !sections.length) {
+  const unassignedBlock =
+    unassigned.length > 0 ? (
+      <div className="border-base-300 rounded-box overflow-hidden border">
+        <div className="border-base-300 bg-base-200/70 rounded-t-box border-b px-3 py-2 text-sm font-semibold">
+          Без привязки к программе
+        </div>
+        <div className="divide-base-300 divide-y">
+          {unassigned.map((course, courseIndex) => (
+            <CourseRowButton
+              key={`unassigned-${course.id}`}
+              course={course}
+              selected={
+                selectedSelectionId ===
+                getSettingsSelectionKey(course.selection)
+              }
+              isLast={courseIndex === unassigned.length - 1}
+              indentClass="px-3 py-1"
+              onSelect={() => selectItem(course.selection)}
+            />
+          ))}
+        </div>
+      </div>
+    ) : null;
+
+  if (!config || (!sections.length && !unassigned.length)) {
     return (
       <div className="flex flex-col gap-2">
         <div className="text-base-content/70 text-sm">
-          В конфигурации отсутствуют sections для табов курсов.
+          Нет курсов в конфигурации.
         </div>
         {createButton}
         {createModal}
@@ -231,14 +258,22 @@ export function CoursesTabContent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <SectionTabsBar
-        tabs={tabs}
-        activeKey={activeSectionKey}
-        onChange={setActiveSectionKey}
-        trailing={<NewSectionButton onCreated={setActiveSectionKey} />}
-      />
+      {sections.length ? (
+        <SectionTabsBar
+          tabs={tabs}
+          activeKey={activeSectionKey}
+          onChange={setActiveSectionKey}
+          trailing={<NewSectionButton onCreated={setActiveSectionKey} />}
+        />
+      ) : (
+        <div className="text-base-content/70 text-sm">
+          В конфигурации отсутствуют sections для табов курсов.
+        </div>
+      )}
+      {createButton}
+      {unassignedBlock}
       <div className="flex flex-col gap-6">
-        {!programs.length ? (
+        {sections.length && !programs.length ? (
           <div className="text-base-content/70 text-sm">
             В этом разделе нет курсов.
           </div>
@@ -246,8 +281,7 @@ export function CoursesTabContent() {
         {programs.map((program) => {
           const hasBody =
             program.sharedCourses.length > 0 || program.tracks.length > 0;
-          const programSelector =
-            program.key !== "unassigned" ? `@${program.key}` : null;
+          const programSelector = `@${program.key}`;
           const hasTracksAfterShared = program.tracks.length > 0;
           return (
             <div
@@ -313,10 +347,7 @@ export function CoursesTabContent() {
                   {program.tracks.map((track, trackIndex) => {
                     const isLastTrack =
                       trackIndex === program.tracks.length - 1;
-                    const trackSelector =
-                      program.key !== "unassigned"
-                        ? `@${program.key}/${track.title}`
-                        : null;
+                    const trackSelector = `@${program.key}/${track.title}`;
                     const trackHasContent =
                       track.courses.length > 0 || track.groups.length > 0;
 
@@ -413,7 +444,6 @@ export function CoursesTabContent() {
             </div>
           );
         })}
-        {createButton}
         {createModal}
       </div>
     </div>

@@ -263,6 +263,16 @@ export function GroupsTabContent() {
         onChange={setActiveSectionKey}
         trailing={<NewSectionButton onCreated={setActiveSectionKey} />}
       />
+      <button
+        type="button"
+        className="btn btn-outline btn-secondary btn-sm w-fit shrink-0"
+        onClick={() => {
+          resetCreateForm(activeSectionKey);
+          setCreateOpen(true);
+        }}
+      >
+        Добавить программу
+      </button>
       <div className="flex flex-col gap-6">
         {activePrograms.map((program, programListIndex) => {
           const programSelected =
@@ -424,16 +434,6 @@ export function GroupsTabContent() {
             </div>
           );
         })}
-        <button
-          type="button"
-          className="btn btn-outline btn-secondary btn-sm mt-1 w-fit shrink-0"
-          onClick={() => {
-            resetCreateForm(activeSectionKey);
-            setCreateOpen(true);
-          }}
-        >
-          Добавить программу
-        </button>
       </div>
       <SettingsCreateModal
         open={createOpen}

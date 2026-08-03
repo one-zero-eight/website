@@ -86,11 +86,16 @@ function buildCourseUsageRows(
 }
 
 /** Дерево курсов по секциям конфига — только для UI вкладки «Курсы». */
+export type CoursesTabSectionsResult = {
+  sections: CourseUsageSectionGroup[];
+  unassigned: CourseUsageRow[];
+};
+
 export function buildCoursesTabSections(
   config: SchemaScheduleConfig | null,
-): CourseUsageSectionGroup[] {
+): CoursesTabSectionsResult {
   const courseItems = buildCourseUsageRows(config);
-  if (!courseItems.length) return [];
+  if (!courseItems.length) return { sections: [], unassigned: [] };
 
   const courseByIndex = new Map<number, CourseUsageRow>();
   for (const item of courseItems) {
@@ -297,23 +302,6 @@ export function buildCoursesTabSections(
     }))
     .sort((a, b) => a.title.localeCompare(b.title, "ru"));
 
-  if (unassigned.length) {
-    groups.push({
-      key: "unassigned",
-      title: "Без привязки к программе",
-      hasExplicitTracks: false,
-      sharedCourses: [],
-      tracks: [
-        {
-          key: "unassigned-track",
-          title: "Не определено",
-          courses: dedupeCourses(unassigned),
-          groups: [],
-        },
-      ],
-    });
-  }
-
   const sections = buildProgramsGroupsTreeViewSectionTabs(config);
   const sectionToPrograms = new Map<string, CourseUsageProgramGroup[]>();
   const orderedSections: CourseUsageSectionGroup[] = [];
@@ -340,5 +328,8 @@ export function buildCoursesTabSections(
     section.programs = sectionToPrograms.get(section.key) || [];
   }
 
-  return orderedSections;
+  return {
+    sections: orderedSections,
+    unassigned: dedupeCourses(unassigned),
+  };
 }
