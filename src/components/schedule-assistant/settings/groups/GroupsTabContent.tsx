@@ -29,6 +29,7 @@ import {
   useSelection,
   type SettingsSelection,
 } from "@/components/schedule-assistant/settings/useSelection.tsx";
+import { useToast } from "@/components/toast";
 
 const STUDENT_GROUPS_SUBTAB_STORAGE_KEY =
   "schedule-assistant:settings:groups-subtab";
@@ -78,6 +79,7 @@ function remapSelectionAfterProgramMove(
 
 export function GroupsTabContent() {
   const { config, isPending, isError, error } = useConfig();
+  const { showConfirm } = useToast();
   const { selectedSelectionId, selectedSelection, selectItem, deselectItem } =
     useSelection();
   const programsGroupsTreeView = useMemo(
@@ -228,8 +230,19 @@ export function GroupsTabContent() {
     (sections.find((section) => section.code === activeSectionKey)?.programCodes
       .length ?? 0) === 0;
 
-  function handleDeleteSection() {
+  async function handleDeleteSection() {
     if (!activeSectionKey || !activeSectionEmpty) return;
+    const sectionLabel =
+      sections.find((section) => section.code === activeSectionKey)?.name ||
+      activeSectionKey;
+    const confirmed = await showConfirm({
+      title: "Удалить секцию?",
+      message: `Секция «${sectionLabel}» будет удалена. Это действие нельзя отменить.`,
+      confirmText: "Удалить",
+      cancelText: "Отмена",
+      type: "error",
+    });
+    if (!confirmed) return;
     deleteSection(activeSectionKey, () => {
       if (
         selectedSelection &&

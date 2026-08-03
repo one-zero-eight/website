@@ -11,6 +11,7 @@ import {
   normalizeRoomAttributeDefs,
   type RoomAttributeType,
 } from "@/components/schedule-assistant/settings/rooms/roomAttributes.ts";
+import { useToast } from "@/components/toast";
 
 function EnumValuesEditor({
   values,
@@ -91,6 +92,7 @@ export function RoomAttributesConfigModal({
   attributes: SchemaRoomAttributeDef[];
 }) {
   const { patchTerm, isPending } = usePatchTermMutation();
+  const { showConfirm } = useToast();
   const [draft, setDraft] = useState<SchemaRoomAttributeDef[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -205,11 +207,20 @@ export function RoomAttributesConfigModal({
                     <button
                       type="button"
                       className="btn btn-ghost btn-sm mt-5"
-                      onClick={() =>
+                      onClick={async () => {
+                        const label = def.key.trim() || `атрибут ${index + 1}`;
+                        const confirmed = await showConfirm({
+                          title: "Удалить атрибут?",
+                          message: `Атрибут «${label}» будет удалён из определений. Это действие нельзя отменить.`,
+                          confirmText: "Удалить",
+                          cancelText: "Отмена",
+                          type: "error",
+                        });
+                        if (!confirmed) return;
                         setDraft((current) =>
                           current.filter((_, itemIndex) => itemIndex !== index),
-                        )
-                      }
+                        );
+                      }}
                     >
                       Удалить
                     </button>

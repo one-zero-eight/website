@@ -158,16 +158,34 @@ function SettingsDetailNestedList({
 
 function SettingsDetailDeleteButton({
   label,
+  confirmTitle,
+  confirmMessage,
   onClick,
 }: {
   label: string;
+  confirmTitle?: string;
+  confirmMessage?: string;
   onClick: () => void;
 }) {
+  const { showConfirm } = useToast();
+
   return (
     <button
       type="button"
       className="btn btn-outline btn-error btn-sm mt-auto w-full shrink-0 sm:w-auto"
-      onClick={onClick}
+      onClick={async () => {
+        const confirmed = await showConfirm({
+          title: confirmTitle ?? label,
+          message:
+            confirmMessage ??
+            "Это действие нельзя отменить. Продолжить удаление?",
+          confirmText: "Удалить",
+          cancelText: "Отмена",
+          type: "error",
+        });
+        if (!confirmed) return;
+        onClick();
+      }}
     >
       {label}
     </button>
@@ -182,6 +200,8 @@ function SettingsDetailReorderRow({
   onMoveUp,
   onMoveDown,
   onDelete,
+  deleteConfirmTitle,
+  deleteConfirmMessage,
 }: {
   children: ReactNode;
   disableMoveUp: boolean;
@@ -189,7 +209,11 @@ function SettingsDetailReorderRow({
   onMoveUp: () => void;
   onMoveDown: () => void;
   onDelete: () => void;
+  deleteConfirmTitle?: string;
+  deleteConfirmMessage?: string;
 }) {
+  const { showConfirm } = useToast();
+
   return (
     <div className="border-base-300 flex items-start justify-between gap-2 border-b px-2.5 py-1.5 last:border-b-0">
       {children}
@@ -213,7 +237,19 @@ function SettingsDetailReorderRow({
         <button
           type="button"
           className="btn btn-ghost btn-xs btn-square text-error"
-          onClick={onDelete}
+          onClick={async () => {
+            const confirmed = await showConfirm({
+              title: deleteConfirmTitle ?? "Удалить",
+              message:
+                deleteConfirmMessage ??
+                "Это действие нельзя отменить. Продолжить удаление?",
+              confirmText: "Удалить",
+              cancelText: "Отмена",
+              type: "error",
+            });
+            if (!confirmed) return;
+            onDelete();
+          }}
         >
           <span className="icon-[material-symbols--delete-outline-rounded] text-lg" />
         </button>
@@ -434,6 +470,8 @@ export function RoomDetails({ roomId }: { roomId: string }) {
             />
             <SettingsDetailDeleteButton
               label="Удалить аудиторию"
+              confirmTitle="Удалить аудиторию?"
+              confirmMessage={`Аудитория «${roomId}» будет удалена. Это действие нельзя отменить.`}
               onClick={() => {
                 deleteRoom({ params: { path: { room_id: roomId } } });
                 deselectItem();
@@ -832,6 +870,8 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
 
           <SettingsDetailDeleteButton
             label="Удалить курс"
+            confirmTitle="Удалить курс?"
+            confirmMessage={`Курс «${courseName}» будет удалён. Это действие нельзя отменить.`}
             onClick={() => {
               if (!courseName) return;
               deleteCourse({ params: { path: { course_name: courseName } } });
@@ -1295,6 +1335,8 @@ export function GroupDetails({
 
           <SettingsDetailDeleteButton
             label="Удалить группу"
+            confirmTitle="Удалить группу?"
+            confirmMessage={`Группа «${headingTitle}» будет удалена. Это действие нельзя отменить.`}
             onClick={() => {
               void deleteStudentGroupCascade(groupId).then(() => {
                 deselectItem();
@@ -1439,6 +1481,8 @@ export function ProgramDetails({
                   key={track.id}
                   disableMoveUp={index === 0}
                   disableMoveDown={index === tracks.length - 1}
+                  deleteConfirmTitle="Удалить трек?"
+                  deleteConfirmMessage={`Трек «${track.title}» будет удалён. Это действие нельзя отменить.`}
                   onMoveUp={() =>
                     updateProgram((target) => {
                       const [moved] = target.tracks.splice(index, 1);
@@ -1475,6 +1519,8 @@ export function ProgramDetails({
 
           <SettingsDetailDeleteButton
             label="Удалить программу"
+            confirmTitle="Удалить программу?"
+            confirmMessage={`Программа «${headingTitle}» будет удалена. Это действие нельзя отменить.`}
             onClick={() => {
               deleteProgram();
               deselectItem();
@@ -1623,6 +1669,8 @@ export function TrackDetails({
                   key={group.id}
                   disableMoveUp={index === 0}
                   disableMoveDown={index === groups.length - 1}
+                  deleteConfirmTitle="Удалить группу?"
+                  deleteConfirmMessage={`Группа «${group.title}» будет удалена. Это действие нельзя отменить.`}
                   onMoveUp={() => {
                     if (index <= 0) return;
                     const reordered = [...trackGroups];
@@ -1673,6 +1721,8 @@ export function TrackDetails({
 
           <SettingsDetailDeleteButton
             label="Удалить трек"
+            confirmTitle="Удалить трек?"
+            confirmMessage={`Трек «${headingTitle}» будет удалён. Это действие нельзя отменить.`}
             onClick={() => {
               updateProgram((target) => {
                 target.tracks.splice(trackIndex, 1);
@@ -1839,6 +1889,8 @@ export function InstructorDetails({
           </div>
           <SettingsDetailDeleteButton
             label="Удалить преподавателя"
+            confirmTitle="Удалить преподавателя?"
+            confirmMessage={`Преподаватель «${headingTitle || instructorId}» будет удалён. Это действие нельзя отменить.`}
             onClick={() => {
               if (!instructorId) return;
               deleteInstructor({
