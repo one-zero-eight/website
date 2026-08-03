@@ -71,6 +71,8 @@ import { Route as With_menuEventsAdminRouteImport } from "./routes/_with_menu/ev
 import { Route as With_menuClubsNewRouteImport } from "./routes/_with_menu/clubs/new";
 import { Route as With_menuClubsLeagueRouteImport } from "./routes/_with_menu/clubs/league";
 import { Route as With_menuClubsAdminRouteImport } from "./routes/_with_menu/clubs/admin";
+import { Route as With_menuBoardGamesAdminRouteImport } from "./routes/_with_menu/board-games/admin";
+import { Route as With_menuAdminReservationsRouteImport } from "./routes/_with_menu/admin/reservations";
 import { Route as With_menuAccountTokenRouteImport } from "./routes/_with_menu/account/token";
 import { Route as With_menuAccountConnectTelegramRouteImport } from "./routes/_with_menu/account/connect-telegram";
 import { Route as With_menuWhen2meetMeetingIdIndexRouteImport } from "./routes/_with_menu/when2meet/$meetingId.index";
@@ -410,6 +412,18 @@ const With_menuClubsAdminRoute = With_menuClubsAdminRouteImport.update({
   path: "/clubs/admin",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
+const With_menuBoardGamesAdminRoute =
+  With_menuBoardGamesAdminRouteImport.update({
+    id: "/board-games/admin",
+    path: "/board-games/admin",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuAdminReservationsRoute =
+  With_menuAdminReservationsRouteImport.update({
+    id: "/admin/reservations",
+    path: "/admin/reservations",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
 const With_menuAccountTokenRoute = With_menuAccountTokenRouteImport.update({
   id: "/account/token",
   path: "/account/token",
@@ -502,6 +516,8 @@ export interface FileRoutesByFullPath {
   "/schedule-assistant/": typeof ScheduleAssistantIndexRoute;
   "/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/account/token": typeof With_menuAccountTokenRoute;
+  "/admin/reservations": typeof With_menuAdminReservationsRoute;
+  "/board-games/admin": typeof With_menuBoardGamesAdminRoute;
   "/clubs/admin": typeof With_menuClubsAdminRoute;
   "/clubs/league": typeof With_menuClubsLeagueRoute;
   "/clubs/new": typeof With_menuClubsNewRoute;
@@ -576,6 +592,8 @@ export interface FileRoutesByTo {
   "/schedule-assistant": typeof ScheduleAssistantIndexRoute;
   "/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/account/token": typeof With_menuAccountTokenRoute;
+  "/admin/reservations": typeof With_menuAdminReservationsRoute;
+  "/board-games/admin": typeof With_menuBoardGamesAdminRoute;
   "/clubs/admin": typeof With_menuClubsAdminRoute;
   "/clubs/league": typeof With_menuClubsLeagueRoute;
   "/clubs/new": typeof With_menuClubsNewRoute;
@@ -653,6 +671,8 @@ export interface FileRoutesById {
   "/schedule-assistant/": typeof ScheduleAssistantIndexRoute;
   "/_with_menu/account/connect-telegram": typeof With_menuAccountConnectTelegramRoute;
   "/_with_menu/account/token": typeof With_menuAccountTokenRoute;
+  "/_with_menu/admin/reservations": typeof With_menuAdminReservationsRoute;
+  "/_with_menu/board-games/admin": typeof With_menuBoardGamesAdminRoute;
   "/_with_menu/clubs/admin": typeof With_menuClubsAdminRoute;
   "/_with_menu/clubs/league": typeof With_menuClubsLeagueRoute;
   "/_with_menu/clubs/new": typeof With_menuClubsNewRoute;
@@ -730,6 +750,8 @@ export interface FileRouteTypes {
     | "/schedule-assistant/"
     | "/account/connect-telegram"
     | "/account/token"
+    | "/admin/reservations"
+    | "/board-games/admin"
     | "/clubs/admin"
     | "/clubs/league"
     | "/clubs/new"
@@ -804,6 +826,8 @@ export interface FileRouteTypes {
     | "/schedule-assistant"
     | "/account/connect-telegram"
     | "/account/token"
+    | "/admin/reservations"
+    | "/board-games/admin"
     | "/clubs/admin"
     | "/clubs/league"
     | "/clubs/new"
@@ -880,6 +904,8 @@ export interface FileRouteTypes {
     | "/schedule-assistant/"
     | "/_with_menu/account/connect-telegram"
     | "/_with_menu/account/token"
+    | "/_with_menu/admin/reservations"
+    | "/_with_menu/board-games/admin"
     | "/_with_menu/clubs/admin"
     | "/_with_menu/clubs/league"
     | "/_with_menu/clubs/new"
@@ -1378,6 +1404,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuClubsAdminRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
+    "/_with_menu/board-games/admin": {
+      id: "/_with_menu/board-games/admin";
+      path: "/board-games/admin";
+      fullPath: "/board-games/admin";
+      preLoaderRoute: typeof With_menuBoardGamesAdminRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/admin/reservations": {
+      id: "/_with_menu/admin/reservations";
+      path: "/admin/reservations";
+      fullPath: "/admin/reservations";
+      preLoaderRoute: typeof With_menuAdminReservationsRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
     "/_with_menu/account/token": {
       id: "/_with_menu/account/token";
       path: "/account/token";
@@ -1481,6 +1521,8 @@ interface With_menuRouteRouteChildren {
   With_menuWorkshopsRoute: typeof With_menuWorkshopsRoute;
   With_menuAccountConnectTelegramRoute: typeof With_menuAccountConnectTelegramRoute;
   With_menuAccountTokenRoute: typeof With_menuAccountTokenRoute;
+  With_menuAdminReservationsRoute: typeof With_menuAdminReservationsRoute;
+  With_menuBoardGamesAdminRoute: typeof With_menuBoardGamesAdminRoute;
   With_menuClubsAdminRoute: typeof With_menuClubsAdminRoute;
   With_menuClubsLeagueRoute: typeof With_menuClubsLeagueRoute;
   With_menuClubsNewRoute: typeof With_menuClubsNewRoute;
@@ -1546,6 +1588,8 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuWorkshopsRoute: With_menuWorkshopsRoute,
   With_menuAccountConnectTelegramRoute: With_menuAccountConnectTelegramRoute,
   With_menuAccountTokenRoute: With_menuAccountTokenRoute,
+  With_menuAdminReservationsRoute: With_menuAdminReservationsRoute,
+  With_menuBoardGamesAdminRoute: With_menuBoardGamesAdminRoute,
   With_menuClubsAdminRoute: With_menuClubsAdminRoute,
   With_menuClubsLeagueRoute: With_menuClubsLeagueRoute,
   With_menuClubsNewRoute: With_menuClubsNewRoute,
