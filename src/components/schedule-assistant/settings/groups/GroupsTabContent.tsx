@@ -17,6 +17,7 @@ import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   useAddProgramToSection,
   useConfig,
+  useDeleteSection,
   useMoveProgramInSection,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
@@ -77,7 +78,8 @@ function remapSelectionAfterProgramMove(
 
 export function GroupsTabContent() {
   const { config, isPending, isError, error } = useConfig();
-  const { selectedSelectionId, selectedSelection, selectItem } = useSelection();
+  const { selectedSelectionId, selectedSelection, selectItem, deselectItem } =
+    useSelection();
   const programsGroupsTreeView = useMemo(
     () => buildProgramsGroupsTreeView(config),
     [config],
@@ -136,6 +138,7 @@ export function GroupsTabContent() {
   }, [activeSectionKey]);
 
   const { addProgram, isPending: isAddingProgram } = useAddProgramToSection();
+  const { deleteSection, isPending: isDeletingSection } = useDeleteSection();
   const { moveProgram } = useMoveProgramInSection(activeSectionKey);
   const [createOpen, setCreateOpen] = useState(false);
   const [createSectionCode, setCreateSectionCode] = useState("");
@@ -221,6 +224,22 @@ export function GroupsTabContent() {
   }
 
   const activePrograms = sectionPrograms[activeSectionKey] || [];
+  const activeSectionEmpty =
+    (sections.find((section) => section.code === activeSectionKey)?.programCodes
+      .length ?? 0) === 0;
+
+  function handleDeleteSection() {
+    if (!activeSectionKey || !activeSectionEmpty) return;
+    deleteSection(activeSectionKey, () => {
+      if (
+        selectedSelection &&
+        "sectionCode" in selectedSelection &&
+        selectedSelection.sectionCode === activeSectionKey
+      ) {
+        deselectItem();
+      }
+    });
+  }
 
   function handleCreateProgram() {
     const sectionCode = createSectionCode.trim() || activeSectionKey;
@@ -263,16 +282,31 @@ export function GroupsTabContent() {
         onChange={setActiveSectionKey}
         trailing={<NewSectionButton onCreated={setActiveSectionKey} />}
       />
-      <button
-        type="button"
-        className="btn btn-outline btn-secondary btn-sm w-fit shrink-0"
-        onClick={() => {
-          resetCreateForm(activeSectionKey);
-          setCreateOpen(true);
-        }}
-      >
-        Добавить программу
-      </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          className="btn btn-outline btn-secondary btn-sm w-fit shrink-0"
+          onClick={() => {
+            resetCreateForm(activeSectionKey);
+            setCreateOpen(true);
+          }}
+        >
+          Добавить программу
+        </button>
+        {activeSectionEmpty ? (
+          <button
+            type="button"
+            className="btn btn-outline btn-error btn-sm w-fit shrink-0"
+            disabled={isDeletingSection}
+            onClick={handleDeleteSection}
+          >
+            {isDeletingSection ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : null}
+            Удалить секцию
+          </button>
+        ) : null}
+      </div>
       <div className="flex flex-col gap-6">
         {activePrograms.map((program, programListIndex) => {
           const programSelected =
