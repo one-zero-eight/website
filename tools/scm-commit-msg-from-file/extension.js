@@ -34,7 +34,9 @@ async function getGitApi() {
 
 function findRepository(api, repoRoot) {
   const normalized = path.resolve(repoRoot);
-  return api.repositories.find((repo) => path.resolve(repo.rootUri.fsPath) === normalized);
+  return api.repositories.find(
+    (repo) => path.resolve(repo.rootUri.fsPath) === normalized,
+  );
 }
 
 function clearMsgFile(repoRoot) {
@@ -61,7 +63,9 @@ async function clearInputIfMatches(repoRoot, expected) {
   if (!repository) {
     return;
   }
-  if (normalizeMessage(repository.inputBox.value) === normalizeMessage(expected)) {
+  if (
+    normalizeMessage(repository.inputBox.value) === normalizeMessage(expected)
+  ) {
     repository.inputBox.value = "";
   }
 }
@@ -171,12 +175,16 @@ function watchMsgFile(context, rootPath, watchedFiles) {
 
   // Node watcher — reliable for agent/CLI create/delete of gitignored files.
   try {
-    const fsWatcher = fs.watch(normalized, { persistent: false }, (_event, filename) => {
-      if (!filename || filename.toString() !== MSG_FILE) {
-        return;
-      }
-      handleMsgFileFsEvent(normalized);
-    });
+    const fsWatcher = fs.watch(
+      normalized,
+      { persistent: false },
+      (_event, filename) => {
+        if (!filename || filename.toString() !== MSG_FILE) {
+          return;
+        }
+        handleMsgFileFsEvent(normalized);
+      },
+    );
     fsWatcher.on("error", () => {});
     context.subscriptions.push({ dispose: () => fsWatcher.close() });
   } catch {
@@ -248,7 +256,9 @@ function activate(context) {
     vscode.commands.registerCommand("scmCommitMsg.set", async () => {
       const api = await getGitApi();
       const roots = new Set([
-        ...(vscode.workspace.workspaceFolders ?? []).map((folder) => folder.uri.fsPath),
+        ...(vscode.workspace.workspaceFolders ?? []).map(
+          (folder) => folder.uri.fsPath,
+        ),
         ...(api?.repositories ?? []).map((repo) => repo.rootUri.fsPath),
       ]);
       for (const root of roots) {
