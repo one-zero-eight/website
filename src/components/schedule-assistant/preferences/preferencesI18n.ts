@@ -18,9 +18,6 @@ type PreferencesCopy = {
   title: string;
   instruction: string;
   save: string;
-  savedTitle: string;
-  savedBody: string;
-  errorTitle: string;
   preferred: string;
   discouraged: string;
   banned: string;
@@ -33,9 +30,6 @@ export const PREFERENCES_COPY: Record<PreferencesLocale, PreferencesCopy> = {
     title: "Предпочтения по времени",
     instruction: "Нажмите уровень и нажмите на ячейки слотов в таблице.",
     save: "Сохранить",
-    savedTitle: "Сохранено",
-    savedBody: "Предпочтения обновлены.",
-    errorTitle: "Ошибка",
     preferred: "Предпочтительно",
     discouraged: "Нежелательно",
     banned: "Запрещено",
@@ -47,9 +41,6 @@ export const PREFERENCES_COPY: Record<PreferencesLocale, PreferencesCopy> = {
     title: "Time preferences",
     instruction: "Select a level and tap the time slots in the table.",
     save: "Save",
-    savedTitle: "Saved",
-    savedBody: "Preferences updated.",
-    errorTitle: "Error",
     preferred: "Preferred",
     discouraged: "Discouraged",
     banned: "Forbidden",

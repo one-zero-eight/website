@@ -8,9 +8,9 @@ import {
   storePreferencesLocale,
   type PreferencesLocale,
 } from "@/components/schedule-assistant/preferences/preferencesI18n.ts";
-import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { Helmet } from "@dr.pogodin/react-helmet";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 
 export function InstructorPreferencesEditor({
@@ -20,7 +20,7 @@ export function InstructorPreferencesEditor({
   mode: "me" | "token";
   token?: string;
 }) {
-  const { showError, showSuccess } = useToast();
+  const queryClient = useQueryClient();
   const [locale, setLocale] = useState<PreferencesLocale>(() =>
     readStoredPreferencesLocale(),
   );
@@ -51,12 +51,14 @@ export function InstructorPreferencesEditor({
   const [draft, setDraft] = useState<
     SchemaInstructorSlotPreferenceEntry[] | null
   >(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const preferences = draft ?? query.data?.slot_preferences ?? [];
 
   const handleChange = useCallback(
     (next: SchemaInstructorSlotPreferenceEntry[]) => {
       setDraft(next);
+      setSaveError(null);
     },
     [],
   );
@@ -69,18 +71,24 @@ export function InstructorPreferencesEditor({
   function handleSave() {
     if (!query.data) return;
     const body = { slot_preferences: preferences };
+    setSaveError(null);
+
     if (mode === "me") {
       saveMe(
         { body },
         {
           onSuccess: (data) => {
+            queryClient.setQueryData(
+              $scheduleAssistant.queryOptions(
+                "get",
+                "/instructor-preferences/me",
+              ).queryKey,
+              data,
+            );
             setDraft(null);
-            showSuccess(copy.savedTitle, copy.savedBody);
-            meQuery.refetch();
-            void data;
           },
           onError: (error) => {
-            showError(copy.errorTitle, formatApiErrorMessage(error));
+            setSaveError(formatApiErrorMessage(error));
           },
         },
       );
@@ -90,13 +98,19 @@ export function InstructorPreferencesEditor({
     saveToken(
       { params: { path: { token } }, body },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
+          queryClient.setQueryData(
+            $scheduleAssistant.queryOptions(
+              "get",
+              "/instructor-preferences/link/{token}",
+              { params: { path: { token } } },
+            ).queryKey,
+            data,
+          );
           setDraft(null);
-          showSuccess(copy.savedTitle, copy.savedBody);
-          tokenQuery.refetch();
         },
         onError: (error) => {
-          showError(copy.errorTitle, formatApiErrorMessage(error));
+          setSaveError(formatApiErrorMessage(error));
         },
       },
     );
@@ -169,7 +183,7 @@ export function InstructorPreferencesEditor({
           locale={locale}
         />
       </div>
-      <div className="flex justify-stretch sm:justify-end">
+      <div className="flex flex-col gap-1.5 sm:items-end">
         <button
           type="button"
           className="btn btn-primary w-full sm:w-auto"
@@ -182,6 +196,9 @@ export function InstructorPreferencesEditor({
             copy.save
           )}
         </button>
+        {saveError ? (
+          <p className="text-error text-xs sm:text-right">{saveError}</p>
+        ) : null}
       </div>
     </div>
   );
