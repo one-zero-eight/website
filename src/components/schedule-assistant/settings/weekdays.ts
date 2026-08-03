@@ -23,6 +23,16 @@ export const TERM_WEEKDAY_LABEL_RU: Record<TermWeekdayKey, string> = {
   Sun: "Вс",
 };
 
+export const TERM_WEEKDAY_LABEL_EN: Record<TermWeekdayKey, string> = {
+  Mon: "Mon",
+  Tue: "Tue",
+  Wed: "Wed",
+  Thu: "Thu",
+  Fri: "Fri",
+  Sat: "Sat",
+  Sun: "Sun",
+};
+
 const TERM_KEY_TO_WEEKDAY: Record<TermWeekdayKey, Weekday> = {
   Mon: Weekday.MONDAY,
   Tue: Weekday.TUESDAY,

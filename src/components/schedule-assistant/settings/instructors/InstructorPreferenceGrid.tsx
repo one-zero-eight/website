@@ -7,6 +7,11 @@ import {
   Weekday,
 } from "@/api/schedule-assistant/types.ts";
 import {
+  PREFERENCES_COPY,
+  type PreferencesLocale,
+} from "@/components/schedule-assistant/preferences/preferencesI18n.ts";
+import {
+  TERM_WEEKDAY_LABEL_EN,
   TERM_WEEKDAY_LABEL_RU,
   normalizeTermWeekdays,
   termWeekdayKeyToWeekday,
@@ -24,27 +29,23 @@ import {
 type CellLevel = InstructorSlotPreferenceLevel | "neutral";
 type PaintMode = "set" | "clear";
 
-const PALETTE: {
+const PALETTE_STYLE: {
   level: InstructorSlotPreferenceLevel;
-  label: string;
   cellClass: string;
   activeClass: string;
 }[] = [
   {
     level: InstructorSlotPreferenceLevel.preferred,
-    label: "Предпочтительно",
     cellClass: "bg-success/20 border-success/40",
     activeClass: "ring-success/60",
   },
   {
     level: InstructorSlotPreferenceLevel.discouraged,
-    label: "Нежелательно",
     cellClass: "bg-warning/25 border-warning/50",
     activeClass: "ring-warning/60",
   },
   {
     level: InstructorSlotPreferenceLevel.banned,
-    label: "Запрещено",
     cellClass: "bg-error/25 border-error/50",
     activeClass: "ring-error/60",
   },
@@ -100,13 +101,27 @@ export function InstructorPreferenceGrid({
   term,
   preferences,
   onChange,
+  locale = "ru",
 }: {
   term: SchemaTermConfig | undefined;
   preferences: SchemaInstructorSlotPreferenceEntry[];
   onChange: (preferences: SchemaInstructorSlotPreferenceEntry[]) => void;
+  locale?: PreferencesLocale;
 }) {
   const weekdays = normalizeTermWeekdays(term?.days);
   const slots = term?.time_slots ?? [];
+  const copy = PREFERENCES_COPY[locale];
+  const weekdayLabels =
+    locale === "en" ? TERM_WEEKDAY_LABEL_EN : TERM_WEEKDAY_LABEL_RU;
+  const paletteLabels: Record<InstructorSlotPreferenceLevel, string> = {
+    preferred: copy.preferred,
+    discouraged: copy.discouraged,
+    banned: copy.banned,
+  };
+  const palette = PALETTE_STYLE.map((item) => ({
+    ...item,
+    label: paletteLabels[item.level],
+  }));
 
   const [activeLevel, setActiveLevel] = useState(
     InstructorSlotPreferenceLevel.discouraged,
@@ -224,7 +239,7 @@ export function InstructorPreferenceGrid({
   return (
     <div className="flex w-full min-w-0 flex-col gap-2">
       <div className="flex flex-wrap gap-1.5 p-0.5">
-        {PALETTE.map((item) => (
+        {palette.map((item) => (
           <button
             key={item.level}
             type="button"
@@ -240,11 +255,10 @@ export function InstructorPreferenceGrid({
         ))}
       </div>
       <p className="text-base-content/60 text-[11px] leading-snug sm:hidden">
-        Удерживайте и ведите пальцем, чтобы закрасить. Повторное нажатие тем же
-        уровнем — сбросить.
+        {copy.hintTouch}
       </p>
       <p className="text-base-content/60 hidden text-[11px] leading-snug sm:block">
-        ЛКМ — закрасить выбранным значением. ПКМ — сбросить ячейку.
+        {copy.hintDesktop}
       </p>
       <div
         ref={gridRef}
@@ -264,7 +278,7 @@ export function InstructorPreferenceGrid({
               key={weekdayKey}
               className="text-base-content/70 bg-base-200 truncate px-0.5 text-center text-[10px] leading-tight font-medium"
             >
-              {TERM_WEEKDAY_LABEL_RU[weekdayKey]}
+              {weekdayLabels[weekdayKey]}
             </div>
           ))}
           {slots.map((slot) => {
