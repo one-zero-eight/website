@@ -492,7 +492,10 @@ export function buildGroupMeta(config: SchemaScheduleConfig) {
 
 export function buildRoomCapacityMap(config: SchemaScheduleConfig) {
   const out: Record<string, number> = {};
-  for (const r of config.rooms ?? []) out[r.id] = r.capacity;
+  for (const r of config.rooms ?? []) {
+    if (r.capacity == null) continue;
+    out[r.id] = r.capacity;
+  }
   return out;
 }
 
