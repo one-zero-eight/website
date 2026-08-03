@@ -113,6 +113,7 @@ export function InstructorPreferenceGrid({
   );
   const [draft, setDraft] = useState(preferences);
   const draftRef = useRef(preferences);
+  const activeLevelRef = useRef(activeLevel);
   const paintRef = useRef<PaintMode | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -122,13 +123,21 @@ export function InstructorPreferenceGrid({
   }, [preferences]);
 
   useEffect(() => {
+    activeLevelRef.current = activeLevel;
+  }, [activeLevel]);
+
+  useEffect(() => {
     function handlePointerUp() {
       if (!paintRef.current) return;
       paintRef.current = null;
       onChange(draftRef.current);
     }
     window.addEventListener("pointerup", handlePointerUp);
-    return () => window.removeEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
+    return () => {
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+    };
   }, [onChange]);
 
   if (!weekdays.length || !slots.length) {
@@ -147,15 +156,10 @@ export function InstructorPreferenceGrid({
     const weekday = termWeekdayKeyToWeekday(weekdayKey);
     const normalized = normalizeStartTime(startTime);
     const current = cellLevel(draftRef.current, weekday, normalized);
-    const targetLevel = mode === "clear" ? "neutral" : activeLevel;
+    const level = activeLevelRef.current;
+    const targetLevel = mode === "clear" ? "neutral" : level;
     if (current === targetLevel) return;
-    const next = applyCell(
-      draftRef.current,
-      weekday,
-      startTime,
-      mode,
-      activeLevel,
-    );
+    const next = applyCell(draftRef.current, weekday, startTime, mode, level);
     draftRef.current = next;
     setDraft(next);
   }
@@ -185,6 +189,22 @@ export function InstructorPreferenceGrid({
     weekdayKey: TermWeekdayKey,
     startTime: string,
   ) {
+    if (event.pointerType === "touch") {
+      event.preventDefault();
+      const weekday = termWeekdayKeyToWeekday(weekdayKey);
+      const current = cellLevel(
+        draftRef.current,
+        weekday,
+        normalizeStartTime(startTime),
+      );
+      const mode: PaintMode =
+        current === activeLevelRef.current ? "clear" : "set";
+      paintRef.current = mode;
+      gridRef.current?.setPointerCapture(event.pointerId);
+      paintCell(weekdayKey, startTime, mode);
+      return;
+    }
+
     if (event.button === 2) {
       paintRef.current = "clear";
       gridRef.current?.setPointerCapture(event.pointerId);
@@ -203,13 +223,13 @@ export function InstructorPreferenceGrid({
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-2">
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-1.5 p-0.5">
         {PALETTE.map((item) => (
           <button
             key={item.level}
             type="button"
             className={cn(
-              "rounded-field h-7 border px-2 text-xs",
+              "rounded-field h-9 border px-2.5 text-xs sm:h-7 sm:px-2",
               item.cellClass,
               activeLevel === item.level && `ring-2 ${item.activeClass}`,
             )}
@@ -219,13 +239,16 @@ export function InstructorPreferenceGrid({
           </button>
         ))}
       </div>
-      <p className="text-base-content/60 text-[11px] leading-snug">
-        ЛКМ — закрасить выбранным значением, протянуть для заливки. ПКМ —
-        сбросить ячейку.
+      <p className="text-base-content/60 text-[11px] leading-snug sm:hidden">
+        Удерживайте и ведите пальцем, чтобы закрасить. Повторное нажатие тем же
+        уровнем — сбросить.
+      </p>
+      <p className="text-base-content/60 hidden text-[11px] leading-snug sm:block">
+        ЛКМ — закрасить выбранным значением. ПКМ — сбросить ячейку.
       </p>
       <div
         ref={gridRef}
-        className="w-full min-w-0 select-none"
+        className="w-full min-w-0 touch-none select-none"
         onContextMenu={handleContextMenu}
         onPointerMove={handleGridPointerMove}
       >
@@ -248,7 +271,7 @@ export function InstructorPreferenceGrid({
             const normalized = normalizeStartTime(slot.start_time);
             return (
               <div key={slot.start_time} className="contents">
-                <div className="text-base-content/70 bg-base-200 flex items-center pr-1 text-[10px] leading-tight">
+                <div className="text-base-content/70 bg-base-200 flex items-center pr-1 text-[10px] leading-tight tabular-nums">
                   {normalized.slice(0, 5)}
                 </div>
                 {weekdays.map((weekdayKey) => {
@@ -262,7 +285,7 @@ export function InstructorPreferenceGrid({
                       data-weekday={weekdayKey}
                       data-time={normalized}
                       className={cn(
-                        "h-7 w-full min-w-0 touch-none border p-0",
+                        "box-border h-9 w-full min-w-0 touch-none justify-self-stretch border p-0 sm:h-7",
                         CELL_CLASS[level],
                       )}
                       onPointerDown={(event) =>

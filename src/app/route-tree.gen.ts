@@ -31,9 +31,9 @@ import { Route as With_menuDashboardRouteImport } from "./routes/_with_menu/dash
 import { Route as With_menuCalendarRouteImport } from "./routes/_with_menu/calendar";
 import { Route as With_menuAboutRouteImport } from "./routes/_with_menu/about";
 import { Route as With_menu42RouteImport } from "./routes/_with_menu/42";
-import { Route as ScheduleAssistantPreferencesRouteRouteImport } from "./routes/schedule-assistant/preferences/route";
+import { Route as ScheduleAssistantForInstructorsRouteRouteImport } from "./routes/schedule-assistant/for-instructors/route";
 import { Route as ScheduleAssistantSettingsIndexRouteImport } from "./routes/schedule-assistant/settings/index";
-import { Route as ScheduleAssistantPreferencesIndexRouteImport } from "./routes/schedule-assistant/preferences/index";
+import { Route as ScheduleAssistantForInstructorsIndexRouteImport } from "./routes/schedule-assistant/for-instructors/index";
 import { Route as With_menuWhen2meetIndexRouteImport } from "./routes/_with_menu/when2meet/index";
 import { Route as With_menuTabletennisIndexRouteImport } from "./routes/_with_menu/tabletennis/index";
 import { Route as With_menuStudentAffairsIndexRouteImport } from "./routes/_with_menu/student-affairs/index";
@@ -47,7 +47,6 @@ import { Route as With_menuEventsIndexRouteImport } from "./routes/_with_menu/ev
 import { Route as With_menuClubsIndexRouteImport } from "./routes/_with_menu/clubs/index";
 import { Route as With_menuAccountIndexRouteImport } from "./routes/_with_menu/account/index";
 import { Route as ScheduleAssistantSettingsSettingsTabRouteImport } from "./routes/schedule-assistant/settings/$settingsTab";
-import { Route as ScheduleAssistantPreferencesTokenRouteImport } from "./routes/schedule-assistant/preferences/$token";
 import { Route as With_menuWhen2meetNewRouteImport } from "./routes/_with_menu/when2meet/new";
 import { Route as With_menuTabletennisTournamentsRouteImport } from "./routes/_with_menu/tabletennis/tournaments";
 import { Route as With_menuTabletennisPlayersRouteImport } from "./routes/_with_menu/tabletennis/players";
@@ -196,10 +195,10 @@ const With_menu42Route = With_menu42RouteImport.update({
   path: "/42",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
-const ScheduleAssistantPreferencesRouteRoute =
-  ScheduleAssistantPreferencesRouteRouteImport.update({
-    id: "/preferences",
-    path: "/preferences",
+const ScheduleAssistantForInstructorsRouteRoute =
+  ScheduleAssistantForInstructorsRouteRouteImport.update({
+    id: "/for-instructors",
+    path: "/for-instructors",
     getParentRoute: () => ScheduleAssistantRouteRoute,
   } as any);
 const ScheduleAssistantSettingsIndexRoute =
@@ -208,11 +207,11 @@ const ScheduleAssistantSettingsIndexRoute =
     path: "/settings/",
     getParentRoute: () => ScheduleAssistantRouteRoute,
   } as any);
-const ScheduleAssistantPreferencesIndexRoute =
-  ScheduleAssistantPreferencesIndexRouteImport.update({
+const ScheduleAssistantForInstructorsIndexRoute =
+  ScheduleAssistantForInstructorsIndexRouteImport.update({
     id: "/",
     path: "/",
-    getParentRoute: () => ScheduleAssistantPreferencesRouteRoute,
+    getParentRoute: () => ScheduleAssistantForInstructorsRouteRoute,
   } as any);
 const With_menuWhen2meetIndexRoute = With_menuWhen2meetIndexRouteImport.update({
   id: "/when2meet/",
@@ -282,12 +281,6 @@ const ScheduleAssistantSettingsSettingsTabRoute =
     id: "/settings/$settingsTab",
     path: "/settings/$settingsTab",
     getParentRoute: () => ScheduleAssistantRouteRoute,
-  } as any);
-const ScheduleAssistantPreferencesTokenRoute =
-  ScheduleAssistantPreferencesTokenRouteImport.update({
-    id: "/$token",
-    path: "/$token",
-    getParentRoute: () => ScheduleAssistantPreferencesRouteRoute,
   } as any);
 const With_menuWhen2meetNewRoute = With_menuWhen2meetNewRouteImport.update({
   id: "/when2meet/new",
@@ -496,7 +489,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/schedule-assistant": typeof ScheduleAssistantRouteRouteWithChildren;
   "/tv": typeof TvRoute;
-  "/schedule-assistant/preferences": typeof ScheduleAssistantPreferencesRouteRouteWithChildren;
+  "/schedule-assistant/for-instructors": typeof ScheduleAssistantForInstructorsRouteRouteWithChildren;
   "/42": typeof With_menu42Route;
   "/about": typeof With_menuAboutRoute;
   "/calendar": typeof With_menuCalendarRoute;
@@ -542,7 +535,6 @@ export interface FileRoutesByFullPath {
   "/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
   "/when2meet/new": typeof With_menuWhen2meetNewRoute;
-  "/schedule-assistant/preferences/$token": typeof ScheduleAssistantPreferencesTokenRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
   "/account/": typeof With_menuAccountIndexRoute;
   "/clubs/": typeof With_menuClubsIndexRoute;
@@ -556,7 +548,7 @@ export interface FileRoutesByFullPath {
   "/student-affairs/": typeof With_menuStudentAffairsIndexRoute;
   "/tabletennis/": typeof With_menuTabletennisIndexRoute;
   "/when2meet/": typeof With_menuWhen2meetIndexRoute;
-  "/schedule-assistant/preferences/": typeof ScheduleAssistantPreferencesIndexRoute;
+  "/schedule-assistant/for-instructors/": typeof ScheduleAssistantForInstructorsIndexRoute;
   "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/events/$id/edit": typeof With_menuEventsIdEditRoute;
@@ -617,7 +609,6 @@ export interface FileRoutesByTo {
   "/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
   "/when2meet/new": typeof With_menuWhen2meetNewRoute;
-  "/schedule-assistant/preferences/$token": typeof ScheduleAssistantPreferencesTokenRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
   "/account": typeof With_menuAccountIndexRoute;
   "/clubs": typeof With_menuClubsIndexRoute;
@@ -631,7 +622,7 @@ export interface FileRoutesByTo {
   "/student-affairs": typeof With_menuStudentAffairsIndexRoute;
   "/tabletennis": typeof With_menuTabletennisIndexRoute;
   "/when2meet": typeof With_menuWhen2meetIndexRoute;
-  "/schedule-assistant/preferences": typeof ScheduleAssistantPreferencesIndexRoute;
+  "/schedule-assistant/for-instructors": typeof ScheduleAssistantForInstructorsIndexRoute;
   "/schedule-assistant/settings": typeof ScheduleAssistantSettingsIndexRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/events/$id/edit": typeof With_menuEventsIdEditRoute;
@@ -650,7 +641,7 @@ export interface FileRoutesById {
   "/_with_menu": typeof With_menuRouteRouteWithChildren;
   "/schedule-assistant": typeof ScheduleAssistantRouteRouteWithChildren;
   "/tv": typeof TvRoute;
-  "/schedule-assistant/preferences": typeof ScheduleAssistantPreferencesRouteRouteWithChildren;
+  "/schedule-assistant/for-instructors": typeof ScheduleAssistantForInstructorsRouteRouteWithChildren;
   "/_with_menu/42": typeof With_menu42Route;
   "/_with_menu/about": typeof With_menuAboutRoute;
   "/_with_menu/calendar": typeof With_menuCalendarRoute;
@@ -696,7 +687,6 @@ export interface FileRoutesById {
   "/_with_menu/tabletennis/players": typeof With_menuTabletennisPlayersRoute;
   "/_with_menu/tabletennis/tournaments": typeof With_menuTabletennisTournamentsRoute;
   "/_with_menu/when2meet/new": typeof With_menuWhen2meetNewRoute;
-  "/schedule-assistant/preferences/$token": typeof ScheduleAssistantPreferencesTokenRoute;
   "/schedule-assistant/settings/$settingsTab": typeof ScheduleAssistantSettingsSettingsTabRoute;
   "/_with_menu/account/": typeof With_menuAccountIndexRoute;
   "/_with_menu/clubs/": typeof With_menuClubsIndexRoute;
@@ -710,7 +700,7 @@ export interface FileRoutesById {
   "/_with_menu/student-affairs/": typeof With_menuStudentAffairsIndexRoute;
   "/_with_menu/tabletennis/": typeof With_menuTabletennisIndexRoute;
   "/_with_menu/when2meet/": typeof With_menuWhen2meetIndexRoute;
-  "/schedule-assistant/preferences/": typeof ScheduleAssistantPreferencesIndexRoute;
+  "/schedule-assistant/for-instructors/": typeof ScheduleAssistantForInstructorsIndexRoute;
   "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/_with_menu/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
   "/_with_menu/events/$id/edit": typeof With_menuEventsIdEditRoute;
@@ -729,7 +719,7 @@ export interface FileRouteTypes {
     | "/"
     | "/schedule-assistant"
     | "/tv"
-    | "/schedule-assistant/preferences"
+    | "/schedule-assistant/for-instructors"
     | "/42"
     | "/about"
     | "/calendar"
@@ -775,7 +765,6 @@ export interface FileRouteTypes {
     | "/tabletennis/players"
     | "/tabletennis/tournaments"
     | "/when2meet/new"
-    | "/schedule-assistant/preferences/$token"
     | "/schedule-assistant/settings/$settingsTab"
     | "/account/"
     | "/clubs/"
@@ -789,7 +778,7 @@ export interface FileRouteTypes {
     | "/student-affairs/"
     | "/tabletennis/"
     | "/when2meet/"
-    | "/schedule-assistant/preferences/"
+    | "/schedule-assistant/for-instructors/"
     | "/schedule-assistant/settings/"
     | "/clubs/$slug/edit"
     | "/events/$id/edit"
@@ -850,7 +839,6 @@ export interface FileRouteTypes {
     | "/tabletennis/players"
     | "/tabletennis/tournaments"
     | "/when2meet/new"
-    | "/schedule-assistant/preferences/$token"
     | "/schedule-assistant/settings/$settingsTab"
     | "/account"
     | "/clubs"
@@ -864,7 +852,7 @@ export interface FileRouteTypes {
     | "/student-affairs"
     | "/tabletennis"
     | "/when2meet"
-    | "/schedule-assistant/preferences"
+    | "/schedule-assistant/for-instructors"
     | "/schedule-assistant/settings"
     | "/clubs/$slug/edit"
     | "/events/$id/edit"
@@ -882,7 +870,7 @@ export interface FileRouteTypes {
     | "/_with_menu"
     | "/schedule-assistant"
     | "/tv"
-    | "/schedule-assistant/preferences"
+    | "/schedule-assistant/for-instructors"
     | "/_with_menu/42"
     | "/_with_menu/about"
     | "/_with_menu/calendar"
@@ -928,7 +916,6 @@ export interface FileRouteTypes {
     | "/_with_menu/tabletennis/players"
     | "/_with_menu/tabletennis/tournaments"
     | "/_with_menu/when2meet/new"
-    | "/schedule-assistant/preferences/$token"
     | "/schedule-assistant/settings/$settingsTab"
     | "/_with_menu/account/"
     | "/_with_menu/clubs/"
@@ -942,7 +929,7 @@ export interface FileRouteTypes {
     | "/_with_menu/student-affairs/"
     | "/_with_menu/tabletennis/"
     | "/_with_menu/when2meet/"
-    | "/schedule-assistant/preferences/"
+    | "/schedule-assistant/for-instructors/"
     | "/schedule-assistant/settings/"
     | "/_with_menu/clubs/$slug/edit"
     | "/_with_menu/events/$id/edit"
@@ -1122,11 +1109,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menu42RouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/schedule-assistant/preferences": {
-      id: "/schedule-assistant/preferences";
-      path: "/preferences";
-      fullPath: "/schedule-assistant/preferences";
-      preLoaderRoute: typeof ScheduleAssistantPreferencesRouteRouteImport;
+    "/schedule-assistant/for-instructors": {
+      id: "/schedule-assistant/for-instructors";
+      path: "/for-instructors";
+      fullPath: "/schedule-assistant/for-instructors";
+      preLoaderRoute: typeof ScheduleAssistantForInstructorsRouteRouteImport;
       parentRoute: typeof ScheduleAssistantRouteRoute;
     };
     "/schedule-assistant/settings/": {
@@ -1136,12 +1123,12 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ScheduleAssistantSettingsIndexRouteImport;
       parentRoute: typeof ScheduleAssistantRouteRoute;
     };
-    "/schedule-assistant/preferences/": {
-      id: "/schedule-assistant/preferences/";
+    "/schedule-assistant/for-instructors/": {
+      id: "/schedule-assistant/for-instructors/";
       path: "/";
-      fullPath: "/schedule-assistant/preferences/";
-      preLoaderRoute: typeof ScheduleAssistantPreferencesIndexRouteImport;
-      parentRoute: typeof ScheduleAssistantPreferencesRouteRoute;
+      fullPath: "/schedule-assistant/for-instructors/";
+      preLoaderRoute: typeof ScheduleAssistantForInstructorsIndexRouteImport;
+      parentRoute: typeof ScheduleAssistantForInstructorsRouteRoute;
     };
     "/_with_menu/when2meet/": {
       id: "/_with_menu/when2meet/";
@@ -1233,13 +1220,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/schedule-assistant/settings/$settingsTab";
       preLoaderRoute: typeof ScheduleAssistantSettingsSettingsTabRouteImport;
       parentRoute: typeof ScheduleAssistantRouteRoute;
-    };
-    "/schedule-assistant/preferences/$token": {
-      id: "/schedule-assistant/preferences/$token";
-      path: "/$token";
-      fullPath: "/schedule-assistant/preferences/$token";
-      preLoaderRoute: typeof ScheduleAssistantPreferencesTokenRouteImport;
-      parentRoute: typeof ScheduleAssistantPreferencesRouteRoute;
     };
     "/_with_menu/when2meet/new": {
       id: "/_with_menu/when2meet/new";
@@ -1636,26 +1616,23 @@ const With_menuRouteRouteWithChildren = With_menuRouteRoute._addFileChildren(
   With_menuRouteRouteChildren,
 );
 
-interface ScheduleAssistantPreferencesRouteRouteChildren {
-  ScheduleAssistantPreferencesTokenRoute: typeof ScheduleAssistantPreferencesTokenRoute;
-  ScheduleAssistantPreferencesIndexRoute: typeof ScheduleAssistantPreferencesIndexRoute;
+interface ScheduleAssistantForInstructorsRouteRouteChildren {
+  ScheduleAssistantForInstructorsIndexRoute: typeof ScheduleAssistantForInstructorsIndexRoute;
 }
 
-const ScheduleAssistantPreferencesRouteRouteChildren: ScheduleAssistantPreferencesRouteRouteChildren =
+const ScheduleAssistantForInstructorsRouteRouteChildren: ScheduleAssistantForInstructorsRouteRouteChildren =
   {
-    ScheduleAssistantPreferencesTokenRoute:
-      ScheduleAssistantPreferencesTokenRoute,
-    ScheduleAssistantPreferencesIndexRoute:
-      ScheduleAssistantPreferencesIndexRoute,
+    ScheduleAssistantForInstructorsIndexRoute:
+      ScheduleAssistantForInstructorsIndexRoute,
   };
 
-const ScheduleAssistantPreferencesRouteRouteWithChildren =
-  ScheduleAssistantPreferencesRouteRoute._addFileChildren(
-    ScheduleAssistantPreferencesRouteRouteChildren,
+const ScheduleAssistantForInstructorsRouteRouteWithChildren =
+  ScheduleAssistantForInstructorsRouteRoute._addFileChildren(
+    ScheduleAssistantForInstructorsRouteRouteChildren,
   );
 
 interface ScheduleAssistantRouteRouteChildren {
-  ScheduleAssistantPreferencesRouteRoute: typeof ScheduleAssistantPreferencesRouteRouteWithChildren;
+  ScheduleAssistantForInstructorsRouteRoute: typeof ScheduleAssistantForInstructorsRouteRouteWithChildren;
   ScheduleAssistantChecksRoute: typeof ScheduleAssistantChecksRoute;
   ScheduleAssistantTimetableRoute: typeof ScheduleAssistantTimetableRoute;
   ScheduleAssistantIndexRoute: typeof ScheduleAssistantIndexRoute;
@@ -1665,8 +1642,8 @@ interface ScheduleAssistantRouteRouteChildren {
 
 const ScheduleAssistantRouteRouteChildren: ScheduleAssistantRouteRouteChildren =
   {
-    ScheduleAssistantPreferencesRouteRoute:
-      ScheduleAssistantPreferencesRouteRouteWithChildren,
+    ScheduleAssistantForInstructorsRouteRoute:
+      ScheduleAssistantForInstructorsRouteRouteWithChildren,
     ScheduleAssistantChecksRoute: ScheduleAssistantChecksRoute,
     ScheduleAssistantTimetableRoute: ScheduleAssistantTimetableRoute,
     ScheduleAssistantIndexRoute: ScheduleAssistantIndexRoute,

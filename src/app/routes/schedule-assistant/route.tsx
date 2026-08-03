@@ -72,11 +72,18 @@ function RequireModerator({ children }: PropsWithChildren) {
   return children;
 }
 
-function Shell({ children }: PropsWithChildren) {
+function Shell({
+  children,
+  minHDvh = false,
+}: PropsWithChildren<{ minHDvh?: boolean }>) {
   return (
     <div
       data-theme="light"
-      className="font-rubik flex h-screen w-full flex-col text-base leading-normal antialiased [&_.tab]:select-text [&_button]:select-text [&_summary]:select-text"
+      className={
+        minHDvh
+          ? "font-rubik flex min-h-dvh w-full flex-col text-base leading-normal antialiased [&_.tab]:select-text [&_button]:select-text [&_summary]:select-text"
+          : "font-rubik flex h-screen w-full flex-col text-base leading-normal antialiased [&_.tab]:select-text [&_button]:select-text [&_summary]:select-text"
+      }
     >
       <Helmet>
         <title>Составление расписания</title>
@@ -95,33 +102,16 @@ function RouteComponent() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-  const isTokenPreferences = /\/schedule-assistant\/preferences\/.+/.test(
-    pathname,
-  );
-  const isSelfPreferences =
-    pathname === "/schedule-assistant/preferences" ||
-    pathname === "/schedule-assistant/preferences/";
+  const isForInstructors =
+    pathname === "/schedule-assistant/for-instructors" ||
+    pathname === "/schedule-assistant/for-instructors/";
 
-  if (isTokenPreferences) {
+  if (isForInstructors) {
     return (
-      <Shell>
+      <Shell minHDvh>
         <div className="bg-base-200/40 relative flex min-h-0 flex-1 flex-col overflow-auto">
           <Outlet />
         </div>
-      </Shell>
-    );
-  }
-
-  if (isSelfPreferences) {
-    return (
-      <Shell>
-        <RequireAuth>
-          <RequireAccessToken>
-            <div className="bg-base-200/40 relative flex min-h-0 flex-1 flex-col overflow-auto">
-              <Outlet />
-            </div>
-          </RequireAccessToken>
-        </RequireAuth>
       </Shell>
     );
   }

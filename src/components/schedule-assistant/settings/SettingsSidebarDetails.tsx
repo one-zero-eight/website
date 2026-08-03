@@ -1736,45 +1736,89 @@ export function TrackDetails({
   );
 }
 
-function SharePreferenceLinkButton({
+function SharePreferenceLinks({
   instructorId,
 }: {
   instructorId: string | undefined;
 }) {
-  const { showError, showSuccess } = useToast();
+  const { showError } = useToast();
   const { mutate, isPending } = $scheduleAssistant.useMutation(
     "post",
     "/instructor-preferences/{instructor_id}/share-link",
   );
+  const [copiedKind, setCopiedKind] = useState<"sso" | "personal" | null>(null);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    };
+  }, []);
+
+  function markCopied(kind: "sso" | "personal") {
+    if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    setCopiedKind(kind);
+    copiedTimerRef.current = setTimeout(() => setCopiedKind(null), 1500);
+  }
+
+  async function handleCopySsoLink() {
+    const url = `${window.location.origin}/schedule-assistant/for-instructors`;
+    await navigator.clipboard.writeText(url);
+    markCopied("sso");
+  }
+
+  function handleCopyPersonalLink() {
+    if (!instructorId) return;
+    mutate(
+      { params: { path: { instructor_id: instructorId } } },
+      {
+        onSuccess: async (data) => {
+          const url = `${window.location.origin}/schedule-assistant/for-instructors?key=${encodeURIComponent(data.token)}`;
+          await navigator.clipboard.writeText(url);
+          markCopied("personal");
+        },
+        onError: (error) => {
+          showError("Ошибка", formatApiErrorMessage(error));
+        },
+      },
+    );
+  }
 
   return (
-    <button
-      type="button"
-      className="btn btn-outline btn-secondary btn-sm mt-2 w-fit"
-      disabled={!instructorId || isPending}
-      onClick={() => {
-        if (!instructorId) return;
-        mutate(
-          { params: { path: { instructor_id: instructorId } } },
-          {
-            onSuccess: async (data) => {
-              const url = `${window.location.origin}/schedule-assistant/preferences/${data.token}`;
-              await navigator.clipboard.writeText(url);
-              showSuccess("Ссылка скопирована", url);
-            },
-            onError: (error) => {
-              showError("Ошибка", formatApiErrorMessage(error));
-            },
-          },
-        );
-      }}
-    >
-      {isPending ? (
-        <span className="loading loading-spinner loading-sm" />
-      ) : (
-        "Скопировать ссылку для преподавателя"
-      )}
-    </button>
+    <p className="text-base-content/55 mt-1.5 text-xs">
+      <button
+        type="button"
+        className={clsx(
+          "underline-offset-2 hover:underline",
+          copiedKind === "sso"
+            ? "text-base-content/45"
+            : "hover:text-base-content/80",
+        )}
+        onClick={() => {
+          void handleCopySsoLink();
+        }}
+      >
+        {copiedKind === "sso" ? "Скопировано" : "Ссылка для заполнения"}
+      </button>
+      <span className="mx-1.5">·</span>
+      <button
+        type="button"
+        className={clsx(
+          "underline-offset-2 hover:underline disabled:opacity-50",
+          copiedKind === "personal"
+            ? "text-base-content/45"
+            : "hover:text-base-content/80",
+        )}
+        disabled={!instructorId || isPending}
+        onClick={handleCopyPersonalLink}
+      >
+        {isPending
+          ? "Копирование…"
+          : copiedKind === "personal"
+            ? "Скопировано"
+            : "Персональная ссылка"}
+      </button>
+    </p>
   );
 }
 
@@ -1885,7 +1929,7 @@ export function InstructorDetails({
                 patchInstructor({ slot_preferences })
               }
             />
-            <SharePreferenceLinkButton instructorId={instructorId} />
+            <SharePreferenceLinks instructorId={instructorId} />
           </div>
           <SettingsDetailDeleteButton
             label="Удалить преподавателя"

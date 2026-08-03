@@ -99,23 +99,40 @@ export function InstructorPreferencesEditor({
   if (!query.data) return null;
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 sm:p-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Предпочтения по слотам</h1>
-        <p className="text-base-content/70 mt-1 text-sm">
-          {query.data.instructor_name}
-          {query.data.email ? ` · ${query.data.email}` : ""}
-        </p>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 pb-8 sm:p-6">
+      <div className="flex flex-col gap-2">
+        <div>
+          <h1 className="text-xl font-semibold sm:text-2xl">
+            Предпочтения по времени
+          </h1>
+          <p className="text-base-content/70 mt-1 text-sm">
+            {query.data.instructor_name}
+            {query.data.email ? ` · ${query.data.email}` : ""}
+          </p>
+          <p className="text-base-content/60 mt-2 text-sm">
+            Нажмите уровень{" "}
+            <span className="text-base-content/80 font-medium">
+              Предпочтительно
+            </span>
+            ,{" "}
+            <span className="text-base-content/80 font-medium">
+              Нежелательно
+            </span>{" "}
+            или{" "}
+            <span className="text-base-content/80 font-medium">Запрещено</span>{" "}
+            и нажмите на ячейки слотов в таблице.
+          </p>
+        </div>
+        <InstructorPreferenceGrid
+          term={query.data.term}
+          preferences={preferences}
+          onChange={handleChange}
+        />
       </div>
-      <InstructorPreferenceGrid
-        term={query.data.term}
-        preferences={preferences}
-        onChange={handleChange}
-      />
-      <div className="flex justify-end">
+      <div className="flex justify-stretch sm:justify-end">
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary w-full sm:w-auto"
           disabled={isSaving || draft == null}
           onClick={handleSave}
         >
