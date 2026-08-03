@@ -3,6 +3,8 @@ import { $schedule } from "@/api/schedule";
 import { queryClient } from "@/app/query-client.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useState } from "react";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client.ts";
+import { useToast } from "@/components/toast";
 
 export default function RemoveButtonLinked({
   alias,
@@ -37,11 +39,19 @@ export default function RemoveButtonLinked({
     },
     onSettled,
   });
+  const { showError } = useToast();
 
   const removeLinkedCalendar = () => {
-    remove.mutate({
-      params: { query: { alias } },
-    });
+    remove.mutate(
+      {
+        params: { query: { alias } },
+      },
+      {
+        onError: (error) => {
+          showError("Import failed", formatApiErrorMessage(error));
+        },
+      },
+    );
   };
 
   return (
