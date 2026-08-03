@@ -1403,12 +1403,42 @@ export interface components {
       capacity: number | null;
       /**
        * Features
-       * @description Arbitrary room attributes (for example projector, board, outlets); not a fixed enum
+       * @description Room attribute values keyed by term.room_attributes[].key
        * @default {}
        */
       features?: {
-        [key: string]: boolean | string | number;
+        [key: string]: boolean | string | number | string[];
       };
+    };
+    /** RoomAttributeDef */
+    RoomAttributeDef: {
+      /**
+       * Key
+       * @description Attribute key stored in room.features
+       */
+      key: string;
+      /**
+       * Type
+       * @description Value type for this attribute
+       * @enum {string}
+       */
+      type: "boolean" | "string" | "number" | "enum" | "list";
+      /**
+       * Default
+       * @description Reserved; always null (attributes have no defaults)
+       */
+      default?: null;
+      /**
+       * Hint
+       * @description Short hint shown next to the attribute in the room editor
+       */
+      hint?: string | null;
+      /**
+       * Enum Values
+       * @description Allowed values when type is enum; ignored otherwise
+       * @default []
+       */
+      enum_values?: string[];
     };
     /**
      * RoomDTO
@@ -1834,6 +1864,12 @@ export interface components {
        * @default []
        */
       course_component_tags?: string[];
+      /**
+       * Room Attributes
+       * @description Allowed room.features keys with types/defaults; empty means unrestricted legacy keys
+       * @default []
+       */
+      room_attributes?: components["schemas"]["RoomAttributeDef"][];
     };
     /** TermPartialUpdate */
     TermPartialUpdate: {
@@ -1855,6 +1891,11 @@ export interface components {
        * @description Allowed course.components[].tag values; empty means unrestricted
        */
       course_component_tags?: string[] | null;
+      /**
+       * Room Attributes
+       * @description Allowed room.features keys with types/defaults; empty means unrestricted legacy keys
+       */
+      room_attributes?: components["schemas"]["RoomAttributeDef"][] | null;
       /** Days */
       days?: components["schemas"]["Weekday"][] | null;
       starting_day?: components["schemas"]["Weekday"] | null;
@@ -2080,6 +2121,7 @@ export type SchemaParseLocationStringResponse =
 export type SchemaPerWeekIssue = components["schemas"]["PerWeekIssue"];
 export type SchemaProgramTrack = components["schemas"]["ProgramTrack"];
 export type SchemaRoom = components["schemas"]["Room"];
+export type SchemaRoomAttributeDef = components["schemas"]["RoomAttributeDef"];
 export type SchemaRoomDto = components["schemas"]["RoomDTO"];
 export type SchemaRoomIssue = components["schemas"]["RoomIssue"];
 export type SchemaScheduleConfig = components["schemas"]["ScheduleConfig"];

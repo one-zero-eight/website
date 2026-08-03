@@ -4,15 +4,19 @@ import type { Meeting } from "./timetableViewerModel.ts";
 
 export function formatRoomFeatureChip(
   key: string,
-  value: boolean | string | number,
+  value: boolean | string | number | string[],
 ): string | null {
   if (value === false) return null;
   if (value === true) return key;
+  if (Array.isArray(value)) {
+    if (!value.length) return null;
+    return `${key}=${value.join("|")}`;
+  }
   return `${key}=${value}`;
 }
 
 export function formatRoomFeaturesLabel(
-  features: { [key: string]: boolean | string | number } | undefined,
+  features: { [key: string]: boolean | string | number | string[] } | undefined,
 ): string {
   if (!features) return "";
   return Object.entries(features)

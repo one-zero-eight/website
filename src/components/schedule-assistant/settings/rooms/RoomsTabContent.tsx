@@ -6,6 +6,7 @@ import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   useCreateRoomMutation,
   useRoomsQuery,
+  useSemesterSettings,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   SettingsCreateField,
@@ -36,14 +37,42 @@ function roomCapacityToLabel(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
+function roomFeaturesSubtitle(
+  room: SchemaRoom,
+  attributeKeys: string[],
+): string | null {
+  const features = room.features ?? {};
+  const entries = Object.entries(features).filter(([key, value]) => {
+    if (attributeKeys.length && !attributeKeys.includes(key)) return false;
+    if (Array.isArray(value)) return value.length > 0;
+    return value !== false && value !== "" && value !== 0;
+  });
+  if (!entries.length) return null;
+  return entries
+    .map(([key, value]) => {
+      if (value === true) return key;
+      if (Array.isArray(value)) return `${key}: ${value.join(", ")}`;
+      return `${key}: ${value}`;
+    })
+    .join(", ");
+}
+
 export function RoomsTabContent() {
   const { data: rooms, isPending, isError, error } = useRoomsQuery();
+  const { term } = useSemesterSettings();
   const { mutate: createRoom, isPending: isCreating } = useCreateRoomMutation();
   const { selectedSelectionId, selectItem } = useSelection();
   const [createOpen, setCreateOpen] = useState(false);
   const [newId, setNewId] = useState("");
   const [newName, setNewName] = useState("");
   const [newCapacity, setNewCapacity] = useState("");
+  const attributeKeys = useMemo(
+    () =>
+      (term?.room_attributes ?? [])
+        .map((item) => item.key.trim())
+        .filter(Boolean),
+    [term?.room_attributes],
+  );
   const handleSelectRoom = useCallback(
     (roomIndex: number) => {
       selectItem({ kind: "room", roomIndex });
@@ -68,19 +97,7 @@ export function RoomsTabContent() {
           room?.capacity == null || String(room?.capacity).trim() === ""
             ? "Вместимость: —"
             : `Вместимость: ${roomCapacityToLabel(room?.capacity)}`;
-        const featureEntries = Object.entries(room.features ?? {});
-        const featureLabel =
-          featureEntries.length > 0
-            ? featureEntries
-                .map(([key, value]) =>
-                  value === true
-                    ? key
-                    : value === false
-                      ? `${key}: нет`
-                      : `${key}: ${value}`,
-                )
-                .join(", ")
-            : null;
+        const featureLabel = roomFeaturesSubtitle(room, attributeKeys);
         return {
           id: `room-${index}`,
           title: String(room?.id || ""),
@@ -112,7 +129,7 @@ export function RoomsTabContent() {
         if (b.floor === "Без этажа") return -1;
         return a.floor.localeCompare(b.floor, "ru");
       });
-  }, [rooms]);
+  }, [attributeKeys, rooms]);
 
   function resetCreateForm() {
     setNewId("");
