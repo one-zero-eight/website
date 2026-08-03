@@ -4,6 +4,8 @@ import { useState } from "react";
 import ScheduleLinkInput from "@/components/calendar/ScheduleLinkInput.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 import { ImportColorsPalette } from "@/components/calendar/import/ColorsPalette.tsx";
+import { useToast } from "@/components/toast";
+import { formatApiErrorMessage } from "@/api/helpers/create-query-client.ts";
 
 function toAliasPart(value: string) {
   return value
@@ -25,7 +27,7 @@ export function ImportModal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: () => void;
+  onSubmit: () => Promise<void>;
   prevAlias?: string | null;
   prevName?: string | null;
   prevDescription?: string | null;
@@ -34,6 +36,7 @@ export function ImportModal({
 }) {
   const { data: eventsUser } = $schedule.useQuery("get", "/users/me");
   const { mutate: addLink } = $schedule.useMutation("post", "/users/me/linked");
+  const { showError } = useToast();
 
   const [calendarURL, setCalendarURL] = useState(prevUrl ?? "");
 
@@ -65,17 +68,26 @@ export function ImportModal({
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          await addLink({
-            body: {
-              alias: prevAlias ?? `${username}_${normalizedCalendarName}`,
-              url: calendarURL,
-              name: calendarName,
-              description: calendarDescription,
-              color: calendarColor,
-              is_active: true,
+          addLink(
+            {
+              body: {
+                alias: prevAlias ?? `${username}_${normalizedCalendarName}`,
+                url: calendarURL,
+                name: calendarName,
+                description: calendarDescription,
+                color: calendarColor,
+                is_active: true,
+              },
             },
-          });
-          await onSubmit();
+            {
+              onSuccess: async () => {
+                await onSubmit();
+              },
+              onError: (error) => {
+                showError("Import failed", formatApiErrorMessage(error));
+              },
+            },
+          );
         }}
         className="text-base-content/75"
       >
