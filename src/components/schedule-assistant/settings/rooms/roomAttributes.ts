@@ -46,7 +46,6 @@ export function emptyRoomAttributeDef(): SchemaRoomAttributeDef {
   return {
     key: "",
     type: "boolean",
-    default: null,
     hint: null,
     enum_values: [],
   };
@@ -94,7 +93,6 @@ export function normalizeRoomAttributeDefs(
         type: def.type,
         hint,
         enum_values: def.type === "enum" ? enumValues : [],
-        default: null,
       };
     })
     .filter((def) => def.key);

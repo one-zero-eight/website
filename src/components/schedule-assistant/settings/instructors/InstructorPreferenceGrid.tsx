@@ -113,14 +113,14 @@ export function InstructorPreferenceGrid({
   const copy = PREFERENCES_COPY[locale];
   const weekdayLabels =
     locale === "en" ? TERM_WEEKDAY_LABEL_EN : TERM_WEEKDAY_LABEL_RU;
-  const paletteLabels: Record<InstructorSlotPreferenceLevel, string> = {
-    preferred: copy.preferred,
-    discouraged: copy.discouraged,
-    banned: copy.banned,
-  };
   const palette = PALETTE_STYLE.map((item) => ({
     ...item,
-    label: paletteLabels[item.level],
+    label:
+      item.level === InstructorSlotPreferenceLevel.preferred
+        ? copy.preferred
+        : item.level === InstructorSlotPreferenceLevel.discouraged
+          ? copy.discouraged
+          : copy.banned,
   }));
 
   const [activeLevel, setActiveLevel] = useState(

@@ -102,7 +102,6 @@ export function RoomAttributesConfigModal({
       attributes.length
         ? attributes.map((item) => ({
             ...item,
-            default: null,
             enum_values: [...(item.enum_values ?? [])],
           }))
         : [],
@@ -114,7 +113,7 @@ export function RoomAttributesConfigModal({
     setDraft((current) =>
       current.map((item, itemIndex) => {
         if (itemIndex !== index) return item;
-        const next = { ...item, ...patch, default: null };
+        const next = { ...item, ...patch };
         if (patch.type && patch.type !== item.type) {
           next.enum_values =
             patch.type === "enum" ? (next.enum_values ?? []) : [];

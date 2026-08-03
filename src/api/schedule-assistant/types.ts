@@ -1424,11 +1424,6 @@ export interface components {
        */
       type: "boolean" | "string" | "number" | "enum" | "list";
       /**
-       * Default
-       * @description Reserved; always null (attributes have no defaults)
-       */
-      default?: null;
-      /**
        * Hint
        * @description Short hint shown next to the attribute in the room editor
        */
