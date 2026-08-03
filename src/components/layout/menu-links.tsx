@@ -127,6 +127,12 @@ export const items: ItemType[] = [
     to: "/timer",
     icon: <span className="icon-[material-symbols--timer-outline-rounded]" />,
   },
+  {
+    type: "local",
+    title: "Board Games",
+    to: "/board-games",
+    icon: <span className="icon-[fluent--board-games-20-regular]" />,
+  },
   ...((import.meta.env.VITE_PRODUCTION && []) || [
     {
       type: "local",
