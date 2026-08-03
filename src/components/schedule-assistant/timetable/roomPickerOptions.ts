@@ -1,29 +1,11 @@
+import { createElement } from "react";
+
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import type { SelectDropdownOption } from "@/components/common/SelectDropdown.tsx";
 import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
+import { RoomAttributesHoverBadge } from "@/components/schedule-assistant/settings/rooms/RoomAttributesHoverBadge.tsx";
+import { listRoomFeatureEntries } from "@/components/schedule-assistant/settings/rooms/roomAttributes.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
-
-export function formatRoomFeatureChip(
-  key: string,
-  value: boolean | string | number | string[],
-): string | null {
-  if (value === false) return null;
-  if (value === true) return key;
-  if (Array.isArray(value)) {
-    if (!value.length) return null;
-    return `${key}=${value.join("|")}`;
-  }
-  return `${key}=${value}`;
-}
-
-export function formatRoomFeaturesLabel(
-  features: { [key: string]: boolean | string | number | string[] } | undefined,
-): string {
-  if (!features) return "";
-  return Object.entries(features)
-    .map(([key, value]) => formatRoomFeatureChip(key, value))
-    .filter((part): part is string => !!part)
-    .join(", ");
-}
 
 export function countRoomDailyLoad(
   meetings: Meeting[],
@@ -109,7 +91,7 @@ export function buildRoomPickerOptions({
   audienceTokens?: string[];
   excludeInstanceId?: string | null;
   includeRoomIds?: string[];
-}): { value: string; label: string; hint?: string }[] {
+}): SelectDropdownOption[] {
   const roomsById = new Map(
     (config.rooms || [])
       .map((room) => [String(room.id || "").trim(), room] as const)
@@ -124,6 +106,9 @@ export function buildRoomPickerOptions({
   }
 
   const audienceSize = audienceSizeForTokens(config, audienceTokens);
+  const attributeKeys = (config.term?.room_attributes ?? [])
+    .map((item) => item.key.trim())
+    .filter(Boolean);
 
   return [...ids]
     .map((roomId) => {
@@ -134,11 +119,13 @@ export function buildRoomPickerOptions({
         date,
         excludeInstanceId,
       );
-      const features = formatRoomFeaturesLabel(room?.features);
+      const featureEntries = listRoomFeatureEntries(
+        room?.features,
+        attributeKeys,
+      );
       const hint = [
         room?.capacity != null ? `Вместимость ${room.capacity}` : null,
         `в этот день ${load} занятий`,
-        features || null,
       ]
         .filter(Boolean)
         .join(", ");
@@ -146,6 +133,14 @@ export function buildRoomPickerOptions({
         value: roomId,
         label: roomId,
         hint: hint || undefined,
+        searchText: featureEntries
+          .map((entry) => `${entry.key} ${entry.label}`)
+          .join(" "),
+        endAdornment: featureEntries.length
+          ? createElement(RoomAttributesHoverBadge, {
+              entries: featureEntries,
+            })
+          : undefined,
         capacity: room?.capacity ?? null,
       };
     })
@@ -156,5 +151,11 @@ export function buildRoomPickerOptions({
       if (capA !== capB) return capA - capB;
       return a.value.localeCompare(b.value, "ru");
     })
-    .map(({ value, label, hint }) => ({ value, label, hint }));
+    .map(({ value, label, hint, searchText, endAdornment }) => ({
+      value,
+      label,
+      hint,
+      searchText: searchText || undefined,
+      endAdornment,
+    }));
 }

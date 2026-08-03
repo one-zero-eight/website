@@ -13,7 +13,14 @@ import {
   useRole,
 } from "@floating-ui/react";
 import { cn } from "@/lib/ui/cn";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 function timeCompactsFromText(text: string): string[] {
   const times = text.match(/\d{1,2}:\d{2}/g) || [];
@@ -43,17 +50,19 @@ function filterSelectOptions<T extends string>(
     const label = option.label.toLowerCase();
     const value = option.value.toLowerCase();
     const hint = option.hint?.toLowerCase() ?? "";
+    const searchText = option.searchText?.toLowerCase() ?? "";
     if (
       label.includes(normalized) ||
       value.includes(normalized) ||
-      hint.includes(normalized)
+      hint.includes(normalized) ||
+      searchText.includes(normalized)
     )
       return true;
 
     // "1230" matches "12:30–14:00", "900" matches "09:00–10:30"
     if (queryDigits.length >= 3) {
       const compacts = timeCompactsFromText(
-        `${option.label} ${option.value} ${option.hint ?? ""}`,
+        `${option.label} ${option.value} ${option.hint ?? ""} ${option.searchText ?? ""}`,
       );
       if (
         compacts.some(
@@ -76,6 +85,10 @@ export type SelectDropdownOption<T extends string = string> = {
   label: string;
   /** Secondary gray text shown after the label. */
   hint?: string;
+  /** Extra text included in search matching only. */
+  searchText?: string;
+  /** Right-side content in the option row (e.g. hover badge). */
+  endAdornment?: ReactNode;
 };
 
 export type SelectDropdownChangeContext = {
@@ -329,11 +342,16 @@ export function SelectDropdown<T extends string>({
         )}
         {...getReferenceProps()}
       >
-        <OptionLabel
-          label={currentOption?.label ?? placeholder}
-          hint={currentOption?.hint}
-          muted={!value}
-        />
+        <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+          <span className="min-w-0">
+            <OptionLabel
+              label={currentOption?.label ?? placeholder}
+              hint={currentOption?.hint}
+              muted={!value}
+            />
+          </span>
+          {currentOption?.endAdornment}
+        </span>
         <span className="icon-[material-symbols--expand-more] shrink-0 text-base" />
       </button>
 
@@ -387,7 +405,15 @@ export function SelectDropdown<T extends string>({
                           selectOption(option.value);
                         }}
                       >
-                        <OptionLabel label={option.label} hint={option.hint} />
+                        <span className="flex w-full items-center justify-between gap-2">
+                          <span className="min-w-0">
+                            <OptionLabel
+                              label={option.label}
+                              hint={option.hint}
+                            />
+                          </span>
+                          {option.endAdornment}
+                        </span>
                       </button>
                     </li>
                   );
@@ -422,10 +448,15 @@ export function SelectDropdown<T extends string>({
                       selectOption(resolvedTrailing.value);
                     }}
                   >
-                    <OptionLabel
-                      label={resolvedTrailing.label}
-                      hint={resolvedTrailing.hint}
-                    />
+                    <span className="flex w-full items-center justify-between gap-2">
+                      <span className="min-w-0">
+                        <OptionLabel
+                          label={resolvedTrailing.label}
+                          hint={resolvedTrailing.hint}
+                        />
+                      </span>
+                      {resolvedTrailing.endAdornment}
+                    </span>
                   </button>
                 </div>
               ) : null}

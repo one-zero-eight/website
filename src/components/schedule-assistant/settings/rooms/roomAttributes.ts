@@ -99,3 +99,31 @@ export function normalizeRoomAttributeDefs(
     })
     .filter((def) => def.key);
 }
+
+export function formatRoomFeatureDisplayValue(value: RoomFeatureValue): string {
+  if (value === true) return "да";
+  if (value === false) return "нет";
+  if (Array.isArray(value)) return value.join(", ");
+  return String(value);
+}
+
+export function listRoomFeatureEntries(
+  features: { [key: string]: RoomFeatureValue } | undefined,
+  attributeKeys: string[] = [],
+): { key: string; label: string }[] {
+  if (!features) return [];
+  const keys =
+    attributeKeys.length > 0
+      ? attributeKeys.filter((key) =>
+          Object.prototype.hasOwnProperty.call(features, key),
+        )
+      : Object.keys(features);
+
+  return keys.flatMap((key) => {
+    const value = features[key];
+    if (value === undefined || value === null) return [];
+    if (Array.isArray(value) && value.length === 0) return [];
+    if (value === "" || value === false) return [];
+    return [{ key, label: formatRoomFeatureDisplayValue(value) }];
+  });
+}

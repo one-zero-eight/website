@@ -1,4 +1,5 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import {
   useCreateInstructorMutation,
   useInstructorsQuery,
@@ -219,6 +220,11 @@ export function InstructorsTabContent() {
     );
   }, [deferredSearchQuery, searchIndex, sortMode, term?.instructor_positions]);
 
+  const positionOptions = useMemo(
+    () => (term?.instructor_positions ?? []).filter(Boolean),
+    [term?.instructor_positions],
+  );
+
   const activeInstructors = useMemo(
     () => visibleInstructors.filter((item) => (item.meetings_count ?? 0) > 0),
     [visibleInstructors],
@@ -371,11 +377,18 @@ export function InstructorsTabContent() {
           />
         </SettingsCreateField>
         <SettingsCreateField label="Должность">
-          <input
-            className="input input-bordered input-sm w-full"
+          <SelectDropdown
             value={newPosition}
-            placeholder="Instructor"
-            onChange={(e) => setNewPosition(e.target.value)}
+            onChange={setNewPosition}
+            options={[
+              { value: "", label: "Не задано" },
+              ...positionOptions.map((position) => ({
+                value: position,
+                label: position,
+              })),
+            ]}
+            placeholder="Не задано"
+            triggerClassName="btn btn-outline btn-sm w-full justify-between font-normal"
           />
         </SettingsCreateField>
       </SettingsCreateModal>

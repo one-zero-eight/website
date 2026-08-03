@@ -9,6 +9,7 @@ import {
 } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
+import Tooltip from "@/components/common/Tooltip.tsx";
 import { useToast } from "@/components/toast";
 import {
   nextGroupIdentifiers,
@@ -465,35 +466,27 @@ function RoomFeatureStringListEditor({
   }
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2">
-      {values.length === 0 ? (
-        <div className="text-base-content/50 text-sm">Не задано</div>
-      ) : (
-        <ul className="flex flex-col gap-1">
-          {values.map((value, index) => (
-            <li key={`${value}-${index}`} className="flex items-center gap-2">
-              <span className="bg-base-200 rounded-box px-2 py-1 text-sm">
-                {value}
-              </span>
-              <button
-                type="button"
-                className="btn btn-ghost btn-xs"
-                onClick={() => {
-                  const next = values.filter(
-                    (_, valueIndex) => valueIndex !== index,
-                  );
-                  onChange(next.length ? next : null);
-                }}
-              >
-                Удалить
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="flex min-w-0 flex-col gap-1.5">
+      {values.map((value, index) => (
+        <div key={`${value}-${index}`} className="flex items-center gap-2">
+          <span className="text-sm font-medium whitespace-nowrap">{value}</span>
+          <button
+            type="button"
+            className="btn btn-ghost btn-xs justify-self-start"
+            onClick={() => {
+              const next = values.filter(
+                (_, valueIndex) => valueIndex !== index,
+              );
+              onChange(next.length ? next : null);
+            }}
+          >
+            Удалить
+          </button>
+        </div>
+      ))}
       <div className="flex flex-wrap items-center gap-2">
         <input
-          className={`${detailInputClass} min-w-40 flex-1`}
+          className={`${detailInputClass} w-44 max-w-full`}
           placeholder="Добавить значение"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -513,6 +506,14 @@ function RoomFeatureStringListEditor({
         </button>
       </div>
     </div>
+  );
+}
+
+function RoomAttributeHintIcon({ hint }: { hint: string }) {
+  return (
+    <Tooltip content={hint}>
+      <span className="icon-[material-symbols--info-outline-rounded] text-base-content/45 hover:text-base-content/70 shrink-0 cursor-help text-base" />
+    </Tooltip>
   );
 }
 
@@ -538,7 +539,7 @@ function RoomFeaturesEditor({
   }
 
   return (
-    <div className={`${detailControlClass} shrink-0`}>
+    <div className={`${detailControlClass} shrink-0 pb-1`}>
       <div className="flex items-center gap-1">
         <span className={detailLabelUpperClass}>Атрибуты</span>
         <button
@@ -550,125 +551,114 @@ function RoomFeaturesEditor({
           <span className="icon-[material-symbols--settings-outline] text-base" />
         </button>
       </div>
-      <div className="flex flex-col gap-2">
-        {defs.length === 0 ? (
-          <div className="text-base-content/60 text-sm">
-            Определите атрибуты через шестерёнку — они будут общими для всех
-            аудиторий.
-          </div>
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {defs.map((def) => {
-              const value = resolveRoomFeatureValue(def, features);
-              return (
-                <li key={def.key} className="flex flex-col gap-1">
-                  <div className="flex flex-wrap items-start gap-2">
-                    <span className="bg-base-200 rounded-box shrink-0 px-2 py-1 text-sm font-medium">
-                      {def.key}
-                    </span>
-                    {def.type === "boolean" ? (
-                      <div className="min-w-40 flex-1">
-                        <SelectDropdown
-                          value={
-                            value === null
-                              ? ""
-                              : value === true
-                                ? "true"
-                                : "false"
-                          }
-                          options={[
-                            { value: "", label: "Не задано" },
-                            { value: "true", label: "Да" },
-                            { value: "false", label: "Нет" },
-                          ]}
-                          onChange={(next) =>
-                            handleValueChange(
-                              def.key,
-                              next === "" ? null : next === "true",
-                            )
-                          }
-                          triggerClassName="btn btn-outline btn-sm w-full justify-between font-normal"
-                        />
-                      </div>
-                    ) : null}
-                    {def.type === "string" ? (
-                      <input
-                        key={`${def.key}:${value === null ? "" : String(value)}`}
-                        className={`${detailInputClass} min-w-0 flex-1`}
-                        defaultValue={
-                          value === null
-                            ? ""
-                            : typeof value === "string"
-                              ? value
-                              : String(value)
-                        }
-                        placeholder="Не задано"
-                        onBlur={(e) => {
-                          const next = e.target.value;
-                          handleValueChange(
-                            def.key,
-                            next.trim() === "" ? null : next,
-                          );
-                        }}
-                      />
-                    ) : null}
-                    {def.type === "number" ? (
-                      <input
-                        type="number"
-                        className={`${detailInputClass} min-w-0 flex-1`}
-                        value={typeof value === "number" ? value : ""}
-                        placeholder="Не задано"
-                        onChange={(e) => {
-                          const raw = e.target.value.trim();
-                          if (raw === "") {
-                            handleValueChange(def.key, null);
-                            return;
-                          }
-                          const next = Number(raw);
-                          if (!Number.isFinite(next)) return;
-                          handleValueChange(def.key, Math.trunc(next));
-                        }}
-                      />
-                    ) : null}
-                    {def.type === "enum" ? (
-                      <div className="min-w-40 flex-1">
-                        <SelectDropdown
-                          value={typeof value === "string" ? value : ""}
-                          options={[
-                            { value: "", label: "Не задано" },
-                            ...(def.enum_values ?? []).map((item) => ({
-                              value: item,
-                              label: item,
-                            })),
-                          ]}
-                          onChange={(next) =>
-                            handleValueChange(
-                              def.key,
-                              next === "" ? null : next,
-                            )
-                          }
-                          triggerClassName="btn btn-outline btn-sm w-full justify-between font-normal"
-                        />
-                      </div>
-                    ) : null}
-                    {def.type === "list" ? (
-                      <RoomFeatureStringListEditor
-                        values={Array.isArray(value) ? value : []}
-                        onChange={(next) => handleValueChange(def.key, next)}
-                      />
-                    ) : null}
-                  </div>
-                  {def.hint ? (
-                    <div className="text-base-content/50 text-xs">
-                      {def.hint}
-                    </div>
+      {defs.length === 0 ? (
+        <div className="text-base-content/60 text-sm">
+          Определите атрибуты через шестерёнку — они будут общими для всех
+          аудиторий.
+        </div>
+      ) : (
+        <div className="grid w-full max-w-2xl grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 p-0.5">
+          {defs.map((def) => {
+            const value = resolveRoomFeatureValue(def, features);
+            const hint = def.hint?.trim() || "";
+            const placeholder = hint || "Не задано";
+            return (
+              <Fragment key={def.key}>
+                <div className="flex items-center gap-1 self-start pt-1.5">
+                  <span className="text-sm font-medium whitespace-nowrap">
+                    {def.key}
+                  </span>
+                  {hint ? <RoomAttributeHintIcon hint={hint} /> : null}
+                </div>
+                <div className="min-w-0">
+                  {def.type === "boolean" ? (
+                    <SelectDropdown
+                      value={
+                        value === null ? "" : value === true ? "true" : "false"
+                      }
+                      options={[
+                        { value: "", label: "Не задано" },
+                        { value: "true", label: "Да" },
+                        { value: "false", label: "Нет" },
+                      ]}
+                      onChange={(next) =>
+                        handleValueChange(
+                          def.key,
+                          next === "" ? null : next === "true",
+                        )
+                      }
+                      placeholder="Не задано"
+                      triggerClassName="btn btn-outline btn-sm w-full max-w-xs justify-between font-normal"
+                    />
                   ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+                  {def.type === "string" ? (
+                    <input
+                      key={`${def.key}:${value === null ? "" : String(value)}`}
+                      className={`${detailInputClass} w-full max-w-xl`}
+                      defaultValue={
+                        value === null
+                          ? ""
+                          : typeof value === "string"
+                            ? value
+                            : String(value)
+                      }
+                      placeholder={placeholder}
+                      onBlur={(e) => {
+                        const next = e.target.value;
+                        handleValueChange(
+                          def.key,
+                          next.trim() === "" ? null : next,
+                        );
+                      }}
+                    />
+                  ) : null}
+                  {def.type === "number" ? (
+                    <input
+                      type="number"
+                      className={`${detailInputClass} w-full max-w-xs`}
+                      value={typeof value === "number" ? value : ""}
+                      placeholder={placeholder}
+                      onChange={(e) => {
+                        const raw = e.target.value.trim();
+                        if (raw === "") {
+                          handleValueChange(def.key, null);
+                          return;
+                        }
+                        const next = Number(raw);
+                        if (!Number.isFinite(next)) return;
+                        handleValueChange(def.key, Math.trunc(next));
+                      }}
+                    />
+                  ) : null}
+                  {def.type === "enum" ? (
+                    <SelectDropdown
+                      value={typeof value === "string" ? value : ""}
+                      options={[
+                        { value: "", label: "Не задано" },
+                        ...(def.enum_values ?? []).map((item) => ({
+                          value: item,
+                          label: item,
+                        })),
+                      ]}
+                      onChange={(next) =>
+                        handleValueChange(def.key, next === "" ? null : next)
+                      }
+                      placeholder="Не задано"
+                      triggerClassName="btn btn-outline btn-sm w-full max-w-xs justify-between font-normal"
+                    />
+                  ) : null}
+                  {def.type === "list" ? (
+                    <RoomFeatureStringListEditor
+                      values={Array.isArray(value) ? value : []}
+                      onChange={(next) => handleValueChange(def.key, next)}
+                    />
+                  ) : null}
+                </div>
+              </Fragment>
+            );
+          })}
+        </div>
+      )}
       <RoomAttributesConfigModal
         open={configOpen}
         onOpenChange={setConfigOpen}

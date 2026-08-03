@@ -12,6 +12,8 @@ import {
   SettingsCreateField,
   SettingsCreateModal,
 } from "@/components/schedule-assistant/settings/SettingsCreateModal.tsx";
+import { RoomAttributesHoverBadge } from "@/components/schedule-assistant/settings/rooms/RoomAttributesHoverBadge.tsx";
+import { listRoomFeatureEntries } from "@/components/schedule-assistant/settings/rooms/roomAttributes.ts";
 import { usePendingSettingsSelect } from "@/components/schedule-assistant/settings/usePendingSettingsSelect.ts";
 import {
   getSettingsSelectionKey,
@@ -21,6 +23,7 @@ import {
 
 export type RoomListRow = SettingsListRow & {
   roomIndex: number;
+  featureEntries: { key: string; label: string }[];
 };
 
 export type RoomsFloorGroup = {
@@ -35,26 +38,6 @@ function roomCapacityToLabel(value: unknown): string {
     return String(value);
   if (Array.isArray(value)) return value.map(roomCapacityToLabel).join(", ");
   return JSON.stringify(value, null, 2);
-}
-
-function roomFeaturesSubtitle(
-  room: SchemaRoom,
-  attributeKeys: string[],
-): string | null {
-  const features = room.features ?? {};
-  const entries = Object.entries(features).filter(([key, value]) => {
-    if (attributeKeys.length && !attributeKeys.includes(key)) return false;
-    if (Array.isArray(value)) return value.length > 0;
-    return value !== false && value !== "" && value !== 0;
-  });
-  if (!entries.length) return null;
-  return entries
-    .map(([key, value]) => {
-      if (value === true) return key;
-      if (Array.isArray(value)) return `${key}: ${value.join(", ")}`;
-      return `${key}: ${value}`;
-    })
-    .join(", ");
 }
 
 export function RoomsTabContent() {
@@ -95,17 +78,15 @@ export function RoomsTabContent() {
       (room: SchemaRoom, index: number) => {
         const capacityLabel =
           room?.capacity == null || String(room?.capacity).trim() === ""
-            ? "Вместимость: —"
-            : `Вместимость: ${roomCapacityToLabel(room?.capacity)}`;
-        const featureLabel = roomFeaturesSubtitle(room, attributeKeys);
+            ? "Вместимость —"
+            : `Вместимость ${roomCapacityToLabel(room?.capacity)}`;
         return {
           id: `room-${index}`,
           title: String(room?.id || ""),
-          subtitle: featureLabel
-            ? `${capacityLabel} · ${featureLabel}`
-            : capacityLabel,
+          subtitle: capacityLabel,
           selection: { kind: "room" as const, roomIndex: index },
           roomIndex: index,
+          featureEntries: listRoomFeatureEntries(room.features, attributeKeys),
         };
       },
     );
@@ -213,11 +194,16 @@ export function RoomsTabContent() {
                     )}
                     onClick={() => selectItem(item.selection)}
                   >
-                    <div className="w-full text-left">
-                      <div className="text-sm font-semibold">{item.title}</div>
-                      <div className="text-base-content/70 text-xs">
-                        {item.subtitle ?? "Вместимость: —"}
+                    <div className="flex w-full items-start justify-between gap-2 text-left">
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold">
+                          {item.title}
+                        </div>
+                        <div className="text-base-content/70 text-xs">
+                          {item.subtitle ?? "Вместимость —"}
+                        </div>
                       </div>
+                      <RoomAttributesHoverBadge entries={item.featureEntries} />
                     </div>
                   </button>
                 ))}
