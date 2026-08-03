@@ -84,7 +84,10 @@ function ReservationsSection({
           )}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <Link to="/admin/reservations" className="btn btn-ghost btn-sm">
+          <Link
+            to="/board-games/admin/reservations"
+            className="btn btn-ghost btn-sm"
+          >
             View all
             <span className="icon-[material-symbols--arrow-forward] text-lg" />
           </Link>
@@ -670,7 +673,7 @@ function BoardGameDetailsModal({
         </div>
         <div className="flex justify-end">
           <Link
-            to="/admin/reservations"
+            to="/board-games/admin/reservations"
             search={{ gameId: game.id }}
             className="btn btn-primary"
           >

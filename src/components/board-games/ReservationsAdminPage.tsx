@@ -77,7 +77,7 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
     setCreatedFrom("");
     setCreatedTo("");
     navigate({
-      to: "/admin/reservations",
+      to: "/board-games/admin/reservations",
       search: { gameId: undefined },
       replace: true,
     });
@@ -85,7 +85,7 @@ export function ReservationsAdminPage({ gameId }: { gameId?: string }) {
 
   function handleClearGameFilter() {
     navigate({
-      to: "/admin/reservations",
+      to: "/board-games/admin/reservations",
       search: { gameId: undefined },
       replace: true,
     });
