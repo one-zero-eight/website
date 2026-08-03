@@ -1,11 +1,12 @@
-import { Fragment } from "react";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $scheduleAssistant } from "@/api/schedule-assistant";
 import {
   SchemaCourseConfig,
+  SchemaInstructorListItem,
   SchemaSectionProgram,
   SectionProgramLanguageAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
+import { Modal } from "@/components/common/Modal.tsx";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import { useToast } from "@/components/toast";
 import {
@@ -36,6 +37,7 @@ import {
   useStudentGroup,
   useTrack,
   useUpdateProgramMutation,
+  useInstructorsQuery,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
   collectKnownStudentGroupIds,
@@ -43,11 +45,21 @@ import {
   validateCourseComponentsYaml,
 } from "@/components/schedule-assistant/settings/courses/courseComponentsYamlLint.ts";
 import {
+  countCourseLessonsByInstructor,
+  formatLessonBreakdown,
+  type InstructorLessonBreakdown,
+} from "@/components/schedule-assistant/settings/courses/courseInstructorLessonCounts.ts";
+import {
   mutateNormalizedTrackGroups,
   normalizeTracksFromSectionProgram,
   programUsesExplicitTracks,
 } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 import { InstructorPreferenceGrid } from "@/components/schedule-assistant/settings/instructors/InstructorPreferenceGrid.tsx";
+import {
+  createInstructorsSearchIndex,
+  instructorDisplayName,
+  searchInstructors,
+} from "@/components/schedule-assistant/settings/instructors/instructorsSearchUtils.ts";
 import { useRegisterSettingsDirty } from "@/components/schedule-assistant/settings/settingsSaveStatus.tsx";
 import { useBlurSaveField } from "@/components/schedule-assistant/settings/useBlurSaveField.ts";
 import { useSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
@@ -68,7 +80,9 @@ import clsx from "clsx";
 import {
   type KeyboardEvent,
   type ReactNode,
+  Fragment,
   useCallback,
+  useDeferredValue,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -525,6 +539,8 @@ function RoomFeaturesEditor({
 
 export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const { config } = useConfig();
+  const { term } = useSemesterSettings();
+  const { data: instructors = [] } = useInstructorsQuery();
   const { course, courseName, isPending, isError, error } =
     useCourse(courseIndex);
   const { patchCourse } = usePatchCourseMutation(courseName);
@@ -533,9 +549,6 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
   const { mutate: createStudentGroup } = useCreateStudentGroupMutation();
   const { deselectItem } = useSelection();
   const name = String(course?.name ?? "");
-  const tags = Array.isArray(course?.course_tags)
-    ? course.course_tags.join(", ")
-    : "";
   const components = Array.isArray(course?.components) ? course.components : [];
   const componentTags = components
     .map((comp: { tag?: string }) => comp?.tag)
@@ -608,14 +621,6 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
     course?.short_name_ru ?? "",
     (value) => patchCourse({ short_name_ru: value.trim() || null }),
   );
-  const tagsField = useBlurSaveField(tags, (value) =>
-    patchCourse({
-      course_tags: value
-        .split(",")
-        .map((chunk) => chunk.trim())
-        .filter(Boolean),
-    }),
-  );
 
   function handleCommitYaml() {
     const result = validateCourseComponentsYaml(yamlText);
@@ -654,12 +659,17 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
             </span>
             <input className={detailInputClass} {...shortNameRuField} />
           </label>
-          <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>
-              Теги курса (через запятую)
-            </span>
-            <input className={detailInputClass} {...tagsField} />
-          </label>
+
+          <CourseInstructorsEditor
+            assignments={course?.instructors ?? []}
+            roleOptions={(term?.course_instructor_roles ?? []).filter(Boolean)}
+            tagOrder={(term?.course_component_tags ?? []).filter(Boolean)}
+            lessonCounts={countCourseLessonsByInstructor(course, term)}
+            instructors={instructors}
+            onChange={(courseInstructors) =>
+              patchCourse({ instructors: courseInstructors })
+            }
+          />
 
           <div
             className={`${detailControlClass} flex min-h-0 min-w-0 flex-1 flex-col gap-1.5`}
@@ -703,6 +713,340 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
         </div>
       </DetailQueryState>
     </SettingsSidebarDetailFrame>
+  );
+}
+
+function CourseInstructorsEditor({
+  assignments,
+  roleOptions,
+  tagOrder,
+  instructors,
+  lessonCounts,
+  onChange,
+}: {
+  assignments: { id: string; role: string }[];
+  roleOptions: string[];
+  tagOrder: string[];
+  instructors: SchemaInstructorListItem[];
+  lessonCounts: Map<string, InstructorLessonBreakdown>;
+  onChange: (assignments: { id: string; role: string }[]) => void;
+}) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [draft, setDraft] = useState(assignments);
+  const [draftRole, setDraftRole] = useState(roleOptions[0] ?? "");
+  const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+
+  const labelById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const instructor of instructors) {
+      map.set(instructor.id, instructorDisplayName(instructor));
+    }
+    return map;
+  }, [instructors]);
+
+  const roleRank = useMemo(() => {
+    const map = new Map<string, number>();
+    roleOptions.forEach((role, index) => map.set(role, index));
+    return map;
+  }, [roleOptions]);
+
+  const searchIndex = useMemo(
+    () => createInstructorsSearchIndex(instructors),
+    [instructors],
+  );
+
+  const assignedIds = useMemo(
+    () => new Set(draft.map((item) => item.id)),
+    [draft],
+  );
+
+  const searchResults = useMemo(() => {
+    const trimmed = deferredSearchQuery.trim();
+    if (!trimmed) return [];
+    return searchInstructors(searchIndex, trimmed)
+      .filter((item) => !assignedIds.has(item.id))
+      .slice(0, 8);
+  }, [assignedIds, deferredSearchQuery, searchIndex]);
+
+  const sortedDraft = useMemo(() => {
+    return draft
+      .map((item, index) => ({ item, index }))
+      .sort((left, right) => {
+        const leftRank = roleRank.get(left.item.role) ?? 999;
+        const rightRank = roleRank.get(right.item.role) ?? 999;
+        if (leftRank !== rightRank) return leftRank - rightRank;
+        const leftName = (
+          labelById.get(left.item.id) ?? left.item.id
+        ).toLocaleLowerCase("ru");
+        const rightName = (
+          labelById.get(right.item.id) ?? right.item.id
+        ).toLocaleLowerCase("ru");
+        return leftName.localeCompare(rightName, "ru");
+      });
+  }, [draft, labelById, roleRank]);
+
+  function handleOpenModal() {
+    setDraft(assignments.map((item) => ({ ...item })));
+    setDraftRole(roleOptions[0] ?? "");
+    setSearchQuery("");
+    setModalOpen(true);
+  }
+
+  function handleSave() {
+    onChange(draft);
+    setModalOpen(false);
+  }
+
+  function handleAddInstructor(instructorId: string) {
+    const role = draftRole.trim() || roleOptions[0] || "";
+    if (!instructorId || !role || assignedIds.has(instructorId)) return;
+    setDraft((current) => [...current, { id: instructorId, role }]);
+    setSearchQuery("");
+  }
+
+  function roleSelectOptions(currentRole: string) {
+    const options = roleOptions.map((role) => ({ value: role, label: role }));
+    if (currentRole && !roleOptions.includes(currentRole)) {
+      options.push({
+        value: currentRole,
+        label: `${currentRole} (вне списка)`,
+      });
+    }
+    return options;
+  }
+
+  function lessonsLabel(instructorId: string) {
+    return formatLessonBreakdown(lessonCounts.get(instructorId), tagOrder);
+  }
+
+  return (
+    <div className={`${detailControlClass} shrink-0`}>
+      <div className="flex items-center justify-between gap-2">
+        <span className={detailLabelUpperClass}>Преподаватели курса</span>
+        <button
+          type="button"
+          className="btn btn-ghost btn-xs btn-square"
+          onClick={handleOpenModal}
+          title="Редактировать"
+        >
+          <span className="icon-[material-symbols--edit-outline-rounded] text-base" />
+        </button>
+      </div>
+      {assignments.length === 0 ? (
+        <div className="text-base-content/60 text-sm">
+          Пока никого не назначили на предмет.
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-1.5 px-0.5">
+          {assignments.map((assignment, index) => (
+            <li
+              key={`${assignment.id}-${index}`}
+              className="flex min-w-0 items-start justify-between gap-2 text-sm leading-snug"
+            >
+              <span className="min-w-0 wrap-break-word">
+                {labelById.get(assignment.id) ?? assignment.id}
+              </span>
+              <div className="text-base-content/55 shrink-0 text-right text-xs leading-tight">
+                <div className="whitespace-nowrap">{assignment.role}</div>
+                <div className="whitespace-nowrap">
+                  {lessonsLabel(assignment.id)}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Modal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        title="Преподаватели курса"
+        overlayClassName="!flex items-start justify-center overflow-y-auto pt-[max(1rem,12vh)]"
+        containerClassName="max-h-[calc(100dvh-2rem-12vh)] max-w-xl overflow-y-auto"
+      >
+        <div className="flex flex-col gap-3">
+          <div className="px-1">
+            {sortedDraft.length === 0 ? (
+              <div className="text-base-content/60 py-1 text-sm">
+                Пока никого не назначили на предмет.
+              </div>
+            ) : (
+              <ul className="divide-base-300 border-base-300 divide-y overflow-hidden rounded-lg border">
+                {sortedDraft.map(({ item: assignment, index }) => (
+                  <li
+                    key={`${assignment.id}-${index}`}
+                    className="flex items-center gap-2 px-2.5 py-1.5"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm leading-tight font-medium">
+                        {labelById.get(assignment.id) ?? assignment.id}
+                      </div>
+                      <div className="text-base-content/55 truncate text-xs leading-tight">
+                        {lessonsLabel(assignment.id)}
+                      </div>
+                    </div>
+                    {roleOptions.length > 0 ? (
+                      <select
+                        className="select select-bordered select-xs w-44 shrink-0"
+                        value={assignment.role}
+                        onChange={(e) => {
+                          const role = e.target.value;
+                          setDraft((current) =>
+                            current.map((entry, itemIndex) =>
+                              itemIndex === index ? { ...entry, role } : entry,
+                            ),
+                          );
+                        }}
+                      >
+                        {roleSelectOptions(assignment.role).map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        className="input input-bordered input-xs w-36 shrink-0"
+                        value={assignment.role}
+                        onChange={(e) => {
+                          const role = e.target.value;
+                          setDraft((current) =>
+                            current.map((entry, itemIndex) =>
+                              itemIndex === index ? { ...entry, role } : entry,
+                            ),
+                          );
+                        }}
+                      />
+                    )}
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-xs btn-square text-base-content/50 hover:text-error shrink-0"
+                      title="Удалить"
+                      onClick={() =>
+                        setDraft((current) =>
+                          current.filter((_, itemIndex) => itemIndex !== index),
+                        )
+                      }
+                    >
+                      <span className="icon-[material-symbols--close] text-base" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="border-base-300 space-y-2 border-t px-1 pt-3">
+            <div className="text-base-content/70 text-xs font-medium tracking-wide uppercase">
+              Добавить
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative min-w-0 flex-1">
+                <input
+                  type="search"
+                  className="input input-bordered input-sm w-full pr-8 [&::-webkit-search-cancel-button]:hidden"
+                  value={searchQuery}
+                  placeholder="Поиск преподавателя…"
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                />
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    className="text-base-content/40 hover:text-base-content/70 absolute top-1/2 right-2 flex -translate-y-1/2 items-center rounded-sm transition-colors"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    <span className="icon-[material-symbols--close] text-lg" />
+                  </button>
+                ) : null}
+              </div>
+              {roleOptions.length > 0 ? (
+                <select
+                  className="select select-bordered select-sm w-44 shrink-0"
+                  value={draftRole}
+                  onChange={(e) => setDraftRole(e.target.value)}
+                >
+                  {roleOptions.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  className="input input-bordered input-sm w-44 shrink-0"
+                  placeholder="Роль"
+                  value={draftRole}
+                  onChange={(e) => setDraftRole(e.target.value)}
+                />
+              )}
+            </div>
+
+            {deferredSearchQuery.trim() ? (
+              searchResults.length > 0 ? (
+                <ul className="border-base-300 divide-base-300 max-h-48 divide-y overflow-y-auto rounded-lg border">
+                  {searchResults.map((instructor) => {
+                    const name = instructorDisplayName(instructor);
+                    const subtitle = [
+                      instructor.position?.trim(),
+                      instructor.email?.trim(),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ");
+                    return (
+                      <li key={instructor.id}>
+                        <button
+                          type="button"
+                          className="hover:bg-base-300/50 flex w-full items-center gap-2 px-2.5 py-1.5 text-left transition-colors"
+                          onClick={() => handleAddInstructor(instructor.id)}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm leading-tight">
+                              {name}
+                            </div>
+                            {subtitle ? (
+                              <div className="text-base-content/55 truncate text-xs leading-tight">
+                                {subtitle}
+                              </div>
+                            ) : null}
+                          </div>
+                          <span className="icon-[material-symbols--add] text-base-content/45 shrink-0 text-lg" />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <div className="text-base-content/60 text-sm">
+                  Ничего не найдено.
+                </div>
+              )
+            ) : (
+              <div className="text-base-content/50 text-xs">
+                Начните вводить имя, email или алиас.
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-2 flex justify-end gap-2 px-1">
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => setModalOpen(false)}
+          >
+            Отмена
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSave}
+          >
+            Сохранить
+          </button>
+        </div>
+      </Modal>
+    </div>
   );
 }
 
@@ -1290,7 +1634,7 @@ export function InstructorDetails({
   const positionField = useBlurSaveField(instructor?.position ?? "", (value) =>
     patchInstructor({ position: value.trim() || null }),
   );
-  const roleOptions = (term?.instructor_roles ?? []).filter(Boolean);
+  const positionOptions = (term?.instructor_positions ?? []).filter(Boolean);
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
@@ -1318,7 +1662,7 @@ export function InstructorDetails({
           </label>
           <div className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Должность</span>
-            {roleOptions.length > 0 ? (
+            {positionOptions.length > 0 ? (
               <SelectDropdown
                 value={instructor?.position ?? ""}
                 onChange={(value) =>
@@ -1328,12 +1672,21 @@ export function InstructorDetails({
                 }
                 options={[
                   { value: "", label: "Не задано" },
-                  ...roleOptions.map((role) => ({
-                    value: role,
-                    label: role,
+                  ...positionOptions.map((position) => ({
+                    value: position,
+                    label: position,
                   })),
+                  ...(instructor?.position &&
+                  !positionOptions.includes(instructor.position)
+                    ? [
+                        {
+                          value: instructor.position,
+                          label: `${instructor.position} (вне списка)`,
+                        },
+                      ]
+                    : []),
                 ]}
-                placeholder="Должность"
+                placeholder="Не задано"
                 triggerClassName="w-full"
               />
             ) : (
@@ -1433,7 +1786,7 @@ export function SemesterDetails() {
   }
 
   return (
-    <div className={settingsDetailShellClass}>
+    <div className={`${settingsDetailShellClass} pb-6`}>
       <label className={`${detailControlClass} shrink-0`}>
         <span className={detailLabelUpperClass}>Название семестра</span>
         <input
@@ -1556,75 +1909,106 @@ export function SemesterDetails() {
           ) : null}
         </div>
       </div>
-      <InstructorRolesEditor
-        roles={term?.instructor_roles ?? []}
-        onChange={(instructor_roles) =>
-          patchTerm((current) => ({ ...current, instructor_roles }))
+      <StringListEditor
+        title="Должности преподавателей"
+        emptyHint="Список пуст — должность можно вводить свободно."
+        addPlaceholder="Новая должность"
+        values={term?.instructor_positions ?? []}
+        onChange={(instructor_positions) =>
+          patchTerm((current) => ({ ...current, instructor_positions }))
+        }
+      />
+      <StringListEditor
+        title="Роли преподавателя на курсе"
+        emptyHint="Список пуст — роль на курсе можно задавать свободно."
+        addPlaceholder="Новая роль"
+        values={term?.course_instructor_roles ?? []}
+        onChange={(course_instructor_roles) =>
+          patchTerm((current) => ({ ...current, course_instructor_roles }))
+        }
+      />
+      <StringListEditor
+        title="Теги компонентов курса"
+        emptyHint="Список пуст — тег компонента можно задавать свободно."
+        addPlaceholder="Новый тег"
+        values={term?.course_component_tags ?? []}
+        onChange={(course_component_tags) =>
+          patchTerm((current) => ({ ...current, course_component_tags }))
         }
       />
     </div>
   );
 }
 
-function InstructorRolesEditor({
-  roles,
+function StringListEditor({
+  title,
+  emptyHint,
+  addPlaceholder,
+  values,
   onChange,
 }: {
-  roles: string[];
-  onChange: (roles: string[]) => void;
+  title: string;
+  emptyHint: string;
+  addPlaceholder: string;
+  values: string[];
+  onChange: (values: string[]) => void;
 }) {
   const [draft, setDraft] = useState("");
   return (
-    <div className={`${detailControlClass} shrink-0`}>
-      <span className={detailLabelUpperClass}>Роли преподавателей</span>
-      <div className="flex flex-col gap-2">
-        {roles.length === 0 ? (
-          <div className="text-base-content/60 text-sm">
-            Список пуст — должность можно вводить свободно.
+    <div className={`${detailControlClass} shrink-0 pb-1`}>
+      <span className={detailLabelUpperClass}>{title}</span>
+      <div className="grid w-fit grid-cols-[auto_auto] items-center gap-x-2 gap-y-2 p-0.5">
+        {values.length === 0 ? (
+          <div className="text-base-content/60 col-span-2 text-sm">
+            {emptyHint}
           </div>
         ) : (
-          <ul className="flex flex-col gap-1">
-            {roles.map((role, index) => (
-              <li key={`${role}-${index}`} className="flex items-center gap-2">
-                <span className="bg-base-200 rounded-box px-2 py-1 text-sm">
-                  {role}
-                </span>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs"
-                  onClick={() =>
-                    onChange(
-                      roles.filter((_, roleIndex) => roleIndex !== index),
-                    )
-                  }
-                >
-                  Удалить
-                </button>
-              </li>
-            ))}
-          </ul>
+          values.map((value, index) => (
+            <Fragment key={`${value}-${index}`}>
+              <span className="text-sm font-medium whitespace-nowrap">
+                {value}
+              </span>
+              <button
+                type="button"
+                className="btn btn-ghost btn-xs justify-self-start"
+                onClick={() =>
+                  onChange(
+                    values.filter((_, valueIndex) => valueIndex !== index),
+                  )
+                }
+              >
+                Удалить
+              </button>
+            </Fragment>
+          ))
         )}
-        <div className="flex flex-wrap gap-2">
-          <input
-            className={`${detailInputClass} min-w-0 flex-1`}
-            placeholder="Новая роль"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-          />
-          <button
-            type="button"
-            className="btn btn-outline btn-secondary btn-sm"
-            disabled={!draft.trim()}
-            onClick={() => {
-              const next = draft.trim();
-              if (!next || roles.includes(next)) return;
-              onChange([...roles, next]);
-              setDraft("");
-            }}
-          >
-            Добавить
-          </button>
-        </div>
+        <input
+          className="input input-bordered input-sm w-44 max-w-full px-3 py-1.5 text-sm leading-normal font-normal [color-scheme:inherit] focus:outline-offset-0"
+          placeholder={addPlaceholder}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+            const next = draft.trim();
+            if (!next || values.includes(next)) return;
+            onChange([...values, next]);
+            setDraft("");
+          }}
+        />
+        <button
+          type="button"
+          className="btn btn-outline btn-secondary btn-sm justify-self-start"
+          disabled={!draft.trim()}
+          onClick={() => {
+            const next = draft.trim();
+            if (!next || values.includes(next)) return;
+            onChange([...values, next]);
+            setDraft("");
+          }}
+        >
+          Добавить
+        </button>
       </div>
     </div>
   );

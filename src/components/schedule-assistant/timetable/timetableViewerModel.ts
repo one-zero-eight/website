@@ -768,7 +768,6 @@ export function buildMeetings(
 type SectionLookupMaps = {
   programToSection: Record<string, string>;
   groupsToSections: Record<string, string>;
-  sectionByKind: Record<string, string>;
 };
 
 function buildSectionLookupMaps(
@@ -776,14 +775,10 @@ function buildSectionLookupMaps(
 ): SectionLookupMaps {
   const programToSection: Record<string, string> = {};
   const groupsToSections: Record<string, string> = {};
-  const sectionByKind: Record<string, string> = {};
 
   for (const section of getScheduleSections(config)) {
     const sectionCode = String(section.code || "").trim();
     if (!sectionCode) continue;
-    if (section.kind) {
-      sectionByKind[String(section.kind).trim().toLowerCase()] = sectionCode;
-    }
     for (const program of section.programs || []) {
       const programCode = String(program.code || "").trim();
       if (programCode) programToSection[programCode] = sectionCode;
@@ -795,7 +790,7 @@ function buildSectionLookupMaps(
     }
   }
 
-  return { programToSection, groupsToSections, sectionByKind };
+  return { programToSection, groupsToSections };
 }
 
 function resolveAudienceTokenToSection(
@@ -810,24 +805,6 @@ function resolveAudienceTokenToSection(
   if (isStudentGroupSelector(raw)) return null;
 
   return maps.groupsToSections[raw] ?? null;
-}
-
-function sectionsFromCourseTags(
-  courseTags: (string | unknown)[] | undefined,
-  sectionByKind: Record<string, string>,
-): string[] {
-  const out = new Set<string>();
-  for (const tag of courseTags || []) {
-    const tagStr = String(tag).trim().toLowerCase();
-    if (tagStr === "english" && sectionByKind.english) {
-      out.add(sectionByKind.english);
-    } else if (tagStr === "elective" && sectionByKind.electives) {
-      out.add(sectionByKind.electives);
-    } else if (tagStr === "core_course" && sectionByKind.core) {
-      out.add(sectionByKind.core);
-    }
-  }
-  return Array.from(out);
 }
 
 export function buildCoursesToSections(config: SchemaScheduleConfig) {
@@ -848,20 +825,10 @@ export function buildCoursesToSections(config: SchemaScheduleConfig) {
         const sectionCode = resolveAudienceTokenToSection(token, maps);
         if (sectionCode) courseSections.add(sectionCode);
       }
-      for (const groupId of expandStudentGroupSelectors(
-        config,
-        component.student_groups || [],
-      )) {
+      for (const groupId of expandStudentGroupSelectors(config, tokens)) {
         const sectionCode = maps.groupsToSections[groupId];
         if (sectionCode) courseSections.add(sectionCode);
       }
-    }
-
-    for (const sectionCode of sectionsFromCourseTags(
-      course.course_tags,
-      maps.sectionByKind,
-    )) {
-      courseSections.add(sectionCode);
     }
 
     coursesToSections[courseIdx] = Array.from(courseSections);

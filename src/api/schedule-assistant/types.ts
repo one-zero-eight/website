@@ -684,8 +684,6 @@ export interface components {
     };
     /** @enum {string} */
     CommonCourseClassTags: CommonCourseClassTags;
-    /** @enum {string} */
-    CommonCourseTags: CommonCourseTags;
     /** Component */
     Component: {
       /**
@@ -851,16 +849,29 @@ export interface components {
        */
       short_name_ru?: string | null;
       /**
-       * Course Tags
-       * @description Course tags (for example, core_course / elective / english)
+       * Instructors
+       * @description Subject-level staff with roles; preferred in event instructor pickers
        * @default []
        */
-      course_tags: (components["schemas"]["CommonCourseTags"] | string)[];
+      instructors?: components["schemas"]["CourseInstructor"][];
       /**
        * Components
        * @description Course subparts (lec/tut/lab/…) to schedule
        */
       components: components["schemas"]["Component"][];
+    };
+    /** CourseInstructor */
+    CourseInstructor: {
+      /**
+       * Id
+       * @description Instructor id from the global instructors list
+       */
+      id: string;
+      /**
+       * Role
+       * @description Subject role (for example, Primary Instructor, Secondary Instructor, Teaching Assistant)
+       */
+      role: string;
     };
     /** CoursesConfig */
     CoursesConfig: {
@@ -939,7 +950,7 @@ export interface components {
       alias?: string | null;
       /**
        * Position
-       * @description Staff position from roster (for example, Professor, Visiting)
+       * @description Staff position from roster (for example, Full Professor, Visiting)
        */
       position?: string | null;
       /**
@@ -1020,7 +1031,7 @@ export interface components {
       alias?: string | null;
       /**
        * Position
-       * @description Staff position from roster (for example, Professor, Visiting)
+       * @description Staff position from roster (for example, Full Professor, Visiting)
        */
       position?: string | null;
       /**
@@ -1806,11 +1817,23 @@ export interface components {
        */
       sections?: components["schemas"]["SectionConfig"][];
       /**
-       * Instructor Roles
-       * @description Allowed instructor position/role values; empty means unrestricted
+       * Instructor Positions
+       * @description Allowed instructor.position values (staff titles); empty means unrestricted
        * @default []
        */
-      instructor_roles?: string[];
+      instructor_positions?: string[];
+      /**
+       * Course Instructor Roles
+       * @description Allowed course.instructors[].role values (subject roles); empty means unrestricted
+       * @default []
+       */
+      course_instructor_roles?: string[];
+      /**
+       * Course Component Tags
+       * @description Allowed course.components[].tag values; empty means unrestricted
+       * @default []
+       */
+      course_component_tags?: string[];
     };
     /** TermPartialUpdate */
     TermPartialUpdate: {
@@ -1818,10 +1841,20 @@ export interface components {
       name?: string | null;
       semester?: components["schemas"]["DateRange"] | null;
       /**
-       * Instructor Roles
-       * @description Allowed instructor position/role values; empty means unrestricted
+       * Instructor Positions
+       * @description Allowed instructor.position values (staff titles); empty means unrestricted
        */
-      instructor_roles?: string[] | null;
+      instructor_positions?: string[] | null;
+      /**
+       * Course Instructor Roles
+       * @description Allowed course.instructors[].role values (subject roles); empty means unrestricted
+       */
+      course_instructor_roles?: string[] | null;
+      /**
+       * Course Component Tags
+       * @description Allowed course.components[].tag values; empty means unrestricted
+       */
+      course_component_tags?: string[] | null;
       /** Days */
       days?: components["schemas"]["Weekday"][] | null;
       starting_day?: components["schemas"]["Weekday"] | null;
@@ -3355,11 +3388,6 @@ export enum CommonCourseClassTags {
   tut = "tut",
   lab = "lab",
   class = "class",
-}
-export enum CommonCourseTags {
-  core_course = "core_course",
-  elective = "elective",
-  english = "english",
 }
 export enum ConfigChangeEventResources {
   term = "term",

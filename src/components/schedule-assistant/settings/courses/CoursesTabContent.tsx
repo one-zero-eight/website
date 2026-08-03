@@ -79,7 +79,6 @@ export function CoursesTabContent() {
   const [newShortName, setNewShortName] = useState("");
   const [newNameRu, setNewNameRu] = useState("");
   const [newShortNameRu, setNewShortNameRu] = useState("");
-  const [newTags, setNewTags] = useState("");
   const courses = config?.courses;
   const handleSelectCourse = useCallback(
     (courseIndex: number) => {
@@ -118,7 +117,6 @@ export function CoursesTabContent() {
     setNewShortName("");
     setNewNameRu("");
     setNewShortNameRu("");
-    setNewTags("");
   }
 
   function handleCreateCourse() {
@@ -131,10 +129,6 @@ export function CoursesTabContent() {
           short_name: newShortName.trim() || null,
           name_ru: newNameRu.trim() || null,
           short_name_ru: newShortNameRu.trim() || null,
-          course_tags: newTags
-            .split(",")
-            .map((chunk) => chunk.trim())
-            .filter(Boolean),
           components: [],
         },
       },
@@ -198,14 +192,6 @@ export function CoursesTabContent() {
           className="input input-bordered input-sm w-full"
           value={newShortNameRu}
           onChange={(e) => setNewShortNameRu(e.target.value)}
-        />
-      </SettingsCreateField>
-      <SettingsCreateField label="Теги курса (через запятую)">
-        <input
-          className="input input-bordered input-sm w-full"
-          value={newTags}
-          placeholder="core_course, elective, english"
-          onChange={(e) => setNewTags(e.target.value)}
         />
       </SettingsCreateField>
     </SettingsCreateModal>

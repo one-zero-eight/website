@@ -142,7 +142,20 @@ function nameKey(instructor: SchemaInstructorListItem): string {
 }
 
 function positionKey(instructor: SchemaInstructorListItem): string {
-  return (instructor.position ?? "").trim().toLocaleLowerCase("ru");
+  return (instructor.position ?? "").trim();
+}
+
+function positionEnumIndex(
+  position: string,
+  positionOrder: readonly string[] | undefined,
+): number {
+  if (!position || !positionOrder?.length) return -1;
+  const exact = positionOrder.indexOf(position);
+  if (exact >= 0) return exact;
+  const folded = position.toLocaleLowerCase("en");
+  return positionOrder.findIndex(
+    (entry) => entry.trim().toLocaleLowerCase("en") === folded,
+  );
 }
 
 function preferencesCount(instructor: SchemaInstructorListItem): number {
@@ -153,6 +166,7 @@ export function compareInstructors(
   a: SchemaInstructorListItem,
   b: SchemaInstructorListItem,
   mode: InstructorSortMode,
+  positionOrder?: readonly string[],
 ): number {
   if (mode === "meetings") {
     const byMeetings = (b.meetings_count ?? 0) - (a.meetings_count ?? 0);
@@ -162,9 +176,22 @@ export function compareInstructors(
   if (mode === "position") {
     const aPos = positionKey(a);
     const bPos = positionKey(b);
-    const byPosition =
-      Number(!aPos) - Number(!bPos) || aPos.localeCompare(bPos, "ru");
-    if (byPosition !== 0) return byPosition;
+    if (!aPos && !bPos) return nameKey(a).localeCompare(nameKey(b), "ru");
+    if (!aPos) return 1;
+    if (!bPos) return -1;
+
+    const aIndex = positionEnumIndex(aPos, positionOrder);
+    const bIndex = positionEnumIndex(bPos, positionOrder);
+    const aKnown = aIndex >= 0;
+    const bKnown = bIndex >= 0;
+    if (aKnown && bKnown && aIndex !== bIndex) return aIndex - bIndex;
+    if (aKnown !== bKnown) return aKnown ? -1 : 1;
+    if (!aKnown && !bKnown) {
+      const byPosition = aPos
+        .toLocaleLowerCase("ru")
+        .localeCompare(bPos.toLocaleLowerCase("ru"), "ru");
+      if (byPosition !== 0) return byPosition;
+    }
     return nameKey(a).localeCompare(nameKey(b), "ru");
   }
   if (mode === "preferences") {
@@ -178,6 +205,7 @@ export function compareInstructors(
 export function sortInstructors(
   items: InstructorSearchItem[],
   mode: InstructorSortMode,
+  positionOrder?: readonly string[],
 ): InstructorSearchItem[] {
   return [...items].sort((a, b) => {
     const aScore = a.fuseScore;
@@ -185,7 +213,7 @@ export function sortInstructors(
     if (aScore != null && bScore != null && aScore !== bScore) {
       return aScore - bScore;
     }
-    return compareInstructors(a, b, mode);
+    return compareInstructors(a, b, mode, positionOrder);
   });
 }
 

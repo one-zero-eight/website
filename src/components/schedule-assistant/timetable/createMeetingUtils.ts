@@ -115,17 +115,66 @@ export function parseCourseComponentKey(value: string) {
   return { courseIdx, componentIdx };
 }
 
-function courseUsesOccurrences(course: SchemaCourseConfig) {
-  return (course.course_tags || []).includes("elective");
+function resolveSectionKind(
+  tokens: string[],
+  config: SchemaScheduleConfig,
+): string | null {
+  const tokenToKind = new Map<string, string>();
+  for (const section of config.term?.sections ?? []) {
+    const kind = String(section.kind || section.code || "")
+      .trim()
+      .toLowerCase();
+    if (!kind) continue;
+    for (const program of section.programs ?? []) {
+      const programCode = String(program.code || "").trim();
+      if (programCode) tokenToKind.set(`@${programCode}`, kind);
+      for (const group of program.groups ?? []) {
+        tokenToKind.set(String(group), kind);
+      }
+      for (const track of program.tracks ?? []) {
+        if (programCode) {
+          tokenToKind.set(`@${programCode}/${track.name}`, kind);
+          tokenToKind.set(`@${programCode}/${track.code}`, kind);
+        }
+        for (const group of track.groups ?? []) {
+          tokenToKind.set(String(group), kind);
+        }
+      }
+    }
+  }
+  for (const group of config.students_groups ?? []) {
+    const code = String(group.code || "").trim();
+    const kind = String(group.kind || "")
+      .trim()
+      .toLowerCase();
+    if (code && kind && !tokenToKind.has(code)) tokenToKind.set(code, kind);
+  }
+
+  for (const token of tokens) {
+    const raw = String(token || "").trim();
+    if (!raw) continue;
+    const kind = tokenToKind.get(raw);
+    if (kind) return kind;
+    if (raw.startsWith("@") && raw.includes("/")) {
+      const programKind = tokenToKind.get(raw.split("/", 1)[0] ?? "");
+      if (programKind) return programKind;
+    }
+  }
+  return null;
 }
 
 function seriesUsesOccurrences(
-  course: SchemaCourseConfig,
   series: SchemaComponentSessionSeries,
+  component: SchemaComponent,
+  config: SchemaScheduleConfig,
 ) {
   if ((series.occurrences || []).length > 0) return true;
   if ((series.weekly_pattern || []).length > 0) return false;
-  return courseUsesOccurrences(course);
+  const audience = series.audience?.length
+    ? series.audience
+    : component.student_groups || [];
+  const kind = resolveSectionKind(audience.map(String), config);
+  return kind !== "core" && kind !== "core_course";
 }
 
 function audienceForSeries(
@@ -194,7 +243,7 @@ export function applyCreateMeetingToCourse(
   const room = String(draft.room || "").trim() || null;
   const instructor = String(draft.instructor || "").trim() || null;
 
-  if (seriesUsesOccurrences(nextCourse, series)) {
+  if (seriesUsesOccurrences(series, nextComponent, config)) {
     if (!series.occurrences) series.occurrences = [];
     const occurrence: SchemaSessionOccurrence = {
       date: draft.date,

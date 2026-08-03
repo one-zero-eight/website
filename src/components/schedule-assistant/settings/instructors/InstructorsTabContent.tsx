@@ -212,8 +212,12 @@ export function InstructorsTabContent() {
     const indexed = trimmed
       ? searchInstructors(searchIndex, trimmed)
       : searchIndex.items;
-    return sortInstructors(indexed, sortMode);
-  }, [deferredSearchQuery, searchIndex, sortMode]);
+    return sortInstructors(
+      indexed,
+      sortMode,
+      term?.instructor_positions ?? undefined,
+    );
+  }, [deferredSearchQuery, searchIndex, sortMode, term?.instructor_positions]);
 
   const activeInstructors = useMemo(
     () => visibleInstructors.filter((item) => (item.meetings_count ?? 0) > 0),
