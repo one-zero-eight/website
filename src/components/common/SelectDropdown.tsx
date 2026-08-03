@@ -32,7 +32,7 @@ function timeCompactsFromText(text: string): string[] {
 }
 
 function filterSelectOptions<T extends string>(
-  options: { value: T; label: string }[],
+  options: SelectDropdownOption<T>[],
   query: string,
 ) {
   const normalized = query.trim().toLowerCase();
@@ -42,11 +42,19 @@ function filterSelectOptions<T extends string>(
   return options.filter((option) => {
     const label = option.label.toLowerCase();
     const value = option.value.toLowerCase();
-    if (label.includes(normalized) || value.includes(normalized)) return true;
+    const hint = option.hint?.toLowerCase() ?? "";
+    if (
+      label.includes(normalized) ||
+      value.includes(normalized) ||
+      hint.includes(normalized)
+    )
+      return true;
 
     // "1230" matches "12:30–14:00", "900" matches "09:00–10:30"
     if (queryDigits.length >= 3) {
-      const compacts = timeCompactsFromText(`${option.label} ${option.value}`);
+      const compacts = timeCompactsFromText(
+        `${option.label} ${option.value} ${option.hint ?? ""}`,
+      );
       if (
         compacts.some(
           (compact) =>
@@ -63,9 +71,33 @@ function filterSelectOptions<T extends string>(
   });
 }
 
+export type SelectDropdownOption<T extends string = string> = {
+  value: T;
+  label: string;
+  /** Secondary gray text shown after the label. */
+  hint?: string;
+};
+
 export type SelectDropdownChangeContext = {
   searchQuery: string;
 };
+
+function OptionLabel({
+  label,
+  hint,
+  muted,
+}: {
+  label: string;
+  hint?: string;
+  muted?: boolean;
+}) {
+  return (
+    <span className={cn("truncate", muted && "text-base-content/50")}>
+      <span>{label}</span>
+      {hint ? <span className="text-base-content/50"> {hint}</span> : null}
+    </span>
+  );
+}
 
 export function SelectDropdown<T extends string>({
   value,
@@ -84,7 +116,7 @@ export function SelectDropdown<T extends string>({
 }: {
   value: T | "";
   onChange: (value: T, context?: SelectDropdownChangeContext) => void;
-  options: { value: T; label: string }[];
+  options: SelectDropdownOption<T>[];
   placeholder?: string;
   className?: string;
   triggerClassName?: string;
@@ -95,7 +127,7 @@ export function SelectDropdown<T extends string>({
   searchable?: boolean;
   searchPlaceholder?: string;
   /** Always appended; label can depend on the current search query. */
-  trailingOption?: (query: string) => { value: T; label: string } | null;
+  trailingOption?: (query: string) => SelectDropdownOption<T> | null;
 }) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -282,9 +314,9 @@ export function SelectDropdown<T extends string>({
     selectOption(option.value);
   }
 
-  const currentLabel =
-    allOptionsForLabel.find((option) => option.value === value)?.label ??
-    placeholder;
+  const currentOption = allOptionsForLabel.find(
+    (option) => option.value === value,
+  );
 
   return (
     <div className={cn("relative shrink-0", className)}>
@@ -297,9 +329,11 @@ export function SelectDropdown<T extends string>({
         )}
         {...getReferenceProps()}
       >
-        <span className={cn("truncate", !value && "text-base-content/50")}>
-          {currentLabel}
-        </span>
+        <OptionLabel
+          label={currentOption?.label ?? placeholder}
+          hint={currentOption?.hint}
+          muted={!value}
+        />
         <span className="icon-[material-symbols--expand-more] shrink-0 text-base" />
       </button>
 
@@ -353,7 +387,7 @@ export function SelectDropdown<T extends string>({
                           selectOption(option.value);
                         }}
                       >
-                        {option.label}
+                        <OptionLabel label={option.label} hint={option.hint} />
                       </button>
                     </li>
                   );
@@ -388,7 +422,10 @@ export function SelectDropdown<T extends string>({
                       selectOption(resolvedTrailing.value);
                     }}
                   >
-                    {resolvedTrailing.label}
+                    <OptionLabel
+                      label={resolvedTrailing.label}
+                      hint={resolvedTrailing.hint}
+                    />
                   </button>
                 </div>
               ) : null}

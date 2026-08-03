@@ -16,6 +16,7 @@ import {
   formatAudienceTokensLabel,
   meetingAudienceEqual,
 } from "./meetingEditUtils.ts";
+import { audienceSizeForTokens } from "./roomPickerOptions.ts";
 
 export function EditClassAudienceSummaryRow({
   config,
@@ -42,6 +43,10 @@ export function EditClassAudienceSummaryRow({
 }) {
   const expandedGroups = useMemo(
     () => expandStudentGroupSelectors(config, tokens),
+    [config, tokens],
+  );
+  const audienceSize = useMemo(
+    () => audienceSizeForTokens(config, tokens),
     [config, tokens],
   );
   const expandedTooltip = useMemo(() => {
@@ -74,6 +79,12 @@ export function EditClassAudienceSummaryRow({
             ) : null}
           </span>{" "}
           {displayLabel}
+          {audienceSize != null ? (
+            <span className="text-base-content/50">
+              {" "}
+              · {audienceSize} студ.
+            </span>
+          ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1">
           {changed ? (

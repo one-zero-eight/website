@@ -45,7 +45,10 @@ import {
   type MeetingOriginalValues,
 } from "./meetingEditUtils.ts";
 import { MeetingOverrideIndicator } from "./meetingOverrideIndicator.tsx";
-import { buildRoomPickerOptions } from "./roomPickerOptions.ts";
+import {
+  buildRoomPickerOptions,
+  audienceSizeForTokens,
+} from "./roomPickerOptions.ts";
 import type { Meeting, MeetingOverrideField } from "./timetableViewerModel.ts";
 
 const SCOPE_OPTIONS: { value: EditClassScope; label: string }[] = [
@@ -259,10 +262,16 @@ export function EditClassModal({
       config,
       meetings,
       date: meeting.date,
+      audienceTokens: audienceValue.length ? audienceValue : meeting.groups,
       excludeInstanceId: meeting.instance_id,
       includeRoomIds: meeting.room ? [meeting.room] : undefined,
     });
-  }, [config, meeting, meetings]);
+  }, [audienceValue, config, meeting, meetings]);
+
+  const audienceSize = useMemo(
+    () => audienceSizeForTokens(config, audienceValue),
+    [audienceValue, config],
+  );
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const instructorOptions = useMemo(() => {
     const items = (config.instructors || [])
@@ -590,7 +599,11 @@ export function EditClassModal({
         <div className="flex flex-col gap-3">
           {perGroup ? (
             <EditClassField
-              label="Группа"
+              label={
+                audienceSize != null
+                  ? `Группа · ${audienceSize} студ.`
+                  : "Группа"
+              }
               changed={audienceChanged}
               originalLabel={originalAudienceLabel}
               onRestoreOriginal={() =>

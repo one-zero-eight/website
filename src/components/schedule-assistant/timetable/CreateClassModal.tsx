@@ -42,7 +42,10 @@ import {
   timeOptionsForConfig,
   weekdayOptionsForConfig,
 } from "./meetingEditUtils.ts";
-import { buildRoomPickerOptions } from "./roomPickerOptions.ts";
+import {
+  buildRoomPickerOptions,
+  audienceSizeForTokens,
+} from "./roomPickerOptions.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
 
 function CreateClassDropdown({
@@ -173,8 +176,9 @@ export function CreateClassModal({
       config,
       meetings,
       date: cellContext.date,
+      audienceTokens: audienceValue,
     });
-  }, [cellContext, config, meetings]);
+  }, [audienceValue, cellContext, config, meetings]);
 
   const instructorOptions = useMemo(() => {
     return (config.instructors || [])
@@ -203,6 +207,10 @@ export function CreateClassModal({
   }, [config, selectedComponent]);
 
   const audienceDisplayLabel = formatAudienceTokensLabel(config, audienceValue);
+  const audienceSize = useMemo(
+    () => audienceSizeForTokens(config, audienceValue),
+    [audienceValue, config],
+  );
 
   useEffect(() => {
     if (!open || !cellContext) return;
@@ -392,7 +400,11 @@ export function CreateClassModal({
         ) : null}
 
         {selectedComponent && perGroup ? (
-          <CreateClassField label="Группа">
+          <CreateClassField
+            label={
+              audienceSize != null ? `Группа · ${audienceSize} студ.` : "Группа"
+            }
+          >
             {componentAudienceLabel ? (
               <div className="text-base-content/60 text-xs">
                 В компоненте: {componentAudienceLabel}
