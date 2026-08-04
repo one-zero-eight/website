@@ -1,10 +1,34 @@
+import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
+import type { QueryClient } from "@tanstack/react-query";
 
 export const SPORT_TRAINING_STATUS_COLORS = {
   trainer: "#F1C40F",
   registered: "#8D4CF6",
   unavailable: "#EF4444",
 } as const;
+
+/** Refresh schedule + hours summary after a check-in/check-out mutation. */
+export function invalidateSportCheckinQueries(
+  queryClient: QueryClient,
+  studentId: number,
+) {
+  queryClient.invalidateQueries({
+    predicate: (q) =>
+      Array.isArray(q.queryKey) &&
+      q.queryKey[0] === "sport" &&
+      q.queryKey[2] === "/users/me/schedule",
+  });
+  queryClient.invalidateQueries({
+    queryKey: $sport.queryOptions(
+      "get",
+      "/students/{student_id}/hours-summary",
+      {
+        params: { path: { student_id: studentId } },
+      },
+    ).queryKey,
+  });
+}
 
 export function isTrainerTraining(
   row: SchemaTrainingInfoPersonalSchema,

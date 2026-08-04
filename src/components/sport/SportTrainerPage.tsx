@@ -1,8 +1,9 @@
 import { $sport } from "@/api/sport";
 import type {
-  SchemaTrainingInfoPersonalSchema,
   SchemaTrainerInfoSchema,
+  SchemaTrainingInfoPersonalSchema,
 } from "@/api/sport/types.ts";
+import { SportPageShell } from "@/components/sport/SportPageShell.tsx";
 import { SportStudentTrainingModal } from "@/components/sport/SportStudentTrainingModal.tsx";
 import { SportTrainerAttendanceModal } from "@/components/sport/SportTrainerAttendanceModal.tsx";
 import { SportTrainingsCalendarList } from "@/components/sport/SportTrainingsCalendarList.tsx";
@@ -16,7 +17,28 @@ import { useMemo, useState } from "react";
 const RECENT_TRAINING_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
 const PAST_TRAININGS_LOOKBACK_MS = 8 * 7 * 24 * 60 * 60 * 1000;
 
-export function SportTrainerSection({
+export function SportTrainerPage() {
+  return (
+    <SportPageShell>
+      {(sport) =>
+        sport.isTrainer && sport.studentId != null ? (
+          <SportTrainerContent
+            enabled={sport.canQuerySport}
+            studentId={sport.studentId}
+            trainerGroupIds={sport.trainerGroupIds}
+            trainerGroups={sport.profile.trainer_info?.groups ?? []}
+          />
+        ) : (
+          <div className="text-base-content/70 rounded-box border-base-300 border p-6 text-center text-sm">
+            You are not registered as a sport trainer.
+          </div>
+        )
+      }
+    </SportPageShell>
+  );
+}
+
+function SportTrainerContent({
   enabled,
   studentId,
   trainerGroupIds,
@@ -141,6 +163,7 @@ export function SportTrainerSection({
             rows={currentTrainings}
             emptyText="No current trainings"
             compactEmpty
+            studentId={studentId}
             trainerGroupIds={trainerGroupIds}
             onSelect={setSelectedCurrent}
           />
@@ -156,6 +179,7 @@ export function SportTrainerSection({
             rows={upcomingTrainings}
             emptyText="No upcoming trainings"
             compactEmpty
+            studentId={studentId}
             trainerGroupIds={trainerGroupIds}
             onSelect={setSelectedUpcoming}
           />
@@ -175,6 +199,7 @@ export function SportTrainerSection({
             rows={pastTrainings}
             emptyText="No past trainings"
             compactEmpty
+            studentId={studentId}
             trainerGroupIds={trainerGroupIds}
             onSelect={setSelectedPast}
           />

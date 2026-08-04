@@ -7,7 +7,7 @@ import { MusicRoomPage } from "@/components/music-room/MusicRoomPage";
 import { WebPrintLandingPage } from "@/components/web-print/WebPrintLandingPage";
 import SchedulePage from "@/components/schedule/SchedulePage";
 import { ScholarshipPage } from "@/components/scholarship/ScholarshipPage";
-import { SportPage } from "../sport/SportPage";
+import { SportSchedulePage } from "../sport/SportSchedulePage";
 import { RoomBookingRules } from "../room-booking/rules/RoomBookingRules";
 
 type PageEntry = {
@@ -38,7 +38,7 @@ export const componentByPath: Record<string, PageEntry> = {
     }),
   },
   "/scholarship": { component: ScholarshipPage },
-  "/sport": { component: SportPage },
+  "/sport": { component: SportSchedulePage },
 };
 
 export function resolvePageByUrl(url: string): {

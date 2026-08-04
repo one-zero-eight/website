@@ -1,10 +1,27 @@
 import { $sport } from "@/api/sport";
 import type {
+  SchemaFitnessTestStudentSessionResultSchema,
   SchemaSemesterHistorySchema,
   SchemaTrainingHistorySchema,
 } from "@/api/sport/types.ts";
+import { SportPageShell } from "@/components/sport/SportPageShell.tsx";
 
-export function SportHistorySection({
+export function SportHistoryPage() {
+  return (
+    <SportPageShell>
+      {(sport) =>
+        sport.studentId != null ? (
+          <SportHistoryContent
+            enabled={sport.canQuerySport}
+            studentId={sport.studentId}
+          />
+        ) : null
+      }
+    </SportPageShell>
+  );
+}
+
+function SportHistoryContent({
   enabled,
   studentId,
 }: {
@@ -78,6 +95,12 @@ function SportHistorySemesterCard({
     semester.semester_end,
   );
   const trainings = semester.trainings;
+  // The API lists every fitness test session held that semester, not just
+  // the ones this student actually took — sessions with no recorded
+  // exercise results aren't this student's test and must be filtered out.
+  const fitnessTests = (semester.fitness_tests ?? []).filter(
+    (fitnessTest) => fitnessTest.exercise_results.length > 0,
+  );
 
   return (
     <div className="card card-border bg-base-100">
@@ -130,8 +153,73 @@ function SportHistorySemesterCard({
             </ul>
           </details>
         ) : null}
+
+        {fitnessTests.length > 0 ? (
+          <details className="mt-1">
+            <summary className="text-base-content/70 cursor-pointer text-sm font-medium">
+              Fitness test{fitnessTests.length === 1 ? "" : "s"}
+            </summary>
+            <ul className="mt-2 flex flex-col gap-3">
+              {fitnessTests.map((fitnessTest) => (
+                <FitnessTestResultCard
+                  key={fitnessTest.session.id}
+                  fitnessTest={fitnessTest}
+                />
+              ))}
+            </ul>
+          </details>
+        ) : null}
       </div>
     </div>
+  );
+}
+
+function FitnessTestResultCard({
+  fitnessTest,
+}: {
+  fitnessTest: SchemaFitnessTestStudentSessionResultSchema;
+}) {
+  const { session, exercise_results: exerciseResults } = fitnessTest;
+  const date = toDateSafe(session.date);
+
+  return (
+    <li className="border-base-300 bg-base-200/50 rounded-box border-t p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span className="font-medium">
+          {date
+            ? date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            : session.date}
+        </span>
+        <div className="flex items-center gap-2">
+          {session.retake ? (
+            <span className="badge badge-warning badge-sm">Retake</span>
+          ) : null}
+          <span className="text-base-content/60">{session.teacher}</span>
+        </div>
+      </div>
+      {exerciseResults.length > 0 ? (
+        <ul className="mt-2 flex flex-col gap-1">
+          {exerciseResults.map((result) => (
+            <li
+              key={result.exercise_id}
+              className="border-base-300/60 flex flex-wrap items-center justify-between gap-2 border-t py-1 text-sm"
+            >
+              <span className="text-base-content/80">
+                {result.exercise_name}
+              </span>
+              <span className="text-base-content font-medium">
+                {result.value}
+                {result.unit ? ` ${result.unit}` : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </li>
   );
 }
 

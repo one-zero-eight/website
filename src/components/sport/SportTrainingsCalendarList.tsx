@@ -1,3 +1,4 @@
+import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
 import "@/components/calendar/styles-calendar.css";
 import {
@@ -8,26 +9,132 @@ import {
 } from "@/components/calendar/calendar-list-view.tsx";
 import { useMyAcademicCalendar } from "@/components/dashboard/academic-calendar.tsx";
 import { trainingRowToListEvent } from "@/components/sport/sport-calendar-events.ts";
+import {
+  canShowCheckInButton,
+  invalidateSportCheckinQueries,
+} from "@/components/sport/sport-checkin-utils.ts";
+import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/react";
+import type { EventContentArg } from "@fullcalendar/core";
+import { useQueryClient } from "@tanstack/react-query";
 import moment from "moment/moment";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export function SportTrainingsCalendarList({
   rows,
   emptyText,
   compactEmpty = false,
+  studentId,
   trainerGroupIds,
   onSelect,
 }: {
   rows: SchemaTrainingInfoPersonalSchema[];
   emptyText: string;
   compactEmpty?: boolean;
+  studentId: number;
   trainerGroupIds: ReadonlySet<number>;
   onSelect: (row: SchemaTrainingInfoPersonalSchema) => void;
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
+  const queryClient = useQueryClient();
+  const { showError, showSuccess } = useToast();
+  const [pendingTrainingId, setPendingTrainingId] = useState<number | null>(
+    null,
+  );
+
+  const { mutate: setCheckin } = $sport.useMutation(
+    "post",
+    "/trainings/{training_id}/checkin",
+    {
+      onSuccess: (_, vars) => {
+        const checkin = vars.params.query.checkin;
+        showSuccess(
+          checkin ? "Checked in" : "Checked out",
+          checkin
+            ? "You are signed up for this training."
+            : "You are no longer signed up.",
+        );
+      },
+      onError: () => {
+        showError(
+          "Could not update check-in",
+          "Please try again or use the Telegram bot.",
+        );
+      },
+      onSettled: (_data, _error, vars) => {
+        invalidateSportCheckinQueries(queryClient, studentId);
+        setPendingTrainingId((current) =>
+          current === vars.params.path.training_id ? null : current,
+        );
+      },
+    },
+  );
+
+  function handleCheckin(
+    row: SchemaTrainingInfoPersonalSchema,
+    checkin: boolean,
+  ) {
+    setPendingTrainingId(row.training.id);
+    setCheckin({
+      params: {
+        path: { training_id: row.training.id },
+        query: { checkin },
+      },
+    });
+  }
+
+  function renderEventContent(arg: EventContentArg) {
+    const row = arg.event.extendedProps.row as
+      | SchemaTrainingInfoPersonalSchema
+      | undefined;
+
+    if (!row) {
+      return renderCalendarListEventContent(arg);
+    }
+
+    const checkedIn = row.checked_in;
+    const showCheckInButton = canShowCheckInButton(
+      row,
+      checkedIn,
+      trainerGroupIds,
+    );
+    const isPending = pendingTrainingId === row.training.id;
+
+    return (
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 flex-1 flex-wrap gap-x-1 text-left">
+          {arg.event.title}
+          <span className="text-base-content/30 break-all">
+            {arg.event.extendedProps.location}
+          </span>
+        </div>
+        {showCheckInButton ? (
+          <button
+            type="button"
+            className={cn(
+              "btn btn-xs shrink-0",
+              checkedIn ? "btn-error btn-outline" : "btn-primary",
+            )}
+            disabled={isPending}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleCheckin(row, !checkedIn);
+            }}
+          >
+            {isPending ? (
+              <span className="loading loading-spinner loading-xs" />
+            ) : checkedIn ? (
+              "Check-out"
+            ) : (
+              "Check-in"
+            )}
+          </button>
+        ) : null}
+      </div>
+    );
+  }
 
   const events = useMemo(
     () => rows.map((row) => trainingRowToListEvent(row, trainerGroupIds)),
@@ -74,7 +181,7 @@ export function SportTrainingsCalendarList({
       views={{
         listMonth: {
           duration: { days: viewDays },
-          eventContent: renderCalendarListEventContent,
+          eventContent: renderEventContent,
           listDayFormat: (arg) => {
             if (arg.date.year === new Date().getFullYear()) {
               // Show month, day, weekday

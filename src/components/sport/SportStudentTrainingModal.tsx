@@ -1,34 +1,15 @@
 import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
-import { canShowCheckInButton } from "@/components/sport/sport-checkin-utils.ts";
+import {
+  canShowCheckInButton,
+  invalidateSportCheckinQueries,
+} from "@/components/sport/sport-checkin-utils.ts";
 import { SportTrainingModalShell } from "@/components/sport/SportTrainingModalShell.tsx";
 import { sportTrainingTitle } from "@/components/sport/sport-training-label.ts";
 import { formatTimeRangeMoscow } from "@/components/sport/sport-week-utils.ts";
 import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-
-function invalidateSportSchedule(client: ReturnType<typeof useQueryClient>) {
-  client.invalidateQueries({
-    predicate: (q) =>
-      Array.isArray(q.queryKey) &&
-      q.queryKey[0] === "sport" &&
-      q.queryKey[2] === "/users/me/schedule",
-  });
-}
-
-function invalidateStudentHours(
-  client: ReturnType<typeof useQueryClient>,
-  studentId: number,
-) {
-  client.invalidateQueries({
-    queryKey: $sport.queryOptions(
-      "get",
-      "/students/{student_id}/hours-summary",
-      { params: { path: { student_id: studentId } } },
-    ).queryKey,
-  });
-}
 
 export function SportStudentTrainingModal({
   open,
@@ -51,8 +32,7 @@ export function SportStudentTrainingModal({
     "/trainings/{training_id}/checkin",
     {
       onSettled: () => {
-        invalidateSportSchedule(queryClient);
-        invalidateStudentHours(queryClient, studentId);
+        invalidateSportCheckinQueries(queryClient, studentId);
       },
       onSuccess: (_, vars) => {
         const checkin = vars.params.query.checkin;
