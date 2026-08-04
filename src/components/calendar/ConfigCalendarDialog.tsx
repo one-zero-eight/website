@@ -17,10 +17,7 @@ export function ConfigCalendarDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data: scheduleUser, refetch } = $schedule.useQuery(
-    "get",
-    "/users/me",
-  );
+  const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
   const { data: predefined } = $schedule.useQuery(
     "get",
     "/users/me/predefined",
@@ -106,13 +103,13 @@ export function ConfigCalendarDialog({
             setExportModalOpen(true);
           }}
         />
-        {Object.keys(scheduleUser?.linked_calendars || {}).map((key) => {
+        {Object.keys(scheduleUser?.linked_calendars || {}).map((key, index) => {
           const linkedCalendar = scheduleUser?.linked_calendars
             ? scheduleUser?.linked_calendars[key]
             : null;
           return (
             <LinkedCard
-              key={linkedCalendar?.id}
+              key={linkedCalendar?.id ?? `${key}-${index}`}
               name={linkedCalendar?.name}
               alias={linkedCalendar?.alias}
               url={linkedCalendar?.url}
@@ -125,9 +122,7 @@ export function ConfigCalendarDialog({
       <p className="text-base-content/75 mb-4 text-lg">
         Add favorite calendars using star button or{" "}
         <button
-          onClick={() => {
-            setImportModalOpen(true);
-          }}
+          onClick={() => setImportModalOpen(true)}
           className="underline underline-offset-4"
         >
           import your own calendars
@@ -148,10 +143,7 @@ export function ConfigCalendarDialog({
       <ImportModal
         open={importModalOpen}
         onOpenChange={setImportModalOpen}
-        onSubmit={async () => {
-          setImportModalOpen(false);
-          await refetch();
-        }}
+        onSubmit={() => setImportModalOpen(false)}
         aboveModal
       />
     </Modal>
