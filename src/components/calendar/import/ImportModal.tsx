@@ -6,6 +6,7 @@ import { Modal } from "@/components/common/Modal.tsx";
 import { ImportColorsPalette } from "@/components/calendar/import/ColorsPalette.tsx";
 import { useToast } from "@/components/toast";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client.ts";
+import { queryClient } from "@/app/query-client.ts";
 
 function toAliasPart(value: string) {
   return value
@@ -27,7 +28,7 @@ export function ImportModal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: () => Promise<void>;
+  onSubmit: () => void;
   prevAlias?: string | null;
   prevName?: string | null;
   prevDescription?: string | null;
@@ -35,7 +36,64 @@ export function ImportModal({
   aboveModal?: boolean;
 }) {
   const { data: eventsUser } = $schedule.useQuery("get", "/users/me");
-  const { mutate: addLink } = $schedule.useMutation("post", "/users/me/linked");
+  const { mutate: postLinkedCalendar } = $schedule.useMutation(
+    "post",
+    "/users/me/linked",
+  );
+  const { mutate: patchLinkedCalendar } = $schedule.useMutation(
+    "patch",
+    "/users/me/linked",
+  );
+
+  const onSuccess = async () => {
+    await queryClient.invalidateQueries({
+      queryKey: $schedule.queryOptions("get", "/users/me").queryKey,
+    });
+    onSubmit();
+  };
+
+  const handleSubmit = (event: React.SubmitEvent) => {
+    event.preventDefault();
+    return prevAlias
+      ? patchLinkedCalendar(
+          {
+            body: {
+              alias: prevAlias,
+              url: calendarURL,
+              name: calendarName,
+              description: calendarDescription,
+              color: calendarColor,
+              is_active: true,
+            },
+            params: { query: { alias: prevAlias } },
+          },
+          {
+            onSuccess,
+            onError: (error) => {
+              showError("Calendar update failed", formatApiErrorMessage(error));
+            },
+          },
+        )
+      : postLinkedCalendar(
+          {
+            body: {
+              alias: `${username}_${normalizedCalendarName}`,
+              url: calendarURL,
+              name: calendarName,
+              description: calendarDescription,
+              color: calendarColor,
+              is_active: true,
+            },
+          },
+          {
+            onSuccess,
+            onError: (error) => {
+              showError("Import failed", formatApiErrorMessage(error));
+            },
+          },
+        );
+  };
+
   const { showError } = useToast();
 
   const [calendarURL, setCalendarURL] = useState(prevUrl ?? "");
@@ -65,32 +123,7 @@ export function ImportModal({
         You can add your schedule to InNoHassle and it will be updated on
         schedule changes.
       </div>
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          addLink(
-            {
-              body: {
-                alias: prevAlias ?? `${username}_${normalizedCalendarName}`,
-                url: calendarURL,
-                name: calendarName,
-                description: calendarDescription,
-                color: calendarColor,
-                is_active: true,
-              },
-            },
-            {
-              onSuccess: async () => {
-                await onSubmit();
-              },
-              onError: (error) => {
-                showError("Import failed", formatApiErrorMessage(error));
-              },
-            },
-          );
-        }}
-        className="text-base-content/75"
-      >
+      <form onSubmit={handleSubmit} className="text-base-content/75">
         <label htmlFor="calendarName" className="ml-1">
           Name
         </label>

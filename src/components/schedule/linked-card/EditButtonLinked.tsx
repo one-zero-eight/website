@@ -15,7 +15,7 @@ export default function EditButtonLinked({
 }) {
   const [importModalOpen, setImportModalOpen] = useState(false);
 
-  if (!alias || !name) return;
+  if (!alias || !name) return null;
 
   return (
     <>
