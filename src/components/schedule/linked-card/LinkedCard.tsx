@@ -20,7 +20,7 @@ export function LinkedCard({
   pageUrl,
 }: LinkedCardProps) {
   const navigate = useNavigate();
-  if (!alias) return;
+  if (!alias) return null;
 
   return (
     <div
@@ -32,15 +32,12 @@ export function LinkedCard({
         <p className="text-base-content/30">{description}</p>
       </div>
       <div className="flex flex-row place-items-center select-none">
-        <div className="hidden">
-          {/* Hide button as edition does not work on backend */}
-          <EditButtonLinked
-            alias={alias}
-            name={name}
-            url={url}
-            description={description}
-          />
-        </div>
+        <EditButtonLinked
+          alias={alias}
+          name={name}
+          url={url}
+          description={description}
+        />
         <HideButtonLinked alias={alias} />
         <RemoveButtonLinked alias={alias} calendarName={name ?? ""} />
       </div>
