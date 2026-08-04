@@ -1,6 +1,9 @@
 import { $sport } from "@/api/sport";
 import type { SchemaTrainingInfoPersonalSchema } from "@/api/sport/types.ts";
+import { SportPageShell } from "@/components/sport/SportPageShell.tsx";
+import { SportProgressSection } from "@/components/sport/SportOverviewSection.tsx";
 import { isTrainerTraining } from "@/components/sport/sport-checkin-utils.ts";
+import type { SportProfileReady } from "@/components/sport/sport-profile.ts";
 import { SportStudentTrainingModal } from "@/components/sport/SportStudentTrainingModal.tsx";
 import { SportTrainerTrainingModal } from "@/components/sport/SportTrainerTrainingModal.tsx";
 import { SportTrainingsCalendarList } from "@/components/sport/SportTrainingsCalendarList.tsx";
@@ -10,7 +13,53 @@ import {
 } from "@/components/sport/sport-week-utils.ts";
 import { useMemo, useState } from "react";
 
-export function SportScheduleSection({
+export function SportSchedulePage() {
+  return (
+    <SportPageShell>
+      {(sport) => <SportScheduleContent {...sport} />}
+    </SportPageShell>
+  );
+}
+
+function SportScheduleContent({
+  canQuerySport,
+  studentId,
+  trainerGroupIds,
+  profile,
+}: SportProfileReady) {
+  const { data: hours } = $sport.useQuery(
+    "get",
+    "/students/{student_id}/hours-summary",
+    { params: { path: { student_id: Number(studentId) } } },
+    { enabled: canQuerySport && studentId != null },
+  );
+
+  const { data: currentSemester } = $sport.useQuery(
+    "get",
+    "/semesters/current",
+    {},
+    { enabled: canQuerySport },
+  );
+
+  return (
+    <>
+      <SportProgressSection
+        hours={hours}
+        currentSemester={currentSemester}
+        medicalGroup={profile.student_info?.medical_group}
+      />
+      {studentId != null ? (
+        <SportCalendar
+          enabled={canQuerySport}
+          studentId={studentId}
+          trainerGroupIds={trainerGroupIds}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function SportCalendar({
   enabled,
   studentId,
   trainerGroupIds,
@@ -130,6 +179,7 @@ export function SportScheduleSection({
             <SportTrainingsCalendarList
               rows={filteredSchedule}
               emptyText="No trainings match the selected filters."
+              studentId={studentId}
               trainerGroupIds={trainerGroupIds}
               onSelect={setSelected}
             />

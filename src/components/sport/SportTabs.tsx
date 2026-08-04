@@ -1,11 +1,15 @@
+import { useSportProfile } from "@/components/sport/sport-profile.ts";
 import { Link, ValidateLinkOptions } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 const SPORT_BOT_URL = "https://t.me/IUSportBot";
+const SPORT_ADMIN_URL = "https://sport.innopolis.university/admin/";
 
-export function SportTabs({ isTrainer }: { isTrainer: boolean }) {
+export function SportTabs() {
+  const { isTrainer, isAdmin } = useSportProfile();
+
   return (
-    <div className="border-base-300 -my-4 flex shrink-0 flex-row gap-1 overflow-x-auto border-b whitespace-nowrap">
+    <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
       <TabLink to="/sport">Calendar</TabLink>
       <TabLink to="/sport/history">History</TabLink>
       {isTrainer ? <TabLink to="/sport/trainer">Trainer</TabLink> : null}
@@ -16,6 +20,9 @@ export function SportTabs({ isTrainer }: { isTrainer: boolean }) {
         </span>
       </ExternalTabLink>
       <TabLink to="/sport/faq">FAQ</TabLink>
+      {isAdmin ? (
+        <ExternalTabLink href={SPORT_ADMIN_URL}>Admin</ExternalTabLink>
+      ) : null}
     </div>
   );
 }
