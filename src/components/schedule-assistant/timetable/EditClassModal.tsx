@@ -38,6 +38,7 @@ import {
   parseMeetingInstanceId,
   parseTimeRangeQuery,
   perGroupAudienceOptions,
+  resolveEndTimeForStart,
   timeOptionsForConfig,
   weekdayOptionsForConfig,
   type EditClassScope,
@@ -46,8 +47,9 @@ import {
 } from "./meetingEditUtils.ts";
 import { MeetingOverrideIndicator } from "./meetingOverrideIndicator.tsx";
 import {
-  buildRoomPickerOptions,
   audienceSizeForTokens,
+  buildRoomPickerOptions,
+  roomPickerDatesForEdit,
 } from "./roomPickerOptions.ts";
 import type { Meeting, MeetingOverrideField } from "./timetableViewerModel.ts";
 
@@ -258,15 +260,49 @@ export function EditClassModal({
   );
   const roomOptions = useMemo(() => {
     if (!meeting) return [];
+    const weekday = (weekdayValue ||
+      originals?.weekday ||
+      "monday") as TermWeekdayKey;
+    const audienceTokens = audienceValue.length
+      ? audienceValue
+      : meeting.groups;
+    const start = useCustomTime
+      ? normalizeTypedHhmm(timeValue)
+      : timeValue.trim();
+    const end = useCustomTime
+      ? normalizeTypedHhmm(endTimeValue)
+      : endTimeValue.trim() ||
+        (start
+          ? resolveEndTimeForStart(config, start, audienceTokens).slice(0, 5)
+          : "");
+    const dates = roomPickerDatesForEdit({
+      config,
+      weekday,
+    });
     return buildRoomPickerOptions({
       config,
       meetings,
       date: meeting.date,
-      audienceTokens: audienceValue.length ? audienceValue : meeting.groups,
+      dates: dates.length ? dates : [meeting.date],
+      start,
+      end: end || undefined,
+      audienceTokens,
       excludeInstanceId: meeting.instance_id,
+      excludeRef: meetingRef,
       includeRoomIds: meeting.room ? [meeting.room] : undefined,
     });
-  }, [audienceValue, config, meeting, meetings]);
+  }, [
+    audienceValue,
+    config,
+    endTimeValue,
+    meeting,
+    meetingRef,
+    meetings,
+    originals?.weekday,
+    timeValue,
+    useCustomTime,
+    weekdayValue,
+  ]);
 
   const audienceSize = useMemo(
     () => audienceSizeForTokens(config, audienceValue),
@@ -548,7 +584,7 @@ export function EditClassModal({
       }}
       title="Редактировать занятие"
       closeOnOutsidePress={!isPending && !audienceModalOpen}
-      containerClassName="max-w-xl"
+      containerClassName="max-w-2xl"
     >
       <div className="flex flex-col gap-3">
         <div className="rounded-box border-base-300 bg-base-100 border px-3 py-2 text-sm">

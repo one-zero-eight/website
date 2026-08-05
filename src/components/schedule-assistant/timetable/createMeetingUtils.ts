@@ -177,6 +177,42 @@ function seriesUsesOccurrences(
   return kind !== "core" && kind !== "core_course";
 }
 
+/** Whether create would add a single occurrence (vs weekly pattern). */
+export function createWouldUseOccurrences(
+  course: SchemaCourseConfig | null | undefined,
+  componentIdx: number | null | undefined,
+  audience: string[],
+  config: SchemaScheduleConfig,
+): boolean {
+  if (!course || componentIdx == null || componentIdx < 0) return false;
+  const component = course.components?.[componentIdx];
+  if (!component) return false;
+
+  const tree = buildAudienceSelectorTree(config);
+  const targetAudience = minimizeAudienceTokens(audience, tree);
+  if (!targetAudience.length) {
+    const kind = resolveSectionKind(
+      (component.student_groups || []).map(String),
+      config,
+    );
+    return kind !== "core" && kind !== "core_course";
+  }
+
+  for (const series of component.sessions || []) {
+    if (
+      meetingAudienceEqual(
+        audienceForSeries(component, series, config),
+        targetAudience,
+      )
+    ) {
+      return seriesUsesOccurrences(series, component, config);
+    }
+  }
+
+  const kind = resolveSectionKind(targetAudience.map(String), config);
+  return kind !== "core" && kind !== "core_course";
+}
+
 function audienceForSeries(
   component: SchemaComponent,
   series: SchemaComponentSessionSeries,

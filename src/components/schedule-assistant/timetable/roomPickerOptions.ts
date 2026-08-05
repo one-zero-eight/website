@@ -5,13 +5,49 @@ import type { SelectDropdownOption } from "@/components/common/SelectDropdown.ts
 import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { RoomAttributesHoverBadge } from "@/components/schedule-assistant/settings/rooms/RoomAttributesHoverBadge.tsx";
 import { listRoomFeatureEntries } from "@/components/schedule-assistant/settings/rooms/roomAttributes.ts";
+import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
+
+import {
+  parseMeetingInstanceId,
+  resolveEndTimeForStart,
+  type MeetingRef,
+} from "./meetingEditUtils.ts";
+import { RoomAvailabilityStatusMark } from "./RoomAvailabilityStatusMark.tsx";
 import type { Meeting } from "./timetableViewerModel.ts";
+import {
+  add90m,
+  semesterDatesForWeekday,
+  toMinutes,
+} from "./timetableViewerModel.ts";
+
+export type RoomAvailabilityStatus = "green" | "orange" | "red";
+
+export type RoomConflictMeeting = {
+  label: string;
+  start: string;
+  end?: string;
+};
+
+/** One logical conflict (single date or aggregated weekly series). */
+export type RoomConflictDetail = {
+  weekly: boolean;
+  dates: string[];
+  meeting: RoomConflictMeeting;
+};
+
+export type RoomAvailabilityInfo = {
+  status: RoomAvailabilityStatus;
+  conflictDates: string[];
+  conflicts: RoomConflictDetail[];
+  capacityIssue: { capacity: number; needed: number } | null;
+};
 
 export function countRoomDailyLoad(
   meetings: Meeting[],
   roomId: string,
   date: string,
   excludeInstanceId?: string | null,
+  isExcluded?: (meeting: Meeting) => boolean,
 ): number {
   const room = roomId.trim();
   const day = date.trim();
@@ -21,6 +57,7 @@ export function countRoomDailyLoad(
     if (excludeInstanceId && meeting.instance_id === excludeInstanceId) {
       continue;
     }
+    if (isExcluded?.(meeting)) continue;
     if (meeting.cancelled) continue;
     if ((meeting.room || "").trim() !== room) continue;
     if ((meeting.date || "").trim() !== day) continue;
@@ -58,6 +95,207 @@ export function audienceSizeForTokens(
   return known ? total : null;
 }
 
+export function isSameLogicalMeeting(
+  meeting: Meeting,
+  excludeRef: MeetingRef,
+): boolean {
+  const ref = parseMeetingInstanceId(meeting.instance_id);
+  if (!ref) return false;
+  if (excludeRef.kind === "wp" && ref.kind === "wp") {
+    return (
+      ref.courseIdx === excludeRef.courseIdx &&
+      ref.componentIdx === excludeRef.componentIdx &&
+      ref.seriesIdx === excludeRef.seriesIdx &&
+      ref.slotIdx === excludeRef.slotIdx
+    );
+  }
+  if (excludeRef.kind === "occ" && ref.kind === "occ") {
+    return (
+      ref.courseIdx === excludeRef.courseIdx &&
+      ref.componentIdx === excludeRef.componentIdx &&
+      ref.seriesIdx === excludeRef.seriesIdx &&
+      ref.occIdx === excludeRef.occIdx
+    );
+  }
+  return false;
+}
+
+function normalizeHhmm(value: string | undefined): string {
+  return String(value || "")
+    .trim()
+    .slice(0, 5);
+}
+
+function resolveMeetingEnd(
+  config: SchemaScheduleConfig,
+  meeting: Meeting,
+): string {
+  const end = normalizeHhmm(meeting.end);
+  if (end) return end;
+  const start = normalizeHhmm(meeting.start);
+  if (!start) return "";
+  const resolved = normalizeHhmm(
+    resolveEndTimeForStart(config, start, meeting.groups),
+  );
+  if (resolved) return resolved;
+  return add90m(start);
+}
+
+export function timesOverlap(
+  startA: string,
+  endA: string,
+  startB: string,
+  endB: string,
+): boolean {
+  const aStart = toMinutes(normalizeHhmm(startA));
+  const aEnd = toMinutes(normalizeHhmm(endA));
+  const bStart = toMinutes(normalizeHhmm(startB));
+  const bEnd = toMinutes(normalizeHhmm(endB));
+  if (![aStart, aEnd, bStart, bEnd].every(Number.isFinite)) return false;
+  return aStart < bEnd && bStart < aEnd;
+}
+
+function conflictMeetingLabel(meeting: Meeting): string {
+  const title =
+    String(meeting.course_short_name || meeting.course || "").trim() || "—";
+  const tag = String(meeting.tag || "").trim();
+  return tag ? `${title} (${tag})` : title;
+}
+
+/** Group key for aggregating the same weekly slot / occurrence across dates. */
+function conflictGroupKey(meeting: Meeting): string {
+  const ref = parseMeetingInstanceId(meeting.instance_id);
+  if (ref?.kind === "wp") {
+    return `wp:${ref.courseIdx}:${ref.componentIdx}:${ref.seriesIdx}:${ref.slotIdx}`;
+  }
+  if (ref?.kind === "occ") {
+    return `occ:${ref.courseIdx}:${ref.componentIdx}:${ref.seriesIdx}:${ref.occIdx}`;
+  }
+  const start = normalizeHhmm(meeting.start);
+  const end = normalizeHhmm(meeting.end);
+  return `fb:${conflictMeetingLabel(meeting)}|${start}|${end}|${meeting.date}`;
+}
+
+function isWeeklyPatternMeeting(meeting: Meeting): boolean {
+  return parseMeetingInstanceId(meeting.instance_id)?.kind === "wp";
+}
+
+export function roomAvailabilityForSlot({
+  config,
+  meetings,
+  roomId,
+  dates,
+  start,
+  end,
+  audienceSize,
+  capacity,
+  excludeRef,
+  excludeInstanceId,
+}: {
+  config: SchemaScheduleConfig;
+  meetings: Meeting[];
+  roomId: string;
+  dates: string[];
+  start: string;
+  end?: string;
+  audienceSize: number | null;
+  capacity: number | null | undefined;
+  excludeRef?: MeetingRef | null;
+  excludeInstanceId?: string | null;
+}): RoomAvailabilityInfo {
+  const room = roomId.trim();
+  const proposedStart = normalizeHhmm(start);
+  const proposedEnd =
+    normalizeHhmm(end) ||
+    (proposedStart
+      ? normalizeHhmm(resolveEndTimeForStart(config, proposedStart)) ||
+        add90m(proposedStart)
+      : "");
+
+  const dateSet = new Set(dates.map((d) => d.trim()).filter(Boolean));
+  type RawHit = {
+    date: string;
+    weeklyPattern: boolean;
+    meeting: RoomConflictMeeting;
+  };
+  const groups = new Map<string, RawHit[]>();
+
+  if (room && proposedStart && proposedEnd && dateSet.size) {
+    for (const meeting of meetings) {
+      if (excludeInstanceId && meeting.instance_id === excludeInstanceId) {
+        continue;
+      }
+      if (excludeRef && isSameLogicalMeeting(meeting, excludeRef)) continue;
+      if (meeting.cancelled) continue;
+      if ((meeting.room || "").trim() !== room) continue;
+      const day = (meeting.date || "").trim();
+      if (!dateSet.has(day)) continue;
+      const otherStart = normalizeHhmm(meeting.start);
+      const otherEnd = resolveMeetingEnd(config, meeting);
+      if (!timesOverlap(proposedStart, proposedEnd, otherStart, otherEnd)) {
+        continue;
+      }
+      const key = conflictGroupKey(meeting);
+      const list = groups.get(key) || [];
+      list.push({
+        date: day,
+        weeklyPattern: isWeeklyPatternMeeting(meeting),
+        meeting: {
+          label: conflictMeetingLabel(meeting),
+          start: otherStart,
+          end: otherEnd || undefined,
+        },
+      });
+      groups.set(key, list);
+    }
+  }
+
+  const conflicts: RoomConflictDetail[] = [...groups.values()]
+    .map((hits) => {
+      const datesHit = [...new Set(hits.map((h) => h.date))].sort();
+      const weekly = hits.some((h) => h.weeklyPattern) || datesHit.length >= 2;
+      return {
+        weekly,
+        dates: datesHit,
+        meeting: hits[0]!.meeting,
+      };
+    })
+    .sort((a, b) => {
+      if (a.weekly !== b.weekly) return a.weekly ? -1 : 1;
+      return (a.dates[0] || "").localeCompare(b.dates[0] || "");
+    });
+
+  const conflictDates = [
+    ...new Set(conflicts.flatMap((conflict) => conflict.dates)),
+  ].sort();
+
+  const capacityIssue =
+    audienceSize != null &&
+    audienceSize > 0 &&
+    capacity != null &&
+    capacity < audienceSize
+      ? { capacity, needed: audienceSize }
+      : null;
+
+  const hasWeeklyConflict = conflicts.some((conflict) => conflict.weekly);
+  const onceConflicts = conflicts.filter((conflict) => !conflict.weekly);
+
+  let status: RoomAvailabilityStatus = "green";
+  if (capacityIssue || hasWeeklyConflict || conflictDates.length >= 2) {
+    status = "red";
+  } else if (onceConflicts.length === 1 || conflictDates.length === 1) {
+    status = "orange";
+  }
+
+  return { status, conflictDates, conflicts, capacityIssue };
+}
+
+function statusSortRank(status: RoomAvailabilityStatus): number {
+  if (status === "green") return 0;
+  if (status === "orange") return 1;
+  return 2;
+}
+
 function roomSortKey(
   capacity: number | null | undefined,
   audienceSize: number | null,
@@ -77,19 +315,41 @@ function roomSortKey(
   return [1, Number.POSITIVE_INFINITY];
 }
 
+export function roomPickerDatesForEdit({
+  config,
+  weekday,
+}: {
+  config: SchemaScheduleConfig;
+  weekday: TermWeekdayKey;
+}): string[] {
+  // Always check the full weekday series so recurring weekly clashes
+  // show as multi-date (red), independent of edit apply-scope.
+  return semesterDatesForWeekday(config, weekday);
+}
+
 export function buildRoomPickerOptions({
   config,
   meetings,
   date,
+  dates,
+  start,
+  end,
   audienceTokens,
   excludeInstanceId,
+  excludeRef,
   includeRoomIds,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
+  /** Focus date for the daily-load hint. */
   date: string;
+  /** Dates to check for timeslot conflicts. */
+  dates: string[];
+  start: string;
+  end?: string;
   audienceTokens?: string[];
   excludeInstanceId?: string | null;
+  excludeRef?: MeetingRef | null;
   includeRoomIds?: string[];
 }): SelectDropdownOption[] {
   const roomsById = new Map(
@@ -109,6 +369,9 @@ export function buildRoomPickerOptions({
   const attributeKeys = (config.term?.room_attributes ?? [])
     .map((item) => item.key.trim())
     .filter(Boolean);
+  const isExcluded = excludeRef
+    ? (meeting: Meeting) => isSameLogicalMeeting(meeting, excludeRef)
+    : undefined;
 
   return [...ids]
     .map((roomId) => {
@@ -118,17 +381,31 @@ export function buildRoomPickerOptions({
         roomId,
         date,
         excludeInstanceId,
+        isExcluded,
       );
       const featureEntries = listRoomFeatureEntries(
         room?.features,
         attributeKeys,
       );
+      const availability = roomAvailabilityForSlot({
+        config,
+        meetings,
+        roomId,
+        dates,
+        start,
+        end,
+        audienceSize,
+        capacity: room?.capacity,
+        excludeRef,
+        excludeInstanceId,
+      });
       const hint = [
         room?.capacity != null ? `Вместимость ${room.capacity}` : null,
         `в этот день ${load} занятий`,
       ]
         .filter(Boolean)
         .join(", ");
+
       return {
         value: roomId,
         label: roomId,
@@ -136,26 +413,35 @@ export function buildRoomPickerOptions({
         searchText: featureEntries
           .map((entry) => `${entry.key} ${entry.label}`)
           .join(" "),
+        startAdornment: createElement(RoomAvailabilityStatusMark, {
+          info: availability,
+        }),
         endAdornment: featureEntries.length
           ? createElement(RoomAttributesHoverBadge, {
               entries: featureEntries,
             })
           : undefined,
         capacity: room?.capacity ?? null,
+        status: availability.status,
       };
     })
     .sort((a, b) => {
+      const statusDiff = statusSortRank(a.status) - statusSortRank(b.status);
+      if (statusDiff !== 0) return statusDiff;
       const [tierA, capA] = roomSortKey(a.capacity, audienceSize);
       const [tierB, capB] = roomSortKey(b.capacity, audienceSize);
       if (tierA !== tierB) return tierA - tierB;
       if (capA !== capB) return capA - capB;
       return a.value.localeCompare(b.value, "ru");
     })
-    .map(({ value, label, hint, searchText, endAdornment }) => ({
-      value,
-      label,
-      hint,
-      searchText: searchText || undefined,
-      endAdornment,
-    }));
+    .map(
+      ({ value, label, hint, searchText, startAdornment, endAdornment }) => ({
+        value,
+        label,
+        hint,
+        searchText: searchText || undefined,
+        startAdornment,
+        endAdornment,
+      }),
+    );
 }

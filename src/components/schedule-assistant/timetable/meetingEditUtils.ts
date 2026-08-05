@@ -436,7 +436,7 @@ function upsertWeeklyEdit(
   return next;
 }
 
-function dateForWeekdayInWeek(
+export function dateForWeekdayInWeek(
   weekAnchorDate: string,
   weekday: TermWeekdayKey,
   startingDay: Weekday,

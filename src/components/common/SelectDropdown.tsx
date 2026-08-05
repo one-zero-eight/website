@@ -87,6 +87,8 @@ export type SelectDropdownOption<T extends string = string> = {
   hint?: string;
   /** Extra text included in search matching only. */
   searchText?: string;
+  /** Left-side content before the label (e.g. status mark). */
+  startAdornment?: ReactNode;
   /** Right-side content in the option row (e.g. hover badge). */
   endAdornment?: ReactNode;
 };
@@ -343,12 +345,15 @@ export function SelectDropdown<T extends string>({
         {...getReferenceProps()}
       >
         <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
-          <span className="min-w-0">
-            <OptionLabel
-              label={currentOption?.label ?? placeholder}
-              hint={currentOption?.hint}
-              muted={!value}
-            />
+          <span className="flex min-w-0 items-center gap-1.5">
+            {currentOption?.startAdornment}
+            <span className="min-w-0">
+              <OptionLabel
+                label={currentOption?.label ?? placeholder}
+                hint={currentOption?.hint}
+                muted={!value}
+              />
+            </span>
           </span>
           {currentOption?.endAdornment}
         </span>
@@ -406,11 +411,14 @@ export function SelectDropdown<T extends string>({
                         }}
                       >
                         <span className="flex w-full items-center justify-between gap-2">
-                          <span className="min-w-0">
-                            <OptionLabel
-                              label={option.label}
-                              hint={option.hint}
-                            />
+                          <span className="flex min-w-0 items-center gap-1.5">
+                            {option.startAdornment}
+                            <span className="min-w-0">
+                              <OptionLabel
+                                label={option.label}
+                                hint={option.hint}
+                              />
+                            </span>
                           </span>
                           {option.endAdornment}
                         </span>
@@ -449,11 +457,14 @@ export function SelectDropdown<T extends string>({
                     }}
                   >
                     <span className="flex w-full items-center justify-between gap-2">
-                      <span className="min-w-0">
-                        <OptionLabel
-                          label={resolvedTrailing.label}
-                          hint={resolvedTrailing.hint}
-                        />
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        {resolvedTrailing.startAdornment}
+                        <span className="min-w-0">
+                          <OptionLabel
+                            label={resolvedTrailing.label}
+                            hint={resolvedTrailing.hint}
+                          />
+                        </span>
                       </span>
                       {resolvedTrailing.endAdornment}
                     </span>

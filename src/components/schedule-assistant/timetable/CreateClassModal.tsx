@@ -29,6 +29,7 @@ import {
 import {
   applyCreateMeetingToCourse,
   courseComponentOptions,
+  createWouldUseOccurrences,
   parseCourseComponentKey,
   type CreateMeetingCellContext,
 } from "./createMeetingUtils.ts";
@@ -39,14 +40,16 @@ import {
   normalizeTypedHhmm,
   parseTimeRangeQuery,
   perGroupAudienceOptions,
+  resolveEndTimeForStart,
   timeOptionsForConfig,
   weekdayOptionsForConfig,
 } from "./meetingEditUtils.ts";
 import {
-  buildRoomPickerOptions,
   audienceSizeForTokens,
+  buildRoomPickerOptions,
 } from "./roomPickerOptions.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
+import { semesterDatesForWeekday } from "./timetableViewerModel.ts";
 
 function CreateClassDropdown({
   value,
@@ -172,13 +175,46 @@ export function CreateClassModal({
 
   const roomOptions = useMemo(() => {
     if (!cellContext) return [];
+    const weekday = (weekdayValue || cellContext.weekday) as TermWeekdayKey;
+    const start = useCustomTime
+      ? normalizeTypedHhmm(timeValue)
+      : timeValue.trim();
+    const end = useCustomTime
+      ? normalizeTypedHhmm(endTimeValue)
+      : endTimeValue.trim() ||
+        (start
+          ? resolveEndTimeForStart(config, start, audienceValue).slice(0, 5)
+          : "");
+    const usesOccurrences = createWouldUseOccurrences(
+      selectedCourse,
+      parsedComponent?.componentIdx,
+      audienceValue,
+      config,
+    );
+    const dates = usesOccurrences
+      ? [cellContext.date]
+      : semesterDatesForWeekday(config, weekday);
     return buildRoomPickerOptions({
       config,
       meetings,
       date: cellContext.date,
+      dates: dates.length ? dates : [cellContext.date],
+      start,
+      end: end || undefined,
       audienceTokens: audienceValue,
     });
-  }, [audienceValue, cellContext, config, meetings]);
+  }, [
+    audienceValue,
+    cellContext,
+    config,
+    endTimeValue,
+    meetings,
+    parsedComponent?.componentIdx,
+    selectedCourse,
+    timeValue,
+    useCustomTime,
+    weekdayValue,
+  ]);
 
   const instructorOptions = useMemo(() => {
     return (config.instructors || [])
