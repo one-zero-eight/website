@@ -89,6 +89,7 @@ import {
   buildCoursesToSections,
   buildGrid,
   buildGroupSizeMap,
+  buildInstructorLabelById,
   buildMeetings,
   buildRoomCapacityMap,
   buildWeeks,
@@ -101,6 +102,7 @@ import {
   meetingRoomLoadOverCapacity,
   meetingSelectionKey,
   mergedMeetingsForCell,
+  resolveInstructorLabel,
   roomFillPercent,
   scheduleAssistantDetailTooltips,
   todayIsoDate,
@@ -234,6 +236,7 @@ type MeetingCardProps = {
   courseColors: Record<string, { bg: string; border: string }>;
   roomCapacityById: Record<string, number>;
   groupSizeById: Record<string, number | null | undefined>;
+  instructorLabelById: Record<string, string>;
 };
 
 function meetingCardPropsEqual(
@@ -272,6 +275,7 @@ function meetingCardPropsEqual(
   if (prev.courseColors !== next.courseColors) return false;
   if (prev.roomCapacityById !== next.roomCapacityById) return false;
   if (prev.groupSizeById !== next.groupSizeById) return false;
+  if (prev.instructorLabelById !== next.instructorLabelById) return false;
   if (prev.selectMeeting !== next.selectMeeting) return false;
   if (prev.selectInstructorCell !== next.selectInstructorCell) return false;
   if (prev.selectRoomCell !== next.selectRoomCell) return false;
@@ -316,6 +320,10 @@ function TimetableWorkspaceInner({
   const [groupSizeById, setGroupSizeById] = useState<
     Record<string, number | null | undefined>
   >({});
+  const instructorLabelById = useMemo(
+    () => (config ? buildInstructorLabelById(config) : {}),
+    [config],
+  );
   const [isMiddleDragScrolling, setIsMiddleDragScrolling] = useState(false);
   const [scrollToMeetingId, setScrollToMeetingId] = useState<string | null>(
     null,
@@ -871,6 +879,7 @@ function TimetableWorkspaceInner({
                     courseColors={courseColors}
                     roomCapacityById={roomCapacityById}
                     groupSizeById={groupSizeById}
+                    instructorLabelById={instructorLabelById}
                     selectMeeting={selectMeeting}
                     selectInstructorCell={selectInstructorCell}
                     selectRoomCell={selectRoomCell}
@@ -949,6 +958,7 @@ function TimetableMainGrid({
   courseColors,
   roomCapacityById,
   groupSizeById,
+  instructorLabelById,
   selectMeeting,
   selectInstructorCell,
   selectRoomCell,
@@ -971,6 +981,7 @@ function TimetableMainGrid({
   courseColors: Record<string, { bg: string; border: string }>;
   roomCapacityById: Record<string, number>;
   groupSizeById: Record<string, number | null | undefined>;
+  instructorLabelById: Record<string, string>;
   selectMeeting: (valueKey: string, course: string) => void;
   selectInstructorCell: (name: string) => void;
   selectRoomCell: (room: string) => void;
@@ -1011,6 +1022,7 @@ function TimetableMainGrid({
       courseColors={courseColors}
       roomCapacityById={roomCapacityById}
       groupSizeById={groupSizeById}
+      instructorLabelById={instructorLabelById}
       selectMeeting={selectMeeting}
       selectInstructorCell={selectInstructorCell}
       selectRoomCell={selectRoomCell}
@@ -1067,6 +1079,7 @@ type TimetableTableProps = {
   courseColors: Record<string, { bg: string; border: string }>;
   roomCapacityById: Record<string, number>;
   groupSizeById: Record<string, number | null | undefined>;
+  instructorLabelById: Record<string, string>;
   selectMeeting: (valueKey: string, course: string) => void;
   selectInstructorCell: (name: string) => void;
   selectRoomCell: (room: string) => void;
@@ -1088,6 +1101,7 @@ function TimetableTable({
   courseColors,
   roomCapacityById,
   groupSizeById,
+  instructorLabelById,
   selectMeeting,
   selectInstructorCell,
   selectRoomCell,
@@ -1107,6 +1121,7 @@ function TimetableTable({
           courseColors,
           roomCapacityById,
           groupSizeById,
+          instructorLabelById,
           selectMeeting,
           selectInstructorCell,
           selectRoomCell,
@@ -1124,6 +1139,7 @@ function TimetableTable({
           courseColors={courseColors}
           roomCapacityById={roomCapacityById}
           groupSizeById={groupSizeById}
+          instructorLabelById={instructorLabelById}
           selectMeeting={selectMeeting}
           selectInstructorCell={selectInstructorCell}
           selectRoomCell={selectRoomCell}
@@ -1638,6 +1654,7 @@ function CoreGroupsTable({
   courseColors,
   roomCapacityById,
   groupSizeById,
+  instructorLabelById,
   selectMeeting,
   selectInstructorCell,
   selectRoomCell,
@@ -1655,6 +1672,7 @@ function CoreGroupsTable({
   courseColors: Record<string, { bg: string; border: string }>;
   roomCapacityById: Record<string, number>;
   groupSizeById: Record<string, number | null | undefined>;
+  instructorLabelById: Record<string, string>;
   selectMeeting: (valueKey: string, course: string) => void;
   selectInstructorCell: (name: string) => void;
   selectRoomCell: (room: string) => void;
@@ -1880,6 +1898,7 @@ function CoreGroupsTable({
                     courseColors={courseColors}
                     roomCapacityById={roomCapacityById}
                     groupSizeById={groupSizeById}
+                    instructorLabelById={instructorLabelById}
                   />
                 ))}
               </div>
@@ -2019,6 +2038,7 @@ const MeetingCard = memo(function MeetingCard({
   courseColors,
   roomCapacityById,
   groupSizeById,
+  instructorLabelById,
 }: MeetingCardProps) {
   const m = row.sample;
   const count = row.count;
@@ -2053,6 +2073,9 @@ const MeetingCard = memo(function MeetingCard({
         ? [m.instructors]
         : []
       : (m.instructors ?? []);
+  const instructorLabels = instructorNames.map((id) =>
+    resolveInstructorLabel(id, instructorLabelById),
+  );
 
   const meetingHighlightClass = clsx(
     isSelected &&
@@ -2114,26 +2137,29 @@ const MeetingCard = memo(function MeetingCard({
               ? "w-max max-w-full overflow-hidden whitespace-normal"
               : "overflow-hidden text-ellipsis whitespace-nowrap",
           )}
-          title={instructorNames.join(" / ")}
+          title={instructorLabels.join(" / ")}
         >
           <span className="inline-flex max-w-full flex-wrap items-center gap-1">
             <span className={clsx("min-w-0", !isWideCell && "truncate")}>
               {instructorNames.length
-                ? instructorNames.map((name, idx) => (
-                    <span key={name}>
-                      <span
-                        className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
-                        title={instructorDetailTooltip(name)}
-                        onClick={(ev) => {
-                          ev.stopPropagation();
-                          selectInstructorCell(name);
-                        }}
-                      >
-                        {name}
+                ? instructorNames.map((name, idx) => {
+                    const label = instructorLabels[idx]!;
+                    return (
+                      <span key={name}>
+                        <span
+                          className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
+                          title={instructorDetailTooltip(label)}
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            selectInstructorCell(name);
+                          }}
+                        >
+                          {label}
+                        </span>
+                        {idx < instructorNames.length - 1 ? " / " : null}
                       </span>
-                      {idx < instructorNames.length - 1 ? " / " : null}
-                    </span>
-                  ))
+                    );
+                  })
                 : "-"}
             </span>
             <MeetingOverrideFieldBadge
@@ -2223,6 +2249,7 @@ function renderUtilizationRows(args: {
   courseColors: Record<string, { bg: string; border: string }>;
   roomCapacityById: Record<string, number>;
   groupSizeById: Record<string, number | null | undefined>;
+  instructorLabelById: Record<string, string>;
   selectMeeting: (valueKey: string, course: string) => void;
   selectInstructorCell: (name: string) => void;
   selectRoomCell: (room: string) => void;
@@ -2235,6 +2262,7 @@ function renderUtilizationRows(args: {
     courseColors,
     roomCapacityById,
     groupSizeById,
+    instructorLabelById,
     selectMeeting,
     selectInstructorCell,
     selectRoomCell,
@@ -2252,7 +2280,13 @@ function renderUtilizationRows(args: {
           typeof m.instructors === "string" ? [m.instructors] : m.instructors,
         ),
       ),
-    ).sort();
+    ).sort((a, b) =>
+      resolveInstructorLabel(a, instructorLabelById).localeCompare(
+        resolveInstructorLabel(b, instructorLabelById),
+        "en",
+        { sensitivity: "base" },
+      ),
+    );
     headerTitle = "Преподаватели";
   } else {
     resourceCols = Array.from(
@@ -2290,11 +2324,15 @@ function renderUtilizationRows(args: {
           const cap = roomCapacityById?.[col];
           const onSelectResource =
             mode === "instructor" ? selectInstructorHeader : selectRoomHeader;
+          const label =
+            mode === "room"
+              ? `${col} (вм. ${cap ?? "-"})`
+              : resolveInstructorLabel(col, instructorLabelById);
           return (
             <UtilResourceHeadCell
               key={col}
               resourceKey={col}
-              label={mode === "room" ? `${col} (вм. ${cap ?? "-"})` : col}
+              label={label}
               type={mode === "room" ? "room" : "instructor"}
               onSelectResource={onSelectResource}
             />
@@ -2373,6 +2411,7 @@ function renderUtilizationRows(args: {
                     courseColors={courseColors}
                     roomCapacityById={roomCapacityById}
                     groupSizeById={groupSizeById}
+                    instructorLabelById={instructorLabelById}
                   />
                 );
               })}
@@ -2416,6 +2455,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
   courseColors,
   roomCapacityById,
   groupSizeById,
+  instructorLabelById,
 }: UtilizationMeetingCardProps) {
   const m = row.sample;
   const courseTitle = String(m.course || "").trim() || "—";
@@ -2435,6 +2475,15 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
     overCap
       ? "!text-[#b42318] decoration-[#b42318] hover:!text-[#7f1d1d] hover:decoration-[#7f1d1d]"
       : "text-[#4f5c6d] hover:text-[#303a47] hover:decoration-solid",
+  );
+  const instructorIds =
+    typeof m.instructors === "string"
+      ? m.instructors
+        ? [m.instructors]
+        : []
+      : (m.instructors ?? []);
+  const instructorLabels = instructorIds.map((id) =>
+    resolveInstructorLabel(id, instructorLabelById),
   );
 
   return (
@@ -2484,7 +2533,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
             title={
               mode === "instructor"
                 ? `${m.groups.join(", ")} | ${roomLoad}`
-                : `${m.groups.join(", ")} | ${roomLoad} | заполн. ${roomFillPercent(m, roomCapacityById, groupSizeById)} | ${(typeof m.instructors === "string" ? [m.instructors] : m.instructors).join(" / ")}`
+                : `${m.groups.join(", ")} | ${roomLoad} | заполн. ${roomFillPercent(m, roomCapacityById, groupSizeById)} | ${instructorLabels.join(" / ")}`
             }
           >
             {mode === "instructor" ? (
@@ -2524,28 +2573,25 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
                 )}{" "}
                 | заполн. {roomFillPercent(m, roomCapacityById, groupSizeById)}{" "}
                 |{" "}
-                {(typeof m.instructors === "string"
-                  ? [m.instructors]
-                  : m.instructors
-                ).length
-                  ? (typeof m.instructors === "string"
-                      ? [m.instructors]
-                      : m.instructors
-                    ).map((name, idx) => (
-                      <span key={name}>
-                        {idx > 0 ? " / " : null}
-                        <span
-                          className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
-                          title={instructorDetailTooltip(name)}
-                          onClick={(ev) => {
-                            ev.stopPropagation();
-                            selectInstructorCell(name);
-                          }}
-                        >
-                          {name}
+                {instructorIds.length
+                  ? instructorIds.map((name, idx) => {
+                      const label = instructorLabels[idx]!;
+                      return (
+                        <span key={name}>
+                          {idx > 0 ? " / " : null}
+                          <span
+                            className="clickable inline cursor-pointer font-semibold text-[#4f5c6d] underline decoration-dotted decoration-2 underline-offset-2 hover:text-[#303a47] hover:decoration-solid"
+                            title={instructorDetailTooltip(label)}
+                            onClick={(ev) => {
+                              ev.stopPropagation();
+                              selectInstructorCell(name);
+                            }}
+                          >
+                            {label}
+                          </span>
                         </span>
-                      </span>
-                    ))
+                      );
+                    })
                   : "-"}
               </>
             )}

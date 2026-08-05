@@ -7,11 +7,13 @@ import {
   type Meeting,
   type Selection,
   type WeekRange,
+  buildInstructorLabelById,
   filterMeetingsToCurrentWeek,
   groupWeekHistogramsHtml,
   meetingRoomLoadLabel,
   meetingRoomLoadOverCapacity,
   meetingSelectionKey,
+  resolveInstructorLabel,
   roomFillPercent,
   scheduleAssistantDetailTooltips,
   instructorDetailTooltip,
@@ -84,26 +86,31 @@ function DetailRoomLoad({
 
 function DetailInstructorLinks({
   instructors,
+  instructorLabelById,
 }: {
   instructors: string | string[];
+  instructorLabelById: Record<string, string>;
 }) {
   const instructorsArray =
     typeof instructors === "string" ? [instructors] : instructors;
   if (!instructorsArray?.length) return "-";
   return (
     <>
-      {instructorsArray.map((name, idx) => (
-        <span key={name}>
-          {idx > 0 ? " / " : null}
-          <span
-            className={clsx(CLICK, "instructor-link inline")}
-            data-inst={encodeURIComponent(name)}
-            title={instructorDetailTooltip(name)}
-          >
-            {name}
+      {instructorsArray.map((name, idx) => {
+        const label = resolveInstructorLabel(name, instructorLabelById);
+        return (
+          <span key={name}>
+            {idx > 0 ? " / " : null}
+            <span
+              className={clsx(CLICK, "instructor-link inline")}
+              data-inst={encodeURIComponent(name)}
+              title={instructorDetailTooltip(label)}
+            >
+              {label}
+            </span>
           </span>
-        </span>
-      ))}
+        );
+      })}
     </>
   );
 }
@@ -132,6 +139,7 @@ function DetailMeetingSessionRow({
   m,
   roomCapacityById,
   groupSizeById,
+  instructorLabelById,
   indented = false,
   onRestoreMeeting,
   restoringMeetingId,
@@ -139,6 +147,7 @@ function DetailMeetingSessionRow({
   m: Meeting;
   roomCapacityById: Record<string, number>;
   groupSizeById: Record<string, number | null | undefined>;
+  instructorLabelById: Record<string, string>;
   indented?: boolean;
   onRestoreMeeting?: (meeting: Meeting) => void;
   restoringMeetingId?: string | null;
@@ -192,7 +201,10 @@ function DetailMeetingSessionRow({
         |{" "}
         <span className="inline-flex flex-wrap items-center gap-1">
           <span className={textClass}>препод.</span>{" "}
-          <DetailInstructorLinks instructors={m.instructors} />
+          <DetailInstructorLinks
+            instructors={m.instructors}
+            instructorLabelById={instructorLabelById}
+          />
           {!m.cancelled ? (
             <MeetingOverrideFieldBadge
               field="instructor"
@@ -252,6 +264,7 @@ export function computeDetailPanel(input: {
 
   const rfp = (m: Meeting) =>
     roomFillPercent(m, roomCapacityById, groupSizeById);
+  const instructorLabelById = buildInstructorLabelById(config);
 
   if (!sel) {
     return {
@@ -278,9 +291,16 @@ export function computeDetailPanel(input: {
   const formatInstructorPool = (pool: unknown[]) => {
     if (!pool || !pool.length) return "-";
     return pool
-      .map((p) =>
-        Array.isArray(p) ? `[${(p as string[]).join(" + ")}]` : String(p),
-      )
+      .map((p) => {
+        if (Array.isArray(p)) {
+          return `[${(p as string[])
+            .map((id) =>
+              resolveInstructorLabel(String(id), instructorLabelById),
+            )
+            .join(" + ")}]`;
+        }
+        return resolveInstructorLabel(String(p), instructorLabelById);
+      })
       .join(" | ");
   };
 
@@ -315,6 +335,7 @@ export function computeDetailPanel(input: {
           m={m}
           roomCapacityById={roomCapacityById}
           groupSizeById={groupSizeById}
+          instructorLabelById={instructorLabelById}
           onRestoreMeeting={onRestoreMeeting}
           restoringMeetingId={restoringMeetingId}
         />,
@@ -387,6 +408,7 @@ export function computeDetailPanel(input: {
               m={m}
               roomCapacityById={roomCapacityById}
               groupSizeById={groupSizeById}
+              instructorLabelById={instructorLabelById}
               indented
               onRestoreMeeting={onRestoreMeeting}
               restoringMeetingId={restoringMeetingId}
@@ -441,7 +463,11 @@ export function computeDetailPanel(input: {
           </div>
           <div className="text-[#4f5c6d]">
             группы: <DetailGroupLinks groups={m.groups || []} /> | препод.:{" "}
-            <DetailInstructorLinks instructors={m.instructors} /> | ауд.:{" "}
+            <DetailInstructorLinks
+              instructors={m.instructors}
+              instructorLabelById={instructorLabelById}
+            />{" "}
+            | ауд.:{" "}
             <DetailRoomLoad
               m={m}
               roomCapacityById={roomCapacityById}
@@ -481,7 +507,11 @@ export function computeDetailPanel(input: {
               roomCapacityById={roomCapacityById}
               groupSizeById={groupSizeById}
             />{" "}
-            | препод.: <DetailInstructorLinks instructors={m.instructors} />
+            | препод.:{" "}
+            <DetailInstructorLinks
+              instructors={m.instructors}
+              instructorLabelById={instructorLabelById}
+            />
           </div>
         </DetailRow>,
       );
@@ -500,7 +530,7 @@ export function computeDetailPanel(input: {
         ),
     );
     detailTitle = "Преподаватель";
-    detailSummary = `${sel.value} | ${mm.length} занятий`;
+    detailSummary = `${resolveInstructorLabel(sel.value, instructorLabelById)} | ${mm.length} занятий`;
     const weekMm = filterMeetingsToCurrentWeek(mm, weeks, weekIndex);
     histogramHtml = workloadHistogramHtml(weekMm);
     histogramHidden = false;
@@ -557,7 +587,10 @@ export function computeDetailPanel(input: {
               groupSizeById={groupSizeById}
             />{" "}
             | заполн.: {rfp(m)} | препод.:{" "}
-            <DetailInstructorLinks instructors={m.instructors} />
+            <DetailInstructorLinks
+              instructors={m.instructors}
+              instructorLabelById={instructorLabelById}
+            />
           </div>
         </DetailRow>,
       );

@@ -93,6 +93,34 @@ export function instructorDetailTooltip(name: string) {
   return `Показать преподавателя «${name}» в панели деталей`;
 }
 
+/** Table UI: English name, else Russian, else alias/email/id. */
+export function buildInstructorLabelById(
+  config: SchemaScheduleConfig,
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const instructor of config.instructors ?? []) {
+    const id = String(instructor.id || "").trim();
+    if (!id) continue;
+    const label =
+      instructor.name_en?.trim() ||
+      instructor.name_ru?.trim() ||
+      instructor.alias?.trim() ||
+      instructor.email?.trim() ||
+      id;
+    out[id] = label;
+    const email = instructor.email?.trim();
+    if (email && !(email in out)) out[email] = label;
+  }
+  return out;
+}
+
+export function resolveInstructorLabel(
+  instructorId: string,
+  labelById: Record<string, string>,
+): string {
+  return labelById[instructorId] || instructorId;
+}
+
 export type MeetingOverrideField = "room" | "time" | "weekday" | "instructor";
 
 export type Meeting = {
