@@ -2204,7 +2204,7 @@ const MeetingCard = memo(function MeetingCard({
         <div
           className="sticky z-[1] inline-flex h-full max-h-full w-max max-w-full flex-col gap-0.5 self-start overflow-hidden"
           style={{
-            left: "calc(var(--sa-time-col-width, 130px) + 14px)",
+            left: "calc(var(--sa-time-col-width, 130px) + 8px)",
             backgroundColor: colors.bg,
           }}
         >
