@@ -3,7 +3,6 @@ import {
   SchemaScheduleConfig,
   Weekday,
 } from "@/api/schedule-assistant/types.ts";
-import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import { ReturnToChecksLink } from "@/components/schedule-assistant/checks/ReturnToChecksLink.tsx";
 import {
@@ -12,6 +11,7 @@ import {
   useCoursesQuery,
   useUpdateCourseMutation,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
+import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
 import clsx from "clsx";
 import {
@@ -35,25 +35,21 @@ import {
 } from "./createMeetingUtils.ts";
 import { EditClassModal } from "./EditClassModal.tsx";
 import {
-  programSlotLabelForTermRow,
-  resolveProgramTimeColumns,
-} from "./programTimeSlots.ts";
-import { TimetableCalendarTable } from "./TimetableCalendarTable.tsx";
-import {
-  TimetableLayoutSelector,
-  type TimetableLayoutMode,
-} from "./TimetableLayoutSelector.tsx";
-import {
   canRestoreMeeting,
   parseMeetingInstanceId,
   restoreMeetingInCourse,
 } from "./meetingEditUtils.ts";
 import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
+import {
+  programSlotLabelForTermRow,
+  resolveProgramTimeColumns,
+} from "./programTimeSlots.ts";
 import { computeDetailPanel } from "./scheduleAssistantDetailPanel.tsx";
 import {
   buildCalendarGrid,
   formatCalendarWeekRange,
 } from "./timetableCalendarModel.ts";
+import { TimetableCalendarTable } from "./TimetableCalendarTable.tsx";
 import {
   GROUPS_CELL_PAD,
   GROUPS_COL_PX,
@@ -74,6 +70,10 @@ import {
   GROUPS_TIME_COL_PX,
   GROUPS_TIME_COL_WIDTH,
 } from "./timetableGroupsGridLayout.ts";
+import {
+  TimetableLayoutSelector,
+  type TimetableLayoutMode,
+} from "./TimetableLayoutSelector.tsx";
 import { scrollMeetingIntoCenter } from "./timetableMeetingScroll.ts";
 import {
   isTodayWeekdayInDisplayedWeek,
@@ -1820,7 +1820,7 @@ function CoreGroupsTable({
             className={clsx(
               "link-cell relative border-r border-b border-[#d8dfeb] align-top",
               GROUPS_CELL_PAD,
-              cell.span > 1 ? "overflow-hidden" : GROUPS_COL_WIDTH,
+              cell.span > 1 ? null : GROUPS_COL_WIDTH,
               cell.isProgramEmptyAtSlot &&
                 "bg-[#eef1f6] [&_.empty]:bg-[#e9edf3]",
               todayGroupsSlotCellClass(isTodayDay, isLastInTable, isLastSlot),
@@ -2067,9 +2067,24 @@ const MeetingCard = memo(function MeetingCard({
   );
 
   const body = (
-    <div className={GROUPS_MEETING_BODY_CLASS}>
-      <div className="subject flex min-h-0 min-w-0 gap-1 overflow-hidden">
-        <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+    <div
+      className={clsx(
+        GROUPS_MEETING_BODY_CLASS,
+        isWideCell && "w-max max-w-full",
+      )}
+    >
+      <div
+        className={clsx(
+          "subject flex min-h-0 min-w-0 gap-1 overflow-hidden",
+          isWideCell && "w-max max-w-full",
+        )}
+      >
+        <div
+          className={clsx(
+            "min-h-0 min-w-0 overflow-hidden",
+            isWideCell ? "w-max max-w-full" : "flex-1",
+          )}
+        >
           <div
             className={GROUPS_MEETING_TITLE_CLASS}
             title={`${courseTitle} (${m.tag})${count > 1 ? ` x${count}` : ""}`}
@@ -2096,7 +2111,7 @@ const MeetingCard = memo(function MeetingCard({
           className={clsx(
             GROUPS_MEETING_LINE_CLASS,
             isWideCell
-              ? "overflow-hidden whitespace-normal"
+              ? "w-max max-w-full overflow-hidden whitespace-normal"
               : "overflow-hidden text-ellipsis whitespace-nowrap",
           )}
           title={instructorNames.join(" / ")}
@@ -2131,6 +2146,7 @@ const MeetingCard = memo(function MeetingCard({
           className={clsx(
             GROUPS_MEETING_LINE_CLASS,
             "overflow-hidden text-ellipsis whitespace-nowrap",
+            isWideCell && "w-max max-w-full",
             overCap ? "font-bold text-[#b42318]" : null,
           )}
           title={roomLoadLabel}
@@ -2170,8 +2186,9 @@ const MeetingCard = memo(function MeetingCard({
     <div
       data-meeting-id={m.instance_id}
       className={clsx(
-        "meeting relative z-[2] overflow-hidden rounded-lg",
+        "meeting relative z-[2] rounded-lg",
         GROUPS_MEETING_CLASS,
+        isWideCell ? "overflow-visible" : "overflow-hidden",
         meetingHighlightClass,
       )}
       style={{
@@ -2185,9 +2202,9 @@ const MeetingCard = memo(function MeetingCard({
     >
       {isWideCell ? (
         <div
-          className="sticky z-[1] flex h-full max-h-full w-full max-w-full flex-col gap-0.5 self-start overflow-hidden"
+          className="sticky z-[1] inline-flex h-full max-h-full w-max max-w-full flex-col gap-0.5 self-start overflow-hidden"
           style={{
-            left: "calc(var(--sa-time-col-width, 130px) + 4px)",
+            left: "calc(var(--sa-time-col-width, 130px) + 14px)",
             backgroundColor: colors.bg,
           }}
         >

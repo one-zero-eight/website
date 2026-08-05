@@ -38,7 +38,7 @@ export const GROUPS_MEETING_BODY_CLASS =
   "grid h-full min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-0.5 overflow-hidden";
 
 export const GROUPS_MEETING_TITLE_CLASS =
-  "line-clamp-3 max-h-[calc(1.25em*3)] w-full min-h-0 min-w-0 overflow-hidden text-[0.6875rem] leading-tight font-bold break-words text-[#1a2332]";
+  "line-clamp-3 max-h-[calc(1.25em*3)] min-h-0 min-w-0 overflow-hidden text-[0.6875rem] leading-tight font-bold break-words text-[#1a2332]";
 
 export const GROUPS_MEETING_FOOTER_CLASS =
   "flex min-w-0 shrink-0 flex-col gap-0.5";
