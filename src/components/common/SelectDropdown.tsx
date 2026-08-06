@@ -91,6 +91,8 @@ export type SelectDropdownOption<T extends string = string> = {
   startAdornment?: ReactNode;
   /** Right-side content in the option row (e.g. hover badge). */
   endAdornment?: ReactNode;
+  /** Hide until the searchable query is non-empty (selected value still shown). */
+  requireSearch?: boolean;
 };
 
 export type SelectDropdownChangeContext = {
@@ -196,12 +198,19 @@ export function SelectDropdown<T extends string>({
   );
 
   const matchedOptions = useMemo(() => {
-    const filtered = searchable
-      ? filterSelectOptions(options, searchQuery)
+    const hasQuery = searchQuery.trim().length > 0;
+    const visible = searchable
+      ? options.filter(
+          (option) =>
+            hasQuery || !option.requireSearch || option.value === value,
+        )
       : options;
+    const filtered = searchable
+      ? filterSelectOptions(visible, searchQuery)
+      : visible;
     if (!resolvedTrailing) return filtered;
     return filtered.filter((option) => option.value !== resolvedTrailing.value);
-  }, [options, resolvedTrailing, searchQuery, searchable]);
+  }, [options, resolvedTrailing, searchQuery, searchable, value]);
 
   /** Matched presets + trailing (always last when present). */
   const filteredOptions = useMemo(() => {

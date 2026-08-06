@@ -4,6 +4,7 @@ import { Modal } from "@/components/common/Modal.tsx";
 import {
   SelectDropdown,
   type SelectDropdownChangeContext,
+  type SelectDropdownOption,
 } from "@/components/common/SelectDropdown.tsx";
 import {
   useCoursesQuery,
@@ -51,7 +52,9 @@ import {
   buildRoomPickerOptions,
   roomPickerDatesForEdit,
 } from "./roomPickerOptions.ts";
+import { buildInstructorPickerOptions } from "./instructorPickerOptions.ts";
 import type { Meeting, MeetingOverrideField } from "./timetableViewerModel.ts";
+import { semesterDatesForWeekday } from "./timetableViewerModel.ts";
 
 const SCOPE_OPTIONS: { value: EditClassScope; label: string }[] = [
   { value: "single", label: "Только это занятие" },
@@ -69,10 +72,10 @@ function EditClassDropdown({
 }: {
   value: string;
   onChange: (value: string, context?: SelectDropdownChangeContext) => void;
-  options: { value: string; label: string }[];
+  options: SelectDropdownOption[];
   placeholder: string;
   disabled?: boolean;
-  trailingOption?: (query: string) => { value: string; label: string } | null;
+  trailingOption?: (query: string) => SelectDropdownOption | null;
 }) {
   return (
     <SelectDropdown
@@ -262,7 +265,7 @@ export function EditClassModal({
     if (!meeting) return [];
     const weekday = (weekdayValue ||
       originals?.weekday ||
-      "monday") as TermWeekdayKey;
+      "Mon") as TermWeekdayKey;
     const audienceTokens = audienceValue.length
       ? audienceValue
       : meeting.groups;
@@ -308,31 +311,57 @@ export function EditClassModal({
     () => audienceSizeForTokens(config, audienceValue),
     [audienceValue, config],
   );
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+
   const instructorOptions = useMemo(() => {
-    const items = (config.instructors || [])
-      .map((instructor) => ({
-        id: String(instructor.id || "").trim(),
-        label:
-          instructor.name_ru ||
-          instructor.name_en ||
-          instructor.email ||
-          instructor.id,
-      }))
-      .filter((item) => item.id);
+    if (!meeting) return [];
+    const course = courses?.find((item) => item.name === meeting.course);
     const currentInstructor = String(
-      typeof meeting?.instructors === "string"
+      typeof meeting.instructors === "string"
         ? meeting.instructors
-        : meeting?.instructors?.[0] || "",
+        : meeting.instructors?.[0] || "",
     ).trim();
-    if (
-      currentInstructor &&
-      !items.some((item) => item.id === currentInstructor)
-    ) {
-      items.push({ id: currentInstructor, label: currentInstructor });
-    }
-    return items;
-  }, [config.instructors, meeting?.instructors]);
+    const weekday = (weekdayValue ||
+      originals?.weekday ||
+      "Mon") as TermWeekdayKey;
+    const audienceTokens = audienceValue.length
+      ? audienceValue
+      : meeting.groups;
+    const start = useCustomTime
+      ? normalizeTypedHhmm(timeValue)
+      : timeValue.trim();
+    const end = useCustomTime
+      ? normalizeTypedHhmm(endTimeValue)
+      : endTimeValue.trim() ||
+        (start
+          ? resolveEndTimeForStart(config, start, audienceTokens).slice(0, 5)
+          : "");
+    const dates = semesterDatesForWeekday(config, weekday);
+    return buildInstructorPickerOptions({
+      config,
+      meetings,
+      date: meeting.date,
+      dates: dates.length ? dates : [meeting.date],
+      start,
+      end: end || undefined,
+      weekday,
+      courseInstructors: course?.instructors,
+      excludeInstanceId: meeting.instance_id,
+      excludeRef: meetingRef,
+      includeInstructorIds: currentInstructor ? [currentInstructor] : undefined,
+    });
+  }, [
+    audienceValue,
+    config,
+    courses,
+    endTimeValue,
+    meeting,
+    meetingRef,
+    meetings,
+    originals?.weekday,
+    timeValue,
+    useCustomTime,
+    weekdayValue,
+  ]);
 
   const patternBase = useMemo(() => {
     if (!meeting) return null;
@@ -505,7 +534,8 @@ export function EditClassModal({
     weekdayOptions.find((day) => day.key === originals.weekday)?.label ||
     originals.weekday;
   const originalInstructorLabel =
-    instructorOptions.find((item) => item.id === originals.instructor)?.label ||
+    instructorOptions.find((item) => item.value === originals.instructor)
+      ?.label ||
     originals.instructor ||
     "—";
   const originalAudienceLabel = formatAudienceTokensLabel(
@@ -555,7 +585,7 @@ export function EditClassModal({
   function patternInstructorLabel() {
     if (!patternBase) return "";
     return (
-      instructorOptions.find((item) => item.id === patternBase.instructor)
+      instructorOptions.find((item) => item.value === patternBase.instructor)
         ?.label ||
       patternBase.instructor ||
       "—"
@@ -787,10 +817,7 @@ export function EditClassModal({
               onChange={setInstructorValue}
               placeholder="Выберите преподавателя"
               disabled={cancelChecked}
-              options={instructorOptions.map((instructor) => ({
-                value: instructor.id,
-                label: instructor.label,
-              }))}
+              options={instructorOptions}
             />
           </EditClassField>
 

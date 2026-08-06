@@ -7,6 +7,7 @@ import { Modal } from "@/components/common/Modal.tsx";
 import {
   SelectDropdown,
   type SelectDropdownChangeContext,
+  type SelectDropdownOption,
 } from "@/components/common/SelectDropdown.tsx";
 import {
   useCoursesQuery,
@@ -44,6 +45,7 @@ import {
   timeOptionsForConfig,
   weekdayOptionsForConfig,
 } from "./meetingEditUtils.ts";
+import { buildInstructorPickerOptions } from "./instructorPickerOptions.ts";
 import {
   audienceSizeForTokens,
   buildRoomPickerOptions,
@@ -61,10 +63,10 @@ function CreateClassDropdown({
 }: {
   value: string;
   onChange: (value: string, context?: SelectDropdownChangeContext) => void;
-  options: { value: string; label: string }[];
+  options: SelectDropdownOption[];
   placeholder: string;
   disabled?: boolean;
-  trailingOption?: (query: string) => { value: string; label: string } | null;
+  trailingOption?: (query: string) => SelectDropdownOption | null;
 }) {
   return (
     <SelectDropdown
@@ -217,17 +219,39 @@ export function CreateClassModal({
   ]);
 
   const instructorOptions = useMemo(() => {
-    return (config.instructors || [])
-      .map((instructor) => ({
-        id: String(instructor.id || "").trim(),
-        label:
-          instructor.name_ru ||
-          instructor.name_en ||
-          instructor.email ||
-          instructor.id,
-      }))
-      .filter((item) => item.id);
-  }, [config.instructors]);
+    if (!cellContext) return [];
+    const weekday = (weekdayValue || cellContext.weekday) as TermWeekdayKey;
+    const start = useCustomTime
+      ? normalizeTypedHhmm(timeValue)
+      : timeValue.trim();
+    const end = useCustomTime
+      ? normalizeTypedHhmm(endTimeValue)
+      : endTimeValue.trim() ||
+        (start
+          ? resolveEndTimeForStart(config, start, audienceValue).slice(0, 5)
+          : "");
+    const dates = semesterDatesForWeekday(config, weekday);
+    return buildInstructorPickerOptions({
+      config,
+      meetings,
+      date: cellContext.date,
+      dates: dates.length ? dates : [cellContext.date],
+      start,
+      end: end || undefined,
+      weekday,
+      courseInstructors: selectedCourse?.instructors,
+    });
+  }, [
+    audienceValue,
+    cellContext,
+    config,
+    endTimeValue,
+    meetings,
+    selectedCourse?.instructors,
+    timeValue,
+    useCustomTime,
+    weekdayValue,
+  ]);
 
   const perGroupOptions = useMemo(() => {
     if (!selectedComponent) return [];
@@ -532,10 +556,7 @@ export function CreateClassModal({
             value={instructorValue}
             onChange={setInstructorValue}
             placeholder="Выберите преподавателя"
-            options={instructorOptions.map((instructor) => ({
-              value: instructor.id,
-              label: instructor.label,
-            }))}
+            options={instructorOptions}
           />
         </CreateClassField>
 
