@@ -48,9 +48,17 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
     but we couldn't leverage built-in allDay-guessing, among other things.
     */
     if (!internalState || arg.isRefetch) {
+      const url = /^https?:\/\/api\.innohassle\.ru(\/|$)/i.test(meta.url)
+        ? meta.url
+        : `https://api.innohassle.ru/events/v0/me/check-calendar-url-to-link?${new URLSearchParams(
+            {
+              calendar_url: meta.url,
+            },
+          )}`;
+
       internalState = meta.internalState = {
         response: null,
-        iCalExpanderPromise: fetch(meta.url, {
+        iCalExpanderPromise: fetch(url, {
           method: "GET",
           headers:
             localStorage.getItem("accessToken") &&
@@ -62,6 +70,7 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
                 }
               : undefined,
         }).then((response) => {
+          if (response.status !== 200) return;
           return response.text().then((icsText) => {
             internalState.response = response;
             return new IcalExpander({

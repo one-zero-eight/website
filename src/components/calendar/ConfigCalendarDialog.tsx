@@ -1,12 +1,14 @@
 import { $schedule } from "@/api/schedule";
 import { Modal } from "@/components/common/Modal.tsx";
 import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
-import { PersonalCard } from "@/components/schedule/group-card/PersonalCard.tsx";
+import { PersonalCard } from "@/components/schedule/personal-card/PersonalCard.tsx";
 import { useMyMusicRoom } from "@/api/schedule/event-group.ts";
 import { Link } from "@tanstack/react-router";
 import { TargetForExport } from "@/api/schedule/types.ts";
 import { useState } from "react";
 import { ExportModal } from "@/components/calendar/ExportModal.tsx";
+import { LinkedCard } from "@/components/schedule/linked-card/LinkedCard.tsx";
+import { ImportModal } from "@/components/calendar/import";
 
 export function ConfigCalendarDialog({
   open,
@@ -24,6 +26,7 @@ export function ConfigCalendarDialog({
   const { isSuccess: musicRoomIsSuccess } = useMyMusicRoom();
 
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [targetForExport, setTargetForExport] = useState<
     number | TargetForExport | null
   >(null);
@@ -100,10 +103,31 @@ export function ConfigCalendarDialog({
             setExportModalOpen(true);
           }}
         />
+        {Object.keys(scheduleUser?.linked_calendars || {}).map((key, index) => {
+          const linkedCalendar = scheduleUser?.linked_calendars
+            ? scheduleUser?.linked_calendars[key]
+            : null;
+          return (
+            <LinkedCard
+              key={linkedCalendar?.id ?? `${key}-${index}`}
+              name={linkedCalendar?.name}
+              alias={linkedCalendar?.alias}
+              url={linkedCalendar?.url}
+              description={linkedCalendar?.description}
+            />
+          );
+        })}
       </div>
 
       <p className="text-base-content/75 mb-4 text-lg">
-        Add favorite calendars using star button.
+        Add favorite calendars using star button or{" "}
+        <button
+          onClick={() => setImportModalOpen(true)}
+          className="underline underline-offset-4"
+        >
+          import your own calendars
+        </button>{" "}
+        to InNoHassle.
         <br />
         <Link to="/schedule" className="underline underline-offset-4">
           Explore schedules
@@ -114,6 +138,12 @@ export function ConfigCalendarDialog({
         eventGroupOrTarget={targetForExport}
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
+        aboveModal
+      />
+      <ImportModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        onSubmit={() => setImportModalOpen(false)}
         aboveModal
       />
     </Modal>

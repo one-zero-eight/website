@@ -41,12 +41,19 @@ export default function CalendarViewer({
   initialView = "listMonth",
   viewId = "",
   isFullPage = false,
+  onEventSourceSuccess,
+  isHidden,
 }: {
   urls: URLType[];
   extraEvents?: EventInput[];
   initialView?: string;
   viewId?: string;
   isFullPage?: boolean;
+  onEventSourceSuccess?: (
+    eventsInput: EventInput[],
+    response?: Response,
+  ) => void;
+  isHidden?: boolean;
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
   const academicCalendarRef = useRef(academicCalendar);
@@ -96,7 +103,7 @@ export default function CalendarViewer({
           // Accumulate 'extendedProps.calendarURLs' to use it later.
           const unique: Record<string, EventApi> = {};
           for (const event of events) {
-            // Using 'id' instead of 'title' is a fix for Music romm
+            // Using 'id' instead of 'title' is a fix for Music room
             const uniqueId =
               (event.id || event.title) + event.startStr + event.endStr;
             if (!(uniqueId in unique)) {
@@ -159,6 +166,7 @@ export default function CalendarViewer({
 
           return input;
         }}
+        eventSourceSuccess={onEventSourceSuccess}
         progressiveEventRendering={true}
         timeZone="UTC+0" // Use the same timezone for everyone
         plugins={[
@@ -346,7 +354,12 @@ export default function CalendarViewer({
       for (const eventSource of eventSourcesPrev) {
         // Check if the source is in the list of sources to get
         const found = eventSourcesToGet.find(
-          (source) => source.url === eventSource.url,
+          (source) =>
+            source.url === eventSource.url &&
+            // @ts-expect-error internalEventSource is presented in eventSource
+            (source.color === eventSource.internalEventSource.meta.color ||
+              // @ts-expect-error internalEventSource is presented in eventSource
+              eventSource.internalEventSource.meta.color === "undefined"),
         );
         if (!found) {
           eventSource.remove();
@@ -357,7 +370,12 @@ export default function CalendarViewer({
       for (const eventSource of eventSourcesToGet) {
         // Check if the source is already in the calendar
         const found = eventSourcesPrev.find(
-          (source) => source.url === eventSource.url,
+          (source) =>
+            source.url === eventSource.url &&
+            // @ts-expect-error internalEventSource is presented in eventSource
+            (source.internalEventSource.meta.color === eventSource.color ||
+              // @ts-expect-error internalEventSource is presented in eventSource
+              source.internalEventSource.meta.color === "undefined"),
         );
         if (!found) {
           calendarApi.addEventSource(eventSource);
@@ -406,6 +424,7 @@ export default function CalendarViewer({
       className={cn(
         isFullPage ? "h-full overflow-clip" : "",
         isLoading && "calendar-loading",
+        isHidden && "hidden",
       )}
     >
       {calendarComponent}
