@@ -1,4 +1,7 @@
-import type { SchemaRoomAttributeDef } from "@/api/schedule-assistant/types.ts";
+import {
+  RoomAttributeDefType,
+  type SchemaRoomAttributeDef,
+} from "@/api/schedule-assistant/types.ts";
 
 export type RoomAttributeType = SchemaRoomAttributeDef["type"];
 
@@ -8,35 +11,35 @@ export const ROOM_ATTRIBUTE_TYPE_OPTIONS: {
   value: RoomAttributeType;
   label: string;
 }[] = [
-  { value: "boolean", label: "Да/нет" },
-  { value: "string", label: "Текст" },
-  { value: "number", label: "Число" },
-  { value: "enum", label: "Выбор" },
-  { value: "list", label: "Список" },
+  { value: RoomAttributeDefType.boolean, label: "Да/нет" },
+  { value: RoomAttributeDefType.string, label: "Текст" },
+  { value: RoomAttributeDefType.number, label: "Число" },
+  { value: RoomAttributeDefType.enum, label: "Выбор" },
+  { value: RoomAttributeDefType.list, label: "Список" },
 ];
 
 export const ROOM_ATTRIBUTE_TYPE_EXAMPLES: Record<
   RoomAttributeType,
   { key: string; hint: string; enumValue?: string }
 > = {
-  boolean: {
+  [RoomAttributeDefType.boolean]: {
     key: "Проектор",
     hint: "Есть ли проектор в аудитории",
   },
-  string: {
+  [RoomAttributeDefType.string]: {
     key: "Корпус",
     hint: "Корпус или крыло здания",
   },
-  number: {
+  [RoomAttributeDefType.number]: {
     key: "Розетки",
     hint: "Количество розеток",
   },
-  enum: {
+  [RoomAttributeDefType.enum]: {
     key: "Доска",
     hint: "Тип доски в аудитории",
     enumValue: "Маркерная",
   },
-  list: {
+  [RoomAttributeDefType.list]: {
     key: "Оборудование",
     hint: "Дополнительное оборудование",
   },
@@ -45,7 +48,7 @@ export const ROOM_ATTRIBUTE_TYPE_EXAMPLES: Record<
 export function emptyRoomAttributeDef(): SchemaRoomAttributeDef {
   return {
     key: "",
-    type: "boolean",
+    type: RoomAttributeDefType.boolean,
     hint: null,
     enum_values: [],
   };
@@ -92,7 +95,7 @@ export function normalizeRoomAttributeDefs(
         key,
         type: def.type,
         hint,
-        enum_values: def.type === "enum" ? enumValues : [],
+        enum_values: def.type === RoomAttributeDefType.enum ? enumValues : [],
       };
     })
     .filter((def) => def.key);

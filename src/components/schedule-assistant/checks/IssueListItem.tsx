@@ -134,7 +134,9 @@ export function IssueListItem({
         <h3 className="text-sm font-semibold">
           {ISSUE_TYPE_HEADINGS[issue.issue_type]}
         </h3>
-        {metric && issue.issue_type !== "instructor_id" ? (
+        {metric &&
+        issue.issue_type !== "instructor_id" &&
+        issue.issue_type !== "student_email" ? (
           <span
             className={cn(
               "rounded-full border px-2 py-0.5 text-xs font-medium",
@@ -151,6 +153,18 @@ export function IssueListItem({
       {issue.issue_type === "instructor_id" ? (
         <div className="mt-2 flex flex-col gap-1">
           <InstructorNavigateButton instructorId={issue.instructor_id} />
+          <p className="text-base-content/80 px-1 text-sm leading-relaxed">
+            {issue.text}
+          </p>
+        </div>
+      ) : issue.issue_type === "student_email" ? (
+        <div className="mt-2 flex flex-col gap-1">
+          <p className="text-base-content/80 px-1 text-sm leading-relaxed">
+            <span className="font-medium">{issue.student_email}</span>
+            {issue.groups?.length
+              ? ` · группы ${issue.groups.join(", ")}`
+              : null}
+          </p>
           <p className="text-base-content/80 px-1 text-sm leading-relaxed">
             {issue.text}
           </p>

@@ -55,6 +55,144 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/distributions/uploads": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Distribution Uploads */
+    get: operations["distributions_list_distribution_uploads"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/distributions/uploads/{upload_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Distribution Upload */
+    get: operations["distributions_get_distribution_upload"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/distributions/uploads/{upload_id}/file": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Download Distribution Upload */
+    get: operations["distributions_download_distribution_upload"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/distributions/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Preview Distribution */
+    post: operations["distributions_preview_distribution"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/distributions/apply": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Apply Distribution */
+    post: operations["distributions_apply_distribution"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/instructor-preferences/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get My Preferences */
+    get: operations["instructor_preferences_get_my_preferences"];
+    /** Update My Preferences */
+    put: operations["instructor_preferences_update_my_preferences"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/instructor-preferences/{instructor_id}/share-link": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create Preference Share Link */
+    post: operations["instructor_preferences_create_preference_share_link"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/instructor-preferences/link/{token}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Preferences By Token */
+    get: operations["instructor_preferences_get_preferences_by_token"];
+    /** Update Preferences By Token */
+    put: operations["instructor_preferences_update_preferences_by_token"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/issues/check": {
     parameters: {
       query?: never;
@@ -443,58 +581,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/instructor-preferences/me": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["instructor_preferences_get_my_preferences"];
-    put: operations["instructor_preferences_update_my_preferences"];
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/instructor-preferences/{instructor_id}/share-link": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: {
-        instructor_id: string;
-      };
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["instructor_preferences_create_preference_share_link"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/instructor-preferences/link/{token}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: {
-        token: string;
-      };
-      cookie?: never;
-    };
-    get: operations["instructor_preferences_get_preferences_by_token"];
-    put: operations["instructor_preferences_update_preferences_by_token"];
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/me": {
     parameters: {
       query?: never;
@@ -516,6 +602,59 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** Body_distributions_apply_distribution */
+    Body_distributions_apply_distribution: {
+      /**
+       * File
+       * @description Distribution Excel workbook
+       */
+      file: string;
+      /** Section Code */
+      section_code: string;
+      /**
+       * Mapping
+       * @description JSON object excel_label -> group_code|null
+       */
+      mapping: string;
+      /** Sheet Name */
+      sheet_name?: string | null;
+      /** Email Column */
+      email_column?: string | null;
+      /**
+       * Membership Columns
+       * @description JSON array of column names
+       */
+      membership_columns?: string | null;
+      /**
+       * Forward Fill Columns
+       * @description JSON array of column names
+       */
+      forward_fill_columns?: string | null;
+    };
+    /** Body_distributions_preview_distribution */
+    Body_distributions_preview_distribution: {
+      /**
+       * File
+       * @description Distribution Excel workbook
+       */
+      file: string;
+      /** Section Code */
+      section_code: string;
+      /** Sheet Name */
+      sheet_name?: string | null;
+      /** Email Column */
+      email_column?: string | null;
+      /**
+       * Membership Columns
+       * @description JSON array of column names
+       */
+      membership_columns?: string | null;
+      /**
+       * Forward Fill Columns
+       * @description JSON array of column names
+       */
+      forward_fill_columns?: string | null;
+    };
     /** Body_schedule_config_put_schedule_config_yaml_file */
     Body_schedule_config_put_schedule_config_yaml_file: {
       /**
@@ -647,6 +786,11 @@ export interface components {
        * @default true
        */
       check_instructor_id: boolean;
+      /**
+       * Check Student Email
+       * @default true
+       */
+      check_student_email: boolean;
       /**
        * Check Instructor Preference
        * @default true
@@ -851,7 +995,6 @@ export interface components {
       /**
        * Instructors
        * @description Subject-level staff with roles; preferred in event instructor pickers
-       * @default []
        */
       instructors?: components["schemas"]["CourseInstructor"][];
       /**
@@ -895,6 +1038,217 @@ export interface components {
        * @description Inclusive range end date in ISO format (YYYY-MM-DD)
        */
       end_date: string;
+    };
+    /** DistributionApplyResponse */
+    DistributionApplyResponse: {
+      /** Section Code */
+      section_code: string;
+      /** Updated Groups */
+      updated_groups?: components["schemas"]["DistributionApplyResultItem"][];
+      /** Skipped Labels */
+      skipped_labels?: string[];
+      /** Revision */
+      revision: number;
+      /** Upload Id */
+      upload_id?: string | null;
+    };
+    /** DistributionApplyResultItem */
+    DistributionApplyResultItem: {
+      /** Group Code */
+      group_code: string;
+      /** Excel Label */
+      excel_label: string;
+      /** Students Count */
+      students_count: number;
+    };
+    /** DistributionLabelStat */
+    DistributionLabelStat: {
+      /** Label */
+      label: string;
+      /** Email Count */
+      email_count: number;
+      /** Emails */
+      emails?: string[];
+      /** Suggested Group Code */
+      suggested_group_code?: string | null;
+    };
+    /** DistributionPreviewResponse */
+    DistributionPreviewResponse: {
+      /** Section Code */
+      section_code: string;
+      /** Sheet Names */
+      sheet_names: string[];
+      /** Sheet Name */
+      sheet_name: string;
+      /** Columns */
+      columns: string[];
+      /** Header Row Index */
+      header_row_index: number;
+      /** Email Column */
+      email_column: string | null;
+      /** Membership Columns */
+      membership_columns: string[];
+      /** Forward Fill Columns */
+      forward_fill_columns: string[];
+      /** Labels */
+      labels: components["schemas"]["DistributionLabelStat"][];
+      /** Suggested Mapping */
+      suggested_mapping: {
+        [key: string]: string | null;
+      };
+      stats: components["schemas"]["DistributionPreviewStats"];
+      /** Target Groups */
+      target_groups: components["schemas"]["DistributionTargetGroup"][];
+    };
+    /** DistributionPreviewStats */
+    DistributionPreviewStats: {
+      /** Row Count */
+      row_count: number;
+      /** Email Count */
+      email_count: number;
+      /** Label Count */
+      label_count: number;
+      /** Unmapped Label Count */
+      unmapped_label_count: number;
+    };
+    /** DistributionTargetGroup */
+    DistributionTargetGroup: {
+      /** Code */
+      code: string;
+      /** Name */
+      name?: string | null;
+      /** Kind */
+      kind: string;
+      /**
+       * Students Count
+       * @default 0
+       */
+      students_count: number;
+    };
+    /** DistributionUploadDetail */
+    DistributionUploadDetail: {
+      /** Id */
+      id: string;
+      /** Section Code */
+      section_code: string;
+      /** Filename */
+      filename: string;
+      /** Content Type */
+      content_type: string;
+      /** Uploaded By */
+      uploaded_by: string;
+      /** Uploaded At */
+      uploaded_at: string;
+      /** Sheet Name */
+      sheet_name?: string | null;
+      /** Email Column */
+      email_column?: string | null;
+      /** Membership Columns */
+      membership_columns?: string[];
+      stats?: components["schemas"]["DistributionUploadStats"];
+      /**
+       * Updated Group Count
+       * @default 0
+       */
+      updated_group_count: number;
+      /**
+       * Skipped Label Count
+       * @default 0
+       */
+      skipped_label_count: number;
+      /**
+       * Revision
+       * @default 0
+       */
+      revision: number;
+      /**
+       * File Size
+       * @default 0
+       */
+      file_size: number;
+      /** Mapping */
+      mapping?: {
+        [key: string]: string | null;
+      };
+      /** Updated Groups */
+      updated_groups?: components["schemas"]["DistributionApplyResultItem"][];
+      /** Skipped Labels */
+      skipped_labels?: string[];
+    };
+    /** DistributionUploadStats */
+    DistributionUploadStats: {
+      /**
+       * Row Count
+       * @default 0
+       */
+      row_count: number;
+      /**
+       * Email Count
+       * @default 0
+       */
+      email_count: number;
+      /**
+       * Label Count
+       * @default 0
+       */
+      label_count: number;
+      /**
+       * Mapped Label Count
+       * @default 0
+       */
+      mapped_label_count: number;
+      /**
+       * Skipped Label Count
+       * @default 0
+       */
+      skipped_label_count: number;
+      /**
+       * Updated Group Count
+       * @default 0
+       */
+      updated_group_count: number;
+    };
+    /** DistributionUploadSummary */
+    DistributionUploadSummary: {
+      /** Id */
+      id: string;
+      /** Section Code */
+      section_code: string;
+      /** Filename */
+      filename: string;
+      /** Content Type */
+      content_type: string;
+      /** Uploaded By */
+      uploaded_by: string;
+      /** Uploaded At */
+      uploaded_at: string;
+      /** Sheet Name */
+      sheet_name?: string | null;
+      /** Email Column */
+      email_column?: string | null;
+      /** Membership Columns */
+      membership_columns?: string[];
+      stats?: components["schemas"]["DistributionUploadStats"];
+      /**
+       * Updated Group Count
+       * @default 0
+       */
+      updated_group_count: number;
+      /**
+       * Skipped Label Count
+       * @default 0
+       */
+      skipped_label_count: number;
+      /**
+       * Revision
+       * @default 0
+       */
+      revision: number;
+      /**
+       * File Size
+       * @default 0
+       */
+      file_size: number;
     };
     /**
      * GroupIssue
@@ -1002,6 +1356,29 @@ export interface components {
       /** Instructor Id */
       instructor_id: string;
     };
+    /**
+     * StudentEmailIssue
+     * @description Email студента в students_groups не является корпоративным адресом Innopolis.
+     */
+    StudentEmailIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: StudentEmailIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Student Email */
+      student_email: string;
+      /**
+       * Groups
+       * @default []
+       */
+      groups?: string[];
+    };
     /** InstructorListItem */
     InstructorListItem: {
       /**
@@ -1046,6 +1423,18 @@ export interface components {
        */
       meetings_count: number;
     };
+    /** InstructorPreferenceForm */
+    InstructorPreferenceForm: {
+      /** Instructor Id */
+      instructor_id: string;
+      /** Instructor Name */
+      instructor_name: string;
+      /** Email */
+      email: string | null;
+      term: components["schemas"]["TermConfig"];
+      /** Slot Preferences */
+      slot_preferences: components["schemas"]["InstructorSlotPreferenceEntry"][];
+    };
     /**
      * InstructorPreferenceIssue
      * @description Занятие назначено преподавателю в нежелательную (discouraged) ячейку сетки.
@@ -1073,6 +1462,11 @@ export interface components {
       penalty_weight: number;
       meeting: components["schemas"]["ScheduledMeeting"];
     };
+    /** InstructorPreferenceUpdate */
+    InstructorPreferenceUpdate: {
+      /** Slot Preferences */
+      slot_preferences: components["schemas"]["InstructorSlotPreferenceEntry"][];
+    };
     /** InstructorSlotPreferenceEntry */
     InstructorSlotPreferenceEntry: {
       /** @description Teaching weekday for this preference cell */
@@ -1098,6 +1492,7 @@ export interface components {
       | components["schemas"]["TeacherIssue"]
       | components["schemas"]["UnplacedIssue"]
       | components["schemas"]["InstructorIdIssue"]
+      | components["schemas"]["StudentEmailIssue"]
       | components["schemas"]["UnbookedIssue"]
       | components["schemas"]["GroupIssue"]
       | components["schemas"]["StudentIssue"]
@@ -1270,21 +1665,6 @@ export interface components {
        */
       is_moderator: boolean;
     };
-    InstructorPreferenceForm: {
-      instructor_id: string;
-      instructor_name: string;
-      email?: string | null;
-      term: components["schemas"]["TermConfig"];
-      slot_preferences?: components["schemas"]["InstructorSlotPreferenceEntry"][];
-    };
-    InstructorPreferenceUpdate: {
-      slot_preferences?: components["schemas"]["InstructorSlotPreferenceEntry"][];
-    };
-    PreferenceShareLinkResponse: {
-      token: string;
-      /** Format: date-time */
-      expires_at: string;
-    };
     /** OccurrencePlacement */
     OccurrencePlacement: {
       /**
@@ -1360,6 +1740,16 @@ export interface components {
       /** Actual Per Week */
       actual_per_week: number;
     };
+    /** PreferenceShareLinkResponse */
+    PreferenceShareLinkResponse: {
+      /** Token */
+      token: string;
+      /**
+       * Expires At
+       * Format: date-time
+       */
+      expires_at: string;
+    };
     /** ProgramTrack */
     ProgramTrack: {
       /**
@@ -1400,11 +1790,10 @@ export interface components {
        * Capacity
        * @description Maximum room capacity
        */
-      capacity: number | null;
+      capacity?: number | null;
       /**
        * Features
        * @description Room attribute values keyed by term.room_attributes[].key
-       * @default {}
        */
       features?: {
         [key: string]: boolean | string | number | string[];
@@ -1422,7 +1811,7 @@ export interface components {
        * @description Value type for this attribute
        * @enum {string}
        */
-      type: "boolean" | "string" | "number" | "enum" | "list";
+      type: RoomAttributeDefType;
       /**
        * Hint
        * @description Short hint shown next to the attribute in the room editor
@@ -1431,7 +1820,6 @@ export interface components {
       /**
        * Enum Values
        * @description Allowed values when type is enum; ignored otherwise
-       * @default []
        */
       enum_values?: string[];
     };
@@ -1597,15 +1985,15 @@ export interface components {
        */
       name: string;
       /**
-       * Default Layout
-       * @description Default timetable layout when opening this section (groups or calendar)
-       */
-      default_layout?: ("groups" | "calendar") | null;
-      /**
        * Kind
        * @description Section kind marker (for example, core/english/electives)
        */
       kind?: SectionConfigKindAnyOf0 | string | null;
+      /**
+       * Default Layout
+       * @description Default timetable layout when opening this section (groups or calendar)
+       */
+      default_layout?: SectionConfigDefault_layoutAnyOf0 | null;
       /**
        * Programs
        * @description Programs inside the section
@@ -1844,25 +2232,21 @@ export interface components {
       /**
        * Instructor Positions
        * @description Allowed instructor.position values (staff titles); empty means unrestricted
-       * @default []
        */
       instructor_positions?: string[];
       /**
        * Course Instructor Roles
        * @description Allowed course.instructors[].role values (subject roles); empty means unrestricted
-       * @default []
        */
       course_instructor_roles?: string[];
       /**
        * Course Component Tags
        * @description Allowed course.components[].tag values; empty means unrestricted
-       * @default []
        */
       course_component_tags?: string[];
       /**
        * Room Attributes
-       * @description Allowed room.features keys with types/defaults; empty means unrestricted legacy keys
-       * @default []
+       * @description Allowed room.features keys with types; empty means unrestricted legacy keys
        */
       room_attributes?: components["schemas"]["RoomAttributeDef"][];
     };
@@ -1871,26 +2255,6 @@ export interface components {
       /** Name */
       name?: string | null;
       semester?: components["schemas"]["DateRange"] | null;
-      /**
-       * Instructor Positions
-       * @description Allowed instructor.position values (staff titles); empty means unrestricted
-       */
-      instructor_positions?: string[] | null;
-      /**
-       * Course Instructor Roles
-       * @description Allowed course.instructors[].role values (subject roles); empty means unrestricted
-       */
-      course_instructor_roles?: string[] | null;
-      /**
-       * Course Component Tags
-       * @description Allowed course.components[].tag values; empty means unrestricted
-       */
-      course_component_tags?: string[] | null;
-      /**
-       * Room Attributes
-       * @description Allowed room.features keys with types/defaults; empty means unrestricted legacy keys
-       */
-      room_attributes?: components["schemas"]["RoomAttributeDef"][] | null;
       /** Days */
       days?: components["schemas"]["Weekday"][] | null;
       starting_day?: components["schemas"]["Weekday"] | null;
@@ -1898,6 +2262,14 @@ export interface components {
       time_slots?: components["schemas"]["TermTimeSlot"][] | null;
       /** Sections */
       sections?: components["schemas"]["SectionConfig"][] | null;
+      /** Instructor Positions */
+      instructor_positions?: string[] | null;
+      /** Course Instructor Roles */
+      course_instructor_roles?: string[] | null;
+      /** Course Component Tags */
+      course_component_tags?: string[] | null;
+      /** Room Attributes */
+      room_attributes?: components["schemas"]["RoomAttributeDef"][] | null;
     };
     /** TermTimeSlot */
     TermTimeSlot: {
@@ -2075,6 +2447,10 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaBodyDistributionsApplyDistribution =
+  components["schemas"]["Body_distributions_apply_distribution"];
+export type SchemaBodyDistributionsPreviewDistribution =
+  components["schemas"]["Body_distributions_preview_distribution"];
 export type SchemaBodyScheduleConfigPutScheduleConfigYamlFile =
   components["schemas"]["Body_schedule_config_put_schedule_config_yaml_file"];
 export type SchemaBookingDto = components["schemas"]["BookingDTO"];
@@ -2089,8 +2465,27 @@ export type SchemaConfigChangeEvent =
 export type SchemaConfigChangeEventSummary =
   components["schemas"]["ConfigChangeEventSummary"];
 export type SchemaCourseConfig = components["schemas"]["CourseConfig"];
+export type SchemaCourseInstructor = components["schemas"]["CourseInstructor"];
 export type SchemaCoursesConfig = components["schemas"]["CoursesConfig"];
 export type SchemaDateRange = components["schemas"]["DateRange"];
+export type SchemaDistributionApplyResponse =
+  components["schemas"]["DistributionApplyResponse"];
+export type SchemaDistributionApplyResultItem =
+  components["schemas"]["DistributionApplyResultItem"];
+export type SchemaDistributionLabelStat =
+  components["schemas"]["DistributionLabelStat"];
+export type SchemaDistributionPreviewResponse =
+  components["schemas"]["DistributionPreviewResponse"];
+export type SchemaDistributionPreviewStats =
+  components["schemas"]["DistributionPreviewStats"];
+export type SchemaDistributionTargetGroup =
+  components["schemas"]["DistributionTargetGroup"];
+export type SchemaDistributionUploadDetail =
+  components["schemas"]["DistributionUploadDetail"];
+export type SchemaDistributionUploadStats =
+  components["schemas"]["DistributionUploadStats"];
+export type SchemaDistributionUploadSummary =
+  components["schemas"]["DistributionUploadSummary"];
 export type SchemaGroupIssue = components["schemas"]["GroupIssue"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
@@ -2101,8 +2496,12 @@ export type SchemaInstructorIdIssue =
   components["schemas"]["InstructorIdIssue"];
 export type SchemaInstructorListItem =
   components["schemas"]["InstructorListItem"];
+export type SchemaInstructorPreferenceForm =
+  components["schemas"]["InstructorPreferenceForm"];
 export type SchemaInstructorPreferenceIssue =
   components["schemas"]["InstructorPreferenceIssue"];
+export type SchemaInstructorPreferenceUpdate =
+  components["schemas"]["InstructorPreferenceUpdate"];
 export type SchemaInstructorSlotPreferenceEntry =
   components["schemas"]["InstructorSlotPreferenceEntry"];
 export type SchemaIssue = components["schemas"]["Issue"];
@@ -2114,6 +2513,8 @@ export type SchemaOutlookIssue = components["schemas"]["OutlookIssue"];
 export type SchemaParseLocationStringResponse =
   components["schemas"]["ParseLocationStringResponse"];
 export type SchemaPerWeekIssue = components["schemas"]["PerWeekIssue"];
+export type SchemaPreferenceShareLinkResponse =
+  components["schemas"]["PreferenceShareLinkResponse"];
 export type SchemaProgramTrack = components["schemas"]["ProgramTrack"];
 export type SchemaRoom = components["schemas"]["Room"];
 export type SchemaRoomAttributeDef = components["schemas"]["RoomAttributeDef"];
@@ -2127,6 +2528,8 @@ export type SchemaSectionConfig = components["schemas"]["SectionConfig"];
 export type SchemaSectionProgram = components["schemas"]["SectionProgram"];
 export type SchemaSessionOccurrence =
   components["schemas"]["SessionOccurrence"];
+export type SchemaStudentEmailIssue =
+  components["schemas"]["StudentEmailIssue"];
 export type SchemaStudentIssue = components["schemas"]["StudentIssue"];
 export type SchemaStudentsGroups = components["schemas"]["StudentsGroups"];
 export type SchemaTeacherIssue = components["schemas"]["TeacherIssue"];
@@ -2212,6 +2615,316 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["RoomDTO"][];
+        };
+      };
+    };
+  };
+  distributions_list_distribution_uploads: {
+    parameters: {
+      query?: {
+        section_code?: string | null;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DistributionUploadSummary"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  distributions_get_distribution_upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        upload_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DistributionUploadDetail"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  distributions_download_distribution_upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        upload_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  distributions_preview_distribution: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_distributions_preview_distribution"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DistributionPreviewResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  distributions_apply_distribution: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_distributions_apply_distribution"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DistributionApplyResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  instructor_preferences_get_my_preferences: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InstructorPreferenceForm"];
+        };
+      };
+    };
+  };
+  instructor_preferences_update_my_preferences: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InstructorPreferenceUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InstructorPreferenceForm"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  instructor_preferences_create_preference_share_link: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        instructor_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PreferenceShareLinkResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  instructor_preferences_get_preferences_by_token: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InstructorPreferenceForm"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  instructor_preferences_update_preferences_by_token: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InstructorPreferenceUpdate"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InstructorPreferenceForm"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -3281,121 +3994,6 @@ export interface operations {
       };
     };
   };
-
-  instructor_preferences_get_my_preferences: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["InstructorPreferenceForm"];
-        };
-      };
-    };
-  };
-  instructor_preferences_update_my_preferences: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["InstructorPreferenceUpdate"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["InstructorPreferenceForm"];
-        };
-      };
-    };
-  };
-  instructor_preferences_create_preference_share_link: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        instructor_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["PreferenceShareLinkResponse"];
-        };
-      };
-    };
-  };
-  instructor_preferences_get_preferences_by_token: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        token: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["InstructorPreferenceForm"];
-        };
-      };
-    };
-  };
-  instructor_preferences_update_preferences_by_token: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        token: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["InstructorPreferenceUpdate"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["InstructorPreferenceForm"];
-        };
-      };
-    };
-  };
   users_get_me: {
     parameters: {
       query?: never;
@@ -3449,6 +4047,9 @@ export enum InstructorBannedSlotIssueIssue_type {
 export enum InstructorIdIssueIssue_type {
   instructor_id = "instructor_id",
 }
+export enum StudentEmailIssueIssue_type {
+  student_email = "student_email",
+}
 export enum InstructorPreferenceIssueIssue_type {
   instructor_preference = "instructor_preference",
 }
@@ -3475,6 +4076,13 @@ export enum ProgramTrackKindAnyOf0 {
   track = "track",
   english_program = "english_program",
 }
+export enum RoomAttributeDefType {
+  boolean = "boolean",
+  string = "string",
+  number = "number",
+  enum = "enum",
+  list = "list",
+}
 export enum RoomDTOAccess_levelAnyOf0 {
   yellow = "yellow",
   red = "red",
@@ -3491,6 +4099,10 @@ export enum SectionConfigKindAnyOf0 {
   core = "core",
   english = "english",
   electives = "electives",
+}
+export enum SectionConfigDefault_layoutAnyOf0 {
+  groups = "groups",
+  calendar = "calendar",
 }
 export enum SectionProgramKindAnyOf0 {
   degree_year = "degree_year",

@@ -5,6 +5,7 @@ import {
   SchemaInstructorListItem,
   SchemaRoomAttributeDef,
   SchemaSectionProgram,
+  SectionConfigDefault_layoutAnyOf0,
   SectionProgramLanguageAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
@@ -2118,7 +2119,10 @@ export function SemesterDetails() {
                     const target = next.sections?.[sectionIndex];
                     if (!target) return current;
                     target.default_layout =
-                      value === "groups" || value === "calendar" ? value : null;
+                      value === SectionConfigDefault_layoutAnyOf0.groups ||
+                      value === SectionConfigDefault_layoutAnyOf0.calendar
+                        ? value
+                        : null;
                     return next;
                   });
                 }}

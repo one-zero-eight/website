@@ -8,6 +8,7 @@ import {
 } from "@/components/schedule-assistant/settings/groups/programsGroupsTreeView.ts";
 import { SectionTabsBar } from "@/components/schedule-assistant/settings/SectionTabsBar.tsx";
 import { NewSectionButton } from "@/components/schedule-assistant/settings/NewSectionButton.tsx";
+import { ImportDistributionsModal } from "@/components/schedule-assistant/settings/groups/ImportDistributionsModal.tsx";
 import {
   SchemaSectionProgram,
   SectionProgramKindAnyOf0,
@@ -143,6 +144,7 @@ export function GroupsTabContent() {
   const { deleteSection, isPending: isDeletingSection } = useDeleteSection();
   const { moveProgram } = useMoveProgramInSection(activeSectionKey);
   const [createOpen, setCreateOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [createSectionCode, setCreateSectionCode] = useState("");
   const [newCode, setNewCode] = useState("");
   const [newName, setNewName] = useState("");
@@ -305,6 +307,13 @@ export function GroupsTabContent() {
           }}
         >
           Добавить программу
+        </button>
+        <button
+          type="button"
+          className="btn btn-outline btn-primary btn-sm w-fit shrink-0"
+          onClick={() => setImportOpen(true)}
+        >
+          Импорт распределения из Excel
         </button>
         {activeSectionEmpty ? (
           <button
@@ -554,6 +563,12 @@ export function GroupsTabContent() {
           </select>
         </SettingsCreateField>
       </SettingsCreateModal>
+      <ImportDistributionsModal
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        config={config}
+        initialSectionCode={activeSectionKey}
+      />
     </div>
   );
 }

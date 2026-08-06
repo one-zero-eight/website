@@ -14,6 +14,7 @@ export const DEFAULT_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_unplaced: true,
   check_per_week: true,
   check_instructor_id: true,
+  check_student_email: true,
   check_instructor_preference: true,
   count_touching_room: false,
   count_touching_teacher: false,
@@ -32,6 +33,7 @@ export const ALL_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_unplaced: true,
   check_per_week: true,
   check_instructor_id: true,
+  check_student_email: true,
   check_instructor_preference: true,
   count_touching_room: false,
   count_touching_teacher: false,
@@ -50,6 +52,7 @@ export const NO_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_unplaced: false,
   check_per_week: false,
   check_instructor_id: false,
+  check_student_email: false,
   check_instructor_preference: false,
   count_touching_room: false,
   count_touching_teacher: false,
@@ -129,6 +132,11 @@ export const CHECK_OPTIONS: {
     description: "Некорректные идентификаторы преподавателей",
   },
   {
+    key: "check_student_email",
+    label: "Email студентов",
+    description: "Некорпоративные адреса в списках групп",
+  },
+  {
     key: "check_instructor_preference",
     label: "Предпочтения",
     description: "Запрещённые и нежелательные слоты преподавателей",
@@ -150,6 +158,7 @@ export const ISSUE_TYPE_LABELS: Record<SchemaIssue["issue_type"], string> = {
   unplaced: "Неразмещённые",
   per_week: "Частота в неделю",
   instructor_id: "ID преподавателей",
+  student_email: "Email студентов",
   instructor_banned_slot: "Запрещённые слоты",
   instructor_preference: "Нежелательные слоты",
 };
@@ -165,6 +174,7 @@ export const ISSUE_TYPE_HEADINGS: Record<SchemaIssue["issue_type"], string> = {
   unplaced: "Компонент без занятий",
   per_week: "Неверная частота в неделю",
   instructor_id: "Некорректный ID преподавателя",
+  student_email: "Некорректный email студента",
   instructor_banned_slot: "Запрещённый слот",
   instructor_preference: "Нежелательный слот",
 };
@@ -185,6 +195,8 @@ export function getIssueMetric(issue: SchemaIssue): string | null {
       return issue.outlook_event_title;
     case "instructor_id":
       return issue.instructor_id;
+    case "student_email":
+      return issue.student_email;
     case "instructor_banned_slot":
     case "instructor_preference":
       return `${issue.instructor_id}, ${issue.weekday} ${String(issue.start_time).slice(0, 5)}`;
