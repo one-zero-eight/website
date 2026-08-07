@@ -882,7 +882,11 @@ function TimetableWorkspaceInner({
                     <button
                       type="button"
                       className="btn btn-xs btn-ghost gap-1"
-                      title="Экспорт расписания и распределений в XLSX"
+                      title={
+                        isUtilizationTab
+                          ? "Экспорт недоступен на вкладках преподавателей и аудиторий"
+                          : "Экспорт всех разделов в XLSX"
+                      }
                       disabled={isUtilizationTab || exportPending || !config}
                       onClick={() => {
                         void handleExportXlsx();
