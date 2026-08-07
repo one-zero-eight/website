@@ -6,7 +6,6 @@ import {
   SchemaRoomAttributeDef,
   SchemaSectionProgram,
   SectionConfigDefault_layoutAnyOf0,
-  SectionProgramLanguageAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
@@ -1375,9 +1374,6 @@ export function ProgramDetails({
   const programIdentity = program ? programStableId(program) : code;
   const headingTitle = String(program?.name || programIdentity);
   const headingSubtitle = `Программа · ${sectionCode}`;
-  const kind = program && "kind" in program ? String(program.kind ?? "") : "";
-  const language = String(program?.language ?? "");
-  const year = program?.year != null ? String(program.year) : "";
   const tracks = (
     program ? normalizeTracksFromSectionProgram(program) : []
   ).map((track, trackIdx) => ({
@@ -1392,28 +1388,6 @@ export function ProgramDetails({
   const codeField = useBlurSaveField(code, (value) =>
     updateProgram((target) => {
       target.code = value;
-    }),
-  );
-  const kindField = useBlurSaveField(kind, (value) =>
-    updateProgram((target) => {
-      if (!("kind" in target)) return;
-      (target as Record<string, unknown>).kind = value;
-    }),
-  );
-  const languageField = useBlurSaveField(language, (value) =>
-    updateProgram((target) => {
-      target.language =
-        value === "en"
-          ? SectionProgramLanguageAnyOf0.en
-          : value === "ru"
-            ? SectionProgramLanguageAnyOf0.ru
-            : null;
-    }),
-  );
-  const yearField = useBlurSaveField(year, (value) =>
-    updateProgram((target) => {
-      const parsed = Number(value);
-      target.year = Number.isFinite(parsed) ? parsed : null;
     }),
   );
   const timeSlots = formatTermTimeSlots(program?.time_slots ?? undefined);
@@ -1438,18 +1412,6 @@ export function ProgramDetails({
             <input className={detailInputClass} {...codeField} />
           </label>
           <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>Тип</span>
-            <input className={detailInputClass} {...kindField} />
-          </label>
-          <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>Язык</span>
-            <input className={detailInputClass} {...languageField} />
-          </label>
-          <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>Год</span>
-            <input className={detailInputClass} {...yearField} />
-          </label>
-          <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Таймслоты программы</span>
             <textarea
               ref={timeSlotsTextareaRef}
@@ -1468,7 +1430,6 @@ export function ProgramDetails({
                 target.tracks.push({
                   code: `new-track-${target.tracks.length + 1}`,
                   name: `Новый трек ${target.tracks.length + 1}`,
-                  kind: null,
                   groups: [],
                 });
               })
@@ -1564,7 +1525,6 @@ export function TrackDetails({
   const headingTitle = name;
   const headingSubtitle = `Трек · ${programTitleForSubtitle}`;
   const code = track && "code" in track ? String(track.code ?? "") : "";
-  const kind = track && "kind" in track ? String(track.kind ?? "") : "";
   const trackGroups = Array.isArray(track?.groups) ? track.groups : [];
   const studentsGroups = Array.isArray(config?.students_groups)
     ? config.students_groups
@@ -1595,13 +1555,6 @@ export function TrackDetails({
       (draftTrack as Record<string, unknown>).code = value;
     }),
   );
-  const kindField = useBlurSaveField(kind, (value) =>
-    updateProgram((target) => {
-      const draftTrack = target.tracks[trackIndex];
-      if (!("kind" in draftTrack)) return;
-      (draftTrack as Record<string, unknown>).kind = value;
-    }),
-  );
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
@@ -1614,10 +1567,6 @@ export function TrackDetails({
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Код</span>
             <input className={detailInputClass} {...codeField} />
-          </label>
-          <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>Тип</span>
-            <input className={detailInputClass} {...kindField} />
           </label>
 
           <SettingsDetailNestedList

@@ -1762,11 +1762,6 @@ export interface components {
        */
       name: string;
       /**
-       * Kind
-       * @description Track kind marker
-       */
-      kind?: ProgramTrackKindAnyOf0 | string | null;
-      /**
        * Groups
        * @description Track groups as plain group codes
        * @default []
@@ -2012,32 +2007,6 @@ export interface components {
        * @description Program display name
        */
       name: string;
-      /**
-       * Kind
-       * @description Program kind marker
-       */
-      kind?: SectionProgramKindAnyOf0 | string | null;
-      /**
-       * Degree
-       * @description Optional degree marker (for example, bs/ms/phd)
-       */
-      degree?: string | null;
-      /**
-       * Language
-       * @description Program language marker (en/ru)
-       */
-      language?: SectionProgramLanguageAnyOf0 | null;
-      /**
-       * Year
-       * @description Program year
-       */
-      year?: number | null;
-      /**
-       * Applies To
-       * @description Optional list of entity codes this program applies to (for example, [BS_Y1_EN, BS_Y1_RU])
-       * @default []
-       */
-      applies_to: string[];
       /**
        * Tracks
        * @description Program tracks (optional wrapper when groups are split by track)
@@ -4111,10 +4080,6 @@ export enum PerWeekIssueSource_kind {
   core_course = "core_course",
   elective = "elective",
 }
-export enum ProgramTrackKindAnyOf0 {
-  track = "track",
-  english_program = "english_program",
-}
 export enum RoomAttributeDefType {
   boolean = "boolean",
   string = "string",
@@ -4142,15 +4107,6 @@ export enum SectionConfigKindAnyOf0 {
 export enum SectionConfigDefault_layoutAnyOf0 {
   groups = "groups",
   calendar = "calendar",
-}
-export enum SectionProgramKindAnyOf0 {
-  degree_year = "degree_year",
-  english_program = "english_program",
-  elective_bucket = "elective_bucket",
-}
-export enum SectionProgramLanguageAnyOf0 {
-  en = "en",
-  ru = "ru",
 }
 export enum StudentEmailIssueIssue_type {
   student_email = "student_email",

@@ -9,11 +9,7 @@ import {
 import { SectionTabsBar } from "@/components/schedule-assistant/settings/SectionTabsBar.tsx";
 import { NewSectionButton } from "@/components/schedule-assistant/settings/NewSectionButton.tsx";
 import { ImportDistributionsModal } from "@/components/schedule-assistant/settings/groups/ImportDistributionsModal.tsx";
-import {
-  SchemaSectionProgram,
-  SectionProgramKindAnyOf0,
-  SectionProgramLanguageAnyOf0,
-} from "@/api/schedule-assistant/types.ts";
+import { SchemaSectionProgram } from "@/api/schedule-assistant/types.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
   useAddProgramToSection,
@@ -34,15 +30,6 @@ import { useToast } from "@/components/toast";
 
 const STUDENT_GROUPS_SUBTAB_STORAGE_KEY =
   "schedule-assistant:settings:groups-subtab";
-
-const PROGRAM_KIND_OPTIONS = [
-  { value: SectionProgramKindAnyOf0.degree_year, label: "degree_year" },
-  { value: SectionProgramKindAnyOf0.english_program, label: "english_program" },
-  {
-    value: SectionProgramKindAnyOf0.elective_bucket,
-    label: "elective_bucket",
-  },
-] as const;
 
 function remapProgramIndex(
   index: number,
@@ -148,13 +135,6 @@ export function GroupsTabContent() {
   const [createSectionCode, setCreateSectionCode] = useState("");
   const [newCode, setNewCode] = useState("");
   const [newName, setNewName] = useState("");
-  const [newKind, setNewKind] = useState<string>(
-    SectionProgramKindAnyOf0.degree_year,
-  );
-  const [newDegree, setNewDegree] = useState("");
-  const [newLanguage, setNewLanguage] = useState<string>(
-    SectionProgramLanguageAnyOf0.en,
-  );
   const [pendingCreatedProgram, setPendingCreatedProgram] = useState<{
     sectionCode: string;
     code: string;
@@ -179,9 +159,6 @@ export function GroupsTabContent() {
     setCreateSectionCode(sectionCode);
     setNewCode("");
     setNewName("");
-    setNewKind(SectionProgramKindAnyOf0.degree_year);
-    setNewDegree("");
-    setNewLanguage(SectionProgramLanguageAnyOf0.en);
   }
 
   function handleMoveProgram(fromIndex: number, toIndex: number) {
@@ -266,16 +243,6 @@ export function GroupsTabContent() {
       {
         code,
         name,
-        kind: newKind.trim() || null,
-        degree: newDegree.trim() || null,
-        language:
-          newLanguage === SectionProgramLanguageAnyOf0.ru
-            ? SectionProgramLanguageAnyOf0.ru
-            : newLanguage === SectionProgramLanguageAnyOf0.en
-              ? SectionProgramLanguageAnyOf0.en
-              : null,
-        year: null,
-        applies_to: [],
         tracks: [],
         groups: [],
       } satisfies SchemaSectionProgram,
@@ -530,37 +497,6 @@ export function GroupsTabContent() {
             placeholder="BS - Year 1 (EN)"
             onChange={(e) => setNewName(e.target.value)}
           />
-        </SettingsCreateField>
-        <SettingsCreateField label="Тип">
-          <select
-            className="select select-bordered select-sm w-full"
-            value={newKind}
-            onChange={(e) => setNewKind(e.target.value)}
-          >
-            {PROGRAM_KIND_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </SettingsCreateField>
-        <SettingsCreateField label="Степень">
-          <input
-            className="input input-bordered input-sm w-full"
-            value={newDegree}
-            placeholder="bs / ms / phd"
-            onChange={(e) => setNewDegree(e.target.value)}
-          />
-        </SettingsCreateField>
-        <SettingsCreateField label="Язык">
-          <select
-            className="select select-bordered select-sm w-full"
-            value={newLanguage}
-            onChange={(e) => setNewLanguage(e.target.value)}
-          >
-            <option value={SectionProgramLanguageAnyOf0.en}>en</option>
-            <option value={SectionProgramLanguageAnyOf0.ru}>ru</option>
-          </select>
         </SettingsCreateField>
       </SettingsCreateModal>
       <ImportDistributionsModal

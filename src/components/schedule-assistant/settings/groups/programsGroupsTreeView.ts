@@ -34,7 +34,6 @@ export type ProgramTreeProgram = {
   subtitle: string;
   selection: SettingsSelection;
   sectionCode: string;
-  language: string;
   programIndex: number;
   tracks: ProgramTreeTrack[];
 };
@@ -138,7 +137,6 @@ export function buildProgramsGroupsTreeView(
         subtitle: `Программа · ${sectionCode}`,
         selection: programSelection,
         sectionCode,
-        language: String(program?.language || ""),
         programIndex,
         tracks,
       });
