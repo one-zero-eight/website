@@ -312,6 +312,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/schedule/export.xlsx": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Export Schedule Xlsx */
+    get: operations["schedule_export_schedule_xlsx"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/schedule-config/": {
     parameters: {
       query?: never;
@@ -630,6 +647,11 @@ export interface components {
        * @description JSON array of column names
        */
       forward_fill_columns?: string | null;
+      /**
+       * Emails By Label
+       * @description Optional JSON object excel_label -> email[] overrides
+       */
+      emails_by_label?: string | null;
     };
     /** Body_distributions_preview_distribution */
     Body_distributions_preview_distribution: {
@@ -1356,29 +1378,6 @@ export interface components {
       /** Instructor Id */
       instructor_id: string;
     };
-    /**
-     * StudentEmailIssue
-     * @description Email студента в students_groups не является корпоративным адресом Innopolis.
-     */
-    StudentEmailIssue: {
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      issue_type: StudentEmailIssueIssue_type;
-      /**
-       * Text
-       * @default
-       */
-      text: string;
-      /** Student Email */
-      student_email: string;
-      /**
-       * Groups
-       * @default []
-       */
-      groups?: string[];
-    };
     /** InstructorListItem */
     InstructorListItem: {
       /**
@@ -2090,6 +2089,29 @@ export interface components {
        * @description Instructor id(s) for this meeting
        */
       instructor?: string | string[] | null;
+    };
+    /**
+     * StudentEmailIssue
+     * @description Email студента в students_groups не является корпоративным адресом Innopolis.
+     */
+    StudentEmailIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: StudentEmailIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      /** Student Email */
+      student_email: string;
+      /**
+       * Groups
+       * @default []
+       */
+      groups: string[];
     };
     /**
      * StudentIssue
@@ -3148,6 +3170,26 @@ export interface operations {
       };
     };
   };
+  schedule_export_schedule_xlsx: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+    };
+  };
   schedule_config_get_schedule_config: {
     parameters: {
       query?: never;
@@ -4047,9 +4089,6 @@ export enum InstructorBannedSlotIssueIssue_type {
 export enum InstructorIdIssueIssue_type {
   instructor_id = "instructor_id",
 }
-export enum StudentEmailIssueIssue_type {
-  student_email = "student_email",
-}
 export enum InstructorPreferenceIssueIssue_type {
   instructor_preference = "instructor_preference",
 }
@@ -4112,6 +4151,9 @@ export enum SectionProgramKindAnyOf0 {
 export enum SectionProgramLanguageAnyOf0 {
   en = "en",
   ru = "ru",
+}
+export enum StudentEmailIssueIssue_type {
+  student_email = "student_email",
 }
 export enum StudentIssueIssue_type {
   student = "student",

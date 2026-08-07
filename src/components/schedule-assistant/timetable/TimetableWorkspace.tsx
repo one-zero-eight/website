@@ -1,4 +1,5 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { scheduleAssistantFetch } from "@/api/schedule-assistant";
 import {
   SchemaScheduleConfig,
   Weekday,
@@ -304,6 +305,7 @@ function TimetableWorkspaceInner({
   returnFromChecks?: boolean;
 }) {
   const { config } = useConfig();
+  const { showError } = useToast();
   const [msg, setMsg] = useState("");
   const [weeks, setWeeks] = useState<WeekRange[]>([]);
   const [weekIndex, setWeekIndex] = useState(0);
@@ -314,6 +316,7 @@ function TimetableWorkspaceInner({
   >({});
   const [activeTab, setActiveTab] = useState<InnerTab>("core");
   const [layoutMode, setLayoutMode] = useState<TimetableLayoutMode>("groups");
+  const [exportPending, setExportPending] = useState(false);
   const [roomCapacityById, setRoomCapacityById] = useState<
     Record<string, number>
   >({});
@@ -373,6 +376,44 @@ function TimetableWorkspaceInner({
   }, [config?.term?.sections]);
 
   const isUtilizationTab = activeTab === "instructor" || activeTab === "room";
+
+  const handleExportXlsx = useCallback(async () => {
+    if (isUtilizationTab || exportPending) return;
+    setExportPending(true);
+    try {
+      const {
+        data,
+        error: downloadError,
+        response,
+      } = await scheduleAssistantFetch.GET("/schedule/export.xlsx", {
+        parseAs: "blob",
+      });
+      if (downloadError || !data) {
+        throw (
+          downloadError ?? new Error("Не удалось экспортировать расписание")
+        );
+      }
+      const disposition = response.headers.get("content-disposition") ?? "";
+      const utfMatch = /filename\*=UTF-8''([^;]+)/i.exec(disposition);
+      const asciiMatch = /filename="([^"]+)"/i.exec(disposition);
+      const termLabel = String(config?.term?.name || "").trim();
+      const fallbackName = termLabel ? `${termLabel}.xlsx` : "Schedule.xlsx";
+      const filename = utfMatch
+        ? decodeURIComponent(utfMatch[1]!)
+        : asciiMatch?.[1] || fallbackName;
+      const blob = data as Blob;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      showError("Ошибка экспорта", formatApiErrorMessage(e));
+    } finally {
+      setExportPending(false);
+    }
+  }, [config, exportPending, isUtilizationTab, showError]);
 
   useEffect(() => {
     if (isUtilizationTab && layoutMode === "calendar") {
@@ -838,6 +879,22 @@ function TimetableWorkspaceInner({
                     </div>
                   ) : null}
                   <div className="ml-auto flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-xs btn-ghost gap-1"
+                      title="Экспорт расписания и распределений в XLSX"
+                      disabled={isUtilizationTab || exportPending || !config}
+                      onClick={() => {
+                        void handleExportXlsx();
+                      }}
+                    >
+                      {exportPending ? (
+                        <span className="loading loading-spinner loading-xs" />
+                      ) : (
+                        <span className="icon-[material-symbols--download-rounded] text-base" />
+                      )}
+                      Экспорт XLSX
+                    </button>
                     <TimetableLayoutSelector
                       layoutMode={layoutMode}
                       onLayoutModeChange={setLayoutMode}
