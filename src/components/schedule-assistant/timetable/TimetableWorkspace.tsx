@@ -9,8 +9,6 @@ import { ReturnToChecksLink } from "@/components/schedule-assistant/checks/Retur
 import {
   getScheduleSections,
   useConfig,
-  useCoursesQuery,
-  useUpdateCourseMutation,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
@@ -35,17 +33,13 @@ import {
   type CreateMeetingCellContext,
 } from "./createMeetingUtils.ts";
 import { EditClassModal } from "./EditClassModal.tsx";
-import {
-  canRestoreMeeting,
-  parseMeetingInstanceId,
-  restoreMeetingInCourse,
-} from "./meetingEditUtils.ts";
+import { MeetingDetailPanel } from "./MeetingDetailPanel.tsx";
+import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
 import {
   programSlotLabelForTermRow,
   resolveProgramTimeColumns,
 } from "./programTimeSlots.ts";
-import { computeDetailPanel } from "./scheduleAssistantDetailPanel.tsx";
 import {
   buildCalendarGrid,
   formatCalendarWeekRange,
@@ -964,12 +958,7 @@ function TimetableWorkspaceInner({
               <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto">
                 <TimetableDetailPanel
                   allMeetings={allMeetings}
-                  columns={columns}
                   config={config}
-                  roomCapacityById={roomCapacityById}
-                  groupSizeById={groupSizeById}
-                  weeks={weeks}
-                  weekIndex={weekIndex}
                   clearSelection={clearSelection}
                 />
               </div>
@@ -1216,12 +1205,7 @@ function TimetableTable({
 
 type TimetableDetailPanelProps = {
   allMeetings: Meeting[];
-  columns: Column[];
   config: SchemaScheduleConfig;
-  roomCapacityById: Record<string, number>;
-  groupSizeById: Record<string, number | null | undefined>;
-  weeks: WeekRange[];
-  weekIndex: number;
   clearSelection: () => void;
 };
 
@@ -1231,142 +1215,35 @@ function timetableDetailPanelPropsEqual(
 ): boolean {
   return (
     prev.allMeetings === next.allMeetings &&
-    prev.columns === next.columns &&
     prev.config === next.config &&
-    prev.roomCapacityById === next.roomCapacityById &&
-    prev.groupSizeById === next.groupSizeById &&
-    prev.weeks === next.weeks &&
-    prev.weekIndex === next.weekIndex &&
     prev.clearSelection === next.clearSelection
   );
 }
 
+function selectionStubLabel(selection: Selection): string {
+  if (!selection) return "";
+  switch (selection.type) {
+    case "meeting":
+      return selection.course ? `Занятие · ${selection.course}` : "Занятие";
+    case "program":
+      return `Программа · ${selection.value}`;
+    case "group":
+      return `Группа · ${selection.value}`;
+    case "instructor":
+      return `Преподаватель · ${selection.value}`;
+    case "room":
+      return `Аудитория · ${selection.value}`;
+  }
+}
+
 const TimetableDetailPanel = memo(function TimetableDetailPanel({
   allMeetings,
-  columns,
   config,
-  roomCapacityById,
-  groupSizeById,
-  weeks,
-  weekIndex,
   clearSelection,
 }: TimetableDetailPanelProps) {
   const selection = useSelectionSnapshot();
-  const selectionStore = useSelectionStore();
   const deferredSelection = useDeferredValue(selection);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [restoringMeetingId, setRestoringMeetingId] = useState<string | null>(
-    null,
-  );
-  const { data: courses } = useCoursesQuery();
-  const { mutate: updateCourse, isPending: isRestorePending } =
-    useUpdateCourseMutation();
-  const { showError, showSuccess } = useToast();
-
-  const handleRestoreMeeting = useCallback(
-    (meeting: Meeting) => {
-      if (!canRestoreMeeting(meeting) || !courses) return;
-      const meetingRef = parseMeetingInstanceId(meeting.instance_id);
-      if (!meetingRef || meetingRef.kind !== "wp") return;
-
-      const course = courses.find((item) => item.name === meeting.course);
-      if (!course) {
-        showError("Ошибка", "Курс не найден в конфигурации.");
-        return;
-      }
-
-      const updatedCourse = restoreMeetingInCourse(course, meetingRef, config);
-      if (!updatedCourse) {
-        showError("Ошибка", "Не удалось восстановить занятие.");
-        return;
-      }
-
-      setRestoringMeetingId(meeting.instance_id);
-      updateCourse(
-        {
-          params: { path: { course_name: course.name } },
-          body: updatedCourse,
-        },
-        {
-          onSuccess: () => {
-            showSuccess(
-              "Восстановлено",
-              "Занятие снова добавлено в расписание.",
-            );
-            setRestoringMeetingId(null);
-          },
-          onError: (error) => {
-            showError("Ошибка восстановления", formatApiErrorMessage(error));
-            setRestoringMeetingId(null);
-          },
-        },
-      );
-    },
-    [config, courses, showError, showSuccess, updateCourse],
-  );
-
-  const detail = useMemo(
-    () =>
-      computeDetailPanel({
-        selection: deferredSelection,
-        allMeetings,
-        columns,
-        config,
-        roomCapacityById,
-        groupSizeById,
-        weeks,
-        weekIndex,
-        onRestoreMeeting: handleRestoreMeeting,
-        restoringMeetingId: isRestorePending ? restoringMeetingId : null,
-      }),
-    [
-      deferredSelection,
-      allMeetings,
-      columns,
-      config,
-      roomCapacityById,
-      groupSizeById,
-      weeks,
-      weekIndex,
-      handleRestoreMeeting,
-      isRestorePending,
-      restoringMeetingId,
-    ],
-  );
-
-  const onDetailListClick = useCallback(
-    (ev: React.MouseEvent<HTMLDivElement>) => {
-      const t = ev.target;
-      if (!(t instanceof Element)) return;
-      const instEl = t.closest(".instructor-link");
-      const roomEl = t.closest(".room-link");
-      const groupEl = t.closest(".group-link");
-      if (groupEl) {
-        ev.stopPropagation();
-        const encoded = groupEl.getAttribute("data-group") || "";
-        const groupId = decodeURIComponent(encoded);
-        if (!groupId) return;
-        selectionStore.setSelection({ type: "group", value: groupId });
-        return;
-      }
-      if (instEl) {
-        ev.stopPropagation();
-        const encoded = instEl.getAttribute("data-inst") || "";
-        const instName = decodeURIComponent(encoded);
-        if (!instName) return;
-        selectionStore.setSelection({ type: "instructor", value: instName });
-        return;
-      }
-      if (roomEl) {
-        ev.stopPropagation();
-        const encoded = roomEl.getAttribute("data-room") || "";
-        const roomName = decodeURIComponent(encoded);
-        if (!roomName) return;
-        selectionStore.setSelection({ type: "room", value: roomName });
-      }
-    },
-    [selectionStore],
-  );
 
   const selectedMeeting = useMemo(() => {
     if (deferredSelection?.type !== "meeting") return null;
@@ -1382,6 +1259,12 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
     return !!parseMeetingInstanceId(selectedMeeting.instance_id);
   }, [selectedMeeting]);
 
+  const title = !deferredSelection
+    ? "Ничего не выбрано"
+    : selectedMeeting
+      ? `${selectedMeeting.course || "—"} (${selectedMeeting.tag || "—"})`
+      : selectionStubLabel(deferredSelection);
+
   return (
     <>
       <div className="border-base-300 mb-2 flex flex-col gap-2 border-b pb-2">
@@ -1389,7 +1272,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
           className="detail-title text-base-content min-w-0 text-lg leading-snug font-semibold [overflow-wrap:anywhere]"
           id="detailTitle"
         >
-          {detail.detailTitle}
+          {title}
         </div>
         {!editModalOpen ? (
           <div className="flex flex-wrap items-center gap-1.5">
@@ -1415,36 +1298,24 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
           </div>
         ) : null}
       </div>
-      {detail.detailSummary ? (
-        <div
-          className="detail-summary text-base-content/70 mb-3 text-sm leading-snug"
-          id="detailSummary"
-        >
-          {detail.detailSummary}
+      {!deferredSelection ? (
+        <div className="border-base-300 bg-base-200/40 rounded-box flex flex-col items-center gap-3 border border-dashed px-4 py-10 text-center">
+          <span className="icon-[material-symbols--touch-app-outline-rounded] text-base-content/35 text-4xl" />
+          <div className="text-base-content text-sm font-medium">
+            Панель деталей пуста
+          </div>
+          <p className="text-base-content/60 max-w-56 text-xs leading-relaxed">
+            Кликните по ячейке или заголовку в расписании — здесь появятся
+            детали.
+          </p>
         </div>
+      ) : selectedMeeting ? (
+        <MeetingDetailPanel meeting={selectedMeeting} config={config} />
       ) : (
-        <div id="detailSummary" className="detail-summary mb-0" />
+        <p className="text-base-content/60 text-sm leading-relaxed">
+          Детали этого выбора появятся позже.
+        </p>
       )}
-      {!detail.histogramHidden ? (
-        <div
-          id="detailHistogram"
-          className="border-base-300 bg-base-200/30 rounded-box mb-3 flex shrink-0 flex-col gap-2 border p-2"
-          dangerouslySetInnerHTML={{ __html: detail.histogramHtml }}
-        />
-      ) : (
-        <div
-          id="detailHistogram"
-          className="my-0 flex shrink-0 flex-col gap-2.5"
-          hidden
-        />
-      )}
-      <div
-        className="grid min-h-0 flex-1 gap-1 text-sm"
-        id="detailList"
-        onClick={onDetailListClick}
-      >
-        {detail.listContent}
-      </div>
       <EditClassModal
         open={editModalOpen}
         onOpenChange={setEditModalOpen}
