@@ -64,7 +64,11 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    put?: never;
+    /**
+     * Put Locale
+     * @description Replace name and description in a locale; auto-creates the locale if missing.
+     */
+    put: operations["drafts_put_locale"];
     post?: never;
     /**
      * Delete Locale
@@ -73,11 +77,7 @@ export interface paths {
     delete: operations["drafts_delete_locale"];
     options?: never;
     head?: never;
-    /**
-     * Patch Locale
-     * @description Patch name or description in a locale; auto-creates the locale if missing.
-     */
-    patch: operations["drafts_patch_locale"];
+    patch?: never;
     trace?: never;
   };
   "/drafts/{id}/image": {
@@ -89,7 +89,7 @@ export interface paths {
     };
     /**
      * Get Draft Image
-     * @description Redirect to the draft image in MinIO.
+     * @description Redirect to the draft image in MinIO (public; for <img src>).
      */
     get: operations["drafts_get_draft_image"];
     put?: never;
@@ -181,7 +181,7 @@ export interface paths {
     };
     /**
      * Get Submission Image
-     * @description Redirect to the submission image in MinIO.
+     * @description Redirect to the submission image in MinIO (public; for <img src>).
      */
     get: operations["submissions_get_submission_image"];
     put?: never;
@@ -325,7 +325,7 @@ export interface paths {
     };
     /**
      * Get Event Image
-     * @description Redirect to the event image in MinIO.
+     * @description Redirect to the event image in MinIO (public; for <img src>).
      */
     get: operations["events_get_event_image"];
     put?: never;
@@ -715,13 +715,6 @@ export interface components {
       location?: string | null;
       host?: components["schemas"]["Host"] | null;
     };
-    /** PatchLocale */
-    PatchLocale: {
-      /** Name */
-      name?: string | null;
-      /** Description */
-      description?: string | null;
-    };
     /**
      * PublicHost
      * @description Host as shown on published events (resolved for display).
@@ -731,6 +724,19 @@ export interface components {
       display_name: string;
       /** Link */
       link?: string | null;
+    };
+    /** PutLocale */
+    PutLocale: {
+      /**
+       * Name
+       * @description Locale name; null or empty string allowed
+       */
+      name: string | null;
+      /**
+       * Description
+       * @description Locale description; null or empty string allowed
+       */
+      description: string | null;
     };
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
@@ -889,8 +895,8 @@ export type SchemaMeOut = components["schemas"]["MeOut"];
 export type SchemaModeration = components["schemas"]["Moderation"];
 export type SchemaOwnedClub = components["schemas"]["OwnedClub"];
 export type SchemaPatchDraft = components["schemas"]["PatchDraft"];
-export type SchemaPatchLocale = components["schemas"]["PatchLocale"];
 export type SchemaPublicHost = components["schemas"]["PublicHost"];
+export type SchemaPutLocale = components["schemas"]["PutLocale"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaRestoreBody = components["schemas"]["RestoreBody"];
 export type SchemaSubmission = components["schemas"]["Submission"];
@@ -1038,7 +1044,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Cannot delete a draft while the event is published OR Cannot delete a draft while a submission is pending */
+      /** @description Cannot delete a draft while a submission is pending OR Cannot delete a draft while the event is published */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1075,6 +1081,49 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["PatchDraft"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_put_locale: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+        locale: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PutLocale"];
       };
     };
     responses: {
@@ -1144,49 +1193,6 @@ export interface operations {
       };
     };
   };
-  drafts_patch_locale: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: components["schemas"]["PydanticObjectId"];
-        locale: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PatchLocale"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["DraftOut"];
-        };
-      };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
   drafts_get_draft_image: {
     parameters: {
       query?: never;
@@ -1207,14 +1213,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description No image available */
+      /** @description Draft not found OR No image available */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1530,14 +1529,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Unable to verify credentials OR Credentials not provided */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Submission not found OR No image available */
+      /** @description No image available */
       404: {
         headers: {
           [name: string]: unknown;
