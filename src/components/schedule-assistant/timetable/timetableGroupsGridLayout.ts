@@ -9,7 +9,7 @@ export const GROUPS_TABLE_CLASS =
   "groups-grid-table isolate w-max min-w-full table-fixed border-separate border-spacing-0";
 
 export const GROUPS_SLOT_ROW_CLASS =
-  "slot-row [&_.empty]:h-full [&_.empty]:min-h-[64px] [&_.meeting]:h-full [&_.meeting]:min-h-0 [&_td]:h-[100px]";
+  "slot-row [content-visibility:auto] [contain-intrinsic-size:auto_100px] [&_.empty]:h-full [&_.empty]:min-h-[64px] [&_.meeting]:h-full [&_.meeting]:min-h-0 [&_td]:h-[100px]";
 
 export const GROUPS_HEAD_PAD = "px-2 py-1.5 text-[0.6875rem] leading-tight";
 
@@ -29,7 +29,7 @@ export const GROUPS_DAY_ROW_STICKY_STYLE = {
 export const GROUPS_TABLE_HEAD_CLASS =
   "sticky top-0 z-[20] shadow-[0_1px_0_#d8dfeb]";
 
-export const GROUPS_GRID_HEADER_HEIGHT_DEFAULT = "68px";
+export const GROUPS_GRID_HEADER_HEIGHT_DEFAULT = "57px";
 
 export const GROUPS_MEETING_CLASS =
   "mb-0 flex h-full min-h-0 w-full cursor-pointer flex-col gap-0.5 rounded border p-[7px] pb-1.5 last:mb-0";

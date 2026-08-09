@@ -16,10 +16,10 @@ import clsx from "clsx";
 import {
   createContext,
   memo,
+  startTransition,
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -448,29 +448,36 @@ function TimetableWorkspaceInner({
       if (!cols.length)
         throw new Error("Не удалось построить колонки групп из config.");
 
-      setAllMeetings(meetings);
-      setRoomCapacityById(buildRoomCapacityMap(config));
-      setGroupSizeById(buildGroupSizeMap(config));
-      setCourseColors(buildCourseColors(meetings));
-      selectionStore.setSelection(null);
-      setColumns(cols);
       const nextWeeks = buildWeeks(meetings);
-      setWeeks(nextWeeks);
-      setWeekIndex((currentIndex) => {
-        const preservedStart = activeWeekStartRef.current;
-        if (preservedStart) {
-          const preservedIndex = nextWeeks.findIndex(
-            (week) => week.start === preservedStart,
-          );
-          if (preservedIndex >= 0) return preservedIndex;
-        }
-        if (!nextWeeks.length) return 0;
-        if (!preservedStart) {
-          return weekIndexForDate(nextWeeks, todayIsoDate());
-        }
-        return Math.min(currentIndex, nextWeeks.length - 1);
+      const nextColors = buildCourseColors(meetings);
+      const nextRoomCapacity = buildRoomCapacityMap(config);
+      const nextGroupSize = buildGroupSizeMap(config);
+
+      // Keep the timetable chrome interactive while the heavy grid mounts.
+      startTransition(() => {
+        setAllMeetings(meetings);
+        setRoomCapacityById(nextRoomCapacity);
+        setGroupSizeById(nextGroupSize);
+        setCourseColors(nextColors);
+        selectionStore.setSelection(null);
+        setColumns(cols);
+        setWeeks(nextWeeks);
+        setWeekIndex((currentIndex) => {
+          const preservedStart = activeWeekStartRef.current;
+          if (preservedStart) {
+            const preservedIndex = nextWeeks.findIndex(
+              (week) => week.start === preservedStart,
+            );
+            if (preservedIndex >= 0) return preservedIndex;
+          }
+          if (!nextWeeks.length) return 0;
+          if (!preservedStart) {
+            return weekIndexForDate(nextWeeks, todayIsoDate());
+          }
+          return Math.min(currentIndex, nextWeeks.length - 1);
+        });
+        setMsg("");
       });
-      setMsg("");
     } catch (e: unknown) {
       setMsg(String((e as Error)?.message || e));
     }
@@ -573,34 +580,61 @@ function TimetableWorkspaceInner({
   }, [config, allMeetings, weeks, weekIndex, activeTab, columns]);
 
   const calendarGrid = useMemo(() => {
+    if (layoutMode !== "calendar" || isUtilizationTab) return null;
     if (!config || !allMeetings.length || !weeks.length) return null;
     return buildCalendarGrid(config, allMeetings, weeks, activeTab);
-  }, [config, allMeetings, weeks, activeTab]);
+  }, [layoutMode, isUtilizationTab, config, allMeetings, weeks, activeTab]);
 
-  useLayoutEffect(() => {
+  // Sticky day-row `top` uses --sa-grid-header-height. Measuring thead on open
+  // forces a full layout of the ~10k-node table. Prefer the CSS default and
+  // only resync when idle / on resize.
+  useEffect(() => {
     if (layoutMode === "calendar") return;
 
     const wrap = gridWrapRef.current;
     if (!wrap) return;
 
+    let rafId = 0;
+    let idleId = 0;
+    let observer: ResizeObserver | null = null;
+
     const syncGridHeaderHeight = () => {
-      const thead = wrap.querySelector<HTMLElement>("#table thead");
-      if (!thead) return;
-      const height = thead.offsetHeight;
-      if (height <= 0) return;
-      wrap.style.setProperty("--sa-grid-header-height", `${height}px`);
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const thead = wrap.querySelector<HTMLElement>("#table thead");
+        if (!thead) return;
+        const height = thead.offsetHeight;
+        if (height <= 0) return;
+        const next = `${height}px`;
+        if (wrap.style.getPropertyValue("--sa-grid-header-height") === next) {
+          return;
+        }
+        wrap.style.setProperty("--sa-grid-header-height", next);
+      });
     };
 
-    syncGridHeaderHeight();
-    const rafId = requestAnimationFrame(syncGridHeaderHeight);
+    const startObserving = () => {
+      const thead = wrap.querySelector<HTMLElement>("#table thead");
+      if (!thead || observer) return;
+      observer = new ResizeObserver(syncGridHeaderHeight);
+      observer.observe(thead);
+    };
 
-    const thead = wrap.querySelector<HTMLElement>("#table thead");
-    const observer = thead ? new ResizeObserver(syncGridHeaderHeight) : null;
-    if (thead) observer?.observe(thead);
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(startObserving, { timeout: 800 });
+    } else {
+      idleId = window.setTimeout(startObserving, 200) as unknown as number;
+    }
+
     window.addEventListener("resize", syncGridHeaderHeight);
 
     return () => {
       cancelAnimationFrame(rafId);
+      if (typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleId);
+      } else {
+        window.clearTimeout(idleId);
+      }
       observer?.disconnect();
       window.removeEventListener("resize", syncGridHeaderHeight);
     };
@@ -928,32 +962,39 @@ function TimetableWorkspaceInner({
                     } as React.CSSProperties
                   }
                 >
-                  <TimetableMainGrid
-                    layoutMode={layoutMode}
-                    isUtilizationTab={isUtilizationTab}
-                    calendarGrid={calendarGrid}
-                    grid={grid}
-                    activeWeek={weeks[weekIndex] ?? null}
-                    columns={columns}
-                    activeTab={activeTab}
-                    allMeetings={allMeetings}
-                    config={config}
-                    courseColors={courseColors}
-                    roomCapacityById={roomCapacityById}
-                    groupSizeById={groupSizeById}
-                    instructorLabelById={instructorLabelById}
-                    selectMeeting={selectMeeting}
-                    selectInstructorCell={selectInstructorCell}
-                    selectRoomCell={selectRoomCell}
-                    selectInstructorHeader={selectInstructorHeader}
-                    selectRoomHeader={selectRoomHeader}
-                    selectProgram={selectProgram}
-                    selectGroup={selectGroup}
-                    clearSelection={clearSelection}
-                    onEmptyCellClick={
-                      isUtilizationTab ? undefined : handleEmptyCellClick
-                    }
-                  />
+                  {!grid && !msg ? (
+                    <div className="text-base-content/60 flex h-full min-h-48 items-center justify-center gap-2 text-sm">
+                      <span className="loading loading-spinner loading-sm" />
+                      Загрузка таблицы…
+                    </div>
+                  ) : (
+                    <TimetableMainGrid
+                      layoutMode={layoutMode}
+                      isUtilizationTab={isUtilizationTab}
+                      calendarGrid={calendarGrid}
+                      grid={grid}
+                      activeWeek={weeks[weekIndex] ?? null}
+                      columns={columns}
+                      activeTab={activeTab}
+                      allMeetings={allMeetings}
+                      config={config}
+                      courseColors={courseColors}
+                      roomCapacityById={roomCapacityById}
+                      groupSizeById={groupSizeById}
+                      instructorLabelById={instructorLabelById}
+                      selectMeeting={selectMeeting}
+                      selectInstructorCell={selectInstructorCell}
+                      selectRoomCell={selectRoomCell}
+                      selectInstructorHeader={selectInstructorHeader}
+                      selectRoomHeader={selectRoomHeader}
+                      selectProgram={selectProgram}
+                      selectGroup={selectGroup}
+                      clearSelection={clearSelection}
+                      onEmptyCellClick={
+                        isUtilizationTab ? undefined : handleEmptyCellClick
+                      }
+                    />
+                  )}
                 </div>
               </div>
             </div>
