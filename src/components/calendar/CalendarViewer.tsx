@@ -1,6 +1,8 @@
 import type { EventInput } from "@fullcalendar/core";
 import { scheduleTypes } from "@/api/schedule";
-import CalendarEventPopover from "@/components/calendar/CalendarEventPopover.tsx";
+import CalendarEventPopover, {
+  ScheduleDialogProps,
+} from "@/components/calendar/CalendarEventPopover.tsx";
 import { ConfigCalendarDialog } from "@/components/calendar/ConfigCalendarDialog.tsx";
 import {
   AcademicCalendar,
@@ -19,7 +21,14 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { cn } from "@/lib/ui/cn";
 import moment from "moment/moment";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ComponentType,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useLocalStorage } from "usehooks-ts";
 import iCalendarPlugin from "./iCalendarPlugin";
 import { WHEN2MEET_EVENT_ID_PREFIX } from "./when2meet-events.ts";
@@ -41,12 +50,14 @@ export default function CalendarViewer({
   initialView = "listMonth",
   viewId = "",
   isFullPage = false,
+  EventPopover = CalendarEventPopover,
 }: {
   urls: URLType[];
   extraEvents?: EventInput[];
   initialView?: string;
   viewId?: string;
   isFullPage?: boolean;
+  EventPopover?: ComponentType<ScheduleDialogProps>;
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
   const academicCalendarRef = useRef(academicCalendar);
@@ -410,7 +421,7 @@ export default function CalendarViewer({
     >
       {calendarComponent}
       {popoverInfo.event && popoverInfo.eventElement && (
-        <CalendarEventPopover
+        <EventPopover
           event={popoverInfo.event}
           isOpen={popoverInfo.opened}
           setIsOpen={setIsOpenCallback}

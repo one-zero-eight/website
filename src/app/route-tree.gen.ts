@@ -65,10 +65,6 @@ import { Route as With_menuMusicRoomInstructionsRouteImport } from "./routes/_wi
 import { Route as With_menuGuardFilesRouteImport } from "./routes/_with_menu/guard/files";
 import { Route as With_menuGuardCreateRouteImport } from "./routes/_with_menu/guard/create";
 import { Route as With_menuGuardCopyRouteImport } from "./routes/_with_menu/guard/copy";
-import { Route as With_menuEventsCalendarRouteImport } from "./routes/_with_menu/events/calendar";
-import { Route as With_menuEventsArchiveRouteImport } from "./routes/_with_menu/events/archive";
-import { Route as With_menuEventsApprovalRouteImport } from "./routes/_with_menu/events/approval";
-import { Route as With_menuEventsAdminRouteImport } from "./routes/_with_menu/events/admin";
 import { Route as With_menuClubsNewRouteImport } from "./routes/_with_menu/clubs/new";
 import { Route as With_menuClubsLeagueRouteImport } from "./routes/_with_menu/clubs/league";
 import { Route as With_menuClubsAdminRouteImport } from "./routes/_with_menu/clubs/admin";
@@ -76,12 +72,15 @@ import { Route as With_menuAccountTokenRouteImport } from "./routes/_with_menu/a
 import { Route as With_menuAccountConnectTelegramRouteImport } from "./routes/_with_menu/account/connect-telegram";
 import { Route as With_menuWhen2meetMeetingIdIndexRouteImport } from "./routes/_with_menu/when2meet/$meetingId.index";
 import { Route as With_menuRoomBookingRoomsIndexRouteImport } from "./routes/_with_menu/room-booking/rooms.index";
-import { Route as With_menuEventsIdIndexRouteImport } from "./routes/_with_menu/events/$id.index";
+import { Route as With_menuEventsSubmissionsIndexRouteImport } from "./routes/_with_menu/events/submissions/index";
+import { Route as With_menuEventsDraftsIndexRouteImport } from "./routes/_with_menu/events/drafts/index";
 import { Route as With_menuClubsSlugIndexRouteImport } from "./routes/_with_menu/clubs/$slug.index";
 import { Route as With_menuWhen2meetMeetingIdEditRouteImport } from "./routes/_with_menu/when2meet/$meetingId.edit";
 import { Route as With_menuScheduleEventGroupsAliasRouteImport } from "./routes/_with_menu/schedule/event-groups.$alias";
 import { Route as With_menuRoomBookingRoomsRoomRouteImport } from "./routes/_with_menu/room-booking/rooms.$room";
-import { Route as With_menuEventsIdEditRouteImport } from "./routes/_with_menu/events/$id.edit";
+import { Route as With_menuEventsSubmissionsIdRouteImport } from "./routes/_with_menu/events/submissions/$id";
+import { Route as With_menuEventsPIdRouteImport } from "./routes/_with_menu/events/p.$id";
+import { Route as With_menuEventsDraftsIdRouteImport } from "./routes/_with_menu/events/drafts/$id";
 import { Route as With_menuClubsSlugEditRouteImport } from "./routes/_with_menu/clubs/$slug.edit";
 import { Route as GuardGoogleFilesSlugJoinRouteImport } from "./routes/guard.google.files.$slug.join";
 
@@ -382,26 +381,6 @@ const With_menuGuardCopyRoute = With_menuGuardCopyRouteImport.update({
   path: "/guard/copy",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
-const With_menuEventsCalendarRoute = With_menuEventsCalendarRouteImport.update({
-  id: "/events/calendar",
-  path: "/events/calendar",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
-const With_menuEventsArchiveRoute = With_menuEventsArchiveRouteImport.update({
-  id: "/events/archive",
-  path: "/events/archive",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
-const With_menuEventsApprovalRoute = With_menuEventsApprovalRouteImport.update({
-  id: "/events/approval",
-  path: "/events/approval",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
-const With_menuEventsAdminRoute = With_menuEventsAdminRouteImport.update({
-  id: "/events/admin",
-  path: "/events/admin",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
 const With_menuClubsNewRoute = With_menuClubsNewRouteImport.update({
   id: "/clubs/new",
   path: "/clubs/new",
@@ -440,11 +419,18 @@ const With_menuRoomBookingRoomsIndexRoute =
     path: "/room-booking/rooms/",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
-const With_menuEventsIdIndexRoute = With_menuEventsIdIndexRouteImport.update({
-  id: "/events/$id/",
-  path: "/events/$id/",
-  getParentRoute: () => With_menuRouteRoute,
-} as any);
+const With_menuEventsSubmissionsIndexRoute =
+  With_menuEventsSubmissionsIndexRouteImport.update({
+    id: "/events/submissions/",
+    path: "/events/submissions/",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuEventsDraftsIndexRoute =
+  With_menuEventsDraftsIndexRouteImport.update({
+    id: "/events/drafts/",
+    path: "/events/drafts/",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
 const With_menuClubsSlugIndexRoute = With_menuClubsSlugIndexRouteImport.update({
   id: "/clubs/$slug/",
   path: "/clubs/$slug/",
@@ -468,9 +454,20 @@ const With_menuRoomBookingRoomsRoomRoute =
     path: "/room-booking/rooms/$room",
     getParentRoute: () => With_menuRouteRoute,
   } as any);
-const With_menuEventsIdEditRoute = With_menuEventsIdEditRouteImport.update({
-  id: "/events/$id/edit",
-  path: "/events/$id/edit",
+const With_menuEventsSubmissionsIdRoute =
+  With_menuEventsSubmissionsIdRouteImport.update({
+    id: "/events/submissions/$id",
+    path: "/events/submissions/$id",
+    getParentRoute: () => With_menuRouteRoute,
+  } as any);
+const With_menuEventsPIdRoute = With_menuEventsPIdRouteImport.update({
+  id: "/events/p/$id",
+  path: "/events/p/$id",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
+const With_menuEventsDraftsIdRoute = With_menuEventsDraftsIdRouteImport.update({
+  id: "/events/drafts/$id",
+  path: "/events/drafts/$id",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menuClubsSlugEditRoute = With_menuClubsSlugEditRouteImport.update({
@@ -513,10 +510,6 @@ export interface FileRoutesByFullPath {
   "/clubs/admin": typeof With_menuClubsAdminRoute;
   "/clubs/league": typeof With_menuClubsLeagueRoute;
   "/clubs/new": typeof With_menuClubsNewRoute;
-  "/events/admin": typeof With_menuEventsAdminRoute;
-  "/events/approval": typeof With_menuEventsApprovalRoute;
-  "/events/archive": typeof With_menuEventsArchiveRoute;
-  "/events/calendar": typeof With_menuEventsCalendarRoute;
   "/guard/copy": typeof With_menuGuardCopyRoute;
   "/guard/create": typeof With_menuGuardCreateRoute;
   "/guard/files": typeof With_menuGuardFilesRoute;
@@ -551,12 +544,15 @@ export interface FileRoutesByFullPath {
   "/schedule-assistant/for-instructors/": typeof ScheduleAssistantForInstructorsIndexRoute;
   "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
-  "/events/$id/edit": typeof With_menuEventsIdEditRoute;
+  "/events/drafts/$id": typeof With_menuEventsDraftsIdRoute;
+  "/events/p/$id": typeof With_menuEventsPIdRoute;
+  "/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
   "/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/clubs/$slug/": typeof With_menuClubsSlugIndexRoute;
-  "/events/$id/": typeof With_menuEventsIdIndexRoute;
+  "/events/drafts/": typeof With_menuEventsDraftsIndexRoute;
+  "/events/submissions/": typeof With_menuEventsSubmissionsIndexRoute;
   "/room-booking/rooms/": typeof With_menuRoomBookingRoomsIndexRoute;
   "/when2meet/$meetingId/": typeof With_menuWhen2meetMeetingIdIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
@@ -587,10 +583,6 @@ export interface FileRoutesByTo {
   "/clubs/admin": typeof With_menuClubsAdminRoute;
   "/clubs/league": typeof With_menuClubsLeagueRoute;
   "/clubs/new": typeof With_menuClubsNewRoute;
-  "/events/admin": typeof With_menuEventsAdminRoute;
-  "/events/approval": typeof With_menuEventsApprovalRoute;
-  "/events/archive": typeof With_menuEventsArchiveRoute;
-  "/events/calendar": typeof With_menuEventsCalendarRoute;
   "/guard/copy": typeof With_menuGuardCopyRoute;
   "/guard/create": typeof With_menuGuardCreateRoute;
   "/guard/files": typeof With_menuGuardFilesRoute;
@@ -625,12 +617,15 @@ export interface FileRoutesByTo {
   "/schedule-assistant/for-instructors": typeof ScheduleAssistantForInstructorsIndexRoute;
   "/schedule-assistant/settings": typeof ScheduleAssistantSettingsIndexRoute;
   "/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
-  "/events/$id/edit": typeof With_menuEventsIdEditRoute;
+  "/events/drafts/$id": typeof With_menuEventsDraftsIdRoute;
+  "/events/p/$id": typeof With_menuEventsPIdRoute;
+  "/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
   "/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
   "/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/clubs/$slug": typeof With_menuClubsSlugIndexRoute;
-  "/events/$id": typeof With_menuEventsIdIndexRoute;
+  "/events/drafts": typeof With_menuEventsDraftsIndexRoute;
+  "/events/submissions": typeof With_menuEventsSubmissionsIndexRoute;
   "/room-booking/rooms": typeof With_menuRoomBookingRoomsIndexRoute;
   "/when2meet/$meetingId": typeof With_menuWhen2meetMeetingIdIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
@@ -665,10 +660,6 @@ export interface FileRoutesById {
   "/_with_menu/clubs/admin": typeof With_menuClubsAdminRoute;
   "/_with_menu/clubs/league": typeof With_menuClubsLeagueRoute;
   "/_with_menu/clubs/new": typeof With_menuClubsNewRoute;
-  "/_with_menu/events/admin": typeof With_menuEventsAdminRoute;
-  "/_with_menu/events/approval": typeof With_menuEventsApprovalRoute;
-  "/_with_menu/events/archive": typeof With_menuEventsArchiveRoute;
-  "/_with_menu/events/calendar": typeof With_menuEventsCalendarRoute;
   "/_with_menu/guard/copy": typeof With_menuGuardCopyRoute;
   "/_with_menu/guard/create": typeof With_menuGuardCreateRoute;
   "/_with_menu/guard/files": typeof With_menuGuardFilesRoute;
@@ -703,12 +694,15 @@ export interface FileRoutesById {
   "/schedule-assistant/for-instructors/": typeof ScheduleAssistantForInstructorsIndexRoute;
   "/schedule-assistant/settings/": typeof ScheduleAssistantSettingsIndexRoute;
   "/_with_menu/clubs/$slug/edit": typeof With_menuClubsSlugEditRoute;
-  "/_with_menu/events/$id/edit": typeof With_menuEventsIdEditRoute;
+  "/_with_menu/events/drafts/$id": typeof With_menuEventsDraftsIdRoute;
+  "/_with_menu/events/p/$id": typeof With_menuEventsPIdRoute;
+  "/_with_menu/events/submissions/$id": typeof With_menuEventsSubmissionsIdRoute;
   "/_with_menu/room-booking/rooms/$room": typeof With_menuRoomBookingRoomsRoomRoute;
   "/_with_menu/schedule/event-groups/$alias": typeof With_menuScheduleEventGroupsAliasRoute;
   "/_with_menu/when2meet/$meetingId/edit": typeof With_menuWhen2meetMeetingIdEditRoute;
   "/_with_menu/clubs/$slug/": typeof With_menuClubsSlugIndexRoute;
-  "/_with_menu/events/$id/": typeof With_menuEventsIdIndexRoute;
+  "/_with_menu/events/drafts/": typeof With_menuEventsDraftsIndexRoute;
+  "/_with_menu/events/submissions/": typeof With_menuEventsSubmissionsIndexRoute;
   "/_with_menu/room-booking/rooms/": typeof With_menuRoomBookingRoomsIndexRoute;
   "/_with_menu/when2meet/$meetingId/": typeof With_menuWhen2meetMeetingIdIndexRoute;
   "/guard/google/files/$slug/join": typeof GuardGoogleFilesSlugJoinRoute;
@@ -743,10 +737,6 @@ export interface FileRouteTypes {
     | "/clubs/admin"
     | "/clubs/league"
     | "/clubs/new"
-    | "/events/admin"
-    | "/events/approval"
-    | "/events/archive"
-    | "/events/calendar"
     | "/guard/copy"
     | "/guard/create"
     | "/guard/files"
@@ -781,12 +771,15 @@ export interface FileRouteTypes {
     | "/schedule-assistant/for-instructors/"
     | "/schedule-assistant/settings/"
     | "/clubs/$slug/edit"
-    | "/events/$id/edit"
+    | "/events/drafts/$id"
+    | "/events/p/$id"
+    | "/events/submissions/$id"
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
     | "/when2meet/$meetingId/edit"
     | "/clubs/$slug/"
-    | "/events/$id/"
+    | "/events/drafts/"
+    | "/events/submissions/"
     | "/room-booking/rooms/"
     | "/when2meet/$meetingId/"
     | "/guard/google/files/$slug/join";
@@ -817,10 +810,6 @@ export interface FileRouteTypes {
     | "/clubs/admin"
     | "/clubs/league"
     | "/clubs/new"
-    | "/events/admin"
-    | "/events/approval"
-    | "/events/archive"
-    | "/events/calendar"
     | "/guard/copy"
     | "/guard/create"
     | "/guard/files"
@@ -855,12 +844,15 @@ export interface FileRouteTypes {
     | "/schedule-assistant/for-instructors"
     | "/schedule-assistant/settings"
     | "/clubs/$slug/edit"
-    | "/events/$id/edit"
+    | "/events/drafts/$id"
+    | "/events/p/$id"
+    | "/events/submissions/$id"
     | "/room-booking/rooms/$room"
     | "/schedule/event-groups/$alias"
     | "/when2meet/$meetingId/edit"
     | "/clubs/$slug"
-    | "/events/$id"
+    | "/events/drafts"
+    | "/events/submissions"
     | "/room-booking/rooms"
     | "/when2meet/$meetingId"
     | "/guard/google/files/$slug/join";
@@ -894,10 +886,6 @@ export interface FileRouteTypes {
     | "/_with_menu/clubs/admin"
     | "/_with_menu/clubs/league"
     | "/_with_menu/clubs/new"
-    | "/_with_menu/events/admin"
-    | "/_with_menu/events/approval"
-    | "/_with_menu/events/archive"
-    | "/_with_menu/events/calendar"
     | "/_with_menu/guard/copy"
     | "/_with_menu/guard/create"
     | "/_with_menu/guard/files"
@@ -932,12 +920,15 @@ export interface FileRouteTypes {
     | "/schedule-assistant/for-instructors/"
     | "/schedule-assistant/settings/"
     | "/_with_menu/clubs/$slug/edit"
-    | "/_with_menu/events/$id/edit"
+    | "/_with_menu/events/drafts/$id"
+    | "/_with_menu/events/p/$id"
+    | "/_with_menu/events/submissions/$id"
     | "/_with_menu/room-booking/rooms/$room"
     | "/_with_menu/schedule/event-groups/$alias"
     | "/_with_menu/when2meet/$meetingId/edit"
     | "/_with_menu/clubs/$slug/"
-    | "/_with_menu/events/$id/"
+    | "/_with_menu/events/drafts/"
+    | "/_with_menu/events/submissions/"
     | "/_with_menu/room-booking/rooms/"
     | "/_with_menu/when2meet/$meetingId/"
     | "/guard/google/files/$slug/join";
@@ -1347,34 +1338,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuGuardCopyRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/events/calendar": {
-      id: "/_with_menu/events/calendar";
-      path: "/events/calendar";
-      fullPath: "/events/calendar";
-      preLoaderRoute: typeof With_menuEventsCalendarRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
-    "/_with_menu/events/archive": {
-      id: "/_with_menu/events/archive";
-      path: "/events/archive";
-      fullPath: "/events/archive";
-      preLoaderRoute: typeof With_menuEventsArchiveRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
-    "/_with_menu/events/approval": {
-      id: "/_with_menu/events/approval";
-      path: "/events/approval";
-      fullPath: "/events/approval";
-      preLoaderRoute: typeof With_menuEventsApprovalRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
-    "/_with_menu/events/admin": {
-      id: "/_with_menu/events/admin";
-      path: "/events/admin";
-      fullPath: "/events/admin";
-      preLoaderRoute: typeof With_menuEventsAdminRouteImport;
-      parentRoute: typeof With_menuRouteRoute;
-    };
     "/_with_menu/clubs/new": {
       id: "/_with_menu/clubs/new";
       path: "/clubs/new";
@@ -1424,11 +1387,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuRoomBookingRoomsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/events/$id/": {
-      id: "/_with_menu/events/$id/";
-      path: "/events/$id";
-      fullPath: "/events/$id/";
-      preLoaderRoute: typeof With_menuEventsIdIndexRouteImport;
+    "/_with_menu/events/submissions/": {
+      id: "/_with_menu/events/submissions/";
+      path: "/events/submissions";
+      fullPath: "/events/submissions/";
+      preLoaderRoute: typeof With_menuEventsSubmissionsIndexRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/events/drafts/": {
+      id: "/_with_menu/events/drafts/";
+      path: "/events/drafts";
+      fullPath: "/events/drafts/";
+      preLoaderRoute: typeof With_menuEventsDraftsIndexRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/clubs/$slug/": {
@@ -1459,11 +1429,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof With_menuRoomBookingRoomsRoomRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
-    "/_with_menu/events/$id/edit": {
-      id: "/_with_menu/events/$id/edit";
-      path: "/events/$id/edit";
-      fullPath: "/events/$id/edit";
-      preLoaderRoute: typeof With_menuEventsIdEditRouteImport;
+    "/_with_menu/events/submissions/$id": {
+      id: "/_with_menu/events/submissions/$id";
+      path: "/events/submissions/$id";
+      fullPath: "/events/submissions/$id";
+      preLoaderRoute: typeof With_menuEventsSubmissionsIdRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/events/p/$id": {
+      id: "/_with_menu/events/p/$id";
+      path: "/events/p/$id";
+      fullPath: "/events/p/$id";
+      preLoaderRoute: typeof With_menuEventsPIdRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/events/drafts/$id": {
+      id: "/_with_menu/events/drafts/$id";
+      path: "/events/drafts/$id";
+      fullPath: "/events/drafts/$id";
+      preLoaderRoute: typeof With_menuEventsDraftsIdRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/clubs/$slug/edit": {
@@ -1502,10 +1486,6 @@ interface With_menuRouteRouteChildren {
   With_menuClubsAdminRoute: typeof With_menuClubsAdminRoute;
   With_menuClubsLeagueRoute: typeof With_menuClubsLeagueRoute;
   With_menuClubsNewRoute: typeof With_menuClubsNewRoute;
-  With_menuEventsAdminRoute: typeof With_menuEventsAdminRoute;
-  With_menuEventsApprovalRoute: typeof With_menuEventsApprovalRoute;
-  With_menuEventsArchiveRoute: typeof With_menuEventsArchiveRoute;
-  With_menuEventsCalendarRoute: typeof With_menuEventsCalendarRoute;
   With_menuGuardCopyRoute: typeof With_menuGuardCopyRoute;
   With_menuGuardCreateRoute: typeof With_menuGuardCreateRoute;
   With_menuGuardFilesRoute: typeof With_menuGuardFilesRoute;
@@ -1537,12 +1517,15 @@ interface With_menuRouteRouteChildren {
   With_menuTabletennisIndexRoute: typeof With_menuTabletennisIndexRoute;
   With_menuWhen2meetIndexRoute: typeof With_menuWhen2meetIndexRoute;
   With_menuClubsSlugEditRoute: typeof With_menuClubsSlugEditRoute;
-  With_menuEventsIdEditRoute: typeof With_menuEventsIdEditRoute;
+  With_menuEventsDraftsIdRoute: typeof With_menuEventsDraftsIdRoute;
+  With_menuEventsPIdRoute: typeof With_menuEventsPIdRoute;
+  With_menuEventsSubmissionsIdRoute: typeof With_menuEventsSubmissionsIdRoute;
   With_menuRoomBookingRoomsRoomRoute: typeof With_menuRoomBookingRoomsRoomRoute;
   With_menuScheduleEventGroupsAliasRoute: typeof With_menuScheduleEventGroupsAliasRoute;
   With_menuWhen2meetMeetingIdEditRoute: typeof With_menuWhen2meetMeetingIdEditRoute;
   With_menuClubsSlugIndexRoute: typeof With_menuClubsSlugIndexRoute;
-  With_menuEventsIdIndexRoute: typeof With_menuEventsIdIndexRoute;
+  With_menuEventsDraftsIndexRoute: typeof With_menuEventsDraftsIndexRoute;
+  With_menuEventsSubmissionsIndexRoute: typeof With_menuEventsSubmissionsIndexRoute;
   With_menuRoomBookingRoomsIndexRoute: typeof With_menuRoomBookingRoomsIndexRoute;
   With_menuWhen2meetMeetingIdIndexRoute: typeof With_menuWhen2meetMeetingIdIndexRoute;
 }
@@ -1566,10 +1549,6 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuClubsAdminRoute: With_menuClubsAdminRoute,
   With_menuClubsLeagueRoute: With_menuClubsLeagueRoute,
   With_menuClubsNewRoute: With_menuClubsNewRoute,
-  With_menuEventsAdminRoute: With_menuEventsAdminRoute,
-  With_menuEventsApprovalRoute: With_menuEventsApprovalRoute,
-  With_menuEventsArchiveRoute: With_menuEventsArchiveRoute,
-  With_menuEventsCalendarRoute: With_menuEventsCalendarRoute,
   With_menuGuardCopyRoute: With_menuGuardCopyRoute,
   With_menuGuardCreateRoute: With_menuGuardCreateRoute,
   With_menuGuardFilesRoute: With_menuGuardFilesRoute,
@@ -1601,13 +1580,16 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuTabletennisIndexRoute: With_menuTabletennisIndexRoute,
   With_menuWhen2meetIndexRoute: With_menuWhen2meetIndexRoute,
   With_menuClubsSlugEditRoute: With_menuClubsSlugEditRoute,
-  With_menuEventsIdEditRoute: With_menuEventsIdEditRoute,
+  With_menuEventsDraftsIdRoute: With_menuEventsDraftsIdRoute,
+  With_menuEventsPIdRoute: With_menuEventsPIdRoute,
+  With_menuEventsSubmissionsIdRoute: With_menuEventsSubmissionsIdRoute,
   With_menuRoomBookingRoomsRoomRoute: With_menuRoomBookingRoomsRoomRoute,
   With_menuScheduleEventGroupsAliasRoute:
     With_menuScheduleEventGroupsAliasRoute,
   With_menuWhen2meetMeetingIdEditRoute: With_menuWhen2meetMeetingIdEditRoute,
   With_menuClubsSlugIndexRoute: With_menuClubsSlugIndexRoute,
-  With_menuEventsIdIndexRoute: With_menuEventsIdIndexRoute,
+  With_menuEventsDraftsIndexRoute: With_menuEventsDraftsIndexRoute,
+  With_menuEventsSubmissionsIndexRoute: With_menuEventsSubmissionsIndexRoute,
   With_menuRoomBookingRoomsIndexRoute: With_menuRoomBookingRoomsIndexRoute,
   With_menuWhen2meetMeetingIdIndexRoute: With_menuWhen2meetMeetingIdIndexRoute,
 };

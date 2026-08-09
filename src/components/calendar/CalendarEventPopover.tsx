@@ -23,12 +23,12 @@ export type ScheduleDialogProps = {
   eventElement: HTMLElement;
 };
 
-export default function CalendarEventPopover({
+export function CalendarEventPopover({
   event,
   isOpen,
   setIsOpen,
   eventElement,
-}: React.PropsWithChildren<ScheduleDialogProps>) {
+}: ScheduleDialogProps) {
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
@@ -195,3 +195,5 @@ export default function CalendarEventPopover({
     </>
   );
 }
+
+export default CalendarEventPopover;
