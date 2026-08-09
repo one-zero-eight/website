@@ -99,8 +99,8 @@ export function DraftPage({ id }: { id: string }) {
     });
   };
 
-  const { mutate: patchLocale, isPending: isSavingLocale } =
-    $workshops.useMutation("patch", "/drafts/{id}/locales/{locale}", {
+  const { mutate: putLocale, isPending: isSavingLocale } =
+    $workshops.useMutation("put", "/drafts/{id}/locales/{locale}", {
       onError: (mutationError) => {
         showError("Error", formatApiErrorMessage(mutationError));
       },
@@ -211,7 +211,7 @@ export function DraftPage({ id }: { id: string }) {
       return;
     }
 
-    patchLocale(
+    putLocale(
       {
         params: { path: { id, locale: selectedLocale } },
         body: {
@@ -231,10 +231,13 @@ export function DraftPage({ id }: { id: string }) {
 
   function handleAddLocale(locale: string) {
     setAddLocaleOpen(false);
-    patchLocale(
+    putLocale(
       {
         params: { path: { id, locale } },
-        body: {},
+        body: {
+          name: null,
+          description: null,
+        },
       },
       {
         onSuccess: (draft) => {
