@@ -363,6 +363,7 @@ export function buildRoomPickerOptions({
   excludeRef,
   includeRoomIds,
   index: indexArg,
+  includeStatus = true,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
@@ -377,6 +378,8 @@ export function buildRoomPickerOptions({
   excludeRef?: MeetingRef | null;
   includeRoomIds?: string[];
   index?: MeetingPickerIndex | null;
+  /** When false, skip conflict scoring and show gray pending dots. */
+  includeStatus?: boolean;
 }): SelectDropdownOption[] {
   const roomsById = new Map(
     (config.rooms || [])
@@ -398,39 +401,45 @@ export function buildRoomPickerOptions({
   const isExcluded = excludeRef
     ? (meeting: Meeting) => isSameLogicalMeeting(meeting, excludeRef)
     : undefined;
-  const index = indexArg ?? buildMeetingPickerIndex(meetings);
+  const index = includeStatus
+    ? (indexArg ?? buildMeetingPickerIndex(meetings))
+    : null;
 
   return [...ids]
     .map((roomId) => {
       const room = roomsById.get(roomId);
-      const load = countRoomDailyLoad(
-        meetings,
-        roomId,
-        date,
-        excludeInstanceId,
-        isExcluded,
-        index,
-      );
       const featureEntries = listRoomFeatureEntries(
         room?.features,
         attributeKeys,
       );
-      const availability = roomAvailabilityForSlot({
-        config,
-        meetings,
-        roomId,
-        dates,
-        start,
-        end,
-        audienceSize,
-        capacity: room?.capacity,
-        excludeRef,
-        excludeInstanceId,
-        index,
-      });
+      const availability = includeStatus
+        ? roomAvailabilityForSlot({
+            config,
+            meetings,
+            roomId,
+            dates,
+            start,
+            end,
+            audienceSize,
+            capacity: room?.capacity,
+            excludeRef,
+            excludeInstanceId,
+            index,
+          })
+        : null;
+      const load = includeStatus
+        ? countRoomDailyLoad(
+            meetings,
+            roomId,
+            date,
+            excludeInstanceId,
+            isExcluded,
+            index,
+          )
+        : null;
       const hint = [
         room?.capacity != null ? `Вместимость ${room.capacity}` : null,
-        `в этот день ${load} занятий`,
+        load != null ? `в этот день ${load} занятий` : null,
       ]
         .filter(Boolean)
         .join(", ");
@@ -451,12 +460,14 @@ export function buildRoomPickerOptions({
             })
           : undefined,
         capacity: room?.capacity ?? null,
-        status: availability.status,
+        status: availability?.status ?? null,
       };
     })
     .sort((a, b) => {
-      const statusDiff = statusSortRank(a.status) - statusSortRank(b.status);
-      if (statusDiff !== 0) return statusDiff;
+      if (includeStatus && a.status && b.status) {
+        const statusDiff = statusSortRank(a.status) - statusSortRank(b.status);
+        if (statusDiff !== 0) return statusDiff;
+      }
       const [tierA, capA] = roomSortKey(a.capacity, audienceSize);
       const [tierB, capB] = roomSortKey(b.capacity, audienceSize);
       if (tierA !== tierB) return tierA - tierB;

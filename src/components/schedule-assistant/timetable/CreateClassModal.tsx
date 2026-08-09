@@ -17,7 +17,14 @@ import { TERM_WEEKDAY_LABEL_RU } from "@/components/schedule-assistant/settings/
 import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
 import clsx from "clsx";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  startTransition,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import {
   EditClassAudienceModal,
@@ -139,6 +146,7 @@ export function CreateClassModal({
   const [instructorValue, setInstructorValue] = useState("");
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
+  const [pickerOptionsReady, setPickerOptionsReady] = useState(false);
 
   const parsedComponent = useMemo(
     () => parseCourseComponentKey(courseComponentKey),
@@ -178,8 +186,34 @@ export function CreateClassModal({
     [config],
   );
 
+  useEffect(() => {
+    if (!open) return;
+    setPickerOptionsReady(false);
+    let cancelled = false;
+    let innerFrame = 0;
+    const outerFrame = requestAnimationFrame(() => {
+      innerFrame = requestAnimationFrame(() => {
+        startTransition(() => {
+          if (!cancelled) setPickerOptionsReady(true);
+        });
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(outerFrame);
+      cancelAnimationFrame(innerFrame);
+    };
+  }, [open, cellContext?.date, cellContext?.weekday]);
+
+  const lastRoomOptionsRef = useRef<SelectDropdownOption[]>([]);
+  const lastInstructorOptionsRef = useRef<SelectDropdownOption[]>([]);
+
   const roomOptions = useMemo(() => {
-    if (!cellContext) return [];
+    if (!cellContext) {
+      lastRoomOptionsRef.current = [];
+      return [];
+    }
+    if (!open) return lastRoomOptionsRef.current;
     const weekday = (weekdayValue || cellContext.weekday) as TermWeekdayKey;
     const start = useCustomTime
       ? normalizeTypedHhmm(timeValue)
@@ -199,7 +233,7 @@ export function CreateClassModal({
     const dates = usesOccurrences
       ? [cellContext.date]
       : semesterDatesForWeekday(config, weekday);
-    return buildRoomPickerOptions({
+    const next = buildRoomPickerOptions({
       config,
       meetings,
       index: meetingPickerIndex,
@@ -208,7 +242,10 @@ export function CreateClassModal({
       start,
       end: end || undefined,
       audienceTokens: audienceValue,
+      includeStatus: pickerOptionsReady,
     });
+    lastRoomOptionsRef.current = next;
+    return next;
   }, [
     audienceValue,
     cellContext,
@@ -216,7 +253,9 @@ export function CreateClassModal({
     endTimeValue,
     meetingPickerIndex,
     meetings,
+    open,
     parsedComponent?.componentIdx,
+    pickerOptionsReady,
     selectedCourse,
     timeValue,
     useCustomTime,
@@ -224,7 +263,11 @@ export function CreateClassModal({
   ]);
 
   const instructorOptions = useMemo(() => {
-    if (!cellContext) return [];
+    if (!cellContext) {
+      lastInstructorOptionsRef.current = [];
+      return [];
+    }
+    if (!open) return lastInstructorOptionsRef.current;
     const weekday = (weekdayValue || cellContext.weekday) as TermWeekdayKey;
     const start = useCustomTime
       ? normalizeTypedHhmm(timeValue)
@@ -236,7 +279,7 @@ export function CreateClassModal({
           ? resolveEndTimeForStart(config, start, audienceValue).slice(0, 5)
           : "");
     const dates = semesterDatesForWeekday(config, weekday);
-    return buildInstructorPickerOptions({
+    const next = buildInstructorPickerOptions({
       config,
       meetings,
       index: meetingPickerIndex,
@@ -246,7 +289,10 @@ export function CreateClassModal({
       end: end || undefined,
       weekday,
       courseInstructors: selectedCourse?.instructors,
+      includeStatus: pickerOptionsReady,
     });
+    lastInstructorOptionsRef.current = next;
+    return next;
   }, [
     audienceValue,
     cellContext,
@@ -254,6 +300,8 @@ export function CreateClassModal({
     endTimeValue,
     meetingPickerIndex,
     meetings,
+    open,
+    pickerOptionsReady,
     selectedCourse?.instructors,
     timeValue,
     useCustomTime,

@@ -13,7 +13,14 @@ import {
 import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
 import clsx from "clsx";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  startTransition,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import {
   EditClassAudienceModal,
@@ -223,6 +230,7 @@ export function EditClassModal({
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
   const [cancelChecked, setCancelChecked] = useState(false);
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
+  const [pickerOptionsReady, setPickerOptionsReady] = useState(false);
 
   const meetingRef = useMemo(
     () => (meeting ? parseMeetingInstanceId(meeting.instance_id) : null),
@@ -264,8 +272,36 @@ export function EditClassModal({
     () => weekdayOptionsForConfig(config),
     [config],
   );
+
+  useEffect(() => {
+    if (!open) return;
+    setPickerOptionsReady(false);
+    let cancelled = false;
+    let innerFrame = 0;
+    const outerFrame = requestAnimationFrame(() => {
+      innerFrame = requestAnimationFrame(() => {
+        startTransition(() => {
+          if (!cancelled) setPickerOptionsReady(true);
+        });
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(outerFrame);
+      cancelAnimationFrame(innerFrame);
+    };
+  }, [open, meeting?.instance_id]);
+
+  const lastRoomOptionsRef = useRef<SelectDropdownOption[]>([]);
+  const lastInstructorOptionsRef = useRef<SelectDropdownOption[]>([]);
+
   const roomOptions = useMemo(() => {
-    if (!meeting) return [];
+    if (!meeting) {
+      lastRoomOptionsRef.current = [];
+      return [];
+    }
+    // Keep last options while the close transition is still mounted.
+    if (!open) return lastRoomOptionsRef.current;
     const weekday = (weekdayValue ||
       originals?.weekday ||
       "Mon") as TermWeekdayKey;
@@ -285,7 +321,7 @@ export function EditClassModal({
       config,
       weekday,
     });
-    return buildRoomPickerOptions({
+    const next = buildRoomPickerOptions({
       config,
       meetings,
       index: meetingPickerIndex,
@@ -297,7 +333,10 @@ export function EditClassModal({
       excludeInstanceId: meeting.instance_id,
       excludeRef: meetingRef,
       includeRoomIds: meeting.room ? [meeting.room] : undefined,
+      includeStatus: pickerOptionsReady,
     });
+    lastRoomOptionsRef.current = next;
+    return next;
   }, [
     audienceValue,
     config,
@@ -306,7 +345,9 @@ export function EditClassModal({
     meetingPickerIndex,
     meetingRef,
     meetings,
+    open,
     originals?.weekday,
+    pickerOptionsReady,
     timeValue,
     useCustomTime,
     weekdayValue,
@@ -318,13 +359,17 @@ export function EditClassModal({
   );
 
   const instructorOptions = useMemo(() => {
-    if (!meeting) return [];
-    const course = courses?.find((item) => item.name === meeting.course);
+    if (!meeting) {
+      lastInstructorOptionsRef.current = [];
+      return [];
+    }
+    if (!open) return lastInstructorOptionsRef.current;
     const currentInstructor = String(
       typeof meeting.instructors === "string"
         ? meeting.instructors
         : meeting.instructors?.[0] || "",
     ).trim();
+    const course = courses?.find((item) => item.name === meeting.course);
     const weekday = (weekdayValue ||
       originals?.weekday ||
       "Mon") as TermWeekdayKey;
@@ -341,7 +386,7 @@ export function EditClassModal({
           ? resolveEndTimeForStart(config, start, audienceTokens).slice(0, 5)
           : "");
     const dates = semesterDatesForWeekday(config, weekday);
-    return buildInstructorPickerOptions({
+    const next = buildInstructorPickerOptions({
       config,
       meetings,
       index: meetingPickerIndex,
@@ -354,7 +399,10 @@ export function EditClassModal({
       excludeInstanceId: meeting.instance_id,
       excludeRef: meetingRef,
       includeInstructorIds: currentInstructor ? [currentInstructor] : undefined,
+      includeStatus: pickerOptionsReady,
     });
+    lastInstructorOptionsRef.current = next;
+    return next;
   }, [
     audienceValue,
     config,
@@ -364,7 +412,9 @@ export function EditClassModal({
     meetingPickerIndex,
     meetingRef,
     meetings,
+    open,
     originals?.weekday,
+    pickerOptionsReady,
     timeValue,
     useCustomTime,
     weekdayValue,

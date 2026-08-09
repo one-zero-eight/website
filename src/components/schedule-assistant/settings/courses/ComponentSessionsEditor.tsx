@@ -319,6 +319,35 @@ function RoomSelect({
   excludeRef?: MeetingRef | null;
   onChange: (room: string) => void;
 }) {
+  const [statusReady, setStatusReady] = useState(false);
+
+  useEffect(() => {
+    setStatusReady(false);
+    let cancelled = false;
+    let innerFrame = 0;
+    const outerFrame = requestAnimationFrame(() => {
+      innerFrame = requestAnimationFrame(() => {
+        startTransition(() => {
+          if (!cancelled) setStatusReady(true);
+        });
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(outerFrame);
+      cancelAnimationFrame(innerFrame);
+    };
+  }, [
+    audienceTokens,
+    date,
+    end,
+    excludeRef,
+    meetingIndex,
+    start,
+    value,
+    weekday,
+  ]);
+
   const options = useMemo(() => {
     const dates = roomPickerDatesForEdit({ config, weekday });
     const focusDate = date?.trim() || dates[0] || "";
@@ -344,6 +373,7 @@ function RoomSelect({
         excludeRef,
         includeRoomIds: value ? [value] : undefined,
         index: meetingIndex,
+        includeStatus: statusReady,
       }),
     ];
   }, [
@@ -355,6 +385,7 @@ function RoomSelect({
     meetingIndex,
     meetings,
     start,
+    statusReady,
     value,
     weekday,
   ]);
@@ -400,6 +431,35 @@ function InstructorSelect({
   excludeRef?: MeetingRef | null;
   onChange: (instructorId: string) => void;
 }) {
+  const [statusReady, setStatusReady] = useState(false);
+
+  useEffect(() => {
+    setStatusReady(false);
+    let cancelled = false;
+    let innerFrame = 0;
+    const outerFrame = requestAnimationFrame(() => {
+      innerFrame = requestAnimationFrame(() => {
+        startTransition(() => {
+          if (!cancelled) setStatusReady(true);
+        });
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(outerFrame);
+      cancelAnimationFrame(innerFrame);
+    };
+  }, [
+    courseInstructors,
+    date,
+    end,
+    excludeRef,
+    meetingIndex,
+    start,
+    value,
+    weekday,
+  ]);
+
   const options = useMemo(() => {
     const dates = roomPickerDatesForEdit({ config, weekday });
     const focusDate = date?.trim() || dates[0] || "";
@@ -420,6 +480,7 @@ function InstructorSelect({
         excludeRef,
         includeInstructorIds: value ? [value] : undefined,
         index: meetingIndex,
+        includeStatus: statusReady,
       }),
     ];
   }, [
@@ -431,6 +492,7 @@ function InstructorSelect({
     meetingIndex,
     meetings,
     start,
+    statusReady,
     value,
     weekday,
   ]);

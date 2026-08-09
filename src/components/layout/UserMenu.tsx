@@ -37,7 +37,9 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
   });
 
   // Transition effect
-  const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
+  const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
+    duration: 50,
+  });
 
   // Event listeners to change the open state
   const click = useClick(context);

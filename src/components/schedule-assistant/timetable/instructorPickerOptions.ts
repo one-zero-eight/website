@@ -326,6 +326,7 @@ export function buildInstructorPickerOptions({
   excludeRef,
   includeInstructorIds,
   index: indexArg,
+  includeStatus = true,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
@@ -341,6 +342,8 @@ export function buildInstructorPickerOptions({
   excludeRef?: MeetingRef | null;
   includeInstructorIds?: string[];
   index?: MeetingPickerIndex | null;
+  /** When false, skip conflict scoring and show gray pending dots. */
+  includeStatus?: boolean;
 }): SelectDropdownOption[] {
   const byId = new Map<string, SchemaInstructor>();
   for (const instructor of config.instructors || []) {
@@ -378,36 +381,45 @@ export function buildInstructorPickerOptions({
   const isExcluded = excludeRef
     ? (meeting: Meeting) => isSameLogicalMeeting(meeting, excludeRef)
     : undefined;
-  const index = indexArg ?? buildMeetingPickerIndex(meetings);
+  const index = includeStatus
+    ? (indexArg ?? buildMeetingPickerIndex(meetings))
+    : null;
 
   return ids
     .map((id) => {
       const instructor = byId.get(id);
       const label = instructor ? instructorPickerLabel(instructor) : id;
-      const load = countInstructorDailyLoad(
-        meetings,
-        id,
-        date,
-        excludeInstanceId,
-        isExcluded,
-        index,
-      );
       const role = roleById.get(id);
       const preferred = seenPreferred.has(id);
-      const availability = instructorAvailabilityForSlot({
-        config,
-        meetings,
-        instructorId: id,
-        dates,
-        start,
-        end,
-        weekday: apiWeekday,
-        preferences: instructor?.slot_preferences,
-        excludeRef,
-        excludeInstanceId,
-        index,
-      });
-      const hint = [role || null, `в этот день ${load} занятий`]
+      const availability = includeStatus
+        ? instructorAvailabilityForSlot({
+            config,
+            meetings,
+            instructorId: id,
+            dates,
+            start,
+            end,
+            weekday: apiWeekday,
+            preferences: instructor?.slot_preferences,
+            excludeRef,
+            excludeInstanceId,
+            index,
+          })
+        : null;
+      const load = includeStatus
+        ? countInstructorDailyLoad(
+            meetings,
+            id,
+            date,
+            excludeInstanceId,
+            isExcluded,
+            index,
+          )
+        : null;
+      const hint = [
+        role || null,
+        load != null ? `в этот день ${load} занятий` : null,
+      ]
         .filter(Boolean)
         .join(", ");
       const searchText = [
@@ -432,18 +444,22 @@ export function buildInstructorPickerOptions({
         }),
         requireSearch: restrictToPreferred && !preferred,
         preferred,
-        status: availability.status,
-        preferenceLevel: availability.preference?.level ?? null,
+        status: availability?.status ?? null,
+        preferenceLevel: availability?.preference?.level ?? null,
       };
     })
     .sort((a, b) => {
-      const statusDiff = statusSortRank(a.status) - statusSortRank(b.status);
-      if (statusDiff !== 0) return statusDiff;
+      if (includeStatus && a.status && b.status) {
+        const statusDiff = statusSortRank(a.status) - statusSortRank(b.status);
+        if (statusDiff !== 0) return statusDiff;
+      }
       if (a.preferred !== b.preferred) return a.preferred ? -1 : 1;
-      const prefDiff =
-        preferenceSortRank(a.preferenceLevel) -
-        preferenceSortRank(b.preferenceLevel);
-      if (prefDiff !== 0) return prefDiff;
+      if (includeStatus) {
+        const prefDiff =
+          preferenceSortRank(a.preferenceLevel) -
+          preferenceSortRank(b.preferenceLevel);
+        if (prefDiff !== 0) return prefDiff;
+      }
       return a.label.localeCompare(b.label, "ru");
     })
     .map(

@@ -68,8 +68,17 @@ function TooltipSection({
 export function InstructorAvailabilityStatusMark({
   info,
 }: {
-  info: InstructorAvailabilityInfo;
+  info: InstructorAvailabilityInfo | null;
 }) {
+  if (!info) {
+    return (
+      <span
+        className="bg-base-content/25 inline-block size-2.5 shrink-0 rounded-full"
+        onClick={(e) => e.stopPropagation()}
+      />
+    );
+  }
+
   const visibleConflicts = info.conflicts.slice(0, MAX_TOOLTIP_CONFLICTS);
   const remainingConflicts = info.conflicts.length - visibleConflicts.length;
   const hasConflicts = visibleConflicts.length > 0;

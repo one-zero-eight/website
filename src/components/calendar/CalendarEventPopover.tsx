@@ -51,7 +51,7 @@ export default function CalendarEventPopover({
     common: {
       transitionProperty: "all",
     },
-    duration: 200,
+    duration: 50,
   });
 
   // Event listeners to change the open state

@@ -32,7 +32,9 @@ export function ConfigLoadModal({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const { context, refs } = useFloating({ open, onOpenChange });
-  const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
+  const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
+    duration: 50,
+  });
   const dismiss = useDismiss(context, {
     enabled: loadPhase !== "loading",
     outsidePressEvent: "mousedown",
