@@ -5,6 +5,7 @@ import {
   Weekday,
 } from "@/api/schedule-assistant/types.ts";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
+import { DetailFullscreenModal } from "@/components/schedule-assistant/DetailFullscreenModal.tsx";
 import { ReturnToChecksLink } from "@/components/schedule-assistant/checks/ReturnToChecksLink.tsx";
 import {
   getScheduleSections,
@@ -22,6 +23,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useMediaQuery } from "usehooks-ts";
 
 import { CreateClassModal } from "./CreateClassModal.tsx";
 import {
@@ -244,6 +246,7 @@ function TimetableWorkspaceInner({
   const appliedFocusMeetingIdRef = useRef<string | null>(null);
 
   const selectionStore = useMemo(() => createSelectionStore(), []);
+  const isLgUp = useMediaQuery("(min-width: 1024px)");
 
   const coursesToSections = useMemo(
     () => config && buildCoursesToSections(config),
@@ -752,7 +755,7 @@ function TimetableWorkspaceInner({
     <SelectionStoreContext.Provider value={selectionStore}>
       <div className="font-rubik text-base-content flex min-h-0 flex-1 flex-col leading-[1.45] antialiased">
         <div className="flex h-full min-h-0 w-full flex-1 flex-col gap-3 p-4">
-          <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_360px] xl:grid-rows-[minmax(0,1fr)]">
+          <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[minmax(0,1fr)]">
             <div className="-mt-2 -ml-4 flex min-h-0 min-w-0 flex-col overflow-hidden">
               {msg ? (
                 <div className="alert alert-error alert-soft mx-2 mt-2 shrink-0 py-2 text-sm">
@@ -900,21 +903,32 @@ function TimetableWorkspaceInner({
             </div>
 
             <aside
-              className="detail border-base-300 bg-base-100 rounded-box sticky top-4 flex max-h-[calc(100vh-2rem)] min-h-0 w-full flex-col self-start overflow-hidden border p-3 xl:col-start-2 xl:h-[calc(100vh-2rem)]"
+              className="detail border-base-300 bg-base-100 rounded-box sticky top-4 hidden max-h-[calc(100vh-2rem)] min-h-0 w-full flex-col self-start overflow-hidden border p-3 lg:col-start-2 lg:flex lg:h-[calc(100vh-2rem)]"
               id="detail"
             >
-              <div className="flex min-h-0 min-w-0 flex-1 [scrollbar-width:thin] flex-col gap-3 overflow-y-auto">
-                <TimetableDetailPanel
-                  allMeetings={allMeetings}
-                  meetingPickerIndex={meetingPickerIndex}
-                  config={config}
-                  clearSelection={clearSelection}
-                />
-              </div>
+              {isLgUp ? (
+                <div className="flex min-h-0 min-w-0 flex-1 [scrollbar-width:thin] flex-col gap-3 overflow-y-auto">
+                  <TimetableDetailPanel
+                    allMeetings={allMeetings}
+                    meetingPickerIndex={meetingPickerIndex}
+                    config={config}
+                    clearSelection={clearSelection}
+                    chrome="aside"
+                  />
+                </div>
+              ) : null}
             </aside>
           </div>
         </div>
       </div>
+      {!isLgUp ? (
+        <TimetableMobileDetailModal
+          allMeetings={allMeetings}
+          meetingPickerIndex={meetingPickerIndex}
+          config={config}
+          clearSelection={clearSelection}
+        />
+      ) : null}
       <CreateClassModal
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
@@ -1206,6 +1220,7 @@ type TimetableDetailPanelProps = {
   meetingPickerIndex: MeetingPickerIndex;
   config: SchemaScheduleConfig;
   clearSelection: () => void;
+  chrome?: "aside" | "modal";
 };
 
 function timetableDetailPanelPropsEqual(
@@ -1216,7 +1231,8 @@ function timetableDetailPanelPropsEqual(
     prev.allMeetings === next.allMeetings &&
     prev.meetingPickerIndex === next.meetingPickerIndex &&
     prev.config === next.config &&
-    prev.clearSelection === next.clearSelection
+    prev.clearSelection === next.clearSelection &&
+    prev.chrome === next.chrome
   );
 }
 
@@ -1236,11 +1252,63 @@ function selectionStubLabel(selection: Selection): string {
   }
 }
 
+function timetableDetailTitle(
+  selection: Selection,
+  selectedMeeting: Meeting | null,
+): string {
+  if (!selection) return "Ничего не выбрано";
+  if (selectedMeeting) {
+    return `${selectedMeeting.course || "—"} (${selectedMeeting.tag || "—"})`;
+  }
+  return selectionStubLabel(selection);
+}
+
+function TimetableMobileDetailModal({
+  allMeetings,
+  meetingPickerIndex,
+  config,
+  clearSelection,
+}: {
+  allMeetings: Meeting[];
+  meetingPickerIndex: MeetingPickerIndex;
+  config: SchemaScheduleConfig;
+  clearSelection: () => void;
+}) {
+  const selection = useSelectionSnapshot();
+
+  const selectedMeeting = useMemo(() => {
+    if (selection?.type !== "meeting") return null;
+    return (
+      allMeetings.find((meeting) => meeting.instance_id === selection.value) ??
+      null
+    );
+  }, [allMeetings, selection]);
+
+  return (
+    <DetailFullscreenModal
+      open={!!selection}
+      onOpenChange={(open) => {
+        if (!open) clearSelection();
+      }}
+      title={timetableDetailTitle(selection, selectedMeeting)}
+    >
+      <TimetableDetailPanel
+        allMeetings={allMeetings}
+        meetingPickerIndex={meetingPickerIndex}
+        config={config}
+        clearSelection={clearSelection}
+        chrome="modal"
+      />
+    </DetailFullscreenModal>
+  );
+}
+
 const TimetableDetailPanel = memo(function TimetableDetailPanel({
   allMeetings,
   meetingPickerIndex,
   config,
   clearSelection,
+  chrome = "aside",
 }: TimetableDetailPanelProps) {
   const selection = useSelectionSnapshot();
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -1258,45 +1326,54 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
     return !!parseMeetingInstanceId(selectedMeeting.instance_id);
   }, [selectedMeeting]);
 
-  const title = !selection
-    ? "Ничего не выбрано"
-    : selectedMeeting
-      ? `${selectedMeeting.course || "—"} (${selectedMeeting.tag || "—"})`
-      : selectionStubLabel(selection);
+  const title = timetableDetailTitle(selection, selectedMeeting);
+  const showEditButton = canEditSelectedMeeting && !editModalOpen;
 
   return (
     <>
-      <div className="border-base-300 mb-2 flex flex-col gap-2 border-b pb-2">
-        <div
-          className="detail-title text-base-content min-w-0 text-lg leading-snug font-semibold [overflow-wrap:anywhere]"
-          id="detailTitle"
-        >
-          {title}
-        </div>
-        {!editModalOpen ? (
-          <div className="flex flex-wrap items-center gap-1.5">
-            {canEditSelectedMeeting ? (
-              <button
-                className="btn btn-primary btn-sm"
-                type="button"
-                onClick={() => setEditModalOpen(true)}
-              >
-                Редактировать
-              </button>
-            ) : null}
-            {selection ? (
-              <button
-                className="btn btn-ghost btn-sm shrink-0"
-                id="clearSelectionBtn"
-                type="button"
-                onClick={clearSelection}
-              >
-                Сбросить
-              </button>
-            ) : null}
+      {chrome === "aside" ? (
+        <div className="border-base-300 mb-2 flex flex-col gap-2 border-b pb-2">
+          <div
+            className="detail-title text-base-content min-w-0 text-lg leading-snug font-semibold [overflow-wrap:anywhere]"
+            id="detailTitle"
+          >
+            {title}
           </div>
-        ) : null}
-      </div>
+          {!editModalOpen ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {canEditSelectedMeeting ? (
+                <button
+                  className="btn btn-primary btn-sm"
+                  type="button"
+                  onClick={() => setEditModalOpen(true)}
+                >
+                  Редактировать
+                </button>
+              ) : null}
+              {selection ? (
+                <button
+                  className="btn btn-ghost btn-sm shrink-0"
+                  id="clearSelectionBtn"
+                  type="button"
+                  onClick={clearSelection}
+                >
+                  Сбросить
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : showEditButton ? (
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+          <button
+            className="btn btn-primary btn-sm"
+            type="button"
+            onClick={() => setEditModalOpen(true)}
+          >
+            Редактировать
+          </button>
+        </div>
+      ) : null}
       {!selection ? (
         <div className="border-base-300 bg-base-200/40 rounded-box flex flex-col items-center gap-3 border border-dashed px-4 py-10 text-center">
           <span className="icon-[material-symbols--touch-app-outline-rounded] text-base-content/35 text-4xl" />

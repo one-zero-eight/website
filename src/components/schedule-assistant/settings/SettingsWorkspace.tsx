@@ -1,25 +1,71 @@
 import { CoursesTabContent } from "@/components/schedule-assistant/settings/courses/CoursesTabContent.tsx";
-import { isSettingsSelectionValid } from "@/components/schedule-assistant/settings/groups/groupsSelection.ts";
+import {
+  isSettingsSelectionValid,
+  resolveGroupsSelection,
+} from "@/components/schedule-assistant/settings/groups/groupsSelection.ts";
 import { InstructorsTabContent } from "@/components/schedule-assistant/settings/instructors/InstructorsTabContent.tsx";
 import { RoomsTabContent } from "@/components/schedule-assistant/settings/rooms/RoomsTabContent.tsx";
 import { SemesterTabContent } from "@/components/schedule-assistant/settings/semester/SemesterTabContent.tsx";
 import { SettingsSidebar } from "@/components/schedule-assistant/settings/SettingsSidebar.tsx";
 import { SettingsSaveStatusProvider } from "@/components/schedule-assistant/settings/settingsSaveStatus.tsx";
 import { SettingsTopTabs } from "@/components/schedule-assistant/settings/SettingsTopTabs.tsx";
+import { DetailFullscreenModal } from "@/components/schedule-assistant/DetailFullscreenModal.tsx";
 import { ReturnToChecksLink } from "@/components/schedule-assistant/checks/ReturnToChecksLink.tsx";
 import { GroupsTabContent } from "@/components/schedule-assistant/settings/groups/GroupsTabContent.tsx";
 import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
-import type { SettingsSubTab } from "@/components/schedule-assistant/settings/useSelection.tsx";
+import type {
+  SettingsSelection,
+  SettingsSubTab,
+} from "@/components/schedule-assistant/settings/useSelection.tsx";
 import {
   SelectionProvider,
   useSelection,
   useSelectionState,
 } from "@/components/schedule-assistant/settings/useSelection.tsx";
-import { useEffect, useRef, useState } from "react";
+import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useMediaQuery } from "usehooks-ts";
 import {
   findInstructorIndex,
   scrollInstructorIntoCenter,
 } from "@/components/schedule-assistant/settings/settingsDeepLink.ts";
+
+function settingsDetailTitle(
+  selection: SettingsSelection | null,
+  config: SchemaScheduleConfig | null | undefined,
+): string {
+  if (!selection) return "Детали";
+
+  if (selection.kind === "course") {
+    const course = config?.courses?.[selection.courseIndex];
+    return String(
+      course?.name_ru || course?.name || course?.short_name || "Курс",
+    );
+  }
+  if (selection.kind === "room") {
+    const room = config?.rooms?.[selection.roomIndex];
+    return String(room?.id || room?.name || "Аудитория");
+  }
+  if (selection.kind === "instructor") {
+    const instructor = config?.instructors?.[selection.instructorIndex];
+    if (!instructor) return "Преподаватель";
+    return (
+      instructor.name_en?.trim() ||
+      instructor.name_ru?.trim() ||
+      instructor.email?.trim() ||
+      instructor.id ||
+      "Преподаватель"
+    );
+  }
+
+  const groupsSelection = resolveGroupsSelection(config ?? null, selection);
+  if (groupsSelection?.headingTitle) return groupsSelection.headingTitle;
+
+  if (selection.kind === "program") return "Программа";
+  if (selection.kind === "track") return "Трек";
+  if (selection.kind === "group") return "Группа";
+  return "Детали";
+}
 
 export function SettingsWorkspace({
   settingsTab,
@@ -69,8 +115,15 @@ function SettingsWorkspaceInner({
     setSettingsSelectionByTab,
     clearAllSelection,
     selectItem,
+    selectedSelection,
   } = useSelection();
-
+  const isLgUp = useMediaQuery("(min-width: 1024px)");
+  const detailModalOpen =
+    !isLgUp && settingsSubTab !== "semester" && selectedSelection != null;
+  const detailModalTitle = useMemo(
+    () => settingsDetailTitle(selectedSelection, config),
+    [selectedSelection, config],
+  );
   useEffect(() => {
     if (settingsSubTab === routeSettingsSubTab) return;
     setSettingsSubTab(routeSettingsSubTab);
@@ -168,13 +221,13 @@ function SettingsWorkspaceInner({
   return (
     <SettingsSaveStatusProvider>
       <div className="flex w-full flex-col gap-3 p-4">
-        <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_360px] xl:grid-rows-[auto_minmax(0,1fr)]">
-          <div className="flex flex-col gap-2 xl:col-start-1 xl:row-start-1">
+        <div className="grid h-full min-h-0 w-full flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[auto_minmax(0,1fr)]">
+          <div className="flex flex-col gap-2 lg:col-start-1 lg:row-start-1">
             {returnFromChecks ? <ReturnToChecksLink /> : null}
             <SettingsTopTabs />
           </div>
 
-          <div className="border-base-300 bg-base-100 rounded-box min-h-0 border p-3 xl:col-start-1 xl:row-start-2">
+          <div className="border-base-300 bg-base-100 rounded-box min-h-0 border p-3 lg:col-start-1 lg:row-start-2">
             <div className="flex h-full min-h-0 flex-col">
               <div
                 ref={settingsListScrollRef}
@@ -195,13 +248,26 @@ function SettingsWorkspaceInner({
             </div>
           </div>
 
-          <aside className="border-base-300 bg-base-100 rounded-box sticky top-4 flex max-h-[calc(100vh-2rem)] min-h-0 w-full flex-col self-start overflow-hidden border p-3 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:h-[calc(100vh-2rem)]">
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
-              <SettingsSidebar />
-            </div>
+          <aside className="border-base-300 bg-base-100 rounded-box sticky top-4 hidden max-h-[calc(100vh-2rem)] min-h-0 w-full flex-col self-start overflow-hidden border p-3 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:flex lg:h-[calc(100vh-2rem)]">
+            {isLgUp ? (
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+                <SettingsSidebar />
+              </div>
+            ) : null}
           </aside>
         </div>
       </div>
+      {!isLgUp ? (
+        <DetailFullscreenModal
+          open={detailModalOpen}
+          onOpenChange={(open) => {
+            if (!open) clearAllSelection();
+          }}
+          title={detailModalTitle}
+        >
+          <SettingsSidebar />
+        </DetailFullscreenModal>
+      ) : null}
     </SettingsSaveStatusProvider>
   );
 }
