@@ -14,6 +14,8 @@
 }
 
 .fc {
+  @apply pt-3;
+
   .fc-scroller {
     scrollbar-width: none;
   }
@@ -22,12 +24,20 @@
     @apply border-t-0;
   }
 
+  .fc-timegrid-axis-cushion {
+    @apply px-2 py-1;
+  }
+
   .fc-timegrid-slot-label {
-    @apply text-base-content/50 relative top-[-0.5rem] border-t-0 pr-1 align-top text-xs;
+    @apply text-base-content/50 relative top-[-0.5rem] border-t-0 px-2 align-top text-xs;
+  }
+
+  .fc-timegrid-slot-label-cushion {
+    @apply px-0;
   }
 
   .fc-header-toolbar.fc-toolbar {
-    @apply mb-0 gap-x-0.5 gap-y-2 overflow-x-auto px-1;
+    @apply mx-4 mb-4 gap-x-0.5 gap-y-2 overflow-x-auto px-0;
 
     /* Shadow on the right side of a toolbar visible on the right when we can scroll to right */
     @media (max-width: 450px) {
@@ -58,7 +68,7 @@
         @apply bg-base-200 flex items-center justify-center gap-0.5 rounded-xl border-0 py-0 outline-0;
       }
       .fc-toolbar-title {
-        @apply m-0 inline w-fit text-center text-base;
+        @apply m-0 inline w-fit px-1 text-center text-base;
       }
       /* < > buttons */
       .fc-next-button,
@@ -126,7 +136,7 @@
   }
 
   .week-cell {
-    @apply text-base-content/50 text-xs;
+    @apply text-base-content/50 ml-2 text-xs;
   }
 
   .fc-list-empty-cushion {
@@ -155,8 +165,16 @@
     @apply ml-2 inline-flex h-7 w-fit items-center justify-center rounded-md bg-red-500 px-1 font-medium text-white;
   }
 
+  .fc-daygrid-day-frame {
+    @apply pt-1 pr-1.5 pl-0.5;
+  }
+
+  .fc-daygrid-day-number {
+    @apply mr-1;
+  }
+
   .fc-daygrid-day-events {
-    @apply !m-0 !min-h-0;
+    @apply !mx-0 !mt-0 !mb-1 !min-h-0;
   }
 
   .fc-timegrid-divider {
@@ -168,7 +186,11 @@
   }
 
   .fc-timegrid-now-indicator-arrow {
-    @apply w-full border-none pr-2 text-right text-xs font-medium text-[red];
+    @apply box-border w-full border-none px-2 text-right text-xs font-normal text-[red];
+  }
+
+  .fc-timegrid-now-indicator-arrow > * {
+    @apply w-full text-right;
   }
 
   .fc-day-today {

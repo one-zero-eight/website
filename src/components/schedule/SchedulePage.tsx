@@ -129,7 +129,7 @@ export default function SchedulePage({
               key={v.alias}
               to="/schedule/$category"
               params={{ category: v.alias }}
-              className="px-2 py-1"
+              className="px-3 py-2.5"
               activeOptions={{ exact: true, includeSearch: true }}
               activeProps={{ className: "border-b-2 border-b-primary" }}
               inactiveProps={{

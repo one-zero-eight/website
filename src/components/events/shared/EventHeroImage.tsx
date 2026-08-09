@@ -12,7 +12,7 @@ export function EventHeroImage({
   return (
     <div
       className={cn(
-        "bg-base-200 border-base-300 relative aspect-21/9 w-full overflow-hidden rounded-2xl border",
+        "bg-base-200 border-base-300 relative aspect-video w-full overflow-hidden rounded-2xl border",
         className,
       )}
     >

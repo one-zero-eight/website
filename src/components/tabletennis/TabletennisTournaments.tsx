@@ -397,7 +397,7 @@ export function TabletennisTournaments() {
     return (
       <>
         <div>
-          <div className="border-base-300 flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-2 whitespace-nowrap">
+          <div className="border-base-300 flex shrink-0 flex-row gap-2 overflow-x-auto border-b px-4 whitespace-nowrap">
             <button
               type="button"
               className={cn(

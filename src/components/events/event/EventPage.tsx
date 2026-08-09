@@ -10,14 +10,14 @@ import { EventInfoCard } from "../shared/EventInfoCard";
 import { EventPageLayout } from "../shared/EventPageLayout";
 import { LocaleContentSection } from "../shared/LocaleContentSection";
 import { getEventImageUrl } from "../utils/links";
-import { EnrolledListModal } from "./EnrolledListModal";
+// import { EnrolledListModal } from "./EnrolledListModal";
 
 export function EventPage({ id }: { id: string }) {
   const { me } = useMe();
   const { showError } = useToast();
   const queryClient = useQueryClient();
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
-  const [enrolledOpen, setEnrolledOpen] = useState(false);
+  // const [enrolledOpen, setEnrolledOpen] = useState(false);
 
   const { data, isPending, isError, error, refetch } = $workshops.useQuery(
     "get",
@@ -104,7 +104,7 @@ export function EventPage({ id }: { id: string }) {
   const localeContent = selectedLocale
     ? data.data.locales[selectedLocale]
     : undefined;
-  const enrolledUsers = data.enrolled_users ?? null;
+  // const enrolledUsers = data.enrolled_users ?? null;
   const actionPending = isEnrolling || isUnenrolling;
 
   return (
@@ -136,7 +136,7 @@ export function EventPage({ id }: { id: string }) {
                 {data.enrolled_count} students enrolled
               </p>
               <div className="flex flex-wrap justify-end gap-2">
-                {enrolledUsers && (
+                {/* {enrolledUsers && (
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm"
@@ -144,7 +144,7 @@ export function EventPage({ id }: { id: string }) {
                   >
                     Enrolled list
                   </button>
-                )}
+                )} */}
                 {!me ? (
                   <SignInButton />
                 ) : data.enrolled ? (
@@ -177,13 +177,13 @@ export function EventPage({ id }: { id: string }) {
           </>
         }
       />
-      {enrolledUsers && (
+      {/* {enrolledUsers && (
         <EnrolledListModal
           open={enrolledOpen}
           onOpenChange={setEnrolledOpen}
           enrolledUsers={enrolledUsers}
         />
-      )}
+      )} */}
     </>
   );
 }
