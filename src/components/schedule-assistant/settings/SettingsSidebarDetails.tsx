@@ -1,7 +1,6 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $scheduleAssistant } from "@/api/schedule-assistant";
 import {
-  SchemaCourseConfig,
   SchemaInstructorListItem,
   SchemaRoomAttributeDef,
   SchemaSectionProgram,
@@ -42,15 +41,11 @@ import {
   useInstructorsQuery,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import {
-  collectKnownStudentGroupIds,
-  courseComponentsYamlLintExtensions,
-  validateCourseComponentsYaml,
-} from "@/components/schedule-assistant/settings/courses/courseComponentsYamlLint.ts";
-import {
   countCourseLessonsByInstructor,
   formatLessonBreakdown,
   type InstructorLessonBreakdown,
 } from "@/components/schedule-assistant/settings/courses/courseInstructorLessonCounts.ts";
+import { CourseComponentsEditor } from "@/components/schedule-assistant/settings/courses/CourseComponentsEditor.tsx";
 import { RoomAttributesConfigModal } from "@/components/schedule-assistant/settings/rooms/RoomAttributesConfigModal.tsx";
 import {
   buildRoomFeaturesFromDefs,
@@ -68,7 +63,6 @@ import {
   instructorDisplayName,
   searchInstructors,
 } from "@/components/schedule-assistant/settings/instructors/instructorsSearchUtils.ts";
-import { useRegisterSettingsDirty } from "@/components/schedule-assistant/settings/settingsSaveStatus.tsx";
 import { useBlurSaveField } from "@/components/schedule-assistant/settings/useBlurSaveField.ts";
 import { useSelection } from "@/components/schedule-assistant/settings/useSelection.tsx";
 import {
@@ -80,10 +74,6 @@ import {
   termWeekdayKeyToWeekday,
   toggleTermWeekday,
 } from "@/components/schedule-assistant/settings/weekdays.ts";
-import { yaml } from "@codemirror/lang-yaml";
-import { lintKeymap } from "@codemirror/lint";
-import { EditorView, keymap } from "@codemirror/view";
-import CodeMirror from "@uiw/react-codemirror";
 import clsx from "clsx";
 import {
   type KeyboardEvent,
@@ -97,7 +87,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { stringify } from "yaml";
 
 function programStableId(program: SchemaSectionProgram): string {
   return String(program?.code || "").trim();
@@ -730,15 +719,6 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
         course?.short_name,
     ) || `Курс #${courseIndex + 1}`;
   const headingSubtitle = componentTags.length ? componentTags.join(", ") : "—";
-  const knownStudentGroupIds = useMemo(
-    () => collectKnownStudentGroupIds(config),
-    [config],
-  );
-
-  const componentsSignature = stringify(components, { lineWidth: 0 });
-  const [yamlText, setYamlText] = useState(componentsSignature);
-  const [committedYaml, setCommittedYaml] = useState(componentsSignature);
-  const [parseError, setParseError] = useState<string | null>(null);
 
   const handleCreateStudentGroup = useCallback(
     (groupId: string) => {
@@ -760,22 +740,6 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
     },
     [config?.students_groups, createStudentGroup],
   );
-  const yamlLintExtensions = useMemo(
-    () =>
-      courseComponentsYamlLintExtensions(
-        knownStudentGroupIds,
-        handleCreateStudentGroup,
-      ),
-    [knownStudentGroupIds, handleCreateStudentGroup],
-  );
-
-  useEffect(() => {
-    setYamlText(componentsSignature);
-    setCommittedYaml(componentsSignature);
-    setParseError(null);
-  }, [courseIndex, componentsSignature]);
-
-  useRegisterSettingsDirty(yamlText !== committedYaml);
 
   const nameField = useBlurSaveField(name, (value) =>
     patchCourse({ name: value }),
@@ -790,19 +754,6 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
     course?.short_name_ru ?? "",
     (value) => patchCourse({ short_name_ru: value.trim() || null }),
   );
-
-  function handleCommitYaml() {
-    const result = validateCourseComponentsYaml(yamlText);
-    if (!result.ok) {
-      setParseError(result.error);
-      return;
-    }
-    setParseError(null);
-    setCommittedYaml(yamlText);
-    patchCourse({
-      components: result.value as SchemaCourseConfig["components"],
-    });
-  }
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
@@ -840,33 +791,20 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
             }
           />
 
-          <div
-            className={`${detailControlClass} flex min-h-0 min-w-0 flex-1 flex-col gap-1.5`}
-          >
-            <span className={detailLabelUpperClass}>Компоненты (YAML)</span>
-            <div className="rounded-box overflow-scroll border">
-              <CodeMirror
-                value={yamlText}
-                height="auto"
-                theme="light"
-                className=""
-                extensions={[
-                  yaml(),
-                  EditorView.lineWrapping,
-                  ...yamlLintExtensions,
-                  keymap.of(lintKeymap as Parameters<typeof keymap.of>[0]),
-                ]}
-                onChange={(value) => setYamlText(value)}
-                onBlur={handleCommitYaml}
-                basicSetup={{ foldGutter: true }}
-              />
-            </div>
-            {parseError ? (
-              <div className="text-error text-xs wrap-break-word">
-                {parseError}
-              </div>
-            ) : null}
-          </div>
+          {config ? (
+            <CourseComponentsEditor
+              config={config}
+              courseIndex={courseIndex}
+              components={components}
+              tagOptions={(term?.course_component_tags ?? []).filter(Boolean)}
+              instructors={instructors}
+              courseInstructors={course?.instructors ?? []}
+              onChange={(nextComponents) =>
+                patchCourse({ components: nextComponents })
+              }
+              onCreateStudentGroup={handleCreateStudentGroup}
+            />
+          ) : null}
 
           <SettingsDetailDeleteButton
             label="Удалить курс"
@@ -1785,10 +1723,10 @@ export function InstructorDetails({
     useDeleteInstructorMutation();
   const { deselectItem } = useSelection();
   const headingTitle =
-    instructor?.name_ru ??
-    instructor?.name_en ??
-    instructor?.email ??
-    instructor?.id ??
+    instructor?.name_en?.trim() ||
+    instructor?.name_ru?.trim() ||
+    instructor?.email?.trim() ||
+    instructor?.id ||
     "";
   const headingSubtitle = "Преподаватель";
   const nameRuField = useBlurSaveField(instructor?.name_ru ?? "", (value) =>

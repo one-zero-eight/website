@@ -29,6 +29,11 @@ import {
 } from "./roomPickerOptions.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
 import { add90m, semesterDatesForWeekday } from "./timetableViewerModel.ts";
+import {
+  buildMeetingPickerIndex,
+  meetingInstructorDateKey,
+  type MeetingPickerIndex,
+} from "./meetingPickerIndex.ts";
 
 type CourseInstructor = NonNullable<SchemaCourseConfig["instructors"]>[number];
 
@@ -62,18 +67,26 @@ export function countInstructorDailyLoad(
   instructorId: string,
   date: string,
   excludeInstanceId?: string | null,
+  isExcluded?: (meeting: Meeting) => boolean,
+  index?: MeetingPickerIndex | null,
 ): number {
   const id = instructorId.trim();
   const day = date.trim();
   if (!id || !day) return 0;
+  const candidates = index
+    ? (index.byInstructorDate.get(meetingInstructorDateKey(id, day)) ?? [])
+    : meetings;
   let count = 0;
-  for (const meeting of meetings) {
+  for (const meeting of candidates) {
     if (excludeInstanceId && meeting.instance_id === excludeInstanceId) {
       continue;
     }
+    if (isExcluded?.(meeting)) continue;
     if (meeting.cancelled) continue;
-    if ((meeting.date || "").trim() !== day) continue;
-    if (!meetingHasInstructor(meeting, id)) continue;
+    if (!index) {
+      if ((meeting.date || "").trim() !== day) continue;
+      if (!meetingHasInstructor(meeting, id)) continue;
+    }
     count += 1;
   }
   return count;
@@ -170,6 +183,7 @@ export function instructorAvailabilityForSlot({
   preferences,
   excludeRef,
   excludeInstanceId,
+  index,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
@@ -181,6 +195,7 @@ export function instructorAvailabilityForSlot({
   preferences?: SchemaInstructorSlotPreferenceEntry[] | null;
   excludeRef?: MeetingRef | null;
   excludeInstanceId?: string | null;
+  index?: MeetingPickerIndex | null;
 }): InstructorAvailabilityInfo {
   const id = instructorId.trim();
   const proposedStart = normalizeHhmm(start);
@@ -200,19 +215,16 @@ export function instructorAvailabilityForSlot({
   const groups = new Map<string, RawHit[]>();
 
   if (id && proposedStart && proposedEnd && dateSet.size) {
-    for (const meeting of meetings) {
+    const consider = (meeting: Meeting, day: string) => {
       if (excludeInstanceId && meeting.instance_id === excludeInstanceId) {
-        continue;
+        return;
       }
-      if (excludeRef && isSameLogicalMeeting(meeting, excludeRef)) continue;
-      if (meeting.cancelled) continue;
-      if (!meetingHasInstructor(meeting, id)) continue;
-      const day = (meeting.date || "").trim();
-      if (!dateSet.has(day)) continue;
+      if (excludeRef && isSameLogicalMeeting(meeting, excludeRef)) return;
+      if (meeting.cancelled) return;
       const otherStart = normalizeHhmm(meeting.start);
       const otherEnd = resolveMeetingEnd(config, meeting);
       if (!timesOverlap(proposedStart, proposedEnd, otherStart, otherEnd)) {
-        continue;
+        return;
       }
       const key = conflictGroupKey(meeting);
       const list = groups.get(key) || [];
@@ -226,6 +238,21 @@ export function instructorAvailabilityForSlot({
         },
       });
       groups.set(key, list);
+    };
+
+    if (index) {
+      for (const day of dateSet) {
+        const list =
+          index.byInstructorDate.get(meetingInstructorDateKey(id, day)) || [];
+        for (const meeting of list) consider(meeting, day);
+      }
+    } else {
+      for (const meeting of meetings) {
+        if (!meetingHasInstructor(meeting, id)) continue;
+        const day = (meeting.date || "").trim();
+        if (!dateSet.has(day)) continue;
+        consider(meeting, day);
+      }
     }
   }
 
@@ -298,6 +325,7 @@ export function buildInstructorPickerOptions({
   excludeInstanceId,
   excludeRef,
   includeInstructorIds,
+  index: indexArg,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
@@ -312,6 +340,7 @@ export function buildInstructorPickerOptions({
   excludeInstanceId?: string | null;
   excludeRef?: MeetingRef | null;
   includeInstructorIds?: string[];
+  index?: MeetingPickerIndex | null;
 }): SelectDropdownOption[] {
   const byId = new Map<string, SchemaInstructor>();
   for (const instructor of config.instructors || []) {
@@ -331,18 +360,25 @@ export function buildInstructorPickerOptions({
     if (role) roleById.set(id, role);
   }
 
+  const includeSet = new Set(
+    (includeInstructorIds || []).map((id) => id.trim()).filter(Boolean),
+  );
+
   const otherIds = [...byId.keys()].filter((id) => !seenPreferred.has(id));
 
   const ids: string[] = [...preferredIds];
   for (const id of otherIds) ids.push(id);
-  for (const raw of includeInstructorIds || []) {
-    const id = raw.trim();
-    if (id && !ids.includes(id)) ids.push(id);
+  for (const id of includeSet) {
+    if (!ids.includes(id)) ids.push(id);
   }
 
   const apiWeekday = termWeekdayKeyToWeekday(weekday);
 
   const restrictToPreferred = preferredIds.length > 0;
+  const isExcluded = excludeRef
+    ? (meeting: Meeting) => isSameLogicalMeeting(meeting, excludeRef)
+    : undefined;
+  const index = indexArg ?? buildMeetingPickerIndex(meetings);
 
   return ids
     .map((id) => {
@@ -353,6 +389,8 @@ export function buildInstructorPickerOptions({
         id,
         date,
         excludeInstanceId,
+        isExcluded,
+        index,
       );
       const role = roleById.get(id);
       const preferred = seenPreferred.has(id);
@@ -367,6 +405,7 @@ export function buildInstructorPickerOptions({
         preferences: instructor?.slot_preferences,
         excludeRef,
         excludeInstanceId,
+        index,
       });
       const hint = [role || null, `в этот день ${load} занятий`]
         .filter(Boolean)

@@ -53,6 +53,7 @@ import {
   roomPickerDatesForEdit,
 } from "./roomPickerOptions.ts";
 import { buildInstructorPickerOptions } from "./instructorPickerOptions.ts";
+import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
 import type { Meeting, MeetingOverrideField } from "./timetableViewerModel.ts";
 import { semesterDatesForWeekday } from "./timetableViewerModel.ts";
 
@@ -200,12 +201,14 @@ export function EditClassModal({
   meeting,
   config,
   meetings,
+  meetingPickerIndex,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   meeting: Meeting | null;
   config: SchemaScheduleConfig;
   meetings: Meeting[];
+  meetingPickerIndex: MeetingPickerIndex;
 }) {
   const { data: courses } = useCoursesQuery();
   const { mutate, isPending } = useUpdateCourseMutation();
@@ -285,6 +288,7 @@ export function EditClassModal({
     return buildRoomPickerOptions({
       config,
       meetings,
+      index: meetingPickerIndex,
       date: meeting.date,
       dates: dates.length ? dates : [meeting.date],
       start,
@@ -299,6 +303,7 @@ export function EditClassModal({
     config,
     endTimeValue,
     meeting,
+    meetingPickerIndex,
     meetingRef,
     meetings,
     originals?.weekday,
@@ -339,6 +344,7 @@ export function EditClassModal({
     return buildInstructorPickerOptions({
       config,
       meetings,
+      index: meetingPickerIndex,
       date: meeting.date,
       dates: dates.length ? dates : [meeting.date],
       start,
@@ -355,6 +361,7 @@ export function EditClassModal({
     courses,
     endTimeValue,
     meeting,
+    meetingPickerIndex,
     meetingRef,
     meetings,
     originals?.weekday,

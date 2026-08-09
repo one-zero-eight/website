@@ -12,7 +12,7 @@ import type { Node } from "yaml";
 
 /**
  * JSON Schema for `courses[].components[]` (schedule-assistant CourseConfig.Component).
- * Aligns with schedule-assistant/config.py CourseConfig.Component.
+ * Aligns with OpenAPI Component / ComponentSessionSeries / WeeklyPatternSlot.
  */
 const courseComponentsRootSchema = {
   title: "Компоненты курса",
@@ -20,21 +20,58 @@ const courseComponentsRootSchema = {
   type: "array",
   items: { $ref: "#/$defs/component" },
   $defs: {
+    instructorValue: {
+      anyOf: [
+        { type: "null" },
+        { type: "string" },
+        { type: "array", items: { type: "string" } },
+      ],
+    },
+    weeklyPatternSlotEdit: {
+      type: "object",
+      additionalProperties: false,
+      required: ["select_week"],
+      properties: {
+        select_week: { type: "string" },
+        cancel: { type: "boolean", default: false },
+        date: { type: ["string", "null"] },
+        start_time: { type: ["string", "null"] },
+        end_time: { type: ["string", "null"] },
+        room: { type: ["string", "null"] },
+        instructor: { $ref: "#/$defs/instructorValue" },
+      },
+    },
     weeklyPatternSlot: {
       type: "object",
       additionalProperties: false,
-      required: ["day", "time"],
+      required: ["weekday", "start_time", "end_time"],
       properties: {
-        day: { type: "string" },
-        time: { type: "string" },
+        weekday: { type: "string" },
+        start_time: { type: "string" },
+        end_time: { type: "string" },
         room: { type: ["string", "null"] },
-        instructor: {
+        instructor: { $ref: "#/$defs/instructorValue" },
+        edits: {
           anyOf: [
             { type: "null" },
-            { type: "string" },
-            { type: "array", items: { type: "string" } },
+            {
+              type: "array",
+              items: { $ref: "#/$defs/weeklyPatternSlotEdit" },
+            },
           ],
         },
+      },
+    },
+    sessionOccurrence: {
+      type: "object",
+      additionalProperties: false,
+      required: ["date", "start_time", "end_time"],
+      properties: {
+        date: { type: "string" },
+        start_time: { type: "string" },
+        end_time: { type: "string" },
+        room: { type: ["string", "null"] },
+        instructor: { $ref: "#/$defs/instructorValue" },
       },
     },
     componentSessionSeries: {
@@ -55,35 +92,12 @@ const courseComponentsRootSchema = {
             },
           ],
         },
-        dates: {
-          anyOf: [
-            { type: "null" },
-            { type: "array", items: { type: "string" } },
-          ],
-        },
-        times: {
-          anyOf: [
-            { type: "null" },
-            { type: "array", items: { type: "string" } },
-          ],
-        },
-        rooms: {
-          anyOf: [
-            { type: "null" },
-            { type: "array", items: { type: "string" } },
-          ],
-        },
-        instructors: {
+        occurrences: {
           anyOf: [
             { type: "null" },
             {
               type: "array",
-              items: {
-                anyOf: [
-                  { type: "string" },
-                  { type: "array", items: { type: "string" } },
-                ],
-              },
+              items: { $ref: "#/$defs/sessionOccurrence" },
             },
           ],
         },

@@ -29,6 +29,10 @@ import {
 
 import { CreateClassModal } from "./CreateClassModal.tsx";
 import {
+  buildMeetingPickerIndex,
+  type MeetingPickerIndex,
+} from "./meetingPickerIndex.ts";
+import {
   dateForWeekdayInWeekRange,
   type CreateMeetingCellContext,
 } from "./createMeetingUtils.ts";
@@ -305,6 +309,10 @@ function TimetableWorkspaceInner({
   const [weekIndex, setWeekIndex] = useState(0);
   const [columns, setColumns] = useState<Column[]>([]);
   const [allMeetings, setAllMeetings] = useState<Meeting[]>([]);
+  const meetingPickerIndex = useMemo(
+    () => buildMeetingPickerIndex(allMeetings),
+    [allMeetings],
+  );
   const [courseColors, setCourseColors] = useState<
     Record<string, { bg: string; border: string }>
   >({});
@@ -958,6 +966,7 @@ function TimetableWorkspaceInner({
               <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto">
                 <TimetableDetailPanel
                   allMeetings={allMeetings}
+                  meetingPickerIndex={meetingPickerIndex}
                   config={config}
                   clearSelection={clearSelection}
                 />
@@ -972,6 +981,7 @@ function TimetableWorkspaceInner({
         cellContext={createCellContext}
         config={config}
         meetings={allMeetings}
+        meetingPickerIndex={meetingPickerIndex}
       />
     </SelectionStoreContext.Provider>
   );
@@ -1205,6 +1215,7 @@ function TimetableTable({
 
 type TimetableDetailPanelProps = {
   allMeetings: Meeting[];
+  meetingPickerIndex: MeetingPickerIndex;
   config: SchemaScheduleConfig;
   clearSelection: () => void;
 };
@@ -1215,6 +1226,7 @@ function timetableDetailPanelPropsEqual(
 ): boolean {
   return (
     prev.allMeetings === next.allMeetings &&
+    prev.meetingPickerIndex === next.meetingPickerIndex &&
     prev.config === next.config &&
     prev.clearSelection === next.clearSelection
   );
@@ -1238,6 +1250,7 @@ function selectionStubLabel(selection: Selection): string {
 
 const TimetableDetailPanel = memo(function TimetableDetailPanel({
   allMeetings,
+  meetingPickerIndex,
   config,
   clearSelection,
 }: TimetableDetailPanelProps) {
@@ -1322,6 +1335,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
         meeting={selectedMeeting}
         config={config}
         meetings={allMeetings}
+        meetingPickerIndex={meetingPickerIndex}
       />
     </>
   );

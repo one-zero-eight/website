@@ -46,6 +46,7 @@ import {
   weekdayOptionsForConfig,
 } from "./meetingEditUtils.ts";
 import { buildInstructorPickerOptions } from "./instructorPickerOptions.ts";
+import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
 import {
   audienceSizeForTokens,
   buildRoomPickerOptions,
@@ -116,12 +117,14 @@ export function CreateClassModal({
   cellContext,
   config,
   meetings,
+  meetingPickerIndex,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   cellContext: CreateMeetingCellContext | null;
   config: SchemaScheduleConfig;
   meetings: Meeting[];
+  meetingPickerIndex: MeetingPickerIndex;
 }) {
   const { data: courses } = useCoursesQuery();
   const { mutate, isPending } = useUpdateCourseMutation();
@@ -199,6 +202,7 @@ export function CreateClassModal({
     return buildRoomPickerOptions({
       config,
       meetings,
+      index: meetingPickerIndex,
       date: cellContext.date,
       dates: dates.length ? dates : [cellContext.date],
       start,
@@ -210,6 +214,7 @@ export function CreateClassModal({
     cellContext,
     config,
     endTimeValue,
+    meetingPickerIndex,
     meetings,
     parsedComponent?.componentIdx,
     selectedCourse,
@@ -234,6 +239,7 @@ export function CreateClassModal({
     return buildInstructorPickerOptions({
       config,
       meetings,
+      index: meetingPickerIndex,
       date: cellContext.date,
       dates: dates.length ? dates : [cellContext.date],
       start,
@@ -246,6 +252,7 @@ export function CreateClassModal({
     cellContext,
     config,
     endTimeValue,
+    meetingPickerIndex,
     meetings,
     selectedCourse?.instructors,
     timeValue,

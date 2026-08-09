@@ -103,13 +103,20 @@ function OptionLabel({
   label,
   hint,
   muted,
+  truncate = false,
 }: {
   label: string;
   hint?: string;
   muted?: boolean;
+  truncate?: boolean;
 }) {
   return (
-    <span className={cn("truncate", muted && "text-base-content/50")}>
+    <span
+      className={cn(
+        muted && "text-base-content/50",
+        truncate ? "truncate" : "break-words whitespace-normal",
+      )}
+    >
       <span>{label}</span>
       {hint ? <span className="text-base-content/50"> {hint}</span> : null}
     </span>
@@ -126,6 +133,7 @@ export function SelectDropdown<T extends string>({
   menuClassName,
   placement = "bottom-start",
   matchTriggerWidth = true,
+  showHintOnTrigger = false,
   isOptionDisabled,
   searchable = false,
   searchPlaceholder = "Поиск…",
@@ -140,6 +148,8 @@ export function SelectDropdown<T extends string>({
   menuClassName?: string;
   placement?: "bottom-start" | "bottom-end";
   matchTriggerWidth?: boolean;
+  /** Show option hint next to the label on the closed trigger. */
+  showHintOnTrigger?: boolean;
   isOptionDisabled?: (value: T) => boolean;
   searchable?: boolean;
   searchPlaceholder?: string;
@@ -356,11 +366,12 @@ export function SelectDropdown<T extends string>({
         <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
           <span className="flex min-w-0 items-center gap-1.5">
             {currentOption?.startAdornment}
-            <span className="min-w-0">
+            <span className="min-w-0 truncate">
               <OptionLabel
                 label={currentOption?.label ?? placeholder}
-                hint={currentOption?.hint}
+                hint={showHintOnTrigger ? currentOption?.hint : undefined}
                 muted={!value}
+                truncate
               />
             </span>
           </span>

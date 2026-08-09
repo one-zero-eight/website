@@ -129,10 +129,10 @@ export function instructorDisplayName(
   instructor: SchemaInstructorListItem,
 ): string {
   return (
-    instructor.name_ru ??
-    instructor.name_en ??
-    instructor.email ??
-    instructor.id ??
+    instructor.name_en?.trim() ||
+    instructor.name_ru?.trim() ||
+    instructor.email?.trim() ||
+    instructor.id ||
     ""
   );
 }

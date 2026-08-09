@@ -19,6 +19,11 @@ import {
   semesterDatesForWeekday,
   toMinutes,
 } from "./timetableViewerModel.ts";
+import {
+  buildMeetingPickerIndex,
+  meetingRoomDateKey,
+  type MeetingPickerIndex,
+} from "./meetingPickerIndex.ts";
 
 export type RoomAvailabilityStatus = "green" | "orange" | "red";
 
@@ -48,19 +53,25 @@ export function countRoomDailyLoad(
   date: string,
   excludeInstanceId?: string | null,
   isExcluded?: (meeting: Meeting) => boolean,
+  index?: MeetingPickerIndex | null,
 ): number {
   const room = roomId.trim();
   const day = date.trim();
   if (!room || !day) return 0;
+  const candidates = index
+    ? (index.byRoomDate.get(meetingRoomDateKey(room, day)) ?? [])
+    : meetings;
   let count = 0;
-  for (const meeting of meetings) {
+  for (const meeting of candidates) {
     if (excludeInstanceId && meeting.instance_id === excludeInstanceId) {
       continue;
     }
     if (isExcluded?.(meeting)) continue;
     if (meeting.cancelled) continue;
-    if ((meeting.room || "").trim() !== room) continue;
-    if ((meeting.date || "").trim() !== day) continue;
+    if (!index) {
+      if ((meeting.room || "").trim() !== room) continue;
+      if ((meeting.date || "").trim() !== day) continue;
+    }
     count += 1;
   }
   return count;
@@ -191,6 +202,7 @@ export function roomAvailabilityForSlot({
   capacity,
   excludeRef,
   excludeInstanceId,
+  index,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
@@ -202,6 +214,7 @@ export function roomAvailabilityForSlot({
   capacity: number | null | undefined;
   excludeRef?: MeetingRef | null;
   excludeInstanceId?: string | null;
+  index?: MeetingPickerIndex | null;
 }): RoomAvailabilityInfo {
   const room = roomId.trim();
   const proposedStart = normalizeHhmm(start);
@@ -221,19 +234,16 @@ export function roomAvailabilityForSlot({
   const groups = new Map<string, RawHit[]>();
 
   if (room && proposedStart && proposedEnd && dateSet.size) {
-    for (const meeting of meetings) {
+    const consider = (meeting: Meeting, day: string) => {
       if (excludeInstanceId && meeting.instance_id === excludeInstanceId) {
-        continue;
+        return;
       }
-      if (excludeRef && isSameLogicalMeeting(meeting, excludeRef)) continue;
-      if (meeting.cancelled) continue;
-      if ((meeting.room || "").trim() !== room) continue;
-      const day = (meeting.date || "").trim();
-      if (!dateSet.has(day)) continue;
+      if (excludeRef && isSameLogicalMeeting(meeting, excludeRef)) return;
+      if (meeting.cancelled) return;
       const otherStart = normalizeHhmm(meeting.start);
       const otherEnd = resolveMeetingEnd(config, meeting);
       if (!timesOverlap(proposedStart, proposedEnd, otherStart, otherEnd)) {
-        continue;
+        return;
       }
       const key = conflictGroupKey(meeting);
       const list = groups.get(key) || [];
@@ -247,6 +257,20 @@ export function roomAvailabilityForSlot({
         },
       });
       groups.set(key, list);
+    };
+
+    if (index) {
+      for (const day of dateSet) {
+        const list = index.byRoomDate.get(meetingRoomDateKey(room, day)) || [];
+        for (const meeting of list) consider(meeting, day);
+      }
+    } else {
+      for (const meeting of meetings) {
+        if ((meeting.room || "").trim() !== room) continue;
+        const day = (meeting.date || "").trim();
+        if (!dateSet.has(day)) continue;
+        consider(meeting, day);
+      }
     }
   }
 
@@ -338,6 +362,7 @@ export function buildRoomPickerOptions({
   excludeInstanceId,
   excludeRef,
   includeRoomIds,
+  index: indexArg,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
@@ -351,6 +376,7 @@ export function buildRoomPickerOptions({
   excludeInstanceId?: string | null;
   excludeRef?: MeetingRef | null;
   includeRoomIds?: string[];
+  index?: MeetingPickerIndex | null;
 }): SelectDropdownOption[] {
   const roomsById = new Map(
     (config.rooms || [])
@@ -372,6 +398,7 @@ export function buildRoomPickerOptions({
   const isExcluded = excludeRef
     ? (meeting: Meeting) => isSameLogicalMeeting(meeting, excludeRef)
     : undefined;
+  const index = indexArg ?? buildMeetingPickerIndex(meetings);
 
   return [...ids]
     .map((roomId) => {
@@ -382,6 +409,7 @@ export function buildRoomPickerOptions({
         date,
         excludeInstanceId,
         isExcluded,
+        index,
       );
       const featureEntries = listRoomFeatureEntries(
         room?.features,
@@ -398,6 +426,7 @@ export function buildRoomPickerOptions({
         capacity: room?.capacity,
         excludeRef,
         excludeInstanceId,
+        index,
       });
       const hint = [
         room?.capacity != null ? `Вместимость ${room.capacity}` : null,

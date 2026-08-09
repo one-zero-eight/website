@@ -1,2 +1,5 @@
 allowBuilds:
   "@parcel/watcher": true
+
+overrides:
+  "@codemirror/view": "6.43.0"
