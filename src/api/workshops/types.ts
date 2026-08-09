@@ -4,6 +4,358 @@
  */
 
 export interface paths {
+  "/drafts/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Drafts
+     * @description List the current user's drafts.
+     */
+    get: operations["drafts_list_drafts"];
+    put?: never;
+    /**
+     * Create Draft
+     * @description Create a draft event.
+     */
+    post: operations["drafts_create_draft"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Draft
+     * @description Get the current user's draft.
+     */
+    get: operations["drafts_get_draft"];
+    put?: never;
+    post?: never;
+    /**
+     * Delete Draft
+     * @description Delete the draft; allowed only when the event is not published and no submission is pending.
+     */
+    delete: operations["drafts_delete_draft"];
+    options?: never;
+    head?: never;
+    /**
+     * Patch Draft
+     * @description Change draft data (starts_at / location / host).
+     */
+    patch: operations["drafts_patch_draft"];
+    trace?: never;
+  };
+  "/drafts/{id}/locales/{locale}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Locale
+     * @description Delete a locale from the draft.
+     */
+    delete: operations["drafts_delete_locale"];
+    options?: never;
+    head?: never;
+    /**
+     * Patch Locale
+     * @description Patch name or description in a locale; auto-creates the locale if missing.
+     */
+    patch: operations["drafts_patch_locale"];
+    trace?: never;
+  };
+  "/drafts/{id}/image": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Draft Image
+     * @description Redirect to the draft image in MinIO.
+     */
+    get: operations["drafts_get_draft_image"];
+    put?: never;
+    /**
+     * Upload Image
+     * @description Upload an image for the draft; stores its id in draft.data.image_id.
+     */
+    post: operations["drafts_upload_image"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Restore Draft
+     * @description Copy the revision and data from submission or public back into the draft.
+     */
+    post: operations["drafts_restore_draft"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/submissions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Submission
+     * @description Get a submission; visible to its author and to moderators.
+     */
+    get: operations["submissions_get_submission"];
+    put?: never;
+    /**
+     * Submit Draft
+     * @description Submit the draft to moderators.
+     */
+    post: operations["submissions_submit_draft"];
+    /**
+     * Delete Submission
+     * @description Delete a pending submission (author only).
+     */
+    delete: operations["submissions_delete_submission"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/submissions/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Submissions
+     * @description List submissions; moderators see all, others see only their own.
+     */
+    get: operations["submissions_list_submissions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/submissions/{id}/image": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Submission Image
+     * @description Redirect to the submission image in MinIO.
+     */
+    get: operations["submissions_get_submission_image"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/submissions/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve Submission
+     * @description Approve a submission and publish its data into the public event.
+     */
+    post: operations["submissions_approve_submission"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/submissions/{id}/decline": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decline Submission
+     * @description Decline a submission with required feedback.
+     */
+    post: operations["submissions_decline_submission"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Events
+     * @description List published events; defaults to the current month window.
+     */
+    get: operations["events_list_events"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Event
+     * @description Get a published event.
+     */
+    get: operations["events_get_event"];
+    put?: never;
+    post?: never;
+    /**
+     * Unpublish Event
+     * @description Unpublish the event by erasing its public data (moderator only).
+     */
+    delete: operations["events_unpublish_event"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{id}/enroll": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Enroll
+     * @description Enroll the current user in the event.
+     */
+    post: operations["events_enroll"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{id}/unenroll": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Unenroll
+     * @description Unenroll the current user from the event.
+     */
+    post: operations["events_unenroll"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{id}/image": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Event Image
+     * @description Redirect to the event image in MinIO.
+     */
+    get: operations["events_get_event_image"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Events Ics
+     * @description ICS feed of all published events (no event description, no enrollment filtering).
+     */
+    get: operations["events_get_events_ics"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/me": {
     parameters: {
       query?: never;
@@ -13,9 +365,9 @@ export interface paths {
     };
     /**
      * Get Me
-     * @description Get current user info if authenticated
+     * @description Get the current user's roles and owned clubs.
      */
-    get: operations["get_me_users_me_get"];
+    get: operations["users_get_me"];
     put?: never;
     post?: never;
     delete?: never;
@@ -24,185 +376,21 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/users/my_checkins": {
+  "/locales": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get My Checkins */
-    get: operations["get_my_checkins_users_my_checkins_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/users/change_role": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
     /**
-     * Change Role
-     * @description Change role of user by email
+     * Get Locales
+     * @description Get the allowed locales list.
      */
-    post: operations["change_role_users_change_role_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/users/{user_id}/checkins": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get User Checkins */
-    get: operations["get_user_checkins_users__user_id__checkins_get"];
+    get: operations["locales_get_locales"];
     put?: never;
     post?: never;
     delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/workshops/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get All Workshops */
-    get: operations["get_all_workshops_workshops__get"];
-    put?: never;
-    /**
-     * Add Workshop
-     * @description Add a new workshop
-     */
-    post: operations["add_workshop_workshops__post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/workshops/{workshop_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Workshop */
-    get: operations["get_workshop_workshops__workshop_id__get"];
-    /** Update Workshop */
-    put: operations["update_workshop_workshops__workshop_id__put"];
-    post?: never;
-    /** Delete Workshop */
-    delete: operations["delete_workshop_workshops__workshop_id__delete"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/workshops/{workshop_id}/approve": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Approve Workshop */
-    post: operations["approve_workshop_workshops__workshop_id__approve_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/workshops/{workshop_id}/checkin": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Checkin User
-     * @description Check in a user to a workshop
-     */
-    post: operations["checkin_user_workshops__workshop_id__checkin_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/workshops/{workshop_id}/checkout": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Checkout User */
-    post: operations["checkout_user_workshops__workshop_id__checkout_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/workshops/{workshop_id}/checkins": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get All Check Ins */
-    get: operations["get_all_check_ins_workshops__workshop_id__checkins_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/workshops/{workshop_id}/image": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get Event Image */
-    get: operations["get_event_image_workshops__workshop_id__image_get"];
-    put?: never;
-    /** Set Event Image */
-    post: operations["set_event_image_workshops__workshop_id__image_post"];
-    /** Delete Event Image */
-    delete: operations["delete_event_image_workshops__workshop_id__image_delete"];
     options?: never;
     head?: never;
     patch?: never;
@@ -212,61 +400,224 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** Badge */
-    Badge: {
-      /** Title */
-      title: string;
-      /** Color */
-      color: string;
-    };
-    /** Body_set_event_image_workshops__workshop_id__image_post */
-    Body_set_event_image_workshops__workshop_id__image_post: {
+    /** Body_drafts_upload_image */
+    Body_drafts_upload_image: {
       /** Image File */
       image_file: string;
     };
+    /** CreateDraft */
+    CreateDraft: {
+      /** Starts At */
+      starts_at?: string | null;
+      /** Location */
+      location?: string | null;
+      /**
+       * Locales
+       * @description Locale codes to pre-create in the draft
+       */
+      locales?: string[] | null;
+      host?: components["schemas"]["Host"] | null;
+    };
+    /** DeclineBody */
+    DeclineBody: {
+      /**
+       * Feedback
+       * @description Moderation feedback (required)
+       */
+      feedback: string;
+    };
+    /** DraftListItem */
+    DraftListItem: {
+      id: components["schemas"]["PydanticObjectId"];
+      /** Creator Id */
+      creator_id: string;
+      status: components["schemas"]["DraftStatus"] | null;
+      /**
+       * Revision
+       * Format: date-time
+       */
+      revision: string;
+      data: components["schemas"]["EventDataSummary"];
+    };
+    /** DraftOut */
+    DraftOut: {
+      id: components["schemas"]["PydanticObjectId"];
+      /** Creator Id */
+      creator_id: string;
+      status: components["schemas"]["DraftStatus"] | null;
+      /**
+       * Revision
+       * Format: date-time
+       */
+      revision: string;
+      data: components["schemas"]["EventData"];
+      /**
+       * Can Submit
+       * @description Whether the draft can be submitted
+       */
+      can_submit: boolean;
+      /**
+       * Cannot Submit Reasons
+       * @description Human-readable reasons why the draft cannot be submitted
+       */
+      cannot_submit_reasons: string[];
+    };
     /**
-     * CheckInType
+     * DraftStatus
      * @enum {string}
      */
-    CheckInType: CheckInType;
-    /** CreateWorkshop */
-    CreateWorkshop: {
-      /** English Name */
-      english_name: string;
-      /** Russian Name */
-      russian_name: string;
-      /** English Description */
-      english_description?: string | null;
-      /** Russian Description */
-      russian_description?: string | null;
-      language?: components["schemas"]["WorkshopLanguage"] | null;
-      /** Host */
-      host?: components["schemas"]["Host"][] | null;
-      /** Dtstart */
-      dtstart?: string | null;
-      /** Dtend */
-      dtend?: string | null;
-      /** Check In Opens */
-      check_in_opens?: string | null;
-      /** Check In Closes */
-      check_in_closes?: string | null;
-      /** Place */
-      place?: string | null;
-      /** Capacity */
-      capacity?: number | null;
+    DraftStatus: DraftStatus;
+    /**
+     * EventData
+     * @description Mutable draft data; all fields may be unset until submission.
+     */
+    EventData: {
       /**
-       * Is Draft
-       * @default false
+       * Starts At
+       * @description Event start time, normalized to UTC
        */
-      is_draft: boolean;
-      /** Badges */
-      badges?: components["schemas"]["Badge"][];
-      /** Links */
-      links?: components["schemas"]["Link"][];
-      /** @default on_innohassle */
-      check_in_type: components["schemas"]["CheckInType"];
-      /** Check In Link */
-      check_in_link?: string | null;
+      starts_at?: string | null;
+      /**
+       * Image Id
+       * @description ID of the event image in MinIO
+       */
+      image_id?: string | null;
+      /**
+       * Location
+       * @description Event location
+       */
+      location?: string | null;
+      /**
+       * Locales
+       * @description Localized title and description
+       */
+      locales?: {
+        [key: string]: components["schemas"]["Locale"];
+      };
+      /** @description Event host */
+      host?: components["schemas"]["Host"] | null;
+    };
+    /** EventDataOut */
+    EventDataOut: {
+      /**
+       * Starts At
+       * Format: date-time
+       */
+      starts_at: string;
+      /** Image Id */
+      image_id?: string | null;
+      /** Location */
+      location: string;
+      /** Locales */
+      locales: {
+        [key: string]: components["schemas"]["SubmissionLocale"];
+      };
+      host: components["schemas"]["PublicHost"];
+    };
+    /** EventDataSummary */
+    EventDataSummary: {
+      /** Starts At */
+      starts_at?: string | null;
+      /** Image Id */
+      image_id?: string | null;
+      /** Location */
+      location?: string | null;
+      /**
+       * Name
+       * @description Display name picked from locales by settings.locales priority
+       */
+      name?: string | null;
+      host?: components["schemas"]["Host"] | null;
+    };
+    /** EventListData */
+    EventListData: {
+      /**
+       * Starts At
+       * Format: date-time
+       */
+      starts_at: string;
+      /** Image Id */
+      image_id?: string | null;
+      /** Location */
+      location: string;
+      /**
+       * Name
+       * @description Display name picked from locales by settings.locales priority
+       */
+      name?: string | null;
+      host: components["schemas"]["PublicHost"];
+    };
+    /** EventListItem */
+    EventListItem: {
+      id: components["schemas"]["PydanticObjectId"];
+      /** Creator Id */
+      creator_id: string;
+      data: components["schemas"]["EventListData"];
+      /** Enrolled Count */
+      enrolled_count: number;
+      /**
+       * Enrolled
+       * @description Visible to authenticated users only
+       */
+      enrolled?: boolean | null;
+      /**
+       * Revision
+       * @description Visible to the author or a moderator only
+       */
+      revision?: string | null;
+      /**
+       * Approved At
+       * @description Visible to the author or a moderator only
+       */
+      approved_at?: string | null;
+      /**
+       * Approved By
+       * @description Visible to a moderator only
+       */
+      approved_by?: string | null;
+    };
+    /** EventOut */
+    EventOut: {
+      id: components["schemas"]["PydanticObjectId"];
+      /** Creator Id */
+      creator_id: string;
+      data: components["schemas"]["EventDataOut"];
+      /** Enrolled Count */
+      enrolled_count: number;
+      /**
+       * Enrolled
+       * @description Visible to authenticated users only
+       */
+      enrolled?: boolean | null;
+      /**
+       * Enrolled Users
+       * @description Visible to the author or a moderator only
+       */
+      enrolled_users?: string[] | null;
+      /**
+       * Revision
+       * @description Visible to the author or a moderator only
+       */
+      revision?: string | null;
+      /**
+       * Approved At
+       * @description Visible to the author or a moderator only
+       */
+      approved_at?: string | null;
+      /**
+       * Approved By
+       * @description Visible to a moderator only
+       */
+      approved_by?: string | null;
+    };
+    /** FeedbackBody */
+    FeedbackBody: {
+      /**
+       * Feedback
+       * @description Moderation feedback (may be empty)
+       * @default
+       */
+      feedback: string;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -275,75 +626,226 @@ export interface components {
     };
     /** Host */
     Host: {
-      host_type: components["schemas"]["HostType"];
-      /** Name */
-      name: string;
+      /** @description Host type */
+      type: components["schemas"]["HostType"];
+      /**
+       * Club Id
+       * @description Club id (for type=club)
+       */
+      club_id?: string | null;
+      /**
+       * Name
+       * @description External host name (for type=external)
+       */
+      name?: string | null;
+      /**
+       * Url
+       * @description External host url (for type=external, optional)
+       */
+      url?: string | null;
     };
     /**
      * HostType
      * @enum {string}
      */
     HostType: HostType;
-    /** Link */
-    Link: {
-      /** Title */
-      title: string;
-      /** Url */
-      url: string;
-    };
-    /** UpdateWorkshop */
-    UpdateWorkshop: {
-      /** English Name */
-      english_name?: string | null;
-      /** Russian Name */
-      russian_name?: string | null;
-      /** English Description */
-      english_description?: string | null;
-      /** Russian Description */
-      russian_description?: string | null;
-      language?: components["schemas"]["WorkshopLanguage"] | null;
-      /** Host */
-      host?: components["schemas"]["Host"][] | null;
-      /** Dtstart */
-      dtstart?: string | null;
-      /** Dtend */
-      dtend?: string | null;
-      /** Check In Opens */
-      check_in_opens?: string | null;
-      /** Check In Closes */
-      check_in_closes?: string | null;
-      /** Place */
-      place?: string | null;
-      /** Capacity */
-      capacity?: number | null;
-      /** Badges */
-      badges?: components["schemas"]["Badge"][] | null;
-      /** Links */
-      links?: components["schemas"]["Link"][] | null;
-      check_in_type?: components["schemas"]["CheckInType"] | null;
-      /** Check In Link */
-      check_in_link?: string | null;
-      /** Is Active */
-      is_active?: boolean | null;
-      /** Is Draft */
-      is_draft?: boolean | null;
-    };
-    /** User */
-    User: {
-      /** Innohassle Id */
-      innohassle_id: string;
-      /** Email */
-      email: string;
-      /** Telegram Username */
-      telegram_username: string | null;
-      /** @default user */
-      role: components["schemas"]["UserRole"];
+    /** ImageUploadResponse */
+    ImageUploadResponse: {
+      /**
+       * Image Id
+       * @description File ID of the uploaded event image
+       */
+      image_id: string;
     };
     /**
-     * UserRole
+     * Locale
+     * @description Locale content in a draft — all fields optional.
+     */
+    Locale: {
+      /** Name */
+      name?: string | null;
+      /** Description */
+      description?: string | null;
+    };
+    /** MeOut */
+    MeOut: {
+      /**
+       * Roles
+       * @description List of roles: "club-leader", "event-manager", "moderator"
+       */
+      roles: string[];
+      /** Clubs */
+      clubs: components["schemas"]["OwnedClub"][];
+    };
+    /** Moderation */
+    Moderation: {
+      status: components["schemas"]["ModerationStatus"];
+      /** Feedback */
+      feedback?: string | null;
+      /**
+       * Updated At
+       * Format: date-time
+       * @description Timestamp of the last moderation action (submit, approve, or decline)
+       */
+      updated_at: string;
+    };
+    /**
+     * ModerationStatus
      * @enum {string}
      */
-    UserRole: UserRole;
+    ModerationStatus: ModerationStatus;
+    /** OwnedClub */
+    OwnedClub: {
+      /**
+       * Club Id
+       * @description ID of the club
+       */
+      club_id: string;
+      /**
+       * Title
+       * @description Display name of the club
+       */
+      title: string;
+    };
+    /** PatchDraft */
+    PatchDraft: {
+      /** Starts At */
+      starts_at?: string | null;
+      /** Location */
+      location?: string | null;
+      host?: components["schemas"]["Host"] | null;
+    };
+    /** PatchLocale */
+    PatchLocale: {
+      /** Name */
+      name?: string | null;
+      /** Description */
+      description?: string | null;
+    };
+    /**
+     * PublicHost
+     * @description Host as shown on published events (resolved for display).
+     */
+    PublicHost: {
+      /** Display Name */
+      display_name: string;
+      /** Link */
+      link?: string | null;
+    };
+    /** @example 5eb7cf5a86d9755df3a6c593 */
+    PydanticObjectId: string;
+    /** RestoreBody */
+    RestoreBody: {
+      /**
+       * From
+       * @enum {string}
+       */
+      from: RestoreBodyFrom;
+    };
+    /** Submission */
+    Submission: {
+      /**
+       * Revision
+       * Format: date-time
+       * @description Draft revision that was submitted
+       */
+      revision: string;
+      /**
+       * Submitted At
+       * Format: date-time
+       */
+      submitted_at: string;
+      moderation: components["schemas"]["Moderation"];
+      data: components["schemas"]["SubmissionData"];
+    };
+    /**
+     * SubmissionData
+     * @description Immutable data of a submission/public event; only image_id is nullable.
+     */
+    SubmissionData: {
+      /**
+       * Starts At
+       * Format: date-time
+       * @description Event start time, normalized to UTC
+       */
+      starts_at: string;
+      /**
+       * Image Id
+       * @description ID of the event image in MinIO
+       */
+      image_id?: string | null;
+      /**
+       * Location
+       * @description Event location
+       */
+      location: string;
+      /**
+       * Locales
+       * @description Localized title and description
+       */
+      locales: {
+        [key: string]: components["schemas"]["SubmissionLocale"];
+      };
+      /** @description Event host */
+      host: components["schemas"]["Host"];
+    };
+    /** SubmissionDataSummary */
+    SubmissionDataSummary: {
+      /**
+       * Starts At
+       * Format: date-time
+       */
+      starts_at: string;
+      /** Image Id */
+      image_id?: string | null;
+      /** Location */
+      location: string;
+      /**
+       * Name
+       * @description Display name picked from locales by settings.locales priority
+       */
+      name?: string | null;
+      host: components["schemas"]["Host"];
+    };
+    /** SubmissionListItem */
+    SubmissionListItem: {
+      id: components["schemas"]["PydanticObjectId"];
+      /** Creator Id */
+      creator_id: string;
+      submission: components["schemas"]["SubmissionSummary"];
+    };
+    /**
+     * SubmissionLocale
+     * @description Locale content in a submission/public event — fields are required.
+     */
+    SubmissionLocale: {
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
+    };
+    /** SubmissionOut */
+    SubmissionOut: {
+      id: components["schemas"]["PydanticObjectId"];
+      /** Creator Id */
+      creator_id: string;
+      submission: components["schemas"]["Submission"];
+    };
+    /** SubmissionSummary */
+    SubmissionSummary: {
+      /**
+       * Revision
+       * Format: date-time
+       */
+      revision: string;
+      /**
+       * Submitted At
+       * Format: date-time
+       */
+      submitted_at: string;
+      moderation: components["schemas"]["Moderation"];
+      data: components["schemas"]["SubmissionDataSummary"];
+    };
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -357,98 +859,6 @@ export interface components {
       /** Context */
       ctx?: Record<string, never>;
     };
-    /** ViewUserScheme */
-    ViewUserScheme: {
-      /** Id */
-      id: string;
-      /** Innohassle Id */
-      innohassle_id: string;
-      role: components["schemas"]["UserRole"];
-      /** Email */
-      email: string;
-      /** Telegram Username */
-      telegram_username?: string | null;
-      /** Name */
-      name?: string | null;
-    };
-    /** Workshop */
-    Workshop: {
-      /** Id */
-      id: string;
-      /** English Name */
-      english_name: string;
-      /** Russian Name */
-      russian_name: string;
-      /** English Description */
-      english_description: string | null;
-      /** Russian Description */
-      russian_description: string | null;
-      language: components["schemas"]["WorkshopLanguage"] | null;
-      /** Host */
-      host: {
-        [key: string]: string;
-      }[];
-      /** Dtstart */
-      dtstart: string | null;
-      /** Dtend */
-      dtend: string | null;
-      /** Check In Opens */
-      check_in_opens: string | null;
-      /** Check In Closes */
-      check_in_closes: string | null;
-      /** Place */
-      place: string | null;
-      /** Capacity */
-      capacity: number | null;
-      /** Badges */
-      badges: {
-        [key: string]: string;
-      }[];
-      /** Links */
-      links: {
-        [key: string]: string;
-      }[];
-      /** @default on_innohassle */
-      check_in_type: components["schemas"]["CheckInType"];
-      /** Check In Link */
-      check_in_link: string | null;
-      /**
-       * Is Active
-       * @default true
-       */
-      is_active: boolean;
-      /**
-       * Is Draft
-       * @default false
-       */
-      is_draft: boolean;
-      /**
-       * Is Approved
-       * @default false
-       */
-      is_approved: boolean;
-      /** Image File Id */
-      image_file_id: string | null;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at: string;
-      /** Remain Places */
-      readonly remain_places: number;
-      /**
-       * Is Registrable
-       * @description Marks whether users can register to the workshop.
-       *     Can register after check-in opens dt, and cannot register after the workshop.
-       *     Cannot register to drafts.
-       */
-      readonly is_registrable: boolean;
-    };
-    /**
-     * WorkshopLanguage
-     * @enum {string}
-     */
-    WorkshopLanguage: WorkshopLanguage;
   };
   responses: never;
   parameters: never;
@@ -456,22 +866,47 @@ export interface components {
   headers: never;
   pathItems: never;
 }
-export type SchemaBadge = components["schemas"]["Badge"];
-export type SchemaBodySetEventImageWorkshopsWorkshopIdImagePost =
-  components["schemas"]["Body_set_event_image_workshops__workshop_id__image_post"];
-export type SchemaCreateWorkshop = components["schemas"]["CreateWorkshop"];
+export type SchemaBodyDraftsUploadImage =
+  components["schemas"]["Body_drafts_upload_image"];
+export type SchemaCreateDraft = components["schemas"]["CreateDraft"];
+export type SchemaDeclineBody = components["schemas"]["DeclineBody"];
+export type SchemaDraftListItem = components["schemas"]["DraftListItem"];
+export type SchemaDraftOut = components["schemas"]["DraftOut"];
+export type SchemaEventData = components["schemas"]["EventData"];
+export type SchemaEventDataOut = components["schemas"]["EventDataOut"];
+export type SchemaEventDataSummary = components["schemas"]["EventDataSummary"];
+export type SchemaEventListData = components["schemas"]["EventListData"];
+export type SchemaEventListItem = components["schemas"]["EventListItem"];
+export type SchemaEventOut = components["schemas"]["EventOut"];
+export type SchemaFeedbackBody = components["schemas"]["FeedbackBody"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
 export type SchemaHost = components["schemas"]["Host"];
-export type SchemaLink = components["schemas"]["Link"];
-export type SchemaUpdateWorkshop = components["schemas"]["UpdateWorkshop"];
-export type SchemaUser = components["schemas"]["User"];
+export type SchemaImageUploadResponse =
+  components["schemas"]["ImageUploadResponse"];
+export type SchemaLocale = components["schemas"]["Locale"];
+export type SchemaMeOut = components["schemas"]["MeOut"];
+export type SchemaModeration = components["schemas"]["Moderation"];
+export type SchemaOwnedClub = components["schemas"]["OwnedClub"];
+export type SchemaPatchDraft = components["schemas"]["PatchDraft"];
+export type SchemaPatchLocale = components["schemas"]["PatchLocale"];
+export type SchemaPublicHost = components["schemas"]["PublicHost"];
+export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
+export type SchemaRestoreBody = components["schemas"]["RestoreBody"];
+export type SchemaSubmission = components["schemas"]["Submission"];
+export type SchemaSubmissionData = components["schemas"]["SubmissionData"];
+export type SchemaSubmissionDataSummary =
+  components["schemas"]["SubmissionDataSummary"];
+export type SchemaSubmissionListItem =
+  components["schemas"]["SubmissionListItem"];
+export type SchemaSubmissionLocale = components["schemas"]["SubmissionLocale"];
+export type SchemaSubmissionOut = components["schemas"]["SubmissionOut"];
+export type SchemaSubmissionSummary =
+  components["schemas"]["SubmissionSummary"];
 export type SchemaValidationError = components["schemas"]["ValidationError"];
-export type SchemaViewUserScheme = components["schemas"]["ViewUserScheme"];
-export type SchemaWorkshop = components["schemas"]["Workshop"];
 export type $defs = Record<string, never>;
 export interface operations {
-  get_me_users_me_get: {
+  drafts_list_drafts: {
     parameters: {
       query?: never;
       header?: never;
@@ -480,36 +915,16 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Current user info */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["User"];
+          "application/json": components["schemas"]["DraftListItem"][];
         };
       };
-    };
-  };
-  get_my_checkins_users_my_checkins_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description User's check-ins retrieved successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Workshop"][];
-        };
-      };
-      /** @description Not authenticated */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
@@ -518,41 +933,42 @@ export interface operations {
       };
     };
   };
-  change_role_users_change_role_post: {
+  drafts_create_draft: {
     parameters: {
-      query: {
-        role: components["schemas"]["UserRole"];
-        user_to_change_email: string;
-      };
+      query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateDraft"];
+      };
+    };
     responses: {
-      /** @description Changed role succesfully, returns updated user */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["User"];
+          "application/json": components["schemas"]["DraftOut"];
         };
       };
-      /** @description Only superadmin can change role */
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only club leaders or event managers can create drafts */
       403: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description User to change not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -564,34 +980,241 @@ export interface operations {
       };
     };
   };
-  get_user_checkins_users__user_id__checkins_get: {
+  drafts_get_draft: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        user_id: string;
+        id: components["schemas"]["PydanticObjectId"];
       };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description User's check-ins retrieved successfully */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Workshop"][];
+          "application/json": components["schemas"]["DraftOut"];
         };
       };
-      /** @description Not authenticated */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description User not found */
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_delete_draft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Cannot delete a draft while the event is published OR Cannot delete a draft while a submission is pending */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_patch_draft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PatchDraft"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_delete_locale: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+        locale: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_patch_locale: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+        locale: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PatchLocale"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_get_draft_image: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No image available */
       404: {
         headers: {
           [name: string]: unknown;
@@ -609,10 +1232,250 @@ export interface operations {
       };
     };
   };
-  get_all_workshops_workshops__get: {
+  drafts_upload_image: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_drafts_upload_image"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ImageUploadResponse"];
+        };
+      };
+      /** @description Invalid content type ({content_type}) */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_restore_draft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RestoreBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description No {body.source} to restore from */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  submissions_get_submission: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubmissionOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Submission not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  submissions_submit_draft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubmissionOut"];
+        };
+      };
+      /** @description Draft has not changed since the last submission */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  submissions_delete_submission: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Only pending submissions can be deleted */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Submission not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  submissions_list_submissions: {
     parameters: {
       query?: {
-        limit?: number;
+        status?: components["schemas"]["ModerationStatus"] | null;
       };
       header?: never;
       path?: never;
@@ -620,69 +1483,22 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description All workshops retrieved successfully */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Workshop"][];
+          "application/json": components["schemas"]["SubmissionListItem"][];
         };
       };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  add_workshop_workshops__post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateWorkshop"];
-      };
-    };
-    responses: {
-      /** @description Workshop successfully created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Workshop"];
-        };
-      };
-      /** @description Workshop creation failed */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not authenticated */
+      /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Not authorized (admin required) */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -694,359 +1510,12 @@ export interface operations {
       };
     };
   };
-  get_workshop_workshops__workshop_id__get: {
+  submissions_get_submission_image: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        workshop_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Workshop retrieved successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Workshop"] | null;
-        };
-      };
-      /** @description Workshop not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  update_workshop_workshops__workshop_id__put: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        workshop_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateWorkshop"];
-      };
-    };
-    responses: {
-      /** @description Workshop updated successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Workshop"];
-        };
-      };
-      /** @description Not authenticated */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not authorized (admin required) */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Workshop not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  delete_workshop_workshops__workshop_id__delete: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        workshop_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Workshop deleted successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Not authenticated */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not authorized (admin required) */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Workshop not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  approve_workshop_workshops__workshop_id__approve_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        workshop_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Workshop approved successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["Workshop"];
-        };
-      };
-      /** @description Not authenticated */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Only superadmin can approve workshops */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Workshop not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  checkin_user_workshops__workshop_id__checkin_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        workshop_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description User successfully checked in */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Some error occurred during checkin */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not authenticated */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Workshop not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  checkout_user_workshops__workshop_id__checkout_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        workshop_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description User successfully checked out */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** @description Some error occurred during checkout */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not authenticated */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Workshop not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  get_all_check_ins_workshops__workshop_id__checkins_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        workshop_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description All check-ins retrieved successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["ViewUserScheme"][];
-        };
-      };
-      /** @description Not authenticated */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Workshop not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  get_event_image_workshops__workshop_id__image_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        workshop_id: string;
+        id: components["schemas"]["PydanticObjectId"];
       };
       cookie?: never;
     };
@@ -1061,14 +1530,14 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Redirect to the event image */
-      307: {
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Event not found or no logo available */
+      /** @description Submission not found OR No image available */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1086,46 +1555,74 @@ export interface operations {
       };
     };
   };
-  set_event_image_workshops__workshop_id__image_post: {
+  submissions_approve_submission: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        workshop_id: string;
+        id: components["schemas"]["PydanticObjectId"];
       };
       cookie?: never;
     };
     requestBody: {
       content: {
-        "multipart/form-data": components["schemas"]["Body_set_event_image_workshops__workshop_id__image_post"];
+        "application/json": components["schemas"]["FeedbackBody"];
       };
     };
     responses: {
-      /** @description Changed event image successfully */
+      /** @description Successful Response */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Workshop"];
+          "application/json": components["schemas"]["SubmissionOut"];
         };
       };
-      /** @description Invalid content type */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Only admin can change event image */
+      /** @description Only moderators can perform this action */
       403: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Event not found */
-      404: {
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  submissions_decline_submission: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeclineBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SubmissionOut"];
+        };
+      };
+      /** @description Only moderators can perform this action */
+      403: {
         headers: {
           [name: string]: unknown;
         };
@@ -1142,12 +1639,82 @@ export interface operations {
       };
     };
   };
-  delete_event_image_workshops__workshop_id__image_delete: {
+  events_list_events: {
+    parameters: {
+      query?: {
+        from?: string | null;
+        to?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventListItem"][];
+        };
+      };
+      /** @description from must not be later than to */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  events_get_event: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        workshop_id: string;
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventOut"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  events_unpublish_event: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
       };
       cookie?: never;
     };
@@ -1162,21 +1729,121 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Deleted event image successfully */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Only admin can change event image */
+      /** @description Only moderators can perform this action */
       403: {
         headers: {
           [name: string]: unknown;
         };
         content?: never;
       };
-      /** @description Event not found */
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  events_enroll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  events_unenroll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  events_get_event_image: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description No image available */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1190,26 +1857,94 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  events_get_events_ics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+    };
+  };
+  users_get_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MeOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  locales_get_locales: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": string[];
         };
       };
     };
   };
 }
-export enum CheckInType {
-  no_check_in = "no_check_in",
-  on_innohassle = "on_innohassle",
-  by_link = "by_link",
+export enum DraftStatus {
+  published = "published",
+  unpublished = "unpublished",
+  pending = "pending",
+  declined = "declined",
 }
 export enum HostType {
   club = "club",
-  other = "other",
+  external = "external",
 }
-export enum UserRole {
-  admin = "admin",
-  user = "user",
+export enum ModerationStatus {
+  pending = "pending",
+  approved = "approved",
+  declined = "declined",
 }
-export enum WorkshopLanguage {
-  english = "english",
-  russian = "russian",
-  both = "both",
+export enum RestoreBodyFrom {
+  submission = "submission",
+  public = "public",
 }
