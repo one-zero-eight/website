@@ -936,7 +936,9 @@ function TimetableWorkspaceInner({
                     </button>
                     <TimetableLayoutSelector
                       layoutMode={layoutMode}
-                      onLayoutModeChange={setLayoutMode}
+                      onLayoutModeChange={(mode) => {
+                        startTransition(() => setLayoutMode(mode));
+                      }}
                       calendarDisabled={isUtilizationTab}
                     />
                     <TimetableTabSelector

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/ui/cn";
-import { Fragment, memo } from "react";
+import { Fragment, memo, useEffect, useMemo, useState } from "react";
 
 import {
   meetingCalendarCellLabel,
@@ -27,8 +27,12 @@ const CALENDAR_TABLE_CLASS =
 const CALENDAR_HEAD_ROW_CLASS = "h-12";
 /** h-12 + нижняя граница шапки */
 const CALENDAR_STICKY_SLOT_TOP_CLASS = "top-[calc(3rem+1px)]";
+/** Approx. week block height (header + 7 slots) for unmounted placeholders. */
+const CALENDAR_WEEK_PLACEHOLDER_HEIGHT_PX = 800;
+const CALENDAR_WEEK_SHELL_CLASS =
+  "[content-visibility:auto] [contain-intrinsic-size:auto_800px]";
 
-function CalendarMeetingCard({
+const CalendarMeetingCard = memo(function CalendarMeetingCard({
   meeting,
   selection,
   courseColors,
@@ -87,7 +91,7 @@ function CalendarMeetingCard({
       ) : null}
     </button>
   );
-}
+});
 
 function CalendarWeekHeader({ week }: { week: CalendarWeekBlock }) {
   return (
@@ -131,7 +135,7 @@ function CalendarWeekHeader({ week }: { week: CalendarWeekBlock }) {
   );
 }
 
-function CalendarWeekTable({
+const CalendarWeekTable = memo(function CalendarWeekTable({
   week,
   calendarGrid,
   courseColors,
@@ -222,7 +226,7 @@ function CalendarWeekTable({
       </tbody>
     </table>
   );
-}
+});
 
 function CalendarStackedTable({
   calendarGrid,
@@ -239,24 +243,84 @@ function CalendarStackedTable({
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 }) {
+  const weeks = calendarGrid.weeks;
+  const currentWeekIndex = useMemo(() => {
+    const idx = weeks.findIndex((week) => week.weekRelative === "current");
+    return idx >= 0 ? idx : 0;
+  }, [weeks]);
+
+  const [mountedRange, setMountedRange] = useState({
+    start: currentWeekIndex,
+    end: currentWeekIndex,
+  });
+
+  useEffect(() => {
+    setMountedRange({ start: currentWeekIndex, end: currentWeekIndex });
+  }, [calendarGrid, currentWeekIndex]);
+
+  useEffect(() => {
+    if (mountedRange.start <= 0 && mountedRange.end >= weeks.length - 1) {
+      return;
+    }
+
+    let cancelled = false;
+    const expand = () => {
+      if (cancelled) return;
+      setMountedRange((prev) => ({
+        start: Math.max(0, prev.start - 1),
+        end: Math.min(weeks.length - 1, prev.end + 1),
+      }));
+    };
+
+    let idleId = 0;
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(expand, { timeout: 120 });
+    } else {
+      idleId = window.setTimeout(expand, 0) as unknown as number;
+    }
+
+    return () => {
+      cancelled = true;
+      if (typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleId);
+      } else {
+        window.clearTimeout(idleId);
+      }
+    };
+  }, [mountedRange, weeks.length]);
+
   return (
     <div id="calendar-table" className="flex w-max min-w-full flex-col">
-      {calendarGrid.weeks.map((week, weekIndex) => (
-        <Fragment key={week.key}>
-          <CalendarWeekTable
-            week={week}
-            calendarGrid={calendarGrid}
-            courseColors={courseColors}
-            selection={selection}
-            selectMeeting={selectMeeting}
-            clearSelection={clearSelection}
-            onEmptyCellClick={onEmptyCellClick}
-          />
-          {weekIndex < calendarGrid.weeks.length - 1 ? (
-            <div className="h-px shrink-0 bg-[#d8dfeb]" />
-          ) : null}
-        </Fragment>
-      ))}
+      {weeks.map((week, weekIndex) => {
+        const mounted =
+          weekIndex >= mountedRange.start && weekIndex <= mountedRange.end;
+        return (
+          <Fragment key={week.key}>
+            {mounted ? (
+              <div className={CALENDAR_WEEK_SHELL_CLASS}>
+                <CalendarWeekTable
+                  week={week}
+                  calendarGrid={calendarGrid}
+                  courseColors={courseColors}
+                  selection={selection}
+                  selectMeeting={selectMeeting}
+                  clearSelection={clearSelection}
+                  onEmptyCellClick={onEmptyCellClick}
+                />
+              </div>
+            ) : (
+              <div
+                className={CALENDAR_WEEK_SHELL_CLASS}
+                data-calendar-week-placeholder={week.key}
+                style={{ height: CALENDAR_WEEK_PLACEHOLDER_HEIGHT_PX }}
+              />
+            )}
+            {weekIndex < weeks.length - 1 ? (
+              <div className="h-px shrink-0 bg-[#d8dfeb]" />
+            ) : null}
+          </Fragment>
+        );
+      })}
     </div>
   );
 }
