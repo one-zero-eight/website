@@ -1,7 +1,7 @@
 import type {
   SchemaComponent,
   SchemaCourseConfig,
-  SchemaInstructorListItem,
+  SchemaInstructor,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { ComponentEditModal } from "@/components/schedule-assistant/settings/courses/ComponentEditModal.tsx";
@@ -139,7 +139,7 @@ export function CourseComponentsEditor({
   courseIndex: number;
   components: SchemaCourseConfig["components"];
   tagOptions: string[];
-  instructors: SchemaInstructorListItem[];
+  instructors: SchemaInstructor[];
   courseInstructors: SchemaCourseConfig["instructors"];
   onChange: (components: SchemaCourseConfig["components"]) => void;
   onCreateStudentGroup?: (groupId: string) => void;

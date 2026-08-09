@@ -542,13 +542,12 @@ export function usePatchInstructorMutation(instructorId: string | undefined) {
   const patchInstructor = useCallback(
     (patch: Partial<SchemaInstructor>) => {
       if (!instructorId || !query.data) return;
-      const { meetings_count: _meetingsCount, ...instructor } = {
-        ...query.data,
-        ...patch,
-      };
       mutate({
         params: { path: { instructor_id: instructorId } },
-        body: instructor,
+        body: {
+          ...query.data,
+          ...patch,
+        },
       });
     },
     [instructorId, mutate, query.data],

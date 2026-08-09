@@ -1,4 +1,5 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { $scheduleAssistant } from "@/api/schedule-assistant";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import {
   useCreateInstructorMutation,
@@ -132,6 +133,17 @@ export function InstructorsTabContent() {
     isError,
     error,
   } = useInstructorsQuery();
+  const {
+    data: meetingsCounts,
+    isPending: isMeetingsCountsPending,
+    isError: isMeetingsCountsError,
+    error: meetingsCountsError,
+  } = $scheduleAssistant.useQuery(
+    "get",
+    "/schedule-config/instructors/meetings-counts",
+    {},
+    { enabled: (instructors?.length ?? 0) > 0 },
+  );
   const { data: termData } = useTermQuery();
   const term = termData ?? undefined;
   const { mutate: createInstructor, isPending: isCreating } =
@@ -213,12 +225,25 @@ export function InstructorsTabContent() {
     const indexed = trimmed
       ? searchInstructors(searchIndex, trimmed)
       : searchIndex.items;
+    const counts = meetingsCounts?.counts;
+    const withCounts = counts
+      ? indexed.map((item) => ({
+          ...item,
+          meetings_count: counts[item.id] ?? 0,
+        }))
+      : indexed;
     return sortInstructors(
-      indexed,
+      withCounts,
       sortMode,
       term?.instructor_positions ?? undefined,
     );
-  }, [deferredSearchQuery, searchIndex, sortMode, term?.instructor_positions]);
+  }, [
+    deferredSearchQuery,
+    meetingsCounts?.counts,
+    searchIndex,
+    sortMode,
+    term?.instructor_positions,
+  ]);
 
   const positionOptions = useMemo(
     () => (term?.instructor_positions ?? []).filter(Boolean),
@@ -234,14 +259,17 @@ export function InstructorsTabContent() {
     [visibleInstructors],
   );
 
-  if (isPending) {
+  if (
+    isPending ||
+    ((instructors?.length ?? 0) > 0 && isMeetingsCountsPending)
+  ) {
     return <div className="skeleton h-40 w-full" />;
   }
 
-  if (isError) {
+  if (isError || isMeetingsCountsError) {
     return (
       <div className="alert alert-error alert-soft text-sm">
-        {formatApiErrorMessage(error)}
+        {formatApiErrorMessage(error ?? meetingsCountsError)}
       </div>
     );
   }

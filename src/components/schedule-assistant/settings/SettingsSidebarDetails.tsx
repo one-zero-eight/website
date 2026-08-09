@@ -1,7 +1,7 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $scheduleAssistant } from "@/api/schedule-assistant";
 import {
-  SchemaInstructorListItem,
+  SchemaInstructor,
   SchemaRoomAttributeDef,
   SchemaSectionProgram,
   SectionConfigDefault_layoutAnyOf0,
@@ -836,7 +836,7 @@ function CourseInstructorsEditor({
   assignments: { id: string; role: string }[];
   roleOptions: string[];
   tagOrder: string[];
-  instructors: SchemaInstructorListItem[];
+  instructors: SchemaInstructor[];
   lessonCounts: Map<string, InstructorLessonBreakdown>;
   onChange: (assignments: { id: string; role: string }[]) => void;
 }) {

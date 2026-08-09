@@ -454,6 +454,28 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/schedule-config/instructors/meetings-counts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Instructor Meetings Counts
+     * @description Count placed term meetings for instructors.
+     *
+     *     Omit `instructor_id` to count all instructors; pass one or more ids to count selectively.
+     */
+    get: operations["schedule_config_instructor_meetings_counts"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/schedule-config/instructors/{instructor_id}": {
     parameters: {
       query?: never;
@@ -1378,49 +1400,15 @@ export interface components {
       /** Instructor Id */
       instructor_id: string;
     };
-    /** InstructorListItem */
-    InstructorListItem: {
+    /** InstructorMeetingsCountsResponse */
+    InstructorMeetingsCountsResponse: {
       /**
-       * Id
-       * @description Instructor unique identifier
+       * Counts
+       * @description Map of instructor id → placed meetings in the current term
        */
-      id: string;
-      /**
-       * Name En
-       * @description English display name
-       */
-      name_en?: string | null;
-      /**
-       * Name Ru
-       * @description Russian display name
-       */
-      name_ru?: string | null;
-      /**
-       * Email
-       * @description Work email when known
-       */
-      email?: string | null;
-      /**
-       * Alias
-       * @description Short handle or Telegram-style alias from staff roster
-       */
-      alias?: string | null;
-      /**
-       * Position
-       * @description Staff position from roster (for example, Full Professor, Visiting)
-       */
-      position?: string | null;
-      /**
-       * Slot Preferences
-       * @description Sparse weekday+slot preference grid; omitted cells are neutral
-       */
-      slot_preferences?: components["schemas"]["InstructorSlotPreferenceEntry"][];
-      /**
-       * Meetings Count
-       * @description Placed meetings in the current term; weekly patterns expand by +1 per week
-       * @default 0
-       */
-      meetings_count: number;
+      counts: {
+        [key: string]: number;
+      };
     };
     /** InstructorPreferenceForm */
     InstructorPreferenceForm: {
@@ -2485,8 +2473,8 @@ export type SchemaInstructorBannedSlotIssue =
   components["schemas"]["InstructorBannedSlotIssue"];
 export type SchemaInstructorIdIssue =
   components["schemas"]["InstructorIdIssue"];
-export type SchemaInstructorListItem =
-  components["schemas"]["InstructorListItem"];
+export type SchemaInstructorMeetingsCountsResponse =
+  components["schemas"]["InstructorMeetingsCountsResponse"];
 export type SchemaInstructorPreferenceForm =
   components["schemas"]["InstructorPreferenceForm"];
 export type SchemaInstructorPreferenceIssue =
@@ -3494,7 +3482,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["InstructorListItem"][];
+          "application/json": components["schemas"]["Instructor"][];
         };
       };
     };
@@ -3519,6 +3507,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Instructor"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  schedule_config_instructor_meetings_counts: {
+    parameters: {
+      query?: {
+        instructor_id?: string[] | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InstructorMeetingsCountsResponse"];
         };
       };
       /** @description Validation Error */

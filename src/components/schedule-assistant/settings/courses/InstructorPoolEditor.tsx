@@ -1,6 +1,6 @@
 import type {
   SchemaCourseConfig,
-  SchemaInstructorListItem,
+  SchemaInstructor,
 } from "@/api/schedule-assistant/types.ts";
 import {
   createInstructorsSearchIndex,
@@ -46,7 +46,7 @@ export function InstructorPoolEditor({
 }: {
   value: InstructorPoolEntry[];
   onChange: (next: InstructorPoolEntry[]) => void;
-  instructors: SchemaInstructorListItem[];
+  instructors: SchemaInstructor[];
   courseInstructors?: SchemaCourseConfig["instructors"];
 }) {
   const [searchQuery, setSearchQuery] = useState("");

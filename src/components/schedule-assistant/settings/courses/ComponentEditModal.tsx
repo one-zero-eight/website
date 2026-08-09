@@ -1,7 +1,7 @@
 import type {
   SchemaComponent,
   SchemaCourseConfig,
-  SchemaInstructorListItem,
+  SchemaInstructor,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
@@ -162,7 +162,7 @@ export function ComponentEditModal({
   component: SchemaComponent | null;
   isNew?: boolean;
   tagOptions: string[];
-  instructors: SchemaInstructorListItem[];
+  instructors: SchemaInstructor[];
   courseInstructors: SchemaCourseConfig["instructors"];
   onSave: (component: SchemaComponent) => void;
 }) {
