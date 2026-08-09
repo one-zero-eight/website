@@ -25,7 +25,7 @@ export function CreateDraftModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const navigate = useNavigate();
-  const { showError, showSuccess } = useToast();
+  const { showError } = useToast();
   const { clubs, isClubLeader, isEventManager } = useEventsAuth();
   const { data: allowedLocales = [] } = $workshops.useQuery("get", "/locales");
 
@@ -53,7 +53,6 @@ export function CreateDraftModal({
 
   const { mutate, isPending } = $workshops.useMutation("post", "/drafts/", {
     onSuccess: (draft) => {
-      showSuccess("Draft created", "You can continue editing it.");
       onOpenChange(false);
       navigate({ to: "/events/drafts/$id", params: { id: draft.id } });
     },

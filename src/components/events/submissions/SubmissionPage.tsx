@@ -15,7 +15,7 @@ import { getSubmissionImageUrl } from "../utils/links";
 export function SubmissionPage({ id }: { id: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { showError, showSuccess } = useToast();
+  const { showError } = useToast();
   const { isModerator, clubs, isPending: isAuthPending } = useEventsAuth();
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
@@ -65,7 +65,6 @@ export function SubmissionPage({ id }: { id: string }) {
     "/submissions/{id}/approve",
     {
       onSuccess: () => {
-        showSuccess("Approved", "Event published.");
         invalidate();
         navigate({ to: "/events/submissions" });
       },
@@ -80,7 +79,6 @@ export function SubmissionPage({ id }: { id: string }) {
     "/submissions/{id}/decline",
     {
       onSuccess: () => {
-        showSuccess("Declined", "Submission declined.");
         invalidate();
         navigate({ to: "/events/submissions" });
       },

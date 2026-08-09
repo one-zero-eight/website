@@ -14,7 +14,7 @@ import { EnrolledListModal } from "./EnrolledListModal";
 
 export function EventPage({ id }: { id: string }) {
   const { me } = useMe();
-  const { showError, showSuccess } = useToast();
+  const { showError } = useToast();
   const queryClient = useQueryClient();
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [enrolledOpen, setEnrolledOpen] = useState(false);
@@ -54,7 +54,6 @@ export function EventPage({ id }: { id: string }) {
     "/events/{id}/enroll",
     {
       onSuccess: () => {
-        showSuccess("Enrolled", "You are enrolled in this event.");
         invalidateEvent();
       },
       onError: (mutationError) => {
@@ -68,7 +67,6 @@ export function EventPage({ id }: { id: string }) {
     "/events/{id}/unenroll",
     {
       onSuccess: () => {
-        showSuccess("Unenrolled", "You are no longer enrolled.");
         invalidateEvent();
       },
       onError: (mutationError) => {

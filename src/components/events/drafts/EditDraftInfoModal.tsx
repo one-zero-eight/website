@@ -27,7 +27,7 @@ export function EditDraftInfoModal({
   onOpenChange: (open: boolean) => void;
   draft: SchemaDraftOut;
 }) {
-  const { showError, showSuccess } = useToast();
+  const { showError } = useToast();
   const queryClient = useQueryClient();
   const { clubs, isClubLeader, isEventManager } = useEventsAuth();
 
@@ -56,7 +56,6 @@ export function EditDraftInfoModal({
     "/drafts/{id}",
     {
       onSuccess: () => {
-        showSuccess("Saved", "Draft info updated.");
         queryClient.invalidateQueries({
           queryKey: $workshops.queryOptions("get", "/drafts/{id}", {
             params: { path: { id: draft.id } },

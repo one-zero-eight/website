@@ -18,7 +18,7 @@ import { EditDraftInfoModal } from "./EditDraftInfoModal";
 export function DraftPage({ id }: { id: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { showError, showSuccess } = useToast();
+  const { showError } = useToast();
   const { canManage, clubs, isPending: isAuthPending } = useEventsAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addLocaleMenuRef = useRef<HTMLDivElement>(null);
@@ -109,7 +109,6 @@ export function DraftPage({ id }: { id: string }) {
   const { mutate: deleteLocale, isPending: isDeletingLocale } =
     $workshops.useMutation("delete", "/drafts/{id}/locales/{locale}", {
       onSuccess: () => {
-        showSuccess("Deleted", "Locale removed.");
         setDeleteLocaleOpen(false);
         setEditingLocale(false);
         invalidateDraft();
@@ -122,7 +121,6 @@ export function DraftPage({ id }: { id: string }) {
   const { mutate: uploadImage, isPending: isUploadingImage } =
     $workshops.useMutation("post", "/drafts/{id}/image", {
       onSuccess: () => {
-        showSuccess("Uploaded", "Image updated.");
         setImageCacheBust(Date.now());
         invalidateDraft();
       },
@@ -134,7 +132,6 @@ export function DraftPage({ id }: { id: string }) {
   const { mutate: submitDraft, isPending: isSubmitting } =
     $workshops.useMutation("post", "/submissions/{id}", {
       onSuccess: () => {
-        showSuccess("Submitted", "Draft submitted for review.");
         invalidateDraft();
       },
       onError: (mutationError) => {
