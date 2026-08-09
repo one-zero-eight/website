@@ -1,5 +1,13 @@
 import { cn } from "@/lib/ui/cn";
-import { Fragment, memo, useEffect, useMemo, useState } from "react";
+import {
+  Fragment,
+  memo,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   meetingCalendarCellLabel,
@@ -31,6 +39,32 @@ const CALENDAR_STICKY_SLOT_TOP_CLASS = "top-[calc(3rem+1px)]";
 const CALENDAR_WEEK_PLACEHOLDER_HEIGHT_PX = 800;
 const CALENDAR_WEEK_SHELL_CLASS =
   "[content-visibility:auto] [contain-intrinsic-size:auto_800px]";
+/** Keep only a sliding window of weeks mounted so layout switches stay cheap. */
+const CALENDAR_MAX_MOUNTED_WEEKS = 3;
+const CALENDAR_INITIAL_WEEK_RADIUS = 0;
+
+function mountedWeekRangeAround(
+  focusIndex: number,
+  weekCount: number,
+  radius: number,
+  maxMounted: number,
+): { start: number; end: number } {
+  if (weekCount <= 0) return { start: 0, end: 0 };
+  const focus = Math.min(Math.max(focusIndex, 0), weekCount - 1);
+  const maxRadius = Math.max(0, Math.floor((maxMounted - 1) / 2));
+  const usedRadius = Math.min(radius, maxRadius);
+  let start = Math.max(0, focus - usedRadius);
+  let end = Math.min(weekCount - 1, focus + usedRadius);
+  // Prefer growing toward maxMounted without jumping far from focus.
+  while (end - start + 1 < Math.min(maxMounted, weekCount)) {
+    const canBefore = start > 0;
+    const canAfter = end < weekCount - 1;
+    if (!canBefore && !canAfter) break;
+    if (canAfter && (!canBefore || focus - start <= end - focus)) end += 1;
+    else start -= 1;
+  }
+  return { start, end };
+}
 
 const CalendarMeetingCard = memo(function CalendarMeetingCard({
   meeting,
@@ -229,60 +263,103 @@ function CalendarStackedTable({
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 }) {
   const weeks = calendarGrid.weeks;
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const currentWeekIndex = useMemo(() => {
     const idx = weeks.findIndex((week) => week.weekRelative === "current");
     return idx >= 0 ? idx : 0;
   }, [weeks]);
 
-  const [mountedRange, setMountedRange] = useState({
-    start: currentWeekIndex,
-    end: currentWeekIndex,
-  });
+  const [mountedRange, setMountedRange] = useState(() =>
+    mountedWeekRangeAround(
+      currentWeekIndex,
+      weeks.length,
+      CALENDAR_INITIAL_WEEK_RADIUS,
+      1,
+    ),
+  );
+  const [placeholderHeightPx, setPlaceholderHeightPx] = useState(
+    CALENDAR_WEEK_PLACEHOLDER_HEIGHT_PX,
+  );
 
   useEffect(() => {
-    setMountedRange({ start: currentWeekIndex, end: currentWeekIndex });
-  }, [calendarGrid, currentWeekIndex]);
+    setMountedRange(
+      mountedWeekRangeAround(
+        currentWeekIndex,
+        weeks.length,
+        CALENDAR_INITIAL_WEEK_RADIUS,
+        1,
+      ),
+    );
+  }, [calendarGrid, currentWeekIndex, weeks.length]);
+
+  useLayoutEffect(() => {
+    const mountedWeek = rootRef.current?.querySelector(".calendar-week-table");
+    if (!(mountedWeek instanceof HTMLElement)) return;
+    const height = Math.round(mountedWeek.getBoundingClientRect().height);
+    if (height > 0) setPlaceholderHeightPx(height);
+  }, [mountedRange, calendarGrid]);
 
   useEffect(() => {
-    if (mountedRange.start <= 0 && mountedRange.end >= weeks.length - 1) {
-      return;
-    }
+    const root = rootRef.current;
+    if (!root) return;
+    const scrollRoot =
+      root.closest("#gridWrap") ??
+      root.closest('[class*="overflow-auto"]') ??
+      null;
 
-    let cancelled = false;
-    const expand = () => {
-      if (cancelled) return;
-      setMountedRange((prev) => ({
-        start: Math.max(0, prev.start - 1),
-        end: Math.min(weeks.length - 1, prev.end + 1),
-      }));
-    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        let focusIndex: number | null = null;
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const raw = (entry.target as HTMLElement).dataset.calendarWeekIndex;
+          const idx = raw == null ? NaN : Number(raw);
+          if (!Number.isFinite(idx)) continue;
+          focusIndex = idx;
+          break;
+        }
+        if (focusIndex == null) return;
+        setMountedRange((prev) => {
+          const next = mountedWeekRangeAround(
+            focusIndex,
+            weeks.length,
+            1,
+            CALENDAR_MAX_MOUNTED_WEEKS,
+          );
+          if (next.start === prev.start && next.end === prev.end) return prev;
+          return next;
+        });
+      },
+      {
+        root: scrollRoot instanceof Element ? scrollRoot : null,
+        rootMargin: "600px 0px",
+        threshold: 0,
+      },
+    );
 
-    let idleId = 0;
-    if (typeof window.requestIdleCallback === "function") {
-      idleId = window.requestIdleCallback(expand, { timeout: 120 });
-    } else {
-      idleId = window.setTimeout(expand, 0) as unknown as number;
-    }
+    root
+      .querySelectorAll("[data-calendar-week-placeholder]")
+      .forEach((node) => observer.observe(node));
 
-    return () => {
-      cancelled = true;
-      if (typeof window.cancelIdleCallback === "function") {
-        window.cancelIdleCallback(idleId);
-      } else {
-        window.clearTimeout(idleId);
-      }
-    };
+    return () => observer.disconnect();
   }, [mountedRange, weeks.length]);
 
   return (
-    <div id="calendar-table" className="flex w-max min-w-full flex-col">
+    <div
+      id="calendar-table"
+      ref={rootRef}
+      className="flex w-max min-w-full flex-col"
+    >
       {weeks.map((week, weekIndex) => {
         const mounted =
           weekIndex >= mountedRange.start && weekIndex <= mountedRange.end;
         return (
           <Fragment key={week.key}>
             {mounted ? (
-              <div className={CALENDAR_WEEK_SHELL_CLASS}>
+              <div
+                className={CALENDAR_WEEK_SHELL_CLASS}
+                data-calendar-week-index={weekIndex}
+              >
                 <CalendarWeekTable
                   week={week}
                   calendarGrid={calendarGrid}
@@ -296,7 +373,8 @@ function CalendarStackedTable({
               <div
                 className={CALENDAR_WEEK_SHELL_CLASS}
                 data-calendar-week-placeholder={week.key}
-                style={{ height: CALENDAR_WEEK_PLACEHOLDER_HEIGHT_PX }}
+                data-calendar-week-index={weekIndex}
+                style={{ height: placeholderHeightPx }}
               />
             )}
             {weekIndex < weeks.length - 1 ? (

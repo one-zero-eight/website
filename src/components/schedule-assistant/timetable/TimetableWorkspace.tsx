@@ -836,9 +836,7 @@ function TimetableWorkspaceInner({
                     </button>
                     <TimetableLayoutSelector
                       layoutMode={layoutMode}
-                      onLayoutModeChange={(mode) => {
-                        startTransition(() => setLayoutMode(mode));
-                      }}
+                      onLayoutModeChange={setLayoutMode}
                       calendarDisabled={isUtilizationTab}
                     />
                     <TimetableTabSelector
@@ -996,7 +994,22 @@ function TimetableMainGrid({
 }) {
   // Do not subscribe to selection here: that re-reconciles the whole table on
   // every click. Meeting/header cells subscribe locally for highlights.
-  if (layoutMode === "calendar" && !isUtilizationTab) {
+  const showCalendar = layoutMode === "calendar" && !isUtilizationTab;
+  const [groupsReady, setGroupsReady] = useState(false);
+
+  useEffect(() => {
+    if (showCalendar) {
+      setGroupsReady(false);
+      return;
+    }
+    setGroupsReady(false);
+    const frame = requestAnimationFrame(() => {
+      setGroupsReady(true);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [showCalendar, activeTab, grid]);
+
+  if (showCalendar) {
     if (!calendarGrid) return null;
     return (
       <TimetableCalendarSelectionGrid
@@ -1010,6 +1023,15 @@ function TimetableMainGrid({
   }
 
   if (!grid) return null;
+
+  if (!groupsReady) {
+    return (
+      <div className="text-base-content/60 flex h-full min-h-48 items-center justify-center gap-2 text-sm">
+        <span className="loading loading-spinner loading-sm" />
+        Загрузка таблицы…
+      </div>
+    );
+  }
 
   return (
     <TimetableTable
@@ -1674,9 +1696,11 @@ function CoreGroupsTable({
 
   const yearLabels = prepared.yearLabels;
   const lastSlotStart = grid.slots.at(-1)?.start;
+  const groupYear = new Map(
+    visibleColumns.map((col) => [col.groupId, col.yearLabel] as const),
+  );
 
   const rows: React.ReactNode[] = [];
-
   for (const preparedRow of prepared.rows) {
     if (preparedRow.kind === "day") {
       const isTodayDay = isTodayWeekdayInDisplayedWeek(
@@ -1708,16 +1732,11 @@ function CoreGroupsTable({
     );
     const isLastSlot = preparedRow.slotStart === lastSlotStart;
 
-    const groupYear = new Map(
-      visibleColumns.map((col) => [col.groupId, col.yearLabel] as const),
-    );
-
     const rowCells: React.ReactNode[] = [];
     let cellIndex = 0;
     for (const [yearIndex, yearLabel] of yearLabels.entries()) {
       const programLabel = preparedRow.programSlotLabels[yearLabel];
       if (prepared.showProgramTimeColumn[yearLabel]) {
-        // Sticky left:0 overlays the term time column when scrolled into view.
         rowCells.push(
           <td
             key={`${yearLabel}-time-${preparedRow.slotStart}`}
