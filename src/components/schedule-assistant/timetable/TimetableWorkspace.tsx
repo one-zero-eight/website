@@ -14,19 +14,25 @@ import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/we
 import { useToast } from "@/components/toast";
 import clsx from "clsx";
 import {
-  createContext,
   memo,
   startTransition,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 
 import { CreateClassModal } from "./CreateClassModal.tsx";
+import {
+  createSelectionStore,
+  SelectionStoreContext,
+  useGroupHeaderHighlight,
+  useMeetingHighlightBits,
+  useProgramSelected,
+  useResourceHeaderSelected,
+  useSelectionSnapshot,
+} from "./timetableSelectionStore.ts";
 import {
   buildMeetingPickerIndex,
   type MeetingPickerIndex,
@@ -117,112 +123,6 @@ import {
 } from "./timetableViewerModel.ts";
 
 type InnerTab = "instructor" | "room" | string;
-
-type SelectionStore = {
-  subscribe: (cb: () => void) => () => void;
-  getSelection: () => Selection;
-  setSelection: (next: Selection) => void;
-};
-
-function createSelectionStore(): SelectionStore {
-  let selection: Selection = null;
-  const listeners = new Set<() => void>();
-  return {
-    subscribe(cb) {
-      listeners.add(cb);
-      return () => listeners.delete(cb);
-    },
-    getSelection() {
-      return selection;
-    },
-    setSelection(next) {
-      if (selection === next) return;
-      if (
-        selection?.type === next?.type &&
-        selection?.value === next?.value &&
-        (selection?.type !== "meeting" ||
-          selection.course === (next as { course?: string })?.course)
-      ) {
-        return;
-      }
-      selection = next;
-      listeners.forEach((l) => l());
-    },
-  };
-}
-
-const SelectionStoreContext = createContext<SelectionStore | null>(null);
-
-function useSelectionStore(): SelectionStore {
-  const ctx = useContext(SelectionStoreContext);
-  if (!ctx) throw new Error("SelectionStoreContext is missing");
-  return ctx;
-}
-
-function useSelectionSnapshot(): Selection {
-  const store = useSelectionStore();
-  return useSyncExternalStore(store.subscribe, store.getSelection, () => null);
-}
-
-function useProgramSelected(yearLabel: string): boolean {
-  const store = useSelectionStore();
-  return useSyncExternalStore(
-    store.subscribe,
-    () => {
-      const sel = store.getSelection();
-      return sel?.type === "program" && sel.value === yearLabel;
-    },
-    () => false,
-  );
-}
-
-function useGroupHeaderHighlight(groupId: string, yearLabel: string): boolean {
-  const store = useSelectionStore();
-  return useSyncExternalStore(
-    store.subscribe,
-    () => {
-      const sel = store.getSelection();
-      return (
-        (sel?.type === "group" && sel.value === groupId) ||
-        (sel?.type === "program" && sel.value === yearLabel)
-      );
-    },
-    () => false,
-  );
-}
-
-function useResourceHeaderSelected(
-  type: "room" | "instructor",
-  resourceKey: string,
-): boolean {
-  const store = useSelectionStore();
-  return useSyncExternalStore(
-    store.subscribe,
-    () => {
-      const sel = store.getSelection();
-      return sel?.type === type && sel.value === resourceKey;
-    },
-    () => false,
-  );
-}
-
-function useMeetingHighlightBits(m: Meeting): number {
-  const store = useSelectionStore();
-  const courseTitle = String(m.course || "").trim() || "—";
-  const key = meetingSelectionKey(m);
-  const course = m.course || courseTitle;
-  return useSyncExternalStore(
-    store.subscribe,
-    () => {
-      const sel = store.getSelection();
-      if (sel?.type !== "meeting") return 0;
-      const selected = sel.value === key ? 1 : 0;
-      const related = sel.course === course ? 2 : 0;
-      return selected | related;
-    },
-    () => 0,
-  );
-}
 
 type MeetingCardProps = {
   row: MergedRow;
@@ -1150,12 +1050,11 @@ function TimetableCalendarSelectionGrid({
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 }) {
-  const selection = useSelectionSnapshot();
+  // Do not subscribe to selection here: that re-reconciles every calendar card.
   return (
     <TimetableCalendarTable
       calendarGrid={calendarGrid}
       courseColors={courseColors}
-      selection={selection}
       selectMeeting={selectMeeting}
       clearSelection={clearSelection}
       onEmptyCellClick={onEmptyCellClick}

@@ -8,6 +8,7 @@ import {
   type BuiltCalendarGrid,
   type CalendarWeekBlock,
 } from "./timetableCalendarModel.ts";
+import { useMeetingHighlightBits } from "./timetableSelectionStore.ts";
 import {
   todayCalendarColumnBodyClass,
   todayCalendarColumnHeadClass,
@@ -16,7 +17,6 @@ import {
   colorBySubject,
   meetingSelectionKey,
   type Meeting,
-  type Selection,
 } from "./timetableViewerModel.ts";
 import type { CreateMeetingCellContext } from "./createMeetingUtils.ts";
 
@@ -34,12 +34,10 @@ const CALENDAR_WEEK_SHELL_CLASS =
 
 const CalendarMeetingCard = memo(function CalendarMeetingCard({
   meeting,
-  selection,
   courseColors,
   onSelectMeeting,
 }: {
   meeting: Meeting;
-  selection: Selection;
   courseColors: Record<string, { bg: string; border: string }>;
   onSelectMeeting: (valueKey: string, course: string) => void;
 }) {
@@ -48,10 +46,9 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
   const mainLabel = meetingCalendarMainLabel(meeting);
   const groupsLabel = meetingCalendarGroupsLabel(meeting);
   const colors = colorBySubject(meeting.course || courseTitle, courseColors);
-  const isSelected = selection?.type === "meeting" && selection.value === key;
-  const isRelated =
-    selection?.type === "meeting" &&
-    selection.course === (meeting.course || courseTitle);
+  const bits = useMeetingHighlightBits(meeting);
+  const isSelected = (bits & 1) !== 0;
+  const isRelated = (bits & 2) !== 0;
 
   return (
     <button
@@ -68,13 +65,6 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
       style={{
         backgroundColor: colors.bg,
         borderColor: colors.border,
-        marginTop:
-          meeting.off_grid && meeting.off_grid_offset_minutes
-            ? `${Math.max(
-                -8,
-                Math.min(24, Math.round(meeting.off_grid_offset_minutes * 0.4)),
-              )}px`
-            : undefined,
       }}
       onClick={() => onSelectMeeting(key, meeting.course || courseTitle)}
       title={meetingCalendarCellLabel(meeting, null)}
@@ -139,7 +129,6 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
   week,
   calendarGrid,
   courseColors,
-  selection,
   selectMeeting,
   clearSelection,
   onEmptyCellClick,
@@ -147,7 +136,6 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
   week: CalendarWeekBlock;
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
-  selection: Selection;
   selectMeeting: (valueKey: string, course: string) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
@@ -183,7 +171,7 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                   key={`${week.key}-${day.key}-${slot.start}`}
                   className={cn(
                     CALENDAR_DAY_COL_WIDTH,
-                    "link-cell relative border-r border-b border-[#d8dfeb] bg-white p-0.5 align-top text-[0.6875rem] leading-tight",
+                    "link-cell relative border-r border-b border-[#d8dfeb] bg-[#fafcff] p-0.5 align-top text-[0.6875rem] leading-tight",
                     todayCalendarColumnBodyClass(day.isToday, isLastSlot),
                     !cellMeetings.length &&
                       onEmptyCellClick &&
@@ -204,19 +192,18 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                   }}
                 >
                   {cellMeetings.length ? (
-                    <div className="flex flex-col gap-px">
+                    <div className="flex flex-col gap-1">
                       {cellMeetings.map((meeting) => (
                         <CalendarMeetingCard
                           key={meeting.instance_id}
                           meeting={meeting}
-                          selection={selection}
                           courseColors={courseColors}
                           onSelectMeeting={selectMeeting}
                         />
                       ))}
                     </div>
                   ) : (
-                    <div className="empty min-h-4 bg-[#fafcff]" />
+                    <div className="empty min-h-4" />
                   )}
                 </td>
               );
@@ -231,14 +218,12 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
 function CalendarStackedTable({
   calendarGrid,
   courseColors,
-  selection,
   selectMeeting,
   clearSelection,
   onEmptyCellClick,
 }: {
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
-  selection: Selection;
   selectMeeting: (valueKey: string, course: string) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
@@ -302,7 +287,6 @@ function CalendarStackedTable({
                   week={week}
                   calendarGrid={calendarGrid}
                   courseColors={courseColors}
-                  selection={selection}
                   selectMeeting={selectMeeting}
                   clearSelection={clearSelection}
                   onEmptyCellClick={onEmptyCellClick}
@@ -328,14 +312,12 @@ function CalendarStackedTable({
 export const TimetableCalendarTable = memo(function TimetableCalendarTable({
   calendarGrid,
   courseColors,
-  selection,
   selectMeeting,
   clearSelection,
   onEmptyCellClick,
 }: {
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
-  selection: Selection;
   selectMeeting: (valueKey: string, course: string) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
@@ -346,7 +328,6 @@ export const TimetableCalendarTable = memo(function TimetableCalendarTable({
     <CalendarStackedTable
       calendarGrid={calendarGrid}
       courseColors={courseColors}
-      selection={selection}
       selectMeeting={selectMeeting}
       clearSelection={clearSelection}
       onEmptyCellClick={onEmptyCellClick}
