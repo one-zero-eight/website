@@ -18,7 +18,6 @@ import {
   memo,
   useCallback,
   useContext,
-  useDeferredValue,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -1052,15 +1051,14 @@ function TimetableMainGrid({
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
 }) {
-  const selection = useSelectionSnapshot();
-
+  // Do not subscribe to selection here: that re-reconciles the whole table on
+  // every click. Meeting/header cells subscribe locally for highlights.
   if (layoutMode === "calendar" && !isUtilizationTab) {
     if (!calendarGrid) return null;
     return (
-      <TimetableCalendarTable
+      <TimetableCalendarSelectionGrid
         calendarGrid={calendarGrid}
         courseColors={courseColors}
-        selection={selection}
         selectMeeting={selectMeeting}
         clearSelection={clearSelection}
         onEmptyCellClick={onEmptyCellClick}
@@ -1090,6 +1088,32 @@ function TimetableMainGrid({
       selectRoomHeader={selectRoomHeader}
       selectProgram={selectProgram}
       selectGroup={selectGroup}
+      clearSelection={clearSelection}
+      onEmptyCellClick={onEmptyCellClick}
+    />
+  );
+}
+
+function TimetableCalendarSelectionGrid({
+  calendarGrid,
+  courseColors,
+  selectMeeting,
+  clearSelection,
+  onEmptyCellClick,
+}: {
+  calendarGrid: NonNullable<ReturnType<typeof buildCalendarGrid>>;
+  courseColors: Record<string, { bg: string; border: string }>;
+  selectMeeting: (valueKey: string, course: string) => void;
+  clearSelection: () => void;
+  onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+}) {
+  const selection = useSelectionSnapshot();
+  return (
+    <TimetableCalendarTable
+      calendarGrid={calendarGrid}
+      courseColors={courseColors}
+      selection={selection}
+      selectMeeting={selectMeeting}
       clearSelection={clearSelection}
       onEmptyCellClick={onEmptyCellClick}
     />
@@ -1255,28 +1279,26 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   clearSelection,
 }: TimetableDetailPanelProps) {
   const selection = useSelectionSnapshot();
-  const deferredSelection = useDeferredValue(selection);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
   const selectedMeeting = useMemo(() => {
-    if (deferredSelection?.type !== "meeting") return null;
+    if (selection?.type !== "meeting") return null;
     return (
-      allMeetings.find(
-        (meeting) => meeting.instance_id === deferredSelection.value,
-      ) ?? null
+      allMeetings.find((meeting) => meeting.instance_id === selection.value) ??
+      null
     );
-  }, [allMeetings, deferredSelection]);
+  }, [allMeetings, selection]);
 
   const canEditSelectedMeeting = useMemo(() => {
     if (!selectedMeeting) return false;
     return !!parseMeetingInstanceId(selectedMeeting.instance_id);
   }, [selectedMeeting]);
 
-  const title = !deferredSelection
+  const title = !selection
     ? "Ничего не выбрано"
     : selectedMeeting
       ? `${selectedMeeting.course || "—"} (${selectedMeeting.tag || "—"})`
-      : selectionStubLabel(deferredSelection);
+      : selectionStubLabel(selection);
 
   return (
     <>
@@ -1298,7 +1320,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
                 Редактировать
               </button>
             ) : null}
-            {deferredSelection ? (
+            {selection ? (
               <button
                 className="btn btn-ghost btn-sm shrink-0"
                 id="clearSelectionBtn"
@@ -1311,7 +1333,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
           </div>
         ) : null}
       </div>
-      {!deferredSelection ? (
+      {!selection ? (
         <div className="border-base-300 bg-base-200/40 rounded-box flex flex-col items-center gap-3 border border-dashed px-4 py-10 text-center">
           <span className="icon-[material-symbols--touch-app-outline-rounded] text-base-content/35 text-4xl" />
           <div className="text-base-content text-sm font-medium">
