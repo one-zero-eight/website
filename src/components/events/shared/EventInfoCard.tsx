@@ -23,8 +23,8 @@ export function EventInfoCard({
   return (
     <div className="border-base-300 rounded-2xl border p-4">
       <div className="flex flex-col gap-3 text-sm">
-        <div className="flex items-start gap-2">
-          <span className="icon-[material-symbols--person-outline] mt-0.5 shrink-0 text-xl" />
+        <div className="flex items-center gap-2">
+          <span className="icon-[material-symbols--person-outline] shrink-0 text-xl" />
           <div className="min-w-0">
             {host ? (
               <PublicHostLink host={host} />
@@ -34,13 +34,13 @@ export function EventInfoCard({
           </div>
         </div>
 
-        <div className="flex items-start gap-2">
-          <span className="icon-[material-symbols--schedule-outline] mt-0.5 shrink-0 text-xl" />
+        <div className="flex items-center gap-2">
+          <span className="icon-[material-symbols--schedule-outline] shrink-0 text-xl" />
           <span>{formatEventDateTime(startsAt)}</span>
         </div>
 
-        <div className="flex items-start gap-2">
-          <span className="icon-[material-symbols--location-on-outline] mt-0.5 shrink-0 text-xl" />
+        <div className="flex items-center gap-2">
+          <span className="icon-[material-symbols--location-on-outline] shrink-0 text-xl" />
           {locationLabel.toUpperCase() === "TBA" ||
           locationLabel.toUpperCase() === "ONLINE" ||
           locationLabel.toUpperCase() === "ОНЛАЙН" ? (

@@ -62,19 +62,19 @@ export function EventSummaryCard({
           {name?.trim() || "Untitled event"}
         </h3>
         <div className="text-base-content/80 flex flex-col gap-1.5 text-sm">
-          <div className="flex items-start gap-2">
-            <span className="icon-[material-symbols--person-outline] mt-0.5 shrink-0 text-lg" />
+          <div className="flex items-center gap-2">
+            <span className="icon-[material-symbols--person-outline] shrink-0 text-lg" />
             <span>
               {hostPrefix}
               <StoredHostLink host={host} clubs={clubs} />
             </span>
           </div>
-          <div className="flex items-start gap-2">
-            <span className="icon-[material-symbols--schedule-outline] mt-0.5 shrink-0 text-lg" />
+          <div className="flex items-center gap-2">
+            <span className="icon-[material-symbols--schedule-outline] shrink-0 text-lg" />
             <span>{formatEventDateTime(startsAt)}</span>
           </div>
-          <div className="flex items-start gap-2">
-            <span className="icon-[material-symbols--location-on-outline] mt-0.5 shrink-0 text-lg" />
+          <div className="flex items-center gap-2">
+            <span className="icon-[material-symbols--location-on-outline] shrink-0 text-lg" />
             <span>{location?.trim() || "TBA"}</span>
           </div>
         </div>
