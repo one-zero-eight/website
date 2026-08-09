@@ -853,7 +853,7 @@ function TimetableWorkspaceInner({
                   id="gridWrap"
                   ref={gridWrapRef}
                   className={clsx(
-                    "min-h-0 flex-1 overflow-auto overscroll-x-contain bg-white pb-4 [overflow-anchor:none]",
+                    "min-h-0 flex-1 [scrollbar-width:thin] overflow-auto overscroll-x-contain bg-white pb-4 [overflow-anchor:none]",
                     isMiddleDragScrolling ? "cursor-grabbing" : "cursor-auto",
                   )}
                   style={
@@ -905,7 +905,7 @@ function TimetableWorkspaceInner({
               className="detail border-base-300 bg-base-100 rounded-box sticky top-4 flex max-h-[calc(100vh-2rem)] min-h-0 w-full flex-col self-start overflow-hidden border p-3 xl:col-start-2 xl:h-[calc(100vh-2rem)]"
               id="detail"
             >
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto">
+              <div className="flex min-h-0 min-w-0 flex-1 [scrollbar-width:thin] flex-col gap-3 overflow-y-auto">
                 <TimetableDetailPanel
                   allMeetings={allMeetings}
                   meetingPickerIndex={meetingPickerIndex}
