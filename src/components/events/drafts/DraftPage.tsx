@@ -21,6 +21,7 @@ export function DraftPage({ id }: { id: string }) {
   const { showError, showSuccess } = useToast();
   const { canManage, clubs, isPending: isAuthPending } = useEventsAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const addLocaleMenuRef = useRef<HTMLDivElement>(null);
 
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [editingLocale, setEditingLocale] = useState(false);
@@ -72,6 +73,21 @@ export function DraftPage({ id }: { id: string }) {
     }
   }, [locales, selectedLocale]);
 
+  useEffect(() => {
+    if (!addLocaleOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: MouseEvent) {
+      if (!addLocaleMenuRef.current?.contains(event.target as Node)) {
+        setAddLocaleOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [addLocaleOpen]);
+
   const invalidateDraft = () => {
     queryClient.invalidateQueries({
       queryKey: $workshops.queryOptions("get", "/drafts/{id}", {
@@ -85,11 +101,6 @@ export function DraftPage({ id }: { id: string }) {
 
   const { mutate: patchLocale, isPending: isSavingLocale } =
     $workshops.useMutation("patch", "/drafts/{id}/locales/{locale}", {
-      onSuccess: () => {
-        showSuccess("Saved", "Locale updated.");
-        setEditingLocale(false);
-        invalidateDraft();
-      },
       onError: (mutationError) => {
         showError("Error", formatApiErrorMessage(mutationError));
       },
@@ -176,26 +187,66 @@ export function DraftPage({ id }: { id: string }) {
     setEditingLocale(true);
   }
 
+  function handleCancelEditLocale() {
+    setEditingLocale(false);
+    setEditName("");
+    setEditDescription("");
+  }
+
+  function syncDraftCache(draft: typeof data) {
+    if (!draft) {
+      return;
+    }
+
+    queryClient.setQueryData(
+      $workshops.queryOptions("get", "/drafts/{id}", {
+        params: { path: { id } },
+      }).queryKey,
+      draft,
+    );
+  }
+
   function handleSaveLocale() {
     if (!selectedLocale) {
       return;
     }
 
-    patchLocale({
-      params: { path: { id, locale: selectedLocale } },
-      body: {
-        name: editName,
-        description: editDescription,
+    patchLocale(
+      {
+        params: { path: { id, locale: selectedLocale } },
+        body: {
+          name: editName,
+          description: editDescription,
+        },
       },
-    });
+      {
+        onSuccess: (draft) => {
+          syncDraftCache(draft);
+          setEditingLocale(false);
+          invalidateDraft();
+        },
+      },
+    );
   }
 
   function handleAddLocale(locale: string) {
     setAddLocaleOpen(false);
-    setSelectedLocale(locale);
-    setEditName("");
-    setEditDescription("");
-    setEditingLocale(true);
+    patchLocale(
+      {
+        params: { path: { id, locale } },
+        body: {},
+      },
+      {
+        onSuccess: (draft) => {
+          syncDraftCache(draft);
+          setSelectedLocale(locale);
+          setEditName("");
+          setEditDescription("");
+          setEditingLocale(true);
+          invalidateDraft();
+        },
+      },
+    );
   }
 
   function handleUploadImage(file: File) {
@@ -265,11 +316,11 @@ export function DraftPage({ id }: { id: string }) {
             toolbar={
               <>
                 {missingLocales.length > 0 && (
-                  <div className="relative">
+                  <div className="relative" ref={addLocaleMenuRef}>
                     <button
                       type="button"
                       className="btn btn-sm btn-ghost border"
-                      disabled={controlsDisabled}
+                      disabled={controlsDisabled || isSavingLocale}
                       onClick={() => setAddLocaleOpen((open) => !open)}
                     >
                       +
@@ -281,6 +332,7 @@ export function DraftPage({ id }: { id: string }) {
                             key={locale}
                             type="button"
                             className="btn btn-ghost btn-sm justify-start uppercase"
+                            disabled={isSavingLocale}
                             onClick={() => handleAddLocale(locale)}
                           >
                             {locale}
@@ -291,35 +343,47 @@ export function DraftPage({ id }: { id: string }) {
                   </div>
                 )}
                 <div className="ml-auto flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-ghost text-error"
-                    disabled={!selectedLocale || controlsDisabled}
-                    onClick={() => setDeleteLocaleOpen(true)}
-                  >
-                    Delete locale
-                  </button>
                   {editingLocale ? (
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-primary"
-                      disabled={isSavingLocale || !selectedLocale}
-                      onClick={handleSaveLocale}
-                    >
-                      {isSavingLocale && (
-                        <span className="loading loading-spinner loading-sm" />
-                      )}
-                      Save locale
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-ghost"
+                        disabled={isSavingLocale}
+                        onClick={handleCancelEditLocale}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-primary"
+                        disabled={isSavingLocale || !selectedLocale}
+                        onClick={handleSaveLocale}
+                      >
+                        {isSavingLocale && (
+                          <span className="loading loading-spinner loading-sm" />
+                        )}
+                        Save locale
+                      </button>
+                    </>
                   ) : (
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-ghost border"
-                      disabled={!selectedLocale}
-                      onClick={handleStartEditLocale}
-                    >
-                      Edit locale
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-ghost text-error"
+                        disabled={!selectedLocale || isSavingLocale}
+                        onClick={() => setDeleteLocaleOpen(true)}
+                      >
+                        Delete locale
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-ghost border"
+                        disabled={!selectedLocale || isSavingLocale}
+                        onClick={handleStartEditLocale}
+                      >
+                        Edit locale
+                      </button>
+                    </>
                   )}
                 </div>
               </>
