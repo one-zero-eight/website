@@ -16,7 +16,7 @@
     "prettier:check": "prettier --ignore-unknown --check .",
     "lint-staged": "lint-staged",
     "prepare": "husky",
-    "gen:api": "pnpm exec openapi-typescript --root-types --enum",
+    "gen:api": "pnpm exec openapi-typescript --root-types --enum && prettier --write --list-different src/api",
     "release": "bumpp package.json",
     "update-deps": "taze minor -wIrl",
     "test:ndcg": "vite-node src/components/dashboard/links/searchUtils.test.ts",
