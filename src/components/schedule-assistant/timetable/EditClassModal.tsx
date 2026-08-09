@@ -475,7 +475,7 @@ export function EditClassModal({
 
     if (!cancelChecked) {
       if (!roomValue.trim()) {
-        showError("Ошибка", "Выберите аудиторию.");
+        showError("Ошибка", "Выберите локацию.");
         return;
       }
       if (!submitStart) {
@@ -753,7 +753,7 @@ export function EditClassModal({
             </EditClassField>
           ) : null}
           <EditClassField
-            label="Аудитория"
+            label="Локация"
             changed={roomChanged}
             originalLabel={originalRoomLabel}
             onRestoreOriginal={() => setRoomValue(originals.room)}
@@ -763,7 +763,7 @@ export function EditClassModal({
             <EditClassDropdown
               value={roomValue}
               onChange={setRoomValue}
-              placeholder="Выберите аудиторию"
+              placeholder="Выберите локацию"
               disabled={cancelChecked}
               options={roomOptions}
             />

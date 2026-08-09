@@ -77,8 +77,8 @@ export const CHECK_OPTIONS: {
 }[] = [
   {
     key: "check_room",
-    label: "Аудитории",
-    description: "Пересечения занятий в одной аудитории",
+    label: "Локации",
+    description: "Пересечения занятий в одной локации",
     countTouchingKey: "count_touching_room",
   },
   {
@@ -148,7 +148,7 @@ export function areAllChecksEnabled(value: SchemaCheckParameters): boolean {
 }
 
 export const ISSUE_TYPE_LABELS: Record<SchemaIssue["issue_type"], string> = {
-  room: "Аудитории",
+  room: "Локации",
   teacher: "Преподаватели",
   capacity: "Вместимость",
   group: "Группы",
@@ -164,7 +164,7 @@ export const ISSUE_TYPE_LABELS: Record<SchemaIssue["issue_type"], string> = {
 };
 
 export const ISSUE_TYPE_HEADINGS: Record<SchemaIssue["issue_type"], string> = {
-  room: "Пересечение в аудитории",
+  room: "Пересечение в локации",
   teacher: "Конфликт преподавателя",
   capacity: "Превышена вместимость",
   group: "Пересечение у группы",

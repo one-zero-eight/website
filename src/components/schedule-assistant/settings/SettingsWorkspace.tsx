@@ -44,7 +44,7 @@ function settingsDetailTitle(
   }
   if (selection.kind === "room") {
     const room = config?.rooms?.[selection.roomIndex];
-    return String(room?.id || room?.name || "Аудитория");
+    return String(room?.id || room?.name || "Локация");
   }
   if (selection.kind === "instructor") {
     const instructor = config?.instructors?.[selection.instructorIndex];

@@ -24,7 +24,7 @@ export const ROOM_ATTRIBUTE_TYPE_EXAMPLES: Record<
 > = {
   [RoomAttributeDefType.boolean]: {
     key: "Проектор",
-    hint: "Есть ли проектор в аудитории",
+    hint: "Есть ли проектор в локации",
   },
   [RoomAttributeDefType.string]: {
     key: "Корпус",
@@ -36,7 +36,7 @@ export const ROOM_ATTRIBUTE_TYPE_EXAMPLES: Record<
   },
   [RoomAttributeDefType.enum]: {
     key: "Доска",
-    hint: "Тип доски в аудитории",
+    hint: "Тип доски в локации",
     enumValue: "Маркерная",
   },
   [RoomAttributeDefType.list]: {

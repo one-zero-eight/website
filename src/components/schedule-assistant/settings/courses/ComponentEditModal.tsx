@@ -327,8 +327,8 @@ export function ComponentEditModal({
               <span className="label-text text-sm leading-snug">
                 Отдельное занятие на каждую группу
                 <span className="text-base-content/55 block text-xs">
-                  Для lab: каждая группа в своё время/аудиторию. Иначе все
-                  группы вместе.
+                  Для lab: каждая группа в своё время/локацию. Иначе все группы
+                  вместе.
                 </span>
               </span>
             </label>

@@ -71,7 +71,7 @@ export function everyWeekdayPhraseRu(day: string) {
 
 /** Один источник текстов `title` для таблицы и для HTML панели деталей. */
 export const scheduleAssistantDetailTooltips = {
-  room: "Показать аудиторию в панели деталей",
+  room: "Показать локацию в панели деталей",
   instructor: "Показать преподавателя в панели деталей",
   group: "Показать группу в панели деталей",
   program: "Показать программу в панели деталей",
@@ -169,7 +169,13 @@ export type BuiltGrid = {
 
 export type Selection =
   | null
-  | { type: "meeting"; value: string; course: string }
+  | {
+      type: "meeting";
+      value: string;
+      course: string;
+      /** Component tag whose meetings get related highlight; defaults to selected meeting tag. */
+      focusTag?: string;
+    }
   | { type: "program"; value: string }
   | { type: "group"; value: string }
   | { type: "instructor"; value: string }

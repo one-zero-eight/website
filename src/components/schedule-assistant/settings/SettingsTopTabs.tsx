@@ -36,7 +36,7 @@ export function SettingsTopTabs() {
           className="tab rounded-btn"
           activeProps={{ className: "tab-active" }}
         >
-          Аудитории
+          Локации
         </Link>
         <Link
           to="/schedule-assistant/settings/$settingsTab"

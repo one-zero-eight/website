@@ -190,7 +190,116 @@ export function AudienceTreeInfoIcon({
     <Tooltip
       content={<AudienceTreeTooltipContent config={config} tree={tree} />}
     >
-      <span className="icon-[material-symbols--info-outline-rounded] text-base-content/45 hover:text-base-content/70 shrink-0 cursor-help text-base" />
+      <span className="icon-[material-symbols--info-outline-rounded] text-base-content/45 hover:text-base-content/70 inline-block shrink-0 cursor-help text-sm leading-none" />
+    </Tooltip>
+  );
+}
+
+export type GroupProgramTrack = {
+  groupId: string;
+  groupTitle: string;
+  programCode: string;
+  programTitle: string;
+  trackTitle: string | null;
+  hasExplicitTracks: boolean;
+};
+
+/** Resolve program (+ track when used) for concrete student group ids. */
+export function resolveGroupsProgramTrack(
+  config: SchemaScheduleConfig,
+  groupIds: string[],
+): GroupProgramTrack[] {
+  const groupNameById = new Map(
+    (config.students_groups ?? []).map((group) => [
+      String(group.code || "").trim(),
+      String(group.name || group.code || "").trim(),
+    ]),
+  );
+  const byGroup = new Map<string, GroupProgramTrack>();
+
+  for (const section of getScheduleSections(config)) {
+    for (const program of section.programs || []) {
+      const programCode = String(program.code || "").trim();
+      if (!programCode) continue;
+      const programTitle = String(
+        program.name || program.code || programCode,
+      ).trim();
+      const hasExplicitTracks = programUsesExplicitTracks(program);
+      for (const track of normalizeTracksFromSectionProgram(program)) {
+        const trackTitle =
+          String(track.name || track.code || "").trim() || null;
+        for (const rawId of track.groups || []) {
+          const groupId = String(rawId || "").trim();
+          if (!groupId || byGroup.has(groupId)) continue;
+          byGroup.set(groupId, {
+            groupId,
+            groupTitle: groupNameById.get(groupId) || groupId,
+            programCode,
+            programTitle,
+            trackTitle: hasExplicitTracks ? trackTitle : null,
+            hasExplicitTracks,
+          });
+        }
+      }
+    }
+  }
+
+  return groupIds
+    .map((id) => String(id || "").trim())
+    .filter(Boolean)
+    .map(
+      (groupId) =>
+        byGroup.get(groupId) ?? {
+          groupId,
+          groupTitle: groupNameById.get(groupId) || groupId,
+          programCode: "",
+          programTitle: "—",
+          trackTitle: null,
+          hasExplicitTracks: false,
+        },
+    );
+}
+
+function GroupHierarchyTooltipContent({
+  memberships,
+}: {
+  memberships: GroupProgramTrack[];
+}) {
+  if (!memberships.length) return null;
+
+  return (
+    <div className="flex max-w-sm flex-col gap-0.5 font-mono text-xs leading-snug whitespace-pre-wrap">
+      {memberships.map((item) => (
+        <div key={item.groupId}>
+          <div>{`Программа ${item.programTitle}`}</div>
+          {item.trackTitle ? <div>{`  Трек ${item.trackTitle}`}</div> : null}
+          <div>{`  ${item.trackTitle ? "  " : ""}${item.groupTitle}`}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Info icon for concrete groups — shows program / track membership. */
+export function GroupHierarchyInfoIcon({
+  config,
+  groupIds,
+}: {
+  config: SchemaScheduleConfig;
+  groupIds: string[];
+}) {
+  const memberships = useMemo(
+    () => resolveGroupsProgramTrack(config, groupIds),
+    [config, groupIds],
+  );
+
+  if (!memberships.length) return null;
+
+  return (
+    <Tooltip
+      content={<GroupHierarchyTooltipContent memberships={memberships} />}
+    >
+      <span className="icon-[material-symbols--info-outline-rounded] text-base-content/45 hover:text-base-content/70 inline-block shrink-0 cursor-help text-sm leading-none" />
     </Tooltip>
   );
 }

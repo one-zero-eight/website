@@ -395,7 +395,7 @@ function RoomSelect({
       value={value}
       onChange={onChange}
       options={options}
-      placeholder="Аудитория"
+      placeholder="Локация"
       searchable
       matchTriggerWidth={false}
       showHintOnTrigger

@@ -371,7 +371,7 @@ export function CreateClassModal({
       return;
     }
     if (!roomValue.trim()) {
-      showError("Ошибка", "Выберите аудиторию.");
+      showError("Ошибка", "Выберите локацию.");
       return;
     }
     if (!timeValue.trim()) {
@@ -534,11 +534,11 @@ export function CreateClassModal({
           </CreateClassField>
         ) : null}
 
-        <CreateClassField label="Аудитория">
+        <CreateClassField label="Локация">
           <CreateClassDropdown
             value={roomValue}
             onChange={setRoomValue}
-            placeholder="Выберите аудиторию"
+            placeholder="Выберите локацию"
             options={roomOptions}
           />
         </CreateClassField>

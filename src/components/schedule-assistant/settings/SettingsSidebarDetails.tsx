@@ -101,7 +101,7 @@ const detailInputClass =
 const detailTimeSlotsTextareaClass =
   "textarea textarea-bordered min-h-[2.75rem] w-full resize-none overflow-hidden px-3 py-2 text-sm font-normal leading-normal [color-scheme:inherit]";
 
-/** Общая оболочка формы деталей настроек (программа, трек, группа, аудитория, преподаватель). */
+/** Общая оболочка формы деталей настроек (программа, трек, группа, локация, преподаватель). */
 const settingsDetailShellClass =
   "flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto";
 
@@ -401,7 +401,7 @@ export function RoomDetails({ roomId }: { roomId: string }) {
   const { mutate: deleteRoom, isPending: isDeleting } = useDeleteRoomMutation();
   const { deselectItem } = useSelection();
   const headingTitle = room ? String(room.id) : roomId || "—";
-  const headingSubtitle = "Аудитория";
+  const headingSubtitle = "Локация";
   const idField = useBlurSaveField(String(room?.id ?? ""), (value) => {
     if (!room) return;
     patchRoom({ id: value });
@@ -431,7 +431,7 @@ export function RoomDetails({ roomId }: { roomId: string }) {
         {!room ? (
           <div className={settingsDetailShellClass}>
             <div className="text-base-content/70 text-sm">
-              Аудитория не найдена в конфигурации.
+              Локация не найдена в конфигурации.
             </div>
           </div>
         ) : (
@@ -458,9 +458,9 @@ export function RoomDetails({ roomId }: { roomId: string }) {
               onChange={(features) => patchRoom({ features })}
             />
             <SettingsDetailDeleteButton
-              label="Удалить аудиторию"
-              confirmTitle="Удалить аудиторию?"
-              confirmMessage={`Аудитория «${roomId}» будет удалена. Это действие нельзя отменить.`}
+              label="Удалить локацию"
+              confirmTitle="Удалить локацию?"
+              confirmMessage={`Локация «${roomId}» будет удалена. Это действие нельзя отменить.`}
               onClick={() => {
                 deleteRoom({ params: { path: { room_id: roomId } } });
                 deselectItem();
@@ -581,7 +581,7 @@ function RoomFeaturesEditor({
       {defs.length === 0 ? (
         <div className="text-base-content/60 text-sm">
           Определите атрибуты через шестерёнку — они будут общими для всех
-          аудиторий.
+          локаций.
         </div>
       ) : (
         <div className="grid w-full max-w-2xl grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 p-0.5">
