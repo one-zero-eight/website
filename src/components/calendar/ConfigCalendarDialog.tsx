@@ -110,10 +110,7 @@ export function ConfigCalendarDialog({
           return (
             <LinkedCard
               key={linkedCalendar?.id ?? `${key}-${index}`}
-              name={linkedCalendar?.name}
-              alias={linkedCalendar?.alias}
-              url={linkedCalendar?.url}
-              description={linkedCalendar?.description}
+              linkedCalendar={linkedCalendar}
             />
           );
         })}
@@ -122,6 +119,7 @@ export function ConfigCalendarDialog({
       <p className="text-base-content/75 mb-4 text-lg">
         Add favorite calendars using star button or{" "}
         <button
+          type="button"
           onClick={() => setImportModalOpen(true)}
           className="underline underline-offset-4"
         >

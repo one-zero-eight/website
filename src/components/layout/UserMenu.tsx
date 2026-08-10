@@ -128,6 +128,7 @@ function UserMenu({ isMobile, isSidebar }: UserMenuProps) {
                     My dashboard
                   </Link>
                   <button
+                    type="button"
                     onClick={() => setConfigModalOpen(true)}
                     className="bg-base-200 text-base-content/75 hover:bg-base-300 rounded-box flex w-full flex-row items-center justify-center gap-2 px-6 py-2 text-center whitespace-nowrap"
                   >
