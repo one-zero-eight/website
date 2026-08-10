@@ -13,7 +13,7 @@ export interface paths {
     };
     /**
      * List Drafts
-     * @description List the current user's drafts.
+     * @description List drafts the user created, co-hosts, or was invited to.
      */
     get: operations["drafts_list_drafts"];
     put?: never;
@@ -37,7 +37,7 @@ export interface paths {
     };
     /**
      * Get Draft
-     * @description Get the current user's draft.
+     * @description Get a draft the user can view.
      */
     get: operations["drafts_get_draft"];
     put?: never;
@@ -51,7 +51,7 @@ export interface paths {
     head?: never;
     /**
      * Patch Draft
-     * @description Change draft data (starts_at / location / host).
+     * @description Change draft data (starts_at / location / duration / enrollment / links).
      */
     patch: operations["drafts_patch_draft"];
     trace?: never;
@@ -75,6 +75,186 @@ export interface paths {
      * @description Delete a locale from the draft.
      */
     delete: operations["drafts_delete_locale"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/hosts/external": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add External Host
+     * @description Add an external host (event managers only).
+     */
+    post: operations["drafts_add_external_host"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/hosts/external/{host_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Patch External Host
+     * @description Patch an external host.
+     */
+    patch: operations["drafts_patch_external_host"];
+    trace?: never;
+  };
+  "/drafts/{id}/hosts/clubs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add Club Host
+     * @description Add one of the caller's clubs as a host.
+     */
+    post: operations["drafts_add_club_host"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/hosts/invitations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Invite Club
+     * @description Invite another club as a host (pending until accept).
+     */
+    post: operations["drafts_invite_club"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/hosts/invitations/{club_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Invitation
+     * @description Remove a pending club invitation.
+     */
+    delete: operations["drafts_delete_invitation"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/hosts/{host_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Host
+     * @description Remove a host from the draft.
+     */
+    delete: operations["drafts_delete_host"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/hosts/order": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Order Hosts
+     * @description Reorder hosts; body must list every current host id exactly once.
+     */
+    put: operations["drafts_order_hosts"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/accept": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Accept Invitation
+     * @description Accept a pending host invitation for one of the caller's clubs.
+     */
+    post: operations["drafts_accept_invitation"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/decline": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Decline Invitation
+     * @description Decline a pending host invitation for one of the caller's clubs.
+     */
+    post: operations["drafts_decline_invitation"];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -287,7 +467,7 @@ export interface paths {
     put?: never;
     /**
      * Enroll
-     * @description Enroll the current user in the event.
+     * @description Enroll the current user in the event (stores email).
      */
     post: operations["events_enroll"];
     delete?: never;
@@ -376,6 +556,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/me/events.ics": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get My Enrolled Events Ics
+     * @description ICS feed of published events the current user is enrolled in.
+     */
+    get: operations["users_get_my_enrolled_events_ics"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/locales": {
     parameters: {
       query?: never;
@@ -400,6 +600,18 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** AddClubHostBody */
+    AddClubHostBody: {
+      /** Club Id */
+      club_id: string;
+    };
+    /** AddExternalHostBody */
+    AddExternalHostBody: {
+      /** Name */
+      name: string;
+      /** Url */
+      url?: string | null;
+    };
     /** Body_drafts_upload_image */
     Body_drafts_upload_image: {
       /** Image File */
@@ -416,7 +628,11 @@ export interface components {
        * @description Locale codes to pre-create in the draft
        */
       locales?: string[] | null;
-      host?: components["schemas"]["Host"] | null;
+      /** Duration Hours */
+      duration_hours?: number | null;
+      enrollment?: components["schemas"]["Enrollment"] | null;
+      /** Links */
+      links?: components["schemas"]["EventLink"][] | null;
     };
     /** DeclineBody */
     DeclineBody: {
@@ -438,6 +654,11 @@ export interface components {
        */
       revision: string;
       data: components["schemas"]["EventDataSummary"];
+      /**
+       * Invited By
+       * @description Present only while the current user's club has a pending invitation
+       */
+      invited_by?: string | null;
     };
     /** DraftOut */
     DraftOut: {
@@ -452,6 +673,16 @@ export interface components {
       revision: string;
       data: components["schemas"]["EventData"];
       /**
+       * Invitations
+       * @description Club ids with pending host invitations
+       */
+      invitations: string[];
+      /**
+       * Can Edit
+       * @description Whether the current user can edit this draft
+       */
+      can_edit: boolean;
+      /**
        * Can Submit
        * @description Whether the draft can be submitted
        */
@@ -461,12 +692,36 @@ export interface components {
        * @description Human-readable reasons why the draft cannot be submitted
        */
       cannot_submit_reasons: string[];
+      /**
+       * Feedback
+       * @description Latest moderation feedback when set; kept after the draft diverges from the submission
+       */
+      feedback?: string | null;
     };
     /**
      * DraftStatus
      * @enum {string}
      */
     DraftStatus: DraftStatus;
+    /** Enrollment */
+    Enrollment: {
+      type: components["schemas"]["EnrollmentType"];
+      /**
+       * Url
+       * @description Enrollment URL (required for external)
+       */
+      url?: string | null;
+      /**
+       * Capacity
+       * @description Max enrollments for internal; null means unlimited
+       */
+      capacity?: number | null;
+    };
+    /**
+     * EnrollmentType
+     * @enum {string}
+     */
+    EnrollmentType: EnrollmentType;
     /**
      * EventData
      * @description Mutable draft data; all fields may be unset until submission.
@@ -494,8 +749,23 @@ export interface components {
       locales?: {
         [key: string]: components["schemas"]["Locale"];
       };
-      /** @description Event host */
-      host?: components["schemas"]["Host"] | null;
+      /**
+       * Hosts
+       * @description Event hosts
+       */
+      hosts?: components["schemas"]["Host"][];
+      /**
+       * Duration Hours
+       * @description Event duration in hours
+       */
+      duration_hours?: number | null;
+      /** @description Enrollment configuration */
+      enrollment?: components["schemas"]["Enrollment"] | null;
+      /**
+       * Links
+       * @description Related links
+       */
+      links?: components["schemas"]["EventLink"][];
     };
     /** EventDataOut */
     EventDataOut: {
@@ -512,7 +782,13 @@ export interface components {
       locales: {
         [key: string]: components["schemas"]["SubmissionLocale"];
       };
-      host: components["schemas"]["PublicHost"];
+      /** Hosts */
+      hosts: components["schemas"]["PublicHost"][];
+      /** Duration Hours */
+      duration_hours: number;
+      enrollment: components["schemas"]["Enrollment"];
+      /** Links */
+      links?: components["schemas"]["EventLink"][];
     };
     /** EventDataSummary */
     EventDataSummary: {
@@ -527,7 +803,18 @@ export interface components {
        * @description Display name picked from locales by settings.locales priority
        */
       name?: string | null;
-      host?: components["schemas"]["Host"] | null;
+      /** Hosts */
+      hosts?: components["schemas"]["Host"][];
+      /** Duration Hours */
+      duration_hours?: number | null;
+      enrollment?: components["schemas"]["Enrollment"] | null;
+    };
+    /** EventLink */
+    EventLink: {
+      /** Url */
+      url: string;
+      /** Name */
+      name?: string | null;
     };
     /** EventListData */
     EventListData: {
@@ -545,7 +832,11 @@ export interface components {
        * @description Display name picked from locales by settings.locales priority
        */
       name?: string | null;
-      host: components["schemas"]["PublicHost"];
+      /** Hosts */
+      hosts: components["schemas"]["PublicHost"][];
+      /** Duration Hours */
+      duration_hours: number;
+      enrollment: components["schemas"]["Enrollment"];
     };
     /** EventListItem */
     EventListItem: {
@@ -590,10 +881,10 @@ export interface components {
        */
       enrolled?: boolean | null;
       /**
-       * Enrolled Users
+       * Enrolled Emails
        * @description Visible to the author or a moderator only
        */
-      enrolled_users?: string[] | null;
+      enrolled_emails?: string[] | null;
       /**
        * Revision
        * @description Visible to the author or a moderator only
@@ -626,6 +917,11 @@ export interface components {
     };
     /** Host */
     Host: {
+      /**
+       * Id
+       * @description Stable host id within the event
+       */
+      id: string;
       /** @description Host type */
       type: components["schemas"]["HostType"];
       /**
@@ -656,6 +952,11 @@ export interface components {
        * @description File ID of the uploaded event image
        */
       image_id: string;
+    };
+    /** InviteClubBody */
+    InviteClubBody: {
+      /** Club Id */
+      club_id: string;
     };
     /**
      * Locale
@@ -694,6 +995,11 @@ export interface components {
      * @enum {string}
      */
     ModerationStatus: ModerationStatus;
+    /** OrderHostsBody */
+    OrderHostsBody: {
+      /** Host Ids */
+      host_ids: string[];
+    };
     /** OwnedClub */
     OwnedClub: {
       /**
@@ -713,13 +1019,26 @@ export interface components {
       starts_at?: string | null;
       /** Location */
       location?: string | null;
-      host?: components["schemas"]["Host"] | null;
+      /** Duration Hours */
+      duration_hours?: number | null;
+      enrollment?: components["schemas"]["Enrollment"] | null;
+      /** Links */
+      links?: components["schemas"]["EventLink"][] | null;
+    };
+    /** PatchExternalHostBody */
+    PatchExternalHostBody: {
+      /** Name */
+      name?: string | null;
+      /** Url */
+      url?: string | null;
     };
     /**
      * PublicHost
      * @description Host as shown on published events (resolved for display).
      */
     PublicHost: {
+      /** Id */
+      id: string;
       /** Display Name */
       display_name: string;
       /** Link */
@@ -792,8 +1111,23 @@ export interface components {
       locales: {
         [key: string]: components["schemas"]["SubmissionLocale"];
       };
-      /** @description Event host */
-      host: components["schemas"]["Host"];
+      /**
+       * Hosts
+       * @description Event hosts
+       */
+      hosts: components["schemas"]["Host"][];
+      /**
+       * Duration Hours
+       * @description Event duration in hours
+       */
+      duration_hours: number;
+      /** @description Enrollment configuration */
+      enrollment: components["schemas"]["Enrollment"];
+      /**
+       * Links
+       * @description Related links
+       */
+      links?: components["schemas"]["EventLink"][];
     };
     /** SubmissionDataSummary */
     SubmissionDataSummary: {
@@ -811,7 +1145,11 @@ export interface components {
        * @description Display name picked from locales by settings.locales priority
        */
       name?: string | null;
-      host: components["schemas"]["Host"];
+      /** Hosts */
+      hosts: components["schemas"]["Host"][];
+      /** Duration Hours */
+      duration_hours: number;
+      enrollment: components["schemas"]["Enrollment"];
     };
     /** SubmissionListItem */
     SubmissionListItem: {
@@ -872,15 +1210,20 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaAddClubHostBody = components["schemas"]["AddClubHostBody"];
+export type SchemaAddExternalHostBody =
+  components["schemas"]["AddExternalHostBody"];
 export type SchemaBodyDraftsUploadImage =
   components["schemas"]["Body_drafts_upload_image"];
 export type SchemaCreateDraft = components["schemas"]["CreateDraft"];
 export type SchemaDeclineBody = components["schemas"]["DeclineBody"];
 export type SchemaDraftListItem = components["schemas"]["DraftListItem"];
 export type SchemaDraftOut = components["schemas"]["DraftOut"];
+export type SchemaEnrollment = components["schemas"]["Enrollment"];
 export type SchemaEventData = components["schemas"]["EventData"];
 export type SchemaEventDataOut = components["schemas"]["EventDataOut"];
 export type SchemaEventDataSummary = components["schemas"]["EventDataSummary"];
+export type SchemaEventLink = components["schemas"]["EventLink"];
 export type SchemaEventListData = components["schemas"]["EventListData"];
 export type SchemaEventListItem = components["schemas"]["EventListItem"];
 export type SchemaEventOut = components["schemas"]["EventOut"];
@@ -890,11 +1233,15 @@ export type SchemaHttpValidationError =
 export type SchemaHost = components["schemas"]["Host"];
 export type SchemaImageUploadResponse =
   components["schemas"]["ImageUploadResponse"];
+export type SchemaInviteClubBody = components["schemas"]["InviteClubBody"];
 export type SchemaLocale = components["schemas"]["Locale"];
 export type SchemaMeOut = components["schemas"]["MeOut"];
 export type SchemaModeration = components["schemas"]["Moderation"];
+export type SchemaOrderHostsBody = components["schemas"]["OrderHostsBody"];
 export type SchemaOwnedClub = components["schemas"]["OwnedClub"];
 export type SchemaPatchDraft = components["schemas"]["PatchDraft"];
+export type SchemaPatchExternalHostBody =
+  components["schemas"]["PatchExternalHostBody"];
 export type SchemaPublicHost = components["schemas"]["PublicHost"];
 export type SchemaPutLocale = components["schemas"]["PutLocale"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
@@ -1044,7 +1391,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Cannot delete a draft while a submission is pending OR Cannot delete a draft while the event is published */
+      /** @description Cannot delete a draft while the event is published OR Cannot delete a draft while a submission is pending */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1053,6 +1400,13 @@ export interface operations {
       };
       /** @description Unable to verify credentials OR Credentials not provided */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only the creator can delete the draft */
+      403: {
         headers: {
           [name: string]: unknown;
         };
@@ -1193,6 +1547,441 @@ export interface operations {
       };
     };
   };
+  drafts_add_external_host: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddExternalHostBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only event managers can add external hosts */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_patch_external_host: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+        host_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PatchExternalHostBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description External host name is required */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description External host not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_add_club_host: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddClubHostBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Club is already a host OR You are not a leader of the specified club */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_invite_club: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InviteClubBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Club is already invited OR Club is already a host */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_delete_invitation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+        club_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invitation not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_delete_host: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+        host_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Host not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_order_hosts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrderHostsBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description host_ids must be a permutation of current host ids */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_accept_invitation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description No pending invitation for your clubs */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_decline_invitation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description No pending invitation for your clubs */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   drafts_get_draft_image: {
     parameters: {
       query?: never;
@@ -1213,7 +2002,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Draft not found OR No image available */
+      /** @description No image available OR Draft not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1759,6 +2548,13 @@ export interface operations {
           "application/json": components["schemas"]["EventOut"];
         };
       };
+      /** @description Event is at capacity */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Unable to verify credentials OR Credentials not provided */
       401: {
         headers: {
@@ -1900,6 +2696,33 @@ export interface operations {
       };
     };
   };
+  users_get_my_enrolled_events_ics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   locales_get_locales: {
     parameters: {
       query?: never;
@@ -1926,6 +2749,10 @@ export enum DraftStatus {
   unpublished = "unpublished",
   pending = "pending",
   declined = "declined",
+}
+export enum EnrollmentType {
+  external = "external",
+  internal = "internal",
 }
 export enum HostType {
   club = "club",
