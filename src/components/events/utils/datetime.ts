@@ -9,6 +9,18 @@ export function formatEventDateTime(value: string | null | undefined) {
   return moment(value).format("DD.MM.YYYY HH:mm");
 }
 
+/** End datetime from start + duration hours; null if either is missing. */
+export function getEventEndsAt(
+  startsAt: string | null | undefined,
+  durationHours: number | null | undefined,
+) {
+  if (!startsAt || durationHours === null || durationHours === undefined) {
+    return null;
+  }
+
+  return moment(startsAt).add(durationHours, "hours").toISOString();
+}
+
 /** Value for `<input type="datetime-local" />` in local timezone */
 export function toDatetimeLocalValue(value: string | null | undefined) {
   if (!value) {

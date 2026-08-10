@@ -6,20 +6,9 @@ import {
   SchemaPublicHost,
 } from "@/api/workshops/types";
 import { Link } from "@tanstack/react-router";
-import { formatEventDateTime } from "../utils/datetime";
+import { formatEventDateTime, getEventEndsAt } from "../utils/datetime";
+import { getLinkDisplayLabel } from "../utils/links";
 import { PublicHostsList, StoredHostsList } from "./HostLink";
-
-function formatDurationHours(durationHours?: number | null) {
-  if (durationHours === null || durationHours === undefined) {
-    return null;
-  }
-
-  if (durationHours === 1) {
-    return "1 hour";
-  }
-
-  return `${durationHours} hours`;
-}
 
 function formatEnrollment(enrollment?: SchemaEnrollment | null) {
   if (!enrollment) {
@@ -33,11 +22,11 @@ function formatEnrollment(enrollment?: SchemaEnrollment | null) {
   }
 
   if (enrollment.capacity === null || enrollment.capacity === undefined) {
-    return { label: "Internal enrollment · unlimited", url: null };
+    return { label: "On InNoHassle · unlimited", url: null };
   }
 
   return {
-    label: `Internal enrollment · capacity ${enrollment.capacity}`,
+    label: `On InNoHassle · capacity ${enrollment.capacity}`,
     url: null,
   };
 }
@@ -64,7 +53,7 @@ export function EventInfoCard({
   actions?: React.ReactNode;
 }) {
   const locationLabel = location?.trim() || "TBA";
-  const durationLabel = formatDurationHours(durationHours);
+  const endsAt = getEventEndsAt(startsAt, durationHours);
   const enrollmentInfo = formatEnrollment(enrollment);
   const visibleLinks = (links ?? []).filter((link) => link.url.trim());
 
@@ -87,12 +76,10 @@ export function EventInfoCard({
           <span>{formatEventDateTime(startsAt)}</span>
         </div>
 
-        {durationLabel && (
-          <div className="flex items-center gap-2">
-            <span className="icon-[material-symbols--timelapse-outline] shrink-0 text-xl" />
-            <span>{durationLabel}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <span className="icon-[material-symbols--event-available-outline] shrink-0 text-xl" />
+          <span>{formatEventDateTime(endsAt)}</span>
+        </div>
 
         <div className="flex items-center gap-2">
           <span className="icon-[material-symbols--location-on-outline] shrink-0 text-xl" />
@@ -134,14 +121,14 @@ export function EventInfoCard({
             <span className="icon-[material-symbols--link] shrink-0 text-xl" />
             <ul className="flex min-w-0 flex-col gap-1">
               {visibleLinks.map((link) => (
-                <li key={`${link.url}-${link.name ?? ""}`}>
+                <li key={link.id}>
                   <a
                     href={link.url}
                     target="_blank"
                     rel="noreferrer"
                     className="wrap-anywhere underline underline-offset-2"
                   >
-                    {link.name?.trim() || link.url}
+                    {getLinkDisplayLabel(link)}
                   </a>
                 </li>
               ))}

@@ -14,6 +14,7 @@ import { EventPageLayout } from "../shared/EventPageLayout";
 import { LocaleContentSection } from "../shared/LocaleContentSection";
 import { getDraftImageUrl } from "../utils/links";
 import { DraftHostsSection } from "./DraftHostsSection";
+import { DraftLinksSection } from "./DraftLinksSection";
 import { EditDraftInfoModal } from "./EditDraftInfoModal";
 
 export function DraftPage({ id }: { id: string }) {
@@ -437,7 +438,7 @@ export function DraftPage({ id }: { id: string }) {
                             disabled={!selectedLocale || isSavingLocale}
                             onClick={() => setDeleteLocaleOpen(true)}
                           >
-                            Delete locale
+                            Delete language
                           </button>
                           <button
                             type="button"
@@ -445,7 +446,7 @@ export function DraftPage({ id }: { id: string }) {
                             disabled={!selectedLocale || isSavingLocale}
                             onClick={handleStartEditLocale}
                           >
-                            Edit locale
+                            Edit
                           </button>
                         </>
                       )}
@@ -480,6 +481,7 @@ export function DraftPage({ id }: { id: string }) {
               }
             />
             <DraftHostsSection draft={data} canEdit={canEdit} />
+            <DraftLinksSection draft={data} canEdit={canEdit} />
             <DraftSubmissionCard
               id={id}
               status={data.status}
@@ -505,10 +507,10 @@ export function DraftPage({ id }: { id: string }) {
       <Modal
         open={deleteLocaleOpen}
         onOpenChange={setDeleteLocaleOpen}
-        title="Delete locale"
+        title="Delete language"
       >
         <p className="mb-4 text-sm">
-          Delete locale{" "}
+          Delete language{" "}
           <span className="font-medium uppercase">{selectedLocale}</span>?
         </p>
         <div className="flex justify-end gap-2">

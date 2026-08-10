@@ -10,6 +10,7 @@ import { EventHeroImage } from "../shared/EventHeroImage";
 import { EventInfoCard } from "../shared/EventInfoCard";
 import { EventPageLayout } from "../shared/EventPageLayout";
 import { LocaleContentSection } from "../shared/LocaleContentSection";
+import { eventFieldClass } from "../shared/formStyles";
 import { getSubmissionImageUrl } from "../utils/links";
 
 export function SubmissionPage({ id }: { id: string }) {
@@ -156,7 +157,7 @@ export function SubmissionPage({ id }: { id: string }) {
               Leave your feedback and judge
             </p>
             <textarea
-              className="textarea textarea-bordered mb-3 min-h-28 w-full"
+              className={eventFieldClass("mb-3 min-h-28 resize-y")}
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               placeholder="Feedback"

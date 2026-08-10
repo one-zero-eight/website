@@ -1,5 +1,21 @@
 const workshopsApiUrl = import.meta.env.VITE_WORKSHOPS_API_URL;
 
+export function getLinkDisplayLabel(link: {
+  url: string;
+  name?: string | null;
+}) {
+  const name = link.name?.trim();
+  if (name) {
+    return name;
+  }
+
+  try {
+    return new URL(link.url).host || link.url;
+  } catch {
+    return link.url;
+  }
+}
+
 export function getEventsIcsUrl() {
   return `${workshopsApiUrl}/events.ics`;
 }

@@ -1,11 +1,36 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
-import { ModerationStatus } from "@/api/workshops/types";
+import {
+  ModerationStatus,
+  SchemaSubmissionListItem,
+} from "@/api/workshops/types";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useEventsAuth } from "../hooks";
 import { EventSummaryCard } from "../shared/EventSummaryCard";
 import { getSubmissionImageUrl } from "../utils/links";
+
+const sections: {
+  status: ModerationStatus;
+  title: string;
+  empty: string;
+}[] = [
+  {
+    status: ModerationStatus.pending,
+    title: "Pending",
+    empty: "No pending submissions.",
+  },
+  {
+    status: ModerationStatus.declined,
+    title: "Declined",
+    empty: "No declined submissions.",
+  },
+  {
+    status: ModerationStatus.approved,
+    title: "Approved",
+    empty: "No approved submissions.",
+  },
+];
 
 export function SubmissionsPage() {
   const navigate = useNavigate();
@@ -14,13 +39,24 @@ export function SubmissionsPage() {
   const { data, isPending, isError, error, refetch } = $workshops.useQuery(
     "get",
     "/submissions/",
-    {
-      params: {
-        query: { status: ModerationStatus.pending },
-      },
-    },
+    undefined,
     { enabled: isModerator },
   );
+
+  const byStatus = useMemo(() => {
+    const groups: Record<ModerationStatus, SchemaSubmissionListItem[]> = {
+      [ModerationStatus.pending]: [],
+      [ModerationStatus.declined]: [],
+      [ModerationStatus.approved]: [],
+    };
+
+    for (const item of data ?? []) {
+      const status = item.submission.moderation.status;
+      groups[status]?.push(item);
+    }
+
+    return groups;
+  }, [data]);
 
   useEffect(() => {
     if (!isAuthPending && !isModerator) {
@@ -57,31 +93,41 @@ export function SubmissionsPage() {
   }
 
   return (
-    <div className="@container/content px-4 py-4">
-      <h2 className="mb-4 text-2xl font-medium">Submissions</h2>
+    <div className="@container/content flex flex-col gap-8 px-4 py-4">
+      <h2 className="text-2xl font-medium">Submissions</h2>
 
-      {data && data.length === 0 ? (
-        <p className="text-base-content/70">No pending submissions.</p>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 @min-[700px]/content:grid-cols-2 @min-[1000px]/content:grid-cols-3">
-          {data?.map((item) => (
-            <EventSummaryCard
-              key={item.id}
-              href={`/events/submissions/${item.id}`}
-              imageUrl={
-                item.submission.data.image_id
-                  ? getSubmissionImageUrl(item.id)
-                  : null
-              }
-              name={item.submission.data.name}
-              hosts={item.submission.data.hosts}
-              clubs={clubs}
-              startsAt={item.submission.data.starts_at}
-              location={item.submission.data.location}
-            />
-          ))}
-        </div>
-      )}
+      {sections.map((section) => {
+        const items = byStatus[section.status];
+
+        return (
+          <section key={section.status} className="flex flex-col gap-4">
+            <h3 className="text-xl font-medium">{section.title}</h3>
+            {items.length === 0 ? (
+              <p className="text-base-content/70">{section.empty}</p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 @min-[700px]/content:grid-cols-2 @min-[1000px]/content:grid-cols-3">
+                {items.map((item) => (
+                  <EventSummaryCard
+                    key={item.id}
+                    href={`/events/submissions/${item.id}`}
+                    imageUrl={
+                      item.submission.data.image_id
+                        ? getSubmissionImageUrl(item.id)
+                        : null
+                    }
+                    name={item.submission.data.name}
+                    hosts={item.submission.data.hosts}
+                    clubs={clubs}
+                    startsAt={item.submission.data.starts_at}
+                    location={item.submission.data.location}
+                    status={item.submission.moderation.status}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }

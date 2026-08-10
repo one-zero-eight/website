@@ -6,9 +6,14 @@ import { StoredHostsList } from "./HostLink";
 
 const statusClassName: Record<string, string> = {
   published: "badge-success",
+  approved: "badge-success",
   pending: "badge-warning",
   declined: "badge-error",
   unpublished: "badge-ghost",
+};
+
+const statusLabel: Record<string, string> = {
+  pending: "Pending Review",
 };
 
 export function EventSummaryCard({
@@ -50,11 +55,12 @@ export function EventSummaryCard({
           {status && (
             <span
               className={cn(
-                "badge absolute top-2 right-2 capitalize",
+                "badge absolute top-2 right-2",
+                statusLabel[status] ? null : "capitalize",
                 statusClassName[status] ?? "badge-ghost",
               )}
             >
-              {status}
+              {statusLabel[status] ?? status}
             </span>
           )}
           {invitedBy && (

@@ -1,3 +1,5 @@
+import { eventFieldClass } from "./formStyles";
+
 export function durationApiToForm(
   durationHours: number | null | undefined,
 ): string {
@@ -38,7 +40,7 @@ export function DurationField({
         type="number"
         min={0.25}
         step={0.25}
-        className="input input-bordered w-full"
+        className={eventFieldClass()}
         placeholder="e.g. 2"
         disabled={disabled}
         value={value}

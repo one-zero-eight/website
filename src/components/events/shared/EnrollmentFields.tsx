@@ -1,5 +1,6 @@
 import { EnrollmentType, SchemaEnrollment } from "@/api/workshops/types";
 import { cn } from "@/lib/ui/cn";
+import { eventFieldClass } from "./formStyles";
 
 export type EnrollmentFormValue = {
   type: EnrollmentType;
@@ -75,6 +76,7 @@ export function EnrollmentFields({
 }) {
   return (
     <div className="flex flex-col gap-3">
+      <span className="text-sm">Enrollment</span>
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -89,7 +91,7 @@ export function EnrollmentFields({
             onChange({ ...value, type: EnrollmentType.internal, url: "" })
           }
         >
-          Internal
+          On InNoHassle
         </button>
         <button
           type="button"
@@ -115,7 +117,7 @@ export function EnrollmentFields({
             type="number"
             min={1}
             step={1}
-            className="input input-bordered w-full"
+            className={eventFieldClass()}
             placeholder="Unlimited"
             disabled={disabled}
             value={value.capacity}
@@ -127,7 +129,7 @@ export function EnrollmentFields({
           <span>Enrollment URL</span>
           <input
             type="url"
-            className="input input-bordered w-full"
+            className={eventFieldClass()}
             placeholder="https://"
             disabled={disabled}
             value={value.url}

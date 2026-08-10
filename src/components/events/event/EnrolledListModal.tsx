@@ -1,5 +1,6 @@
 import { Modal } from "@/components/common/Modal.tsx";
 import { useMemo, useState } from "react";
+import { eventFieldClass } from "../shared/formStyles";
 
 export function EnrolledListModal({
   open,
@@ -28,7 +29,7 @@ export function EnrolledListModal({
       <div className="@container/modal flex flex-col gap-3">
         <input
           type="search"
-          className="input input-bordered w-full"
+          className={eventFieldClass()}
           placeholder="Search..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}

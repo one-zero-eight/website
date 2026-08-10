@@ -16,12 +16,7 @@ import {
   enrollmentFormToApi,
   EnrollmentFormValue,
 } from "../shared/EnrollmentFields";
-import {
-  LinksFields,
-  linksApiToForm,
-  linksFormToApi,
-  LinkFormValue,
-} from "../shared/LinksFields";
+import { eventFieldClass } from "../shared/formStyles";
 import {
   fromDatetimeLocalValue,
   isDatetimeLocalInPast,
@@ -46,7 +41,6 @@ export function EditDraftInfoModal({
   const [enrollment, setEnrollment] = useState<EnrollmentFormValue>(
     enrollmentApiToForm(null),
   );
-  const [links, setLinks] = useState<LinkFormValue[]>([]);
 
   useEffect(() => {
     if (!open) {
@@ -57,7 +51,6 @@ export function EditDraftInfoModal({
     setLocation(draft.data.location ?? "");
     setDurationHours(durationApiToForm(draft.data.duration_hours));
     setEnrollment(enrollmentApiToForm(draft.data.enrollment));
-    setLinks(linksApiToForm(draft.data.links));
   }, [open, draft]);
 
   const { mutate, isPending } = $workshops.useMutation(
@@ -113,7 +106,6 @@ export function EditDraftInfoModal({
         location: location.trim() || "TBA",
         duration_hours: durationFormToApi(durationHours),
         enrollment: apiEnrollment,
-        links: linksFormToApi(links),
       },
     });
   }
@@ -125,7 +117,7 @@ export function EditDraftInfoModal({
           <span>Starts at</span>
           <input
             type="datetime-local"
-            className="input input-bordered w-full"
+            className={eventFieldClass()}
             value={startsAt}
             disabled={isPending}
             onChange={(e) => setStartsAt(e.target.value)}
@@ -136,7 +128,7 @@ export function EditDraftInfoModal({
           <span>Location</span>
           <input
             type="text"
-            className="input input-bordered w-full"
+            className={eventFieldClass()}
             placeholder="TBA"
             value={location}
             disabled={isPending}
@@ -155,8 +147,6 @@ export function EditDraftInfoModal({
           onChange={setEnrollment}
           disabled={isPending}
         />
-
-        <LinksFields value={links} onChange={setLinks} disabled={isPending} />
 
         <div className="mt-2 flex justify-end gap-2">
           <button

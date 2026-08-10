@@ -12,11 +12,7 @@ import {
   enrollmentFormToApi,
   EnrollmentFormValue,
 } from "../shared/EnrollmentFields";
-import {
-  LinksFields,
-  linksFormToApi,
-  LinkFormValue,
-} from "../shared/LinksFields";
+import { eventFieldClass } from "../shared/formStyles";
 import {
   fromDatetimeLocalValue,
   isDatetimeLocalInPast,
@@ -40,7 +36,6 @@ export function CreateDraftModal({
   const [enrollment, setEnrollment] = useState<EnrollmentFormValue>(
     defaultEnrollmentForm(),
   );
-  const [links, setLinks] = useState<LinkFormValue[]>([]);
 
   useEffect(() => {
     if (!open) {
@@ -52,7 +47,6 @@ export function CreateDraftModal({
     setSelectedLocales(allowedLocales.slice(0, 1));
     setDurationHours("");
     setEnrollment(defaultEnrollmentForm());
-    setLinks([]);
   }, [open, allowedLocales]);
 
   const { mutate, isPending } = $workshops.useMutation("post", "/drafts/", {
@@ -97,7 +91,6 @@ export function CreateDraftModal({
         locales: selectedLocales,
         duration_hours: durationFormToApi(durationHours),
         enrollment: apiEnrollment,
-        links: linksFormToApi(links),
       },
     });
   }
@@ -109,7 +102,7 @@ export function CreateDraftModal({
           <span>Starts at</span>
           <input
             type="datetime-local"
-            className="input input-bordered w-full"
+            className={eventFieldClass()}
             value={startsAt}
             disabled={isPending}
             onChange={(e) => setStartsAt(e.target.value)}
@@ -120,7 +113,7 @@ export function CreateDraftModal({
           <span>Location</span>
           <input
             type="text"
-            className="input input-bordered w-full"
+            className={eventFieldClass()}
             placeholder="TBA"
             value={location}
             disabled={isPending}
@@ -139,8 +132,6 @@ export function CreateDraftModal({
           onChange={setEnrollment}
           disabled={isPending}
         />
-
-        <LinksFields value={links} onChange={setLinks} disabled={isPending} />
 
         <div className="flex flex-col gap-2">
           <span className="text-sm">Locales</span>
@@ -170,10 +161,6 @@ export function CreateDraftModal({
             })}
           </div>
         </div>
-
-        <p className="text-base-content/60 text-sm">
-          Hosts are added on the draft page after creation.
-        </p>
 
         <div className="mt-2 flex justify-end gap-2">
           <button

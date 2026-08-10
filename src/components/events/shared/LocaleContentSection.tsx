@@ -1,4 +1,5 @@
 import { cn } from "@/lib/ui/cn";
+import { eventFieldClass } from "./formStyles";
 
 export function LocaleContentSection({
   locales,
@@ -49,13 +50,13 @@ export function LocaleContentSection({
         <div className="flex flex-col gap-3">
           <input
             type="text"
-            className="input input-bordered w-full"
+            className={eventFieldClass()}
             placeholder="Event name"
             value={editName ?? ""}
             onChange={(e) => onEditNameChange?.(e.target.value)}
           />
           <textarea
-            className="textarea textarea-bordered min-h-40 w-full"
+            className={eventFieldClass("min-h-40 resize-y")}
             placeholder="Event description"
             value={editDescription ?? ""}
             onChange={(e) => onEditDescriptionChange?.(e.target.value)}
