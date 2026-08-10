@@ -51,7 +51,7 @@ export interface paths {
     head?: never;
     /**
      * Patch Draft
-     * @description Change draft data (starts_at / location / duration / enrollment / links).
+     * @description Change draft data (starts_at / location / duration / enrollment).
      */
     patch: operations["drafts_patch_draft"];
     trace?: never;
@@ -218,6 +218,50 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/links": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add Link
+     * @description Add a related link to the draft.
+     */
+    post: operations["drafts_add_link"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/drafts/{id}/links/{link_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Link
+     * @description Remove a related link from the draft.
+     */
+    delete: operations["drafts_delete_link"];
+    options?: never;
+    head?: never;
+    /**
+     * Patch Link
+     * @description Patch a related link.
+     */
+    patch: operations["drafts_patch_link"];
     trace?: never;
   };
   "/drafts/{id}/accept": {
@@ -612,6 +656,13 @@ export interface components {
       /** Url */
       url?: string | null;
     };
+    /** AddLinkBody */
+    AddLinkBody: {
+      /** Url */
+      url: string;
+      /** Name */
+      name?: string | null;
+    };
     /** Body_drafts_upload_image */
     Body_drafts_upload_image: {
       /** Image File */
@@ -631,8 +682,6 @@ export interface components {
       /** Duration Hours */
       duration_hours?: number | null;
       enrollment?: components["schemas"]["Enrollment"] | null;
-      /** Links */
-      links?: components["schemas"]["EventLink"][] | null;
     };
     /** DeclineBody */
     DeclineBody: {
@@ -811,6 +860,11 @@ export interface components {
     };
     /** EventLink */
     EventLink: {
+      /**
+       * Id
+       * @description Stable link id within the event
+       */
+      id: string;
       /** Url */
       url: string;
       /** Name */
@@ -1022,8 +1076,6 @@ export interface components {
       /** Duration Hours */
       duration_hours?: number | null;
       enrollment?: components["schemas"]["Enrollment"] | null;
-      /** Links */
-      links?: components["schemas"]["EventLink"][] | null;
     };
     /** PatchExternalHostBody */
     PatchExternalHostBody: {
@@ -1031,6 +1083,13 @@ export interface components {
       name?: string | null;
       /** Url */
       url?: string | null;
+    };
+    /** PatchLinkBody */
+    PatchLinkBody: {
+      /** Url */
+      url?: string | null;
+      /** Name */
+      name?: string | null;
     };
     /**
      * PublicHost
@@ -1213,6 +1272,7 @@ export interface components {
 export type SchemaAddClubHostBody = components["schemas"]["AddClubHostBody"];
 export type SchemaAddExternalHostBody =
   components["schemas"]["AddExternalHostBody"];
+export type SchemaAddLinkBody = components["schemas"]["AddLinkBody"];
 export type SchemaBodyDraftsUploadImage =
   components["schemas"]["Body_drafts_upload_image"];
 export type SchemaCreateDraft = components["schemas"]["CreateDraft"];
@@ -1242,6 +1302,7 @@ export type SchemaOwnedClub = components["schemas"]["OwnedClub"];
 export type SchemaPatchDraft = components["schemas"]["PatchDraft"];
 export type SchemaPatchExternalHostBody =
   components["schemas"]["PatchExternalHostBody"];
+export type SchemaPatchLinkBody = components["schemas"]["PatchLinkBody"];
 export type SchemaPublicHost = components["schemas"]["PublicHost"];
 export type SchemaPutLocale = components["schemas"]["PutLocale"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
@@ -1391,7 +1452,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Cannot delete a draft while the event is published OR Cannot delete a draft while a submission is pending */
+      /** @description Cannot delete a draft while a submission is pending OR Cannot delete a draft while the event is published */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1892,6 +1953,158 @@ export interface operations {
       };
     };
   };
+  drafts_add_link: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddLinkBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Link url is required */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_delete_link: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+        link_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Link not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  drafts_patch_link: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+        link_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PatchLinkBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description Link url is required */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Link not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   drafts_accept_invitation: {
     parameters: {
       query?: never;
@@ -2002,7 +2215,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description No image available OR Draft not found */
+      /** @description Draft not found OR No image available */
       404: {
         headers: {
           [name: string]: unknown;
