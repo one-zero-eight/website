@@ -32,7 +32,7 @@ export function getMyMoodleLink() {
 }
 
 export function getMyWorkshopsLink() {
-  return `${SCHEDULE_API_URL}/users/me/workshops.ics`;
+  return `${WORKSHOPS_API_URL}/users/me/events.ics`;
 }
 
 export function getMyRoomBookingsLink() {

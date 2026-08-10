@@ -2,20 +2,25 @@ import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
 import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/ui/cn";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useEventsAuth } from "../hooks";
+import { DurationField, durationFormToApi } from "../shared/DurationField";
 import {
-  HostFields,
-  HostFormValue,
-  hostApiToForm,
-  hostFormToApi,
-} from "../shared/HostFields";
+  defaultEnrollmentForm,
+  EnrollmentFields,
+  enrollmentFormToApi,
+  EnrollmentFormValue,
+} from "../shared/EnrollmentFields";
+import {
+  LinksFields,
+  linksFormToApi,
+  LinkFormValue,
+} from "../shared/LinksFields";
 import {
   fromDatetimeLocalValue,
   isDatetimeLocalInPast,
 } from "../utils/datetime";
-import { cn } from "@/lib/ui/cn";
 
 export function CreateDraftModal({
   open,
@@ -26,13 +31,16 @@ export function CreateDraftModal({
 }) {
   const navigate = useNavigate();
   const { showError } = useToast();
-  const { clubs, isClubLeader, isEventManager } = useEventsAuth();
   const { data: allowedLocales = [] } = $workshops.useQuery("get", "/locales");
 
   const [startsAt, setStartsAt] = useState("");
   const [location, setLocation] = useState("");
   const [selectedLocales, setSelectedLocales] = useState<string[]>([]);
-  const [host, setHost] = useState<HostFormValue>({ mode: "none" });
+  const [durationHours, setDurationHours] = useState("");
+  const [enrollment, setEnrollment] = useState<EnrollmentFormValue>(
+    defaultEnrollmentForm(),
+  );
+  const [links, setLinks] = useState<LinkFormValue[]>([]);
 
   useEffect(() => {
     if (!open) {
@@ -42,14 +50,10 @@ export function CreateDraftModal({
     setStartsAt("");
     setLocation("");
     setSelectedLocales(allowedLocales.slice(0, 1));
-    setHost(
-      hostApiToForm(null, {
-        canUseClub: isClubLeader,
-        canUseExternal: isEventManager,
-        defaultClubId: clubs[0]?.club_id,
-      }),
-    );
-  }, [open, allowedLocales, isClubLeader, isEventManager, clubs]);
+    setDurationHours("");
+    setEnrollment(defaultEnrollmentForm());
+    setLinks([]);
+  }, [open, allowedLocales]);
 
   const { mutate, isPending } = $workshops.useMutation("post", "/drafts/", {
     onSuccess: (draft) => {
@@ -67,14 +71,33 @@ export function CreateDraftModal({
       return;
     }
 
-    const apiHost = hostFormToApi(host);
+    if (durationHours.trim()) {
+      const duration = durationFormToApi(durationHours);
+      if (duration === null) {
+        showError("Invalid duration", "Duration must be a positive number.");
+        return;
+      }
+    }
+
+    const apiEnrollment = enrollmentFormToApi(enrollment);
+    if (!apiEnrollment) {
+      showError(
+        "Invalid enrollment",
+        enrollment.type === "external"
+          ? "Enrollment URL is required for external enrollment."
+          : "Capacity must be empty or at least 1.",
+      );
+      return;
+    }
 
     mutate({
       body: {
         starts_at: startsAt ? fromDatetimeLocalValue(startsAt) : null,
         location: location.trim() || "TBA",
         locales: selectedLocales,
-        host: apiHost,
+        duration_hours: durationFormToApi(durationHours),
+        enrollment: apiEnrollment,
+        links: linksFormToApi(links),
       },
     });
   }
@@ -82,15 +105,6 @@ export function CreateDraftModal({
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Create draft">
       <div className="@container/modal flex flex-col gap-4">
-        <HostFields
-          value={host}
-          onChange={setHost}
-          clubs={clubs}
-          canUseClub={isClubLeader}
-          canUseExternal={isEventManager}
-          disabled={isPending}
-        />
-
         <label className="flex flex-col gap-1 text-sm">
           <span>Starts at</span>
           <input
@@ -113,6 +127,20 @@ export function CreateDraftModal({
             onChange={(e) => setLocation(e.target.value)}
           />
         </label>
+
+        <DurationField
+          value={durationHours}
+          onChange={setDurationHours}
+          disabled={isPending}
+        />
+
+        <EnrollmentFields
+          value={enrollment}
+          onChange={setEnrollment}
+          disabled={isPending}
+        />
+
+        <LinksFields value={links} onChange={setLinks} disabled={isPending} />
 
         <div className="flex flex-col gap-2">
           <span className="text-sm">Locales</span>
@@ -142,6 +170,10 @@ export function CreateDraftModal({
             })}
           </div>
         </div>
+
+        <p className="text-base-content/60 text-sm">
+          Hosts are added on the draft page after creation.
+        </p>
 
         <div className="mt-2 flex justify-end gap-2">
           <button

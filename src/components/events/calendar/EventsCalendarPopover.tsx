@@ -18,7 +18,7 @@ import moment from "moment";
 import { useEffect } from "react";
 import { extractEventIdFromUrl } from "../utils/links";
 import { parseIcsHostDescription } from "../utils/host";
-import { PublicHostLink } from "../shared/HostLink";
+import { IcsHostsList, PublicHostsList } from "../shared/HostLink";
 
 export function EventsCalendarPopover({
   event,
@@ -78,10 +78,10 @@ export function EventsCalendarPopover({
   const location =
     eventData?.data.location ??
     (event.extendedProps?.location as string | undefined);
-  const icsHost = parseIcsHostDescription(
+  const icsHosts = parseIcsHostDescription(
     event.extendedProps?.description as string | undefined,
   );
-  const host = eventData?.data.host;
+  const hosts = eventData?.data.hosts;
 
   return (
     <>
@@ -142,25 +142,16 @@ export function EventsCalendarPopover({
                 </div>
               )}
 
-              {(host || icsHost) && (
+              {((hosts && hosts.length > 0) || icsHosts.length > 0) && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
                     <span className="icon-[material-symbols--person-outline] text-2xl" />
                   </div>
                   <div className="flex w-full py-1 wrap-anywhere">
-                    {host ? (
-                      <PublicHostLink host={host} />
-                    ) : icsHost?.link ? (
-                      <a
-                        href={icsHost.link}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="underline underline-offset-2"
-                      >
-                        {icsHost.displayName}
-                      </a>
+                    {hosts && hosts.length > 0 ? (
+                      <PublicHostsList hosts={hosts} />
                     ) : (
-                      <span>{icsHost?.displayName}</span>
+                      <IcsHostsList hosts={icsHosts} />
                     )}
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
+import { EnrollmentType } from "@/api/workshops/types";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
 import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,14 +11,14 @@ import { EventInfoCard } from "../shared/EventInfoCard";
 import { EventPageLayout } from "../shared/EventPageLayout";
 import { LocaleContentSection } from "../shared/LocaleContentSection";
 import { getEventImageUrl } from "../utils/links";
-// import { EnrolledListModal } from "./EnrolledListModal";
+import { EnrolledListModal } from "./EnrolledListModal";
 
 export function EventPage({ id }: { id: string }) {
   const { me } = useMe();
   const { showError } = useToast();
   const queryClient = useQueryClient();
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
-  // const [enrolledOpen, setEnrolledOpen] = useState(false);
+  const [enrolledOpen, setEnrolledOpen] = useState(false);
 
   const { data, isPending, isError, error, refetch } = $workshops.useQuery(
     "get",
@@ -104,7 +105,15 @@ export function EventPage({ id }: { id: string }) {
   const localeContent = selectedLocale
     ? data.data.locales[selectedLocale]
     : undefined;
-  // const enrolledUsers = data.enrolled_users ?? null;
+  const enrollment = data.data.enrollment;
+  const isExternal = enrollment.type === EnrollmentType.external;
+  const capacity = enrollment.capacity;
+  const atCapacity =
+    !isExternal &&
+    capacity !== null &&
+    capacity !== undefined &&
+    data.enrolled_count >= capacity;
+  const enrolledEmails = data.enrolled_emails ?? null;
   const actionPending = isEnrolling || isUnenrolling;
 
   return (
@@ -127,16 +136,29 @@ export function EventPage({ id }: { id: string }) {
         side={
           <>
             <EventInfoCard
-              host={data.data.host}
+              hosts={data.data.hosts}
               startsAt={data.data.starts_at}
               location={data.data.location}
+              durationHours={data.data.duration_hours}
+              enrollment={data.data.enrollment}
+              links={data.data.links}
             />
             <div className="border-base-300 rounded-2xl border p-4">
-              <p className="mb-3 text-sm">
-                {data.enrolled_count} students enrolled
-              </p>
+              {isExternal ? (
+                <p className="mb-3 text-sm">
+                  Enrollment is handled externally.
+                </p>
+              ) : (
+                <p className="mb-3 text-sm">
+                  {data.enrolled_count}
+                  {capacity !== null && capacity !== undefined
+                    ? ` / ${capacity}`
+                    : ""}{" "}
+                  students enrolled
+                </p>
+              )}
               <div className="flex flex-wrap justify-end gap-2">
-                {/* {enrolledUsers && (
+                {enrolledEmails && (
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm"
@@ -144,9 +166,45 @@ export function EventPage({ id }: { id: string }) {
                   >
                     Enrolled list
                   </button>
-                )} */}
+                )}
+                {isExternal && enrollment.url && (
+                  <a
+                    href={enrollment.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-primary btn-sm"
+                  >
+                    Enroll
+                  </a>
+                )}
                 {!me ? (
                   <SignInButton />
+                ) : isExternal ? (
+                  data.enrolled ? (
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-sm"
+                      disabled={actionPending}
+                      onClick={() => unenroll({ params: { path: { id } } })}
+                    >
+                      {isUnenrolling && (
+                        <span className="loading loading-spinner loading-sm" />
+                      )}
+                      Remove from calendar
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm border"
+                      disabled={actionPending}
+                      onClick={() => enroll({ params: { path: { id } } })}
+                    >
+                      {isEnrolling && (
+                        <span className="loading loading-spinner loading-sm" />
+                      )}
+                      Add to calendar
+                    </button>
+                  )
                 ) : data.enrolled ? (
                   <button
                     type="button"
@@ -163,13 +221,13 @@ export function EventPage({ id }: { id: string }) {
                   <button
                     type="button"
                     className="btn btn-primary btn-sm"
-                    disabled={actionPending}
+                    disabled={actionPending || atCapacity}
                     onClick={() => enroll({ params: { path: { id } } })}
                   >
                     {isEnrolling && (
                       <span className="loading loading-spinner loading-sm" />
                     )}
-                    Enroll
+                    {atCapacity ? "Full" : "Enroll"}
                   </button>
                 )}
               </div>
@@ -177,13 +235,13 @@ export function EventPage({ id }: { id: string }) {
           </>
         }
       />
-      {/* {enrolledUsers && (
+      {enrolledEmails && (
         <EnrolledListModal
           open={enrolledOpen}
           onOpenChange={setEnrolledOpen}
-          enrolledUsers={enrolledUsers}
+          enrolledEmails={enrolledEmails}
         />
-      )} */}
+      )}
     </>
   );
 }

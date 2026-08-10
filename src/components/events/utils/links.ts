@@ -4,6 +4,10 @@ export function getEventsIcsUrl() {
   return `${workshopsApiUrl}/events.ics`;
 }
 
+export function getMyEventsIcsUrl() {
+  return `${workshopsApiUrl}/users/me/events.ics`;
+}
+
 export function getEventImageUrl(id: string) {
   return `${workshopsApiUrl}/events/${id}/image`;
 }

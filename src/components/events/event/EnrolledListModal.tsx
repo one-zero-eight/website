@@ -4,24 +4,24 @@ import { useMemo, useState } from "react";
 export function EnrolledListModal({
   open,
   onOpenChange,
-  enrolledUsers,
+  enrolledEmails,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  enrolledUsers: string[];
+  enrolledEmails: string[];
 }) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) {
-      return enrolledUsers;
+      return enrolledEmails;
     }
 
-    return enrolledUsers.filter((user) =>
-      user.toLowerCase().includes(normalized),
+    return enrolledEmails.filter((email) =>
+      email.toLowerCase().includes(normalized),
     );
-  }, [enrolledUsers, query]);
+  }, [enrolledEmails, query]);
 
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Enrolled list">
@@ -38,9 +38,9 @@ export function EnrolledListModal({
             <p className="text-base-content/70 text-sm">No matches.</p>
           ) : (
             <ul className="divide-base-300 divide-y">
-              {filtered.map((user) => (
-                <li key={user} className="py-2 text-sm wrap-anywhere">
-                  {user}
+              {filtered.map((email) => (
+                <li key={email} className="py-2 text-sm wrap-anywhere">
+                  {email}
                 </li>
               ))}
             </ul>

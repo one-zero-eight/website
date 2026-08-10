@@ -41,9 +41,10 @@ export function displayStoredHost(
   };
 }
 
+/** Parse ICS DESCRIPTION lines like `Host: Name` + optional URL on the next line. */
 export function parseIcsHostDescription(description: string | undefined) {
   if (!description) {
-    return null;
+    return [] as HostDisplay[];
   }
 
   const lines = description
@@ -51,18 +52,26 @@ export function parseIcsHostDescription(description: string | undefined) {
     .map((line) => line.trim())
     .filter(Boolean);
 
-  const hostLine = lines.find((line) => /^host:\s*/i.test(line));
-  if (!hostLine) {
-    return null;
+  const hosts: HostDisplay[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!/^host:\s*/i.test(line)) {
+      continue;
+    }
+
+    const displayName = line.replace(/^host:\s*/i, "").trim() || "Unknown host";
+    const next = lines[i + 1];
+    const link =
+      next && /^https?:\/\//i.test(next) && !/^host:\s*/i.test(next)
+        ? next
+        : null;
+
+    hosts.push({ displayName, link });
+    if (link) {
+      i += 1;
+    }
   }
 
-  const displayName = hostLine.replace(/^host:\s*/i, "").trim();
-  const linkLine = lines.find(
-    (line) => line !== hostLine && /^https?:\/\//i.test(line),
-  );
-
-  return {
-    displayName: displayName || "Unknown host",
-    link: linkLine ?? null,
-  } satisfies HostDisplay;
+  return hosts;
 }

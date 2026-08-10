@@ -5,13 +5,23 @@ import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useEventsAuth } from "../hooks";
 import {
-  HostFields,
-  HostFormValue,
-  hostApiToForm,
-  hostFormToApi,
-} from "../shared/HostFields";
+  DurationField,
+  durationApiToForm,
+  durationFormToApi,
+} from "../shared/DurationField";
+import {
+  EnrollmentFields,
+  enrollmentApiToForm,
+  enrollmentFormToApi,
+  EnrollmentFormValue,
+} from "../shared/EnrollmentFields";
+import {
+  LinksFields,
+  linksApiToForm,
+  linksFormToApi,
+  LinkFormValue,
+} from "../shared/LinksFields";
 import {
   fromDatetimeLocalValue,
   isDatetimeLocalInPast,
@@ -29,11 +39,14 @@ export function EditDraftInfoModal({
 }) {
   const { showError } = useToast();
   const queryClient = useQueryClient();
-  const { clubs, isClubLeader, isEventManager } = useEventsAuth();
 
   const [startsAt, setStartsAt] = useState("");
   const [location, setLocation] = useState("");
-  const [host, setHost] = useState<HostFormValue>({ mode: "none" });
+  const [durationHours, setDurationHours] = useState("");
+  const [enrollment, setEnrollment] = useState<EnrollmentFormValue>(
+    enrollmentApiToForm(null),
+  );
+  const [links, setLinks] = useState<LinkFormValue[]>([]);
 
   useEffect(() => {
     if (!open) {
@@ -42,20 +55,22 @@ export function EditDraftInfoModal({
 
     setStartsAt(toDatetimeLocalValue(draft.data.starts_at));
     setLocation(draft.data.location ?? "");
-    setHost(
-      hostApiToForm(draft.data.host, {
-        canUseClub: isClubLeader,
-        canUseExternal: isEventManager,
-        defaultClubId: clubs[0]?.club_id,
-      }),
-    );
-  }, [open, draft, isClubLeader, isEventManager, clubs]);
+    setDurationHours(durationApiToForm(draft.data.duration_hours));
+    setEnrollment(enrollmentApiToForm(draft.data.enrollment));
+    setLinks(linksApiToForm(draft.data.links));
+  }, [open, draft]);
 
   const { mutate, isPending } = $workshops.useMutation(
     "patch",
     "/drafts/{id}",
     {
-      onSuccess: () => {
+      onSuccess: (next) => {
+        queryClient.setQueryData(
+          $workshops.queryOptions("get", "/drafts/{id}", {
+            params: { path: { id: draft.id } },
+          }).queryKey,
+          next,
+        );
         queryClient.invalidateQueries({
           queryKey: $workshops.queryOptions("get", "/drafts/{id}", {
             params: { path: { id: draft.id } },
@@ -75,12 +90,30 @@ export function EditDraftInfoModal({
       return;
     }
 
+    if (durationHours.trim() && durationFormToApi(durationHours) === null) {
+      showError("Invalid duration", "Duration must be a positive number.");
+      return;
+    }
+
+    const apiEnrollment = enrollmentFormToApi(enrollment);
+    if (!apiEnrollment) {
+      showError(
+        "Invalid enrollment",
+        enrollment.type === "external"
+          ? "Enrollment URL is required for external enrollment."
+          : "Capacity must be empty or at least 1.",
+      );
+      return;
+    }
+
     mutate({
       params: { path: { id: draft.id } },
       body: {
         starts_at: startsAt ? fromDatetimeLocalValue(startsAt) : null,
         location: location.trim() || "TBA",
-        host: hostFormToApi(host),
+        duration_hours: durationFormToApi(durationHours),
+        enrollment: apiEnrollment,
+        links: linksFormToApi(links),
       },
     });
   }
@@ -88,15 +121,6 @@ export function EditDraftInfoModal({
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Edit info">
       <div className="@container/modal flex flex-col gap-4">
-        <HostFields
-          value={host}
-          onChange={setHost}
-          clubs={clubs}
-          canUseClub={isClubLeader}
-          canUseExternal={isEventManager}
-          disabled={isPending}
-        />
-
         <label className="flex flex-col gap-1 text-sm">
           <span>Starts at</span>
           <input
@@ -119,6 +143,20 @@ export function EditDraftInfoModal({
             onChange={(e) => setLocation(e.target.value)}
           />
         </label>
+
+        <DurationField
+          value={durationHours}
+          onChange={setDurationHours}
+          disabled={isPending}
+        />
+
+        <EnrollmentFields
+          value={enrollment}
+          onChange={setEnrollment}
+          disabled={isPending}
+        />
+
+        <LinksFields value={links} onChange={setLinks} disabled={isPending} />
 
         <div className="mt-2 flex justify-end gap-2">
           <button

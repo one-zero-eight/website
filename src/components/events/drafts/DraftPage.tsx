@@ -13,6 +13,7 @@ import { EventInfoCard } from "../shared/EventInfoCard";
 import { EventPageLayout } from "../shared/EventPageLayout";
 import { LocaleContentSection } from "../shared/LocaleContentSection";
 import { getDraftImageUrl } from "../utils/links";
+import { DraftHostsSection } from "./DraftHostsSection";
 import { EditDraftInfoModal } from "./EditDraftInfoModal";
 
 export function DraftPage({ id }: { id: string }) {
@@ -38,14 +39,6 @@ export function DraftPage({ id }: { id: string }) {
     "/drafts/{id}",
     { params: { path: { id } } },
     { enabled: canManage },
-  );
-  const { data: submission } = $workshops.useQuery(
-    "get",
-    "/submissions/{id}",
-    { params: { path: { id } } },
-    {
-      enabled: canManage && data?.status === DraftStatus.declined,
-    },
   );
 
   const locales = useMemo(
@@ -139,6 +132,35 @@ export function DraftPage({ id }: { id: string }) {
       },
     });
 
+  const { mutate: acceptInvite, isPending: isAccepting } =
+    $workshops.useMutation("post", "/drafts/{id}/accept", {
+      onSuccess: (draft) => {
+        queryClient.setQueryData(
+          $workshops.queryOptions("get", "/drafts/{id}", {
+            params: { path: { id } },
+          }).queryKey,
+          draft,
+        );
+        invalidateDraft();
+      },
+      onError: (mutationError) => {
+        showError("Error", formatApiErrorMessage(mutationError));
+      },
+    });
+
+  const { mutate: declineInvite, isPending: isDeclining } =
+    $workshops.useMutation("post", "/drafts/{id}/decline", {
+      onSuccess: () => {
+        navigate({ to: "/events/drafts" });
+        queryClient.invalidateQueries({
+          queryKey: $workshops.queryOptions("get", "/drafts/").queryKey,
+        });
+      },
+      onError: (mutationError) => {
+        showError("Error", formatApiErrorMessage(mutationError));
+      },
+    });
+
   if (isAuthPending || isPending) {
     return (
       <div className="flex flex-col gap-4 px-4 py-4">
@@ -172,7 +194,12 @@ export function DraftPage({ id }: { id: string }) {
   const localeContent = selectedLocale
     ? data.data.locales?.[selectedLocale]
     : undefined;
-  const controlsDisabled = editingLocale;
+  const canEdit = data.can_edit;
+  const controlsDisabled = editingLocale || !canEdit;
+  const hasPendingInvite = clubs.some((club) =>
+    data.invitations.includes(club.club_id),
+  );
+  const inviteActionPending = isAccepting || isDeclining;
 
   function handleStartEditLocale() {
     if (!selectedLocale) {
@@ -269,163 +296,211 @@ export function DraftPage({ id }: { id: string }) {
                 : null
             }
           >
-            <button
-              type="button"
-              className="btn btn-sm btn-circle absolute right-3 bottom-3"
-              disabled={isUploadingImage}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {isUploadingImage ? (
-                <span className="loading loading-spinner loading-sm" />
-              ) : (
-                <span className="icon-[material-symbols--upload]" />
-              )}
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  handleUploadImage(file);
-                }
-                e.target.value = "";
-              }}
-            />
+            {canEdit && (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-circle absolute right-3 bottom-3"
+                  disabled={isUploadingImage}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {isUploadingImage ? (
+                    <span className="loading loading-spinner loading-sm" />
+                  ) : (
+                    <span className="icon-[material-symbols--upload]" />
+                  )}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleUploadImage(file);
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </>
+            )}
           </EventHeroImage>
         }
         main={
-          <LocaleContentSection
-            locales={locales}
-            selectedLocale={selectedLocale}
-            onSelectLocale={(locale) => {
-              if (editingLocale) {
-                return;
-              }
-              setSelectedLocale(locale);
-            }}
-            name={localeContent?.name}
-            description={localeContent?.description}
-            editing={editingLocale}
-            editName={editName}
-            editDescription={editDescription}
-            onEditNameChange={setEditName}
-            onEditDescriptionChange={setEditDescription}
-            toolbar={
-              <>
-                {missingLocales.length > 0 && (
-                  <div className="relative" ref={addLocaleMenuRef}>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-ghost border"
-                      disabled={controlsDisabled || isSavingLocale}
-                      onClick={() => setAddLocaleOpen((open) => !open)}
-                    >
-                      +
-                    </button>
-                    {addLocaleOpen && (
-                      <div className="border-base-300 bg-base-100 absolute top-full left-0 mt-1 flex min-w-24 flex-col rounded-lg border p-1 shadow-md">
-                        {missingLocales.map((locale) => (
-                          <button
-                            key={locale}
-                            type="button"
-                            className="btn btn-ghost btn-sm justify-start uppercase"
-                            disabled={isSavingLocale}
-                            onClick={() => handleAddLocale(locale)}
-                          >
-                            {locale}
-                          </button>
-                        ))}
+          <>
+            {hasPendingInvite && (
+              <div className="border-info/40 bg-info/10 mb-4 rounded-2xl border p-4">
+                <p className="mb-3 text-sm">
+                  Your club was invited as a host for this draft.
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    disabled={inviteActionPending}
+                    onClick={() => declineInvite({ params: { path: { id } } })}
+                  >
+                    {isDeclining && (
+                      <span className="loading loading-spinner loading-sm" />
+                    )}
+                    Decline
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    disabled={inviteActionPending}
+                    onClick={() => acceptInvite({ params: { path: { id } } })}
+                  >
+                    {isAccepting && (
+                      <span className="loading loading-spinner loading-sm" />
+                    )}
+                    Accept
+                  </button>
+                </div>
+              </div>
+            )}
+            <LocaleContentSection
+              locales={locales}
+              selectedLocale={selectedLocale}
+              onSelectLocale={(locale) => {
+                if (editingLocale) {
+                  return;
+                }
+                setSelectedLocale(locale);
+              }}
+              name={localeContent?.name}
+              description={localeContent?.description}
+              editing={editingLocale}
+              editName={editName}
+              editDescription={editDescription}
+              onEditNameChange={setEditName}
+              onEditDescriptionChange={setEditDescription}
+              toolbar={
+                canEdit ? (
+                  <>
+                    {missingLocales.length > 0 && (
+                      <div className="relative" ref={addLocaleMenuRef}>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-ghost border"
+                          disabled={controlsDisabled || isSavingLocale}
+                          onClick={() => setAddLocaleOpen((open) => !open)}
+                        >
+                          +
+                        </button>
+                        {addLocaleOpen && (
+                          <div className="border-base-300 bg-base-100 absolute top-full left-0 mt-1 flex min-w-24 flex-col rounded-lg border p-1 shadow-md">
+                            {missingLocales.map((locale) => (
+                              <button
+                                key={locale}
+                                type="button"
+                                className="btn btn-ghost btn-sm justify-start uppercase"
+                                disabled={isSavingLocale}
+                                onClick={() => handleAddLocale(locale)}
+                              >
+                                {locale}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
-                  </div>
-                )}
-                <div className="ml-auto flex flex-wrap gap-2">
-                  {editingLocale ? (
-                    <>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-ghost"
-                        disabled={isSavingLocale}
-                        onClick={handleCancelEditLocale}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-primary"
-                        disabled={isSavingLocale || !selectedLocale}
-                        onClick={handleSaveLocale}
-                      >
-                        {isSavingLocale && (
-                          <span className="loading loading-spinner loading-sm" />
-                        )}
-                        Save locale
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-ghost text-error"
-                        disabled={!selectedLocale || isSavingLocale}
-                        onClick={() => setDeleteLocaleOpen(true)}
-                      >
-                        Delete locale
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-ghost border"
-                        disabled={!selectedLocale || isSavingLocale}
-                        onClick={handleStartEditLocale}
-                      >
-                        Edit locale
-                      </button>
-                    </>
-                  )}
-                </div>
-              </>
-            }
-          />
+                    <div className="ml-auto flex flex-wrap gap-2">
+                      {editingLocale ? (
+                        <>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-ghost"
+                            disabled={isSavingLocale}
+                            onClick={handleCancelEditLocale}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-primary"
+                            disabled={isSavingLocale || !selectedLocale}
+                            onClick={handleSaveLocale}
+                          >
+                            {isSavingLocale && (
+                              <span className="loading loading-spinner loading-sm" />
+                            )}
+                            Save locale
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-ghost text-error"
+                            disabled={!selectedLocale || isSavingLocale}
+                            onClick={() => setDeleteLocaleOpen(true)}
+                          >
+                            Delete locale
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-ghost border"
+                            disabled={!selectedLocale || isSavingLocale}
+                            onClick={handleStartEditLocale}
+                          >
+                            Edit locale
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </>
+                ) : undefined
+              }
+            />
+          </>
         }
         side={
           <>
             <EventInfoCard
-              storedHost={data.data.host}
+              storedHosts={data.data.hosts}
               clubs={clubs}
               startsAt={data.data.starts_at}
               location={data.data.location}
+              durationHours={data.data.duration_hours}
+              enrollment={data.data.enrollment}
+              links={data.data.links}
               actions={
-                <button
-                  type="button"
-                  className="btn btn-sm btn-ghost border"
-                  disabled={controlsDisabled}
-                  onClick={() => setEditInfoOpen(true)}
-                >
-                  Edit info
-                </button>
+                canEdit ? (
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-ghost border"
+                    disabled={controlsDisabled}
+                    onClick={() => setEditInfoOpen(true)}
+                  >
+                    Edit info
+                  </button>
+                ) : undefined
               }
             />
+            <DraftHostsSection draft={data} canEdit={canEdit} />
             <DraftSubmissionCard
               id={id}
               status={data.status}
-              canSubmit={data.can_submit}
+              canSubmit={canEdit && data.can_submit}
               cannotSubmitReasons={data.cannot_submit_reasons}
-              feedback={submission?.submission.moderation.feedback}
+              feedback={data.feedback}
               isSubmitting={isSubmitting}
               onSubmit={() => submitDraft({ params: { path: { id } } })}
+              canEdit={canEdit}
             />
           </>
         }
       />
 
-      <EditDraftInfoModal
-        open={editInfoOpen}
-        onOpenChange={setEditInfoOpen}
-        draft={data}
-      />
+      {canEdit && (
+        <EditDraftInfoModal
+          open={editInfoOpen}
+          onOpenChange={setEditInfoOpen}
+          draft={data}
+        />
+      )}
 
       <Modal
         open={deleteLocaleOpen}
@@ -476,6 +551,7 @@ function DraftSubmissionCard({
   feedback,
   isSubmitting,
   onSubmit,
+  canEdit,
 }: {
   id: string;
   status: DraftStatus | null;
@@ -484,6 +560,7 @@ function DraftSubmissionCard({
   feedback?: string | null;
   isSubmitting: boolean;
   onSubmit: () => void;
+  canEdit: boolean;
 }) {
   if (status === DraftStatus.pending) {
     return (
@@ -525,8 +602,22 @@ function DraftSubmissionCard({
     );
   }
 
+  if (!canEdit) {
+    return (
+      <div className="border-base-300 rounded-2xl border p-4 text-sm">
+        You can view this draft. Accept the host invitation to edit and submit.
+      </div>
+    );
+  }
+
   return (
     <div className="border-base-300 rounded-2xl border p-4">
+      {feedback?.trim() && (
+        <div className="mb-3 text-sm">
+          <p className="mb-1 font-medium">Moderator feedback</p>
+          <p className="text-base-content/80 whitespace-pre-wrap">{feedback}</p>
+        </div>
+      )}
       {canSubmit ? (
         <p className="mb-3 text-sm">Draft can be submitted for review.</p>
       ) : (

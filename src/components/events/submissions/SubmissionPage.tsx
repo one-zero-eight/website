@@ -143,10 +143,13 @@ export function SubmissionPage({ id }: { id: string }) {
       side={
         <>
           <EventInfoCard
-            storedHost={data.submission.data.host}
+            storedHosts={data.submission.data.hosts}
             clubs={clubs}
             startsAt={data.submission.data.starts_at}
             location={data.submission.data.location}
+            durationHours={data.submission.data.duration_hours}
+            enrollment={data.submission.data.enrollment}
+            links={data.submission.data.links}
           />
           <div className="border-base-300 rounded-2xl border p-4">
             <p className="mb-2 text-sm font-medium">

@@ -1,7 +1,12 @@
 import { $clubs } from "@/api/clubs";
 import { HostType, SchemaHost, SchemaPublicHost } from "@/api/workshops/types";
 import { Link } from "@tanstack/react-router";
-import { displayPublicHost, displayStoredHost } from "../utils/host";
+import { Fragment } from "react";
+import {
+  displayPublicHost,
+  displayStoredHost,
+  HostDisplay,
+} from "../utils/host";
 
 export function PublicHostLink({ host }: { host: SchemaPublicHost }) {
   const { displayName, link } = displayPublicHost(host);
@@ -79,4 +84,78 @@ export function StoredHostLink({
   }
 
   return <span>{ownedDisplay.displayName}</span>;
+}
+
+function HostDisplayLink({ host }: { host: HostDisplay }) {
+  if (!host.link) {
+    return <span>{host.displayName}</span>;
+  }
+
+  return (
+    <a
+      href={host.link}
+      target="_blank"
+      rel="noreferrer"
+      className="underline underline-offset-2"
+    >
+      {host.displayName}
+    </a>
+  );
+}
+
+export function PublicHostsList({ hosts }: { hosts: SchemaPublicHost[] }) {
+  if (hosts.length === 0) {
+    return <span>TBA</span>;
+  }
+
+  return (
+    <span className="inline">
+      {hosts.map((host, index) => (
+        <Fragment key={host.id}>
+          {index > 0 && <span>, </span>}
+          <PublicHostLink host={host} />
+        </Fragment>
+      ))}
+    </span>
+  );
+}
+
+export function StoredHostsList({
+  hosts,
+  clubs,
+}: {
+  hosts: SchemaHost[];
+  clubs: { club_id: string; title: string }[];
+}) {
+  if (hosts.length === 0) {
+    return <span>TBA</span>;
+  }
+
+  return (
+    <span className="inline">
+      {hosts.map((host, index) => (
+        <Fragment key={host.id}>
+          {index > 0 && <span>, </span>}
+          <StoredHostLink host={host} clubs={clubs} />
+        </Fragment>
+      ))}
+    </span>
+  );
+}
+
+export function IcsHostsList({ hosts }: { hosts: HostDisplay[] }) {
+  if (hosts.length === 0) {
+    return null;
+  }
+
+  return (
+    <span className="inline">
+      {hosts.map((host, index) => (
+        <Fragment key={`${host.displayName}-${index}`}>
+          {index > 0 && <span>, </span>}
+          <HostDisplayLink host={host} />
+        </Fragment>
+      ))}
+    </span>
+  );
 }

@@ -74,11 +74,10 @@ export function SubmissionsPage() {
                   : null
               }
               name={item.submission.data.name}
-              host={item.submission.data.host}
+              hosts={item.submission.data.hosts}
               clubs={clubs}
               startsAt={item.submission.data.starts_at}
               location={item.submission.data.location}
-              hostPrefix="By "
             />
           ))}
         </div>
