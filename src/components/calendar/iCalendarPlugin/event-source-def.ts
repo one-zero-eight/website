@@ -70,7 +70,12 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
                 }
               : undefined,
         }).then((response) => {
-          if (response.status !== 200) return;
+          if (!response.ok) {
+            internalState.response = response;
+            throw new Error(
+              `Failed to fetch calendar feed (${response.status})`,
+            );
+          }
           return response.text().then((icsText) => {
             internalState.response = response;
             return new IcalExpander({

@@ -37,10 +37,13 @@ export function ImportColorsPalette({
   }, [setShowColors]);
 
   return (
-    <>
+    <div className="mb-7 ml-1 flex items-center">
+      <div
+        className="mr-2 h-3 w-3 rounded-full"
+        style={{ backgroundColor: calendarColor }}
+      />
       <button
         type="button"
-        className="mb-7 ml-1"
         onClick={() => setShowColors((showColors) => !showColors)}
         ref={chooseColorButtonRef}
       >
@@ -66,7 +69,7 @@ export function ImportColorsPalette({
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }
 

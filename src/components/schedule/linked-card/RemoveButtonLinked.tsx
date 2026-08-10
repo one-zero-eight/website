@@ -5,13 +5,12 @@ import { Modal } from "@/components/common/Modal.tsx";
 import { useState } from "react";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client.ts";
 import { useToast } from "@/components/toast";
+import { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 
 export default function RemoveButtonLinked({
-  alias,
-  calendarName,
+  linkedCalendar,
 }: {
-  alias: string;
-  calendarName: string;
+  linkedCalendar: SchemaLinkedCalendarView;
 }) {
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
 
@@ -44,11 +43,11 @@ export default function RemoveButtonLinked({
   const removeLinkedCalendar = () => {
     remove.mutate(
       {
-        params: { query: { alias } },
+        params: { query: { alias: linkedCalendar.alias } },
       },
       {
         onError: (error) => {
-          showError("Import failed", formatApiErrorMessage(error));
+          showError("Remove failed", formatApiErrorMessage(error));
         },
       },
     );
@@ -70,7 +69,7 @@ export default function RemoveButtonLinked({
       <Modal
         open={removeModalOpen}
         onOpenChange={setRemoveModalOpen}
-        title={`Remove calendar ${calendarName}?`}
+        title={`Remove calendar ${linkedCalendar.name}?`}
         overlayClassName={"bg-black/50"}
         containerClassName="bg-base-100"
       >

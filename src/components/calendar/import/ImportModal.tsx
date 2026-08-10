@@ -1,12 +1,13 @@
 import { $schedule } from "@/api/schedule";
 import { Calendar } from "@/components/calendar/Calendar.tsx";
-import { useState } from "react";
+import { SubmitEvent, useState } from "react";
 import ScheduleLinkInput from "@/components/calendar/ScheduleLinkInput.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
 import { ImportColorsPalette } from "@/components/calendar/import/ColorsPalette.tsx";
 import { useToast } from "@/components/toast";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client.ts";
 import { queryClient } from "@/app/query-client.ts";
+import { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 
 function toAliasPart(value: string) {
   return value
@@ -20,19 +21,13 @@ export function ImportModal({
   open,
   onOpenChange,
   onSubmit,
-  prevAlias,
-  prevName = "",
-  prevDescription,
-  prevUrl,
+  prevCalendar,
   aboveModal = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: () => void;
-  prevAlias?: string | null;
-  prevName?: string | null;
-  prevDescription?: string | null;
-  prevUrl?: string | null;
+  prevCalendar?: SchemaLinkedCalendarView;
   aboveModal?: boolean;
 }) {
   const { data: eventsUser } = $schedule.useQuery("get", "/users/me");
@@ -52,20 +47,20 @@ export function ImportModal({
     onSubmit();
   };
 
-  const handleSubmit = (event: React.SubmitEvent) => {
+  const handleSubmit = (event: SubmitEvent) => {
     event.preventDefault();
-    return prevAlias
+    return prevCalendar?.alias
       ? patchLinkedCalendar(
           {
             body: {
-              alias: prevAlias,
+              alias: prevCalendar.alias,
               url: calendarURL,
               name: calendarName,
               description: calendarDescription,
               color: calendarColor,
               is_active: true,
             },
-            params: { query: { alias: prevAlias } },
+            params: { query: { alias: prevCalendar.alias } },
           },
           {
             onSuccess,
@@ -96,18 +91,27 @@ export function ImportModal({
 
   const { showError } = useToast();
 
-  const [calendarURL, setCalendarURL] = useState(prevUrl ?? "");
+  const [calendarURL, setCalendarURL] = useState(prevCalendar?.url ?? "");
 
-  const [calendarName, setCalendarName] = useState(prevName ?? "");
+  const [calendarName, setCalendarName] = useState(prevCalendar?.name ?? "");
   const [calendarDescription, setCalendarDescription] = useState(
-    prevDescription ?? "",
+    prevCalendar?.description ?? "",
   );
-  const [calendarColor, setCalendarColor] = useState("#9747ff");
+  const [calendarColor, setCalendarColor] = useState(
+    prevCalendar?.color ?? "#9747ff",
+  );
   const [showColors, setShowColors] = useState(false);
-  const [isCalendarChecked, setIsCalendarChecked] = useState(false);
+  const [isCalendarChecked, setIsCalendarChecked] = useState(
+    prevCalendar != null,
+  );
 
   const username = toAliasPart(eventsUser?.email ?? "") || "user";
   const normalizedCalendarName = toAliasPart(calendarName) || "calendar";
+  const calendarNotUpdated =
+    prevCalendar != null &&
+    calendarURL === prevCalendar.url &&
+    calendarDescription === prevCalendar.description &&
+    calendarColor === prevCalendar.color;
 
   const [showPreview, setShowPreview] = useState(true);
 
@@ -133,7 +137,7 @@ export function ImportModal({
           onChange={(e) => setCalendarName(e.target.value)}
           placeholder="Name for your calendar..."
           className="input bg-base-200 mb-3 w-full grow rounded-xl border-0 p-2 text-base outline-none"
-          disabled={!!prevName}
+          disabled={!!prevCalendar?.name}
         />
         <label htmlFor="calendarURL" className="ml-1">
           Calendar URL
@@ -145,6 +149,7 @@ export function ImportModal({
             setCalendarURL(url);
             setIsCalendarChecked(false);
           }}
+          isCalendarChecked={isCalendarChecked}
         />
         <label htmlFor="description" className="ml-1">
           Description
@@ -165,7 +170,7 @@ export function ImportModal({
             setShowColors={setShowColors}
           />
         </div>
-        {calendarURL.length > 0 && (
+        {isCalendarChecked && (
           <div className="mt-2 flex items-start justify-between px-3">
             <button
               type="button"
@@ -180,8 +185,7 @@ export function ImportModal({
               disabled={
                 calendarName.length === 0 ||
                 !isCalendarChecked ||
-                (calendarURL === prevUrl &&
-                  prevDescription === calendarDescription)
+                calendarNotUpdated
               }
             >
               Submit
@@ -190,7 +194,7 @@ export function ImportModal({
         )}
       </form>
       {/* Calendar itself */}
-      {calendarURL.length > 0 && (
+      {calendarURL.length > 0 && URL.canParse(calendarURL) && (
         <Calendar
           urls={[
             {
@@ -200,7 +204,7 @@ export function ImportModal({
           ]}
           viewId="popup"
           onEventSourceSuccess={() => setIsCalendarChecked(true)}
-          isHidden={!showPreview}
+          isHidden={!showPreview || !isCalendarChecked}
         />
       )}
     </Modal>

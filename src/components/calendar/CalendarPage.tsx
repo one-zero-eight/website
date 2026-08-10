@@ -68,7 +68,7 @@ function getCalendarsToShow(
   hidden: number[],
   predefined: number[],
   eventGroups: scheduleTypes.SchemaListEventGroupsResponse,
-  userId: number | undefined,
+  userId: number,
   music_room_hidden: boolean,
   sports_hidden: boolean,
   moodle_hidden: boolean,
