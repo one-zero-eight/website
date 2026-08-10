@@ -264,6 +264,26 @@ export interface paths {
     patch: operations["drafts_patch_link"];
     trace?: never;
   };
+  "/drafts/{id}/links/order": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Order Links
+     * @description Reorder links; body must list every current link id exactly once.
+     */
+    put: operations["drafts_order_links"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/drafts/{id}/accept": {
     parameters: {
       query?: never;
@@ -1054,6 +1074,11 @@ export interface components {
       /** Host Ids */
       host_ids: string[];
     };
+    /** OrderLinksBody */
+    OrderLinksBody: {
+      /** Link Ids */
+      link_ids: string[];
+    };
     /** OwnedClub */
     OwnedClub: {
       /**
@@ -1298,6 +1323,7 @@ export type SchemaLocale = components["schemas"]["Locale"];
 export type SchemaMeOut = components["schemas"]["MeOut"];
 export type SchemaModeration = components["schemas"]["Moderation"];
 export type SchemaOrderHostsBody = components["schemas"]["OrderHostsBody"];
+export type SchemaOrderLinksBody = components["schemas"]["OrderLinksBody"];
 export type SchemaOwnedClub = components["schemas"]["OwnedClub"];
 export type SchemaPatchDraft = components["schemas"]["PatchDraft"];
 export type SchemaPatchExternalHostBody =
@@ -1452,7 +1478,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Cannot delete a draft while a submission is pending OR Cannot delete a draft while the event is published */
+      /** @description Cannot delete a draft while the event is published OR Cannot delete a draft while a submission is pending */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1738,7 +1764,7 @@ export interface operations {
           "application/json": components["schemas"]["DraftOut"];
         };
       };
-      /** @description Club is already a host OR You are not a leader of the specified club */
+      /** @description You are not a leader of the specified club OR Club is already a host */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1787,7 +1813,7 @@ export interface operations {
           "application/json": components["schemas"]["DraftOut"];
         };
       };
-      /** @description Club is already invited OR Club is already a host */
+      /** @description Club is already a host OR Club is already invited */
       400: {
         headers: {
           [name: string]: unknown;
@@ -2105,6 +2131,55 @@ export interface operations {
       };
     };
   };
+  drafts_order_links: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrderLinksBody"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DraftOut"];
+        };
+      };
+      /** @description link_ids must be a permutation of current link ids */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   drafts_accept_invitation: {
     parameters: {
       query?: never;
@@ -2215,7 +2290,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Draft not found OR No image available */
+      /** @description No image available OR Draft not found */
       404: {
         headers: {
           [name: string]: unknown;
