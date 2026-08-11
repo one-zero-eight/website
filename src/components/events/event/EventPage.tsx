@@ -152,7 +152,18 @@ export function EventPage({ id }: { id: string }) {
                   {locale}
                 </button>
               ))}
-              <h1 className="text-2xl font-medium wrap-anywhere">{title}</h1>
+              <h1 className="min-w-0 flex-1 text-2xl font-medium wrap-anywhere">
+                {title}
+              </h1>
+              {data.can_edit_draft && (
+                <Link
+                  to="/events/drafts/$id"
+                  params={{ id }}
+                  className="btn btn-sm btn-ghost shrink-0 border"
+                >
+                  Edit draft
+                </Link>
+              )}
             </div>
 
             <ul className="mb-6 flex flex-col gap-3 text-sm">
