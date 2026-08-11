@@ -974,6 +974,12 @@ export interface components {
        * @description Visible to a moderator only
        */
       approved_by?: string | null;
+      /**
+       * Can Edit Draft
+       * @description Whether the current user can edit the underlying draft (same rules as draft can_edit)
+       * @default false
+       */
+      can_edit_draft: boolean;
     };
     /** FeedbackBody */
     FeedbackBody: {
@@ -1813,7 +1819,7 @@ export interface operations {
           "application/json": components["schemas"]["DraftOut"];
         };
       };
-      /** @description Club is already a host OR Club is already invited */
+      /** @description Club is already invited OR Club is already a host */
       400: {
         headers: {
           [name: string]: unknown;
@@ -2290,7 +2296,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description No image available OR Draft not found */
+      /** @description Draft not found OR No image available */
       404: {
         headers: {
           [name: string]: unknown;
