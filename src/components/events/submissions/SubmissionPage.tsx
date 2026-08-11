@@ -2,6 +2,7 @@ import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
 import { EnrollmentType, ModerationStatus } from "@/api/workshops/types";
 import Tooltip from "@/components/common/Tooltip.tsx";
+import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
@@ -13,6 +14,7 @@ import { EventHeroImage } from "../shared/EventHeroImage";
 import { StoredHostsList } from "../shared/HostLink";
 import { eventFieldClass } from "../shared/formStyles";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
+import { parseDescriptionContent } from "../utils/description";
 import { getLinkDisplayLabel, getSubmissionImageUrl } from "../utils/links";
 
 export function SubmissionPage({ id }: { id: string }) {
@@ -139,8 +141,6 @@ export function SubmissionPage({ id }: { id: string }) {
   const endsAt = getEventEndsAt(event.starts_at, event.duration_hours);
   const locationLabel = event.location?.trim() || "TBA";
   const title = localeContent?.name?.trim() || "Untitled event";
-  const description =
-    localeContent?.description?.trim() || "No description yet.";
   const enrollment = event.enrollment;
   const isExternal = enrollment?.type === EnrollmentType.external;
   const capacity = enrollment?.capacity;
@@ -257,9 +257,10 @@ export function SubmissionPage({ id }: { id: string }) {
             )}
           </ul>
 
-          <p className="text-base-content/80 wrap-anywhere whitespace-pre-wrap">
-            {description}
-          </p>
+          <DescriptionViewer
+            content={parseDescriptionContent(localeContent?.description)}
+            className="text-base-content/80"
+          />
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">

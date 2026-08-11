@@ -14,7 +14,7 @@ import {
 import { Editor } from "@tiptap/react";
 import { useEditorState } from "@tiptap/react";
 import { cn } from "@/lib/ui/cn";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 type BlockType = {
   id: string;
@@ -139,20 +139,27 @@ const blockTypes: BlockType[] = [
 export function BlockTypeDropdown({ editor }: { editor: Editor }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const availableBlockTypes = useMemo(
+    () =>
+      editor.storage.editorImageHandlers?.uploadImage
+        ? blockTypes
+        : blockTypes.filter((type) => type.id !== "image"),
+    [editor.storage.editorImageHandlers?.uploadImage],
+  );
 
   const activeBlockTypes = useEditorState({
     editor,
     selector: (ctx) => {
       return Object.fromEntries(
-        blockTypes.map((type) => [type.id, type.isActive(ctx.editor)]),
+        availableBlockTypes.map((type) => [type.id, type.isActive(ctx.editor)]),
       );
     },
   });
 
   const activeBlockType =
-    blockTypes.find(
+    availableBlockTypes.find(
       (type) => activeBlockTypes[type.id] && type.id !== "paragraph",
-    ) || blockTypes[0];
+    ) || availableBlockTypes[0];
 
   const { refs, context, x, y, strategy } = useFloating({
     placement: "bottom-start",
@@ -213,7 +220,7 @@ export function BlockTypeDropdown({ editor }: { editor: Editor }) {
               className="border-base-300 bg-base-200 rounded-field z-50 mt-1 max-h-64 overflow-y-auto border shadow-lg"
               {...getFloatingProps()}
             >
-              {blockTypes.map((type, index) => (
+              {availableBlockTypes.map((type, index) => (
                 <div
                   key={type.id}
                   ref={(node) => {

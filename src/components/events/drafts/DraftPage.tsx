@@ -2,6 +2,7 @@ import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
 import { DraftStatus } from "@/api/workshops/types";
 import { Modal } from "@/components/common/Modal.tsx";
+import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,6 +12,11 @@ import { useEventsAuth } from "../hooks";
 import { EventHeroImage } from "../shared/EventHeroImage";
 import { EventInfoCard } from "../shared/EventInfoCard";
 import { LocaleContentSection } from "../shared/LocaleContentSection";
+import {
+  parseDescriptionContent,
+  stringifyDescriptionContent,
+  type DescriptionDoc,
+} from "../utils/description";
 import { getDraftImageUrl } from "../utils/links";
 import { DraftHostsSection } from "./DraftHostsSection";
 import { DraftLinksSection } from "./DraftLinksSection";
@@ -23,11 +29,13 @@ export function DraftPage({ id }: { id: string }) {
   const { canManage, clubs, isPending: isAuthPending } = useEventsAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addLocaleMenuRef = useRef<HTMLDivElement>(null);
+  const descriptionEditorRef = useRef<TiptapEditorRef>(null);
 
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [editingLocale, setEditingLocale] = useState(false);
   const [editName, setEditName] = useState("");
-  const [editDescription, setEditDescription] = useState("");
+  const [editorInitialContent, setEditorInitialContent] =
+    useState<DescriptionDoc | null>(null);
   const [addLocaleOpen, setAddLocaleOpen] = useState(false);
   const [deleteLocaleOpen, setDeleteLocaleOpen] = useState(false);
   const [editInfoOpen, setEditInfoOpen] = useState(false);
@@ -217,14 +225,16 @@ export function DraftPage({ id }: { id: string }) {
     }
 
     setEditName(localeContent?.name ?? "");
-    setEditDescription(localeContent?.description ?? "");
+    setEditorInitialContent(
+      parseDescriptionContent(localeContent?.description),
+    );
     setEditingLocale(true);
   }
 
   function handleCancelEditLocale() {
     setEditingLocale(false);
     setEditName("");
-    setEditDescription("");
+    setEditorInitialContent(null);
   }
 
   function syncDraftCache(draft: typeof data) {
@@ -250,13 +260,16 @@ export function DraftPage({ id }: { id: string }) {
         params: { path: { id, locale: selectedLocale } },
         body: {
           name: editName,
-          description: editDescription,
+          description: stringifyDescriptionContent(
+            descriptionEditorRef.current?.getJSON(),
+          ),
         },
       },
       {
         onSuccess: (draft) => {
           syncDraftCache(draft);
           setEditingLocale(false);
+          setEditorInitialContent(null);
           invalidateDraft();
         },
       },
@@ -368,9 +381,9 @@ export function DraftPage({ id }: { id: string }) {
               description={localeContent?.description}
               editing={editingLocale}
               editName={editName}
-              editDescription={editDescription}
               onEditNameChange={setEditName}
-              onEditDescriptionChange={setEditDescription}
+              editorRef={descriptionEditorRef}
+              editorInitialContent={editorInitialContent}
               toolbar={
                 canEdit ? (
                   <>

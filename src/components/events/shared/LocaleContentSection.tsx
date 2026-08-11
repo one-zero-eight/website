@@ -1,4 +1,12 @@
+import { DescriptionEditor } from "@/components/editor/DescriptionEditor.tsx";
+import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
+import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { cn } from "@/lib/ui/cn";
+import { RefObject } from "react";
+import {
+  parseDescriptionContent,
+  type DescriptionDoc,
+} from "../utils/description";
 import { eventFieldClass } from "./formStyles";
 
 export function LocaleContentSection({
@@ -10,9 +18,9 @@ export function LocaleContentSection({
   toolbar,
   editing,
   editName,
-  editDescription,
   onEditNameChange,
-  onEditDescriptionChange,
+  editorRef,
+  editorInitialContent,
 }: {
   locales: string[];
   selectedLocale: string | null;
@@ -22,9 +30,9 @@ export function LocaleContentSection({
   toolbar?: React.ReactNode;
   editing?: boolean;
   editName?: string;
-  editDescription?: string;
   onEditNameChange?: (value: string) => void;
-  onEditDescriptionChange?: (value: string) => void;
+  editorRef?: RefObject<TiptapEditorRef | null>;
+  editorInitialContent?: DescriptionDoc | null;
 }) {
   return (
     <div className="border-base-300 rounded-2xl border p-4">
@@ -57,21 +65,25 @@ export function LocaleContentSection({
             value={editName ?? ""}
             onChange={(e) => onEditNameChange?.(e.target.value)}
           />
-          <textarea
-            className={eventFieldClass("min-h-40 resize-y")}
-            placeholder="Event description"
-            value={editDescription ?? ""}
-            onChange={(e) => onEditDescriptionChange?.(e.target.value)}
-          />
+          {/* Border wraps the whole editor (incl. drag handle gutter), not only .tiptap */}
+          <div className="border-base-300 bg-base-100 min-h-40 rounded-xl border py-3 pr-3 pl-3 md:pl-10">
+            <DescriptionEditor
+              key={`${selectedLocale}-${editing}`}
+              ref={editorRef}
+              className="min-h-32"
+              initialContent={editorInitialContent ?? undefined}
+            />
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-medium wrap-anywhere">
             {name?.trim() || "Untitled event"}
           </h2>
-          <p className="text-base-content/80 wrap-anywhere whitespace-pre-wrap">
-            {description?.trim() || "No description yet."}
-          </p>
+          <DescriptionViewer
+            content={parseDescriptionContent(description)}
+            className="text-base-content/80"
+          />
         </div>
       )}
     </div>

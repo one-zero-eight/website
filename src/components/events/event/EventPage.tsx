@@ -3,6 +3,7 @@ import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
 import { EnrollmentType } from "@/api/workshops/types";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
+import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { EventHeroImage } from "../shared/EventHeroImage";
 import { PublicHostsList } from "../shared/HostLink";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
+import { parseDescriptionContent } from "../utils/description";
 import { getEventImageUrl, getLinkDisplayLabel } from "../utils/links";
 import { EnrolledListModal } from "./EnrolledListModal";
 
@@ -128,8 +130,6 @@ export function EventPage({ id }: { id: string }) {
     link.url.trim(),
   );
   const title = localeContent?.name?.trim() || "Untitled event";
-  const description =
-    localeContent?.description?.trim() || "No description yet.";
 
   return (
     <>
@@ -195,9 +195,10 @@ export function EventPage({ id }: { id: string }) {
               </li>
             </ul>
 
-            <p className="text-base-content/80 wrap-anywhere whitespace-pre-wrap">
-              {description}
-            </p>
+            <DescriptionViewer
+              content={parseDescriptionContent(localeContent?.description)}
+              className="text-base-content/80"
+            />
           </div>
 
           <div className="flex min-w-0 flex-col gap-4">
