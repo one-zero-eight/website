@@ -10,7 +10,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useEventsAuth } from "../hooks";
 import { EventHeroImage } from "../shared/EventHeroImage";
 import { EventInfoCard } from "../shared/EventInfoCard";
-import { EventPageLayout } from "../shared/EventPageLayout";
 import { LocaleContentSection } from "../shared/LocaleContentSection";
 import { getDraftImageUrl } from "../utils/links";
 import { DraftHostsSection } from "./DraftHostsSection";
@@ -164,9 +163,19 @@ export function DraftPage({ id }: { id: string }) {
 
   if (isAuthPending || isPending) {
     return (
-      <div className="flex flex-col gap-4 px-4 py-4">
-        <div className="skeleton h-48 w-full rounded-2xl" />
-        <div className="skeleton h-40 w-full rounded-2xl" />
+      <div className="@container/content px-4 pt-6 pb-4">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="flex flex-col gap-4">
+            <div className="skeleton h-40 rounded-2xl" />
+            <div className="skeleton h-28 rounded-2xl" />
+            <div className="skeleton h-64 rounded-2xl" />
+          </div>
+          <div className="flex flex-col gap-4">
+            <div className="skeleton aspect-video rounded-2xl" />
+            <div className="skeleton h-28 rounded-2xl" />
+            <div className="skeleton h-32 rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -288,50 +297,11 @@ export function DraftPage({ id }: { id: string }) {
 
   return (
     <>
-      <EventPageLayout
-        hero={
-          <EventHeroImage
-            src={
-              data.data.image_id
-                ? `${getDraftImageUrl(id)}?t=${imageCacheBust}`
-                : null
-            }
-          >
-            {canEdit && (
-              <>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-circle absolute right-3 bottom-3"
-                  disabled={isUploadingImage}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {isUploadingImage ? (
-                    <span className="loading loading-spinner loading-sm" />
-                  ) : (
-                    <span className="icon-[material-symbols--upload]" />
-                  )}
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleUploadImage(file);
-                    }
-                    e.target.value = "";
-                  }}
-                />
-              </>
-            )}
-          </EventHeroImage>
-        }
-        main={
-          <>
+      <div className="@container/content px-4 pt-6 pb-4">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="flex min-w-0 flex-col gap-4">
             {hasPendingInvite && (
-              <div className="border-info/40 bg-info/10 mb-4 rounded-2xl border p-4">
+              <div className="border-info/40 bg-info/10 rounded-2xl border p-4">
                 <p className="mb-3 text-sm">
                   Your club was invited as a host for this draft.
                 </p>
@@ -361,6 +331,30 @@ export function DraftPage({ id }: { id: string }) {
                 </div>
               </div>
             )}
+
+            <EventInfoCard
+              storedHosts={data.data.hosts}
+              clubs={clubs}
+              startsAt={data.data.starts_at}
+              location={data.data.location}
+              durationHours={data.data.duration_hours}
+              enrollment={data.data.enrollment}
+              actions={
+                canEdit ? (
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-ghost border"
+                    disabled={controlsDisabled}
+                    onClick={() => setEditInfoOpen(true)}
+                  >
+                    Edit info
+                  </button>
+                ) : undefined
+              }
+            />
+
+            <DraftHostsSection draft={data} canEdit={canEdit} />
+
             <LocaleContentSection
               locales={locales}
               selectedLocale={selectedLocale}
@@ -455,33 +449,49 @@ export function DraftPage({ id }: { id: string }) {
                 ) : undefined
               }
             />
-          </>
-        }
-        side={
-          <>
-            <EventInfoCard
-              storedHosts={data.data.hosts}
-              clubs={clubs}
-              startsAt={data.data.starts_at}
-              location={data.data.location}
-              durationHours={data.data.duration_hours}
-              enrollment={data.data.enrollment}
-              links={data.data.links}
-              actions={
-                canEdit ? (
+          </div>
+
+          <div className="flex min-w-0 flex-col gap-4">
+            <EventHeroImage
+              src={
+                data.data.image_id
+                  ? `${getDraftImageUrl(id)}?t=${imageCacheBust}`
+                  : null
+              }
+            >
+              {canEdit && (
+                <>
                   <button
                     type="button"
-                    className="btn btn-sm btn-ghost border"
-                    disabled={controlsDisabled}
-                    onClick={() => setEditInfoOpen(true)}
+                    className="btn btn-sm btn-circle absolute right-3 bottom-3"
+                    disabled={isUploadingImage}
+                    onClick={() => fileInputRef.current?.click()}
                   >
-                    Edit info
+                    {isUploadingImage ? (
+                      <span className="loading loading-spinner loading-sm" />
+                    ) : (
+                      <span className="icon-[material-symbols--upload]" />
+                    )}
                   </button>
-                ) : undefined
-              }
-            />
-            <DraftHostsSection draft={data} canEdit={canEdit} />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleUploadImage(file);
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                </>
+              )}
+            </EventHeroImage>
+
             <DraftLinksSection draft={data} canEdit={canEdit} />
+
             <DraftSubmissionCard
               id={id}
               status={data.status}
@@ -492,9 +502,9 @@ export function DraftPage({ id }: { id: string }) {
               onSubmit={() => submitDraft({ params: { path: { id } } })}
               canEdit={canEdit}
             />
-          </>
-        }
-      />
+          </div>
+        </div>
+      </div>
 
       {canEdit && (
         <EditDraftInfoModal
@@ -621,7 +631,7 @@ function DraftSubmissionCard({
         </div>
       )}
       {canSubmit ? (
-        <p className="mb-3 text-sm">Draft can be submitted for review.</p>
+        <p className="mb-3 text-sm">Draft is ready for publication.</p>
       ) : (
         <div className="mb-3 text-sm">
           <p className="mb-2">Draft cannot be submitted on review:</p>
@@ -645,7 +655,7 @@ function DraftSubmissionCard({
           {isSubmitting && (
             <span className="loading loading-spinner loading-sm" />
           )}
-          Submit
+          Submit on review
         </button>
       </div>
     </div>

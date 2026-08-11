@@ -35,7 +35,9 @@ export function LocaleContentSection({
             type="button"
             className={cn(
               "btn btn-sm uppercase",
-              selectedLocale === locale ? "btn-primary" : "btn-ghost border",
+              selectedLocale === locale
+                ? "btn-primary"
+                : "btn-ghost border border-dashed",
             )}
             onClick={() => onSelectLocale(locale)}
             disabled={editing && selectedLocale !== locale}

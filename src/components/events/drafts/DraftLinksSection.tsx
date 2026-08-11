@@ -24,7 +24,7 @@ export function DraftLinksSection({
   const [editLink, setEditLink] = useState<SchemaEventLink | null>(null);
   const [url, setUrl] = useState("");
   const [name, setName] = useState("");
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
 

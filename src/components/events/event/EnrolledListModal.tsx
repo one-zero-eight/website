@@ -24,8 +24,20 @@ export function EnrolledListModal({
     );
   }, [enrolledEmails, query]);
 
+  function handleExport() {
+    const blob = new Blob([enrolledEmails.join("\n") + "\n"], {
+      type: "text/plain;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "enrolled.txt";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Enrolled list">
+    <Modal open={open} onOpenChange={onOpenChange} title="Participants">
       <div className="@container/modal flex flex-col gap-3">
         <input
           type="search"
@@ -34,8 +46,10 @@ export function EnrolledListModal({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <div className="max-h-80 overflow-y-auto">
-          {filtered.length === 0 ? (
+        <div className="max-h-80 min-h-0 overflow-y-auto">
+          {enrolledEmails.length === 0 ? (
+            <p className="text-base-content/70 text-sm">No participants.</p>
+          ) : filtered.length === 0 ? (
             <p className="text-base-content/70 text-sm">No matches.</p>
           ) : (
             <ul className="divide-base-300 divide-y">
@@ -46,6 +60,16 @@ export function EnrolledListModal({
               ))}
             </ul>
           )}
+        </div>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            className="btn btn-ghost border"
+            disabled={enrolledEmails.length === 0}
+            onClick={handleExport}
+          >
+            Export
+          </button>
         </div>
       </div>
     </Modal>

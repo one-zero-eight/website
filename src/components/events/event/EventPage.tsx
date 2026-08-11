@@ -4,13 +4,14 @@ import { $workshops } from "@/api/workshops";
 import { EnrollmentType } from "@/api/workshops/types";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { EventHeroImage } from "../shared/EventHeroImage";
-import { EventInfoCard } from "../shared/EventInfoCard";
-import { EventPageLayout } from "../shared/EventPageLayout";
-import { LocaleContentSection } from "../shared/LocaleContentSection";
-import { getEventImageUrl } from "../utils/links";
+import { PublicHostsList } from "../shared/HostLink";
+import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
+import { getEventImageUrl, getLinkDisplayLabel } from "../utils/links";
 import { EnrolledListModal } from "./EnrolledListModal";
 
 export function EventPage({ id }: { id: string }) {
@@ -78,9 +79,15 @@ export function EventPage({ id }: { id: string }) {
 
   if (isPending) {
     return (
-      <div className="flex flex-col gap-4 px-4 py-4">
-        <div className="skeleton h-48 w-full rounded-2xl" />
-        <div className="skeleton h-40 w-full rounded-2xl" />
+      <div className="@container/content px-4 py-4">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="skeleton h-64 rounded-2xl" />
+          <div className="flex flex-col gap-4">
+            <div className="skeleton h-24 rounded-2xl" />
+            <div className="skeleton aspect-video rounded-2xl" />
+            <div className="skeleton h-28 rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -115,48 +122,102 @@ export function EventPage({ id }: { id: string }) {
     data.enrolled_count >= capacity;
   const enrolledEmails = data.enrolled_emails ?? null;
   const actionPending = isEnrolling || isUnenrolling;
+  const endsAt = getEventEndsAt(data.data.starts_at, data.data.duration_hours);
+  const locationLabel = data.data.location?.trim() || "TBA";
+  const visibleLinks = (data.data.links ?? []).filter((link) =>
+    link.url.trim(),
+  );
+  const title = localeContent?.name?.trim() || "Untitled event";
+  const description =
+    localeContent?.description?.trim() || "No description yet.";
 
   return (
     <>
-      <EventPageLayout
-        hero={
-          <EventHeroImage
-            src={data.data.image_id ? getEventImageUrl(id) : null}
-          />
-        }
-        main={
-          <LocaleContentSection
-            locales={locales}
-            selectedLocale={selectedLocale}
-            onSelectLocale={setSelectedLocale}
-            name={localeContent?.name}
-            description={localeContent?.description}
-          />
-        }
-        side={
-          <>
-            <EventInfoCard
-              hosts={data.data.hosts}
-              startsAt={data.data.starts_at}
-              location={data.data.location}
-              durationHours={data.data.duration_hours}
-              enrollment={data.data.enrollment}
-              links={data.data.links}
-            />
+      <div className="@container/content px-4 pt-6 pb-4">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="border-base-300 rounded-2xl border p-4 @min-[700px]/content:p-6">
+            <div className="mb-5 flex flex-wrap items-center gap-2">
+              {locales.map((locale) => (
+                <button
+                  key={locale}
+                  type="button"
+                  className={cn(
+                    "btn btn-sm uppercase",
+                    selectedLocale === locale
+                      ? "btn-primary"
+                      : "btn-ghost border border-dashed",
+                  )}
+                  onClick={() => setSelectedLocale(locale)}
+                >
+                  {locale}
+                </button>
+              ))}
+              <h1 className="text-2xl font-medium wrap-anywhere">{title}</h1>
+            </div>
+
+            <ul className="mb-6 flex flex-col gap-3 text-sm">
+              <li className="flex items-center gap-2">
+                <span className="icon-[material-symbols--schedule-outline] shrink-0 text-xl" />
+                <span>{formatEventDateRange(data.data.starts_at, endsAt)}</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="icon-[material-symbols--person-outline] shrink-0 text-xl" />
+                <div className="min-w-0">
+                  <PublicHostsList hosts={data.data.hosts} />
+                </div>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="icon-[material-symbols--location-on-outline] shrink-0 text-xl" />
+                {locationLabel.toUpperCase() === "TBA" ||
+                locationLabel.toUpperCase() === "ONLINE" ||
+                locationLabel.toUpperCase() === "ОНЛАЙН" ? (
+                  <span>{locationLabel}</span>
+                ) : (
+                  <Link
+                    to="/maps"
+                    search={{ q: locationLabel }}
+                    className="underline underline-offset-2"
+                  >
+                    {locationLabel}
+                  </Link>
+                )}
+              </li>
+            </ul>
+
+            <p className="text-base-content/80 wrap-anywhere whitespace-pre-wrap">
+              {description}
+            </p>
+          </div>
+
+          <div className="flex min-w-0 flex-col gap-4">
             <div className="border-base-300 rounded-2xl border p-4">
-              {isExternal ? (
-                <p className="mb-3 text-sm">
-                  Enrollment is handled externally.
-                </p>
-              ) : (
-                <p className="mb-3 text-sm">
-                  {data.enrolled_count}
-                  {capacity !== null && capacity !== undefined
-                    ? ` / ${capacity}`
-                    : ""}{" "}
-                  students enrolled
-                </p>
-              )}
+              <div className="mb-3 flex flex-col gap-1 text-sm">
+                {isExternal ? (
+                  enrollment.url ? (
+                    <a
+                      href={enrollment.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline underline-offset-2"
+                    >
+                      External
+                    </a>
+                  ) : (
+                    <p>External</p>
+                  )
+                ) : (
+                  <p>On InNoHassle</p>
+                )}
+                {!isExternal && (
+                  <p>
+                    {data.enrolled_count}
+                    {capacity !== null && capacity !== undefined
+                      ? ` / ${capacity}`
+                      : ""}{" "}
+                    {data.enrolled_count === 1 ? "student" : "students"}
+                  </p>
+                )}
+              </div>
               <div className="flex flex-wrap justify-end gap-2">
                 {enrolledEmails && (
                   <button
@@ -164,7 +225,7 @@ export function EventPage({ id }: { id: string }) {
                     className="btn btn-ghost btn-sm"
                     onClick={() => setEnrolledOpen(true)}
                   >
-                    Enrolled list
+                    Participants
                   </button>
                 )}
                 {isExternal && enrollment.url && (
@@ -232,9 +293,37 @@ export function EventPage({ id }: { id: string }) {
                 )}
               </div>
             </div>
-          </>
-        }
-      />
+
+            <EventHeroImage
+              src={data.data.image_id ? getEventImageUrl(id) : null}
+            />
+
+            <div className="border-base-300 rounded-2xl border p-4">
+              <h2 className="mb-3 font-medium">Links</h2>
+              {visibleLinks.length === 0 ? (
+                <p className="text-base-content/70 text-sm">No links.</p>
+              ) : (
+                <ul className="flex flex-col gap-2 text-sm">
+                  {visibleLinks.map((link) => (
+                    <li key={link.id} className="flex items-start gap-3">
+                      <span className="bg-base-content mt-1.5 size-2 shrink-0 rounded-full" />
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="min-w-0 wrap-anywhere underline underline-offset-2"
+                      >
+                        {getLinkDisplayLabel(link)}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {enrolledEmails && (
         <EnrolledListModal
           open={enrolledOpen}

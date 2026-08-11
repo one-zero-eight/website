@@ -1,17 +1,18 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
+import { EnrollmentType } from "@/api/workshops/types";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useEventsAuth } from "../hooks";
 import { EventHeroImage } from "../shared/EventHeroImage";
-import { EventInfoCard } from "../shared/EventInfoCard";
-import { EventPageLayout } from "../shared/EventPageLayout";
-import { LocaleContentSection } from "../shared/LocaleContentSection";
+import { StoredHostsList } from "../shared/HostLink";
 import { eventFieldClass } from "../shared/formStyles";
-import { getSubmissionImageUrl } from "../utils/links";
+import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
+import { getLinkDisplayLabel, getSubmissionImageUrl } from "../utils/links";
 
 export function SubmissionPage({ id }: { id: string }) {
   const navigate = useNavigate();
@@ -91,9 +92,15 @@ export function SubmissionPage({ id }: { id: string }) {
 
   if (isAuthPending || isPending) {
     return (
-      <div className="flex flex-col gap-4 px-4 py-4">
-        <div className="skeleton h-48 w-full rounded-2xl" />
-        <div className="skeleton h-40 w-full rounded-2xl" />
+      <div className="@container/content px-4 pt-6 pb-4">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="skeleton h-64 rounded-2xl" />
+          <div className="flex flex-col gap-4">
+            <div className="skeleton aspect-video rounded-2xl" />
+            <div className="skeleton h-28 rounded-2xl" />
+            <div className="skeleton h-40 rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -119,39 +126,131 @@ export function SubmissionPage({ id }: { id: string }) {
     );
   }
 
+  const event = data.submission.data;
   const localeContent = selectedLocale
-    ? data.submission.data.locales[selectedLocale]
+    ? event.locales[selectedLocale]
     : undefined;
   const feedbackTrimmed = feedback.trim();
   const declineDisabled = !feedbackTrimmed || isDeclining || isApproving;
+  const visibleLinks = (event.links ?? []).filter((link) => link.url.trim());
+  const endsAt = getEventEndsAt(event.starts_at, event.duration_hours);
+  const locationLabel = event.location?.trim() || "TBA";
+  const title = localeContent?.name?.trim() || "Untitled event";
+  const description =
+    localeContent?.description?.trim() || "No description yet.";
+  const enrollment = event.enrollment;
+  const isExternal = enrollment?.type === EnrollmentType.external;
+  const capacity = enrollment?.capacity;
+  const enrollmentLabel = !enrollment
+    ? null
+    : isExternal
+      ? "External"
+      : capacity !== null && capacity !== undefined
+        ? `On InNoHassle · ${capacity} participants`
+        : "On InNoHassle · unlimited";
 
   return (
-    <EventPageLayout
-      hero={
-        <EventHeroImage
-          src={data.submission.data.image_id ? getSubmissionImageUrl(id) : null}
-        />
-      }
-      main={
-        <LocaleContentSection
-          locales={locales}
-          selectedLocale={selectedLocale}
-          onSelectLocale={setSelectedLocale}
-          name={localeContent?.name}
-          description={localeContent?.description}
-        />
-      }
-      side={
-        <>
-          <EventInfoCard
-            storedHosts={data.submission.data.hosts}
-            clubs={clubs}
-            startsAt={data.submission.data.starts_at}
-            location={data.submission.data.location}
-            durationHours={data.submission.data.duration_hours}
-            enrollment={data.submission.data.enrollment}
-            links={data.submission.data.links}
+    <div className="@container/content px-4 pt-6 pb-4">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="border-base-300 rounded-2xl border p-4 @min-[700px]/content:p-6">
+          <div className="mb-5 flex flex-wrap items-center gap-2">
+            {locales.map((locale) => (
+              <button
+                key={locale}
+                type="button"
+                className={cn(
+                  "btn btn-sm uppercase",
+                  selectedLocale === locale
+                    ? "btn-primary"
+                    : "btn-ghost border border-dashed",
+                )}
+                onClick={() => setSelectedLocale(locale)}
+              >
+                {locale}
+              </button>
+            ))}
+            <h1 className="text-2xl font-medium wrap-anywhere">{title}</h1>
+          </div>
+
+          <ul className="mb-6 flex flex-col gap-3 text-sm">
+            <li className="flex items-center gap-2">
+              <span className="icon-[material-symbols--schedule-outline] shrink-0 text-xl" />
+              <span>{formatEventDateRange(event.starts_at, endsAt)}</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="icon-[material-symbols--person-outline] shrink-0 text-xl" />
+              <div className="min-w-0">
+                <StoredHostsList hosts={event.hosts ?? []} clubs={clubs} />
+              </div>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="icon-[material-symbols--location-on-outline] shrink-0 text-xl" />
+              {locationLabel.toUpperCase() === "TBA" ||
+              locationLabel.toUpperCase() === "ONLINE" ||
+              locationLabel.toUpperCase() === "ОНЛАЙН" ? (
+                <span>{locationLabel}</span>
+              ) : (
+                <Link
+                  to="/maps"
+                  search={{ q: locationLabel }}
+                  className="underline underline-offset-2"
+                >
+                  {locationLabel}
+                </Link>
+              )}
+            </li>
+            {enrollmentLabel && (
+              <li className="flex items-center gap-2">
+                <span className="icon-[material-symbols--how-to-reg-outline] shrink-0 text-xl" />
+                {isExternal && enrollment?.url ? (
+                  <a
+                    href={enrollment.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline underline-offset-2"
+                  >
+                    {enrollmentLabel}
+                  </a>
+                ) : (
+                  <span>{enrollmentLabel}</span>
+                )}
+              </li>
+            )}
+          </ul>
+
+          <p className="text-base-content/80 wrap-anywhere whitespace-pre-wrap">
+            {description}
+          </p>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-4">
+          <EventHeroImage
+            src={event.image_id ? getSubmissionImageUrl(id) : null}
           />
+
+          <div className="border-base-300 rounded-2xl border p-4">
+            <h2 className="mb-3 font-medium">Links</h2>
+            {visibleLinks.length === 0 ? (
+              <p className="text-base-content/70 text-sm">No links.</p>
+            ) : (
+              <ul className="flex flex-col gap-2 text-sm">
+                {visibleLinks.map((link) => (
+                  <li key={link.id} className="flex items-start gap-3">
+                    <span className="bg-base-content mt-1.5 size-2 shrink-0 rounded-full" />
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="min-w-0 wrap-anywhere underline underline-offset-2"
+                    >
+                      {getLinkDisplayLabel(link)}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           <div className="border-base-300 rounded-2xl border p-4">
             <p className="mb-2 text-sm font-medium">
               Leave your feedback and judge
@@ -211,8 +310,8 @@ export function SubmissionPage({ id }: { id: string }) {
               </button>
             </div>
           </div>
-        </>
-      }
-    />
+        </div>
+      </div>
+    </div>
   );
 }

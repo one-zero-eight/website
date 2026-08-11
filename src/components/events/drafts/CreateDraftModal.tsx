@@ -98,16 +98,24 @@ export function CreateDraftModal({
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Create draft">
       <div className="@container/modal flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          <span>Starts at</span>
-          <input
-            type="datetime-local"
-            className={eventFieldClass()}
-            value={startsAt}
+        <div className="grid grid-cols-1 gap-4 @min-[400px]/modal:grid-cols-[minmax(0,1fr)_8rem]">
+          <label className="flex flex-col gap-1 text-sm">
+            <span>Starts at</span>
+            <input
+              type="datetime-local"
+              className={eventFieldClass()}
+              value={startsAt}
+              disabled={isPending}
+              onChange={(e) => setStartsAt(e.target.value)}
+            />
+          </label>
+
+          <DurationField
+            value={durationHours}
+            onChange={setDurationHours}
             disabled={isPending}
-            onChange={(e) => setStartsAt(e.target.value)}
           />
-        </label>
+        </div>
 
         <label className="flex flex-col gap-1 text-sm">
           <span>Location</span>
@@ -120,12 +128,6 @@ export function CreateDraftModal({
             onChange={(e) => setLocation(e.target.value)}
           />
         </label>
-
-        <DurationField
-          value={durationHours}
-          onChange={setDurationHours}
-          disabled={isPending}
-        />
 
         <EnrollmentFields
           value={enrollment}

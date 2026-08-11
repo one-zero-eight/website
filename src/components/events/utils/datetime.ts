@@ -21,6 +21,28 @@ export function getEventEndsAt(
   return moment(startsAt).add(durationHours, "hours").toISOString();
 }
 
+/** Compact range, e.g. 13 AUG 18:00 – 19:00 */
+export function formatEventDateRange(
+  startsAt: string | null | undefined,
+  endsAt: string | null | undefined,
+) {
+  if (!startsAt) {
+    return "TBA";
+  }
+
+  const start = moment(startsAt);
+  if (!endsAt) {
+    return start.format("D MMM HH:mm").toUpperCase();
+  }
+
+  const end = moment(endsAt);
+  if (start.isSame(end, "day")) {
+    return `${start.format("D MMM HH:mm").toUpperCase()} – ${end.format("HH:mm")}`;
+  }
+
+  return `${start.format("D MMM HH:mm").toUpperCase()} – ${end.format("D MMM HH:mm").toUpperCase()}`;
+}
+
 /** Value for `<input type="datetime-local" />` in local timezone */
 export function toDatetimeLocalValue(value: string | null | undefined) {
   if (!value) {

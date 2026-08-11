@@ -1,13 +1,11 @@
 import {
   EnrollmentType,
   SchemaEnrollment,
-  SchemaEventLink,
   SchemaHost,
   SchemaPublicHost,
 } from "@/api/workshops/types";
 import { Link } from "@tanstack/react-router";
-import { formatEventDateTime, getEventEndsAt } from "../utils/datetime";
-import { getLinkDisplayLabel } from "../utils/links";
+import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
 import { PublicHostsList, StoredHostsList } from "./HostLink";
 
 function formatEnrollment(enrollment?: SchemaEnrollment | null) {
@@ -17,8 +15,8 @@ function formatEnrollment(enrollment?: SchemaEnrollment | null) {
 
   if (enrollment.type === EnrollmentType.external) {
     return enrollment.url?.trim()
-      ? { label: "External enrollment", url: enrollment.url.trim() }
-      : { label: "External enrollment", url: null };
+      ? { label: "External", url: enrollment.url.trim() }
+      : { label: "External", url: null };
   }
 
   if (enrollment.capacity === null || enrollment.capacity === undefined) {
@@ -26,7 +24,7 @@ function formatEnrollment(enrollment?: SchemaEnrollment | null) {
   }
 
   return {
-    label: `On InNoHassle · capacity ${enrollment.capacity}`,
+    label: `On InNoHassle · ${enrollment.capacity} participants`,
     url: null,
   };
 }
@@ -39,7 +37,6 @@ export function EventInfoCard({
   location,
   durationHours,
   enrollment,
-  links,
   actions,
 }: {
   hosts?: SchemaPublicHost[] | null;
@@ -49,18 +46,32 @@ export function EventInfoCard({
   location?: string | null;
   durationHours?: number | null;
   enrollment?: SchemaEnrollment | null;
-  links?: SchemaEventLink[] | null;
   actions?: React.ReactNode;
 }) {
   const locationLabel = location?.trim() || "TBA";
   const endsAt = getEventEndsAt(startsAt, durationHours);
   const enrollmentInfo = formatEnrollment(enrollment);
-  const visibleLinks = (links ?? []).filter((link) => link.url.trim());
 
   return (
-    <div className="border-base-300 rounded-2xl border p-4">
-      <div className="flex flex-col gap-3 text-sm">
-        <div className="flex items-center gap-2">
+    <div className="border-base-300 relative rounded-2xl border p-4">
+      {actions && (
+        <div className="absolute top-3 right-3 flex flex-wrap justify-end gap-2">
+          {actions}
+        </div>
+      )}
+      <ul
+        className={
+          actions
+            ? "flex flex-col gap-3 pr-28 text-sm"
+            : "flex flex-col gap-3 text-sm"
+        }
+      >
+        <li className="flex items-center gap-2">
+          <span className="icon-[material-symbols--schedule-outline] shrink-0 text-xl" />
+          <span>{formatEventDateRange(startsAt, endsAt)}</span>
+        </li>
+
+        <li className="flex items-center gap-2">
           <span className="icon-[material-symbols--person-outline] shrink-0 text-xl" />
           <div className="min-w-0">
             {hosts ? (
@@ -69,19 +80,9 @@ export function EventInfoCard({
               <StoredHostsList hosts={storedHosts ?? []} clubs={clubs} />
             )}
           </div>
-        </div>
+        </li>
 
-        <div className="flex items-center gap-2">
-          <span className="icon-[material-symbols--schedule-outline] shrink-0 text-xl" />
-          <span>{formatEventDateTime(startsAt)}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="icon-[material-symbols--event-available-outline] shrink-0 text-xl" />
-          <span>{formatEventDateTime(endsAt)}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
+        <li className="flex items-center gap-2">
           <span className="icon-[material-symbols--location-on-outline] shrink-0 text-xl" />
           {locationLabel.toUpperCase() === "TBA" ||
           locationLabel.toUpperCase() === "ONLINE" ||
@@ -96,10 +97,10 @@ export function EventInfoCard({
               {locationLabel}
             </Link>
           )}
-        </div>
+        </li>
 
         {enrollmentInfo && (
-          <div className="flex items-center gap-2">
+          <li className="flex items-center gap-2">
             <span className="icon-[material-symbols--how-to-reg-outline] shrink-0 text-xl" />
             {enrollmentInfo.url ? (
               <a
@@ -113,25 +114,9 @@ export function EventInfoCard({
             ) : (
               <span>{enrollmentInfo.label}</span>
             )}
-          </div>
+          </li>
         )}
-
-        {visibleLinks.map((link) => (
-          <div key={link.id} className="flex items-center gap-2">
-            <span className="icon-[material-symbols--link] shrink-0 text-xl" />
-            <a
-              href={link.url}
-              target="_blank"
-              rel="noreferrer"
-              className="min-w-0 wrap-anywhere underline underline-offset-2"
-            >
-              {getLinkDisplayLabel(link)}
-            </a>
-          </div>
-        ))}
-      </div>
-
-      {actions && <div className="mt-4 flex justify-end">{actions}</div>}
+      </ul>
     </div>
   );
 }

@@ -112,7 +112,7 @@ export function EnrollmentFields({
 
       {value.type === EnrollmentType.internal ? (
         <label className="flex flex-col gap-1 text-sm">
-          <span>Capacity (optional)</span>
+          <span>Max participants</span>
           <input
             type="number"
             min={1}
