@@ -97,7 +97,13 @@ export function CreateDraftModal({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Create draft">
-      <div className="@container/modal flex flex-col gap-4">
+      <form
+        className="@container/modal flex flex-col gap-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
         <div className="grid grid-cols-1 gap-4 @min-[400px]/modal:grid-cols-[minmax(0,1fr)_8rem]">
           <label className="flex flex-col gap-1 text-sm">
             <span>Starts at</span>
@@ -174,10 +180,9 @@ export function CreateDraftModal({
             Cancel
           </button>
           <button
-            type="button"
+            type="submit"
             className="btn btn-primary"
             disabled={isPending}
-            onClick={handleSubmit}
           >
             {isPending && (
               <span className="loading loading-spinner loading-sm" />
@@ -185,7 +190,7 @@ export function CreateDraftModal({
             Create
           </button>
         </div>
-      </div>
+      </form>
     </Modal>
   );
 }

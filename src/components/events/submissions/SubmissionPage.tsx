@@ -1,11 +1,12 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
-import { EnrollmentType } from "@/api/workshops/types";
+import { EnrollmentType, ModerationStatus } from "@/api/workshops/types";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
+import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
 import { useEventsAuth } from "../hooks";
 import { EventHeroImage } from "../shared/EventHeroImage";
@@ -17,7 +18,7 @@ import { getLinkDisplayLabel, getSubmissionImageUrl } from "../utils/links";
 export function SubmissionPage({ id }: { id: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { showError } = useToast();
+  const { showError, showConfirm } = useToast();
   const { isModerator, clubs, isPending: isAuthPending } = useEventsAuth();
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
@@ -127,6 +128,8 @@ export function SubmissionPage({ id }: { id: string }) {
   }
 
   const event = data.submission.data;
+  const moderation = data.submission.moderation;
+  const isPendingReview = moderation.status === ModerationStatus.pending;
   const localeContent = selectedLocale
     ? event.locales[selectedLocale]
     : undefined;
@@ -148,6 +151,42 @@ export function SubmissionPage({ id }: { id: string }) {
       : capacity !== null && capacity !== undefined
         ? `On InNoHassle · ${capacity} participants`
         : "On InNoHassle · unlimited";
+
+  async function handleApprove() {
+    const confirmed = await showConfirm({
+      title: "Approve submission",
+      message: "Publish this event? This cannot be undone from here.",
+      confirmText: "Approve",
+      cancelText: "Cancel",
+      type: "info",
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    approve({
+      params: { path: { id } },
+      body: { feedback: feedbackTrimmed },
+    });
+  }
+
+  async function handleDecline() {
+    const confirmed = await showConfirm({
+      title: "Decline submission",
+      message: "Decline this submission with the feedback you entered?",
+      confirmText: "Decline",
+      cancelText: "Cancel",
+      type: "error",
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    decline({
+      params: { path: { id } },
+      body: { feedback: feedbackTrimmed },
+    });
+  }
 
   return (
     <div className="@container/content px-4 pt-6 pb-4">
@@ -252,63 +291,80 @@ export function SubmissionPage({ id }: { id: string }) {
           </div>
 
           <div className="border-base-300 rounded-2xl border p-4">
-            <p className="mb-2 text-sm font-medium">
-              Leave your feedback and judge
-            </p>
-            <textarea
-              className={eventFieldClass("mb-3 min-h-28 resize-y")}
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Feedback"
-            />
-            <div className="flex flex-wrap justify-end gap-2">
-              {declineDisabled && !feedbackTrimmed ? (
-                <Tooltip content="Cannot decline without feedback">
-                  <span className="inline-flex">
+            {isPendingReview ? (
+              <>
+                <p className="mb-2 text-sm font-medium">
+                  Leave your feedback and judge
+                </p>
+                <textarea
+                  className={eventFieldClass("mb-3 min-h-28 resize-y")}
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Feedback"
+                />
+                <div className="flex flex-wrap justify-end gap-2">
+                  {declineDisabled && !feedbackTrimmed ? (
+                    <Tooltip content="Cannot decline without feedback">
+                      <span className="inline-flex">
+                        <button
+                          type="button"
+                          className="btn btn-error btn-sm btn-disabled pointer-events-none"
+                          disabled
+                        >
+                          Decline
+                        </button>
+                      </span>
+                    </Tooltip>
+                  ) : (
                     <button
                       type="button"
-                      className="btn btn-error btn-sm btn-disabled pointer-events-none"
-                      disabled
+                      className="btn btn-error btn-sm"
+                      disabled={declineDisabled}
+                      onClick={handleDecline}
                     >
+                      {isDeclining && (
+                        <span className="loading loading-spinner loading-sm" />
+                      )}
                       Decline
                     </button>
-                  </span>
-                </Tooltip>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btn-error btn-sm"
-                  disabled={declineDisabled}
-                  onClick={() =>
-                    decline({
-                      params: { path: { id } },
-                      body: { feedback: feedbackTrimmed },
-                    })
-                  }
-                >
-                  {isDeclining && (
-                    <span className="loading loading-spinner loading-sm" />
                   )}
-                  Decline
-                </button>
-              )}
-              <button
-                type="button"
-                className="btn btn-success btn-sm"
-                disabled={isApproving || isDeclining}
-                onClick={() =>
-                  approve({
-                    params: { path: { id } },
-                    body: { feedback: feedbackTrimmed },
-                  })
-                }
-              >
-                {isApproving && (
-                  <span className="loading loading-spinner loading-sm" />
+                  <button
+                    type="button"
+                    className="btn btn-success btn-sm"
+                    disabled={isApproving || isDeclining}
+                    onClick={handleApprove}
+                  >
+                    {isApproving && (
+                      <span className="loading loading-spinner loading-sm" />
+                    )}
+                    Approve
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col gap-2 text-sm">
+                <p className="font-medium capitalize">{moderation.status}</p>
+                <p className="text-base-content/70">
+                  {moment(moderation.updated_at).format("D MMM YYYY, HH:mm")}
+                </p>
+                {moderation.feedback?.trim() ? (
+                  <p className="text-base-content/80 whitespace-pre-wrap">
+                    {moderation.feedback}
+                  </p>
+                ) : (
+                  <p className="text-base-content/70">No feedback.</p>
                 )}
-                Approve
-              </button>
-            </div>
+                {moderation.status === ModerationStatus.approved && (
+                  <Link
+                    to="/events/p/$id"
+                    params={{ id }}
+                    className="link link-primary mt-1"
+                  >
+                    Open event publication
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

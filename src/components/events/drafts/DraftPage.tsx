@@ -421,7 +421,7 @@ export function DraftPage({ id }: { id: string }) {
                             {isSavingLocale && (
                               <span className="loading loading-spinner loading-sm" />
                             )}
-                            Save locale
+                            Save
                           </button>
                         </>
                       ) : (
