@@ -5,7 +5,7 @@ import { Modal } from "@/components/common/Modal.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { eventFieldClass } from "../shared/formStyles";
 import { getLinkDisplayLabel } from "../utils/links";
 
@@ -18,13 +18,15 @@ export function DraftLinksSection({
 }) {
   const { showError } = useToast();
   const queryClient = useQueryClient();
-  const links = draft.data.links ?? [];
+  const links = useMemo(() => draft.data.links ?? [], [draft.data.links]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editLink, setEditLink] = useState<SchemaEventLink | null>(null);
   const [url, setUrl] = useState("");
   const [name, setName] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
 
   function invalidateDraft(next?: SchemaDraftOut) {
     if (next) {
@@ -87,7 +89,33 @@ export function DraftLinksSection({
     },
   );
 
-  const busy = isAdding || isPatching || isDeleting;
+  const { mutate: orderLinks, isPending: isOrdering } = $workshops.useMutation(
+    "put",
+    "/drafts/{id}/links/order",
+    {
+      onSuccess: invalidateDraft,
+      onError,
+    },
+  );
+
+  const busy = isAdding || isPatching || isDeleting || isOrdering;
+
+  function handleReorder(fromIndex: number, toIndex: number) {
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) {
+      return;
+    }
+    if (fromIndex >= links.length || toIndex >= links.length) {
+      return;
+    }
+
+    const reordered = [...links];
+    const [item] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, item);
+    orderLinks({
+      params: { path: { id: draft.id } },
+      body: { link_ids: reordered.map((link) => link.id) },
+    });
+  }
 
   function handleOpenAdd() {
     setEditLink(null);
@@ -160,11 +188,62 @@ export function DraftLinksSection({
           <p className="text-base-content/70 mt-3 text-sm">No links yet.</p>
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
-            {links.map((link) => (
+            {links.map((link, index) => (
               <li
                 key={link.id}
-                className="border-base-300 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm"
+                className={cn(
+                  "border-base-300 flex items-center gap-2 rounded-xl border px-3 py-2 text-sm",
+                  dropIndex === index &&
+                    dragIndex !== null &&
+                    dragIndex !== index
+                    ? "border-primary"
+                    : null,
+                  dragIndex === index ? "opacity-50" : null,
+                )}
+                onDragOver={(e) => {
+                  if (!canEdit || busy || dragIndex === null) {
+                    return;
+                  }
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  if (dropIndex !== index) {
+                    setDropIndex(index);
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (dragIndex === null) {
+                    return;
+                  }
+                  handleReorder(dragIndex, index);
+                  setDragIndex(null);
+                  setDropIndex(null);
+                }}
+                onDragLeave={() => {
+                  if (dropIndex === index) {
+                    setDropIndex(null);
+                  }
+                }}
               >
+                {canEdit && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-square btn-xs text-base-content/50 h-7 min-h-7 w-5 cursor-grab px-0 active:cursor-grabbing"
+                    disabled={busy}
+                    draggable
+                    onDragStart={(e) => {
+                      setDragIndex(index);
+                      e.dataTransfer.effectAllowed = "move";
+                      e.dataTransfer.setData("text/plain", link.id);
+                    }}
+                    onDragEnd={() => {
+                      setDragIndex(null);
+                      setDropIndex(null);
+                    }}
+                  >
+                    <span className="icon-[material-symbols--drag-indicator] text-lg" />
+                  </button>
+                )}
                 <div className="min-w-0 grow">
                   <a
                     href={link.url}

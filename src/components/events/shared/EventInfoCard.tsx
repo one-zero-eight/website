@@ -116,25 +116,19 @@ export function EventInfoCard({
           </div>
         )}
 
-        {visibleLinks.length > 0 && (
-          <div className="flex items-start gap-2">
+        {visibleLinks.map((link) => (
+          <div key={link.id} className="flex items-center gap-2">
             <span className="icon-[material-symbols--link] shrink-0 text-xl" />
-            <ul className="flex min-w-0 flex-col gap-1">
-              {visibleLinks.map((link) => (
-                <li key={link.id}>
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="wrap-anywhere underline underline-offset-2"
-                  >
-                    {getLinkDisplayLabel(link)}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noreferrer"
+              className="min-w-0 wrap-anywhere underline underline-offset-2"
+            >
+              {getLinkDisplayLabel(link)}
+            </a>
           </div>
-        )}
+        ))}
       </div>
 
       {actions && <div className="mt-4 flex justify-end">{actions}</div>}
