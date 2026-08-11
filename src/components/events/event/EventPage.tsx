@@ -85,8 +85,8 @@ export function EventPage({ id }: { id: string }) {
         <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="skeleton h-64 rounded-2xl" />
           <div className="flex flex-col gap-4">
-            <div className="skeleton h-24 rounded-2xl" />
             <div className="skeleton aspect-video rounded-2xl" />
+            <div className="skeleton h-24 rounded-2xl" />
             <div className="skeleton h-28 rounded-2xl" />
           </div>
         </div>
@@ -130,6 +130,16 @@ export function EventPage({ id }: { id: string }) {
     link.url.trim(),
   );
   const title = localeContent?.name?.trim() || "Untitled event";
+  const enrollmentHost = (() => {
+    if (!enrollment.url?.trim()) {
+      return null;
+    }
+    try {
+      return new URL(enrollment.url).host || enrollment.url;
+    } catch {
+      return enrollment.url;
+    }
+  })();
 
   return (
     <>
@@ -202,31 +212,40 @@ export function EventPage({ id }: { id: string }) {
           </div>
 
           <div className="flex min-w-0 flex-col gap-4">
+            <EventHeroImage
+              src={data.data.image_id ? getEventImageUrl(id) : null}
+            />
+
             <div className="border-base-300 rounded-2xl border p-4">
-              <div className="mb-3 flex flex-col gap-1 text-sm">
+              <div className="mb-3 text-sm">
                 {isExternal ? (
-                  enrollment.url ? (
-                    <a
-                      href={enrollment.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="underline underline-offset-2"
-                    >
-                      External
-                    </a>
+                  enrollment.url && enrollmentHost ? (
+                    <p className="flex flex-wrap items-center gap-1">
+                      <span>Enrollment on</span>
+                      <a
+                        href={enrollment.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 underline underline-offset-2"
+                      >
+                        {enrollmentHost}
+                        <span className="icon-[material-symbols--open-in-new] text-base" />
+                      </a>
+                    </p>
                   ) : (
-                    <p>External</p>
+                    <p>External enrollment</p>
                   )
                 ) : (
-                  <p>On InNoHassle</p>
-                )}
-                {!isExternal && (
                   <p>
                     {data.enrolled_count}
                     {capacity !== null && capacity !== undefined
                       ? ` / ${capacity}`
                       : ""}{" "}
-                    {data.enrolled_count === 1 ? "student" : "students"}
+                    {capacity !== null && capacity !== undefined
+                      ? "students"
+                      : data.enrolled_count === 1
+                        ? "student"
+                        : "students"}
                   </p>
                 )}
               </div>
@@ -239,16 +258,6 @@ export function EventPage({ id }: { id: string }) {
                   >
                     Participants
                   </button>
-                )}
-                {isExternal && enrollment.url && (
-                  <a
-                    href={enrollment.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="btn btn-primary btn-sm"
-                  >
-                    Enroll
-                  </a>
                 )}
                 {!me ? (
                   <SignInButton />
@@ -268,7 +277,7 @@ export function EventPage({ id }: { id: string }) {
                   ) : (
                     <button
                       type="button"
-                      className="btn btn-ghost btn-sm border"
+                      className="btn btn-primary btn-sm"
                       disabled={actionPending}
                       onClick={() => enroll({ params: { path: { id } } })}
                     >
@@ -305,10 +314,6 @@ export function EventPage({ id }: { id: string }) {
                 )}
               </div>
             </div>
-
-            <EventHeroImage
-              src={data.data.image_id ? getEventImageUrl(id) : null}
-            />
 
             <div className="border-base-300 rounded-2xl border p-4">
               <h2 className="mb-3 font-medium">Links</h2>
