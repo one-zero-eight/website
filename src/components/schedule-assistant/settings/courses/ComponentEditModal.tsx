@@ -336,7 +336,7 @@ export function ComponentEditModal({
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="form-control w-full gap-1.5">
                 <span className="label-text text-xs font-medium tracking-wide uppercase">
-                  В неделю
+                  Цель в неделю
                 </span>
                 <input
                   type="number"
@@ -355,7 +355,7 @@ export function ComponentEditModal({
               </label>
               <label className="form-control w-full gap-1.5">
                 <span className="label-text text-xs font-medium tracking-wide uppercase">
-                  За семестр
+                  Цель за семестр
                 </span>
                 <input
                   type="number"

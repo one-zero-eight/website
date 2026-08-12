@@ -4,11 +4,18 @@ import type {
   SchemaInstructor,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
+import {
+  CourseComponentAccordionItem,
+  CourseComponentDetailsFields,
+  CourseComponentsAccordionList,
+} from "@/components/schedule-assistant/courses/CourseComponentDetailsView.tsx";
 import { ComponentEditModal } from "@/components/schedule-assistant/settings/courses/ComponentEditModal.tsx";
 import { ComponentsYamlModal } from "@/components/schedule-assistant/settings/courses/ComponentsYamlModal.tsx";
-import { summarizeSessions } from "@/components/schedule-assistant/settings/courses/ComponentSessionsEditor.tsx";
-import { formatAudienceTokensLabel } from "@/components/schedule-assistant/timetable/meetingEditUtils.ts";
-import { cn } from "@/lib/ui/cn";
+import {
+  formatComponentProgressHint,
+  listComponentSeriesDisplayItems,
+} from "@/components/schedule-assistant/timetable/meetingComponentContext.ts";
+import { buildInstructorLabelById } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const detailCaptionUpperClass =
@@ -145,7 +152,12 @@ export function CourseComponentsEditor({
   onCreateStudentGroup?: (groupId: string) => void;
 }) {
   const list = useMemo(() => components ?? [], [components]);
+  const instructorLabelById = useMemo(
+    () => buildInstructorLabelById(config),
+    [config],
+  );
   const [yamlOpen, setYamlOpen] = useState(false);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [createDraft, setCreateDraft] = useState<SchemaComponent | null>(null);
 
@@ -173,6 +185,10 @@ export function CourseComponentsEditor({
     if (editIndex === index) setEditIndex(null);
     else if (editIndex !== null && editIndex > index) {
       setEditIndex(editIndex - 1);
+    }
+    if (openIndex === index) setOpenIndex(null);
+    else if (openIndex !== null && openIndex > index) {
+      setOpenIndex(openIndex - 1);
     }
   }
 
@@ -204,71 +220,58 @@ export function CourseComponentsEditor({
           Пока нет компонентов. Добавьте lec/tut/lab или откройте YAML.
         </div>
       ) : (
-        <ul className="flex flex-col gap-1.5">
+        <CourseComponentsAccordionList>
           {list.map((component, index) => {
-            const audience = formatAudienceTokensLabel(
-              config,
-              component.student_groups ?? [],
-            );
-            const sessionsLabel = summarizeSessions(component.sessions);
+            const tag =
+              String(component.tag || "").trim() || `Компонент ${index + 1}`;
+            const hint = formatComponentProgressHint(component);
+            const open = openIndex === index;
             return (
-              <li
+              <CourseComponentAccordionItem
                 key={`${component.tag}-${index}`}
-                className={cn(
-                  "border-base-300 rounded-box flex items-start gap-2 border px-2.5 py-2",
-                  "hover:border-base-content/20",
-                )}
-              >
-                <button
-                  type="button"
-                  className="min-w-0 flex-1 cursor-pointer text-left"
-                  onClick={() => {
-                    setCreateDraft(null);
-                    setEditIndex(index);
-                  }}
-                >
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-sm font-semibold">
-                      {component.tag || "—"}
+                tag={tag}
+                hint={hint || undefined}
+                badge={
+                  component.per_group ? (
+                    <span className="badge badge-ghost badge-xs shrink-0">
+                      per group
                     </span>
-                    {component.per_group ? (
-                      <span className="badge badge-ghost badge-xs">
-                        per group
-                      </span>
-                    ) : null}
-                    {component.per_week != null ? (
-                      <span className="text-base-content/55 text-xs">
-                        {component.per_week}/нед
-                      </span>
-                    ) : null}
-                    {component.per_semester != null ? (
-                      <span className="text-base-content/55 text-xs">
-                        {component.per_semester}/сем
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="text-base-content/60 mt-0.5 text-xs [overflow-wrap:anywhere]">
-                    {component.student_groups?.length
-                      ? audience
-                      : "Группы не заданы"}
-                    {sessionsLabel ? ` · ${sessionsLabel}` : ""}
-                  </div>
-                </button>
-                <ComponentRowMenu
-                  canMoveUp={index > 0}
-                  canMoveDown={index < list.length - 1}
-                  onEdit={() => {
-                    setCreateDraft(null);
-                    setEditIndex(index);
-                  }}
-                  onMoveUp={() => onChange(moveIndex(list, index, index - 1))}
-                  onMoveDown={() => onChange(moveIndex(list, index, index + 1))}
-                  onDelete={() => handleDelete(index)}
+                  ) : undefined
+                }
+                open={open}
+                onToggle={() => setOpenIndex(open ? null : index)}
+                trailing={
+                  <ComponentRowMenu
+                    canMoveUp={index > 0}
+                    canMoveDown={index < list.length - 1}
+                    onEdit={() => {
+                      setCreateDraft(null);
+                      setEditIndex(index);
+                    }}
+                    onMoveUp={() => onChange(moveIndex(list, index, index - 1))}
+                    onMoveDown={() =>
+                      onChange(moveIndex(list, index, index + 1))
+                    }
+                    onDelete={() => handleDelete(index)}
+                  />
+                }
+              >
+                <CourseComponentDetailsFields
+                  config={config}
+                  component={component}
+                  instructorLabelById={instructorLabelById}
+                  showAudienceAlways
+                  seriesItems={listComponentSeriesDisplayItems(
+                    config,
+                    component,
+                    instructorLabelById,
+                  )}
+                  compact
                 />
-              </li>
+              </CourseComponentAccordionItem>
             );
           })}
-        </ul>
+        </CourseComponentsAccordionList>
       )}
 
       <ComponentEditModal

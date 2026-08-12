@@ -3,26 +3,21 @@ import type {
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import {
-  AudienceTreeInfoIcon,
-  GroupHierarchyInfoIcon,
-} from "@/components/schedule-assistant/settings/courses/audienceTreeTooltip.tsx";
-import { cn } from "@/lib/ui/cn";
-import { type ReactNode, useEffect, useState } from "react";
+  CourseComponentAccordionItem,
+  CourseComponentDetailsFields,
+  CourseComponentsAccordionList,
+  DetailField,
+  DetailSection,
+  MeetingAudienceInline,
+} from "@/components/schedule-assistant/courses/CourseComponentDetailsView.tsx";
+import { useEffect, useState } from "react";
 
-import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
-import { summarizeMeetingAudience } from "./meetingAudienceSummary.ts";
 import {
-  countComponentPlacement,
   courseDisplayTitle,
   findMeetingForComponent,
-  formatComponentPlaced,
   formatComponentProgressHint,
-  formatComponentTarget,
-  formatInstructorPoolEntries,
   listComponentSeriesNavItemsForRef,
   resolveCourseAndComponent,
-  shouldShowInstructorPool,
-  type ComponentSeriesNavItem,
 } from "./meetingComponentContext.ts";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
@@ -37,52 +32,7 @@ import {
   weekdayLabelRu,
   type Meeting,
 } from "./timetableViewerModel.ts";
-
-function DetailSection({ title }: { title: string }) {
-  return (
-    <div className="text-base-content/55 mt-3 mb-1.5 text-xs font-semibold tracking-wide uppercase first:mt-0">
-      {title}
-    </div>
-  );
-}
-
-function DetailField({
-  label,
-  children,
-  compact,
-  truncate,
-  fullWidth,
-}: {
-  label: string;
-  children: ReactNode;
-  compact?: boolean;
-  truncate?: boolean;
-  fullWidth?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "border-base-300/70 text-base-content flex border-b text-sm leading-snug last:border-b-0",
-        compact ? "py-1" : "py-1.5",
-        fullWidth
-          ? "flex-col items-stretch gap-1"
-          : cn("items-center gap-x-1.5", !truncate && "flex-wrap"),
-      )}
-    >
-      <span className="text-base-content/55 shrink-0">{label}</span>
-      <span
-        className={cn(
-          "min-w-0",
-          fullWidth && "w-full",
-          truncate ? "flex-1 truncate" : "[overflow-wrap:anywhere]",
-        )}
-        title={truncate && typeof children === "string" ? children : undefined}
-      >
-        {children}
-      </span>
-    </div>
-  );
-}
+import { cn } from "@/lib/ui/cn";
 
 function formatInstructors(
   instructors: string | string[],
@@ -276,236 +226,6 @@ function MeetingScheduleKind({
   return <span className="text-base-content">{weekdayLabelRu(weekday)}</span>;
 }
 
-function MeetingAudienceInline({
-  config,
-  groupIds,
-}: {
-  config: SchemaScheduleConfig;
-  groupIds: string[];
-}) {
-  const programs = summarizeMeetingAudience(config, groupIds);
-
-  if (!programs.length) {
-    return <span className="text-base-content/50">—</span>;
-  }
-
-  const items = programs.flatMap((program) => {
-    if (program.full) {
-      return [
-        {
-          key: program.selector || program.title,
-          label: program.title,
-          selector: program.selector,
-          mode: "program" as const,
-          groupIds: groupIds
-            .map((id) => String(id || "").trim())
-            .filter(Boolean),
-        },
-      ];
-    }
-
-    const trackItems = program.tracks.flatMap((track) => {
-      if (track.full) {
-        return [
-          {
-            key: track.selector + track.title,
-            label: track.title,
-            selector: track.selector,
-            mode: "track" as const,
-            groupIds: [] as string[],
-          },
-        ];
-      }
-      return track.groups.map((group) => ({
-        key: `${track.selector}-${group.code}`,
-        label: group.title,
-        selector: "",
-        mode: "track" as const,
-        groupIds: [group.code],
-      }));
-    });
-
-    const flatItems = program.flatGroups.map((group) => ({
-      key: `${program.programCode || "other"}-${group.code}`,
-      label: group.title,
-      selector: "",
-      mode: "program" as const,
-      groupIds: [group.code],
-    }));
-
-    return [...trackItems, ...flatItems];
-  });
-
-  return (
-    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-0.5">
-      {items.map((item, index) => (
-        <span
-          key={item.key}
-          className="inline-flex max-w-full items-center gap-0.5 leading-none"
-        >
-          {index > 0 ? (
-            <span className="text-base-content/35 leading-none" aria-hidden>
-              ·
-            </span>
-          ) : null}
-          <span className="min-w-0 leading-snug [overflow-wrap:anywhere]">
-            {item.label}
-          </span>
-          {item.selector ? (
-            <AudienceTreeInfoIcon
-              config={config}
-              selector={item.selector}
-              mode={item.mode}
-            />
-          ) : (
-            <GroupHierarchyInfoIcon config={config} groupIds={item.groupIds} />
-          )}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-function ComponentSeriesList({
-  items,
-  onNavigateToMeeting,
-  compact,
-}: {
-  items: ComponentSeriesNavItem[];
-  onNavigateToMeeting: (meeting: Meeting) => void;
-  compact?: boolean;
-}) {
-  if (!items.length) return null;
-  return (
-    <div
-      className={cn(
-        "border-base-300/70 border-b last:border-b-0",
-        compact ? "py-1" : "py-1.5",
-      )}
-    >
-      <div
-        className={cn(
-          "text-base-content/55 text-sm",
-          compact ? "mb-1" : "mb-1.5",
-        )}
-      >
-        Серии
-      </div>
-      <div className={cn("flex flex-col", compact ? "gap-0.5" : "gap-1")}>
-        {items.map((item) => (
-          <button
-            key={item.seriesIdx}
-            type="button"
-            onClick={() => onNavigateToMeeting(item.meeting)}
-            className={cn(
-              "rounded-box cursor-pointer border text-left transition-colors",
-              compact ? "px-2 py-1" : "px-2.5 py-2",
-              item.isCurrent
-                ? "border-primary/40 bg-primary/10 hover:bg-primary/15"
-                : "border-base-300/80 bg-base-200/25 hover:border-base-300 hover:bg-base-200/50",
-            )}
-            title={`Перейти к серии: ${item.label}`}
-          >
-            <div className="text-sm font-medium [overflow-wrap:anywhere]">
-              {item.label}
-            </div>
-            {item.secondary ? (
-              <div className="text-base-content/55 mt-0.5 text-xs [overflow-wrap:anywhere]">
-                {item.secondary}
-              </div>
-            ) : null}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ComponentDetailsFields({
-  config,
-  component,
-  instructorLabelById,
-  assignedInstructors,
-  audienceGroupIds,
-  showAudienceAlways,
-  seriesNavItems,
-  onNavigateToMeeting,
-  compact,
-}: {
-  config: SchemaScheduleConfig;
-  component: SchemaComponent;
-  instructorLabelById: Record<string, string>;
-  assignedInstructors?: string | string[];
-  audienceGroupIds?: string[];
-  showAudienceAlways?: boolean;
-  seriesNavItems: ComponentSeriesNavItem[];
-  onNavigateToMeeting: (meeting: Meeting) => void;
-  compact?: boolean;
-}) {
-  const placement = countComponentPlacement(component);
-  const targetLabel = formatComponentTarget(component);
-  const placedLabel = formatComponentPlaced(placement);
-  const showPool = shouldShowInstructorPool(
-    component.instructor_pool,
-    assignedInstructors ?? [],
-  );
-  const poolEntries = showPool
-    ? formatInstructorPoolEntries(component.instructor_pool ?? [], (id) =>
-        resolveInstructorLabel(id, instructorLabelById),
-      )
-    : [];
-  const groupIds =
-    audienceGroupIds ??
-    expandStudentGroupSelectors(config, component.student_groups ?? []);
-  const showGroups =
-    Boolean(showAudienceAlways) ||
-    (audienceGroupIds != null && audienceGroupIds.length > 0);
-
-  return (
-    <>
-      {targetLabel ? (
-        <DetailField label="Цель" compact={compact}>
-          {targetLabel}
-        </DetailField>
-      ) : null}
-      {placedLabel ? (
-        <DetailField label="Размещено" compact={compact}>
-          {placedLabel}
-        </DetailField>
-      ) : null}
-      {component.per_group ? (
-        <DetailField label="Режим" compact={compact}>
-          <span className="badge badge-ghost badge-sm">по группам</span>
-        </DetailField>
-      ) : null}
-      {component.expected_enrollment != null ? (
-        <DetailField label="Набор" compact={compact}>
-          {component.expected_enrollment}
-        </DetailField>
-      ) : null}
-      {poolEntries.length ? (
-        <DetailField label="Кто может вести" compact={compact}>
-          <span className="inline-flex flex-col gap-0.5">
-            {poolEntries.map((entry) => (
-              <span key={entry}>{entry}</span>
-            ))}
-          </span>
-        </DetailField>
-      ) : null}
-      {showGroups && groupIds.length ? (
-        <DetailField label="Группы" compact={compact}>
-          <MeetingAudienceInline config={config} groupIds={groupIds} />
-        </DetailField>
-      ) : null}
-      <ComponentSeriesList
-        items={seriesNavItems}
-        onNavigateToMeeting={onNavigateToMeeting}
-        compact={compact}
-      />
-    </>
-  );
-}
-
 function CourseComponentsAccordion({
   config,
   courseIdx,
@@ -536,7 +256,7 @@ function CourseComponentsAccordion({
   return (
     <>
       <DetailSection title="Компоненты курса" />
-      <div className="border-base-300/70 divide-base-300/70 divide-y border-b">
+      <CourseComponentsAccordionList>
         {components.map((sibling, idx) => {
           const tag =
             String(sibling.tag || "").trim() || `Компонент ${idx + 1}`;
@@ -561,50 +281,34 @@ function CourseComponentsAccordion({
               )?.instructors;
 
           return (
-            <div key={`${tag}-${idx}`}>
-              <button
-                type="button"
-                className="hover:bg-base-200/40 flex w-full items-center gap-1.5 px-0 py-1.5 text-left"
-                onClick={() => setOpenIdx(open ? null : idx)}
-              >
-                <span
-                  className={cn(
-                    "icon-[material-symbols--expand-more] text-base-content/50 shrink-0 text-base transition-transform",
-                    open && "rotate-180",
-                  )}
-                />
-                <span className="text-base-content min-w-0 flex-1 text-sm font-medium">
-                  {tag}
-                </span>
-                {isCurrent ? (
+            <CourseComponentAccordionItem
+              key={`${tag}-${idx}`}
+              tag={tag}
+              hint={hint || undefined}
+              badge={
+                isCurrent ? (
                   <span className="badge badge-ghost badge-sm shrink-0">
                     текущий
                   </span>
-                ) : null}
-                {hint ? (
-                  <span className="text-base-content/45 shrink-0 text-xs">
-                    {hint}
-                  </span>
-                ) : null}
-              </button>
-              {open ? (
-                <div className="pb-0.5">
-                  <ComponentDetailsFields
-                    config={config}
-                    component={sibling}
-                    instructorLabelById={instructorLabelById}
-                    assignedInstructors={assigned}
-                    showAudienceAlways
-                    seriesNavItems={seriesNavItems}
-                    onNavigateToMeeting={onNavigateToMeeting}
-                    compact
-                  />
-                </div>
-              ) : null}
-            </div>
+                ) : undefined
+              }
+              open={open}
+              onToggle={() => setOpenIdx(open ? null : idx)}
+            >
+              <CourseComponentDetailsFields
+                config={config}
+                component={sibling}
+                instructorLabelById={instructorLabelById}
+                assignedInstructors={assigned}
+                showAudienceAlways
+                seriesItems={seriesNavItems}
+                onNavigateToMeeting={onNavigateToMeeting}
+                compact
+              />
+            </CourseComponentAccordionItem>
           );
         })}
-      </div>
+      </CourseComponentsAccordionList>
     </>
   );
 }

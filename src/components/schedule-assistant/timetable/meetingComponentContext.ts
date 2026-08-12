@@ -3,8 +3,14 @@ import type {
   SchemaComponentSessionSeries,
   SchemaCourseConfig,
   SchemaScheduleConfig,
+  SchemaSessionOccurrence,
+  SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
 import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
+import {
+  TERM_WEEKDAY_LABEL_RU,
+  type TermWeekdayKey,
+} from "@/components/schedule-assistant/settings/weekdays.ts";
 
 import {
   formatAudienceTokensLabel,
@@ -209,13 +215,179 @@ export function courseDisplayTitle(
   );
 }
 
-export type ComponentSeriesNavItem = {
+export type ComponentSeriesDisplayItem = {
   seriesIdx: number;
   label: string;
   secondary?: string;
-  meeting: Meeting;
-  isCurrent: boolean;
+  isCurrent?: boolean;
+  meeting?: Meeting;
 };
+
+export type ComponentSeriesNavItem = ComponentSeriesDisplayItem & {
+  meeting: Meeting;
+};
+
+export function listComponentSeriesDisplayItems(
+  config: SchemaScheduleConfig,
+  component: SchemaComponent,
+  instructorLabelById: Record<string, string> = {},
+): ComponentSeriesDisplayItem[] {
+  const sessions = component.sessions ?? [];
+  if (!sessions.length) return [];
+
+  const usedLabels = new Map<string, number>();
+  const items: ComponentSeriesDisplayItem[] = [];
+  const resolveLabel = (id: string) =>
+    resolveInstructorLabel(id, instructorLabelById);
+
+  for (const [seriesIdx, series] of sessions.entries()) {
+    const tokens = series.audience?.length
+      ? series.audience
+          .map((token) => String(token || "").trim())
+          .filter(Boolean)
+      : (component.student_groups ?? [])
+          .map((token) => String(token || "").trim())
+          .filter(Boolean);
+
+    let label = formatAudienceTokensLabel(config, tokens);
+    if (!label || label === "—") {
+      label = `Серия ${seriesIdx + 1}`;
+    }
+    usedLabels.set(label, (usedLabels.get(label) ?? 0) + 1);
+
+    items.push({
+      seriesIdx,
+      label,
+      secondary: formatSeriesSecondaryFromConfig(series, resolveLabel),
+    });
+  }
+
+  return items.map((item) => {
+    if ((usedLabels.get(item.label) ?? 0) <= 1) return item;
+    if (!item.secondary) {
+      return { ...item, label: `${item.label} · #${item.seriesIdx + 1}` };
+    }
+    return item;
+  });
+}
+
+function toUiTime(value: string | null | undefined): string {
+  return String(value || "").slice(0, 5);
+}
+
+function weekdayKeyFromApi(weekday: string | null | undefined): TermWeekdayKey {
+  const lowered = String(weekday || "")
+    .trim()
+    .toLowerCase();
+  const map: Record<string, TermWeekdayKey> = {
+    monday: "Mon",
+    mon: "Mon",
+    tuesday: "Tue",
+    tue: "Tue",
+    wednesday: "Wed",
+    wed: "Wed",
+    thursday: "Thu",
+    thu: "Thu",
+    friday: "Fri",
+    fri: "Fri",
+    saturday: "Sat",
+    sat: "Sat",
+    sunday: "Sun",
+    sun: "Sun",
+  };
+  if (map[lowered]) return map[lowered];
+  if (
+    (Object.keys(TERM_WEEKDAY_LABEL_RU) as string[]).includes(String(weekday))
+  ) {
+    return String(weekday) as TermWeekdayKey;
+  }
+  return "Mon";
+}
+
+function formatInstructorField(
+  instructor: string | string[] | null | undefined,
+  resolveLabel: (id: string) => string,
+): string {
+  const ids = Array.isArray(instructor)
+    ? instructor
+    : instructor
+      ? [instructor]
+      : [];
+  return ids
+    .map((id) => String(id || "").trim())
+    .filter(Boolean)
+    .map(resolveLabel)
+    .join(", ");
+}
+
+function formatTimeRange(
+  start: string | null | undefined,
+  end: string | null | undefined,
+): string {
+  const startUi = toUiTime(start);
+  if (!startUi) return "";
+  const endUi = toUiTime(end);
+  return endUi ? `${startUi}–${endUi}` : startUi;
+}
+
+function formatSingleWeeklySlot(
+  slot: SchemaWeeklyPatternSlot,
+  resolveLabel: (id: string) => string,
+): string {
+  const parts: string[] = [];
+  const day = TERM_WEEKDAY_LABEL_RU[weekdayKeyFromApi(slot.weekday)];
+  const time = formatTimeRange(slot.start_time, slot.end_time);
+  if (day && time) parts.push(`${day} ${time}`);
+  else if (day) parts.push(day);
+  else if (time) parts.push(time);
+  const room = String(slot.room || "").trim();
+  if (room) parts.push(room);
+  const instructor = formatInstructorField(slot.instructor, resolveLabel);
+  if (instructor) parts.push(instructor);
+  return parts.join(" · ");
+}
+
+function formatSingleOccurrence(
+  occurrence: SchemaSessionOccurrence,
+  resolveLabel: (id: string) => string,
+): string {
+  const parts: string[] = [];
+  const date = String(occurrence.date || "").trim();
+  if (date) parts.push(date);
+  const time = formatTimeRange(occurrence.start_time, occurrence.end_time);
+  if (time) parts.push(time);
+  const room = String(occurrence.room || "").trim();
+  if (room) parts.push(room);
+  const instructor = formatInstructorField(occurrence.instructor, resolveLabel);
+  if (instructor) parts.push(instructor);
+  return parts.join(" · ");
+}
+
+function formatSeriesSecondaryFromConfig(
+  series: SchemaComponentSessionSeries,
+  resolveLabel: (id: string) => string = (id) => id,
+): string | undefined {
+  const occurrences = (series.occurrences ?? []).filter((occurrence) =>
+    String(occurrence.date || "").trim(),
+  );
+  const weekly = series.weekly_pattern ?? [];
+
+  if (occurrences.length > 0) {
+    if (occurrences.length === 1) {
+      return formatSingleOccurrence(occurrences[0]!, resolveLabel) || "1 дата";
+    }
+    return `${occurrences.length} дат`;
+  }
+
+  if (weekly.length > 0) {
+    if (weekly.length === 1) {
+      return formatSingleWeeklySlot(weekly[0]!, resolveLabel) || "Еженедельно";
+    }
+    return "Еженедельно";
+  }
+
+  return undefined;
+}
 
 function pickSeriesRepresentative(
   ofSeries: Meeting[],
@@ -256,9 +428,13 @@ function formatSeriesScheduleKind(
     String(occurrence.date || "").trim(),
   ).length;
   if (occCount > 0) {
-    return occCount === 1 ? "1 дата" : `${occCount} дат`;
+    return occCount === 1 ? undefined : `${occCount} дат`;
   }
-  if ((series.weekly_pattern ?? []).length > 0) {
+  const weekly = series.weekly_pattern ?? [];
+  if (weekly.length === 1) {
+    return TERM_WEEKDAY_LABEL_RU[weekdayKeyFromApi(weekly[0]!.weekday)];
+  }
+  if (weekly.length > 1) {
     return "Еженедельно";
   }
   return undefined;
