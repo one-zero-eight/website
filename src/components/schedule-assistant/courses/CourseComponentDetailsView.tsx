@@ -15,11 +15,30 @@ import {
   formatInstructorPoolEntries,
   shouldShowInstructorPool,
   type ComponentSeriesDisplayItem,
+  type ComponentSeriesTooltipItem,
 } from "@/components/schedule-assistant/timetable/meetingComponentContext.ts";
 import { resolveInstructorLabel } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import type { Meeting } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { cn } from "@/lib/ui/cn";
-import { type ReactNode } from "react";
+import {
+  autoUpdate,
+  flip,
+  FloatingPortal,
+  offset,
+  safePolygon,
+  shift,
+  useFloating,
+  useHover,
+  useInteractions,
+  useTransitionStyles,
+} from "@floating-ui/react";
+import {
+  type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 export function DetailSection({ title }: { title: string }) {
   return (
@@ -157,6 +176,199 @@ export function MeetingAudienceInline({
   );
 }
 
+function SeriesSchedulePrimaryLine({
+  item,
+}: {
+  item: ComponentSeriesTooltipItem;
+}) {
+  if (item.primaryDate || item.primaryWeekday || item.primaryTime) {
+    return (
+      <span className="inline-grid grid-cols-[auto_3.5rem_auto] items-baseline gap-x-0.5">
+        <span className="whitespace-nowrap tabular-nums">
+          {item.primaryDate}
+          {item.primaryWeekday ? "," : ""}
+        </span>
+        <span className="overflow-hidden whitespace-nowrap">
+          {item.primaryWeekday}
+        </span>
+        <span className="whitespace-nowrap tabular-nums">
+          {item.primaryTime}
+        </span>
+      </span>
+    );
+  }
+
+  return <span className="block wrap-anywhere">{item.primary}</span>;
+}
+
+export function SeriesScheduleItemsList({
+  items,
+  onNavigateToMeeting,
+  className,
+}: {
+  items: ComponentSeriesTooltipItem[];
+  onNavigateToMeeting?: (meeting: Meeting) => void;
+  className?: string;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const currentRef = useRef<HTMLElement | null>(null);
+  const [currentOffscreen, setCurrentOffscreen] = useState<
+    "above" | "below" | null
+  >(null);
+
+  const currentIndex = items.findIndex((item) => item.isCurrent);
+
+  function updateCurrentVisibility() {
+    const root = scrollRef.current;
+    const current = currentRef.current;
+    if (!root || !current) {
+      setCurrentOffscreen(null);
+      return;
+    }
+    const rootRect = root.getBoundingClientRect();
+    const itemRect = current.getBoundingClientRect();
+    if (itemRect.bottom < rootRect.top + 2) {
+      setCurrentOffscreen("above");
+      return;
+    }
+    if (itemRect.top > rootRect.bottom - 2) {
+      setCurrentOffscreen("below");
+      return;
+    }
+    setCurrentOffscreen(null);
+  }
+
+  function scrollToCurrent() {
+    currentRef.current?.scrollIntoView({ block: "nearest" });
+    requestAnimationFrame(updateCurrentVisibility);
+  }
+
+  useLayoutEffect(() => {
+    if (currentIndex < 0) {
+      setCurrentOffscreen(null);
+      return;
+    }
+    currentRef.current?.scrollIntoView({ block: "nearest" });
+    updateCurrentVisibility();
+  }, [currentIndex, items]);
+
+  useEffect(() => {
+    const root = scrollRef.current;
+    if (!root) return;
+    const onScrollOrResize = () => updateCurrentVisibility();
+    root.addEventListener("scroll", onScrollOrResize, { passive: true });
+    const observer = new ResizeObserver(onScrollOrResize);
+    observer.observe(root);
+    return () => {
+      root.removeEventListener("scroll", onScrollOrResize);
+      observer.disconnect();
+    };
+  }, [items, currentIndex]);
+
+  if (!items.length) return null;
+
+  return (
+    <div className={cn("relative w-full", className)}>
+      <div
+        ref={scrollRef}
+        className="flex max-h-72 w-full [scrollbar-width:thin] flex-col gap-0.5 overflow-y-auto"
+      >
+        {items.map((item, index) => {
+          const canNavigate = Boolean(item.meeting && onNavigateToMeeting);
+          const rowClass = cn(
+            "w-full rounded px-1.5 py-1 text-left text-xs leading-snug font-normal transition-colors",
+            item.isCurrent
+              ? "bg-primary/10 text-base-content"
+              : "text-base-content/70",
+            canNavigate &&
+              !item.isCurrent &&
+              "hover:bg-base-200/60 hover:text-base-content",
+            canNavigate && "cursor-pointer",
+          );
+          const body = (
+            <>
+              <SeriesSchedulePrimaryLine item={item} />
+              {item.secondary ? (
+                <span
+                  className={cn(
+                    "mt-0.5 block wrap-anywhere",
+                    item.isCurrent
+                      ? "text-base-content/55"
+                      : "text-base-content/45",
+                  )}
+                >
+                  {item.secondary}
+                </span>
+              ) : null}
+            </>
+          );
+          const setRowRef = (node: HTMLElement | null) => {
+            if (item.isCurrent) currentRef.current = node;
+          };
+
+          if (canNavigate) {
+            return (
+              <button
+                key={`${index}-${item.primary}-${item.meeting!.instance_id}`}
+                ref={setRowRef}
+                type="button"
+                className={rowClass}
+                title={`Перейти к ${item.meeting!.date || item.primary}`}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onNavigateToMeeting?.(item.meeting!);
+                }}
+                onMouseDown={(event) => {
+                  event.stopPropagation();
+                }}
+              >
+                {body}
+              </button>
+            );
+          }
+
+          return (
+            <div
+              key={`${index}-${item.primary}`}
+              ref={setRowRef}
+              className={rowClass}
+            >
+              {body}
+            </div>
+          );
+        })}
+      </div>
+      {currentOffscreen === "above" ? (
+        <button
+          type="button"
+          className="bg-primary/45 pointer-events-auto absolute top-0 right-3 z-10 size-5 cursor-pointer rounded-bl-full border-0 p-0"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            scrollToCurrent();
+          }}
+          onMouseDown={(event) => event.stopPropagation()}
+          title="К выбранному выше"
+        />
+      ) : null}
+      {currentOffscreen === "below" ? (
+        <button
+          type="button"
+          className="bg-primary/45 pointer-events-auto absolute right-3 bottom-0 z-10 size-5 cursor-pointer rounded-tl-full border-0 p-0"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            scrollToCurrent();
+          }}
+          onMouseDown={(event) => event.stopPropagation()}
+          title="К выбранному ниже"
+        />
+      ) : null}
+    </div>
+  );
+}
+
 export function ComponentSeriesList({
   items,
   onNavigateToMeeting,
@@ -185,16 +397,20 @@ export function ComponentSeriesList({
       </div>
       <div className={cn("flex flex-col", compact ? "gap-0.5" : "gap-1")}>
         {items.map((item) => {
+          const secondary = item.secondary ? (
+            <SeriesSecondaryLabel
+              text={item.secondary}
+              tooltipItems={item.secondaryTooltipItems}
+              onNavigateToMeeting={onNavigateToMeeting}
+            />
+          ) : null;
+
           const body = (
             <>
-              <div className="text-sm font-medium [overflow-wrap:anywhere]">
+              <div className="text-sm font-medium wrap-anywhere">
                 {item.label}
               </div>
-              {item.secondary ? (
-                <div className="text-base-content/55 mt-0.5 text-xs [overflow-wrap:anywhere]">
-                  {item.secondary}
-                </div>
-              ) : null}
+              {secondary}
             </>
           );
 
@@ -232,6 +448,84 @@ export function ComponentSeriesList({
         })}
       </div>
     </div>
+  );
+}
+
+function SeriesSecondaryLabel({
+  text,
+  tooltipItems,
+  onNavigateToMeeting,
+}: {
+  text: string;
+  tooltipItems?: ComponentSeriesTooltipItem[];
+  onNavigateToMeeting?: (meeting: Meeting) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const { refs, floatingStyles, context } = useFloating({
+    open,
+    onOpenChange: setOpen,
+    whileElementsMounted: autoUpdate,
+    placement: "bottom-start",
+    middleware: [offset(6), flip(), shift({ padding: 8 })],
+  });
+  const hover = useHover(context, {
+    handleClose: safePolygon({ buffer: 2 }),
+  });
+  const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
+  const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
+    duration: 80,
+  });
+
+  if (!tooltipItems?.length) {
+    return (
+      <div className="text-base-content/55 mt-0.5 text-xs wrap-anywhere">
+        {text}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <span
+        ref={refs.setReference}
+        className="text-base-content/55 decoration-base-content/30 mt-0.5 inline-block cursor-default text-xs wrap-anywhere underline decoration-dotted underline-offset-2"
+        {...getReferenceProps({
+          onClick: (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          },
+          onMouseDown: (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          },
+        })}
+      >
+        {text}
+      </span>
+      {isMounted ? (
+        <FloatingPortal>
+          <div
+            ref={refs.setFloating}
+            style={{ ...floatingStyles, ...transitionStyles }}
+            {...getFloatingProps({
+              onMouseDown: (event) => {
+                event.stopPropagation();
+              },
+              onClick: (event) => {
+                event.stopPropagation();
+              },
+            })}
+            className="border-base-300 bg-base-100 z-[100] max-w-sm rounded-lg border p-1 shadow-md select-text"
+          >
+            <SeriesScheduleItemsList
+              items={tooltipItems}
+              onNavigateToMeeting={onNavigateToMeeting}
+              className="min-w-56"
+            />
+          </div>
+        </FloatingPortal>
+      ) : null}
+    </>
   );
 }
 
@@ -275,16 +569,13 @@ export function CourseComponentDetailsFields({
     Boolean(showAudienceAlways) ||
     (audienceGroupIds != null && audienceGroupIds.length > 0);
 
+  const goalParts = [targetLabel, placedLabel].filter(Boolean);
+
   return (
     <>
-      {targetLabel ? (
+      {goalParts.length ? (
         <DetailField label="Цель" compact={compact}>
-          {targetLabel}
-        </DetailField>
-      ) : null}
-      {placedLabel ? (
-        <DetailField label="Размещено" compact={compact}>
-          {placedLabel}
+          {goalParts.join(" · ")}
         </DetailField>
       ) : null}
       {component.per_group ? (

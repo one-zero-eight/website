@@ -17,7 +17,39 @@ import {
   parseMeetingInstanceId,
 } from "./meetingEditUtils.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
-import { resolveInstructorLabel } from "./timetableViewerModel.ts";
+import {
+  dayKey,
+  resolveInstructorLabel,
+  weekdayLabelRu,
+} from "./timetableViewerModel.ts";
+
+function formatScheduleDateTimeParts(
+  dateIso: string,
+  time: string,
+): {
+  primary: string;
+  primaryDate?: string;
+  primaryWeekday?: string;
+  primaryTime?: string;
+} {
+  const iso = dateIso.trim();
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  const weekday = iso ? weekdayLabelRu(dayKey(iso)) : "";
+  const dateLabel = match ? `${match[3]}.${match[2]}` : iso || "—";
+  const joined = (() => {
+    if (!weekday && !time) return dateLabel;
+    if (!time) return `${dateLabel}, ${weekday}`;
+    if (!weekday) return `${dateLabel} ${time}`;
+    return `${dateLabel}, ${weekday} ${time}`;
+  })();
+
+  return {
+    primary: joined,
+    primaryDate: dateLabel === "—" && !iso ? undefined : dateLabel,
+    primaryWeekday: weekday || undefined,
+    primaryTime: time || undefined,
+  };
+}
 
 export function resolveCourseAndComponent(
   config: SchemaScheduleConfig,
@@ -83,13 +115,34 @@ export function formatComponentTarget(
 export function formatComponentPlaced(
   counts: ComponentPlacementCounts,
 ): string | null {
-  const parts: string[] = [];
-  if (counts.weeklySlots) parts.push(`${counts.weeklySlots} слот.`);
-  if (counts.occurrences) parts.push(`${counts.occurrences} дат`);
-  if (!parts.length && counts.seriesCount) {
-    parts.push(`${counts.seriesCount} сер.`);
-  }
-  return parts.length ? parts.join(", ") : null;
+  const placed = counts.weeklySlots + counts.occurrences || counts.seriesCount;
+  if (!placed) return null;
+  return `размещено ${placed} ${pluralizeZanyatiya(placed)}`;
+}
+
+function pluralizeZanyatiya(n: number): string {
+  return pluralizeRu(n, "занятие", "занятия", "занятий");
+}
+
+function pluralizeDaty(n: number): string {
+  return pluralizeRu(n, "дата", "даты", "дат");
+}
+
+function pluralizeSloty(n: number): string {
+  return pluralizeRu(n, "слот", "слота", "слотов");
+}
+
+function pluralizeRu(
+  n: number,
+  one: string,
+  few: string,
+  many: string,
+): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+  return many;
 }
 
 /**
@@ -215,10 +268,26 @@ export function courseDisplayTitle(
   );
 }
 
+export type ComponentSeriesTooltipItem = {
+  primary: string;
+  /** Structured primary for aligned date / weekday / time columns. */
+  primaryDate?: string;
+  primaryWeekday?: string;
+  primaryTime?: string;
+  secondary?: string;
+  isCurrent?: boolean;
+  /** Index in weekly_pattern / occurrences before sorting. */
+  sourceIdx?: number;
+  /** When set, row can navigate to this meeting on the timetable. */
+  meeting?: Meeting;
+};
+
 export type ComponentSeriesDisplayItem = {
   seriesIdx: number;
   label: string;
   secondary?: string;
+  /** Rows shown on hover over secondary (e.g. each occurrence). */
+  secondaryTooltipItems?: ComponentSeriesTooltipItem[];
   isCurrent?: boolean;
   meeting?: Meeting;
 };
@@ -226,6 +295,82 @@ export type ComponentSeriesDisplayItem = {
 export type ComponentSeriesNavItem = ComponentSeriesDisplayItem & {
   meeting: Meeting;
 };
+
+export function formatMeetingSchedulePrimary(meeting: Meeting): string {
+  return formatMeetingSchedulePrimaryParts(meeting).primary;
+}
+
+export function formatMeetingSchedulePrimaryParts(meeting: Meeting): {
+  primary: string;
+  primaryDate?: string;
+  primaryWeekday?: string;
+  primaryTime?: string;
+} {
+  const iso = String(meeting.date || "").trim();
+  const time = meeting.start
+    ? meeting.end
+      ? `${meeting.start}–${meeting.end}`
+      : meeting.start
+    : "";
+  return formatScheduleDateTimeParts(iso, time);
+}
+
+export function formatMeetingScheduleSecondary(
+  meeting: Meeting,
+  instructorLabelById: Record<string, string>,
+): string | undefined {
+  const parts: string[] = [];
+  const list =
+    typeof meeting.instructors === "string"
+      ? meeting.instructors.trim()
+        ? [meeting.instructors]
+        : []
+      : (meeting.instructors ?? []);
+  if (list.length) {
+    parts.push(
+      list
+        .map((id) => resolveInstructorLabel(String(id), instructorLabelById))
+        .join(", "),
+    );
+  }
+  const room = String(meeting.room || "").trim();
+  if (room) parts.push(room);
+  return parts.length ? parts.join(" · ") : undefined;
+}
+
+export function meetingToScheduleTooltipItem(
+  meeting: Meeting,
+  instructorLabelById: Record<string, string>,
+  isCurrent = false,
+): ComponentSeriesTooltipItem {
+  const parts = formatMeetingSchedulePrimaryParts(meeting);
+  return {
+    ...parts,
+    secondary: formatMeetingScheduleSecondary(meeting, instructorLabelById),
+    isCurrent,
+    meeting,
+  };
+}
+
+function attachMeetingsToTooltipItems(
+  items: ComponentSeriesTooltipItem[] | undefined,
+  ofSeries: Meeting[],
+  seriesIdx: number,
+): ComponentSeriesTooltipItem[] | undefined {
+  if (!items?.length) return items;
+  return items.map((item) => {
+    if (item.sourceIdx == null) return item;
+    const match =
+      ofSeries.find((candidate) => {
+        const ref = parseMeetingInstanceId(candidate.instance_id);
+        if (!ref || ref.seriesIdx !== seriesIdx) return false;
+        if (ref.kind === "occ") return ref.occIdx === item.sourceIdx;
+        if (ref.kind === "wp") return ref.slotIdx === item.sourceIdx;
+        return false;
+      }) ?? undefined;
+    return match ? { ...item, meeting: match } : item;
+  });
+}
 
 export function listComponentSeriesDisplayItems(
   config: SchemaScheduleConfig,
@@ -255,10 +400,12 @@ export function listComponentSeriesDisplayItems(
     }
     usedLabels.set(label, (usedLabels.get(label) ?? 0) + 1);
 
+    const secondaryInfo = seriesSecondaryFromConfig(series, resolveLabel);
     items.push({
       seriesIdx,
       label,
-      secondary: formatSeriesSecondaryFromConfig(series, resolveLabel),
+      secondary: secondaryInfo.secondary,
+      secondaryTooltipItems: secondaryInfo.secondaryTooltipItems,
     });
   }
 
@@ -334,59 +481,114 @@ function formatSingleWeeklySlot(
   slot: SchemaWeeklyPatternSlot,
   resolveLabel: (id: string) => string,
 ): string {
-  const parts: string[] = [];
+  const item = formatWeeklySlotTooltipItem(slot, resolveLabel);
+  return [item.primary, item.secondary].filter(Boolean).join(" · ");
+}
+
+function formatWeeklySlotTooltipItem(
+  slot: SchemaWeeklyPatternSlot,
+  resolveLabel: (id: string) => string,
+): ComponentSeriesTooltipItem {
   const day = TERM_WEEKDAY_LABEL_RU[weekdayKeyFromApi(slot.weekday)];
   const time = formatTimeRange(slot.start_time, slot.end_time);
-  if (day && time) parts.push(`${day} ${time}`);
-  else if (day) parts.push(day);
-  else if (time) parts.push(time);
-  const room = String(slot.room || "").trim();
-  if (room) parts.push(room);
+  const primary = day && time ? `${day} ${time}` : day || time || "Слот";
+  const previewParts: string[] = [];
   const instructor = formatInstructorField(slot.instructor, resolveLabel);
-  if (instructor) parts.push(instructor);
-  return parts.join(" · ");
+  if (instructor) previewParts.push(instructor);
+  const room = String(slot.room || "").trim();
+  if (room) previewParts.push(room);
+  return {
+    primary,
+    secondary: previewParts.length ? previewParts.join(" · ") : undefined,
+  };
 }
 
 function formatSingleOccurrence(
   occurrence: SchemaSessionOccurrence,
   resolveLabel: (id: string) => string,
 ): string {
-  const parts: string[] = [];
-  const date = String(occurrence.date || "").trim();
-  if (date) parts.push(date);
-  const time = formatTimeRange(occurrence.start_time, occurrence.end_time);
-  if (time) parts.push(time);
-  const room = String(occurrence.room || "").trim();
-  if (room) parts.push(room);
-  const instructor = formatInstructorField(occurrence.instructor, resolveLabel);
-  if (instructor) parts.push(instructor);
-  return parts.join(" · ");
+  const item = formatOccurrenceTooltipItem(occurrence, resolveLabel);
+  return [item.primary, item.secondary].filter(Boolean).join(" · ");
 }
 
-function formatSeriesSecondaryFromConfig(
+function formatOccurrenceTooltipItem(
+  occurrence: SchemaSessionOccurrence,
+  resolveLabel: (id: string) => string,
+): ComponentSeriesTooltipItem {
+  const date = String(occurrence.date || "").trim();
+  const time = formatTimeRange(occurrence.start_time, occurrence.end_time);
+  const parts = formatScheduleDateTimeParts(date, time);
+  const previewParts: string[] = [];
+  const instructor = formatInstructorField(occurrence.instructor, resolveLabel);
+  if (instructor) previewParts.push(instructor);
+  const room = String(occurrence.room || "").trim();
+  if (room) previewParts.push(room);
+  return {
+    ...parts,
+    primary: parts.primary || time || "Дата",
+    secondary: previewParts.length ? previewParts.join(" · ") : undefined,
+  };
+}
+
+function seriesSecondaryFromConfig(
   series: SchemaComponentSessionSeries,
   resolveLabel: (id: string) => string = (id) => id,
-): string | undefined {
-  const occurrences = (series.occurrences ?? []).filter((occurrence) =>
-    String(occurrence.date || "").trim(),
-  );
+): {
+  secondary?: string;
+  secondaryTooltipItems?: ComponentSeriesTooltipItem[];
+} {
+  const occurrences = (series.occurrences ?? [])
+    .map((occurrence, sourceIdx) => ({ occurrence, sourceIdx }))
+    .filter(({ occurrence }) => String(occurrence.date || "").trim())
+    .sort((a, b) =>
+      String(a.occurrence.date).localeCompare(String(b.occurrence.date)),
+    );
   const weekly = series.weekly_pattern ?? [];
 
   if (occurrences.length > 0) {
     if (occurrences.length === 1) {
-      return formatSingleOccurrence(occurrences[0]!, resolveLabel) || "1 дата";
+      return {
+        secondary:
+          formatSingleOccurrence(occurrences[0]!.occurrence, resolveLabel) ||
+          "1 дата",
+      };
     }
-    return `${occurrences.length} дат`;
+    return {
+      secondary: `${occurrences.length} ${pluralizeDaty(occurrences.length)}`,
+      secondaryTooltipItems: occurrences.map(({ occurrence, sourceIdx }) => ({
+        ...formatOccurrenceTooltipItem(occurrence, resolveLabel),
+        sourceIdx,
+      })),
+    };
   }
 
   if (weekly.length > 0) {
     if (weekly.length === 1) {
-      return formatSingleWeeklySlot(weekly[0]!, resolveLabel) || "Еженедельно";
+      return {
+        secondary: formatSingleWeeklySlot(weekly[0]!, resolveLabel) || "1 слот",
+      };
     }
-    return "Еженедельно";
+    return {
+      secondary: `${weekly.length} ${pluralizeSloty(weekly.length)}`,
+      secondaryTooltipItems: weekly.map((slot, sourceIdx) => ({
+        ...formatWeeklySlotTooltipItem(slot, resolveLabel),
+        sourceIdx,
+      })),
+    };
   }
 
-  return undefined;
+  return {};
+}
+
+function markCurrentTooltipItems(
+  items: ComponentSeriesTooltipItem[] | undefined,
+  currentSourceIdx: number | null,
+): ComponentSeriesTooltipItem[] | undefined {
+  if (!items?.length || currentSourceIdx == null) return items;
+  return items.map((item) => ({
+    ...item,
+    isCurrent: item.sourceIdx === currentSourceIdx,
+  }));
 }
 
 function pickSeriesRepresentative(
@@ -427,15 +629,18 @@ function formatSeriesScheduleKind(
   const occCount = (series.occurrences ?? []).filter((occurrence) =>
     String(occurrence.date || "").trim(),
   ).length;
-  if (occCount > 0) {
-    return occCount === 1 ? undefined : `${occCount} дат`;
+  if (occCount > 1) {
+    return `${occCount} ${pluralizeDaty(occCount)}`;
+  }
+  if (occCount === 1) {
+    return undefined;
   }
   const weekly = series.weekly_pattern ?? [];
   if (weekly.length === 1) {
     return TERM_WEEKDAY_LABEL_RU[weekdayKeyFromApi(weekly[0]!.weekday)];
   }
   if (weekly.length > 1) {
-    return "Еженедельно";
+    return `${weekly.length} ${pluralizeSloty(weekly.length)}`;
   }
   return undefined;
 }
@@ -445,6 +650,16 @@ function formatSeriesSecondary(
   instructorLabelById: Record<string, string>,
   series?: SchemaComponentSessionSeries,
 ): string | undefined {
+  if (series) {
+    const occCount = (series.occurrences ?? []).filter((occurrence) =>
+      String(occurrence.date || "").trim(),
+    ).length;
+    const weeklyCount = (series.weekly_pattern ?? []).length;
+    // Multi-date / multi-slot: only the count; details live in tooltip.
+    if (occCount > 1) return `${occCount} ${pluralizeDaty(occCount)}`;
+    if (weeklyCount > 1) return `${weeklyCount} ${pluralizeSloty(weeklyCount)}`;
+  }
+
   const parts: string[] = [];
   if (series) {
     const kind = formatSeriesScheduleKind(series);
@@ -573,6 +788,15 @@ export function listComponentSeriesNavItemsForRef(
     }
     usedLabels.set(label, (usedLabels.get(label) ?? 0) + 1);
 
+    const resolveLabel = (id: string) =>
+      resolveInstructorLabel(id, instructorLabelById);
+    const secondaryInfo = seriesSecondaryFromConfig(series, resolveLabel);
+    const currentSourceIdx =
+      seriesIdx === currentSeriesIdx && currentRef
+        ? currentRef.kind === "occ"
+          ? currentRef.occIdx
+          : currentRef.slotIdx
+        : null;
     items.push({
       seriesIdx,
       label,
@@ -580,6 +804,14 @@ export function listComponentSeriesNavItemsForRef(
         representative,
         instructorLabelById,
         series,
+      ),
+      secondaryTooltipItems: attachMeetingsToTooltipItems(
+        markCurrentTooltipItems(
+          secondaryInfo.secondaryTooltipItems,
+          currentSourceIdx,
+        ),
+        bySeries.get(seriesIdx) ?? [],
+        seriesIdx,
       ),
       meeting: representative,
       isCurrent: seriesIdx === currentSeriesIdx,

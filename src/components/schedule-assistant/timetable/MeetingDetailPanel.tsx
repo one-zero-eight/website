@@ -9,6 +9,7 @@ import {
   DetailField,
   DetailSection,
   MeetingAudienceInline,
+  SeriesScheduleItemsList,
 } from "@/components/schedule-assistant/courses/CourseComponentDetailsView.tsx";
 import { useEffect, useState } from "react";
 
@@ -17,6 +18,7 @@ import {
   findMeetingForComponent,
   formatComponentProgressHint,
   listComponentSeriesNavItemsForRef,
+  meetingToScheduleTooltipItem,
   resolveCourseAndComponent,
 } from "./meetingComponentContext.ts";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
@@ -32,7 +34,6 @@ import {
   weekdayLabelRu,
   type Meeting,
 } from "./timetableViewerModel.ts";
-import { cn } from "@/lib/ui/cn";
 
 function formatInstructors(
   instructors: string | string[],
@@ -97,34 +98,6 @@ function occurrenceMeetingsForSeries(
     });
 }
 
-function formatOccurrencePreview(
-  meeting: Meeting,
-  instructorLabelById: Record<string, string>,
-): string | undefined {
-  const parts: string[] = [];
-  const instructors = formatInstructors(
-    meeting.instructors,
-    instructorLabelById,
-  );
-  if (instructors !== "—") parts.push(instructors);
-  const room = String(meeting.room || "").trim();
-  if (room) parts.push(room);
-  return parts.length ? parts.join(" · ") : undefined;
-}
-
-function formatOccurrenceDateLine(meeting: Meeting): string {
-  const iso = String(meeting.date || "").trim();
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  const datePart = match
-    ? `${match[3]}.${match[2]}, ${weekdayLabelRu(dayKey(iso))}`
-    : iso
-      ? `${iso}, ${weekdayLabelRu(dayKey(iso))}`
-      : "—";
-  if (!meeting.start) return datePart;
-  const time = meeting.end ? `${meeting.start}–${meeting.end}` : meeting.start;
-  return `${datePart} ${time}`;
-}
-
 function MeetingScheduleKind({
   meeting,
   config,
@@ -148,59 +121,33 @@ function MeetingScheduleKind({
   if (ref?.kind === "occ") {
     const siblings = occurrenceMeetingsForSeries(allMeetings, meeting);
     const dates = occurrenceDatesForMeeting(config, meeting);
-    const singlePreview =
+    const items = siblings.map((item) =>
+      meetingToScheduleTooltipItem(
+        item,
+        instructorLabelById,
+        item.instance_id === meeting.instance_id,
+      ),
+    );
+    const single =
       dates.length === 1
-        ? formatOccurrencePreview(meeting, instructorLabelById)
-        : undefined;
+        ? meetingToScheduleTooltipItem(meeting, instructorLabelById)
+        : null;
 
     return (
       <span className="flex w-full min-w-0 flex-col gap-1">
         <span className="text-base-content">На определенные даты</span>
         {dates.length > 1 ? (
-          <span className="flex max-h-36 w-full [scrollbar-width:thin] flex-col gap-0.5 overflow-y-auto">
-            {siblings.map((item) => {
-              const isCurrent = item.instance_id === meeting.instance_id;
-              const preview = formatOccurrencePreview(
-                item,
-                instructorLabelById,
-              );
-              return (
-                <button
-                  key={item.instance_id}
-                  type="button"
-                  onClick={() => onNavigateToMeeting(item)}
-                  className={cn(
-                    "w-full rounded px-1.5 py-1 text-left text-xs leading-snug transition-colors",
-                    isCurrent
-                      ? "bg-primary/10 text-base-content font-medium"
-                      : "text-base-content/70 hover:bg-base-200/60 hover:text-base-content",
-                  )}
-                  title={`Перейти к ${item.date}`}
-                >
-                  <span className="block [overflow-wrap:anywhere]">
-                    {formatOccurrenceDateLine(item)}
-                  </span>
-                  {preview ? (
-                    <span
-                      className={cn(
-                        "mt-0.5 block [overflow-wrap:anywhere]",
-                        isCurrent
-                          ? "text-base-content/55 font-normal"
-                          : "text-base-content/45",
-                      )}
-                    >
-                      {preview}
-                    </span>
-                  ) : null}
-                </button>
-              );
-            })}
-          </span>
-        ) : dates.length === 1 ? (
+          <SeriesScheduleItemsList
+            items={items}
+            onNavigateToMeeting={onNavigateToMeeting}
+          />
+        ) : single ? (
           <span className="text-base-content/55 text-xs">
-            <span className="block">{formatOccurrenceDateLine(meeting)}</span>
-            {singlePreview ? (
-              <span className="mt-0.5 block">{singlePreview}</span>
+            <span className="block wrap-anywhere">{single.primary}</span>
+            {single.secondary ? (
+              <span className="mt-0.5 block wrap-anywhere">
+                {single.secondary}
+              </span>
             ) : null}
           </span>
         ) : null}
@@ -287,8 +234,8 @@ function CourseComponentsAccordion({
               hint={hint || undefined}
               badge={
                 isCurrent ? (
-                  <span className="badge badge-ghost badge-sm shrink-0">
-                    текущий
+                  <span className="badge badge-sm border-primary/40 bg-primary/10 text-base-content shrink-0">
+                    выбран
                   </span>
                 ) : undefined
               }
