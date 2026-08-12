@@ -88,6 +88,21 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
   );
 });
 
+function CalendarAddSlotButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className="flex w-full items-center justify-center rounded bg-[#f3f7ff] px-1 py-0.5 text-[0.8125rem] leading-none font-semibold text-[#1d3f70] opacity-50 hover:bg-[#e4edff] hover:opacity-100"
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick();
+      }}
+    >
+      +
+    </button>
+  );
+}
+
 function CalendarWeekHeader({ week }: { week: CalendarWeekBlock }) {
   return (
     <thead className="sticky top-0 z-20 shadow-[0_1px_0_#d8dfeb]">
@@ -170,6 +185,11 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
               const cellMeetings =
                 calendarGrid.cells.get(`${day.date}|${slot.start}`) || [];
               const isLastSlot = slotIndex === calendarGrid.slots.length - 1;
+              const createContext: CreateMeetingCellContext = {
+                weekday: day.day,
+                time: slot.start,
+                date: day.date,
+              };
 
               return (
                 <td
@@ -189,11 +209,7 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                       clearSelection();
                       return;
                     }
-                    onEmptyCellClick({
-                      weekday: day.day,
-                      time: slot.start,
-                      date: day.date,
-                    });
+                    onEmptyCellClick(createContext);
                   }}
                 >
                   {cellMeetings.length ? (
@@ -206,13 +222,18 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                           onSelectMeeting={selectMeeting}
                         />
                       ))}
+                      {onEmptyCellClick ? (
+                        <CalendarAddSlotButton
+                          onClick={() => onEmptyCellClick(createContext)}
+                        />
+                      ) : null}
                     </div>
                   ) : (
                     <div className="empty min-h-4" />
                   )}
                 </td>
               );
-            })}
+            })}{" "}
           </tr>
         ))}
       </tbody>
