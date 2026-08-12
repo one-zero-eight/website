@@ -1263,6 +1263,8 @@ export interface components {
       id: components["schemas"]["PydanticObjectId"];
       /** Creator Id */
       creator_id: string;
+      /** @description Same lifecycle statuses as drafts; `unpublished` when approved but public was removed */
+      status: components["schemas"]["DraftStatus"] | null;
       submission: components["schemas"]["Submission"];
     };
     /** SubmissionSummary */
@@ -1484,7 +1486,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Cannot delete a draft while the event is published OR Cannot delete a draft while a submission is pending */
+      /** @description Cannot delete a draft while a submission is pending OR Cannot delete a draft while the event is published */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1770,7 +1772,7 @@ export interface operations {
           "application/json": components["schemas"]["DraftOut"];
         };
       };
-      /** @description You are not a leader of the specified club OR Club is already a host */
+      /** @description Club is already a host OR You are not a leader of the specified club */
       400: {
         headers: {
           [name: string]: unknown;
