@@ -1,6 +1,7 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import { useMe } from "@/api/accounts/user.ts";
 import { $workshops } from "@/api/workshops";
-import { DraftStatus } from "@/api/workshops/types";
+import { DraftStatus, RestoreBodyFrom } from "@/api/workshops/types";
 import { Modal } from "@/components/common/Modal.tsx";
 import type { TiptapEditorRef } from "@/components/editor/_TiptapDescriptionEditor";
 import { useToast } from "@/components/toast";
@@ -21,11 +22,13 @@ import { getDraftImageUrl } from "../utils/links";
 import { DraftHostsSection } from "./DraftHostsSection";
 import { DraftLinksSection } from "./DraftLinksSection";
 import { EditDraftInfoModal } from "./EditDraftInfoModal";
+import { RestoreDraftModal } from "./RestoreDraftModal";
 
 export function DraftPage({ id }: { id: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { showError } = useToast();
+  const { me } = useMe();
+  const { showError, showConfirm } = useToast();
   const { canManage, clubs, isPending: isAuthPending } = useEventsAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addLocaleMenuRef = useRef<HTMLDivElement>(null);
@@ -39,6 +42,7 @@ export function DraftPage({ id }: { id: string }) {
   const [addLocaleOpen, setAddLocaleOpen] = useState(false);
   const [deleteLocaleOpen, setDeleteLocaleOpen] = useState(false);
   const [editInfoOpen, setEditInfoOpen] = useState(false);
+  const [restoreOpen, setRestoreOpen] = useState(false);
   const [imageCacheBust, setImageCacheBust] = useState(0);
 
   const { data: allowedLocales = [] } = $workshops.useQuery("get", "/locales");
@@ -169,6 +173,46 @@ export function DraftPage({ id }: { id: string }) {
       },
     });
 
+  const { mutate: deleteDraft, isPending: isDeletingDraft } =
+    $workshops.useMutation("delete", "/drafts/{id}", {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: $workshops.queryOptions("get", "/drafts/").queryKey,
+        });
+        navigate({ to: "/events/drafts" });
+      },
+      onError: (mutationError) => {
+        showError("Error", formatApiErrorMessage(mutationError));
+      },
+    });
+
+  const { mutate: cancelSubmission, isPending: isCancelingSubmission } =
+    $workshops.useMutation("delete", "/submissions/{id}", {
+      onSuccess: () => {
+        invalidateDraft();
+      },
+      onError: (mutationError) => {
+        showError("Error", formatApiErrorMessage(mutationError));
+      },
+    });
+
+  const { mutate: restoreDraft, isPending: isRestoring } =
+    $workshops.useMutation("post", "/drafts/{id}/restore", {
+      onSuccess: (draft) => {
+        setRestoreOpen(false);
+        queryClient.setQueryData(
+          $workshops.queryOptions("get", "/drafts/{id}", {
+            params: { path: { id } },
+          }).queryKey,
+          draft,
+        );
+        invalidateDraft();
+      },
+      onError: (mutationError) => {
+        showError("Error", formatApiErrorMessage(mutationError));
+      },
+    });
+
   if (isAuthPending || isPending) {
     return (
       <div className="@container/content px-4 pt-6 pb-4">
@@ -218,6 +262,63 @@ export function DraftPage({ id }: { id: string }) {
     data.invitations.includes(club.club_id),
   );
   const inviteActionPending = isAccepting || isDeclining;
+  const isCreator = me?.id === data.creator_id;
+  const canDeleteDraft =
+    isCreator && !data.has_public && data.status !== DraftStatus.pending;
+  const canCancelSubmission = isCreator && data.status === DraftStatus.pending;
+  const restoreSources = data.can_be_restored_from;
+  const canRestore = restoreSources.length > 0;
+  const showManageActions = canDeleteDraft || canCancelSubmission || canRestore;
+
+  async function handleDeleteDraft() {
+    const confirmed = await showConfirm({
+      title: "Delete draft",
+      message: "Delete this draft permanently? This cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "error",
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    deleteDraft({ params: { path: { id } } });
+  }
+
+  async function handleCancelSubmission() {
+    const confirmed = await showConfirm({
+      title: "Cancel submission",
+      message: "Cancel the pending submission? The draft will stay.",
+      confirmText: "Cancel submission",
+      cancelText: "Keep",
+      type: "warning",
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    cancelSubmission({ params: { path: { id } } });
+  }
+
+  async function handleRestore(from: RestoreBodyFrom) {
+    const sourceLabel =
+      from === RestoreBodyFrom.public ? "public event" : "submission";
+    const confirmed = await showConfirm({
+      title: "Restore draft",
+      message: `Replace the current draft with the ${sourceLabel} version? Unsaved draft changes will be lost.`,
+      confirmText: "Restore",
+      cancelText: "Cancel",
+      type: "warning",
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    restoreDraft({
+      params: { path: { id } },
+      body: { from },
+    });
+  }
 
   function handleStartEditLocale() {
     if (!selectedLocale) {
@@ -291,7 +392,7 @@ export function DraftPage({ id }: { id: string }) {
           syncDraftCache(draft);
           setSelectedLocale(locale);
           setEditName("");
-          setEditDescription("");
+          setEditorInitialContent(null);
           setEditingLocale(true);
           invalidateDraft();
         },
@@ -530,6 +631,50 @@ export function DraftPage({ id }: { id: string }) {
               onSubmit={() => submitDraft({ params: { path: { id } } })}
               canEdit={canEdit}
             />
+
+            {showManageActions && (
+              <div className="border-base-300 flex flex-wrap items-center justify-between gap-2 rounded-2xl border p-4">
+                <p className="text-sm font-medium">Manage</p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  {canRestore && (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-ghost border"
+                      disabled={isRestoring}
+                      onClick={() => setRestoreOpen(true)}
+                    >
+                      Restore
+                    </button>
+                  )}
+                  {canCancelSubmission && (
+                    <button
+                      type="button"
+                      className="btn btn-warning btn-sm"
+                      disabled={isCancelingSubmission}
+                      onClick={handleCancelSubmission}
+                    >
+                      {isCancelingSubmission && (
+                        <span className="loading loading-spinner loading-sm" />
+                      )}
+                      Cancel submission
+                    </button>
+                  )}
+                  {canDeleteDraft && (
+                    <button
+                      type="button"
+                      className="btn btn-error btn-sm"
+                      disabled={isDeletingDraft}
+                      onClick={handleDeleteDraft}
+                    >
+                      {isDeletingDraft && (
+                        <span className="loading loading-spinner loading-sm" />
+                      )}
+                      Delete draft
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -541,6 +686,14 @@ export function DraftPage({ id }: { id: string }) {
           draft={data}
         />
       )}
+
+      <RestoreDraftModal
+        open={restoreOpen}
+        onOpenChange={setRestoreOpen}
+        sources={restoreSources}
+        isPending={isRestoring}
+        onRestore={handleRestore}
+      />
 
       <Modal
         open={deleteLocaleOpen}
