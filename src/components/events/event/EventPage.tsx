@@ -7,8 +7,9 @@ import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useEventsAuth } from "../hooks";
 import { EventHeroImage } from "../shared/EventHeroImage";
 import { PublicHostsList } from "../shared/HostLink";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
@@ -17,8 +18,10 @@ import { getEventImageUrl, getLinkDisplayLabel } from "../utils/links";
 import { EnrolledListModal } from "./EnrolledListModal";
 
 export function EventPage({ id }: { id: string }) {
+  const navigate = useNavigate();
   const { me } = useMe();
-  const { showError } = useToast();
+  const { isModerator } = useEventsAuth();
+  const { showError, showConfirm } = useToast();
   const queryClient = useQueryClient();
   const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
   const [enrolledOpen, setEnrolledOpen] = useState(false);
@@ -79,13 +82,42 @@ export function EventPage({ id }: { id: string }) {
     },
   );
 
+  const { mutate: unpublish, isPending: isUnpublishing } =
+    $workshops.useMutation("delete", "/events/{id}", {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: $workshops.queryOptions("get", "/submissions/").queryKey,
+        });
+        navigate({ to: "/events" });
+      },
+      onError: (mutationError) => {
+        showError("Error", formatApiErrorMessage(mutationError));
+      },
+    });
+
+  async function handleUnpublish() {
+    const confirmed = await showConfirm({
+      title: "Unpublish event",
+      message:
+        "Remove this event from the public calendar? This cannot be undone from here.",
+      confirmText: "Unpublish",
+      cancelText: "Cancel",
+      type: "error",
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    unpublish({ params: { path: { id } } });
+  }
+
   if (isPending) {
     return (
       <div className="@container/content px-4 py-4">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
-          <div className="skeleton h-64 rounded-2xl" />
-          <div className="flex flex-col gap-4">
-            <div className="skeleton aspect-video rounded-2xl" />
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_24rem]">
+          <div className="skeleton aspect-video rounded-2xl @min-[700px]/content:col-start-2 @min-[700px]/content:row-start-1" />
+          <div className="skeleton h-64 rounded-2xl @min-[700px]/content:col-start-1 @min-[700px]/content:row-span-2 @min-[700px]/content:row-start-1" />
+          <div className="flex flex-col gap-4 @min-[700px]/content:col-start-2 @min-[700px]/content:row-start-2">
             <div className="skeleton h-24 rounded-2xl" />
             <div className="skeleton h-28 rounded-2xl" />
           </div>
@@ -144,8 +176,13 @@ export function EventPage({ id }: { id: string }) {
   return (
     <>
       <div className="@container/content px-4 pt-6 pb-4">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
-          <div className="border-base-300 rounded-2xl border p-4 @min-[700px]/content:p-6">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_24rem]">
+          <EventHeroImage
+            className="@min-[700px]/content:col-start-2 @min-[700px]/content:row-start-1"
+            src={data.data.image_id ? getEventImageUrl(id) : null}
+          />
+
+          <div className="border-base-300 rounded-2xl border p-4 @min-[700px]/content:col-start-1 @min-[700px]/content:row-span-2 @min-[700px]/content:row-start-1 @min-[700px]/content:p-6">
             <div className="mb-5 flex flex-wrap items-center gap-2">
               {locales.map((locale) => (
                 <button
@@ -162,18 +199,9 @@ export function EventPage({ id }: { id: string }) {
                   {locale}
                 </button>
               ))}
-              <h1 className="min-w-0 flex-1 text-2xl font-medium wrap-anywhere">
+              <h1 className="min-w-0 flex-1 text-xl font-medium wrap-anywhere @min-[700px]/content:text-2xl">
                 {title}
               </h1>
-              {data.can_edit_draft && (
-                <Link
-                  to="/events/drafts/$id"
-                  params={{ id }}
-                  className="btn btn-sm btn-ghost shrink-0 border"
-                >
-                  Edit draft
-                </Link>
-              )}
             </div>
 
             <ul className="mb-6 flex flex-col gap-3 text-sm">
@@ -211,11 +239,7 @@ export function EventPage({ id }: { id: string }) {
             />
           </div>
 
-          <div className="flex min-w-0 flex-col gap-4">
-            <EventHeroImage
-              src={data.data.image_id ? getEventImageUrl(id) : null}
-            />
-
+          <div className="flex min-w-0 flex-col gap-4 @min-[700px]/content:col-start-2 @min-[700px]/content:row-start-2">
             <div className="border-base-300 rounded-2xl border p-4">
               <div className="mb-3 text-sm">
                 {isExternal ? (
@@ -337,6 +361,36 @@ export function EventPage({ id }: { id: string }) {
                 </ul>
               )}
             </div>
+
+            {(data.can_edit_draft || isModerator) && (
+              <div className="border-base-300 flex flex-wrap items-center justify-between gap-2 rounded-2xl border p-4">
+                <p className="text-sm font-medium">Manage</p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  {data.can_edit_draft && (
+                    <Link
+                      to="/events/drafts/$id"
+                      params={{ id }}
+                      className="btn btn-sm btn-ghost border"
+                    >
+                      Edit draft
+                    </Link>
+                  )}
+                  {isModerator && (
+                    <button
+                      type="button"
+                      className="btn btn-error btn-sm"
+                      disabled={isUnpublishing}
+                      onClick={handleUnpublish}
+                    >
+                      {isUnpublishing && (
+                        <span className="loading loading-spinner loading-sm" />
+                      )}
+                      Unpublish
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

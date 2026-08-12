@@ -93,10 +93,21 @@ export function SubmissionPage({ id }: { id: string }) {
     },
   );
 
+  const { mutate: unpublish, isPending: isUnpublishing } =
+    $workshops.useMutation("delete", "/events/{id}", {
+      onSuccess: () => {
+        invalidate();
+        navigate({ to: "/events/submissions" });
+      },
+      onError: (mutationError) => {
+        showError("Error", formatApiErrorMessage(mutationError));
+      },
+    });
+
   if (isAuthPending || isPending) {
     return (
       <div className="@container/content px-4 pt-6 pb-4">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_24rem]">
           <div className="skeleton h-64 rounded-2xl" />
           <div className="flex flex-col gap-4">
             <div className="skeleton aspect-video rounded-2xl" />
@@ -188,9 +199,25 @@ export function SubmissionPage({ id }: { id: string }) {
     });
   }
 
+  async function handleUnpublish() {
+    const confirmed = await showConfirm({
+      title: "Unpublish event",
+      message:
+        "Remove this event from the public calendar? This cannot be undone from here.",
+      confirmText: "Unpublish",
+      cancelText: "Cancel",
+      type: "error",
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    unpublish({ params: { path: { id } } });
+  }
+
   return (
     <div className="@container/content px-4 pt-6 pb-4">
-      <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="border-base-300 rounded-2xl border p-4 @min-[700px]/content:p-6">
           <div className="mb-5 flex flex-wrap items-center gap-2">
             {locales.map((locale) => (
@@ -208,7 +235,9 @@ export function SubmissionPage({ id }: { id: string }) {
                 {locale}
               </button>
             ))}
-            <h1 className="text-2xl font-medium wrap-anywhere">{title}</h1>
+            <h1 className="text-xl font-medium wrap-anywhere @min-[700px]/content:text-2xl">
+              {title}
+            </h1>
           </div>
 
           <ul className="mb-6 flex flex-col gap-3 text-sm">
@@ -343,9 +372,9 @@ export function SubmissionPage({ id }: { id: string }) {
                 </div>
               </>
             ) : (
-              <div className="flex flex-col gap-2 text-sm">
-                <p className="font-medium capitalize">{moderation.status}</p>
-                <p className="text-base-content/70">
+              <div className="flex flex-col gap-3 text-sm">
+                <p className="font-medium capitalize">
+                  {moderation.status} at{" "}
                   {moment(moderation.updated_at).format("D MMM YYYY, HH:mm")}
                 </p>
                 {moderation.feedback?.trim() ? (
@@ -356,13 +385,26 @@ export function SubmissionPage({ id }: { id: string }) {
                   <p className="text-base-content/70">No feedback.</p>
                 )}
                 {moderation.status === ModerationStatus.approved && (
-                  <Link
-                    to="/events/p/$id"
-                    params={{ id }}
-                    className="link link-primary mt-1"
-                  >
-                    Open event publication
-                  </Link>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Link
+                      to="/events/p/$id"
+                      params={{ id }}
+                      className="btn btn-primary btn-sm"
+                    >
+                      Open
+                    </Link>
+                    <button
+                      type="button"
+                      className="btn btn-error btn-sm"
+                      disabled={isUnpublishing}
+                      onClick={handleUnpublish}
+                    >
+                      {isUnpublishing && (
+                        <span className="loading loading-spinner loading-sm" />
+                      )}
+                      Unpublish
+                    </button>
+                  </div>
                 )}
               </div>
             )}

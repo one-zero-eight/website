@@ -172,7 +172,7 @@ export function DraftPage({ id }: { id: string }) {
   if (isAuthPending || isPending) {
     return (
       <div className="@container/content px-4 pt-6 pb-4">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_24rem]">
           <div className="flex flex-col gap-4">
             <div className="skeleton h-40 rounded-2xl" />
             <div className="skeleton h-28 rounded-2xl" />
@@ -311,7 +311,7 @@ export function DraftPage({ id }: { id: string }) {
   return (
     <>
       <div className="@container/content px-4 pt-6 pb-4">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-4 @min-[700px]/content:grid-cols-[minmax(0,1fr)_24rem]">
           <div className="flex min-w-0 flex-col gap-4">
             {hasPendingInvite && (
               <div className="border-info/40 bg-info/10 rounded-2xl border p-4">
@@ -465,43 +465,58 @@ export function DraftPage({ id }: { id: string }) {
           </div>
 
           <div className="flex min-w-0 flex-col gap-4">
-            <EventHeroImage
-              src={
-                data.data.image_id
-                  ? `${getDraftImageUrl(id)}?t=${imageCacheBust}`
-                  : null
-              }
-            >
-              {canEdit && (
-                <>
+            {canEdit && !data.data.image_id ? (
+              <button
+                type="button"
+                className="bg-base-200 border-base-300 text-base-content/40 hover:text-base-content/70 relative flex aspect-video w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border"
+                disabled={isUploadingImage}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {isUploadingImage ? (
+                  <span className="loading loading-spinner loading-lg" />
+                ) : (
+                  <span className="icon-[material-symbols--upload] text-5xl" />
+                )}
+              </button>
+            ) : (
+              <EventHeroImage
+                src={
+                  data.data.image_id
+                    ? `${getDraftImageUrl(id)}?t=${imageCacheBust}`
+                    : null
+                }
+              >
+                {canEdit && (
                   <button
                     type="button"
-                    className="btn btn-sm btn-circle absolute right-3 bottom-3"
+                    className="btn btn-circle absolute right-3 bottom-3"
                     disabled={isUploadingImage}
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {isUploadingImage ? (
-                      <span className="loading loading-spinner loading-sm" />
+                      <span className="loading loading-spinner" />
                     ) : (
-                      <span className="icon-[material-symbols--upload]" />
+                      <span className="icon-[material-symbols--upload] text-2xl" />
                     )}
                   </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleUploadImage(file);
-                      }
-                      e.target.value = "";
-                    }}
-                  />
-                </>
-              )}
-            </EventHeroImage>
+                )}
+              </EventHeroImage>
+            )}
+            {canEdit && (
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleUploadImage(file);
+                  }
+                  e.target.value = "";
+                }}
+              />
+            )}
 
             <DraftLinksSection draft={data} canEdit={canEdit} />
 
@@ -610,10 +625,14 @@ function DraftSubmissionCard({
 
   if (status === DraftStatus.published) {
     return (
-      <div className="border-base-300 rounded-2xl border p-4 text-sm">
-        <p className="mb-2">Draft published</p>
-        <Link to="/events/p/$id" params={{ id }} className="link link-primary">
-          Open event publication
+      <div className="border-base-300 flex flex-wrap items-center justify-between gap-2 rounded-2xl border p-4 text-sm">
+        <p className="font-medium">Draft published</p>
+        <Link
+          to="/events/p/$id"
+          params={{ id }}
+          className="btn btn-primary btn-sm"
+        >
+          Open
         </Link>
       </div>
     );

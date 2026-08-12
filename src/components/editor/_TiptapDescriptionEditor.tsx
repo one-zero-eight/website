@@ -199,7 +199,10 @@ function TiptapDescriptionEditor(
         <EditorContent
           editor={editor}
           role="presentation"
-          className="col-start-1 row-start-1 min-w-0 [&_.tiptap]:pb-12 md:[&_.tiptap]:pb-0"
+          className={cn(
+            "col-start-1 row-start-1 min-w-0",
+            !isReadOnly && "[&_.tiptap]:pb-12 md:[&_.tiptap]:pb-0",
+          )}
         />
         {!isReadOnly && <ClickableDragHandle editor={editor} />}
         {!isReadOnly && <BubbleMenuContent editor={editor} />}

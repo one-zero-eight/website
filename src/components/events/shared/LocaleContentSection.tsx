@@ -77,7 +77,7 @@ export function LocaleContentSection({
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-medium wrap-anywhere">
+          <h2 className="text-xl font-medium wrap-anywhere @min-[700px]/content:text-2xl">
             {name?.trim() || "Untitled event"}
           </h2>
           <DescriptionViewer
