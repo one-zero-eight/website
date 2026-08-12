@@ -736,6 +736,16 @@ export interface components {
       creator_id: string;
       status: components["schemas"]["DraftStatus"] | null;
       /**
+       * Has Public
+       * @description Whether a published copy exists (blocks draft deletion until unpublished)
+       */
+      has_public: boolean;
+      /**
+       * Can Be Restored From
+       * @description Sources whose revision differs from the draft; entities match POST /drafts/:id/restore `from`
+       */
+      can_be_restored_from: components["schemas"]["RestoreSourceItem"][];
+      /**
        * Revision
        * Format: date-time
        */
@@ -1157,6 +1167,20 @@ export interface components {
        */
       from: RestoreBodyFrom;
     };
+    /**
+     * RestoreSource
+     * @enum {string}
+     */
+    RestoreSource: RestoreSource;
+    /** RestoreSourceItem */
+    RestoreSourceItem: {
+      entity: components["schemas"]["RestoreSource"];
+      /**
+       * Revision
+       * Format: date-time
+       */
+      revision: string;
+    };
     /** Submission */
     Submission: {
       /**
@@ -1343,6 +1367,8 @@ export type SchemaPublicHost = components["schemas"]["PublicHost"];
 export type SchemaPutLocale = components["schemas"]["PutLocale"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
 export type SchemaRestoreBody = components["schemas"]["RestoreBody"];
+export type SchemaRestoreSourceItem =
+  components["schemas"]["RestoreSourceItem"];
 export type SchemaSubmission = components["schemas"]["Submission"];
 export type SchemaSubmissionData = components["schemas"]["SubmissionData"];
 export type SchemaSubmissionDataSummary =
@@ -1823,7 +1849,7 @@ export interface operations {
           "application/json": components["schemas"]["DraftOut"];
         };
       };
-      /** @description Club is already a host OR Club is already invited */
+      /** @description Club is already invited OR Club is already a host */
       400: {
         headers: {
           [name: string]: unknown;
@@ -3062,6 +3088,10 @@ export enum ModerationStatus {
   declined = "declined",
 }
 export enum RestoreBodyFrom {
+  submission = "submission",
+  public = "public",
+}
+export enum RestoreSource {
   submission = "submission",
   public = "public",
 }
