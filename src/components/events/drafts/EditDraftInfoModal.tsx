@@ -6,11 +6,6 @@ import { useToast } from "@/components/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
-  DurationField,
-  durationApiToForm,
-  durationFormToApi,
-} from "../shared/DurationField";
-import {
   EnrollmentFields,
   enrollmentApiToForm,
   enrollmentFormToApi,
@@ -18,8 +13,10 @@ import {
 } from "../shared/EnrollmentFields";
 import { eventFieldClass } from "../shared/formStyles";
 import {
+  durationHoursFromLocalRange,
   fromDatetimeLocalValue,
-  isDatetimeLocalInPast,
+  getEventEndsAt,
+  getScheduleLocalWarning,
   toDatetimeLocalValue,
 } from "../utils/datetime";
 
@@ -36,8 +33,8 @@ export function EditDraftInfoModal({
   const queryClient = useQueryClient();
 
   const [startsAt, setStartsAt] = useState("");
+  const [endsAt, setEndsAt] = useState("");
   const [location, setLocation] = useState("");
-  const [durationHours, setDurationHours] = useState("");
   const [enrollment, setEnrollment] = useState<EnrollmentFormValue>(
     enrollmentApiToForm(null),
   );
@@ -48,10 +45,16 @@ export function EditDraftInfoModal({
     }
 
     setStartsAt(toDatetimeLocalValue(draft.data.starts_at));
+    setEndsAt(
+      toDatetimeLocalValue(
+        getEventEndsAt(draft.data.starts_at, draft.data.duration_hours),
+      ),
+    );
     setLocation(draft.data.location ?? "");
-    setDurationHours(durationApiToForm(draft.data.duration_hours));
     setEnrollment(enrollmentApiToForm(draft.data.enrollment));
   }, [open, draft]);
+
+  const scheduleWarning = getScheduleLocalWarning(startsAt, endsAt);
 
   const { mutate, isPending } = $workshops.useMutation(
     "patch",
@@ -78,13 +81,7 @@ export function EditDraftInfoModal({
   );
 
   function handleSubmit() {
-    if (startsAt && isDatetimeLocalInPast(startsAt)) {
-      showError("Invalid date", "Start time cannot be in the past.");
-      return;
-    }
-
-    if (durationHours.trim() && durationFormToApi(durationHours) === null) {
-      showError("Invalid duration", "Duration must be a positive number.");
+    if (scheduleWarning) {
       return;
     }
 
@@ -104,7 +101,7 @@ export function EditDraftInfoModal({
       body: {
         starts_at: startsAt ? fromDatetimeLocalValue(startsAt) : null,
         location: location.trim() || "TBA",
-        duration_hours: durationFormToApi(durationHours),
+        duration_hours: durationHoursFromLocalRange(startsAt, endsAt),
         enrollment: apiEnrollment,
       },
     });
@@ -119,7 +116,7 @@ export function EditDraftInfoModal({
           handleSubmit();
         }}
       >
-        <div className="grid grid-cols-1 gap-4 @min-[400px]/modal:grid-cols-[minmax(0,1fr)_8rem]">
+        <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-1 text-sm">
             <span>Starts at</span>
             <input
@@ -131,11 +128,20 @@ export function EditDraftInfoModal({
             />
           </label>
 
-          <DurationField
-            value={durationHours}
-            onChange={setDurationHours}
-            disabled={isPending}
-          />
+          <label className="flex flex-col gap-1 text-sm">
+            <span>Ends at</span>
+            <input
+              type="datetime-local"
+              className={eventFieldClass()}
+              value={endsAt}
+              disabled={isPending}
+              onChange={(e) => setEndsAt(e.target.value)}
+            />
+          </label>
+
+          {scheduleWarning && (
+            <p className="text-warning text-sm">{scheduleWarning}</p>
+          )}
         </div>
 
         <label className="flex flex-col gap-1 text-sm">
@@ -167,7 +173,7 @@ export function EditDraftInfoModal({
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={isPending}
+            disabled={isPending || !!scheduleWarning}
           >
             {isPending && (
               <span className="loading loading-spinner loading-sm" />

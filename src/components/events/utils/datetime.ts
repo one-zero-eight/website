@@ -67,3 +67,46 @@ export function isDatetimeLocalInPast(value: string) {
 
   return moment(value).isBefore(moment());
 }
+
+/**
+ * Duration in hours from datetime-local start/end values.
+ * Returns null if either is empty; null if end is not after start.
+ */
+export function durationHoursFromLocalRange(
+  startsAtLocal: string,
+  endsAtLocal: string,
+): number | null {
+  if (!startsAtLocal.trim() || !endsAtLocal.trim()) {
+    return null;
+  }
+
+  const hours = moment(endsAtLocal).diff(moment(startsAtLocal), "hours", true);
+  if (!Number.isFinite(hours) || hours <= 0) {
+    return null;
+  }
+
+  return hours;
+}
+
+/** Inline validation for starts/ends datetime-local fields. */
+export function getScheduleLocalWarning(
+  startsAtLocal: string,
+  endsAtLocal: string,
+): string | null {
+  if (startsAtLocal && isDatetimeLocalInPast(startsAtLocal)) {
+    return "Start time cannot be in the past.";
+  }
+
+  if (endsAtLocal.trim() && !startsAtLocal.trim()) {
+    return "Set a start time before the end time.";
+  }
+
+  if (
+    endsAtLocal.trim() &&
+    durationHoursFromLocalRange(startsAtLocal, endsAtLocal) === null
+  ) {
+    return "End time must be after the start time.";
+  }
+
+  return null;
+}
