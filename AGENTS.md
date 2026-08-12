@@ -389,6 +389,7 @@ When finishing a task with code changes:
 
 - stage only the relevant changes (not the full working tree / unrelated diffs); do not stage secrets (`.env`, credentials)
 - draft a concise conventional commit message matching recent `git log` style (focus on why). **Always include a scope** (e.g. `feat(schedule): …`); use comma-separated scopes for a few areas (`chore(schedule, maps): …`); use `general` for repo-wide changes (`docs(general): …`)
+- **Base the message on the full staged diff** (`git diff --cached` / all files being committed), not only the last edit in the chat. One commit = one message that covers the whole staged set.
 - if the change is tied to a GitHub issue, put a trailer in the commit body: `Closes one-zero-eight/monorepo#123` when the commit closes the issue, or `Relates one-zero-eight/monorepo#123` when it only relates to it
 - propose that message to the IDE Source Control input by writing it to `.scm-commit-msg` at the repo root (gitignored — do not stage it). Requires the SCM Commit Message extension in `tools/scm-commit-msg-from-file` (install once per machine into `~/.cursor/extensions/local.scm-commit-msg-from-file-<version>/`, then Reload Window). After an IDE commit the extension clears the SCM input only when it still matches `.scm-commit-msg`, then deletes the file. After a CLI commit, always `rm -f .scm-commit-msg` (the extension then clears the matching SCM input).
 - do **not** run `git commit` unless the user explicitly asks
