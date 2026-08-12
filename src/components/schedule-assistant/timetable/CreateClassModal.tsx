@@ -59,7 +59,10 @@ import {
   buildRoomPickerOptions,
 } from "./roomPickerOptions.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
-import { semesterDatesForWeekday } from "./timetableViewerModel.ts";
+import {
+  formatDisplayDate,
+  semesterDatesForWeekday,
+} from "./timetableViewerModel.ts";
 
 function CreateClassDropdown({
   value,
@@ -455,7 +458,7 @@ export function CreateClassModal({
   const weekdayLabel =
     TERM_WEEKDAY_LABEL_RU[cellContext.weekday] || cellContext.weekday;
   const contextParts = [
-    `${cellContext.date} (${weekdayLabel})`,
+    `${formatDisplayDate(cellContext.date)} (${weekdayLabel})`,
     timeOptions.find((slot) => slot.value === cellContext.time)?.label ||
       cellContext.time,
     cellContext.groupId ? `группа ${cellContext.groupId}` : null,

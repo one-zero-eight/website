@@ -17,7 +17,10 @@ import {
   type ComponentSeriesDisplayItem,
   type ComponentSeriesTooltipItem,
 } from "@/components/schedule-assistant/timetable/meetingComponentContext.ts";
-import { resolveInstructorLabel } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
+import {
+  formatDisplayDate,
+  resolveInstructorLabel,
+} from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import type { Meeting } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { cn } from "@/lib/ui/cn";
 import {
@@ -313,7 +316,7 @@ export function SeriesScheduleItemsList({
                 ref={setRowRef}
                 type="button"
                 className={rowClass}
-                title={`Перейти к ${item.meeting!.date || item.primary}`}
+                title={`Перейти к ${item.meeting!.date ? formatDisplayDate(item.meeting!.date) : item.primary}`}
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();

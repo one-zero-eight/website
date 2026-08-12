@@ -30,6 +30,7 @@ import {
   buildInstructorLabelById,
   dayKey,
   everyWeekdayPhraseRu,
+  formatDisplayDate,
   resolveInstructorLabel,
   weekdayLabelRu,
   type Meeting,
@@ -304,7 +305,7 @@ export function MeetingDetailPanel({
       <DetailSection title="Занятие" />
       <DetailField label="Дата">
         {meeting.date
-          ? `${meeting.date}, ${weekdayLabelRu(dayKey(meeting.date))}`
+          ? `${formatDisplayDate(meeting.date)}, ${weekdayLabelRu(dayKey(meeting.date))}`
           : "—"}
       </DetailField>
       <DetailField label="Время">{timeRange}</DetailField>

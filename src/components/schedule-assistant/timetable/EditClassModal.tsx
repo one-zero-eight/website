@@ -62,7 +62,10 @@ import {
 import { buildInstructorPickerOptions } from "./instructorPickerOptions.ts";
 import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
 import type { Meeting, MeetingOverrideField } from "./timetableViewerModel.ts";
-import { semesterDatesForWeekday } from "./timetableViewerModel.ts";
+import {
+  formatDisplayDate,
+  semesterDatesForWeekday,
+} from "./timetableViewerModel.ts";
 
 const SCOPE_OPTIONS: { value: EditClassScope; label: string }[] = [
   { value: "single", label: "Только это занятие" },
@@ -680,7 +683,7 @@ export function EditClassModal({
             <MeetingOverrideIndicator fields={overrideFields} />
           </div>
           <div className="text-base-content/70 mt-1">
-            {meeting.date} {meeting.start}
+            {formatDisplayDate(meeting.date)} {meeting.start}
             {meeting.room ? ` · ${meeting.room}` : ""}
             {instructorsLabel ? ` · ${instructorsLabel}` : ""}
           </div>

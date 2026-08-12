@@ -19,6 +19,7 @@ import {
 import type { Meeting } from "./timetableViewerModel.ts";
 import {
   dayKey,
+  formatDisplayDate,
   resolveInstructorLabel,
   weekdayLabelRu,
 } from "./timetableViewerModel.ts";
@@ -33,9 +34,8 @@ function formatScheduleDateTimeParts(
   primaryTime?: string;
 } {
   const iso = dateIso.trim();
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   const weekday = iso ? weekdayLabelRu(dayKey(iso)) : "";
-  const dateLabel = match ? `${match[3]}.${match[2]}` : iso || "—";
+  const dateLabel = iso ? formatDisplayDate(iso, { withYear: false }) : "—";
   const joined = (() => {
     if (!weekday && !time) return dateLabel;
     if (!time) return `${dateLabel}, ${weekday}`;

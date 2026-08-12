@@ -7,6 +7,7 @@ import type { Meeting } from "@/components/schedule-assistant/timetable/timetabl
 import {
   dayKey,
   everyWeekdayPhraseRu,
+  formatDisplayDate,
   todayIsoDate,
   weekdayLabelRu,
   weeklyPatternDayKey,
@@ -167,13 +168,7 @@ export function resolveMeetingInstanceId(
 }
 
 export function formatRuDate(dateStr: string) {
-  const [year, month, day] = dateStr.slice(0, 10).split("-").map(Number);
-  if (!year || !month || !day) return dateStr;
-  return new Date(year, month - 1, day).toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  return formatDisplayDate(dateStr);
 }
 
 export function formatScheduledMeetingWhen(scheduled: SchemaScheduledMeeting) {

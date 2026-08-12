@@ -112,23 +112,20 @@ export function isSameLogicalMeeting(
 ): boolean {
   const ref = parseMeetingInstanceId(meeting.instance_id);
   if (!ref) return false;
+  if (
+    ref.courseIdx !== excludeRef.courseIdx ||
+    ref.componentIdx !== excludeRef.componentIdx ||
+    ref.seriesIdx !== excludeRef.seriesIdx
+  ) {
+    return false;
+  }
+  // Weekly slots: only the same slot across dates (other slots stay real conflicts).
   if (excludeRef.kind === "wp" && ref.kind === "wp") {
-    return (
-      ref.courseIdx === excludeRef.courseIdx &&
-      ref.componentIdx === excludeRef.componentIdx &&
-      ref.seriesIdx === excludeRef.seriesIdx &&
-      ref.slotIdx === excludeRef.slotIdx
-    );
+    return ref.slotIdx === excludeRef.slotIdx;
   }
-  if (excludeRef.kind === "occ" && ref.kind === "occ") {
-    return (
-      ref.courseIdx === excludeRef.courseIdx &&
-      ref.componentIdx === excludeRef.componentIdx &&
-      ref.seriesIdx === excludeRef.seriesIdx &&
-      ref.occIdx === excludeRef.occIdx
-    );
-  }
-  return false;
+  // Occurrences share one series: semester-wide room/instructor checks must not
+  // treat sibling dates as conflicts (edit modal / session editors).
+  return true;
 }
 
 function normalizeHhmm(value: string | undefined): string {

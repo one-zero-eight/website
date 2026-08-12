@@ -15,6 +15,7 @@ import {
   DAY_NAMES,
   WEEKDAY_LABEL_RU,
   filterMeetingsByTab,
+  formatDisplayDate,
   normalizedTermDays,
   todayIsoDate,
   weekRelativeToToday,
@@ -71,11 +72,7 @@ function dateForWeekDay(
 }
 
 function formatCalendarDate(dateStr: string) {
-  const date = new Date(`${dateStr}T00:00:00`);
-  return date.toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-  });
+  return formatDisplayDate(dateStr, { withYear: false });
 }
 
 export function formatCalendarWeekRange(start: string, end: string) {

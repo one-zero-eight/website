@@ -186,6 +186,21 @@ export function dayKey(dateStr: string) {
   return DAY_NAMES[d.getDay() === 0 ? 6 : d.getDay() - 1];
 }
 
+/** Display ISO `yyyy-mm-dd` as `dd.mm.yyyy` (default) or `dd.mm`. */
+export function formatDisplayDate(
+  dateStr: string,
+  options?: { withYear?: boolean },
+): string {
+  const iso = String(dateStr || "")
+    .trim()
+    .slice(0, 10);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!match) return iso || "—";
+  const [, year, month, day] = match;
+  if (options?.withYear === false) return `${day}.${month}`;
+  return `${day}.${month}.${year}`;
+}
+
 const WEEKLY_PATTERN_DAY_TO_KEY: Record<string, (typeof DAY_NAMES)[number]> = {
   monday: "Mon",
   mon: "Mon",
