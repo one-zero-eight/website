@@ -96,19 +96,17 @@ export const items: ItemType[] = [
   },
   { type: "separator", hideOnMore: true },
   // On-site services:
-  ...((import.meta.env.VITE_PRODUCTION && []) || [
-    {
-      type: "local",
-      title: "Events",
-      to: "/events",
-      badge: (
-        <span className="ml-2 rounded-full bg-mauve-500 px-2 py-0.5 text-xs font-medium text-mauve-100">
-          DEV
-        </span>
-      ),
-      icon: <span className="icon-[material-symbols--campaign-rounded]" />,
-    },
-  ]),
+  {
+    type: "local",
+    title: "Events",
+    to: "/events",
+    badge: (
+      <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs font-medium text-white">
+        NEW
+      </span>
+    ),
+    icon: <span className="icon-[material-symbols--campaign-rounded]" />,
+  },
   {
     type: "local",
     title: "Clubs",
