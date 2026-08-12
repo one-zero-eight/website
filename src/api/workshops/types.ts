@@ -1246,6 +1246,8 @@ export interface components {
       id: components["schemas"]["PydanticObjectId"];
       /** Creator Id */
       creator_id: string;
+      /** @description Same lifecycle statuses as submission detail */
+      status: components["schemas"]["DraftStatus"] | null;
       submission: components["schemas"]["SubmissionSummary"];
     };
     /**
@@ -1821,7 +1823,7 @@ export interface operations {
           "application/json": components["schemas"]["DraftOut"];
         };
       };
-      /** @description Club is already invited OR Club is already a host */
+      /** @description Club is already a host OR Club is already invited */
       400: {
         headers: {
           [name: string]: unknown;
