@@ -1,6 +1,10 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
-import { EnrollmentType, ModerationStatus } from "@/api/workshops/types";
+import {
+  EnrollmentType,
+  DraftStatus,
+  ModerationStatus,
+} from "@/api/workshops/types";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
@@ -142,7 +146,10 @@ export function SubmissionPage({ id }: { id: string }) {
 
   const event = data.submission.data;
   const moderation = data.submission.moderation;
+  const lifecycleStatus = data.status;
   const isPendingReview = moderation.status === ModerationStatus.pending;
+  const isUnpublished = lifecycleStatus === DraftStatus.unpublished;
+  const isPublished = lifecycleStatus === DraftStatus.published;
   const localeContent = selectedLocale
     ? event.locales[selectedLocale]
     : undefined;
@@ -374,8 +381,9 @@ export function SubmissionPage({ id }: { id: string }) {
             ) : (
               <div className="flex flex-col gap-3 text-sm">
                 <p className="font-medium capitalize">
-                  {moderation.status} at{" "}
-                  {moment(moderation.updated_at).format("D MMM YYYY, HH:mm")}
+                  {isUnpublished
+                    ? "Unpublished"
+                    : `${moderation.status} at ${moment(moderation.updated_at).format("D MMM YYYY, HH:mm")}`}
                 </p>
                 {moderation.feedback?.trim() ? (
                   <p className="text-base-content/80 whitespace-pre-wrap">
@@ -384,28 +392,31 @@ export function SubmissionPage({ id }: { id: string }) {
                 ) : (
                   <p className="text-base-content/70">No feedback.</p>
                 )}
-                {moderation.status === ModerationStatus.approved && (
-                  <div className="flex flex-wrap justify-end gap-2">
-                    <Link
-                      to="/events/p/$id"
-                      params={{ id }}
-                      className="btn btn-primary btn-sm"
-                    >
-                      Open
-                    </Link>
-                    <button
-                      type="button"
-                      className="btn btn-error btn-sm"
-                      disabled={isUnpublishing}
-                      onClick={handleUnpublish}
-                    >
-                      {isUnpublishing && (
-                        <span className="loading loading-spinner loading-sm" />
+                {moderation.status === ModerationStatus.approved &&
+                  !isUnpublished && (
+                    <div className="flex flex-wrap justify-end gap-2">
+                      {isPublished && (
+                        <Link
+                          to="/events/p/$id"
+                          params={{ id }}
+                          className="btn btn-primary btn-sm"
+                        >
+                          Open
+                        </Link>
                       )}
-                      Unpublish
-                    </button>
-                  </div>
-                )}
+                      <button
+                        type="button"
+                        className="btn btn-error btn-sm"
+                        disabled={isUnpublishing}
+                        onClick={handleUnpublish}
+                      >
+                        {isUnpublishing && (
+                          <span className="loading loading-spinner loading-sm" />
+                        )}
+                        Unpublish
+                      </button>
+                    </div>
+                  )}
               </div>
             )}
           </div>

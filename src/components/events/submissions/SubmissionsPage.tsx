@@ -120,7 +120,7 @@ export function SubmissionsPage() {
                     clubs={clubs}
                     startsAt={item.submission.data.starts_at}
                     location={item.submission.data.location}
-                    status={item.submission.moderation.status}
+                    status={item.status ?? item.submission.moderation.status}
                   />
                 ))}
               </div>

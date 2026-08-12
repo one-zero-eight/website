@@ -1,5 +1,8 @@
 import { useMe } from "@/api/accounts/user.ts";
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  formatApiErrorMessage,
+  isApiHttpError,
+} from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
 import { EnrollmentType } from "@/api/workshops/types";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
@@ -7,7 +10,7 @@ import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useEventsAuth } from "../hooks";
 import { EventHeroImage } from "../shared/EventHeroImage";
@@ -127,6 +130,10 @@ export function EventPage({ id }: { id: string }) {
   }
 
   if (isError || !data) {
+    if (isApiHttpError(error) && error.httpCode === 404) {
+      return <Navigate to="/events" />;
+    }
+
     return (
       <div className="px-4 py-4">
         <p className="text-error mb-2">
