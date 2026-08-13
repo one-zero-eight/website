@@ -1,6 +1,5 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type {
-  SchemaComponent,
   SchemaScheduleConfig,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
@@ -18,6 +17,7 @@ import {
 import { TERM_WEEKDAY_LABEL_RU } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { termWeekdayKeyToWeekday } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/ui/cn";
 import clsx from "clsx";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
@@ -27,16 +27,17 @@ import {
   EditClassPerGroupModal,
 } from "./EditClassAudienceModal.tsx";
 import {
-  buildAudienceSelectorTree,
-  minimizeAudienceTokens,
-} from "./audienceSelectorTree.ts";
-import {
   applyCreateMeetingToCourse,
   courseComponentOptions,
+  defaultAudienceForCreate,
   defaultCreatePlacement,
   parseCourseComponentKey,
+  previewCreateSeriesAction,
+  type ComponentScheduleStatus,
   type CreateMeetingCellContext,
+  type CreateMeetingViewContext,
   type CreatePlacement,
+  type CourseComponentCreateOption,
 } from "./createMeetingUtils.ts";
 import {
   formatAudienceTokensLabel,
@@ -75,6 +76,7 @@ function CreateClassDropdown({
       options={options}
       placeholder={placeholder}
       searchable
+      showHintOnTrigger
       trailingOption={trailingOption}
       className={clsx("w-full", disabled && "pointer-events-none opacity-50")}
       triggerClassName="w-full"
@@ -97,17 +99,33 @@ function CreateClassField({
   );
 }
 
-function defaultAudienceForComponent(
-  component: SchemaComponent,
-  config: SchemaScheduleConfig,
-  cellGroupId?: string,
-) {
-  const tree = buildAudienceSelectorTree(config);
-  if (cellGroupId) {
-    const fromCell = minimizeAudienceTokens([cellGroupId], tree);
-    if (fromCell.length) return fromCell;
-  }
-  return minimizeAudienceTokens(component.student_groups || [], tree);
+function statusDotClass(status: ComponentScheduleStatus) {
+  if (status === "covered") return "bg-success";
+  if (status === "partial") return "bg-warning";
+  return "bg-base-content/25";
+}
+
+function toSelectOptions(
+  options: CourseComponentCreateOption[],
+): SelectDropdownOption[] {
+  return options.map((item) => ({
+    value: item.value,
+    label: item.label,
+    hint: [item.modeLabel, item.statusLabel].filter(Boolean).join(" · "),
+    searchText: item.searchText,
+    startAdornment: (
+      <span
+        className={cn(
+          "mt-1.5 size-1.5 shrink-0 rounded-full",
+          statusDotClass(item.status),
+          !item.inCurrentView && "opacity-40",
+        )}
+      />
+    ),
+    endAdornment: item.inCurrentView ? (
+      <span className="badge badge-ghost badge-xs shrink-0">вид</span>
+    ) : null,
+  }));
 }
 
 function seedOccurrenceFromCell(
@@ -157,6 +175,7 @@ export function CreateClassModal({
   meetings,
   meetingPickerIndex,
   layoutMode,
+  viewContext,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -165,6 +184,7 @@ export function CreateClassModal({
   meetings: Meeting[];
   meetingPickerIndex: MeetingPickerIndex;
   layoutMode: TimetableLayoutMode;
+  viewContext?: CreateMeetingViewContext;
 }) {
   const { data: courses } = useCoursesQuery();
   const { mutate, isPending } = useUpdateCourseMutation();
@@ -196,13 +216,23 @@ export function CreateClassModal({
 
   const perGroup = selectedComponent?.per_group ?? false;
 
-  const courseComponentDropdownOptions = useMemo(() => {
+  const createOptions = useMemo(() => {
     if (!courses) return [];
-    return courseComponentOptions(courses).map((item) => ({
-      value: item.value,
-      label: item.label,
-    }));
-  }, [courses]);
+    return courseComponentOptions(courses, config, {
+      ...viewContext,
+      groupId: cellContext?.groupId ?? viewContext?.groupId,
+    });
+  }, [cellContext?.groupId, config, courses, viewContext]);
+
+  const courseComponentDropdownOptions = useMemo(
+    () => toSelectOptions(createOptions),
+    [createOptions],
+  );
+
+  const selectedOption = useMemo(
+    () => createOptions.find((item) => item.value === courseComponentKey),
+    [courseComponentKey, createOptions],
+  );
 
   const perGroupOptions = useMemo(() => {
     if (!selectedComponent) return [];
@@ -219,6 +249,13 @@ export function CreateClassModal({
 
   const audienceDisplayLabel = formatAudienceTokensLabel(config, audienceValue);
 
+  const seriesAction = useMemo(() => {
+    if (!selectedComponent || !audienceValue.length) {
+      return selectedOption?.seriesAction ?? null;
+    }
+    return previewCreateSeriesAction(selectedComponent, audienceValue, config);
+  }, [audienceValue, config, selectedComponent, selectedOption?.seriesAction]);
+
   useEffect(() => {
     if (!open || !cellContext) return;
     setCourseComponentKey("");
@@ -231,11 +268,7 @@ export function CreateClassModal({
   useEffect(() => {
     if (!selectedComponent) return;
     setAudienceValue(
-      defaultAudienceForComponent(
-        selectedComponent,
-        config,
-        cellContext?.groupId,
-      ),
+      defaultAudienceForCreate(selectedComponent, config, cellContext?.groupId),
     );
   }, [cellContext?.groupId, config, selectedComponent]);
 
@@ -313,7 +346,12 @@ export function CreateClassModal({
       },
       {
         onSuccess: () => {
-          showSuccess("Создано", "Занятие добавлено в расписание.");
+          showSuccess(
+            "Создано",
+            seriesAction === "append"
+              ? "Занятие добавлено в существующую серию."
+              : "Создана новая серия занятий.",
+          );
           handleClose();
         },
         onError: (error) => {
@@ -361,6 +399,23 @@ export function CreateClassModal({
             placeholder="Выберите предмет и компонент"
             options={courseComponentDropdownOptions}
           />
+          {selectedOption ? (
+            <p className="text-base-content/55 text-xs">
+              {selectedOption.inCurrentView ? "Текущий вид · " : null}
+              {selectedOption.modeLabel
+                ? `${selectedOption.modeLabel} · `
+                : null}
+              расписание: {selectedOption.statusLabel}
+              {seriesAction === "append"
+                ? " · добавится в существующую серию"
+                : " · будет создана новая серия"}
+            </p>
+          ) : (
+            <p className="text-base-content/55 text-xs">
+              Сначала предметы текущего вида. Точка: нет / частично / есть
+              занятия.
+            </p>
+          )}
         </CreateClassField>
 
         {selectedComponent && !perGroup ? (
@@ -369,7 +424,7 @@ export function CreateClassModal({
             onOpenChange={setAudienceModalOpen}
             config={config}
             tokens={audienceValue}
-            originalTokens={defaultAudienceForComponent(
+            originalTokens={defaultAudienceForCreate(
               selectedComponent,
               config,
               cellContext.groupId,
@@ -455,6 +510,8 @@ export function CreateClassModal({
           >
             {isPending ? (
               <span className="loading loading-spinner loading-sm" />
+            ) : seriesAction === "append" ? (
+              "Добавить"
             ) : (
               "Создать"
             )}

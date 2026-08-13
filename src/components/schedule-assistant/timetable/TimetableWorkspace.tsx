@@ -42,6 +42,7 @@ import {
 import {
   dateForWeekdayInWeekRange,
   type CreateMeetingCellContext,
+  type CreateMeetingViewContext,
 } from "./createMeetingUtils.ts";
 import { EditClassModal } from "./EditClassModal.tsx";
 import { MeetingDetailPanel } from "./MeetingDetailPanel.tsx";
@@ -689,6 +690,33 @@ function TimetableWorkspaceInner({
   const [createCellContext, setCreateCellContext] =
     useState<CreateMeetingCellContext | null>(null);
 
+  const createViewContext = useMemo((): CreateMeetingViewContext => {
+    const sectionCode =
+      !isUtilizationTab && activeTab !== "instructor" && activeTab !== "room"
+        ? activeTab
+        : undefined;
+    const visibleGroupIds =
+      config && sectionCode
+        ? columnsForTab(activeTab, columns, allMeetings, config).map(
+            (column) => column.groupId,
+          )
+        : [];
+    return {
+      sectionCode,
+      groupId: createCellContext?.groupId,
+      visibleGroupIds,
+      coursesToSections: coursesToSections ?? undefined,
+    };
+  }, [
+    activeTab,
+    allMeetings,
+    columns,
+    config,
+    coursesToSections,
+    createCellContext?.groupId,
+    isUtilizationTab,
+  ]);
+
   const handleEmptyCellClick = useCallback(
     (context: CreateMeetingCellContext) => {
       setCreateCellContext(context);
@@ -993,6 +1021,7 @@ function TimetableWorkspaceInner({
         meetings={allMeetings}
         meetingPickerIndex={meetingPickerIndex}
         layoutMode={layoutMode}
+        viewContext={createViewContext}
       />
     </SelectionStoreContext.Provider>
   );

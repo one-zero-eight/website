@@ -7,6 +7,7 @@ import type {
   SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
+import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { termWeekdayKeyToWeekday } from "@/components/schedule-assistant/settings/weekdays.ts";
 
@@ -15,7 +16,7 @@ import {
   minimizeAudienceTokens,
 } from "./audienceSelectorTree.ts";
 import {
-  meetingAudienceEqual,
+  audienceTokensEquivalent,
   resolveEndTimeForStart,
 } from "./meetingEditUtils.ts";
 import type { TimetableLayoutMode } from "./TimetableLayoutSelector.tsx";
@@ -29,7 +30,33 @@ export type CreateMeetingCellContext = {
   groupId?: string;
 };
 
+export type CreateMeetingViewContext = {
+  sectionCode?: string;
+  groupId?: string;
+  visibleGroupIds?: string[];
+  /** From buildCoursesToSections(config); keys are course indices as strings. */
+  coursesToSections?: Record<string, string[]>;
+};
+
 export type CreatePlacement = "weekly" | "occurrences";
+
+export type ComponentScheduleStatus = "empty" | "partial" | "covered";
+
+export type CreateSeriesAction = "append" | "create";
+
+export type CourseComponentCreateOption = {
+  value: string;
+  label: string;
+  courseIdx: number;
+  componentIdx: number;
+  perGroup: boolean;
+  inCurrentView: boolean;
+  status: ComponentScheduleStatus;
+  statusLabel: string;
+  modeLabel: string;
+  seriesAction: CreateSeriesAction;
+  searchText: string;
+};
 
 export type CreateMeetingDraft = {
   courseIdx: number;
@@ -48,6 +75,12 @@ const WEEKDAY_TO_JS_INDEX: Record<Weekday, number> = {
   [Weekday.THURSDAY]: 4,
   [Weekday.FRIDAY]: 5,
   [Weekday.SATURDAY]: 6,
+};
+
+const STATUS_RANK: Record<ComponentScheduleStatus, number> = {
+  empty: 0,
+  partial: 1,
+  covered: 2,
 };
 
 function formatLocalDate(d: Date) {
@@ -79,13 +112,258 @@ function normalizeTimeToApi(value: string) {
   return trimmed;
 }
 
-export function courseComponentOptions(courses: SchemaCourseConfig[]) {
-  const options: {
-    value: string;
-    label: string;
-    courseIdx: number;
-    componentIdx: number;
-  }[] = [];
+function audienceForSeries(
+  component: SchemaComponent,
+  series: SchemaComponentSessionSeries,
+  config: SchemaScheduleConfig,
+) {
+  const tree = buildAudienceSelectorTree(config);
+  const explicit = series.audience || [];
+  if (explicit.length) return minimizeAudienceTokens(explicit, tree);
+  return minimizeAudienceTokens(component.student_groups || [], tree);
+}
+
+function expandedAudience(
+  config: SchemaScheduleConfig,
+  tokens: string[],
+): string[] {
+  return [
+    ...new Set(
+      expandStudentGroupSelectors(config, tokens).map((item) =>
+        String(item || "").trim(),
+      ),
+    ),
+  ].filter(Boolean);
+}
+
+function seriesCoversGroup(
+  component: SchemaComponent,
+  series: SchemaComponentSessionSeries,
+  config: SchemaScheduleConfig,
+  groupId: string,
+) {
+  return expandedAudience(
+    config,
+    audienceForSeries(component, series, config),
+  ).includes(groupId);
+}
+
+function seriesHasPlacement(series: SchemaComponentSessionSeries) {
+  return (
+    (series.weekly_pattern?.length ?? 0) > 0 ||
+    (series.occurrences?.length ?? 0) > 0
+  );
+}
+
+function weeklySlotCount(sessions: SchemaComponentSessionSeries[]) {
+  return sessions.reduce(
+    (sum, series) => sum + (series.weekly_pattern?.length ?? 0),
+    0,
+  );
+}
+
+export function defaultAudienceForCreate(
+  component: SchemaComponent,
+  config: SchemaScheduleConfig,
+  cellGroupId?: string,
+): string[] {
+  const tree = buildAudienceSelectorTree(config);
+  if (component.per_group) {
+    const pool = expandedAudience(config, component.student_groups || []);
+    const poolSet = new Set(pool);
+    if (cellGroupId && poolSet.has(cellGroupId)) {
+      return minimizeAudienceTokens([cellGroupId], tree);
+    }
+    if (pool.length === 1) {
+      return minimizeAudienceTokens([pool[0]!], tree);
+    }
+    return [];
+  }
+  return minimizeAudienceTokens(component.student_groups || [], tree);
+}
+
+/**
+ * Find an existing session series to attach to, without creating.
+ * Shared components attach to the component-level series even when the draft
+ * audience is a single group from the grid cell.
+ */
+export function findMatchingSessionSeries(
+  component: SchemaComponent,
+  audience: string[],
+  config: SchemaScheduleConfig,
+): SchemaComponentSessionSeries | null {
+  const tree = buildAudienceSelectorTree(config);
+  const targetAudience = minimizeAudienceTokens(audience, tree);
+  if (!targetAudience.length) return null;
+
+  const sessions = component.sessions || [];
+  if (!sessions.length) return null;
+
+  for (const series of sessions) {
+    if (
+      audienceTokensEquivalent(
+        config,
+        audienceForSeries(component, series, config),
+        targetAudience,
+      )
+    ) {
+      return series;
+    }
+  }
+
+  const targetExpanded = expandedAudience(config, targetAudience);
+
+  if (component.per_group && targetExpanded.length === 1) {
+    const groupId = targetExpanded[0]!;
+    let multiHit: SchemaComponentSessionSeries | null = null;
+    for (const series of sessions) {
+      const expanded = expandedAudience(
+        config,
+        audienceForSeries(component, series, config),
+      );
+      if (expanded.length === 1 && expanded[0] === groupId) return series;
+      if (expanded.includes(groupId) && !multiHit) multiHit = series;
+    }
+    if (multiHit) return multiHit;
+    return null;
+  }
+
+  if (!component.per_group) {
+    const componentTokens = component.student_groups || [];
+    const componentExpanded = expandedAudience(config, componentTokens);
+    const targetIsSubset =
+      targetExpanded.length > 0 &&
+      targetExpanded.every((groupId) => componentExpanded.includes(groupId));
+    if (!targetIsSubset && componentExpanded.length) return null;
+
+    for (const series of sessions) {
+      if (
+        audienceTokensEquivalent(
+          config,
+          audienceForSeries(component, series, config),
+          componentTokens,
+        )
+      ) {
+        return series;
+      }
+    }
+  }
+
+  return null;
+}
+
+function seriesAudienceForCreate(
+  component: SchemaComponent,
+  audience: string[],
+  config: SchemaScheduleConfig,
+): string[] {
+  const tree = buildAudienceSelectorTree(config);
+  if (component.per_group) {
+    return minimizeAudienceTokens(audience, tree);
+  }
+  return minimizeAudienceTokens(component.student_groups || [], tree);
+}
+
+function findOrCreateSessionSeries(
+  component: SchemaComponent,
+  audience: string[],
+  config: SchemaScheduleConfig,
+): SchemaComponentSessionSeries {
+  const matched = findMatchingSessionSeries(component, audience, config);
+  if (matched) return matched;
+
+  if (!component.sessions) component.sessions = [];
+  const created: SchemaComponentSessionSeries = {
+    audience: seriesAudienceForCreate(component, audience, config),
+    weekly_pattern: [],
+    occurrences: [],
+  };
+  component.sessions.push(created);
+  return created;
+}
+
+export function previewCreateSeriesAction(
+  component: SchemaComponent,
+  audience: string[],
+  config: SchemaScheduleConfig,
+): CreateSeriesAction {
+  return findMatchingSessionSeries(component, audience, config)
+    ? "append"
+    : "create";
+}
+
+export function componentScheduleStatus(
+  component: SchemaComponent,
+  config: SchemaScheduleConfig,
+  focusGroupId?: string,
+): ComponentScheduleStatus {
+  const sessions = component.sessions || [];
+  const relevant =
+    component.per_group && focusGroupId
+      ? sessions.filter((series) =>
+          seriesCoversGroup(component, series, config, focusGroupId),
+        )
+      : sessions;
+
+  if (!relevant.some(seriesHasPlacement)) return "empty";
+
+  const perWeek = component.per_week;
+  if (perWeek != null && perWeek > 0) {
+    const weekly = weeklySlotCount(relevant);
+    if (weekly >= perWeek) return "covered";
+    return "partial";
+  }
+
+  return "covered";
+}
+
+export function componentScheduleStatusLabel(
+  status: ComponentScheduleStatus,
+): string {
+  if (status === "empty") return "нет";
+  if (status === "partial") return "частично";
+  return "есть";
+}
+
+function componentTouchesView(
+  component: SchemaComponent,
+  config: SchemaScheduleConfig,
+  view: CreateMeetingViewContext | undefined,
+  courseIdx: number,
+): boolean {
+  if (!view) return false;
+
+  const sectionCodes = view.coursesToSections?.[String(courseIdx)] ?? [];
+  if (
+    view.sectionCode &&
+    sectionCodes.some((code) => code === view.sectionCode)
+  ) {
+    return true;
+  }
+
+  const focusIds = [
+    ...(view.groupId ? [view.groupId] : []),
+    ...(view.visibleGroupIds ?? []),
+  ];
+  if (!focusIds.length) return Boolean(view.sectionCode && sectionCodes.length);
+
+  const focusSet = new Set(focusIds);
+  const tokens = [
+    ...(component.student_groups || []),
+    ...(component.sessions || []).flatMap((series) => series.audience || []),
+  ];
+  return expandedAudience(config, tokens).some((groupId) =>
+    focusSet.has(groupId),
+  );
+}
+
+export function courseComponentOptions(
+  courses: SchemaCourseConfig[],
+  config?: SchemaScheduleConfig,
+  view?: CreateMeetingViewContext,
+): CourseComponentCreateOption[] {
+  const options: CourseComponentCreateOption[] = [];
+  const focusGroupId = view?.groupId;
 
   for (const [courseIdx, course] of courses.entries()) {
     const title = String(course.short_name || course.name || "").trim() || "—";
@@ -93,16 +371,50 @@ export function courseComponentOptions(courses: SchemaCourseConfig[]) {
       course.components || []
     ).entries()) {
       const tag = String(component.tag || "").trim() || "—";
+      const perGroup = Boolean(component.per_group);
+      const status = config
+        ? componentScheduleStatus(component, config, focusGroupId)
+        : "empty";
+      const audience = config
+        ? defaultAudienceForCreate(component, config, focusGroupId)
+        : [];
+      const seriesAction =
+        config && audience.length
+          ? previewCreateSeriesAction(component, audience, config)
+          : "create";
+      const statusLabel = componentScheduleStatusLabel(status);
+      const modeLabel = perGroup ? "по группам" : "";
+      const inCurrentView = config
+        ? componentTouchesView(component, config, view, courseIdx)
+        : false;
+
       options.push({
         value: `${courseIdx}:${componentIdx}`,
         label: `${title} (${tag})`,
         courseIdx,
         componentIdx,
+        perGroup,
+        inCurrentView,
+        status,
+        statusLabel,
+        modeLabel,
+        seriesAction,
+        searchText: [title, tag, course.name, modeLabel, statusLabel]
+          .filter(Boolean)
+          .join(" "),
       });
     }
   }
 
-  return options.sort((a, b) => a.label.localeCompare(b.label, "ru"));
+  return options.sort((a, b) => {
+    if (a.inCurrentView !== b.inCurrentView) {
+      return a.inCurrentView ? -1 : 1;
+    }
+    if (a.status !== b.status) {
+      return STATUS_RANK[a.status] - STATUS_RANK[b.status];
+    }
+    return a.label.localeCompare(b.label, "ru");
+  });
 }
 
 export function parseCourseComponentKey(value: string) {
@@ -199,22 +511,10 @@ export function defaultCreatePlacement(
   if (!course || componentIdx == null || componentIdx < 0) return layoutDefault;
   const component = course.components?.[componentIdx];
   if (!component) return layoutDefault;
+  if (!audience.length) return layoutDefault;
 
-  const tree = buildAudienceSelectorTree(config);
-  const targetAudience = minimizeAudienceTokens(audience, tree);
-  if (!targetAudience.length) return layoutDefault;
-
-  for (const series of component.sessions || []) {
-    if (
-      meetingAudienceEqual(
-        audienceForSeries(component, series, config),
-        targetAudience,
-      )
-    ) {
-      return seriesPlacement(series) ?? layoutDefault;
-    }
-  }
-
+  const matched = findMatchingSessionSeries(component, audience, config);
+  if (matched) return seriesPlacement(matched) ?? layoutDefault;
   return layoutDefault;
 }
 
@@ -235,46 +535,6 @@ export function createWouldUseOccurrences(
       layoutMode,
     ) === "occurrences"
   );
-}
-
-function audienceForSeries(
-  component: SchemaComponent,
-  series: SchemaComponentSessionSeries,
-  config: SchemaScheduleConfig,
-) {
-  const tree = buildAudienceSelectorTree(config);
-  const explicit = series.audience || [];
-  if (explicit.length) return minimizeAudienceTokens(explicit, tree);
-  return minimizeAudienceTokens(component.student_groups || [], tree);
-}
-
-function findOrCreateSessionSeries(
-  component: SchemaComponent,
-  audience: string[],
-  config: SchemaScheduleConfig,
-): SchemaComponentSessionSeries {
-  const tree = buildAudienceSelectorTree(config);
-  const targetAudience = minimizeAudienceTokens(audience, tree);
-  if (!component.sessions) component.sessions = [];
-
-  for (const series of component.sessions) {
-    if (
-      meetingAudienceEqual(
-        audienceForSeries(component, series, config),
-        targetAudience,
-      )
-    ) {
-      return series;
-    }
-  }
-
-  const created: SchemaComponentSessionSeries = {
-    audience: [...targetAudience],
-    weekly_pattern: [],
-    occurrences: [],
-  };
-  component.sessions.push(created);
-  return created;
 }
 
 export function applyCreateMeetingToCourse(
