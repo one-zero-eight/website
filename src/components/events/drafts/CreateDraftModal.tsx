@@ -12,6 +12,7 @@ import {
   EnrollmentFormValue,
 } from "../shared/EnrollmentFields";
 import { eventFieldClass } from "../shared/formStyles";
+import { LocationField } from "../shared/LocationField";
 import {
   durationHoursFromLocalRange,
   fromDatetimeLocalValue,
@@ -125,17 +126,11 @@ export function CreateDraftModal({
           )}
         </div>
 
-        <label className="flex flex-col gap-1 text-sm">
-          <span>Location</span>
-          <input
-            type="text"
-            className={eventFieldClass()}
-            placeholder="TBA"
-            value={location}
-            disabled={isPending}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </label>
+        <LocationField
+          value={location}
+          onChange={setLocation}
+          disabled={isPending}
+        />
 
         <EnrollmentFields
           value={enrollment}
