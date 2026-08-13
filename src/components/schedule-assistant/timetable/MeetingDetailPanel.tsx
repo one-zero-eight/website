@@ -11,7 +11,7 @@ import {
   MeetingAudienceInline,
   SeriesScheduleItemsList,
 } from "@/components/schedule-assistant/courses/CourseComponentDetailsView.tsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import {
   courseDisplayTitle,
@@ -52,27 +52,6 @@ function formatInstructors(
     .join(", ");
 }
 
-function occurrenceDatesForMeeting(
-  config: SchemaScheduleConfig,
-  meeting: Meeting,
-): string[] {
-  const ref = parseMeetingInstanceId(meeting.instance_id);
-  if (!ref || ref.kind !== "occ") {
-    return meeting.date ? [meeting.date] : [];
-  }
-
-  const course = config.courses?.[ref.courseIdx];
-  const series =
-    course?.components?.[ref.componentIdx]?.sessions?.[ref.seriesIdx];
-  const dates = (series?.occurrences ?? [])
-    .map((occurrence) => String(occurrence.date || "").trim())
-    .filter(Boolean)
-    .sort((a, b) => a.localeCompare(b));
-
-  if (dates.length) return [...new Set(dates)];
-  return meeting.date ? [meeting.date] : [];
-}
-
 function occurrenceMeetingsForSeries(
   allMeetings: Meeting[],
   meeting: Meeting,
@@ -99,29 +78,29 @@ function occurrenceMeetingsForSeries(
     });
 }
 
-function MeetingScheduleKind({
+function resolveMeetingSchedule({
   meeting,
-  config,
   allMeetings,
   instructorLabelById,
   onNavigateToMeeting,
 }: {
   meeting: Meeting;
-  config: SchemaScheduleConfig;
   allMeetings: Meeting[];
   instructorLabelById: Record<string, string>;
   onNavigateToMeeting: (meeting: Meeting) => void;
-}) {
+}): { phrase: ReactNode; datesList: ReactNode | null } {
   const ref = parseMeetingInstanceId(meeting.instance_id);
   const weekday = dayKey(meeting.date);
 
   if (meeting.cancelled) {
-    return <span className="badge badge-error badge-sm">Отменено</span>;
+    return {
+      phrase: <span className="badge badge-error badge-sm">Отменено</span>,
+      datesList: null,
+    };
   }
 
   if (ref?.kind === "occ") {
     const siblings = occurrenceMeetingsForSeries(allMeetings, meeting);
-    const dates = occurrenceDatesForMeeting(config, meeting);
     const items = siblings.map((item) =>
       meetingToScheduleTooltipItem(
         item,
@@ -129,49 +108,42 @@ function MeetingScheduleKind({
         item.instance_id === meeting.instance_id,
       ),
     );
-    const single =
-      dates.length === 1
-        ? meetingToScheduleTooltipItem(meeting, instructorLabelById)
-        : null;
 
-    return (
-      <span className="flex w-full min-w-0 flex-col gap-1">
-        <span className="text-base-content">На определенные даты</span>
-        {dates.length > 1 ? (
+    return {
+      phrase: "На определенные даты",
+      datesList: items.length ? (
+        <div className="border-base-300/70 w-full border-b pb-1.5">
           <SeriesScheduleItemsList
             items={items}
             onNavigateToMeeting={onNavigateToMeeting}
           />
-        ) : single ? (
-          <span className="text-base-content/55 text-xs">
-            <span className="block wrap-anywhere">{single.primary}</span>
-            {single.secondary ? (
-              <span className="mt-0.5 block wrap-anywhere">
-                {single.secondary}
-              </span>
-            ) : null}
-          </span>
-        ) : null}
-      </span>
-    );
+        </div>
+      ) : null,
+    };
   }
 
   if (ref?.kind === "wp") {
-    return (
-      <span className="text-base-content">
-        {everyWeekdayPhraseRu(weekday)}
-        {meeting.override_fields?.length ? (
-          <span className="text-base-content/60">
-            {" "}
-            · переопределено:{" "}
-            {formatMeetingOverrideFields(meeting.override_fields)}
-          </span>
-        ) : null}
-      </span>
-    );
+    return {
+      phrase: (
+        <>
+          {everyWeekdayPhraseRu(weekday)}
+          {meeting.override_fields?.length ? (
+            <span className="text-base-content/60">
+              {" "}
+              · переопределено:{" "}
+              {formatMeetingOverrideFields(meeting.override_fields)}
+            </span>
+          ) : null}
+        </>
+      ),
+      datesList: null,
+    };
   }
 
-  return <span className="text-base-content">{weekdayLabelRu(weekday)}</span>;
+  return {
+    phrase: weekdayLabelRu(weekday),
+    datesList: null,
+  };
 }
 
 function CourseComponentsAccordion({
@@ -294,6 +266,13 @@ export function MeetingDetailPanel({
   const courseShortName =
     String(course?.short_name || course?.short_name_ru || "").trim() || "—";
 
+  const schedule = resolveMeetingSchedule({
+    meeting,
+    allMeetings,
+    instructorLabelById,
+    onNavigateToMeeting,
+  });
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-1 text-sm" id="detailList">
       {meeting.cancelled ? (
@@ -309,18 +288,13 @@ export function MeetingDetailPanel({
           : "—"}
       </DetailField>
       <DetailField label="Время">{timeRange}</DetailField>
-      <DetailField label="Повтор" fullWidth>
-        <span className="flex w-full min-w-0 flex-col gap-1.5">
-          <MeetingScheduleKind
-            meeting={meeting}
-            config={config}
-            allMeetings={allMeetings}
-            instructorLabelById={instructorLabelById}
-            onNavigateToMeeting={onNavigateToMeeting}
-          />
+      <DetailField label="Повтор">
+        <span className="inline-flex min-w-0 flex-wrap items-center gap-1.5">
+          {schedule.phrase}
           <MeetingOverrideIndicator fields={meeting.override_fields} />
         </span>
       </DetailField>
+      {schedule.datesList}
       <DetailField label="Локация">{room}</DetailField>
       <DetailField label="Преподаватель">{instructors}</DetailField>
       <DetailField label="Группы">

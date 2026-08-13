@@ -22,6 +22,31 @@ import {
   type AudienceSelectableItem,
 } from "./audienceSelectorTree.ts";
 
+function firstSelectedItemIndex(
+  items: AudienceSelectableItem[],
+  selected: ReadonlySet<string>,
+) {
+  for (let index = 0; index < items.length; index++) {
+    const item = items[index]!;
+    if (item.kind === "program") {
+      if (isProgramEffectivelySelected(item.program, selected)) return index;
+      continue;
+    }
+    if (item.kind === "track") {
+      if (isTrackEffectivelySelected(item.program, item.track, selected)) {
+        return index;
+      }
+      continue;
+    }
+    if (
+      isGroupEffectivelySelected(item.program, item.track, item.group, selected)
+    ) {
+      return index;
+    }
+  }
+  return -1;
+}
+
 export function EditClassAudienceMultiSelect({
   config,
   tokens,
@@ -71,6 +96,9 @@ export function EditClassAudienceMultiSelect({
     () => new Set(minimizeAudienceTokens(tokens, tree)),
     [tokens, tree],
   );
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
+  const centerHighlightedRef = useRef(false);
 
   const activeHighlightedIndex =
     selectableItems.length > 0
@@ -78,23 +106,44 @@ export function EditClassAudienceMultiSelect({
       : null;
 
   useEffect(() => {
-    setHighlightedIndex(0);
-  }, [searchQuery, selectableItems.length]);
+    if (searchQuery.trim()) {
+      setHighlightedIndex(0);
+      return;
+    }
+    const index = firstSelectedItemIndex(selectableItems, selectedRef.current);
+    centerHighlightedRef.current = true;
+    setHighlightedIndex(index >= 0 ? index : 0);
+  }, [searchQuery, selectableItems]);
 
   useEffect(() => {
     if (activeHighlightedIndex === null) return;
-    const list = listRef.current;
-    const item = itemRefs.current[activeHighlightedIndex];
-    if (!list || !item) return;
+    const frame = requestAnimationFrame(() => {
+      const list = listRef.current;
+      const item = itemRefs.current[activeHighlightedIndex];
+      if (!list || !item) return;
 
-    const listRect = list.getBoundingClientRect();
-    const itemRect = item.getBoundingClientRect();
+      const listRect = list.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
 
-    if (itemRect.top < listRect.top) {
-      list.scrollTop -= listRect.top - itemRect.top;
-    } else if (itemRect.bottom > listRect.bottom) {
-      list.scrollTop += itemRect.bottom - listRect.bottom;
-    }
+      if (centerHighlightedRef.current) {
+        centerHighlightedRef.current = false;
+        const itemCenter =
+          itemRect.top - listRect.top + list.scrollTop + itemRect.height / 2;
+        const nextTop = itemCenter - list.clientHeight / 2;
+        list.scrollTop = Math.max(
+          0,
+          Math.min(nextTop, list.scrollHeight - list.clientHeight),
+        );
+        return;
+      }
+
+      if (itemRect.top < listRect.top) {
+        list.scrollTop -= listRect.top - itemRect.top;
+      } else if (itemRect.bottom > listRect.bottom) {
+        list.scrollTop += itemRect.bottom - listRect.bottom;
+      }
+    });
+    return () => cancelAnimationFrame(frame);
   }, [activeHighlightedIndex]);
 
   function focusSearchInput() {
@@ -182,32 +231,15 @@ export function EditClassAudienceMultiSelect({
   return (
     <div
       className={clsx(
-        "flex flex-col gap-2 text-sm",
-        !editorOnly && "rounded-lg",
-        !editorOnly &&
-          changed &&
-          "bg-warning/10 ring-warning/40 px-2 py-1.5 ring-2",
-        !editorOnly &&
-          !changed &&
-          overridden &&
-          "bg-info/10 ring-info/40 px-2 py-1.5 ring-2",
-        !editorOnly && !changed && !overridden && "px-0.5 py-0.5",
+        "flex flex-col gap-2 border-l-4 pl-2 text-sm",
+        !editorOnly && changed && "border-warning/60",
+        !editorOnly && !changed && overridden && "border-info/60",
+        (editorOnly || (!changed && !overridden)) && "border-transparent",
       )}
     >
       {!editorOnly ? (
         <>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium">Группы</span>
-            {changed ? (
-              <span className="badge badge-warning badge-sm">изменено</span>
-            ) : overridden ? (
-              <span className="badge badge-info badge-sm">переопр.</span>
-            ) : (
-              <span className="text-base-content/50 text-xs">
-                без изменений
-              </span>
-            )}
-          </div>
+          <span className="text-sm font-medium">Группы</span>
 
           {tokens.length ? (
             <div className="text-base-content/70 min-w-0 leading-snug wrap-break-word">
@@ -218,20 +250,22 @@ export function EditClassAudienceMultiSelect({
           )}
 
           {changed && originalLabel ? (
-            <div className="text-base-content/60 text-xs">
+            <div className="text-base-content/55 text-xs">
               Было:{" "}
               <button
                 type="button"
-                className="text-base-content/80 hover:text-base-content cursor-pointer underline decoration-dotted underline-offset-2"
+                className="hover:text-base-content cursor-pointer underline decoration-dotted underline-offset-2"
                 onClick={onRestoreOriginal}
               >
-                {originalLabel}
+                {originalLabel || "—"}
               </button>
             </div>
           ) : null}
-          {!changed && overridden && patternLabel ? (
-            <div className="text-base-content/60 text-xs">
-              В шаблоне: {patternLabel}
+          {!changed && overridden ? (
+            <div className="text-info/80 text-xs">
+              {patternLabel
+                ? `В шаблоне: ${patternLabel}`
+                : "переопределено в шаблоне"}
             </div>
           ) : null}
         </>

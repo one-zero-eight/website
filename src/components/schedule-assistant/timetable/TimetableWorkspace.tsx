@@ -992,6 +992,7 @@ function TimetableWorkspaceInner({
         config={config}
         meetings={allMeetings}
         meetingPickerIndex={meetingPickerIndex}
+        layoutMode={layoutMode}
       />
     </SelectionStoreContext.Provider>
   );

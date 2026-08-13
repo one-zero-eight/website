@@ -176,9 +176,11 @@ export function formatInstructorPoolEntries(
   });
 }
 
-function flattenInstructorPoolIds(pool: unknown[]): string[] {
+export function flattenInstructorPoolIds(
+  pool: unknown[] | null | undefined,
+): string[] {
   const ids: string[] = [];
-  for (const entry of pool) {
+  for (const entry of pool ?? []) {
     if (Array.isArray(entry)) {
       for (const id of entry) {
         const value = String(id || "").trim();

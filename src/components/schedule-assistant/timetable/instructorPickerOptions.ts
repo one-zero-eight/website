@@ -282,12 +282,22 @@ export function instructorAvailabilityForSlot({
 
   const hasWeeklyConflict = conflicts.some((conflict) => conflict.weekly);
   const onceConflicts = conflicts.filter((conflict) => !conflict.weekly);
+  const conflictDates = [
+    ...new Set(conflicts.flatMap((conflict) => conflict.dates)),
+  ];
+  const everyCheckedDateConflicts =
+    dateSet.size > 0 && conflictDates.length >= dateSet.size;
   const isBanned = preferenceLevel === InstructorSlotPreferenceLevel.banned;
   const isDiscouraged =
     preferenceLevel === InstructorSlotPreferenceLevel.discouraged;
 
   let status: InstructorAvailabilityStatus = "green";
-  if (isBanned || hasWeeklyConflict || conflicts.length >= 2) {
+  if (
+    isBanned ||
+    hasWeeklyConflict ||
+    conflicts.length >= 2 ||
+    everyCheckedDateConflicts
+  ) {
     status = "red";
   } else if (onceConflicts.length === 1 || isDiscouraged) {
     status = "orange";
@@ -322,6 +332,7 @@ export function buildInstructorPickerOptions({
   end,
   weekday,
   courseInstructors,
+  instructorPool,
   excludeInstanceId,
   excludeRef,
   includeInstructorIds,
@@ -338,6 +349,8 @@ export function buildInstructorPickerOptions({
   end?: string;
   weekday: TermWeekdayKey;
   courseInstructors?: CourseInstructor[] | null;
+  /** Component instructor_pool entries (string | string[]). */
+  instructorPool?: unknown[] | null;
   excludeInstanceId?: string | null;
   excludeRef?: MeetingRef | null;
   includeInstructorIds?: string[];
@@ -363,13 +376,36 @@ export function buildInstructorPickerOptions({
     if (role) roleById.set(id, role);
   }
 
+  const poolIdSet = new Set<string>();
+  for (const entry of instructorPool ?? []) {
+    if (Array.isArray(entry)) {
+      for (const id of entry) {
+        const value = String(id || "").trim();
+        if (value) poolIdSet.add(value);
+      }
+      continue;
+    }
+    const value = String(entry || "").trim();
+    if (value) poolIdSet.add(value);
+  }
+
   const includeSet = new Set(
     (includeInstructorIds || []).map((id) => id.trim()).filter(Boolean),
   );
 
-  const otherIds = [...byId.keys()].filter((id) => !seenPreferred.has(id));
+  const visibleWithoutSearch = new Set<string>([
+    ...seenPreferred,
+    ...poolIdSet,
+  ]);
+
+  const otherIds = [...byId.keys()].filter(
+    (id) => !visibleWithoutSearch.has(id),
+  );
 
   const ids: string[] = [...preferredIds];
+  for (const id of poolIdSet) {
+    if (!ids.includes(id)) ids.push(id);
+  }
   for (const id of otherIds) ids.push(id);
   for (const id of includeSet) {
     if (!ids.includes(id)) ids.push(id);
@@ -377,7 +413,7 @@ export function buildInstructorPickerOptions({
 
   const apiWeekday = termWeekdayKeyToWeekday(weekday);
 
-  const restrictToPreferred = preferredIds.length > 0;
+  const restrictCatalog = true;
   const isExcluded = excludeRef
     ? (meeting: Meeting) => isSameLogicalMeeting(meeting, excludeRef)
     : undefined;
@@ -391,6 +427,7 @@ export function buildInstructorPickerOptions({
       const label = instructor ? instructorPickerLabel(instructor) : id;
       const role = roleById.get(id);
       const preferred = seenPreferred.has(id);
+      const inPool = poolIdSet.has(id);
       const availability = includeStatus
         ? instructorAvailabilityForSlot({
             config,
@@ -442,8 +479,9 @@ export function buildInstructorPickerOptions({
         startAdornment: createElement(InstructorAvailabilityStatusMark, {
           info: availability,
         }),
-        requireSearch: restrictToPreferred && !preferred,
+        requireSearch: restrictCatalog && !visibleWithoutSearch.has(id),
         preferred,
+        inPool,
         status: availability?.status ?? null,
         preferenceLevel: availability?.preference?.level ?? null,
       };
@@ -454,6 +492,7 @@ export function buildInstructorPickerOptions({
         if (statusDiff !== 0) return statusDiff;
       }
       if (a.preferred !== b.preferred) return a.preferred ? -1 : 1;
+      if (a.inPool !== b.inPool) return a.inPool ? -1 : 1;
       if (includeStatus) {
         const prefDiff =
           preferenceSortRank(a.preferenceLevel) -

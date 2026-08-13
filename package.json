@@ -106,6 +106,7 @@
     "qrcode": "^1.5.4",
     "react": "^19.2.6",
     "react-confetti-boom": "^2.0.1",
+    "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.6",
     "react-error-boundary": "^6.1.1",
     "react-markdown": "^10.1.0",

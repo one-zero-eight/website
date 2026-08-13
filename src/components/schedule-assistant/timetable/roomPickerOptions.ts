@@ -27,6 +27,16 @@ import {
 
 export type RoomAvailabilityStatus = "green" | "orange" | "red";
 
+/** Virtual location — does not consume a physical room (matches backend VIRTUAL_ROOM_ID). */
+export const VIRTUAL_ROOM_ID = "ONLINE";
+
+export function isVirtualRoom(roomId: string | null | undefined): boolean {
+  const room = String(roomId || "")
+    .trim()
+    .toLocaleUpperCase("en-US");
+  return room === VIRTUAL_ROOM_ID || room === "ОНЛАЙН";
+}
+
 export type RoomConflictMeeting = {
   label: string;
   start: string;
@@ -123,9 +133,11 @@ export function isSameLogicalMeeting(
   if (excludeRef.kind === "wp" && ref.kind === "wp") {
     return ref.slotIdx === excludeRef.slotIdx;
   }
-  // Occurrences share one series: semester-wide room/instructor checks must not
-  // treat sibling dates as conflicts (edit modal / session editors).
-  return true;
+  // Occurrences: only the same date row (overlapping sibling dates are conflicts).
+  if (excludeRef.kind === "occ" && ref.kind === "occ") {
+    return ref.occIdx === excludeRef.occIdx;
+  }
+  return false;
 }
 
 function normalizeHhmm(value: string | undefined): string {
@@ -214,6 +226,15 @@ export function roomAvailabilityForSlot({
   index?: MeetingPickerIndex | null;
 }): RoomAvailabilityInfo {
   const room = roomId.trim();
+  if (isVirtualRoom(room)) {
+    return {
+      status: "green",
+      conflictDates: [],
+      conflicts: [],
+      capacityIssue: null,
+    };
+  }
+
   const proposedStart = normalizeHhmm(start);
   const proposedEnd =
     normalizeHhmm(end) ||
@@ -300,9 +321,18 @@ export function roomAvailabilityForSlot({
 
   const hasWeeklyConflict = conflicts.some((conflict) => conflict.weekly);
   const onceConflicts = conflicts.filter((conflict) => !conflict.weekly);
+  // Date-pattern checks use one date: any hit is a hard conflict (red).
+  // Weekly checks across many dates: a single once-hit stays orange.
+  const everyCheckedDateConflicts =
+    dateSet.size > 0 && conflictDates.length >= dateSet.size;
 
   let status: RoomAvailabilityStatus = "green";
-  if (capacityIssue || hasWeeklyConflict || conflictDates.length >= 2) {
+  if (
+    capacityIssue ||
+    hasWeeklyConflict ||
+    conflictDates.length >= 2 ||
+    everyCheckedDateConflicts
+  ) {
     status = "red";
   } else if (onceConflicts.length === 1 || conflictDates.length === 1) {
     status = "orange";

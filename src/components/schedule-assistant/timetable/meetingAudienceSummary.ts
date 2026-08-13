@@ -202,3 +202,67 @@ export function summarizeMeetingAudience(
 
   return programs;
 }
+
+export type AudienceInlineItem = {
+  key: string;
+  label: string;
+  selector: string;
+  mode: "program" | "track";
+  groupIds: string[];
+};
+
+/** Flatten summarized audience into label + tree-icon targets (detail panel / tooltips). */
+export function listAudienceInlineItems(
+  config: SchemaScheduleConfig,
+  groupIds: string[],
+): AudienceInlineItem[] {
+  const programs = summarizeMeetingAudience(config, groupIds);
+  if (!programs.length) return [];
+
+  return programs.flatMap((program) => {
+    if (program.full) {
+      return [
+        {
+          key: program.selector || program.title,
+          label: program.title,
+          selector: program.selector,
+          mode: "program" as const,
+          groupIds: groupIds
+            .map((id) => String(id || "").trim())
+            .filter(Boolean),
+        },
+      ];
+    }
+
+    const trackItems = program.tracks.flatMap((track) => {
+      if (track.full) {
+        return [
+          {
+            key: track.selector + track.title,
+            label: track.title,
+            selector: track.selector,
+            mode: "track" as const,
+            groupIds: [] as string[],
+          },
+        ];
+      }
+      return track.groups.map((group) => ({
+        key: `${track.selector}-${group.code}`,
+        label: group.title,
+        selector: "",
+        mode: "track" as const,
+        groupIds: [group.code],
+      }));
+    });
+
+    const flatItems = program.flatGroups.map((group) => ({
+      key: `${program.programCode || "other"}-${group.code}`,
+      label: group.title,
+      selector: "",
+      mode: "program" as const,
+      groupIds: [group.code],
+    }));
+
+    return [...trackItems, ...flatItems];
+  });
+}

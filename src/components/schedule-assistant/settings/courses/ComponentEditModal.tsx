@@ -1,5 +1,6 @@
 import type {
   SchemaComponent,
+  SchemaComponentSessionSeries,
   SchemaCourseConfig,
   SchemaInstructor,
   SchemaScheduleConfig,
@@ -8,6 +9,7 @@ import { Modal } from "@/components/common/Modal.tsx";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import { ComponentSessionsEditor } from "@/components/schedule-assistant/settings/courses/ComponentSessionsEditor.tsx";
 import { InstructorPoolEditor } from "@/components/schedule-assistant/settings/courses/InstructorPoolEditor.tsx";
+import { AudienceTokensInfoIcon } from "@/components/schedule-assistant/settings/courses/audienceTreeTooltip.tsx";
 import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { EditClassAudienceMultiSelect } from "@/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx";
 import {
@@ -16,7 +18,7 @@ import {
 } from "@/components/schedule-assistant/timetable/audienceSelectorTree.ts";
 import { formatAudienceTokensLabel } from "@/components/schedule-assistant/timetable/meetingEditUtils.ts";
 import { cn } from "@/lib/ui/cn";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type EditTab = "basics" | "people" | "sessions";
 
@@ -78,8 +80,9 @@ function AudienceSummaryEditor({
       <div className="border-base-300 rounded-box flex items-start justify-between gap-3 border px-3 py-2.5">
         <div className="min-w-0">
           <div className="text-base-content/50 text-xs">Группы</div>
-          <div className="mt-0.5 text-sm leading-snug [overflow-wrap:anywhere]">
-            {label}
+          <div className="mt-0.5 inline-flex max-w-full items-center gap-1 text-sm leading-snug">
+            <span className="min-w-0 [overflow-wrap:anywhere]">{label}</span>
+            <AudienceTokensInfoIcon config={config} tokens={tokens} />
           </div>
           {expandedCount > 0 ? (
             <div className="text-base-content/45 mt-0.5 text-xs">
@@ -104,10 +107,15 @@ function AudienceSummaryEditor({
         <div className="flex flex-col gap-3">
           <div className="rounded-box border-base-300 bg-base-100 border px-3 py-2 text-sm">
             <div className="text-base-content/50 text-xs">Выбрано</div>
-            <div className="mt-0.5 leading-snug [overflow-wrap:anywhere]">
-              {draft.length
-                ? formatAudienceTokensLabel(config, draft)
-                : "Не выбраны"}
+            <div className="mt-0.5 inline-flex min-w-0 items-center gap-1 leading-snug">
+              <span className="min-w-0 [overflow-wrap:anywhere]">
+                {draft.length
+                  ? formatAudienceTokensLabel(config, draft)
+                  : "Не выбраны"}
+              </span>
+              {draft.length ? (
+                <AudienceTokensInfoIcon config={config} tokens={draft} />
+              ) : null}
             </div>
           </div>
           <EditClassAudienceMultiSelect
@@ -169,6 +177,11 @@ export function ComponentEditModal({
   const [draft, setDraft] = useState<SchemaComponent | null>(null);
   const [baseline, setBaseline] = useState<SchemaComponent | null>(null);
   const [tab, setTab] = useState<EditTab>("basics");
+  const [sessionDeletesDirty, setSessionDeletesDirty] = useState(false);
+  const [sessionsResetKey, setSessionsResetKey] = useState(0);
+  const sessionsForSaveRef = useRef<
+    (() => SchemaComponentSessionSeries[] | null) | null
+  >(null);
   const tree = useMemo(() => buildAudienceSelectorTree(config), [config]);
 
   useEffect(() => {
@@ -180,6 +193,8 @@ export function ComponentEditModal({
     );
     setDraft(next);
     setBaseline(cloneComponent(next));
+    setSessionDeletesDirty(false);
+    setSessionsResetKey((key) => key + 1);
     setTab("basics");
   }, [open, component, tree]);
 
@@ -194,20 +209,31 @@ export function ComponentEditModal({
   const sessionCount = draft?.sessions?.length ?? 0;
   const hasTag = Boolean(String(draft?.tag || "").trim());
   const isDirty =
-    !!draft &&
-    !!baseline &&
-    normalizeComponentForCompare(draft, tree) !==
-      normalizeComponentForCompare(baseline, tree);
+    (!!draft &&
+      !!baseline &&
+      normalizeComponentForCompare(draft, tree) !==
+        normalizeComponentForCompare(baseline, tree)) ||
+    sessionDeletesDirty;
   const canSave = hasTag && (isNew || isDirty);
 
   function handleClose() {
     onOpenChange(false);
   }
 
+  function handleReset() {
+    if (!baseline) return;
+    setDraft(cloneComponent(baseline));
+    setSessionDeletesDirty(false);
+    setSessionsResetKey((key) => key + 1);
+  }
+
   function handleSave() {
     if (!draft || !canSave) return;
     const tag = String(draft.tag || "").trim();
     if (!tag) return;
+    const sessions =
+      sessionsForSaveRef.current?.() ??
+      (draft.sessions && draft.sessions.length ? draft.sessions : null);
     onSave({
       ...draft,
       tag,
@@ -222,7 +248,7 @@ export function ComponentEditModal({
         draft.per_semester === null || draft.per_semester === undefined
           ? null
           : Number(draft.per_semester),
-      sessions: draft.sessions && draft.sessions.length ? draft.sessions : null,
+      sessions: sessions && sessions.length ? sessions : null,
     });
     onOpenChange(false);
   }
@@ -257,8 +283,8 @@ export function ComponentEditModal({
         else onOpenChange(next);
       }}
       title={`Компонент · ${draft.tag || "новый"}`}
-      overlayClassName="!flex items-start justify-center overflow-y-auto pt-[max(1rem,6vh)]"
-      containerClassName="max-h-[calc(100dvh-2rem-6vh)] max-w-2xl overflow-y-auto"
+      overlayClassName="!flex items-start justify-center overflow-hidden py-4"
+      containerClassName="max-h-[calc(100dvh-2rem)] max-w-2xl overflow-y-auto"
     >
       <div className="flex flex-col gap-4">
         <div className="tabs tabs-box tabs-sm bg-base-200/60 w-full p-1">
@@ -394,12 +420,27 @@ export function ComponentEditModal({
             componentIndex={componentIndex}
             sessions={draft.sessions}
             courseInstructors={courseInstructors}
+            instructorPool={draft.instructor_pool}
             componentGroups={draft.student_groups}
+            perGroup={Boolean(draft.per_group)}
             onChange={(sessions) => setDraft({ ...draft, sessions })}
+            baselineSessions={baseline?.sessions}
+            onDeletedDirtyChange={setSessionDeletesDirty}
+            sessionsForSaveRef={sessionsForSaveRef}
+            resetKey={sessionsResetKey}
           />
         ) : null}
 
-        <div className="flex justify-end gap-2 border-t pt-3">
+        <div className="flex items-center justify-end gap-3 border-t pt-3">
+          {isDirty ? (
+            <button
+              type="button"
+              className="text-base-content/50 hover:text-base-content/80 text-sm"
+              onClick={handleReset}
+            >
+              Сбросить изменения
+            </button>
+          ) : null}
           <button type="button" className="btn btn-ghost" onClick={handleClose}>
             Отмена
           </button>

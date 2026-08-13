@@ -18,6 +18,7 @@ import {
   meetingAudienceEqual,
   resolveEndTimeForStart,
 } from "./meetingEditUtils.ts";
+import type { TimetableLayoutMode } from "./TimetableLayoutSelector.tsx";
 import type { WeekRange } from "./timetableViewerModel.ts";
 import { weekStartForDate } from "./timetableViewerModel.ts";
 
@@ -28,16 +29,15 @@ export type CreateMeetingCellContext = {
   groupId?: string;
 };
 
+export type CreatePlacement = "weekly" | "occurrences";
+
 export type CreateMeetingDraft = {
   courseIdx: number;
   componentIdx: number;
-  date: string;
-  weekday: TermWeekdayKey;
-  time: string;
-  endTime?: string;
-  room: string;
-  instructor: string;
   audience: string[];
+  placement: CreatePlacement;
+  weeklySlots?: SchemaWeeklyPatternSlot[];
+  occurrences?: SchemaSessionOccurrence[];
 };
 
 const WEEKDAY_TO_JS_INDEX: Record<Weekday, number> = {
@@ -115,7 +115,7 @@ export function parseCourseComponentKey(value: string) {
   return { courseIdx, componentIdx };
 }
 
-function resolveSectionKind(
+export function resolveSectionKind(
   tokens: string[],
   config: SchemaScheduleConfig,
 ): string | null {
@@ -163,40 +163,46 @@ function resolveSectionKind(
   return null;
 }
 
-function seriesUsesOccurrences(
-  series: SchemaComponentSessionSeries,
-  component: SchemaComponent,
+/** Non-core audiences (electives, english, …) prefer date occurrences in settings. */
+export function audiencePrefersOccurrences(
+  tokens: string[],
   config: SchemaScheduleConfig,
-) {
-  if ((series.occurrences || []).length > 0) return true;
-  if ((series.weekly_pattern || []).length > 0) return false;
-  const audience = series.audience?.length
-    ? series.audience
-    : component.student_groups || [];
-  const kind = resolveSectionKind(audience.map(String), config);
-  return kind !== "core" && kind !== "core_course";
+): boolean {
+  const kind = resolveSectionKind(tokens.map(String), config);
+  return kind != null && kind !== "core" && kind !== "core_course";
 }
 
-/** Whether create would add a single occurrence (vs weekly pattern). */
-export function createWouldUseOccurrences(
+function placementFromLayout(layoutMode: TimetableLayoutMode): CreatePlacement {
+  return layoutMode === "calendar" ? "occurrences" : "weekly";
+}
+
+function seriesPlacement(
+  series: SchemaComponentSessionSeries,
+): CreatePlacement | null {
+  if ((series.occurrences || []).length > 0) return "occurrences";
+  if ((series.weekly_pattern || []).length > 0) return "weekly";
+  return null;
+}
+
+/**
+ * Default create placement: existing matching series wins, else layout
+ * (По дням → occurrences, По группам → weekly).
+ */
+export function defaultCreatePlacement(
   course: SchemaCourseConfig | null | undefined,
   componentIdx: number | null | undefined,
   audience: string[],
   config: SchemaScheduleConfig,
-): boolean {
-  if (!course || componentIdx == null || componentIdx < 0) return false;
+  layoutMode: TimetableLayoutMode,
+): CreatePlacement {
+  const layoutDefault = placementFromLayout(layoutMode);
+  if (!course || componentIdx == null || componentIdx < 0) return layoutDefault;
   const component = course.components?.[componentIdx];
-  if (!component) return false;
+  if (!component) return layoutDefault;
 
   const tree = buildAudienceSelectorTree(config);
   const targetAudience = minimizeAudienceTokens(audience, tree);
-  if (!targetAudience.length) {
-    const kind = resolveSectionKind(
-      (component.student_groups || []).map(String),
-      config,
-    );
-    return kind !== "core" && kind !== "core_course";
-  }
+  if (!targetAudience.length) return layoutDefault;
 
   for (const series of component.sessions || []) {
     if (
@@ -205,12 +211,30 @@ export function createWouldUseOccurrences(
         targetAudience,
       )
     ) {
-      return seriesUsesOccurrences(series, component, config);
+      return seriesPlacement(series) ?? layoutDefault;
     }
   }
 
-  const kind = resolveSectionKind(targetAudience.map(String), config);
-  return kind !== "core" && kind !== "core_course";
+  return layoutDefault;
+}
+
+/** Whether create would add a single occurrence (vs weekly pattern). */
+export function createWouldUseOccurrences(
+  course: SchemaCourseConfig | null | undefined,
+  componentIdx: number | null | undefined,
+  audience: string[],
+  config: SchemaScheduleConfig,
+  layoutMode: TimetableLayoutMode,
+): boolean {
+  return (
+    defaultCreatePlacement(
+      course,
+      componentIdx,
+      audience,
+      config,
+      layoutMode,
+    ) === "occurrences"
+  );
 }
 
 function audienceForSeries(
@@ -272,34 +296,43 @@ export function applyCreateMeetingToCourse(
   if (!audience.length) return null;
 
   const series = findOrCreateSessionSeries(nextComponent, audience, config);
-  const startTime = normalizeTimeToApi(draft.time);
-  const endTime = draft.endTime
-    ? normalizeTimeToApi(draft.endTime)
-    : resolveEndTimeForStart(config, startTime, audience);
-  const room = String(draft.room || "").trim() || null;
-  const instructor = String(draft.instructor || "").trim() || null;
 
-  if (seriesUsesOccurrences(series, nextComponent, config)) {
+  if (draft.placement === "occurrences") {
+    const items = (draft.occurrences ?? []).filter((occurrence) =>
+      String(occurrence.date || "").trim(),
+    );
+    if (!items.length) return null;
     if (!series.occurrences) series.occurrences = [];
-    const occurrence: SchemaSessionOccurrence = {
-      date: draft.date,
-      start_time: startTime,
-      end_time: endTime,
-      room,
-      instructor,
-    };
-    series.occurrences.push(occurrence);
+    for (const occurrence of items) {
+      series.occurrences.push({
+        date: occurrence.date,
+        start_time: normalizeTimeToApi(occurrence.start_time),
+        end_time: normalizeTimeToApi(
+          occurrence.end_time ||
+            resolveEndTimeForStart(config, occurrence.start_time, audience),
+        ),
+        room: String(occurrence.room || "").trim() || null,
+        instructor: occurrence.instructor ?? null,
+      });
+    }
     return nextCourse;
   }
 
+  const slots = draft.weeklySlots ?? [];
+  if (!slots.length) return null;
   if (!series.weekly_pattern) series.weekly_pattern = [];
-  const slot: SchemaWeeklyPatternSlot = {
-    weekday: termWeekdayKeyToWeekday(draft.weekday),
-    start_time: startTime,
-    end_time: endTime,
-    room,
-    instructor,
-  };
-  series.weekly_pattern.push(slot);
+  for (const slot of slots) {
+    series.weekly_pattern.push({
+      weekday: slot.weekday,
+      start_time: normalizeTimeToApi(slot.start_time),
+      end_time: normalizeTimeToApi(
+        slot.end_time ||
+          resolveEndTimeForStart(config, slot.start_time, audience),
+      ),
+      room: String(slot.room || "").trim() || null,
+      instructor: slot.instructor ?? null,
+      edits: slot.edits ?? null,
+    });
+  }
   return nextCourse;
 }

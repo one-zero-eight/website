@@ -2,6 +2,8 @@ import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type {
   SchemaComponent,
   SchemaScheduleConfig,
+  SchemaSessionOccurrence,
+  SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import {
@@ -14,21 +16,15 @@ import {
   useUpdateCourseMutation,
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { TERM_WEEKDAY_LABEL_RU } from "@/components/schedule-assistant/settings/weekdays.ts";
-import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
+import { termWeekdayKeyToWeekday } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
 import clsx from "clsx";
-import {
-  startTransition,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import {
   EditClassAudienceModal,
   EditClassAudienceSummaryRow,
+  EditClassPerGroupModal,
 } from "./EditClassAudienceModal.tsx";
 import {
   buildAudienceSelectorTree,
@@ -37,32 +33,25 @@ import {
 import {
   applyCreateMeetingToCourse,
   courseComponentOptions,
-  createWouldUseOccurrences,
+  defaultCreatePlacement,
   parseCourseComponentKey,
   type CreateMeetingCellContext,
+  type CreatePlacement,
 } from "./createMeetingUtils.ts";
 import {
-  CUSTOM_TIME_OPTION_VALUE,
-  customTimeOptionLabel,
   formatAudienceTokensLabel,
-  normalizeTypedHhmm,
-  parseTimeRangeQuery,
   perGroupAudienceOptions,
   resolveEndTimeForStart,
   timeOptionsForConfig,
-  weekdayOptionsForConfig,
 } from "./meetingEditUtils.ts";
-import { buildInstructorPickerOptions } from "./instructorPickerOptions.ts";
 import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
-import {
-  audienceSizeForTokens,
-  buildRoomPickerOptions,
-} from "./roomPickerOptions.ts";
+import { audienceSummaryHintProps } from "./audienceSummaryHints.ts";
+import { validateSessionSeriesDraft } from "./sessionSeriesValidation.ts";
+import { SessionSeriesEditor } from "./SessionSeriesEditor.tsx";
+import { toApiTime } from "./sessionSeriesRows.tsx";
+import type { TimetableLayoutMode } from "./TimetableLayoutSelector.tsx";
 import type { Meeting } from "./timetableViewerModel.ts";
-import {
-  formatDisplayDate,
-  semesterDatesForWeekday,
-} from "./timetableViewerModel.ts";
+import { formatDisplayDate } from "./timetableViewerModel.ts";
 
 function CreateClassDropdown({
   value,
@@ -121,6 +110,45 @@ function defaultAudienceForComponent(
   return minimizeAudienceTokens(component.student_groups || [], tree);
 }
 
+function seedOccurrenceFromCell(
+  config: SchemaScheduleConfig,
+  cell: CreateMeetingCellContext,
+): SchemaSessionOccurrence {
+  const groups = cell.groupId ? [cell.groupId] : undefined;
+  const options = timeOptionsForConfig(config, groups);
+  const preset = options.find((slot) => slot.value === cell.time);
+  const start = cell.time || options[0]?.value || "09:00";
+  const end =
+    preset?.end || resolveEndTimeForStart(config, start, groups).slice(0, 5);
+  return {
+    date: cell.date,
+    start_time: toApiTime(start),
+    end_time: toApiTime(end),
+    room: null,
+    instructor: null,
+  };
+}
+
+function seedWeeklyFromCell(
+  config: SchemaScheduleConfig,
+  cell: CreateMeetingCellContext,
+): SchemaWeeklyPatternSlot {
+  const groups = cell.groupId ? [cell.groupId] : undefined;
+  const options = timeOptionsForConfig(config, groups);
+  const preset = options.find((slot) => slot.value === cell.time);
+  const start = cell.time || options[0]?.value || "09:00";
+  const end =
+    preset?.end || resolveEndTimeForStart(config, start, groups).slice(0, 5);
+  return {
+    weekday: termWeekdayKeyToWeekday(cell.weekday),
+    start_time: toApiTime(start),
+    end_time: toApiTime(end),
+    room: null,
+    instructor: null,
+    edits: null,
+  };
+}
+
 export function CreateClassModal({
   open,
   onOpenChange,
@@ -128,6 +156,7 @@ export function CreateClassModal({
   config,
   meetings,
   meetingPickerIndex,
+  layoutMode,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -135,21 +164,20 @@ export function CreateClassModal({
   config: SchemaScheduleConfig;
   meetings: Meeting[];
   meetingPickerIndex: MeetingPickerIndex;
+  layoutMode: TimetableLayoutMode;
 }) {
   const { data: courses } = useCoursesQuery();
   const { mutate, isPending } = useUpdateCourseMutation();
   const { showError, showSuccess } = useToast();
 
   const [courseComponentKey, setCourseComponentKey] = useState("");
-  const [roomValue, setRoomValue] = useState("");
-  const [timeValue, setTimeValue] = useState("");
-  const [endTimeValue, setEndTimeValue] = useState("");
-  const [useCustomTime, setUseCustomTime] = useState(false);
-  const [weekdayValue, setWeekdayValue] = useState<TermWeekdayKey | "">("");
-  const [instructorValue, setInstructorValue] = useState("");
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
-  const [pickerOptionsReady, setPickerOptionsReady] = useState(false);
+  const [placement, setPlacement] = useState<CreatePlacement>(() =>
+    layoutMode === "calendar" ? "occurrences" : "weekly",
+  );
+  const [weeklySlots, setWeeklySlots] = useState<SchemaWeeklyPatternSlot[]>([]);
+  const [occurrences, setOccurrences] = useState<SchemaSessionOccurrence[]>([]);
 
   const parsedComponent = useMemo(
     () => parseCourseComponentKey(courseComponentKey),
@@ -176,141 +204,6 @@ export function CreateClassModal({
     }));
   }, [courses]);
 
-  const timeOptions = useMemo(
-    () =>
-      timeOptionsForConfig(
-        config,
-        cellContext?.groupId ? [cellContext.groupId] : audienceValue,
-      ),
-    [audienceValue, cellContext, config],
-  );
-  const weekdayOptions = useMemo(
-    () => weekdayOptionsForConfig(config),
-    [config],
-  );
-
-  useEffect(() => {
-    if (!open) return;
-    setPickerOptionsReady(false);
-    let cancelled = false;
-    let innerFrame = 0;
-    const outerFrame = requestAnimationFrame(() => {
-      innerFrame = requestAnimationFrame(() => {
-        startTransition(() => {
-          if (!cancelled) setPickerOptionsReady(true);
-        });
-      });
-    });
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(outerFrame);
-      cancelAnimationFrame(innerFrame);
-    };
-  }, [open, cellContext?.date, cellContext?.weekday]);
-
-  const lastRoomOptionsRef = useRef<SelectDropdownOption[]>([]);
-  const lastInstructorOptionsRef = useRef<SelectDropdownOption[]>([]);
-
-  const roomOptions = useMemo(() => {
-    if (!cellContext) {
-      lastRoomOptionsRef.current = [];
-      return [];
-    }
-    if (!open) return lastRoomOptionsRef.current;
-    const weekday = (weekdayValue || cellContext.weekday) as TermWeekdayKey;
-    const start = useCustomTime
-      ? normalizeTypedHhmm(timeValue)
-      : timeValue.trim();
-    const end = useCustomTime
-      ? normalizeTypedHhmm(endTimeValue)
-      : endTimeValue.trim() ||
-        (start
-          ? resolveEndTimeForStart(config, start, audienceValue).slice(0, 5)
-          : "");
-    const usesOccurrences = createWouldUseOccurrences(
-      selectedCourse,
-      parsedComponent?.componentIdx,
-      audienceValue,
-      config,
-    );
-    const dates = usesOccurrences
-      ? [cellContext.date]
-      : semesterDatesForWeekday(config, weekday);
-    const next = buildRoomPickerOptions({
-      config,
-      meetings,
-      index: meetingPickerIndex,
-      date: cellContext.date,
-      dates: dates.length ? dates : [cellContext.date],
-      start,
-      end: end || undefined,
-      audienceTokens: audienceValue,
-      includeStatus: pickerOptionsReady,
-    });
-    lastRoomOptionsRef.current = next;
-    return next;
-  }, [
-    audienceValue,
-    cellContext,
-    config,
-    endTimeValue,
-    meetingPickerIndex,
-    meetings,
-    open,
-    parsedComponent?.componentIdx,
-    pickerOptionsReady,
-    selectedCourse,
-    timeValue,
-    useCustomTime,
-    weekdayValue,
-  ]);
-
-  const instructorOptions = useMemo(() => {
-    if (!cellContext) {
-      lastInstructorOptionsRef.current = [];
-      return [];
-    }
-    if (!open) return lastInstructorOptionsRef.current;
-    const weekday = (weekdayValue || cellContext.weekday) as TermWeekdayKey;
-    const start = useCustomTime
-      ? normalizeTypedHhmm(timeValue)
-      : timeValue.trim();
-    const end = useCustomTime
-      ? normalizeTypedHhmm(endTimeValue)
-      : endTimeValue.trim() ||
-        (start
-          ? resolveEndTimeForStart(config, start, audienceValue).slice(0, 5)
-          : "");
-    const dates = semesterDatesForWeekday(config, weekday);
-    const next = buildInstructorPickerOptions({
-      config,
-      meetings,
-      index: meetingPickerIndex,
-      date: cellContext.date,
-      dates: dates.length ? dates : [cellContext.date],
-      start,
-      end: end || undefined,
-      weekday,
-      courseInstructors: selectedCourse?.instructors,
-      includeStatus: pickerOptionsReady,
-    });
-    lastInstructorOptionsRef.current = next;
-    return next;
-  }, [
-    audienceValue,
-    cellContext,
-    config,
-    endTimeValue,
-    meetingPickerIndex,
-    meetings,
-    open,
-    pickerOptionsReady,
-    selectedCourse?.instructors,
-    timeValue,
-    useCustomTime,
-    weekdayValue,
-  ]);
-
   const perGroupOptions = useMemo(() => {
     if (!selectedComponent) return [];
     return perGroupAudienceOptions(config, selectedComponent);
@@ -325,25 +218,14 @@ export function CreateClassModal({
   }, [config, selectedComponent]);
 
   const audienceDisplayLabel = formatAudienceTokensLabel(config, audienceValue);
-  const audienceSize = useMemo(
-    () => audienceSizeForTokens(config, audienceValue),
-    [audienceValue, config],
-  );
 
   useEffect(() => {
     if (!open || !cellContext) return;
     setCourseComponentKey("");
-    setRoomValue("");
-    const groups = cellContext.groupId ? [cellContext.groupId] : undefined;
-    const options = timeOptionsForConfig(config, groups);
-    const preset = options.find((slot) => slot.value === cellContext.time);
-    setTimeValue(cellContext.time);
-    setEndTimeValue(preset?.end || "");
-    setUseCustomTime(!preset && !!cellContext.time);
-    setWeekdayValue(cellContext.weekday);
-    setInstructorValue("");
     setAudienceValue(cellContext.groupId ? [cellContext.groupId] : []);
     setAudienceModalOpen(false);
+    setWeeklySlots([seedWeeklyFromCell(config, cellContext)]);
+    setOccurrences([seedOccurrenceFromCell(config, cellContext)]);
   }, [cellContext, config, open]);
 
   useEffect(() => {
@@ -357,6 +239,26 @@ export function CreateClassModal({
     );
   }, [cellContext?.groupId, config, selectedComponent]);
 
+  useEffect(() => {
+    if (!open) return;
+    setPlacement(
+      defaultCreatePlacement(
+        selectedCourse,
+        parsedComponent?.componentIdx,
+        audienceValue,
+        config,
+        layoutMode,
+      ),
+    );
+  }, [
+    audienceValue,
+    config,
+    layoutMode,
+    open,
+    parsedComponent?.componentIdx,
+    selectedCourse,
+  ]);
+
   function handleClose() {
     if (isPending) return;
     setAudienceModalOpen(false);
@@ -368,47 +270,8 @@ export function CreateClassModal({
       showError("Ошибка", "Выберите предмет и компонент.");
       return;
     }
-
     if (!courseComponentKey) {
       showError("Ошибка", "Выберите предмет и компонент.");
-      return;
-    }
-    if (!roomValue.trim()) {
-      showError("Ошибка", "Выберите локацию.");
-      return;
-    }
-    if (!timeValue.trim()) {
-      showError("Ошибка", "Выберите время.");
-      return;
-    }
-    const submitStart = useCustomTime
-      ? normalizeTypedHhmm(timeValue)
-      : timeValue.trim();
-    const submitEnd = useCustomTime
-      ? normalizeTypedHhmm(endTimeValue)
-      : endTimeValue.trim();
-    if (useCustomTime) {
-      if (!submitEnd) {
-        showError("Ошибка", "Укажите время окончания.");
-        return;
-      }
-      if (
-        !/^\d{2}:\d{2}$/.test(submitStart) ||
-        !/^\d{2}:\d{2}$/.test(submitEnd)
-      ) {
-        showError(
-          "Ошибка",
-          "Время должно быть в формате ЧЧ:ММ (например 09:00).",
-        );
-        return;
-      }
-    }
-    if (!weekdayValue) {
-      showError("Ошибка", "Выберите день недели.");
-      return;
-    }
-    if (!instructorValue.trim()) {
-      showError("Ошибка", "Выберите преподавателя.");
       return;
     }
     if (!audienceValue.length) {
@@ -419,16 +282,23 @@ export function CreateClassModal({
       return;
     }
 
+    const seriesError = validateSessionSeriesDraft({
+      placement,
+      weeklySlots,
+      occurrences,
+    });
+    if (seriesError) {
+      showError("Ошибка", seriesError);
+      return;
+    }
+
     const updatedCourse = applyCreateMeetingToCourse(selectedCourse, config, {
       courseIdx: parsedComponent.courseIdx,
       componentIdx: parsedComponent.componentIdx,
-      date: cellContext.date,
-      weekday: weekdayValue,
-      time: submitStart,
-      endTime: useCustomTime && submitEnd ? submitEnd : undefined,
-      room: roomValue,
-      instructor: instructorValue,
       audience: audienceValue,
+      placement,
+      weeklySlots: placement === "weekly" ? weeklySlots : undefined,
+      occurrences: placement === "occurrences" ? occurrences : undefined,
     });
 
     if (!updatedCourse) {
@@ -459,7 +329,10 @@ export function CreateClassModal({
     TERM_WEEKDAY_LABEL_RU[cellContext.weekday] || cellContext.weekday;
   const contextParts = [
     `${formatDisplayDate(cellContext.date)} (${weekdayLabel})`,
-    timeOptions.find((slot) => slot.value === cellContext.time)?.label ||
+    timeOptionsForConfig(
+      config,
+      cellContext.groupId ? [cellContext.groupId] : [],
+    ).find((slot) => slot.value === cellContext.time)?.label ||
       cellContext.time,
     cellContext.groupId ? `группа ${cellContext.groupId}` : null,
   ].filter(Boolean);
@@ -473,7 +346,8 @@ export function CreateClassModal({
       }}
       title="Создать занятие"
       closeOnOutsidePress={!isPending && !audienceModalOpen}
-      containerClassName="max-w-xl"
+      overlayClassName="!flex items-start justify-center overflow-hidden py-4"
+      containerClassName="max-h-[calc(100dvh-2rem)] max-w-xl overflow-y-auto"
     >
       <div className="flex flex-col gap-3">
         <div className="rounded-box border-base-300 bg-base-100 border px-3 py-2 text-sm">
@@ -490,133 +364,79 @@ export function CreateClassModal({
         </CreateClassField>
 
         {selectedComponent && !perGroup ? (
-          <>
-            <EditClassAudienceSummaryRow
-              config={config}
-              tokens={audienceValue}
-              displayLabel={audienceDisplayLabel}
-              changed={false}
-              originalLabel="—"
-              overridden={false}
-              patternLabel={componentAudienceLabel}
-              onEdit={() => setAudienceModalOpen(true)}
-            />
-            <EditClassAudienceModal
-              open={audienceModalOpen}
-              onOpenChange={setAudienceModalOpen}
-              config={config}
-              tokens={audienceValue}
-              originalTokens={defaultAudienceForComponent(
-                selectedComponent,
-                config,
-                cellContext.groupId,
-              )}
-              originalLabel={componentAudienceLabel}
-              onSave={setAudienceValue}
-            />
-          </>
+          <EditClassAudienceModal
+            open={audienceModalOpen}
+            onOpenChange={setAudienceModalOpen}
+            config={config}
+            tokens={audienceValue}
+            originalTokens={defaultAudienceForComponent(
+              selectedComponent,
+              config,
+              cellContext.groupId,
+            )}
+            originalLabel={componentAudienceLabel}
+            onSave={setAudienceValue}
+          />
         ) : null}
 
         {selectedComponent && perGroup ? (
-          <CreateClassField
-            label={
-              audienceSize != null ? `Группа · ${audienceSize} студ.` : "Группа"
-            }
-          >
-            {componentAudienceLabel ? (
-              <div className="text-base-content/60 text-xs">
-                В компоненте: {componentAudienceLabel}
-              </div>
-            ) : null}
-            <CreateClassDropdown
-              value={audienceValue[0] || ""}
-              onChange={(group) => setAudienceValue(group ? [group] : [])}
-              placeholder="Выберите группу"
-              options={perGroupOptions}
-            />
-          </CreateClassField>
+          <EditClassPerGroupModal
+            open={audienceModalOpen}
+            onOpenChange={setAudienceModalOpen}
+            value={audienceValue[0] || ""}
+            options={perGroupOptions}
+            onSave={(group) => setAudienceValue(group ? [group] : [])}
+          />
         ) : null}
 
-        <CreateClassField label="Локация">
-          <CreateClassDropdown
-            value={roomValue}
-            onChange={setRoomValue}
-            placeholder="Выберите локацию"
-            options={roomOptions}
-          />
-        </CreateClassField>
-
-        <CreateClassField label="Время">
-          <CreateClassDropdown
-            value={useCustomTime ? CUSTOM_TIME_OPTION_VALUE : timeValue}
-            onChange={(value, context) => {
-              if (value === CUSTOM_TIME_OPTION_VALUE) {
-                setUseCustomTime(true);
-                const parsed = parseTimeRangeQuery(context?.searchQuery ?? "");
-                if (parsed.start) setTimeValue(parsed.start);
-                if (parsed.end) setEndTimeValue(parsed.end);
-                return;
-              }
-              setUseCustomTime(false);
-              setTimeValue(value);
-              const preset = timeOptions.find((slot) => slot.value === value);
-              setEndTimeValue(preset?.end || "");
-            }}
-            placeholder="Выберите время"
-            trailingOption={(query) => ({
-              value: CUSTOM_TIME_OPTION_VALUE,
-              label: customTimeOptionLabel(query),
-            })}
-            options={timeOptions.map((slot) => ({
-              value: slot.value,
-              label: slot.label,
-            }))}
-          />
-          {useCustomTime ? (
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="09:00"
-                className="input input-bordered input-sm w-24 font-mono"
-                value={timeValue}
-                onChange={(event) => setTimeValue(event.target.value)}
-                onBlur={() => setTimeValue(normalizeTypedHhmm(timeValue))}
+        <SessionSeriesEditor
+          config={config}
+          meetings={meetings}
+          meetingIndex={meetingPickerIndex}
+          placement={placement}
+          onPlacementChange={setPlacement}
+          afterPlacement={
+            selectedComponent ? (
+              <EditClassAudienceSummaryRow
+                config={config}
+                tokens={audienceValue}
+                displayLabel={audienceDisplayLabel}
+                changed={false}
+                originalLabel="—"
+                {...audienceSummaryHintProps({
+                  perGroup,
+                  componentLabel: componentAudienceLabel,
+                  context: "component",
+                })}
+                overridden={Boolean(componentAudienceLabel)}
+                onEdit={() => setAudienceModalOpen(true)}
               />
-              <span className="text-base-content/50 shrink-0">–</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="14:30"
-                className="input input-bordered input-sm w-24 font-mono"
-                value={endTimeValue}
-                onChange={(event) => setEndTimeValue(event.target.value)}
-                onBlur={() => setEndTimeValue(normalizeTypedHhmm(endTimeValue))}
-              />
-            </div>
-          ) : null}
-        </CreateClassField>
-
-        <CreateClassField label="День недели">
-          <CreateClassDropdown
-            value={weekdayValue}
-            onChange={(value) => setWeekdayValue(value as TermWeekdayKey)}
-            placeholder="Выберите день"
-            options={weekdayOptions.map((day) => ({
-              value: day.key,
-              label: day.label,
-            }))}
-          />
-        </CreateClassField>
-
-        <CreateClassField label="Преподаватель">
-          <CreateClassDropdown
-            value={instructorValue}
-            onChange={setInstructorValue}
-            placeholder="Выберите преподавателя"
-            options={instructorOptions}
-          />
-        </CreateClassField>
+            ) : null
+          }
+          weeklySlots={weeklySlots}
+          onWeeklySlotsChange={setWeeklySlots}
+          occurrences={occurrences}
+          onOccurrencesChange={setOccurrences}
+          audienceTokens={audienceValue}
+          courseInstructors={selectedCourse?.instructors}
+          instructorPool={selectedComponent?.instructor_pool}
+          newOccurrenceDefaults={{
+            date: cellContext.date,
+            start_time: occurrences[0]?.start_time,
+            end_time: occurrences[0]?.end_time,
+            room: occurrences[0]?.room ?? null,
+            instructor: occurrences[0]?.instructor ?? null,
+          }}
+          newWeeklyDefaults={{
+            weekday:
+              weeklySlots[0]?.weekday ??
+              termWeekdayKeyToWeekday(cellContext.weekday),
+            start_time: weeklySlots[0]?.start_time,
+            end_time: weeklySlots[0]?.end_time,
+            room: weeklySlots[0]?.room ?? null,
+            instructor: weeklySlots[0]?.instructor ?? null,
+          }}
+        />
 
         <div className="flex justify-end gap-2">
           <button
