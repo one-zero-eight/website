@@ -16,6 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useEventsAuth } from "../hooks";
 import { EventHeroImage } from "../shared/EventHeroImage";
 import { StoredHostsList } from "../shared/HostLink";
+import { LocationLink } from "../shared/LocationLink";
 import { eventFieldClass } from "../shared/formStyles";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
 import { parseDescriptionContent } from "../utils/description";
@@ -157,7 +158,6 @@ export function SubmissionPage({ id }: { id: string }) {
   const declineDisabled = !feedbackTrimmed || isDeclining || isApproving;
   const visibleLinks = (event.links ?? []).filter((link) => link.url.trim());
   const endsAt = getEventEndsAt(event.starts_at, event.duration_hours);
-  const locationLabel = event.location?.trim() || "TBA";
   const title = localeContent?.name?.trim() || "Untitled event";
   const enrollment = event.enrollment;
   const isExternal = enrollment?.type === EnrollmentType.external;
@@ -260,19 +260,7 @@ export function SubmissionPage({ id }: { id: string }) {
             </li>
             <li className="flex items-center gap-2">
               <span className="icon-[material-symbols--location-on-outline] shrink-0 text-xl" />
-              {locationLabel.toUpperCase() === "TBA" ||
-              locationLabel.toUpperCase() === "ONLINE" ||
-              locationLabel.toUpperCase() === "ОНЛАЙН" ? (
-                <span>{locationLabel}</span>
-              ) : (
-                <Link
-                  to="/maps"
-                  search={{ q: locationLabel }}
-                  className="underline underline-offset-2"
-                >
-                  {locationLabel}
-                </Link>
-              )}
+              <LocationLink location={event.location} />
             </li>
             {enrollmentLabel && (
               <li className="flex items-center gap-2">

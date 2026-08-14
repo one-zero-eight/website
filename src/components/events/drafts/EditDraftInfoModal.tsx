@@ -51,7 +51,7 @@ export function EditDraftInfoModal({
         getEventEndsAt(draft.data.starts_at, draft.data.duration_hours),
       ),
     );
-    setLocation(draft.data.location ?? "");
+    setLocation(draft.data.location?.display_name ?? "");
     setEnrollment(enrollmentApiToForm(draft.data.enrollment));
   }, [open, draft]);
 

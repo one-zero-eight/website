@@ -5,6 +5,7 @@ import {
 } from "@/components/events/shared/HostLink";
 import { parseIcsHostDescription } from "@/components/events/utils/host";
 import { extractEventIdFromUrl } from "@/components/events/utils/links";
+import { LocationLink } from "@/components/events/shared/LocationLink";
 import {
   autoUpdate,
   flip,
@@ -83,11 +84,10 @@ export function CalendarEventPopover({
   const role = useRole(context);
   const { getFloatingProps } = useInteractions([dismiss, role]);
 
-  const location =
-    eventData?.data.location ??
-    (event.extendedProps?.location as string | undefined);
+  const resolvedLocation = eventData?.data.location;
+  const icsLocation = event.extendedProps?.location as string | undefined;
   const locations =
-    !isWorkshopsEvent && location ? location.split("/") : undefined;
+    !isWorkshopsEvent && icsLocation ? icsLocation.split("/") : undefined;
   const hosts = eventData?.data.hosts;
   const showHosts = (hosts && hosts.length > 0) || icsHosts.length > 0;
   const showRawDescription =
@@ -131,24 +131,30 @@ export function CalendarEventPopover({
                 </p>
               </div>
 
-              {isWorkshopsEvent && location && (
+              {isWorkshopsEvent && (resolvedLocation || icsLocation) && (
                 <div className="flex flex-row gap-2">
                   <div className="w-6">
                     <span className="icon-[material-symbols--location-on-outline] text-2xl" />
                   </div>
-                  {location.toUpperCase() === "ONLINE" ||
-                  location.toUpperCase() === "ОНЛАЙН" ||
-                  location.toUpperCase() === "TBA" ? (
+                  {resolvedLocation ? (
+                    <LocationLink
+                      location={resolvedLocation}
+                      className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap"
+                    />
+                  ) : icsLocation &&
+                    (icsLocation.toUpperCase() === "ONLINE" ||
+                      icsLocation.toUpperCase() === "ОНЛАЙН" ||
+                      icsLocation.toUpperCase() === "TBA") ? (
                     <span className="flex w-full py-1 whitespace-pre-wrap">
-                      {location}
+                      {icsLocation}
                     </span>
                   ) : (
                     <Link
                       to="/maps"
-                      search={{ q: location }}
+                      search={{ q: icsLocation }}
                       className="flex w-full py-1 wrap-anywhere whitespace-pre-wrap underline underline-offset-2"
                     >
-                      {location}
+                      {icsLocation}
                     </Link>
                   )}
                 </div>

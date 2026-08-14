@@ -1,7 +1,8 @@
-import { SchemaHost } from "@/api/workshops/types";
+import { SchemaHost, SchemaResolvedLocation } from "@/api/workshops/types";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 import { formatEventDateTime } from "../utils/datetime";
+import { locationDisplayName } from "../utils/location";
 import { StoredHostsList } from "./HostLink";
 
 const statusClassName: Record<string, string> = {
@@ -34,7 +35,7 @@ export function EventSummaryCard({
   hosts?: SchemaHost[] | null;
   clubs?: { club_id: string; title: string }[];
   startsAt?: string | null;
-  location?: string | null;
+  location?: SchemaResolvedLocation | null;
   status?: string | null;
   invitedBy?: string | null;
   footer?: React.ReactNode;
@@ -96,7 +97,7 @@ export function EventSummaryCard({
             </div>
             <div className="flex items-center gap-2">
               <span className="icon-[material-symbols--location-on-outline] shrink-0 text-lg" />
-              <span>{location?.trim() || "TBA"}</span>
+              <span>{locationDisplayName(location)}</span>
             </div>
           </div>
         </div>

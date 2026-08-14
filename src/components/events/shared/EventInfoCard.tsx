@@ -3,10 +3,11 @@ import {
   SchemaEnrollment,
   SchemaHost,
   SchemaPublicHost,
+  SchemaResolvedLocation,
 } from "@/api/workshops/types";
-import { Link } from "@tanstack/react-router";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
 import { PublicHostsList, StoredHostsList } from "./HostLink";
+import { LocationLink } from "./LocationLink";
 
 function formatEnrollment(enrollment?: SchemaEnrollment | null) {
   if (!enrollment) {
@@ -43,12 +44,11 @@ export function EventInfoCard({
   storedHosts?: SchemaHost[] | null;
   clubs?: { club_id: string; title: string }[];
   startsAt?: string | null;
-  location?: string | null;
+  location?: SchemaResolvedLocation | null;
   durationHours?: number | null;
   enrollment?: SchemaEnrollment | null;
   actions?: React.ReactNode;
 }) {
-  const locationLabel = location?.trim() || "TBA";
   const endsAt = getEventEndsAt(startsAt, durationHours);
   const enrollmentInfo = formatEnrollment(enrollment);
 
@@ -84,19 +84,7 @@ export function EventInfoCard({
 
         <li className="flex items-center gap-2">
           <span className="icon-[material-symbols--location-on-outline] shrink-0 text-xl" />
-          {locationLabel.toUpperCase() === "TBA" ||
-          locationLabel.toUpperCase() === "ONLINE" ||
-          locationLabel.toUpperCase() === "ОНЛАЙН" ? (
-            <span>{locationLabel}</span>
-          ) : (
-            <Link
-              to="/maps"
-              search={{ q: locationLabel }}
-              className="underline underline-offset-2"
-            >
-              {locationLabel}
-            </Link>
-          )}
+          <LocationLink location={location} />
         </li>
 
         {enrollmentInfo && (

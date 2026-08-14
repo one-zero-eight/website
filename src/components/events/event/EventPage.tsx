@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useEventsAuth } from "../hooks";
 import { EventHeroImage } from "../shared/EventHeroImage";
 import { PublicHostsList } from "../shared/HostLink";
+import { LocationLink } from "../shared/LocationLink";
 import { formatEventDateRange, getEventEndsAt } from "../utils/datetime";
 import { parseDescriptionContent } from "../utils/description";
 import { getEventImageUrl, getLinkDisplayLabel } from "../utils/links";
@@ -164,7 +165,6 @@ export function EventPage({ id }: { id: string }) {
   const enrolledEmails = data.enrolled_emails ?? null;
   const actionPending = isEnrolling || isUnenrolling;
   const endsAt = getEventEndsAt(data.data.starts_at, data.data.duration_hours);
-  const locationLabel = data.data.location?.trim() || "TBA";
   const visibleLinks = (data.data.links ?? []).filter((link) =>
     link.url.trim(),
   );
@@ -224,19 +224,7 @@ export function EventPage({ id }: { id: string }) {
               </li>
               <li className="flex items-center gap-2">
                 <span className="icon-[material-symbols--location-on-outline] shrink-0 text-xl" />
-                {locationLabel.toUpperCase() === "TBA" ||
-                locationLabel.toUpperCase() === "ONLINE" ||
-                locationLabel.toUpperCase() === "ОНЛАЙН" ? (
-                  <span>{locationLabel}</span>
-                ) : (
-                  <Link
-                    to="/maps"
-                    search={{ q: locationLabel }}
-                    className="underline underline-offset-2"
-                  >
-                    {locationLabel}
-                  </Link>
-                )}
+                <LocationLink location={data.data.location} />
               </li>
             </ul>
 
