@@ -988,6 +988,27 @@ export function AvailabilitySelector({
         </p>
       )}
 
+      {!selectionOnly && (
+        <div className="text-base-content/70 mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
+            Participant availability
+          </span>
+          {currentUserId && (
+            <span className="inline-flex items-center gap-1.5">
+              <span className="border-primary h-3 w-5 rounded-sm border-2" />
+              Your timeslots
+            </span>
+          )}
+          {(selectedMeetingSlotKeys?.size || intervalSelectionMode) && (
+            <span className="inline-flex items-center gap-1.5">
+              <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-2" />
+              Chosen meeting time
+            </span>
+          )}
+        </div>
+      )}
+
       <div className="w-full min-w-0">
         {showPagination && !isPhone ? (
           <div className="flex items-start gap-2">
@@ -1015,27 +1036,6 @@ export function AvailabilitySelector({
           gridContent
         )}
       </div>
-
-      {!selectionOnly && (
-        <div className="text-base-content/70 mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
-            Participant availability
-          </span>
-          {currentUserId && (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="border-primary h-3 w-5 rounded-sm border-2" />
-              Your timeslots
-            </span>
-          )}
-          {(selectedMeetingSlotKeys?.size || intervalSelectionMode) && (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="border-secondary bg-secondary/15 h-3 w-5 rounded-sm border-2" />
-              Chosen meeting time
-            </span>
-          )}
-        </div>
-      )}
     </div>
   );
 }
