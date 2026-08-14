@@ -711,6 +711,25 @@ export interface components {
        */
       feedback: string;
     };
+    /** DraftDataOut */
+    DraftDataOut: {
+      /** Starts At */
+      starts_at?: string | null;
+      /** Image Id */
+      image_id?: string | null;
+      location?: components["schemas"]["ResolvedLocation"] | null;
+      /** Locales */
+      locales?: {
+        [key: string]: components["schemas"]["Locale"];
+      };
+      /** Hosts */
+      hosts?: components["schemas"]["Host"][];
+      /** Duration Hours */
+      duration_hours?: number | null;
+      enrollment?: components["schemas"]["Enrollment"] | null;
+      /** Links */
+      links?: components["schemas"]["EventLink"][];
+    };
     /** DraftListItem */
     DraftListItem: {
       id: components["schemas"]["PydanticObjectId"];
@@ -750,7 +769,7 @@ export interface components {
        * Format: date-time
        */
       revision: string;
-      data: components["schemas"]["EventData"];
+      data: components["schemas"]["DraftDataOut"];
       /**
        * Invitations
        * @description Club ids with pending host invitations
@@ -801,51 +820,6 @@ export interface components {
      * @enum {string}
      */
     EnrollmentType: EnrollmentType;
-    /**
-     * EventData
-     * @description Mutable draft data; all fields may be unset until submission.
-     */
-    EventData: {
-      /**
-       * Starts At
-       * @description Event start time, normalized to UTC
-       */
-      starts_at?: string | null;
-      /**
-       * Image Id
-       * @description ID of the event image in MinIO
-       */
-      image_id?: string | null;
-      /**
-       * Location
-       * @description Event location
-       */
-      location?: string | null;
-      /**
-       * Locales
-       * @description Localized title and description
-       */
-      locales?: {
-        [key: string]: components["schemas"]["Locale"];
-      };
-      /**
-       * Hosts
-       * @description Event hosts
-       */
-      hosts?: components["schemas"]["Host"][];
-      /**
-       * Duration Hours
-       * @description Event duration in hours
-       */
-      duration_hours?: number | null;
-      /** @description Enrollment configuration */
-      enrollment?: components["schemas"]["Enrollment"] | null;
-      /**
-       * Links
-       * @description Related links
-       */
-      links?: components["schemas"]["EventLink"][];
-    };
     /** EventDataOut */
     EventDataOut: {
       /**
@@ -855,8 +829,7 @@ export interface components {
       starts_at: string;
       /** Image Id */
       image_id?: string | null;
-      /** Location */
-      location: string;
+      location: components["schemas"]["ResolvedLocation"];
       /** Locales */
       locales: {
         [key: string]: components["schemas"]["SubmissionLocale"];
@@ -875,8 +848,7 @@ export interface components {
       starts_at?: string | null;
       /** Image Id */
       image_id?: string | null;
-      /** Location */
-      location?: string | null;
+      location?: components["schemas"]["ResolvedLocation"] | null;
       /**
        * Name
        * @description Display name picked from locales by settings.locales priority
@@ -909,8 +881,7 @@ export interface components {
       starts_at: string;
       /** Image Id */
       image_id?: string | null;
-      /** Location */
-      location: string;
+      location: components["schemas"]["ResolvedLocation"];
       /**
        * Name
        * @description Display name picked from locales by settings.locales priority
@@ -1159,6 +1130,19 @@ export interface components {
     };
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
+    /**
+     * ResolvedLocation
+     * @description Location as returned by the API (stored as a flat string in Mongo).
+     */
+    ResolvedLocation: {
+      /** Display Name */
+      display_name: string;
+      /**
+       * Url
+       * @description Maps search URL when display_name matches an area title; otherwise empty
+       */
+      url: string;
+    };
     /** RestoreBody */
     RestoreBody: {
       /**
@@ -1181,66 +1165,26 @@ export interface components {
        */
       revision: string;
     };
-    /** Submission */
-    Submission: {
-      /**
-       * Revision
-       * Format: date-time
-       * @description Draft revision that was submitted
-       */
-      revision: string;
-      /**
-       * Submitted At
-       * Format: date-time
-       */
-      submitted_at: string;
-      moderation: components["schemas"]["Moderation"];
-      data: components["schemas"]["SubmissionData"];
-    };
-    /**
-     * SubmissionData
-     * @description Immutable data of a submission/public event; only image_id is nullable.
-     */
-    SubmissionData: {
+    /** SubmissionDataOut */
+    SubmissionDataOut: {
       /**
        * Starts At
        * Format: date-time
-       * @description Event start time, normalized to UTC
        */
       starts_at: string;
-      /**
-       * Image Id
-       * @description ID of the event image in MinIO
-       */
+      /** Image Id */
       image_id?: string | null;
-      /**
-       * Location
-       * @description Event location
-       */
-      location: string;
-      /**
-       * Locales
-       * @description Localized title and description
-       */
+      location: components["schemas"]["ResolvedLocation"];
+      /** Locales */
       locales: {
         [key: string]: components["schemas"]["SubmissionLocale"];
       };
-      /**
-       * Hosts
-       * @description Event hosts
-       */
+      /** Hosts */
       hosts: components["schemas"]["Host"][];
-      /**
-       * Duration Hours
-       * @description Event duration in hours
-       */
+      /** Duration Hours */
       duration_hours: number;
-      /** @description Enrollment configuration */
       enrollment: components["schemas"]["Enrollment"];
-      /**
-       * Links
-       * @description Related links
-       */
+      /** Links */
       links?: components["schemas"]["EventLink"][];
     };
     /** SubmissionDataSummary */
@@ -1252,8 +1196,7 @@ export interface components {
       starts_at: string;
       /** Image Id */
       image_id?: string | null;
-      /** Location */
-      location: string;
+      location: components["schemas"]["ResolvedLocation"];
       /**
        * Name
        * @description Display name picked from locales by settings.locales priority
@@ -1264,6 +1207,21 @@ export interface components {
       /** Duration Hours */
       duration_hours: number;
       enrollment: components["schemas"]["Enrollment"];
+    };
+    /** SubmissionDetail */
+    SubmissionDetail: {
+      /**
+       * Revision
+       * Format: date-time
+       */
+      revision: string;
+      /**
+       * Submitted At
+       * Format: date-time
+       */
+      submitted_at: string;
+      moderation: components["schemas"]["Moderation"];
+      data: components["schemas"]["SubmissionDataOut"];
     };
     /** SubmissionListItem */
     SubmissionListItem: {
@@ -1291,7 +1249,7 @@ export interface components {
       creator_id: string;
       /** @description Same lifecycle statuses as drafts; `unpublished` when approved but public was removed */
       status: components["schemas"]["DraftStatus"] | null;
-      submission: components["schemas"]["Submission"];
+      submission: components["schemas"]["SubmissionDetail"];
     };
     /** SubmissionSummary */
     SubmissionSummary: {
@@ -1336,10 +1294,10 @@ export type SchemaBodyDraftsUploadImage =
   components["schemas"]["Body_drafts_upload_image"];
 export type SchemaCreateDraft = components["schemas"]["CreateDraft"];
 export type SchemaDeclineBody = components["schemas"]["DeclineBody"];
+export type SchemaDraftDataOut = components["schemas"]["DraftDataOut"];
 export type SchemaDraftListItem = components["schemas"]["DraftListItem"];
 export type SchemaDraftOut = components["schemas"]["DraftOut"];
 export type SchemaEnrollment = components["schemas"]["Enrollment"];
-export type SchemaEventData = components["schemas"]["EventData"];
 export type SchemaEventDataOut = components["schemas"]["EventDataOut"];
 export type SchemaEventDataSummary = components["schemas"]["EventDataSummary"];
 export type SchemaEventLink = components["schemas"]["EventLink"];
@@ -1366,13 +1324,15 @@ export type SchemaPatchLinkBody = components["schemas"]["PatchLinkBody"];
 export type SchemaPublicHost = components["schemas"]["PublicHost"];
 export type SchemaPutLocale = components["schemas"]["PutLocale"];
 export type SchemaPydanticObjectId = components["schemas"]["PydanticObjectId"];
+export type SchemaResolvedLocation = components["schemas"]["ResolvedLocation"];
 export type SchemaRestoreBody = components["schemas"]["RestoreBody"];
 export type SchemaRestoreSourceItem =
   components["schemas"]["RestoreSourceItem"];
-export type SchemaSubmission = components["schemas"]["Submission"];
-export type SchemaSubmissionData = components["schemas"]["SubmissionData"];
+export type SchemaSubmissionDataOut =
+  components["schemas"]["SubmissionDataOut"];
 export type SchemaSubmissionDataSummary =
   components["schemas"]["SubmissionDataSummary"];
+export type SchemaSubmissionDetail = components["schemas"]["SubmissionDetail"];
 export type SchemaSubmissionListItem =
   components["schemas"]["SubmissionListItem"];
 export type SchemaSubmissionLocale = components["schemas"]["SubmissionLocale"];
@@ -1849,7 +1809,7 @@ export interface operations {
           "application/json": components["schemas"]["DraftOut"];
         };
       };
-      /** @description Club is already invited OR Club is already a host */
+      /** @description Club is already a host OR Club is already invited */
       400: {
         headers: {
           [name: string]: unknown;
