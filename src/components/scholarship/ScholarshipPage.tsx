@@ -4,6 +4,7 @@ import { ScholarshipFormula } from "@/components/icons/ScholarshipFormula.tsx";
 import { ScholarshipGPA } from "@/components/icons/ScholarshipGPA.tsx";
 import { ScholarshipS } from "@/components/icons/ScholarshipS.tsx";
 import ScholarshipCalculator from "@/components/scholarship/ScholarshipCalculator.tsx";
+import { Link } from "@tanstack/react-router";
 
 export function ScholarshipPage() {
   return (
@@ -33,36 +34,43 @@ export function ScholarshipPage() {
         </p>
         <p>
           <ScholarshipBmax className="fill-base-content -mt-1 inline" /> &mdash;
-          maximum scholarship amount (10,000₽ or 20,000₽ for masters)
+          maximum scholarship amount (10,000₽ for Bachelors or 20,000₽ for
+          Masters)
         </p>
         <p>
           <ScholarshipGPA className="fill-base-content inline" /> &mdash;
           student&apos;s average grade for the last semester
         </p>
 
-        <h3 className="mt-4 text-2xl">Increased scholarship:</h3>
         <p>
-          + <i>10,000₽</i> &mdash; if you get all A grades in all subjects for
-          two consecutive semesters.
+          State Academic Scholarship for bachelor&apos;s and master&apos;s
+          students &mdash; <i>3,500₽</i>.
         </p>
         <p>
-          + <i>6,000₽</i> &mdash; if you win a competition for a{" "}
-          <a
-            href="https://my.innopolis.university/education/higher-scholarship"
-            target="_blank"
-            className="italic underline"
-          >
-            higher scholarship
-          </a>{" "}
-          (+<i>12,000₽</i> for{" "}
-          <a
-            href="https://innopolis.university/upload/iblock/cae/qr81hpqswq2bucdwvyn0aphwlz5i4agy/Приказ_об_утверждении_размеров_государственных_стипендий.pdf"
-            target="_blank"
-            className="italic underline"
-          >
-            state-funded students
-          </a>
-          ).
+          State Academic Scholarship for PhD students &mdash; <i>11,000₽</i>.
+        </p>
+        <p>
+          Increased State Academic Scholarship for bachelor&apos;s and
+          master&apos;s students &mdash; <i>12,000₽</i>.
+        </p>
+
+        <h3 className="mt-4 text-2xl">Social scholarships:</h3>
+        <p>
+          State Social Scholarship for bachelor&apos;s and master&apos;s
+          students &mdash; <i>4,000₽</i>.
+        </p>
+        <p>
+          Increased State Social Scholarship for bachelor&apos;s and
+          master&apos;s students &mdash; <i>15,500₽</i>.
+        </p>
+
+        <h3 className="mt-4 text-2xl">Special payouts:</h3>
+        <p>
+          Special payouts are financial support granted by decision of the
+          Scholarship Committee based on a student&apos;s application. They are
+          available only for serious circumstances, such as the death of a close
+          relative, disability, or maternity leave. Special payouts are not
+          regular scholarships.
         </p>
 
         <h3 className="mt-4 text-2xl">Financial support:</h3>
@@ -72,8 +80,11 @@ export function ScholarshipPage() {
         </p>
         <p>
           <i>support</i> &mdash; if you require financial assistance due to
-          personal or unexpected reasons, you can submit a financial support
-          application to 319.
+          personal or unexpected reasons, you can{" "}
+          <Link to="/student-affairs" className="italic underline">
+            submit a financial support application
+          </Link>{" "}
+          to 319.
         </p>
 
         <h3 className="mt-4 text-2xl">Official sources:</h3>
