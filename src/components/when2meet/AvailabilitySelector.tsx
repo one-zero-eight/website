@@ -990,7 +990,7 @@ export function AvailabilitySelector({
 
       {!selectionOnly && (
         <div className="text-base-content/70 mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 lg:px-3">
             <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
             Participant availability
           </span>
