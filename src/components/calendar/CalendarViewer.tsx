@@ -39,6 +39,10 @@ export type URLType =
       eventGroup?: scheduleTypes.SchemaViewEventGroup;
     };
 
+function toCalendarSpace(date: Date): Date {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+}
+
 export default function CalendarViewer({
   urls,
   extraEvents = [],
@@ -153,7 +157,7 @@ export default function CalendarViewer({
             typeof input.start === "string" &&
             input.start.length === 10
           ) {
-            return input;
+            return input; // It is an all-day event, no need to transform
           }
 
           // Dates have Europe/Moscow timezone,
@@ -277,7 +281,7 @@ export default function CalendarViewer({
         }}
         allDayText="" // Remove text in all day row
         // displayEventEnd={true} // Display end time
-        nowIndicator
+        nowIndicator={true} // Display current time as line
         nowIndicatorContent={(arg) => {
           if (
             arg.date.getUTCHours() === 0 &&
@@ -334,7 +338,7 @@ export default function CalendarViewer({
         // slotMinTime="07:00:00" // Cut everything earlier than 7am
         scrollTime="07:30:00" // Scroll to 7:30am on launch
         scrollTimeReset={false} // Do not reset scroll on date switch
-        noEventsContent={() => "No events this month"}
+        noEventsContent={() => "No events this month"} // Custom message
         datesSet={handleDatesSet}
         loading={setIsLoading}
       />
@@ -558,8 +562,4 @@ function renderDayHeader({ date }: DayHeaderContentArg) {
       </span>
     </>
   );
-}
-
-function toCalendarSpace(date: Date): Date {
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
 }

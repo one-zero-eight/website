@@ -26,7 +26,9 @@ export function useSportProfile() {
 
   const studentId = profile?.user_id;
   const isTrainer = (profile?.trainer_info?.groups.length ?? 0) > 0;
+  const isCollege = profile?.student_info?.is_college ?? false;
   const isAdmin = profile?.is_admin ?? false;
+  const studentStatus = profile?.student_info?.student_status ?? null;
   const trainerGroupIds = useMemo(
     () => new Set(profile?.trainer_info?.groups.map((group) => group.id) ?? []),
     [profile?.trainer_info?.groups],
@@ -41,7 +43,9 @@ export function useSportProfile() {
     profileErr,
     studentId,
     isTrainer,
+    isCollege,
     isAdmin,
+    studentStatus,
     trainerGroupIds,
   };
 }

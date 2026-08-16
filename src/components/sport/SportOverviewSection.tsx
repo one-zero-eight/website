@@ -12,10 +12,22 @@ import { useState } from "react";
 export function SportProgressSection({
   hours,
   currentSemester,
+  studentId,
+  fullName,
+  hasStudentInfo,
+  isCollege,
+  isTrainer,
+  studentStatus,
   medicalGroup,
 }: {
   hours: SchemaStudentHoursSummarySchema | undefined;
   currentSemester: SchemaSemesterSchema | undefined;
+  studentId?: number | null;
+  fullName?: string | null;
+  hasStudentInfo?: boolean;
+  isCollege?: boolean;
+  isTrainer?: boolean;
+  studentStatus?: string | null;
   medicalGroup?: string | null;
 }) {
   const [selfSportModalOpen, setSelfSportModalOpen] = useState(false);
@@ -24,87 +36,143 @@ export function SportProgressSection({
     useState(false);
   const required = hours?.required_hours ?? currentSemester?.required_hours;
 
-  if (!hours || required == null) return null;
+  const { data: betterThanInfo } = $sport.useQuery(
+    "get",
+    "/students/{student_id}/better-than",
+    { params: { path: { student_id: Number(studentId) } } },
+    { enabled: studentId != null },
+  );
 
-  const earned = hours.hours_from_groups + hours.self_sport_hours;
-  const earnedPct = Math.min(100, (earned / required) * 100);
-  const remaining = Math.max(0, required - earned);
+  const roleLabels = [
+    hasStudentInfo ? (isCollege ? "College" : "Student") : null,
+    isTrainer ? "Trainer" : null,
+  ].filter((label): label is string => !!label);
+  const normalizedStatus = studentStatus?.trim().toLowerCase() ?? "";
+  const enrollmentStatus =
+    studentStatus && normalizedStatus && normalizedStatus !== "normal"
+      ? studentStatus
+      : null;
+
+  const earned =
+    hours != null ? hours.hours_from_groups + hours.self_sport_hours : 0;
+  const earnedPct =
+    hours != null && required != null
+      ? Math.min(100, (earned / required) * 100)
+      : 0;
+  const remaining =
+    hours != null && required != null ? Math.max(0, required - earned) : 0;
+  const deadline = currentSemester?.end ? new Date(currentSemester.end) : null;
+  const daysLeft =
+    deadline != null
+      ? Math.max(
+          0,
+          Math.ceil((deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+        )
+      : null;
+  const betterThan =
+    betterThanInfo != null && betterThanInfo.better_than >= 30
+      ? betterThanInfo.better_than
+      : null;
 
   return (
-    <div className="card card-border bg-base-100">
-      <div className="card-body gap-4">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold">Progress</h3>
-          {currentSemester ? (
-            <p className="text-base-content/60 text-sm">
-              {currentSemester.name}
-            </p>
-          ) : null}
-        </div>
-        <p className="text-base-content/80 text-center text-sm">
-          Current sport hours:{" "}
-          <span className="text-base-content font-semibold">
-            {earned} out of {required} hours
-          </span>
-        </p>
-        <div className="bg-base-200 overflow-hidden rounded-lg">
-          <div className="grid grid-cols-2 px-4 py-2 text-xs font-semibold">
-            <span className="text-info text-center">
-              Regular sport ({hours.hours_from_groups}h)
-            </span>
-            <span className="text-primary text-center">
-              Self-sport ({hours.self_sport_hours}h)
-            </span>
-          </div>
-          <div className="bg-base-300 h-8 w-full">
-            <div
-              className="bg-info h-full"
-              style={{ width: `${earnedPct}%` }}
-              title="Earned hours"
-            />
-          </div>
-        </div>
-        {medicalGroup ? (
-          <p className="text-base-content/75 text-center text-sm">
-            Medical group:{" "}
-            <span className="text-base-content font-semibold">
-              {medicalGroup}
-            </span>
-          </p>
-        ) : null}
-        {remaining > 0 ? (
-          <p className="text-base-content/75 text-center text-sm">
-            To pass the sport course you must get{" "}
-            <span className="text-base-content font-semibold">
-              {remaining} hours
-            </span>{" "}
-            more.
-          </p>
-        ) : null}
-        <div className="flex flex-wrap justify-center gap-2 pt-1">
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={() => setSelfSportModalOpen(true)}
-          >
-            Self-sport upload
-          </button>
-          <button
-            type="button"
-            className="btn btn-sm border-base-content bg-base-content text-base-100 hover:opacity-90"
-            onClick={() => setMedicalGroupModalOpen(true)}
-          >
-            Change medical group
-          </button>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <SportIdentityInfo
+          fullName={fullName}
+          roleLabels={roleLabels}
+          enrollmentStatus={enrollmentStatus}
+          medicalGroup={medicalGroup}
+          onChangeMedicalGroup={() => setMedicalGroupModalOpen(true)}
+        />
+        <div>
           <button
             type="button"
             className="btn btn-outline btn-sm border-base-content text-base-content hover:bg-base-content hover:text-base-100"
             onClick={() => setMedicalReferenceModalOpen(true)}
           >
-            Submit medical reference
+            Submit medical leave reference
           </button>
         </div>
       </div>
+
+      {hours && required != null ? (
+        <div className="card card-border bg-base-100">
+          <div className="card-body gap-4">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold">Progress</h3>
+              {currentSemester ? (
+                <p className="text-base-content/60 text-sm">
+                  {currentSemester.name}
+                </p>
+              ) : null}
+              {betterThan != null ? (
+                <p className="text-base-content/80 mt-1 text-sm">
+                  You are better than{" "}
+                  <span className="text-base-content font-semibold">
+                    {betterThan}%
+                  </span>{" "}
+                  of the students!
+                </p>
+              ) : null}
+            </div>
+            {deadline != null && daysLeft != null ? (
+              <p className="text-base-content/75 text-center text-sm">
+                Deadline:{" "}
+                <span className="text-base-content font-semibold">
+                  {deadline.toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>{" "}
+                ({daysLeft} days left)
+              </p>
+            ) : null}
+            <p className="text-base-content/80 text-center text-sm">
+              Current sport hours:{" "}
+              <span className="text-base-content font-semibold">
+                {earned} out of {required} hours
+              </span>
+            </p>
+            <div className="bg-base-200 overflow-hidden rounded-lg">
+              <div className="grid grid-cols-2 px-4 py-2 text-xs font-semibold">
+                <span className="text-info text-center">
+                  Regular sport ({hours.hours_from_groups}h)
+                </span>
+                <span className="text-primary text-center">
+                  Self-sport ({hours.self_sport_hours}h)
+                </span>
+              </div>
+              <div className="bg-base-300 h-8 w-full">
+                <div
+                  className="bg-info h-full"
+                  style={{ width: `${earnedPct}%` }}
+                  title="Earned hours"
+                />
+              </div>
+            </div>
+            {remaining > 0 ? (
+              <p className="text-base-content/75 text-center text-sm">
+                To pass the sport course you must get{" "}
+                <span className="text-base-content font-semibold">
+                  {remaining} hours
+                </span>{" "}
+                more and pass fitness test.
+              </p>
+            ) : null}
+            <div className="flex flex-wrap justify-center gap-2 pt-1">
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => setSelfSportModalOpen(true)}
+              >
+                Self-sport upload
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <SelfSportUploadModal
         open={selfSportModalOpen}
         onOpenChange={setSelfSportModalOpen}
@@ -117,6 +185,68 @@ export function SportProgressSection({
         open={medicalReferenceModalOpen}
         onOpenChange={setMedicalReferenceModalOpen}
       />
+    </div>
+  );
+}
+
+function SportIdentityInfo({
+  fullName,
+  roleLabels,
+  enrollmentStatus,
+  medicalGroup,
+  onChangeMedicalGroup,
+}: {
+  fullName?: string | null;
+  roleLabels: string[];
+  enrollmentStatus?: string | null;
+  medicalGroup?: string | null;
+  onChangeMedicalGroup: () => void;
+}) {
+  if (
+    !fullName &&
+    roleLabels.length === 0 &&
+    !enrollmentStatus &&
+    !medicalGroup
+  ) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {fullName ? <h2 className="text-2xl font-medium">{fullName}</h2> : null}
+      {roleLabels.length > 0 ? (
+        <p className="text-base-content/75 text-sm">
+          Status:{" "}
+          <span className="text-base-content font-semibold">
+            {roleLabels.join(", ")}
+          </span>
+        </p>
+      ) : null}
+      {enrollmentStatus ? (
+        <p className="text-base-content/75 text-sm">
+          Student status:{" "}
+          <span className="text-base-content font-semibold">
+            {enrollmentStatus}
+          </span>
+        </p>
+      ) : null}
+      {medicalGroup ? (
+        <p className="text-base-content/75 flex flex-wrap items-center gap-2 text-sm">
+          <span>
+            Medical group:{" "}
+            <span className="text-base-content font-semibold">
+              {medicalGroup}
+            </span>
+          </span>
+          <button
+            type="button"
+            className="btn btn-ghost btn-xs"
+            onClick={onChangeMedicalGroup}
+          >
+            Change
+          </button>
+        </p>
+      ) : null}
     </div>
   );
 }

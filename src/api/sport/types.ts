@@ -804,7 +804,13 @@ export interface components {
       /** Unit */
       unit: string | null;
       /** Value */
-      value: string;
+      value: number;
+      /** Display Value */
+      display_value: string;
+      /** Score */
+      score: number;
+      /** Max Score */
+      max_score: number;
     };
     /** FitnessTestExerciseSchema */
     FitnessTestExerciseSchema: {
@@ -1113,6 +1119,8 @@ export interface components {
     };
     /** StudentInfoSchema */
     StudentInfoSchema: {
+      /** Is College */
+      is_college: boolean;
       /** Student Status */
       student_status: string;
       /** Medical Group */

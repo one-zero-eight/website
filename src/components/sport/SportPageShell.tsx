@@ -51,18 +51,6 @@ export function SportPageShell({
                 ? (sport.profileErr as { message: string }).message
                 : "You may not be registered in the sport system yet."}
             </p>
-            <p className="text-base-content/70 text-sm">
-              Try the{" "}
-              <a
-                href="https://t.me/IUSportBot"
-                className="text-primary link"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Telegram bot
-              </a>
-              .
-            </p>
           </div>
         </div>
       </div>

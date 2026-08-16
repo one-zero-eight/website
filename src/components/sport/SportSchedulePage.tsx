@@ -26,6 +26,9 @@ function SportScheduleContent({
   studentId,
   trainerGroupIds,
   profile,
+  isCollege,
+  isTrainer,
+  studentStatus,
 }: SportProfileReady) {
   const { data: hours } = $sport.useQuery(
     "get",
@@ -46,6 +49,12 @@ function SportScheduleContent({
       <SportProgressSection
         hours={hours}
         currentSemester={currentSemester}
+        studentId={studentId}
+        fullName={profile.full_name}
+        hasStudentInfo={!!profile.student_info}
+        isCollege={isCollege}
+        isTrainer={isTrainer}
+        studentStatus={studentStatus}
         medicalGroup={profile.student_info?.medical_group}
       />
       {studentId != null ? (
@@ -141,9 +150,10 @@ function SportCalendar({
 
   return (
     <>
-      <div className="border-base-300 bg-base-100 border-t pt-4">
+      <div className="bg-base-100">
         <div className="flex flex-col gap-2">
-          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <div className="grow text-3xl font-medium">Sport calendar</div>
             <button
               type="button"
               className="btn btn-primary btn-sm"
