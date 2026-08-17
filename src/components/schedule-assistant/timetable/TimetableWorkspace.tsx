@@ -18,6 +18,7 @@ import {
   memo,
   startTransition,
   useCallback,
+  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
@@ -41,8 +42,11 @@ import {
 } from "./meetingPickerIndex.ts";
 import {
   dateForWeekdayInWeekRange,
+  suggestPlacementResources,
   type CreateMeetingCellContext,
+  type CreateMeetingPreset,
   type CreateMeetingViewContext,
+  type PlacementResourceSuggestion,
 } from "./createMeetingUtils.ts";
 import { EditClassModal } from "./EditClassModal.tsx";
 import { MeetingDetailPanel } from "./MeetingDetailPanel.tsx";
@@ -81,6 +85,14 @@ import {
   TimetableLayoutSelector,
   type TimetableLayoutMode,
 } from "./TimetableLayoutSelector.tsx";
+import { UnarrangedLessonsPanel } from "./UnarrangedLessonsPanel.tsx";
+import {
+  buildUnarrangedComponentGroups,
+  flattenUnarrangedGroups,
+  findUnarrangedLesson,
+  type UnarrangedComponentGroup,
+  type UnarrangedLessonItem,
+} from "./unarrangedLessons.ts";
 import { scrollMeetingIntoCenter } from "./timetableMeetingScroll.ts";
 import {
   isTodayWeekdayInDisplayedWeek,
@@ -93,7 +105,6 @@ import {
   WEEK_RELATIVE_LABELS,
   buildColumns,
   buildCourseColors,
-  buildCoursesToSections,
   buildGrid,
   buildGroupSizeMap,
   buildInstructorLabelById,
@@ -109,6 +120,7 @@ import {
   meetingRoomLoadOverCapacity,
   meetingSelectionKey,
   mergedMeetingsForCell,
+  rebuildMeetingsForChangedCourses,
   resolveInstructorLabel,
   roomFillPercent,
   scheduleAssistantDetailTooltips,
@@ -126,6 +138,66 @@ import {
 } from "./timetableViewerModel.ts";
 
 type InnerTab = "instructor" | "room" | string;
+
+function shallowStringRecordEqual(
+  a: Record<string, unknown>,
+  b: Record<string, unknown>,
+) {
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const key of aKeys) {
+    if (a[key] !== b[key]) return false;
+  }
+  return true;
+}
+
+function courseColorsEqual(
+  a: Record<string, { bg: string; border: string }>,
+  b: Record<string, { bg: string; border: string }>,
+) {
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const key of aKeys) {
+    const prev = a[key];
+    const next = b[key];
+    if (!next || prev.bg !== next.bg || prev.border !== next.border)
+      return false;
+  }
+  return true;
+}
+
+function columnsEqual(a: Column[], b: Column[]) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const prev = a[i];
+    const next = b[i];
+    if (
+      prev.yearLabel !== next.yearLabel ||
+      prev.groupId !== next.groupId ||
+      prev.groupLabel !== next.groupLabel ||
+      prev.programCode !== next.programCode
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function weeksEqual(a: WeekRange[], b: WeekRange[]) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (
+      a[i].key !== b[i].key ||
+      a[i].start !== b[i].start ||
+      a[i].end !== b[i].end
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
 
 type MeetingCardProps = {
   row: MergedRow;
@@ -211,16 +283,27 @@ function TimetableWorkspaceInner({
   const [weekIndex, setWeekIndex] = useState(0);
   const [columns, setColumns] = useState<Column[]>([]);
   const [allMeetings, setAllMeetings] = useState<Meeting[]>([]);
+  const deferredMeetings = useDeferredValue(allMeetings);
   const meetingPickerIndex = useMemo(
-    () => buildMeetingPickerIndex(allMeetings),
-    [allMeetings],
+    () => buildMeetingPickerIndex(deferredMeetings),
+    [deferredMeetings],
   );
+  const coursesSnapshotRef = useRef<SchemaScheduleConfig["courses"] | null>(
+    null,
+  );
+  const meetingsSnapshotRef = useRef<Meeting[]>([]);
+  meetingsSnapshotRef.current = allMeetings;
+  const meetingsRebuildIdRef = useRef(0);
   const [courseColors, setCourseColors] = useState<
     Record<string, { bg: string; border: string }>
   >({});
   const [activeTab, setActiveTab] = useState<InnerTab>("core");
   const [layoutMode, setLayoutMode] = useState<TimetableLayoutMode>("groups");
   const [exportPending, setExportPending] = useState(false);
+  const [placeTargetKey, setPlaceTargetKey] = useState<string | null>(null);
+  const [hoverPlaceCell, setHoverPlaceCell] =
+    useState<CreateMeetingCellContext | null>(null);
+  const [mobileUnarrangedOpen, setMobileUnarrangedOpen] = useState(false);
   const [roomCapacityById, setRoomCapacityById] = useState<
     Record<string, number>
   >({});
@@ -245,14 +328,10 @@ function TimetableWorkspaceInner({
   } | null>(null);
   const activeWeekStartRef = useRef<string | null>(null);
   const appliedFocusMeetingIdRef = useRef<string | null>(null);
+  const pendingMeetingScrollRef = useRef(false);
 
   const selectionStore = useMemo(() => createSelectionStore(), []);
   const isLgUp = useMediaQuery("(min-width: 1024px)");
-
-  const coursesToSections = useMemo(
-    () => config && buildCoursesToSections(config),
-    [config],
-  );
 
   useEffect(() => {
     if (!config) return;
@@ -331,61 +410,148 @@ function TimetableWorkspaceInner({
   }, [weeks, weekIndex]);
 
   useEffect(() => {
-    if (!config || !coursesToSections) {
+    if (!config) {
+      meetingsRebuildIdRef.current += 1;
       setAllMeetings([]);
       setColumns([]);
       setWeeks([]);
       setWeekIndex(0);
       activeWeekStartRef.current = null;
+      coursesSnapshotRef.current = null;
       setMsg("");
       return;
     }
-    try {
-      const meetings = buildMeetings(config, coursesToSections);
-      if (!meetings.length)
-        throw new Error("В config.yaml не найдено занятий.");
-      if (!config.term)
-        throw new Error(
-          "config.yaml не похож на конфиг расписания (нет term).",
-        );
-      const cols = buildColumns(config);
-      if (!cols.length)
-        throw new Error("Не удалось построить колонки групп из config.");
 
-      const nextWeeks = buildWeeks(meetings);
-      const nextColors = buildCourseColors(meetings);
-      const nextRoomCapacity = buildRoomCapacityMap(config);
-      const nextGroupSize = buildGroupSizeMap(config);
+    const rebuildId = ++meetingsRebuildIdRef.current;
+    // Yield so modal close can paint before the heavy rebuild.
+    const timer = window.setTimeout(() => {
+      if (rebuildId !== meetingsRebuildIdRef.current) return;
+      try {
+        const nextCourses = config.courses ?? [];
+        const prevCourses = coursesSnapshotRef.current;
+        const previousMeetings = meetingsSnapshotRef.current;
 
-      // Keep the timetable chrome interactive while the heavy grid mounts.
-      startTransition(() => {
-        setAllMeetings(meetings);
-        setRoomCapacityById(nextRoomCapacity);
-        setGroupSizeById(nextGroupSize);
-        setCourseColors(nextColors);
-        selectionStore.setSelection(null);
-        setColumns(cols);
-        setWeeks(nextWeeks);
-        setWeekIndex((currentIndex) => {
-          const preservedStart = activeWeekStartRef.current;
-          if (preservedStart) {
-            const preservedIndex = nextWeeks.findIndex(
-              (week) => week.start === preservedStart,
+        const changedIndexes: number[] = [];
+        if (
+          prevCourses &&
+          previousMeetings.length > 0 &&
+          prevCourses.length === nextCourses.length
+        ) {
+          for (let i = 0; i < nextCourses.length; i++) {
+            if (prevCourses[i] !== nextCourses[i]) changedIndexes.push(i);
+          }
+        }
+
+        const coursesUnchanged =
+          !!prevCourses &&
+          previousMeetings.length > 0 &&
+          prevCourses.length === nextCourses.length &&
+          changedIndexes.length === 0;
+
+        const useIncremental =
+          changedIndexes.length > 0 &&
+          changedIndexes.length <= 3 &&
+          changedIndexes.length < nextCourses.length;
+
+        let meetings = previousMeetings;
+        if (!coursesUnchanged) {
+          meetings = useIncremental
+            ? rebuildMeetingsForChangedCourses(
+                previousMeetings,
+                config,
+                changedIndexes,
+              )
+            : buildMeetings(config);
+        }
+
+        if (!meetings.length)
+          throw new Error("В config.yaml не найдено занятий.");
+        if (!config.term)
+          throw new Error(
+            "config.yaml не похож на конфиг расписания (нет term).",
+          );
+        const cols = buildColumns(config);
+        if (!cols.length)
+          throw new Error("Не удалось построить колонки групп из config.");
+
+        const nextWeeks = coursesUnchanged ? null : buildWeeks(meetings);
+        const nextColors = coursesUnchanged
+          ? null
+          : buildCourseColors(meetings);
+        const nextRoomCapacity = buildRoomCapacityMap(config);
+        const nextGroupSize = buildGroupSizeMap(config);
+
+        if (rebuildId !== meetingsRebuildIdRef.current) return;
+
+        // Commit meetings synchronously. Gating this inside startTransition + a
+        // cancelled flag dropped creates when modal close re-ran the effect
+        // after compute but before the transition flushed — and with no further
+        // config change the table stayed stale until reload.
+        if (!coursesUnchanged) {
+          coursesSnapshotRef.current = nextCourses;
+          setAllMeetings(meetings);
+          if (nextColors) {
+            setCourseColors((prev) =>
+              courseColorsEqual(prev, nextColors) ? prev : nextColors,
             );
-            if (preservedIndex >= 0) return preservedIndex;
           }
-          if (!nextWeeks.length) return 0;
-          if (!preservedStart) {
-            return weekIndexForDate(nextWeeks, todayIsoDate());
+          const selected = selectionStore.getSelection();
+          if (selected?.type === "meeting") {
+            const stillVisible = meetings.some(
+              (meeting) =>
+                meeting.instance_id === selected.value && !meeting.cancelled,
+            );
+            if (!stillVisible) {
+              queueMicrotask(() => selectionStore.setSelection(null));
+            }
           }
-          return Math.min(currentIndex, nextWeeks.length - 1);
+          if (nextWeeks) {
+            setWeeks((prev) =>
+              weeksEqual(prev, nextWeeks) ? prev : nextWeeks,
+            );
+            setWeekIndex((currentIndex) => {
+              const preservedStart = activeWeekStartRef.current;
+              if (preservedStart) {
+                const preservedIndex = nextWeeks.findIndex(
+                  (week) => week.start === preservedStart,
+                );
+                if (preservedIndex >= 0) return preservedIndex;
+              }
+              if (!nextWeeks.length) return 0;
+              if (!preservedStart) {
+                return weekIndexForDate(nextWeeks, todayIsoDate());
+              }
+              return Math.min(currentIndex, nextWeeks.length - 1);
+            });
+          }
+        }
+
+        startTransition(() => {
+          if (rebuildId !== meetingsRebuildIdRef.current) return;
+          setRoomCapacityById((prev) =>
+            shallowStringRecordEqual(prev, nextRoomCapacity)
+              ? prev
+              : nextRoomCapacity,
+          );
+          setGroupSizeById((prev) =>
+            shallowStringRecordEqual(prev, nextGroupSize)
+              ? prev
+              : nextGroupSize,
+          );
+          setColumns((prev) => (columnsEqual(prev, cols) ? prev : cols));
+          setMsg("");
         });
-        setMsg("");
-      });
-    } catch (e: unknown) {
-      setMsg(String((e as Error)?.message || e));
-    }
-  }, [config, coursesToSections, selectionStore]);
+      } catch (e: unknown) {
+        if (rebuildId === meetingsRebuildIdRef.current) {
+          setMsg(String((e as Error)?.message || e));
+        }
+      }
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [config, selectionStore]);
 
   useEffect(() => {
     function handleGlobalEsc(event: KeyboardEvent) {
@@ -477,17 +643,30 @@ function TimetableWorkspaceInner({
     const visibleColumns = columnsForTab(
       activeTab,
       columns,
-      allMeetings,
+      deferredMeetings,
       config,
     );
-    return buildGrid(config, allMeetings, wk.start, activeTab, visibleColumns);
-  }, [config, allMeetings, weeks, weekIndex, activeTab, columns]);
+    return buildGrid(
+      config,
+      deferredMeetings,
+      wk.start,
+      activeTab,
+      visibleColumns,
+    );
+  }, [config, deferredMeetings, weeks, weekIndex, activeTab, columns]);
 
   const calendarGrid = useMemo(() => {
     if (layoutMode !== "calendar" || isUtilizationTab) return null;
-    if (!config || !allMeetings.length || !weeks.length) return null;
-    return buildCalendarGrid(config, allMeetings, weeks, activeTab);
-  }, [layoutMode, isUtilizationTab, config, allMeetings, weeks, activeTab]);
+    if (!config || !deferredMeetings.length || !weeks.length) return null;
+    return buildCalendarGrid(config, deferredMeetings, weeks, activeTab);
+  }, [
+    layoutMode,
+    isUtilizationTab,
+    config,
+    deferredMeetings,
+    weeks,
+    activeTab,
+  ]);
 
   // Sticky day-row `top` uses --sa-grid-header-height. Measuring thead on open
   // forces a full layout of the ~10k-node table. Prefer the CSS default and
@@ -559,16 +738,56 @@ function TimetableWorkspaceInner({
       layoutMode === "calendar" && prevLayoutModeRef.current !== "calendar";
     prevLayoutModeRef.current = layoutMode;
     if (!enteredCalendar || !calendarGrid) return;
+    if (pendingMeetingScrollRef.current) return;
     const currentWeekRow = gridWrapRef.current?.querySelector(
       "[data-current-week]",
     );
     currentWeekRow?.scrollIntoView({ block: "start" });
   }, [layoutMode, calendarGrid]);
 
+  const clearSelection = useCallback(() => {
+    selectionStore.setSelection(null);
+  }, [selectionStore]);
+
+  const clearPlaceMode = useCallback(() => {
+    setPlaceTargetKey(null);
+    setHoverPlaceCell(null);
+  }, []);
+
+  const defaultLayoutForSection = useCallback(
+    (sectionCode: string | undefined): TimetableLayoutMode | null => {
+      if (!sectionCode || !config) return null;
+      if (sectionCode === "instructor" || sectionCode === "room") {
+        return "groups";
+      }
+      const section = getScheduleSections(config).find(
+        (candidate) => candidate.code === sectionCode,
+      );
+      const defaultLayout = section?.default_layout;
+      if (defaultLayout === "groups" || defaultLayout === "calendar") {
+        return defaultLayout;
+      }
+      return null;
+    },
+    [config],
+  );
+
+  const applySectionView = useCallback(
+    (sectionCode: string | undefined) => {
+      if (!sectionCode) return;
+      setActiveTab(sectionCode as InnerTab);
+      const nextLayout = defaultLayoutForSection(sectionCode);
+      if (nextLayout) setLayoutMode(nextLayout);
+    },
+    [defaultLayoutForSection],
+  );
+
   const applyTabChange = useCallback(
     (nextTab: InnerTab) => {
       setActiveTab(nextTab);
       selectionStore.setSelection(null);
+      setPlaceTargetKey(null);
+      setHoverPlaceCell(null);
       if (nextTab === "instructor" || nextTab === "room") {
         setLayoutMode("groups");
         return;
@@ -586,6 +805,8 @@ function TimetableWorkspaceInner({
 
   const selectMeeting = useCallback(
     (valueKey: string, course: string, focusTag?: string) => {
+      setPlaceTargetKey(null);
+      setHoverPlaceCell(null);
       selectionStore.setSelection({
         type: "meeting",
         value: valueKey,
@@ -638,20 +859,20 @@ function TimetableWorkspaceInner({
     [selectionStore],
   );
 
-  const clearSelection = useCallback(() => {
-    selectionStore.setSelection(null);
-  }, [selectionStore]);
-
   const navigateToMeeting = useCallback(
     (meeting: Meeting) => {
       const nextWeek = weeks.length
         ? weekIndexForDate(weeks, meeting.date)
         : weekIndex;
       const weekChanged = Boolean(weeks.length) && nextWeek !== weekIndex;
-      const nextTab = meeting.sections[0] as InnerTab | undefined;
+      const nextTab = meeting.section as InnerTab | undefined;
+      const nextLayout = defaultLayoutForSection(nextTab);
       const tabChanged = Boolean(nextTab) && nextTab !== activeTab;
+      const layoutChanged = Boolean(nextLayout) && nextLayout !== layoutMode;
 
       const applySelection = () => {
+        setPlaceTargetKey(null);
+        setHoverPlaceCell(null);
         selectionStore.setSelection({
           type: "meeting",
           value: meeting.instance_id,
@@ -662,68 +883,201 @@ function TimetableWorkspaceInner({
 
       // Same week/tab: scroll in the click handler before selection fan-out
       // (~370 useSyncExternalStore subscribers) blocks the main thread.
-      if (!weekChanged && !tabChanged) {
+      if (!weekChanged && !tabChanged && !layoutChanged) {
         const scrolled = scrollMeetingIntoCenter(
           gridWrapRef.current,
           meeting.instance_id,
+          meeting.date,
         );
         requestAnimationFrame(applySelection);
         if (!scrolled) {
+          pendingMeetingScrollRef.current = true;
           setScrollToMeetingId(meeting.instance_id);
         }
         return;
       }
 
+      pendingMeetingScrollRef.current = true;
       if (weeks.length) {
         setWeekIndex(nextWeek);
       }
-      if (nextTab) {
-        setActiveTab(nextTab);
-      }
+      applySectionView(nextTab);
       applySelection();
       setScrollToMeetingId(meeting.instance_id);
     },
-    [activeTab, selectionStore, weekIndex, weeks],
+    [
+      activeTab,
+      applySectionView,
+      defaultLayoutForSection,
+      layoutMode,
+      selectionStore,
+      weekIndex,
+      weeks,
+    ],
   );
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createCellContext, setCreateCellContext] =
     useState<CreateMeetingCellContext | null>(null);
+  const [createPresetSnapshot, setCreatePresetSnapshot] =
+    useState<CreateMeetingPreset | null>(null);
 
   const createViewContext = useMemo((): CreateMeetingViewContext => {
     const sectionCode =
       !isUtilizationTab && activeTab !== "instructor" && activeTab !== "room"
         ? activeTab
         : undefined;
-    const visibleGroupIds =
-      config && sectionCode
-        ? columnsForTab(activeTab, columns, allMeetings, config).map(
-            (column) => column.groupId,
-          )
-        : [];
     return {
       sectionCode,
       groupId: createCellContext?.groupId,
-      visibleGroupIds,
-      coursesToSections: coursesToSections ?? undefined,
     };
+  }, [activeTab, createCellContext?.groupId, isUtilizationTab]);
+
+  const unarrangedViewContext = useMemo((): CreateMeetingViewContext => {
+    const sectionCode =
+      !isUtilizationTab && activeTab !== "instructor" && activeTab !== "room"
+        ? activeTab
+        : undefined;
+    return { sectionCode };
+  }, [activeTab, isUtilizationTab]);
+
+  const deferredCourses = useDeferredValue(config?.courses);
+  const unarrangedGroups = useMemo(() => {
+    if (!config || isUtilizationTab || !deferredCourses) return [];
+    return buildUnarrangedComponentGroups(
+      deferredCourses,
+      config,
+      unarrangedViewContext,
+      instructorLabelById,
+    );
   }, [
-    activeTab,
-    allMeetings,
-    columns,
     config,
-    coursesToSections,
-    createCellContext?.groupId,
+    deferredCourses,
+    instructorLabelById,
     isUtilizationTab,
+    unarrangedViewContext,
   ]);
+
+  const placePending = createModalOpen && Boolean(createPresetSnapshot);
+  const unarrangedFreezeRef = useRef<UnarrangedComponentGroup[] | null>(null);
+  if (placePending) {
+    unarrangedFreezeRef.current ??= unarrangedGroups;
+  } else {
+    unarrangedFreezeRef.current = null;
+  }
+  const panelUnarrangedGroups = unarrangedFreezeRef.current ?? unarrangedGroups;
+
+  const unarrangedItems = useMemo(
+    () => flattenUnarrangedGroups(panelUnarrangedGroups),
+    [panelUnarrangedGroups],
+  );
+
+  const placeTarget = useMemo(
+    () => findUnarrangedLesson(unarrangedItems, placeTargetKey),
+    [placeTargetKey, unarrangedItems],
+  );
+
+  const placeGhostPreview = useMemo((): PlacementResourceSuggestion | null => {
+    if (!placeTarget || !hoverPlaceCell || !config) return null;
+    const course = config.courses?.[placeTarget.courseIdx];
+    if (!course) return null;
+    return suggestPlacementResources({
+      config,
+      meetings: allMeetings,
+      index: meetingPickerIndex,
+      cell: hoverPlaceCell,
+      course,
+      componentIdx: placeTarget.componentIdx,
+      audience: placeTarget.audience,
+      layoutMode,
+    });
+  }, [
+    allMeetings,
+    config,
+    hoverPlaceCell,
+    layoutMode,
+    meetingPickerIndex,
+    placeTarget,
+  ]);
+
+  const placeGhostRoom = placeGhostPreview?.room?.trim() || "";
+  const placeGhostInstructor = placeGhostPreview?.instructor
+    ? instructorLabelById[placeGhostPreview.instructor] ||
+      placeGhostPreview.instructor
+    : "";
+
+  useEffect(() => {
+    if (!placeTargetKey) return;
+    if (!placeTarget) {
+      setPlaceTargetKey(null);
+      setHoverPlaceCell(null);
+    }
+  }, [placeTarget, placeTargetKey]);
+
+  useEffect(() => {
+    if (!placeTargetKey || createModalOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setPlaceTargetKey(null);
+      setHoverPlaceCell(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [createModalOpen, placeTargetKey]);
+
+  const handleSelectUnarranged = useCallback(
+    (item: UnarrangedLessonItem) => {
+      if (placeTargetKey === item.key) {
+        clearPlaceMode();
+        return;
+      }
+      selectionStore.setSelection(null);
+      setPlaceTargetKey(item.key);
+      setHoverPlaceCell(null);
+      if (!isLgUp) setMobileUnarrangedOpen(false);
+
+      const scrollGroupId = item.groupIds[0];
+      if (!scrollGroupId || layoutMode !== "groups") return;
+      requestAnimationFrame(() => {
+        const head = gridWrapRef.current?.querySelector(
+          `th.group-head[data-group-id="${CSS.escape(scrollGroupId)}"]`,
+        );
+        head?.scrollIntoView({
+          inline: "center",
+          block: "nearest",
+          behavior: "smooth",
+        });
+      });
+    },
+    [clearPlaceMode, isLgUp, layoutMode, placeTargetKey, selectionStore],
+  );
 
   const handleEmptyCellClick = useCallback(
     (context: CreateMeetingCellContext) => {
+      if (createModalOpen) return;
       setCreateCellContext(context);
+      setCreatePresetSnapshot(
+        placeTarget
+          ? {
+              courseIdx: placeTarget.courseIdx,
+              componentIdx: placeTarget.componentIdx,
+              audience: [...placeTarget.audience],
+            }
+          : null,
+      );
+      setHoverPlaceCell(null);
       setCreateModalOpen(true);
     },
-    [],
+    [createModalOpen, placeTarget],
   );
+
+  const handleCreateModalOpenChange = useCallback((open: boolean) => {
+    setCreateModalOpen(open);
+    if (!open) {
+      setCreateCellContext(null);
+      setCreatePresetSnapshot(null);
+    }
+  }, []);
 
   useEffect(() => {
     if (!focusMeetingId) {
@@ -739,10 +1093,9 @@ function TimetableWorkspaceInner({
     if (!meeting) return;
 
     appliedFocusMeetingIdRef.current = focusMeetingId;
+    pendingMeetingScrollRef.current = true;
     setWeekIndex(weekIndexForDate(weeks, meeting.date));
-    if (meeting.sections[0]) {
-      setActiveTab(meeting.sections[0]);
-    }
+    applySectionView(meeting.section);
     selectionStore.setSelection({
       type: "meeting",
       value: meeting.instance_id,
@@ -750,7 +1103,7 @@ function TimetableWorkspaceInner({
       focusTag: meeting.tag || undefined,
     });
     setScrollToMeetingId(meeting.instance_id);
-  }, [allMeetings, focusMeetingId, selectionStore, weeks]);
+  }, [allMeetings, applySectionView, focusMeetingId, selectionStore, weeks]);
 
   useEffect(() => {
     if (!scrollToMeetingId) return;
@@ -760,21 +1113,24 @@ function TimetableWorkspaceInner({
 
     const tryScroll = () => {
       if (cancelled) return;
+      const focusMeeting =
+        meetingsSnapshotRef.current.find(
+          (entry) => entry.instance_id === scrollToMeetingId,
+        ) ?? null;
       const scrolled = scrollMeetingIntoCenter(
         gridWrapRef.current,
         scrollToMeetingId,
+        focusMeeting?.date,
       );
       if (scrolled) {
+        pendingMeetingScrollRef.current = false;
         setScrollToMeetingId(null);
         onFocusMeetingHandled?.();
         return;
       }
       attempts += 1;
-      if (attempts < 12) {
+      if (attempts < 45) {
         requestAnimationFrame(tryScroll);
-      } else {
-        setScrollToMeetingId(null);
-        onFocusMeetingHandled?.();
       }
     };
 
@@ -899,6 +1255,16 @@ function TimetableWorkspaceInner({
                     </div>
                   ) : null}
                   <div className="ml-auto flex shrink-0 items-center gap-2">
+                    {!isLgUp && !isUtilizationTab ? (
+                      <button
+                        type="button"
+                        className="btn btn-xs btn-ghost gap-1"
+                        onClick={() => setMobileUnarrangedOpen(true)}
+                      >
+                        <span className="icon-[material-symbols--playlist-add-check-rounded] text-base" />
+                        Список
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       className="btn btn-xs btn-ghost gap-1"
@@ -978,6 +1344,13 @@ function TimetableWorkspaceInner({
                       onEmptyCellClick={
                         isUtilizationTab ? undefined : handleEmptyCellClick
                       }
+                      placeTarget={placeTarget}
+                      placeGhostRoom={placeGhostRoom}
+                      placeGhostInstructor={placeGhostInstructor}
+                      hoverPlaceCell={hoverPlaceCell}
+                      onHoverPlaceCell={
+                        placeTarget ? setHoverPlaceCell : undefined
+                      }
                     />
                   )}
                 </div>
@@ -997,6 +1370,12 @@ function TimetableWorkspaceInner({
                     clearSelection={clearSelection}
                     onNavigateToMeeting={navigateToMeeting}
                     chrome="aside"
+                    unarrangedGroups={panelUnarrangedGroups}
+                    placeTargetKey={placeTargetKey}
+                    onSelectUnarranged={handleSelectUnarranged}
+                    onCancelPlace={clearPlaceMode}
+                    placePending={placePending}
+                    showUnarranged={!isUtilizationTab}
                   />
                 </div>
               ) : null}
@@ -1011,17 +1390,52 @@ function TimetableWorkspaceInner({
           config={config}
           clearSelection={clearSelection}
           onNavigateToMeeting={navigateToMeeting}
+          unarrangedGroups={panelUnarrangedGroups}
+          placeTargetKey={placeTargetKey}
+          onSelectUnarranged={handleSelectUnarranged}
+          onCancelPlace={clearPlaceMode}
+          placePending={placePending}
+          showUnarranged={!isUtilizationTab}
         />
       ) : null}
+      {!isLgUp && !isUtilizationTab ? (
+        <DetailFullscreenModal
+          open={mobileUnarrangedOpen}
+          onOpenChange={setMobileUnarrangedOpen}
+          title="Неразмещённые"
+        >
+          <UnarrangedLessonsPanel
+            groups={panelUnarrangedGroups}
+            selectedKey={placeTargetKey}
+            onSelect={handleSelectUnarranged}
+            onCancel={clearPlaceMode}
+            placing={placePending}
+          />
+        </DetailFullscreenModal>
+      ) : null}
       <CreateClassModal
+        key={
+          createModalOpen
+            ? [
+                createPresetSnapshot
+                  ? `${createPresetSnapshot.courseIdx}:${createPresetSnapshot.componentIdx}:${createPresetSnapshot.audience.join("|")}`
+                  : "free",
+                createCellContext?.date ?? "",
+                createCellContext?.time ?? "",
+                createCellContext?.groupId ?? "",
+              ].join("::")
+            : "closed"
+        }
         open={createModalOpen}
-        onOpenChange={setCreateModalOpen}
+        onOpenChange={handleCreateModalOpenChange}
         cellContext={createCellContext}
         config={config}
         meetings={allMeetings}
         meetingPickerIndex={meetingPickerIndex}
         layoutMode={layoutMode}
         viewContext={createViewContext}
+        preset={createPresetSnapshot}
+        onCreated={clearPlaceMode}
       />
     </SelectionStoreContext.Provider>
   );
@@ -1068,6 +1482,11 @@ function TimetableMainGrid({
   selectGroup,
   clearSelection,
   onEmptyCellClick,
+  placeTarget,
+  placeGhostRoom,
+  placeGhostInstructor,
+  hoverPlaceCell,
+  onHoverPlaceCell,
 }: {
   layoutMode: TimetableLayoutMode;
   isUtilizationTab: boolean;
@@ -1091,12 +1510,20 @@ function TimetableMainGrid({
   selectGroup: (groupId: string) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+  placeTarget: UnarrangedLessonItem | null;
+  placeGhostRoom?: string;
+  placeGhostInstructor?: string;
+  hoverPlaceCell: CreateMeetingCellContext | null;
+  onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
   // Do not subscribe to selection here: that re-reconciles the whole table on
   // every click. Meeting/header cells subscribe locally for highlights.
   const showCalendar = layoutMode === "calendar" && !isUtilizationTab;
   const [groupsReady, setGroupsReady] = useState(false);
 
+  // Only gate the heavy groups mount on layout/tab switches — not on every
+  // grid rebuild (modal cancel / config refetch would otherwise flash
+  // «Загрузка таблицы…» and remount the whole table).
   useEffect(() => {
     if (showCalendar) {
       setGroupsReady(false);
@@ -1107,7 +1534,12 @@ function TimetableMainGrid({
       setGroupsReady(true);
     });
     return () => cancelAnimationFrame(frame);
-  }, [showCalendar, activeTab, grid]);
+  }, [showCalendar, activeTab]);
+
+  useEffect(() => {
+    if (showCalendar || !grid) return;
+    setGroupsReady(true);
+  }, [grid, showCalendar]);
 
   if (showCalendar) {
     if (!calendarGrid) return null;
@@ -1118,6 +1550,11 @@ function TimetableMainGrid({
         selectMeeting={selectMeeting}
         clearSelection={clearSelection}
         onEmptyCellClick={onEmptyCellClick}
+        placeTarget={placeTarget}
+        placeGhostRoom={placeGhostRoom}
+        placeGhostInstructor={placeGhostInstructor}
+        hoverPlaceCell={hoverPlaceCell}
+        onHoverPlaceCell={onHoverPlaceCell}
       />
     );
   }
@@ -1155,6 +1592,11 @@ function TimetableMainGrid({
       selectGroup={selectGroup}
       clearSelection={clearSelection}
       onEmptyCellClick={onEmptyCellClick}
+      placeTarget={placeTarget}
+      placeGhostRoom={placeGhostRoom}
+      placeGhostInstructor={placeGhostInstructor}
+      hoverPlaceCell={hoverPlaceCell}
+      onHoverPlaceCell={onHoverPlaceCell}
     />
   );
 }
@@ -1165,12 +1607,22 @@ function TimetableCalendarSelectionGrid({
   selectMeeting,
   clearSelection,
   onEmptyCellClick,
+  placeTarget,
+  placeGhostRoom,
+  placeGhostInstructor,
+  hoverPlaceCell,
+  onHoverPlaceCell,
 }: {
   calendarGrid: NonNullable<ReturnType<typeof buildCalendarGrid>>;
   courseColors: Record<string, { bg: string; border: string }>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+  placeTarget: UnarrangedLessonItem | null;
+  placeGhostRoom?: string;
+  placeGhostInstructor?: string;
+  hoverPlaceCell: CreateMeetingCellContext | null;
+  onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
   // Do not subscribe to selection here: that re-reconciles every calendar card.
   return (
@@ -1180,6 +1632,11 @@ function TimetableCalendarSelectionGrid({
       selectMeeting={selectMeeting}
       clearSelection={clearSelection}
       onEmptyCellClick={onEmptyCellClick}
+      placeTarget={placeTarget}
+      placeGhostRoom={placeGhostRoom}
+      placeGhostInstructor={placeGhostInstructor}
+      hoverPlaceCell={hoverPlaceCell}
+      onHoverPlaceCell={onHoverPlaceCell}
     />
   );
 }
@@ -1237,6 +1694,11 @@ type TimetableTableProps = {
   selectGroup: (groupId: string) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+  placeTarget: UnarrangedLessonItem | null;
+  placeGhostRoom?: string;
+  placeGhostInstructor?: string;
+  hoverPlaceCell: CreateMeetingCellContext | null;
+  onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 };
 
 function TimetableTable({
@@ -1259,6 +1721,11 @@ function TimetableTable({
   selectGroup,
   clearSelection,
   onEmptyCellClick,
+  placeTarget,
+  placeGhostRoom,
+  placeGhostInstructor,
+  hoverPlaceCell,
+  onHoverPlaceCell,
 }: TimetableTableProps) {
   return (
     <table id="table" className={GROUPS_TABLE_CLASS}>
@@ -1295,6 +1762,11 @@ function TimetableTable({
           selectGroup={selectGroup}
           clearSelection={clearSelection}
           onEmptyCellClick={onEmptyCellClick}
+          placeTarget={placeTarget}
+          placeGhostRoom={placeGhostRoom}
+          placeGhostInstructor={placeGhostInstructor}
+          hoverPlaceCell={hoverPlaceCell}
+          onHoverPlaceCell={onHoverPlaceCell}
         />
       )}
     </table>
@@ -1308,6 +1780,12 @@ type TimetableDetailPanelProps = {
   clearSelection: () => void;
   onNavigateToMeeting: (meeting: Meeting) => void;
   chrome?: "aside" | "modal";
+  unarrangedGroups?: UnarrangedComponentGroup[];
+  placeTargetKey?: string | null;
+  onSelectUnarranged?: (item: UnarrangedLessonItem) => void;
+  onCancelPlace?: () => void;
+  placePending?: boolean;
+  showUnarranged?: boolean;
 };
 
 function timetableDetailPanelPropsEqual(
@@ -1320,7 +1798,13 @@ function timetableDetailPanelPropsEqual(
     prev.config === next.config &&
     prev.clearSelection === next.clearSelection &&
     prev.onNavigateToMeeting === next.onNavigateToMeeting &&
-    prev.chrome === next.chrome
+    prev.chrome === next.chrome &&
+    prev.unarrangedGroups === next.unarrangedGroups &&
+    prev.placeTargetKey === next.placeTargetKey &&
+    prev.onSelectUnarranged === next.onSelectUnarranged &&
+    prev.onCancelPlace === next.onCancelPlace &&
+    prev.placePending === next.placePending &&
+    prev.showUnarranged === next.showUnarranged
   );
 }
 
@@ -1357,12 +1841,24 @@ function TimetableMobileDetailModal({
   config,
   clearSelection,
   onNavigateToMeeting,
+  unarrangedGroups = [],
+  placeTargetKey = null,
+  onSelectUnarranged,
+  onCancelPlace,
+  placePending = false,
+  showUnarranged = false,
 }: {
   allMeetings: Meeting[];
   meetingPickerIndex: MeetingPickerIndex;
   config: SchemaScheduleConfig;
   clearSelection: () => void;
   onNavigateToMeeting: (meeting: Meeting) => void;
+  unarrangedGroups?: UnarrangedComponentGroup[];
+  placeTargetKey?: string | null;
+  onSelectUnarranged?: (item: UnarrangedLessonItem) => void;
+  onCancelPlace?: () => void;
+  placePending?: boolean;
+  showUnarranged?: boolean;
 }) {
   const selection = useSelectionSnapshot();
 
@@ -1389,6 +1885,12 @@ function TimetableMobileDetailModal({
         clearSelection={clearSelection}
         onNavigateToMeeting={onNavigateToMeeting}
         chrome="modal"
+        unarrangedGroups={unarrangedGroups}
+        placeTargetKey={placeTargetKey}
+        onSelectUnarranged={onSelectUnarranged}
+        onCancelPlace={onCancelPlace}
+        placePending={placePending}
+        showUnarranged={showUnarranged}
       />
     </DetailFullscreenModal>
   );
@@ -1401,6 +1903,12 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   clearSelection,
   onNavigateToMeeting,
   chrome = "aside",
+  unarrangedGroups = [],
+  placeTargetKey = null,
+  onSelectUnarranged,
+  onCancelPlace,
+  placePending = false,
+  showUnarranged = false,
 }: TimetableDetailPanelProps) {
   const selection = useSelectionSnapshot();
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -1420,10 +1928,15 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
 
   const title = timetableDetailTitle(selection, selectedMeeting);
   const showEditButton = canEditSelectedMeeting && !editModalOpen;
+  const showUnarrangedPanel =
+    showUnarranged &&
+    !selectedMeeting &&
+    !!onSelectUnarranged &&
+    !!onCancelPlace;
 
   return (
     <>
-      {chrome === "aside" ? (
+      {chrome === "aside" && selectedMeeting ? (
         <div className="border-base-300 mb-2 flex flex-col gap-2 border-b pb-2">
           <div
             className="detail-title text-base-content min-w-0 text-lg leading-snug font-semibold [overflow-wrap:anywhere]"
@@ -1466,7 +1979,26 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
           </button>
         </div>
       ) : null}
-      {!selection ? (
+      {selectedMeeting ? (
+        <MeetingDetailPanel
+          meeting={selectedMeeting}
+          config={config}
+          allMeetings={allMeetings}
+          onNavigateToMeeting={onNavigateToMeeting}
+        />
+      ) : showUnarrangedPanel ? (
+        <UnarrangedLessonsPanel
+          groups={unarrangedGroups}
+          selectedKey={placeTargetKey}
+          onSelect={onSelectUnarranged}
+          onCancel={onCancelPlace}
+          placing={placePending}
+        />
+      ) : selection ? (
+        <p className="text-base-content/60 text-sm leading-relaxed">
+          Детали этого выбора появятся позже.
+        </p>
+      ) : (
         <div className="border-base-300 bg-base-200/40 rounded-box flex flex-col items-center gap-3 border border-dashed px-4 py-10 text-center">
           <span className="icon-[material-symbols--touch-app-outline-rounded] text-base-content/35 text-4xl" />
           <div className="text-base-content text-sm font-medium">
@@ -1477,17 +2009,6 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
             детали.
           </p>
         </div>
-      ) : selectedMeeting ? (
-        <MeetingDetailPanel
-          meeting={selectedMeeting}
-          config={config}
-          allMeetings={allMeetings}
-          onNavigateToMeeting={onNavigateToMeeting}
-        />
-      ) : (
-        <p className="text-base-content/60 text-sm leading-relaxed">
-          Детали этого выбора появятся позже.
-        </p>
       )}
       <EditClassModal
         open={editModalOpen}
@@ -1505,10 +2026,12 @@ const CoreYearHeadCell = memo(function CoreYearHeadCell({
   yearLabel,
   colSpan,
   onSelectProgram,
+  dimmed,
 }: {
   yearLabel: string;
   colSpan: number;
   onSelectProgram: (y: string) => void;
+  dimmed?: boolean;
 }) {
   const programSelected = useProgramSelected(yearLabel);
   return (
@@ -1517,6 +2040,7 @@ const CoreYearHeadCell = memo(function CoreYearHeadCell({
         "year-head z-[8] cursor-pointer border-t border-r border-b border-[#d8dfeb] bg-[#1f5fae] text-center align-top font-bold text-white",
         GROUPS_HEAD_PAD,
         programSelected && "shadow-[inset_0_-3px_0_#ffd54f]",
+        dimmed && "opacity-35 saturate-50",
       )}
       colSpan={colSpan}
       data-year-label={yearLabel}
@@ -1537,11 +2061,13 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
   groupLabel,
   yearLabel,
   onSelectGroup,
+  dimmed,
 }: {
   groupId: string;
   groupLabel: string;
   yearLabel: string;
   onSelectGroup: (id: string) => void;
+  dimmed?: boolean;
 }) {
   const highlight = useGroupHeaderHighlight(groupId, yearLabel);
   return (
@@ -1551,7 +2077,9 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
         GROUPS_COL_WIDTH,
         GROUPS_HEAD_PAD,
         highlight && "shadow-[inset_0_-3px_0_#ffd54f]",
+        dimmed && "opacity-35 saturate-50",
       )}
+      data-group-id={groupId}
       onClick={() => onSelectGroup(groupId)}
     >
       <span
@@ -1564,6 +2092,66 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
   );
 });
 
+function PlaceGhostCard({
+  label,
+  room,
+  instructor,
+  colors,
+}: {
+  label: string;
+  room?: string;
+  instructor?: string;
+  colors: { bg: string; border: string };
+}) {
+  const roomLabel = String(room || "").trim();
+  const instructorLabel = String(instructor || "").trim();
+  return (
+    <div
+      className={clsx(
+        GROUPS_MEETING_CLASS,
+        "ring-dashed pointer-events-none opacity-70 ring-2 ring-[#1d3f70]/55 ring-inset",
+      )}
+      style={{
+        backgroundColor: colors.bg,
+        borderColor: colors.border,
+      }}
+    >
+      <div className={GROUPS_MEETING_BODY_CLASS}>
+        <div className="subject flex min-h-0 min-w-0 gap-1 overflow-hidden">
+          <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+            <div className={GROUPS_MEETING_TITLE_CLASS} title={label}>
+              {label}
+            </div>
+          </div>
+        </div>
+        <div className={GROUPS_MEETING_FOOTER_CLASS}>
+          <div
+            className={clsx(
+              GROUPS_MEETING_LINE_CLASS,
+              "overflow-hidden text-ellipsis whitespace-nowrap",
+            )}
+            title={instructorLabel || undefined}
+          >
+            <span className="min-w-0 truncate font-semibold text-[#4f5c6d]">
+              {instructorLabel || "—"}
+            </span>
+          </div>
+          <div
+            className={clsx(
+              GROUPS_MEETING_LINE_CLASS,
+              "overflow-hidden text-ellipsis whitespace-nowrap",
+            )}
+            title={roomLabel || undefined}
+          >
+            <span className="min-w-0 truncate font-semibold text-[#4f5c6d]">
+              {roomLabel || "—"}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 const UtilResourceHeadCell = memo(function UtilResourceHeadCell({
   resourceKey,
   label,
@@ -1599,6 +2187,7 @@ const UtilResourceHeadCell = memo(function UtilResourceHeadCell({
 type CorePreparedCell = {
   key: string;
   groupId: string;
+  groupIds: string[];
   span: number;
   mergedRows: MergedRow[];
   isProgramEmptyAtSlot: boolean;
@@ -1719,6 +2308,9 @@ function buildCorePrepared(
         cells.push({
           key: `${day}-${slot.start}-${i}-${col.groupId}`,
           groupId: col.groupId,
+          groupIds: visibleColumns
+            .slice(i, i + span)
+            .map((item) => item.groupId),
           span,
           mergedRows: current.mergedRows,
           isProgramEmptyAtSlot: programSlotLabels[col.yearLabel] == null,
@@ -1768,6 +2360,11 @@ function CoreGroupsTable({
   selectGroup,
   clearSelection,
   onEmptyCellClick,
+  placeTarget,
+  placeGhostRoom,
+  placeGhostInstructor,
+  hoverPlaceCell,
+  onHoverPlaceCell,
 }: {
   grid: BuiltGrid;
   activeWeek: WeekRange | null;
@@ -1786,6 +2383,11 @@ function CoreGroupsTable({
   selectGroup: (groupId: string) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+  placeTarget: UnarrangedLessonItem | null;
+  placeGhostRoom?: string;
+  placeGhostInstructor?: string;
+  hoverPlaceCell: CreateMeetingCellContext | null;
+  onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
 
@@ -1799,6 +2401,21 @@ function CoreGroupsTable({
       visibleColumns.length ? buildCorePrepared(grid, visibleColumns) : null,
     [grid, visibleColumns],
   );
+
+  const focusGroupSet = useMemo(() => {
+    if (!placeTarget?.groupIds.length) return null;
+    return new Set(placeTarget.groupIds);
+  }, [placeTarget]);
+
+  const ghostColors = useMemo(() => {
+    if (!placeTarget) return null;
+    return colorBySubject(
+      placeTarget.courseName || placeTarget.shortName,
+      courseColors,
+    );
+  }, [courseColors, placeTarget]);
+
+  const ghostLabel = placeTarget?.label ?? "";
 
   if (!visibleColumns.length) {
     const lastSlotStart = grid.slots.at(-1)?.start;
@@ -1935,6 +2552,37 @@ function CoreGroupsTable({
         const isLastInTable =
           yearIndex === yearLabels.length - 1 &&
           cellIndex === preparedRow.cells.length - 1;
+        const cellTime =
+          prepared.showProgramTimeColumn[yearLabel] && programLabel
+            ? programLabel.slice(0, 5)
+            : preparedRow.slotStart;
+        const cellDate = activeWeek
+          ? dateForWeekdayInWeekRange(
+              activeWeek,
+              preparedRow.day as TermWeekdayKey,
+              startingDay,
+            )
+          : "";
+        const cellContext: CreateMeetingCellContext = {
+          weekday: preparedRow.day as TermWeekdayKey,
+          time: cellTime,
+          date: cellDate,
+          groupId: cell.groupId,
+        };
+        const dimmed =
+          focusGroupSet != null &&
+          !cell.groupIds.some((groupId) => focusGroupSet.has(groupId));
+        const rowHovered =
+          !!hoverPlaceCell &&
+          hoverPlaceCell.weekday === cellContext.weekday &&
+          hoverPlaceCell.time === cellContext.time &&
+          hoverPlaceCell.date === cellContext.date;
+        const placeTargetCell =
+          !!placeTarget &&
+          !!focusGroupSet?.has(cell.groupId) &&
+          !cell.mergedRows.length;
+        const showGhost = placeTargetCell && !!ghostColors && rowHovered;
+
         rowCells.push(
           <td
             key={cell.key}
@@ -1945,6 +2593,7 @@ function CoreGroupsTable({
               cell.isProgramEmptyAtSlot &&
                 "bg-[#eef1f6] [&_.empty]:bg-[#e9edf3]",
               todayGroupsSlotCellClass(isTodayDay, isLastInTable, isLastSlot),
+              dimmed && "opacity-35 saturate-50",
             )}
             colSpan={cell.span > 1 ? cell.span : undefined}
             style={
@@ -1961,32 +2610,52 @@ function CoreGroupsTable({
               <div
                 className={clsx(
                   "empty h-full min-h-0 min-h-[64px] rounded bg-[#fafcff]",
-                  onEmptyCellClick &&
+                  !placeTarget &&
+                    onEmptyCellClick &&
                     activeWeek &&
                     programLabel &&
                     "cursor-pointer hover:bg-[#eef4ff]",
+                  placeTargetCell &&
+                    "ring-dashed cursor-pointer bg-[#f3f7ff] ring-1 ring-[#2d77cc]/45 ring-inset hover:bg-[#e4edff]",
                 )}
+                onMouseEnter={() => {
+                  if (!placeTargetCell || !onHoverPlaceCell) return;
+                  onHoverPlaceCell(cellContext);
+                }}
+                onMouseLeave={() => {
+                  if (!placeTargetCell || !onHoverPlaceCell) return;
+                  onHoverPlaceCell(null);
+                }}
                 onClick={(event) => {
                   event.stopPropagation();
+                  if (placeTarget) {
+                    if (
+                      !placeTargetCell ||
+                      !onEmptyCellClick ||
+                      !activeWeek ||
+                      !programLabel
+                    ) {
+                      return;
+                    }
+                    onEmptyCellClick(cellContext);
+                    return;
+                  }
                   if (!onEmptyCellClick || !activeWeek || !programLabel) {
                     clearSelection();
                     return;
                   }
-                  onEmptyCellClick({
-                    weekday: preparedRow.day as TermWeekdayKey,
-                    time:
-                      prepared.showProgramTimeColumn[yearLabel] && programLabel
-                        ? programLabel.slice(0, 5)
-                        : preparedRow.slotStart,
-                    date: dateForWeekdayInWeekRange(
-                      activeWeek,
-                      preparedRow.day as TermWeekdayKey,
-                      startingDay,
-                    ),
-                    groupId: cell.groupId,
-                  });
+                  onEmptyCellClick(cellContext);
                 }}
-              />
+              >
+                {showGhost ? (
+                  <PlaceGhostCard
+                    label={ghostLabel}
+                    room={placeGhostRoom}
+                    instructor={placeGhostInstructor}
+                    colors={ghostColors}
+                  />
+                ) : null}
+              </div>
             ) : (
               <div className="flex h-full min-h-0 flex-col gap-1">
                 {cell.mergedRows.map((row) => (
@@ -2080,14 +2749,18 @@ function CoreGroupsTable({
           </th>
           {yearLabels.map((yearLabel) => {
             const timeCols = prepared.showProgramTimeColumn[yearLabel] ? 1 : 0;
+            const yearCols = prepared.columnsByYear[yearLabel] || [];
+            const yearDimmed =
+              focusGroupSet != null &&
+              yearCols.length > 0 &&
+              yearCols.every((col) => !focusGroupSet.has(col.groupId));
             return (
               <CoreYearHeadCell
                 key={yearLabel}
                 yearLabel={yearLabel}
-                colSpan={
-                  timeCols + (prepared.columnsByYear[yearLabel]?.length || 0)
-                }
+                colSpan={timeCols + yearCols.length}
                 onSelectProgram={selectProgram}
+                dimmed={yearDimmed}
               />
             );
           })}
@@ -2119,6 +2792,9 @@ function CoreGroupsTable({
                   groupLabel={col.groupLabel}
                   yearLabel={yearLabel}
                   onSelectGroup={selectGroup}
+                  dimmed={
+                    focusGroupSet != null && !focusGroupSet.has(col.groupId)
+                  }
                 />,
               );
             }

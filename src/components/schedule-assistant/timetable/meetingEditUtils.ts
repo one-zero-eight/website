@@ -691,7 +691,9 @@ export function applySeriesScheduleToCourse(
       update.audience
         .map((token) => String(token || "").trim())
         .filter(Boolean),
-      buildAudienceSelectorTree(config),
+      buildAudienceSelectorTree(config, {
+        sectionCode: course.section_code,
+      }),
     );
   }
 
@@ -741,7 +743,9 @@ export function applyMeetingEditsToCourse(
     if (!component || !series) return null;
     series.audience = minimizeAudienceTokens(
       edits.audience.map((token) => String(token || "").trim()).filter(Boolean),
-      buildAudienceSelectorTree(config),
+      buildAudienceSelectorTree(config, {
+        sectionCode: course.section_code,
+      }),
     );
   }
 

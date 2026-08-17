@@ -12,6 +12,8 @@ export const DEFAULT_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_outlook: false,
   check_unbooked: false,
   check_unplaced: true,
+  check_missing_room: true,
+  check_missing_instructor: true,
   check_per_week: true,
   check_instructor_id: true,
   check_student_email: true,
@@ -31,6 +33,8 @@ export const ALL_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_outlook: true,
   check_unbooked: true,
   check_unplaced: true,
+  check_missing_room: true,
+  check_missing_instructor: true,
   check_per_week: true,
   check_instructor_id: true,
   check_student_email: true,
@@ -50,6 +54,8 @@ export const NO_CHECK_PARAMETERS: SchemaCheckParameters = {
   check_outlook: false,
   check_unbooked: false,
   check_unplaced: false,
+  check_missing_room: false,
+  check_missing_instructor: false,
   check_per_week: false,
   check_instructor_id: false,
   check_student_email: false,
@@ -122,6 +128,16 @@ export const CHECK_OPTIONS: {
     description: "Компоненты курса без занятий в расписании",
   },
   {
+    key: "check_missing_room",
+    label: "Без локации",
+    description: "Занятия в сетке без назначенной локации",
+  },
+  {
+    key: "check_missing_instructor",
+    label: "Без преподавателя",
+    description: "Занятия в сетке без назначенного преподавателя",
+  },
+  {
     key: "check_per_week",
     label: "Частота в неделю",
     description: "Число слотов не совпадает с per_week",
@@ -156,6 +172,8 @@ export const ISSUE_TYPE_LABELS: Record<SchemaIssue["issue_type"], string> = {
   outlook: "Outlook",
   unbooked: "Бронирования",
   unplaced: "Неразмещённые",
+  missing_room: "Без локации",
+  missing_instructor: "Без преподавателя",
   per_week: "Частота в неделю",
   instructor_id: "ID преподавателей",
   student_email: "Email студентов",
@@ -172,6 +190,8 @@ export const ISSUE_TYPE_HEADINGS: Record<SchemaIssue["issue_type"], string> = {
   outlook: "Конфликт с Outlook",
   unbooked: "Нет бронирования",
   unplaced: "Компонент без занятий",
+  missing_room: "Нет локации",
+  missing_instructor: "Нет преподавателя",
   per_week: "Неверная частота в неделю",
   instructor_id: "Некорректный ID преподавателя",
   student_email: "Некорректный email студента",
@@ -202,6 +222,9 @@ export function getIssueMetric(issue: SchemaIssue): string | null {
       return `${issue.instructor_id}, ${issue.weekday} ${String(issue.start_time).slice(0, 5)}`;
     case "unplaced":
       return `${issue.course_name} · ${issue.component_tag}`;
+    case "missing_room":
+    case "missing_instructor":
+      return `${issue.meeting.course_name} · ${issue.meeting.component_tag}`;
     case "per_week":
       return `${issue.actual_per_week}/${issue.expected_per_week} в неделю`;
     case "unbooked":

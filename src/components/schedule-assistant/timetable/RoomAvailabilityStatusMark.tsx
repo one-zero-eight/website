@@ -8,7 +8,10 @@ import type {
   RoomAvailabilityStatus,
   RoomConflictDetail,
 } from "./roomPickerOptions.ts";
-import { formatDisplayDate } from "./timetableViewerModel.ts";
+import {
+  formatDisplayDate,
+  weeklyConflictWhenLabel,
+} from "./timetableViewerModel.ts";
 
 const STATUS_DOT_CLASS: Record<RoomAvailabilityStatus, string> = {
   green: "bg-success",
@@ -32,7 +35,7 @@ function formatConflictMeeting(item: {
 }
 
 function conflictWhenLabel(conflict: RoomConflictDetail): string {
-  if (conflict.weekly) return "каждую неделю";
+  if (conflict.weekly) return weeklyConflictWhenLabel(conflict.dates);
   return conflict.dates[0] ? formatDisplayDate(conflict.dates[0]) : "—";
 }
 

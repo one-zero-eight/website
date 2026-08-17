@@ -32,7 +32,6 @@ import {
   weekdayToKey,
 } from "@/components/schedule-assistant/timetable/sessionSeriesRows.tsx";
 import {
-  buildCoursesToSections,
   buildMeetings,
   type Meeting,
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
@@ -138,6 +137,7 @@ function SeriesAudienceButton({
   baselineTokens,
   perGroup = false,
   onChange,
+  sectionCode,
 }: {
   config: SchemaScheduleConfig;
   tokens: string[];
@@ -145,6 +145,7 @@ function SeriesAudienceButton({
   baselineTokens?: string[];
   perGroup?: boolean;
   onChange: (tokens: string[]) => void;
+  sectionCode: string;
 }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(tokens);
@@ -206,6 +207,7 @@ function SeriesAudienceButton({
             config={config}
             tokens={draft}
             onChange={setDraft}
+            sectionCode={sectionCode}
           />
           <div className="flex justify-end gap-2">
             <button
@@ -266,6 +268,8 @@ export function ComponentSessionsEditor({
   >;
   resetKey?: number;
 }) {
+  const sectionCode =
+    courseIndex != null ? config.courses![courseIndex].section_code : "";
   const list = sessions ?? [];
   const modeStashRef = useRef(
     new Map<
@@ -332,8 +336,7 @@ export function ComponentSessionsEditor({
   useEffect(() => {
     let cancelled = false;
     startTransition(() => {
-      const coursesToSections = buildCoursesToSections(config);
-      const nextMeetings = buildMeetings(config, coursesToSections);
+      const nextMeetings = buildMeetings(config);
       const nextIndex = buildMeetingPickerIndex(nextMeetings);
       if (cancelled) return;
       setMeetings(nextMeetings);
@@ -543,6 +546,7 @@ export function ComponentSessionsEditor({
                         : undefined
                     }
                     perGroup={perGroup}
+                    sectionCode={sectionCode}
                     onChange={(audience) =>
                       updateSeries(seriesIndex, { audience })
                     }

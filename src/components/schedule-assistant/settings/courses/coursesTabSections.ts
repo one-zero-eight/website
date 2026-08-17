@@ -46,6 +46,8 @@ export type CourseUsageProgramGroup = {
 export type CourseUsageSectionGroup = {
   key: string;
   title: string;
+  /** Courses in this section without a resolvable program/track audience. */
+  looseCourses: CourseUsageRow[];
   programs: CourseUsageProgramGroup[];
 };
 
@@ -88,14 +90,13 @@ function buildCourseUsageRows(
 /** Дерево курсов по секциям конфига — только для UI вкладки «Курсы». */
 export type CoursesTabSectionsResult = {
   sections: CourseUsageSectionGroup[];
-  unassigned: CourseUsageRow[];
 };
 
 export function buildCoursesTabSections(
   config: SchemaScheduleConfig | null,
 ): CoursesTabSectionsResult {
   const courseItems = buildCourseUsageRows(config);
-  if (!courseItems.length) return { sections: [], unassigned: [] };
+  if (!courseItems.length) return { sections: [] };
 
   const courseByIndex = new Map<number, CourseUsageRow>();
   for (const item of courseItems) {
@@ -124,6 +125,7 @@ export function buildCoursesTabSections(
     { title: string; trackNames: string[]; hasExplicitTracks: boolean }
   >();
   const programHasExplicitTracks = new Map<string, boolean>();
+  const programToSectionCode = new Map<string, string>();
 
   for (const section of getScheduleSections(config)) {
     if (!section?.code || !Array.isArray(section.programs)) continue;
@@ -142,6 +144,7 @@ export function buildCoursesTabSections(
           ),
           hasExplicitTracks,
         });
+        programToSectionCode.set(programId, sectionCode);
       }
       for (const track of normalizedTracks) {
         const trackName = String(track?.name || "Без направления");
@@ -159,32 +162,53 @@ export function buildCoursesTabSections(
     }
   }
 
-  const usageMap = new Map<
+  const usageBySection = new Map<
     string,
     {
       title: string;
-      sharedCourses: CourseUsageRow[];
-      tracks: Map<string, TrackUsageBucket>;
+      looseCourses: CourseUsageRow[];
+      usageMap: Map<
+        string,
+        {
+          title: string;
+          sharedCourses: CourseUsageRow[];
+          tracks: Map<string, TrackUsageBucket>;
+        }
+      >;
     }
   >();
-  const unassigned: CourseUsageRow[] = [];
+  const sectionTabs = buildProgramsGroupsTreeViewSectionTabs(config);
+  const knownSectionCodes = new Set(sectionTabs.map((section) => section.code));
+  for (const section of sectionTabs) {
+    usageBySection.set(section.code, {
+      title: section.name,
+      looseCourses: [],
+      usageMap: new Map(),
+    });
+  }
 
-  function ensureProgram(programId: string, programTitle: string) {
-    if (!usageMap.has(programId))
-      usageMap.set(programId, {
+  function ensureProgram(
+    sectionCode: string,
+    programId: string,
+    programTitle: string,
+  ) {
+    const sectionBucket = usageBySection.get(sectionCode)!;
+    if (!sectionBucket.usageMap.has(programId))
+      sectionBucket.usageMap.set(programId, {
         title: programTitle,
         sharedCourses: [],
         tracks: new Map(),
       });
-    return usageMap.get(programId)!;
+    return sectionBucket.usageMap.get(programId)!;
   }
 
   function ensureTrack(
+    sectionCode: string,
     programId: string,
     programTitle: string,
     trackTitle: string,
   ): TrackUsageBucket {
-    const program = ensureProgram(programId, programTitle);
+    const program = ensureProgram(sectionCode, programId, programTitle);
     if (!program.tracks.has(trackTitle))
       program.tracks.set(trackTitle, { courses: [], groups: new Map() });
     return program.tracks.get(trackTitle)!;
@@ -195,6 +219,9 @@ export function buildCoursesTabSections(
     if (!courseName) continue;
     const courseItem = courseByIndex.get(courseIndex);
     if (!courseItem) continue;
+
+    const sectionCode = course.section_code;
+    if (!knownSectionCodes.has(sectionCode)) continue;
 
     const seenTargets = new Set<string>();
     for (const component of course?.components || []) {
@@ -208,6 +235,8 @@ export function buildCoursesTabSections(
           programById,
           groupToProgramTrack,
         )) {
+          const programSection = programToSectionCode.get(resolved.programId);
+          if (programSection && programSection !== sectionCode) continue;
           seenTargets.add(
             [
               resolved.programId,
@@ -222,7 +251,7 @@ export function buildCoursesTabSections(
     }
 
     if (!seenTargets.size) {
-      unassigned.push(courseItem);
+      usageBySection.get(sectionCode)?.looseCourses.push(courseItem);
       continue;
     }
 
@@ -255,12 +284,15 @@ export function buildCoursesTabSections(
         continue;
       }
       if (!target.trackTitle) {
-        ensureProgram(target.programId, target.programTitle).sharedCourses.push(
-          courseItem,
-        );
+        ensureProgram(
+          sectionCode,
+          target.programId,
+          target.programTitle,
+        ).sharedCourses.push(courseItem);
         continue;
       }
       const trackBucket = ensureTrack(
+        sectionCode,
         target.programId,
         target.programTitle,
         target.trackTitle,
@@ -278,58 +310,43 @@ export function buildCoursesTabSections(
     }
   }
 
-  const groups: CourseUsageProgramGroup[] = Array.from(usageMap.entries())
-    .map(([programId, payload]) => ({
-      key: programId,
-      title: payload.title,
-      hasExplicitTracks: programHasExplicitTracks.get(programId) ?? true,
-      sharedCourses: dedupeCourses(payload.sharedCourses),
-      tracks: Array.from(payload.tracks.entries())
-        .map(([trackTitle, trackBucket]) => ({
-          key: `${programId}-${trackTitle}`,
-          title: trackTitle,
-          courses: dedupeCourses(trackBucket.courses),
-          groups: Array.from(trackBucket.groups.entries())
-            .map(([groupId, groupBucket]) => ({
-              key: `${programId}-${trackTitle}-${groupId}`,
-              groupId,
-              title: groupBucket.title,
-              courses: dedupeCourses(groupBucket.courses),
-            }))
-            .sort((a, b) => a.title.localeCompare(b.title, "ru")),
-        }))
-        .sort((a, b) => a.title.localeCompare(b.title, "ru")),
-    }))
-    .sort((a, b) => a.title.localeCompare(b.title, "ru"));
-
-  const sections = buildProgramsGroupsTreeViewSectionTabs(config);
-  const sectionToPrograms = new Map<string, CourseUsageProgramGroup[]>();
   const orderedSections: CourseUsageSectionGroup[] = [];
-  for (const section of sections) {
-    sectionToPrograms.set(section.code, []);
+  for (const section of sectionTabs) {
+    const bucket = usageBySection.get(section.code);
+    if (!bucket) continue;
+    const programs: CourseUsageProgramGroup[] = Array.from(
+      bucket.usageMap.entries(),
+    )
+      .map(([programId, payload]) => ({
+        key: programId,
+        title: payload.title,
+        hasExplicitTracks: programHasExplicitTracks.get(programId) ?? true,
+        sharedCourses: dedupeCourses(payload.sharedCourses),
+        tracks: Array.from(payload.tracks.entries())
+          .map(([trackTitle, trackBucket]) => ({
+            key: `${programId}-${trackTitle}`,
+            title: trackTitle,
+            courses: dedupeCourses(trackBucket.courses),
+            groups: Array.from(trackBucket.groups.entries())
+              .map(([groupId, groupBucket]) => ({
+                key: `${programId}-${trackTitle}-${groupId}`,
+                groupId,
+                title: groupBucket.title,
+                courses: dedupeCourses(groupBucket.courses),
+              }))
+              .sort((a, b) => a.title.localeCompare(b.title, "ru")),
+          }))
+          .sort((a, b) => a.title.localeCompare(b.title, "ru")),
+      }))
+      .sort((a, b) => a.title.localeCompare(b.title, "ru"));
+
     orderedSections.push({
       key: section.code,
       title: section.name,
-      programs: [],
+      looseCourses: dedupeCourses(bucket.looseCourses),
+      programs,
     });
   }
-  const programToSection = new Map<string, string>();
-  for (const section of sections) {
-    for (const programCode of section.programCodes) {
-      programToSection.set(programCode, section.code);
-    }
-  }
-  for (const group of groups) {
-    const sectionCode = programToSection.get(group.key);
-    if (!sectionCode) continue;
-    sectionToPrograms.get(sectionCode)?.push(group);
-  }
-  for (const section of orderedSections) {
-    section.programs = sectionToPrograms.get(section.key) || [];
-  }
 
-  return {
-    sections: orderedSections,
-    unassigned: dedupeCourses(unassigned),
-  };
+  return { sections: orderedSections };
 }

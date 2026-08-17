@@ -22,7 +22,10 @@ import {
   weekdayOptionsForConfig,
   type MeetingRef,
 } from "@/components/schedule-assistant/timetable/meetingEditUtils.ts";
-import type { MeetingPickerIndex } from "@/components/schedule-assistant/timetable/meetingPickerIndex.ts";
+import {
+  buildMeetingPickerIndex,
+  type MeetingPickerIndex,
+} from "@/components/schedule-assistant/timetable/meetingPickerIndex.ts";
 import {
   buildRoomPickerOptions,
   roomPickerDatesForEdit,
@@ -389,10 +392,74 @@ export function emptyOccurrence(
   };
 }
 
+export function draftMeetingsFromOccurrences(
+  occurrences: SchemaSessionOccurrence[],
+  skipIndex: number,
+  deleted: Set<number>,
+): Meeting[] {
+  const result: Meeting[] = [];
+  occurrences.forEach((occurrence, index) => {
+    if (index === skipIndex || deleted.has(index)) return;
+    const date = String(occurrence.date || "").trim();
+    const start = toUiTime(occurrence.start_time);
+    if (!date || !start) return;
+    const instructor = instructorValue(occurrence.instructor);
+    result.push({
+      instance_id: `draft:occ:${index}`,
+      course: "это же занятие",
+      tag: "",
+      groups: [],
+      date,
+      start,
+      end: toUiTime(occurrence.end_time) || undefined,
+      room: String(occurrence.room || "").trim(),
+      instructors: instructor ? [instructor] : [],
+      instructor_pool: [],
+      section: "",
+    });
+  });
+  return result;
+}
+
+export function draftMeetingsFromWeeklySlots(
+  slots: SchemaWeeklyPatternSlot[],
+  skipIndex: number,
+  deleted: Set<number>,
+  datesForWeekday: (weekday: TermWeekdayKey) => string[],
+): Meeting[] {
+  const result: Meeting[] = [];
+  slots.forEach((slot, index) => {
+    if (index === skipIndex || deleted.has(index)) return;
+    const start = toUiTime(slot.start_time);
+    const weekday = weekdayToKey(slot.weekday);
+    if (!start || !weekday) return;
+    const instructor = instructorValue(slot.instructor);
+    const room = String(slot.room || "").trim();
+    const end = toUiTime(slot.end_time) || undefined;
+    for (const date of datesForWeekday(weekday)) {
+      result.push({
+        instance_id: `draft:wp:${index}:${date}`,
+        course: "это же занятие",
+        tag: "",
+        groups: [],
+        date,
+        start,
+        end,
+        room,
+        instructors: instructor ? [instructor] : [],
+        instructor_pool: [],
+        section: "",
+      });
+    }
+  });
+  return result;
+}
+
 function RoomSelect({
   config,
   meetings,
   meetingIndex,
+  extraMeetings,
   value,
   weekday,
   date,
@@ -405,6 +472,7 @@ function RoomSelect({
   config: SchemaScheduleConfig;
   meetings: Meeting[];
   meetingIndex: MeetingPickerIndex | null;
+  extraMeetings?: Meeting[];
   value: string;
   weekday: TermWeekdayKey;
   date?: string;
@@ -458,11 +526,18 @@ function RoomSelect({
         })),
       ];
     }
+    const hasExtras = Boolean(extraMeetings?.length);
+    const meetingsForStatus = hasExtras
+      ? [...meetings, ...extraMeetings!]
+      : meetings;
+    const indexForStatus = hasExtras
+      ? buildMeetingPickerIndex(meetingsForStatus)
+      : meetingIndex;
     return [
       { value: "", label: "—" },
       ...buildRoomPickerOptions({
         config,
-        meetings,
+        meetings: meetingsForStatus,
         date: focusDate,
         dates: dates.length ? dates : [focusDate],
         start: start.slice(0, 5),
@@ -470,7 +545,7 @@ function RoomSelect({
         audienceTokens,
         excludeRef,
         includeRoomIds: value ? [value] : undefined,
-        index: meetingIndex,
+        index: indexForStatus,
         includeStatus: statusReady,
       }),
     ];
@@ -480,6 +555,7 @@ function RoomSelect({
     date,
     end,
     excludeRef,
+    extraMeetings,
     meetingIndex,
     meetings,
     start,
@@ -508,6 +584,7 @@ export function WeeklySlotRow({
   config,
   meetings,
   meetingIndex,
+  extraMeetings,
   slot,
   audienceTokens,
   courseInstructors,
@@ -517,11 +594,13 @@ export function WeeklySlotRow({
   onRemove,
   removable = true,
   deleted = false,
+  highlighted = false,
   fieldMarks,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
   meetingIndex: MeetingPickerIndex | null;
+  extraMeetings?: Meeting[];
   slot: SchemaWeeklyPatternSlot;
   audienceTokens: string[];
   courseInstructors?: SchemaCourseConfig["instructors"];
@@ -531,6 +610,7 @@ export function WeeklySlotRow({
   onRemove?: () => void;
   removable?: boolean;
   deleted?: boolean;
+  highlighted?: boolean;
   fieldMarks?: SessionRowFieldMarks;
 }) {
   const weekdayKey = weekdayToKey(slot.weekday);
@@ -547,7 +627,8 @@ export function WeeklySlotRow({
     >
       <div
         className={cn(
-          "border-base-300 rounded-box grid gap-2 border p-2 sm:grid-cols-2",
+          "rounded-box grid gap-2 border-2 p-2 sm:grid-cols-2",
+          highlighted ? "border-primary" : "border-base-300",
         )}
       >
         <div className="flex gap-2 sm:col-span-2">
@@ -620,6 +701,7 @@ export function WeeklySlotRow({
               config={config}
               meetings={meetings}
               meetingIndex={meetingIndex}
+              extraMeetings={extraMeetings}
               value={String(slot.room || "")}
               weekday={weekdayKey}
               start={start}
@@ -641,6 +723,7 @@ export function WeeklySlotRow({
               config={config}
               meetings={meetings}
               meetingIndex={meetingIndex}
+              extraMeetings={extraMeetings}
               value={instructorValue(slot.instructor)}
               weekday={weekdayKey}
               start={start}
@@ -664,6 +747,7 @@ export function OccurrenceRow({
   config,
   meetings,
   meetingIndex,
+  extraMeetings,
   occurrence,
   audienceTokens,
   courseInstructors,
@@ -673,11 +757,13 @@ export function OccurrenceRow({
   onRemove,
   removable = true,
   deleted = false,
+  highlighted = false,
   fieldMarks,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
   meetingIndex: MeetingPickerIndex | null;
+  extraMeetings?: Meeting[];
   occurrence: SchemaSessionOccurrence;
   audienceTokens: string[];
   courseInstructors?: SchemaCourseConfig["instructors"];
@@ -687,6 +773,7 @@ export function OccurrenceRow({
   onRemove?: () => void;
   removable?: boolean;
   deleted?: boolean;
+  highlighted?: boolean;
   fieldMarks?: SessionRowFieldMarks;
 }) {
   const start = toUiTime(occurrence.start_time);
@@ -704,7 +791,12 @@ export function OccurrenceRow({
         deleted && "border-error/60 border-l-4 pl-2",
       )}
     >
-      <div className="border-base-300 rounded-box grid gap-2 border p-2 sm:grid-cols-2">
+      <div
+        className={cn(
+          "rounded-box grid gap-2 border-2 p-2 sm:grid-cols-2",
+          highlighted ? "border-primary" : "border-base-300",
+        )}
+      >
         <div className="flex gap-2 sm:col-span-2">
           <div
             className={cn(
@@ -763,6 +855,7 @@ export function OccurrenceRow({
               config={config}
               meetings={meetings}
               meetingIndex={meetingIndex}
+              extraMeetings={extraMeetings}
               value={String(occurrence.room || "")}
               weekday={weekdayKey}
               date={occurrence.date || undefined}
@@ -787,6 +880,7 @@ export function OccurrenceRow({
               config={config}
               meetings={meetings}
               meetingIndex={meetingIndex}
+              extraMeetings={extraMeetings}
               value={instructorValue(occurrence.instructor)}
               weekday={weekdayKey}
               date={occurrence.date || undefined}

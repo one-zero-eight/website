@@ -118,6 +118,7 @@ export function EditClassAudienceModal({
   originalTokens,
   originalLabel,
   onSave,
+  sectionCode,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -126,9 +127,13 @@ export function EditClassAudienceModal({
   originalTokens: string[];
   originalLabel: string;
   onSave: (tokens: string[]) => void;
+  sectionCode: string;
 }) {
   const { showError } = useToast();
-  const tree = useMemo(() => buildAudienceSelectorTree(config), [config]);
+  const tree = useMemo(
+    () => buildAudienceSelectorTree(config, { sectionCode }),
+    [config, sectionCode],
+  );
   const normalizedOriginalTokens = useMemo(
     () => minimizeAudienceTokens(originalTokens, tree),
     [originalTokens, tree],
@@ -216,6 +221,7 @@ export function EditClassAudienceModal({
           config={config}
           tokens={draft}
           onChange={setDraft}
+          sectionCode={sectionCode}
         />
         <div className="flex justify-end gap-2">
           <button type="button" className="btn btn-ghost" onClick={handleClose}>

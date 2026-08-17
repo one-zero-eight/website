@@ -59,6 +59,7 @@ export function EditClassAudienceMultiSelect({
   onRestoreOriginal,
   overridden = false,
   patternLabel,
+  sectionCode,
 }: {
   config: SchemaScheduleConfig;
   tokens: string[];
@@ -71,6 +72,7 @@ export function EditClassAudienceMultiSelect({
   onRestoreOriginal?: () => void;
   overridden?: boolean;
   patternLabel?: string;
+  sectionCode: string;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -78,7 +80,10 @@ export function EditClassAudienceMultiSelect({
   const listRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
 
-  const tree = useMemo(() => buildAudienceSelectorTree(config), [config]);
+  const tree = useMemo(
+    () => buildAudienceSelectorTree(config, { sectionCode }),
+    [config, sectionCode],
+  );
   const filteredTree = useMemo(
     () => filterAudienceSelectorTree(tree, searchQuery),
     [tree, searchQuery],

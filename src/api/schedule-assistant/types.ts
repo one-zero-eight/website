@@ -821,6 +821,16 @@ export interface components {
        */
       check_unplaced: boolean;
       /**
+       * Check Missing Room
+       * @default true
+       */
+      check_missing_room: boolean;
+      /**
+       * Check Missing Instructor
+       * @default true
+       */
+      check_missing_instructor: boolean;
+      /**
        * Check Per Week
        * @default true
        */
@@ -1021,6 +1031,11 @@ export interface components {
        * @description Course name
        */
       name: string;
+      /**
+       * Section Code
+       * @description Exactly one timetable section this course belongs to (term.sections[].code)
+       */
+      section_code: string;
       /**
        * Short Name
        * @description Short English display name
@@ -1478,6 +1493,8 @@ export interface components {
       | components["schemas"]["OutlookIssue"]
       | components["schemas"]["TeacherIssue"]
       | components["schemas"]["UnplacedIssue"]
+      | components["schemas"]["MissingRoomIssue"]
+      | components["schemas"]["MissingInstructorIssue"]
       | components["schemas"]["InstructorIdIssue"]
       | components["schemas"]["StudentEmailIssue"]
       | components["schemas"]["UnbookedIssue"]
@@ -2283,6 +2300,40 @@ export interface components {
       meeting: components["schemas"]["ScheduledMeeting"];
     };
     /**
+     * MissingInstructorIssue
+     * @description Занятие стоит в сетке, но преподаватель ещё не назначен.
+     */
+    MissingInstructorIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: MissingInstructorIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      meeting: components["schemas"]["ScheduledMeeting"];
+    };
+    /**
+     * MissingRoomIssue
+     * @description Занятие стоит в сетке, но локация ещё не назначена.
+     */
+    MissingRoomIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: MissingRoomIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      meeting: components["schemas"]["ScheduledMeeting"];
+    };
+    /**
      * UnplacedIssue
      * @description Компонент курса объявлен в конфигурации, но для него не задано расписание.
      */
@@ -2486,6 +2537,9 @@ export type SchemaInstructorSlotPreferenceEntry =
 export type SchemaIssue = components["schemas"]["Issue"];
 export type SchemaItem = components["schemas"]["Item"];
 export type SchemaMeResponse = components["schemas"]["MeResponse"];
+export type SchemaMissingInstructorIssue =
+  components["schemas"]["MissingInstructorIssue"];
+export type SchemaMissingRoomIssue = components["schemas"]["MissingRoomIssue"];
 export type SchemaOccurrencePlacement =
   components["schemas"]["OccurrencePlacement"];
 export type SchemaOutlookIssue = components["schemas"]["OutlookIssue"];
@@ -4138,6 +4192,12 @@ export enum TeacherIssueIssue_type {
 }
 export enum UnbookedIssueIssue_type {
   unbooked = "unbooked",
+}
+export enum MissingInstructorIssueIssue_type {
+  missing_instructor = "missing_instructor",
+}
+export enum MissingRoomIssueIssue_type {
+  missing_room = "missing_room",
 }
 export enum UnplacedIssueIssue_type {
   unplaced = "unplaced",

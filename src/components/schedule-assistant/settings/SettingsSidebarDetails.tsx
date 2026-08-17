@@ -46,6 +46,7 @@ import {
   type InstructorLessonBreakdown,
 } from "@/components/schedule-assistant/settings/courses/courseInstructorLessonCounts.ts";
 import { CourseComponentsEditor } from "@/components/schedule-assistant/settings/courses/CourseComponentsEditor.tsx";
+import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import { RoomAttributesConfigModal } from "@/components/schedule-assistant/settings/rooms/RoomAttributesConfigModal.tsx";
 import {
   buildRoomFeaturesFromDefs,
@@ -98,6 +99,8 @@ const detailLabelUpperClass = `label-text ${detailCaptionUpperClass}`;
 const detailControlClass = "form-control w-full gap-1.5 px-1 py-0.5";
 const detailInputClass =
   "input input-bordered input-sm w-full px-3 py-2 text-sm font-normal leading-normal [color-scheme:inherit]";
+const detailSelectClass =
+  "select select-bordered select-sm w-full px-3 text-sm font-normal leading-normal [color-scheme:inherit]";
 const detailTimeSlotsTextareaClass =
   "textarea textarea-bordered min-h-[2.75rem] w-full resize-none overflow-hidden px-3 py-2 text-sm font-normal leading-normal [color-scheme:inherit]";
 
@@ -754,11 +757,40 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
     course?.short_name_ru ?? "",
     (value) => patchCourse({ short_name_ru: value.trim() || null }),
   );
+  const sectionOptions = useMemo(() => {
+    return getScheduleSections(config)
+      .map((section) => ({
+        value: String(section.code || "").trim(),
+        label: String(section.name || section.code || "").trim(),
+      }))
+      .filter((option) => option.value);
+  }, [config]);
+  const sectionCode = String(course?.section_code ?? "").trim();
 
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
       <DetailQueryState isPending={isPending} isError={isError} error={error}>
         <div className={settingsDetailShellClass}>
+          <label className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Секция</span>
+            <select
+              className={detailSelectClass}
+              required
+              value={sectionCode}
+              disabled={!sectionOptions.length}
+              onChange={(event) => {
+                const next = event.target.value.trim();
+                if (!next || next === sectionCode) return;
+                patchCourse({ section_code: next });
+              }}
+            >
+              {sectionOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className={`${detailControlClass} shrink-0`}>
             <span className={detailLabelUpperClass}>Название</span>
             <input className={detailInputClass} {...nameField} />

@@ -512,3 +512,68 @@ export function buildRoomPickerOptions({
       }),
     );
 }
+
+/** Best free physical room for a slot (green, capacity-fit). Skips ONLINE. */
+export function suggestBestRoomId({
+  config,
+  meetings,
+  date,
+  dates,
+  start,
+  end,
+  audienceTokens,
+  index,
+}: {
+  config: SchemaScheduleConfig;
+  meetings: Meeting[];
+  date: string;
+  dates: string[];
+  start: string;
+  end?: string;
+  audienceTokens?: string[];
+  index?: MeetingPickerIndex | null;
+}): string | null {
+  const startHhmm = String(start || "")
+    .trim()
+    .slice(0, 5);
+  if (!date.trim() || !startHhmm || !dates.length) return null;
+
+  const roomsById = new Map(
+    (config.rooms || [])
+      .map((room) => [String(room.id || "").trim(), room] as const)
+      .filter(([id]) => !!id),
+  );
+  const audienceSize = audienceSizeForTokens(config, audienceTokens);
+  const pickerIndex = index ?? buildMeetingPickerIndex(meetings);
+
+  const ranked = [...roomsById.entries()]
+    .filter(([roomId]) => !isVirtualRoom(roomId))
+    .map(([roomId, room]) => {
+      const availability = roomAvailabilityForSlot({
+        config,
+        meetings,
+        roomId,
+        dates,
+        start: startHhmm,
+        end: end?.slice(0, 5) || undefined,
+        audienceSize,
+        capacity: room.capacity,
+        index: pickerIndex,
+      });
+      return {
+        roomId,
+        capacity: room.capacity ?? null,
+        status: availability.status,
+      };
+    })
+    .filter((item) => item.status === "green")
+    .sort((a, b) => {
+      const [tierA, capA] = roomSortKey(a.capacity, audienceSize);
+      const [tierB, capB] = roomSortKey(b.capacity, audienceSize);
+      if (tierA !== tierB) return tierA - tierB;
+      if (capA !== capB) return capA - capB;
+      return a.roomId.localeCompare(b.roomId, "ru");
+    });
+
+  return ranked[0]?.roomId ?? null;
+}

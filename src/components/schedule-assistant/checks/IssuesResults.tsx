@@ -15,10 +15,7 @@ import {
   buildMeetingInstanceIndex,
 } from "@/components/schedule-assistant/checks/issueMeetings.ts";
 import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
-import {
-  buildCoursesToSections,
-  buildMeetings,
-} from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
+import { buildMeetings } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { useEffect, useMemo } from "react";
 
 export function IssuesResults({
@@ -33,9 +30,7 @@ export function IssuesResults({
 
   const meetingIndex = useMemo(() => {
     if (!config) return buildMeetingInstanceIndex([]);
-    return buildMeetingInstanceIndex(
-      buildMeetings(config, buildCoursesToSections(config)),
-    );
+    return buildMeetingInstanceIndex(buildMeetings(config));
   }, [config]);
 
   const instructorsById = useMemo(

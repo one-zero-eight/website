@@ -513,6 +513,109 @@ export function buildInstructorPickerOptions({
     );
 }
 
+/** Best free instructor for a slot: preferred/pool, green, preference-aware. */
+export function suggestBestInstructorId({
+  config,
+  meetings,
+  date,
+  dates,
+  start,
+  end,
+  weekday,
+  courseInstructors,
+  instructorPool,
+  index,
+}: {
+  config: SchemaScheduleConfig;
+  meetings: Meeting[];
+  date: string;
+  dates: string[];
+  start: string;
+  end?: string;
+  weekday: TermWeekdayKey;
+  courseInstructors?: CourseInstructor[] | null;
+  instructorPool?: unknown[] | null;
+  index?: MeetingPickerIndex | null;
+}): string | null {
+  const startHhmm = String(start || "")
+    .trim()
+    .slice(0, 5);
+  if (!date.trim() || !startHhmm || !dates.length) return null;
+
+  const byId = new Map<string, SchemaInstructor>();
+  for (const instructor of config.instructors || []) {
+    const id = String(instructor.id || "").trim();
+    if (id) byId.set(id, instructor);
+  }
+
+  const preferredIds: string[] = [];
+  const seenPreferred = new Set<string>();
+  for (const entry of courseInstructors || []) {
+    const id = String(entry.id || "").trim();
+    if (!id || seenPreferred.has(id)) continue;
+    seenPreferred.add(id);
+    preferredIds.push(id);
+  }
+
+  const poolIdSet = new Set<string>();
+  for (const entry of instructorPool ?? []) {
+    if (Array.isArray(entry)) {
+      for (const id of entry) {
+        const value = String(id || "").trim();
+        if (value) poolIdSet.add(value);
+      }
+      continue;
+    }
+    const value = String(entry || "").trim();
+    if (value) poolIdSet.add(value);
+  }
+
+  const candidateIds = [
+    ...preferredIds,
+    ...[...poolIdSet].filter((id) => !seenPreferred.has(id)),
+  ];
+  if (!candidateIds.length) return null;
+
+  const apiWeekday = termWeekdayKeyToWeekday(weekday);
+  const pickerIndex = index ?? buildMeetingPickerIndex(meetings);
+
+  const ranked = candidateIds
+    .map((id) => {
+      const instructor = byId.get(id);
+      const availability = instructorAvailabilityForSlot({
+        config,
+        meetings,
+        instructorId: id,
+        dates,
+        start: startHhmm,
+        end: end?.slice(0, 5) || undefined,
+        weekday: apiWeekday,
+        preferences: instructor?.slot_preferences,
+        index: pickerIndex,
+      });
+      return {
+        id,
+        preferred: seenPreferred.has(id),
+        inPool: poolIdSet.has(id),
+        status: availability.status,
+        preferenceLevel: availability.preference?.level ?? null,
+        label: instructor ? instructorPickerLabel(instructor) : id,
+      };
+    })
+    .filter((item) => item.status === "green")
+    .sort((a, b) => {
+      if (a.preferred !== b.preferred) return a.preferred ? -1 : 1;
+      if (a.inPool !== b.inPool) return a.inPool ? -1 : 1;
+      const prefDiff =
+        preferenceSortRank(a.preferenceLevel) -
+        preferenceSortRank(b.preferenceLevel);
+      if (prefDiff !== 0) return prefDiff;
+      return a.label.localeCompare(b.label, "ru");
+    });
+
+  return ranked[0]?.id ?? null;
+}
+
 export function instructorPickerDatesForWeekday(
   config: SchemaScheduleConfig,
   weekday: TermWeekdayKey,

@@ -19,6 +19,7 @@ import {
   type Meeting,
 } from "./timetableViewerModel.ts";
 import type { CreateMeetingCellContext } from "./createMeetingUtils.ts";
+import type { UnarrangedLessonItem } from "./unarrangedLessons.ts";
 
 const CALENDAR_TIME_COL_WIDTH = "w-[130px] min-w-[130px] max-w-[130px]";
 const CALENDAR_DAY_COL_WIDTH = "w-[170px] min-w-[170px] max-w-[170px]";
@@ -35,6 +36,7 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
   meeting,
   courseColors,
   onSelectMeeting,
+  disableSelect = false,
 }: {
   meeting: Meeting;
   courseColors: Record<string, { bg: string; border: string }>;
@@ -43,6 +45,7 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
     course: string,
     focusTag?: string,
   ) => void;
+  disableSelect?: boolean;
 }) {
   const courseTitle = String(meeting.course || "").trim() || "—";
   const key = meetingSelectionKey(meeting);
@@ -59,6 +62,7 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
       data-meeting-id={meeting.instance_id}
       className={cn(
         "meeting block w-full min-w-0 truncate rounded border px-1 py-px text-left text-[0.6875rem] leading-tight text-[#1a2332]",
+        disableSelect && "pointer-events-none",
         isSelected &&
           "shadow-[inset_0_0_0_2px_rgba(29,63,112,0.2)] outline-2 outline-[#1d3f70]",
         !isSelected &&
@@ -69,9 +73,10 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
         backgroundColor: colors.bg,
         borderColor: colors.border,
       }}
-      onClick={() =>
-        onSelectMeeting(key, meeting.course || courseTitle, meeting.tag)
-      }
+      onClick={() => {
+        if (disableSelect) return;
+        onSelectMeeting(key, meeting.course || courseTitle, meeting.tag);
+      }}
       title={meetingCalendarCellLabel(meeting, null)}
     >
       {meeting.off_grid ? (
@@ -100,6 +105,43 @@ function CalendarAddSlotButton({ onClick }: { onClick: () => void }) {
     >
       +
     </button>
+  );
+}
+
+function CalendarPlaceGhost({
+  label,
+  room,
+  instructor,
+  colors,
+}: {
+  label: string;
+  room?: string;
+  instructor?: string;
+  colors: { bg: string; border: string };
+}) {
+  const roomLabel = String(room || "").trim();
+  const instructorLabel = String(instructor || "").trim();
+  return (
+    <div
+      className="meeting ring-dashed pointer-events-none block w-full min-w-0 rounded border px-1 py-px text-left text-[0.6875rem] leading-tight text-[#1a2332] opacity-70 ring-2 ring-[#1d3f70]/55 ring-inset"
+      style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+    >
+      <span className="block truncate font-semibold" title={label}>
+        {label}
+      </span>
+      <span
+        className="block truncate text-[0.625rem] font-semibold text-[#4f5c6d]"
+        title={instructorLabel || undefined}
+      >
+        {instructorLabel || "—"}
+      </span>
+      <span
+        className="block truncate text-[0.625rem] font-semibold text-[#4f5c6d]"
+        title={roomLabel || undefined}
+      >
+        {roomLabel || "—"}
+      </span>
+    </div>
   );
 }
 
@@ -152,6 +194,11 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
   selectMeeting,
   clearSelection,
   onEmptyCellClick,
+  placeTarget,
+  placeGhostRoom,
+  placeGhostInstructor,
+  hoverPlaceCell,
+  onHoverPlaceCell,
 }: {
   week: CalendarWeekBlock;
   calendarGrid: BuiltCalendarGrid;
@@ -159,7 +206,19 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+  placeTarget: UnarrangedLessonItem | null;
+  placeGhostRoom?: string;
+  placeGhostInstructor?: string;
+  hoverPlaceCell: CreateMeetingCellContext | null;
+  onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
+  const ghostColors = placeTarget
+    ? colorBySubject(
+        placeTarget.courseName || placeTarget.shortName,
+        courseColors,
+      )
+    : null;
+
   return (
     <table className={CALENDAR_TABLE_CLASS}>
       <CalendarWeekHeader week={week} />
@@ -190,6 +249,16 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                 time: slot.start,
                 date: day.date,
               };
+              const showGhost =
+                !!placeTarget &&
+                !!ghostColors &&
+                !!hoverPlaceCell &&
+                hoverPlaceCell.weekday === createContext.weekday &&
+                hoverPlaceCell.time === createContext.time &&
+                hoverPlaceCell.date === createContext.date;
+
+              const canPlaceHere = !!placeTarget;
+              const canCreateHere = !placeTarget && !cellMeetings.length;
 
               return (
                 <td
@@ -198,13 +267,27 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                     CALENDAR_DAY_COL_WIDTH,
                     "link-cell relative border-r border-b border-[#d8dfeb] bg-[#fafcff] p-0.5 align-top text-[0.6875rem] leading-tight",
                     todayCalendarColumnBodyClass(day.isToday, isLastSlot),
-                    !cellMeetings.length &&
-                      onEmptyCellClick &&
-                      "cursor-pointer hover:bg-[#eef4ff]",
+                    (canCreateHere && onEmptyCellClick) || canPlaceHere
+                      ? "cursor-pointer hover:bg-[#eef4ff]"
+                      : null,
+                    showGhost && "bg-[#eef4ff]",
                   )}
+                  onMouseEnter={() => {
+                    if (!canPlaceHere || !onHoverPlaceCell) return;
+                    onHoverPlaceCell(createContext);
+                  }}
+                  onMouseLeave={() => {
+                    if (!canPlaceHere || !onHoverPlaceCell) return;
+                    onHoverPlaceCell(null);
+                  }}
                   onClick={(event) => {
-                    if (cellMeetings.length) return;
                     event.stopPropagation();
+                    if (placeTarget) {
+                      if (!canPlaceHere || !onEmptyCellClick) return;
+                      onEmptyCellClick(createContext);
+                      return;
+                    }
+                    if (cellMeetings.length) return;
                     if (!onEmptyCellClick) {
                       clearSelection();
                       return;
@@ -220,14 +303,31 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                           meeting={meeting}
                           courseColors={courseColors}
                           onSelectMeeting={selectMeeting}
+                          disableSelect={canPlaceHere}
                         />
                       ))}
                       {onEmptyCellClick ? (
-                        <CalendarAddSlotButton
-                          onClick={() => onEmptyCellClick(createContext)}
-                        />
+                        placeTarget && showGhost && ghostColors ? (
+                          <CalendarPlaceGhost
+                            label={placeTarget.label}
+                            room={placeGhostRoom}
+                            instructor={placeGhostInstructor}
+                            colors={ghostColors}
+                          />
+                        ) : (
+                          <CalendarAddSlotButton
+                            onClick={() => onEmptyCellClick(createContext)}
+                          />
+                        )
                       ) : null}
                     </div>
+                  ) : showGhost ? (
+                    <CalendarPlaceGhost
+                      label={placeTarget!.label}
+                      room={placeGhostRoom}
+                      instructor={placeGhostInstructor}
+                      colors={ghostColors!}
+                    />
                   ) : (
                     <div className="empty min-h-4" />
                   )}
@@ -247,12 +347,22 @@ function CalendarStackedTable({
   selectMeeting,
   clearSelection,
   onEmptyCellClick,
+  placeTarget,
+  placeGhostRoom,
+  placeGhostInstructor,
+  hoverPlaceCell,
+  onHoverPlaceCell,
 }: {
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+  placeTarget: UnarrangedLessonItem | null;
+  placeGhostRoom?: string;
+  placeGhostInstructor?: string;
+  hoverPlaceCell: CreateMeetingCellContext | null;
+  onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
   const weeks = calendarGrid.weeks;
 
@@ -265,6 +375,8 @@ function CalendarStackedTable({
           <div
             className={CALENDAR_WEEK_SHELL_CLASS}
             data-calendar-week-index={weekIndex}
+            data-calendar-week-start={week.days[0]?.date}
+            data-calendar-week-end={week.days.at(-1)?.date}
           >
             <CalendarWeekTable
               week={week}
@@ -273,6 +385,11 @@ function CalendarStackedTable({
               selectMeeting={selectMeeting}
               clearSelection={clearSelection}
               onEmptyCellClick={onEmptyCellClick}
+              placeTarget={placeTarget}
+              placeGhostRoom={placeGhostRoom}
+              placeGhostInstructor={placeGhostInstructor}
+              hoverPlaceCell={hoverPlaceCell}
+              onHoverPlaceCell={onHoverPlaceCell}
             />
           </div>
           {weekIndex < weeks.length - 1 ? (
@@ -290,12 +407,22 @@ export const TimetableCalendarTable = memo(function TimetableCalendarTable({
   selectMeeting,
   clearSelection,
   onEmptyCellClick,
+  placeTarget = null,
+  placeGhostRoom,
+  placeGhostInstructor,
+  hoverPlaceCell = null,
+  onHoverPlaceCell,
 }: {
   calendarGrid: BuiltCalendarGrid;
   courseColors: Record<string, { bg: string; border: string }>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
+  placeTarget?: UnarrangedLessonItem | null;
+  placeGhostRoom?: string;
+  placeGhostInstructor?: string;
+  hoverPlaceCell?: CreateMeetingCellContext | null;
+  onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
   if (!calendarGrid.weeks.length) return null;
 
@@ -306,6 +433,11 @@ export const TimetableCalendarTable = memo(function TimetableCalendarTable({
       selectMeeting={selectMeeting}
       clearSelection={clearSelection}
       onEmptyCellClick={onEmptyCellClick}
+      placeTarget={placeTarget}
+      placeGhostRoom={placeGhostRoom}
+      placeGhostInstructor={placeGhostInstructor}
+      hoverPlaceCell={hoverPlaceCell}
+      onHoverPlaceCell={onHoverPlaceCell}
     />
   );
 });

@@ -1,4 +1,3 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type {
   SchemaScheduleConfig,
   SchemaSessionOccurrence,
@@ -19,7 +18,7 @@ import { termWeekdayKeyToWeekday } from "@/components/schedule-assistant/setting
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import clsx from "clsx";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import {
   EditClassAudienceModal,
@@ -29,30 +28,77 @@ import {
 import {
   applyCreateMeetingToCourse,
   courseComponentOptions,
+  coveringSeriesSlots,
   defaultAudienceForCreate,
   defaultCreatePlacement,
+  findMatchingSessionSeries,
   parseCourseComponentKey,
   previewCreateSeriesAction,
+  seedOccurrenceFromCell,
+  seedWeeklyFromCell,
   type ComponentScheduleStatus,
   type CreateMeetingCellContext,
+  type CreateMeetingPreset,
   type CreateMeetingViewContext,
   type CreatePlacement,
   type CourseComponentCreateOption,
 } from "./createMeetingUtils.ts";
 import {
   formatAudienceTokensLabel,
+  occurrenceExcludeRef,
   perGroupAudienceOptions,
-  resolveEndTimeForStart,
   timeOptionsForConfig,
+  weeklySlotExcludeRef,
 } from "./meetingEditUtils.ts";
+import {
+  instructorPickerDatesForWeekday,
+  suggestBestInstructorId,
+} from "./instructorPickerOptions.ts";
 import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
 import { audienceSummaryHintProps } from "./audienceSummaryHints.ts";
+import {
+  roomPickerDatesForEdit,
+  suggestBestRoomId,
+} from "./roomPickerOptions.ts";
 import { validateSessionSeriesDraft } from "./sessionSeriesValidation.ts";
 import { SessionSeriesEditor } from "./SessionSeriesEditor.tsx";
-import { toApiTime } from "./sessionSeriesRows.tsx";
+import { normalizeOccurrence, normalizeWeeklySlot } from "./sessionRowMarks.ts";
+import { toUiTime, weekdayToKey } from "./sessionSeriesRows.tsx";
 import type { TimetableLayoutMode } from "./TimetableLayoutSelector.tsx";
 import type { Meeting } from "./timetableViewerModel.ts";
-import { formatDisplayDate } from "./timetableViewerModel.ts";
+import { dayKey, formatDisplayDate } from "./timetableViewerModel.ts";
+
+function cloneOccurrences(
+  items: SchemaSessionOccurrence[] | null | undefined,
+): SchemaSessionOccurrence[] {
+  return structuredClone(items ?? []);
+}
+
+function cloneWeeklySlots(
+  items: SchemaWeeklyPatternSlot[] | null | undefined,
+): SchemaWeeklyPatternSlot[] {
+  return structuredClone(items ?? []);
+}
+
+function occurrencesChanged(
+  current: SchemaSessionOccurrence[],
+  original: SchemaSessionOccurrence[],
+) {
+  return (
+    JSON.stringify(current.map(normalizeOccurrence)) !==
+    JSON.stringify(original.map(normalizeOccurrence))
+  );
+}
+
+function weeklySlotsChanged(
+  current: SchemaWeeklyPatternSlot[],
+  original: SchemaWeeklyPatternSlot[],
+) {
+  return (
+    JSON.stringify(current.map(normalizeWeeklySlot)) !==
+    JSON.stringify(original.map(normalizeWeeklySlot))
+  );
+}
 
 function CreateClassDropdown({
   value,
@@ -116,55 +162,12 @@ function toSelectOptions(
     startAdornment: (
       <span
         className={cn(
-          "mt-1.5 size-1.5 shrink-0 rounded-full",
+          "inline-block size-2.5 shrink-0 rounded-full",
           statusDotClass(item.status),
-          !item.inCurrentView && "opacity-40",
         )}
       />
     ),
-    endAdornment: item.inCurrentView ? (
-      <span className="badge badge-ghost badge-xs shrink-0">вид</span>
-    ) : null,
   }));
-}
-
-function seedOccurrenceFromCell(
-  config: SchemaScheduleConfig,
-  cell: CreateMeetingCellContext,
-): SchemaSessionOccurrence {
-  const groups = cell.groupId ? [cell.groupId] : undefined;
-  const options = timeOptionsForConfig(config, groups);
-  const preset = options.find((slot) => slot.value === cell.time);
-  const start = cell.time || options[0]?.value || "09:00";
-  const end =
-    preset?.end || resolveEndTimeForStart(config, start, groups).slice(0, 5);
-  return {
-    date: cell.date,
-    start_time: toApiTime(start),
-    end_time: toApiTime(end),
-    room: null,
-    instructor: null,
-  };
-}
-
-function seedWeeklyFromCell(
-  config: SchemaScheduleConfig,
-  cell: CreateMeetingCellContext,
-): SchemaWeeklyPatternSlot {
-  const groups = cell.groupId ? [cell.groupId] : undefined;
-  const options = timeOptionsForConfig(config, groups);
-  const preset = options.find((slot) => slot.value === cell.time);
-  const start = cell.time || options[0]?.value || "09:00";
-  const end =
-    preset?.end || resolveEndTimeForStart(config, start, groups).slice(0, 5);
-  return {
-    weekday: termWeekdayKeyToWeekday(cell.weekday),
-    start_time: toApiTime(start),
-    end_time: toApiTime(end),
-    room: null,
-    instructor: null,
-    edits: null,
-  };
 }
 
 export function CreateClassModal({
@@ -176,6 +179,8 @@ export function CreateClassModal({
   meetingPickerIndex,
   layoutMode,
   viewContext,
+  preset,
+  onCreated,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -185,10 +190,13 @@ export function CreateClassModal({
   meetingPickerIndex: MeetingPickerIndex;
   layoutMode: TimetableLayoutMode;
   viewContext?: CreateMeetingViewContext;
+  preset?: CreateMeetingPreset | null;
+  onCreated?: () => void;
 }) {
   const { data: courses } = useCoursesQuery();
   const { mutate, isPending } = useUpdateCourseMutation();
-  const { showError, showSuccess } = useToast();
+  const { showError } = useToast();
+  const [dismissed, setDismissed] = useState(false);
 
   const [courseComponentKey, setCourseComponentKey] = useState("");
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
@@ -198,6 +206,30 @@ export function CreateClassModal({
   );
   const [weeklySlots, setWeeklySlots] = useState<SchemaWeeklyPatternSlot[]>([]);
   const [occurrences, setOccurrences] = useState<SchemaSessionOccurrence[]>([]);
+  /** Existing series rows kept visible when appending. */
+  const [seriesBaselineWeekly, setSeriesBaselineWeekly] = useState(0);
+  const [seriesBaselineOccurrences, setSeriesBaselineOccurrences] = useState(0);
+  const [originalWeeklySlots, setOriginalWeeklySlots] = useState<
+    SchemaWeeklyPatternSlot[]
+  >([]);
+  const [originalOccurrences, setOriginalOccurrences] = useState<
+    SchemaSessionOccurrence[]
+  >([]);
+  const [deletedWeeklyIndexes, setDeletedWeeklyIndexes] = useState(
+    () => new Set<number>(),
+  );
+  const [deletedOccurrenceIndexes, setDeletedOccurrenceIndexes] = useState(
+    () => new Set<number>(),
+  );
+  const [lockedExistingWeekly, setLockedExistingWeekly] = useState(0);
+  const [lockedExistingOccurrences, setLockedExistingOccurrences] = useState(0);
+  const [matchedSeriesIdx, setMatchedSeriesIdx] = useState<number | null>(null);
+  const [coveringWeeklyRefs, setCoveringWeeklyRefs] = useState<
+    { seriesIdx: number; slotIdx: number }[]
+  >([]);
+  const [coveringOccurrenceRefs, setCoveringOccurrenceRefs] = useState<
+    { seriesIdx: number; occIdx: number }[]
+  >([]);
 
   const parsedComponent = useMemo(
     () => parseCourseComponentKey(courseComponentKey),
@@ -250,27 +282,213 @@ export function CreateClassModal({
   const audienceDisplayLabel = formatAudienceTokensLabel(config, audienceValue);
 
   const seriesAction = useMemo(() => {
-    if (!selectedComponent || !audienceValue.length) {
+    if (!selectedComponent || !selectedCourse || !audienceValue.length) {
       return selectedOption?.seriesAction ?? null;
     }
-    return previewCreateSeriesAction(selectedComponent, audienceValue, config);
-  }, [audienceValue, config, selectedComponent, selectedOption?.seriesAction]);
-
-  useEffect(() => {
-    if (!open || !cellContext) return;
-    setCourseComponentKey("");
-    setAudienceValue(cellContext.groupId ? [cellContext.groupId] : []);
-    setAudienceModalOpen(false);
-    setWeeklySlots([seedWeeklyFromCell(config, cellContext)]);
-    setOccurrences([seedOccurrenceFromCell(config, cellContext)]);
-  }, [cellContext, config, open]);
-
-  useEffect(() => {
-    if (!selectedComponent) return;
-    setAudienceValue(
-      defaultAudienceForCreate(selectedComponent, config, cellContext?.groupId),
+    return previewCreateSeriesAction(
+      selectedComponent,
+      audienceValue,
+      config,
+      selectedCourse.section_code,
     );
-  }, [cellContext?.groupId, config, selectedComponent]);
+  }, [
+    audienceValue,
+    config,
+    selectedComponent,
+    selectedCourse,
+    selectedOption?.seriesAction,
+  ]);
+
+  const seriesBaseline =
+    placement === "weekly" ? seriesBaselineWeekly : seriesBaselineOccurrences;
+
+  const presetKey = preset ? `${preset.courseIdx}:${preset.componentIdx}` : "";
+
+  function seedSeriesDraft(
+    component: NonNullable<typeof selectedComponent>,
+    audience: string[],
+    sectionCode: string,
+  ) {
+    if (!cellContext) return;
+    const seededWeekly = seedWeeklyFromCell(config, cellContext, audience);
+    const seededOccurrence = seedOccurrenceFromCell(
+      config,
+      cellContext,
+      audience,
+    );
+    const matched =
+      audience.length > 0
+        ? findMatchingSessionSeries(component, audience, config, sectionCode)
+        : null;
+    const covering =
+      audience.length > 0
+        ? coveringSeriesSlots(component, audience, config, sectionCode, matched)
+        : {
+            weekly: [],
+            occurrences: [],
+            weeklyRefs: [],
+            occurrenceRefs: [],
+          };
+    const foreignWeekly = cloneWeeklySlots(covering.weekly);
+    const foreignOccurrences = cloneOccurrences(covering.occurrences);
+    const dedicatedWeekly = cloneWeeklySlots(matched?.weekly_pattern);
+    const dedicatedOccurrences = cloneOccurrences(matched?.occurrences);
+    const matchedIdx =
+      matched != null ? (component.sessions || []).indexOf(matched) : -1;
+
+    setWeeklySlots([...foreignWeekly, ...dedicatedWeekly, seededWeekly]);
+    setOccurrences([
+      ...foreignOccurrences,
+      ...dedicatedOccurrences,
+      seededOccurrence,
+    ]);
+    setOriginalWeeklySlots([...foreignWeekly, ...dedicatedWeekly]);
+    setOriginalOccurrences([...foreignOccurrences, ...dedicatedOccurrences]);
+    setLockedExistingWeekly(foreignWeekly.length);
+    setLockedExistingOccurrences(foreignOccurrences.length);
+    setSeriesBaselineWeekly(foreignWeekly.length + dedicatedWeekly.length);
+    setSeriesBaselineOccurrences(
+      foreignOccurrences.length + dedicatedOccurrences.length,
+    );
+    setMatchedSeriesIdx(matchedIdx >= 0 ? matchedIdx : null);
+    setCoveringWeeklyRefs(covering.weeklyRefs);
+    setCoveringOccurrenceRefs(covering.occurrenceRefs);
+    setDeletedWeeklyIndexes(new Set());
+    setDeletedOccurrenceIndexes(new Set());
+  }
+
+  useEffect(() => {
+    if (open) setDismissed(false);
+  }, [open]);
+
+  const seededOpenKeyRef = useRef("");
+
+  useEffect(() => {
+    if (!open || !cellContext) {
+      seededOpenKeyRef.current = "";
+      return;
+    }
+    const seedKey = [
+      presetKey,
+      cellContext.date,
+      cellContext.time,
+      cellContext.groupId ?? "",
+      (preset?.audience ?? []).join("|"),
+    ].join("::");
+    if (seededOpenKeyRef.current === seedKey) return;
+    seededOpenKeyRef.current = seedKey;
+
+    setCourseComponentKey(presetKey);
+
+    // Seed the final audience immediately (preset or component default) so
+    // room/instructor autofill never runs against the cell's single group.
+    let audience: string[];
+    if (preset?.audience.length) {
+      audience = [...preset.audience];
+    } else {
+      const parsed = parseCourseComponentKey(presetKey);
+      const component =
+        parsed && courses
+          ? (courses[parsed.courseIdx]?.components?.[parsed.componentIdx] ??
+            null)
+          : null;
+      audience =
+        component && parsed && courses
+          ? defaultAudienceForCreate(
+              component,
+              config,
+              courses[parsed.courseIdx].section_code,
+              cellContext.groupId,
+            )
+          : cellContext.groupId
+            ? [cellContext.groupId]
+            : [];
+    }
+    setAudienceValue(audience);
+    setAudienceModalOpen(false);
+
+    const parsed = parseCourseComponentKey(presetKey);
+    const component =
+      parsed && courses
+        ? (courses[parsed.courseIdx]?.components?.[parsed.componentIdx] ?? null)
+        : null;
+    if (component && parsed && courses) {
+      seedSeriesDraft(
+        component,
+        audience,
+        courses[parsed.courseIdx].section_code,
+      );
+    } else {
+      setWeeklySlots([seedWeeklyFromCell(config, cellContext, audience)]);
+      setOccurrences([seedOccurrenceFromCell(config, cellContext, audience)]);
+      setOriginalWeeklySlots([]);
+      setOriginalOccurrences([]);
+      setSeriesBaselineWeekly(0);
+      setSeriesBaselineOccurrences(0);
+      setLockedExistingWeekly(0);
+      setLockedExistingOccurrences(0);
+      setMatchedSeriesIdx(null);
+      setCoveringWeeklyRefs([]);
+      setCoveringOccurrenceRefs([]);
+      setDeletedWeeklyIndexes(new Set());
+      setDeletedOccurrenceIndexes(new Set());
+    }
+    // seedSeriesDraft closes over cellContext/config; intentionally tied to open seed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cellContext, config, courses, open, preset, presetKey]);
+
+  function handleCourseComponentChange(nextKey: string) {
+    setCourseComponentKey(nextKey);
+    const parsed = parseCourseComponentKey(nextKey);
+    const component =
+      parsed && courses
+        ? (courses[parsed.courseIdx]?.components?.[parsed.componentIdx] ?? null)
+        : null;
+    if (!component || !parsed || !courses) {
+      setAudienceValue([]);
+      setWeeklySlots([]);
+      setOccurrences([]);
+      setOriginalWeeklySlots([]);
+      setOriginalOccurrences([]);
+      setSeriesBaselineWeekly(0);
+      setSeriesBaselineOccurrences(0);
+      setLockedExistingWeekly(0);
+      setLockedExistingOccurrences(0);
+      setMatchedSeriesIdx(null);
+      setCoveringWeeklyRefs([]);
+      setCoveringOccurrenceRefs([]);
+      setDeletedWeeklyIndexes(new Set());
+      setDeletedOccurrenceIndexes(new Set());
+      return;
+    }
+    const audience = defaultAudienceForCreate(
+      component,
+      config,
+      courses[parsed.courseIdx].section_code,
+      cellContext?.groupId,
+    );
+    setAudienceValue(audience);
+    seedSeriesDraft(
+      component,
+      audience,
+      courses[parsed.courseIdx].section_code,
+    );
+  }
+
+  function handleAudienceSave(tokens: string[]) {
+    setAudienceValue(tokens);
+    if (selectedComponent && selectedCourse) {
+      seedSeriesDraft(selectedComponent, tokens, selectedCourse.section_code);
+    }
+  }
+
+  function handlePerGroupAudienceSave(group: string) {
+    const audience = group ? [group] : [];
+    setAudienceValue(audience);
+    if (selectedComponent && selectedCourse) {
+      seedSeriesDraft(selectedComponent, audience, selectedCourse.section_code);
+    }
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -283,22 +501,249 @@ export function CreateClassModal({
         layoutMode,
       ),
     );
+    // Do not depend on config/selectedCourse identity: optimistic cache
+    // updates would reset the draft while the modal is still open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     audienceValue,
-    config,
     layoutMode,
     open,
     parsedComponent?.componentIdx,
-    selectedCourse,
+    selectedCourse?.name,
+    selectedCourse?.section_code,
+  ]);
+
+  useEffect(() => {
+    if (!open || !audienceValue.length) return;
+    const draftIndex =
+      placement === "weekly" ? seriesBaselineWeekly : seriesBaselineOccurrences;
+
+    if (placement === "weekly") {
+      setWeeklySlots((slots) => {
+        if (draftIndex >= slots.length) return slots;
+        const slot = slots[draftIndex]!;
+        const needRoom = !String(slot.room || "").trim();
+        const needInstructor =
+          Boolean(selectedComponent) &&
+          !String(
+            Array.isArray(slot.instructor)
+              ? slot.instructor[0]
+              : slot.instructor || "",
+          ).trim();
+        if (!needRoom && !needInstructor) return slots;
+
+        const weekday = weekdayToKey(String(slot.weekday));
+        const start = toUiTime(slot.start_time);
+        const end = toUiTime(slot.end_time);
+        const dates = roomPickerDatesForEdit({ config, weekday });
+        const focusDate = cellContext?.date || dates[0] || "";
+        if (!focusDate || !start) return slots;
+
+        const next = { ...slot };
+        let changed = false;
+        if (needRoom) {
+          const room = suggestBestRoomId({
+            config,
+            meetings,
+            date: focusDate,
+            dates: dates.length ? dates : [focusDate],
+            start,
+            end: end || undefined,
+            audienceTokens: audienceValue,
+            index: meetingPickerIndex,
+          });
+          if (room) {
+            next.room = room;
+            changed = true;
+          }
+        }
+        if (needInstructor && selectedComponent) {
+          const instructor = suggestBestInstructorId({
+            config,
+            meetings,
+            date: focusDate,
+            dates: instructorPickerDatesForWeekday(config, weekday),
+            start,
+            end: end || undefined,
+            weekday,
+            courseInstructors: selectedCourse?.instructors,
+            instructorPool: selectedComponent.instructor_pool,
+            index: meetingPickerIndex,
+          });
+          if (instructor) {
+            next.instructor = instructor;
+            changed = true;
+          }
+        }
+        if (!changed) return slots;
+        const list = [...slots];
+        list[draftIndex] = next;
+        return list;
+      });
+      return;
+    }
+
+    setOccurrences((items) => {
+      if (draftIndex >= items.length) return items;
+      const occurrence = items[draftIndex]!;
+      const needRoom = !String(occurrence.room || "").trim();
+      const needInstructor =
+        Boolean(selectedComponent) &&
+        !String(
+          Array.isArray(occurrence.instructor)
+            ? occurrence.instructor[0]
+            : occurrence.instructor || "",
+        ).trim();
+      if (!needRoom && !needInstructor) return items;
+
+      const date = String(occurrence.date || "").trim();
+      const start = toUiTime(occurrence.start_time);
+      const end = toUiTime(occurrence.end_time);
+      if (!date || !start) return items;
+      const weekday = weekdayToKey(dayKey(date));
+
+      const next = { ...occurrence };
+      let changed = false;
+      if (needRoom) {
+        const room = suggestBestRoomId({
+          config,
+          meetings,
+          date,
+          dates: [date],
+          start,
+          end: end || undefined,
+          audienceTokens: audienceValue,
+          index: meetingPickerIndex,
+        });
+        if (room) {
+          next.room = room;
+          changed = true;
+        }
+      }
+      if (needInstructor && selectedComponent) {
+        const instructor = suggestBestInstructorId({
+          config,
+          meetings,
+          date,
+          dates: [date],
+          start,
+          end: end || undefined,
+          weekday,
+          courseInstructors: selectedCourse?.instructors,
+          instructorPool: selectedComponent.instructor_pool,
+          index: meetingPickerIndex,
+        });
+        if (instructor) {
+          next.instructor = instructor;
+          changed = true;
+        }
+      }
+      if (!changed) return items;
+      const list = [...items];
+      list[draftIndex] = next;
+      return list;
+    });
+  }, [
+    audienceValue,
+    cellContext?.date,
+    config,
+    meetingPickerIndex,
+    meetings,
+    open,
+    placement,
+    selectedComponent,
+    selectedCourse?.instructors,
+    seriesBaselineOccurrences,
+    seriesBaselineWeekly,
+    weeklySlots[seriesBaselineWeekly]?.start_time,
+    weeklySlots[seriesBaselineWeekly]?.weekday,
+    occurrences[seriesBaselineOccurrences]?.date,
+    occurrences[seriesBaselineOccurrences]?.start_time,
   ]);
 
   function handleClose() {
     if (isPending) return;
     setAudienceModalOpen(false);
+    setDismissed(true);
     onOpenChange(false);
   }
 
+  function handleWeeklySlotRemove(index: number) {
+    const isOriginalRow = index < originalWeeklySlots.length;
+    if (isOriginalRow) {
+      setDeletedWeeklyIndexes((prev) => {
+        const next = new Set(prev);
+        if (next.has(index)) next.delete(index);
+        else next.add(index);
+        return next;
+      });
+      return;
+    }
+
+    setWeeklySlots(weeklySlots.filter((_, i) => i !== index));
+    setDeletedWeeklyIndexes((prev) => {
+      const next = new Set<number>();
+      for (const deletedIndex of prev) {
+        if (deletedIndex === index) continue;
+        next.add(deletedIndex > index ? deletedIndex - 1 : deletedIndex);
+      }
+      return next;
+    });
+  }
+
+  function handleOccurrenceRemove(index: number) {
+    const isOriginalRow = index < originalOccurrences.length;
+    if (isOriginalRow) {
+      setDeletedOccurrenceIndexes((prev) => {
+        const next = new Set(prev);
+        if (next.has(index)) next.delete(index);
+        else next.add(index);
+        return next;
+      });
+      return;
+    }
+
+    setOccurrences(occurrences.filter((_, i) => i !== index));
+    setDeletedOccurrenceIndexes((prev) => {
+      const next = new Set<number>();
+      for (const deletedIndex of prev) {
+        if (deletedIndex === index) continue;
+        next.add(deletedIndex > index ? deletedIndex - 1 : deletedIndex);
+      }
+      return next;
+    });
+  }
+
+  function restoreExistingSeriesChanges() {
+    const addedWeekly = weeklySlots.slice(originalWeeklySlots.length);
+    const addedOccurrences = occurrences.slice(originalOccurrences.length);
+    setWeeklySlots([...cloneWeeklySlots(originalWeeklySlots), ...addedWeekly]);
+    setOccurrences([
+      ...cloneOccurrences(originalOccurrences),
+      ...addedOccurrences,
+    ]);
+    setDeletedWeeklyIndexes(new Set());
+    setDeletedOccurrenceIndexes(new Set());
+  }
+
+  const existingScheduleChanged =
+    seriesAction === "append" &&
+    (placement === "weekly"
+      ? deletedWeeklyIndexes.size > 0 ||
+        (originalWeeklySlots.length > 0 &&
+          weeklySlotsChanged(
+            weeklySlots.slice(0, originalWeeklySlots.length),
+            originalWeeklySlots,
+          ))
+      : deletedOccurrenceIndexes.size > 0 ||
+        (originalOccurrences.length > 0 &&
+          occurrencesChanged(
+            occurrences.slice(0, originalOccurrences.length),
+            originalOccurrences,
+          )));
+
   function handleSubmit() {
+    if (isPending) return;
     if (!cellContext || !courses || !parsedComponent || !selectedCourse) {
       showError("Ошибка", "Выберите предмет и компонент.");
       return;
@@ -319,19 +764,31 @@ export function CreateClassModal({
       placement,
       weeklySlots,
       occurrences,
+      deletedWeeklyIndexes,
+      deletedOccurrenceIndexes,
     });
     if (seriesError) {
       showError("Ошибка", seriesError);
       return;
     }
 
+    const activeWeeklySlots = weeklySlots.filter(
+      (_, index) =>
+        index >= lockedExistingWeekly && !deletedWeeklyIndexes.has(index),
+    );
+    const activeOccurrences = occurrences.filter(
+      (_, index) =>
+        index >= lockedExistingOccurrences &&
+        !deletedOccurrenceIndexes.has(index),
+    );
+
     const updatedCourse = applyCreateMeetingToCourse(selectedCourse, config, {
       courseIdx: parsedComponent.courseIdx,
       componentIdx: parsedComponent.componentIdx,
       audience: audienceValue,
       placement,
-      weeklySlots: placement === "weekly" ? weeklySlots : undefined,
-      occurrences: placement === "occurrences" ? occurrences : undefined,
+      weeklySlots: placement === "weekly" ? activeWeeklySlots : undefined,
+      occurrences: placement === "occurrences" ? activeOccurrences : undefined,
     });
 
     if (!updatedCourse) {
@@ -346,16 +803,10 @@ export function CreateClassModal({
       },
       {
         onSuccess: () => {
-          showSuccess(
-            "Создано",
-            seriesAction === "append"
-              ? "Занятие добавлено в существующую серию."
-              : "Создана новая серия занятий.",
-          );
-          handleClose();
-        },
-        onError: (error) => {
-          showError("Ошибка сохранения", formatApiErrorMessage(error));
+          onCreated?.();
+          setAudienceModalOpen(false);
+          setDismissed(true);
+          onOpenChange(false);
         },
       },
     );
@@ -377,7 +828,7 @@ export function CreateClassModal({
 
   return (
     <Modal
-      open={open}
+      open={open && !dismissed}
       onOpenChange={(next) => {
         if (!next) handleClose();
         else onOpenChange(next);
@@ -395,13 +846,12 @@ export function CreateClassModal({
         <CreateClassField label="Предмет · компонент">
           <CreateClassDropdown
             value={courseComponentKey}
-            onChange={setCourseComponentKey}
+            onChange={handleCourseComponentChange}
             placeholder="Выберите предмет и компонент"
             options={courseComponentDropdownOptions}
           />
           {selectedOption ? (
             <p className="text-base-content/55 text-xs">
-              {selectedOption.inCurrentView ? "Текущий вид · " : null}
               {selectedOption.modeLabel
                 ? `${selectedOption.modeLabel} · `
                 : null}
@@ -412,13 +862,12 @@ export function CreateClassModal({
             </p>
           ) : (
             <p className="text-base-content/55 text-xs">
-              Сначала предметы текущего вида. Точка: нет / частично / есть
-              занятия.
+              Точка: не расставлено / частично / всё расставлено.
             </p>
           )}
         </CreateClassField>
 
-        {selectedComponent && !perGroup ? (
+        {selectedComponent && selectedCourse && !perGroup ? (
           <EditClassAudienceModal
             open={audienceModalOpen}
             onOpenChange={setAudienceModalOpen}
@@ -427,10 +876,12 @@ export function CreateClassModal({
             originalTokens={defaultAudienceForCreate(
               selectedComponent,
               config,
+              selectedCourse.section_code,
               cellContext.groupId,
             )}
             originalLabel={componentAudienceLabel}
-            onSave={setAudienceValue}
+            onSave={handleAudienceSave}
+            sectionCode={selectedCourse.section_code}
           />
         ) : null}
 
@@ -440,7 +891,7 @@ export function CreateClassModal({
             onOpenChange={setAudienceModalOpen}
             value={audienceValue[0] || ""}
             options={perGroupOptions}
-            onSave={(group) => setAudienceValue(group ? [group] : [])}
+            onSave={handlePerGroupAudienceSave}
           />
         ) : null}
 
@@ -475,25 +926,130 @@ export function CreateClassModal({
           audienceTokens={audienceValue}
           courseInstructors={selectedCourse?.instructors}
           instructorPool={selectedComponent?.instructor_pool}
+          originalWeeklySlots={
+            seriesAction === "append" ? originalWeeklySlots : undefined
+          }
+          originalOccurrences={
+            seriesAction === "append" ? originalOccurrences : undefined
+          }
+          deletedWeeklyIndexes={
+            seriesAction === "append" ? deletedWeeklyIndexes : undefined
+          }
+          deletedOccurrenceIndexes={
+            seriesAction === "append" ? deletedOccurrenceIndexes : undefined
+          }
+          onRemoveWeekly={
+            seriesAction === "append" ? handleWeeklySlotRemove : undefined
+          }
+          onRemoveOccurrence={
+            seriesAction === "append" ? handleOccurrenceRemove : undefined
+          }
+          highlightFromIndex={seriesAction === "append" ? seriesBaseline : null}
+          excludeRefForWeekly={(index) => {
+            if (!parsedComponent) return null;
+            const covering = coveringWeeklyRefs[index];
+            if (covering) {
+              return weeklySlotExcludeRef(
+                {
+                  courseIdx: parsedComponent.courseIdx,
+                  componentIdx: parsedComponent.componentIdx,
+                  seriesIdx: covering.seriesIdx,
+                  date: cellContext.date,
+                },
+                covering.slotIdx,
+              );
+            }
+            if (matchedSeriesIdx == null || index >= seriesBaselineWeekly) {
+              return null;
+            }
+            return weeklySlotExcludeRef(
+              {
+                courseIdx: parsedComponent.courseIdx,
+                componentIdx: parsedComponent.componentIdx,
+                seriesIdx: matchedSeriesIdx,
+                date: cellContext.date,
+              },
+              index - coveringWeeklyRefs.length,
+            );
+          }}
+          excludeRefForOccurrence={(index) => {
+            if (!parsedComponent) return null;
+            const covering = coveringOccurrenceRefs[index];
+            if (covering) {
+              return occurrenceExcludeRef(
+                {
+                  courseIdx: parsedComponent.courseIdx,
+                  componentIdx: parsedComponent.componentIdx,
+                  seriesIdx: covering.seriesIdx,
+                },
+                covering.occIdx,
+              );
+            }
+            if (
+              matchedSeriesIdx == null ||
+              index >= seriesBaselineOccurrences
+            ) {
+              return null;
+            }
+            return occurrenceExcludeRef(
+              {
+                courseIdx: parsedComponent.courseIdx,
+                componentIdx: parsedComponent.componentIdx,
+                seriesIdx: matchedSeriesIdx,
+              },
+              index - coveringOccurrenceRefs.length,
+            );
+          }}
           newOccurrenceDefaults={{
             date: cellContext.date,
-            start_time: occurrences[0]?.start_time,
-            end_time: occurrences[0]?.end_time,
-            room: occurrences[0]?.room ?? null,
-            instructor: occurrences[0]?.instructor ?? null,
+            start_time:
+              occurrences[seriesBaselineOccurrences]?.start_time ??
+              occurrences.at(-1)?.start_time,
+            end_time:
+              occurrences[seriesBaselineOccurrences]?.end_time ??
+              occurrences.at(-1)?.end_time,
+            room:
+              occurrences[seriesBaselineOccurrences]?.room ??
+              occurrences.at(-1)?.room ??
+              null,
+            instructor:
+              occurrences[seriesBaselineOccurrences]?.instructor ??
+              occurrences.at(-1)?.instructor ??
+              null,
           }}
           newWeeklyDefaults={{
             weekday:
-              weeklySlots[0]?.weekday ??
+              weeklySlots[seriesBaselineWeekly]?.weekday ??
+              weeklySlots.at(-1)?.weekday ??
               termWeekdayKeyToWeekday(cellContext.weekday),
-            start_time: weeklySlots[0]?.start_time,
-            end_time: weeklySlots[0]?.end_time,
-            room: weeklySlots[0]?.room ?? null,
-            instructor: weeklySlots[0]?.instructor ?? null,
+            start_time:
+              weeklySlots[seriesBaselineWeekly]?.start_time ??
+              weeklySlots.at(-1)?.start_time,
+            end_time:
+              weeklySlots[seriesBaselineWeekly]?.end_time ??
+              weeklySlots.at(-1)?.end_time,
+            room:
+              weeklySlots[seriesBaselineWeekly]?.room ??
+              weeklySlots.at(-1)?.room ??
+              null,
+            instructor:
+              weeklySlots[seriesBaselineWeekly]?.instructor ??
+              weeklySlots.at(-1)?.instructor ??
+              null,
           }}
         />
 
-        <div className="flex justify-end gap-2">
+        <div className="flex items-center justify-end gap-3">
+          {existingScheduleChanged ? (
+            <button
+              type="button"
+              className="text-base-content/50 hover:text-base-content/80 text-sm"
+              disabled={isPending}
+              onClick={restoreExistingSeriesChanges}
+            >
+              Сбросить изменения
+            </button>
+          ) : null}
           <button
             type="button"
             className="btn btn-ghost"
@@ -504,17 +1060,16 @@ export function CreateClassModal({
           </button>
           <button
             type="button"
-            className="btn btn-primary"
+            className="btn btn-primary relative"
             disabled={isPending}
             onClick={handleSubmit}
           >
+            <span className={cn(isPending && "invisible")}>
+              {seriesAction === "append" ? "Добавить" : "Создать"}
+            </span>
             {isPending ? (
-              <span className="loading loading-spinner loading-sm" />
-            ) : seriesAction === "append" ? (
-              "Добавить"
-            ) : (
-              "Создать"
-            )}
+              <span className="loading loading-spinner loading-sm absolute inset-0 m-auto" />
+            ) : null}
           </button>
         </div>
       </div>

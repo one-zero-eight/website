@@ -18,10 +18,27 @@ import {
 import {
   audienceTokensEquivalent,
   resolveEndTimeForStart,
+  timeOptionsForConfig,
 } from "./meetingEditUtils.ts";
+import {
+  instructorPickerDatesForWeekday,
+  suggestBestInstructorId,
+} from "./instructorPickerOptions.ts";
+import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
+import {
+  roomPickerDatesForEdit,
+  suggestBestRoomId,
+} from "./roomPickerOptions.ts";
 import type { TimetableLayoutMode } from "./TimetableLayoutSelector.tsx";
-import type { WeekRange } from "./timetableViewerModel.ts";
+import type { Meeting, WeekRange } from "./timetableViewerModel.ts";
 import { weekStartForDate } from "./timetableViewerModel.ts";
+
+function toApiTime(value: string): string {
+  const trimmed = String(value || "").trim();
+  if (/^\d{2}:\d{2}$/.test(trimmed)) return `${trimmed}:00`;
+  if (/^\d{2}:\d{2}:\d{2}$/.test(trimmed)) return trimmed;
+  return trimmed;
+}
 
 export type CreateMeetingCellContext = {
   weekday: TermWeekdayKey;
@@ -33,9 +50,12 @@ export type CreateMeetingCellContext = {
 export type CreateMeetingViewContext = {
   sectionCode?: string;
   groupId?: string;
-  visibleGroupIds?: string[];
-  /** From buildCoursesToSections(config); keys are course indices as strings. */
-  coursesToSections?: Record<string, string[]>;
+};
+
+export type CreateMeetingPreset = {
+  courseIdx: number;
+  componentIdx: number;
+  audience: string[];
 };
 
 export type CreatePlacement = "weekly" | "occurrences";
@@ -50,7 +70,6 @@ export type CourseComponentCreateOption = {
   courseIdx: number;
   componentIdx: number;
   perGroup: boolean;
-  inCurrentView: boolean;
   status: ComponentScheduleStatus;
   statusLabel: string;
   modeLabel: string;
@@ -116,14 +135,15 @@ function audienceForSeries(
   component: SchemaComponent,
   series: SchemaComponentSessionSeries,
   config: SchemaScheduleConfig,
+  sectionCode: string,
 ) {
-  const tree = buildAudienceSelectorTree(config);
+  const tree = buildAudienceSelectorTree(config, { sectionCode });
   const explicit = series.audience || [];
   if (explicit.length) return minimizeAudienceTokens(explicit, tree);
   return minimizeAudienceTokens(component.student_groups || [], tree);
 }
 
-function expandedAudience(
+export function expandedAudience(
   config: SchemaScheduleConfig,
   tokens: string[],
 ): string[] {
@@ -141,11 +161,62 @@ function seriesCoversGroup(
   series: SchemaComponentSessionSeries,
   config: SchemaScheduleConfig,
   groupId: string,
+  sectionCode: string,
 ) {
   return expandedAudience(
     config,
-    audienceForSeries(component, series, config),
+    audienceForSeries(component, series, config, sectionCode),
   ).includes(groupId);
+}
+
+function seriesAudienceMatches(
+  component: SchemaComponent,
+  series: SchemaComponentSessionSeries,
+  config: SchemaScheduleConfig,
+  sectionCode: string,
+  audience: string[],
+) {
+  return audienceTokensEquivalent(
+    config,
+    audienceForSeries(component, series, config, sectionCode),
+    audience,
+  );
+}
+
+/** Sessions whose expanded audience equals `audience`. */
+function sessionsMatchingAudience(
+  component: SchemaComponent,
+  config: SchemaScheduleConfig,
+  sectionCode: string,
+  audience: string[],
+) {
+  const target = expandedAudience(config, audience);
+  if (!target.length) return [];
+  return (component.sessions || []).filter((series) =>
+    seriesAudienceMatches(component, series, config, sectionCode, audience),
+  );
+}
+
+function relevantSessionsForProgress(
+  component: SchemaComponent,
+  config: SchemaScheduleConfig,
+  sectionCode: string,
+  focusGroupId?: string,
+) {
+  if (component.per_group && focusGroupId) {
+    return (component.sessions || []).filter((series) =>
+      seriesCoversGroup(component, series, config, focusGroupId, sectionCode),
+    );
+  }
+  if (!component.per_group) {
+    return sessionsMatchingAudience(
+      component,
+      config,
+      sectionCode,
+      component.student_groups || [],
+    );
+  }
+  return component.sessions || [];
 }
 
 function seriesHasPlacement(series: SchemaComponentSessionSeries) {
@@ -162,12 +233,20 @@ function weeklySlotCount(sessions: SchemaComponentSessionSeries[]) {
   );
 }
 
+function occurrenceCount(sessions: SchemaComponentSessionSeries[]) {
+  return sessions.reduce(
+    (sum, series) => sum + (series.occurrences?.length ?? 0),
+    0,
+  );
+}
+
 export function defaultAudienceForCreate(
   component: SchemaComponent,
   config: SchemaScheduleConfig,
+  sectionCode: string,
   cellGroupId?: string,
 ): string[] {
-  const tree = buildAudienceSelectorTree(config);
+  const tree = buildAudienceSelectorTree(config, { sectionCode });
   if (component.per_group) {
     const pool = expandedAudience(config, component.student_groups || []);
     const poolSet = new Set(pool);
@@ -191,8 +270,9 @@ export function findMatchingSessionSeries(
   component: SchemaComponent,
   audience: string[],
   config: SchemaScheduleConfig,
+  sectionCode: string,
 ): SchemaComponentSessionSeries | null {
-  const tree = buildAudienceSelectorTree(config);
+  const tree = buildAudienceSelectorTree(config, { sectionCode });
   const targetAudience = minimizeAudienceTokens(audience, tree);
   if (!targetAudience.length) return null;
 
@@ -203,7 +283,7 @@ export function findMatchingSessionSeries(
     if (
       audienceTokensEquivalent(
         config,
-        audienceForSeries(component, series, config),
+        audienceForSeries(component, series, config, sectionCode),
         targetAudience,
       )
     ) {
@@ -215,16 +295,15 @@ export function findMatchingSessionSeries(
 
   if (component.per_group && targetExpanded.length === 1) {
     const groupId = targetExpanded[0]!;
-    let multiHit: SchemaComponentSessionSeries | null = null;
     for (const series of sessions) {
       const expanded = expandedAudience(
         config,
-        audienceForSeries(component, series, config),
+        audienceForSeries(component, series, config, sectionCode),
       );
       if (expanded.length === 1 && expanded[0] === groupId) return series;
-      if (expanded.includes(groupId) && !multiHit) multiHit = series;
     }
-    if (multiHit) return multiHit;
+    // Do not append to a shared/superset series: that would add the new slot
+    // for every group in the series and show their existing rows in the modal.
     return null;
   }
 
@@ -240,7 +319,7 @@ export function findMatchingSessionSeries(
       if (
         audienceTokensEquivalent(
           config,
-          audienceForSeries(component, series, config),
+          audienceForSeries(component, series, config, sectionCode),
           componentTokens,
         )
       ) {
@@ -252,12 +331,55 @@ export function findMatchingSessionSeries(
   return null;
 }
 
+/** Slots from series that cover the audience but are not `exclude` (shared labs). */
+export function coveringSeriesSlots(
+  component: SchemaComponent,
+  audience: string[],
+  config: SchemaScheduleConfig,
+  sectionCode: string,
+  exclude: SchemaComponentSessionSeries | null,
+): {
+  weekly: SchemaWeeklyPatternSlot[];
+  occurrences: SchemaSessionOccurrence[];
+  weeklyRefs: { seriesIdx: number; slotIdx: number }[];
+  occurrenceRefs: { seriesIdx: number; occIdx: number }[];
+} {
+  const target = expandedAudience(config, audience);
+  const weekly: SchemaWeeklyPatternSlot[] = [];
+  const occurrences: SchemaSessionOccurrence[] = [];
+  const weeklyRefs: { seriesIdx: number; slotIdx: number }[] = [];
+  const occurrenceRefs: { seriesIdx: number; occIdx: number }[] = [];
+  if (!target.length) {
+    return { weekly, occurrences, weeklyRefs, occurrenceRefs };
+  }
+
+  const sessions = component.sessions || [];
+  sessions.forEach((series, seriesIdx) => {
+    if (exclude != null && series === exclude) return;
+    const expanded = expandedAudience(
+      config,
+      audienceForSeries(component, series, config, sectionCode),
+    );
+    if (!target.some((groupId) => expanded.includes(groupId))) return;
+    (series.weekly_pattern || []).forEach((slot, slotIdx) => {
+      weekly.push(slot);
+      weeklyRefs.push({ seriesIdx, slotIdx });
+    });
+    (series.occurrences || []).forEach((occurrence, occIdx) => {
+      occurrences.push(occurrence);
+      occurrenceRefs.push({ seriesIdx, occIdx });
+    });
+  });
+  return { weekly, occurrences, weeklyRefs, occurrenceRefs };
+}
+
 function seriesAudienceForCreate(
   component: SchemaComponent,
   audience: string[],
   config: SchemaScheduleConfig,
+  sectionCode: string,
 ): string[] {
-  const tree = buildAudienceSelectorTree(config);
+  const tree = buildAudienceSelectorTree(config, { sectionCode });
   if (component.per_group) {
     return minimizeAudienceTokens(audience, tree);
   }
@@ -268,13 +390,19 @@ function findOrCreateSessionSeries(
   component: SchemaComponent,
   audience: string[],
   config: SchemaScheduleConfig,
+  sectionCode: string,
 ): SchemaComponentSessionSeries {
-  const matched = findMatchingSessionSeries(component, audience, config);
+  const matched = findMatchingSessionSeries(
+    component,
+    audience,
+    config,
+    sectionCode,
+  );
   if (matched) return matched;
 
   if (!component.sessions) component.sessions = [];
   const created: SchemaComponentSessionSeries = {
-    audience: seriesAudienceForCreate(component, audience, config),
+    audience: seriesAudienceForCreate(component, audience, config, sectionCode),
     weekly_pattern: [],
     occurrences: [],
   };
@@ -286,8 +414,9 @@ export function previewCreateSeriesAction(
   component: SchemaComponent,
   audience: string[],
   config: SchemaScheduleConfig,
+  sectionCode: string,
 ): CreateSeriesAction {
-  return findMatchingSessionSeries(component, audience, config)
+  return findMatchingSessionSeries(component, audience, config, sectionCode)
     ? "append"
     : "create";
 }
@@ -295,15 +424,27 @@ export function previewCreateSeriesAction(
 export function componentScheduleStatus(
   component: SchemaComponent,
   config: SchemaScheduleConfig,
+  sectionCode: string,
   focusGroupId?: string,
 ): ComponentScheduleStatus {
-  const sessions = component.sessions || [];
-  const relevant =
-    component.per_group && focusGroupId
-      ? sessions.filter((series) =>
-          seriesCoversGroup(component, series, config, focusGroupId),
-        )
-      : sessions;
+  if (component.per_group && !focusGroupId) {
+    const pool = expandedAudience(config, component.student_groups || []);
+    if (pool.length) {
+      const statuses = pool.map((groupId) =>
+        componentScheduleStatus(component, config, sectionCode, groupId),
+      );
+      if (statuses.every((status) => status === "covered")) return "covered";
+      if (statuses.every((status) => status === "empty")) return "empty";
+      return "partial";
+    }
+  }
+
+  const relevant = relevantSessionsForProgress(
+    component,
+    config,
+    sectionCode,
+    focusGroupId,
+  );
 
   if (!relevant.some(seriesHasPlacement)) return "empty";
 
@@ -314,47 +455,50 @@ export function componentScheduleStatus(
     return "partial";
   }
 
+  const perSemester = component.per_semester;
+  if (perSemester != null && perSemester > 0) {
+    const placed = weeklySlotCount(relevant) + occurrenceCount(relevant);
+    if (placed >= perSemester) return "covered";
+    return "partial";
+  }
+
   return "covered";
 }
 
 export function componentScheduleStatusLabel(
   status: ComponentScheduleStatus,
 ): string {
-  if (status === "empty") return "нет";
-  if (status === "partial") return "частично";
-  return "есть";
+  if (status === "empty") return "не расставлено";
+  if (status === "partial") return "частично расставлено";
+  return "всё расставлено";
 }
 
-function componentTouchesView(
+/** Placed/target for a component, optionally scoped to one per_group audience. */
+export function componentProgressHint(
   component: SchemaComponent,
   config: SchemaScheduleConfig,
-  view: CreateMeetingViewContext | undefined,
-  courseIdx: number,
-): boolean {
-  if (!view) return false;
+  sectionCode: string,
+  focusGroupId?: string,
+): string {
+  const relevant = relevantSessionsForProgress(
+    component,
+    config,
+    sectionCode,
+    focusGroupId,
+  );
 
-  const sectionCodes = view.coursesToSections?.[String(courseIdx)] ?? [];
-  if (
-    view.sectionCode &&
-    sectionCodes.some((code) => code === view.sectionCode)
-  ) {
-    return true;
+  let weekly = 0;
+  let occurrences = 0;
+  for (const series of relevant) {
+    weekly += series.weekly_pattern?.length ?? 0;
+    occurrences += series.occurrences?.length ?? 0;
   }
 
-  const focusIds = [
-    ...(view.groupId ? [view.groupId] : []),
-    ...(view.visibleGroupIds ?? []),
-  ];
-  if (!focusIds.length) return Boolean(view.sectionCode && sectionCodes.length);
-
-  const focusSet = new Set(focusIds);
-  const tokens = [
-    ...(component.student_groups || []),
-    ...(component.sessions || []).flatMap((series) => series.audience || []),
-  ];
-  return expandedAudience(config, tokens).some((groupId) =>
-    focusSet.has(groupId),
-  );
+  if (component.per_week != null) return `${weekly}/${component.per_week}`;
+  if (component.per_semester != null) {
+    return `${occurrences || weekly}/${component.per_semester}`;
+  }
+  return "";
 }
 
 export function courseComponentOptions(
@@ -366,6 +510,9 @@ export function courseComponentOptions(
   const focusGroupId = view?.groupId;
 
   for (const [courseIdx, course] of courses.entries()) {
+    if (view?.sectionCode && course.section_code !== view.sectionCode) {
+      continue;
+    }
     const title = String(course.short_name || course.name || "").trim() || "—";
     for (const [componentIdx, component] of (
       course.components || []
@@ -373,20 +520,32 @@ export function courseComponentOptions(
       const tag = String(component.tag || "").trim() || "—";
       const perGroup = Boolean(component.per_group);
       const status = config
-        ? componentScheduleStatus(component, config, focusGroupId)
+        ? componentScheduleStatus(
+            component,
+            config,
+            course.section_code,
+            focusGroupId,
+          )
         : "empty";
       const audience = config
-        ? defaultAudienceForCreate(component, config, focusGroupId)
+        ? defaultAudienceForCreate(
+            component,
+            config,
+            course.section_code,
+            focusGroupId,
+          )
         : [];
       const seriesAction =
         config && audience.length
-          ? previewCreateSeriesAction(component, audience, config)
+          ? previewCreateSeriesAction(
+              component,
+              audience,
+              config,
+              course.section_code,
+            )
           : "create";
       const statusLabel = componentScheduleStatusLabel(status);
       const modeLabel = perGroup ? "по группам" : "";
-      const inCurrentView = config
-        ? componentTouchesView(component, config, view, courseIdx)
-        : false;
 
       options.push({
         value: `${courseIdx}:${componentIdx}`,
@@ -394,7 +553,6 @@ export function courseComponentOptions(
         courseIdx,
         componentIdx,
         perGroup,
-        inCurrentView,
         status,
         statusLabel,
         modeLabel,
@@ -407,9 +565,6 @@ export function courseComponentOptions(
   }
 
   return options.sort((a, b) => {
-    if (a.inCurrentView !== b.inCurrentView) {
-      return a.inCurrentView ? -1 : 1;
-    }
     if (a.status !== b.status) {
       return STATUS_RANK[a.status] - STATUS_RANK[b.status];
     }
@@ -513,7 +668,12 @@ export function defaultCreatePlacement(
   if (!component) return layoutDefault;
   if (!audience.length) return layoutDefault;
 
-  const matched = findMatchingSessionSeries(component, audience, config);
+  const matched = findMatchingSessionSeries(
+    component,
+    audience,
+    config,
+    course.section_code,
+  );
   if (matched) return seriesPlacement(matched) ?? layoutDefault;
   return layoutDefault;
 }
@@ -537,6 +697,160 @@ export function createWouldUseOccurrences(
   );
 }
 
+export function seedOccurrenceFromCell(
+  config: SchemaScheduleConfig,
+  cell: CreateMeetingCellContext,
+  audienceGroups?: string[],
+): SchemaSessionOccurrence {
+  const groups = audienceGroups?.length
+    ? audienceGroups
+    : cell.groupId
+      ? [cell.groupId]
+      : undefined;
+  const options = timeOptionsForConfig(config, groups);
+  const preset = options.find((slot) => slot.value === cell.time);
+  const start = cell.time || options[0]?.value || "09:00";
+  const end =
+    preset?.end || resolveEndTimeForStart(config, start, groups).slice(0, 5);
+  return {
+    date: cell.date,
+    start_time: toApiTime(start),
+    end_time: toApiTime(end),
+    room: null,
+    instructor: null,
+  };
+}
+
+export function seedWeeklyFromCell(
+  config: SchemaScheduleConfig,
+  cell: CreateMeetingCellContext,
+  audienceGroups?: string[],
+): SchemaWeeklyPatternSlot {
+  const groups = audienceGroups?.length
+    ? audienceGroups
+    : cell.groupId
+      ? [cell.groupId]
+      : undefined;
+  const options = timeOptionsForConfig(config, groups);
+  const preset = options.find((slot) => slot.value === cell.time);
+  const start = cell.time || options[0]?.value || "09:00";
+  const end =
+    preset?.end || resolveEndTimeForStart(config, start, groups).slice(0, 5);
+  return {
+    weekday: termWeekdayKeyToWeekday(cell.weekday),
+    start_time: toApiTime(start),
+    end_time: toApiTime(end),
+    room: null,
+    instructor: null,
+    edits: null,
+  };
+}
+
+export type PlacementResourceSuggestion = {
+  room: string | null;
+  instructor: string | null;
+};
+
+/** Best free room + instructor for a place-preview / create seed cell. */
+export function suggestPlacementResources({
+  config,
+  meetings,
+  index,
+  cell,
+  course,
+  componentIdx,
+  audience,
+  layoutMode,
+}: {
+  config: SchemaScheduleConfig;
+  meetings: Meeting[];
+  index?: MeetingPickerIndex | null;
+  cell: CreateMeetingCellContext;
+  course: SchemaCourseConfig;
+  componentIdx: number;
+  audience: string[];
+  layoutMode: TimetableLayoutMode;
+}): PlacementResourceSuggestion {
+  const component = course.components?.[componentIdx];
+  if (!component || !audience.length) {
+    return { room: null, instructor: null };
+  }
+
+  const placement = defaultCreatePlacement(
+    course,
+    componentIdx,
+    audience,
+    config,
+    layoutMode,
+  );
+  const groupIds = expandedAudience(config, audience);
+  const weekday = cell.weekday;
+
+  if (placement === "occurrences") {
+    const occurrence = seedOccurrenceFromCell(config, cell, groupIds);
+    const start = String(occurrence.start_time || "").slice(0, 5);
+    const end = String(occurrence.end_time || "").slice(0, 5);
+    const date = String(occurrence.date || cell.date).trim();
+    if (!date || !start) return { room: null, instructor: null };
+    return {
+      room: suggestBestRoomId({
+        config,
+        meetings,
+        date,
+        dates: [date],
+        start,
+        end: end || undefined,
+        audienceTokens: audience,
+        index,
+      }),
+      instructor: suggestBestInstructorId({
+        config,
+        meetings,
+        date,
+        dates: [date],
+        start,
+        end: end || undefined,
+        weekday,
+        courseInstructors: course.instructors,
+        instructorPool: component.instructor_pool,
+        index,
+      }),
+    };
+  }
+
+  const slot = seedWeeklyFromCell(config, cell, groupIds);
+  const start = String(slot.start_time || "").slice(0, 5);
+  const end = String(slot.end_time || "").slice(0, 5);
+  const dates = roomPickerDatesForEdit({ config, weekday });
+  const focusDate = cell.date || dates[0] || "";
+  if (!focusDate || !start) return { room: null, instructor: null };
+
+  return {
+    room: suggestBestRoomId({
+      config,
+      meetings,
+      date: focusDate,
+      dates: dates.length ? dates : [focusDate],
+      start,
+      end: end || undefined,
+      audienceTokens: audience,
+      index,
+    }),
+    instructor: suggestBestInstructorId({
+      config,
+      meetings,
+      date: focusDate,
+      dates: instructorPickerDatesForWeekday(config, weekday),
+      start,
+      end: end || undefined,
+      weekday,
+      courseInstructors: course.instructors,
+      instructorPool: component.instructor_pool,
+      index,
+    }),
+  };
+}
+
 export function applyCreateMeetingToCourse(
   course: SchemaCourseConfig,
   config: SchemaScheduleConfig,
@@ -551,48 +865,49 @@ export function applyCreateMeetingToCourse(
 
   const audience = minimizeAudienceTokens(
     draft.audience,
-    buildAudienceSelectorTree(config),
+    buildAudienceSelectorTree(config, {
+      sectionCode: course.section_code,
+    }),
   );
   if (!audience.length) return null;
 
-  const series = findOrCreateSessionSeries(nextComponent, audience, config);
+  const series = findOrCreateSessionSeries(
+    nextComponent,
+    audience,
+    config,
+    course.section_code,
+  );
 
   if (draft.placement === "occurrences") {
     const items = (draft.occurrences ?? []).filter((occurrence) =>
       String(occurrence.date || "").trim(),
     );
     if (!items.length) return null;
-    if (!series.occurrences) series.occurrences = [];
-    for (const occurrence of items) {
-      series.occurrences.push({
-        date: occurrence.date,
-        start_time: normalizeTimeToApi(occurrence.start_time),
-        end_time: normalizeTimeToApi(
-          occurrence.end_time ||
-            resolveEndTimeForStart(config, occurrence.start_time, audience),
-        ),
-        room: String(occurrence.room || "").trim() || null,
-        instructor: occurrence.instructor ?? null,
-      });
-    }
+    series.occurrences = items.map((occurrence) => ({
+      date: occurrence.date,
+      start_time: normalizeTimeToApi(occurrence.start_time),
+      end_time: normalizeTimeToApi(
+        occurrence.end_time ||
+          resolveEndTimeForStart(config, occurrence.start_time, audience),
+      ),
+      room: String(occurrence.room || "").trim() || null,
+      instructor: occurrence.instructor ?? null,
+    }));
     return nextCourse;
   }
 
   const slots = draft.weeklySlots ?? [];
   if (!slots.length) return null;
-  if (!series.weekly_pattern) series.weekly_pattern = [];
-  for (const slot of slots) {
-    series.weekly_pattern.push({
-      weekday: slot.weekday,
-      start_time: normalizeTimeToApi(slot.start_time),
-      end_time: normalizeTimeToApi(
-        slot.end_time ||
-          resolveEndTimeForStart(config, slot.start_time, audience),
-      ),
-      room: String(slot.room || "").trim() || null,
-      instructor: slot.instructor ?? null,
-      edits: slot.edits ?? null,
-    });
-  }
+  series.weekly_pattern = slots.map((slot) => ({
+    weekday: slot.weekday,
+    start_time: normalizeTimeToApi(slot.start_time),
+    end_time: normalizeTimeToApi(
+      slot.end_time ||
+        resolveEndTimeForStart(config, slot.start_time, audience),
+    ),
+    room: String(slot.room || "").trim() || null,
+    instructor: slot.instructor ?? null,
+    edits: slot.edits ?? null,
+  }));
   return nextCourse;
 }

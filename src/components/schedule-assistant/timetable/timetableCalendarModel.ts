@@ -147,7 +147,7 @@ export function buildCalendarGrid(
   }));
   const slotByStart = new Map(slotsResolved.map((slot) => [slot.start, slot]));
 
-  const tabMeetings = filterMeetingsByTab(allMeetings, tabMode, config).filter(
+  const tabMeetings = filterMeetingsByTab(allMeetings, tabMode).filter(
     (meeting) => !meeting.cancelled,
   );
 

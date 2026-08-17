@@ -9,7 +9,10 @@ import { useEffect, useMemo, useState, startTransition } from "react";
 
 import { buildInstructorPickerOptions } from "./instructorPickerOptions.ts";
 import type { MeetingRef } from "./meetingEditUtils.ts";
-import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
+import {
+  buildMeetingPickerIndex,
+  type MeetingPickerIndex,
+} from "./meetingPickerIndex.ts";
 import { roomPickerDatesForEdit } from "./roomPickerOptions.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
 
@@ -17,6 +20,7 @@ export function InstructorPicker({
   config,
   meetings,
   meetingIndex,
+  extraMeetings,
   value,
   weekday,
   date,
@@ -38,6 +42,7 @@ export function InstructorPicker({
   config: SchemaScheduleConfig;
   meetings: Meeting[];
   meetingIndex: MeetingPickerIndex | null;
+  extraMeetings?: Meeting[];
   value: string;
   weekday: TermWeekdayKey;
   date?: string;
@@ -97,11 +102,18 @@ export function InstructorPicker({
     if (!focusDate || !start.trim() || !meetingIndex) {
       return empty;
     }
+    const hasExtras = Boolean(extraMeetings?.length);
+    const meetingsForStatus = hasExtras
+      ? [...meetings, ...extraMeetings!]
+      : meetings;
+    const indexForStatus = hasExtras
+      ? buildMeetingPickerIndex(meetingsForStatus)
+      : meetingIndex;
     return [
       ...empty,
       ...buildInstructorPickerOptions({
         config,
-        meetings,
+        meetings: meetingsForStatus,
         date: focusDate,
         dates: dates.length ? dates : [focusDate],
         start: start.slice(0, 5),
@@ -112,7 +124,7 @@ export function InstructorPicker({
         excludeRef,
         excludeInstanceId,
         includeInstructorIds: value ? [value] : undefined,
-        index: meetingIndex,
+        index: indexForStatus,
         includeStatus: statusReady,
       }),
     ];
@@ -124,6 +136,7 @@ export function InstructorPicker({
     end,
     excludeInstanceId,
     excludeRef,
+    extraMeetings,
     instructorPool,
     meetingIndex,
     meetings,

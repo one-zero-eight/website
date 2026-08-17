@@ -128,8 +128,8 @@ function pluralizeDaty(n: number): string {
   return pluralizeRu(n, "дата", "даты", "дат");
 }
 
-function pluralizeSloty(n: number): string {
-  return pluralizeRu(n, "слот", "слота", "слотов");
+function formatTimesPerWeek(n: number): string {
+  return `${n} ${pluralizeRu(n, "раз", "раза", "раз")} в неделю`;
 }
 
 function pluralizeRu(
@@ -567,11 +567,12 @@ function seriesSecondaryFromConfig(
   if (weekly.length > 0) {
     if (weekly.length === 1) {
       return {
-        secondary: formatSingleWeeklySlot(weekly[0]!, resolveLabel) || "1 слот",
+        secondary:
+          formatSingleWeeklySlot(weekly[0]!, resolveLabel) || "1 раз в неделю",
       };
     }
     return {
-      secondary: `${weekly.length} ${pluralizeSloty(weekly.length)}`,
+      secondary: formatTimesPerWeek(weekly.length),
       secondaryTooltipItems: weekly.map((slot, sourceIdx) => ({
         ...formatWeeklySlotTooltipItem(slot, resolveLabel),
         sourceIdx,
@@ -642,7 +643,7 @@ function formatSeriesScheduleKind(
     return TERM_WEEKDAY_LABEL_RU[weekdayKeyFromApi(weekly[0]!.weekday)];
   }
   if (weekly.length > 1) {
-    return `${weekly.length} ${pluralizeSloty(weekly.length)}`;
+    return formatTimesPerWeek(weekly.length);
   }
   return undefined;
 }
@@ -659,7 +660,7 @@ function formatSeriesSecondary(
     const weeklyCount = (series.weekly_pattern ?? []).length;
     // Multi-date / multi-slot: only the count; details live in tooltip.
     if (occCount > 1) return `${occCount} ${pluralizeDaty(occCount)}`;
-    if (weeklyCount > 1) return `${weeklyCount} ${pluralizeSloty(weeklyCount)}`;
+    if (weeklyCount > 1) return formatTimesPerWeek(weeklyCount);
   }
 
   const parts: string[] = [];

@@ -38,12 +38,6 @@ export function validateSessionSeriesDraft({
       if (!normalizeTypedHhmm(occurrence.start_time).slice(0, 5)) {
         return `Укажите время для строки ${index + 1}.`;
       }
-      if (!String(occurrence.room || "").trim()) {
-        return `Выберите локацию для строки ${index + 1}.`;
-      }
-      if (!instructorValue(occurrence.instructor)) {
-        return `Выберите преподавателя для строки ${index + 1}.`;
-      }
     }
     return null;
   }
@@ -58,12 +52,6 @@ export function validateSessionSeriesDraft({
     }
     if (!normalizeTypedHhmm(slot.start_time).slice(0, 5)) {
       return `Укажите время для строки ${index + 1}.`;
-    }
-    if (!String(slot.room || "").trim()) {
-      return `Выберите локацию для строки ${index + 1}.`;
-    }
-    if (!instructorValue(slot.instructor)) {
-      return `Выберите преподавателя для строки ${index + 1}.`;
     }
   }
   return null;

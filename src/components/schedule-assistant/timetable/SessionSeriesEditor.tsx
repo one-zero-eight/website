@@ -11,7 +11,10 @@ import type { ReactNode } from "react";
 import type { MeetingRef } from "./meetingEditUtils.ts";
 import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
 import { occurrenceRowMarks, weeklyRowMarks } from "./sessionRowMarks.ts";
+import { roomPickerDatesForEdit } from "./roomPickerOptions.ts";
 import {
+  draftMeetingsFromOccurrences,
+  draftMeetingsFromWeeklySlots,
   emptyOccurrence,
   emptyWeeklySlot,
   OccurrenceRow,
@@ -83,6 +86,10 @@ export function SessionSeriesEditor({
   onRemoveOccurrence,
   focusIndex = null,
   showFocusRing = false,
+  /** First N rows are existing series entries (not removable; muted). */
+  lockedRowCount = 0,
+  /** Highlight rows at/after this index as newly added (create append). */
+  highlightFromIndex = null,
   overrideFields,
   marksDisabled = false,
   excludeRefForWeekly,
@@ -117,6 +124,8 @@ export function SessionSeriesEditor({
   onRemoveOccurrence?: (index: number) => void;
   focusIndex?: number | null;
   showFocusRing?: boolean;
+  lockedRowCount?: number;
+  highlightFromIndex?: number | null;
   overrideFields?: MeetingOverrideField[];
   marksDisabled?: boolean;
   excludeRefForWeekly?: (index: number) => MeetingRef | null;
@@ -130,6 +139,7 @@ export function SessionSeriesEditor({
   const deletedOcc = deletedOccurrenceIndexes ?? new Set<number>();
 
   function handleRemoveWeekly(index: number) {
+    if (index < lockedRowCount) return;
     if (onRemoveWeekly) {
       onRemoveWeekly(index);
       return;
@@ -138,11 +148,24 @@ export function SessionSeriesEditor({
   }
 
   function handleRemoveOccurrence(index: number) {
+    if (index < lockedRowCount) return;
     if (onRemoveOccurrence) {
       onRemoveOccurrence(index);
       return;
     }
     onOccurrencesChange(occurrences.filter((_, i) => i !== index));
+  }
+
+  function rowFocusClass(index: number, deleted: boolean) {
+    const isFocus = showFocusRing && focusIndex === index;
+    return cn(
+      isFocus &&
+        !deleted &&
+        (placement === "occurrences"
+          ? occurrences.length > 1
+          : weeklySlots.length > 1) &&
+        "ring-primary/70 rounded-box ring-4",
+    );
   }
 
   const toggle = (
@@ -157,49 +180,53 @@ export function SessionSeriesEditor({
     placement === "occurrences" ? (
       <div className="flex flex-col gap-2">
         {occurrences.map((occurrence, index) => {
-          const isFocus = showFocusRing && focusIndex === index;
-          const original = originalOccurrences?.[index];
           const deleted = deletedOcc.has(index);
+          const locked = index < lockedRowCount;
+          const highlighted =
+            highlightFromIndex != null &&
+            index >= highlightFromIndex &&
+            !deleted;
           return (
-            <div
-              key={`occ-${index}`}
-              className={cn(
-                isFocus &&
-                  !deleted &&
-                  occurrences.length > 1 &&
-                  "ring-primary/70 rounded-box ring-4",
-              )}
-            >
-              <OccurrenceRow
-                config={config}
-                meetings={meetings}
-                meetingIndex={meetingIndex}
-                occurrence={occurrence}
-                audienceTokens={audienceTokens}
-                courseInstructors={courseInstructors}
-                instructorPool={instructorPool}
-                excludeRef={excludeRefForOccurrence?.(index) ?? null}
-                deleted={deleted}
-                removable
-                fieldMarks={occurrenceRowMarks({
-                  current: occurrence,
-                  original,
-                  overrideFields,
-                  isFocus: Boolean(isFocus),
-                  cancelChecked: marksDisabled || deleted,
-                  onRestore: (next) => {
+            <div key={`occ-${index}`} className={rowFocusClass(index, deleted)}>
+              <div className={cn(locked && "pointer-events-none opacity-60")}>
+                <OccurrenceRow
+                  config={config}
+                  meetings={meetings}
+                  meetingIndex={meetingIndex}
+                  extraMeetings={draftMeetingsFromOccurrences(
+                    occurrences,
+                    index,
+                    deletedOcc,
+                  )}
+                  occurrence={occurrence}
+                  audienceTokens={audienceTokens}
+                  courseInstructors={courseInstructors}
+                  instructorPool={instructorPool}
+                  excludeRef={excludeRefForOccurrence?.(index) ?? null}
+                  deleted={deleted}
+                  highlighted={highlighted}
+                  removable={!locked}
+                  fieldMarks={occurrenceRowMarks({
+                    current: occurrence,
+                    original: originalOccurrences?.[index],
+                    overrideFields,
+                    isFocus: Boolean(showFocusRing && focusIndex === index),
+                    cancelChecked: marksDisabled || deleted || locked,
+                    onRestore: (next) => {
+                      const list = [...occurrences];
+                      list[index] = next;
+                      onOccurrencesChange(list);
+                    },
+                  })}
+                  onChange={(next) => {
+                    if (locked) return;
                     const list = [...occurrences];
                     list[index] = next;
                     onOccurrencesChange(list);
-                  },
-                })}
-                onChange={(next) => {
-                  const list = [...occurrences];
-                  list[index] = next;
-                  onOccurrencesChange(list);
-                }}
-                onRemove={() => handleRemoveOccurrence(index)}
-              />
+                  }}
+                  onRemove={() => handleRemoveOccurrence(index)}
+                />
+              </div>
             </div>
           );
         })}
@@ -222,53 +249,59 @@ export function SessionSeriesEditor({
     ) : (
       <div className="flex flex-col gap-2">
         {weeklySlots.map((slot, index) => {
-          const isFocus = showFocusRing && focusIndex === index;
-          const original = originalWeeklySlots?.[index];
           const deleted = deletedWeekly.has(index);
+          const locked = index < lockedRowCount;
+          const highlighted =
+            highlightFromIndex != null &&
+            index >= highlightFromIndex &&
+            !deleted;
+          const original = originalWeeklySlots?.[index];
           const originalWeekdayLabel = original
             ? TERM_WEEKDAY_LABEL_RU[weekdayToKey(String(original.weekday))]
             : "";
           return (
-            <div
-              key={`wp-${index}`}
-              className={cn(
-                isFocus &&
-                  !deleted &&
-                  weeklySlots.length > 1 &&
-                  "ring-primary/70 rounded-box ring-4",
-              )}
-            >
-              <WeeklySlotRow
-                config={config}
-                meetings={meetings}
-                meetingIndex={meetingIndex}
-                slot={slot}
-                audienceTokens={audienceTokens}
-                courseInstructors={courseInstructors}
-                instructorPool={instructorPool}
-                excludeRef={excludeRefForWeekly?.(index) ?? null}
-                deleted={deleted}
-                removable
-                fieldMarks={weeklyRowMarks({
-                  current: slot,
-                  original,
-                  overrideFields,
-                  isFocus: Boolean(isFocus),
-                  cancelChecked: marksDisabled || deleted,
-                  weekdayLabel: originalWeekdayLabel,
-                  onRestore: (next) => {
+            <div key={`wp-${index}`} className={rowFocusClass(index, deleted)}>
+              <div className={cn(locked && "pointer-events-none opacity-60")}>
+                <WeeklySlotRow
+                  config={config}
+                  meetings={meetings}
+                  meetingIndex={meetingIndex}
+                  extraMeetings={draftMeetingsFromWeeklySlots(
+                    weeklySlots,
+                    index,
+                    deletedWeekly,
+                    (weekday) => roomPickerDatesForEdit({ config, weekday }),
+                  )}
+                  slot={slot}
+                  audienceTokens={audienceTokens}
+                  courseInstructors={courseInstructors}
+                  instructorPool={instructorPool}
+                  excludeRef={excludeRefForWeekly?.(index) ?? null}
+                  deleted={deleted}
+                  highlighted={highlighted}
+                  removable={!locked}
+                  fieldMarks={weeklyRowMarks({
+                    current: slot,
+                    original,
+                    overrideFields,
+                    isFocus: Boolean(showFocusRing && focusIndex === index),
+                    cancelChecked: marksDisabled || deleted || locked,
+                    weekdayLabel: originalWeekdayLabel,
+                    onRestore: (next) => {
+                      const list = [...weeklySlots];
+                      list[index] = next;
+                      onWeeklySlotsChange(list);
+                    },
+                  })}
+                  onChange={(next) => {
+                    if (locked) return;
                     const list = [...weeklySlots];
                     list[index] = next;
                     onWeeklySlotsChange(list);
-                  },
-                })}
-                onChange={(next) => {
-                  const list = [...weeklySlots];
-                  list[index] = next;
-                  onWeeklySlotsChange(list);
-                }}
-                onRemove={() => handleRemoveWeekly(index)}
-              />
+                  }}
+                  onRemove={() => handleRemoveWeekly(index)}
+                />
+              </div>
             </div>
           );
         })}

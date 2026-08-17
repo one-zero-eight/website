@@ -57,14 +57,19 @@ function AudienceSummaryEditor({
   config,
   tokens,
   onChange,
+  sectionCode,
 }: {
   config: SchemaScheduleConfig;
   tokens: string[];
   onChange: (tokens: string[]) => void;
+  sectionCode: string;
 }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(tokens);
-  const tree = useMemo(() => buildAudienceSelectorTree(config), [config]);
+  const tree = useMemo(
+    () => buildAudienceSelectorTree(config, { sectionCode }),
+    [config, sectionCode],
+  );
   const label = tokens.length
     ? formatAudienceTokensLabel(config, tokens)
     : "Не выбраны";
@@ -123,6 +128,7 @@ function AudienceSummaryEditor({
             config={config}
             tokens={draft}
             onChange={setDraft}
+            sectionCode={sectionCode}
           />
           <div className="flex justify-end gap-2">
             <button
@@ -182,7 +188,11 @@ export function ComponentEditModal({
   const sessionsForSaveRef = useRef<
     (() => SchemaComponentSessionSeries[] | null) | null
   >(null);
-  const tree = useMemo(() => buildAudienceSelectorTree(config), [config]);
+  const courseSectionCode = config.courses![courseIndex].section_code;
+  const tree = useMemo(
+    () => buildAudienceSelectorTree(config, { sectionCode: courseSectionCode }),
+    [config, courseSectionCode],
+  );
 
   useEffect(() => {
     if (!open || !component) return;
@@ -336,6 +346,7 @@ export function ComponentEditModal({
             <AudienceSummaryEditor
               config={config}
               tokens={draft.student_groups ?? []}
+              sectionCode={courseSectionCode}
               onChange={(student_groups) =>
                 setDraft({ ...draft, student_groups })
               }

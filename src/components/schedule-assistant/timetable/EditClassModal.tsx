@@ -1,4 +1,3 @@
-import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type {
   SchemaCourseConfig,
   SchemaScheduleConfig,
@@ -208,7 +207,8 @@ export function EditClassModal({
 }) {
   const { data: courses } = useCoursesQuery();
   const { mutate, isPending } = useUpdateCourseMutation();
-  const { showError, showSuccess } = useToast();
+  const { showError } = useToast();
+  const [dismissed, setDismissed] = useState(false);
   const [scope, setScope] = useState<EditClassScope>("single");
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
   const [cancelChecked, setCancelChecked] = useState(false);
@@ -319,7 +319,7 @@ export function EditClassModal({
         room: String(occurrence.room || "").trim(),
         instructors: instructorValue(occurrence.instructor),
         instructor_pool: meeting.instructor_pool || [],
-        sections: meeting.sections || [],
+        section: meeting.section,
       });
     }
     return [...stripped, ...drafts];
@@ -340,11 +340,17 @@ export function EditClassModal({
   );
 
   useEffect(() => {
+    if (open) setDismissed(false);
+  }, [open]);
+
+  useEffect(() => {
     if (!open || !meeting || !originals) return;
     setScope("single");
     const audience = minimizeAudienceTokens(
       [...originals.audience],
-      buildAudienceSelectorTree(config),
+      buildAudienceSelectorTree(config, {
+        sectionCode: meeting.section,
+      }),
     );
     setAudienceValue(audience);
     setCancelChecked(false);
@@ -388,10 +394,18 @@ export function EditClassModal({
   function handleClose() {
     if (isPending) return;
     setAudienceModalOpen(false);
+    setDismissed(true);
+    onOpenChange(false);
+  }
+
+  function closeAfterSave() {
+    setAudienceModalOpen(false);
+    setDismissed(true);
     onOpenChange(false);
   }
 
   function handleSubmit() {
+    if (isPending) return;
     if (!meeting || !meetingRef || !courses || !originals) return;
     const course = courses.find((item) => item.name === meeting.course);
     if (!course) {
@@ -417,15 +431,7 @@ export function EditClassModal({
           params: { path: { course_name: course.name } },
           body: updatedCourse,
         },
-        {
-          onSuccess: () => {
-            showSuccess("Сохранено", "Занятие отменено.");
-            handleClose();
-          },
-          onError: (error) => {
-            showError("Ошибка сохранения", formatApiErrorMessage(error));
-          },
-        },
+        { onSuccess: closeAfterSave },
       );
       return;
     }
@@ -533,15 +539,7 @@ export function EditClassModal({
         params: { path: { course_name: course.name } },
         body: updatedCourse,
       },
-      {
-        onSuccess: () => {
-          showSuccess("Сохранено", "Изменения занятия применены.");
-          handleClose();
-        },
-        onError: (error) => {
-          showError("Ошибка сохранения", formatApiErrorMessage(error));
-        },
-      },
+      { onSuccess: closeAfterSave },
     );
   }
 
@@ -656,7 +654,7 @@ export function EditClassModal({
 
   return (
     <Modal
-      open={open}
+      open={open && !dismissed}
       onOpenChange={(next) => {
         if (!next) handleClose();
         else onOpenChange(next);
@@ -701,7 +699,9 @@ export function EditClassModal({
                 setAudienceValue(
                   minimizeAudienceTokens(
                     [...originals.audience],
-                    buildAudienceSelectorTree(config),
+                    buildAudienceSelectorTree(config, {
+                      sectionCode: meeting.section,
+                    }),
                   ),
                 )
               }
@@ -807,6 +807,7 @@ export function EditClassModal({
             originalTokens={originals.audience}
             originalLabel={originalAudienceLabel}
             onSave={setAudienceValue}
+            sectionCode={meeting.section}
           />
         )}
 
@@ -883,15 +884,14 @@ export function EditClassModal({
           </button>
           <button
             type="button"
-            className="btn btn-primary"
+            className="btn btn-primary relative"
             disabled={isPending || !canSave}
             onClick={handleSubmit}
           >
+            <span className={clsx(isPending && "invisible")}>Сохранить</span>
             {isPending ? (
-              <span className="loading loading-spinner loading-sm" />
-            ) : (
-              "Сохранить"
-            )}
+              <span className="loading loading-spinner loading-sm absolute inset-0 m-auto" />
+            ) : null}
           </button>
         </div>
       </div>
