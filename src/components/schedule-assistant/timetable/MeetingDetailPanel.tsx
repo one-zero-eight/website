@@ -1,5 +1,6 @@
 import type {
   SchemaComponent,
+  SchemaCourseConfig,
   SchemaScheduleConfig,
 } from "@/api/schedule-assistant/types.ts";
 import {
@@ -11,6 +12,12 @@ import {
   MeetingAudienceInline,
   SeriesScheduleItemsList,
 } from "@/components/schedule-assistant/courses/CourseComponentDetailsView.tsx";
+import {
+  useInstructorsQuery,
+  usePatchCourseMutation,
+  useSemesterSettings,
+} from "@/components/schedule-assistant/config/useConfig.tsx";
+import { ComponentEditModal } from "@/components/schedule-assistant/settings/courses/ComponentEditModal.tsx";
 import { useEffect, useState, type ReactNode } from "react";
 
 import {
@@ -148,6 +155,7 @@ function resolveMeetingSchedule({
 
 function CourseComponentsAccordion({
   config,
+  course,
   courseIdx,
   components,
   currentComponentIdx,
@@ -157,6 +165,7 @@ function CourseComponentsAccordion({
   onNavigateToMeeting,
 }: {
   config: SchemaScheduleConfig;
+  course: SchemaCourseConfig | null;
   courseIdx: number | null;
   components: SchemaComponent[];
   currentComponentIdx: number | null;
@@ -166,6 +175,13 @@ function CourseComponentsAccordion({
   onNavigateToMeeting: (meeting: Meeting) => void;
 }) {
   const [openIdx, setOpenIdx] = useState<number | null>(currentComponentIdx);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const { term } = useSemesterSettings();
+  const { data: instructors = [] } = useInstructorsQuery();
+  const courseName = String(course?.name || "").trim();
+  const { patchCourse } = usePatchCourseMutation(courseName || undefined);
+  const editingComponent =
+    editIndex === null ? null : (components[editIndex] ?? null);
 
   useEffect(() => {
     setOpenIdx(currentComponentIdx);
@@ -205,15 +221,19 @@ function CourseComponentsAccordion({
               key={`${tag}-${idx}`}
               tag={tag}
               hint={hint || undefined}
-              badge={
-                isCurrent ? (
-                  <span className="badge badge-sm border-primary/40 bg-primary/10 text-base-content shrink-0">
-                    выбран
-                  </span>
-                ) : undefined
-              }
+              selected={isCurrent}
               open={open}
               onToggle={() => setOpenIdx(open ? null : idx)}
+              afterTag={
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs btn-square"
+                  title="Редактировать"
+                  onClick={() => setEditIndex(idx)}
+                >
+                  <span className="icon-[material-symbols--edit-outline-rounded] text-base" />
+                </button>
+              }
             >
               <CourseComponentDetailsFields
                 config={config}
@@ -229,6 +249,25 @@ function CourseComponentsAccordion({
           );
         })}
       </CourseComponentsAccordionList>
+      <ComponentEditModal
+        open={editIndex !== null && !!editingComponent}
+        onOpenChange={(open) => {
+          if (!open) setEditIndex(null);
+        }}
+        config={config}
+        courseIndex={courseIdx}
+        componentIndex={editIndex}
+        component={editingComponent}
+        tagOptions={(term?.course_component_tags ?? []).filter(Boolean)}
+        instructors={instructors}
+        courseInstructors={course?.instructors}
+        onSave={(component) => {
+          if (editIndex === null) return;
+          const next = [...components];
+          next[editIndex] = component;
+          patchCourse({ components: next });
+        }}
+      />
     </>
   );
 }
@@ -327,6 +366,7 @@ export function MeetingDetailPanel({
       </DetailField>
       <CourseComponentsAccordion
         config={config}
+        course={course}
         courseIdx={meetingRef?.courseIdx ?? null}
         components={siblings}
         currentComponentIdx={meetingRef?.componentIdx ?? null}

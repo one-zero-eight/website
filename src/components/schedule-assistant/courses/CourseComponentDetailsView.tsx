@@ -584,7 +584,9 @@ export function CourseComponentAccordionItem({
   hint,
   badge,
   open,
+  selected = false,
   onToggle,
+  afterTag,
   trailing,
   children,
 }: {
@@ -592,16 +594,18 @@ export function CourseComponentAccordionItem({
   hint?: string;
   badge?: ReactNode;
   open: boolean;
+  selected?: boolean;
   onToggle: () => void;
+  afterTag?: ReactNode;
   trailing?: ReactNode;
   children?: ReactNode;
 }) {
   return (
     <div>
-      <div className="flex items-center gap-0.5">
+      <div className="hover:bg-base-200/40 flex items-center gap-0.5 rounded-md px-0.5">
         <button
           type="button"
-          className="hover:bg-base-200/40 flex min-w-0 flex-1 items-center gap-1.5 py-1.5 text-left"
+          className="flex items-center gap-1.5 py-1.5 text-left"
           onClick={onToggle}
         >
           <span
@@ -610,12 +614,24 @@ export function CourseComponentAccordionItem({
               open && "rotate-180",
             )}
           />
-          <span className="text-base-content min-w-0 flex-1 text-sm font-medium">
+          <span
+            className={cn(
+              "text-base-content shrink-0 rounded-sm px-1 text-sm font-medium",
+              selected && "bg-primary/15",
+            )}
+          >
             {tag}
           </span>
+        </button>
+        {afterTag}
+        <button
+          type="button"
+          className="flex min-w-0 flex-1 items-center gap-1.5 py-1.5 text-left"
+          onClick={onToggle}
+        >
           {badge}
           {hint ? (
-            <span className="text-base-content/45 shrink-0 text-xs">
+            <span className="text-base-content/45 ml-auto shrink-0 text-xs">
               {hint}
             </span>
           ) : null}
