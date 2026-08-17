@@ -4,15 +4,15 @@
  */
 
 export interface paths {
-  "/dev/bookings": {
+  "/bookings/review": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get All Bookings */
-    get: operations["bookings_get_all_bookings"];
+    /** Get Booking Review */
+    get: operations["bookings_get_booking_review"];
     put?: never;
     post?: never;
     delete?: never;
@@ -21,34 +21,34 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/dev/bookings/{room_id}": {
+  "/bookings/batch": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get Bookings */
-    get: operations["bookings_get_bookings"];
+    get?: never;
     put?: never;
-    post?: never;
+    /** Batch Book Slots */
+    post: operations["bookings_batch_book_slots"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/dev/rooms": {
+  "/bookings/cancel-extra": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** Get Rooms */
-    get: operations["bookings_get_rooms"];
+    get?: never;
     put?: never;
-    post?: never;
+    /** Cancel Extra Bookings */
+    post: operations["bookings_cancel_extra_bookings"];
     delete?: never;
     options?: never;
     head?: never;
@@ -641,6 +641,55 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** BatchBookItemResult */
+    BatchBookItemResult: {
+      /**
+       * Index
+       * @description Index in the submitted batch
+       */
+      index: string;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: BatchBookItemResultStatus;
+      /**
+       * Title
+       * @description Booking title that was submitted
+       */
+      title: string | null;
+      /**
+       * Error
+       * @description Error message when status is error
+       */
+      error: string | null;
+    };
+    /** BatchBookRequest */
+    BatchBookRequest: {
+      /**
+       * Slot Ids
+       * @description Selected slot ids from the review tree
+       */
+      slot_ids: string[];
+      /**
+       * Conflict Modes
+       * @description Per-slot action for conflict rows: skip, book, or split
+       * @default {}
+       */
+      conflict_modes: {
+        [key: string]: components["schemas"]["ConflictMode"];
+      };
+    };
+    /** BatchBookResponse */
+    BatchBookResponse: {
+      /**
+       * Submitted
+       * @description Number of payloads sent to BMP
+       */
+      submitted: number;
+      /** Results */
+      results: components["schemas"]["BatchBookItemResult"][];
+    };
     /** Body_distributions_apply_distribution */
     Body_distributions_apply_distribution: {
       /**
@@ -754,6 +803,44 @@ export interface components {
        * @description ID of outlook booking in service account calendar. Only set if we can manage the booking.
        */
       outlook_booking_id: string | null;
+      /**
+       * Outlook Entry Id
+       * @description Hex Entry Id from Outlook free/busy. Set when we cannot manage the booking.
+       */
+      outlook_entry_id: string | null;
+    };
+    /** BookingReview */
+    BookingReview: {
+      /** Programs */
+      programs: components["schemas"]["ReviewProgram"][];
+      /**
+       * Extra Auto Bookings
+       * @default []
+       */
+      extra_auto_bookings: components["schemas"]["ExtraAutoBooking"][];
+    };
+    /** CancelExtraRequest */
+    CancelExtraRequest: {
+      /**
+       * Extra Ids
+       * @description Extra auto-booking ids from the review tree
+       */
+      extra_ids: string[];
+    };
+    /** CancelExtraResponse */
+    CancelExtraResponse: {
+      /**
+       * Cancelled
+       * @description Successfully cancelled extra ids or outlook ids
+       */
+      cancelled: string[];
+      /**
+       * Failed
+       * @description Map of extra id → error
+       */
+      failed: {
+        [key: string]: string;
+      };
     };
     /**
      * CapacityIssue
@@ -1024,6 +1111,36 @@ export interface components {
        */
       change_count: number;
     };
+    /** ConflictHit */
+    ConflictHit: {
+      /**
+       * Start
+       * Format: date-time
+       * @description Occurrence start that overlaps an existing booking
+       */
+      start: string;
+      /**
+       * End
+       * Format: date-time
+       * @description Occurrence end that overlaps an existing booking
+       */
+      end: string;
+      /**
+       * Title
+       * @description Title of the overlapping Outlook booking
+       */
+      title: string;
+      /**
+       * Room Id
+       * @description Room of the overlapping booking
+       */
+      room_id: string;
+    };
+    /**
+     * ConflictMode
+     * @enum {string}
+     */
+    ConflictMode: ConflictMode;
     /** CourseConfig */
     CourseConfig: {
       /**
@@ -1308,6 +1425,51 @@ export interface components {
        * @default 0
        */
       file_size: number;
+    };
+    /** ExtraAutoBooking */
+    ExtraAutoBooking: {
+      /**
+       * Extra Id
+       * @description Stable id used to cancel this extra booking
+       */
+      extra_id: string;
+      /**
+       * Label
+       * @description Human-readable extra booking line
+       */
+      label: string;
+      /**
+       * Room Id
+       * @description Booked room
+       */
+      room_id: string;
+      /**
+       * Start
+       * Format: date-time
+       * @description Booking start
+       */
+      start: string;
+      /**
+       * End
+       * Format: date-time
+       * @description Booking end
+       */
+      end: string;
+      /**
+       * Title
+       * @description Outlook title
+       */
+      title: string;
+      /**
+       * Outlook Booking Id
+       * @description BMP calendar item id when we can manage the booking
+       */
+      outlook_booking_id: string | null;
+      /**
+       * Outlook Entry Id
+       * @description Room-calendar entry id fallback
+       */
+      outlook_entry_id: string | null;
     };
     /**
      * GroupIssue
@@ -1669,6 +1831,40 @@ export interface components {
        */
       is_moderator: boolean;
     };
+    /**
+     * MissingInstructorIssue
+     * @description Занятие стоит в сетке, но преподаватель ещё не назначен.
+     */
+    MissingInstructorIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: MissingInstructorIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      meeting: components["schemas"]["ScheduledMeeting"];
+    };
+    /**
+     * MissingRoomIssue
+     * @description Занятие стоит в сетке, но локация ещё не назначена.
+     */
+    MissingRoomIssue: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      issue_type: MissingRoomIssueIssue_type;
+      /**
+       * Text
+       * @default
+       */
+      text: string;
+      meeting: components["schemas"]["ScheduledMeeting"];
+    };
     /** OccurrencePlacement */
     OccurrencePlacement: {
       /**
@@ -1773,6 +1969,125 @@ export interface components {
        */
       groups: string[];
     };
+    /** ReviewComponent */
+    ReviewComponent: {
+      /**
+       * Component Id
+       * @description Stable id for the course component + audience session
+       */
+      component_id: string;
+      /**
+       * Label
+       * @description Component tag and audiences
+       */
+      label: string;
+      /** Slots */
+      slots: components["schemas"]["ReviewSlot"][];
+    };
+    /** ReviewCourse */
+    ReviewCourse: {
+      /**
+       * Course Id
+       * @description Course name
+       */
+      course_id: string;
+      /**
+       * Name
+       * @description Course display name
+       */
+      name: string;
+      /** Components */
+      components: components["schemas"]["ReviewComponent"][];
+    };
+    /**
+     * ReviewKind
+     * @enum {string}
+     */
+    ReviewKind: ReviewKind;
+    /** ReviewProgram */
+    ReviewProgram: {
+      /**
+       * Program Id
+       * @description Program track label
+       */
+      program_id: string;
+      /**
+       * Name
+       * @description Program track label
+       */
+      name: string;
+      /** Courses */
+      courses: components["schemas"]["ReviewCourse"][];
+    };
+    /** ReviewSlot */
+    ReviewSlot: {
+      /**
+       * Slot Id
+       * @description Stable id for this bookable slot
+       */
+      slot_id: string;
+      /**
+       * Label
+       * @description Human-readable schedule line
+       */
+      label: string;
+      /**
+       * Date
+       * @description ISO date for a one-off slot, or weekday name for a weekly series
+       */
+      date: string;
+      /**
+       * Start Time
+       * @description Slot start time HH:MM:SS
+       */
+      start_time: string;
+      /**
+       * End Time
+       * @description Slot end time HH:MM:SS
+       */
+      end_time: string;
+      /**
+       * Room
+       * @description Room id to book, if any
+       */
+      room: string | null;
+      /**
+       * Bookable
+       * @description False when the room is missing, online, or unknown
+       */
+      bookable: boolean;
+      /**
+       * Disabled Reason
+       * @description Why the slot cannot be booked
+       */
+      disabled_reason: string | null;
+      /**
+       * Recurring
+       * @description True for weekly series payloads
+       * @default false
+       */
+      recurring: boolean;
+      /** @description Classification against current Outlook bookings */
+      review_kind: components["schemas"]["ReviewKind"] | null;
+      /**
+       * Partially Booked
+       * @description True when this slot already has a matching auto-booking
+       * @default false
+       */
+      partially_booked: boolean;
+      /**
+       * Can Split
+       * @description True when a weekly conflict can be booked around conflicting dates
+       * @default false
+       */
+      can_split: boolean;
+      /**
+       * Conflicts
+       * @description Overlapping foreign Outlook bookings
+       * @default []
+       */
+      conflicts: components["schemas"]["ConflictHit"][];
+    };
     /** Room */
     Room: {
       /**
@@ -1821,48 +2136,6 @@ export interface components {
        * @description Allowed values when type is enum; ignored otherwise
        */
       enum_values?: string[];
-    };
-    /**
-     * RoomDTO
-     * @description Room description.
-     */
-    RoomDTO: {
-      /**
-       * Id
-       * @description Room slug
-       */
-      id: string;
-      /**
-       * Title
-       * @description Room title
-       */
-      title: string | null;
-      /**
-       * Short Name
-       * @description Shorter version of room title
-       */
-      short_name: string | null;
-      /**
-       * My Uni Id
-       * @description ID of room on My University portal
-       */
-      my_uni_id: number | null;
-      /**
-       * Capacity
-       * @description Room capacity, amount of people
-       */
-      capacity: number | null;
-      /**
-       * Access Level
-       * @description Access level to the room. Yellow = for students. Red = for employees. Special = special rules apply.
-       */
-      access_level: RoomDTOAccess_levelAnyOf0 | null;
-      /**
-       * Restrict Daytime
-       * @description Prohibit to book during working hours. True = this room is available only at night 19:00-8:00, or full day on weekends.
-       * @default false
-       */
-      restrict_daytime: boolean;
     };
     /**
      * RoomIssue
@@ -2242,7 +2515,7 @@ export interface components {
       course_component_tags?: string[];
       /**
        * Room Attributes
-       * @description Allowed room.features keys with types; empty means unrestricted legacy keys
+       * @description Allowed room.features keys with types; empty means any key is allowed
        */
       room_attributes?: components["schemas"]["RoomAttributeDef"][];
     };
@@ -2292,40 +2565,6 @@ export interface components {
        * @enum {string}
        */
       issue_type: UnbookedIssueIssue_type;
-      /**
-       * Text
-       * @default
-       */
-      text: string;
-      meeting: components["schemas"]["ScheduledMeeting"];
-    };
-    /**
-     * MissingInstructorIssue
-     * @description Занятие стоит в сетке, но преподаватель ещё не назначен.
-     */
-    MissingInstructorIssue: {
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      issue_type: MissingInstructorIssueIssue_type;
-      /**
-       * Text
-       * @default
-       */
-      text: string;
-      meeting: components["schemas"]["ScheduledMeeting"];
-    };
-    /**
-     * MissingRoomIssue
-     * @description Занятие стоит в сетке, но локация ещё не назначена.
-     */
-    MissingRoomIssue: {
-      /**
-       * @description discriminator enum property added by openapi-typescript
-       * @enum {string}
-       */
-      issue_type: MissingRoomIssueIssue_type;
       /**
        * Text
        * @default
@@ -2477,6 +2716,11 @@ export interface components {
   headers: never;
   pathItems: never;
 }
+export type SchemaBatchBookItemResult =
+  components["schemas"]["BatchBookItemResult"];
+export type SchemaBatchBookRequest = components["schemas"]["BatchBookRequest"];
+export type SchemaBatchBookResponse =
+  components["schemas"]["BatchBookResponse"];
 export type SchemaBodyDistributionsApplyDistribution =
   components["schemas"]["Body_distributions_apply_distribution"];
 export type SchemaBodyDistributionsPreviewDistribution =
@@ -2484,6 +2728,11 @@ export type SchemaBodyDistributionsPreviewDistribution =
 export type SchemaBodyScheduleConfigPutScheduleConfigYamlFile =
   components["schemas"]["Body_schedule_config_put_schedule_config_yaml_file"];
 export type SchemaBookingDto = components["schemas"]["BookingDTO"];
+export type SchemaBookingReview = components["schemas"]["BookingReview"];
+export type SchemaCancelExtraRequest =
+  components["schemas"]["CancelExtraRequest"];
+export type SchemaCancelExtraResponse =
+  components["schemas"]["CancelExtraResponse"];
 export type SchemaCapacityIssue = components["schemas"]["CapacityIssue"];
 export type SchemaCheckParameters = components["schemas"]["CheckParameters"];
 export type SchemaCheckResults = components["schemas"]["CheckResults"];
@@ -2494,6 +2743,7 @@ export type SchemaConfigChangeEvent =
   components["schemas"]["ConfigChangeEvent"];
 export type SchemaConfigChangeEventSummary =
   components["schemas"]["ConfigChangeEventSummary"];
+export type SchemaConflictHit = components["schemas"]["ConflictHit"];
 export type SchemaCourseConfig = components["schemas"]["CourseConfig"];
 export type SchemaCourseInstructor = components["schemas"]["CourseInstructor"];
 export type SchemaCoursesConfig = components["schemas"]["CoursesConfig"];
@@ -2516,6 +2766,7 @@ export type SchemaDistributionUploadStats =
   components["schemas"]["DistributionUploadStats"];
 export type SchemaDistributionUploadSummary =
   components["schemas"]["DistributionUploadSummary"];
+export type SchemaExtraAutoBooking = components["schemas"]["ExtraAutoBooking"];
 export type SchemaGroupIssue = components["schemas"]["GroupIssue"];
 export type SchemaHttpValidationError =
   components["schemas"]["HTTPValidationError"];
@@ -2549,9 +2800,12 @@ export type SchemaPerWeekIssue = components["schemas"]["PerWeekIssue"];
 export type SchemaPreferenceShareLinkResponse =
   components["schemas"]["PreferenceShareLinkResponse"];
 export type SchemaProgramTrack = components["schemas"]["ProgramTrack"];
+export type SchemaReviewComponent = components["schemas"]["ReviewComponent"];
+export type SchemaReviewCourse = components["schemas"]["ReviewCourse"];
+export type SchemaReviewProgram = components["schemas"]["ReviewProgram"];
+export type SchemaReviewSlot = components["schemas"]["ReviewSlot"];
 export type SchemaRoom = components["schemas"]["Room"];
 export type SchemaRoomAttributeDef = components["schemas"]["RoomAttributeDef"];
-export type SchemaRoomDto = components["schemas"]["RoomDTO"];
 export type SchemaRoomIssue = components["schemas"]["RoomIssue"];
 export type SchemaScheduleConfig = components["schemas"]["ScheduleConfig"];
 export type SchemaScheduleConfigUpdate =
@@ -2581,7 +2835,7 @@ export type SchemaWeeklyPatternSlotEdit =
   components["schemas"]["WeeklyPatternSlotEdit"];
 export type $defs = Record<string, never>;
 export interface operations {
-  bookings_get_all_bookings: {
+  bookings_get_booking_review: {
     parameters: {
       query?: never;
       header?: never;
@@ -2596,21 +2850,23 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["BookingDTO"][];
+          "application/json": components["schemas"]["BookingReview"];
         };
       };
     };
   };
-  bookings_get_bookings: {
+  bookings_batch_book_slots: {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        room_id: string;
-      };
+      path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BatchBookRequest"];
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -2618,7 +2874,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["BookingDTO"][];
+          "application/json": components["schemas"]["BatchBookResponse"];
         };
       };
       /** @description Validation Error */
@@ -2632,14 +2888,18 @@ export interface operations {
       };
     };
   };
-  bookings_get_rooms: {
+  bookings_cancel_extra_bookings: {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CancelExtraRequest"];
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -2647,7 +2907,16 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["RoomDTO"][];
+          "application/json": components["schemas"]["CancelExtraResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -4099,6 +4368,10 @@ export interface operations {
     };
   };
 }
+export enum BatchBookItemResultStatus {
+  ok = "ok",
+  error = "error",
+}
 export enum CapacityIssueIssue_type {
   capacity = "capacity",
 }
@@ -4122,6 +4395,11 @@ export enum ConfigChangeEventSummaryResources {
   rooms = "rooms",
   instructors = "instructors",
 }
+export enum ConflictMode {
+  skip = "skip",
+  book = "book",
+  split = "split",
+}
 export enum GroupIssueIssue_type {
   group = "group",
 }
@@ -4140,6 +4418,12 @@ export enum InstructorSlotPreferenceLevel {
   discouraged = "discouraged",
   banned = "banned",
 }
+export enum MissingInstructorIssueIssue_type {
+  missing_instructor = "missing_instructor",
+}
+export enum MissingRoomIssueIssue_type {
+  missing_room = "missing_room",
+}
 export enum OccurrencePlacementKind {
   occurrence = "occurrence",
 }
@@ -4153,17 +4437,17 @@ export enum PerWeekIssueSource_kind {
   core_course = "core_course",
   elective = "elective",
 }
+export enum ReviewKind {
+  ready = "ready",
+  booked = "booked",
+  conflict = "conflict",
+}
 export enum RoomAttributeDefType {
   boolean = "boolean",
   string = "string",
   number = "number",
   enum = "enum",
   list = "list",
-}
-export enum RoomDTOAccess_levelAnyOf0 {
-  yellow = "yellow",
-  red = "red",
-  special = "special",
 }
 export enum RoomIssueIssue_type {
   room = "room",
@@ -4192,12 +4476,6 @@ export enum TeacherIssueIssue_type {
 }
 export enum UnbookedIssueIssue_type {
   unbooked = "unbooked",
-}
-export enum MissingInstructorIssueIssue_type {
-  missing_instructor = "missing_instructor",
-}
-export enum MissingRoomIssueIssue_type {
-  missing_room = "missing_room",
 }
 export enum UnplacedIssueIssue_type {
   unplaced = "unplaced",

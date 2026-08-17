@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from "./routes/index";
 import { Route as ScheduleAssistantIndexRouteImport } from "./routes/schedule-assistant/index";
 import { Route as ScheduleAssistantTimetableRouteImport } from "./routes/schedule-assistant/timetable";
 import { Route as ScheduleAssistantChecksRouteImport } from "./routes/schedule-assistant/checks";
+import { Route as ScheduleAssistantBookingsRouteImport } from "./routes/schedule-assistant/bookings";
 import { Route as RoomsRoomRouteImport } from "./routes/rooms.$room";
 import { Route as FormsSubmitRouteImport } from "./routes/forms.submit";
 import { Route as With_menuWorkshopsRouteImport } from "./routes/_with_menu/workshops";
@@ -125,6 +126,12 @@ const ScheduleAssistantChecksRoute = ScheduleAssistantChecksRouteImport.update({
   path: "/checks",
   getParentRoute: () => ScheduleAssistantRouteRoute,
 } as any);
+const ScheduleAssistantBookingsRoute =
+  ScheduleAssistantBookingsRouteImport.update({
+    id: "/bookings",
+    path: "/bookings",
+    getParentRoute: () => ScheduleAssistantRouteRoute,
+  } as any);
 const RoomsRoomRoute = RoomsRoomRouteImport.update({
   id: "/rooms/$room",
   path: "/rooms/$room",
@@ -541,6 +548,7 @@ export interface FileRoutesByFullPath {
   "/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
   "/rooms/$room": typeof RoomsRoomRoute;
+  "/schedule-assistant/bookings": typeof ScheduleAssistantBookingsRoute;
   "/schedule-assistant/checks": typeof ScheduleAssistantChecksRoute;
   "/schedule-assistant/timetable": typeof ScheduleAssistantTimetableRoute;
   "/schedule-assistant/": typeof ScheduleAssistantIndexRoute;
@@ -620,6 +628,7 @@ export interface FileRoutesByTo {
   "/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
   "/rooms/$room": typeof RoomsRoomRoute;
+  "/schedule-assistant/bookings": typeof ScheduleAssistantBookingsRoute;
   "/schedule-assistant/checks": typeof ScheduleAssistantChecksRoute;
   "/schedule-assistant/timetable": typeof ScheduleAssistantTimetableRoute;
   "/schedule-assistant": typeof ScheduleAssistantIndexRoute;
@@ -703,6 +712,7 @@ export interface FileRoutesById {
   "/_with_menu/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
   "/rooms/$room": typeof RoomsRoomRoute;
+  "/schedule-assistant/bookings": typeof ScheduleAssistantBookingsRoute;
   "/schedule-assistant/checks": typeof ScheduleAssistantChecksRoute;
   "/schedule-assistant/timetable": typeof ScheduleAssistantTimetableRoute;
   "/schedule-assistant/": typeof ScheduleAssistantIndexRoute;
@@ -786,6 +796,7 @@ export interface FileRouteTypes {
     | "/workshops"
     | "/forms/submit"
     | "/rooms/$room"
+    | "/schedule-assistant/bookings"
     | "/schedule-assistant/checks"
     | "/schedule-assistant/timetable"
     | "/schedule-assistant/"
@@ -865,6 +876,7 @@ export interface FileRouteTypes {
     | "/workshops"
     | "/forms/submit"
     | "/rooms/$room"
+    | "/schedule-assistant/bookings"
     | "/schedule-assistant/checks"
     | "/schedule-assistant/timetable"
     | "/schedule-assistant"
@@ -947,6 +959,7 @@ export interface FileRouteTypes {
     | "/_with_menu/workshops"
     | "/forms/submit"
     | "/rooms/$room"
+    | "/schedule-assistant/bookings"
     | "/schedule-assistant/checks"
     | "/schedule-assistant/timetable"
     | "/schedule-assistant/"
@@ -1068,6 +1081,13 @@ declare module "@tanstack/react-router" {
       path: "/checks";
       fullPath: "/schedule-assistant/checks";
       preLoaderRoute: typeof ScheduleAssistantChecksRouteImport;
+      parentRoute: typeof ScheduleAssistantRouteRoute;
+    };
+    "/schedule-assistant/bookings": {
+      id: "/schedule-assistant/bookings";
+      path: "/bookings";
+      fullPath: "/schedule-assistant/bookings";
+      preLoaderRoute: typeof ScheduleAssistantBookingsRouteImport;
       parentRoute: typeof ScheduleAssistantRouteRoute;
     };
     "/rooms/$room": {
@@ -1744,6 +1764,7 @@ const ScheduleAssistantForInstructorsRouteRouteWithChildren =
 
 interface ScheduleAssistantRouteRouteChildren {
   ScheduleAssistantForInstructorsRouteRoute: typeof ScheduleAssistantForInstructorsRouteRouteWithChildren;
+  ScheduleAssistantBookingsRoute: typeof ScheduleAssistantBookingsRoute;
   ScheduleAssistantChecksRoute: typeof ScheduleAssistantChecksRoute;
   ScheduleAssistantTimetableRoute: typeof ScheduleAssistantTimetableRoute;
   ScheduleAssistantIndexRoute: typeof ScheduleAssistantIndexRoute;
@@ -1755,6 +1776,7 @@ const ScheduleAssistantRouteRouteChildren: ScheduleAssistantRouteRouteChildren =
   {
     ScheduleAssistantForInstructorsRouteRoute:
       ScheduleAssistantForInstructorsRouteRouteWithChildren,
+    ScheduleAssistantBookingsRoute: ScheduleAssistantBookingsRoute,
     ScheduleAssistantChecksRoute: ScheduleAssistantChecksRoute,
     ScheduleAssistantTimetableRoute: ScheduleAssistantTimetableRoute,
     ScheduleAssistantIndexRoute: ScheduleAssistantIndexRoute,
