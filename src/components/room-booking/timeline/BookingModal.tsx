@@ -3,6 +3,10 @@ import { $roomBooking, roomBookingTypes } from "@/api/room-booking";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { BookingStatus, SchemaAttendee } from "@/api/room-booking/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
+import {
+  isRoomBookingQuestSelection,
+  isRoomBookingQuestTitle,
+} from "@/components/room-booking/quest.ts";
 import { sanitizeBookingTitle } from "@/components/room-booking/utils.ts";
 import {
   clockTime,
@@ -126,6 +130,8 @@ export function BookingModal({
   selectedRoomId,
   onSelectedRoomIdChange,
   fixedSchedule = false,
+  onQuestSolved,
+  onQuestFailed,
 }: {
   newSlot?: Slot;
   detailsBooking?: Booking;
@@ -136,6 +142,8 @@ export function BookingModal({
   selectedRoomId?: string | null;
   onSelectedRoomIdChange?: (roomId: string) => void;
   fixedSchedule?: boolean;
+  onQuestSolved?: () => void;
+  onQuestFailed?: () => void;
 }) {
   const queryClient = useQueryClient();
   const { me } = useMe();
@@ -216,6 +224,11 @@ export function BookingModal({
   const [end, setEnd] = useState<Date | undefined>(
     newSlot?.end || detailsBooking?.endsAt,
   );
+  const [editedNewSlotKey, setEditedNewSlotKey] = useState<string>();
+
+  const newSlotKey = newSlot
+    ? `${newSlot.room.id}:${newSlot.start.toISOString()}:${newSlot.end.toISOString()}`
+    : undefined;
 
   useEffect(() => {
     if (detailsBooking && isEditing) return;
@@ -266,9 +279,34 @@ export function BookingModal({
     null;
 
   const activeNewBookingRoom = selectableRoom ?? newSlot?.room;
+  const hasEditedCurrentNewSlot = editedNewSlotKey === newSlotKey;
+  const selectedStart = hasEditedCurrentNewSlot
+    ? start
+    : (newSlot?.start ?? start);
+  const selectedEnd = hasEditedCurrentNewSlot ? end : (newSlot?.end ?? end);
+  const isQuestSelection =
+    !!onQuestSolved &&
+    !!onQuestFailed &&
+    isRoomBookingQuestSelection({
+      room: activeNewBookingRoom,
+      start: selectedStart,
+      end: selectedEnd,
+    });
 
   const submitBooking = useCallback(() => {
     if (!newSlot || !activeNewBookingRoom) return;
+    if (isQuestSelection) {
+      const questTitleAccepted = isRoomBookingQuestTitle(title);
+      setTitle("");
+      resetCreateBooking();
+      onOpenChange(false);
+      if (questTitleAccepted) {
+        onQuestSolved?.();
+      } else {
+        onQuestFailed?.();
+      }
+      return;
+    }
     if (!title.trim()) {
       titleInputRef.current?.focus();
       return;
@@ -279,8 +317,8 @@ export function BookingModal({
         body: {
           room_id: activeNewBookingRoom.id,
           title: title.trim(),
-          start: (start ?? newSlot.start).toISOString(),
-          end: (end ?? newSlot.end).toISOString(),
+          start: (selectedStart ?? newSlot.start).toISOString(),
+          end: (selectedEnd ?? newSlot.end).toISOString(),
           participant_emails: [],
         },
       },
@@ -310,8 +348,12 @@ export function BookingModal({
     resetCreateBooking,
     queryClient,
     onBookingCreated,
-    start,
-    end,
+    selectedStart,
+    selectedEnd,
+    isQuestSelection,
+    onOpenChange,
+    onQuestSolved,
+    onQuestFailed,
   ]);
 
   const updateBooking = useCallback(() => {
@@ -412,13 +454,18 @@ export function BookingModal({
         params: {
           path: { id: room?.id ?? "" },
           query: {
-            start: (start ?? newSlot?.start)?.toISOString() ?? "",
-            end: (end ?? newSlot?.end)?.toISOString() ?? "",
+            start: selectedStart?.toISOString() ?? "",
+            end: selectedEnd?.toISOString() ?? "",
           },
         },
       },
       {
-        enabled: (!!newSlot || isEditing) && !!room && !!start && !!end,
+        enabled:
+          !isQuestSelection &&
+          (!!newSlot || isEditing) &&
+          !!room &&
+          !!selectedStart &&
+          !!selectedEnd,
       },
     );
 
@@ -513,9 +560,10 @@ export function BookingModal({
     `${date.toLocaleString("en-US", { day: "2-digit", month: "long" })}, ${date.toLocaleString("en-US", { weekday: "long" })}`;
   // Show end date only if start and end dates differ
   const showEndDate =
-    start &&
-    end &&
-    (start.getMonth() !== end.getMonth() || start.getDate() !== end.getDate());
+    selectedStart &&
+    selectedEnd &&
+    (selectedStart.getMonth() !== selectedEnd.getMonth() ||
+      selectedStart.getDate() !== selectedEnd.getDate());
 
   const BookingDateTime = fixedSchedule ? null : (
     <div className="my-1">
@@ -526,10 +574,12 @@ export function BookingModal({
         id="start"
         type="datetime-local"
         name="party-date"
-        value={start ? toLocalTimeString(start) : ""}
-        onChange={(e) =>
-          e.target.value && setStart(fromLocalTimeString(e.target.value))
-        }
+        value={selectedStart ? toLocalTimeString(selectedStart) : ""}
+        onChange={(e) => {
+          if (!e.target.value) return;
+          setStart(fromLocalTimeString(e.target.value));
+          setEditedNewSlotKey(newSlotKey);
+        }}
         className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
       />
       <label htmlFor="end" className="text-base-content/75 text-base">
@@ -539,10 +589,12 @@ export function BookingModal({
         id="end"
         type="datetime-local"
         name="party-date"
-        value={end ? toLocalTimeString(end) : ""}
-        onChange={(e) =>
-          e.target.value && setEnd(fromLocalTimeString(e.target.value))
-        }
+        value={selectedEnd ? toLocalTimeString(selectedEnd) : ""}
+        onChange={(e) => {
+          if (!e.target.value) return;
+          setEnd(fromLocalTimeString(e.target.value));
+          setEditedNewSlotKey(newSlotKey);
+        }}
         className="bg-base-300 focus:ring-primary mb-2 w-full grow rounded-xl px-4 py-2 text-base outline-hidden focus:ring-2"
       />
     </div>
@@ -561,8 +613,8 @@ export function BookingModal({
         <span className="icon-[material-symbols--today-outline] text-xl" />
       </div>
       <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
-        {start && formatBookingDate(start)}
-        {showEndDate && ` – ${formatBookingDate(end)}`}
+        {selectedStart && formatBookingDate(selectedStart)}
+        {showEndDate && ` – ${formatBookingDate(selectedEnd)}`}
       </p>
     </div>
   );
@@ -572,9 +624,9 @@ export function BookingModal({
       <div className="flex h-fit w-6">
         <span className="icon-[material-symbols--schedule-outline] text-xl" />
       </div>
-      {start && end && (
+      {selectedStart && selectedEnd && (
         <p className="flex w-full items-center py-1 wrap-anywhere whitespace-pre-wrap">
-          {`${clockTime(start)} – ${clockTime(end)} (${durationFormatted(msBetween(start, end))})`}
+          {`${clockTime(selectedStart)} – ${clockTime(selectedEnd)} (${durationFormatted(msBetween(selectedStart, selectedEnd))})`}
         </p>
       )}
     </div>
@@ -590,7 +642,7 @@ export function BookingModal({
       ))
     : undefined;
 
-  const NewBookingWarning = canBookPending ? (
+  const NewBookingWarning = isQuestSelection ? null : canBookPending ? (
     <div className="alert alert-info alert-soft px-4 py-2 text-base">
       <span>Checking rules...</span>
     </div>
@@ -603,7 +655,9 @@ export function BookingModal({
   );
 
   const errorText =
-    newSlot && creationError ? formatApiErrorMessage(creationError) : null;
+    newSlot && creationError && !isQuestSelection
+      ? formatApiErrorMessage(creationError)
+      : null;
   const NewBookingError = errorText && (
     <div className="alert alert-error text-base">
       <span>{errorText}</span>

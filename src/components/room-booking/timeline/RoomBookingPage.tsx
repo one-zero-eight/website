@@ -2,6 +2,14 @@ import { $accounts } from "@/api/accounts";
 import { useMe } from "@/api/accounts/user.ts";
 import { $roomBooking } from "@/api/room-booking";
 import { RoomAccess_levelAnyOf0 } from "@/api/room-booking/types.ts";
+import {
+  RoomBookingQuestSecret,
+  type RoomBookingQuestOutcome,
+} from "@/components/room-booking/RoomBookingQuestSecret.tsx";
+import {
+  findRoomBookingQuestRoomId,
+  isHiddenRoomBookingQuestReservation,
+} from "@/components/room-booking/quest.ts";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { OutlookDownScreen } from "@/components/room-booking/timeline/OutlookDownScreen.tsx";
 import { T } from "@/lib/utils/dates.ts";
@@ -22,6 +30,7 @@ const routeApi = getRouteApi("/_with_menu/room-booking/");
 export function RoomBookingPage() {
   const search = routeApi.useSearch();
   const [modalOpen, setModalOpen] = useState(false);
+  const [questOutcome, setQuestOutcome] = useState<RoomBookingQuestOutcome>();
   const [newBookingSlot, setNewBookingSlot] = useState<Slot>();
   const [bookingDetails, setBookingDetails] = useState<Booking>();
   const timelineRef = useRef<BookingTimelineRef | null>(null);
@@ -112,7 +121,25 @@ export function RoomBookingPage() {
 
   const bookingsFetchFailed = bookingsQueryEnabled && isBookingsError;
 
-  const bookings = rawBookings?.map((schema) => schemaToBooking(schema));
+  const questRoomId = findRoomBookingQuestRoomId(rooms);
+  const bookings = rawBookings
+    ?.filter(
+      (booking) =>
+        !isHiddenRoomBookingQuestReservation({
+          roomId: booking.room_id,
+          start: booking.start,
+          end: booking.end,
+          questRoomId,
+        }),
+    )
+    .map((schema) => schemaToBooking(schema));
+
+  function handleQuestOutcome(outcome: RoomBookingQuestOutcome) {
+    setModalOpen(false);
+    setNewBookingSlot(undefined);
+    setBookingDetails(undefined);
+    setQuestOutcome(outcome);
+  }
 
   return (
     <>
@@ -151,12 +178,18 @@ export function RoomBookingPage() {
         detailsBooking={bookingDetails}
         open={modalOpen}
         onOpenChange={setModalOpen}
+        onQuestSolved={() => handleQuestOutcome("success")}
+        onQuestFailed={() => handleQuestOutcome("failure")}
         onBookingCreated={(data) => {
           console.log("booking created", data);
 
           setNewBookingSlot(undefined);
           setBookingDetails(data);
         }}
+      />
+      <RoomBookingQuestSecret
+        outcome={questOutcome}
+        onFailureDismiss={() => setQuestOutcome(undefined)}
       />
     </>
   );

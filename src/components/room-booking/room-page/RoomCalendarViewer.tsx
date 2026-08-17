@@ -1,4 +1,12 @@
 import { $roomBooking } from "@/api/room-booking";
+import {
+  RoomBookingQuestSecret,
+  type RoomBookingQuestOutcome,
+} from "@/components/room-booking/RoomBookingQuestSecret.tsx";
+import {
+  findRoomBookingQuestRoomId,
+  isHiddenRoomBookingQuestReservation,
+} from "@/components/room-booking/quest.ts";
 import { BookingModal } from "@/components/room-booking/timeline/BookingModal.tsx";
 import { T } from "@/lib/utils/dates.ts";
 import {
@@ -329,6 +337,7 @@ const MemoizedCalendar = memo(function MemoizedCalendar({
 
 export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [questOutcome, setQuestOutcome] = useState<RoomBookingQuestOutcome>();
   const [selectedSlot, setSelectedSlot] = useState<Slot | undefined>(undefined);
   const [selectedBookingDetails, setSelectedBookingDetails] = useState<
     Booking | undefined
@@ -336,7 +345,7 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
   const [pastBookingPopupVisible, setPastBookingPopupVisible] = useState(false);
 
   const [dateRange, setDateRange] = useState(getTimeRangeForWeek());
-  const { data: bookings, isPending } = $roomBooking.useQuery(
+  const { data: rawBookings, isPending } = $roomBooking.useQuery(
     "get",
     "/room/{id}/bookings",
     {
@@ -362,6 +371,20 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
     params: { query: { include_red: true } },
   });
   const room = rooms?.find((r) => r.id === roomId);
+  const questRoomId = findRoomBookingQuestRoomId(rooms);
+  const bookings = useMemo(() => {
+    if (!rooms || !rawBookings) return undefined;
+
+    return rawBookings.filter(
+      (booking) =>
+        !isHiddenRoomBookingQuestReservation({
+          roomId: booking.room_id,
+          start: booking.start,
+          end: booking.end,
+          questRoomId,
+        }),
+    );
+  }, [questRoomId, rawBookings, rooms]);
 
   const [calendarView, setCalendarView] = useState("timeGrid3");
   const bookingDraftRef = useRef<BookingDraft | null>(null);
@@ -487,6 +510,12 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
       }
     }
   }, []);
+
+  function handleQuestOutcome(outcome: RoomBookingQuestOutcome) {
+    setSelectedSlot(undefined);
+    setSelectedBookingDetails(undefined);
+    setQuestOutcome(outcome);
+  }
 
   const handleDateClick = useCallback(
     (arg: DateClickArg) => {
@@ -1004,10 +1033,16 @@ export default function RoomCalendarViewer({ roomId }: { roomId: string }) {
         detailsBooking={selectedBookingDetails}
         open={bookingModalOpen}
         onOpenChange={handleModalClose}
+        onQuestSolved={() => handleQuestOutcome("success")}
+        onQuestFailed={() => handleQuestOutcome("failure")}
         onBookingCreated={(data) => {
           setSelectedSlot(undefined);
           setSelectedBookingDetails(data);
         }}
+      />
+      <RoomBookingQuestSecret
+        outcome={questOutcome}
+        onFailureDismiss={() => setQuestOutcome(undefined)}
       />
     </div>
   );
