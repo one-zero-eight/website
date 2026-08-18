@@ -54,6 +54,10 @@ function writeStoredBookingTask(stored: StoredBookingTask) {
   sessionStorage.setItem(BOOKING_TASK_STORAGE_KEY, JSON.stringify(stored));
 }
 
+function clearStoredBookingTask() {
+  sessionStorage.removeItem(BOOKING_TASK_STORAGE_KEY);
+}
+
 function isTerminalStatus(status: BookingTaskStatus) {
   return (
     status === BookingTaskStatus.done || status === BookingTaskStatus.error
@@ -257,7 +261,7 @@ export function BookingWorkspace() {
     });
   }, [queryClient, showError, showSuccess, showWarning, task]);
 
-  const busy = isBooking || isCancelling || isActiveStatus(task?.status);
+  const busy = isBooking || isCancelling;
 
   function handleToggleExpanded(id: string) {
     setExpandedIds((prev) => {
@@ -314,6 +318,26 @@ export function BookingWorkspace() {
       });
     }
     setConfirmAction(null);
+  }
+
+  function handleDismissTask() {
+    if (taskId) {
+      queryClient.removeQueries({
+        queryKey: $scheduleAssistant.queryOptions(
+          "get",
+          "/bookings/tasks/{task_id}",
+          { params: { path: { task_id: taskId } } },
+        ).queryKey,
+      });
+    }
+    clearStoredBookingTask();
+    prevItemStatusRef.current = new Map();
+    setFlashIds(new Set());
+    setTaskId(null);
+    void queryClient.invalidateQueries({
+      queryKey: $scheduleAssistant.queryOptions("get", "/bookings/review")
+        .queryKey,
+    });
   }
 
   if (isPending) {
@@ -398,7 +422,7 @@ export function BookingWorkspace() {
           disabled={busy || selectedSlotIds.size === 0}
           onClick={() => setConfirmAction("book")}
         >
-          {isBooking || (busy && task?.kind === BookingTaskKind.book) ? (
+          {isBooking ? (
             <span className="loading loading-spinner loading-sm" />
           ) : (
             <span className="icon-[material-symbols--event-available-outline] text-lg" />
@@ -411,7 +435,7 @@ export function BookingWorkspace() {
           disabled={busy || selectedExtraIds.size === 0}
           onClick={() => setConfirmAction("cancel-extra")}
         >
-          {isCancelling || (busy && task?.kind === BookingTaskKind.cancel) ? (
+          {isCancelling ? (
             <span className="loading loading-spinner loading-sm" />
           ) : (
             <span className="icon-[material-symbols--event-busy-outline] text-lg" />
@@ -434,6 +458,7 @@ export function BookingWorkspace() {
           task={task}
           flashIds={flashIds}
           pollError={isTaskError ? formatApiErrorMessage(taskError) : undefined}
+          onDismiss={handleDismissTask}
         />
       ) : null}
 
@@ -580,10 +605,12 @@ function TaskProgressPanel({
   task,
   flashIds,
   pollError,
+  onDismiss,
 }: {
   task: SchemaBookingTask;
   flashIds: ReadonlySet<string>;
   pollError?: string;
+  onDismiss: () => void;
 }) {
   const isBook = task.kind === BookingTaskKind.book;
   const running = isActiveStatus(task.status);
@@ -607,7 +634,19 @@ function TaskProgressPanel({
         {running ? (
           <span className="loading loading-spinner loading-sm" />
         ) : null}
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm ml-auto"
+          onClick={onDismiss}
+        >
+          Сбросить ожидание
+        </button>
       </div>
+      {running ? (
+        <p className="text-base-content/60 mb-1 text-xs">
+          Сброс только закрывает этот экран. Отправка в Outlook продолжается.
+        </p>
+      ) : null}
       <p className="text-base-content/70 mb-1 text-sm">
         {task.done}/{task.total}
         {task.current ? ` · ${task.current}` : ""}
