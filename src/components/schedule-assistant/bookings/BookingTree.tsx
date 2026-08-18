@@ -8,22 +8,27 @@ import type {
   SchemaReviewSlot,
 } from "@/api/schedule-assistant/types.ts";
 import {
+  BookingGroupStatusMarks,
+  BookingSlotStatusMark,
+} from "@/components/schedule-assistant/bookings/BookingStatusMark.tsx";
+import {
   checkState,
   componentNodeId,
   courseNodeId,
-  disabledReasonLabel,
   EXTRA_NODE_ID,
   formatConflictWhen,
+  formatReviewSlotLabel,
   isReadySlot,
   isSplitSelectableSlot,
   programNodeId,
   readySlotIdsInComponent,
   readySlotIdsInCourse,
   readySlotIdsInProgram,
-  reviewKindLabel,
+  reviewItemsInComponent,
+  reviewItemsInCourse,
 } from "./bookingModel.ts";
 import { cn } from "@/lib/ui/cn";
-import { useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 export function BookingTree({
   review,
@@ -168,6 +173,12 @@ function CourseBranch({
         checkState={state}
         checkDisabled={disabled || ids.length === 0}
         label={course.name}
+        marks={
+          <BookingGroupStatusMarks
+            items={reviewItemsInCourse(course)}
+            showComponent
+          />
+        }
         onToggleExpanded={() => onToggleExpanded(nodeId)}
         onToggleCheck={() => onToggleSlots(ids, state !== "all")}
       />
@@ -229,6 +240,9 @@ function ComponentBranch({
         checkState={state}
         checkDisabled={disabled || ids.length === 0}
         label={component.label}
+        marks={
+          <BookingGroupStatusMarks items={reviewItemsInComponent(component)} />
+        }
         onToggleExpanded={() => onToggleExpanded(nodeId)}
         onToggleCheck={() => onToggleSlots(ids, state !== "all")}
       />
@@ -277,45 +291,25 @@ function SlotRow({
 }) {
   const ready = isReadySlot(slot);
   const splitSelectable = isSplitSelectableSlot(slot);
-  const kindLabel = reviewKindLabel(slot.review_kind);
-  const reason = disabledReasonLabel(slot.disabled_reason);
 
   return (
-    <div className="border-base-200 border-t">
-      <div className="flex items-start gap-2 py-1.5 pr-2 pl-14">
-        {ready ? (
-          <input
-            type="checkbox"
-            className="checkbox checkbox-xs mt-1 shrink-0"
-            checked={selected}
-            disabled={disabled}
-            onChange={onToggle}
-          />
-        ) : (
-          <span className="mt-1 w-3.5 shrink-0" />
-        )}
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+    <div>
+      <div className="flex items-start gap-1.5 py-1.5 pr-2 pl-12">
+        <span className="invisible size-5 shrink-0" />
+        <span className="invisible size-5 shrink-0" />
+        <input
+          type="checkbox"
+          className="checkbox checkbox-xs mt-1 shrink-0 disabled:opacity-50"
+          checked={selected}
+          disabled={disabled || !ready}
+          onChange={onToggle}
+        />
+        <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex min-w-0 items-center gap-1.5">
             <span className="min-w-0 text-sm wrap-break-word">
-              {slot.label}
+              {formatReviewSlotLabel(slot)}
             </span>
-            {kindLabel && slot.bookable ? (
-              <span
-                className={cn(
-                  "badge badge-sm shrink-0",
-                  slot.review_kind === ReviewKind.ready && "badge-success",
-                  slot.review_kind === ReviewKind.booked && "badge-ghost",
-                  slot.review_kind === ReviewKind.conflict && "badge-warning",
-                )}
-              >
-                {kindLabel}
-              </span>
-            ) : null}
-            {!slot.bookable && reason ? (
-              <span className="badge badge-ghost badge-sm shrink-0">
-                {reason}
-              </span>
-            ) : null}
+            <BookingSlotStatusMark slot={slot} />
           </div>
           {slot.review_kind === ReviewKind.conflict ? (
             <div className="flex flex-wrap items-center gap-1.5">
@@ -362,7 +356,7 @@ function SlotRow({
       {detailsOpen &&
       slot.review_kind === ReviewKind.conflict &&
       slot.conflicts.length > 0 ? (
-        <ul className="text-base-content/70 pb-2 pl-16 text-xs">
+        <ul className="text-base-content/70 pb-2 pl-27 text-xs">
           {slot.conflicts.map((hit, index) => (
             <li key={`${hit.start}-${hit.room_id}-${index}`} className="py-0.5">
               {formatConflictWhen(hit.start, hit.end)}
@@ -438,7 +432,9 @@ function ExtraRow({
   onToggle: () => void;
 }) {
   return (
-    <label className="border-base-200 flex cursor-pointer items-start gap-2 border-t py-1.5 pr-2 pl-9">
+    <label className="flex cursor-pointer items-start gap-1.5 py-1.5 pr-2 pl-2">
+      <span className="invisible size-5 shrink-0" />
+      <span className="invisible size-5 shrink-0" />
       <input
         type="checkbox"
         className="checkbox checkbox-xs mt-1 shrink-0"
@@ -464,6 +460,7 @@ function TreeRow({
   checkState: state,
   checkDisabled,
   label,
+  marks,
   onToggleExpanded,
   onToggleCheck,
 }: {
@@ -473,6 +470,7 @@ function TreeRow({
   checkState: "none" | "some" | "all";
   checkDisabled: boolean;
   label: string;
+  marks?: ReactNode;
   onToggleExpanded: () => void;
   onToggleCheck: () => void;
 }) {
@@ -483,23 +481,19 @@ function TreeRow({
         depth === 0 && "pl-2",
         depth === 1 && "pl-7",
         depth === 2 && "pl-12",
+        hasChildren && "hover:bg-base-200 cursor-pointer",
       )}
+      onClick={hasChildren ? onToggleExpanded : undefined}
     >
       {hasChildren ? (
-        <button
-          type="button"
-          className="btn btn-ghost btn-xs btn-square shrink-0"
-          onClick={onToggleExpanded}
-        >
-          <span
-            className={cn(
-              "icon-[material-symbols--chevron-right] text-lg transition-transform",
-              expanded && "rotate-90",
-            )}
-          />
-        </button>
+        <span
+          className={cn(
+            "icon-[material-symbols--chevron-right] shrink-0 text-lg transition-transform",
+            expanded && "rotate-90",
+          )}
+        />
       ) : (
-        <span className="btn btn-xs btn-square invisible shrink-0" />
+        <span className="invisible size-5 shrink-0" />
       )}
       <TriStateCheckbox
         state={state}
@@ -509,6 +503,7 @@ function TreeRow({
       <span className="min-w-0 text-sm font-medium wrap-break-word">
         {label}
       </span>
+      {marks}
     </div>
   );
 }
@@ -534,6 +529,7 @@ function TriStateCheckbox({
       className="checkbox checkbox-xs shrink-0"
       checked={state === "all"}
       disabled={disabled}
+      onClick={(event) => event.stopPropagation()}
       onChange={onToggle}
     />
   );

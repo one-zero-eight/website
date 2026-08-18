@@ -289,3 +289,17 @@ export function groupIssuesByType(
     }))
     .sort((left, right) => compareIssueTypes(left.issueType, right.issueType));
 }
+
+export function formatIssuesText(issues: SchemaIssue[]) {
+  if (issues.length === 0) return "Проблем не найдено.";
+
+  const lines: string[] = [`Найдено проблем: ${issues.length}`, ""];
+  for (const { issueType, issues: grouped } of groupIssuesByType(issues)) {
+    lines.push(`${ISSUE_TYPE_HEADINGS[issueType]} (${grouped.length})`);
+    for (const issue of grouped) {
+      lines.push(issue.text);
+    }
+    lines.push("");
+  }
+  return lines.join("\n").trimEnd();
+}

@@ -7,6 +7,13 @@ import {
   type SchemaReviewProgram,
   type SchemaReviewSlot,
 } from "@/api/schedule-assistant/types.ts";
+import {
+  dayKey,
+  everyWeekdayPhraseRu,
+  formatDisplayDate,
+  weekdayLabelRu,
+  weeklyPatternDayKey,
+} from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 
 export const EXTRA_NODE_ID = "extra-auto-bookings";
 
@@ -31,13 +38,6 @@ export function disabledReasonLabel(reason: string | null | undefined) {
   if (reason === "online") return "онлайн";
   if (reason === "unknown room") return "неизвестная комната";
   return reason ?? "";
-}
-
-export function reviewKindLabel(kind: ReviewKind | null | undefined) {
-  if (kind === ReviewKind.ready) return "OK";
-  if (kind === ReviewKind.booked) return "Забронировано";
-  if (kind === ReviewKind.conflict) return "Конфликт";
-  return null;
 }
 
 export function isReadySlot(slot: SchemaReviewSlot) {
@@ -76,6 +76,62 @@ export function readySlotIdsInCourse(course: SchemaReviewCourse) {
 
 export function readySlotIdsInComponent(component: SchemaReviewComponent) {
   return component.slots.filter(isReadySlot).map((slot) => slot.slot_id);
+}
+
+export type BookingSlotStatus =
+  | "ready"
+  | "booked"
+  | "conflict"
+  | "disabled"
+  | "online";
+
+export function slotStatus(slot: SchemaReviewSlot): BookingSlotStatus {
+  if (!slot.bookable) {
+    return slot.disabled_reason === "online" ? "online" : "disabled";
+  }
+  if (slot.review_kind === ReviewKind.conflict) return "conflict";
+  if (slot.review_kind === ReviewKind.booked) return "booked";
+  return "ready";
+}
+
+export const BOOKING_STATUS_ORDER: BookingSlotStatus[] = [
+  "conflict",
+  "disabled",
+  "ready",
+  "booked",
+  "online",
+];
+
+export type BookingReviewItem = {
+  componentLabel: string;
+  slot: SchemaReviewSlot;
+};
+
+export function reviewItemsInComponent(
+  component: SchemaReviewComponent,
+): BookingReviewItem[] {
+  return component.slots.map((slot) => ({
+    componentLabel: component.label,
+    slot,
+  }));
+}
+
+export function reviewItemsInCourse(
+  course: SchemaReviewCourse,
+): BookingReviewItem[] {
+  return course.components.flatMap(reviewItemsInComponent);
+}
+
+export function countSlotStatuses(slots: SchemaReviewSlot[]) {
+  const counts = {
+    ready: 0,
+    booked: 0,
+    conflict: 0,
+    disabled: 0,
+    online: 0,
+  };
+  for (const slot of slots) counts[slotStatus(slot)] += 1;
+  return counts;
 }
 
 export function extraIds(review: SchemaBookingReview) {
@@ -120,26 +176,75 @@ export function checkState(ids: string[], selected: ReadonlySet<string>) {
 }
 
 export function countStats(review: SchemaBookingReview) {
-  let ready = 0;
-  let booked = 0;
-  let conflict = 0;
-  let disabled = 0;
+  const counts = countSlotStatuses(
+    review.programs.flatMap((program) =>
+      program.courses.flatMap((course) =>
+        course.components.flatMap((component) => component.slots),
+      ),
+    ),
+  );
+  return counts;
+}
+
+function formatClock(clock: string) {
+  return clock.length >= 5 ? clock.slice(0, 5) : clock;
+}
+
+export function formatReviewSlotLabel(slot: SchemaReviewSlot) {
+  const time = `${formatClock(slot.start_time)}–${formatClock(slot.end_time)}`;
+  const room = slot.room ? ` (${slot.room})` : "";
+  const weekdayKey = weeklyPatternDayKey(slot.date);
+  if (slot.recurring || weekdayKey) {
+    return `${everyWeekdayPhraseRu(weekdayKey ?? "")} ${time}${room}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(slot.date)) {
+    return `${weekdayLabelRu(dayKey(slot.date))} ${formatDisplayDate(slot.date)} ${time}${room}`;
+  }
+  return `${time}${room}`.trim();
+}
+
+export function formatConflictsText(review: SchemaBookingReview) {
+  const lines: string[] = [];
+  let conflictSlots = 0;
+
   for (const program of review.programs) {
+    const programLines: string[] = [];
     for (const course of program.courses) {
+      const courseLines: string[] = [];
       for (const component of course.components) {
+        const componentLines: string[] = [];
         for (const slot of component.slots) {
-          if (!slot.bookable) {
-            disabled += 1;
+          if (
+            slot.review_kind !== ReviewKind.conflict ||
+            slot.conflicts.length === 0
+          ) {
             continue;
           }
-          if (slot.review_kind === ReviewKind.booked) booked += 1;
-          else if (slot.review_kind === ReviewKind.conflict) conflict += 1;
-          else ready += 1;
+          conflictSlots += 1;
+          componentLines.push(`      ${formatReviewSlotLabel(slot)}`);
+          for (const hit of slot.conflicts) {
+            const room = hit.room_id ? ` · ${hit.room_id}` : "";
+            const title = hit.title ? ` · ${hit.title}` : "";
+            componentLines.push(
+              `        ${formatConflictWhen(hit.start, hit.end)}${room}${title}`,
+            );
+          }
+          componentLines.push("");
         }
+        if (componentLines.length === 0) continue;
+        courseLines.push(`    ${component.label}`, ...componentLines);
       }
+      if (courseLines.length === 0) continue;
+      programLines.push(`  ${course.name}`, ...courseLines);
     }
+    if (programLines.length === 0) continue;
+    lines.push(program.name, ...programLines);
   }
-  return { ready, booked, conflict, disabled };
+
+  if (conflictSlots === 0) return "Конфликтов нет.";
+  return [`Конфликтующих слотов: ${conflictSlots}`, "", ...lines]
+    .join("\n")
+    .trimEnd();
 }
 
 export function formatConflictWhen(start: string, end: string) {

@@ -7,7 +7,9 @@ import {
   type SchemaCancelExtraResponse,
 } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
+import { CopyableTextModal } from "@/components/schedule-assistant/CopyableTextModal.tsx";
 import { BookingTree } from "@/components/schedule-assistant/bookings/BookingTree.tsx";
+import { BookingStatusLegend } from "@/components/schedule-assistant/bookings/BookingStatusMark.tsx";
 import {
   buildConflictModes,
   collectReadySlotIds,
@@ -15,6 +17,8 @@ import {
   componentNodeId,
   extraIds,
   EXTRA_NODE_ID,
+  formatConflictsText,
+  formatReviewSlotLabel,
   isReadySlot,
   isSplitSelectableSlot,
   programNodeId,
@@ -59,6 +63,7 @@ export function BookingWorkspace() {
   const [actionResults, setActionResults] = useState<ActionResults | null>(
     null,
   );
+  const [conflictsTextOpen, setConflictsTextOpen] = useState(false);
 
   useEffect(() => {
     if (!data) return;
@@ -102,6 +107,10 @@ export function BookingWorkspace() {
   const stats = useMemo(() => (data ? countStats(data) : null), [data]);
   const readyIds = useMemo(
     () => (data ? collectReadySlotIds(data) : []),
+    [data],
+  );
+  const conflictsText = useMemo(
+    () => (data ? formatConflictsText(data) : ""),
     [data],
   );
 
@@ -260,13 +269,10 @@ export function BookingWorkspace() {
             Outlook может занять несколько минут.
           </p>
           {stats ? (
-            <p className="text-base-content/70 text-sm">
-              OK: {stats.ready} · Забронировано: {stats.booked} · Конфликт:{" "}
-              {stats.conflict} · Нельзя: {stats.disabled}
-              {data.extra_auto_bookings.length > 0
-                ? ` · Лишние: ${data.extra_auto_bookings.length}`
-                : ""}
-            </p>
+            <BookingStatusLegend
+              stats={stats}
+              extraCount={data.extra_auto_bookings.length}
+            />
           ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -327,6 +333,15 @@ export function BookingWorkspace() {
           )}
           Отменить лишние ({selectedExtraIds.size})
         </button>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          disabled={busy || isFetching || !stats?.conflict}
+          onClick={() => setConflictsTextOpen(true)}
+        >
+          <span className="icon-[material-symbols--notes] text-lg" />
+          Конфликты текстом
+        </button>
       </div>
 
       {busy ? (
@@ -357,6 +372,14 @@ export function BookingWorkspace() {
       )}
 
       {actionResults ? <ActionResultsPanel results={actionResults} /> : null}
+
+      <CopyableTextModal
+        open={conflictsTextOpen}
+        text={conflictsText}
+        title="Конфликты текстом"
+        copiedDescription="Текст конфликтов скопирован"
+        onOpenChange={setConflictsTextOpen}
+      />
 
       <ConfirmModal
         open={confirmAction !== null}
@@ -394,10 +417,13 @@ function ConfirmModal({
   if (action !== null) lastActionRef.current = action;
   const isBook = (action ?? lastActionRef.current) === "book";
   const labels = isBook
-    ? [...selectedSlotIds].map((id) => ({
-        id,
-        label: slotById(review, id)?.label ?? id,
-      }))
+    ? [...selectedSlotIds].map((id) => {
+        const slot = slotById(review, id);
+        return {
+          id,
+          label: slot ? formatReviewSlotLabel(slot) : id,
+        };
+      })
     : review.extra_auto_bookings
         .filter((item) => selectedExtraIds.has(item.extra_id))
         .map((item) => ({ id: item.extra_id, label: item.label }));
