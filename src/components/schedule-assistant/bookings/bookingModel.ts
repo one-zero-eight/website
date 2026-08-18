@@ -138,17 +138,26 @@ export function extraIds(review: SchemaBookingReview) {
   return review.extra_auto_bookings.map((item) => item.extra_id);
 }
 
-export function slotById(review: SchemaBookingReview, slotId: string) {
+export function findReviewSlotContext(
+  review: SchemaBookingReview,
+  slotId: string,
+) {
   for (const program of review.programs) {
     for (const course of program.courses) {
       for (const component of course.components) {
         for (const slot of component.slots) {
-          if (slot.slot_id === slotId) return slot;
+          if (slot.slot_id === slotId) {
+            return { program, course, component, slot };
+          }
         }
       }
     }
   }
   return undefined;
+}
+
+export function slotById(review: SchemaBookingReview, slotId: string) {
+  return findReviewSlotContext(review, slotId)?.slot;
 }
 
 export function buildConflictModes(
@@ -201,6 +210,62 @@ export function formatReviewSlotLabel(slot: SchemaReviewSlot) {
     return `${weekdayLabelRu(dayKey(slot.date))} ${formatDisplayDate(slot.date)} ${time}${room}`;
   }
   return `${time}${room}`.trim();
+}
+
+export function groupSelectedSlotsForConfirm(
+  review: SchemaBookingReview,
+  selectedSlotIds: ReadonlySet<string>,
+) {
+  const courses: {
+    courseId: string;
+    course: string;
+    groups: {
+      groupId: string;
+      group: string;
+      slots: { id: string; when: string }[];
+    }[];
+  }[] = [];
+  const courseById = new Map<string, (typeof courses)[number]>();
+  const groupById = new Map<
+    string,
+    (typeof courses)[number]["groups"][number]
+  >();
+
+  for (const program of review.programs) {
+    for (const course of program.courses) {
+      for (const component of course.components) {
+        for (const slot of component.slots) {
+          if (!selectedSlotIds.has(slot.slot_id)) continue;
+          let courseNode = courseById.get(course.course_id);
+          if (!courseNode) {
+            courseNode = {
+              courseId: course.course_id,
+              course: course.name,
+              groups: [],
+            };
+            courseById.set(course.course_id, courseNode);
+            courses.push(courseNode);
+          }
+          const groupKey = `${course.course_id}:${component.component_id}`;
+          let groupNode = groupById.get(groupKey);
+          if (!groupNode) {
+            groupNode = {
+              groupId: component.component_id,
+              group: component.label,
+              slots: [],
+            };
+            groupById.set(groupKey, groupNode);
+            courseNode.groups.push(groupNode);
+          }
+          groupNode.slots.push({
+            id: slot.slot_id,
+            when: formatReviewSlotLabel(slot),
+          });
+        }
+      }
+    }
+  }
+  return courses;
 }
 
 export function formatConflictsText(review: SchemaBookingReview) {

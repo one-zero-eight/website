@@ -20,12 +20,11 @@ import {
   extraIds,
   EXTRA_NODE_ID,
   formatConflictsText,
-  formatReviewSlotLabel,
+  groupSelectedSlotsForConfirm,
   isReadySlot,
   isSplitSelectableSlot,
   programNodeId,
   pruneSelectedIds,
-  slotById,
 } from "@/components/schedule-assistant/bookings/bookingModel.ts";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
@@ -526,19 +525,16 @@ function ConfirmModal({
   const lastActionRef = useRef<ConfirmAction>("book");
   if (action !== null) lastActionRef.current = action;
   const isBook = (action ?? lastActionRef.current) === "book";
-  const labels = isBook
-    ? [...selectedSlotIds].map((id) => {
-        const slot = slotById(review, id);
-        return {
-          id,
-          label: slot ? formatReviewSlotLabel(slot) : id,
-        };
-      })
+  const extraLabels = isBook
+    ? []
     : review.extra_auto_bookings
         .filter((item) => selectedExtraIds.has(item.extra_id))
         .map((item) => ({ id: item.extra_id, label: item.label }));
-  const preview = labels.slice(0, 12);
-  const rest = labels.length - preview.length;
+  const extraPreview = extraLabels.slice(0, 12);
+  const extraRest = extraLabels.length - extraPreview.length;
+  const bookGroups = isBook
+    ? groupSelectedSlotsForConfirm(review, selectedSlotIds)
+    : [];
 
   return (
     <Modal
@@ -551,19 +547,48 @@ function ConfirmModal({
           ? `Будет отправлено в BMP: ${selectedSlotIds.size}`
           : `Будет отменено: ${selectedExtraIds.size}`}
       </p>
-      <ul className="mt-2 max-h-64 overflow-auto text-sm">
-        {preview.map((item) => (
-          <li
-            key={item.id}
-            className="text-base-content/80 py-0.5 wrap-break-word"
-          >
-            {item.label}
-          </li>
-        ))}
-      </ul>
-      {rest > 0 ? (
-        <p className="text-base-content/60 mt-1 text-sm">и ещё {rest}</p>
-      ) : null}
+      {isBook ? (
+        <div className="mt-2 max-h-64 overflow-auto text-sm">
+          {bookGroups.map((course) => (
+            <div key={course.courseId} className="mt-2 first:mt-0">
+              <p className="font-medium">{course.course}</p>
+              {course.groups.map((group) => (
+                <div key={group.groupId} className="mt-1 pl-2">
+                  <p className="text-base-content/70">{group.group}</p>
+                  <ul className="pl-2">
+                    {group.slots.map((slot) => (
+                      <li
+                        key={slot.id}
+                        className="text-base-content/80 py-0.5 wrap-break-word"
+                      >
+                        {slot.when}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <>
+          <ul className="mt-2 max-h-64 overflow-auto text-sm">
+            {extraPreview.map((item) => (
+              <li
+                key={item.id}
+                className="text-base-content/80 py-0.5 wrap-break-word"
+              >
+                {item.label}
+              </li>
+            ))}
+          </ul>
+          {extraRest > 0 ? (
+            <p className="text-base-content/60 mt-1 text-sm">
+              и ещё {extraRest}
+            </p>
+          ) : null}
+        </>
+      )}
       <div className="mt-3 flex justify-end gap-2">
         <button
           type="button"
