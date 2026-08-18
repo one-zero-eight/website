@@ -1,26 +1,15 @@
-import { useMyAcademicCalendar } from "@/components/dashboard/academic-calendar.tsx";
+import {
+  AcademicCalendar,
+  useMyAcademicCalendar,
+} from "@/components/dashboard/academic-calendar.tsx";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
-export function AcademicCalendarWidget() {
-  const [widgetShown, setWidgetShown] = useLocalStorage(
-    "widget-academic-calendar",
-    false,
-  );
-
-  const { academicCalendar, isPending } = useMyAcademicCalendar();
-
-  useEffect(() => {
-    setWidgetShown((v) => (v && isPending) || !!academicCalendar);
-  }, [setWidgetShown, isPending, academicCalendar]);
-
-  if (!academicCalendar) {
-    if (!widgetShown) return null;
-    return (
-      <div className="group skeleton flex min-h-32 flex-row gap-4 px-4 py-6" />
-    );
-  }
-
+export function AcademicCalendarCard({
+  academicCalendar,
+}: {
+  academicCalendar: AcademicCalendar;
+}) {
   return (
     <div className="group bg-base-200 rounded-box flex flex-row gap-4 px-4 py-4">
       <span className="icon-[ph--books] text-primary hidden w-12 shrink-0 text-5xl sm:block" />
@@ -42,4 +31,26 @@ export function AcademicCalendarWidget() {
       </div>
     </div>
   );
+}
+
+export function AcademicCalendarWidget() {
+  const [widgetShown, setWidgetShown] = useLocalStorage(
+    "widget-academic-calendar",
+    false,
+  );
+
+  const { academicCalendar, isPending } = useMyAcademicCalendar();
+
+  useEffect(() => {
+    setWidgetShown((v) => (v && isPending) || !!academicCalendar);
+  }, [setWidgetShown, isPending, academicCalendar]);
+
+  if (!academicCalendar) {
+    if (!widgetShown) return null;
+    return (
+      <div className="group skeleton flex min-h-32 flex-row gap-4 px-4 py-6" />
+    );
+  }
+
+  return <AcademicCalendarCard academicCalendar={academicCalendar} />;
 }

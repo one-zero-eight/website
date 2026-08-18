@@ -3,12 +3,18 @@ import Tooltip from "@/components/common/Tooltip.tsx";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
 import SwitchThemeButton from "@/components/layout/SwitchThemeButton.tsx";
 import UserMenu from "@/components/layout/UserMenu.tsx";
-import { items, LinkItemType } from "@/components/layout/menu-links.tsx";
+import { useImpersonatingUser } from "@/components/admin/useImpersonation.ts";
+import {
+  items,
+  isMenuItemVisible,
+  LinkItemType,
+} from "@/components/layout/menu-links.tsx";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 
 export function MorePage() {
   const { me } = useMe();
+  const [impersonatingUser] = useImpersonatingUser();
 
   return (
     <div className="flex min-h-full flex-col items-start justify-start">
@@ -51,15 +57,7 @@ export function MorePage() {
               key={index}
               className="bg-base-content/10 my-1 h-0.5 w-full shrink-0 rounded-full"
             />
-          ) : // Hide Forms item for non-staff users
-          !(
-              item.staff_only &&
-              !(
-                me?.innopolis_sso?.is_staff ||
-                me?.id === "65f6ef2847289ea08482e3bf" ||
-                !import.meta.env.VITE_PRODUCTION
-              )
-            ) ? (
+          ) : isMenuItemVisible(item, me, !!impersonatingUser) ? (
             <MenuLink key={index} {...item} />
           ) : null,
         )}
@@ -113,7 +111,13 @@ function MenuLink({ icon, title, badge, ...props }: LinkItemType) {
     );
   } else if (props.type === "local") {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { staff_only, hideOnMore, type, ...linkProps } = props;
+    const {
+      staff_only,
+      innohassle_admin_only,
+      hideOnMore,
+      type,
+      ...linkProps
+    } = props;
     return (
       <Link
         className={cn(

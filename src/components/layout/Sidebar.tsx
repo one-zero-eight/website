@@ -1,6 +1,11 @@
 import { useMe } from "@/api/accounts/user.ts";
 import { LeaveFeedbackButton } from "@/components/layout/LeaveFeedbackButton.tsx";
-import { items, LinkItemType } from "@/components/layout/menu-links.tsx";
+import { useImpersonatingUser } from "@/components/admin/useImpersonation.ts";
+import {
+  items,
+  isMenuItemVisible,
+  LinkItemType,
+} from "@/components/layout/menu-links.tsx";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/ui/cn";
 import { useLocalStorage } from "usehooks-ts";
@@ -12,6 +17,7 @@ export default function Sidebar() {
     false,
   );
   const { me } = useMe();
+  const [impersonatingUser] = useImpersonatingUser();
 
   return (
     <aside className="bg-base-200 sticky top-0 hidden h-full shrink-0 overflow-x-hidden overflow-y-auto lg:flex">
@@ -51,18 +57,7 @@ export default function Sidebar() {
                 key={index}
                 className="bg-base-content/20 my-2 h-px w-full shrink-0 rounded-full"
               />
-            ) : // Hide Forms item for non-staff users
-            !(
-                item.staff_only &&
-                !(
-                  // FIXME: remove explicit user id
-                  (
-                    me?.innopolis_sso?.is_staff ||
-                    me?.id === "65f6ef2847289ea08482e3bf" ||
-                    !import.meta.env.VITE_PRODUCTION
-                  )
-                )
-              ) ? (
+            ) : isMenuItemVisible(item, me, !!impersonatingUser) ? (
               <SidebarLink key={index} isMinimized={isMinimized} {...item} />
             ) : null,
           )}
@@ -162,7 +157,13 @@ function SidebarLink({
     );
   } else if (props.type === "local") {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { staff_only, hideOnMore, type, ...linkProps } = props;
+    const {
+      staff_only,
+      innohassle_admin_only,
+      hideOnMore,
+      type,
+      ...linkProps
+    } = props;
     return (
       <Link
         className={cn(
