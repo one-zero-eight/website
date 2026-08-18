@@ -21,6 +21,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/bookings/tasks/{task_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Booking Task */
+    get: operations["bookings_get_booking_task"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/bookings/batch": {
     parameters: {
       query?: never;
@@ -674,9 +691,8 @@ export interface components {
       /**
        * Conflict Modes
        * @description Per-slot action for conflict rows: skip, book, or split
-       * @default {}
        */
-      conflict_modes: {
+      conflict_modes?: {
         [key: string]: components["schemas"]["ConflictMode"];
       };
     };
@@ -813,11 +829,78 @@ export interface components {
     BookingReview: {
       /** Programs */
       programs: components["schemas"]["ReviewProgram"][];
-      /**
-       * Extra Auto Bookings
-       * @default []
-       */
+      /** Extra Auto Bookings */
       extra_auto_bookings: components["schemas"]["ExtraAutoBooking"][];
+    };
+    /** BookingTask */
+    BookingTask: {
+      /** Task Id */
+      task_id: string;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: BookingTaskKind;
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: BookingTaskStatus;
+      /**
+       * Sent
+       * @description Invites sent, waiting for room Accept
+       * @default 0
+       */
+      sent: number;
+      /**
+       * Done
+       * @description Items that already finished (ok or error)
+       * @default 0
+       */
+      done: number;
+      /**
+       * Total
+       * @default 0
+       */
+      total: number;
+      /**
+       * Current
+       * @description Title of the last updated item
+       */
+      current: string | null;
+      /** Items */
+      items: components["schemas"]["BookingTaskItem"][];
+      /**
+       * Error
+       * @description Task-level failure
+       */
+      error: string | null;
+      book: components["schemas"]["BatchBookResponse"] | null;
+      cancel: components["schemas"]["CancelExtraResponse"] | null;
+    };
+    /** BookingTaskItem */
+    BookingTaskItem: {
+      /**
+       * Index
+       * @description Index in the submitted batch, or extra_id for cancel
+       */
+      index: string;
+      /**
+       * Title
+       * @description Human-readable slot or extra label
+       */
+      title: string | null;
+      /**
+       * Status
+       * @description pending → sent (invite left) → ok (Accept) / error
+       * @enum {string}
+       */
+      status: BookingTaskItemStatus;
+      /**
+       * Error
+       * @description Error message when status is error
+       */
+      error: string | null;
     };
     /** CancelExtraRequest */
     CancelExtraRequest: {
@@ -2084,7 +2167,6 @@ export interface components {
       /**
        * Conflicts
        * @description Overlapping foreign Outlook bookings
-       * @default []
        */
       conflicts: components["schemas"]["ConflictHit"][];
     };
@@ -2729,6 +2811,8 @@ export type SchemaBodyScheduleConfigPutScheduleConfigYamlFile =
   components["schemas"]["Body_schedule_config_put_schedule_config_yaml_file"];
 export type SchemaBookingDto = components["schemas"]["BookingDTO"];
 export type SchemaBookingReview = components["schemas"]["BookingReview"];
+export type SchemaBookingTask = components["schemas"]["BookingTask"];
+export type SchemaBookingTaskItem = components["schemas"]["BookingTaskItem"];
 export type SchemaCancelExtraRequest =
   components["schemas"]["CancelExtraRequest"];
 export type SchemaCancelExtraResponse =
@@ -2855,6 +2939,37 @@ export interface operations {
       };
     };
   };
+  bookings_get_booking_task: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        task_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BookingTask"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   bookings_batch_book_slots: {
     parameters: {
       query?: never;
@@ -2874,7 +2989,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["BatchBookResponse"];
+          "application/json": components["schemas"]["BookingTask"];
         };
       };
       /** @description Validation Error */
@@ -2907,7 +3022,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["CancelExtraResponse"];
+          "application/json": components["schemas"]["BookingTask"];
         };
       };
       /** @description Validation Error */
@@ -4369,6 +4484,22 @@ export interface operations {
   };
 }
 export enum BatchBookItemResultStatus {
+  ok = "ok",
+  error = "error",
+}
+export enum BookingTaskKind {
+  book = "book",
+  cancel = "cancel",
+}
+export enum BookingTaskStatus {
+  queued = "queued",
+  running = "running",
+  done = "done",
+  error = "error",
+}
+export enum BookingTaskItemStatus {
+  pending = "pending",
+  sent = "sent",
   ok = "ok",
   error = "error",
 }

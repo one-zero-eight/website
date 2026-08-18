@@ -1,10 +1,12 @@
 import { $scheduleAssistant } from "@/api/schedule-assistant/index.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import {
-  BatchBookItemResultStatus,
-  type SchemaBatchBookResponse,
+  BookingTaskItemStatus,
+  BookingTaskKind,
+  BookingTaskStatus,
   type SchemaBookingReview,
-  type SchemaCancelExtraResponse,
+  type SchemaBookingTask,
+  type SchemaBookingTaskItem,
 } from "@/api/schedule-assistant/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
 import { CopyableTextModal } from "@/components/schedule-assistant/CopyableTextModal.tsx";
@@ -26,21 +28,49 @@ import {
   slotById,
 } from "@/components/schedule-assistant/bookings/bookingModel.ts";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/ui/cn";
+import { T } from "@/lib/utils/dates";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const BMP_TIMEOUT_MS = 5 * 60 * 1000;
+const BOOKING_TASK_STORAGE_KEY = "schedule-assistant:booking-task";
 
 type ConfirmAction = "book" | "cancel-extra";
 
-type ActionResults =
-  | { kind: "book"; response: SchemaBatchBookResponse }
-  | { kind: "cancel"; response: SchemaCancelExtraResponse };
+type StoredBookingTask = {
+  id: string;
+  toasted: boolean;
+};
+
+function readStoredBookingTask(): StoredBookingTask | null {
+  const raw = sessionStorage.getItem(BOOKING_TASK_STORAGE_KEY);
+  if (!raw) return null;
+  const parsed: { id?: unknown; toasted?: unknown } = JSON.parse(raw);
+  if (typeof parsed.id !== "string" || parsed.id.length === 0) return null;
+  return { id: parsed.id, toasted: parsed.toasted === true };
+}
+
+function writeStoredBookingTask(stored: StoredBookingTask) {
+  sessionStorage.setItem(BOOKING_TASK_STORAGE_KEY, JSON.stringify(stored));
+}
+
+function isTerminalStatus(status: BookingTaskStatus) {
+  return (
+    status === BookingTaskStatus.done || status === BookingTaskStatus.error
+  );
+}
+
+function isActiveStatus(status: BookingTaskStatus | undefined) {
+  return (
+    status === BookingTaskStatus.queued || status === BookingTaskStatus.running
+  );
+}
 
 export function BookingWorkspace() {
   const { showError, showSuccess, showWarning } = useToast();
   const queryClient = useQueryClient();
   const initializedExpandRef = useRef(false);
+  const prevItemStatusRef = useRef(new Map<string, BookingTaskItemStatus>());
 
   const { data, isPending, isError, error, refetch, isFetching } =
     $scheduleAssistant.useQuery("get", "/bookings/review", undefined, {
@@ -60,10 +90,28 @@ export function BookingWorkspace() {
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(
     null,
   );
-  const [actionResults, setActionResults] = useState<ActionResults | null>(
-    null,
-  );
   const [conflictsTextOpen, setConflictsTextOpen] = useState(false);
+  const [taskId, setTaskId] = useState<string | null>(
+    () => readStoredBookingTask()?.id ?? null,
+  );
+  const [flashIds, setFlashIds] = useState<Set<string>>(() => new Set());
+
+  const {
+    data: task,
+    isError: isTaskError,
+    error: taskError,
+  } = $scheduleAssistant.useQuery(
+    "get",
+    "/bookings/tasks/{task_id}",
+    { params: { path: { task_id: taskId ?? "" } } },
+    {
+      enabled: !!taskId,
+      refetchInterval: (query) =>
+        isTerminalStatus(query.state.data?.status ?? BookingTaskStatus.queued)
+          ? false
+          : T.Sec,
+    },
+  );
 
   useEffect(() => {
     if (!data) return;
@@ -104,6 +152,27 @@ export function BookingWorkspace() {
     setExpandedIds(next);
   }, [data]);
 
+  useEffect(() => {
+    if (!task) return;
+    const prev = prevItemStatusRef.current;
+    const nextFlash = new Set<string>();
+    for (const item of task.items) {
+      const previous = prev.get(item.index);
+      if (
+        previous !== undefined &&
+        previous !== item.status &&
+        item.status !== BookingTaskItemStatus.pending
+      ) {
+        nextFlash.add(item.index);
+      }
+      prev.set(item.index, item.status);
+    }
+    if (nextFlash.size === 0) return;
+    setFlashIds(nextFlash);
+    const timer = window.setTimeout(() => setFlashIds(new Set()), 1.5 * T.Sec);
+    return () => window.clearTimeout(timer);
+  }, [task]);
+
   const stats = useMemo(() => (data ? countStats(data) : null), [data]);
   const readyIds = useMemo(
     () => (data ? collectReadySlotIds(data) : []),
@@ -114,33 +183,24 @@ export function BookingWorkspace() {
     [data],
   );
 
-  const invalidateReview = () =>
-    queryClient.invalidateQueries({
-      queryKey: $scheduleAssistant.queryOptions("get", "/bookings/review")
-        .queryKey,
-    });
+  function handleTaskStarted(nextTask: SchemaBookingTask) {
+    writeStoredBookingTask({ id: nextTask.task_id, toasted: false });
+    prevItemStatusRef.current = new Map(
+      nextTask.items.map((item) => [item.index, item.status]),
+    );
+    setFlashIds(new Set());
+    setTaskId(nextTask.task_id);
+    queryClient.setQueryData(
+      $scheduleAssistant.queryOptions("get", "/bookings/tasks/{task_id}", {
+        params: { path: { task_id: nextTask.task_id } },
+      }).queryKey,
+      nextTask,
+    );
+  }
 
   const { mutate: bookSlots, isPending: isBooking } =
     $scheduleAssistant.useMutation("post", "/bookings/batch", {
-      onSuccess: (response) => {
-        setActionResults({ kind: "book", response });
-        const failed = response.results.filter(
-          (item) => item.status === BatchBookItemResultStatus.error,
-        ).length;
-        if (failed > 0) {
-          showWarning(
-            "Бронирование завершено с ошибками",
-            `Успешно: ${response.results.length - failed}, ошибок: ${failed}`,
-          );
-        } else {
-          showSuccess(
-            "Бронирование выполнено",
-            `Отправлено слотов: ${response.submitted}`,
-          );
-        }
-        setSelectedSlotIds(new Set());
-        void invalidateReview();
-      },
+      onSuccess: handleTaskStarted,
       onError: (mutationError) => {
         showError("Ошибка бронирования", formatApiErrorMessage(mutationError));
       },
@@ -148,29 +208,56 @@ export function BookingWorkspace() {
 
   const { mutate: cancelExtras, isPending: isCancelling } =
     $scheduleAssistant.useMutation("post", "/bookings/cancel-extra", {
-      onSuccess: (response) => {
-        setActionResults({ kind: "cancel", response });
-        const failedCount = Object.keys(response.failed).length;
-        if (failedCount > 0) {
-          showWarning(
-            "Отмена завершена с ошибками",
-            `Отменено: ${response.cancelled.length}, ошибок: ${failedCount}`,
-          );
-        } else {
-          showSuccess(
-            "Лишние бронирования отменены",
-            `Отменено: ${response.cancelled.length}`,
-          );
-        }
-        setSelectedExtraIds(new Set());
-        void invalidateReview();
-      },
+      onSuccess: handleTaskStarted,
       onError: (mutationError) => {
         showError("Ошибка отмены", formatApiErrorMessage(mutationError));
       },
     });
 
-  const busy = isBooking || isCancelling;
+  useEffect(() => {
+    if (!task || !isTerminalStatus(task.status)) return;
+    const stored = readStoredBookingTask();
+    if (stored?.id === task.task_id && stored.toasted) return;
+    writeStoredBookingTask({ id: task.task_id, toasted: true });
+
+    const failed = task.items.filter(
+      (item) => item.status === BookingTaskItemStatus.error,
+    ).length;
+    const okCount = task.items.filter(
+      (item) => item.status === BookingTaskItemStatus.ok,
+    ).length;
+    const isBook = task.kind === BookingTaskKind.book;
+
+    if (task.status === BookingTaskStatus.error) {
+      showError(
+        isBook ? "Ошибка бронирования" : "Ошибка отмены",
+        task.error ?? "Задача завершилась с ошибкой",
+      );
+    } else if (failed > 0) {
+      showWarning(
+        isBook
+          ? "Бронирование завершено с ошибками"
+          : "Отмена завершена с ошибками",
+        isBook
+          ? `Успешно: ${okCount}, ошибок: ${failed}`
+          : `Отменено: ${okCount}, ошибок: ${failed}`,
+      );
+    } else {
+      showSuccess(
+        isBook ? "Бронирование выполнено" : "Лишние бронирования отменены",
+        isBook ? `Забронировано слотов: ${okCount}` : `Отменено: ${okCount}`,
+      );
+    }
+
+    if (isBook) setSelectedSlotIds(new Set());
+    else setSelectedExtraIds(new Set());
+    void queryClient.invalidateQueries({
+      queryKey: $scheduleAssistant.queryOptions("get", "/bookings/review")
+        .queryKey,
+    });
+  }, [queryClient, showError, showSuccess, showWarning, task]);
+
+  const busy = isBooking || isCancelling || isActiveStatus(task?.status);
 
   function handleToggleExpanded(id: string) {
     setExpandedIds((prev) => {
@@ -220,12 +307,10 @@ export function BookingWorkspace() {
           slot_ids: [...selectedSlotIds],
           conflict_modes: buildConflictModes(data, selectedSlotIds),
         },
-        signal: AbortSignal.timeout(BMP_TIMEOUT_MS),
       });
     } else {
       cancelExtras({
         body: { extra_ids: [...selectedExtraIds] },
-        signal: AbortSignal.timeout(BMP_TIMEOUT_MS),
       });
     }
     setConfirmAction(null);
@@ -313,7 +398,7 @@ export function BookingWorkspace() {
           disabled={busy || selectedSlotIds.size === 0}
           onClick={() => setConfirmAction("book")}
         >
-          {isBooking ? (
+          {isBooking || (busy && task?.kind === BookingTaskKind.book) ? (
             <span className="loading loading-spinner loading-sm" />
           ) : (
             <span className="icon-[material-symbols--event-available-outline] text-lg" />
@@ -326,7 +411,7 @@ export function BookingWorkspace() {
           disabled={busy || selectedExtraIds.size === 0}
           onClick={() => setConfirmAction("cancel-extra")}
         >
-          {isCancelling ? (
+          {isCancelling || (busy && task?.kind === BookingTaskKind.cancel) ? (
             <span className="loading loading-spinner loading-sm" />
           ) : (
             <span className="icon-[material-symbols--event-busy-outline] text-lg" />
@@ -344,10 +429,12 @@ export function BookingWorkspace() {
         </button>
       </div>
 
-      {busy ? (
-        <p className="text-base-content/70 text-sm">
-          Запрос к BMP может занять до пяти минут. Не закрывайте страницу.
-        </p>
+      {task ? (
+        <TaskProgressPanel
+          task={task}
+          flashIds={flashIds}
+          pollError={isTaskError ? formatApiErrorMessage(taskError) : undefined}
+        />
       ) : null}
 
       {data.programs.length === 0 && data.extra_auto_bookings.length === 0 ? (
@@ -370,8 +457,6 @@ export function BookingWorkspace() {
           onToggleConflictDetails={handleToggleConflictDetails}
         />
       )}
-
-      {actionResults ? <ActionResultsPanel results={actionResults} /> : null}
 
       <CopyableTextModal
         open={conflictsTextOpen}
@@ -474,58 +559,107 @@ function ConfirmModal({
   );
 }
 
-function ActionResultsPanel({ results }: { results: ActionResults }) {
-  if (results.kind === "book") {
-    const { response } = results;
-    return (
-      <div className="border-base-300 bg-base-100 rounded-box border p-3">
-        <h2 className="mb-2 font-medium">Результат бронирования</h2>
-        <p className="text-base-content/70 mb-2 text-sm">
-          Отправлено: {response.submitted}
-        </p>
-        <ul className="flex flex-col gap-1">
-          {response.results.map((item) => (
-            <li
-              key={item.index}
-              className="flex items-start gap-2 text-sm wrap-break-word"
-            >
-              <span
-                className={
-                  item.status === BatchBookItemResultStatus.ok
-                    ? "badge badge-success badge-sm shrink-0"
-                    : "badge badge-error badge-sm shrink-0"
-                }
-              >
-                {item.status === BatchBookItemResultStatus.ok ? "OK" : "Ошибка"}
-              </span>
-              <span>
-                {item.title ?? `#${item.index}`}
-                {item.error ? `: ${item.error}` : ""}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
+function itemStatusLabel(
+  item: SchemaBookingTaskItem,
+  kind: BookingTaskKind,
+): string {
+  if (item.status === BookingTaskItemStatus.pending) return "Ожидание";
+  if (item.status === BookingTaskItemStatus.sent) return "Отправлено";
+  if (item.status === BookingTaskItemStatus.error) return "Ошибка";
+  return kind === BookingTaskKind.cancel ? "Отменено" : "Забронировано";
+}
 
-  const failedEntries = Object.entries(results.response.failed);
+function itemBadgeClass(status: BookingTaskItemStatus): string {
+  if (status === BookingTaskItemStatus.ok) return "badge-success";
+  if (status === BookingTaskItemStatus.error) return "badge-error";
+  if (status === BookingTaskItemStatus.sent) return "badge-info";
+  return "badge-ghost";
+}
+
+function TaskProgressPanel({
+  task,
+  flashIds,
+  pollError,
+}: {
+  task: SchemaBookingTask;
+  flashIds: ReadonlySet<string>;
+  pollError?: string;
+}) {
+  const isBook = task.kind === BookingTaskKind.book;
+  const running = isActiveStatus(task.status);
+  const items = useMemo(() => {
+    const changed = task.items.filter((item) => flashIds.has(item.index));
+    const rest = task.items.filter((item) => !flashIds.has(item.index));
+    return [...changed, ...rest];
+  }, [flashIds, task.items]);
+  const title = running
+    ? isBook
+      ? "Бронирование"
+      : "Отмена лишних"
+    : isBook
+      ? "Результат бронирования"
+      : "Результат отмены";
+
   return (
     <div className="border-base-300 bg-base-100 rounded-box border p-3">
-      <h2 className="mb-2 font-medium">Результат отмены</h2>
-      <p className="text-base-content/70 mb-2 text-sm">
-        Отменено: {results.response.cancelled.length}
+      <div className="mb-2 flex items-center gap-2">
+        <h2 className="font-medium">{title}</h2>
+        {running ? (
+          <span className="loading loading-spinner loading-sm" />
+        ) : null}
+      </div>
+      <p className="text-base-content/70 mb-1 text-sm">
+        {task.done}/{task.total}
+        {task.current ? ` · ${task.current}` : ""}
       </p>
-      {results.response.cancelled.map((id) => (
-        <p key={id} className="text-success text-sm wrap-break-word">
-          {id}
+      {isBook ? (
+        <p className="text-base-content/70 mb-2 text-sm">
+          Отправлено: {task.sent}/{task.total}
         </p>
-      ))}
-      {failedEntries.map(([id, message]) => (
-        <p key={id} className="text-error text-sm wrap-break-word">
-          {id}: {message}
-        </p>
-      ))}
+      ) : null}
+      <progress
+        className="progress progress-primary mb-3 w-full"
+        value={task.done}
+        max={Math.max(task.total, 1)}
+      />
+      {task.status === BookingTaskStatus.error && task.error ? (
+        <p className="text-error mb-2 text-sm wrap-break-word">{task.error}</p>
+      ) : null}
+      {pollError ? (
+        <p className="text-error mb-2 text-sm wrap-break-word">{pollError}</p>
+      ) : null}
+      <ul className="flex max-h-80 flex-col gap-1 overflow-auto">
+        {items.map((item) => (
+          <li
+            key={item.index}
+            className={cn(
+              "flex items-start gap-2 rounded-md px-1 py-0.5 text-sm wrap-break-word",
+              flashIds.has(item.index) &&
+                item.status === BookingTaskItemStatus.ok &&
+                "bg-success/15",
+              flashIds.has(item.index) &&
+                item.status === BookingTaskItemStatus.error &&
+                "bg-error/15",
+              flashIds.has(item.index) &&
+                item.status === BookingTaskItemStatus.sent &&
+                "bg-info/15",
+            )}
+          >
+            <span
+              className={cn(
+                "badge badge-sm shrink-0",
+                itemBadgeClass(item.status),
+              )}
+            >
+              {itemStatusLabel(item, task.kind)}
+            </span>
+            <span>
+              {item.title ?? `#${item.index}`}
+              {item.error ? `: ${item.error}` : ""}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
