@@ -28,7 +28,7 @@ export function MapsPageTabs() {
     <div className="flex shrink-0 flex-col whitespace-nowrap @3xl/content:flex-row">
       <form
         onSubmit={onSubmit}
-        className="border-base-300 focus-within:border-b-primary flex items-center border-b px-4 pb-px focus-within:border-b-2 focus-within:pb-0"
+        className="border-base-300 focus-within:border-b-primary flex items-center border-b px-1 pb-px focus-within:border-b-2 focus-within:pb-0"
       >
         <input
           ref={inputRef}
@@ -45,7 +45,7 @@ export function MapsPageTabs() {
       </form>
 
       <div className="flex grow flex-row overflow-x-auto whitespace-nowrap">
-        <div className="border-base-300 w-2 shrink-0 border-b @3xl/content:w-1" />
+        <div className="border-base-300 w-1 shrink-0 border-b" />
         {scenes?.map((scene, i) => (
           <Link
             key={scene.scene_id}

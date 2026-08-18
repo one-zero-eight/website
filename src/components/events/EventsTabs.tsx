@@ -5,7 +5,7 @@ export function EventsTabs() {
   const { canManage, isModerator } = useEventsAuth();
 
   return (
-    <div className="border-base-300 flex shrink-0 flex-row gap-2 overflow-x-auto border-b px-4 whitespace-nowrap">
+    <div className="border-base-300 flex shrink-0 flex-row gap-2 overflow-x-auto border-b px-1 whitespace-nowrap">
       <TabLink to="/events" exact>
         Calendar
       </TabLink>
