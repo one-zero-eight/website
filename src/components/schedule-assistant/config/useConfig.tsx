@@ -725,7 +725,7 @@ export function useAddSection() {
       const nextTerm = structuredClone(term);
       nextTerm.sections = [
         ...(nextTerm.sections ?? []),
-        { code, name, kind: null, programs: [] },
+        { code, name, programs: [] },
       ];
       updateTerm(
         { body: nextTerm },

@@ -8,7 +8,6 @@ import { Modal } from "@/components/common/Modal.tsx";
 import { TERM_WEEKDAY_LABEL_RU } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { EditClassAudienceSummaryRow } from "@/components/schedule-assistant/timetable/EditClassAudienceModal.tsx";
 import { EditClassAudienceMultiSelect } from "@/components/schedule-assistant/timetable/EditClassAudienceMultiSelect.tsx";
-import { audiencePrefersOccurrences } from "@/components/schedule-assistant/timetable/createMeetingUtils.ts";
 import {
   formatAudienceTokensLabel,
   meetingAudienceEqual,
@@ -594,24 +593,12 @@ export function ComponentSessionsEditor({
         type="button"
         className="btn btn-outline btn-sm self-start"
         onClick={() => {
-          const preferOccurrences = audiencePrefersOccurrences(
-            componentGroups ?? [],
-            config,
-          );
           onChange([
             ...list,
-            preferOccurrences
-              ? {
-                  ...emptySeries(),
-                  weekly_pattern: null,
-                  occurrences: [emptyOccurrence(config, componentGroups ?? [])],
-                }
-              : {
-                  ...emptySeries(),
-                  weekly_pattern: [
-                    emptyWeeklySlot(config, componentGroups ?? []),
-                  ],
-                },
+            {
+              ...emptySeries(),
+              weekly_pattern: [emptyWeeklySlot(config, componentGroups ?? [])],
+            },
           ]);
         }}
       >

@@ -582,63 +582,6 @@ export function parseCourseComponentKey(value: string) {
   return { courseIdx, componentIdx };
 }
 
-export function resolveSectionKind(
-  tokens: string[],
-  config: SchemaScheduleConfig,
-): string | null {
-  const tokenToKind = new Map<string, string>();
-  for (const section of config.term?.sections ?? []) {
-    const kind = String(section.kind || section.code || "")
-      .trim()
-      .toLowerCase();
-    if (!kind) continue;
-    for (const program of section.programs ?? []) {
-      const programCode = String(program.code || "").trim();
-      if (programCode) tokenToKind.set(`@${programCode}`, kind);
-      for (const group of program.groups ?? []) {
-        tokenToKind.set(String(group), kind);
-      }
-      for (const track of program.tracks ?? []) {
-        if (programCode) {
-          tokenToKind.set(`@${programCode}/${track.name}`, kind);
-          tokenToKind.set(`@${programCode}/${track.code}`, kind);
-        }
-        for (const group of track.groups ?? []) {
-          tokenToKind.set(String(group), kind);
-        }
-      }
-    }
-  }
-  for (const group of config.students_groups ?? []) {
-    const code = String(group.code || "").trim();
-    const kind = String(group.kind || "")
-      .trim()
-      .toLowerCase();
-    if (code && kind && !tokenToKind.has(code)) tokenToKind.set(code, kind);
-  }
-
-  for (const token of tokens) {
-    const raw = String(token || "").trim();
-    if (!raw) continue;
-    const kind = tokenToKind.get(raw);
-    if (kind) return kind;
-    if (raw.startsWith("@") && raw.includes("/")) {
-      const programKind = tokenToKind.get(raw.split("/", 1)[0] ?? "");
-      if (programKind) return programKind;
-    }
-  }
-  return null;
-}
-
-/** Non-core audiences (electives, english, …) prefer date occurrences in settings. */
-export function audiencePrefersOccurrences(
-  tokens: string[],
-  config: SchemaScheduleConfig,
-): boolean {
-  const kind = resolveSectionKind(tokens.map(String), config);
-  return kind != null && kind !== "core" && kind !== "core_course";
-}
-
 function placementFromLayout(layoutMode: TimetableLayoutMode): CreatePlacement {
   return layoutMode === "calendar" ? "occurrences" : "weekly";
 }

@@ -2009,11 +2009,6 @@ export interface components {
       /** Component Tag */
       component_tag: string;
       /**
-       * Source Kind
-       * @enum {string}
-       */
-      source_kind: PerWeekIssueSource_kind;
-      /**
        * Student Groups
        * @default []
        */
@@ -2295,11 +2290,6 @@ export interface components {
       course_name: string;
       /** Component Tag */
       component_tag: string;
-      /**
-       * Source Kind
-       * @enum {string}
-       */
-      source_kind: ScheduledMeetingSource_kind;
       /** Placement */
       placement:
         | components["schemas"]["OccurrencePlacement"]
@@ -2338,11 +2328,6 @@ export interface components {
        * @description Section display name
        */
       name: string;
-      /**
-       * Kind
-       * @description Section kind marker (for example, core/english/electives)
-       */
-      kind?: SectionConfigKindAnyOf0 | string | null;
       /**
        * Default Layout
        * @description Default timetable layout when opening this section (groups or calendar)
@@ -2673,11 +2658,6 @@ export interface components {
       course_name: string;
       /** Component Tag */
       component_tag: string;
-      /**
-       * Source Kind
-       * @enum {string}
-       */
-      source_kind: UnplacedIssueSource_kind;
       /**
        * Student Groups
        * @default []
@@ -4564,10 +4544,6 @@ export enum OutlookIssueIssue_type {
 export enum PerWeekIssueIssue_type {
   per_week = "per_week",
 }
-export enum PerWeekIssueSource_kind {
-  core_course = "core_course",
-  elective = "elective",
-}
 export enum ReviewKind {
   ready = "ready",
   booked = "booked",
@@ -4582,15 +4558,6 @@ export enum RoomAttributeDefType {
 }
 export enum RoomIssueIssue_type {
   room = "room",
-}
-export enum ScheduledMeetingSource_kind {
-  core_course = "core_course",
-  elective = "elective",
-}
-export enum SectionConfigKindAnyOf0 {
-  core = "core",
-  english = "english",
-  electives = "electives",
 }
 export enum SectionConfigDefault_layoutAnyOf0 {
   groups = "groups",
@@ -4610,10 +4577,6 @@ export enum UnbookedIssueIssue_type {
 }
 export enum UnplacedIssueIssue_type {
   unplaced = "unplaced",
-}
-export enum UnplacedIssueSource_kind {
-  core_course = "core_course",
-  elective = "elective",
 }
 export enum Weekday {
   MONDAY = "MONDAY",
