@@ -184,6 +184,7 @@ export function AvailabilitySelector({
 
   const isEditing = editingUserId !== null;
   const showEditingVisual = selectionOnly || isEditing;
+  const showAvailabilityEditing = isEditing && !selectionOnly;
   const highlightBestIntersection =
     !showEditingVisual &&
     !!bestIntersectionSlotKeys &&
@@ -241,12 +242,27 @@ export function AvailabilitySelector({
     );
   }
 
+  function getHeatmapAvailableCount(dateId: string, time: string) {
+    if (selectionOnly) {
+      return 0;
+    }
+
+    return countExplicitSlotAvailability(
+      users,
+      viewedUserIds,
+      getSlotKey(dateId, time),
+      editingUserId,
+      draftSlots,
+      editingUserId ?? undefined,
+    );
+  }
+
   let maxCount = 1;
 
   if (!selectionOnly) {
     for (const date of dates) {
       for (const time of timeSlots) {
-        maxCount = Math.max(maxCount, getAvailableCount(date.id, time));
+        maxCount = Math.max(maxCount, getHeatmapAvailableCount(date.id, time));
       }
     }
   }
@@ -610,7 +626,7 @@ export function AvailabilitySelector({
           continue;
         }
 
-        if (showEditingVisual) {
+        if (selectionOnly) {
           if (draftSlots.has(slotKey)) {
             set.add(slotKey);
           }
@@ -631,6 +647,7 @@ export function AvailabilitySelector({
             slotKey,
             editingUserId,
             draftSlots,
+            editingUserId ?? undefined,
           ) > 0
         ) {
           set.add(slotKey);
@@ -645,7 +662,7 @@ export function AvailabilitySelector({
     allowedSlots,
     intervalSelectionMode,
     intervalSelectionSlots,
-    showEditingVisual,
+    selectionOnly,
     draftSlots,
     fadeNonBestSlots,
     bestIntersectionSlotKeys,
@@ -744,6 +761,10 @@ export function AvailabilitySelector({
             const slotKey = getSlotKey(date.id, time);
             const slotAllowed = isSlotAllowed(date.id, time);
             const availableCount = getAvailableCount(date.id, time);
+            const heatmapAvailableCount = getHeatmapAvailableCount(
+              date.id,
+              time,
+            );
             const isSelected = isEditingUserSlot(date.id, time);
             const isMySlot =
               !!mySlots && mySlots.has(slotKey) && !showEditingVisual;
@@ -779,6 +800,14 @@ export function AvailabilitySelector({
               !!mySlots &&
               !!nextTime &&
               mySlots.has(getSlotKey(date.id, nextTime));
+            const editingSlotAbove =
+              isSelected &&
+              !!prevTime &&
+              draftSlots.has(getSlotKey(date.id, prevTime));
+            const editingSlotBelow =
+              isSelected &&
+              !!nextTime &&
+              draftSlots.has(getSlotKey(date.id, nextTime));
             const selectedMeetingSlotAbove =
               !!selectedMeetingSlotKeys &&
               !!prevTime &&
@@ -818,10 +847,10 @@ export function AvailabilitySelector({
               fadeNonBestSlots && slotAllowed && !isBestIntersection;
             const isFullSlot =
               slotAllowed &&
-              !showEditingVisual &&
+              !selectionOnly &&
               !isFilteredOut &&
-              availableCount > 0 &&
-              availableCount >= maxCount;
+              heatmapAvailableCount > 0 &&
+              heatmapAvailableCount >= maxCount;
             const isHovered = hoveredSlotKey === slotKey;
             const showHoverRing =
               isHovered &&
@@ -829,14 +858,14 @@ export function AvailabilitySelector({
             const showFullSlotHover = showHoverRing && isFullSlot;
             const showPartialSlotHover = showHoverRing && !isFullSlot;
             const showHeatmapFill =
-              slotAllowed && !showEditingVisual && !isFilteredOut;
+              slotAllowed && !selectionOnly && !isFilteredOut;
             const heatmapAppearance = showHeatmapFill
               ? highlightBestIntersection
                 ? getSlotHeatmapAppearanceColorblindSafe(
-                    availableCount,
+                    heatmapAvailableCount,
                     maxCount,
                   )
-                : getSlotHeatmapAppearance(availableCount, maxCount)
+                : getSlotHeatmapAppearance(heatmapAvailableCount, maxCount)
               : undefined;
 
             return (
@@ -860,7 +889,7 @@ export function AvailabilitySelector({
                   !slotAllowed &&
                     "bg-base-200/80 cursor-not-allowed opacity-40",
                   slotAllowed &&
-                    (showEditingVisual
+                    (selectionOnly
                       ? isSelected
                         ? "bg-primary text-primary-content"
                         : "bg-base-100"
@@ -907,6 +936,15 @@ export function AvailabilitySelector({
                 }
                 onClick={() => handleSlotTap(slotKey)}
               >
+                {showAvailabilityEditing && isSelected && (
+                  <span
+                    className={getMeetingTimeOverlayClassName({
+                      continuesAbove: editingSlotAbove,
+                      continuesBelow: editingSlotBelow,
+                      overlapsAvailability: true,
+                    })}
+                  />
+                )}
                 {hasCalendarEvent && (
                   <span className="text-base-content/80 pointer-events-none absolute inset-0 flex items-center justify-center truncate px-0.5 text-center text-[10px] leading-none md:text-[11px] dark:text-[#f5f0d8]">
                     {calendarEventLabel}
@@ -992,11 +1030,20 @@ export function AvailabilitySelector({
         <div className="text-base-content/70 mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
           <span className="inline-flex items-center gap-1.5 lg:px-3">
             <span className="bg-primary/50 border-base-300 h-3 w-5 rounded-sm border" />
-            Participant availability
+            {showAvailabilityEditing
+              ? "Other participants"
+              : "Participant availability"}
           </span>
           {currentUserId && (
             <span className="inline-flex items-center gap-1.5">
-              <span className="border-primary h-3 w-5 rounded-sm border-2" />
+              <span
+                className={cn(
+                  "h-3 w-5 rounded-sm border-2",
+                  showAvailabilityEditing
+                    ? "border-success bg-success/35"
+                    : "border-primary",
+                )}
+              />
               Your timeslots
             </span>
           )}

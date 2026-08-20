@@ -77,8 +77,13 @@ export function countExplicitSlotAvailability(
   slotKey: string,
   editingUserId: string | null,
   draftSlots: Set<string>,
+  excludedUserId?: string,
 ) {
   return users.filter((user) => {
+    if (user.id === excludedUserId) {
+      return false;
+    }
+
     if (!viewedUserIds.has(user.id)) {
       return false;
     }
