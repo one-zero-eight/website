@@ -925,7 +925,7 @@ export function MeetingPage({
             <div className="flex flex-wrap gap-2">
               {needsSetup ? (
                 isOwner && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="hidden flex-wrap gap-2 md:flex">
                     <button
                       type="button"
                       className="btn btn-error"
