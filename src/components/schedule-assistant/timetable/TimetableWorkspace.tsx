@@ -74,6 +74,9 @@ import {
   GROUPS_MEETING_FOOTER_CLASS,
   GROUPS_MEETING_LINE_CLASS,
   GROUPS_MEETING_TITLE_CLASS,
+  GROUPS_PROGRAM_SEPARATOR,
+  GROUPS_PROGRAM_TITLE_STICKY_CLASS,
+  GROUPS_PROGRAM_TITLE_STICKY_STYLE,
   GROUPS_SLOT_ROW_CLASS,
   GROUPS_SLOT_TIME_PAD,
   GROUPS_TABLE_CLASS,
@@ -2078,17 +2081,25 @@ const CoreYearHeadCell = memo(function CoreYearHeadCell({
   colSpan,
   onSelectProgram,
   dimmed,
+  programSeparator,
+  flushLeft,
 }: {
   yearLabel: string;
   colSpan: number;
   onSelectProgram: (y: string) => void;
   dimmed?: boolean;
+  programSeparator?: boolean;
+  flushLeft?: boolean;
 }) {
   const programSelected = useProgramSelected(yearLabel);
   return (
     <th
       className={clsx(
-        "year-head z-[8] cursor-pointer border-t border-r border-b border-[#d8dfeb] bg-[#1f5fae] text-center align-top font-bold text-white",
+        "year-head z-[8] cursor-pointer border-t border-b bg-[#1f5fae] text-center align-top font-bold text-white",
+        flushLeft ? "border-l-0" : "border-l border-[#d8dfeb]",
+        programSeparator
+          ? GROUPS_PROGRAM_SEPARATOR
+          : "border-r border-[#d8dfeb]",
         GROUPS_HEAD_PAD,
         programSelected && "shadow-[inset_0_-3px_0_#ffd54f]",
         dimmed && "opacity-35 saturate-50",
@@ -2098,7 +2109,8 @@ const CoreYearHeadCell = memo(function CoreYearHeadCell({
       onClick={() => onSelectProgram(yearLabel)}
     >
       <span
-        className="block w-full"
+        className={GROUPS_PROGRAM_TITLE_STICKY_CLASS}
+        style={GROUPS_PROGRAM_TITLE_STICKY_STYLE}
         title={scheduleAssistantDetailTooltips.program}
       >
         {yearLabel}
@@ -2113,18 +2125,23 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
   yearLabel,
   onSelectGroup,
   dimmed,
+  programSeparator,
 }: {
   groupId: string;
   groupLabel: string;
   yearLabel: string;
   onSelectGroup: (id: string) => void;
   dimmed?: boolean;
+  programSeparator?: boolean;
 }) {
   const highlight = useGroupHeaderHighlight(groupId, yearLabel);
   return (
     <th
       className={clsx(
-        "group-head z-[8] cursor-pointer border-r border-b border-[#d8dfeb] bg-[#2d77cc] text-center align-top font-semibold text-white",
+        "group-head z-[8] cursor-pointer border-b bg-[#2d77cc] text-center align-top font-semibold text-white",
+        programSeparator
+          ? GROUPS_PROGRAM_SEPARATOR
+          : "border-r border-[#d8dfeb]",
         GROUPS_COL_WIDTH,
         GROUPS_HEAD_PAD,
         highlight && "shadow-[inset_0_-3px_0_#ffd54f]",
@@ -2556,15 +2573,35 @@ function CoreGroupsTable({
           <td
             className={clsx(
               GROUPS_DAY_ROW_INNER_CLASS,
+              "left-0 border-r border-l border-[#d8dfeb]",
+              GROUPS_TIME_COL_WIDTH,
               todayGroupsDayRowClass(isTodayDay),
             )}
-            style={GROUPS_DAY_ROW_STICKY_STYLE}
-            colSpan={preparedRow.colSpan}
+            style={{ ...GROUPS_DAY_ROW_STICKY_STYLE, zIndex: 21 }}
           >
-            <span className="day-label sticky left-[9px] z-[7] inline-block bg-inherit pr-1">
-              {weekdayLabelRu(preparedRow.day)}
-            </span>
+            {weekdayLabelRu(preparedRow.day)}
           </td>
+          {yearLabels.map((yearLabel, yearIndex) => {
+            const timeCols = prepared.showProgramTimeColumn[yearLabel] ? 1 : 0;
+            const yearCols = prepared.columnsByYear[yearLabel]?.length || 0;
+            const programSeparator = yearIndex < yearLabels.length - 1;
+            return (
+              <td
+                key={`${preparedRow.key}-${yearLabel}`}
+                className={clsx(
+                  GROUPS_DAY_ROW_INNER_CLASS,
+                  programSeparator
+                    ? GROUPS_PROGRAM_SEPARATOR
+                    : "border-r border-[#d8dfeb]",
+                  isTodayDay && "shadow-[inset_0_2px_0_#f5a623]",
+                )}
+                style={GROUPS_DAY_ROW_STICKY_STYLE}
+                colSpan={Math.max(1, timeCols + yearCols)}
+              >
+                &nbsp;
+              </td>
+            );
+          })}
         </tr>,
       );
       continue;
@@ -2605,6 +2642,11 @@ function CoreGroupsTable({
         const isLastInTable =
           yearIndex === yearLabels.length - 1 &&
           cellIndex === preparedRow.cells.length - 1;
+        const nextCell = preparedRow.cells[cellIndex + 1];
+        const isLastInProgram =
+          !nextCell || groupYear.get(nextCell.groupId) !== yearLabel;
+        const programSeparator =
+          isLastInProgram && yearIndex < yearLabels.length - 1;
         const cellTime =
           prepared.showProgramTimeColumn[yearLabel] && programLabel
             ? programLabel.slice(0, 5)
@@ -2640,9 +2682,12 @@ function CoreGroupsTable({
           <td
             key={cell.key}
             className={clsx(
-              "link-cell relative border-r border-b border-[#d8dfeb] align-top",
+              "link-cell relative border-b border-[#d8dfeb] align-top",
               GROUPS_CELL_PAD,
               cell.span > 1 ? null : GROUPS_COL_WIDTH,
+              programSeparator
+                ? GROUPS_PROGRAM_SEPARATOR
+                : "border-r border-[#d8dfeb]",
               cell.isProgramEmptyAtSlot &&
                 "bg-[#eef1f6] [&_.empty]:bg-[#e9edf3]",
               todayGroupsSlotCellClass(isTodayDay, isLastInTable, isLastSlot),
@@ -2801,7 +2846,7 @@ function CoreGroupsTable({
           >
             День
           </th>
-          {yearLabels.map((yearLabel) => {
+          {yearLabels.map((yearLabel, yearIndex) => {
             const timeCols = prepared.showProgramTimeColumn[yearLabel] ? 1 : 0;
             const yearCols = prepared.columnsByYear[yearLabel] || [];
             const yearDimmed =
@@ -2815,6 +2860,8 @@ function CoreGroupsTable({
                 colSpan={timeCols + yearCols.length}
                 onSelectProgram={selectProgram}
                 dimmed={yearDimmed}
+                programSeparator={yearIndex < yearLabels.length - 1}
+                flushLeft={yearIndex > 0}
               />
             );
           })}
@@ -2828,17 +2875,16 @@ function CoreGroupsTable({
                 <th
                   key={`${yearLabel}-time`}
                   className={clsx(
-                    "sticky left-0 border border-[#d8dfeb] bg-[#1f5fae] text-center text-xs font-semibold text-white",
+                    "sticky left-0 border-r border-b border-[#d8dfeb] bg-[#1f5fae]",
+                    yearIndex > 0 ? "border-l-0" : "border-l",
                     GROUPS_TIME_COL_WIDTH,
                     GROUPS_HEAD_PAD,
                   )}
                   style={{ zIndex: 26 + yearIndex }}
-                >
-                  Время
-                </th>,
+                />,
               );
             }
-            for (const col of cols) {
+            for (const [colIndex, col] of cols.entries()) {
               cells.push(
                 <CoreGroupHeadCell
                   key={col.groupId}
@@ -2848,6 +2894,10 @@ function CoreGroupsTable({
                   onSelectGroup={selectGroup}
                   dimmed={
                     focusGroupSet != null && !focusGroupSet.has(col.groupId)
+                  }
+                  programSeparator={
+                    colIndex === cols.length - 1 &&
+                    yearIndex < yearLabels.length - 1
                   }
                 />,
               );

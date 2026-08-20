@@ -8,6 +8,19 @@ export const GROUPS_COL_WIDTH = "w-[135px] max-w-[135px] min-w-[135px]";
 export const GROUPS_TABLE_CLASS =
   "groups-grid-table isolate w-max min-w-full table-fixed border-separate border-spacing-0";
 
+/** Stronger right border between adjacent programs in «По группам». */
+export const GROUPS_PROGRAM_SEPARATOR = "border-r-2 border-r-[#1d3f70]";
+
+/** Program title stays visible while scrolling through its group columns. */
+export const GROUPS_PROGRAM_TITLE_STICKY_CLASS =
+  "sticky z-[24] mx-auto block w-max max-w-full bg-[#1f5fae] px-2";
+
+/** Stick past the day column; keep the label inside the program header width. */
+export const GROUPS_PROGRAM_TITLE_STICKY_STYLE = {
+  left: "var(--sa-time-col-width)",
+  right: "0px",
+} as const;
+
 export const GROUPS_SLOT_ROW_CLASS =
   "slot-row [content-visibility:auto] [contain-intrinsic-size:auto_100px] [&_.empty]:h-full [&_.empty]:min-h-[64px] [&_.meeting]:h-full [&_.meeting]:min-h-0 [&_td]:h-[100px]";
 
@@ -19,7 +32,7 @@ export const GROUPS_SLOT_TIME_PAD =
   "p-2 text-center text-[0.6875rem] leading-snug font-bold";
 
 export const GROUPS_DAY_ROW_INNER_CLASS =
-  "sticky z-[19] box-border border-r border-b border-l border-[#d8dfeb] bg-[#edf4ff] p-2 align-top text-[0.8125rem] font-bold tracking-[0.3px] text-[#1d3f70]";
+  "sticky z-[19] box-border border-b border-[#d8dfeb] bg-[#edf4ff] p-2 align-top text-[0.8125rem] font-bold tracking-[0.3px] text-[#1d3f70]";
 
 /** Inline `top` — must match measured thead height exactly (no offset). */
 export const GROUPS_DAY_ROW_STICKY_STYLE = {
