@@ -204,6 +204,7 @@ type MeetingCardProps = {
   grid: BuiltGrid;
   span?: number;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
+  openMeetingEdit: (meeting: Meeting) => void;
   selectInstructorCell: (name: string) => void;
   selectRoomCell: (room: string) => void;
   courseColors: Record<string, { bg: string; border: string }>;
@@ -250,6 +251,7 @@ function meetingCardPropsEqual(
   if (prev.groupSizeById !== next.groupSizeById) return false;
   if (prev.instructorLabelById !== next.instructorLabelById) return false;
   if (prev.selectMeeting !== next.selectMeeting) return false;
+  if (prev.openMeetingEdit !== next.openMeetingEdit) return false;
   if (prev.selectInstructorCell !== next.selectInstructorCell) return false;
   if (prev.selectRoomCell !== next.selectRoomCell) return false;
   return true;
@@ -745,14 +747,33 @@ function TimetableWorkspaceInner({
     currentWeekRow?.scrollIntoView({ block: "start" });
   }, [layoutMode, calendarGrid]);
 
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
   const clearSelection = useCallback(() => {
+    setEditModalOpen(false);
     selectionStore.setSelection(null);
-  }, [selectionStore]);
+  }, [selectionStore, setEditModalOpen]);
 
   const clearPlaceMode = useCallback(() => {
     setPlaceTargetKey(null);
     setHoverPlaceCell(null);
   }, []);
+
+  const openMeetingEdit = useCallback(
+    (meeting: Meeting) => {
+      if (!parseMeetingInstanceId(meeting.instance_id)) return;
+      setPlaceTargetKey(null);
+      setHoverPlaceCell(null);
+      selectionStore.setSelection({
+        type: "meeting",
+        value: meetingSelectionKey(meeting),
+        course: meeting.course || "",
+        focusTag: meeting.tag || undefined,
+      });
+      setEditModalOpen(true);
+    },
+    [selectionStore, setEditModalOpen],
+  );
 
   const defaultLayoutForSection = useCallback(
     (sectionCode: string | undefined): TimetableLayoutMode | null => {
@@ -805,6 +826,7 @@ function TimetableWorkspaceInner({
 
   const selectMeeting = useCallback(
     (valueKey: string, course: string, focusTag?: string) => {
+      setEditModalOpen(false);
       setPlaceTargetKey(null);
       setHoverPlaceCell(null);
       selectionStore.setSelection({
@@ -814,7 +836,7 @@ function TimetableWorkspaceInner({
         focusTag: focusTag || undefined,
       });
     },
-    [selectionStore],
+    [selectionStore, setEditModalOpen],
   );
 
   const selectInstructorCell = useCallback(
@@ -871,6 +893,7 @@ function TimetableWorkspaceInner({
       const layoutChanged = Boolean(nextLayout) && nextLayout !== layoutMode;
 
       const applySelection = () => {
+        setEditModalOpen(false);
         setPlaceTargetKey(null);
         setHoverPlaceCell(null);
         selectionStore.setSelection({
@@ -911,6 +934,7 @@ function TimetableWorkspaceInner({
       defaultLayoutForSection,
       layoutMode,
       selectionStore,
+      setEditModalOpen,
       weekIndex,
       weeks,
     ],
@@ -1334,6 +1358,7 @@ function TimetableWorkspaceInner({
                       groupSizeById={groupSizeById}
                       instructorLabelById={instructorLabelById}
                       selectMeeting={selectMeeting}
+                      openMeetingEdit={openMeetingEdit}
                       selectInstructorCell={selectInstructorCell}
                       selectRoomCell={selectRoomCell}
                       selectInstructorHeader={selectInstructorHeader}
@@ -1370,6 +1395,8 @@ function TimetableWorkspaceInner({
                     clearSelection={clearSelection}
                     onNavigateToMeeting={navigateToMeeting}
                     chrome="aside"
+                    editModalOpen={editModalOpen}
+                    onEditModalOpenChange={setEditModalOpen}
                     unarrangedGroups={panelUnarrangedGroups}
                     placeTargetKey={placeTargetKey}
                     onSelectUnarranged={handleSelectUnarranged}
@@ -1390,6 +1417,8 @@ function TimetableWorkspaceInner({
           config={config}
           clearSelection={clearSelection}
           onNavigateToMeeting={navigateToMeeting}
+          editModalOpen={editModalOpen}
+          onEditModalOpenChange={setEditModalOpen}
           unarrangedGroups={panelUnarrangedGroups}
           placeTargetKey={placeTargetKey}
           onSelectUnarranged={handleSelectUnarranged}
@@ -1474,6 +1503,7 @@ function TimetableMainGrid({
   groupSizeById,
   instructorLabelById,
   selectMeeting,
+  openMeetingEdit,
   selectInstructorCell,
   selectRoomCell,
   selectInstructorHeader,
@@ -1502,6 +1532,7 @@ function TimetableMainGrid({
   groupSizeById: Record<string, number | null | undefined>;
   instructorLabelById: Record<string, string>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
+  openMeetingEdit: (meeting: Meeting) => void;
   selectInstructorCell: (name: string) => void;
   selectRoomCell: (room: string) => void;
   selectInstructorHeader: (name: string) => void;
@@ -1548,6 +1579,7 @@ function TimetableMainGrid({
         calendarGrid={calendarGrid}
         courseColors={courseColors}
         selectMeeting={selectMeeting}
+        openMeetingEdit={openMeetingEdit}
         clearSelection={clearSelection}
         onEmptyCellClick={onEmptyCellClick}
         placeTarget={placeTarget}
@@ -1584,6 +1616,7 @@ function TimetableMainGrid({
       groupSizeById={groupSizeById}
       instructorLabelById={instructorLabelById}
       selectMeeting={selectMeeting}
+      openMeetingEdit={openMeetingEdit}
       selectInstructorCell={selectInstructorCell}
       selectRoomCell={selectRoomCell}
       selectInstructorHeader={selectInstructorHeader}
@@ -1605,6 +1638,7 @@ function TimetableCalendarSelectionGrid({
   calendarGrid,
   courseColors,
   selectMeeting,
+  openMeetingEdit,
   clearSelection,
   onEmptyCellClick,
   placeTarget,
@@ -1616,6 +1650,7 @@ function TimetableCalendarSelectionGrid({
   calendarGrid: NonNullable<ReturnType<typeof buildCalendarGrid>>;
   courseColors: Record<string, { bg: string; border: string }>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
+  openMeetingEdit: (meeting: Meeting) => void;
   clearSelection: () => void;
   onEmptyCellClick?: (context: CreateMeetingCellContext) => void;
   placeTarget: UnarrangedLessonItem | null;
@@ -1630,6 +1665,7 @@ function TimetableCalendarSelectionGrid({
       calendarGrid={calendarGrid}
       courseColors={courseColors}
       selectMeeting={selectMeeting}
+      openMeetingEdit={openMeetingEdit}
       clearSelection={clearSelection}
       onEmptyCellClick={onEmptyCellClick}
       placeTarget={placeTarget}
@@ -1686,6 +1722,7 @@ type TimetableTableProps = {
   groupSizeById: Record<string, number | null | undefined>;
   instructorLabelById: Record<string, string>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
+  openMeetingEdit: (meeting: Meeting) => void;
   selectInstructorCell: (name: string) => void;
   selectRoomCell: (room: string) => void;
   selectInstructorHeader: (name: string) => void;
@@ -1713,6 +1750,7 @@ function TimetableTable({
   groupSizeById,
   instructorLabelById,
   selectMeeting,
+  openMeetingEdit,
   selectInstructorCell,
   selectRoomCell,
   selectInstructorHeader,
@@ -1738,6 +1776,7 @@ function TimetableTable({
           groupSizeById,
           instructorLabelById,
           selectMeeting,
+          openMeetingEdit,
           selectInstructorCell,
           selectRoomCell,
           selectInstructorHeader,
@@ -1756,6 +1795,7 @@ function TimetableTable({
           groupSizeById={groupSizeById}
           instructorLabelById={instructorLabelById}
           selectMeeting={selectMeeting}
+          openMeetingEdit={openMeetingEdit}
           selectInstructorCell={selectInstructorCell}
           selectRoomCell={selectRoomCell}
           selectProgram={selectProgram}
@@ -1780,6 +1820,8 @@ type TimetableDetailPanelProps = {
   clearSelection: () => void;
   onNavigateToMeeting: (meeting: Meeting) => void;
   chrome?: "aside" | "modal";
+  editModalOpen: boolean;
+  onEditModalOpenChange: (open: boolean) => void;
   unarrangedGroups?: UnarrangedComponentGroup[];
   placeTargetKey?: string | null;
   onSelectUnarranged?: (item: UnarrangedLessonItem) => void;
@@ -1799,6 +1841,8 @@ function timetableDetailPanelPropsEqual(
     prev.clearSelection === next.clearSelection &&
     prev.onNavigateToMeeting === next.onNavigateToMeeting &&
     prev.chrome === next.chrome &&
+    prev.editModalOpen === next.editModalOpen &&
+    prev.onEditModalOpenChange === next.onEditModalOpenChange &&
     prev.unarrangedGroups === next.unarrangedGroups &&
     prev.placeTargetKey === next.placeTargetKey &&
     prev.onSelectUnarranged === next.onSelectUnarranged &&
@@ -1841,6 +1885,8 @@ function TimetableMobileDetailModal({
   config,
   clearSelection,
   onNavigateToMeeting,
+  editModalOpen,
+  onEditModalOpenChange,
   unarrangedGroups = [],
   placeTargetKey = null,
   onSelectUnarranged,
@@ -1853,6 +1899,8 @@ function TimetableMobileDetailModal({
   config: SchemaScheduleConfig;
   clearSelection: () => void;
   onNavigateToMeeting: (meeting: Meeting) => void;
+  editModalOpen: boolean;
+  onEditModalOpenChange: (open: boolean) => void;
   unarrangedGroups?: UnarrangedComponentGroup[];
   placeTargetKey?: string | null;
   onSelectUnarranged?: (item: UnarrangedLessonItem) => void;
@@ -1885,6 +1933,8 @@ function TimetableMobileDetailModal({
         clearSelection={clearSelection}
         onNavigateToMeeting={onNavigateToMeeting}
         chrome="modal"
+        editModalOpen={editModalOpen}
+        onEditModalOpenChange={onEditModalOpenChange}
         unarrangedGroups={unarrangedGroups}
         placeTargetKey={placeTargetKey}
         onSelectUnarranged={onSelectUnarranged}
@@ -1903,6 +1953,8 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   clearSelection,
   onNavigateToMeeting,
   chrome = "aside",
+  editModalOpen,
+  onEditModalOpenChange,
   unarrangedGroups = [],
   placeTargetKey = null,
   onSelectUnarranged,
@@ -1911,7 +1963,6 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   showUnarranged = false,
 }: TimetableDetailPanelProps) {
   const selection = useSelectionSnapshot();
-  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const selectedMeeting = useMemo(() => {
     if (selection?.type !== "meeting") return null;
@@ -1950,7 +2001,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
                 <button
                   className="btn btn-primary btn-sm"
                   type="button"
-                  onClick={() => setEditModalOpen(true)}
+                  onClick={() => onEditModalOpenChange(true)}
                 >
                   Редактировать
                 </button>
@@ -1973,7 +2024,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
           <button
             className="btn btn-primary btn-sm"
             type="button"
-            onClick={() => setEditModalOpen(true)}
+            onClick={() => onEditModalOpenChange(true)}
           >
             Редактировать
           </button>
@@ -2012,7 +2063,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
       )}
       <EditClassModal
         open={editModalOpen}
-        onOpenChange={setEditModalOpen}
+        onOpenChange={onEditModalOpenChange}
         meeting={selectedMeeting}
         config={config}
         meetings={allMeetings}
@@ -2354,6 +2405,7 @@ function CoreGroupsTable({
   groupSizeById,
   instructorLabelById,
   selectMeeting,
+  openMeetingEdit,
   selectInstructorCell,
   selectRoomCell,
   selectProgram,
@@ -2377,6 +2429,7 @@ function CoreGroupsTable({
   groupSizeById: Record<string, number | null | undefined>;
   instructorLabelById: Record<string, string>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
+  openMeetingEdit: (meeting: Meeting) => void;
   selectInstructorCell: (name: string) => void;
   selectRoomCell: (room: string) => void;
   selectProgram: (yearLabel: string) => void;
@@ -2665,6 +2718,7 @@ function CoreGroupsTable({
                     row={row}
                     grid={grid}
                     selectMeeting={selectMeeting}
+                    openMeetingEdit={openMeetingEdit}
                     selectInstructorCell={selectInstructorCell}
                     selectRoomCell={selectRoomCell}
                     courseColors={courseColors}
@@ -2812,6 +2866,7 @@ const MeetingCard = memo(function MeetingCard({
   grid: _grid,
   span = 1,
   selectMeeting,
+  openMeetingEdit,
   selectInstructorCell,
   selectRoomCell,
   courseColors,
@@ -2820,6 +2875,7 @@ const MeetingCard = memo(function MeetingCard({
   instructorLabelById,
 }: MeetingCardProps) {
   const m = row.sample;
+  const canEdit = !!parseMeetingInstanceId(m.instance_id);
   const count = row.count;
   const courseTitle = String(m.course || "").trim() || "—";
   const colors = colorBySubject(m.course || courseTitle, courseColors);
@@ -3008,6 +3064,11 @@ const MeetingCard = memo(function MeetingCard({
           m.tag || undefined,
         );
       }}
+      onDoubleClick={(event) => {
+        event.stopPropagation();
+        if (!canEdit) return;
+        openMeetingEdit(m);
+      }}
     >
       {isWideCell ? (
         <div
@@ -3034,6 +3095,7 @@ function renderUtilizationRows(args: {
   groupSizeById: Record<string, number | null | undefined>;
   instructorLabelById: Record<string, string>;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
+  openMeetingEdit: (meeting: Meeting) => void;
   selectInstructorCell: (name: string) => void;
   selectRoomCell: (room: string) => void;
   selectInstructorHeader: (name: string) => void;
@@ -3047,6 +3109,7 @@ function renderUtilizationRows(args: {
     groupSizeById,
     instructorLabelById,
     selectMeeting,
+    openMeetingEdit,
     selectInstructorCell,
     selectRoomCell,
     selectInstructorHeader,
@@ -3189,6 +3252,7 @@ function renderUtilizationRows(args: {
                     mode={mode}
                     grid={grid}
                     selectMeeting={selectMeeting}
+                    openMeetingEdit={openMeetingEdit}
                     selectInstructorCell={selectInstructorCell}
                     selectRoomCell={selectRoomCell}
                     courseColors={courseColors}
@@ -3233,6 +3297,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
   mode,
   grid: _grid,
   selectMeeting,
+  openMeetingEdit,
   selectInstructorCell,
   selectRoomCell,
   courseColors,
@@ -3241,6 +3306,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
   instructorLabelById,
 }: UtilizationMeetingCardProps) {
   const m = row.sample;
+  const canEdit = !!parseMeetingInstanceId(m.instance_id);
   const courseTitle = String(m.course || "").trim() || "—";
   const colors = colorBySubject(m.course || courseTitle, courseColors);
   const roomLoad = meetingRoomLoadLabel(m, roomCapacityById, groupSizeById);
@@ -3295,6 +3361,11 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
           m.course || courseTitle,
           m.tag || undefined,
         );
+      }}
+      onDoubleClick={(event) => {
+        event.stopPropagation();
+        if (!canEdit) return;
+        openMeetingEdit(m);
       }}
     >
       <div className={GROUPS_MEETING_BODY_CLASS}>
