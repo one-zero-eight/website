@@ -1,7 +1,0 @@
-apis:
-  schedule-assistant:
-    # Use local OpenAPI until staging has booking tasks.
-    # Switch back to: https://api.innohassle.ru/schedule-assistant/staging-v0/openapi.json
-    root: http://localhost:8012/openapi.json
-    x-openapi-ts:
-      output: ./src/api/schedule-assistant/types.ts

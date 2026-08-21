@@ -17,7 +17,6 @@
     "lint-staged": "lint-staged",
     "prepare": "husky",
     "gen:api": "pnpm exec openapi-typescript --root-types --enum && prettier --write --list-different src/api",
-    "gen:api:schedule-assistant": "pnpm exec openapi-typescript --redocly redocly.schedule-assistant.local.yaml --root-types --enum && prettier --write --list-different src/api/schedule-assistant",
     "release": "bumpp package.json",
     "update-deps": "taze minor -wIrl",
     "test:ndcg": "vite-node src/components/dashboard/links/searchUtils.test.ts",
