@@ -225,7 +225,7 @@ export function buildCoursesTabSections(
 
     const seenTargets = new Set<string>();
     for (const component of course?.components || []) {
-      for (const target of component?.student_groups || []) {
+      for (const target of component?.audience || []) {
         const rawTarget = String(target || "").trim();
         if (!rawTarget) continue;
 

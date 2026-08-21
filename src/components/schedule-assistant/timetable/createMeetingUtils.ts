@@ -58,7 +58,7 @@ export type CreateMeetingPreset = {
   audience: string[];
 };
 
-export type CreatePlacement = "weekly" | "occurrences";
+export type CreatePlacement = "weekly" | "dates_pattern";
 
 export type ComponentScheduleStatus = "empty" | "partial" | "covered";
 
@@ -140,7 +140,7 @@ function audienceForSeries(
   const tree = buildAudienceSelectorTree(config, { sectionCode });
   const explicit = series.audience || [];
   if (explicit.length) return minimizeAudienceTokens(explicit, tree);
-  return minimizeAudienceTokens(component.student_groups || [], tree);
+  return minimizeAudienceTokens(component.audience || [], tree);
 }
 
 export function expandedAudience(
@@ -213,7 +213,7 @@ function relevantSessionsForProgress(
       component,
       config,
       sectionCode,
-      component.student_groups || [],
+      component.audience || [],
     );
   }
   return component.sessions || [];
@@ -222,7 +222,7 @@ function relevantSessionsForProgress(
 function seriesHasPlacement(series: SchemaComponentSessionSeries) {
   return (
     (series.weekly_pattern?.length ?? 0) > 0 ||
-    (series.occurrences?.length ?? 0) > 0
+    (series.dates_pattern?.length ?? 0) > 0
   );
 }
 
@@ -235,7 +235,7 @@ function weeklySlotCount(sessions: SchemaComponentSessionSeries[]) {
 
 function occurrenceCount(sessions: SchemaComponentSessionSeries[]) {
   return sessions.reduce(
-    (sum, series) => sum + (series.occurrences?.length ?? 0),
+    (sum, series) => sum + (series.dates_pattern?.length ?? 0),
     0,
   );
 }
@@ -248,7 +248,7 @@ export function defaultAudienceForCreate(
 ): string[] {
   const tree = buildAudienceSelectorTree(config, { sectionCode });
   if (component.per_group) {
-    const pool = expandedAudience(config, component.student_groups || []);
+    const pool = expandedAudience(config, component.audience || []);
     const poolSet = new Set(pool);
     if (cellGroupId && poolSet.has(cellGroupId)) {
       return minimizeAudienceTokens([cellGroupId], tree);
@@ -258,7 +258,7 @@ export function defaultAudienceForCreate(
     }
     return [];
   }
-  return minimizeAudienceTokens(component.student_groups || [], tree);
+  return minimizeAudienceTokens(component.audience || [], tree);
 }
 
 /**
@@ -308,7 +308,7 @@ export function findMatchingSessionSeries(
   }
 
   if (!component.per_group) {
-    const componentTokens = component.student_groups || [];
+    const componentTokens = component.audience || [];
     const componentExpanded = expandedAudience(config, componentTokens);
     const targetIsSubset =
       targetExpanded.length > 0 &&
@@ -365,7 +365,7 @@ export function coveringSeriesSlots(
       weekly.push(slot);
       weeklyRefs.push({ seriesIdx, slotIdx });
     });
-    (series.occurrences || []).forEach((occurrence, occIdx) => {
+    (series.dates_pattern || []).forEach((occurrence, occIdx) => {
       occurrences.push(occurrence);
       occurrenceRefs.push({ seriesIdx, occIdx });
     });
@@ -383,7 +383,7 @@ function seriesAudienceForCreate(
   if (component.per_group) {
     return minimizeAudienceTokens(audience, tree);
   }
-  return minimizeAudienceTokens(component.student_groups || [], tree);
+  return minimizeAudienceTokens(component.audience || [], tree);
 }
 
 function findOrCreateSessionSeries(
@@ -404,7 +404,7 @@ function findOrCreateSessionSeries(
   const created: SchemaComponentSessionSeries = {
     audience: seriesAudienceForCreate(component, audience, config, sectionCode),
     weekly_pattern: [],
-    occurrences: [],
+    dates_pattern: [],
   };
   component.sessions.push(created);
   return created;
@@ -428,7 +428,7 @@ export function componentScheduleStatus(
   focusGroupId?: string,
 ): ComponentScheduleStatus {
   if (component.per_group && !focusGroupId) {
-    const pool = expandedAudience(config, component.student_groups || []);
+    const pool = expandedAudience(config, component.audience || []);
     if (pool.length) {
       const statuses = pool.map((groupId) =>
         componentScheduleStatus(component, config, sectionCode, groupId),
@@ -491,7 +491,7 @@ export function componentProgressHint(
   let occurrences = 0;
   for (const series of relevant) {
     weekly += series.weekly_pattern?.length ?? 0;
-    occurrences += series.occurrences?.length ?? 0;
+    occurrences += series.dates_pattern?.length ?? 0;
   }
 
   if (component.per_week != null) return `${weekly}/${component.per_week}`;
@@ -583,13 +583,13 @@ export function parseCourseComponentKey(value: string) {
 }
 
 function placementFromLayout(layoutMode: TimetableLayoutMode): CreatePlacement {
-  return layoutMode === "calendar" ? "occurrences" : "weekly";
+  return layoutMode === "calendar" ? "dates_pattern" : "weekly";
 }
 
 function seriesPlacement(
   series: SchemaComponentSessionSeries,
 ): CreatePlacement | null {
-  if ((series.occurrences || []).length > 0) return "occurrences";
+  if ((series.dates_pattern || []).length > 0) return "dates_pattern";
   if ((series.weekly_pattern || []).length > 0) return "weekly";
   return null;
 }
@@ -636,7 +636,7 @@ export function createWouldUseOccurrences(
       audience,
       config,
       layoutMode,
-    ) === "occurrences"
+    ) === "dates_pattern"
   );
 }
 
@@ -729,7 +729,7 @@ export function suggestPlacementResources({
   const groupIds = expandedAudience(config, audience);
   const weekday = cell.weekday;
 
-  if (placement === "occurrences") {
+  if (placement === "dates_pattern") {
     const occurrence = seedOccurrenceFromCell(config, cell, groupIds);
     const start = String(occurrence.start_time || "").slice(0, 5);
     const end = String(occurrence.end_time || "").slice(0, 5);
@@ -821,12 +821,12 @@ export function applyCreateMeetingToCourse(
     course.section_code,
   );
 
-  if (draft.placement === "occurrences") {
+  if (draft.placement === "dates_pattern") {
     const items = (draft.occurrences ?? []).filter((occurrence) =>
       String(occurrence.date || "").trim(),
     );
     if (!items.length) return null;
-    series.occurrences = items.map((occurrence) => ({
+    series.dates_pattern = items.map((occurrence) => ({
       date: occurrence.date,
       start_time: normalizeTimeToApi(occurrence.start_time),
       end_time: normalizeTimeToApi(

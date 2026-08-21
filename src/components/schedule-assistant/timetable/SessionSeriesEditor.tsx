@@ -23,7 +23,7 @@ import {
 } from "./sessionSeriesRows.tsx";
 import type { Meeting, MeetingOverrideField } from "./timetableViewerModel.ts";
 
-export type SessionPlacement = "weekly" | "occurrences";
+export type SessionPlacement = "weekly" | "dates_pattern";
 
 export function SessionPlacementToggle({
   placement,
@@ -51,10 +51,10 @@ export function SessionPlacementToggle({
         type="button"
         className={cn(
           "btn btn-sm join-item",
-          placement === "occurrences" && "btn-active",
+          placement === "dates_pattern" && "btn-active",
         )}
         disabled={disabled}
-        onClick={() => onChange("occurrences")}
+        onClick={() => onChange("dates_pattern")}
       >
         Даты
       </button>
@@ -161,7 +161,7 @@ export function SessionSeriesEditor({
     return cn(
       isFocus &&
         !deleted &&
-        (placement === "occurrences"
+        (placement === "dates_pattern"
           ? occurrences.length > 1
           : weeklySlots.length > 1) &&
         "ring-primary/70 rounded-box ring-4",
@@ -177,7 +177,7 @@ export function SessionSeriesEditor({
   );
 
   const rows =
-    placement === "occurrences" ? (
+    placement === "dates_pattern" ? (
       <div className="flex flex-col gap-2">
         {occurrences.map((occurrence, index) => {
           const deleted = deletedOcc.has(index);

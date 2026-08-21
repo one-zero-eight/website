@@ -91,7 +91,7 @@ export function countComponentPlacement(
   let occurrences = 0;
   for (const series of sessions) {
     weeklySlots += series.weekly_pattern?.length ?? 0;
-    occurrences += series.occurrences?.length ?? 0;
+    occurrences += series.dates_pattern?.length ?? 0;
   }
   return {
     weeklySlots,
@@ -242,7 +242,7 @@ export function componentAudienceDiffersFromMeeting(
   component: SchemaComponent | null | undefined,
   meetingGroupIds: string[],
 ): boolean {
-  const tokens = (component?.student_groups ?? [])
+  const tokens = (component?.audience ?? [])
     .map((token) => String(token || "").trim())
     .filter(Boolean);
   if (!tokens.length) return false;
@@ -392,7 +392,7 @@ export function listComponentSeriesDisplayItems(
       ? series.audience
           .map((token) => String(token || "").trim())
           .filter(Boolean)
-      : (component.student_groups ?? [])
+      : (component.audience ?? [])
           .map((token) => String(token || "").trim())
           .filter(Boolean);
 
@@ -539,7 +539,7 @@ function seriesSecondaryFromConfig(
   secondary?: string;
   secondaryTooltipItems?: ComponentSeriesTooltipItem[];
 } {
-  const occurrences = (series.occurrences ?? [])
+  const occurrences = (series.dates_pattern ?? [])
     .map((occurrence, sourceIdx) => ({ occurrence, sourceIdx }))
     .filter(({ occurrence }) => String(occurrence.date || "").trim())
     .sort((a, b) =>
@@ -621,7 +621,7 @@ function seriesAudienceTokens(
   if (representative.groups?.length) {
     return representative.groups.map(String);
   }
-  return (component.student_groups ?? [])
+  return (component.audience ?? [])
     .map((token) => String(token || "").trim())
     .filter(Boolean);
 }
@@ -629,7 +629,7 @@ function seriesAudienceTokens(
 function formatSeriesScheduleKind(
   series: SchemaComponentSessionSeries,
 ): string | undefined {
-  const occCount = (series.occurrences ?? []).filter((occurrence) =>
+  const occCount = (series.dates_pattern ?? []).filter((occurrence) =>
     String(occurrence.date || "").trim(),
   ).length;
   if (occCount > 1) {
@@ -654,7 +654,7 @@ function formatSeriesSecondary(
   series?: SchemaComponentSessionSeries,
 ): string | undefined {
   if (series) {
-    const occCount = (series.occurrences ?? []).filter((occurrence) =>
+    const occCount = (series.dates_pattern ?? []).filter((occurrence) =>
       String(occurrence.date || "").trim(),
     ).length;
     const weeklyCount = (series.weekly_pattern ?? []).length;

@@ -41,10 +41,7 @@ function normalizeComponentForCompare(
         ? null
         : Number(component.per_semester),
     per_group: Boolean(component.per_group),
-    student_groups: minimizeAudienceTokens(
-      component.student_groups ?? [],
-      tree,
-    ),
+    audience: minimizeAudienceTokens(component.audience ?? [], tree),
     instructor_pool: component.instructor_pool ?? [],
     sessions:
       component.sessions && component.sessions.length
@@ -197,10 +194,7 @@ export function ComponentEditModal({
   useEffect(() => {
     if (!open || !component) return;
     const next = cloneComponent(component);
-    next.student_groups = minimizeAudienceTokens(
-      next.student_groups ?? [],
-      tree,
-    );
+    next.audience = minimizeAudienceTokens(next.audience ?? [], tree);
     setDraft(next);
     setBaseline(cloneComponent(next));
     setSessionDeletesDirty(false);
@@ -247,7 +241,7 @@ export function ComponentEditModal({
     onSave({
       ...draft,
       tag,
-      student_groups: minimizeAudienceTokens(draft.student_groups ?? [], tree),
+      audience: minimizeAudienceTokens(draft.audience ?? [], tree),
       instructor_pool: draft.instructor_pool ?? [],
       per_group: Boolean(draft.per_group),
       per_week:
@@ -345,11 +339,9 @@ export function ComponentEditModal({
 
             <AudienceSummaryEditor
               config={config}
-              tokens={draft.student_groups ?? []}
+              tokens={draft.audience ?? []}
               sectionCode={courseSectionCode}
-              onChange={(student_groups) =>
-                setDraft({ ...draft, student_groups })
-              }
+              onChange={(audience) => setDraft({ ...draft, audience })}
             />
 
             <label className="label cursor-pointer justify-start gap-3 px-0">
@@ -432,7 +424,7 @@ export function ComponentEditModal({
             sessions={draft.sessions}
             courseInstructors={courseInstructors}
             instructorPool={draft.instructor_pool}
-            componentGroups={draft.student_groups}
+            componentGroups={draft.audience}
             perGroup={Boolean(draft.per_group)}
             onChange={(sessions) => setDraft({ ...draft, sessions })}
             baselineSessions={baseline?.sessions}

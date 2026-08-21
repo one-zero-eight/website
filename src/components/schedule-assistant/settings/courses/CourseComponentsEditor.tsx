@@ -29,7 +29,7 @@ function createEmptyComponent(tag: string): SchemaComponent {
     per_week: null,
     per_semester: null,
     instructor_pool: [],
-    student_groups: [],
+    audience: [],
     per_group: false,
     sessions: null,
   };

@@ -85,7 +85,7 @@ function replaceStudentGroupInCourses(
     ...course,
     components: course.components.map((component) => ({
       ...component,
-      student_groups: component.student_groups
+      audience: component.audience
         .map((token) => (token !== oldCode ? token : newCode))
         .filter((token): token is string => token != null),
       sessions: component.sessions?.map((series) => ({

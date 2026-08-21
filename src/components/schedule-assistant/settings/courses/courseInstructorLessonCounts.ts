@@ -57,14 +57,13 @@ export function countCourseLessonsByInstructor(
   for (const component of course.components ?? []) {
     const tag = String(component.tag ?? "").trim() || "class";
     for (const session of component.sessions ?? []) {
-      for (const occurrence of session.occurrences ?? []) {
+      for (const occurrence of session.dates_pattern ?? []) {
         bumpTag(counts, occurrence.instructor, tag);
       }
 
       const audienceTokens =
-        (session.audience?.length
-          ? session.audience
-          : component.student_groups) || [];
+        (session.audience?.length ? session.audience : component.audience) ||
+        [];
       const window = resolveAudienceSemester(config, audienceTokens);
       if (window == null) continue;
 

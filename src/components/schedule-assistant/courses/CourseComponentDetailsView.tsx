@@ -520,7 +520,7 @@ export function CourseComponentDetailsFields({
     : [];
   const groupIds =
     audienceGroupIds ??
-    expandStudentGroupSelectors(config, component.student_groups ?? []);
+    expandStudentGroupSelectors(config, component.audience ?? []);
   const showGroups =
     Boolean(showAudienceAlways) ||
     (audienceGroupIds != null && audienceGroupIds.length > 0);

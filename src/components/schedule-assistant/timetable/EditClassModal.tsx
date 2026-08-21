@@ -235,7 +235,7 @@ export function EditClassModal({
   );
 
   const originalPlacement: CreatePlacement =
-    meetingRef?.kind === "occ" ? "occurrences" : "weekly";
+    meetingRef?.kind === "occ" ? "dates_pattern" : "weekly";
 
   const focusIndex =
     meetingRef?.kind === "occ"
@@ -358,7 +358,7 @@ export function EditClassModal({
     setDeletedOccurrenceIndexes(new Set());
     setDeletedWeeklySlotIndexes(new Set());
 
-    const occFromSeries = cloneOccurrences(meetingSeries?.occurrences);
+    const occFromSeries = cloneOccurrences(meetingSeries?.dates_pattern);
     const weeklyFromSeries = cloneWeeklySlots(meetingSeries?.weekly_pattern);
     const seededOcc =
       occFromSeries.length > 0
@@ -373,7 +373,7 @@ export function EditClassModal({
     setWeeklySlots(seededWeekly);
     setOriginalOccurrences(
       cloneOccurrences(
-        originalPlacement === "occurrences" ? seededOcc : occFromSeries,
+        originalPlacement === "dates_pattern" ? seededOcc : occFromSeries,
       ),
     );
     setOriginalWeeklySlots(
@@ -469,7 +469,7 @@ export function EditClassModal({
     );
     const scheduleDirty =
       placementChanged ||
-      (placement === "occurrences"
+      (placement === "dates_pattern"
         ? deletedOccurrenceIndexes.size > 0 ||
           occurrencesChanged(activeOccurrences, originalOccurrences)
         : deletedWeeklySlotIndexes.size > 0 ||
@@ -485,13 +485,13 @@ export function EditClassModal({
     if (placementChanged) {
       updatedCourse = applySeriesScheduleToCourse(course, meetingRef, config, {
         audience: audienceChanged ? audienceValue : undefined,
-        occurrences: placement === "occurrences" ? activeOccurrences : null,
+        dates_pattern: placement === "dates_pattern" ? activeOccurrences : null,
         weeklyPattern: placement === "weekly" ? activeWeeklySlots : null,
       });
-    } else if (placement === "occurrences") {
+    } else if (placement === "dates_pattern") {
       updatedCourse = applySeriesScheduleToCourse(course, meetingRef, config, {
         audience: audienceChanged ? audienceValue : undefined,
-        occurrences: scheduleDirty ? activeOccurrences : undefined,
+        dates_pattern: scheduleDirty ? activeOccurrences : undefined,
       });
     } else {
       const structural =
@@ -514,7 +514,7 @@ export function EditClassModal({
           {
             audience: audienceChanged ? audienceValue : undefined,
             weeklyPattern: activeWeeklySlots,
-            occurrences: null,
+            dates_pattern: null,
           },
         );
       } else if (hasMeetingFieldEdits(focusEdits)) {
@@ -564,7 +564,7 @@ export function EditClassModal({
   const scheduleChanged =
     !cancelChecked &&
     (placementChanged ||
-      (placement === "occurrences"
+      (placement === "dates_pattern"
         ? deletedOccurrenceIndexes.size > 0 ||
           occurrencesChanged(activeOccurrences, originalOccurrences)
         : deletedWeeklySlotIndexes.size > 0 ||
@@ -586,7 +586,7 @@ export function EditClassModal({
     meetingSeries,
   );
   const componentAudienceLabel = meetingComponent
-    ? formatAudienceTokensLabel(config, meetingComponent.student_groups || [])
+    ? formatAudienceTokensLabel(config, meetingComponent.audience || [])
     : "";
 
   function restoreScheduleOriginals() {
@@ -683,7 +683,7 @@ export function EditClassModal({
           meetingIndex={conflictMeetingIndex}
           placement={placement}
           onPlacementChange={(next) => {
-            if (next === "occurrences") setCancelChecked(false);
+            if (next === "dates_pattern") setCancelChecked(false);
             setPlacement(next);
           }}
           placementDisabled={cancelChecked}

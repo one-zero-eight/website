@@ -47,12 +47,12 @@ function emptySeries(): SchemaComponentSessionSeries {
   return {
     audience: [],
     weekly_pattern: [],
-    occurrences: null,
+    dates_pattern: null,
   };
 }
 
 function seriesMode(series: SchemaComponentSessionSeries): SessionPlacement {
-  if ((series.occurrences ?? []).length > 0) return "occurrences";
+  if ((series.dates_pattern ?? []).length > 0) return "dates_pattern";
   return "weekly";
 }
 
@@ -115,13 +115,13 @@ export function stripDeletedSessionRows(
     const deletedWeekly = deletedWeeklyBySeries.get(seriesIndex);
     const deletedOcc = deletedOccBySeries.get(seriesIndex);
     const weekly = series.weekly_pattern;
-    const occurrences = series.occurrences;
+    const occurrences = series.dates_pattern;
     next.push({
       ...series,
       weekly_pattern: weekly
         ? weekly.filter((_, index) => !deletedWeekly?.has(index))
         : weekly,
-      occurrences: occurrences
+      dates_pattern: occurrences
         ? occurrences.filter((_, index) => !deletedOcc?.has(index))
         : occurrences,
     });
@@ -275,7 +275,7 @@ export function ComponentSessionsEditor({
       number,
       {
         weekly_pattern?: SchemaComponentSessionSeries["weekly_pattern"];
-        occurrences?: SchemaComponentSessionSeries["occurrences"];
+        dates_pattern?: SchemaComponentSessionSeries["dates_pattern"];
       }
     >(),
   );
@@ -434,8 +434,8 @@ export function ComponentSessionsEditor({
       : (componentGroups ?? []);
 
     if (mode === "weekly") {
-      if ((series.occurrences ?? []).length > 0) {
-        stash.occurrences = series.occurrences ?? null;
+      if ((series.dates_pattern ?? []).length > 0) {
+        stash.dates_pattern = series.dates_pattern ?? null;
       }
       const weekly = (series.weekly_pattern?.length
         ? series.weekly_pattern
@@ -450,7 +450,7 @@ export function ComponentSessionsEditor({
       });
       updateSeries(index, {
         weekly_pattern: weekly,
-        occurrences: null,
+        dates_pattern: null,
       });
       return;
     }
@@ -458,10 +458,10 @@ export function ComponentSessionsEditor({
     if ((series.weekly_pattern ?? []).length > 0) {
       stash.weekly_pattern = series.weekly_pattern ?? null;
     }
-    const occurrences = (series.occurrences?.length
-      ? series.occurrences
-      : stash.occurrences?.length
-        ? stash.occurrences
+    const occurrences = (series.dates_pattern?.length
+      ? series.dates_pattern
+      : stash.dates_pattern?.length
+        ? stash.dates_pattern
         : null) ?? [emptyOccurrence(config, audienceTokens)];
     modeStashRef.current.set(index, stash);
     setDeletedWeeklyBySeries((prev) => {
@@ -471,7 +471,7 @@ export function ComponentSessionsEditor({
     });
     updateSeries(index, {
       weekly_pattern: null,
-      occurrences,
+      dates_pattern: occurrences,
     });
   }
 
@@ -556,15 +556,15 @@ export function ComponentSessionsEditor({
               onWeeklySlotsChange={(weekly_pattern) =>
                 updateSeries(seriesIndex, { weekly_pattern })
               }
-              occurrences={series.occurrences ?? []}
+              occurrences={series.dates_pattern ?? []}
               onOccurrencesChange={(occurrences) =>
-                updateSeries(seriesIndex, { occurrences })
+                updateSeries(seriesIndex, { dates_pattern: occurrences })
               }
               audienceTokens={audienceTokens}
               courseInstructors={courseInstructors}
               instructorPool={instructorPool}
               originalWeeklySlots={baselineSeries?.weekly_pattern ?? undefined}
-              originalOccurrences={baselineSeries?.occurrences ?? undefined}
+              originalOccurrences={baselineSeries?.dates_pattern ?? undefined}
               deletedWeeklyIndexes={
                 deletedWeeklyBySeries.get(seriesIndex) ?? undefined
               }
@@ -617,7 +617,7 @@ export function summarizeSessions(
     0,
   );
   const dates = sessions.reduce(
-    (sum, series) => sum + (series.occurrences ?? []).length,
+    (sum, series) => sum + (series.dates_pattern ?? []).length,
     0,
   );
   const parts: string[] = [];

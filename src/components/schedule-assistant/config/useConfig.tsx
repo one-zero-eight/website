@@ -664,7 +664,7 @@ function courseReferencesStudentGroup(
   groupCode: string,
 ): boolean {
   for (const component of course.components) {
-    if (component.student_groups.includes(groupCode)) return true;
+    if (component.audience.includes(groupCode)) return true;
     for (const series of component.sessions ?? []) {
       if (series.audience.includes(groupCode)) return true;
     }

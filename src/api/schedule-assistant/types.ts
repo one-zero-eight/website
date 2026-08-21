@@ -1081,7 +1081,7 @@ export interface components {
        */
       instructor_pool: (string | string[])[];
       /**
-       * Student Groups
+       * Audience
        * @description Who attends: each entry is a group id or an ``@`` selector from ``sections`` hierarchy (union if several).
        *
        *     Examples:
@@ -1091,15 +1091,15 @@ export interface components {
        *     - ``[ENG-eap1]`` or ``[B22-CBS-02]`` — direct group id
        * @default []
        */
-      student_groups: string[];
+      audience: string[];
       /**
        * Expected Enrollment
-       * @description Expected enrollment used for room sizing, defer from sum(student_group.size for groups in student_groups) if None
+       * @description Expected enrollment used for room sizing, defer from sum(student_group.size for groups in audience) if None
        */
       expected_enrollment?: number | null;
       /**
        * Per Group
-       * @description Whether one class instance should be created per group, if True, then one class instance will be created for each group in student_groups. It is useful for lab classes where each group needs a separate meeting. If false, then one class instance (meeting) will be created for all groups in student_groups, so they will be effectively in same time, same room, same instructor.
+       * @description Whether one class instance should be created per group, if True, then one class instance will be created for each group in audience. It is useful for lab classes where each group needs a separate meeting. If false, then one class instance (meeting) will be created for all groups in audience, so they will be effectively in same time, same room, same instructor.
        * @default false
        */
       per_group: boolean;
@@ -1121,7 +1121,7 @@ export interface components {
     ComponentSessionSeries: {
       /**
        * Audience
-       * @description Student group ids for this session series (subset of component student_groups)
+       * @description Student group ids for this session series (subset of component audience)
        * @default []
        */
       audience: string[];
@@ -1131,10 +1131,10 @@ export interface components {
        */
       weekly_pattern?: components["schemas"]["WeeklyPatternSlot"][] | null;
       /**
-       * Occurrences
+       * Dates Pattern
        * @description Concrete placed meetings (for electives and other calendar-date series)
        */
-      occurrences?: components["schemas"]["SessionOccurrence"][] | null;
+      dates_pattern?: components["schemas"]["SessionOccurrence"][] | null;
     };
     /** ConfigChangeEvent */
     ConfigChangeEvent: {

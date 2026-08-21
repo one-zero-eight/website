@@ -20,13 +20,13 @@ export function validateSessionSeriesDraft({
   deletedWeeklyIndexes,
   deletedOccurrenceIndexes,
 }: {
-  placement: "weekly" | "occurrences";
+  placement: "weekly" | "dates_pattern";
   weeklySlots: SchemaWeeklyPatternSlot[];
   occurrences: SchemaSessionOccurrence[];
   deletedWeeklyIndexes?: Set<number>;
   deletedOccurrenceIndexes?: Set<number>;
 }): string | null {
-  if (placement === "occurrences") {
+  if (placement === "dates_pattern") {
     const active = occurrences.filter(
       (_, index) => !deletedOccurrenceIndexes?.has(index),
     );

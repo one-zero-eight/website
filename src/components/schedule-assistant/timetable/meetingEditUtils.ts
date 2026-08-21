@@ -152,10 +152,7 @@ export function serializeAudienceTokens(tokens: string[]) {
 }
 
 export function resolveMeetingAudienceTokens(
-  component:
-    | { student_groups?: string[]; per_group?: boolean }
-    | null
-    | undefined,
+  component: { audience?: string[]; per_group?: boolean } | null | undefined,
   series: { audience?: string[] } | null | undefined,
   meetingGroups?: string[],
 ) {
@@ -164,7 +161,7 @@ export function resolveMeetingAudienceTokens(
   if (component?.per_group && meetingGroups?.length) {
     return [String(meetingGroups[0] || "").trim()].filter(Boolean);
   }
-  return [...(component?.student_groups || [])];
+  return [...(component?.audience || [])];
 }
 
 export function audienceTokensEquivalent(
@@ -185,20 +182,13 @@ export function audienceTokensEquivalent(
 
 export function isMeetingAudienceOverridden(
   config: SchemaScheduleConfig,
-  component:
-    | { student_groups?: string[]; per_group?: boolean }
-    | null
-    | undefined,
+  component: { audience?: string[]; per_group?: boolean } | null | undefined,
   series: { audience?: string[] } | null | undefined,
 ) {
   if (!component || component.per_group) return false;
   const explicit = series?.audience || [];
   if (!explicit.length) return false;
-  return !audienceTokensEquivalent(
-    config,
-    explicit,
-    component.student_groups || [],
-  );
+  return !audienceTokensEquivalent(config, explicit, component.audience || []);
 }
 
 function studentGroupNameByCode(config: SchemaScheduleConfig) {
@@ -243,7 +233,7 @@ export function formatAudienceTokensLabel(
 
 export function audienceTokenHints(
   config: SchemaScheduleConfig,
-  component: { student_groups?: string[] } | null | undefined,
+  component: { audience?: string[] } | null | undefined,
 ): { value: string; label: string }[] {
   const seen = new Set<string>();
   const hints: { value: string; label: string }[] = [];
@@ -255,7 +245,7 @@ export function audienceTokenHints(
     hints.push({ value: trimmed, label });
   }
 
-  for (const token of component?.student_groups || []) {
+  for (const token of component?.audience || []) {
     push(token, formatAudienceTokenLabel(config, token));
   }
 
@@ -284,10 +274,7 @@ export function audienceTokenHints(
 
 export function meetingEditOriginalValues(
   meeting: Meeting,
-  component:
-    | { student_groups?: string[]; per_group?: boolean }
-    | null
-    | undefined,
+  component: { audience?: string[]; per_group?: boolean } | null | undefined,
   series: { audience?: string[] } | null | undefined,
 ): MeetingOriginalValues {
   const instructors =
@@ -320,14 +307,14 @@ export function meetingGroupsEqual(a: string[], b: string[]) {
 
 export function componentStudentGroupPool(
   config: SchemaScheduleConfig,
-  component: { student_groups?: string[] },
+  component: { audience?: string[] },
 ) {
-  return expandStudentGroupSelectors(config, component.student_groups || []);
+  return expandStudentGroupSelectors(config, component.audience || []);
 }
 
 export function perGroupAudienceOptions(
   config: SchemaScheduleConfig,
-  component: { student_groups?: string[] },
+  component: { audience?: string[] },
 ) {
   return componentStudentGroupPool(config, component)
     .map((code) => ({
@@ -522,7 +509,7 @@ function getOccurrenceContext(
 ) {
   const component = course.components?.[ref.componentIdx];
   const series = component?.sessions?.[ref.seriesIdx];
-  const occurrence = series?.occurrences?.[ref.occIdx];
+  const occurrence = series?.dates_pattern?.[ref.occIdx];
   if (!component || !series || !occurrence) return null;
   return { component, series, occurrence };
 }
@@ -681,7 +668,7 @@ export function applySeriesScheduleToCourse(
   config: SchemaScheduleConfig,
   update: {
     audience?: string[];
-    occurrences?: SchemaSessionOccurrence[] | null;
+    dates_pattern?: SchemaSessionOccurrence[] | null;
     weeklyPattern?: SchemaWeeklyPatternSlot[] | null;
   },
 ): SchemaCourseConfig | null {
@@ -701,8 +688,8 @@ export function applySeriesScheduleToCourse(
     );
   }
 
-  if (update.occurrences !== undefined) {
-    series.occurrences = (update.occurrences ?? []).map((occurrence) => ({
+  if (update.dates_pattern !== undefined) {
+    series.dates_pattern = (update.dates_pattern ?? []).map((occurrence) => ({
       date: String(occurrence.date || "").trim(),
       start_time: normalizeTimeToApi(occurrence.start_time),
       end_time: normalizeTimeToApi(
@@ -756,7 +743,7 @@ export function applyMeetingEditsToCourse(
   if (ref.kind === "occ") {
     const ctx = getOccurrenceContext(nextCourse, ref);
     if (!ctx) return null;
-    const occurrences = [...(ctx.series.occurrences || [])];
+    const occurrences = [...(ctx.series.dates_pattern || [])];
     const fromDate = meeting.date;
 
     if (edits.cancel) {
@@ -767,7 +754,7 @@ export function applyMeetingEditsToCourse(
               if (scope === "all") return false;
               return occurrence.date < fromDate;
             });
-      ctx.series.occurrences = filtered;
+      ctx.series.dates_pattern = filtered;
       return nextCourse;
     }
 
@@ -778,11 +765,11 @@ export function applyMeetingEditsToCourse(
       const target = occurrences[ref.occIdx];
       if (!target) return null;
       occurrences[ref.occIdx] = patchOccurrence(target);
-      ctx.series.occurrences = occurrences;
+      ctx.series.dates_pattern = occurrences;
       return nextCourse;
     }
 
-    ctx.series.occurrences = applyOccurrencePatch(
+    ctx.series.dates_pattern = applyOccurrencePatch(
       occurrences,
       fromDate,
       scope,
@@ -806,7 +793,7 @@ export function applyMeetingEditsToCourse(
       const audienceTokens =
         (ctx.series.audience?.length
           ? ctx.series.audience
-          : ctx.component.student_groups) || [];
+          : ctx.component.audience) || [];
       for (const date of weeklyMeetingDatesForSlot(
         config,
         slot,

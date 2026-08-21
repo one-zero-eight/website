@@ -619,12 +619,12 @@ export function buildSectionGroupSets(config: SchemaScheduleConfig) {
 }
 
 function sessionAudienceTokens(
-  component: { student_groups?: string[] },
+  component: { audience?: string[] },
   series: { audience?: string[] },
 ): string[] {
   const audience = series.audience || [];
   if (audience.length) return audience;
-  return component.student_groups || [];
+  return component.audience || [];
 }
 
 export function filterMeetingsByTab(meetings: Meeting[], tabMode: string) {
@@ -661,7 +661,7 @@ export function buildColumns(config: SchemaScheduleConfig) {
       if (!comp.sessions?.length) {
         for (const groupId of expandStudentGroupSelectors(
           config,
-          comp.student_groups || [],
+          comp.audience || [],
         )) {
           usedGroups.add(groupId);
         }
@@ -753,7 +753,9 @@ export function buildMeetingsForCourse(
         groupToProgram,
       );
 
-      for (const [occIdx, occurrence] of (series.occurrences || []).entries()) {
+      for (const [occIdx, occurrence] of (
+        series.dates_pattern || []
+      ).entries()) {
         if (!occurrence.date || !occurrence.start_time) continue;
         flat.push({
           instance_id: `${courseIdx}:${componentIdx}:${seriesIdx}:occ:${occIdx}`,

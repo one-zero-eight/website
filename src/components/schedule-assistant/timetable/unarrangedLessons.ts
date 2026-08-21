@@ -147,7 +147,7 @@ function sessionBucketsForComponent(
 ): UnarrangedLessonItem[] {
   const sectionCode = course.section_code;
   const tree = buildAudienceSelectorTree(config, { sectionCode });
-  const pool = expandedAudience(config, component.student_groups || []);
+  const pool = expandedAudience(config, component.audience || []);
   const sessions: UnarrangedLessonItem[] = [];
 
   if (component.per_group) {
@@ -184,7 +184,7 @@ function sessionBucketsForComponent(
     courseIdx,
     component,
     componentIdx,
-    audience: minimizeAudienceTokens(component.student_groups || [], tree),
+    audience: minimizeAudienceTokens(component.audience || [], tree),
     groupIds: pool,
     status,
     config,

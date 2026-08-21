@@ -202,7 +202,7 @@ export function CreateClassModal({
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
   const [placement, setPlacement] = useState<CreatePlacement>(() =>
-    layoutMode === "calendar" ? "occurrences" : "weekly",
+    layoutMode === "calendar" ? "dates_pattern" : "weekly",
   );
   const [weeklySlots, setWeeklySlots] = useState<SchemaWeeklyPatternSlot[]>([]);
   const [occurrences, setOccurrences] = useState<SchemaSessionOccurrence[]>([]);
@@ -273,10 +273,7 @@ export function CreateClassModal({
 
   const componentAudienceLabel = useMemo(() => {
     if (!selectedComponent) return "";
-    return formatAudienceTokensLabel(
-      config,
-      selectedComponent.student_groups || [],
-    );
+    return formatAudienceTokensLabel(config, selectedComponent.audience || []);
   }, [config, selectedComponent]);
 
   const audienceDisplayLabel = formatAudienceTokensLabel(config, audienceValue);
@@ -332,7 +329,7 @@ export function CreateClassModal({
     const foreignWeekly = cloneWeeklySlots(covering.weekly);
     const foreignOccurrences = cloneOccurrences(covering.occurrences);
     const dedicatedWeekly = cloneWeeklySlots(matched?.weekly_pattern);
-    const dedicatedOccurrences = cloneOccurrences(matched?.occurrences);
+    const dedicatedOccurrences = cloneOccurrences(matched?.dates_pattern);
     const matchedIdx =
       matched != null ? (component.sessions || []).indexOf(matched) : -1;
 
@@ -788,7 +785,8 @@ export function CreateClassModal({
       audience: audienceValue,
       placement,
       weeklySlots: placement === "weekly" ? activeWeeklySlots : undefined,
-      occurrences: placement === "occurrences" ? activeOccurrences : undefined,
+      occurrences:
+        placement === "dates_pattern" ? activeOccurrences : undefined,
     });
 
     if (!updatedCourse) {
