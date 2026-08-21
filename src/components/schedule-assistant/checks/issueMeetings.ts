@@ -238,8 +238,8 @@ export function formatInstructorLabel(
     .map((id) => {
       const entry = instructorsById.get(id);
       return (
-        entry?.name_ru?.trim() ||
         entry?.name_en?.trim() ||
+        entry?.name_ru?.trim() ||
         entry?.alias?.trim() ||
         id
       );
@@ -254,6 +254,10 @@ export function buildInstructorsById(
   const map = new Map<string, SchemaInstructor>();
   for (const instructor of instructors ?? []) {
     map.set(instructor.id, instructor);
+    const email = instructor.email?.trim();
+    if (email && !map.has(email)) {
+      map.set(email, instructor);
+    }
   }
   return map;
 }

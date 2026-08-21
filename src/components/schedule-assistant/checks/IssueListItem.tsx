@@ -93,7 +93,13 @@ function MeetingNavigateButton({
   );
 }
 
-function InstructorNavigateButton({ instructorId }: { instructorId: string }) {
+function InstructorNavigateButton({
+  instructorId,
+  label,
+}: {
+  instructorId: string;
+  label: string;
+}) {
   const navigate = useNavigate();
 
   return (
@@ -109,10 +115,27 @@ function InstructorNavigateButton({ instructorId }: { instructorId: string }) {
       }
     >
       <span className="text-primary font-medium [overflow-wrap:anywhere]">
-        {instructorId}
+        {label}
       </span>
     </button>
   );
+}
+
+function formatIssueMetric(
+  issue: SchemaIssue,
+  instructorsById: Map<string, SchemaInstructor>,
+) {
+  if (issue.issue_type === "teacher") {
+    return formatInstructorLabel(issue.instructor, instructorsById);
+  }
+  if (
+    issue.issue_type === "instructor_banned_slot" ||
+    issue.issue_type === "instructor_preference"
+  ) {
+    const name = formatInstructorLabel(issue.instructor_id, instructorsById);
+    return `${name}, ${issue.weekday} ${String(issue.start_time).slice(0, 5)}`;
+  }
+  return getIssueMetric(issue);
 }
 
 export function IssueListItem({
@@ -125,7 +148,7 @@ export function IssueListItem({
   instructorsById: Map<string, SchemaInstructor>;
 }) {
   const severity = getIssueSeverity(issue);
-  const metric = getIssueMetric(issue);
+  const metric = formatIssueMetric(issue, instructorsById);
   const meetings = uniqueMeetings(extractMeetingsFromIssue(issue));
 
   return (
@@ -152,7 +175,10 @@ export function IssueListItem({
 
       {issue.issue_type === "instructor_id" ? (
         <div className="mt-2 flex flex-col gap-1">
-          <InstructorNavigateButton instructorId={issue.instructor_id} />
+          <InstructorNavigateButton
+            instructorId={issue.instructor_id}
+            label={formatInstructorLabel(issue.instructor_id, instructorsById)}
+          />
           <p className="text-base-content/80 px-1 text-sm leading-relaxed">
             {issue.text}
           </p>

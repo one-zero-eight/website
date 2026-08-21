@@ -14,9 +14,17 @@ import {
   buildInstructorsById,
   buildMeetingInstanceIndex,
 } from "@/components/schedule-assistant/checks/issueMeetings.ts";
+import { groupIssuesByProgram } from "@/components/schedule-assistant/checks/issueProgramGrouping.ts";
 import { useConfig } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { buildMeetings } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+type IssueGroupingMode = "none" | "program";
+
+const GROUPING_OPTIONS: { value: IssueGroupingMode; label: string }[] = [
+  { value: "none", label: "Без группировки" },
+  { value: "program", label: "По программам" },
+];
 
 export function IssuesResults({
   issues,
@@ -27,6 +35,7 @@ export function IssuesResults({
 }) {
   const { selectedIssueType, setSelectedIssueType } = useChecksSession();
   const { config } = useConfig();
+  const [grouping, setGrouping] = useState<IssueGroupingMode>("none");
 
   const meetingIndex = useMemo(() => {
     if (!config) return buildMeetingInstanceIndex([]);
@@ -73,6 +82,11 @@ export function IssuesResults({
     return issues.filter((issue) => issue.issue_type === selectedIssueType);
   }, [issues, selectedIssueType]);
 
+  const programGroups = useMemo(() => {
+    if (grouping !== "program") return [];
+    return groupIssuesByProgram(filteredIssues, config);
+  }, [config, filteredIssues, grouping]);
+
   if (!hasRun) {
     return (
       <div className="border-base-300 bg-base-100 rounded-box flex min-h-48 items-center justify-center border p-6 text-center">
@@ -105,30 +119,64 @@ export function IssuesResults({
               </span>
             ))}
         </p>
-        {typeOptions.length > 0 ? (
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          {typeOptions.length > 0 ? (
+            <SelectDropdown
+              value={selectedIssueType}
+              onChange={setSelectedIssueType}
+              options={typeOptions}
+              className="w-full sm:max-w-md sm:flex-1"
+              triggerClassName="select-sm h-9 min-h-9"
+            />
+          ) : null}
           <SelectDropdown
-            value={selectedIssueType}
-            onChange={setSelectedIssueType}
-            options={typeOptions}
-            className="w-full sm:max-w-md"
+            value={grouping}
+            onChange={setGrouping}
+            options={GROUPING_OPTIONS}
+            className="w-full sm:max-w-xs sm:flex-1"
             triggerClassName="select-sm h-9 min-h-9"
           />
-        ) : null}
+        </div>
         <p className="text-base-content/70 text-xs">
           Показано {filteredIssues.length} из {issues.length}
         </p>
       </div>
 
-      <div className="flex flex-col">
-        {filteredIssues.map((issue, index) => (
-          <IssueListItem
-            key={`${selectedIssueType}-${index}`}
-            issue={issue}
-            meetingIndex={meetingIndex}
-            instructorsById={instructorsById}
-          />
-        ))}
-      </div>
+      {grouping === "none" ? (
+        <div className="flex flex-col">
+          {filteredIssues.map((issue, index) => (
+            <IssueListItem
+              key={`${selectedIssueType}-${index}`}
+              issue={issue}
+              meetingIndex={meetingIndex}
+              instructorsById={instructorsById}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {programGroups.map((group) => (
+            <section key={group.key} className="flex flex-col gap-1">
+              <h3 className="text-sm font-medium">
+                {group.title}{" "}
+                <span className="text-base-content/60 font-normal">
+                  ({group.issues.length})
+                </span>
+              </h3>
+              <div className="flex flex-col">
+                {group.issues.map((issue, index) => (
+                  <IssueListItem
+                    key={`${group.key}-${selectedIssueType}-${index}`}
+                    issue={issue}
+                    meetingIndex={meetingIndex}
+                    instructorsById={instructorsById}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
