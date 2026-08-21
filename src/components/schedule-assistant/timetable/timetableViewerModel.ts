@@ -15,10 +15,12 @@ import {
   nearestSlotStart,
   normalizeHhmm,
   programResolvedTimeSlots,
+  resolveAudienceSemester,
   resolveProgramTimeColumns,
   termResolvedTimeSlots,
   toMinutes as slotToMinutes,
   unionResolvedTimeSlots,
+  type ResolvedDateRange,
   type ResolvedTimeSlot,
 } from "./programTimeSlots.ts";
 
@@ -407,9 +409,14 @@ export function weekStartMondayIso(dateStr: string) {
 export function semesterDatesForWeekday(
   config: SchemaScheduleConfig,
   weekday: (typeof DAY_NAMES)[number],
+  range: ResolvedDateRange | null = null,
 ) {
-  const semester = config.term.semester;
+  const semester = range ?? {
+    start_date: String(config.term.semester?.start_date ?? "").slice(0, 10),
+    end_date: String(config.term.semester?.end_date ?? "").slice(0, 10),
+  };
   if (!semester.start_date || !semester.end_date) return [];
+  if (semester.start_date > semester.end_date) return [];
   const allowed = normalizedTermDaySet(config);
   if (!allowed.has(weekday)) return [];
   const out: string[] = [];
@@ -722,7 +729,7 @@ export function meetingCourseIndex(meeting: Meeting): number {
 export function buildMeetingsForCourse(
   config: SchemaScheduleConfig,
   courseIdx: number,
-  datesByWeekday: Map<
+  _datesByWeekday: Map<
     (typeof DAY_NAMES)[number],
     string[]
   > = buildSemesterDatesByWeekday(config),
@@ -730,13 +737,20 @@ export function buildMeetingsForCourse(
   const course = config.courses?.[courseIdx];
   if (!course) return [] as Meeting[];
   const section = course.section_code;
+  const groupToProgram = buildGroupToProgramMap(config);
 
   const flat: Meeting[] = [];
   for (const [componentIdx, component] of (course.components || []).entries()) {
     for (const [seriesIdx, series] of (component.sessions || []).entries()) {
+      const audienceTokens = sessionAudienceTokens(component, series);
       const audienceGroups = expandStudentGroupSelectors(
         config,
-        sessionAudienceTokens(component, series),
+        audienceTokens,
+      );
+      const audienceWindow = resolveAudienceSemester(
+        config,
+        audienceTokens,
+        groupToProgram,
       );
 
       for (const [occIdx, occurrence] of (series.occurrences || []).entries()) {
@@ -760,10 +774,11 @@ export function buildMeetingsForCourse(
 
       const pattern = series.weekly_pattern || [];
       if (pattern.length === 0) continue;
+      if (audienceWindow == null) continue;
       for (const [slotIdx, slot] of pattern.entries()) {
         const weekday = weeklyPatternDayKey(String(slot.weekday ?? ""));
         if (!weekday) continue;
-        const dates = datesByWeekday.get(weekday) ?? [];
+        const dates = semesterDatesForWeekday(config, weekday, audienceWindow);
         for (const date of dates) {
           const resolved = resolveWeeklyMeetingFields(slot, date, config);
           if (resolved.cancelled) {

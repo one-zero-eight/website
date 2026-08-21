@@ -2369,6 +2369,11 @@ export interface components {
        * @description Optional custom teaching slots for this program; when set, replaces term.time_slots for this program
        */
       time_slots?: components["schemas"]["TermTimeSlot"][] | null;
+      /**
+       * Semester
+       * @description Optional teaching window for this program; when set, replaces term.semester for this program
+       */
+      semester?: components["schemas"]["DateRange"] | null;
     };
     /**
      * SessionOccurrence

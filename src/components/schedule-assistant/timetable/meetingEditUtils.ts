@@ -33,6 +33,7 @@ import {
   buildGroupToProgramMap,
   findProgramByNameOrCode,
   programResolvedTimeSlots,
+  resolveAudienceSemester,
   termResolvedTimeSlots,
   unionResolvedTimeSlots,
 } from "./programTimeSlots.ts";
@@ -495,10 +496,13 @@ export function dateForWeekdayInWeek(
 function weeklyMeetingDatesForSlot(
   config: SchemaScheduleConfig,
   slot: SchemaWeeklyPatternSlot,
+  audienceTokens: string[] = [],
 ): string[] {
   const weekday = weeklyPatternDayKey(String(slot.weekday));
   if (!weekday) return [];
-  return semesterDatesForWeekday(config, weekday);
+  const window = resolveAudienceSemester(config, audienceTokens);
+  if (window == null) return [];
+  return semesterDatesForWeekday(config, weekday, window);
 }
 
 function getWeeklySlotContext(
@@ -799,7 +803,15 @@ export function applyMeetingEditsToCourse(
     }
 
     if (scope === "future") {
-      for (const date of weeklyMeetingDatesForSlot(config, slot)) {
+      const audienceTokens =
+        (ctx.series.audience?.length
+          ? ctx.series.audience
+          : ctx.component.student_groups) || [];
+      for (const date of weeklyMeetingDatesForSlot(
+        config,
+        slot,
+        audienceTokens,
+      )) {
         if (date < meetingDate) continue;
         applyWeeklySingleEdit(slot, date, startingDay, { cancel: true });
       }

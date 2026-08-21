@@ -1,13 +1,13 @@
 import type {
   SchemaCourseConfig,
   SchemaScheduleConfig,
-  SchemaTermConfig,
 } from "@/api/schedule-assistant/types.ts";
 import {
   resolveWeeklyMeetingFields,
   semesterDatesForWeekday,
   weeklyPatternDayKey,
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
+import { resolveAudienceSemester } from "@/components/schedule-assistant/timetable/programTimeSlots.ts";
 
 const DEFAULT_TAG_ORDER = ["lec", "tut", "lab", "class"] as const;
 
@@ -45,14 +45,14 @@ function bumpTag(
  */
 export function countCourseLessonsByInstructor(
   course: SchemaCourseConfig | null | undefined,
-  term: SchemaTermConfig | null | undefined,
+  config: SchemaScheduleConfig | null | undefined,
 ): Map<string, InstructorLessonBreakdown> {
   const counts = new Map<string, InstructorLessonBreakdown>();
+  const term = config?.term;
   if (!course || !term?.semester?.start_date || !term.semester.end_date) {
     return counts;
   }
-
-  const config = { term } as SchemaScheduleConfig;
+  if (!config) return counts;
 
   for (const component of course.components ?? []) {
     const tag = String(component.tag ?? "").trim() || "class";
@@ -61,10 +61,17 @@ export function countCourseLessonsByInstructor(
         bumpTag(counts, occurrence.instructor, tag);
       }
 
+      const audienceTokens =
+        (session.audience?.length
+          ? session.audience
+          : component.student_groups) || [];
+      const window = resolveAudienceSemester(config, audienceTokens);
+      if (window == null) continue;
+
       for (const slot of session.weekly_pattern ?? []) {
         const weekday = weeklyPatternDayKey(String(slot.weekday ?? ""));
         if (!weekday) continue;
-        for (const date of semesterDatesForWeekday(config, weekday)) {
+        for (const date of semesterDatesForWeekday(config, weekday, window)) {
           const resolved = resolveWeeklyMeetingFields(slot, date, config);
           if (resolved.cancelled) continue;
           bumpTag(counts, resolved.instructors, tag);

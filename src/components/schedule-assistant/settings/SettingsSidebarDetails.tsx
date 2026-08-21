@@ -816,7 +816,7 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
             assignments={course?.instructors ?? []}
             roleOptions={(term?.course_instructor_roles ?? []).filter(Boolean)}
             tagOrder={(term?.course_component_tags ?? []).filter(Boolean)}
-            lessonCounts={countCourseLessonsByInstructor(course, term)}
+            lessonCounts={countCourseLessonsByInstructor(course, config)}
             instructors={instructors}
             onChange={(courseInstructors) =>
               patchCourse({ instructors: courseInstructors })

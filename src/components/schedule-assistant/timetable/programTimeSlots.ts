@@ -4,12 +4,18 @@ import type {
   SchemaTermTimeSlot,
 } from "@/api/schedule-assistant/types.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
+import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 
 export type ResolvedTimeSlot = {
   start: string;
   end: string;
   label: string;
+};
+
+export type ResolvedDateRange = {
+  start_date: string;
+  end_date: string;
 };
 
 export function normalizeHhmm(value: string | null | undefined): string {
@@ -89,6 +95,62 @@ export function buildGroupToProgramMap(
     }
   }
   return out;
+}
+
+export function termSemesterRange(
+  config: SchemaScheduleConfig | null | undefined,
+): ResolvedDateRange | null {
+  const semester = config?.term?.semester;
+  const start = String(semester?.start_date ?? "").slice(0, 10);
+  const end = String(semester?.end_date ?? "").slice(0, 10);
+  if (!start || !end) return null;
+  return { start_date: start, end_date: end };
+}
+
+export function programSemesterRange(
+  program: SchemaSectionProgram | null | undefined,
+  fallback: ResolvedDateRange | null,
+): ResolvedDateRange | null {
+  const start = String(program?.semester?.start_date ?? "").slice(0, 10);
+  const end = String(program?.semester?.end_date ?? "").slice(0, 10);
+  if (start && end) return { start_date: start, end_date: end };
+  return fallback;
+}
+
+/**
+ * Intersection of teaching windows for session audience tokens.
+ * Returns null when the intersection is empty.
+ */
+export function resolveAudienceSemester(
+  config: SchemaScheduleConfig | null | undefined,
+  audienceTokens: string[],
+  groupToProgram: Map<string, SchemaSectionProgram> = buildGroupToProgramMap(
+    config,
+  ),
+): ResolvedDateRange | null {
+  const termRange = termSemesterRange(config);
+  if (!termRange) return null;
+  if (!audienceTokens.length) return termRange;
+
+  const groups = expandStudentGroupSelectors(config, audienceTokens);
+  if (!groups.length) return termRange;
+
+  let start = termRange.start_date;
+  let end = termRange.end_date;
+  let sawProgram = false;
+  for (const groupId of groups) {
+    const window = programSemesterRange(
+      groupToProgram.get(String(groupId)) ?? null,
+      termRange,
+    );
+    if (!window) continue;
+    sawProgram = true;
+    if (window.start_date > start) start = window.start_date;
+    if (window.end_date < end) end = window.end_date;
+  }
+  if (!sawProgram) return termRange;
+  if (start > end) return null;
+  return { start_date: start, end_date: end };
 }
 
 export function findProgramByNameOrCode(
@@ -236,8 +298,14 @@ export function nearestSlotStart(
   let best = slots[0]!;
   let bestDist = Math.abs(toMinutes(best.start) - target);
   for (const slot of slots) {
-    const dist = Math.abs(toMinutes(slot.start) - target);
-    if (dist < bestDist) {
+    const startMin = toMinutes(slot.start);
+    const dist = Math.abs(startMin - target);
+    // On a tie (e.g. 11:40 vs 10:40/12:40), prefer the later row so
+    // consecutive custom starts do not stack on the earlier term slot.
+    if (
+      dist < bestDist ||
+      (dist === bestDist && startMin > toMinutes(best.start))
+    ) {
       best = slot;
       bestDist = dist;
     }
