@@ -3,6 +3,7 @@ import { Calendar } from "@/components/calendar/Calendar.tsx";
 import { URLType } from "@/components/calendar/CalendarViewer.tsx";
 import { useWhen2MeetCalendarEvents } from "@/components/calendar/useWhen2MeetCalendarEvents.ts";
 import {
+  getImportedLink,
   getICSLink,
   getMyMoodleLink,
   getMyMusicRoomLink,
@@ -11,6 +12,7 @@ import {
   getMyWorkshopsLink,
 } from "@/api/schedule/links.ts";
 import { useRef } from "react";
+import { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 
 export function CalendarPage() {
   const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
@@ -42,6 +44,7 @@ export function CalendarPage() {
                 scheduleUser.music_room_hidden,
                 scheduleUser.sports_hidden,
                 scheduleUser.moodle_hidden,
+                Object.values(scheduleUser.linked_calendars || {}),
               )
         }
         initialView={
@@ -65,10 +68,11 @@ function getCalendarsToShow(
   hidden: number[],
   predefined: number[],
   eventGroups: scheduleTypes.SchemaListEventGroupsResponse,
-  userId: number | undefined,
+  userId: number,
   music_room_hidden: boolean,
   sports_hidden: boolean,
   moodle_hidden: boolean,
+  imported: SchemaLinkedCalendarView[],
 ): URLType[] {
   // Remove hidden calendars
   const toShow: URLType[] = favorites.concat(predefined).flatMap((v) => {
@@ -119,6 +123,15 @@ function getCalendarsToShow(
     color: "seagreen",
     sourceLink: "https://innohassle.ru/room-booking",
     updatedAt: new Date().toISOString(),
+  });
+
+  // Add imported calendars
+  imported.forEach((v) => {
+    if (v.is_active)
+      toShow.push({
+        url: getImportedLink(userId, v.alias),
+        color: v.color || undefined,
+      });
   });
 
   // Return unique items
