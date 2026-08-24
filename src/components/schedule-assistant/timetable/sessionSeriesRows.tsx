@@ -36,6 +36,7 @@ import {
   type Meeting,
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { instructorValue } from "@/components/schedule-assistant/timetable/sessionSeriesValidation.ts";
+import { SessionEventCard } from "@/components/schedule-assistant/timetable/SessionEventCard.tsx";
 import { cn } from "@/lib/ui/cn";
 import {
   useEffect,
@@ -63,7 +64,7 @@ export type SessionRowFieldMarks = {
   instructor?: SessionRowFieldHint;
 };
 
-function FieldMark({
+export function FieldMark({
   hint,
   children,
 }: {
@@ -456,7 +457,7 @@ export function draftMeetingsFromWeeklySlots(
   return result;
 }
 
-function RoomSelect({
+export function RoomSelect({
   config,
   meetings,
   meetingIndex,
@@ -621,18 +622,8 @@ export function WeeklySlotRow({
   const end = toUiTime(slot.end_time);
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-1",
-        deleted && "border-error/60 border-l-4 pl-2",
-      )}
-    >
-      <div
-        className={cn(
-          "rounded-box grid gap-2 border-2 p-2 sm:grid-cols-2",
-          highlighted ? "border-primary" : "border-base-300",
-        )}
-      >
+    <SessionEventCard deleted={deleted} highlighted={highlighted}>
+      <div className="grid gap-2 sm:grid-cols-2">
         <div className="flex gap-2 sm:col-span-2">
           <div
             className={cn(
@@ -741,7 +732,7 @@ export function WeeklySlotRow({
         </div>
       </div>
       {deleted ? <div className="text-error/80 text-xs">Удалено</div> : null}
-    </div>
+    </SessionEventCard>
   );
 }
 
@@ -787,18 +778,8 @@ export function OccurrenceRow({
   ) as TermWeekdayKey;
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-1",
-        deleted && "border-error/60 border-l-4 pl-2",
-      )}
-    >
-      <div
-        className={cn(
-          "rounded-box grid gap-2 border-2 p-2 sm:grid-cols-2",
-          highlighted ? "border-primary" : "border-base-300",
-        )}
-      >
+    <SessionEventCard deleted={deleted} highlighted={highlighted}>
+      <div className="grid gap-2 sm:grid-cols-2">
         <div className="flex gap-2 sm:col-span-2">
           <div
             className={cn(
@@ -809,6 +790,7 @@ export function OccurrenceRow({
             <FieldMark hint={deleted ? undefined : fieldMarks?.date}>
               <DateInput
                 value={occurrence.date || ""}
+                showWeekday
                 onChange={(date) => onChange({ ...occurrence, date })}
               />
             </FieldMark>
@@ -899,6 +881,6 @@ export function OccurrenceRow({
         </div>
       </div>
       {deleted ? <div className="text-error/80 text-xs">Удалено</div> : null}
-    </div>
+    </SessionEventCard>
   );
 }

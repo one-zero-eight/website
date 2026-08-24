@@ -1,5 +1,4 @@
 import type {
-  SchemaCourseConfig,
   SchemaScheduleConfig,
   SchemaSessionOccurrence,
   SchemaWeeklyPatternSlot,
@@ -23,23 +22,27 @@ import {
   buildAudienceSelectorTree,
   minimizeAudienceTokens,
 } from "./audienceSelectorTree.ts";
-import type { CreatePlacement } from "./createMeetingUtils.ts";
 import {
-  applyMeetingEditsToCourse,
-  applySeriesScheduleToCourse,
+  applyEditableEventsToCourse,
+  createOccurrenceEvent,
+  editableEventsToDraftMeetings,
+  eventsEqual,
+  expandOccurrencesToEvents,
+  expandWeeklySlotsToEvents,
+  initialSelectedEventKey,
+  validateEditableEvents,
+  type EditableSessionEvent,
+} from "./editableSessionEvents.ts";
+import { EditableSessionEventsEditor } from "./EditableSessionEventsEditor.tsx";
+import {
   formatAudienceTokensLabel,
   isMeetingAudienceOverridden,
   meetingAudienceEqual,
   meetingEditOriginalValues,
   meetingInstructorsLabel,
-  occurrenceExcludeRef,
   parseMeetingInstanceId,
   perGroupAudienceOptions,
   resolveEndTimeForStart,
-  weeklySlotExcludeRef,
-  type EditClassScope,
-  type MeetingFieldEdits,
-  type MeetingOriginalValues,
 } from "./meetingEditUtils.ts";
 import { MeetingOverrideIndicator } from "./meetingOverrideIndicator.tsx";
 import {
@@ -47,147 +50,18 @@ import {
   type MeetingPickerIndex,
 } from "./meetingPickerIndex.ts";
 import { audienceSummaryHintProps } from "./audienceSummaryHints.ts";
-import { normalizeOccurrence, normalizeWeeklySlot } from "./sessionRowMarks.ts";
-import { toApiTime, toUiTime, weekdayToKey } from "./sessionSeriesRows.tsx";
-import { SessionSeriesEditor } from "./SessionSeriesEditor.tsx";
+import { toApiTime, weekdayToKey } from "./sessionSeriesRows.tsx";
 import {
-  instructorValue,
-  validateSessionSeriesDraft,
-} from "./sessionSeriesValidation.ts";
-import type { Meeting } from "./timetableViewerModel.ts";
+  SessionPlacementToggle,
+  type SessionPlacement,
+} from "./SessionSeriesEditor.tsx";
+import { dayKey, type Meeting } from "./timetableViewerModel.ts";
 import { formatDisplayDate } from "./timetableViewerModel.ts";
-
-const SCOPE_OPTIONS: { value: EditClassScope; label: string }[] = [
-  { value: "single", label: "Только это занятие" },
-  { value: "future", label: "Это и все следующие" },
-  { value: "all", label: "Все занятия (включая прошлые)" },
-];
-
-function cloneOccurrences(
-  items: SchemaSessionOccurrence[] | null | undefined,
-): SchemaSessionOccurrence[] {
-  return structuredClone(items ?? []);
-}
 
 function cloneWeeklySlots(
   items: SchemaWeeklyPatternSlot[] | null | undefined,
 ): SchemaWeeklyPatternSlot[] {
   return structuredClone(items ?? []);
-}
-
-function occurrencesChanged(
-  current: SchemaSessionOccurrence[],
-  original: SchemaSessionOccurrence[],
-) {
-  return (
-    JSON.stringify(current.map(normalizeOccurrence)) !==
-    JSON.stringify(original.map(normalizeOccurrence))
-  );
-}
-
-function weeklySlotsChanged(
-  current: SchemaWeeklyPatternSlot[],
-  original: SchemaWeeklyPatternSlot[],
-) {
-  return (
-    JSON.stringify(current.map(normalizeWeeklySlot)) !==
-    JSON.stringify(original.map(normalizeWeeklySlot))
-  );
-}
-
-/** True when slot list length changed or a non-focus slot differs. */
-function weeklyStructuralChanged(
-  current: SchemaWeeklyPatternSlot[],
-  original: SchemaWeeklyPatternSlot[],
-  focusIndex: number,
-) {
-  if (current.length !== original.length) return true;
-  for (let index = 0; index < current.length; index += 1) {
-    if (index === focusIndex) continue;
-    if (
-      JSON.stringify(normalizeWeeklySlot(current[index]!)) !==
-      JSON.stringify(normalizeWeeklySlot(original[index]!))
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function buildWeeklyFocusFieldEdits(
-  originals: MeetingOriginalValues,
-  slot: SchemaWeeklyPatternSlot | undefined,
-  audienceValue: string[],
-): MeetingFieldEdits {
-  const edits: MeetingFieldEdits = {};
-  if (!meetingAudienceEqual(audienceValue, originals.audience)) {
-    edits.audience = audienceValue;
-  }
-  if (!slot) return edits;
-
-  const room = String(slot.room || "").trim();
-  const time = toUiTime(slot.start_time);
-  const endTime = toUiTime(slot.end_time);
-  const weekday = weekdayToKey(String(slot.weekday || ""));
-  const instructor = instructorValue(slot.instructor);
-  if (room !== originals.room) edits.room = room;
-  if (time !== originals.time || endTime !== originals.endTime) {
-    edits.time = time;
-    if (endTime) edits.endTime = endTime;
-  }
-  if (weekday !== originals.weekday) edits.weekday = weekday;
-  if (instructor !== originals.instructor) edits.instructor = instructor;
-  return edits;
-}
-
-function hasMeetingFieldEdits(edits: MeetingFieldEdits) {
-  if (edits.cancel) return true;
-  return (
-    edits.room !== undefined ||
-    edits.time !== undefined ||
-    edits.endTime !== undefined ||
-    edits.weekday !== undefined ||
-    edits.date !== undefined ||
-    edits.instructor !== undefined ||
-    edits.audience !== undefined
-  );
-}
-
-function seedOccurrenceFromMeeting(
-  originals: MeetingOriginalValues,
-  config: SchemaScheduleConfig,
-  audience: string[],
-): SchemaSessionOccurrence {
-  const start = originals.time || "09:00";
-  const end =
-    originals.endTime ||
-    resolveEndTimeForStart(config, start, audience).slice(0, 5);
-  return {
-    date: originals.date,
-    start_time: toApiTime(start),
-    end_time: toApiTime(end),
-    room: originals.room || null,
-    instructor: originals.instructor || null,
-  };
-}
-
-function seedWeeklyFromMeeting(
-  originals: MeetingOriginalValues,
-  config: SchemaScheduleConfig,
-  audience: string[],
-): SchemaWeeklyPatternSlot {
-  const start = originals.time || "09:00";
-  const end =
-    originals.endTime ||
-    resolveEndTimeForStart(config, start, audience).slice(0, 5);
-  return {
-    weekday: termWeekdayKeyToWeekday(originals.weekday),
-    start_time: toApiTime(start),
-    end_time: toApiTime(end),
-    room: originals.room || null,
-    instructor: originals.instructor || null,
-    edits: null,
-  };
 }
 
 export function EditClassModal({
@@ -209,40 +83,20 @@ export function EditClassModal({
   const { mutate, isPending } = useUpdateCourseMutation();
   const { showError } = useToast();
   const [dismissed, setDismissed] = useState(false);
-  const [scope, setScope] = useState<EditClassScope>("single");
   const [audienceValue, setAudienceValue] = useState<string[]>([]);
-  const [cancelChecked, setCancelChecked] = useState(false);
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
-  const [placement, setPlacement] = useState<CreatePlacement>("weekly");
+  const [events, setEvents] = useState<EditableSessionEvent[]>([]);
+  const [originalEvents, setOriginalEvents] = useState<EditableSessionEvent[]>(
+    [],
+  );
   const [weeklySlots, setWeeklySlots] = useState<SchemaWeeklyPatternSlot[]>([]);
-  const [occurrences, setOccurrences] = useState<SchemaSessionOccurrence[]>([]);
-  const [originalWeeklySlots, setOriginalWeeklySlots] = useState<
-    SchemaWeeklyPatternSlot[]
-  >([]);
-  const [originalOccurrences, setOriginalOccurrences] = useState<
-    SchemaSessionOccurrence[]
-  >([]);
-  const [deletedOccurrenceIndexes, setDeletedOccurrenceIndexes] = useState(
-    () => new Set<number>(),
-  );
-  const [deletedWeeklySlotIndexes, setDeletedWeeklySlotIndexes] = useState(
-    () => new Set<number>(),
-  );
+  const [focusKey, setFocusKey] = useState<string | null>(null);
+  const [placement, setPlacement] = useState<SessionPlacement>("weekly");
 
   const meetingRef = useMemo(
     () => (meeting ? parseMeetingInstanceId(meeting.instance_id) : null),
     [meeting],
   );
-
-  const originalPlacement: CreatePlacement =
-    meetingRef?.kind === "occ" ? "dates_pattern" : "weekly";
-
-  const focusIndex =
-    meetingRef?.kind === "occ"
-      ? meetingRef.occIdx
-      : meetingRef?.kind === "wp"
-        ? meetingRef.slotIdx
-        : 0;
 
   const meetingComponent = useMemo(() => {
     if (!meeting || !courses || !meetingRef) return null;
@@ -283,56 +137,19 @@ export function EditClassModal({
       ref.componentIdx === meetingRef.componentIdx &&
       ref.seriesIdx === meetingRef.seriesIdx;
 
-    if (placement === "weekly") {
-      // Weekly placement replaces date events for this series.
-      return meetings.filter((item) => {
-        const ref = parseMeetingInstanceId(item.instance_id);
-        if (!sameSeries(ref)) return true;
-        if (ref.kind === "occ") return false;
-        if (ref.kind === "wp" && deletedWeeklySlotIndexes.has(ref.slotIdx)) {
-          return false;
-        }
-        return true;
-      });
-    }
-
     const stripped = meetings.filter((item) => {
       const ref = parseMeetingInstanceId(item.instance_id);
-      if (!sameSeries(ref)) return true;
-      // Dates placement replaces both saved occ rows and weekly instances.
-      return false;
+      return !sameSeries(ref);
     });
-    const drafts: Meeting[] = [];
-    for (const [index, occurrence] of occurrences.entries()) {
-      if (deletedOccurrenceIndexes.has(index)) continue;
-      const date = String(occurrence.date || "").trim();
-      if (!date) continue;
-      drafts.push({
-        instance_id: `${meetingRef.courseIdx}:${meetingRef.componentIdx}:${meetingRef.seriesIdx}:occ:${index}`,
-        course: meeting.course,
-        course_short_name: meeting.course_short_name,
-        tag: meeting.tag,
-        groups: audienceValue,
-        date,
-        start: toUiTime(occurrence.start_time),
-        end: toUiTime(occurrence.end_time) || undefined,
-        room: String(occurrence.room || "").trim(),
-        instructors: instructorValue(occurrence.instructor),
-        instructor_pool: meeting.instructor_pool || [],
-        section: meeting.section,
-      });
-    }
+
+    const drafts = editableEventsToDraftMeetings({
+      events,
+      meeting,
+      meetingRef,
+      audienceTokens: audienceValue,
+    });
     return [...stripped, ...drafts];
-  }, [
-    audienceValue,
-    deletedOccurrenceIndexes,
-    deletedWeeklySlotIndexes,
-    meeting,
-    meetingRef,
-    meetings,
-    occurrences,
-    placement,
-  ]);
+  }, [audienceValue, events, meeting, meetingRef, meetings]);
 
   const conflictMeetingIndex = useMemo(
     () => buildMeetingPickerIndex(conflictMeetings),
@@ -344,8 +161,8 @@ export function EditClassModal({
   }, [open]);
 
   useEffect(() => {
-    if (!open || !meeting || !originals) return;
-    setScope("single");
+    if (!open || !meeting || !originals || !meetingRef) return;
+
     const audience = minimizeAudienceTokens(
       [...originals.audience],
       buildAudienceSelectorTree(config, {
@@ -353,43 +170,124 @@ export function EditClassModal({
       }),
     );
     setAudienceValue(audience);
-    setCancelChecked(false);
-    setPlacement(originalPlacement);
-    setDeletedOccurrenceIndexes(new Set());
-    setDeletedWeeklySlotIndexes(new Set());
 
-    const occFromSeries = cloneOccurrences(meetingSeries?.dates_pattern);
-    const weeklyFromSeries = cloneWeeklySlots(meetingSeries?.weekly_pattern);
-    const seededOcc =
-      occFromSeries.length > 0
-        ? occFromSeries
-        : [seedOccurrenceFromMeeting(originals, config, audience)];
-    const seededWeekly =
-      weeklyFromSeries.length > 0
-        ? weeklyFromSeries
-        : [seedWeeklyFromMeeting(originals, config, audience)];
+    const initialPlacement: SessionPlacement =
+      meetingRef.kind === "occ" ? "dates_pattern" : "weekly";
+    setPlacement(initialPlacement);
 
-    setOccurrences(seededOcc);
-    setWeeklySlots(seededWeekly);
-    setOriginalOccurrences(
-      cloneOccurrences(
-        originalPlacement === "dates_pattern" ? seededOcc : occFromSeries,
-      ),
-    );
-    setOriginalWeeklySlots(
-      cloneWeeklySlots(
-        originalPlacement === "weekly" ? seededWeekly : weeklyFromSeries,
-      ),
-    );
-  }, [
-    config,
-    meeting,
-    meetingRef?.kind,
-    meetingSeries,
-    open,
-    originalPlacement,
-    originals,
-  ]);
+    if (initialPlacement === "dates_pattern") {
+      const fromSeries = meetingSeries?.dates_pattern ?? [];
+      const expanded =
+        fromSeries.length > 0
+          ? expandOccurrencesToEvents(fromSeries)
+          : [
+              createOccurrenceEvent({
+                date: originals.date,
+                start_time: toApiTime(originals.time || "09:00"),
+                end_time: toApiTime(
+                  originals.endTime ||
+                    resolveEndTimeForStart(
+                      config,
+                      originals.time || "09:00",
+                      audience,
+                    ).slice(0, 5),
+                ),
+                room: originals.room || null,
+                instructor: originals.instructor || null,
+              }),
+            ];
+      setWeeklySlots([]);
+      setEvents(expanded);
+      setOriginalEvents(structuredClone(expanded));
+      setFocusKey(initialSelectedEventKey(meeting, expanded));
+      return;
+    }
+
+    const fromSeries = cloneWeeklySlots(meetingSeries?.weekly_pattern);
+    const slots =
+      fromSeries.length > 0
+        ? fromSeries
+        : [
+            {
+              weekday: termWeekdayKeyToWeekday(originals.weekday),
+              start_time: toApiTime(originals.time || "09:00"),
+              end_time: toApiTime(
+                originals.endTime ||
+                  resolveEndTimeForStart(
+                    config,
+                    originals.time || "09:00",
+                    audience,
+                  ).slice(0, 5),
+              ),
+              room: originals.room || null,
+              instructor: originals.instructor || null,
+              edits: null,
+            },
+          ];
+    const expanded = expandWeeklySlotsToEvents({
+      config,
+      weeklySlots: slots,
+      audienceTokens: audience,
+    });
+    setWeeklySlots(slots);
+    setEvents(expanded);
+    setOriginalEvents(structuredClone(expanded));
+    setFocusKey(initialSelectedEventKey(meeting, expanded));
+  }, [config, meeting, meetingRef, meetingSeries, open, originals]);
+
+  function handlePlacementChange(next: SessionPlacement) {
+    if (next === placement) return;
+
+    if (next === "dates_pattern") {
+      const occurrences: SchemaSessionOccurrence[] = events
+        .filter((event) => !event.cancelled)
+        .map((event) => ({
+          date: event.date,
+          start_time: event.start_time,
+          end_time: event.end_time,
+          room: event.room,
+          instructor: event.instructor,
+        }));
+      const nextEvents = expandOccurrencesToEvents(occurrences);
+      setWeeklySlots([]);
+      setEvents(nextEvents);
+      setFocusKey(initialSelectedEventKey(meeting, nextEvents));
+      setPlacement(next);
+      return;
+    }
+
+    const slots = new Map<string, SchemaWeeklyPatternSlot>();
+    for (const event of events) {
+      if (event.cancelled || !event.date) continue;
+      const weekday = weekdayToKey(dayKey(event.date));
+      const key = [
+        weekday,
+        event.start_time,
+        event.end_time,
+        event.room || "",
+        event.instructor || "",
+      ].join("\0");
+      if (slots.has(key)) continue;
+      slots.set(key, {
+        weekday: termWeekdayKeyToWeekday(weekday),
+        start_time: event.start_time,
+        end_time: event.end_time,
+        room: event.room,
+        instructor: event.instructor,
+        edits: null,
+      });
+    }
+    const nextSlots = [...slots.values()];
+    const nextEvents = expandWeeklySlotsToEvents({
+      config,
+      weeklySlots: nextSlots,
+      audienceTokens: audienceValue,
+    });
+    setWeeklySlots(nextSlots);
+    setEvents(nextEvents);
+    setFocusKey(initialSelectedEventKey(meeting, nextEvents));
+    setPlacement(next);
+  }
 
   function handleClose() {
     if (isPending) return;
@@ -413,29 +311,6 @@ export function EditClassModal({
       return;
     }
 
-    if (cancelChecked) {
-      const updatedCourse = applyMeetingEditsToCourse(
-        course,
-        meetingRef,
-        meeting,
-        config,
-        scope,
-        { cancel: true },
-      );
-      if (!updatedCourse) {
-        showError("Ошибка", "Не удалось отменить занятие.");
-        return;
-      }
-      mutate(
-        {
-          params: { path: { course_name: course.name } },
-          body: updatedCourse,
-        },
-        { onSuccess: closeAfterSave },
-      );
-      return;
-    }
-
     if (!audienceValue.length) {
       showError(
         "Ошибка",
@@ -444,13 +319,7 @@ export function EditClassModal({
       return;
     }
 
-    const seriesError = validateSessionSeriesDraft({
-      placement,
-      weeklySlots,
-      occurrences,
-      deletedWeeklyIndexes: deletedWeeklySlotIndexes,
-      deletedOccurrenceIndexes: deletedOccurrenceIndexes,
-    });
+    const seriesError = validateEditableEvents(events);
     if (seriesError) {
       showError("Ошибка", seriesError);
       return;
@@ -460,74 +329,22 @@ export function EditClassModal({
       audienceValue,
       originals.audience,
     );
-    const placementChanged = placement !== originalPlacement;
-    const activeOccurrences = occurrences.filter(
-      (_, index) => !deletedOccurrenceIndexes.has(index),
-    );
-    const activeWeeklySlots = weeklySlots.filter(
-      (_, index) => !deletedWeeklySlotIndexes.has(index),
-    );
-    const scheduleDirty =
-      placementChanged ||
-      (placement === "dates_pattern"
-        ? deletedOccurrenceIndexes.size > 0 ||
-          occurrencesChanged(activeOccurrences, originalOccurrences)
-        : deletedWeeklySlotIndexes.size > 0 ||
-          weeklySlotsChanged(activeWeeklySlots, originalWeeklySlots));
+    const scheduleDirty = !eventsEqual(events, originalEvents);
 
     if (!audienceChanged && !scheduleDirty) {
       showError("Ошибка", "Нет изменений для сохранения.");
       return;
     }
 
-    let updatedCourse: SchemaCourseConfig | null = null;
-
-    if (placementChanged) {
-      updatedCourse = applySeriesScheduleToCourse(course, meetingRef, config, {
-        audience: audienceChanged ? audienceValue : undefined,
-        dates_pattern: placement === "dates_pattern" ? activeOccurrences : null,
-        weeklyPattern: placement === "weekly" ? activeWeeklySlots : null,
-      });
-    } else if (placement === "dates_pattern") {
-      updatedCourse = applySeriesScheduleToCourse(course, meetingRef, config, {
-        audience: audienceChanged ? audienceValue : undefined,
-        dates_pattern: scheduleDirty ? activeOccurrences : undefined,
-      });
-    } else {
-      const structural =
-        deletedWeeklySlotIndexes.size > 0 ||
-        weeklySlots.length !== originalWeeklySlots.length ||
-        weeklyStructuralChanged(weeklySlots, originalWeeklySlots, focusIndex);
-      const focusEdits = buildWeeklyFocusFieldEdits(
-        originals,
-        deletedWeeklySlotIndexes.has(focusIndex)
-          ? undefined
-          : weeklySlots[focusIndex],
-        audienceValue,
-      );
-
-      if (structural) {
-        updatedCourse = applySeriesScheduleToCourse(
-          course,
-          meetingRef,
-          config,
-          {
-            audience: audienceChanged ? audienceValue : undefined,
-            weeklyPattern: activeWeeklySlots,
-            dates_pattern: null,
-          },
-        );
-      } else if (hasMeetingFieldEdits(focusEdits)) {
-        updatedCourse = applyMeetingEditsToCourse(
-          course,
-          meetingRef,
-          meeting,
-          config,
-          scope,
-          focusEdits,
-        );
-      }
-    }
+    const updatedCourse = applyEditableEventsToCourse({
+      course,
+      meetingRef,
+      config,
+      audience: audienceChanged ? audienceValue : undefined,
+      placement,
+      weeklySlots,
+      events,
+    });
 
     if (!updatedCourse) {
       showError("Ошибка", "Не удалось применить изменение к занятию.");
@@ -547,39 +364,17 @@ export function EditClassModal({
 
   const instructorsLabel = meetingInstructorsLabel(meeting.instructors);
   const title = `${meeting.course} (${meeting.tag})`;
-  const audienceChanged =
-    !cancelChecked && !meetingAudienceEqual(audienceValue, originals.audience);
+  const audienceChanged = !meetingAudienceEqual(
+    audienceValue,
+    originals.audience,
+  );
   const originalAudienceLabel = formatAudienceTokensLabel(
     config,
     originals.audience,
   );
   const audienceDisplayLabel = formatAudienceTokensLabel(config, audienceValue);
-  const placementChanged = placement !== originalPlacement;
-  const activeOccurrences = occurrences.filter(
-    (_, index) => !deletedOccurrenceIndexes.has(index),
-  );
-  const activeWeeklySlots = weeklySlots.filter(
-    (_, index) => !deletedWeeklySlotIndexes.has(index),
-  );
-  const scheduleChanged =
-    !cancelChecked &&
-    (placementChanged ||
-      (placement === "dates_pattern"
-        ? deletedOccurrenceIndexes.size > 0 ||
-          occurrencesChanged(activeOccurrences, originalOccurrences)
-        : deletedWeeklySlotIndexes.size > 0 ||
-          weeklySlotsChanged(activeWeeklySlots, originalWeeklySlots)));
-  const weeklyStructural =
-    placement === "weekly" &&
-    !placementChanged &&
-    !cancelChecked &&
-    (deletedWeeklySlotIndexes.size > 0 ||
-      weeklySlots.length !== originalWeeklySlots.length ||
-      weeklyStructuralChanged(weeklySlots, originalWeeklySlots, focusIndex));
-  const showApplyScope =
-    cancelChecked ||
-    (placement === "weekly" && !weeklyStructural && !placementChanged);
-  const canSave = cancelChecked || audienceChanged || scheduleChanged;
+  const scheduleChanged = !eventsEqual(events, originalEvents);
+  const canSave = audienceChanged || scheduleChanged;
   const groupsOverridden = isMeetingAudienceOverridden(
     config,
     meetingComponent,
@@ -590,66 +385,7 @@ export function EditClassModal({
     : "";
 
   function restoreScheduleOriginals() {
-    if (!originals) return;
-    setPlacement(originalPlacement);
-    setDeletedOccurrenceIndexes(new Set());
-    setDeletedWeeklySlotIndexes(new Set());
-    setWeeklySlots(
-      originalWeeklySlots.length > 0
-        ? cloneWeeklySlots(originalWeeklySlots)
-        : [seedWeeklyFromMeeting(originals, config, audienceValue)],
-    );
-    setOccurrences(
-      originalOccurrences.length > 0
-        ? cloneOccurrences(originalOccurrences)
-        : [seedOccurrenceFromMeeting(originals, config, audienceValue)],
-    );
-  }
-
-  function handleOccurrenceRemove(index: number) {
-    const isOriginalRow = index < originalOccurrences.length;
-    if (isOriginalRow) {
-      setDeletedOccurrenceIndexes((prev) => {
-        const next = new Set(prev);
-        if (next.has(index)) next.delete(index);
-        else next.add(index);
-        return next;
-      });
-      return;
-    }
-
-    setOccurrences(occurrences.filter((_, i) => i !== index));
-    setDeletedOccurrenceIndexes((prev) => {
-      const next = new Set<number>();
-      for (const deletedIndex of prev) {
-        if (deletedIndex === index) continue;
-        next.add(deletedIndex > index ? deletedIndex - 1 : deletedIndex);
-      }
-      return next;
-    });
-  }
-
-  function handleWeeklySlotRemove(index: number) {
-    const isOriginalRow = index < originalWeeklySlots.length;
-    if (isOriginalRow) {
-      setDeletedWeeklySlotIndexes((prev) => {
-        const next = new Set(prev);
-        if (next.has(index)) next.delete(index);
-        else next.add(index);
-        return next;
-      });
-      return;
-    }
-
-    setWeeklySlots(weeklySlots.filter((_, i) => i !== index));
-    setDeletedWeeklySlotIndexes((prev) => {
-      const next = new Set<number>();
-      for (const deletedIndex of prev) {
-        if (deletedIndex === index) continue;
-        next.add(deletedIndex > index ? deletedIndex - 1 : deletedIndex);
-      }
-      return next;
-    });
+    setEvents(structuredClone(originalEvents));
   }
 
   return (
@@ -677,117 +413,55 @@ export function EditClassModal({
           </div>
         </div>
 
-        <SessionSeriesEditor
+        <EditableSessionEventsEditor
           config={config}
           meetings={conflictMeetings}
           meetingIndex={conflictMeetingIndex}
-          placement={placement}
-          onPlacementChange={(next) => {
-            if (next === "dates_pattern") setCancelChecked(false);
-            setPlacement(next);
-          }}
-          placementDisabled={cancelChecked}
-          afterPlacement={
-            <EditClassAudienceSummaryRow
-              config={config}
-              tokens={audienceValue}
-              displayLabel={audienceDisplayLabel}
-              disabled={cancelChecked}
-              changed={audienceChanged}
-              originalLabel={originalAudienceLabel}
-              onRestoreOriginal={() =>
-                setAudienceValue(
-                  minimizeAudienceTokens(
-                    [...originals.audience],
-                    buildAudienceSelectorTree(config, {
-                      sectionCode: meeting.section,
-                    }),
-                  ),
-                )
-              }
-              {...audienceSummaryHintProps({
-                perGroup,
-                componentLabel: componentAudienceLabel,
-                context: "template",
-              })}
-              overridden={
-                perGroup
-                  ? !audienceChanged && Boolean(componentAudienceLabel)
-                  : groupsOverridden
-              }
-              onEdit={() => setAudienceModalOpen(true)}
-            />
-          }
-          weeklySlots={weeklySlots}
-          onWeeklySlotsChange={setWeeklySlots}
-          occurrences={occurrences}
-          onOccurrencesChange={setOccurrences}
+          events={events}
+          onEventsChange={setEvents}
+          originalEvents={originalEvents}
           audienceTokens={audienceValue}
           courseInstructors={courseInstructors}
           instructorPool={meetingComponent?.instructor_pool}
-          originalWeeklySlots={originalWeeklySlots}
-          originalOccurrences={originalOccurrences}
-          deletedWeeklyIndexes={deletedWeeklySlotIndexes}
-          deletedOccurrenceIndexes={deletedOccurrenceIndexes}
-          onRemoveWeekly={handleWeeklySlotRemove}
-          onRemoveOccurrence={handleOccurrenceRemove}
-          focusIndex={placementChanged ? null : focusIndex}
-          showFocusRing={!placementChanged}
-          overrideFields={meeting.override_fields}
-          marksDisabled={cancelChecked}
-          excludeRefForWeekly={(index) =>
-            meetingRef
-              ? weeklySlotExcludeRef(
-                  {
-                    courseIdx: meetingRef.courseIdx,
-                    componentIdx: meetingRef.componentIdx,
-                    seriesIdx: meetingRef.seriesIdx,
-                    date: meeting.date,
-                  },
-                  index,
-                )
-              : null
+          meetingRef={meetingRef}
+          focusKey={focusKey}
+          allowAddOccurrence={placement === "dates_pattern"}
+          afterHeader={
+            <div className="flex flex-wrap items-center gap-2">
+              <EditClassAudienceSummaryRow
+                config={config}
+                tokens={audienceValue}
+                displayLabel={audienceDisplayLabel}
+                changed={audienceChanged}
+                originalLabel={originalAudienceLabel}
+                onRestoreOriginal={() =>
+                  setAudienceValue(
+                    minimizeAudienceTokens(
+                      [...originals.audience],
+                      buildAudienceSelectorTree(config, {
+                        sectionCode: meeting.section,
+                      }),
+                    ),
+                  )
+                }
+                {...audienceSummaryHintProps({
+                  perGroup,
+                  componentLabel: componentAudienceLabel,
+                  context: "template",
+                })}
+                overridden={
+                  perGroup
+                    ? !audienceChanged && Boolean(componentAudienceLabel)
+                    : groupsOverridden
+                }
+                onEdit={() => setAudienceModalOpen(true)}
+              />
+              <SessionPlacementToggle
+                placement={placement}
+                onChange={handlePlacementChange}
+              />
+            </div>
           }
-          excludeRefForOccurrence={(index) =>
-            meetingRef
-              ? occurrenceExcludeRef(
-                  {
-                    courseIdx: meetingRef.courseIdx,
-                    componentIdx: meetingRef.componentIdx,
-                    seriesIdx: meetingRef.seriesIdx,
-                  },
-                  index,
-                )
-              : null
-          }
-          newOccurrenceDefaults={{
-            date: meeting.date,
-            start_time:
-              occurrences[focusIndex]?.start_time ?? occurrences[0]?.start_time,
-            end_time:
-              occurrences[focusIndex]?.end_time ?? occurrences[0]?.end_time,
-            room: occurrences[focusIndex]?.room ?? occurrences[0]?.room ?? null,
-            instructor:
-              occurrences[focusIndex]?.instructor ??
-              occurrences[0]?.instructor ??
-              null,
-          }}
-          newWeeklyDefaults={{
-            weekday:
-              weeklySlots[focusIndex]?.weekday ??
-              weeklySlots[0]?.weekday ??
-              termWeekdayKeyToWeekday(originals.weekday),
-            start_time:
-              weeklySlots[focusIndex]?.start_time ?? weeklySlots[0]?.start_time,
-            end_time:
-              weeklySlots[focusIndex]?.end_time ?? weeklySlots[0]?.end_time,
-            room: weeklySlots[focusIndex]?.room ?? weeklySlots[0]?.room ?? null,
-            instructor:
-              weeklySlots[focusIndex]?.instructor ??
-              weeklySlots[0]?.instructor ??
-              null,
-          }}
-          disabled={cancelChecked}
         />
 
         {perGroup ? (
@@ -810,58 +484,6 @@ export function EditClassModal({
             sectionCode={meeting.section}
           />
         )}
-
-        {placement === "weekly" ? (
-          <div
-            className={clsx(
-              "flex flex-col gap-1",
-              cancelChecked && "border-error/60 border-l-4 pl-2",
-            )}
-          >
-            <label className="label cursor-pointer justify-start gap-2 px-0 py-0">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-sm checkbox-error"
-                checked={cancelChecked}
-                onChange={(event) => setCancelChecked(event.target.checked)}
-              />
-              <span className="text-sm font-medium">Отменить занятие</span>
-            </label>
-            {cancelChecked ? (
-              <div className="text-base-content/55 text-xs">
-                Занятие будет отменено для выбранного диапазона.
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-
-        {showApplyScope ? (
-          <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium">Применить к</span>
-            <div className="flex flex-col gap-1">
-              {SCOPE_OPTIONS.map((option) => (
-                <label
-                  key={option.value}
-                  className="label cursor-pointer justify-start gap-2 rounded-lg border border-transparent px-1 py-0.5"
-                >
-                  <input
-                    type="radio"
-                    name="edit-class-scope"
-                    className="radio radio-sm"
-                    checked={scope === option.value}
-                    onChange={() => setScope(option.value)}
-                  />
-                  <span className="text-sm">{option.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        ) : weeklyStructural ? (
-          <div className="text-base-content/60 text-xs">
-            Добавление, удаление или правка других слотов сохраняет всю серию
-            целиком (без «Применить к»).
-          </div>
-        ) : null}
 
         <div className="mt-1 flex items-center justify-end gap-3">
           {scheduleChanged ? (

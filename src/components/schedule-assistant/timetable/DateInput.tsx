@@ -14,12 +14,37 @@ import {
   useInteractions,
   useRole,
 } from "@floating-ui/react";
+import {
+  TERM_WEEKDAY_LABEL_RU,
+  type TermWeekdayKey,
+} from "@/components/schedule-assistant/settings/weekdays.ts";
 import { cn } from "@/lib/ui/cn";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { ru } from "react-day-picker/locale";
 import "react-day-picker/style.css";
+
+const ISO_WEEKDAY_TO_KEY: TermWeekdayKey[] = [
+  "Sun",
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+];
+
+function weekdayLabelFromIso(iso: string): string | null {
+  const raw = String(iso || "")
+    .trim()
+    .slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
+  const parsed = moment(raw, "YYYY-MM-DD", true);
+  if (!parsed.isValid()) return null;
+  const key = ISO_WEEKDAY_TO_KEY[parsed.day()];
+  return key ? TERM_WEEKDAY_LABEL_RU[key] : null;
+}
 
 const DISPLAY_FORMATS = [
   "DD.MM.YYYY",
@@ -69,6 +94,7 @@ export function DateInput({
   className,
   disabled = false,
   placeholder = "дд.мм.гггг",
+  showWeekday = false,
 }: {
   /** ISO `yyyy-mm-dd` (or empty). */
   value: string;
@@ -76,6 +102,8 @@ export function DateInput({
   className?: string;
   disabled?: boolean;
   placeholder?: string;
+  /** Show derived weekday label inside the input (from a valid ISO date). */
+  showWeekday?: boolean;
 }) {
   const parentId = useFloatingParentNodeId();
 
@@ -90,6 +118,7 @@ export function DateInput({
           className={className}
           disabled={disabled}
           placeholder={placeholder}
+          showWeekday={showWeekday}
         />
       </FloatingTree>
     );
@@ -102,6 +131,7 @@ export function DateInput({
       className={className}
       disabled={disabled}
       placeholder={placeholder}
+      showWeekday={showWeekday}
     />
   );
 }
@@ -112,12 +142,14 @@ function DateInputContent({
   className,
   disabled = false,
   placeholder = "дд.мм.гггг",
+  showWeekday = false,
 }: {
   value: string;
   onChange: (iso: string) => void;
   className?: string;
   disabled?: boolean;
   placeholder?: string;
+  showWeekday?: boolean;
 }) {
   const nodeId = useFloatingNodeId();
   const [open, setOpen] = useState(false);
@@ -129,6 +161,11 @@ function DateInputContent({
 
   const display = draft ?? formatIsoToDdMmYyyy(value);
   const selected = isoToLocalDate(value);
+  const weekdayLabel = showWeekday
+    ? weekdayLabelFromIso(
+        draft != null ? (parseDdMmYyyyToIso(draft) ?? "") : value,
+      )
+    : null;
 
   useEffect(() => {
     setDraft(null);
@@ -199,7 +236,8 @@ function DateInputContent({
             disabled={disabled}
             placeholder={placeholder}
             className={cn(
-              "input input-bordered input-xs h-8 min-h-8 w-full pr-9 text-sm",
+              "input input-bordered input-xs h-8 min-h-8 w-full text-sm",
+              showWeekday ? "pr-16" : "pr-9",
               error && "input-error",
             )}
             value={display}
@@ -215,6 +253,11 @@ function DateInputContent({
               else event.currentTarget.select();
             }}
           />
+          {weekdayLabel ? (
+            <span className="text-base-content/55 pointer-events-none absolute top-1/2 right-8 -translate-y-1/2 text-xs font-medium">
+              {weekdayLabel}
+            </span>
+          ) : null}
           <button
             type="button"
             disabled={disabled}

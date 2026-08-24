@@ -132,7 +132,7 @@ export function resolveAudienceSemester(
   if (!termRange) return null;
   if (!audienceTokens.length) return termRange;
 
-  const groups = expandStudentGroupSelectors(config, audienceTokens);
+  const groups = expandStudentGroupSelectors(config ?? null, audienceTokens);
   if (!groups.length) return termRange;
 
   let start = termRange.start_date;
