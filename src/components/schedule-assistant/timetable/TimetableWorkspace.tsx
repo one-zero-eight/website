@@ -141,6 +141,7 @@ import {
 } from "./timetableViewerModel.ts";
 
 type InnerTab = "instructor" | "room" | string;
+const ACTIVE_TAB_STORAGE_KEY = "schedule-assistant:timetable-active-tab";
 
 function shallowStringRecordEqual(
   a: Record<string, unknown>,
@@ -302,7 +303,9 @@ function TimetableWorkspaceInner({
   const [courseColors, setCourseColors] = useState<
     Record<string, { bg: string; border: string }>
   >({});
-  const [activeTab, setActiveTab] = useState<InnerTab>("core");
+  const [activeTab, setActiveTab] = useState<InnerTab>(
+    () => localStorage.getItem(ACTIVE_TAB_STORAGE_KEY) || "core",
+  );
   const [layoutMode, setLayoutMode] = useState<TimetableLayoutMode>("groups");
   const [exportPending, setExportPending] = useState(false);
   const [placeTargetKey, setPlaceTargetKey] = useState<string | null>(null);
@@ -352,6 +355,7 @@ function TimetableWorkspaceInner({
       const next = validTabs.has(current)
         ? current
         : (sectionCodes[0] as InnerTab);
+      localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, next);
       if (next !== "instructor" && next !== "room") {
         const section = sections.find((candidate) => candidate.code === next);
         const defaultLayout = section?.default_layout;
@@ -809,6 +813,7 @@ function TimetableWorkspaceInner({
   const applyTabChange = useCallback(
     (nextTab: InnerTab) => {
       setActiveTab(nextTab);
+      localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, nextTab);
       selectionStore.setSelection(null);
       setPlaceTargetKey(null);
       setHoverPlaceCell(null);
