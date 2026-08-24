@@ -54,10 +54,12 @@ import {
 import { EditClassModal } from "./EditClassModal.tsx";
 import { MeetingDetailPanel } from "./MeetingDetailPanel.tsx";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
-import { MeetingOverrideFieldBadge } from "./meetingOverrideIndicator.tsx";
 import {
+  findProgramByNameOrCode,
   programSlotLabelForTermRow,
+  programSemesterRange,
   resolveProgramTimeColumns,
+  termSemesterRange,
 } from "./programTimeSlots.ts";
 import {
   buildCalendarGrid,
@@ -2576,11 +2578,30 @@ function CoreGroupsTable({
   onHoverPlaceCell?: (context: CreateMeetingCellContext | null) => void;
 }) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
+  const termRange = useMemo(() => termSemesterRange(config), [config]);
 
   const visibleColumns = useMemo(
     () => columnsForTab(activeTab, baseColumns, allMeetings, config),
     [activeTab, baseColumns, allMeetings, config],
   );
+
+  const programRanges = useMemo(() => {
+    const ranges = new Map<
+      string,
+      { start_date: string; end_date: string } | null
+    >();
+    for (const column of visibleColumns) {
+      if (ranges.has(column.yearLabel)) continue;
+      ranges.set(
+        column.yearLabel,
+        programSemesterRange(
+          findProgramByNameOrCode(config, column.yearLabel),
+          termRange,
+        ),
+      );
+    }
+    return ranges;
+  }, [config, termRange, visibleColumns]);
 
   const prepared = useMemo(
     () =>
@@ -2701,6 +2722,18 @@ function CoreGroupsTable({
             const timeCols = prepared.showProgramTimeColumn[yearLabel] ? 1 : 0;
             const yearCols = prepared.columnsByYear[yearLabel]?.length || 0;
             const programSeparator = yearIndex < yearLabels.length - 1;
+            const isInactive =
+              !!activeWeek &&
+              !!programRanges.get(yearLabel) &&
+              (() => {
+                const date = dateForWeekdayInWeekRange(
+                  activeWeek,
+                  preparedRow.day as TermWeekdayKey,
+                  startingDay,
+                );
+                const range = programRanges.get(yearLabel)!;
+                return date < range.start_date || date > range.end_date;
+              })();
             return (
               <td
                 key={`${preparedRow.key}-${yearLabel}`}
@@ -2710,6 +2743,7 @@ function CoreGroupsTable({
                     ? GROUPS_PROGRAM_SEPARATOR
                     : "border-r border-[#d8dfeb]",
                   isTodayDay && "shadow-[inset_0_2px_0_#f5a623]",
+                  isInactive && "bg-[#edf4ff]",
                 )}
                 style={GROUPS_DAY_ROW_STICKY_STYLE}
                 colSpan={Math.max(1, timeCols + yearCols)}
@@ -2733,6 +2767,19 @@ function CoreGroupsTable({
     let cellIndex = 0;
     for (const [yearIndex, yearLabel] of yearLabels.entries()) {
       const programLabel = preparedRow.programSlotLabels[yearLabel];
+      const cellDate = activeWeek
+        ? dateForWeekdayInWeekRange(
+            activeWeek,
+            preparedRow.day as TermWeekdayKey,
+            startingDay,
+          )
+        : "";
+      const programRange = programRanges.get(yearLabel);
+      const isInactive =
+        !!cellDate &&
+        !!programRange &&
+        (cellDate < programRange.start_date ||
+          cellDate > programRange.end_date);
       if (prepared.showProgramTimeColumn[yearLabel]) {
         rowCells.push(
           <td
@@ -2744,6 +2791,7 @@ function CoreGroupsTable({
               (!programLabel || !preparedRow.rowHasMeetings) &&
                 "bg-[#e3e8f1] text-[#5e6673]",
               todayGroupsSlotTimeClass(isTodayDay, isLastSlot),
+              isInactive && "bg-[#f1f6ff]",
             )}
             style={{ zIndex: 6 + yearIndex }}
           >
@@ -2767,13 +2815,6 @@ function CoreGroupsTable({
           prepared.showProgramTimeColumn[yearLabel] && programLabel
             ? programLabel.slice(0, 5)
             : preparedRow.slotStart;
-        const cellDate = activeWeek
-          ? dateForWeekdayInWeekRange(
-              activeWeek,
-              preparedRow.day as TermWeekdayKey,
-              startingDay,
-            )
-          : "";
         const cellContext: CreateMeetingCellContext = {
           weekday: preparedRow.day as TermWeekdayKey,
           time: cellTime,
@@ -2807,6 +2848,8 @@ function CoreGroupsTable({
               cell.isProgramEmptyAtSlot &&
                 "bg-[#eef1f6] [&_.empty]:bg-[#e9edf3]",
               todayGroupsSlotCellClass(isTodayDay, isLastInTable, isLastSlot),
+              isInactive &&
+                "bg-[#fafcff] [background-image:repeating-linear-gradient(135deg,transparent,transparent_11px,#d7e0eb_11px,#d7e0eb_12px)]",
               dimmed && "opacity-35 saturate-50",
             )}
             colSpan={cell.span > 1 ? cell.span : undefined}
@@ -2824,6 +2867,7 @@ function CoreGroupsTable({
               <div
                 className={clsx(
                   "empty h-full min-h-0 min-h-[64px] rounded bg-[#fafcff]",
+                  isInactive && "bg-transparent",
                   !placeTarget &&
                     onEmptyCellClick &&
                     activeWeek &&
@@ -3116,13 +3160,6 @@ const MeetingCard = memo(function MeetingCard({
             {courseTitle} ({m.tag}){count > 1 ? ` x${count}` : ""}
           </div>
         </div>
-        <span className="flex shrink-0 flex-col items-end gap-0.5">
-          <MeetingOverrideFieldBadge
-            field="weekday"
-            fields={m.override_fields}
-          />
-          <MeetingOverrideFieldBadge field="time" fields={m.override_fields} />
-        </span>
       </div>
       {m.off_grid ? (
         <div className="text-[11px] leading-tight font-semibold text-[#8a6d3b]">
@@ -3163,10 +3200,6 @@ const MeetingCard = memo(function MeetingCard({
                   })
                 : "-"}
             </span>
-            <MeetingOverrideFieldBadge
-              field="instructor"
-              fields={m.override_fields}
-            />
           </span>
         </div>
         <div
@@ -3193,10 +3226,6 @@ const MeetingCard = memo(function MeetingCard({
             ) : (
               <span className="min-w-0 truncate">{roomLoadLabel}</span>
             )}
-            <MeetingOverrideFieldBadge
-              field="room"
-              fields={m.override_fields}
-            />
           </span>
         </div>
       </div>

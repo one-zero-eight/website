@@ -32,6 +32,7 @@ export type CalendarDayColumn = {
   headerLabel: string;
   dateLabel: string;
   isToday: boolean;
+  isInactive: boolean;
 };
 
 export type CalendarWeekBlock = {
@@ -159,6 +160,12 @@ export function buildCalendarGrid(
         ),
       )
     : null;
+  const programSemester = selectedProgram?.semester
+    ? {
+        start: String(selectedProgram.semester.start_date).slice(0, 10),
+        end: String(selectedProgram.semester.end_date).slice(0, 10),
+      }
+    : null;
   const tabMeetings = filterMeetingsByTab(allMeetings, tabMode).filter(
     (meeting) =>
       !meeting.cancelled &&
@@ -237,6 +244,9 @@ export function buildCalendarGrid(
         headerLabel: WEEKDAY_LABEL_RU[day],
         dateLabel: formatCalendarDate(date),
         isToday: date === today,
+        isInactive:
+          programSemester != null &&
+          (date < programSemester.start || date > programSemester.end),
       };
     }),
   }));

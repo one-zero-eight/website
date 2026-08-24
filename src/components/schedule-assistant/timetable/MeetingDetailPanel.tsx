@@ -30,10 +30,6 @@ import {
 } from "./meetingComponentContext.ts";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
-  MeetingOverrideIndicator,
-  formatMeetingOverrideFields,
-} from "./meetingOverrideIndicator.tsx";
-import {
   buildInstructorLabelById,
   dayKey,
   everyWeekdayPhraseRu,
@@ -131,18 +127,7 @@ function resolveMeetingSchedule({
 
   if (ref?.kind === "wp") {
     return {
-      phrase: (
-        <>
-          {everyWeekdayPhraseRu(weekday)}
-          {meeting.override_fields?.length ? (
-            <span className="text-base-content/60">
-              {" "}
-              · переопределено:{" "}
-              {formatMeetingOverrideFields(meeting.override_fields)}
-            </span>
-          ) : null}
-        </>
-      ),
+      phrase: <>{everyWeekdayPhraseRu(weekday)}</>,
       datesList: null,
     };
   }
@@ -330,7 +315,6 @@ export function MeetingDetailPanel({
       <DetailField label="Повтор">
         <span className="inline-flex min-w-0 flex-wrap items-center gap-1.5">
           {schedule.phrase}
-          <MeetingOverrideIndicator fields={meeting.override_fields} />
         </span>
       </DetailField>
       {schedule.datesList}

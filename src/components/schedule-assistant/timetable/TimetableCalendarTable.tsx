@@ -183,6 +183,8 @@ function CalendarWeekHeader({ week }: { week: CalendarWeekBlock }) {
               "border-t border-r border-b border-[#d8dfeb] bg-[#edf4ff] px-1 py-0.5 text-center align-middle text-[0.6875rem] leading-tight font-medium text-[#1d3f70]",
               CALENDAR_HEAD_ROW_CLASS,
               todayCalendarColumnHeadClass(day.isToday),
+              day.isInactive &&
+                "bg-[#e8e8e8] [background-image:repeating-linear-gradient(135deg,transparent,transparent_5px,rgba(120,120,120,0.12)_5px,rgba(120,120,120,0.12)_6px)] text-[#8a8a8a]",
             )}
           >
             <span className="block truncate text-[0.625rem] font-semibold text-[#2d77cc]">
@@ -278,6 +280,8 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                     CALENDAR_DAY_COL_WIDTH,
                     "link-cell relative border-r border-b border-[#d8dfeb] bg-[#fafcff] p-0.5 align-top text-[0.6875rem] leading-tight",
                     todayCalendarColumnBodyClass(day.isToday, isLastSlot),
+                    day.isInactive &&
+                      "bg-[#f0f0f0] [background-image:repeating-linear-gradient(135deg,transparent,transparent_5px,rgba(120,120,120,0.12)_5px,rgba(120,120,120,0.12)_6px)] opacity-60",
                     (canCreateHere && onEmptyCellClick) || canPlaceHere
                       ? "cursor-pointer hover:bg-[#eef4ff]"
                       : null,

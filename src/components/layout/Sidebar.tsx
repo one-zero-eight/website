@@ -156,12 +156,11 @@ function SidebarLink({
       </a>
     );
   } else if (props.type === "local") {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {
-      staff_only,
-      innohassle_admin_only,
-      hideOnMore,
-      type,
+      staff_only: _staff_only,
+      innohassle_admin_only: _innohassle_admin_only,
+      hideOnMore: _hideOnMore,
+      type: _type,
       ...linkProps
     } = props;
     return (

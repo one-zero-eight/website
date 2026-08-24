@@ -44,7 +44,6 @@ import {
   perGroupAudienceOptions,
   resolveEndTimeForStart,
 } from "./meetingEditUtils.ts";
-import { MeetingOverrideIndicator } from "./meetingOverrideIndicator.tsx";
 import {
   buildMeetingPickerIndex,
   type MeetingPickerIndex,
@@ -404,7 +403,6 @@ export function EditClassModal({
         <div className="rounded-box border-base-300 bg-base-100 border px-3 py-2 text-sm">
           <div className="flex flex-wrap items-center gap-2">
             <div className="font-medium">{title}</div>
-            <MeetingOverrideIndicator fields={meeting.override_fields} />
           </div>
           <div className="text-base-content/70 mt-1">
             {formatDisplayDate(meeting.date)} {meeting.start}
