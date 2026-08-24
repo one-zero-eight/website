@@ -415,6 +415,7 @@ export function buildRoomPickerOptions({
   );
 
   const ids = new Set<string>();
+  ids.add(VIRTUAL_ROOM_ID);
   for (const id of roomsById.keys()) ids.add(id);
   for (const id of includeRoomIds || []) {
     const trimmed = id.trim();
@@ -491,6 +492,8 @@ export function buildRoomPickerOptions({
       };
     })
     .sort((a, b) => {
+      if (a.value === VIRTUAL_ROOM_ID) return -1;
+      if (b.value === VIRTUAL_ROOM_ID) return 1;
       if (includeStatus && a.status && b.status) {
         const statusDiff = statusSortRank(a.status) - statusSortRank(b.status);
         if (statusDiff !== 0) return statusDiff;

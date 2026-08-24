@@ -29,6 +29,7 @@ import {
 import {
   buildRoomPickerOptions,
   roomPickerDatesForEdit,
+  VIRTUAL_ROOM_ID,
 } from "@/components/schedule-assistant/timetable/roomPickerOptions.ts";
 import {
   dayKey,
@@ -520,6 +521,7 @@ function RoomSelect({
     if (!focusDate || !start.trim() || !meetingIndex) {
       return [
         { value: "", label: "—" },
+        { value: VIRTUAL_ROOM_ID, label: VIRTUAL_ROOM_ID },
         ...(config.rooms ?? []).map((room) => ({
           value: String(room.id || ""),
           label: String(room.id || room.name || ""),
