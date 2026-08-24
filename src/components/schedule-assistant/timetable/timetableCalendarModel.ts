@@ -1,5 +1,6 @@
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
+import { normalizeTracksFromSectionProgram } from "@/components/schedule-assistant/settings/groups/normalizeTrackFromSectionProgram.ts";
 
 import {
   buildGroupToProgramMap,
@@ -123,6 +124,7 @@ export function buildCalendarGrid(
   allMeetings: Meeting[],
   weeks: WeekRange[],
   tabMode: string,
+  programCode?: string,
 ): BuiltCalendarGrid | null {
   if (!weeks.length) return null;
 
@@ -147,8 +149,21 @@ export function buildCalendarGrid(
   }));
   const slotByStart = new Map(slotsResolved.map((slot) => [slot.start, slot]));
 
+  const selectedProgram = getScheduleSections(config)
+    .find((section) => section.code === tabMode)
+    ?.programs?.find((program) => program.code === programCode);
+  const selectedProgramGroups = selectedProgram
+    ? new Set(
+        normalizeTracksFromSectionProgram(selectedProgram).flatMap(
+          (track) => track.groups,
+        ),
+      )
+    : null;
   const tabMeetings = filterMeetingsByTab(allMeetings, tabMode).filter(
-    (meeting) => !meeting.cancelled,
+    (meeting) =>
+      !meeting.cancelled &&
+      (!selectedProgramGroups ||
+        meeting.groups.some((group) => selectedProgramGroups.has(group))),
   );
 
   const cells = new Map<string, Meeting[]>();

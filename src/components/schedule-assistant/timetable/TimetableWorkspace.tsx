@@ -13,6 +13,7 @@ import {
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { useToast } from "@/components/toast";
+import { cn } from "@/lib/ui/cn";
 import clsx from "clsx";
 import {
   memo,
@@ -26,6 +27,8 @@ import {
 } from "react";
 import { useMediaQuery } from "usehooks-ts";
 
+import { CalendarCourseLegendPanel } from "./CalendarCourseLegendPanel.tsx";
+import { buildCalendarCourseLegend } from "./calendarCourseLegend.ts";
 import { CreateClassModal } from "./CreateClassModal.tsx";
 import {
   createSelectionStore,
@@ -306,6 +309,9 @@ function TimetableWorkspaceInner({
   const [activeTab, setActiveTab] = useState<InnerTab>(
     () => localStorage.getItem(ACTIVE_TAB_STORAGE_KEY) || "core",
   );
+  const [activeProgramCode, setActiveProgramCode] = useState<string | null>(
+    null,
+  );
   const [layoutMode, setLayoutMode] = useState<TimetableLayoutMode>("groups");
   const [exportPending, setExportPending] = useState(false);
   const [placeTargetKey, setPlaceTargetKey] = useState<string | null>(null);
@@ -369,6 +375,21 @@ function TimetableWorkspaceInner({
   }, [config?.term?.sections]);
 
   const isUtilizationTab = activeTab === "instructor" || activeTab === "room";
+  const activeSectionPrograms = useMemo(
+    () =>
+      getScheduleSections(config).find((section) => section.code === activeTab)
+        ?.programs ?? [],
+    [activeTab, config],
+  );
+
+  useEffect(() => {
+    setActiveProgramCode((current) => {
+      if (activeSectionPrograms.some((program) => program.code === current)) {
+        return current;
+      }
+      return activeSectionPrograms[0]?.code ?? null;
+    });
+  }, [activeSectionPrograms]);
 
   const handleExportXlsx = useCallback(async () => {
     if (isUtilizationTab || exportPending) return;
@@ -667,7 +688,13 @@ function TimetableWorkspaceInner({
   const calendarGrid = useMemo(() => {
     if (layoutMode !== "calendar" || isUtilizationTab) return null;
     if (!config || !deferredMeetings.length || !weeks.length) return null;
-    return buildCalendarGrid(config, deferredMeetings, weeks, activeTab);
+    return buildCalendarGrid(
+      config,
+      deferredMeetings,
+      weeks,
+      activeTab,
+      activeProgramCode ?? undefined,
+    );
   }, [
     layoutMode,
     isUtilizationTab,
@@ -675,6 +702,27 @@ function TimetableWorkspaceInner({
     deferredMeetings,
     weeks,
     activeTab,
+    activeProgramCode,
+  ]);
+
+  const showCalendarCourseLegend =
+    layoutMode === "calendar" && !isUtilizationTab;
+  const calendarCourseLegend = useMemo(() => {
+    if (!showCalendarCourseLegend || !config) return [];
+    return buildCalendarCourseLegend({
+      config,
+      meetings: deferredMeetings,
+      sectionCode: activeTab,
+      programCode: activeProgramCode,
+      instructorLabelById,
+    });
+  }, [
+    showCalendarCourseLegend,
+    config,
+    deferredMeetings,
+    activeTab,
+    activeProgramCode,
+    instructorLabelById,
   ]);
 
   // Sticky day-row `top` uses --sa-grid-header-height. Measuring thead on open
@@ -1239,6 +1287,19 @@ function TimetableWorkspaceInner({
               >
                 <div className="schedule-assistant-toolbar flex shrink-0 flex-wrap items-center gap-2 border-b border-[#d8dfeb] px-2 py-1 text-sm">
                   {returnFromChecks ? <ReturnToChecksLink /> : null}
+                  {layoutMode === "calendar" &&
+                  activeSectionPrograms.length > 1 ? (
+                    <TimetableProgramTabs
+                      programs={activeSectionPrograms}
+                      activeProgramCode={activeProgramCode}
+                      onProgramChange={(programCode) => {
+                        setActiveProgramCode(programCode);
+                        selectionStore.setSelection(null);
+                        setPlaceTargetKey(null);
+                        setHoverPlaceCell(null);
+                      }}
+                    />
+                  ) : null}
                   {layoutMode !== "calendar" ? (
                     <div className="flex shrink-0 items-center gap-1.5">
                       <div className="join">
@@ -1351,40 +1412,60 @@ function TimetableWorkspaceInner({
                       Загрузка таблицы…
                     </div>
                   ) : (
-                    <TimetableMainGrid
-                      layoutMode={layoutMode}
-                      isUtilizationTab={isUtilizationTab}
-                      calendarGrid={calendarGrid}
-                      grid={grid}
-                      activeWeek={weeks[weekIndex] ?? null}
-                      columns={columns}
-                      activeTab={activeTab}
-                      allMeetings={allMeetings}
-                      config={config}
-                      courseColors={courseColors}
-                      roomCapacityById={roomCapacityById}
-                      groupSizeById={groupSizeById}
-                      instructorLabelById={instructorLabelById}
-                      selectMeeting={selectMeeting}
-                      openMeetingEdit={openMeetingEdit}
-                      selectInstructorCell={selectInstructorCell}
-                      selectRoomCell={selectRoomCell}
-                      selectInstructorHeader={selectInstructorHeader}
-                      selectRoomHeader={selectRoomHeader}
-                      selectProgram={selectProgram}
-                      selectGroup={selectGroup}
-                      clearSelection={clearSelection}
-                      onEmptyCellClick={
-                        isUtilizationTab ? undefined : handleEmptyCellClick
-                      }
-                      placeTarget={placeTarget}
-                      placeGhostRoom={placeGhostRoom}
-                      placeGhostInstructor={placeGhostInstructor}
-                      hoverPlaceCell={hoverPlaceCell}
-                      onHoverPlaceCell={
-                        placeTarget ? setHoverPlaceCell : undefined
-                      }
-                    />
+                    <div
+                      className={cn(
+                        showCalendarCourseLegend &&
+                          "flex min-h-full min-w-max items-start",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          showCalendarCourseLegend &&
+                            "min-w-[min(72rem,calc(100vw-2rem))] shrink-0",
+                        )}
+                      >
+                        <TimetableMainGrid
+                          layoutMode={layoutMode}
+                          isUtilizationTab={isUtilizationTab}
+                          calendarGrid={calendarGrid}
+                          grid={grid}
+                          activeWeek={weeks[weekIndex] ?? null}
+                          columns={columns}
+                          activeTab={activeTab}
+                          allMeetings={allMeetings}
+                          config={config}
+                          courseColors={courseColors}
+                          roomCapacityById={roomCapacityById}
+                          groupSizeById={groupSizeById}
+                          instructorLabelById={instructorLabelById}
+                          selectMeeting={selectMeeting}
+                          openMeetingEdit={openMeetingEdit}
+                          selectInstructorCell={selectInstructorCell}
+                          selectRoomCell={selectRoomCell}
+                          selectInstructorHeader={selectInstructorHeader}
+                          selectRoomHeader={selectRoomHeader}
+                          selectProgram={selectProgram}
+                          selectGroup={selectGroup}
+                          clearSelection={clearSelection}
+                          onEmptyCellClick={
+                            isUtilizationTab ? undefined : handleEmptyCellClick
+                          }
+                          placeTarget={placeTarget}
+                          placeGhostRoom={placeGhostRoom}
+                          placeGhostInstructor={placeGhostInstructor}
+                          hoverPlaceCell={hoverPlaceCell}
+                          onHoverPlaceCell={
+                            placeTarget ? setHoverPlaceCell : undefined
+                          }
+                        />
+                      </div>
+                      {showCalendarCourseLegend ? (
+                        <CalendarCourseLegendPanel
+                          rows={calendarCourseLegend}
+                          className="sticky top-0 w-lg shrink-0 self-start border-l border-[#d8dfeb] p-3"
+                        />
+                      ) : null}
+                    </div>
                   )}
                 </div>
               </div>
@@ -1715,6 +1796,36 @@ function TimetableTabSelector({
       placement="bottom-end"
       matchTriggerWidth={false}
     />
+  );
+}
+
+function TimetableProgramTabs({
+  programs,
+  activeProgramCode,
+  onProgramChange,
+}: {
+  programs: NonNullable<
+    ReturnType<typeof getScheduleSections>[number]["programs"]
+  >;
+  activeProgramCode: string | null;
+  onProgramChange: (programCode: string) => void;
+}) {
+  return (
+    <div className="tabs tabs-box tabs-sm max-w-full shrink overflow-x-auto">
+      {programs.map((program) => (
+        <button
+          key={program.code}
+          type="button"
+          className={cn(
+            "tab shrink-0 whitespace-nowrap",
+            activeProgramCode === program.code && "tab-active",
+          )}
+          onClick={() => onProgramChange(program.code)}
+        >
+          {program.name}
+        </button>
+      ))}
+    </div>
   );
 }
 
