@@ -103,9 +103,28 @@ function HostDisplayLink({ host }: { host: HostDisplay }) {
   );
 }
 
-export function PublicHostsList({ hosts }: { hosts: SchemaPublicHost[] }) {
+export function PublicHostsList({
+  hosts,
+  linked = true,
+}: {
+  hosts: SchemaPublicHost[];
+  linked?: boolean;
+}) {
   if (hosts.length === 0) {
     return <span>TBA</span>;
+  }
+
+  if (!linked) {
+    return (
+      <span className="inline">
+        {hosts.map((host, index) => (
+          <Fragment key={host.id}>
+            {index > 0 && <span>, </span>}
+            <span>{displayPublicHost(host).displayName}</span>
+          </Fragment>
+        ))}
+      </span>
+    );
   }
 
   return (
@@ -123,12 +142,29 @@ export function PublicHostsList({ hosts }: { hosts: SchemaPublicHost[] }) {
 export function StoredHostsList({
   hosts,
   clubs,
+  linked = true,
 }: {
   hosts: SchemaHost[];
   clubs: { club_id: string; title: string }[];
+  linked?: boolean;
 }) {
   if (hosts.length === 0) {
     return <span>TBA</span>;
+  }
+
+  if (!linked) {
+    return (
+      <span className="inline">
+        {hosts.map((host, index) => (
+          <Fragment key={host.id ?? index}>
+            {index > 0 && <span>, </span>}
+            <span>
+              {displayStoredHost(host, clubs)?.displayName ?? "Unknown host"}
+            </span>
+          </Fragment>
+        ))}
+      </span>
+    );
   }
 
   return (

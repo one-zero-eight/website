@@ -62,12 +62,27 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
                 }
               : undefined,
         }).then((response) => {
+          if (!response.ok) {
+            throw new Error(
+              `Calendar feed "${meta.url}" responded with HTTP ${response.status}`,
+            );
+          }
           return response.text().then((icsText) => {
             internalState.response = response;
-            return new IcalExpander({
-              ics: icsText,
-              skipInvalidDates: true,
-            });
+            try {
+              return new IcalExpander({
+                ics: icsText,
+                skipInvalidDates: true,
+              });
+            } catch (error) {
+              // Non-ICS content (e.g. JSON error page) crashes ical.js with an
+              // obscure "designSet" TypeError; fail the source gracefully instead.
+              throw new Error(
+                `Invalid ICS from "${meta.url}": ${
+                  error instanceof Error ? error.message : String(error)
+                }`,
+              );
+            }
           });
         }),
       };
