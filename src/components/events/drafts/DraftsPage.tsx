@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useEventsAuth } from "../hooks";
+import { EventsByDate } from "../shared/EventsByDate";
 import { EventSummaryCard } from "../shared/EventSummaryCard";
 import { getDraftImageUrl } from "../utils/links";
 import { CreateDraftModal } from "./CreateDraftModal";
@@ -104,14 +105,15 @@ export function DraftsPage() {
       {data && data.length === 0 ? (
         <p className="text-base-content/70">No drafts yet.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 @min-[700px]/content:grid-cols-2 @min-[1000px]/content:grid-cols-3">
-          {data?.map((draft) => {
+        <EventsByDate
+          events={data ?? []}
+          getStartsAt={(draft) => draft.data.starts_at}
+          renderCard={(draft) => {
             const inviteBusy =
               pendingId === draft.id && (isAccepting || isDeclining);
 
             return (
               <EventSummaryCard
-                key={draft.id}
                 href={`/events/drafts/${draft.id}`}
                 imageUrl={
                   draft.data.image_id ? getDraftImageUrl(draft.id) : null
@@ -167,8 +169,8 @@ export function DraftsPage() {
                 }
               />
             );
-          })}
-        </div>
+          }}
+        />
       )}
 
       <CreateDraftModal open={createOpen} onOpenChange={setCreateOpen} />

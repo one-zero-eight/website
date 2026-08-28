@@ -1,6 +1,7 @@
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import { $workshops } from "@/api/workshops";
 import moment from "moment";
+import { EventsByDate } from "../shared/EventsByDate";
 import { EventSummaryCard } from "../shared/EventSummaryCard";
 import { getEventImageUrl } from "../utils/links";
 
@@ -49,10 +50,12 @@ export function EventsCardsView({ date }: { date: Date }) {
       {data && data.length === 0 ? (
         <p className="text-base-content/70">No events this month.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 @min-[700px]/content:grid-cols-2 @min-[1000px]/content:grid-cols-3 @min-[1400px]/content:grid-cols-4">
-          {data?.map((event) => (
+        <EventsByDate
+          events={data ?? []}
+          getStartsAt={(event) => event.data.starts_at}
+          gridClassName="grid grid-cols-1 gap-4 @min-[700px]/content:grid-cols-2 @min-[1000px]/content:grid-cols-3 @min-[1400px]/content:grid-cols-4"
+          renderCard={(event) => (
             <EventSummaryCard
-              key={event.id}
               href={`/events/p/${event.id}`}
               imageUrl={event.data.image_id ? getEventImageUrl(event.id) : null}
               name={event.data.name}
@@ -61,8 +64,8 @@ export function EventsCardsView({ date }: { date: Date }) {
               location={event.data.location}
               compact
             />
-          ))}
-        </div>
+          )}
+        />
       )}
     </div>
   );

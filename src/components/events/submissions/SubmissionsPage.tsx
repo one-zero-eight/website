@@ -7,6 +7,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { useEventsAuth } from "../hooks";
+import { EventsByDate } from "../shared/EventsByDate";
 import { EventSummaryCard } from "../shared/EventSummaryCard";
 import { getSubmissionImageUrl } from "../utils/links";
 
@@ -93,38 +94,48 @@ export function SubmissionsPage() {
   }
 
   return (
-    <div className="@container/content flex flex-col gap-8 px-4 py-4">
+    <div className="@container/content flex flex-col gap-3 px-4 py-4">
       <h2 className="text-2xl font-medium">Submissions</h2>
 
       {sections.map((section) => {
         const items = byStatus[section.status];
 
         return (
-          <section key={section.status} className="flex flex-col gap-4">
-            <h3 className="text-xl font-medium">{section.title}</h3>
-            {items.length === 0 ? (
-              <p className="text-base-content/70">{section.empty}</p>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 @min-[700px]/content:grid-cols-2 @min-[1000px]/content:grid-cols-3">
-                {items.map((item) => (
-                  <EventSummaryCard
-                    key={item.id}
-                    href={`/events/submissions/${item.id}`}
-                    imageUrl={
-                      item.submission.data.image_id
-                        ? getSubmissionImageUrl(item.id)
-                        : null
-                    }
-                    name={item.submission.data.name}
-                    hosts={item.submission.data.hosts}
-                    clubs={clubs}
-                    startsAt={item.submission.data.starts_at}
-                    location={item.submission.data.location}
-                    status={item.status ?? item.submission.moderation.status}
+          <section key={section.status}>
+            <details className="collapse-arrow collapse" open>
+              <summary className="collapse-title flex items-center gap-2 py-1 pr-6 text-xl font-medium">
+                {section.title}
+                <span className="badge badge-ghost">{items.length}</span>
+              </summary>
+              <div className="collapse-content py-1 pl-3">
+                {items.length === 0 ? (
+                  <p className="text-base-content/70">{section.empty}</p>
+                ) : (
+                  <EventsByDate
+                    events={items}
+                    getStartsAt={(item) => item.submission.data.starts_at}
+                    renderCard={(item) => (
+                      <EventSummaryCard
+                        href={`/events/submissions/${item.id}`}
+                        imageUrl={
+                          item.submission.data.image_id
+                            ? getSubmissionImageUrl(item.id)
+                            : null
+                        }
+                        name={item.submission.data.name}
+                        hosts={item.submission.data.hosts}
+                        clubs={clubs}
+                        startsAt={item.submission.data.starts_at}
+                        location={item.submission.data.location}
+                        status={
+                          item.status ?? item.submission.moderation.status
+                        }
+                      />
+                    )}
                   />
-                ))}
+                )}
               </div>
-            )}
+            </details>
           </section>
         );
       })}
