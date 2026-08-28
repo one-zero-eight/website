@@ -1,3 +1,5 @@
+import { rewriteCalendarExportHost } from "@/api/schedule/links.ts";
+
 const workshopsApiUrl = import.meta.env.VITE_WORKSHOPS_API_URL;
 
 export function getLinkDisplayLabel(link: {
@@ -17,11 +19,11 @@ export function getLinkDisplayLabel(link: {
 }
 
 export function getEventsIcsUrl() {
-  return `${workshopsApiUrl}/events.ics`;
+  return rewriteCalendarExportHost(`${workshopsApiUrl}/events.ics`);
 }
 
 export function getMyEventsIcsUrl() {
-  return `${workshopsApiUrl}/users/me/events.ics`;
+  return rewriteCalendarExportHost(`${workshopsApiUrl}/users/me/events.ics`);
 }
 
 export function getEventImageUrl(id: string) {
