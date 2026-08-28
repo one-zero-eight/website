@@ -13,6 +13,7 @@ import { DescriptionEditor } from "@/components/editor/DescriptionEditor.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import type { EditorImageHandlers } from "@/components/editor/types";
 import { Modal } from "@/components/common/Modal.tsx";
+import { canUserEditClub } from "./permissions.ts";
 
 export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const navigate = useNavigate();
@@ -290,14 +291,14 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   }, [club?.id, uploadDescriptionImage]);
 
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
+  const canEditClub = canUserEditClub(clubsUser, club?.id);
 
   useEffect(() => {
-    if (clubsUser && clubsUser.role !== "admin") {
-      navigate({ to: "/clubs" });
-    }
-  }, [clubsUser, navigate]);
+    if (!clubsUser || !club || canEditClub) return;
+    navigate({ to: "/clubs" });
+  }, [canEditClub, club, clubsUser, navigate]);
 
-  if (clubsUser?.role !== "admin") {
+  if (!canEditClub) {
     return null;
   }
 

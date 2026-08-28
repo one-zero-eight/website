@@ -11,6 +11,7 @@ import {
   getLinkIconClass,
   getLinkLabel,
 } from "./constants.ts";
+import { canUserEditClub } from "./permissions.ts";
 
 export function ClubPage({ clubSlug }: { clubSlug: string }) {
   const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
@@ -47,6 +48,8 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
     );
   }
 
+  const canEditClub = canUserEditClub(clubsUser, club.id);
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-4">
       <Helmet>
@@ -62,7 +65,7 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
             className="absolute inset-0 bg-repeat"
           />
           <ClubLogo clubId={club.id} className="size-48" />
-          {clubsUser?.role === "admin" && (
+          {canEditClub && (
             <Link
               to="/clubs/$slug/edit"
               params={{ slug: clubSlug }}
