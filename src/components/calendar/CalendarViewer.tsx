@@ -20,6 +20,18 @@ import momentPlugin from "@fullcalendar/moment";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { cn } from "@/lib/ui/cn";
+import {
+  autoUpdate,
+  flip,
+  FloatingPortal,
+  offset,
+  shift,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions,
+  useTransitionStyles,
+} from "@floating-ui/react";
 import moment from "moment/moment";
 import {
   ComponentType,
@@ -29,7 +41,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useLocalStorage } from "usehooks-ts";
+import { useLocalStorage, useMediaQuery } from "usehooks-ts";
 import iCalendarPlugin from "./iCalendarPlugin";
 import { WHEN2MEET_EVENT_ID_PREFIX } from "./when2meet-events.ts";
 import "./styles-calendar.css";
@@ -80,6 +92,7 @@ export function CalendarViewer({
   customViews?: CalendarCustomView[];
 }) {
   const { academicCalendar } = useMyAcademicCalendar();
+  const isMobile = useMediaQuery("(max-width: 767px)");
   const academicCalendarRef = useRef(academicCalendar);
   useEffect(() => {
     academicCalendarRef.current = academicCalendar;
@@ -301,14 +314,14 @@ export function CalendarViewer({
           timeGridWeek: {
             eventContent: renderEventTimeGridWeek,
             dayHeaderContent: renderDayHeader,
-            weekNumbers: true,
+            weekNumbers: !isMobile,
           },
           timeGrid3: {
             type: "timeGrid",
             dayCount: 3,
             eventContent: renderEventTimeGridWeek,
             dayHeaderContent: renderDayHeader,
-            weekNumbers: true,
+            weekNumbers: !isMobile,
           },
           dayGridMonth: {
             eventContent: renderEventDayGridMonth,
@@ -342,7 +355,7 @@ export function CalendarViewer({
         }}
         firstDay={1} // From Monday
         navLinks={false} // Dates are clickable
-        weekNumbers={true} // Display numbers of weeks
+        weekNumbers={!isMobile} // Display numbers of weeks
         weekNumberFormat={{ week: "long" }} // Show "Week 1", not "W1"
         weekNumberClassNames="text-sm week-cell" // Small text size
         weekNumberCalculation={(d) =>
@@ -387,7 +400,7 @@ export function CalendarViewer({
         loading={setIsLoading}
       />
     ),
-    [builtInInitialView, initialView, isFullPage],
+    [builtInInitialView, initialView, isFullPage, isMobile],
   );
 
   useEffect(() => {
@@ -487,8 +500,8 @@ export function CalendarViewer({
         isLoading && "calendar-loading",
       )}
     >
-      <div className="flex flex-none flex-wrap items-center justify-between gap-2 px-4 pt-3 pb-4">
-        <div className="flex items-center gap-1">
+      <div className="flex flex-none flex-nowrap items-center justify-between gap-2 overflow-x-auto px-4 pt-3 pb-4">
+        <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
             className="btn btn-sm rounded-xl"
@@ -514,13 +527,13 @@ export function CalendarViewer({
           </button>
           <button
             type="button"
-            className="btn btn-sm rounded-xl"
+            className="btn btn-sm hidden rounded-xl sm:inline-flex"
             onClick={handleToday}
           >
             Today
           </button>
         </div>
-        <div className="join">
+        <div className="join hidden shrink-0 sm:flex">
           {availableViews.map((view) => (
             <button
               key={view.id}
@@ -538,13 +551,22 @@ export function CalendarViewer({
         {isFullPage && (
           <button
             type="button"
-            className="btn btn-sm rounded-xl"
+            className="btn btn-sm hidden shrink-0 rounded-xl sm:inline-flex"
             onClick={() => setSourcesDialogOpen(true)}
           >
             <span className="icon-[material-symbols--settings-outline] text-xl" />
             Config & Export
           </button>
         )}
+        <CalendarControlMenu
+          className="sm:hidden"
+          views={availableViews}
+          currentView={calendarView}
+          onSelectView={handleChangeView}
+          onToday={handleToday}
+          onConfigExport={() => setSourcesDialogOpen(true)}
+          showConfig={isFullPage}
+        />
       </div>
       <div className={cn("min-h-0 flex-1", isCustomView && "hidden")}>
         {calendarComponent}
@@ -565,6 +587,115 @@ export function CalendarViewer({
         onOpenChange={setSourcesDialogOpen}
       />
     </div>
+  );
+}
+
+function CalendarControlMenu({
+  views,
+  currentView,
+  onSelectView,
+  onToday,
+  onConfigExport,
+  showConfig,
+  className,
+}: {
+  views: CalendarView[];
+  currentView: string;
+  onSelectView: (viewId: string) => void;
+  onToday: () => void;
+  onConfigExport?: () => void;
+  showConfig: boolean;
+  className?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { refs, floatingStyles, context } = useFloating({
+    open: isOpen,
+    onOpenChange: setIsOpen,
+    whileElementsMounted: autoUpdate,
+    strategy: "fixed",
+    middleware: [offset(8), flip(), shift({ padding: 8 })],
+  });
+
+  const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
+    duration: 50,
+  });
+  const click = useClick(context);
+  const dismiss = useDismiss(context);
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss,
+  ]);
+
+  return (
+    <>
+      <button
+        ref={refs.setReference}
+        type="button"
+        className={cn("btn btn-sm shrink-0 rounded-xl", className)}
+        {...getReferenceProps()}
+      >
+        <span className="icon-[material-symbols--menu] text-xl" />
+      </button>
+
+      {isMounted && (
+        <FloatingPortal>
+          <div
+            ref={refs.setFloating}
+            style={{ ...floatingStyles, ...transitionStyles }}
+            {...getFloatingProps()}
+            className="bg-base-100 border-base-300 z-[100] flex w-48 flex-col gap-1 rounded-xl border p-1 pt-2 shadow-lg"
+          >
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost justify-start"
+              onClick={() => {
+                onToday();
+                setIsOpen(false);
+              }}
+            >
+              Go today
+            </button>
+
+            <div className="bg-base-300 my-1 h-px" />
+
+            {views.map((view) => (
+              <button
+                key={view.id}
+                type="button"
+                className={cn(
+                  "btn btn-sm btn-ghost justify-start",
+                  currentView === view.id && "btn-active",
+                )}
+                onClick={() => {
+                  onSelectView(view.id);
+                  setIsOpen(false);
+                }}
+              >
+                {view.displayName}
+              </button>
+            ))}
+
+            {showConfig && onConfigExport && (
+              <>
+                <div className="bg-base-300 my-1 h-px" />
+                <button
+                  type="button"
+                  className="btn btn-sm btn-ghost justify-start"
+                  onClick={() => {
+                    onConfigExport();
+                    setIsOpen(false);
+                  }}
+                >
+                  <span className="icon-[material-symbols--settings-outline] text-lg" />
+                  Config & Export
+                </button>
+              </>
+            )}
+          </div>
+        </FloatingPortal>
+      )}
+    </>
   );
 }
 
