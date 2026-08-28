@@ -103,11 +103,11 @@ export function SubmissionsPage() {
         return (
           <section key={section.status}>
             <details className="collapse-arrow collapse" open>
-              <summary className="collapse-title flex items-center gap-2 py-1 pr-6 text-xl font-medium">
+              <summary className="collapse-title flex items-center gap-2 py-1.5 pr-6 pl-0 text-xl font-medium after:end-3">
                 {section.title}
                 <span className="badge badge-ghost">{items.length}</span>
               </summary>
-              <div className="collapse-content py-1 pl-3">
+              <div className="collapse-content px-0 py-1.5">
                 {items.length === 0 ? (
                   <p className="text-base-content/70">{section.empty}</p>
                 ) : (

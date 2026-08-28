@@ -93,18 +93,18 @@ export function EventsByDate<T extends { id: string }>({
 
     return (
       <details className="collapse-arrow collapse" open>
-        <summary className="collapse-title flex items-center gap-2 py-1 pr-6 text-lg font-medium">
+        <summary className="collapse-title flex items-center gap-2 py-1.5 pr-6 pl-0 text-lg font-medium after:end-3">
           {title}
           <span className="badge badge-ghost">{total}</span>
         </summary>
-        <div className="collapse-content py-1 pl-3">
+        <div className="collapse-content px-0 py-1.5">
           {groups.map((group) => (
             <details key={group.key} className="collapse-arrow collapse" open>
-              <summary className="collapse-title text-base-content/70 flex items-center gap-2 py-1 pr-6 text-sm font-medium">
+              <summary className="collapse-title text-base-content/70 flex items-center gap-2 py-1.5 pr-6 pl-0 text-sm font-medium after:end-3">
                 {group.label}
                 <span className="badge badge-ghost">{group.items.length}</span>
               </summary>
-              <div className="collapse-content py-1 pl-3">
+              <div className="collapse-content px-0 py-1.5">
                 <div className={gridClassName}>
                   {group.items.map((item) => (
                     <Fragment key={item.id}>{renderCard(item)}</Fragment>
