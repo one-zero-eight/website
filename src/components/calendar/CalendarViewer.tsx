@@ -533,31 +533,33 @@ export function CalendarViewer({
             Today
           </button>
         </div>
-        <div className="join hidden shrink-0 sm:flex">
-          {availableViews.map((view) => (
+        <div className="hidden shrink-0 items-center gap-2 sm:flex">
+          <div className="join hidden sm:flex">
+            {availableViews.map((view) => (
+              <button
+                key={view.id}
+                type="button"
+                className={cn(
+                  "btn btn-sm join-item",
+                  calendarView === view.id && "btn-active",
+                )}
+                onClick={() => handleChangeView(view.id)}
+              >
+                {view.displayName}
+              </button>
+            ))}
+          </div>
+          {isFullPage && (
             <button
-              key={view.id}
               type="button"
-              className={cn(
-                "btn btn-sm join-item",
-                calendarView === view.id && "btn-active",
-              )}
-              onClick={() => handleChangeView(view.id)}
+              className="btn btn-sm hidden rounded-xl sm:inline-flex"
+              onClick={() => setSourcesDialogOpen(true)}
             >
-              {view.displayName}
+              <span className="icon-[material-symbols--settings-outline] text-xl" />
+              Config & Export
             </button>
-          ))}
+          )}
         </div>
-        {isFullPage && (
-          <button
-            type="button"
-            className="btn btn-sm hidden shrink-0 rounded-xl sm:inline-flex"
-            onClick={() => setSourcesDialogOpen(true)}
-          >
-            <span className="icon-[material-symbols--settings-outline] text-xl" />
-            Config & Export
-          </button>
-        )}
         <CalendarControlMenu
           className="sm:hidden"
           views={availableViews}
