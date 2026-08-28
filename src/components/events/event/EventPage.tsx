@@ -131,7 +131,7 @@ export function EventPage({ id }: { id: string }) {
   }
 
   if (isError || !data) {
-    if (isApiHttpError(error) && error.httpCode === 404) {
+    if (isApiHttpError(error) && (error.httpCode as number) === 404) {
       return <Navigate to="/events" />;
     }
 
