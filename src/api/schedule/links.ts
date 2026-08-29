@@ -1,7 +1,7 @@
 export const SCHEDULE_API_URL = import.meta.env.VITE_SCHEDULE_API_URL!;
 export const WORKSHOPS_API_URL = import.meta.env.VITE_WORKSHOPS_API_URL!;
 
-export const CALENDAR_EXPORT_HOST = "api.inh.dofi4ka.ru";
+export const CALENDAR_EXPORT_HOST = import.meta.env.VITE_CALENDAR_EXPORT_HOST!;
 
 export function rewriteCalendarExportHost(url: string) {
   const parsed = new URL(url);
