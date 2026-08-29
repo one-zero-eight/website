@@ -7,6 +7,7 @@ import { ImportColorsPalette } from "@/components/calendar/import/ColorsPalette.
 import { useToast } from "@/components/toast";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client.ts";
 import { queryClient } from "@/app/query-client.ts";
+import type { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 
 function toAliasPart(value: string) {
   return value
@@ -20,22 +21,16 @@ export function ImportModal({
   open,
   onOpenChange,
   onSubmit,
-  prevAlias,
-  prevName = "",
-  prevDescription,
-  prevUrl,
+  prevLinkedCalendar,
   aboveModal = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: () => void;
-  prevAlias?: string | null;
-  prevName?: string | null;
-  prevDescription?: string | null;
-  prevUrl?: string | null;
+  prevLinkedCalendar?: SchemaLinkedCalendarView;
   aboveModal?: boolean;
 }) {
-  const { data: eventsUser } = $schedule.useQuery("get", "/users/me");
+  const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
   const { mutate: postLinkedCalendar } = $schedule.useMutation(
     "post",
     "/users/me/linked",
@@ -44,6 +39,8 @@ export function ImportModal({
     "patch",
     "/users/me/linked",
   );
+  const { mutate: deleteLinkedCalendar, isPending: isDeleting } =
+    $schedule.useMutation("delete", "/users/me/linked");
 
   const onSuccess = async () => {
     await queryClient.invalidateQueries({
@@ -54,18 +51,18 @@ export function ImportModal({
 
   const handleSubmit = (event: React.SubmitEvent) => {
     event.preventDefault();
-    return prevAlias
+    return prevLinkedCalendar
       ? patchLinkedCalendar(
           {
             body: {
-              alias: prevAlias,
+              alias: prevLinkedCalendar.alias,
               url: calendarURL,
               name: calendarName,
               description: calendarDescription,
               color: calendarColor,
               is_active: true,
             },
-            params: { query: { alias: prevAlias } },
+            params: { query: { alias: prevLinkedCalendar.alias } },
           },
           {
             onSuccess,
@@ -94,19 +91,46 @@ export function ImportModal({
         );
   };
 
-  const { showError } = useToast();
+  const { showConfirm, showError } = useToast();
 
-  const [calendarURL, setCalendarURL] = useState(prevUrl ?? "");
+  const handleDelete = async () => {
+    if (!prevLinkedCalendar) return;
 
-  const [calendarName, setCalendarName] = useState(prevName ?? "");
-  const [calendarDescription, setCalendarDescription] = useState(
-    prevDescription ?? "",
+    const confirmed = await showConfirm({
+      title: "Delete calendar",
+      message: `Delete "${calendarName}"? This cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "error",
+    });
+    if (!confirmed) return;
+
+    deleteLinkedCalendar(
+      { params: { query: { alias: prevLinkedCalendar.alias } } },
+      {
+        onSuccess,
+        onError: (error) => {
+          showError("Calendar deletion failed", formatApiErrorMessage(error));
+        },
+      },
+    );
+  };
+
+  const [calendarURL, setCalendarURL] = useState(prevLinkedCalendar?.url ?? "");
+
+  const [calendarName, setCalendarName] = useState(
+    prevLinkedCalendar?.name ?? "",
   );
-  const [calendarColor, setCalendarColor] = useState("#9747ff");
+  const [calendarDescription, setCalendarDescription] = useState(
+    prevLinkedCalendar?.description ?? "",
+  );
+  const [calendarColor, setCalendarColor] = useState(
+    prevLinkedCalendar?.color ?? "#9747ff",
+  );
   const [showColors, setShowColors] = useState(false);
   const [isCalendarChecked, setIsCalendarChecked] = useState(false);
 
-  const username = toAliasPart(eventsUser?.email ?? "") || "user";
+  const username = toAliasPart(scheduleUser?.email ?? "") || "user";
   const normalizedCalendarName = toAliasPart(calendarName) || "calendar";
 
   const [showPreview, setShowPreview] = useState(true);
@@ -133,7 +157,7 @@ export function ImportModal({
           onChange={(e) => setCalendarName(e.target.value)}
           placeholder="Name for your calendar..."
           className="input bg-base-200 mb-3 w-full grow rounded-xl border-0 p-2 text-base outline-none"
-          disabled={!!prevName}
+          disabled={!!prevLinkedCalendar}
         />
         <label htmlFor="calendarURL" className="ml-1">
           Calendar URL
@@ -174,18 +198,34 @@ export function ImportModal({
             >
               {showPreview ? "Hide preview" : "Show preview"}
             </button>
-            <button
-              type="submit"
-              className="btn btn-primary btn-md"
-              disabled={
-                calendarName.length === 0 ||
-                !isCalendarChecked ||
-                (calendarURL === prevUrl &&
-                  prevDescription === calendarDescription)
-              }
-            >
-              Submit
-            </button>
+            <div className="flex gap-2">
+              {prevLinkedCalendar && (
+                <button
+                  type="button"
+                  className="btn btn-error btn-md"
+                  disabled={isDeleting}
+                  onClick={handleDelete}
+                >
+                  {isDeleting && (
+                    <span className="loading loading-spinner loading-sm" />
+                  )}
+                  Delete
+                </button>
+              )}
+              <button
+                type="submit"
+                className="btn btn-primary btn-md"
+                disabled={
+                  calendarName.length === 0 ||
+                  !isCalendarChecked ||
+                  (calendarURL === prevLinkedCalendar?.url &&
+                    prevLinkedCalendar.description === calendarDescription &&
+                    calendarColor === (prevLinkedCalendar.color ?? "#9747ff"))
+                }
+              >
+                Submit
+              </button>
+            </div>
           </div>
         )}
       </form>

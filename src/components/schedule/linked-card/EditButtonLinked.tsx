@@ -1,20 +1,16 @@
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { useState } from "react";
-import { ImportModal } from "@/components/calendar/import";
+import { ImportModal } from "@/components/calendar/import/ImportModal.tsx";
+import type { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 
 export default function EditButtonLinked({
-  alias,
-  name,
-  description,
-  url,
+  linkedCalendar,
 }: {
-  alias: string | null | undefined;
-  name: string | null | undefined;
-  description: string | null | undefined;
-  url: string | null | undefined;
+  linkedCalendar: SchemaLinkedCalendarView;
 }) {
   const [importModalOpen, setImportModalOpen] = useState(false);
 
+  const { alias, name } = linkedCalendar;
   if (!alias || !name) return null;
 
   return (
@@ -35,10 +31,7 @@ export default function EditButtonLinked({
         open={importModalOpen}
         onOpenChange={setImportModalOpen}
         onSubmit={() => setImportModalOpen(false)}
-        prevAlias={alias}
-        prevName={name}
-        prevDescription={description}
-        prevUrl={url}
+        prevLinkedCalendar={linkedCalendar}
         aboveModal
       />
     </>

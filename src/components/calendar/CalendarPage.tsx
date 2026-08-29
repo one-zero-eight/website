@@ -131,6 +131,7 @@ function getCalendarsToShow(
       toShow.push({
         url: getImportedLink(userId, v.alias),
         color: v.color || undefined,
+        updatedAt: new Date().toISOString(),
       });
   });
 

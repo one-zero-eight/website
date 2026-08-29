@@ -2,25 +2,19 @@ import { useNavigate } from "@tanstack/react-router";
 import RemoveButtonLinked from "@/components/schedule/linked-card/RemoveButtonLinked.tsx";
 import HideButtonLinked from "@/components/schedule/linked-card/HideButtonLinked.tsx";
 import EditButtonLinked from "@/components/schedule/linked-card/EditButtonLinked.tsx";
+import type { SchemaLinkedCalendarView } from "@/api/schedule/types.ts";
 
 export type LinkedCardProps = {
-  name: string | null | undefined;
-  alias: string | null | undefined;
-  url: string | null | undefined;
-  description: string | null | undefined;
+  linkedCalendar: SchemaLinkedCalendarView | null;
   pageUrl?: string;
   canHide?: boolean;
 };
 
-export function LinkedCard({
-  name,
-  alias,
-  url,
-  description,
-  pageUrl,
-}: LinkedCardProps) {
+export function LinkedCard({ linkedCalendar, pageUrl }: LinkedCardProps) {
   const navigate = useNavigate();
-  if (!alias) return null;
+  if (!linkedCalendar) return null;
+
+  const { alias, name, description } = linkedCalendar;
 
   return (
     <div
@@ -32,12 +26,7 @@ export function LinkedCard({
         <p className="text-base-content/30">{description}</p>
       </div>
       <div className="flex flex-row place-items-center select-none">
-        <EditButtonLinked
-          alias={alias}
-          name={name}
-          url={url}
-          description={description}
-        />
+        <EditButtonLinked linkedCalendar={linkedCalendar} />
         <HideButtonLinked alias={alias} />
         <RemoveButtonLinked alias={alias} calendarName={name ?? ""} />
       </div>
