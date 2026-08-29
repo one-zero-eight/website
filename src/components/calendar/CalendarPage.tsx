@@ -56,7 +56,7 @@ export function CalendarPage() {
                 : "listMonth"
             : "dayGridMonth"
         }
-        viewId="page"
+        viewStorageId="page"
         isFullPage={true}
       />
     </div>

@@ -114,7 +114,7 @@ export function ExportModal({
           urls={
             calendarURL ? [{ url: calendarURL, eventGroup: eventGroup }] : []
           }
-          viewId="popup"
+          viewStorageId="popup"
         />
       </div>
     </Modal>

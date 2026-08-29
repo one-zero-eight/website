@@ -21,7 +21,7 @@ export function EventsCalendarPage() {
           component: EventsCardsView,
         },
       ]}
-      viewId="events"
+      viewStorageId="events"
       EventPopover={EventsCalendarPopover}
     />
   );

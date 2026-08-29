@@ -238,7 +238,7 @@ export function ImportModal({
               color: calendarColor,
             },
           ]}
-          viewId="popup"
+          viewStorageId="popup"
           onEventSourceSuccess={() => setIsCalendarChecked(true)}
           isHidden={!showPreview}
         />

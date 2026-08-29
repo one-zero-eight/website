@@ -113,7 +113,7 @@ export function MusicRoomPage() {
           },
         ]}
         initialView="timeGridWeek"
-        viewId="music-room"
+        viewStorageId="music-room"
       />
       <ExportModal
         eventGroupOrTarget={TargetForExport.music_room}

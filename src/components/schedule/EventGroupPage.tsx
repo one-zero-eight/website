@@ -105,7 +105,7 @@ export function EventGroupPage({ alias }: { alias: string }) {
                 : "listMonth"
             : "dayGridMonth"
         }
-        viewId="page"
+        viewStorageId="page"
       />
       <ExportModal
         eventGroupOrTarget={group.id}

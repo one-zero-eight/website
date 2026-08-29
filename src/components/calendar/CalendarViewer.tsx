@@ -76,7 +76,7 @@ export function CalendarViewer({
   urls,
   extraEvents = [],
   initialView = "listMonth",
-  viewId = "",
+  viewStorageId = "",
   isFullPage = false,
   EventPopover = CalendarEventPopover,
   views = defaultViews.map(({ id }) => id),
@@ -87,7 +87,7 @@ export function CalendarViewer({
   urls: URLType[];
   extraEvents?: EventInput[];
   initialView?: string;
-  viewId?: string;
+  viewStorageId?: string;
   isFullPage?: boolean;
   EventPopover?: ComponentType<ScheduleDialogProps>;
   views?: string[];
@@ -126,11 +126,6 @@ export function CalendarViewer({
   const fallbackInitialView = availableViewIds.includes(initialView)
     ? initialView
     : firstAvailableView;
-  const builtInInitialView = defaultViews.some(
-    ({ id }) => id === fallbackInitialView,
-  )
-    ? fallbackInitialView
-    : "dayGridMonth";
 
   const [popoverInfo, setPopoverInfo] = useState({
     opened: false,
@@ -154,7 +149,7 @@ export function CalendarViewer({
   );
 
   const [storedCalendarView, setStoredCalendarView] = useLocalStorage(
-    `calendar-view-${viewId}`,
+    `calendar-view-${viewStorageId}`,
     fallbackInitialView,
   );
   const [calendarView, setCalendarView] = useState(
@@ -277,7 +272,7 @@ export function CalendarViewer({
           interactionPlugin,
           iCalendarPlugin,
         ]}
-        initialView={builtInInitialView} // Default view
+        initialView={calendarView} // Default view
         eventTimeFormat={{
           // Use 24-hour format
           hour: "2-digit",
@@ -297,7 +292,7 @@ export function CalendarViewer({
           if (arg.date.year === new Date().getFullYear()) {
             // Show only month if current year, show short month name if width is small
             return moment(arg.date).format(
-              initialView === "listMonth" ? "MMM" : "MMMM",
+              calendarView === "listMonth" ? "MMM" : "MMMM",
             );
           } else {
             // Show month and year otherwise
@@ -408,7 +403,8 @@ export function CalendarViewer({
         loading={setIsLoading}
       />
     ),
-    [builtInInitialView, initialView, isFullPage, isMobile],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isFullPage, isMobile],
   );
 
   useEffect(() => {
