@@ -51,7 +51,6 @@ The website uses the API of InNoHassle services: [Events](https://github.com/one
 
 - [Node.js](https://nodejs.org) & [TypeScript](https://www.typescriptlang.org/)
 - [React](https://react.dev/) & [Vite](https://vitejs.dev/) & [TanStack Router](https://tanstack.com/router/latest/docs/framework/react/overview)
-- [Vue](https://vuejs.org/) & [Veaury](https://github.com/gloriasoft/veaury)
 - Styling: [TailwindCSS](https://tailwindcss.com/), [Iconify](https://iconify.design/)
 - Formatting and linting: [Husky](https://typicode.github.io/husky/), [lint-staged](https://github.com/lint-staged/lint-staged), [Prettier](https://prettier.io/), [ESLint](https://eslint.org/)
 - Data fetching: [OpenAPI Typescript](https://openapi-ts.dev/), [TanStack Query](https://tanstack.com/query/latest)

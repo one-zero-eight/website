@@ -2,8 +2,6 @@ import mdx from "@mdx-js/rollup";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import remarkGfm from "remark-gfm";
-// @ts-expect-error The plugin is not typed
-import veauryVitePlugins from "veaury/vite/esm/index.mjs";
 import { defineConfig } from "vite";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
 import mkcert from "vite-plugin-mkcert";
@@ -30,17 +28,6 @@ export default defineConfig({
 
     // TailwindCSS support
     tailwindcss(),
-
-    // Support for React and Vue in one project
-    veauryVitePlugins({
-      type: "react",
-      // Configuration of @vitejs/plugin-react
-      // reactOptions: {...},
-      // Configuration of @vitejs/plugin-vue
-      // vueOptions: {...},
-      // Configuration of @vitejs/plugin-vue-jsx
-      // vueJsxOptions: {...}
-    }),
 
     // MDX support
     mdx({
