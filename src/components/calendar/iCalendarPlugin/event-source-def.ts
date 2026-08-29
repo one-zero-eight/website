@@ -1,5 +1,7 @@
 /* eslint-disable */
 // @ts-nocheck
+import { getMyAccessToken } from "@/api/helpers/access-token.ts";
+import { SCHEDULE_API_URL } from "@/api/schedule/links.ts";
 import { EventInput } from "@fullcalendar/core";
 import {
   addDays,
@@ -48,27 +50,19 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
     but we couldn't leverage built-in allDay-guessing, among other things.
     */
     if (!internalState || arg.isRefetch) {
-      const url = /^https?:\/\/api\.innohassle\.ru(\/|$)/i.test(meta.url)
+      const url = meta.url.startsWith(SCHEDULE_API_URL)
         ? meta.url
-        : `https://api.innohassle.ru/events/v0/me/check-calendar-url-to-link?${new URLSearchParams(
-            {
-              calendar_url: meta.url,
-            },
+        : `${SCHEDULE_API_URL}/me/check-calendar-url-to-link?${new URLSearchParams(
+            { calendar_url: meta.url },
           )}`;
 
       internalState = meta.internalState = {
         response: null,
         iCalExpanderPromise: fetch(url, {
           method: "GET",
-          headers:
-            localStorage.getItem("accessToken") &&
-            localStorage.getItem("accessToken").length > 5
-              ? {
-                  Authorization:
-                    "Bearer " +
-                    localStorage.getItem("accessToken")?.slice(1, -1),
-                }
-              : undefined,
+          headers: getMyAccessToken()
+            ? { Authorization: `Bearer ${getMyAccessToken()}` }
+            : undefined,
         }).then((response) => {
           if (!response.ok) {
             throw new Error(
