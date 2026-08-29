@@ -665,11 +665,7 @@ export interface components {
        * @description Index in the submitted batch
        */
       index: string;
-      /**
-       * Status
-       * @enum {string}
-       */
-      status: BatchBookItemResultStatus;
+      status: components["schemas"]["BookingItemResultStatus"];
       /**
        * Title
        * @description Booking title that was submitted
@@ -825,6 +821,11 @@ export interface components {
        */
       outlook_entry_id: string | null;
     };
+    /**
+     * BookingItemResultStatus
+     * @enum {string}
+     */
+    BookingItemResultStatus: BookingItemResultStatus;
     /** BookingReview */
     BookingReview: {
       /** Programs */
@@ -836,16 +837,8 @@ export interface components {
     BookingTask: {
       /** Task Id */
       task_id: string;
-      /**
-       * Kind
-       * @enum {string}
-       */
-      kind: BookingTaskKind;
-      /**
-       * Status
-       * @enum {string}
-       */
-      status: BookingTaskStatus;
+      kind: components["schemas"]["BookingTaskKind"];
+      status: components["schemas"]["BookingTaskStatus"];
       /**
        * Sent
        * @description Invites sent, waiting for room Accept
@@ -890,18 +883,29 @@ export interface components {
        * @description Human-readable slot or extra label
        */
       title: string | null;
-      /**
-       * Status
-       * @description pending → sent (invite left) → ok (Accept) / error
-       * @enum {string}
-       */
-      status: BookingTaskItemStatus;
+      /** @description pending → sent (invite left) → ok (Accept) / error */
+      status: components["schemas"]["BookingTaskItemStatus"];
       /**
        * Error
        * @description Error message when status is error
        */
       error: string | null;
     };
+    /**
+     * BookingTaskItemStatus
+     * @enum {string}
+     */
+    BookingTaskItemStatus: BookingTaskItemStatus;
+    /**
+     * BookingTaskKind
+     * @enum {string}
+     */
+    BookingTaskKind: BookingTaskKind;
+    /**
+     * BookingTaskStatus
+     * @enum {string}
+     */
+    BookingTaskStatus: BookingTaskStatus;
     /** CancelExtraRequest */
     CancelExtraRequest: {
       /**
@@ -1781,7 +1785,7 @@ export interface components {
      *     - `starts_from`: "STARTS FROM 21/09" → starts_from=date(2024, 9, 21)
      *     - `ends_on`: "ENDS ON 12/03" or "ДО 12/03" or "КОНЕЦ 12/03" → ends_on=date(2024, 3, 12)
      *     - `starts_at`: "STARTS AT 18:00" → starts_at=time(18, 0)
-     *     - `till`: "TILL 21:00" → till=time(21, 0)
+     *     - `till`: "TILL 21:00" or "ДО 13:00" → till=time(21, 0) / time(13, 0)
      *     - `on_weeks`: "WEEK 1-3" → on_weeks=[1, 2, 3]
      *     - `on`: "ON 13/09, 20/09" → on=[date(2024, 9, 13), date(2024, 9, 20)]
      *     - `except_`: "EXCEPT 30/01, 06/02" → except_=[date(2024, 1, 30), date(2024, 2, 6)]
@@ -2369,10 +2373,7 @@ export interface components {
        * @description Optional custom teaching slots for this program; when set, replaces term.time_slots for this program
        */
       time_slots?: components["schemas"]["TermTimeSlot"][] | null;
-      /**
-       * Semester
-       * @description Optional teaching window for this program; when set, replaces term.semester for this program
-       */
+      /** @description Optional teaching window for this program; when set, replaces term.semester for this program */
       semester?: components["schemas"]["DateRange"] | null;
     };
     /**
@@ -4468,7 +4469,13 @@ export interface operations {
     };
   };
 }
-export enum BatchBookItemResultStatus {
+export enum BookingItemResultStatus {
+  ok = "ok",
+  error = "error",
+}
+export enum BookingTaskItemStatus {
+  pending = "pending",
+  sent = "sent",
   ok = "ok",
   error = "error",
 }
@@ -4480,12 +4487,6 @@ export enum BookingTaskStatus {
   queued = "queued",
   running = "running",
   done = "done",
-  error = "error",
-}
-export enum BookingTaskItemStatus {
-  pending = "pending",
-  sent = "sent",
-  ok = "ok",
   error = "error",
 }
 export enum CapacityIssueIssue_type {

@@ -217,6 +217,8 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /**
      * Set Status
      * @description Sets a player's status by innohassle_id.
@@ -1304,7 +1306,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description One or both players from this game are not registered (/reg) OR Tournament not found OR Game not found in this tournament */
+      /** @description Tournament not found OR One or both players from this game are not registered (/reg) OR Game not found in this tournament */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1323,12 +1325,12 @@ export interface operations {
     };
   };
 }
-export enum PathsRegGamePostParametersQueryTip {
-  val = "val",
-  cval = "cval",
-}
 export enum PathsSetStatusPostParametersQueryStatus {
   beginner = "beginner",
   advanced = "advanced",
   admin = "admin",
+}
+export enum PathsRegGamePostParametersQueryTip {
+  val = "val",
+  cval = "cval",
 }

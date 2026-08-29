@@ -76,6 +76,26 @@ export interface paths {
     patch: operations["meetings_update_meeting"];
     trace?: never;
   };
+  "/meetings/{meeting_ref}/archive": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Archive Meeting
+     * @description Archive a meeting manually (owner only).
+     */
+    post: operations["meetings_archive_meeting"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/meetings/{meeting_ref}/participants": {
     parameters: {
       query?: never;
@@ -286,6 +306,22 @@ export interface components {
       date_range_label?: string | null;
       /** @description Final selected meeting time */
       selected_time?: components["schemas"]["MeetingTime"] | null;
+      /**
+       * Archive After
+       * Format: date-time
+       * @description Time after which the meeting is automatically archived
+       */
+      archive_after: string;
+      /**
+       * Is Archived
+       * @description Whether the meeting is archived
+       */
+      is_archived: boolean;
+      /**
+       * Archived At
+       * @description Effective automatic or manual archive time
+       */
+      archived_at?: string | null;
     };
     /** EventUpdate */
     EventUpdate: {
@@ -377,12 +413,33 @@ export interface components {
       selected_time?: components["schemas"]["MeetingTime"] | null;
       /** @description Booked room reference */
       booked_room?: components["schemas"]["BookedRoom"] | null;
+      /**
+       * Archive After
+       * Format: date-time
+       * @description Time after which the meeting is automatically archived
+       */
+      archive_after: string;
+      /**
+       * Is Archived
+       * @description Whether the meeting is archived
+       */
+      is_archived: boolean;
+      /**
+       * Archived At
+       * @description Effective automatic or manual archive time
+       */
+      archived_at?: string | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /**
+     * MeetingStatus
+     * @enum {string}
+     */
+    MeetingStatus: MeetingStatus;
     /** MeetingTime */
     MeetingTime: {
       /**
@@ -481,7 +538,9 @@ export type $defs = Record<string, never>;
 export interface operations {
   meetings_get_my_meetings: {
     parameters: {
-      query?: never;
+      query?: {
+        status?: components["schemas"]["MeetingStatus"];
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -503,6 +562,15 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
     };
   };
@@ -548,7 +616,9 @@ export interface operations {
   };
   meetings_get_participating_meetings: {
     parameters: {
-      query?: never;
+      query?: {
+        status?: components["schemas"]["MeetingStatus"];
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -570,6 +640,15 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
       };
     };
   };
@@ -727,8 +806,60 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Room booking is already being changed for this meeting */
+      /** @description Meeting is archived or its room booking is being changed */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  meetings_archive_meeting: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        meeting_ref: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Meeting archived */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventView"];
+        };
+      };
+      /** @description Unable to verify credentials OR Credentials not provided */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not an owner */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Meeting not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };
@@ -783,6 +914,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Meeting is archived */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -831,6 +969,13 @@ export interface operations {
       };
       /** @description Meeting or participant not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Meeting is archived */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -899,7 +1044,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Room is already booked for this meeting */
+      /** @description Meeting is archived or already has a booked room */
       409: {
         headers: {
           [name: string]: unknown;
@@ -965,7 +1110,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Room booking is already being changed for this meeting */
+      /** @description Meeting is archived or its room booking is being changed */
       409: {
         headers: {
           [name: string]: unknown;
@@ -1035,7 +1180,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Room booking is already being changed for this meeting */
+      /** @description Meeting is archived or its room booking is being changed */
       409: {
         headers: {
           [name: string]: unknown;
@@ -1105,4 +1250,8 @@ export interface operations {
       };
     };
   };
+}
+export enum MeetingStatus {
+  active = "active",
+  archived = "archived",
 }

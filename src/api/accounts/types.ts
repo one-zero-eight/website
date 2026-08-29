@@ -319,7 +319,10 @@ export interface paths {
     };
     /**
      * Generate Service Token
-     * @description Generate access token for access users-related endpoints (/users/*), expires in 90 days
+     * @description Generate access token for access users-related endpoints (/users/*).
+     *
+     *     By default expires on the nearest 14 August if that is more than a month away,
+     *     otherwise on the next 14 August (so yearly tokens rotate on the same date).
      */
     get: operations["generate_service_token_tokens_generate_service_token_get"];
     put?: never;
@@ -400,7 +403,8 @@ export interface paths {
     };
     /**
      * Generate Token
-     * @description Generate arbitrary access token with some sub in `sub` field (f.e. parser), expires in 90 days, only for admins
+     * @description Generate arbitrary access token with some sub in `sub` field (f.e. parser), only for admins.
+     *     Expiration follows the same policy as generate-service-token (default: auto → Aug 14).
      */
     get: operations["generate_token_tokens_generate_access_token_get"];
     put?: never;
@@ -519,6 +523,11 @@ export interface components {
     };
     /** @example 5eb7cf5a86d9755df3a6c593 */
     PydanticObjectId: string;
+    /**
+     * ServiceTokenExpiration
+     * @enum {string}
+     */
+    ServiceTokenExpiration: ServiceTokenExpiration;
     /** StartDeviceFlowResponse */
     StartDeviceFlowResponse: {
       /** Code */
@@ -1306,6 +1315,8 @@ export interface operations {
         scopes?: components["schemas"]["AvailableScopes"][];
         /** @description Generate token only for current user - other users will be marked as not existing in the system */
         only_for_me?: boolean;
+        /** @description Token expiration policy. `auto` (default): nearest 14 August if more than a month away, otherwise next 14 August. `nearest-14-august` / `next-14-august`: fixed Aug 14 targets. `in-3-month`: expire in 90 days. */
+        expiration?: components["schemas"]["ServiceTokenExpiration"];
       };
       header?: never;
       path?: never;
@@ -1473,6 +1484,8 @@ export interface operations {
         sub: string;
         /** @description Space delimited list of scopes */
         scope?: string | null;
+        /** @description Token expiration policy (same as generate-service-token) */
+        expiration?: components["schemas"]["ServiceTokenExpiration"];
       };
       header?: never;
       path?: never;
@@ -1632,4 +1645,10 @@ export interface operations {
 export enum AvailableScopes {
   users = "users",
   sport = "sport",
+}
+export enum ServiceTokenExpiration {
+  auto = "auto",
+  nearest_14_august = "nearest-14-august",
+  next_14_august = "next-14-august",
+  in_3_month = "in-3-month",
 }
