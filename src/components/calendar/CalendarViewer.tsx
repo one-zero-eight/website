@@ -152,6 +152,11 @@ export function CalendarViewer({
     `calendar-view-${viewStorageId}`,
     fallbackInitialView,
   );
+  const builtInInitialView = defaultViews.some(
+    ({ id }) => id === storedCalendarView,
+  )
+    ? storedCalendarView
+    : "dayGridMonth";
   const [calendarView, setCalendarView] = useState(
     availableViewIds.includes(storedCalendarView)
       ? storedCalendarView
@@ -272,7 +277,7 @@ export function CalendarViewer({
           interactionPlugin,
           iCalendarPlugin,
         ]}
-        initialView={calendarView} // Default view
+        initialView={builtInInitialView} // Default view
         eventTimeFormat={{
           // Use 24-hour format
           hour: "2-digit",
