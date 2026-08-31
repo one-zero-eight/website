@@ -18,6 +18,7 @@ import {
 } from "./meetingEditUtils.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
 import {
+  countWeeklyPatternSlotOccurrences,
   dayKey,
   formatDisplayDate,
   resolveInstructorLabel,
@@ -79,22 +80,34 @@ export function resolveCourseAndComponent(
 
 export type ComponentPlacementCounts = {
   weeklySlots: number;
+  weeklyOccurrences: number;
   occurrences: number;
   seriesCount: number;
 };
 
 export function countComponentPlacement(
+  config: SchemaScheduleConfig,
   component: SchemaComponent | null | undefined,
 ): ComponentPlacementCounts {
   const sessions = component?.sessions ?? [];
   let weeklySlots = 0;
+  let weeklyOccurrences = 0;
   let occurrences = 0;
   for (const series of sessions) {
     weeklySlots += series.weekly_pattern?.length ?? 0;
+    const audienceTokens = series.audience?.length
+      ? series.audience
+      : (component?.audience ?? []);
+    weeklyOccurrences += (series.weekly_pattern ?? []).reduce(
+      (sum, slot) =>
+        sum + countWeeklyPatternSlotOccurrences(config, slot, audienceTokens),
+      0,
+    );
     occurrences += series.dates_pattern?.length ?? 0;
   }
   return {
     weeklySlots,
+    weeklyOccurrences,
     occurrences,
     seriesCount: sessions.length,
   };
@@ -115,7 +128,8 @@ export function formatComponentTarget(
 export function formatComponentPlaced(
   counts: ComponentPlacementCounts,
 ): string | null {
-  const placed = counts.weeklySlots + counts.occurrences || counts.seriesCount;
+  const placed =
+    counts.weeklyOccurrences + counts.occurrences || counts.seriesCount;
   if (!placed) return null;
   return `размещено ${placed} ${pluralizeZanyatiya(placed)}`;
 }
@@ -150,14 +164,15 @@ function pluralizeRu(
  * Only when a target exists — bare counts look like noise.
  */
 export function formatComponentProgressHint(
+  config: SchemaScheduleConfig,
   component: SchemaComponent,
 ): string {
-  const counts = countComponentPlacement(component);
+  const counts = countComponentPlacement(config, component);
   if (component.per_week != null) {
     return `${counts.weeklySlots}/${component.per_week}`;
   }
   if (component.per_semester != null) {
-    const placed = counts.occurrences || counts.weeklySlots;
+    const placed = counts.weeklyOccurrences + counts.occurrences;
     return `${placed}/${component.per_semester}`;
   }
   return "";

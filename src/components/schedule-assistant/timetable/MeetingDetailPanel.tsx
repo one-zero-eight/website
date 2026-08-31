@@ -183,7 +183,7 @@ function CourseComponentsAccordion({
             String(sibling.tag || "").trim() || `Компонент ${idx + 1}`;
           const open = openIdx === idx;
           const isCurrent = idx === currentComponentIdx;
-          const hint = formatComponentProgressHint(sibling);
+          const hint = formatComponentProgressHint(config, sibling);
           const seriesNavItems = listComponentSeriesNavItemsForRef(
             config,
             allMeetings,

@@ -172,6 +172,11 @@ export type BuiltGrid = {
   tabMode: string;
 };
 
+export type TimetableGridRow = {
+  day: string;
+  slotStart: string;
+};
+
 export type Selection =
   | null
   | {
@@ -430,6 +435,21 @@ export function semesterDatesForWeekday(
   return out;
 }
 
+export function countWeeklyPatternSlotOccurrences(
+  config: SchemaScheduleConfig,
+  slot: SchemaWeeklyPatternSlot,
+  audienceTokens: string[],
+): number {
+  const weekday = weeklyPatternDayKey(String(slot.weekday));
+  if (!weekday) return 0;
+  const range = resolveAudienceSemester(config, audienceTokens);
+  if (!range) return 0;
+
+  return semesterDatesForWeekday(config, weekday, range).filter(
+    (date) => !resolveWeeklyMeetingFields(slot, date, config).cancelled,
+  ).length;
+}
+
 export function toMinutes(timeStr: string) {
   const [h, m] = String(timeStr).split(":").map(Number);
   return h * 60 + m;
@@ -680,7 +700,7 @@ export function buildColumns(config: SchemaScheduleConfig) {
         undefined;
       for (const track of normalizeTracksFromSectionProgram(program)) {
         for (const gid of track.groups || []) {
-          if (!usedGroups.has(gid) || known.has(gid)) continue;
+          if (known.has(gid)) continue;
           columns.push({
             yearLabel,
             groupId: gid,
@@ -906,15 +926,15 @@ export function weekIndexForDate(weeks: WeekRange[], dateStr: string) {
 export type WeekRelativePosition = "current" | "past" | "future";
 
 export const WEEK_RELATIVE_LABELS: Record<WeekRelativePosition, string> = {
-  current: "текущая",
-  past: "прошлая",
-  future: "будущая",
+  current: "Текущая",
+  past: "Прошлая",
+  future: "Будущая",
 };
 
-export const WEEK_RELATIVE_BADGE_CLASS: Record<WeekRelativePosition, string> = {
-  current: "badge-success",
-  past: "badge-error",
-  future: "badge-info",
+export const WEEK_RELATIVE_DOT_CLASS: Record<WeekRelativePosition, string> = {
+  current: "bg-success",
+  past: "bg-error",
+  future: "bg-info",
 };
 
 export function weekRelativeToToday(
@@ -1090,6 +1110,46 @@ export function buildGrid(
   };
 }
 
+export function compactGroupRows(
+  config: SchemaScheduleConfig,
+  allMeetings: Meeting[],
+  tabMode: string,
+  visibleColumns: Column[],
+): TimetableGridRow[] {
+  const columnGroups = new Set(visibleColumns.map((column) => column.groupId));
+  const usedPairs = new Set<string>();
+  const termSlots = termResolvedTimeSlots(config);
+
+  for (const meeting of filterMeetingsByTab(allMeetings, tabMode)) {
+    if (meeting.cancelled) continue;
+    if (
+      columnGroups.size &&
+      !meeting.groups.some((groupId) => columnGroups.has(groupId))
+    ) {
+      continue;
+    }
+    const start = normalizeHhmm(meeting.start);
+    const rowStart =
+      termSlots.find((slot) => slot.start === start)?.start ??
+      nearestSlotStart(start, termSlots) ??
+      start;
+    usedPairs.add(`${dayKey(meeting.date)}|${rowStart}`);
+  }
+
+  const rows: TimetableGridRow[] = [];
+  for (const day of normalizedTermDays(config)) {
+    const starts = new Set<string>();
+    for (const pair of usedPairs) {
+      const [pairDay, start] = pair.split("|");
+      if (pairDay === day && start) starts.add(start);
+    }
+    [...starts]
+      .sort((a, b) => slotToMinutes(a) - slotToMinutes(b))
+      .forEach((slotStart) => rows.push({ day, slotStart }));
+  }
+  return rows;
+}
+
 export function columnsForTab(
   tabMode: string,
   baseColumns: Column[],
@@ -1097,19 +1157,18 @@ export function columnsForTab(
   config: SchemaScheduleConfig,
 ): Column[] {
   if (!baseColumns.length) return [];
-  if (tabMode === "instructor" || tabMode === "room") return baseColumns;
+  if (tabMode === "instructor" || tabMode === "room" || tabMode === "all") {
+    return baseColumns;
+  }
   const tabMeetings = filterMeetingsByTab(allMeetings, tabMode);
   const usedGroups = new Set<string>();
   for (const m of tabMeetings) {
     for (const g of m.groups || []) usedGroups.add(g);
   }
-  let sectionColumns = baseColumns.filter((c) => usedGroups.has(c.groupId));
-  if (!sectionColumns.length) {
-    const sectionGroups = buildSectionGroupSets(config)[tabMode];
-    if (sectionGroups?.size) {
-      sectionColumns = baseColumns.filter((c) => sectionGroups.has(c.groupId));
-    }
-  }
+  const sectionGroups = buildSectionGroupSets(config)[tabMode];
+  const sectionColumns = sectionGroups?.size
+    ? baseColumns.filter((column) => sectionGroups.has(column.groupId))
+    : baseColumns.filter((column) => usedGroups.has(column.groupId));
   if (tabMode === "english") {
     const normalizeEnglishTrackLabel = (trackName: string, groupId: string) => {
       const t = String(trackName || "")
@@ -1135,7 +1194,7 @@ export function columnsForTab(
       for (const track of normalizeTracksFromSectionProgram(program)) {
         const trackLabel = normalizeEnglishTrackLabel(track?.name || "", "");
         for (const gid of track?.groups || []) {
-          if (!usedGroups.has(gid) || seen.has(gid)) continue;
+          if (seen.has(gid)) continue;
           const base = byId[gid];
           const baseGroupLabel = base?.groupLabel || gid;
           ordered.push({

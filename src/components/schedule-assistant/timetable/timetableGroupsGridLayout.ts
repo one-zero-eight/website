@@ -1,9 +1,13 @@
 /** Compact «По группам» grid scale — aligned with «По дням» density. */
-export const GROUPS_TIME_COL_PX = 130;
-export const GROUPS_TIME_COL_WIDTH = "w-[130px] min-w-[130px] max-w-[130px]";
+export const GROUPS_TIME_COL_PX = 100;
+export const GROUPS_TIME_COL_WIDTH = "w-[100px] min-w-[100px] max-w-[100px]";
 
 export const GROUPS_COL_PX = 135;
 export const GROUPS_COL_WIDTH = "w-[135px] max-w-[135px] min-w-[135px]";
+
+export const COMPACT_GROUPS_COL_PX = 100;
+export const COMPACT_GROUPS_COL_WIDTH =
+  "w-[100px]! max-w-[100px]! min-w-[100px]!";
 
 export const GROUPS_TABLE_CLASS =
   "groups-grid-table isolate w-max min-w-full table-fixed border-separate border-spacing-0";
@@ -24,6 +28,9 @@ export const GROUPS_PROGRAM_TITLE_STICKY_STYLE = {
 export const GROUPS_SLOT_ROW_CLASS =
   "slot-row [content-visibility:auto] [contain-intrinsic-size:auto_100px] [&_.empty]:h-full [&_.empty]:min-h-[64px] [&_.meeting]:h-full [&_.meeting]:min-h-0 [&_td]:h-[100px]";
 
+export const COMPACT_GROUPS_SLOT_ROW_CLASS =
+  "[contain-intrinsic-size:auto_48px] [&_.empty]:min-h-6! [&_.meeting]:p-1 [&_.meeting-body]:gap-0 [&_.meeting-footer]:gap-0 [&_.meeting-title]:line-clamp-1 [&_.meeting-title]:max-h-[1.25em] [&_td]:h-12!";
+
 export const GROUPS_HEAD_PAD = "px-2 py-1.5 text-[0.6875rem] leading-tight";
 
 export const GROUPS_CELL_PAD = "p-1.5 text-[0.6875rem] leading-tight";
@@ -32,7 +39,7 @@ export const GROUPS_SLOT_TIME_PAD =
   "p-2 text-center text-[0.6875rem] leading-snug font-bold";
 
 export const GROUPS_DAY_ROW_INNER_CLASS =
-  "sticky z-[19] box-border border-b border-[#d8dfeb] bg-[#edf4ff] p-2 align-top text-[0.8125rem] font-bold tracking-[0.3px] text-[#1d3f70]";
+  "sticky z-[19] box-border border-b border-[#d8dfeb] bg-[#edf4ff] py-2 pr-2 pl-1.5 align-top text-[0.8125rem] font-bold tracking-[0.3px] text-[#1d3f70]";
 
 /** Inline `top` — must match measured thead height exactly (no offset). */
 export const GROUPS_DAY_ROW_STICKY_STYLE = {
@@ -48,13 +55,13 @@ export const GROUPS_MEETING_CLASS =
   "mb-0 flex h-full min-h-0 w-full cursor-pointer flex-col gap-0.5 rounded border p-[7px] pb-1.5 last:mb-0";
 
 export const GROUPS_MEETING_BODY_CLASS =
-  "grid h-full min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-0.5 overflow-hidden";
+  "meeting-body grid h-full min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-0.5 overflow-hidden";
 
 export const GROUPS_MEETING_TITLE_CLASS =
-  "line-clamp-3 max-h-[calc(1.25em*3)] min-h-0 min-w-0 overflow-hidden text-[0.6875rem] leading-tight font-bold break-words text-[#1a2332]";
+  "meeting-title line-clamp-3 max-h-[calc(1.25em*3)] min-h-0 min-w-0 overflow-hidden text-[0.6875rem] leading-tight font-bold break-words text-[#1a2332]";
 
 export const GROUPS_MEETING_FOOTER_CLASS =
-  "flex min-w-0 shrink-0 flex-col gap-0.5";
+  "meeting-footer flex min-w-0 shrink-0 flex-col gap-0.5";
 
 export const GROUPS_MEETING_LINE_CLASS =
   "w-full min-w-0 shrink-0 text-[0.625rem] leading-tight text-[#313b49]";

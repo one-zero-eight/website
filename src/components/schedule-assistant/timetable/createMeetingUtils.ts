@@ -31,7 +31,10 @@ import {
 } from "./roomPickerOptions.ts";
 import type { TimetableLayoutMode } from "./TimetableLayoutSelector.tsx";
 import type { Meeting, WeekRange } from "./timetableViewerModel.ts";
-import { weekStartForDate } from "./timetableViewerModel.ts";
+import {
+  countWeeklyPatternSlotOccurrences,
+  weekStartForDate,
+} from "./timetableViewerModel.ts";
 
 function toApiTime(value: string): string {
   const trimmed = String(value || "").trim();
@@ -233,11 +236,22 @@ function weeklySlotCount(sessions: SchemaComponentSessionSeries[]) {
   );
 }
 
-function occurrenceCount(sessions: SchemaComponentSessionSeries[]) {
-  return sessions.reduce(
-    (sum, series) => sum + (series.dates_pattern?.length ?? 0),
-    0,
-  );
+function semesterOccurrenceCount(
+  component: SchemaComponent,
+  sessions: SchemaComponentSessionSeries[],
+  config: SchemaScheduleConfig,
+) {
+  return sessions.reduce((total, series) => {
+    const audienceTokens = series.audience?.length
+      ? series.audience
+      : (component.audience ?? []);
+    const weeklyOccurrences = (series.weekly_pattern ?? []).reduce(
+      (sum, slot) =>
+        sum + countWeeklyPatternSlotOccurrences(config, slot, audienceTokens),
+      0,
+    );
+    return total + weeklyOccurrences + (series.dates_pattern?.length ?? 0);
+  }, 0);
 }
 
 export function defaultAudienceForCreate(
@@ -457,7 +471,7 @@ export function componentScheduleStatus(
 
   const perSemester = component.per_semester;
   if (perSemester != null && perSemester > 0) {
-    const placed = weeklySlotCount(relevant) + occurrenceCount(relevant);
+    const placed = semesterOccurrenceCount(component, relevant, config);
     if (placed >= perSemester) return "covered";
     return "partial";
   }
@@ -487,16 +501,11 @@ export function componentProgressHint(
     focusGroupId,
   );
 
-  let weekly = 0;
-  let occurrences = 0;
-  for (const series of relevant) {
-    weekly += series.weekly_pattern?.length ?? 0;
-    occurrences += series.dates_pattern?.length ?? 0;
-  }
+  const weekly = weeklySlotCount(relevant);
 
   if (component.per_week != null) return `${weekly}/${component.per_week}`;
   if (component.per_semester != null) {
-    return `${occurrences || weekly}/${component.per_semester}`;
+    return `${semesterOccurrenceCount(component, relevant, config)}/${component.per_semester}`;
   }
   return "";
 }

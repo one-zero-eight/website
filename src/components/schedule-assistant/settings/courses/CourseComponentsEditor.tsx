@@ -224,7 +224,7 @@ export function CourseComponentsEditor({
           {list.map((component, index) => {
             const tag =
               String(component.tag || "").trim() || `Компонент ${index + 1}`;
-            const hint = formatComponentProgressHint(component);
+            const hint = formatComponentProgressHint(config, component);
             const open = openIndex === index;
             return (
               <CourseComponentAccordionItem

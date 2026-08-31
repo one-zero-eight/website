@@ -11,6 +11,7 @@ import {
   serializeOccurrenceEvents,
   serializeWeeklyEventsToSlots,
 } from "./editableSessionEvents.ts";
+import { countWeeklyPatternSlotOccurrences } from "./timetableViewerModel.ts";
 
 function testConfig(): SchemaScheduleConfig {
   return {
@@ -66,6 +67,23 @@ describe("editableSessionEvents", () => {
     expect(events.find((event) => event.date === "2026-09-14")?.cancelled).toBe(
       true,
     );
+  });
+
+  it("counts weekly semester lessons except cancelled weeks", () => {
+    const count = countWeeklyPatternSlotOccurrences(
+      testConfig(),
+      {
+        weekday: Weekday.MONDAY,
+        start_time: "09:00:00",
+        end_time: "10:30:00",
+        room: "108",
+        instructor: "a@iu.ru",
+        edits: [{ select_week: "2026-09-14", cancel: true }],
+      },
+      [],
+    );
+
+    expect(count).toBe(3);
   });
 
   it("serializes weekly patches as overrides and preserves unrelated edits", () => {

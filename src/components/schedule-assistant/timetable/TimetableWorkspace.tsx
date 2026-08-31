@@ -5,6 +5,7 @@ import {
   Weekday,
 } from "@/api/schedule-assistant/types.ts";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
+import Tooltip from "@/components/common/Tooltip.tsx";
 import { DetailFullscreenModal } from "@/components/schedule-assistant/DetailFullscreenModal.tsx";
 import { ReturnToChecksLink } from "@/components/schedule-assistant/checks/ReturnToChecksLink.tsx";
 import {
@@ -67,6 +68,9 @@ import {
 } from "./timetableCalendarModel.ts";
 import { TimetableCalendarTable } from "./TimetableCalendarTable.tsx";
 import {
+  COMPACT_GROUPS_COL_PX,
+  COMPACT_GROUPS_COL_WIDTH,
+  COMPACT_GROUPS_SLOT_ROW_CLASS,
   GROUPS_CELL_PAD,
   GROUPS_COL_PX,
   GROUPS_COL_WIDTH,
@@ -109,7 +113,7 @@ import {
   todayGroupsSlotTimeClass,
 } from "./timetableTodayHighlight.ts";
 import {
-  WEEK_RELATIVE_BADGE_CLASS,
+  WEEK_RELATIVE_DOT_CLASS,
   WEEK_RELATIVE_LABELS,
   buildColumns,
   buildCourseColors,
@@ -122,6 +126,7 @@ import {
   cellSignature,
   colorBySubject,
   columnsForTab,
+  compactGroupRows,
   dayKey as dayKeyFromModel,
   instructorDetailTooltip,
   meetingRoomLoadLabel,
@@ -141,6 +146,7 @@ import {
   type Meeting,
   type MergedRow,
   type Selection,
+  type TimetableGridRow,
   type WeekRange,
   type WeekRelativePosition,
 } from "./timetableViewerModel.ts";
@@ -212,6 +218,9 @@ type MeetingCardProps = {
   row: MergedRow;
   grid: BuiltGrid;
   span?: number;
+  hideClassTag?: boolean;
+  hideRoomCapacity?: boolean;
+  preferShortCourseName?: boolean;
   selectMeeting: (valueKey: string, course: string, focusTag?: string) => void;
   openMeetingEdit: (meeting: Meeting) => void;
   selectInstructorCell: (name: string) => void;
@@ -227,6 +236,9 @@ function meetingCardPropsEqual(
   next: MeetingCardProps,
 ): boolean {
   if ((prev.span ?? 1) !== (next.span ?? 1)) return false;
+  if (prev.hideClassTag !== next.hideClassTag) return false;
+  if (prev.hideRoomCapacity !== next.hideRoomCapacity) return false;
+  if (prev.preferShortCourseName !== next.preferShortCourseName) return false;
   if (prev.row.sign !== next.row.sign || prev.row.count !== next.row.count)
     return false;
   const pm = prev.row.sample;
@@ -234,6 +246,7 @@ function meetingCardPropsEqual(
   if (
     pm.instance_id !== nm.instance_id ||
     pm.course !== nm.course ||
+    pm.course_short_name !== nm.course_short_name ||
     pm.tag !== nm.tag ||
     pm.room !== nm.room ||
     pm.start !== nm.start ||
@@ -366,8 +379,15 @@ function TimetableWorkspaceInner({
       localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, next);
       if (next !== "instructor" && next !== "room") {
         const section = sections.find((candidate) => candidate.code === next);
-        const defaultLayout = section?.default_layout;
-        if (defaultLayout === "groups" || defaultLayout === "calendar") {
+        const defaultLayout = section?.default_layout as
+          | TimetableLayoutMode
+          | null
+          | undefined;
+        if (
+          defaultLayout === "groups" ||
+          defaultLayout === "compact_groups" ||
+          defaultLayout === "calendar"
+        ) {
           setLayoutMode(defaultLayout);
         }
       }
@@ -687,6 +707,31 @@ function TimetableWorkspaceInner({
     );
   }, [config, deferredMeetings, weeks, weekIndex, activeTab, columns]);
 
+  const compactRows = useMemo(() => {
+    if (layoutMode !== "compact_groups" || !config || isUtilizationTab) {
+      return null;
+    }
+    const visibleColumns = columnsForTab(
+      activeTab,
+      columns,
+      deferredMeetings,
+      config,
+    );
+    return compactGroupRows(
+      config,
+      deferredMeetings,
+      activeTab,
+      visibleColumns,
+    );
+  }, [
+    activeTab,
+    columns,
+    config,
+    deferredMeetings,
+    isUtilizationTab,
+    layoutMode,
+  ]);
+
   const calendarGrid = useMemo(() => {
     if (layoutMode !== "calendar" || isUtilizationTab) return null;
     if (!config || !deferredMeetings.length || !weeks.length) return null;
@@ -841,8 +886,15 @@ function TimetableWorkspaceInner({
       const section = getScheduleSections(config).find(
         (candidate) => candidate.code === sectionCode,
       );
-      const defaultLayout = section?.default_layout;
-      if (defaultLayout === "groups" || defaultLayout === "calendar") {
+      const defaultLayout = section?.default_layout as
+        | TimetableLayoutMode
+        | null
+        | undefined;
+      if (
+        defaultLayout === "groups" ||
+        defaultLayout === "compact_groups" ||
+        defaultLayout === "calendar"
+      ) {
         return defaultLayout;
       }
       return null;
@@ -874,8 +926,15 @@ function TimetableWorkspaceInner({
       const section = getScheduleSections(config).find(
         (candidate) => candidate.code === nextTab,
       );
-      const defaultLayout = section?.default_layout;
-      if (defaultLayout === "groups" || defaultLayout === "calendar") {
+      const defaultLayout = section?.default_layout as
+        | TimetableLayoutMode
+        | null
+        | undefined;
+      if (
+        defaultLayout === "groups" ||
+        defaultLayout === "compact_groups" ||
+        defaultLayout === "calendar"
+      ) {
         setLayoutMode(defaultLayout);
       }
     },
@@ -1153,6 +1212,14 @@ function TimetableWorkspaceInner({
     [createModalOpen, placeTarget],
   );
 
+  const handleToolbarCreateClick = useCallback(() => {
+    if (createModalOpen) return;
+    setCreateCellContext(null);
+    setCreatePresetSnapshot(null);
+    setHoverPlaceCell(null);
+    setCreateModalOpen(true);
+  }, [createModalOpen]);
+
   const handleCreateModalOpenChange = useCallback((open: boolean) => {
     setCreateModalOpen(open);
     if (!open) {
@@ -1269,8 +1336,6 @@ function TimetableWorkspaceInner({
   const weekRelative: WeekRelativePosition | null = weeks[weekIndex]
     ? weekRelativeToToday(weeks[weekIndex]!)
     : null;
-  const weekRelativeBadgeClass = WEEK_RELATIVE_BADGE_CLASS;
-
   return (
     <SelectionStoreContext.Provider value={selectionStore}>
       <div className="font-rubik text-base-content flex min-h-0 flex-1 flex-col leading-[1.45] antialiased">
@@ -1338,19 +1403,35 @@ function TimetableWorkspaceInner({
                         </button>
                       </div>
                       {weekRelative ? (
-                        <span
-                          className={clsx(
-                            "badge badge-xs shrink-0",
-                            weekRelativeBadgeClass[weekRelative],
-                          )}
+                        <Tooltip
+                          content={`${WEEK_RELATIVE_LABELS[weekRelative]} неделя`}
                         >
-                          {WEEK_RELATIVE_LABELS[weekRelative]} неделя
-                        </span>
+                          <span className="inline-flex size-5 shrink-0 items-center justify-center">
+                            <span
+                              className={clsx(
+                                "inline-block size-2.5 rounded-full",
+                                WEEK_RELATIVE_DOT_CLASS[weekRelative],
+                              )}
+                            />
+                          </span>
+                        </Tooltip>
                       ) : null}
                     </div>
                   ) : null}
                   <div className="ml-auto flex shrink-0 items-center gap-2">
-                    {!isLgUp && !isUtilizationTab ? (
+                    {!isUtilizationTab ? (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-xs gap-1"
+                        onClick={handleToolbarCreateClick}
+                      >
+                        <span className="icon-[material-symbols--add-rounded] text-base" />
+                        Добавить занятие
+                      </button>
+                    ) : null}
+                    {!isLgUp &&
+                    !isUtilizationTab &&
+                    layoutMode !== "compact_groups" ? (
                       <button
                         type="button"
                         className="btn btn-xs btn-ghost gap-1"
@@ -1402,7 +1483,7 @@ function TimetableWorkspaceInner({
                   )}
                   style={
                     {
-                      "--sa-time-col-width": "130px",
+                      "--sa-time-col-width": `${GROUPS_TIME_COL_PX}px`,
                       "--sa-grid-header-height":
                         GROUPS_GRID_HEADER_HEIGHT_DEFAULT,
                     } as React.CSSProperties
@@ -1431,6 +1512,7 @@ function TimetableWorkspaceInner({
                           isUtilizationTab={isUtilizationTab}
                           calendarGrid={calendarGrid}
                           grid={grid}
+                          compactRows={compactRows}
                           activeWeek={weeks[weekIndex] ?? null}
                           columns={columns}
                           activeTab={activeTab}
@@ -1452,7 +1534,9 @@ function TimetableWorkspaceInner({
                           onEmptyCellClick={
                             isUtilizationTab ? undefined : handleEmptyCellClick
                           }
-                          placeTarget={placeTarget}
+                          placeTarget={
+                            layoutMode === "compact_groups" ? null : placeTarget
+                          }
                           placeGhostRoom={placeGhostRoom}
                           placeGhostInstructor={placeGhostInstructor}
                           hoverPlaceCell={hoverPlaceCell}
@@ -1493,7 +1577,9 @@ function TimetableWorkspaceInner({
                     onSelectUnarranged={handleSelectUnarranged}
                     onCancelPlace={clearPlaceMode}
                     placePending={placePending}
-                    showUnarranged={!isUtilizationTab}
+                    showUnarranged={
+                      !isUtilizationTab && layoutMode !== "compact_groups"
+                    }
                   />
                 </div>
               ) : null}
@@ -1515,10 +1601,10 @@ function TimetableWorkspaceInner({
           onSelectUnarranged={handleSelectUnarranged}
           onCancelPlace={clearPlaceMode}
           placePending={placePending}
-          showUnarranged={!isUtilizationTab}
+          showUnarranged={!isUtilizationTab && layoutMode !== "compact_groups"}
         />
       ) : null}
-      {!isLgUp && !isUtilizationTab ? (
+      {!isLgUp && !isUtilizationTab && layoutMode !== "compact_groups" ? (
         <DetailFullscreenModal
           open={mobileUnarrangedOpen}
           onOpenChange={setMobileUnarrangedOpen}
@@ -1584,6 +1670,7 @@ function TimetableMainGrid({
   isUtilizationTab,
   calendarGrid,
   grid,
+  compactRows,
   activeWeek,
   columns,
   activeTab,
@@ -1613,6 +1700,7 @@ function TimetableMainGrid({
   isUtilizationTab: boolean;
   calendarGrid: ReturnType<typeof buildCalendarGrid>;
   grid: BuiltGrid | null;
+  compactRows: TimetableGridRow[] | null;
   activeWeek: WeekRange | null;
   columns: Column[];
   activeTab: InnerTab;
@@ -1698,6 +1786,7 @@ function TimetableMainGrid({
       key={activeTab}
       tabMode={activeTab}
       grid={grid}
+      compactRows={compactRows}
       activeWeek={activeWeek}
       columns={columns}
       allMeetings={allMeetings}
@@ -1834,6 +1923,7 @@ function TimetableProgramTabs({
 type TimetableTableProps = {
   tabMode: InnerTab;
   grid: BuiltGrid;
+  compactRows: TimetableGridRow[] | null;
   activeWeek: WeekRange | null;
   columns: Column[];
   allMeetings: Meeting[];
@@ -1862,6 +1952,7 @@ type TimetableTableProps = {
 function TimetableTable({
   tabMode,
   grid,
+  compactRows,
   activeWeek,
   columns,
   allMeetings,
@@ -1887,7 +1978,10 @@ function TimetableTable({
   onHoverPlaceCell,
 }: TimetableTableProps) {
   return (
-    <table id="table" className={GROUPS_TABLE_CLASS}>
+    <table
+      id="table"
+      className={clsx(GROUPS_TABLE_CLASS, compactRows && "w-auto! min-w-0!")}
+    >
       {tabMode === "instructor" || tabMode === "room" ? (
         renderUtilizationRows({
           mode: tabMode === "instructor" ? "instructor" : "room",
@@ -1906,6 +2000,7 @@ function TimetableTable({
       ) : (
         <CoreGroupsTable
           grid={grid}
+          compactRows={compactRows}
           activeWeek={activeWeek}
           columns={columns}
           allMeetings={allMeetings}
@@ -2244,6 +2339,7 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
   onSelectGroup,
   dimmed,
   programSeparator,
+  compact,
 }: {
   groupId: string;
   groupLabel: string;
@@ -2251,6 +2347,7 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
   onSelectGroup: (id: string) => void;
   dimmed?: boolean;
   programSeparator?: boolean;
+  compact?: boolean;
 }) {
   const highlight = useGroupHeaderHighlight(groupId, yearLabel);
   return (
@@ -2260,7 +2357,7 @@ const CoreGroupHeadCell = memo(function CoreGroupHeadCell({
         programSeparator
           ? GROUPS_PROGRAM_SEPARATOR
           : "border-r border-[#d8dfeb]",
-        GROUPS_COL_WIDTH,
+        compact ? COMPACT_GROUPS_COL_WIDTH : GROUPS_COL_WIDTH,
         GROUPS_HEAD_PAD,
         highlight && "shadow-[inset_0_-3px_0_#ffd54f]",
         dimmed && "opacity-35 saturate-50",
@@ -2408,6 +2505,7 @@ type CorePrepared = {
 function buildCorePrepared(
   grid: BuiltGrid,
   visibleColumns: Column[],
+  compactRows: TimetableGridRow[] | null,
 ): CorePrepared {
   const columnsByYear: Record<string, Column[]> = {};
   for (const col of visibleColumns) {
@@ -2429,7 +2527,20 @@ function buildCorePrepared(
 
   const rows: CorePreparedRow[] = [];
 
+  const rowsByDay = new Map<string, Set<string>>();
+  if (compactRows) {
+    for (const row of compactRows) {
+      const starts = rowsByDay.get(row.day) ?? new Set<string>();
+      starts.add(row.slotStart);
+      rowsByDay.set(row.day, starts);
+    }
+  }
+
   for (const day of grid.allowedDays) {
+    const daySlots = compactRows
+      ? grid.slots.filter((slot) => rowsByDay.get(day)?.has(slot.start))
+      : grid.slots;
+    if (compactRows && !daySlots.length) continue;
     rows.push({
       kind: "day",
       key: `day-${day}`,
@@ -2437,7 +2548,7 @@ function buildCorePrepared(
       colSpan: totalColSpan,
     });
 
-    for (const slot of grid.slots) {
+    for (const slot of daySlots) {
       const stickyLabel =
         programSlotLabelForTermRow(stickyLeftSlots, slot.start) ?? slot.label;
       const programSlotLabels: Record<string, string | null> = {};
@@ -2530,6 +2641,7 @@ function buildCorePrepared(
 
 function CoreGroupsTable({
   grid,
+  compactRows,
   activeWeek,
   columns: baseColumns,
   allMeetings,
@@ -2554,6 +2666,7 @@ function CoreGroupsTable({
   onHoverPlaceCell,
 }: {
   grid: BuiltGrid;
+  compactRows: TimetableGridRow[] | null;
   activeWeek: WeekRange | null;
   columns: Column[];
   allMeetings: Meeting[];
@@ -2605,8 +2718,10 @@ function CoreGroupsTable({
 
   const prepared = useMemo(
     () =>
-      visibleColumns.length ? buildCorePrepared(grid, visibleColumns) : null,
-    [grid, visibleColumns],
+      visibleColumns.length
+        ? buildCorePrepared(grid, visibleColumns, compactRows)
+        : null,
+    [compactRows, grid, visibleColumns],
   );
 
   const focusGroupSet = useMemo(() => {
@@ -2699,7 +2814,7 @@ function CoreGroupsTable({
   );
 
   const rows: React.ReactNode[] = [];
-  for (const preparedRow of prepared.rows) {
+  for (const [rowIndex, preparedRow] of prepared.rows.entries()) {
     if (preparedRow.kind === "day") {
       const isTodayDay = isTodayWeekdayInDisplayedWeek(
         preparedRow.day,
@@ -2761,7 +2876,12 @@ function CoreGroupsTable({
       preparedRow.day,
       activeWeek,
     );
-    const isLastSlot = preparedRow.slotStart === lastSlotStart;
+    const nextPreparedRow = prepared.rows[rowIndex + 1];
+    const isLastSlot = compactRows
+      ? !nextPreparedRow ||
+        nextPreparedRow.kind === "day" ||
+        nextPreparedRow.day !== preparedRow.day
+      : preparedRow.slotStart === lastSlotStart;
 
     const rowCells: React.ReactNode[] = [];
     let cellIndex = 0;
@@ -2841,7 +2961,11 @@ function CoreGroupsTable({
             className={clsx(
               "link-cell relative border-b border-[#d8dfeb] align-top",
               GROUPS_CELL_PAD,
-              cell.span > 1 ? null : GROUPS_COL_WIDTH,
+              cell.span > 1
+                ? null
+                : compactRows
+                  ? COMPACT_GROUPS_COL_WIDTH
+                  : GROUPS_COL_WIDTH,
               programSeparator
                 ? GROUPS_PROGRAM_SEPARATOR
                 : "border-r border-[#d8dfeb]",
@@ -2856,9 +2980,15 @@ function CoreGroupsTable({
             style={
               cell.span > 1
                 ? {
-                    width: cell.span * GROUPS_COL_PX,
-                    maxWidth: cell.span * GROUPS_COL_PX,
-                    minWidth: cell.span * GROUPS_COL_PX,
+                    width:
+                      cell.span *
+                      (compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX),
+                    maxWidth:
+                      cell.span *
+                      (compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX),
+                    minWidth:
+                      cell.span *
+                      (compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX),
                   }
                 : undefined
             }
@@ -2920,6 +3050,9 @@ function CoreGroupsTable({
                   <MeetingCard
                     key={row.sign}
                     span={cell.span}
+                    hideClassTag={!!compactRows}
+                    hideRoomCapacity={!!compactRows}
+                    preferShortCourseName={!!compactRows}
                     row={row}
                     grid={grid}
                     selectMeeting={selectMeeting}
@@ -2941,7 +3074,13 @@ function CoreGroupsTable({
     }
 
     rows.push(
-      <tr key={preparedRow.key} className={GROUPS_SLOT_ROW_CLASS}>
+      <tr
+        key={preparedRow.key}
+        className={clsx(
+          GROUPS_SLOT_ROW_CLASS,
+          compactRows && COMPACT_GROUPS_SLOT_ROW_CLASS,
+        )}
+      >
         <td
           className={clsx(
             "slot-cell sticky left-0 z-[5] border-r border-b border-l border-[#d8dfeb] bg-[#f1f6ff] align-top text-[#1d3f70]",
@@ -2985,8 +3124,8 @@ function CoreGroupsTable({
               <col
                 key={col.groupId}
                 style={{
-                  width: GROUPS_COL_PX,
-                  minWidth: GROUPS_COL_PX,
+                  width: compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX,
+                  minWidth: compactRows ? COMPACT_GROUPS_COL_PX : GROUPS_COL_PX,
                 }}
               />,
             );
@@ -3052,6 +3191,7 @@ function CoreGroupsTable({
                   groupLabel={col.groupLabel}
                   yearLabel={yearLabel}
                   onSelectGroup={selectGroup}
+                  compact={!!compactRows}
                   dimmed={
                     focusGroupSet != null && !focusGroupSet.has(col.groupId)
                   }
@@ -3075,6 +3215,9 @@ const MeetingCard = memo(function MeetingCard({
   row,
   grid: _grid,
   span = 1,
+  hideClassTag = false,
+  hideRoomCapacity = false,
+  preferShortCourseName = false,
   selectMeeting,
   openMeetingEdit,
   selectInstructorCell,
@@ -3087,7 +3230,10 @@ const MeetingCard = memo(function MeetingCard({
   const m = row.sample;
   const canEdit = !!parseMeetingInstanceId(m.instance_id);
   const count = row.count;
-  const courseTitle = String(m.course || "").trim() || "—";
+  const fullCourseTitle = String(m.course || "").trim() || "—";
+  const shortCourseTitle = String(m.course_short_name || "").trim();
+  const courseTitle =
+    (preferShortCourseName ? shortCourseTitle : "") || fullCourseTitle;
   const colors = colorBySubject(m.course || courseTitle, courseColors);
   const roomLoadLabel = meetingRoomLoadLabel(
     m,
@@ -3155,9 +3301,11 @@ const MeetingCard = memo(function MeetingCard({
         >
           <div
             className={GROUPS_MEETING_TITLE_CLASS}
-            title={`${courseTitle} (${m.tag})${count > 1 ? ` x${count}` : ""}`}
+            title={`${fullCourseTitle} (${m.tag})${count > 1 ? ` x${count}` : ""}`}
           >
-            {courseTitle} ({m.tag}){count > 1 ? ` x${count}` : ""}
+            {courseTitle}
+            {!hideClassTag || m.tag !== "class" ? ` (${m.tag})` : ""}
+            {count > 1 ? ` x${count}` : ""}
           </div>
         </div>
       </div>
@@ -3221,10 +3369,12 @@ const MeetingCard = memo(function MeetingCard({
                   selectRoomCell(m.room);
                 }}
               >
-                {roomLoadLabel}
+                {hideRoomCapacity ? roomIdTrim : roomLoadLabel}
               </span>
             ) : (
-              <span className="min-w-0 truncate">{roomLoadLabel}</span>
+              <span className="min-w-0 truncate">
+                {hideRoomCapacity ? roomIdTrim || "-" : roomLoadLabel}
+              </span>
             )}
           </span>
         </div>
@@ -3269,7 +3419,7 @@ const MeetingCard = memo(function MeetingCard({
         <div
           className="sticky z-[1] inline-flex h-full max-h-full w-max max-w-full flex-col gap-0.5 self-start overflow-hidden"
           style={{
-            left: "calc(var(--sa-time-col-width, 130px) + 8px)",
+            left: "calc(var(--sa-time-col-width, 100px) + 8px)",
             backgroundColor: colors.bg,
           }}
         >

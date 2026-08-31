@@ -2334,7 +2334,7 @@ export interface components {
       name: string;
       /**
        * Default Layout
-       * @description Default timetable layout when opening this section (groups or calendar)
+       * @description Default timetable layout when opening this section (groups, compact groups, or calendar)
        */
       default_layout?: SectionConfigDefault_layoutAnyOf0 | null;
       /**
@@ -4567,6 +4567,7 @@ export enum RoomIssueIssue_type {
 }
 export enum SectionConfigDefault_layoutAnyOf0 {
   groups = "groups",
+  compact_groups = "compact_groups",
   calendar = "calendar",
 }
 export enum StudentEmailIssueIssue_type {

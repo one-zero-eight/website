@@ -2038,16 +2038,20 @@ export function SemesterDetails() {
                     const target = next.sections?.[sectionIndex];
                     if (!target) return current;
                     target.default_layout =
-                      value === SectionConfigDefault_layoutAnyOf0.groups ||
-                      value === SectionConfigDefault_layoutAnyOf0.calendar
-                        ? value
-                        : null;
+                      value === "groups"
+                        ? SectionConfigDefault_layoutAnyOf0.groups
+                        : value === "compact_groups"
+                          ? SectionConfigDefault_layoutAnyOf0.compact_groups
+                          : value === "calendar"
+                            ? SectionConfigDefault_layoutAnyOf0.calendar
+                            : null;
                     return next;
                   });
                 }}
               >
                 <option value="">Не задано</option>
                 <option value="groups">По группам</option>
+                <option value="compact_groups">По группам (компактно)</option>
                 <option value="calendar">По дням</option>
               </select>
             </Fragment>

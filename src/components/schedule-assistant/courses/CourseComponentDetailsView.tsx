@@ -506,7 +506,7 @@ export function CourseComponentDetailsFields({
   onNavigateToMeeting?: (meeting: Meeting) => void;
   compact?: boolean;
 }) {
-  const placement = countComponentPlacement(component);
+  const placement = countComponentPlacement(config, component);
   const targetLabel = formatComponentTarget(component);
   const placedLabel = formatComponentPlaced(placement);
   const showPool = shouldShowInstructorPool(
