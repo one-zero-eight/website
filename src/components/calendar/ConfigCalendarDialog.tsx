@@ -1,12 +1,15 @@
 import { $schedule } from "@/api/schedule";
 import { Modal } from "@/components/common/Modal.tsx";
-import { GroupCardById } from "@/components/schedule/group-card/GroupCardById.tsx";
+import { GroupCardByAlias } from "@/components/schedule/group-card/GroupCardByAlias.tsx";
 import { PersonalCard } from "@/components/schedule/personal-card/PersonalCard.tsx";
 import { useMyMusicRoom } from "@/api/schedule/event-group.ts";
 import { Link } from "@tanstack/react-router";
 import { TargetForExport } from "@/api/schedule/types.ts";
 import { useState } from "react";
-import { ExportModal } from "@/components/calendar/ExportModal.tsx";
+import {
+  ExportModal,
+  ExportTarget,
+} from "@/components/calendar/ExportModal.tsx";
 import { LinkedCard } from "@/components/schedule/linked-card/LinkedCard.tsx";
 import { ImportModal } from "@/components/calendar/import/ImportModal";
 
@@ -27,9 +30,9 @@ export function ConfigCalendarDialog({
 
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [targetForExport, setTargetForExport] = useState<
-    number | TargetForExport | null
-  >(null);
+  const [targetForExport, setTargetForExport] = useState<ExportTarget | null>(
+    null,
+  );
 
   return (
     <Modal
@@ -40,24 +43,24 @@ export function ConfigCalendarDialog({
     >
       <div className="grid grid-cols-1 justify-stretch gap-4 @2xl/modal:grid-cols-2">
         {predefined?.event_groups.map((v) => (
-          <GroupCardById
+          <GroupCardByAlias
             key={v}
-            groupId={v}
+            groupAlias={v}
             canHide={true}
             exportButtonOnClick={() => {
-              setTargetForExport(v);
+              setTargetForExport({ type: "event-group", alias: v });
               setExportModalOpen(true);
             }}
           />
         ))}
 
         {scheduleUser?.favorite_event_groups?.map((v) => (
-          <GroupCardById
+          <GroupCardByAlias
             key={v}
-            groupId={v}
+            groupAlias={v}
             canHide={true}
             exportButtonOnClick={() => {
-              setTargetForExport(v);
+              setTargetForExport({ type: "event-group", alias: v });
               setExportModalOpen(true);
             }}
           />
@@ -69,7 +72,10 @@ export function ConfigCalendarDialog({
           pageUrl="/sport"
           targetType={TargetForExport.sport}
           exportButtonOnClick={() => {
-            setTargetForExport(TargetForExport.sport);
+            setTargetForExport({
+              type: "personal",
+              target: TargetForExport.sport,
+            });
             setExportModalOpen(true);
           }}
         />
@@ -80,7 +86,10 @@ export function ConfigCalendarDialog({
             pageUrl="/music-room"
             targetType={TargetForExport.music_room}
             exportButtonOnClick={() => {
-              setTargetForExport(TargetForExport.music_room);
+              setTargetForExport({
+                type: "personal",
+                target: TargetForExport.music_room,
+              });
               setExportModalOpen(true);
             }}
           />
@@ -90,7 +99,10 @@ export function ConfigCalendarDialog({
           description="Your Moodle deadlines"
           targetType={TargetForExport.moodle}
           exportButtonOnClick={() => {
-            setTargetForExport(TargetForExport.moodle);
+            setTargetForExport({
+              type: "personal",
+              target: TargetForExport.moodle,
+            });
             setExportModalOpen(true);
           }}
         />
@@ -99,7 +111,10 @@ export function ConfigCalendarDialog({
           description="Your room bookings"
           targetType={TargetForExport.room_bookings}
           exportButtonOnClick={() => {
-            setTargetForExport(TargetForExport.room_bookings);
+            setTargetForExport({
+              type: "personal",
+              target: TargetForExport.room_bookings,
+            });
             setExportModalOpen(true);
           }}
         />
@@ -133,7 +148,7 @@ export function ConfigCalendarDialog({
       </p>
 
       <ExportModal
-        eventGroupOrTarget={targetForExport}
+        target={targetForExport}
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
         aboveModal

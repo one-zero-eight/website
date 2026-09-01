@@ -70,6 +70,7 @@ export type URLType =
       sourceLink?: string;
       updatedAt?: string;
       eventGroup?: scheduleTypes.SchemaViewEventGroup;
+      excludeEnglish?: boolean;
     };
 
 export function CalendarViewer({
@@ -433,6 +434,7 @@ export function CalendarViewer({
                 sourceLink: url.sourceLink,
                 updatedAt: url.updatedAt,
                 eventGroup: url.eventGroup,
+                excludeEnglish: url.excludeEnglish,
               },
             },
       );
@@ -764,7 +766,7 @@ function renderEventTimeGridWeek({
       }}
     >
       <span
-        className="line-clamp-2 text-sm font-medium"
+        className="line-clamp-2 text-sm leading-tight font-medium"
         style={{
           color: `color-mix(in srgb, ${background} 60%, var(--color-base-content))`,
         }}

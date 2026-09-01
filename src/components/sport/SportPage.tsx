@@ -70,7 +70,7 @@ export function SportPage() {
         viewStorageId="music-room"
       />
       <ExportModal
-        eventGroupOrTarget={TargetForExport.sport}
+        target={{ type: "personal", target: TargetForExport.sport }}
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
       />

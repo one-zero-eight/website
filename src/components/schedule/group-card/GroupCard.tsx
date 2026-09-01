@@ -61,8 +61,8 @@ export function GroupCard({
       </div>
       <div className="flex flex-row place-items-center select-none">
         <SimpleExportButton onClick={exportButtonOnClick} />
-        {canHide && <HideButtonGroup groupId={group.id} />}
-        <FavoriteButton groupId={group.id} />
+        {canHide && <HideButtonGroup groupAlias={group.alias} />}
+        <FavoriteButton groupAlias={group.alias} />
       </div>
     </Link>
   );

@@ -678,7 +678,7 @@ export interface paths {
     put?: never;
     /**
      * Hide Favorite
-     * @description Hide favorite from current user
+     * @description Hide a favorite or predefined event group from current user
      */
     post: operations["users_hide_favorite"];
     delete?: never;
@@ -1002,7 +1002,7 @@ export interface components {
     /** UserPredefinedGroupsResponse */
     UserPredefinedGroupsResponse: {
       /** Event Groups */
-      event_groups: number[];
+      event_groups: string[];
     };
     /** ValidationError */
     ValidationError: {
@@ -1023,19 +1023,13 @@ export interface components {
      */
     ViewEventGroup: {
       /** Id */
-      id: number;
+      id?: number | null;
       /** Alias */
       alias: string;
-      /**
-       * Updated At
-       * Format: date-time
-       */
-      updated_at: string;
-      /**
-       * Created At
-       * Format: date-time
-       */
-      created_at: string;
+      /** Updated At */
+      updated_at?: string | null;
+      /** Created At */
+      created_at?: string | null;
       /** Path */
       path?: string | null;
       /** Name */
@@ -1044,6 +1038,11 @@ export interface components {
       description?: string | null;
       /** Tags */
       tags?: components["schemas"]["ViewTag"][];
+      /**
+       * Virtual
+       * @default false
+       */
+      virtual: boolean;
     };
     /** ViewTag */
     ViewTag: {
@@ -1074,9 +1073,9 @@ export interface components {
       /** Name */
       name?: string | null;
       /** Favorite Event Groups */
-      favorite_event_groups?: number[];
+      favorite_event_groups?: string[];
       /** Hidden Event Groups */
-      hidden_event_groups?: number[];
+      hidden_event_groups?: string[];
       /** Linked Calendars */
       linked_calendars?: {
         [key: string]: components["schemas"]["LinkedCalendarView"];
@@ -1343,6 +1342,13 @@ export interface operations {
       };
       /** @description Event group not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Event group alias cannot be changed */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -2576,7 +2582,7 @@ export interface operations {
   users_add_favorite: {
     parameters: {
       query: {
-        group_id: number;
+        group_alias: string;
       };
       header?: never;
       path?: never;
@@ -2621,7 +2627,7 @@ export interface operations {
   users_delete_favorite: {
     parameters: {
       query: {
-        group_id: number;
+        group_alias: string;
       };
       header?: never;
       path?: never;
@@ -2659,7 +2665,7 @@ export interface operations {
   users_hide_favorite: {
     parameters: {
       query: {
-        group_id: number;
+        group_alias: string;
         hide?: boolean;
       };
       header?: never;

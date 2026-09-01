@@ -4,8 +4,9 @@ import Tooltip from "@/components/common/Tooltip";
 import { useEventGroup } from "@/api/schedule/event-group.ts";
 import { useState } from "react";
 
-export default function FavoriteButton({ groupId }: { groupId: number }) {
-  const { switchFavorite, isFavorite, isPredefined } = useEventGroup(groupId);
+export default function FavoriteButton({ groupAlias }: { groupAlias: string }) {
+  const { switchFavorite, isFavorite, isPredefined } =
+    useEventGroup(groupAlias);
   const { me } = useMe();
   const [signInModalOpen, setSignInModalOpen] = useState(false);
 
@@ -21,6 +22,7 @@ export default function FavoriteButton({ groupId }: { groupId: number }) {
         }
       >
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();

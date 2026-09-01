@@ -486,20 +486,22 @@ export function buildCourseColors(meetings: Meeting[]) {
     new Set((meetings || []).map((m) => courseColorKey(m.course))),
   ).sort();
   const out: Record<string, { bg: string; border: string }> = {};
-  const GOLDEN_HUE_STEP = 137.508;
   for (const subject of subjects) {
-    const hue = (hashString(subject) * GOLDEN_HUE_STEP) % 360;
-    const mix = hashString(`${subject}\0sat`);
-    const s = 64 + (mix % 4) * 9;
-    const l = 78 + ((mix >>> 3) % 5) * 3.2;
-    const borderS = Math.min(96, s + 8);
-    const borderL = Math.max(34, l - 28);
-    out[subject] = {
-      bg: `hsl(${hue.toFixed(2)}, ${s}%, ${l.toFixed(1)}%)`,
-      border: `hsl(${hue.toFixed(2)}, ${borderS}%, ${borderL}%)`,
-    };
+    out[subject] = colorForSubject(subject);
   }
   return out;
+}
+
+export function colorForSubject(subject: string) {
+  const key = courseColorKey(subject);
+  const hue = (hashString(key) * 137.508) % 360;
+  const mix = hashString(`${key}\0sat`);
+  const saturation = 64 + (mix % 4) * 9;
+  const lightness = 78 + ((mix >>> 3) % 5) * 3.2;
+  return {
+    bg: `hsl(${hue.toFixed(2)}, ${saturation}%, ${lightness.toFixed(1)}%)`,
+    border: `hsl(${hue.toFixed(2)}, ${Math.min(96, saturation + 8)}%, ${Math.max(34, lightness - 28)}%)`,
+  };
 }
 
 export function colorBySubject(

@@ -103,7 +103,10 @@ export function useMyAcademicCalendar() {
   );
 
   const groups = predefined?.event_groups
-    ?.map((v) => eventGroups?.event_groups.find((g) => g.id === v)?.name)
+    ?.map(
+      (alias) =>
+        eventGroups?.event_groups.find((group) => group.alias === alias)?.name,
+    )
     ?.filter((v) => v) as string[];
   const academicCalendar = findAcademicCalendarByGroups(groups || []);
 

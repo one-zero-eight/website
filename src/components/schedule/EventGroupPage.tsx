@@ -71,7 +71,7 @@ export function EventGroupPage({ alias }: { alias: string }) {
                 "Hello world, this is a long description about my life and this elective."}
             </p>
           </div>
-          <FavoriteButton groupId={group.id} />
+          <FavoriteButton groupAlias={group.alias} />
         </div>
         <h2 className="my-4 flex text-3xl font-medium">Tags</h2>
         <div className="flex flex-wrap gap-2">
@@ -108,7 +108,7 @@ export function EventGroupPage({ alias }: { alias: string }) {
         viewStorageId="page"
       />
       <ExportModal
-        eventGroupOrTarget={group.id}
+        target={{ type: "event-group", alias: group.alias }}
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
       />

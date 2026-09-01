@@ -1,23 +1,22 @@
 import { $schedule } from "@/api/schedule";
 import { GroupCard } from "@/components/schedule/group-card/GroupCard";
 
-export type GroupCardProps = {
-  groupId?: number;
-  canHide?: boolean;
-  exportButtonOnClick?: () => void;
-};
-
-export function GroupCardById({
-  groupId,
+export function GroupCardByAlias({
+  groupAlias,
   canHide = false,
   exportButtonOnClick,
-}: GroupCardProps) {
+}: {
+  groupAlias: string;
+  canHide?: boolean;
+  exportButtonOnClick?: () => void;
+}) {
   const { data: eventGroups } = $schedule.useQuery("get", "/event-groups/");
-  if (groupId === undefined) return null;
-  const group = eventGroups?.event_groups?.find(
-    (group) => group.id === groupId,
+  const group = eventGroups?.event_groups.find(
+    (eventGroup) => eventGroup.alias === groupAlias,
   );
+
   if (!group) return null;
+
   return (
     <GroupCard
       group={group}

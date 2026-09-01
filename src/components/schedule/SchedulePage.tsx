@@ -13,8 +13,10 @@ import { preprocessText } from "@/lib/utils/searchUtils";
 import { Link } from "@tanstack/react-router";
 import Fuse from "fuse.js";
 import React, { useEffect, useMemo, useState } from "react";
-import { ExportModal } from "@/components/calendar/ExportModal.tsx";
-import { TargetForExport } from "@/api/schedule/types.ts";
+import {
+  ExportModal,
+  ExportTarget,
+} from "@/components/calendar/ExportModal.tsx";
 
 export default function SchedulePage({
   category,
@@ -100,9 +102,9 @@ export default function SchedulePage({
     );
 
   const [exportModalOpen, setExportModalOpen] = useState(false);
-  const [targetForExport, setTargetForExport] = useState<
-    number | TargetForExport | null
-  >(null);
+  const [targetForExport, setTargetForExport] = useState<ExportTarget | null>(
+    null,
+  );
 
   if (error) {
     return (
@@ -170,7 +172,10 @@ export default function SchedulePage({
                       key={group.path}
                       group={group}
                       exportButtonOnClick={() => {
-                        setTargetForExport(group.id);
+                        setTargetForExport({
+                          type: "event-group",
+                          alias: group.alias,
+                        });
                         setExportModalOpen(true);
                       }}
                     />
@@ -179,7 +184,7 @@ export default function SchedulePage({
               </React.Fragment>
             ))}
           <ExportModal
-            eventGroupOrTarget={targetForExport}
+            target={targetForExport}
             open={exportModalOpen}
             onOpenChange={setExportModalOpen}
           />

@@ -9,6 +9,7 @@ import {
   EventSourceDef,
 } from "@fullcalendar/core/internal";
 import ICAL from "ical.js";
+import { colorForSubject } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { IcalExpander } from "./ical-expander/IcalExpander";
 
 interface ICalFeedMeta {
@@ -19,6 +20,7 @@ interface ICalFeedMeta {
   sourceLink?: string;
   updatedAt?: string;
   eventGroup?: any;
+  excludeEnglish?: boolean;
 }
 
 interface InternalState {
@@ -36,6 +38,7 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
         sourceLink: refined.extraParams?.sourceLink,
         updatedAt: refined.extraParams?.updatedAt,
         eventGroup: refined.extraParams?.eventGroup,
+        excludeEnglish: refined.extraParams?.excludeEnglish,
       };
     }
     return null;
@@ -117,6 +120,7 @@ function expandICalEvents(
 
   // single events
   for (let iCalEvent of iCalRes.events) {
+    if (meta.excludeEnglish && isEnglishEvent(iCalEvent)) continue;
     expanded.push({
       ...buildNonDateProps(iCalEvent, meta, iCalExpander),
       start: iCalEvent.startDate.toString(),
@@ -130,6 +134,7 @@ function expandICalEvents(
   // recurring event instances
   for (let iCalOccurence of iCalRes.occurrences) {
     let iCalEvent = iCalOccurence.item;
+    if (meta.excludeEnglish && isEnglishEvent(iCalEvent)) continue;
     expanded.push({
       ...buildNonDateProps(iCalEvent, meta, iCalExpander),
       start: iCalOccurence.startDate.toString(),
@@ -143,16 +148,31 @@ function expandICalEvents(
   return expanded;
 }
 
+function isEnglishEvent(iCalEvent: ICAL.Event) {
+  const summary = String(iCalEvent.summary || "")
+    .trim()
+    .toLowerCase();
+  return ["english", "foreign language", "иностранный язык"].some((name) =>
+    summary.includes(name),
+  );
+}
+
 function buildNonDateProps(
   iCalEvent: ICAL.Event,
   meta: ICalFeedMeta,
   iCalExpander: IcalExpander,
 ): EventInput {
+  const scheduleAssistantColors = meta.eventGroup?.virtual
+    ? colorForSubject(courseNameFromSummary(iCalEvent.summary))
+    : null;
   return {
     id: iCalEvent.uid,
     title: iCalEvent.summary,
     url: extractEventUrl(iCalEvent),
-    color: iCalEvent.color || meta.color,
+    backgroundColor:
+      iCalEvent.color || scheduleAssistantColors?.bg || meta.color,
+    borderColor:
+      iCalEvent.color || scheduleAssistantColors?.border || meta.color,
     extendedProps: {
       location: iCalEvent.location,
       organizer: iCalEvent.organizer,
@@ -166,6 +186,10 @@ function buildNonDateProps(
       eventGroup: meta.eventGroup,
     },
   };
+}
+
+function courseNameFromSummary(summary: string) {
+  return String(summary || "").replace(/\s+\([^()]+\)\s*$/, "");
 }
 
 function extractEventUrl(iCalEvent: ICAL.Event): string {

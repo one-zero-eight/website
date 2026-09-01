@@ -116,7 +116,10 @@ export function MusicRoomPage() {
         viewStorageId="music-room"
       />
       <ExportModal
-        eventGroupOrTarget={TargetForExport.music_room}
+        target={{
+          type: "personal",
+          target: TargetForExport.music_room,
+        }}
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
       />

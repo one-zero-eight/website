@@ -6,32 +6,32 @@ import { useRef } from "react";
 import { getICSLink, getPersonalLink } from "@/api/schedule/links.ts";
 import { TargetForExport } from "@/api/schedule/types.ts";
 
+export type ExportTarget =
+  | { type: "event-group"; alias: string }
+  | { type: "personal"; target: TargetForExport };
+
 export function ExportModal({
-  eventGroupOrTarget,
+  target,
   open,
   onOpenChange,
   aboveModal = false,
 }: {
-  eventGroupOrTarget: number | TargetForExport | null;
+  target: ExportTarget | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   aboveModal?: boolean;
 }) {
-  const isEventGroupModal = typeof eventGroupOrTarget === "number";
-  const isTargetModal = !!(
-    eventGroupOrTarget &&
-    typeof eventGroupOrTarget !== "number" &&
-    Object.values(TargetForExport).includes(eventGroupOrTarget)
-  );
+  const eventGroupAlias = target?.type === "event-group" ? target.alias : null;
+  const personalTarget = target?.type === "personal" ? target.target : null;
   const { data: scheduleUser } = $schedule.useQuery("get", "/users/me");
   const { data: eventGroup } = $schedule.useQuery(
     "get",
-    "/event-groups/{event_group_id}",
+    "/event-groups/by-alias",
     {
-      params: { path: { event_group_id: Number(eventGroupOrTarget) } },
+      params: { query: { alias: eventGroupAlias ?? "" } },
     },
     {
-      enabled: isEventGroupModal,
+      enabled: eventGroupAlias !== null,
     },
   );
 
@@ -41,12 +41,12 @@ export function ExportModal({
     {
       params: {
         query: {
-          resource_path: `/users/${scheduleUser?.id}/${eventGroupOrTarget}.ics`,
+          resource_path: `/users/${scheduleUser?.id}/${personalTarget}.ics`,
         },
       },
     },
     {
-      enabled: isTargetModal,
+      enabled: personalTarget !== null && scheduleUser !== undefined,
       refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
@@ -56,11 +56,11 @@ export function ExportModal({
   const copyButtonRef = useRef(null);
 
   let calendarURL = "";
-  if (isEventGroupModal && eventGroup) {
-    calendarURL = getICSLink(eventGroup.alias, scheduleUser?.id, "url");
+  if (eventGroupAlias) {
+    calendarURL = getICSLink(eventGroupAlias, scheduleUser?.id, "url");
   }
 
-  if (isTargetModal && scheduleKey) {
+  if (personalTarget && scheduleKey) {
     calendarURL = getPersonalLink(
       scheduleKey.access_key.resource_path,
       scheduleKey.access_key.access_key,
@@ -72,16 +72,16 @@ export function ExportModal({
       open={open}
       onOpenChange={onOpenChange}
       title={
-        isTargetModal
-          ? modalText[eventGroupOrTarget].title
+        personalTarget
+          ? modalText[personalTarget].title
           : "Export to your calendar"
       }
       overlayClassName={aboveModal ? "bg-black/50" : ""}
       containerClassName="max-w-full xl:max-w-[75%] bg-base-100"
     >
       <div className="text-base-content/75">
-        {isTargetModal
-          ? modalText[eventGroupOrTarget].description
+        {personalTarget
+          ? modalText[personalTarget].description
           : "You can add the schedule to your favorite calendar application and it will be updated on schedule changes."}
       </div>
       <ul className="text-base-content/75 list-decimal pb-4 pl-5">
