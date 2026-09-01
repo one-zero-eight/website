@@ -53,11 +53,13 @@ export const eventSourceDef: EventSourceDef<ICalFeedMeta> = {
     but we couldn't leverage built-in allDay-guessing, among other things.
     */
     if (!internalState || arg.isRefetch) {
-      const url = meta.url.startsWith(SCHEDULE_API_URL)
-        ? meta.url
-        : `${SCHEDULE_API_URL}/me/check-calendar-url-to-link?${new URLSearchParams(
-            { calendar_url: meta.url },
-          )}`;
+      const url =
+        meta.url.startsWith(SCHEDULE_API_URL) ||
+        meta.url.startsWith("https://api.innohassle.ru")
+          ? meta.url
+          : `${SCHEDULE_API_URL}/me/check-calendar-url-to-link?${new URLSearchParams(
+              { calendar_url: meta.url },
+            )}`;
 
       internalState = meta.internalState = {
         response: null,

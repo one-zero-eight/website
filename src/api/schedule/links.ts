@@ -14,43 +14,37 @@ export function getICSLink(
   userId: number | undefined,
   exportType: string | "web" | "url" = "web",
 ) {
-  return rewriteCalendarExportHost(
-    `${SCHEDULE_API_URL}/${groupAlias}.ics?user_id=${
-      userId || 0
-    }&export_type=${exportType}`,
-  );
+  const url = `${SCHEDULE_API_URL}/${groupAlias}.ics?user_id=${userId || 0}&export_type=${exportType}`;
+  if (exportType === "web") return url;
+  return rewriteCalendarExportHost(url);
 }
 
 export function getMusicRoomLink() {
-  return rewriteCalendarExportHost(`${SCHEDULE_API_URL}/music-room.ics`);
+  return `${SCHEDULE_API_URL}/music-room.ics`;
 }
 
 export function getWorkshopsLink() {
-  return rewriteCalendarExportHost(`${SCHEDULE_API_URL}/workshops.ics`);
+  return `${SCHEDULE_API_URL}/workshops.ics`;
 }
 
 export function getMyMusicRoomLink() {
-  return rewriteCalendarExportHost(
-    `${SCHEDULE_API_URL}/users/me/music-room.ics`,
-  );
+  return `${SCHEDULE_API_URL}/users/me/music-room.ics`;
 }
 
 export function getMySportLink() {
-  return rewriteCalendarExportHost(`${SCHEDULE_API_URL}/users/me/sport.ics`);
+  return `${SCHEDULE_API_URL}/users/me/sport.ics`;
 }
 
 export function getMyMoodleLink() {
-  return rewriteCalendarExportHost(`${SCHEDULE_API_URL}/users/me/moodle.ics`);
+  return `${SCHEDULE_API_URL}/users/me/moodle.ics`;
 }
 
 export function getMyWorkshopsLink() {
-  return rewriteCalendarExportHost(`${WORKSHOPS_API_URL}/users/me/events.ics`);
+  return `${WORKSHOPS_API_URL}/users/me/events.ics`;
 }
 
 export function getMyRoomBookingsLink() {
-  return rewriteCalendarExportHost(
-    `${SCHEDULE_API_URL}/users/me/room-bookings.ics`,
-  );
+  return `${SCHEDULE_API_URL}/users/me/room-bookings.ics`;
 }
 
 export function getPersonalLink(resourcePath: string, accessKey: string) {
