@@ -21,6 +21,7 @@ import { Route as RoomsRoomRouteImport } from "./routes/rooms.$room";
 import { Route as FormsSubmitRouteImport } from "./routes/forms.submit";
 import { Route as With_menuWorkshopsRouteImport } from "./routes/_with_menu/workshops";
 import { Route as With_menuTimerRouteImport } from "./routes/_with_menu/timer";
+import { Route as With_menuStartRouteImport } from "./routes/_with_menu/start";
 import { Route as With_menuSportRouteImport } from "./routes/_with_menu/sport";
 import { Route as With_menuScholarshipRouteImport } from "./routes/_with_menu/scholarship";
 import { Route as With_menuMenuRouteImport } from "./routes/_with_menu/menu";
@@ -150,6 +151,11 @@ const With_menuWorkshopsRoute = With_menuWorkshopsRouteImport.update({
 const With_menuTimerRoute = With_menuTimerRouteImport.update({
   id: "/timer",
   path: "/timer",
+  getParentRoute: () => With_menuRouteRoute,
+} as any);
+const With_menuStartRoute = With_menuStartRouteImport.update({
+  id: "/start",
+  path: "/start",
   getParentRoute: () => With_menuRouteRoute,
 } as any);
 const With_menuSportRoute = With_menuSportRouteImport.update({
@@ -544,6 +550,7 @@ export interface FileRoutesByFullPath {
   "/menu": typeof With_menuMenuRoute;
   "/scholarship": typeof With_menuScholarshipRoute;
   "/sport": typeof With_menuSportRoute;
+  "/start": typeof With_menuStartRoute;
   "/timer": typeof With_menuTimerRoute;
   "/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
@@ -624,6 +631,7 @@ export interface FileRoutesByTo {
   "/menu": typeof With_menuMenuRoute;
   "/scholarship": typeof With_menuScholarshipRoute;
   "/sport": typeof With_menuSportRoute;
+  "/start": typeof With_menuStartRoute;
   "/timer": typeof With_menuTimerRoute;
   "/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
@@ -708,6 +716,7 @@ export interface FileRoutesById {
   "/_with_menu/menu": typeof With_menuMenuRoute;
   "/_with_menu/scholarship": typeof With_menuScholarshipRoute;
   "/_with_menu/sport": typeof With_menuSportRoute;
+  "/_with_menu/start": typeof With_menuStartRoute;
   "/_with_menu/timer": typeof With_menuTimerRoute;
   "/_with_menu/workshops": typeof With_menuWorkshopsRoute;
   "/forms/submit": typeof FormsSubmitRoute;
@@ -792,6 +801,7 @@ export interface FileRouteTypes {
     | "/menu"
     | "/scholarship"
     | "/sport"
+    | "/start"
     | "/timer"
     | "/workshops"
     | "/forms/submit"
@@ -872,6 +882,7 @@ export interface FileRouteTypes {
     | "/menu"
     | "/scholarship"
     | "/sport"
+    | "/start"
     | "/timer"
     | "/workshops"
     | "/forms/submit"
@@ -955,6 +966,7 @@ export interface FileRouteTypes {
     | "/_with_menu/menu"
     | "/_with_menu/scholarship"
     | "/_with_menu/sport"
+    | "/_with_menu/start"
     | "/_with_menu/timer"
     | "/_with_menu/workshops"
     | "/forms/submit"
@@ -1116,6 +1128,13 @@ declare module "@tanstack/react-router" {
       path: "/timer";
       fullPath: "/timer";
       preLoaderRoute: typeof With_menuTimerRouteImport;
+      parentRoute: typeof With_menuRouteRoute;
+    };
+    "/_with_menu/start": {
+      id: "/_with_menu/start";
+      path: "/start";
+      fullPath: "/start";
+      preLoaderRoute: typeof With_menuStartRouteImport;
       parentRoute: typeof With_menuRouteRoute;
     };
     "/_with_menu/sport": {
@@ -1616,6 +1635,7 @@ interface With_menuRouteRouteChildren {
   With_menuMenuRoute: typeof With_menuMenuRoute;
   With_menuScholarshipRoute: typeof With_menuScholarshipRoute;
   With_menuSportRoute: typeof With_menuSportRoute;
+  With_menuStartRoute: typeof With_menuStartRoute;
   With_menuTimerRoute: typeof With_menuTimerRoute;
   With_menuWorkshopsRoute: typeof With_menuWorkshopsRoute;
   With_menuAccountConnectTelegramRoute: typeof With_menuAccountConnectTelegramRoute;
@@ -1685,6 +1705,7 @@ const With_menuRouteRouteChildren: With_menuRouteRouteChildren = {
   With_menuMenuRoute: With_menuMenuRoute,
   With_menuScholarshipRoute: With_menuScholarshipRoute,
   With_menuSportRoute: With_menuSportRoute,
+  With_menuStartRoute: With_menuStartRoute,
   With_menuTimerRoute: With_menuTimerRoute,
   With_menuWorkshopsRoute: With_menuWorkshopsRoute,
   With_menuAccountConnectTelegramRoute: With_menuAccountConnectTelegramRoute,
