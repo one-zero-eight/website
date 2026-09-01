@@ -2708,7 +2708,10 @@ function CoreGroupsTable({
       ranges.set(
         column.yearLabel,
         programSemesterRange(
-          findProgramByNameOrCode(config, column.yearLabel),
+          findProgramByNameOrCode(
+            config,
+            column.programCode || column.yearLabel,
+          ),
           termRange,
         ),
       );
