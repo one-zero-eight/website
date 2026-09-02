@@ -72,6 +72,7 @@ export function ReservationDetailsModal({
     statusMutation.isPending || deleteMutation.isPending;
 
   function updateStatus(borrowerName: string | null) {
+    if (!reservation.id) return;
     statusMutation.mutate({
       params: { path: { id: reservation.id } },
       body: { status: selectedStatus, borrower_name: borrowerName },
@@ -98,6 +99,7 @@ export function ReservationDetailsModal({
       type: "error",
     });
     if (!confirmed) return;
+    if (!reservation.id) return;
     deleteMutation.mutate({ params: { path: { id: reservation.id } } });
   }
 

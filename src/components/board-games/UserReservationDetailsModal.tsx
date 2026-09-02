@@ -57,6 +57,7 @@ export function UserReservationDetailsModal({
       type: "error",
     });
     if (!confirmed) return;
+    if (!reservation.id) return;
     deleteMutation.mutate({ params: { path: { id: reservation.id } } });
   }
 
@@ -168,6 +169,10 @@ function EditReservationModal({
     reservation.when_available ?? "",
   );
   const [comments, setComments] = useState(reservation.comments ?? "");
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+  const validationError = hasAttemptedSubmit
+    ? getReservationValidationError(telegramAlias, returnDate)
+    : null;
   const mutation = $boardGames.useMutation(
     "patch",
     "/users/me/reservations/{id}",
@@ -187,6 +192,7 @@ function EditReservationModal({
     setReturnDate(reservation.return_date ?? "");
     setWhenAvailable(reservation.when_available ?? "");
     setComments(reservation.comments ?? "");
+    setHasAttemptedSubmit(false);
   }
 
   function handleOpenChange(nextOpen: boolean) {
@@ -197,6 +203,9 @@ function EditReservationModal({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setHasAttemptedSubmit(true);
+    if (getReservationValidationError(telegramAlias, returnDate)) return;
+    if (!reservation.id) return;
     mutation.mutate({
       params: { path: { id: reservation.id } },
       body: {
@@ -215,7 +224,7 @@ function EditReservationModal({
       title="Edit reservation"
       closeOnOutsidePress={!mutation.isPending}
     >
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         <ReservationFormFields
           telegramAlias={telegramAlias}
           onTelegramAliasChange={setTelegramAlias}
@@ -226,6 +235,7 @@ function EditReservationModal({
           comments={comments}
           onCommentsChange={setComments}
           disabled={mutation.isPending}
+          validationError={validationError}
         />
         <div className="flex justify-end gap-2">
           <button
@@ -262,6 +272,7 @@ export function ReservationFormFields({
   comments,
   onCommentsChange,
   disabled,
+  validationError,
 }: {
   telegramAlias: string;
   onTelegramAliasChange: (value: string) => void;
@@ -272,12 +283,19 @@ export function ReservationFormFields({
   comments: string;
   onCommentsChange: (value: string) => void;
   disabled: boolean;
+  validationError?: string | null;
 }) {
   return (
     <>
+      {validationError && (
+        <div className="alert alert-error py-2 text-sm">
+          <span className="icon-[material-symbols--error-outline] shrink-0 text-xl" />
+          <span>{validationError}</span>
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
         <label className="fieldset">
-          <span className="fieldset-legend">Telegram alias</span>
+          <span className="fieldset-legend">Telegram alias *</span>
           <input
             type="text"
             className="input w-full"
@@ -285,16 +303,18 @@ export function ReservationFormFields({
             onChange={(event) => onTelegramAliasChange(event.target.value)}
             placeholder="@username"
             disabled={disabled}
+            required
           />
         </label>
         <label className="fieldset">
-          <span className="fieldset-legend">Return date</span>
+          <span className="fieldset-legend">Return date *</span>
           <input
             type="date"
             className="input w-full"
             value={returnDate}
             onChange={(event) => onReturnDateChange(event.target.value)}
             disabled={disabled}
+            required
           />
         </label>
       </div>
@@ -321,6 +341,20 @@ export function ReservationFormFields({
       </label>
     </>
   );
+}
+
+export function getReservationValidationError(
+  telegramAlias: string,
+  returnDate: string,
+) {
+  const missingFields = [
+    !telegramAlias.trim() && "Telegram alias",
+    !returnDate && "return date",
+  ].filter(Boolean);
+
+  if (missingFields.length === 0) return null;
+  if (missingFields.length === 1) return `${missingFields[0]} is required.`;
+  return "Telegram alias and return date are required.";
 }
 
 function InformationField({

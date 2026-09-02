@@ -74,6 +74,23 @@ export interface paths {
     patch: operations["edit_board_game_admin_board_games__id__patch"];
     trace?: never;
   };
+  "/admin/board-games/{id}/photo": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Set Board Game Photo */
+    post: operations["set_board_game_photo_admin_board_games__id__photo_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/admin/board-games/{id}/reservations": {
     parameters: {
       query?: never;
@@ -159,6 +176,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/board-games/{id}/photo": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get Board Game Photo */
+    get: operations["get_board_game_photo_board_games__id__photo_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/me/reservations": {
     parameters: {
       query?: never;
@@ -218,7 +252,7 @@ export interface components {
     /** BoardGame */
     BoardGame: {
       /** @description MongoDB document ObjectID */
-      id: components["schemas"]["PydanticObjectId"];
+      id: components["schemas"]["PydanticObjectId"] | null;
       /**
        * Title
        * @description Board game title
@@ -230,10 +264,10 @@ export interface components {
        */
       description: string | null;
       /**
-       * Photo Url
-       * @description Board game photo URL
+       * Photo File Id
+       * @description File ID of the board game photo
        */
-      photo_url: string | null;
+      photo_file_id: string | null;
       /**
        * Total Copies
        * @description Number of copies available for reservation
@@ -244,7 +278,7 @@ export interface components {
     /** BoardGameWithAvailability */
     BoardGameWithAvailability: {
       /** @description MongoDB document ObjectID */
-      id: components["schemas"]["PydanticObjectId"];
+      id: components["schemas"]["PydanticObjectId"] | null;
       /**
        * Title
        * @description Board game title
@@ -256,10 +290,10 @@ export interface components {
        */
       description: string | null;
       /**
-       * Photo Url
-       * @description Board game photo URL
+       * Photo File Id
+       * @description File ID of the board game photo
        */
-      photo_url: string | null;
+      photo_file_id: string | null;
       /**
        * Total Copies
        * @description Number of copies available for reservation
@@ -272,7 +306,7 @@ export interface components {
     /** BoardGameWithStorageAvailability */
     BoardGameWithStorageAvailability: {
       /** @description MongoDB document ObjectID */
-      id: components["schemas"]["PydanticObjectId"];
+      id: components["schemas"]["PydanticObjectId"] | null;
       /**
        * Title
        * @description Board game title
@@ -284,10 +318,10 @@ export interface components {
        */
       description: string | null;
       /**
-       * Photo Url
-       * @description Board game photo URL
+       * Photo File Id
+       * @description File ID of the board game photo
        */
-      photo_url: string | null;
+      photo_file_id: string | null;
       /**
        * Total Copies
        * @description Number of copies available for reservation
@@ -299,26 +333,19 @@ export interface components {
       /** Available In Storage */
       available_in_storage: number;
     };
+    /** Body_set_board_game_photo_admin_board_games__id__photo_post */
+    Body_set_board_game_photo_admin_board_games__id__photo_post: {
+      /** Photo File */
+      photo_file: string;
+    };
     /** CreateBoardGame */
     CreateBoardGame: {
-      /**
-       * Title
-       * @description Board game title
-       */
+      /** Title */
       title: string;
-      /**
-       * Description
-       * @description Short board game description
-       */
+      /** Description */
       description?: string | null;
       /**
-       * Photo Url
-       * @description Board game photo URL
-       */
-      photo_url?: string | null;
-      /**
        * Total Copies
-       * @description Number of copies available for reservation
        * @default 1
        */
       total_copies: number;
@@ -344,7 +371,7 @@ export interface components {
     /** Reservation */
     Reservation: {
       /** @description MongoDB document ObjectID */
-      id: components["schemas"]["PydanticObjectId"];
+      id: components["schemas"]["PydanticObjectId"] | null;
       /**
        * Board Game Id
        * @description Reserved board game ID
@@ -408,8 +435,6 @@ export interface components {
       title?: string | null;
       /** Description */
       description?: string | null;
-      /** Photo Url */
-      photo_url?: string | null;
       /** Total Copies */
       total_copies?: number | null;
     };
@@ -473,6 +498,8 @@ export type SchemaBoardGameWithAvailability =
   components["schemas"]["BoardGameWithAvailability"];
 export type SchemaBoardGameWithStorageAvailability =
   components["schemas"]["BoardGameWithStorageAvailability"];
+export type SchemaBodySetBoardGamePhotoAdminBoardGamesIdPhotoPost =
+  components["schemas"]["Body_set_board_game_photo_admin_board_games__id__photo_post"];
 export type SchemaCreateBoardGame = components["schemas"]["CreateBoardGame"];
 export type SchemaCreateReservation =
   components["schemas"]["CreateReservation"];
@@ -730,6 +757,62 @@ export interface operations {
       };
     };
   };
+  set_board_game_photo_admin_board_games__id__photo_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": components["schemas"]["Body_set_board_game_photo_admin_board_games__id__photo_post"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BoardGame"];
+        };
+      };
+      /** @description Invalid content type ({content_type}) */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You are not an admin in board games service */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Board game not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   get_board_games_reservations_admin_board_games__id__reservations_get: {
     parameters: {
       query?: never;
@@ -934,6 +1017,42 @@ export interface operations {
       };
     };
   };
+  get_board_game_photo_board_games__id__photo_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: components["schemas"]["PydanticObjectId"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      307: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No photo available OR Board game not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   get_users_reservations_users_me_reservations_get: {
     parameters: {
       query?: {
@@ -1062,6 +1181,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Reservation is not reserved */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Validation Error */
       422: {
         headers: {
@@ -1106,6 +1232,13 @@ export interface operations {
       };
       /** @description Reservation not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Reservation is not reserved */
+      409: {
         headers: {
           [name: string]: unknown;
         };

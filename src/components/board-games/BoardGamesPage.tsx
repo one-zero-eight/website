@@ -6,7 +6,9 @@ import {
   type SchemaReservation,
 } from "@/api/board-games/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
+import { BoardGameImage } from "@/components/board-games/BoardGameImage.tsx";
 import {
+  getReservationValidationError,
   ReservationFormFields,
   UserReservationDetailsModal,
 } from "@/components/board-games/UserReservationDetailsModal.tsx";
@@ -15,7 +17,7 @@ import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useRef, useState } from "react";
 
-const boardGamePlaceholderImage = "/board-games/placeholder.png";
+type BoardGame = SchemaBoardGameWithAvailability & { id: string };
 
 export function BoardGamesPage() {
   const reservationsQuery = $boardGames.useQuery(
@@ -24,9 +26,10 @@ export function BoardGamesPage() {
     { params: { query: { how: "all" } } },
   );
   const gamesQuery = $boardGames.useQuery("get", "/board-games");
-  const gameTitles = new Map(
-    (gamesQuery.data ?? []).map((game) => [game.id, game.title]),
+  const games = (gamesQuery.data ?? []).filter((game): game is BoardGame =>
+    Boolean(game.id),
   );
+  const gameTitles = new Map(games.map((game) => [game.id, game.title]));
   const reservationsNewestFirst = [...(reservationsQuery.data ?? [])].sort(
     (firstReservation, secondReservation) =>
       new Date(secondReservation.created_at).getTime() -
@@ -42,7 +45,7 @@ export function BoardGamesPage() {
         error={reservationsQuery.error}
       />
       <GamesCatalogueSection
-        games={gamesQuery.data ?? []}
+        games={games}
         isPending={gamesQuery.isPending}
         error={gamesQuery.error}
       />
@@ -202,14 +205,12 @@ function GamesCatalogueSection({
   isPending,
   error,
 }: {
-  games: SchemaBoardGameWithAvailability[];
+  games: BoardGame[];
   isPending: boolean;
   error: unknown;
 }) {
-  const [gameToReserve, setGameToReserve] =
-    useState<SchemaBoardGameWithAvailability | null>(null);
-  const [gameToView, setGameToView] =
-    useState<SchemaBoardGameWithAvailability | null>(null);
+  const [gameToReserve, setGameToReserve] = useState<BoardGame | null>(null);
+  const [gameToView, setGameToView] = useState<BoardGame | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
   const filteredGames = games.filter((game) =>
@@ -269,14 +270,10 @@ function GamesCatalogueSection({
               onClick={() => setGameToView(game)}
             >
               <div className="flex min-w-0 gap-3">
-                <img
-                  src={game.photo_url || boardGamePlaceholderImage}
-                  alt=""
-                  className="bg-base-200 h-20 w-20 shrink-0 object-cover"
-                  onError={(event) => {
-                    event.currentTarget.onerror = null;
-                    event.currentTarget.src = boardGamePlaceholderImage;
-                  }}
+                <BoardGameImage
+                  boardGameId={game.id}
+                  photoFileId={game.photo_file_id}
+                  className="h-20 w-20 shrink-0 object-cover"
                 />
                 <div className="min-w-0 grow">
                   <h3 className="truncate font-semibold">{game.title}</h3>
@@ -336,21 +333,17 @@ function UserGameDetailsModal({
   onOpenChange,
   onReserve,
 }: {
-  game: SchemaBoardGameWithAvailability;
+  game: BoardGame;
   onOpenChange: (open: boolean) => void;
   onReserve: () => void;
 }) {
   return (
     <Modal open onOpenChange={onOpenChange} title="Game information">
       <div className="flex flex-col gap-4">
-        <img
-          src={game.photo_url || boardGamePlaceholderImage}
-          alt=""
+        <BoardGameImage
+          boardGameId={game.id}
+          photoFileId={game.photo_file_id}
           className="bg-base-300 aspect-video w-full object-contain"
-          onError={(event) => {
-            event.currentTarget.onerror = null;
-            event.currentTarget.src = boardGamePlaceholderImage;
-          }}
         />
         <div>
           <h2 className="text-xl font-semibold wrap-break-word">
@@ -397,7 +390,7 @@ function MakeReservationModal({
   game,
   onOpenChange,
 }: {
-  game: SchemaBoardGameWithAvailability;
+  game: BoardGame;
   onOpenChange: (open: boolean) => void;
 }) {
   const queryClient = useQueryClient();
@@ -406,6 +399,10 @@ function MakeReservationModal({
   const [returnDate, setReturnDate] = useState("");
   const [whenAvailable, setWhenAvailable] = useState("");
   const [comments, setComments] = useState("");
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+  const validationError = hasAttemptedSubmit
+    ? getReservationValidationError(telegramAlias, returnDate)
+    : null;
   const mutation = $boardGames.useMutation(
     "post",
     "/board-games/{id}/reservations",
@@ -422,13 +419,15 @@ function MakeReservationModal({
         onOpenChange(false);
       },
       onError: (error) => {
-        showError("Could not reserve game", formatApiErrorMessage(error));
+        showError("Could not reserve game", formatReservationError(error));
       },
     },
   );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setHasAttemptedSubmit(true);
+    if (getReservationValidationError(telegramAlias, returnDate)) return;
     mutation.mutate({
       params: { path: { id: game.id } },
       body: {
@@ -447,7 +446,7 @@ function MakeReservationModal({
       title={`Reserve ${game.title}`}
       closeOnOutsidePress={!mutation.isPending}
     >
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         <ReservationFormFields
           telegramAlias={telegramAlias}
           onTelegramAliasChange={setTelegramAlias}
@@ -458,6 +457,7 @@ function MakeReservationModal({
           comments={comments}
           onCommentsChange={setComments}
           disabled={mutation.isPending}
+          validationError={validationError}
         />
         <div className="flex justify-end gap-2">
           <button
@@ -482,6 +482,34 @@ function MakeReservationModal({
       </form>
     </Modal>
   );
+}
+
+function formatReservationError(error: unknown) {
+  if (typeof error !== "object" || error === null || !("httpCode" in error)) {
+    return formatApiErrorMessage(error);
+  }
+
+  const apiError = error as { body?: unknown; httpCode: number };
+  const detail = (apiError.body as { detail?: unknown } | undefined)?.detail;
+  const detailMessage = typeof detail === "string" ? detail.toLowerCase() : "";
+
+  if (
+    apiError.httpCode === 409 &&
+    (detailMessage.includes("already") || detailMessage.includes("duplicate"))
+  ) {
+    return "You already have an active reservation for this game.";
+  }
+  if (apiError.httpCode === 409) {
+    return "This game cannot be reserved right now. You may already have an active reservation, or no copies may be available.";
+  }
+  if (apiError.httpCode === 404) {
+    return "This game is no longer available in the catalogue. Refresh the page and choose another game.";
+  }
+  if (apiError.httpCode === 401) {
+    return "Your session has expired. Sign in again and retry the reservation.";
+  }
+
+  return formatApiErrorMessage(error);
 }
 
 function ReservationStatusBadge({ status }: { status: ReservationStatus }) {

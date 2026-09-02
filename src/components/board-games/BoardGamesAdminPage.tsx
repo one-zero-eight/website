@@ -6,30 +6,34 @@ import {
   type SchemaReservation,
 } from "@/api/board-games/types.ts";
 import { Modal } from "@/components/common/Modal.tsx";
+import { BoardGameImage } from "@/components/board-games/BoardGameImage.tsx";
 import { useToast } from "@/components/toast";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { FormEvent, useRef, useState } from "react";
 
-type Reservation = SchemaReservation;
-type BoardGame = SchemaBoardGameWithStorageAvailability;
+type Reservation = SchemaReservation & { id: string };
+type BoardGame = SchemaBoardGameWithStorageAvailability & { id: string };
 
 const activeStatuses: ReservationStatus[] = [
   ReservationStatus.reserved,
   ReservationStatus.taken,
 ];
-const boardGamePlaceholderImage = "/board-games/placeholder.png";
 
 export function BoardGamesAdminPage() {
   const reservationsQuery = $boardGames.useQuery("get", "/admin/reservations");
   const gamesQuery = $boardGames.useQuery("get", "/admin/board-games");
-  const activeReservations = (reservationsQuery.data ?? []).filter(
-    (reservation) => activeStatuses.includes(reservation.status),
+  const reservations = (reservationsQuery.data ?? []).filter(
+    (reservation): reservation is Reservation => Boolean(reservation.id),
   );
-  const gameTitles = new Map(
-    (gamesQuery.data ?? []).map((game) => [game.id, game.title]),
+  const games = (gamesQuery.data ?? []).filter((game): game is BoardGame =>
+    Boolean(game.id),
   );
+  const activeReservations = reservations.filter((reservation) =>
+    activeStatuses.includes(reservation.status),
+  );
+  const gameTitles = new Map(games.map((game) => [game.id, game.title]));
 
   return (
     <main className="@container/content mx-auto flex w-full max-w-6xl flex-col gap-8 p-4 @md/content:p-6">
@@ -40,7 +44,7 @@ export function BoardGamesAdminPage() {
         error={reservationsQuery.error}
       />
       <GamesInventorySection
-        games={gamesQuery.data ?? []}
+        games={games}
         isPending={gamesQuery.isPending}
         error={gamesQuery.error}
       />
@@ -421,7 +425,7 @@ function GamesInventorySection({
   isPending,
   error,
 }: {
-  games: SchemaBoardGameWithStorageAvailability[];
+  games: BoardGame[];
   isPending: boolean;
   error: unknown;
 }) {
@@ -540,14 +544,10 @@ function GamesInventorySection({
               className="border-base-300 bg-base-100 hover:bg-base-200/50 flex cursor-pointer items-center gap-3 border p-3 transition-colors"
               onClick={() => setGameToView(game)}
             >
-              <img
-                src={game.photo_url || boardGamePlaceholderImage}
-                alt=""
-                className="bg-base-200 h-16 w-16 shrink-0 object-cover"
-                onError={(event) => {
-                  event.currentTarget.onerror = null;
-                  event.currentTarget.src = boardGamePlaceholderImage;
-                }}
+              <BoardGameImage
+                boardGameId={game.id}
+                photoFileId={game.photo_file_id}
+                className="h-16 w-16 shrink-0 object-cover"
               />
               <div className="min-w-0 grow">
                 <h3 className="truncate font-semibold">{game.title}</h3>
@@ -624,14 +624,10 @@ function BoardGameDetailsModal({
   return (
     <Modal open onOpenChange={onOpenChange} title="Game information">
       <div className="flex flex-col gap-4">
-        <img
-          src={game.photo_url || boardGamePlaceholderImage}
-          alt=""
+        <BoardGameImage
+          boardGameId={game.id}
+          photoFileId={game.photo_file_id}
           className="bg-base-300 aspect-video w-full object-contain"
-          onError={(event) => {
-            event.currentTarget.onerror = null;
-            event.currentTarget.src = boardGamePlaceholderImage;
-          }}
         />
 
         <div className="grid grid-cols-1 gap-3 @sm/modal:grid-cols-2">
@@ -643,23 +639,6 @@ function BoardGameDetailsModal({
             className="@sm/modal:col-span-2"
           >
             {game.description || "Not provided"}
-          </GameInformationField>
-          <GameInformationField
-            label="Photo URL"
-            className="@sm/modal:col-span-2"
-          >
-            {game.photo_url ? (
-              <a
-                href={game.photo_url}
-                className="link link-hover block truncate"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {game.photo_url}
-              </a>
-            ) : (
-              "Not provided"
-            )}
           </GameInformationField>
           <GameInformationField label="Total copies">
             {game.total_copies}
@@ -714,7 +693,8 @@ function BoardGameFormModal({
   const { showError, showSuccess } = useToast();
   const [title, setTitle] = useState(game?.title ?? "");
   const [description, setDescription] = useState(game?.description ?? "");
-  const [photoUrl, setPhotoUrl] = useState(game?.photo_url ?? "");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [totalCopies, setTotalCopies] = useState(
     game?.total_copies.toString() ?? "1",
   );
@@ -723,7 +703,8 @@ function BoardGameFormModal({
   function resetForm() {
     setTitle(game?.title ?? "");
     setDescription(game?.description ?? "");
-    setPhotoUrl(game?.photo_url ?? "");
+    setPhotoFile(null);
+    setPhotoPreview(null);
     setTotalCopies(game?.total_copies.toString() ?? "1");
   }
 
@@ -748,19 +729,19 @@ function BoardGameFormModal({
     );
   }
 
-  const createMutation = $boardGames.useMutation("post", "/admin/board-games", {
-    onSuccess: handleMutationSuccess,
-    onError: handleMutationError,
-  });
+  const createMutation = $boardGames.useMutation("post", "/admin/board-games");
   const editMutation = $boardGames.useMutation(
     "patch",
     "/admin/board-games/{id}",
-    {
-      onSuccess: handleMutationSuccess,
-      onError: handleMutationError,
-    },
   );
-  const isMutationPending = createMutation.isPending || editMutation.isPending;
+  const photoMutation = $boardGames.useMutation(
+    "post",
+    "/admin/board-games/{id}/photo",
+  );
+  const isMutationPending =
+    createMutation.isPending ||
+    editMutation.isPending ||
+    photoMutation.isPending;
 
   function handleOpenChange(nextOpen: boolean) {
     if (isMutationPending) return;
@@ -768,7 +749,19 @@ function BoardGameFormModal({
     onOpenChange(nextOpen);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handlePhotoChange(file: File | null) {
+    setPhotoFile(file);
+    if (!file) {
+      setPhotoPreview(null);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => setPhotoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const parsedTotalCopies = Number(totalCopies);
     if (
@@ -782,19 +775,30 @@ function BoardGameFormModal({
     const body = {
       title: title.trim(),
       description: description.trim() || null,
-      photo_url: photoUrl.trim() || null,
       total_copies: parsedTotalCopies,
     };
 
-    if (game) {
-      editMutation.mutate({
-        params: { path: { id: game.id } },
-        body,
-      });
-      return;
-    }
+    try {
+      const savedGame = game
+        ? await editMutation.mutateAsync({
+            params: { path: { id: game.id } },
+            body,
+          })
+        : await createMutation.mutateAsync({ body });
 
-    createMutation.mutate({ body });
+      if (photoFile && savedGame.id) {
+        const formData = new FormData();
+        formData.append("photo_file", photoFile);
+        await photoMutation.mutateAsync({
+          params: { path: { id: savedGame.id } },
+          body: formData as never,
+        });
+      }
+
+      handleMutationSuccess();
+    } catch (error) {
+      handleMutationError(error);
+    }
   }
 
   return (
@@ -832,13 +836,16 @@ function BoardGameFormModal({
 
         <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-[1fr_8rem]">
           <label className="fieldset min-w-0">
-            <span className="fieldset-legend">Image URL</span>
+            <span className="fieldset-legend">
+              {isEditing ? "Replace photo" : "Photo"}
+            </span>
             <input
-              type="url"
-              className="input w-full"
-              value={photoUrl}
-              onChange={(event) => setPhotoUrl(event.target.value)}
-              placeholder="https://example.com/game.jpg"
+              type="file"
+              className="file-input w-full"
+              accept="image/*"
+              onChange={(event) =>
+                handlePhotoChange(event.target.files?.[0] ?? null)
+              }
               disabled={isMutationPending}
             />
           </label>
@@ -858,6 +865,22 @@ function BoardGameFormModal({
             />
           </label>
         </div>
+
+        {photoPreview ? (
+          <img
+            src={photoPreview}
+            alt=""
+            className="bg-base-200 aspect-video w-full object-contain"
+          />
+        ) : (
+          game?.id && (
+            <BoardGameImage
+              boardGameId={game.id}
+              photoFileId={game.photo_file_id}
+              className="aspect-video w-full object-contain"
+            />
+          )
+        )}
 
         <div className="flex justify-end gap-2">
           <button
