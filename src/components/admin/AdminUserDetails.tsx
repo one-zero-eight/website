@@ -223,6 +223,16 @@ export function AdminUserDetails({
         />
       </InfoSection>
 
+      <InfoSection title="Preferences">
+        {Object.entries(user.preferences ?? {}).length > 0 ? (
+          Object.entries(user.preferences ?? {}).map(([key, value]) => (
+            <InfoRow key={key} label={key} value={JSON.stringify(value)} mono />
+          ))
+        ) : (
+          <p className="text-base-content/75 text-sm">No preferences.</p>
+        )}
+      </InfoSection>
+
       <InfoSection title="Telegram">
         <InfoRow label="ID" value={user.telegram_info?.id} mono />
         <InfoRow label="First name" value={user.telegram_info?.first_name} />

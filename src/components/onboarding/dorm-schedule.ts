@@ -1,74 +1,43 @@
-export type DormRoom = {
+export type DormSelection = {
   building: string;
-  room: string;
-  floor: number;
-  canonicalRoom: string;
+  floor: string;
 };
-
-export function getDormRoomLength(building: string, room: string): 3 | 4 {
-  if (building !== "6" && building !== "7") return 3;
-  if (/^[2-9]/.test(room)) return 3;
-  if (/^(11|12|13)/.test(room)) return 4;
-  if (room === "10") return 4;
-  if (/^100/.test(room)) return 4;
-  return 3;
-}
-
-export function parseDormRoom(building: string, room: string): DormRoom | null {
-  if (!/^[1-7]$/.test(building)) return null;
-
-  const expectedRoomLength = getDormRoomLength(building, room);
-  if (room.length !== expectedRoomLength || !/^\d+$/.test(room)) return null;
-
-  const floorText = room.length === 4 ? room.slice(0, 2) : room.slice(0, 1);
-  const floor = Number(floorText);
-  if (floor < 1 || floor > 13) return null;
-  if (building === "2" && floor > 4) return null;
-  if (building === "3" && floor > 4) return null;
-  if (building === "5" && floor > 5) return null;
-
-  return {
-    building,
-    room,
-    floor,
-    canonicalRoom: `${building}-${room}`,
-  };
-}
 
 export function getDormScheduleAliases({
   building,
   floor,
-}: DormRoom): string[] {
+}: DormSelection): string[] {
+  if (!/^[1-7]$/.test(building)) return [];
+  if (!/^(?:[1-9]|1[0-3])$/.test(floor)) return [];
+  const floorNumber = Number(floor);
+  if (/^[1-4]$/.test(building) && floorNumber > 4) return [];
+  if (building === "5" && floorNumber > 5) return [];
+
   const linenAlias =
     building === "3"
-      ? floor <= 2
+      ? floorNumber <= 2
         ? "linen-change-3-building-university"
         : "linen-change-3-building-college"
       : `linen-change-${building}-building`;
 
-  const cleaningAliases = getCleaningAliases(building, floor);
+  const cleaningAliases = getCleaningAliases(building, floorNumber);
   return [...new Set([...cleaningAliases, linenAlias])];
 }
 
 function getCleaningAliases(building: string, floor: number): string[] {
   if (building === "1") return ["cleaning-1-building"];
   if (building === "2") {
-    if (floor <= 2) return ["cleaning-2-building-1-2-floors"];
-    return ["cleaning-2-building-3-4-floors"];
+    return [
+      floor <= 2
+        ? "cleaning-2-building-1-2-floors"
+        : "cleaning-2-building-3-4-floors",
+    ];
   }
   if (building === "3") {
-    return floor === 3
-      ? ["cleaning-3-building", "cleaning-3-building-3-floors"]
-      : ["cleaning-3-building"];
+    return ["cleaning-3-building"];
   }
   if (building === "4") return ["cleaning-4-building"];
-  if (building === "5") {
-    const floorAlias =
-      floor <= 3
-        ? "cleaning-5-building-1-3-floors"
-        : "cleaning-5-building-4-5-floors";
-    return ["cleaning-5-building", floorAlias];
-  }
+  if (building === "5") return ["cleaning-5-building"];
   if (building === "6") {
     return [
       floor <= 7

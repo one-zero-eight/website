@@ -4,21 +4,11 @@ import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
 import type { scheduleTypes } from "@/api/schedule";
 import TelegramLoginButton from "@/components/account/TelegramLoginButton.tsx";
 import { SignInButton } from "@/components/common/SignInButton.tsx";
-import {
-  getDormRoomLength,
-  getDormScheduleAliases,
-  parseDormRoom,
-} from "@/components/onboarding/dorm-schedule.ts";
+import { getDormScheduleAliases } from "@/components/onboarding/dorm-schedule.ts";
 import { cn } from "@/lib/ui/cn";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import {
-  type ClipboardEvent,
-  type KeyboardEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useRef, useState } from "react";
 
 export function SignInStep({
   name,
@@ -158,9 +148,9 @@ export function TelegramStep({
 
 export function DormScheduleStep({
   building,
-  room,
+  floor,
   onBuildingChange,
-  onRoomChange,
+  onFloorChange,
   eventGroups,
   isEventGroupsPending,
   isEventGroupsError,
@@ -170,19 +160,27 @@ export function DormScheduleStep({
   onContinue,
 }: {
   building: string;
-  room: string;
+  floor: string;
   onBuildingChange: (building: string) => void;
-  onRoomChange: (room: string) => void;
+  onFloorChange: (floor: string) => void;
   eventGroups?: scheduleTypes.SchemaListEventGroupsResponse;
   isEventGroupsPending: boolean;
   isEventGroupsError: boolean;
   eventGroupsError: unknown;
   isSaving: boolean;
   saveError: string | null;
-  onContinue: (aliases: string[]) => void;
+  onContinue: ({
+    aliases,
+    building,
+    floor,
+  }: {
+    aliases: string[];
+    building: string;
+    floor: string;
+  }) => void;
 }) {
-  const parsedRoom = parseDormRoom(building, room);
-  const matchedAliases = parsedRoom ? getDormScheduleAliases(parsedRoom) : [];
+  const matchedAliases = getDormScheduleAliases({ building, floor });
+  const isSelectionComplete = matchedAliases.length > 0;
   const matchedGroups = matchedAliases.flatMap((alias) => {
     const group = eventGroups?.event_groups.find(
       (eventGroup) => eventGroup.alias === alias,
@@ -193,34 +191,27 @@ export function DormScheduleStep({
   return (
     <StepContent title="Find your dorm schedule">
       <StepBody>
-        <div className="relative">
-          <DormRoomInput
-            building={building}
-            room={room}
-            onBuildingChange={onBuildingChange}
-            onRoomChange={onRoomChange}
-          />
-          {(building || room) && !parsedRoom && (
-            <p className="text-error absolute top-full mt-1 w-full text-center text-sm">
-              Enter a valid room, for example 1-105 or 7-1304.
-            </p>
-          )}
-        </div>
+        <DormBuildingFloorInput
+          building={building}
+          floor={floor}
+          onBuildingChange={onBuildingChange}
+          onFloorChange={onFloorChange}
+        />
 
-        {parsedRoom && isEventGroupsPending && (
+        {isSelectionComplete && isEventGroupsPending && (
           <div className="flex flex-col gap-2">
             <div className="skeleton h-10 w-full" />
             <div className="skeleton h-10 w-full" />
           </div>
         )}
 
-        {parsedRoom && isEventGroupsError && (
+        {isSelectionComplete && isEventGroupsError && (
           <div className="alert alert-error">
             <span>{formatApiErrorMessage(eventGroupsError)}</span>
           </div>
         )}
 
-        {parsedRoom &&
+        {isSelectionComplete &&
           !isEventGroupsPending &&
           !isEventGroupsError &&
           matchedGroups.length > 0 && (
@@ -250,9 +241,15 @@ export function DormScheduleStep({
       </StepBody>
 
       <PrimaryButton
-        onClick={() => onContinue(matchedAliases)}
+        onClick={() =>
+          onContinue({
+            aliases: matchedAliases,
+            building,
+            floor,
+          })
+        }
         disabled={
-          !parsedRoom ||
+          !isSelectionComplete ||
           isEventGroupsPending ||
           isEventGroupsError ||
           matchedGroups.length !== matchedAliases.length ||
@@ -364,87 +361,41 @@ export function CompleteStep() {
   );
 }
 
-function DormRoomInput({
+function DormBuildingFloorInput({
   building,
-  room,
+  floor,
   onBuildingChange,
-  onRoomChange,
+  onFloorChange,
 }: {
   building: string;
-  room: string;
+  floor: string;
   onBuildingChange: (building: string) => void;
-  onRoomChange: (room: string) => void;
+  onFloorChange: (floor: string) => void;
 }) {
-  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const roomLength = getDormRoomLength(building, room);
-  const digits = [
-    building,
-    ...Array.from({ length: roomLength }, (_, index) => room[index] ?? ""),
-  ];
+  const floorInputRef = useRef<HTMLInputElement>(null);
+  const isHighRiseBuilding = building === "6" || building === "7";
 
-  useEffect(() => {
-    if (room.length > roomLength) {
-      onRoomChange(room.slice(0, roomLength));
-    }
-  }, [onRoomChange, room, roomLength]);
-
-  function updateDigit(index: number, value: string) {
+  function handleBuildingChange(value: string) {
     const digit = value.replace(/\D/g, "").slice(-1);
-    if (index === 0) {
-      if (!/^[1-7]?$/.test(digit)) return;
-      onBuildingChange(digit);
-      if (digit) inputRefs.current[1]?.focus();
-      return;
-    }
-
-    const nextRoom = Array.from(
-      { length: roomLength },
-      (_, roomIndex) => room[roomIndex] ?? "",
-    );
-    nextRoom[index - 1] = digit;
-    onRoomChange(nextRoom.join(""));
-    if (digit) inputRefs.current[index + 1]?.focus();
+    if (!/^[1-7]?$/.test(digit)) return;
+    onBuildingChange(digit);
+    onFloorChange("");
+    if (digit) floorInputRef.current?.focus();
   }
 
-  function handleKeyDown(
-    event: KeyboardEvent<HTMLInputElement>,
-    index: number,
-  ) {
-    if (event.key !== "Backspace" || event.currentTarget.value) return;
-    inputRefs.current[index - 1]?.focus();
-  }
-
-  function handlePaste(event: ClipboardEvent<HTMLDivElement>) {
-    const pastedValue = event.clipboardData.getData("text").trim();
-    const match = /^([1-7])-(\d{3,4})$/.exec(pastedValue);
-    if (!match) return;
-
-    const [, pastedBuilding, pastedRoom] = match;
-    if (pastedRoom.length !== getDormRoomLength(pastedBuilding, pastedRoom)) {
-      return;
-    }
-
-    event.preventDefault();
-    onBuildingChange(pastedBuilding);
-    onRoomChange(pastedRoom);
-    inputRefs.current[Math.min(pastedRoom.length, 4)]?.focus();
+  function handleFloorChange(value: string) {
+    const maxLength = isHighRiseBuilding ? 2 : 1;
+    onFloorChange(value.replace(/\D/g, "").slice(0, maxLength));
   }
 
   return (
-    <div
-      className="flex items-start justify-center gap-2"
-      onPaste={handlePaste}
-    >
+    <div className="flex items-start justify-center gap-4">
       <div className="flex flex-col items-center gap-2">
         <input
-          ref={(element) => {
-            inputRefs.current[0] = element;
-          }}
           type="text"
           inputMode="numeric"
-          value={digits[0]?.trim()}
-          onChange={(event) => updateDigit(0, event.target.value)}
-          onKeyDown={(event) => handleKeyDown(event, 0)}
+          value={building}
+          onChange={(event) => handleBuildingChange(event.target.value)}
           className="input input-bordered border-primary h-14 w-11 p-0 text-center text-2xl font-medium"
         />
         <span className="text-base-content/50 text-xs">Building</span>
@@ -455,26 +406,18 @@ function DormRoomInput({
       </span>
 
       <div className="flex flex-col items-center gap-2">
-        <div className="flex gap-2">
-          {digits.slice(1).map((digit, roomIndex) => {
-            const index = roomIndex + 1;
-            return (
-              <input
-                key={index}
-                ref={(element) => {
-                  inputRefs.current[index] = element;
-                }}
-                type="text"
-                inputMode="numeric"
-                value={digit.trim()}
-                onChange={(event) => updateDigit(index, event.target.value)}
-                onKeyDown={(event) => handleKeyDown(event, index)}
-                className="input input-bordered h-14 w-11 p-0 text-center text-2xl font-medium"
-              />
-            );
-          })}
-        </div>
-        <span className="text-base-content/50 text-xs">Room</span>
+        <input
+          ref={floorInputRef}
+          type="text"
+          inputMode="numeric"
+          value={floor}
+          onChange={(event) => handleFloorChange(event.target.value)}
+          className={cn(
+            "input input-bordered h-14 p-0 text-center text-2xl font-medium",
+            isHighRiseBuilding ? "w-16" : "w-11",
+          )}
+        />
+        <span className="text-base-content/50 text-xs">Floor</span>
       </div>
     </div>
   );

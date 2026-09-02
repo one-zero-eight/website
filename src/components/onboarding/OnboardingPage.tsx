@@ -19,7 +19,6 @@ import { viewConfig } from "@/components/schedule/view-config.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
 
 export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
   const { me } = useMe();
@@ -33,15 +32,9 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
     select: ({ searchStr }) => ({ searchStr }),
   });
   const processedTelegramAuth = useRef<string | null>(null);
-  const [building, setBuilding] = useLocalStorage(
-    "onboarding-dorm-building",
-    "",
-  );
-  const [room, setRoom] = useLocalStorage("onboarding-dorm-room", "");
-  const [savedDormAliases, setSavedDormAliases] = useLocalStorage<string[]>(
-    "onboarding-dorm-event-groups",
-    [],
-  );
+  const [building, setBuilding] = useState("");
+  const [floor, setFloor] = useState("");
+  const [savedDormAliases, setSavedDormAliases] = useState<string[]>([]);
   const [favoriteSaveError, setFavoriteSaveError] = useState<string | null>(
     null,
   );
@@ -77,6 +70,10 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
   } = $schedule.useQuery("get", "/users/me/predefined", {}, { enabled: !!me });
   const { mutateAsync: addFavorite, isPending: isFavoriteSavePending } =
     $schedule.useMutation("post", "/users/me/favorites");
+  const {
+    mutateAsync: updatePreferences,
+    isPending: isPreferencesSavePending,
+  } = $accounts.useMutation("patch", "/users/me/preferences");
 
   const displayedGroupAliases = [
     ...new Set(predefinedGroups?.event_groups ?? []),
@@ -109,7 +106,15 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
   const verifyGroupsError =
     eventGroupsError ?? scheduleUserError ?? predefinedGroupsError;
 
-  async function handleSaveDormGroups(aliases: string[]) {
+  async function handleSaveDormGroups({
+    aliases,
+    building,
+    floor,
+  }: {
+    aliases: string[];
+    building: string;
+    floor: string;
+  }) {
     setFavoriteSaveError(null);
     setSavedDormAliases(aliases);
 
@@ -120,6 +125,17 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
     const aliasesToAdd = aliases.filter((alias) => !existingAliases.has(alias));
 
     try {
+      const updatedMe = await updatePreferences({
+        body: {
+          dorm_building: Number(building),
+          dorm_floor: Number(floor),
+        },
+      });
+      queryClient.setQueryData(
+        $accounts.queryOptions("get", "/users/me").queryKey,
+        updatedMe,
+      );
+
       for (const groupAlias of aliasesToAdd) {
         const updatedScheduleUser = await addFavorite({
           params: { query: { group_alias: groupAlias } },
@@ -214,14 +230,14 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
             {step === 3 && (
               <DormScheduleStep
                 building={building}
-                room={room}
+                floor={floor}
                 onBuildingChange={setBuilding}
-                onRoomChange={setRoom}
+                onFloorChange={setFloor}
                 eventGroups={eventGroups}
                 isEventGroupsPending={areEventGroupsPending}
                 isEventGroupsError={areEventGroupsError}
                 eventGroupsError={eventGroupsError}
-                isSaving={isFavoriteSavePending}
+                isSaving={isFavoriteSavePending || isPreferencesSavePending}
                 saveError={favoriteSaveError}
                 onContinue={handleSaveDormGroups}
               />
