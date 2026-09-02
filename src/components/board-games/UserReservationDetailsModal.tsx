@@ -295,7 +295,7 @@ export function ReservationFormFields({
       )}
       <div className="grid grid-cols-1 gap-4 @sm/modal:grid-cols-2">
         <label className="fieldset">
-          <span className="fieldset-legend">Telegram alias *</span>
+          <span className="fieldset-legend">Telegram alias*</span>
           <input
             type="text"
             className="input w-full"
@@ -307,7 +307,7 @@ export function ReservationFormFields({
           />
         </label>
         <label className="fieldset">
-          <span className="fieldset-legend">Return date *</span>
+          <span className="fieldset-legend">Return date*</span>
           <input
             type="date"
             className="input w-full"
