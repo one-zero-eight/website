@@ -13,11 +13,14 @@ import { DescriptionEditor } from "@/components/editor/DescriptionEditor.tsx";
 import { DescriptionViewer } from "@/components/editor/DescriptionViewer.tsx";
 import type { EditorImageHandlers } from "@/components/editor/types";
 import { Modal } from "@/components/common/Modal.tsx";
+import { useToast } from "@/components/toast";
 import { canUserEditClub } from "./permissions.ts";
 
 export function EditClubPage({ clubSlug }: { clubSlug: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const { showSuccess } = useToast();
 
   const { data: club, isPending: clubPending } = $clubs.useQuery(
     "get",
@@ -26,6 +29,10 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       params: { path: { slug: clubSlug } },
     },
   );
+
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
+  const canEditClub = canUserEditClub(clubsUser, club?.id);
+  const isAdmin = clubsUser?.role === "admin";
 
   // Form state
   const [slug, setSlug] = useState("");
@@ -69,30 +76,40 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     },
   );
 
-  // Initialize form with club data
+  // Initialize form with club data, preferring a leader's in-flight pending
+  // draft over the last-approved values so reopening this form doesn't lose it
   useEffect(() => {
     if (club) {
+      const pending = club.pending_update;
+      const title = pending?.title ?? club.title;
+      const shortDescription =
+        pending?.short_description ?? club.short_description;
+      const description = pending?.description ?? club.description;
+      const type = pending?.type ?? club.type;
+      const sportId = pending?.sport_id ?? club.sport_id;
+      const links = pending?.links ?? club.links;
+
       setSlug(club.slug);
-      setTitle(club.title);
-      setShortDescription(club.short_description);
+      setTitle(title);
+      setShortDescription(shortDescription);
       // Parse description JSON if it's a string, otherwise use as-is
       try {
         const parsedDescription =
-          typeof club.description === "string"
-            ? club.description
-              ? JSON.parse(club.description)
+          typeof description === "string"
+            ? description
+              ? JSON.parse(description)
               : null
-            : club.description;
+            : description;
         setDescription(parsedDescription);
       } catch {
         // If parsing fails, treat as empty
         setDescription(null);
       }
       setIsActive(club.is_active);
-      setType(club.type);
-      setIsSport(!!club.sport_id);
-      setSportId(club.sport_id || "");
-      setLinks(club.links || []);
+      setType(type);
+      setIsSport(!!sportId);
+      setSportId(sportId || "");
+      setLinks(links || []);
     }
   }, [club]);
 
@@ -102,33 +119,37 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     }
   }, [clubLeader]);
 
-  // Initialize initial form state after club data is loaded
+  // Initialize initial form state after club data is loaded (matches the
+  // pending-draft-aware seeding above, so dirty-checking isn't tripped by it)
   useEffect(() => {
     if (club) {
+      const pending = club.pending_update;
+      const description = pending?.description ?? club.description;
+
       // Parse description JSON if it's a string, otherwise use as-is
       let parsedDescription: any = null;
       try {
         parsedDescription =
-          typeof club.description === "string"
-            ? club.description
-              ? JSON.parse(club.description)
+          typeof description === "string"
+            ? description
+              ? JSON.parse(description)
               : null
-            : club.description;
+            : description;
       } catch {
         parsedDescription = null;
       }
 
       initialFormStateRef.current = {
         slug: club.slug,
-        title: club.title,
-        shortDescription: club.short_description,
+        title: pending?.title ?? club.title,
+        shortDescription: pending?.short_description ?? club.short_description,
         description: parsedDescription,
         isActive: club.is_active,
-        type: club.type,
+        type: pending?.type ?? club.type,
         leaderEmail: clubLeader?.email || leaderEmail || "",
-        isSport: !!club.sport_id,
-        sportId: club.sport_id || "",
-        links: club.links || [],
+        isSport: !!(pending?.sport_id ?? club.sport_id),
+        sportId: (pending?.sport_id ?? club.sport_id) || "",
+        links: pending?.links ?? club.links ?? [],
       };
     }
   }, [club, clubLeader, leaderEmail]);
@@ -192,10 +213,8 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     },
   });
 
-  const { mutate: updateClub, isPending: isUpdating } = $clubs.useMutation(
-    "post",
-    "/clubs/by-slug/{slug}",
-    {
+  const { mutateAsync: updateClubAsync, isPending: isUpdating } =
+    $clubs.useMutation("post", "/clubs/by-slug/{slug}", {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: $clubs.queryOptions("get", "/clubs/by-slug/{slug}", {
@@ -227,20 +246,15 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
             links,
           };
         }
-        // Navigate to new slug if it changed, otherwise stay on current slug
-        navigate({ to: "/clubs/$slug", params: { slug }, ignoreBlocker: true });
       },
       onError: (error) => {
         console.error("Failed to update club:", error);
         alert(formatApiErrorMessage(error));
       },
-    },
-  );
+    });
 
-  const { mutate: uploadLogo, isPending: isUploadingLogo } = $clubs.useMutation(
-    "post",
-    "/clubs/by-id/{id}/logo",
-    {
+  const { mutateAsync: uploadLogoAsync, isPending: isUploadingLogo } =
+    $clubs.useMutation("post", "/clubs/by-id/{id}/logo", {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: $clubs.queryOptions("get", "/clubs/by-slug/{slug}", {
@@ -252,14 +266,12 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
         });
         setLogoFile(null);
         setLogoPreview(null);
-        alert("Logo uploaded successfully!");
       },
       onError: (error) => {
         console.error("Failed to upload logo:", error);
         alert(formatApiErrorMessage(error));
       },
-    },
-  );
+    });
 
   const { mutateAsync: uploadDescriptionImage } = $clubs.useMutation(
     "post",
@@ -290,9 +302,6 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     };
   }, [club?.id, uploadDescriptionImage]);
 
-  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
-  const canEditClub = canUserEditClub(clubsUser, club?.id);
-
   useEffect(() => {
     if (!clubsUser || !club || canEditClub) return;
     navigate({ to: "/clubs" });
@@ -302,9 +311,7 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     return null;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const buildUpdateData = (): clubsTypes.SchemaUpdateClub => {
     // Convert to JSON string for API
     const descriptionJSON = editorRef.current?.getJSON() || null;
     const descriptionString = descriptionJSON
@@ -326,11 +333,47 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
     if (showChangeLeader && leaderEmail && leaderEmail !== clubLeader?.email) {
       updateData.new_leader_email = leaderEmail;
     }
+    return updateData;
+  };
 
-    updateClub({
-      params: { path: { slug: clubSlug } },
-      body: updateData,
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Text fields always go first: for a leader this also happens to be what
+    // makes the logo upload below safe (see uploadLogoAsync call), since the
+    // backend crashes trying to start a pending change from inside the logo
+    // endpoint itself. Saving as one action also means we never submit a
+    // half-edited field the user hasn't confirmed via "Save Changes" yet.
+    try {
+      await updateClubAsync({
+        params: { path: { slug: clubSlug } },
+        body: buildUpdateData(),
+      });
+    } catch {
+      return; // onError already reported it
+    }
+
+    if (logoFile && club?.id) {
+      const formData = new FormData();
+      formData.append("logo_file", logoFile);
+      try {
+        await uploadLogoAsync({
+          params: { path: { id: club.id } },
+          body: formData as any,
+        });
+      } catch {
+        return; // onError already reported it
+      }
+    }
+
+    if (!isAdmin) {
+      showSuccess(
+        "Submitted for review",
+        "An admin needs to approve your changes before they go live.",
+      );
+    }
+    // Navigate to new slug if it changed, otherwise stay on current slug
+    navigate({ to: "/clubs/$slug", params: { slug }, ignoreBlocker: true });
   };
 
   const handleAddLink = () => {
@@ -368,18 +411,6 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleUploadLogo = () => {
-    if (!logoFile || !club?.id) return;
-
-    const formData = new FormData();
-    formData.append("logo_file", logoFile);
-
-    uploadLogo({
-      params: { path: { id: club.id } },
-      body: formData as any,
-    });
   };
 
   if (clubPending) {
@@ -446,7 +477,11 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                   Current logo
                 </h3>
                 <div className="flex items-center justify-center">
-                  <ClubLogo clubId={club.id} className="size-48" />
+                  <ClubLogo
+                    clubId={club.id}
+                    logoFileId={club.logo_file_id}
+                    className="size-48"
+                  />
                 </div>
               </div>
 
@@ -482,29 +517,22 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                     className="text-base-content file:bg-primary hover:file:bg-primary/90 file:rounded-field w-full text-sm file:mr-4 file:border-0 file:px-4 file:py-2 file:text-white"
                   />
 
-                  <button
-                    type="button"
-                    onClick={handleUploadLogo}
-                    disabled={!logoFile || isUploadingLogo}
-                    className={cn(
-                      "btn btn-primary w-full",
-                      (!logoFile || isUploadingLogo) && "btn-disabled",
-                    )}
-                  >
-                    {isUploadingLogo ? "Uploading..." : "Upload Logo"}
-                  </button>
-
                   {logoFile && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLogoFile(null);
-                        setLogoPreview(null);
-                      }}
-                      className="btn btn-ghost btn-sm w-full"
-                    >
-                      Clear selection
-                    </button>
+                    <>
+                      <p className="text-base-content/50 text-sm">
+                        This will be uploaded when you save changes below.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLogoFile(null);
+                          setLogoPreview(null);
+                        }}
+                        className="btn btn-ghost btn-sm w-full"
+                      >
+                        Clear selection
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -522,23 +550,25 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
           <div className="card-body">
             <h2 className="card-title">Basic information</h2>
 
-            {/* Active Status */}
-            <div className="form-control">
-              <label className="label cursor-pointer justify-start gap-3">
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                  className="checkbox checkbox-primary"
-                />
-                <span className="label-text text-base-content font-medium">
-                  Club is active{" "}
-                  <span className="text-xs font-normal">
-                    (show in the list of clubs)
+            {/* Active Status (admin-only: leaders' edits to this are dropped by the backend) */}
+            {isAdmin && (
+              <div className="form-control">
+                <label className="label cursor-pointer justify-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                    className="checkbox checkbox-primary"
+                  />
+                  <span className="label-text text-base-content font-medium">
+                    Club is active{" "}
+                    <span className="text-xs font-normal">
+                      (show in the list of clubs)
+                    </span>
                   </span>
-                </span>
-              </label>
-            </div>
+                </label>
+              </div>
+            )}
 
             {/* Title */}
             <div className="form-control">
@@ -568,12 +598,16 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
                 required
+                readOnly={!isAdmin}
+                disabled={!isAdmin}
                 className="input input-bordered w-full"
                 placeholder="club-slug"
               />
               <label className="label">
                 <span className="label-text-alt text-base-content/50">
-                  URL-friendly identifier for the club
+                  {isAdmin
+                    ? "URL-friendly identifier for the club"
+                    : "Only an admin can change the club's URL slug"}
                 </span>
               </label>
             </div>
@@ -942,13 +976,20 @@ export function EditClubPage({ clubSlug }: { clubSlug: string }) {
               </button>
               <button
                 type="submit"
-                disabled={isUpdating}
-                className={cn("btn btn-primary", isUpdating && "btn-disabled")}
+                disabled={isUpdating || isUploadingLogo}
+                className={cn(
+                  "btn btn-primary",
+                  (isUpdating || isUploadingLogo) && "btn-disabled",
+                )}
               >
-                {isUpdating && (
+                {(isUpdating || isUploadingLogo) && (
                   <span className="loading loading-spinner loading-sm" />
                 )}
-                {isUpdating ? "Saving..." : "Save Changes"}
+                {isUpdating
+                  ? "Saving..."
+                  : isUploadingLogo
+                    ? "Uploading logo..."
+                    : "Save Changes"}
               </button>
             </div>
           </div>

@@ -10,7 +10,10 @@ export function ClubsTabs() {
       <TabLink to="/clubs/new">Create new</TabLink>
       <TabLink to="/clubs/league">Club league</TabLink>
       {clubsUser?.role === "admin" && (
-        <TabLink to="/clubs/admin">Admin</TabLink>
+        <>
+          <TabLink to="/clubs/admin">Admin</TabLink>
+          <TabLink to="/clubs/pending-updates">Pending Changes</TabLink>
+        </>
       )}
     </div>
   );

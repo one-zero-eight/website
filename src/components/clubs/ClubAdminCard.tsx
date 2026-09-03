@@ -23,7 +23,11 @@ export function ClubAdminCard({ club }: { club: clubsTypes.SchemaClub }) {
   return (
     <div className="card card-border card-sm md:card-side">
       <figure className="shrink-0 items-start p-4 pb-0 md:pr-0 md:pb-4">
-        <ClubLogo clubId={club.id} className="size-16 md:size-20" />
+        <ClubLogo
+          clubId={club.id}
+          logoFileId={club.logo_file_id}
+          className="size-16 md:size-20"
+        />
       </figure>
 
       <div className="card-body">

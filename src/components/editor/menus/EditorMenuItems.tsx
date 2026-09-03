@@ -45,6 +45,13 @@ export function EditorMenuItems({
             iconClassName="icon-[material-symbols--format-italic]"
           />
           <BubbleMenuButton
+            isActive={editorState.isUnderline}
+            isDisabled={!editorState.canUnderline}
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            title="Underline"
+            iconClassName="icon-[material-symbols--format-underlined]"
+          />
+          <BubbleMenuButton
             isActive={editorState.isStrike}
             isDisabled={!editorState.canStrike}
             onClick={() => editor.chain().focus().toggleStrike().run()}

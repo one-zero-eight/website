@@ -3,9 +3,11 @@ import { cn } from "@/lib/ui/cn";
 
 export function ClubLogo({
   clubId,
+  logoFileId,
   className,
 }: {
   clubId: string | null;
+  logoFileId?: string | null;
   className?: string;
 }) {
   return (
@@ -17,7 +19,7 @@ export function ClubLogo({
     >
       <span className="icon-[mdi--account-group] absolute size-8 text-white md:size-12" />
       <img
-        src={clubId !== null ? getLogoURLById(clubId) : undefined}
+        src={clubId !== null ? getLogoURLById(clubId, logoFileId) : undefined}
         alt="Club logo"
         className="bg-base-200 absolute inset-0 size-full object-contain"
         loading="lazy"

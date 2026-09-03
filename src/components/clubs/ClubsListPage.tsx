@@ -13,6 +13,7 @@ import {
   clubTypesOrder,
   getClubTypeLabel,
 } from "./constants.ts";
+import { canUserEditClub, isClubOwner } from "./permissions.ts";
 
 export function ClubsListPage() {
   const { data: clubs, isPending } = $clubs.useQuery(
@@ -35,6 +36,7 @@ export function ClubsListPage() {
     },
   );
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
+  const { data: clubsUser } = $clubs.useQuery("get", "/users/me");
   const [search, setSearch] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<Set<clubsTypes.ClubType>>(
     new Set(),
@@ -55,12 +57,24 @@ export function ClubsListPage() {
       foundClubs = searchClubs(fuse, trimmedSearch);
     }
 
-    return foundClubs.filter(
+    const visible = foundClubs.filter(
       (club) =>
         club.is_active &&
         (selectedTypes.has(club.type) || selectedTypes.size === 0),
     );
-  }, [clubs, fuse, search, selectedTypes]);
+
+    // Clubs the current user leads float to the top of whatever list/section
+    // they'd otherwise appear in (stable sort keeps everything else as-is).
+    return visible
+      .map((club, index) => ({ club, index }))
+      .sort((a, b) => {
+        const aOwned = isClubOwner(clubsUser, a.club.id) ? 0 : 1;
+        const bOwned = isClubOwner(clubsUser, b.club.id) ? 0 : 1;
+        if (aOwned !== bOwned) return aOwned - bOwned;
+        return a.index - b.index;
+      })
+      .map(({ club }) => club);
+  }, [clubs, fuse, search, selectedTypes, clubsUser]);
 
   const handleTypeToggle = (type: clubsTypes.ClubType) => {
     setSelectedTypes((prev) => {
@@ -142,7 +156,12 @@ export function ClubsListPage() {
                 </span>
                 <div className="mt-4 flex flex-col gap-6">
                   {clubsOfType.map((club) => (
-                    <ClubCard key={club.id} club={club} />
+                    <ClubCard
+                      key={club.id}
+                      club={club}
+                      isOwner={isClubOwner(clubsUser, club.id)}
+                      canEdit={canUserEditClub(clubsUser, club.id)}
+                    />
                   ))}
                 </div>
               </div>
@@ -151,7 +170,12 @@ export function ClubsListPage() {
             <div>
               <div className="mt-4 flex flex-col gap-6">
                 {filteredClubs.map((club) => (
-                  <ClubCard key={club.id} club={club} />
+                  <ClubCard
+                    key={club.id}
+                    club={club}
+                    isOwner={isClubOwner(clubsUser, club.id)}
+                    canEdit={canUserEditClub(clubsUser, club.id)}
+                  />
                 ))}
               </div>
             </div>

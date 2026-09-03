@@ -57,6 +57,32 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
         <meta name="description" content={club.short_description} />
       </Helmet>
 
+      {club.pending_update && (
+        <div className="alert alert-info items-start">
+          <span className="icon-[mdi--clock-outline] size-5" />
+          <span>
+            This club has changes pending admin approval.{" "}
+            {clubsUser?.role === "admin" ? (
+              <Link
+                to="/clubs/pending-updates/$slug"
+                params={{ slug: clubSlug }}
+                className="link link-primary"
+              >
+                Review changes
+              </Link>
+            ) : (
+              <Link
+                to="/clubs/$slug/edit"
+                params={{ slug: clubSlug }}
+                className="link link-primary"
+              >
+                View your pending edit
+              </Link>
+            )}
+          </span>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="card card-border">
         <div className="relative flex items-center justify-center p-8">
@@ -64,7 +90,11 @@ export function ClubPage({ clubSlug }: { clubSlug: string }) {
             style={{ backgroundImage: "url(/pattern.svg)" }}
             className="absolute inset-0 bg-repeat"
           />
-          <ClubLogo clubId={club.id} className="size-48" />
+          <ClubLogo
+            clubId={club.id}
+            logoFileId={club.logo_file_id}
+            className="size-48"
+          />
           {canEditClub && (
             <Link
               to="/clubs/$slug/edit"
