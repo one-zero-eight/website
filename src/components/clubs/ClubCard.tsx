@@ -10,7 +10,15 @@ import {
   getLinkLabel,
 } from "./constants.ts";
 
-function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
+function ClubCard({
+  club,
+  isOwner = false,
+  canEdit = false,
+}: {
+  club: clubsTypes.SchemaClub;
+  isOwner?: boolean;
+  canEdit?: boolean;
+}) {
   const { data: clubLeaders } = $clubs.useQuery("get", "/leaders/");
   const clubLeader = useMemo(
     () =>
@@ -23,7 +31,11 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
   return (
     <div className="card card-border md:card-side">
       <figure className="shrink-0 items-start p-6 pb-0 md:pr-0 md:pb-6">
-        <ClubLogo clubId={club.id} className="size-48" />
+        <ClubLogo
+          clubId={club.id}
+          logoFileId={club.logo_file_id}
+          className="size-48"
+        />
       </figure>
       <div className="card-body">
         <div className="flex shrink-0 flex-col items-start gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
@@ -34,9 +46,27 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
           >
             {club.title}
           </Link>
-          <span className={cn("badge shrink-0", getClubTypeColor(club.type))}>
-            {getClubTypeLabel(club.type)}
-          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            {isOwner && (
+              <span className="badge badge-primary badge-soft shrink-0">
+                Owner
+              </span>
+            )}
+            <span className={cn("badge shrink-0", getClubTypeColor(club.type))}>
+              {getClubTypeLabel(club.type)}
+            </span>
+            {canEdit && (
+              <Link
+                to="/clubs/$slug/edit"
+                params={{ slug: club.slug }}
+                className="btn btn-ghost btn-square btn-sm"
+                title="Edit club"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="icon-[mynaui--pencil] size-4" />
+              </Link>
+            )}
+          </div>
         </div>
 
         <p className="text-base-content/50 text-sm md:text-base">
@@ -94,6 +124,10 @@ function ClubCard({ club }: { club: clubsTypes.SchemaClub }) {
 }
 
 const MemoizedClubCard = React.memo(ClubCard, (prevProps, nextProps) => {
-  return prevProps.club.id === nextProps.club.id;
+  return (
+    prevProps.club.id === nextProps.club.id &&
+    prevProps.isOwner === nextProps.isOwner &&
+    prevProps.canEdit === nextProps.canEdit
+  );
 });
 export { MemoizedClubCard as ClubCard };
