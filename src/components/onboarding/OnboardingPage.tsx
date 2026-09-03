@@ -32,6 +32,7 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
     select: ({ searchStr }) => ({ searchStr }),
   });
   const processedTelegramAuth = useRef<string | null>(null);
+  const initializedDormPreferences = useRef(false);
   const [building, setBuilding] = useState("");
   const [floor, setFloor] = useState("");
   const [isDormStepComplete, setIsDormStepComplete] = useState(false);
@@ -153,6 +154,18 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
       setFavoriteSaveError(formatApiErrorMessage(error));
     }
   }
+
+  useEffect(() => {
+    if (initializedDormPreferences.current || !me?.preferences) return;
+
+    initializedDormPreferences.current = true;
+    if (me.preferences.dorm_building != null) {
+      setBuilding(String(me.preferences.dorm_building));
+    }
+    if (me.preferences.dorm_floor != null) {
+      setFloor(String(me.preferences.dorm_floor));
+    }
+  }, [me?.preferences]);
 
   useEffect(() => {
     if (!me && step > 1) {
