@@ -40,14 +40,12 @@ describe("timetable group columns", () => {
       students_groups: [
         {
           code: "M26-SE-01",
-          kind: "core",
           name: "M26-SE-01",
           estimated_size: 32,
           students: [],
         },
         {
           code: "M26-TE-01",
-          kind: "core",
           name: "M26-TE-01",
           estimated_size: 18,
           students: [],
@@ -104,9 +102,9 @@ describe("timetable group columns", () => {
         ],
       },
       students_groups: [
-        { code: "AWA-I-1", kind: "english", name: "AWA-I-1" },
-        { code: "AWA-I-2", kind: "english", name: "AWA-I-2" },
-        { code: "AWA-I-10", kind: "english", name: "AWA-I-10" },
+        { code: "AWA-I-1", name: "AWA-I-1" },
+        { code: "AWA-I-2", name: "AWA-I-2" },
+        { code: "AWA-I-10", name: "AWA-I-10" },
       ],
       courses: [],
     } as unknown as SchemaScheduleConfig;

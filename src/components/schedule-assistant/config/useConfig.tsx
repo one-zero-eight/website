@@ -535,11 +535,23 @@ export function useUpdateProgramMutation(
   } = useUpdateTermMutation();
 
   const updateProgram = useCallback(
-    (mutator: (program: SchemaSectionProgram) => void) => {
+    (
+      mutator: (program: SchemaSectionProgram) => void,
+      options?: {
+        onSuccess?: () => void;
+        onError?: () => void;
+      },
+    ) => {
       if (!term) return;
-      updateTerm({
-        body: mutateProgramInTerm(term, sectionCode, programIndex, mutator),
-      });
+      updateTerm(
+        {
+          body: mutateProgramInTerm(term, sectionCode, programIndex, mutator),
+        },
+        {
+          onSuccess: options?.onSuccess,
+          onError: options?.onError,
+        },
+      );
     },
     [programIndex, sectionCode, term, updateTerm],
   );

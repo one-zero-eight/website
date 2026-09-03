@@ -48,6 +48,9 @@ import {
 import { CourseComponentsEditor } from "@/components/schedule-assistant/settings/courses/CourseComponentsEditor.tsx";
 import { getScheduleSections } from "@/components/schedule-assistant/config/scheduleConfigUtils.ts";
 import { RoomAttributesConfigModal } from "@/components/schedule-assistant/settings/rooms/RoomAttributesConfigModal.tsx";
+import { SettingsCreateModal } from "@/components/schedule-assistant/settings/SettingsCreateModal.tsx";
+import { SettingsIdentityFields } from "@/components/schedule-assistant/settings/SettingsIdentityFields.tsx";
+import { StudentGroupFields } from "@/components/schedule-assistant/settings/StudentGroupFields.tsx";
 import {
   buildRoomFeaturesFromDefs,
   resolveRoomFeatureValue,
@@ -125,7 +128,7 @@ function SettingsDetailNestedList({
   children: ReactNode;
 }) {
   return (
-    <div className="flex min-h-0 shrink-0 flex-col gap-2">
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
       <div className="flex shrink-0 items-center justify-between gap-2 px-0.5">
         <span className={detailCaptionUpperClass}>{sectionTitle}</span>
         <button
@@ -136,7 +139,7 @@ function SettingsDetailNestedList({
           {addButtonLabel}
         </button>
       </div>
-      <div className="rounded-box border-base-300 max-h-[min(50vh,22rem)] overflow-x-hidden overflow-y-auto border">
+      <div className="rounded-box border-base-300 min-h-0 flex-1 overflow-x-hidden overflow-y-auto border">
         {isEmpty ? (
           <div className="text-base-content/70 px-3 py-2 text-sm">
             {emptyHint}
@@ -325,10 +328,6 @@ function handleEscapeBlur(
   event.stopPropagation();
   event.currentTarget.blur();
 }
-/** Растягивается по высоте во flex-контейнере (детали группы). */
-const detailStudentsTextareaClass =
-  "textarea textarea-bordered min-h-[5rem] w-full flex-1 resize-none px-3 py-2 text-sm font-normal leading-normal [color-scheme:inherit]";
-
 function toDateInputValue(raw: unknown): string {
   if (raw == null || raw === "") return "";
   const s = String(raw).trim();
@@ -734,7 +733,6 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
       createStudentGroup({
         body: {
           code: normalized,
-          kind: "core",
           name: normalized,
           estimated_size: null,
           students: [],
@@ -1215,7 +1213,6 @@ export function GroupDetails({
   const name = String(studentGroup?.name ?? titleFallback ?? "");
   const headingTitle = String(studentGroup?.name ?? titleFallback ?? groupId);
   const headingSubtitle = `Группа · ${String(track?.name || "Track")}`;
-  const kind = String(studentGroup?.kind ?? "");
   const estimatedSize =
     studentGroup?.estimated_size != null
       ? String(studentGroup.estimated_size)
@@ -1240,9 +1237,6 @@ export function GroupDetails({
       });
     });
   });
-  const kindField = useBlurSaveField(kind, (value) =>
-    patchStudentGroup({ kind: value }),
-  );
   const estimatedSizeField = useBlurSaveField(estimatedSize, (value) => {
     const parsed = Number(value.trim());
     patchStudentGroup({
@@ -1258,50 +1252,17 @@ export function GroupDetails({
     }),
   );
 
-  const emailLineCount = studentsField.value
-    .split("\n")
-    .map((line: string) => line.trim())
-    .filter(Boolean).length;
-
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
       <DetailQueryState isPending={isPending} isError={isError} error={error}>
         <div className={settingsDetailShellClass}>
-          <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>Название</span>
-            <input className={detailInputClass} {...nameField} />
-          </label>
-          <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>Код</span>
-            <input className={detailInputClass} {...codeField} />
-          </label>
-          <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>Тип</span>
-            <input className={detailInputClass} {...kindField} />
-          </label>
-          <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>Оценка размера</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              className={detailInputClass}
-              {...estimatedSizeField}
-            />
-          </label>
-          <label
-            className={`${detailControlClass} flex min-h-0 flex-1 flex-col gap-1.5`}
-          >
-            <span className={detailLabelUpperClass}>
-              Студенты (по одному email в строке)
-              <span className="text-base-content/55 ml-1.5 font-medium tabular-nums">
-                · {emailLineCount}
-              </span>
-            </span>
-            <textarea
-              className={detailStudentsTextareaClass}
-              {...studentsField}
-            />
-          </label>
+          <StudentGroupFields
+            nameField={nameField}
+            codeField={codeField}
+            estimatedSizeField={estimatedSizeField}
+            studentsField={studentsField}
+            fillAvailableHeight
+          />
 
           <SettingsDetailDeleteButton
             label="Удалить группу"
@@ -1339,6 +1300,11 @@ export function ProgramDetails({
     programIndex,
   );
   const { selectItem, deselectItem } = useSelection();
+  const [createTrackOpen, setCreateTrackOpen] = useState(false);
+  const [newTrackCode, setNewTrackCode] = useState("");
+  const [newTrackName, setNewTrackName] = useState("");
+  const [createTrackError, setCreateTrackError] = useState<string | null>(null);
+  const [isCreatingTrack, setIsCreatingTrack] = useState(false);
   const name = String(program?.name ?? "");
   const code = String(program?.code ?? "");
   const programIdentity = program ? programStableId(program) : code;
@@ -1369,6 +1335,46 @@ export function ProgramDetails({
   );
   const timeSlotsTextareaRef = useAutosizeTextareaRef(timeSlotsField.value);
 
+  function handleOpenCreateTrack() {
+    setNewTrackCode("");
+    setNewTrackName("");
+    setCreateTrackError(null);
+    setCreateTrackOpen(true);
+  }
+
+  function handleCreateTrack() {
+    const trackCode = newTrackCode.trim();
+    const trackName = newTrackName.trim();
+    if (!trackCode || !trackName || isCreatingTrack) return;
+    if (
+      program?.tracks.some(
+        (candidate) => String(candidate.code).trim() === trackCode,
+      )
+    ) {
+      setCreateTrackError(`Трек с кодом «${trackCode}» уже существует.`);
+      return;
+    }
+
+    setCreateTrackError(null);
+    setIsCreatingTrack(true);
+    updateProgram(
+      (target) => {
+        target.tracks.push({
+          code: trackCode,
+          name: trackName,
+          groups: [],
+        });
+      },
+      {
+        onSuccess: () => {
+          setIsCreatingTrack(false);
+          setCreateTrackOpen(false);
+        },
+        onError: () => setIsCreatingTrack(false),
+      },
+    );
+  }
+
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
       <DetailQueryState isPending={isPending} isError={isError} error={error}>
@@ -1395,15 +1401,7 @@ export function ProgramDetails({
           <SettingsDetailNestedList
             sectionTitle="Треки"
             addButtonLabel="Добавить трек"
-            onAdd={() =>
-              updateProgram((target) => {
-                target.tracks.push({
-                  code: `new-track-${target.tracks.length + 1}`,
-                  name: `Новый трек ${target.tracks.length + 1}`,
-                  groups: [],
-                });
-              })
-            }
+            onAdd={handleOpenCreateTrack}
             emptyHint="Нет треков"
             isEmpty={!tracks.length}
           >
@@ -1463,6 +1461,29 @@ export function ProgramDetails({
           ) : null}
         </div>
       </DetailQueryState>
+      <SettingsCreateModal
+        open={createTrackOpen}
+        onOpenChange={setCreateTrackOpen}
+        title="Новый трек"
+        submitLabel="Создать"
+        isPending={isCreatingTrack}
+        errorMessage={createTrackError}
+        onSubmit={handleCreateTrack}
+      >
+        <SettingsIdentityFields
+          nameField={{
+            value: newTrackName,
+            onChange: (event) => setNewTrackName(event.target.value),
+          }}
+          codeField={{
+            value: newTrackCode,
+            onChange: (event) => setNewTrackCode(event.target.value),
+          }}
+          required
+          namePlaceholder="Tech"
+          codePlaceholder="TECH"
+        />
+      </SettingsCreateModal>
     </SettingsSidebarDetailFrame>
   );
 }
@@ -1488,6 +1509,13 @@ export function TrackDetails({
   const { mutate: createStudentGroup } = useCreateStudentGroupMutation();
   const { deleteStudentGroupCascade } = useDeleteStudentGroupCascade();
   const { selectItem, deselectItem } = useSelection();
+  const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [newGroupCode, setNewGroupCode] = useState("");
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupEstimatedSize, setNewGroupEstimatedSize] = useState("");
+  const [newGroupStudents, setNewGroupStudents] = useState("");
+  const [createGroupError, setCreateGroupError] = useState<string | null>(null);
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const name = String(track?.name ?? titleFallback ?? "");
   const programTitleForSubtitle = String(
     program?.name || (program ? programStableId(program) : ""),
@@ -1526,60 +1554,129 @@ export function TrackDetails({
     }),
   );
 
+  function handleOpenCreateGroup() {
+    if (!program || !track) return;
+    const occupiedGroupCodes = new Set(
+      studentsGroups.map((candidate) => String(candidate.code).trim()),
+    );
+    const candidateGroupCodes = [...trackGroups];
+    const identifierContext = {
+      programCode: programCodeForGroupIdentifiers(
+        program,
+        sectionCode,
+        programIndex,
+      ),
+      track,
+    };
+    let suggestedIdentifiers = nextGroupIdentifiers(
+      candidateGroupCodes,
+      (groupId) => {
+        const entity = studentsGroups.find(
+          (candidate) => candidate.code === groupId,
+        );
+        return entity?.name ?? undefined;
+      },
+      identifierContext,
+    );
+    while (occupiedGroupCodes.has(suggestedIdentifiers.code)) {
+      candidateGroupCodes.push(suggestedIdentifiers.code);
+      suggestedIdentifiers = nextGroupIdentifiers(
+        candidateGroupCodes,
+        (groupId) => {
+          const entity = studentsGroups.find(
+            (candidate) => candidate.code === groupId,
+          );
+          return entity?.name ?? undefined;
+        },
+        identifierContext,
+      );
+    }
+    const { code: suggestedCode, name: suggestedName } = suggestedIdentifiers;
+    setNewGroupCode(suggestedCode);
+    setNewGroupName(suggestedName);
+    setNewGroupEstimatedSize("");
+    setNewGroupStudents("");
+    setCreateGroupError(null);
+    setCreateGroupOpen(true);
+  }
+
+  function handleCreateGroup() {
+    const groupCode = newGroupCode.trim();
+    const groupName = newGroupName.trim();
+    if (!groupCode || !groupName || isCreatingGroup) return;
+    const estimatedSizeText = newGroupEstimatedSize.trim();
+    const estimatedSize = Number(estimatedSizeText);
+    if (
+      estimatedSizeText &&
+      (!Number.isInteger(estimatedSize) || estimatedSize < 0)
+    ) {
+      setCreateGroupError(
+        "Оценка размера должна быть целым неотрицательным числом.",
+      );
+      return;
+    }
+    const students = newGroupStudents
+      .split("\n")
+      .map((student) => student.trim())
+      .filter(Boolean);
+    if (
+      studentsGroups.some(
+        (candidate) => String(candidate.code).trim() === groupCode,
+      )
+    ) {
+      setCreateGroupError(`Группа с кодом «${groupCode}» уже существует.`);
+      return;
+    }
+
+    setCreateGroupError(null);
+    setIsCreatingGroup(true);
+    const attachGroupToTrack = () => {
+      updateProgram(
+        (target) => {
+          mutateNormalizedTrackGroups(target, trackIndex, (groupIds) => [
+            ...groupIds,
+            groupCode,
+          ]);
+        },
+        {
+          onSuccess: () => {
+            setIsCreatingGroup(false);
+            setCreateGroupOpen(false);
+          },
+          onError: () => setIsCreatingGroup(false),
+        },
+      );
+    };
+    createStudentGroup(
+      {
+        body: {
+          code: groupCode,
+          name: groupName,
+          estimated_size: estimatedSizeText ? estimatedSize : null,
+          students,
+        },
+      },
+      {
+        onSuccess: attachGroupToTrack,
+        onError: () => setIsCreatingGroup(false),
+      },
+    );
+  }
+
   return (
     <SettingsSidebarDetailFrame title={headingTitle} subtitle={headingSubtitle}>
       <DetailQueryState isPending={isPending} isError={isError} error={error}>
         <div className={settingsDetailShellClass}>
-          <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>Название</span>
-            <input className={detailInputClass} {...nameField} />
-          </label>
-          <label className={`${detailControlClass} shrink-0`}>
-            <span className={detailLabelUpperClass}>Код</span>
-            <input className={detailInputClass} {...codeField} />
-          </label>
+          <SettingsIdentityFields
+            nameField={nameField}
+            codeField={codeField}
+            detailLayout
+          />
 
           <SettingsDetailNestedList
             sectionTitle="Группы"
             addButtonLabel="Добавить группу"
-            onAdd={() => {
-              if (!program || !track) return;
-              const draftTrack = structuredClone(track);
-              const existingIds = [...draftTrack.groups];
-              const { code: newGroupId, name: newGroupName } =
-                nextGroupIdentifiers(
-                  existingIds,
-                  (id) => {
-                    const entity = studentsGroups.find(
-                      (candidate) => candidate.code === id,
-                    );
-                    return entity?.name ?? undefined;
-                  },
-                  {
-                    programCode: programCodeForGroupIdentifiers(
-                      program,
-                      sectionCode,
-                      programIndex,
-                    ),
-                    track: draftTrack,
-                  },
-                );
-              updateProgram((target) => {
-                mutateNormalizedTrackGroups(target, trackIndex, (groups) => [
-                  ...groups,
-                  newGroupId,
-                ]);
-              });
-              createStudentGroup({
-                body: {
-                  code: newGroupId,
-                  kind: "core",
-                  name: newGroupName,
-                  estimated_size: null,
-                  students: [],
-                },
-              });
-            }}
+            onAdd={handleOpenCreateGroup}
             emptyHint="Нет групп"
             isEmpty={!groups.length}
           >
@@ -1652,6 +1749,35 @@ export function TrackDetails({
           />
         </div>
       </DetailQueryState>
+      <SettingsCreateModal
+        open={createGroupOpen}
+        onOpenChange={setCreateGroupOpen}
+        title="Новая группа"
+        submitLabel="Создать"
+        isPending={isCreatingGroup}
+        errorMessage={createGroupError}
+        onSubmit={handleCreateGroup}
+      >
+        <StudentGroupFields
+          nameField={{
+            value: newGroupName,
+            onChange: (event) => setNewGroupName(event.target.value),
+          }}
+          codeField={{
+            value: newGroupCode,
+            onChange: (event) => setNewGroupCode(event.target.value),
+          }}
+          estimatedSizeField={{
+            value: newGroupEstimatedSize,
+            onChange: (event) => setNewGroupEstimatedSize(event.target.value),
+          }}
+          studentsField={{
+            value: newGroupStudents,
+            onChange: (event) => setNewGroupStudents(event.target.value),
+          }}
+          required
+        />
+      </SettingsCreateModal>
     </SettingsSidebarDetailFrame>
   );
 }
