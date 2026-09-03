@@ -158,6 +158,7 @@ export function DormScheduleStep({
   isSaving,
   saveError,
   onContinue,
+  onSkip,
 }: {
   building: string;
   floor: string;
@@ -178,6 +179,7 @@ export function DormScheduleStep({
     building: string;
     floor: string;
   }) => void;
+  onSkip: () => void;
 }) {
   const matchedAliases = getDormScheduleAliases({ building, floor });
   const isSelectionComplete = matchedAliases.length > 0;
@@ -240,6 +242,13 @@ export function DormScheduleStep({
         )}
       </StepBody>
 
+      <button
+        type="button"
+        className="link text-base-content/60 hover:text-base-content mb-3 self-center text-sm"
+        onClick={onSkip}
+      >
+        Skip
+      </button>
       <PrimaryButton
         onClick={() =>
           onContinue({

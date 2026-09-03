@@ -34,7 +34,7 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
   const processedTelegramAuth = useRef<string | null>(null);
   const [building, setBuilding] = useState("");
   const [floor, setFloor] = useState("");
-  const [savedDormAliases, setSavedDormAliases] = useState<string[]>([]);
+  const [isDormStepComplete, setIsDormStepComplete] = useState(false);
   const [favoriteSaveError, setFavoriteSaveError] = useState<string | null>(
     null,
   );
@@ -116,7 +116,6 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
     floor: string;
   }) {
     setFavoriteSaveError(null);
-    setSavedDormAliases(aliases);
 
     const existingAliases = new Set([
       ...(scheduleUser?.favorite_event_groups ?? []),
@@ -148,6 +147,7 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
       await queryClient.invalidateQueries({
         queryKey: $schedule.queryOptions("get", "/users/me").queryKey,
       });
+      setIsDormStepComplete(true);
       navigate({ to: "/start", search: { step: 4 } });
     } catch (error) {
       setFavoriteSaveError(formatApiErrorMessage(error));
@@ -163,10 +163,10 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
       navigate({ to: "/start", search: { step: 2 } });
       return;
     }
-    if (isTelegramConnected && savedDormAliases.length === 0 && step > 3) {
+    if (isTelegramConnected && !isDormStepComplete && step > 3) {
       navigate({ to: "/start", search: { step: 3 } });
     }
-  }, [isTelegramConnected, me, navigate, savedDormAliases.length, step]);
+  }, [isDormStepComplete, isTelegramConnected, me, navigate, step]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(searchStr);
@@ -240,6 +240,10 @@ export function OnboardingPage({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
                 isSaving={isFavoriteSavePending || isPreferencesSavePending}
                 saveError={favoriteSaveError}
                 onContinue={handleSaveDormGroups}
+                onSkip={() => {
+                  setIsDormStepComplete(true);
+                  navigate({ to: "/start", search: { step: 4 } });
+                }}
               />
             )}
             {step === 4 && (
