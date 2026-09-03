@@ -1,6 +1,10 @@
 import { accountsTypes } from "@/api/accounts";
 import {
+  getInnohassleWebvisorUrl,
+  getSportAdminStudentUrl,
+  getSportWebvisorUrl,
   getTelegramProfileUrl,
+  getViewUserEmail,
   PredefinedGroupItem,
 } from "@/components/admin/utils.ts";
 import { PredefinedGroupBadge } from "@/components/admin/PredefinedGroupBadge.tsx";
@@ -152,6 +156,8 @@ export function AdminUserDetails({
     id: user.telegram_info?.id,
   });
 
+  const email = getViewUserEmail(user);
+
   return (
     <div className="flex min-w-0 flex-col gap-6">
       <section className="bg-base-200 rounded-box flex min-w-0 flex-col gap-4 p-4">
@@ -201,6 +207,44 @@ export function AdminUserDetails({
           />
         </dl>
       </section>
+
+      {email && (
+        <section className="bg-base-200 rounded-box flex min-w-0 flex-col gap-3 p-4">
+          <h3 className="text-xl font-medium">Analytics</h3>
+          <ul className="flex min-w-0 flex-col gap-2">
+            <li className="min-w-0">
+              <a
+                href={getInnohassleWebvisorUrl(email)}
+                target="_blank"
+                rel="noreferrer"
+                className="link text-primary block truncate"
+              >
+                Webvisor (innohassle.ru)
+              </a>
+            </li>
+            <li className="min-w-0">
+              <a
+                href={getSportWebvisorUrl(email)}
+                target="_blank"
+                rel="noreferrer"
+                className="link text-primary block truncate"
+              >
+                Webvisor (sport.innopolis.university)
+              </a>
+            </li>
+            <li className="min-w-0">
+              <a
+                href={getSportAdminStudentUrl(email)}
+                target="_blank"
+                rel="noreferrer"
+                className="link text-primary block truncate"
+              >
+                Sport admin
+              </a>
+            </li>
+          </ul>
+        </section>
+      )}
 
       <InfoSection title="Innopolis">
         <InfoRow label="Email" value={user.innopolis_info?.email} />

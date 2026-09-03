@@ -118,6 +118,42 @@ export function getUserByEmailFromBulk(
   return matchedKey ? usersByEmail[matchedKey] : null;
 }
 
+const INNOHASSLE_METRIKA_COUNTER_ID = 92392077;
+const SPORT_METRIKA_COUNTER_ID = 106958157;
+
+function buildMetrikaWebvisorUrl(counterId: number, email: string) {
+  const filter = `(EXISTS ym:up:specialUser WITH (EXISTS(ym:up:paramsLevel1=='email' and ym:up:paramsLevel2=='${email}')))`;
+
+  const params = new URLSearchParams({
+    period: "week",
+    filter,
+    id: String(counterId),
+    group: "day",
+    isMinSamplingEnabled: "false",
+    currency: "RUB",
+    attr: JSON.stringify({
+      attributionId: "LastSign",
+      isCrossDevice: true,
+    }),
+    isUndefinedEnabled: "false",
+  });
+
+  return `https://metrika.yandex.ru/stat/visor?${params.toString()}`;
+}
+
+export function getInnohassleWebvisorUrl(email: string) {
+  return buildMetrikaWebvisorUrl(INNOHASSLE_METRIKA_COUNTER_ID, email);
+}
+
+export function getSportWebvisorUrl(email: string) {
+  return buildMetrikaWebvisorUrl(SPORT_METRIKA_COUNTER_ID, email);
+}
+
+export function getSportAdminStudentUrl(email: string) {
+  const params = new URLSearchParams({ q: email });
+  return `https://sport.innopolis.university/admin/sport/student/?${params.toString()}`;
+}
+
 export function getTelegramProfileUrl({
   username,
   id,
