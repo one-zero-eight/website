@@ -55,9 +55,24 @@ export const SCENE_GEOREFERENCE: Record<string, SceneGeoReference> = {
     // signal); 75m hid the dot for most real indoor fixes.
     accuracyThresholdM: 150,
     controlPoints: [
-      { label: "First", lat: 55.753667, lon: 48.742508, x: 0, y: 0 },
-      { label: "Second", lat: 55.754515, lon: 48.743323, x: 2400, y: 200 },
-      { label: "Last", lat: 55.752985, lon: 48.744165, x: 500, y: 1600 },
+      { label: "Upper-Left", lat: 55.752926, lon: 48.743707, x: 120, y: 1200 },
+      { label: "Upper-middle", lat: 55.753683, lon: 48.742779, x: 1050, y: 50 },
+      { label: "Upper-right", lat: 55.75455, lon: 48.743146, x: 2450, y: 80 },
+      {
+        label: "Bottom-right",
+        lat: 55.754476,
+        lon: 48.743752,
+        x: 2400,
+        y: 600,
+      },
+      {
+        label: "Bottom-middle",
+        lat: 55.753896,
+        lon: 48.743505,
+        x: 1470,
+        y: 620,
+      },
+      { label: "Bottom-Left", lat: 55.753181, lon: 48.744366, x: 650, y: 1550 },
     ],
   },
 };
