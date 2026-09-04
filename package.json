@@ -20,6 +20,7 @@
     "release": "bumpp package.json",
     "update-deps": "taze minor -wIrl",
     "test:ndcg": "vite-node src/components/dashboard/links/searchUtils.test.ts",
+    "check:georeference": "vite-node src/components/maps/georeference-calibration-check.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
