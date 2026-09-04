@@ -27,7 +27,13 @@ export type SceneGeoReference = {
   accuracyThresholdM: number;
 };
 
-/** viewBox of `university-floor-0.svg` ("Floor -1"): "-115.31 -100 2677.53 1893.18". */
+/**
+ * viewBox shared by every `university-floor-*.svg` (Floor -1 through Floor
+ * 5): "-115.31 -100 2677.53 1893.18". Confirmed identical across all of them
+ * (same building, same export coordinate frame), so control points
+ * calibrated on one floor apply to all of them — see
+ * UNIVERSITY_BUILDING_CONTROL_POINTS below.
+ */
 export const MAP_VIEWBOX = {
   minX: -115.31,
   minY: -100,
@@ -39,23 +45,74 @@ export const MAP_VIEWBOX_STRING = `${MAP_VIEWBOX.minX} ${MAP_VIEWBOX.minY} ${MAP
 
 /**
  * Per-scene calibration. A scene missing from this map (or with fewer than 2
- * control points) simply has no location dot.
- *
- * TODO(calibration): fill in `university-floor-0` with real control points.
- * For each point: pick something identifiable on the plan, read its lat/lon
- * from Google Maps / OpenStreetMap satellite view (or stand there with a
- * phone), and read its SVG x/y by inspecting the inline SVG in dev tools.
- * geo:,?z=18
- * 55.753404,48.741515?z=18
- * ,?z=18
+ * control points) simply has no location dot — currently that's
+ * `sport-complex` and `campus`, which need their own control points measured
+ * the same way (pick something identifiable on the plan, read its lat/lon
+ * from Google Maps / OpenStreetMap satellite view, and read its SVG x/y by
+ * inspecting the inline SVG in dev tools).
  */
+/**
+ * Control points for the main university building. Every `university-floor-*`
+ * scene shares the same coordinate frame (verified: identical viewBox across
+ * all of them, and structural elements like stairwells land on byte-identical
+ * SVG coordinates between floors), so a single calibration applies to all
+ * floors of the building.
+ */
+const UNIVERSITY_BUILDING_CONTROL_POINTS: GeoControlPoint[] = [
+  { label: "Upper-Left", lat: 55.752926, lon: 48.743707, x: 120, y: 1200 },
+  { label: "Upper-middle", lat: 55.753683, lon: 48.742779, x: 1050, y: 50 },
+  { label: "Upper-right", lat: 55.75455, lon: 48.743146, x: 2450, y: 80 },
+  { label: "Bottom-right", lat: 55.754476, lon: 48.743752, x: 2400, y: 600 },
+  {
+    label: "Bottom-middle",
+    lat: 55.753896,
+    lon: 48.743505,
+    x: 1470,
+    y: 620,
+  },
+  { label: "Bottom-Left", lat: 55.753181, lon: 48.744366, x: 650, y: 1550 },
+];
+
+// GPS accuracy indoors is commonly worse than outdoors (walls block
+// signal); 75m hid the dot for most real indoor fixes.
+const UNIVERSITY_BUILDING_ACCURACY_THRESHOLD_M = 150;
+
+const UNIVERSITY_BUILDING_GEOREFERENCE: SceneGeoReference = {
+  accuracyThresholdM: UNIVERSITY_BUILDING_ACCURACY_THRESHOLD_M,
+  controlPoints: UNIVERSITY_BUILDING_CONTROL_POINTS,
+};
+
 export const SCENE_GEOREFERENCE: Record<string, SceneGeoReference> = {
-  "university-floor-0": {
-    // GPS accuracy indoors is commonly worse than outdoors (walls block
-    // signal); 75m hid the dot for most real indoor fixes.
-    accuracyThresholdM: 150,
+  "university-floor-0": UNIVERSITY_BUILDING_GEOREFERENCE,
+  "university-floor-1": UNIVERSITY_BUILDING_GEOREFERENCE,
+  "university-floor-2": UNIVERSITY_BUILDING_GEOREFERENCE,
+  "university-floor-3": {
+    accuracyThresholdM: UNIVERSITY_BUILDING_ACCURACY_THRESHOLD_M,
     controlPoints: [
-      { label: "Upper-Left", lat: 55.752926, lon: 48.743707, x: 120, y: 1200 },
+      { label: "Upper-Left", lat: 55.752926, lon: 48.743707, x: 65, y: 1280 },
+      { label: "Upper-middle", lat: 55.753683, lon: 48.742779, x: 1050, y: 50 },
+      { label: "Upper-right", lat: 55.75455, lon: 48.743146, x: 2450, y: 130 },
+      {
+        label: "Bottom-right",
+        lat: 55.754476,
+        lon: 48.743752,
+        x: 2400,
+        y: 600,
+      },
+      {
+        label: "Bottom-middle",
+        lat: 55.753896,
+        lon: 48.743505,
+        x: 1470,
+        y: 620,
+      },
+      { label: "Bottom-Left", lat: 55.753181, lon: 48.744366, x: 550, y: 1670 },
+    ],
+  },
+  "university-floor-4": {
+    accuracyThresholdM: UNIVERSITY_BUILDING_ACCURACY_THRESHOLD_M,
+    controlPoints: [
+      { label: "Upper-Left", lat: 55.752926, lon: 48.743707, x: 15, y: 1300 },
       { label: "Upper-middle", lat: 55.753683, lon: 48.742779, x: 1050, y: 50 },
       { label: "Upper-right", lat: 55.75455, lon: 48.743146, x: 2450, y: 80 },
       {
@@ -72,7 +129,30 @@ export const SCENE_GEOREFERENCE: Record<string, SceneGeoReference> = {
         x: 1470,
         y: 620,
       },
-      { label: "Bottom-Left", lat: 55.753181, lon: 48.744366, x: 650, y: 1550 },
+      { label: "Bottom-Left", lat: 55.753181, lon: 48.744366, x: 520, y: 1700 },
+    ],
+  },
+  "university-floor-5": {
+    accuracyThresholdM: UNIVERSITY_BUILDING_ACCURACY_THRESHOLD_M,
+    controlPoints: [
+      { label: "Upper-Left", lat: 55.752926, lon: 48.743707, x: 15, y: 1300 },
+      { label: "Upper-middle", lat: 55.753683, lon: 48.742779, x: 1050, y: 50 },
+      { label: "Upper-right", lat: 55.75455, lon: 48.743146, x: 2420, y: 130 },
+      {
+        label: "Bottom-right",
+        lat: 55.754476,
+        lon: 48.743752,
+        x: 2400,
+        y: 600,
+      },
+      {
+        label: "Bottom-middle",
+        lat: 55.753896,
+        lon: 48.743505,
+        x: 1470,
+        y: 620,
+      },
+      { label: "Bottom-Left", lat: 55.753181, lon: 48.744366, x: 520, y: 1750 },
     ],
   },
 };
