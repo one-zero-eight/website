@@ -16,22 +16,29 @@ export function UserLocationMarker({
   heading: number | null;
 }) {
   return (
-    <g pointerEvents="none">
+    <g
+      pointerEvents="none"
+      style={{
+        transform: `translate(${x}px, ${y}px)`,
+        transition: "transform 0.6s ease-out",
+      }}
+    >
       {accuracyUnits > 0 && (
         <circle
-          cx={x}
-          cy={y}
+          cx={0}
+          cy={0}
           r={accuracyUnits}
           className="fill-primary stroke-primary"
           fillOpacity={0.12}
           strokeOpacity={0.3}
           strokeWidth={2}
           vectorEffect="non-scaling-stroke"
+          style={{ transition: "r 0.6s ease-out" }}
         />
       )}
 
       {/* Expanding pulse */}
-      <circle cx={x} cy={y} r={26} className="fill-primary" fillOpacity={0.4}>
+      <circle cx={0} cy={0} r={26} className="fill-primary" fillOpacity={0.4}>
         <animate
           attributeName="r"
           values="20;70"
@@ -48,21 +55,22 @@ export function UserLocationMarker({
 
       {/* Solid dot with a light outline for contrast on any background */}
       <circle
-        cx={x}
-        cy={y}
+        cx={0}
+        cy={0}
         r={34}
         className="fill-base-100"
         stroke="white"
         strokeWidth={3}
         vectorEffect="non-scaling-stroke"
       />
-      <circle cx={x} cy={y} r={22} className="fill-primary" />
+      <circle cx={0} cy={0} r={22} className="fill-primary" />
 
       {heading != null && (
         <path
-          d={`M ${x} ${y - 62} L ${x - 16} ${y - 30} L ${x + 16} ${y - 30} Z`}
+          d="M 0 -62 L -16 -30 L 16 -30 Z"
           className="fill-primary"
-          transform={`rotate(${heading} ${x} ${y})`}
+          transform={`rotate(${heading})`}
+          style={{ transition: "transform 0.6s ease-out" }}
         />
       )}
     </g>
