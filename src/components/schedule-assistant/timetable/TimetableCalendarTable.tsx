@@ -1,4 +1,5 @@
 import { cn } from "@/lib/ui/cn";
+import { meetingColorStyle } from "./timetableGroupsGridLayout.ts";
 import { Fragment, memo } from "react";
 
 import {
@@ -73,10 +74,7 @@ const CalendarMeetingCard = memo(function CalendarMeetingCard({
           isRelated &&
           "shadow-[inset_0_0_0_1px_rgba(29,63,112,0.14)] outline outline-[rgba(29,63,112,0.55)] outline-dashed",
       )}
-      style={{
-        backgroundColor: colors.bg,
-        borderColor: colors.border,
-      }}
+      style={meetingColorStyle(colors)}
       onClick={() => {
         if (disableSelect) return;
         onSelectMeeting(key, meeting.course || courseTitle, meeting.tag);
@@ -133,7 +131,7 @@ function CalendarPlaceGhost({
   return (
     <div
       className="meeting ring-dashed pointer-events-none block w-full min-w-0 rounded border px-1 py-px text-left text-[0.6875rem] leading-tight text-[#1a2332] opacity-70 ring-2 ring-[#1d3f70]/55 ring-inset"
-      style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+      style={meetingColorStyle(colors)}
     >
       <span className="block truncate font-semibold" title={label}>
         {label}
@@ -349,7 +347,7 @@ const CalendarWeekTable = memo(function CalendarWeekTable({
                   )}
                 </td>
               );
-            })}{" "}
+            })}
           </tr>
         ))}
       </tbody>

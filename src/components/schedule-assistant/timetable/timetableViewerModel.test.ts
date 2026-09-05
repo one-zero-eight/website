@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import {
   buildColumns,
+  buildCourseColors,
+  colorForSubject,
   columnsForTab,
   compactGroupRows,
   type Meeting,
@@ -188,5 +190,87 @@ describe("compact group rows", () => {
 
     expect(columns.map((column) => column.groupId)).toEqual(["G1", "G2"]);
     expect(rows).toEqual([{ day: "Mon", slotStart: "09:00" }]);
+  });
+});
+
+describe("course colors", () => {
+  const meeting: Meeting = {
+    instance_id: "course:lec:2026-09-07:09:00",
+    course: "Algorithms",
+    tag: "lec",
+    groups: ["G1"],
+    date: "2026-09-07",
+    start: "09:00",
+    room: "",
+    instructors: [],
+    instructor_pool: [],
+    section: "core",
+  };
+
+  it("prioritizes the configured course hex color", () => {
+    const colors = buildCourseColors(
+      [meeting],
+      [
+        {
+          name: "Algorithms",
+          section_code: "core",
+          color: "#aBcDeF",
+          components: [],
+        },
+      ],
+    );
+
+    expect(colors.Algorithms).toEqual({
+      bg: "#ABCDEF",
+      border: "#ABCDEF",
+    });
+  });
+
+  it("builds configured colors even before a course has meetings", () => {
+    expect(
+      buildCourseColors(
+        [],
+        [
+          {
+            name: "Databases",
+            section_code: "core",
+            color: "#FED7AA",
+            components: [],
+          },
+        ],
+      ).Databases,
+    ).toEqual({
+      bg: "#FED7AA",
+      border: "#FED7AA",
+    });
+  });
+
+  it("keeps deterministic fallback for automatic or invalid colors", () => {
+    expect(
+      buildCourseColors(
+        [meeting],
+        [
+          {
+            name: "Algorithms",
+            section_code: "core",
+            color: null,
+            components: [],
+          },
+        ],
+      ).Algorithms,
+    ).toEqual(colorForSubject("Algorithms"));
+    expect(
+      buildCourseColors(
+        [meeting],
+        [
+          {
+            name: "Algorithms",
+            section_code: "core",
+            color: "#123",
+            components: [],
+          },
+        ],
+      ).Algorithms,
+    ).toEqual(colorForSubject("Algorithms"));
   });
 });

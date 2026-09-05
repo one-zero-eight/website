@@ -1,3 +1,20 @@
+import type { CSSProperties } from "react";
+
+/** Soften meeting fills without changing the stored course color. */
+export function meetingColorStyle(colors: {
+  bg: string;
+  border: string;
+}): CSSProperties & {
+  "--meeting-sticky-background": string;
+} {
+  const backgroundColor = `color-mix(in srgb, ${colors.bg} 40%, var(--color-base-100))`;
+  return {
+    backgroundColor,
+    borderColor: colors.border,
+    "--meeting-sticky-background": backgroundColor,
+  };
+}
+
 /** Compact «По группам» grid scale — aligned with «По дням» density. */
 export const GROUPS_TIME_COL_PX = 100;
 export const GROUPS_TIME_COL_WIDTH = "w-[100px] min-w-[100px] max-w-[100px]";

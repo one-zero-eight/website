@@ -78,6 +78,7 @@ import {
   GROUPS_DAY_ROW_STICKY_STYLE,
   GROUPS_GRID_HEADER_HEIGHT_DEFAULT,
   GROUPS_HEAD_PAD,
+  meetingColorStyle,
   GROUPS_MEETING_BODY_CLASS,
   GROUPS_MEETING_CLASS,
   GROUPS_MEETING_FOOTER_CLASS,
@@ -529,7 +530,7 @@ function TimetableWorkspaceInner({
         const nextWeeks = coursesUnchanged ? null : buildWeeks(meetings);
         const nextColors = coursesUnchanged
           ? null
-          : buildCourseColors(meetings);
+          : buildCourseColors(meetings, nextCourses);
         const nextRoomCapacity = buildRoomCapacityMap(config);
         const nextGroupSize = buildGroupSizeMap(config);
 
@@ -2394,10 +2395,7 @@ function PlaceGhostCard({
         GROUPS_MEETING_CLASS,
         "ring-dashed pointer-events-none opacity-70 ring-2 ring-[#1d3f70]/55 ring-inset",
       )}
-      style={{
-        backgroundColor: colors.bg,
-        borderColor: colors.border,
-      }}
+      style={meetingColorStyle(colors)}
     >
       <div className={GROUPS_MEETING_BODY_CLASS}>
         <div className="subject flex min-h-0 min-w-0 gap-1 overflow-hidden">
@@ -3401,8 +3399,7 @@ const MeetingCard = memo(function MeetingCard({
         meetingHighlightClass,
       )}
       style={{
-        backgroundColor: colors.bg,
-        borderColor: colors.border,
+        ...meetingColorStyle(colors),
         marginTop: offsetPx !== 0 ? `${offsetPx}px` : undefined,
       }}
       onClick={() => {
@@ -3423,7 +3420,7 @@ const MeetingCard = memo(function MeetingCard({
           className="sticky z-[1] inline-flex h-full max-h-full w-max max-w-full flex-col gap-0.5 self-start overflow-hidden"
           style={{
             left: "calc(var(--sa-time-col-width, 100px) + 8px)",
-            backgroundColor: colors.bg,
+            backgroundColor: "var(--meeting-sticky-background)",
           }}
         >
           {body}
@@ -3699,10 +3696,7 @@ const UtilizationMeetingCard = memo(function UtilizationMeetingCard({
           isRelated &&
           "ring-dashed shadow-[inset_0_0_0_1px_rgba(29,63,112,0.14)] ring-1 ring-[rgba(29,63,112,0.55)] ring-inset",
       )}
-      style={{
-        backgroundColor: colors.bg,
-        borderColor: colors.border,
-      }}
+      style={meetingColorStyle(colors)}
       onClick={() => {
         selectMeeting(
           meetingSelectionKey(m),

@@ -14,6 +14,8 @@ import type { SettingsListRow } from "@/components/schedule-assistant/settings/u
 /** Курс в сводке по секциям на вкладке «Курсы» (id = `course-${courseIndex}`). */
 export type CourseUsageRow = SettingsListRow & {
   courseIndex: number;
+  colorKey: string;
+  color: string | null;
 };
 
 /** Курсы, привязанные к конкретной студенческой группе. */
@@ -82,6 +84,8 @@ function buildCourseUsageRows(
         subtitle: components.length ? components.join(", ") : "—",
         selection: { kind: "course", courseIndex: index },
         courseIndex: index,
+        colorKey: course.name,
+        color: course.color ?? null,
       };
     },
   );

@@ -1,5 +1,6 @@
 /** Port of schedule-assistant-viewer.html script (same behavior). */
 import type {
+  SchemaCourseConfig,
   SchemaScheduleConfig,
   SchemaWeeklyPatternSlot,
   SchemaWeeklyPatternSlotEdit,
@@ -481,15 +482,39 @@ export function courseColorKey(course: string | undefined | null): string {
   return t || "—";
 }
 
-export function buildCourseColors(meetings: Meeting[]) {
+export function buildCourseColors(
+  meetings: Meeting[],
+  courses: SchemaCourseConfig[] = [],
+) {
+  const configuredColors = new Map(
+    courses.flatMap((course) => {
+      const color = normalizeConfiguredCourseColor(course.color);
+      return color ? [[courseColorKey(course.name), color] as const] : [];
+    }),
+  );
   const subjects = Array.from(
-    new Set((meetings || []).map((m) => courseColorKey(m.course))),
+    new Set([
+      ...(meetings || []).map((meeting) => courseColorKey(meeting.course)),
+      ...courses.map((course) => courseColorKey(course.name)),
+    ]),
   ).sort();
   const out: Record<string, { bg: string; border: string }> = {};
   for (const subject of subjects) {
-    out[subject] = colorForSubject(subject);
+    const configuredColor = configuredColors.get(subject);
+    out[subject] = configuredColor
+      ? { bg: configuredColor, border: configuredColor }
+      : colorForSubject(subject);
   }
   return out;
+}
+
+function normalizeConfiguredCourseColor(
+  color: string | null | undefined,
+): string | null {
+  const normalized = String(color ?? "")
+    .trim()
+    .toUpperCase();
+  return /^#[0-9A-F]{6}$/.test(normalized) ? normalized : null;
 }
 
 export function colorForSubject(subject: string) {

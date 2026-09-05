@@ -6,7 +6,9 @@ import {
   SchemaSectionProgram,
   SectionConfigDefault_layoutAnyOf0,
 } from "@/api/schedule-assistant/types.ts";
+import { CompactColorPicker } from "@/components/common/CompactColorPicker.tsx";
 import { Modal } from "@/components/common/Modal.tsx";
+import { colorForSubject } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import Tooltip from "@/components/common/Tooltip.tsx";
 import { useToast } from "@/components/toast";
@@ -103,7 +105,7 @@ const detailControlClass = "form-control w-full gap-1.5 px-1 py-0.5";
 const detailInputClass =
   "input input-bordered input-sm w-full px-3 py-2 text-sm font-normal leading-normal [color-scheme:inherit]";
 const detailSelectClass =
-  "select select-bordered select-sm w-full px-3 text-sm font-normal leading-normal [color-scheme:inherit]";
+  "select select-bordered select-sm w-full cursor-pointer px-3 text-sm font-normal leading-normal disabled:cursor-not-allowed [color-scheme:inherit]";
 const detailTimeSlotsTextareaClass =
   "textarea textarea-bordered min-h-[2.75rem] w-full resize-none overflow-hidden px-3 py-2 text-sm font-normal leading-normal [color-scheme:inherit]";
 
@@ -809,6 +811,15 @@ export function CourseDetails({ courseIndex }: { courseIndex: number }) {
             </span>
             <input className={detailInputClass} {...shortNameRuField} />
           </label>
+          <div className={`${detailControlClass} shrink-0`}>
+            <span className={detailLabelUpperClass}>Цвет</span>
+            <CompactColorPicker
+              value={course?.color}
+              automaticColor={colorForSubject(courseName ?? "").bg}
+              onChange={(color) => patchCourse({ color })}
+              triggerClassName="w-full justify-between"
+            />
+          </div>
 
           <CourseInstructorsEditor
             assignments={course?.instructors ?? []}

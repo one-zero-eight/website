@@ -7,6 +7,11 @@ import {
   type CourseUsageRow,
 } from "./coursesTabSections.ts";
 import { formatApiErrorMessage } from "@/api/helpers/create-query-client";
+import {
+  CompactColorPicker,
+  colorSwatchStyle,
+} from "@/components/common/CompactColorPicker.tsx";
+import { colorForSubject } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { SectionTabsBar } from "@/components/schedule-assistant/settings/SectionTabsBar.tsx";
 import { NewSectionButton } from "@/components/schedule-assistant/settings/NewSectionButton.tsx";
 import {
@@ -39,6 +44,9 @@ function CourseRowButton({
   indentClass: string;
   onSelect: () => void;
 }) {
+  const automaticColor = colorForSubject(course.colorKey);
+  const displayColor = course.color ?? automaticColor.bg;
+
   return (
     <button
       type="button"
@@ -52,7 +60,14 @@ function CourseRowButton({
       )}
       onClick={onSelect}
     >
-      <div className="min-w-0">
+      <span
+        className="border-base-300 h-3.5 w-3.5 shrink-0 rounded border"
+        style={colorSwatchStyle(
+          displayColor,
+          course.color ?? automaticColor.border,
+        )}
+      />
+      <div className="min-w-0 flex-1">
         <div className="truncate text-sm leading-tight font-medium">
           {course.title}
         </div>
@@ -79,6 +94,7 @@ export function CoursesTabContent() {
   const [newShortName, setNewShortName] = useState("");
   const [newNameRu, setNewNameRu] = useState("");
   const [newShortNameRu, setNewShortNameRu] = useState("");
+  const [newColor, setNewColor] = useState<string | null>(null);
   const courses = config?.courses;
   const handleSelectCourse = useCallback(
     (courseIndex: number) => {
@@ -117,6 +133,7 @@ export function CoursesTabContent() {
     setNewShortName("");
     setNewNameRu("");
     setNewShortNameRu("");
+    setNewColor(null);
   }
 
   function handleCreateCourse() {
@@ -131,6 +148,7 @@ export function CoursesTabContent() {
           short_name: newShortName.trim() || null,
           name_ru: newNameRu.trim() || null,
           short_name_ru: newShortNameRu.trim() || null,
+          color: newColor,
           components: [],
         },
       },
@@ -209,6 +227,14 @@ export function CoursesTabContent() {
           className="input input-bordered input-sm w-full"
           value={newShortNameRu}
           onChange={(e) => setNewShortNameRu(e.target.value)}
+        />
+      </SettingsCreateField>
+      <SettingsCreateField label="Цвет">
+        <CompactColorPicker
+          value={newColor}
+          automaticColor={colorForSubject(newName).bg}
+          onChange={setNewColor}
+          triggerClassName="w-full justify-between"
         />
       </SettingsCreateField>
     </SettingsCreateModal>
