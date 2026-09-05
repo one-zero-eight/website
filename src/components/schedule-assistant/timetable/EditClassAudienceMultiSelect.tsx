@@ -215,6 +215,7 @@ export function EditClassAudienceMultiSelect({
     if (index === undefined) return null;
     return (
       <AudienceCheckboxRow
+        key={item.key}
         ref={(node) => {
           itemRefs.current[index] = node;
         }}

@@ -59,28 +59,38 @@ function isBulkFieldPatch(patch: EditableSessionEventPatch) {
 
 function SelectionBar({
   selectedCount,
-  allSelected,
   onToggleAll,
+  onSelectFollowing,
 }: {
   selectedCount: number;
-  allSelected: boolean;
   onToggleAll: () => void;
+  onSelectFollowing: (() => void) | undefined;
 }) {
-  const label = allSelected
-    ? "Снять выбор"
-    : selectedCount > 0
-      ? `Выбрать все · ${selectedCount}`
-      : "Выбрать все";
-
   return (
-    <div className="flex h-5 items-center">
-      <button
-        type="button"
-        className="text-base-content/70 hover:text-base-content cursor-pointer text-sm hover:underline"
-        onClick={onToggleAll}
-      >
-        {label}
-      </button>
+    <div className="flex min-h-5 items-center gap-4">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <button
+          type="button"
+          className="text-base-content/70 hover:text-base-content cursor-pointer text-sm hover:underline"
+          onClick={onToggleAll}
+        >
+          {selectedCount > 0 ? "Снять выбор" : "Выбрать все"}
+        </button>
+        {onSelectFollowing ? (
+          <button
+            type="button"
+            className="text-base-content/70 hover:text-base-content cursor-pointer text-sm hover:underline"
+            onClick={onSelectFollowing}
+          >
+            Выбрать это и все последующие
+          </button>
+        ) : null}
+      </div>
+      {selectedCount > 0 ? (
+        <span className="text-base-content/70 ml-auto shrink-0 text-sm">
+          Выбрано: {selectedCount}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -430,12 +440,23 @@ export function EditableSessionEventsEditor({
     return () => cancelAnimationFrame(frame);
   }, [focusKey]);
 
-  const allSelected =
-    events.length > 0 && events.every((event) => selectedKeys.has(event.key));
+  const focusedEvent = events.find((event) => event.key === focusKey);
+  function handleSelectFollowing() {
+    if (!focusedEvent) return;
+    const followingKeys = events
+      .filter(
+        (event) =>
+          event.date > focusedEvent.date ||
+          (event.date === focusedEvent.date &&
+            toUiTime(event.start_time) >= toUiTime(focusedEvent.start_time)),
+      )
+      .map((event) => event.key);
+    startTransition(() => setSelectedKeys(new Set(followingKeys)));
+  }
 
   function handleToggleAll() {
     startTransition(() => {
-      if (allSelected) {
+      if (selectedKeys.size > 0) {
         setSelectedKeys(new Set());
         return;
       }
@@ -538,8 +559,8 @@ export function EditableSessionEventsEditor({
       {afterHeader}
       <SelectionBar
         selectedCount={selectedKeys.size}
-        allSelected={allSelected}
         onToggleAll={handleToggleAll}
+        onSelectFollowing={focusedEvent ? handleSelectFollowing : undefined}
       />
       <div ref={listRef} className="flex flex-col gap-2">
         {events.map((event) => (
