@@ -389,6 +389,17 @@ function attachMeetingsToTooltipItems(
   });
 }
 
+function formatSeriesAudienceLabel(
+  config: SchemaScheduleConfig,
+  tokens: string[],
+): string {
+  const displayTokens = tokens.map((token) => {
+    const groups = expandStudentGroupSelectors(config, [token]);
+    return groups.length === 1 ? groups[0]! : token;
+  });
+  return formatAudienceTokensLabel(config, [...new Set(displayTokens)]);
+}
+
 export function listComponentSeriesDisplayItems(
   config: SchemaScheduleConfig,
   component: SchemaComponent,
@@ -411,7 +422,7 @@ export function listComponentSeriesDisplayItems(
           .map((token) => String(token || "").trim())
           .filter(Boolean);
 
-    let label = formatAudienceTokensLabel(config, tokens);
+    let label = formatSeriesAudienceLabel(config, tokens);
     if (!label || label === "—") {
       label = `Серия ${seriesIdx + 1}`;
     }
@@ -800,7 +811,7 @@ export function listComponentSeriesNavItemsForRef(
     if (!representative) continue;
 
     const tokens = seriesAudienceTokens(component!, series, representative);
-    let label = formatAudienceTokensLabel(config, tokens);
+    let label = formatSeriesAudienceLabel(config, tokens);
     if (!label || label === "—") {
       label = `Серия ${seriesIdx + 1}`;
     }
