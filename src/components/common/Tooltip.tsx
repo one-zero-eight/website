@@ -20,6 +20,7 @@ export default function Tooltip({
   content,
   className,
   trigger = "hover",
+  openDelay = 0,
 }: {
   children: React.ReactNode;
   content: React.ReactNode;
@@ -33,6 +34,7 @@ export default function Tooltip({
    * press that opened a click-triggered one.
    */
   trigger?: "hover" | "press";
+  openDelay?: number;
 }) {
   const openOnPress = trigger === "press";
   const [isOpen, setIsOpen] = useState(false);
@@ -50,9 +52,16 @@ export default function Tooltip({
   });
 
   // Event listeners to change the open state
-  const hover = useHover(context, { move: false, enabled: !openOnPress });
-  const focus = useFocus(context);
-  const click = useClick(context, { toggle: openOnPress });
+  const hover = useHover(context, {
+    move: false,
+    enabled: !openOnPress,
+    delay: { open: openDelay, close: 0 },
+  });
+  const focus = useFocus(context, { enabled: openOnPress || openDelay === 0 });
+  const click = useClick(context, {
+    toggle: openOnPress,
+    enabled: openOnPress || openDelay === 0,
+  });
   const dismiss = useDismiss(context, { referencePress: !openOnPress });
   // Role props for screen readers
   const role = useRole(context, { role: "tooltip" });
