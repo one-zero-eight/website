@@ -43,7 +43,7 @@ export const GROUPS_PROGRAM_TITLE_STICKY_STYLE = {
 } as const;
 
 export const GROUPS_SLOT_ROW_CLASS =
-  "slot-row [content-visibility:auto] [contain-intrinsic-size:auto_100px] [&_.empty]:h-full [&_.empty]:min-h-[64px] [&_.meeting]:h-full [&_.meeting]:min-h-0 [&_td]:h-[100px]";
+  "slot-row [&_.empty]:h-full [&_.empty]:min-h-[64px] [&_.meeting]:min-h-0 [&_td]:h-[100px]";
 
 export const COMPACT_GROUPS_SLOT_ROW_CLASS =
   "[contain-intrinsic-size:auto_52px] [&_.empty]:min-h-7! [&_.meeting]:min-h-0! [&_.meeting]:p-1 [&_.meeting-body]:grid-rows-[auto_auto] [&_.meeting-body]:gap-0 [&_.meeting-footer]:gap-0 [&_.meeting-title]:line-clamp-1 [&_.meeting-title]:max-h-[1.25em] [&_td]:h-13!";

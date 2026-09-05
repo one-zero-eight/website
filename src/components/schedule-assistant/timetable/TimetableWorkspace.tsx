@@ -22,6 +22,7 @@ import {
   useCallback,
   useDeferredValue,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -61,6 +62,7 @@ import {
   programSemesterRange,
   resolveProgramTimeColumns,
   termSemesterRange,
+  toMinutes as slotToMinutes,
 } from "./programTimeSlots.ts";
 import {
   buildCalendarGrid,
@@ -255,6 +257,7 @@ function meetingCardPropsEqual(
     pm.end !== nm.end ||
     pm.off_grid !== nm.off_grid ||
     pm.off_grid_offset_minutes !== nm.off_grid_offset_minutes ||
+    pm.grid_row_start !== nm.grid_row_start ||
     pm.date !== nm.date ||
     (pm.override_fields?.join("\0") ?? "") !==
       (nm.override_fields?.join("\0") ?? "") ||
@@ -2998,6 +3001,38 @@ function CoreGroupsTable({
                 : undefined
             }
           >
+            {cell.mergedRows.length > 0 && (
+              <div className="absolute inset-0 flex">
+                {cell.groupIds.map((groupId) => (
+                  <div
+                    key={groupId}
+                    className="min-w-0 flex-1 border-r border-[#d8dfeb] p-1.5 last:border-r-0"
+                  >
+                    <button
+                      type="button"
+                      className={clsx(
+                        "block h-full w-full rounded bg-[#fafcff]",
+                        isInactive && "bg-transparent",
+                        !placeTarget &&
+                          onEmptyCellClick &&
+                          activeWeek &&
+                          programLabel &&
+                          "cursor-pointer hover:bg-[#eef4ff]",
+                      )}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        if (placeTarget) return;
+                        if (!onEmptyCellClick || !activeWeek || !programLabel) {
+                          clearSelection();
+                          return;
+                        }
+                        onEmptyCellClick({ ...cellContext, groupId });
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
             {!cell.mergedRows.length ? (
               <div
                 className={clsx(
@@ -3218,7 +3253,7 @@ function CoreGroupsTable({
 
 const MeetingCard = memo(function MeetingCard({
   row,
-  grid: _grid,
+  grid,
   span = 1,
   hideClassTag = false,
   hideRoomCapacity = false,
@@ -3254,6 +3289,29 @@ const MeetingCard = memo(function MeetingCard({
   const bits = useMeetingHighlightBits(m);
   const isSelected = (bits & 1) !== 0;
   const isRelated = (bits & 2) !== 0;
+  const meetingRef = useRef<HTMLDivElement | null>(null);
+  const [rowHeightPx, setRowHeightPx] = useState(hideClassTag ? 52 : 100);
+
+  useLayoutEffect(() => {
+    const rowElement = meetingRef.current?.closest("tr");
+    if (!rowElement) return;
+    const observedRowElement = rowElement;
+
+    function updateRowHeight() {
+      const measuredHeight = observedRowElement.getBoundingClientRect().height;
+      if (measuredHeight <= 0) return;
+      setRowHeightPx((currentHeight) =>
+        Math.abs(currentHeight - measuredHeight) < 0.25
+          ? currentHeight
+          : measuredHeight,
+      );
+    }
+
+    updateRowHeight();
+    const resizeObserver = new ResizeObserver(updateRowHeight);
+    resizeObserver.observe(observedRowElement);
+    return () => resizeObserver.disconnect();
+  }, [hideClassTag]);
 
   const roomClickableClass = clsx(
     "clickable cursor-pointer font-semibold underline decoration-dotted decoration-2 underline-offset-2",
@@ -3387,6 +3445,52 @@ const MeetingCard = memo(function MeetingCard({
     </div>
   );
 
+  const renderedSlotStart =
+    m.grid_row_start ||
+    grid.slots.find((slot) => slot.start === m.start)?.start ||
+    m.start;
+  const renderedSlotIndex = Math.max(
+    0,
+    grid.slots.findIndex((slot) => slot.start === renderedSlotStart),
+  );
+  const renderedSlot = grid.slots[renderedSlotIndex];
+  const rowStartMinutes = renderedSlot
+    ? slotToMinutes(renderedSlot.start)
+    : slotToMinutes(renderedSlotStart);
+  const meetingStartMinutes = slotToMinutes(m.start);
+  const meetingEndMinutes = m.end
+    ? slotToMinutes(m.end)
+    : renderedSlot
+      ? slotToMinutes(renderedSlot.end)
+      : meetingStartMinutes;
+  const rowGapPx = 0;
+  const rowTopMinutes = grid.slots.map((slot) => slotToMinutes(slot.start));
+  const rowBottomMinutes = grid.slots.map((slot) => slotToMinutes(slot.end));
+  const offsetWithinRow =
+    renderedSlot && rowBottomMinutes[renderedSlotIndex]! > rowStartMinutes
+      ? ((meetingStartMinutes - rowStartMinutes) /
+          (rowBottomMinutes[renderedSlotIndex]! - rowStartMinutes)) *
+        rowHeightPx
+      : 0;
+  let heightPx = rowHeightPx - offsetWithinRow;
+  for (
+    let slotIndex = renderedSlotIndex + 1;
+    slotIndex < grid.slots.length;
+    slotIndex += 1
+  ) {
+    if (meetingEndMinutes <= rowTopMinutes[slotIndex]!) break;
+    const slotStartMinutes = rowTopMinutes[slotIndex]!;
+    const slotEndMinutes = rowBottomMinutes[slotIndex]!;
+    const overlapMinutes =
+      Math.min(meetingEndMinutes, slotEndMinutes) - slotStartMinutes;
+    if (overlapMinutes <= 0) continue;
+    heightPx +=
+      rowGapPx +
+      (overlapMinutes / (slotEndMinutes - slotStartMinutes)) * rowHeightPx;
+  }
+  const spansMultipleRows =
+    m.off_grid &&
+    meetingEndMinutes > (rowBottomMinutes[renderedSlotIndex] ?? 0);
   const offsetMinutes = m.off_grid ? (m.off_grid_offset_minutes ?? 0) : 0;
   const offsetPx = Math.max(
     -12,
@@ -3395,16 +3499,24 @@ const MeetingCard = memo(function MeetingCard({
 
   return (
     <div
+      ref={meetingRef}
       data-meeting-id={m.instance_id}
       className={clsx(
         "meeting relative z-[2] rounded-lg",
         GROUPS_MEETING_CLASS,
+        spansMultipleRows && "w-auto!",
         isWideCell ? "overflow-visible" : "overflow-hidden",
         meetingHighlightClass,
       )}
       style={{
         ...meetingColorStyle(colors),
-        marginTop: offsetPx !== 0 ? `${offsetPx}px` : undefined,
+        position: spansMultipleRows ? "absolute" : undefined,
+        right: spansMultipleRows ? "6px" : undefined,
+        left: spansMultipleRows ? "6px" : undefined,
+        top: spansMultipleRows ? `${offsetWithinRow}px` : undefined,
+        height: spansMultipleRows ? `${heightPx}px` : undefined,
+        marginTop:
+          !spansMultipleRows && offsetPx !== 0 ? `${offsetPx}px` : undefined,
       }}
       onClick={() => {
         selectMeeting(

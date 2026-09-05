@@ -4,6 +4,7 @@ import type { SchemaScheduleConfig } from "@/api/schedule-assistant/types.ts";
 import {
   buildColumns,
   buildCourseColors,
+  buildGrid,
   colorForSubject,
   columnsForTab,
   compactGroupRows,
@@ -190,6 +191,77 @@ describe("compact group rows", () => {
 
     expect(columns.map((column) => column.groupId)).toEqual(["G1", "G2"]);
     expect(rows).toEqual([{ day: "Mon", slotStart: "09:00" }]);
+  });
+});
+
+describe("off-grid meeting placement", () => {
+  it("anchors a meeting to the containing term row", () => {
+    const config = {
+      term: {
+        days: ["Mon"],
+        time_slots: [
+          { start_time: "09:00", end_time: "10:30" },
+          { start_time: "10:40", end_time: "12:10" },
+          { start_time: "12:40", end_time: "14:10" },
+        ],
+        sections: [
+          {
+            code: "core",
+            name: "Core",
+            programs: [
+              {
+                code: "BS_Y3_RU",
+                name: "BS - Year 3 (RU)",
+                groups: ["G1"],
+              },
+            ],
+          },
+        ],
+      },
+    } as unknown as SchemaScheduleConfig;
+    const meeting: Meeting = {
+      instance_id: "meeting",
+      course: "Управление данными",
+      tag: "lec",
+      groups: ["G1"],
+      date: "2026-08-31",
+      start: "10:00",
+      end: "13:00",
+      room: "ONLINE",
+      instructors: [],
+      instructor_pool: [],
+      section: "core",
+    };
+
+    const grid = buildGrid(config, [meeting], "2026-08-31", "core", [
+      {
+        yearLabel: "BS - Year 3 (RU)",
+        groupId: "G1",
+        groupLabel: "G1",
+      },
+    ]);
+
+    expect(grid.map.get("Mon|09:00|G1")?.[0]).toMatchObject({
+      start: "10:00",
+      end: "13:00",
+      off_grid: true,
+      off_grid_offset_minutes: 60,
+      grid_row_start: "09:00",
+    });
+    expect(
+      compactGroupRows(config, [meeting], "core", [
+        { yearLabel: "BS - Year 3 (RU)", groupId: "G1", groupLabel: "G1" },
+      ]),
+    ).toEqual([
+      { day: "Mon", slotStart: "09:00" },
+      { day: "Mon", slotStart: "10:40" },
+      { day: "Mon", slotStart: "12:40" },
+    ]);
+    expect(
+      compactGroupRows(config, [{ ...meeting, end: "10:20" }], "core", [
+        { yearLabel: "BS - Year 3 (RU)", groupId: "G1", groupLabel: "G1" },
+      ]),
+    ).toEqual([{ day: "Mon", slotStart: "09:00" }]);
   });
 });
 

@@ -144,6 +144,8 @@ export type Meeting = {
   off_grid?: boolean;
   /** Minutes offset from the grid row slot start (for off-grid rendering). */
   off_grid_offset_minutes?: number;
+  /** Term-grid row where this meeting is rendered. */
+  grid_row_start?: string;
 };
 
 export type Column = {
@@ -1070,7 +1072,13 @@ export function buildGrid(
         const nearest = nearestSlotStart(start, slots);
         rowStart = nearest || start;
       } else {
+        const containingSlot = slots.find(
+          (slot) =>
+            slotToMinutes(slot.start) <= slotToMinutes(start) &&
+            slotToMinutes(start) < slotToMinutes(slot.end),
+        );
         const nearest =
+          containingSlot?.start ||
           nearestSlotStart(start, slots) ||
           nearestSlotStart(start, programSlots);
         if (nearest) {
@@ -1087,6 +1095,7 @@ export function buildGrid(
         end,
         off_grid: offGrid || undefined,
         off_grid_offset_minutes: offGrid ? offsetMinutes : undefined,
+        grid_row_start: rowStart,
       };
       const k = `${d}|${rowStart}|${g}`;
       const current = map.get(k) || [];
@@ -1146,6 +1155,7 @@ export function compactGroupRows(
   const columnGroups = new Set(visibleColumns.map((column) => column.groupId));
   const usedPairs = new Set<string>();
   const termSlots = termResolvedTimeSlots(config);
+  const groupToProgram = buildGroupToProgramMap(config);
 
   for (const meeting of filterMeetingsByTab(allMeetings, tabMode)) {
     if (meeting.cancelled) continue;
@@ -1156,11 +1166,38 @@ export function compactGroupRows(
       continue;
     }
     const start = normalizeHhmm(meeting.start);
-    const rowStart =
-      termSlots.find((slot) => slot.start === start)?.start ??
-      nearestSlotStart(start, termSlots) ??
-      start;
-    usedPairs.add(`${dayKey(meeting.date)}|${rowStart}`);
+    const startMinutes = slotToMinutes(start);
+    const containingSlot = termSlots.find(
+      (slot) =>
+        slotToMinutes(slot.start) <= startMinutes &&
+        startMinutes < slotToMinutes(slot.end),
+    );
+    const day = dayKey(meeting.date);
+    for (const groupId of meeting.groups) {
+      if (columnGroups.size && !columnGroups.has(groupId)) continue;
+      const programSlot = programResolvedTimeSlots(
+        groupToProgram.get(groupId),
+        termSlots,
+      ).find((slot) => slot.start === start);
+      const onProgramSlot =
+        programSlot && isMeetingOnSlot(start, meeting.end, programSlot);
+      const rowStart =
+        termSlots.find((slot) => slot.start === start)?.start ??
+        (!onProgramSlot ? containingSlot?.start : undefined) ??
+        nearestSlotStart(start, termSlots) ??
+        start;
+      usedPairs.add(`${day}|${rowStart}`);
+      if (!meeting.end || onProgramSlot) continue;
+      const endMinutes = slotToMinutes(meeting.end);
+      for (const slot of termSlots) {
+        if (
+          slotToMinutes(slot.start) > slotToMinutes(rowStart) &&
+          slotToMinutes(slot.start) < endMinutes
+        ) {
+          usedPairs.add(`${day}|${slot.start}`);
+        }
+      }
+    }
   }
 
   const rows: TimetableGridRow[] = [];
