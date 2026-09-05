@@ -209,7 +209,7 @@ export function useCourse(courseIndex: number) {
   const query = $scheduleAssistant.useQuery(
     "get",
     "/schedule-config/courses",
-    {},
+    undefined,
     {
       select: (courses) => ({
         course: courses[courseIndex],
@@ -632,7 +632,7 @@ export function usePatchCourseMutation(courseName: string | undefined) {
   const query = $scheduleAssistant.useQuery(
     "get",
     "/schedule-config/courses",
-    {},
+    undefined,
     {
       enabled: !!courseName,
       select: (courses) => courses.find((course) => course.name === courseName),

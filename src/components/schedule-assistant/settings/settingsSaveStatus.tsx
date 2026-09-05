@@ -14,7 +14,6 @@ import {
   useEffect,
   useId,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -65,8 +64,6 @@ export function SettingsSaveStatusProvider({
 }) {
   const [dirtyFields, setDirtyFields] = useState<Set<string>>(() => new Set());
   const [savedPulse, setSavedPulse] = useState(false);
-  const [saveSettling, setSaveSettling] = useState(false);
-  const prevFetchingRef = useRef(false);
   const queryClient = useQueryClient();
   const { isFetching } = useScheduleConfigQueriesFetchState();
   const savingCount = useIsMutating({
@@ -97,35 +94,11 @@ export function SettingsSaveStatusProvider({
       if (!isScheduleConfigWriteMutationKey(mutation.options.mutationKey))
         return;
 
-      if (mutation.state.status === "pending") {
-        setSaveSettling(true);
-      }
       if (mutation.state.status === "success") {
         setSavedPulse(true);
-        setSaveSettling(true);
-      }
-      if (mutation.state.status === "error") {
-        setSaveSettling(false);
       }
     });
   }, [queryClient]);
-
-  useEffect(() => {
-    if (!saveSettling) {
-      prevFetchingRef.current = isFetching;
-      return;
-    }
-    if (savingCount > 0) {
-      prevFetchingRef.current = isFetching;
-      return;
-    }
-
-    const wasFetching = prevFetchingRef.current;
-    prevFetchingRef.current = isFetching;
-    if (wasFetching && !isFetching) {
-      setSaveSettling(false);
-    }
-  }, [saveSettling, savingCount, isFetching]);
 
   useEffect(() => {
     if (!savedPulse) return;
@@ -137,7 +110,7 @@ export function SettingsSaveStatusProvider({
   }, [savedPulse]);
 
   const hasUnsavedDrafts = dirtyFields.size > 0;
-  const isSaving = savingCount > 0 || saveSettling;
+  const isSaving = savingCount > 0;
   const isSyncing = isFetching && !isSaving && !hasUnsavedDrafts;
 
   const status = useMemo((): SettingsSaveStatusKind => {
