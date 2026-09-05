@@ -110,6 +110,7 @@ import { scrollMeetingIntoCenter } from "./timetableMeetingScroll.ts";
 import {
   isTodayWeekdayInDisplayedWeek,
   todayGroupsDayRowClass,
+  todayGroupsDayProgramCellClass,
   todayGroupsSlotCellClass,
   todayGroupsSlotTimeClass,
 } from "./timetableTodayHighlight.ts";
@@ -2858,7 +2859,10 @@ function CoreGroupsTable({
                   programSeparator
                     ? GROUPS_PROGRAM_SEPARATOR
                     : "border-r border-[#d8dfeb]",
-                  isTodayDay && "shadow-[inset_0_2px_0_#f5a623]",
+                  todayGroupsDayProgramCellClass(
+                    isTodayDay,
+                    yearIndex === yearLabels.length - 1,
+                  ),
                   isInactive && "bg-[#edf4ff]",
                 )}
                 style={GROUPS_DAY_ROW_STICKY_STYLE}
