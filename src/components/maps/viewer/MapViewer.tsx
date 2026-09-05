@@ -1,22 +1,46 @@
 import { mapsTypes } from "@/api/maps";
 import { useMapImage } from "@/api/maps/map-image.ts";
+import {
+  MAP_VIEWBOX,
+  MAP_VIEWBOX_STRING,
+  type GeoControlPoint,
+} from "@/components/maps/georeference.ts";
 import { DetailsPopup } from "@/components/maps/viewer/DetailsPopup.tsx";
+import { GeoControlPointMarkers } from "@/components/maps/viewer/GeoControlPointMarkers.tsx";
+import { UserLocationMarker } from "@/components/maps/viewer/UserLocationMarker.tsx";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useEventListener } from "usehooks-ts";
 import { useNavigate } from "@tanstack/react-router";
+
+export type MapUserLocation = {
+  /** Position in SVG viewBox units. */
+  x: number;
+  y: number;
+  /** GPS accuracy radius converted to SVG units. */
+  accuracyUnits: number;
+  heading: number | null;
+  /** Whether the dot should actually be drawn (in bounds and accurate enough). */
+  visible: boolean;
+};
 
 export const MapViewer = memo(function MapViewer({
   scene,
   highlightAreas,
   disablePopup = false,
+  userLocation = null,
+  debugControlPoints,
 }: {
   scene: mapsTypes.SchemaScene;
   highlightAreas: mapsTypes.SchemaArea[];
   disablePopup?: boolean;
+  userLocation?: MapUserLocation | null;
+  /** TEMPORARY dev-only: raw SCENE_GEOREFERENCE control points to draw for calibration. */
+  debugControlPoints?: GeoControlPoint[];
 }) {
   const navigate = useNavigate();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const transformRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const options = useRef({
     offsetX: 0,
@@ -31,7 +55,8 @@ export const MapViewer = memo(function MapViewer({
   const [popupElement, setPopupElement] = useState<Element | null>(null);
 
   const updateImage = () => {
-    if (!containerRef.current || !imageRef.current) return;
+    if (!containerRef.current || !imageRef.current || !transformRef.current)
+      return;
     const rect = containerRef.current.getBoundingClientRect();
     const imageWidth = imageRef.current.clientWidth * options.current.zoom;
     const imageHeight = imageRef.current.clientHeight * options.current.zoom;
@@ -46,8 +71,8 @@ export const MapViewer = memo(function MapViewer({
       -rect.height * 0.8 - imageHeight + rect.height,
     );
 
-    imageRef.current.style.transformOrigin = "left top";
-    imageRef.current.style.transform = `translate(${options.current.offsetX}px, ${options.current.offsetY}px) scale(${options.current.zoom})`;
+    transformRef.current.style.transformOrigin = "left top";
+    transformRef.current.style.transform = `translate(${options.current.offsetX}px, ${options.current.offsetY}px) scale(${options.current.zoom})`;
   };
 
   useEffect(() => {
@@ -352,6 +377,41 @@ export const MapViewer = memo(function MapViewer({
     }
   }, [scene, highlightAreas, mapSvg?.data]);
 
+  // Convert a point in SVG viewBox units to pixel coords within the image div
+  // (the map SVG fills the div with preserveAspectRatio="xMidYMid meet").
+  const mapPointToImagePixels = (x: number, y: number) => {
+    if (!imageRef.current) return null;
+    const w = imageRef.current.clientWidth;
+    const h = imageRef.current.clientHeight;
+    const scale = Math.min(w / MAP_VIEWBOX.width, h / MAP_VIEWBOX.height);
+    return {
+      px: (x - MAP_VIEWBOX.minX) * scale + (w - MAP_VIEWBOX.width * scale) / 2,
+      py: (y - MAP_VIEWBOX.minY) * scale + (h - MAP_VIEWBOX.height * scale) / 2,
+    };
+  };
+
+  // Center on the user location the first time we get a usable fix
+  const centeredForLocationRef = useRef(false);
+  useEffect(() => {
+    if (!userLocation) {
+      centeredForLocationRef.current = false;
+      return;
+    }
+    if (!userLocation.visible || centeredForLocationRef.current) return;
+    if (!containerRef.current || !imageRef.current) return;
+
+    const pix = mapPointToImagePixels(userLocation.x, userLocation.y);
+    if (!pix) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const zoom = Math.min(Math.max(options.current.zoom, 2), 4);
+    options.current.zoom = zoom;
+    options.current.offsetX = rect.width / 2 - pix.px * zoom;
+    options.current.offsetY = rect.height / 2 - pix.py * zoom;
+    updateImage();
+    centeredForLocationRef.current = true;
+  }, [userLocation]);
+
   const svgDiv = useMemo(
     () =>
       mapSvgData ? (
@@ -401,7 +461,28 @@ export const MapViewer = memo(function MapViewer({
         }
         `}
       </style>
-      {svgDiv}
+      <div ref={transformRef} className="relative h-full w-full">
+        {svgDiv}
+        {(userLocation || debugControlPoints?.length) && (
+          <svg
+            viewBox={MAP_VIEWBOX_STRING}
+            preserveAspectRatio="xMidYMid meet"
+            className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+          >
+            {debugControlPoints && debugControlPoints.length > 0 && (
+              <GeoControlPointMarkers points={debugControlPoints} />
+            )}
+            {userLocation?.visible && (
+              <UserLocationMarker
+                x={userLocation.x}
+                y={userLocation.y}
+                accuracyUnits={userLocation.accuracyUnits}
+                heading={userLocation.heading}
+              />
+            )}
+          </svg>
+        )}
+      </div>
       {!disablePopup && (
         <DetailsPopup
           elementRef={popupElement}
