@@ -14,6 +14,7 @@ import {
 import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 
 import { UnarrangedLessonsPanel } from "./UnarrangedLessonsPanel.tsx";
+import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
   countUnarrangedSessions,
   type UnarrangedComponentGroup,
@@ -26,6 +27,8 @@ import {
 
 import {
   buildTimetableSearchEntries,
+  buildTimetableSeriesEntry,
+  timetableOccurrenceDifferences,
   searchTimetableEntries,
 } from "./timetableSearch.ts";
 
@@ -59,24 +62,31 @@ function TimetableEventSearch({
     [entries, query, activeDate],
   );
   const visibleSeries = results.slice(0, 50);
-  const visibleResults = visibleSeries.flatMap((result) => [
-    {
-      ...result.entry,
-      key: result.key,
-      series: result.isSeries ? result : null,
-      nested: false,
-      parentEntry: null,
-    },
-    ...(expandedSeries === result.key && result.isSeries
-      ? result.occurrences.map((entry) => ({
-          ...entry,
-          key: `${result.key}:${entry.meeting.instance_id}`,
-          series: null,
-          nested: true,
-          parentEntry: result.entry,
-        }))
-      : []),
-  ]);
+  const visibleResults = visibleSeries.flatMap((result) => {
+    const baseEntry = result.isSeries
+      ? buildTimetableSeriesEntry(result.entry, config, instructorLabels)
+      : result.entry;
+    return [
+      {
+        ...baseEntry,
+        navigationMeeting: result.entry.meeting,
+        key: result.key,
+        series: result.isSeries ? result : null,
+        nested: false,
+        parentEntry: null,
+      },
+      ...(expandedSeries === result.key && result.isSeries
+        ? result.occurrences.map((entry) => ({
+            ...entry,
+            navigationMeeting: entry.meeting,
+            key: `${result.key}:${entry.meeting.instance_id}`,
+            series: null,
+            nested: true,
+            parentEntry: baseEntry,
+          }))
+        : []),
+    ];
+  });
   const isOpen = open && Boolean(query.trim());
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
@@ -143,7 +153,7 @@ function TimetableEventSearch({
     }
     if (event.key === "Enter") {
       event.preventDefault();
-      handleSelect(visibleResults[activeIndex].meeting);
+      handleSelect(visibleResults[activeIndex].navigationMeeting);
       return;
     }
     if (!["ArrowDown", "ArrowUp", "Tab"].includes(event.key)) return;
@@ -226,6 +236,7 @@ function TimetableEventSearch({
                 (
                   {
                     meeting,
+                    navigationMeeting,
                     audienceLabel,
                     instructorLabel,
                     weekdayLabel,
@@ -240,23 +251,16 @@ function TimetableEventSearch({
                   const overrides = new Set(meeting.override_fields);
                   const overrideClass =
                     "underline decoration-sky-400 decoration-wavy decoration-1 underline-offset-2";
-                  const showTime =
-                    !parentEntry ||
-                    overrides.has("time") ||
-                    overrides.has("weekday") ||
-                    meeting.start !== parentEntry.meeting.start ||
-                    meeting.end !== parentEntry.meeting.end ||
-                    weekdayLabel !== parentEntry.weekdayLabel;
-                  const showRoom =
-                    !parentEntry ||
-                    overrides.has("room") ||
-                    meeting.room !== parentEntry.meeting.room;
-                  const showAudience =
-                    !parentEntry || audienceLabel !== parentEntry.audienceLabel;
-                  const showInstructor =
-                    !parentEntry ||
-                    overrides.has("instructor") ||
-                    instructorLabel !== parentEntry.instructorLabel;
+                  const differences = parentEntry
+                    ? timetableOccurrenceDifferences(
+                        visibleResults[index],
+                        parentEntry,
+                      )
+                    : null;
+                  const showTime = !differences || differences.time;
+                  const showRoom = !differences || differences.room;
+                  const showAudience = !differences || differences.audience;
+                  const showInstructor = !differences || differences.instructor;
                   return (
                     <div
                       key={key}
@@ -275,7 +279,7 @@ function TimetableEventSearch({
                         }}
                         type="button"
                         className="flex w-full min-w-0 flex-col gap-0.5 rounded-md px-2 py-1.5 text-left text-sm outline-none"
-                        onClick={() => handleSelect(meeting)}
+                        onClick={() => handleSelect(navigationMeeting)}
                         onKeyDown={handleSearchKeyDown}
                       >
                         <span
@@ -285,16 +289,26 @@ function TimetableEventSearch({
                           )}
                         >
                           {nested
-                            ? dateLabel
+                            ? `${weekdayLabel}, ${dateLabel}`
                             : `${meeting.course}${meeting.tag ? ` (${meeting.tag})` : ""}`}
                         </span>
                         {showTime ||
                         (showRoom &&
-                          (meeting.room || overrides.has("room"))) ? (
+                          (meeting.room ||
+                            differences?.room ||
+                            overrides.has("room"))) ? (
                           <span className="text-base-content/80 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                             {showTime ? (
                               <span className="inline-flex items-center gap-1.5">
-                                <span className="icon-[material-symbols--schedule-outline-rounded] text-base-content/45 shrink-0 text-sm" />
+                                <span
+                                  className={cn(
+                                    "shrink-0 text-sm",
+                                    parseMeetingInstanceId(meeting.instance_id)
+                                      ?.kind === "wp"
+                                      ? "icon-[lucide--repeat-2] text-base-content/80"
+                                      : "icon-[material-symbols--calendar-month-outline-rounded] text-base-content/80",
+                                  )}
+                                />
                                 <span
                                   className={cn(
                                     "font-medium tabular-nums",
@@ -306,14 +320,16 @@ function TimetableEventSearch({
                                 >
                                   {!series && !nested
                                     ? dateLabel
-                                    : weekdayLabel}{" "}
+                                    : `${weekdayLabel},`}{" "}
                                   {meeting.start}
                                   {meeting.end ? `–${meeting.end}` : ""}
                                 </span>
                               </span>
                             ) : null}
                             {showRoom &&
-                            (meeting.room || overrides.has("room")) ? (
+                            (meeting.room ||
+                              differences?.room ||
+                              overrides.has("room")) ? (
                               <span className="inline-flex items-center gap-1.5">
                                 <span className="icon-[material-symbols--location-on-outline-rounded] text-base-content/45 shrink-0 text-sm" />
                                 <span
@@ -331,7 +347,9 @@ function TimetableEventSearch({
                         ) : null}
                         {(showAudience && audienceLabel) ||
                         (showInstructor &&
-                          (instructorLabel || overrides.has("instructor"))) ? (
+                          (instructorLabel ||
+                            differences?.instructor ||
+                            overrides.has("instructor"))) ? (
                           <span className="text-base-content/80 text-xs leading-snug">
                             {showAudience && audienceLabel ? (
                               <span>
@@ -342,11 +360,15 @@ function TimetableEventSearch({
                             {showAudience &&
                             audienceLabel &&
                             showInstructor &&
-                            (instructorLabel || overrides.has("instructor")) ? (
+                            (instructorLabel ||
+                              differences?.instructor ||
+                              overrides.has("instructor")) ? (
                               <span className="inline-block w-2" />
                             ) : null}
                             {showInstructor &&
-                            (instructorLabel || overrides.has("instructor")) ? (
+                            (instructorLabel ||
+                              differences?.instructor ||
+                              overrides.has("instructor")) ? (
                               <span>
                                 <span className="icon-[material-symbols--person-outline-rounded] text-base-content/45 mr-1 inline-block align-[-0.125em] text-sm" />
                                 <span

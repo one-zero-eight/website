@@ -3,6 +3,7 @@ import { listAudienceInlineItems } from "./meetingAudienceSummary.ts";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
   resolveInstructorLabel,
+  resolveWeeklyMeetingFields,
   type Meeting,
 } from "./timetableViewerModel.ts";
 
@@ -38,6 +39,10 @@ const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
   day: "numeric",
   month: "short",
   year: "numeric",
+});
+const currentYearDateFormatter = new Intl.DateTimeFormat("ru-RU", {
+  day: "numeric",
+  month: "short",
 });
 const weekdayFormatter = new Intl.DateTimeFormat("ru-RU", { weekday: "short" });
 
@@ -145,7 +150,10 @@ export function buildTimetableSearchEntries(
         audienceLabel,
         instructorLabel: instructors,
         weekdayLabel,
-        dateLabel: dateFormatter.format(date),
+        dateLabel: (date.getFullYear() === new Date().getFullYear()
+          ? currentYearDateFormatter
+          : dateFormatter
+        ).format(date),
         weekday: date.getDay(),
         searchText: [
           meeting.course,
@@ -164,6 +172,45 @@ export function buildTimetableSearchEntries(
         `${b.meeting.date} ${b.meeting.start}`,
       ),
     );
+}
+
+export function buildTimetableSeriesEntry(
+  entry: TimetableSearchEntry,
+  config: SchemaScheduleConfig,
+  instructorLabels: Record<string, string>,
+): TimetableSearchEntry {
+  const ref = parseMeetingInstanceId(entry.meeting.instance_id);
+  if (ref?.kind !== "wp") return entry;
+  const slot =
+    config.courses?.[ref.courseIdx]?.components?.[ref.componentIdx]?.sessions?.[
+      ref.seriesIdx
+    ]?.weekly_pattern?.[ref.slotIdx];
+  if (!slot) return entry;
+  const base = resolveWeeklyMeetingFields(
+    { ...slot, edits: [] },
+    ref.date,
+    config,
+  );
+  return buildTimetableSearchEntries(
+    [{ ...entry.meeting, ...base, override_fields: [] }],
+    instructorLabels,
+    config,
+  )[0];
+}
+
+export function timetableOccurrenceDifferences(
+  entry: TimetableSearchEntry,
+  base: TimetableSearchEntry,
+) {
+  return {
+    time:
+      entry.meeting.start !== base.meeting.start ||
+      entry.meeting.end !== base.meeting.end ||
+      entry.weekday !== base.weekday,
+    room: entry.meeting.room !== base.meeting.room,
+    audience: entry.audienceLabel !== base.audienceLabel,
+    instructor: entry.instructorLabel !== base.instructorLabel,
+  };
 }
 
 export function searchTimetableEntries(

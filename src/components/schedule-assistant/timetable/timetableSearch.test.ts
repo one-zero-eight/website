@@ -30,6 +30,8 @@ const config = {
 } as unknown as SchemaScheduleConfig;
 import {
   buildTimetableSearchEntries,
+  buildTimetableSeriesEntry,
+  timetableOccurrenceDifferences,
   parseTimetableSearchQuery,
   searchTimetableEntries,
 } from "./timetableSearch.ts";
@@ -64,6 +66,85 @@ function search(
 }
 
 describe("timetable series search", () => {
+  it("omits the current year but keeps other years in date labels", () => {
+    const year = new Date().getFullYear();
+    const entries = buildTimetableSearchEntries(
+      [meeting(`${year}-08-24`), meeting(`${year + 1}-08-24`)],
+      {},
+      config,
+    );
+    expect(entries[0].dateLabel).toBe("24 авг.");
+    expect(entries[1].dateLabel).toContain(String(year + 1));
+  });
+  it("shows weekly defaults instead of the nearest occurrence's overrides", () => {
+    const seriesConfig = {
+      ...config,
+      courses: [
+        {
+          components: [
+            {
+              sessions: [
+                {
+                  weekly_pattern: [
+                    {
+                      weekday: "monday",
+                      start_time: "09:00:00",
+                      end_time: "10:30:00",
+                      room: "ONLINE",
+                      instructor: "instructor",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    } as unknown as SchemaScheduleConfig;
+    const labels = { instructor: "Alex Smith", substitute: "Other Teacher" };
+    const entries = buildTimetableSearchEntries(
+      [
+        meeting("2026-09-08", {
+          instance_id: "0:0:0:wp:0:2026-09-07",
+          start: "11:00",
+          end: "12:30",
+          room: "102",
+          instructors: ["substitute"],
+          override_fields: ["weekday", "time", "room", "instructor"],
+        }),
+        meeting("2026-09-14", {
+          room: "ONLINE",
+          override_fields: ["room", "time", "instructor"],
+        }),
+      ],
+      labels,
+      seriesConfig,
+    );
+    const result = searchTimetableEntries(
+      entries,
+      "Mathematical",
+      "2026-09-07",
+    )[0];
+    const base = buildTimetableSeriesEntry(result.entry, seriesConfig, labels);
+    expect(base.meeting.room).toBe("ONLINE");
+    expect(base.meeting.start).toBe("09:00");
+    expect(base.weekdayLabel).toBe("Пн");
+    expect(base.instructorLabel).toBe("Alex Smith");
+    expect(result.entry.meeting.date).toBe("2026-09-08");
+    expect(result.entry.meeting.room).toBe("102");
+    expect(timetableOccurrenceDifferences(entries[0], base)).toEqual({
+      time: true,
+      room: true,
+      audience: false,
+      instructor: true,
+    });
+    expect(timetableOccurrenceDifferences(entries[1], base)).toEqual({
+      time: false,
+      room: false,
+      audience: false,
+      instructor: false,
+    });
+  });
   it.each([
     [1, ["январь", "января", "янв"]],
     [2, ["февраль", "февраля", "фев", "февр"]],
