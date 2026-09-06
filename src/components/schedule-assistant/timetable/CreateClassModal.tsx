@@ -50,16 +50,11 @@ import {
   timeOptionsForConfig,
   weeklySlotExcludeRef,
 } from "./meetingEditUtils.ts";
-import {
-  instructorPickerDatesForWeekday,
-  suggestBestInstructorId,
-} from "./instructorPickerOptions.ts";
+import { suggestBestInstructorId } from "./instructorPickerOptions.ts";
 import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
 import { audienceSummaryHintProps } from "./audienceSummaryHints.ts";
-import {
-  roomPickerDatesForEdit,
-  suggestBestRoomId,
-} from "./roomPickerOptions.ts";
+import { suggestBestRoomId } from "./roomPickerOptions.ts";
+import { weeklyPickerSlots } from "./meetingPickerSchedule.ts";
 import { validateSessionSeriesDraft } from "./sessionSeriesValidation.ts";
 import { SessionSeriesEditor } from "./SessionSeriesEditor.tsx";
 import { normalizeOccurrence, normalizeWeeklySlot } from "./sessionRowMarks.ts";
@@ -532,9 +527,19 @@ export function CreateClassModal({
         const weekday = weekdayToKey(String(slot.weekday));
         const start = toUiTime(slot.start_time);
         const end = toUiTime(slot.end_time);
-        const dates = roomPickerDatesForEdit({ config, weekday });
-        const focusDate = cellContext?.date || dates[0] || "";
-        if (!focusDate || !start) return slots;
+        const roomSlots = weeklyPickerSlots(
+          config,
+          slot,
+          audienceValue,
+          "room",
+        );
+        const instructorSlots = weeklyPickerSlots(
+          config,
+          slot,
+          audienceValue,
+          "instructor",
+        );
+        if (!start) return slots;
 
         const next = { ...slot };
         let changed = false;
@@ -542,8 +547,8 @@ export function CreateClassModal({
           const room = suggestBestRoomId({
             config,
             meetings,
-            date: focusDate,
-            dates: dates.length ? dates : [focusDate],
+            dates: roomSlots.map((slot) => slot.date),
+            slots: roomSlots,
             start,
             end: end || undefined,
             audienceTokens: audienceValue,
@@ -558,8 +563,8 @@ export function CreateClassModal({
           const instructor = suggestBestInstructorId({
             config,
             meetings,
-            date: focusDate,
-            dates: instructorPickerDatesForWeekday(config, weekday),
+            dates: instructorSlots.map((slot) => slot.date),
+            slots: instructorSlots,
             start,
             end: end || undefined,
             weekday,
@@ -605,7 +610,6 @@ export function CreateClassModal({
         const room = suggestBestRoomId({
           config,
           meetings,
-          date,
           dates: [date],
           start,
           end: end || undefined,
@@ -621,7 +625,6 @@ export function CreateClassModal({
         const instructor = suggestBestInstructorId({
           config,
           meetings,
-          date,
           dates: [date],
           start,
           end: end || undefined,

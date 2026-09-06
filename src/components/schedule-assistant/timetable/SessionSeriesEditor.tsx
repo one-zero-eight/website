@@ -6,12 +6,15 @@ import type {
 } from "@/api/schedule-assistant/types.ts";
 import { TERM_WEEKDAY_LABEL_RU } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { cn } from "@/lib/ui/cn";
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 
 import type { MeetingRef } from "./meetingEditUtils.ts";
-import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
+import {
+  buildMeetingPickerIndex,
+  type MeetingPickerIndex,
+} from "./meetingPickerIndex.ts";
+import { isSameLogicalMeeting } from "./roomPickerOptions.ts";
 import { occurrenceRowMarks, weeklyRowMarks } from "./sessionRowMarks.ts";
-import { roomPickerDatesForEdit } from "./roomPickerOptions.ts";
 import {
   draftMeetingsFromOccurrences,
   draftMeetingsFromWeeklySlots,
@@ -135,6 +138,35 @@ export function SessionSeriesEditor({
   addButtonClassName?: string;
   disabled?: boolean;
 }) {
+  // Replace persisted rows with their current drafts, rather than counting both.
+  const pickerMeetings = useMemo(() => {
+    const refs =
+      placement === "weekly"
+        ? weeklySlots
+            .map((_, index) => excludeRefForWeekly?.(index))
+            .filter((ref): ref is MeetingRef => ref != null)
+        : occurrences
+            .map((_, index) => excludeRefForOccurrence?.(index))
+            .filter((ref): ref is MeetingRef => ref != null);
+    if (!refs.length) return meetings;
+    return meetings.filter(
+      (meeting) => !refs.some((ref) => isSameLogicalMeeting(meeting, ref)),
+    );
+  }, [
+    excludeRefForOccurrence,
+    excludeRefForWeekly,
+    meetings,
+    occurrences,
+    placement,
+    weeklySlots,
+  ]);
+  const pickerMeetingIndex = useMemo(
+    () =>
+      pickerMeetings === meetings
+        ? meetingIndex
+        : buildMeetingPickerIndex(pickerMeetings),
+    [meetingIndex, meetings, pickerMeetings],
+  );
   const deletedWeekly = deletedWeeklyIndexes ?? new Set<number>();
   const deletedOcc = deletedOccurrenceIndexes ?? new Set<number>();
 
@@ -191,8 +223,8 @@ export function SessionSeriesEditor({
               <div className={cn(locked && "pointer-events-none opacity-60")}>
                 <OccurrenceRow
                   config={config}
-                  meetings={meetings}
-                  meetingIndex={meetingIndex}
+                  meetings={pickerMeetings}
+                  meetingIndex={pickerMeetingIndex}
                   extraMeetings={draftMeetingsFromOccurrences(
                     occurrences,
                     index,
@@ -264,13 +296,14 @@ export function SessionSeriesEditor({
               <div className={cn(locked && "pointer-events-none opacity-60")}>
                 <WeeklySlotRow
                   config={config}
-                  meetings={meetings}
-                  meetingIndex={meetingIndex}
+                  meetings={pickerMeetings}
+                  meetingIndex={pickerMeetingIndex}
                   extraMeetings={draftMeetingsFromWeeklySlots(
+                    config,
                     weeklySlots,
+                    audienceTokens,
                     index,
                     deletedWeekly,
-                    (weekday) => roomPickerDatesForEdit({ config, weekday }),
                   )}
                   slot={slot}
                   audienceTokens={audienceTokens}

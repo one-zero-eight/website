@@ -28,7 +28,6 @@ import {
 } from "@/components/schedule-assistant/timetable/meetingPickerIndex.ts";
 import {
   buildRoomPickerOptions,
-  roomPickerDatesForEdit,
   VIRTUAL_ROOM_ID,
 } from "@/components/schedule-assistant/timetable/roomPickerOptions.ts";
 import {
@@ -38,7 +37,10 @@ import {
 import { instructorValue } from "@/components/schedule-assistant/timetable/sessionSeriesValidation.ts";
 import { SessionEventCard } from "@/components/schedule-assistant/timetable/SessionEventCard.tsx";
 import { cn } from "@/lib/ui/cn";
+import { weeklyPickerSlots } from "./meetingPickerSchedule.ts";
+import { expandWeeklySlotsToEvents } from "./editableSessionEvents.ts";
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -67,24 +69,39 @@ export type SessionRowFieldMarks = {
 export function FieldMark({
   hint,
   children,
+  overridden = false,
+  reserveGutter = true,
 }: {
   hint?: SessionRowFieldHint;
   children: ReactNode;
+  overridden?: boolean;
+  reserveGutter?: boolean;
 }) {
   const mark = hint?.mark;
 
-  // Always wrap + always reserve the left gutter so toggles never remount
-  // children or shift layout (which steals focus from date/select inputs).
+  // Keep the wrapper stable so marks never remount or shift the inputs.
   return (
     <div
       className={cn(
-        "border-l-4 pl-2",
-        mark === "changed" && "border-warning/60",
-        mark === "overridden" && "border-info/60",
-        !mark && "border-transparent",
+        reserveGutter ? "border-l-4 pl-2" : "relative",
+        reserveGutter && mark === "changed" && "border-warning/60",
+        reserveGutter && mark === "overridden" && "border-info/60",
+        reserveGutter && !mark && "border-transparent",
+        !reserveGutter &&
+          mark &&
+          "before:absolute before:inset-y-0 before:-left-1.5 before:w-0.5 before:rounded-full",
+        !reserveGutter && mark === "changed" && "before:bg-warning/60",
+        !reserveGutter && mark === "overridden" && "before:bg-info/60",
       )}
     >
-      {children}
+      <div
+        className={cn(
+          overridden &&
+            "[&_[data-select-value]]:underline [&_[data-select-value]]:decoration-sky-400 [&_[data-select-value]]:decoration-wavy [&_[data-select-value]]:decoration-1 [&_[data-select-value]]:underline-offset-2 [&_input]:underline [&_input]:decoration-sky-400 [&_input]:decoration-wavy [&_input]:decoration-1 [&_input]:underline-offset-2",
+        )}
+      >
+        {children}
+      </div>
       {mark === "changed" && hint?.originalLabel != null && hint.onRestore ? (
         <div className="text-base-content/55 mt-1 text-xs">
           Было:{" "}
@@ -424,37 +441,37 @@ export function draftMeetingsFromOccurrences(
 }
 
 export function draftMeetingsFromWeeklySlots(
+  config: SchemaScheduleConfig,
   slots: SchemaWeeklyPatternSlot[],
+  audienceTokens: string[],
   skipIndex: number,
   deleted: Set<number>,
-  datesForWeekday: (weekday: TermWeekdayKey) => string[],
 ): Meeting[] {
-  const result: Meeting[] = [];
-  slots.forEach((slot, index) => {
-    if (index === skipIndex || deleted.has(index)) return;
-    const start = toUiTime(slot.start_time);
-    const weekday = weekdayToKey(slot.weekday);
-    if (!start || !weekday) return;
-    const instructor = instructorValue(slot.instructor);
-    const room = String(slot.room || "").trim();
-    const end = toUiTime(slot.end_time) || undefined;
-    for (const date of datesForWeekday(weekday)) {
-      result.push({
-        instance_id: `draft:wp:${index}:${date}`,
-        course: "это же занятие",
-        tag: "",
-        groups: [],
-        date,
-        start,
-        end,
-        room,
-        instructors: instructor ? [instructor] : [],
-        instructor_pool: [],
-        section: "",
-      });
-    }
-  });
-  return result;
+  return expandWeeklySlotsToEvents({
+    config,
+    weeklySlots: slots,
+    audienceTokens,
+  })
+    .filter(
+      (event) =>
+        event.source.kind === "weekly" &&
+        event.source.slotIdx !== skipIndex &&
+        !deleted.has(event.source.slotIdx) &&
+        !event.cancelled,
+    )
+    .map((event) => ({
+      instance_id: `draft:${event.key}`,
+      course: "это же занятие",
+      tag: "",
+      groups: audienceTokens,
+      date: event.date,
+      start: toUiTime(event.start_time),
+      end: toUiTime(event.end_time) || undefined,
+      room: event.room || "",
+      instructors: event.instructor ? [event.instructor] : [],
+      instructor_pool: [],
+      section: "",
+    }));
 }
 
 export function RoomSelect({
@@ -462,26 +479,32 @@ export function RoomSelect({
   meetings,
   meetingIndex,
   extraMeetings,
+  pickerSelection,
   value,
   weekday,
+  weeklySlot,
   date,
   start,
   end,
   audienceTokens,
   excludeRef,
+  excludeInstanceId,
   onChange,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
   meetingIndex: MeetingPickerIndex | null;
   extraMeetings?: Meeting[];
+  pickerSelection?: Meeting[];
   value: string;
   weekday: TermWeekdayKey;
+  weeklySlot?: SchemaWeeklyPatternSlot;
   date?: string;
   start: string;
   end: string;
   audienceTokens: string[];
   excludeRef?: MeetingRef | null;
+  excludeInstanceId?: string | null;
   onChange: (room: string) => void;
 }) {
   const [statusReady, setStatusReady] = useState(false);
@@ -507,71 +530,91 @@ export function RoomSelect({
     date,
     end,
     excludeRef,
+    excludeInstanceId,
     meetingIndex,
     start,
     statusReady,
     value,
     weekday,
+    weeklySlot,
   ]);
 
-  const options = useMemo(() => {
-    const dates = date?.trim()
-      ? [date.trim()]
-      : roomPickerDatesForEdit({ config, weekday });
-    const focusDate = date?.trim() || dates[0] || "";
-    if (!focusDate || !start.trim() || !meetingIndex) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const buildOptions = useCallback(
+    (selection?: Meeting[]) => {
+      const slots = date?.trim()
+        ? [{ date: date.trim(), start, end }]
+        : weeklySlot
+          ? weeklyPickerSlots(config, weeklySlot, audienceTokens, "room")
+          : [];
+      const dates = slots.map((slot) => slot.date);
+      if (!start.trim() || !meetingIndex) {
+        return [
+          { value: "", label: "—" },
+          { value: VIRTUAL_ROOM_ID, label: VIRTUAL_ROOM_ID },
+          ...(config.rooms ?? []).map((room) => ({
+            value: String(room.id || ""),
+            label: String(room.id || room.name || ""),
+          })),
+        ];
+      }
+      const hasExtras = Boolean(extraMeetings?.length);
+      const meetingsForStatus = hasExtras
+        ? [...meetings, ...extraMeetings!]
+        : meetings;
+      const indexForStatus = hasExtras
+        ? buildMeetingPickerIndex(meetingsForStatus)
+        : meetingIndex;
       return [
         { value: "", label: "—" },
-        { value: VIRTUAL_ROOM_ID, label: VIRTUAL_ROOM_ID },
-        ...(config.rooms ?? []).map((room) => ({
-          value: String(room.id || ""),
-          label: String(room.id || room.name || ""),
-        })),
+        ...buildRoomPickerOptions({
+          config,
+          meetings: meetingsForStatus,
+          dates,
+          slots,
+          weekly: Boolean(weeklySlot) || Boolean(selection?.length),
+          selection,
+          start: start.slice(0, 5),
+          end: end.slice(0, 5) || undefined,
+          audienceTokens,
+          excludeRef,
+          excludeInstanceId,
+          includeRoomIds: value ? [value] : undefined,
+          index: indexForStatus,
+          includeStatus: statusReady,
+        }),
       ];
-    }
-    const hasExtras = Boolean(extraMeetings?.length);
-    const meetingsForStatus = hasExtras
-      ? [...meetings, ...extraMeetings!]
-      : meetings;
-    const indexForStatus = hasExtras
-      ? buildMeetingPickerIndex(meetingsForStatus)
-      : meetingIndex;
-    return [
-      { value: "", label: "—" },
-      ...buildRoomPickerOptions({
-        config,
-        meetings: meetingsForStatus,
-        date: focusDate,
-        dates: dates.length ? dates : [focusDate],
-        start: start.slice(0, 5),
-        end: end.slice(0, 5) || undefined,
-        audienceTokens,
-        excludeRef,
-        includeRoomIds: value ? [value] : undefined,
-        index: indexForStatus,
-        includeStatus: statusReady,
-      }),
-    ];
-  }, [
-    audienceTokens,
-    config,
-    date,
-    end,
-    excludeRef,
-    extraMeetings,
-    meetingIndex,
-    meetings,
-    start,
-    statusReady,
-    value,
-    weekday,
-  ]);
+    },
+    [
+      audienceTokens,
+      config,
+      date,
+      end,
+      excludeRef,
+      excludeInstanceId,
+      extraMeetings,
+      meetingIndex,
+      meetings,
+      start,
+      statusReady,
+      value,
+      weeklySlot,
+    ],
+  );
+  const options = useMemo(() => buildOptions(), [buildOptions]);
+  const activeSelection = pickerOpen ? pickerSelection : undefined;
+  const menuOptions = useMemo(
+    () => (activeSelection?.length ? buildOptions(activeSelection) : options),
+    [activeSelection, buildOptions, options],
+  );
 
   return (
     <SelectDropdown
       value={value}
       onChange={onChange}
-      options={options}
+      options={menuOptions}
+      triggerOption={options.find((option) => option.value === value)}
+      onOpenChange={setPickerOpen}
       placeholder="Локация"
       searchable
       matchTriggerWidth={false}
@@ -697,6 +740,7 @@ export function WeeklySlotRow({
               extraMeetings={extraMeetings}
               value={String(slot.room || "")}
               weekday={weekdayKey}
+              weeklySlot={slot}
               start={start}
               end={end}
               audienceTokens={audienceTokens}
@@ -719,8 +763,10 @@ export function WeeklySlotRow({
               extraMeetings={extraMeetings}
               value={instructorValue(slot.instructor)}
               weekday={weekdayKey}
+              weeklySlot={slot}
               start={start}
               end={end}
+              audienceTokens={audienceTokens}
               courseInstructors={courseInstructors}
               instructorPool={instructorPool}
               excludeRef={excludeRef}
@@ -870,6 +916,7 @@ export function OccurrenceRow({
               date={occurrence.date || undefined}
               start={start}
               end={end}
+              audienceTokens={audienceTokens}
               courseInstructors={courseInstructors}
               instructorPool={instructorPool}
               excludeRef={excludeRef}

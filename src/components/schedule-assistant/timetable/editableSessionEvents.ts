@@ -46,6 +46,10 @@ export type EditableSessionEvent = {
   room: string | null;
   instructor: string | null;
   cancelled: boolean;
+  weeklyBase?: Pick<
+    EditableSessionEvent,
+    "date" | "start_time" | "end_time" | "room" | "instructor"
+  >;
 };
 
 export type EditableSessionEventPatch = {
@@ -127,7 +131,19 @@ export function expandWeeklySlotsToEvents({
     const dates = semesterDatesForWeekday(config, weekday, window);
     for (const patternDate of dates) {
       const resolved = resolveWeeklyMeetingFields(slot, patternDate, config);
+      const base = resolveWeeklyMeetingFields(
+        { ...slot, edits: [] },
+        patternDate,
+        config,
+      );
       events.push({
+        weeklyBase: {
+          date: patternDate,
+          start_time: toApiTime(base.start),
+          end_time: toApiTime(base.end),
+          room: String(base.room || "").trim() || null,
+          instructor: normalizeInstructor(base.instructors),
+        },
         key: weeklyEventKey(slotIdx, patternDate),
         source: {
           kind: "weekly",
@@ -397,12 +413,8 @@ export function editableEventsToDraftMeetings({
 }): Meeting[] {
   return events
     .filter((event) => !event.cancelled)
-    .map((event, index) => {
-      const instanceId = editableSessionEventInstanceId(
-        event,
-        meetingRef,
-        index,
-      );
+    .map((event) => {
+      const instanceId = editableSessionEventInstanceId(event, meetingRef);
       return {
         instance_id: instanceId,
         course: meeting.course,
@@ -426,12 +438,14 @@ export function editableEventsToDraftMeetings({
 export function editableSessionEventInstanceId(
   event: EditableSessionEvent,
   meetingRef: MeetingRef,
-  fallbackIndex = 0,
 ): string {
   if (event.source.kind === "weekly") {
     return `${meetingRef.courseIdx}:${meetingRef.componentIdx}:${meetingRef.seriesIdx}:wp:${event.source.slotIdx}:${event.source.patternDate}`;
   }
-  const occurrenceIndex = event.source.occIdx ?? fallbackIndex;
+  if (event.source.occIdx == null) {
+    return `draft:${meetingRef.courseIdx}:${meetingRef.componentIdx}:${meetingRef.seriesIdx}:${event.source.draftId}`;
+  }
+  const occurrenceIndex = event.source.occIdx;
   return `${meetingRef.courseIdx}:${meetingRef.componentIdx}:${meetingRef.seriesIdx}:occ:${occurrenceIndex}`;
 }
 

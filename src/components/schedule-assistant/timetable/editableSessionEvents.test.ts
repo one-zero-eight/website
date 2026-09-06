@@ -36,6 +36,43 @@ function testConfig(): SchemaScheduleConfig {
 }
 
 describe("editableSessionEvents", () => {
+  it("retains weekly base values independently of saved and draft overrides", () => {
+    const events = expandWeeklySlotsToEvents({
+      config: testConfig(),
+      audienceTokens: [],
+      weeklySlots: [
+        {
+          weekday: Weekday.MONDAY,
+          start_time: "09:00:00",
+          end_time: "10:30:00",
+          room: "108",
+          instructor: "a@iu.ru",
+          edits: [
+            {
+              select_week: "2026-09-07",
+              cancel: false,
+              date: "2026-09-08",
+              start_time: "11:00:00",
+              room: "104",
+              instructor: "b@iu.ru",
+            },
+          ],
+        },
+      ],
+    });
+    const event = events[0];
+    expect(event.date).toBe("2026-09-08");
+    expect(event.room).toBe("104");
+    expect(event.weeklyBase).toEqual({
+      date: "2026-09-07",
+      start_time: "09:00:00",
+      end_time: "10:30:00",
+      room: "108",
+      instructor: "a@iu.ru",
+    });
+    const patched = patchEditableEvents(events, [event.key], { room: "105" });
+    expect(patched[0].weeklyBase).toEqual(event.weeklyBase);
+  });
   it("expands weekly slots with stable keys and applies cancel edits", () => {
     const events = expandWeeklySlotsToEvents({
       config: testConfig(),

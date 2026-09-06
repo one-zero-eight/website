@@ -142,8 +142,8 @@ function fieldMarksForEvent(
 }
 
 /**
- * Heavy row content (date/time/room/instructor pickers). Memoized so selection
- * toggles only update the light checkbox chrome, not every RoomSelect.
+ * Memoized row content. Selected rows share the same bulk picker scope;
+ * unselected rows keep their individual availability checks.
  */
 const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
   event,
@@ -159,7 +159,12 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
   onRestore,
   onRemoveOrRestore,
   excludeInstanceId,
+  pickerSelection,
+  selected,
+  onToggleSelected,
 }: {
+  selected: boolean;
+  onToggleSelected: (key: string) => void;
   event: EditableSessionEvent;
   original: EditableSessionEvent | undefined;
   config: SchemaScheduleConfig;
@@ -173,53 +178,84 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
   onRestore: (key: string, patch: EditableSessionEventPatch) => void;
   onRemoveOrRestore: (key: string) => void;
   excludeInstanceId: string | null;
+  pickerSelection?: Meeting[];
 }) {
   const cancelled = event.cancelled;
   const weekday = eventWeekdayKey(event.date, config);
   const start = toUiTime(event.start_time);
   const end = toUiTime(event.end_time);
   const fieldMarks = fieldMarksForEvent(event, original, onRestore);
-  const excludeRef =
-    event.source.kind === "weekly" && meetingRef
-      ? weeklySlotExcludeRef(
-          {
-            courseIdx: meetingRef.courseIdx,
-            componentIdx: meetingRef.componentIdx,
-            seriesIdx: meetingRef.seriesIdx,
-            date: event.source.patternDate,
-          },
-          event.source.slotIdx,
-        )
-      : event.source.kind === "occurrence" &&
-          meetingRef &&
-          event.source.occIdx != null
-        ? occurrenceExcludeRef(
+  const base =
+    event.source.kind === "weekly" && !cancelled ? event.weeklyBase : undefined;
+  const overriddenWeekday =
+    !!base && !!event.date && dayKey(event.date) !== dayKey(base.date);
+  const overriddenTime =
+    !!base &&
+    (start !== toUiTime(base.start_time) || end !== toUiTime(base.end_time));
+  const overriddenRoom =
+    !!base && String(event.room || "") !== String(base.room || "");
+  const overriddenInstructor =
+    !!base && String(event.instructor || "") !== String(base.instructor || "");
+  const excludeRef = useMemo(
+    () =>
+      event.source.kind === "weekly" && meetingRef
+        ? weeklySlotExcludeRef(
             {
               courseIdx: meetingRef.courseIdx,
               componentIdx: meetingRef.componentIdx,
               seriesIdx: meetingRef.seriesIdx,
+              date: event.source.patternDate,
             },
-            event.source.occIdx,
+            event.source.slotIdx,
           )
-        : null;
+        : event.source.kind === "occurrence" &&
+            meetingRef &&
+            event.source.occIdx != null
+          ? occurrenceExcludeRef(
+              {
+                courseIdx: meetingRef.courseIdx,
+                componentIdx: meetingRef.componentIdx,
+                seriesIdx: meetingRef.seriesIdx,
+              },
+              event.source.occIdx,
+            )
+          : null,
+    [event.source, meetingRef],
+  );
 
   return (
-    <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
+    <div className="relative grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
       <div className="flex items-start gap-2 sm:col-span-2">
+        <label className="bg-base-200 absolute -top-4 -left-4 flex size-5 cursor-pointer items-center justify-center rounded-full">
+          <input
+            type="checkbox"
+            className="checkbox checkbox-sm not-checked:border-base-content/20 not-checked:hover:border-base-content/40 transition-colors"
+            checked={selected}
+            onChange={() => onToggleSelected(event.key)}
+          />
+        </label>
         <div
           className={cn(
             "grid min-w-0 flex-1 gap-2 sm:grid-cols-2",
             cancelled && "pointer-events-none line-through opacity-60",
           )}
         >
-          <FieldMark hint={cancelled ? undefined : fieldMarks?.date}>
+          <FieldMark
+            reserveGutter={false}
+            hint={cancelled ? undefined : fieldMarks?.date}
+          >
             <DateInput
               value={event.date || ""}
               showWeekday
+              weekdayOverridden={overriddenWeekday}
               onChange={(date) => onChange(event.key, { date })}
             />
           </FieldMark>
-          <FieldMark hint={cancelled ? undefined : fieldMarks?.time}>
+          <FieldMark
+            reserveGutter={false}
+            hint={cancelled ? undefined : fieldMarks?.time}
+            overridden={overriddenTime}
+          >
             <SlotTimeFields
               config={config}
               startTime={event.start_time}
@@ -260,7 +296,11 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
           cancelled && "pointer-events-none opacity-60",
         )}
       >
-        <FieldMark hint={cancelled ? undefined : fieldMarks?.room}>
+        <FieldMark
+          reserveGutter={false}
+          hint={cancelled ? undefined : fieldMarks?.room}
+          overridden={overriddenRoom}
+        >
           <RoomSelect
             config={config}
             meetings={meetings}
@@ -271,7 +311,9 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
             start={start}
             end={end}
             audienceTokens={audienceTokens}
-            excludeRef={excludeRef}
+            excludeRef={excludeInstanceId ? undefined : excludeRef}
+            excludeInstanceId={excludeInstanceId}
+            pickerSelection={pickerSelection}
             onChange={(room) => onChange(event.key, { room: room || null })}
           />
         </FieldMark>
@@ -282,7 +324,11 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
           cancelled && "pointer-events-none opacity-60",
         )}
       >
-        <FieldMark hint={cancelled ? undefined : fieldMarks?.instructor}>
+        <FieldMark
+          reserveGutter={false}
+          hint={cancelled ? undefined : fieldMarks?.instructor}
+          overridden={overriddenInstructor}
+        >
           <InstructorPicker
             config={config}
             meetings={meetings}
@@ -294,8 +340,9 @@ const ConcreteEventRowFields = memo(function ConcreteEventRowFields({
             end={end}
             courseInstructors={courseInstructors}
             instructorPool={instructorPool}
-            excludeRef={excludeRef}
+            excludeRef={excludeInstanceId ? undefined : excludeRef}
             excludeInstanceId={excludeInstanceId}
+            pickerSelection={pickerSelection}
             onChange={(instructor) =>
               onChange(event.key, { instructor: instructor || null })
             }
@@ -322,6 +369,7 @@ function ConcreteEventRow({
   instructorPool,
   meetingRef,
   excludeInstanceId,
+  pickerSelection,
   selected,
   highlighted,
   onToggleSelected,
@@ -339,6 +387,7 @@ function ConcreteEventRow({
   instructorPool?: unknown[] | null;
   meetingRef: MeetingRef | null;
   excludeInstanceId: string | null;
+  pickerSelection?: Meeting[];
   selected: boolean;
   highlighted: boolean;
   onToggleSelected: (key: string) => void;
@@ -354,15 +403,9 @@ function ConcreteEventRow({
         selected={selected}
       >
         <div className="flex items-start gap-2">
-          <label className="flex h-8 w-5 shrink-0 cursor-pointer items-center justify-center">
-            <input
-              type="checkbox"
-              className="checkbox checkbox-sm"
-              checked={selected}
-              onChange={() => onToggleSelected(event.key)}
-            />
-          </label>
           <ConcreteEventRowFields
+            selected={selected}
+            onToggleSelected={onToggleSelected}
             event={event}
             original={original}
             config={config}
@@ -373,6 +416,7 @@ function ConcreteEventRow({
             instructorPool={instructorPool}
             meetingRef={meetingRef}
             excludeInstanceId={excludeInstanceId}
+            pickerSelection={pickerSelection}
             onChange={onChange}
             onRestore={onRestore}
             onRemoveOrRestore={onRemoveOrRestore}
@@ -439,6 +483,19 @@ export function EditableSessionEventsEditor({
     });
     return () => cancelAnimationFrame(frame);
   }, [focusKey]);
+
+  const pickerSelection = useMemo(() => {
+    if (!meetingRef || selectedKeys.size < 2) return undefined;
+    const ids = new Set(
+      events
+        .filter((event) => selectedKeys.has(event.key) && !event.cancelled)
+        .map((event) => editableSessionEventInstanceId(event, meetingRef)),
+    );
+    const targets = meetings.filter(
+      (meeting) => ids.has(meeting.instance_id) && !meeting.cancelled,
+    );
+    return targets.length > 1 ? targets : undefined;
+  }, [events, meetingRef, meetings, selectedKeys]);
 
   const focusedEvent = events.find((event) => event.key === focusKey);
   function handleSelectFollowing() {
@@ -579,6 +636,9 @@ export function EditableSessionEventsEditor({
               meetingRef && !event.cancelled
                 ? editableSessionEventInstanceId(event, meetingRef)
                 : null
+            }
+            pickerSelection={
+              selectedKeys.has(event.key) ? pickerSelection : undefined
             }
             selected={selectedKeys.has(event.key)}
             highlighted={focusKey === event.key}

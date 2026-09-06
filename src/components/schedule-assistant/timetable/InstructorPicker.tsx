@@ -1,11 +1,18 @@
 import type {
   SchemaCourseConfig,
   SchemaScheduleConfig,
+  SchemaWeeklyPatternSlot,
 } from "@/api/schedule-assistant/types.ts";
 import { SelectDropdown } from "@/components/common/SelectDropdown.tsx";
 import type { TermWeekdayKey } from "@/components/schedule-assistant/settings/weekdays.ts";
 import { cn } from "@/lib/ui/cn";
-import { useEffect, useMemo, useState, startTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  startTransition,
+} from "react";
 
 import { buildInstructorPickerOptions } from "./instructorPickerOptions.ts";
 import type { MeetingRef } from "./meetingEditUtils.ts";
@@ -13,7 +20,7 @@ import {
   buildMeetingPickerIndex,
   type MeetingPickerIndex,
 } from "./meetingPickerIndex.ts";
-import { roomPickerDatesForEdit } from "./roomPickerOptions.ts";
+import { weeklyPickerSlots } from "./meetingPickerSchedule.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
 
 export function InstructorPicker({
@@ -21,9 +28,12 @@ export function InstructorPicker({
   meetings,
   meetingIndex,
   extraMeetings,
+  pickerSelection,
   value,
   weekday,
   date,
+  weeklySlot,
+  audienceTokens,
   start,
   end,
   courseInstructors,
@@ -43,9 +53,12 @@ export function InstructorPicker({
   meetings: Meeting[];
   meetingIndex: MeetingPickerIndex | null;
   extraMeetings?: Meeting[];
+  pickerSelection?: Meeting[];
   value: string;
   weekday: TermWeekdayKey;
   date?: string;
+  weeklySlot?: SchemaWeeklyPatternSlot;
+  audienceTokens?: string[];
   start: string;
   end: string;
   courseInstructors?: SchemaCourseConfig["instructors"];
@@ -91,66 +104,90 @@ export function InstructorPicker({
     statusReady,
     value,
     weekday,
+    weeklySlot,
+    audienceTokens,
   ]);
 
-  const options = useMemo(() => {
-    const dates = date?.trim()
-      ? [date.trim()]
-      : roomPickerDatesForEdit({ config, weekday });
-    const focusDate = date?.trim() || dates[0] || "";
-    const empty = allowEmpty ? [{ value: "", label: "—" }] : [];
-    if (!focusDate || !start.trim() || !meetingIndex) {
-      return empty;
-    }
-    const hasExtras = Boolean(extraMeetings?.length);
-    const meetingsForStatus = hasExtras
-      ? [...meetings, ...extraMeetings!]
-      : meetings;
-    const indexForStatus = hasExtras
-      ? buildMeetingPickerIndex(meetingsForStatus)
-      : meetingIndex;
-    return [
-      ...empty,
-      ...buildInstructorPickerOptions({
-        config,
-        meetings: meetingsForStatus,
-        date: focusDate,
-        dates: dates.length ? dates : [focusDate],
-        start: start.slice(0, 5),
-        end: end.slice(0, 5) || undefined,
-        weekday,
-        courseInstructors,
-        instructorPool,
-        excludeRef,
-        excludeInstanceId,
-        includeInstructorIds: value ? [value] : undefined,
-        index: indexForStatus,
-        includeStatus: statusReady,
-      }),
-    ];
-  }, [
-    allowEmpty,
-    config,
-    courseInstructors,
-    date,
-    end,
-    excludeInstanceId,
-    excludeRef,
-    extraMeetings,
-    instructorPool,
-    meetingIndex,
-    meetings,
-    start,
-    statusReady,
-    value,
-    weekday,
-  ]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const buildOptions = useCallback(
+    (selection?: Meeting[]) => {
+      const explicitDate = date?.trim();
+      const slots = explicitDate
+        ? [{ date: explicitDate, start, end }]
+        : weeklySlot
+          ? weeklyPickerSlots(
+              config,
+              weeklySlot,
+              audienceTokens ?? [],
+              "instructor",
+            )
+          : [];
+      const dates = slots.map((slot) => slot.date);
+      const empty = allowEmpty ? [{ value: "", label: "—" }] : [];
+      const hasExtras = Boolean(extraMeetings?.length);
+      const meetingsForStatus = hasExtras
+        ? [...meetings, ...extraMeetings!]
+        : meetings;
+      const indexForStatus = hasExtras
+        ? buildMeetingPickerIndex(meetingsForStatus)
+        : meetingIndex;
+      return [
+        ...empty,
+        ...buildInstructorPickerOptions({
+          config,
+          meetings: meetingsForStatus,
+          dates,
+          weekly: Boolean(weeklySlot) || Boolean(selection?.length),
+          selection,
+          slots,
+          start: start.slice(0, 5),
+          end: end.slice(0, 5) || undefined,
+          weekday,
+          courseInstructors,
+          instructorPool,
+          excludeRef,
+          excludeInstanceId,
+          includeInstructorIds: value ? [value] : undefined,
+          index: indexForStatus,
+          includeStatus: statusReady,
+        }),
+      ];
+    },
+    [
+      allowEmpty,
+      config,
+      courseInstructors,
+      date,
+      end,
+      excludeInstanceId,
+      excludeRef,
+      extraMeetings,
+      instructorPool,
+      meetingIndex,
+      meetings,
+      start,
+      statusReady,
+      value,
+      weekday,
+      weeklySlot,
+      audienceTokens,
+    ],
+  );
+
+  const options = useMemo(() => buildOptions(), [buildOptions]);
+  const activeSelection = pickerOpen ? pickerSelection : undefined;
+  const menuOptions = useMemo(
+    () => (activeSelection?.length ? buildOptions(activeSelection) : options),
+    [activeSelection, buildOptions, options],
+  );
 
   return (
     <SelectDropdown
       value={value}
       onChange={onChange}
-      options={options}
+      options={menuOptions}
+      triggerOption={options.find((option) => option.value === value)}
+      onOpenChange={setPickerOpen}
       placeholder={placeholder}
       searchable
       matchTriggerWidth={matchTriggerWidth}

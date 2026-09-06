@@ -95,6 +95,7 @@ export function DateInput({
   disabled = false,
   placeholder = "дд.мм.гггг",
   showWeekday = false,
+  weekdayOverridden = false,
 }: {
   /** ISO `yyyy-mm-dd` (or empty). */
   value: string;
@@ -104,6 +105,7 @@ export function DateInput({
   placeholder?: string;
   /** Show derived weekday label inside the input (from a valid ISO date). */
   showWeekday?: boolean;
+  weekdayOverridden?: boolean;
 }) {
   const parentId = useFloatingParentNodeId();
 
@@ -119,6 +121,7 @@ export function DateInput({
           disabled={disabled}
           placeholder={placeholder}
           showWeekday={showWeekday}
+          weekdayOverridden={weekdayOverridden}
         />
       </FloatingTree>
     );
@@ -132,6 +135,7 @@ export function DateInput({
       disabled={disabled}
       placeholder={placeholder}
       showWeekday={showWeekday}
+      weekdayOverridden={weekdayOverridden}
     />
   );
 }
@@ -143,6 +147,7 @@ function DateInputContent({
   disabled = false,
   placeholder = "дд.мм.гггг",
   showWeekday = false,
+  weekdayOverridden = false,
 }: {
   value: string;
   onChange: (iso: string) => void;
@@ -150,6 +155,7 @@ function DateInputContent({
   disabled?: boolean;
   placeholder?: string;
   showWeekday?: boolean;
+  weekdayOverridden?: boolean;
 }) {
   const nodeId = useFloatingNodeId();
   const [open, setOpen] = useState(false);
@@ -254,7 +260,13 @@ function DateInputContent({
             }}
           />
           {weekdayLabel ? (
-            <span className="text-base-content/55 pointer-events-none absolute top-1/2 right-8 -translate-y-1/2 text-xs font-medium">
+            <span
+              className={cn(
+                "text-base-content/55 pointer-events-none absolute top-1/2 right-8 -translate-y-1/2 text-xs font-medium",
+                weekdayOverridden &&
+                  "underline decoration-sky-400 decoration-wavy decoration-1 underline-offset-2",
+              )}
+            >
               {weekdayLabel}
             </span>
           ) : null}

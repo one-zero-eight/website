@@ -117,7 +117,7 @@ function OptionLabel({
         truncate ? "truncate" : "break-words whitespace-normal",
       )}
     >
-      <span>{label}</span>
+      <span data-select-value>{label}</span>
       {hint ? <span className="text-base-content/50"> {hint}</span> : null}
     </span>
   );
@@ -138,10 +138,15 @@ export function SelectDropdown<T extends string>({
   searchable = false,
   searchPlaceholder = "Поиск…",
   trailingOption,
+  onOpenChange,
+  triggerOption,
 }: {
   value: T | "";
   onChange: (value: T, context?: SelectDropdownChangeContext) => void;
   options: SelectDropdownOption<T>[];
+  onOpenChange?: (open: boolean) => void;
+  /** Keep the trigger's single-item status separate from menu options. */
+  triggerOption?: SelectDropdownOption<T>;
   placeholder?: string;
   className?: string;
   triggerClassName?: string;
@@ -162,13 +167,17 @@ export function SelectDropdown<T extends string>({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<Array<HTMLButtonElement | null>>([]);
 
-  const handleOpenChange = (next: boolean) => {
-    setOpen(next);
-    if (!next) {
-      setSearchQuery("");
-      setHighlightedIndex(null);
-    }
-  };
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      setOpen(next);
+      onOpenChange?.(next);
+      if (!next) {
+        setSearchQuery("");
+        setHighlightedIndex(null);
+      }
+    },
+    [onOpenChange],
+  );
 
   const { refs, floatingStyles, context } = useFloating({
     open,
@@ -266,7 +275,7 @@ export function SelectDropdown<T extends string>({
       onChange(optionValue, { searchQuery });
       handleOpenChange(false);
     },
-    [isOptionDisabled, onChange, searchQuery],
+    [handleOpenChange, isOptionDisabled, onChange, searchQuery],
   );
 
   useEffect(() => {
@@ -300,7 +309,7 @@ export function SelectDropdown<T extends string>({
     };
     document.addEventListener("keydown", handleKeyDown, true);
     return () => document.removeEventListener("keydown", handleKeyDown, true);
-  }, [open]);
+  }, [handleOpenChange, open]);
 
   function handleSearchKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "ArrowDown") {
@@ -348,9 +357,9 @@ export function SelectDropdown<T extends string>({
     selectOption(option.value);
   }
 
-  const currentOption = allOptionsForLabel.find(
-    (option) => option.value === value,
-  );
+  const currentOption =
+    triggerOption ??
+    allOptionsForLabel.find((option) => option.value === value);
 
   return (
     <div className={cn("relative shrink-0", className)}>
@@ -366,7 +375,7 @@ export function SelectDropdown<T extends string>({
         <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
           <span className="flex min-w-0 items-center gap-1.5">
             {currentOption?.startAdornment}
-            <span className="min-w-0 truncate">
+            <span className="-my-1 min-w-0 truncate py-1">
               <OptionLabel
                 label={currentOption?.label ?? placeholder}
                 hint={showHintOnTrigger ? currentOption?.hint : undefined}

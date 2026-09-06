@@ -20,10 +20,7 @@ import {
   resolveEndTimeForStart,
   timeOptionsForConfig,
 } from "./meetingEditUtils.ts";
-import {
-  instructorPickerDatesForWeekday,
-  suggestBestInstructorId,
-} from "./instructorPickerOptions.ts";
+import { suggestBestInstructorId } from "./instructorPickerOptions.ts";
 import type { MeetingPickerIndex } from "./meetingPickerIndex.ts";
 import {
   roomPickerDatesForEdit,
@@ -748,7 +745,6 @@ export function suggestPlacementResources({
       room: suggestBestRoomId({
         config,
         meetings,
-        date,
         dates: [date],
         start,
         end: end || undefined,
@@ -758,7 +754,6 @@ export function suggestPlacementResources({
       instructor: suggestBestInstructorId({
         config,
         meetings,
-        date,
         dates: [date],
         start,
         end: end || undefined,
@@ -773,16 +768,18 @@ export function suggestPlacementResources({
   const slot = seedWeeklyFromCell(config, cell, groupIds);
   const start = String(slot.start_time || "").slice(0, 5);
   const end = String(slot.end_time || "").slice(0, 5);
-  const dates = roomPickerDatesForEdit({ config, weekday });
-  const focusDate = cell.date || dates[0] || "";
-  if (!focusDate || !start) return { room: null, instructor: null };
+  const dates = roomPickerDatesForEdit({
+    config,
+    weekday,
+    audienceTokens: audience,
+  });
+  if (!dates.length || !start) return { room: null, instructor: null };
 
   return {
     room: suggestBestRoomId({
       config,
       meetings,
-      date: focusDate,
-      dates: dates.length ? dates : [focusDate],
+      dates,
       start,
       end: end || undefined,
       audienceTokens: audience,
@@ -791,8 +788,7 @@ export function suggestPlacementResources({
     instructor: suggestBestInstructorId({
       config,
       meetings,
-      date: focusDate,
-      dates: instructorPickerDatesForWeekday(config, weekday),
+      dates,
       start,
       end: end || undefined,
       weekday,

@@ -25,6 +25,15 @@ import {
   type MeetingPickerIndex,
 } from "./meetingPickerIndex.ts";
 
+import {
+  mergePickerAvailability,
+  preparePickerSelection,
+  prospectivePickerIndex,
+  type MeetingPickerSlot,
+} from "./meetingPickerSchedule.ts";
+import { formatPickerLoadHint } from "./pickerLabels.ts";
+import { resolveAudienceSemester } from "./programTimeSlots.ts";
+
 export type RoomAvailabilityStatus = "green" | "orange" | "red";
 
 /** Virtual location — does not consume a physical room (matches backend VIRTUAL_ROOM_ID). */
@@ -45,6 +54,8 @@ export type RoomConflictMeeting = {
 
 /** One logical conflict (single date or aggregated weekly series). */
 export type RoomConflictDetail = {
+  /** Stable logical meeting and time identity for merging target checks. */
+  groupKey?: string;
   weekly: boolean;
   dates: string[];
   meeting: RoomConflictMeeting;
@@ -52,6 +63,7 @@ export type RoomConflictDetail = {
 
 export type RoomAvailabilityInfo = {
   status: RoomAvailabilityStatus;
+  checkedDates: string[];
   conflictDates: string[];
   conflicts: RoomConflictDetail[];
   capacityIssue: { capacity: number; needed: number } | null;
@@ -212,6 +224,7 @@ export function roomAvailabilityForSlot({
   excludeRef,
   excludeInstanceId,
   index,
+  slots,
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
@@ -224,26 +237,34 @@ export function roomAvailabilityForSlot({
   excludeRef?: MeetingRef | null;
   excludeInstanceId?: string | null;
   index?: MeetingPickerIndex | null;
+  slots?: MeetingPickerSlot[];
 }): RoomAvailabilityInfo {
+  const checkedSlots = slots ?? dates.map((date) => ({ date, start, end }));
+  const dateSet = new Set(
+    checkedSlots.map((slot) => slot.date.trim()).filter(Boolean),
+  );
   const room = roomId.trim();
   if (isVirtualRoom(room)) {
     return {
       status: "green",
+      checkedDates: [...dateSet].sort(),
       conflictDates: [],
       conflicts: [],
       capacityIssue: null,
     };
   }
 
-  const proposedStart = normalizeHhmm(start);
-  const proposedEnd =
-    normalizeHhmm(end) ||
-    (proposedStart
-      ? normalizeHhmm(resolveEndTimeForStart(config, proposedStart)) ||
-        add90m(proposedStart)
-      : "");
-
-  const dateSet = new Set(dates.map((d) => d.trim()).filter(Boolean));
+  const normalizedSlots = checkedSlots.map((slot) => {
+    const proposedStart = normalizeHhmm(slot.start);
+    return {
+      date: slot.date.trim(),
+      start: proposedStart,
+      end:
+        normalizeHhmm(slot.end) ||
+        normalizeHhmm(resolveEndTimeForStart(config, proposedStart)) ||
+        add90m(proposedStart),
+    };
+  });
   type RawHit = {
     date: string;
     weeklyPattern: boolean;
@@ -251,7 +272,7 @@ export function roomAvailabilityForSlot({
   };
   const groups = new Map<string, RawHit[]>();
 
-  if (room && proposedStart && proposedEnd && dateSet.size) {
+  if (room && dateSet.size) {
     const consider = (meeting: Meeting, day: string) => {
       if (excludeInstanceId && meeting.instance_id === excludeInstanceId) {
         return;
@@ -260,10 +281,17 @@ export function roomAvailabilityForSlot({
       if (meeting.cancelled) return;
       const otherStart = normalizeHhmm(meeting.start);
       const otherEnd = resolveMeetingEnd(config, meeting);
-      if (!timesOverlap(proposedStart, proposedEnd, otherStart, otherEnd)) {
+      if (
+        !normalizedSlots.some(
+          (slot) =>
+            slot.date === day &&
+            slot.start &&
+            timesOverlap(slot.start, slot.end, otherStart, otherEnd),
+        )
+      ) {
         return;
       }
-      const key = conflictGroupKey(meeting);
+      const key = `${conflictGroupKey(meeting)}|${otherStart}|${otherEnd}`;
       const list = groups.get(key) || [];
       list.push({
         date: day,
@@ -292,11 +320,12 @@ export function roomAvailabilityForSlot({
     }
   }
 
-  const conflicts: RoomConflictDetail[] = [...groups.values()]
-    .map((hits) => {
+  const conflicts: RoomConflictDetail[] = [...groups.entries()]
+    .map(([groupKey, hits]) => {
       const datesHit = [...new Set(hits.map((h) => h.date))].sort();
       const weekly = hits.some((h) => h.weeklyPattern) || datesHit.length >= 2;
       return {
+        groupKey,
         weekly,
         dates: datesHit,
         meeting: hits[0]!.meeting,
@@ -338,7 +367,13 @@ export function roomAvailabilityForSlot({
     status = "orange";
   }
 
-  return { status, conflictDates, conflicts, capacityIssue };
+  return {
+    status,
+    checkedDates: [...dateSet].sort(),
+    conflictDates,
+    conflicts,
+    capacityIssue,
+  };
 }
 
 function statusSortRank(status: RoomAvailabilityStatus): number {
@@ -369,20 +404,23 @@ function roomSortKey(
 export function roomPickerDatesForEdit({
   config,
   weekday,
+  audienceTokens = [],
 }: {
   config: SchemaScheduleConfig;
   weekday: TermWeekdayKey;
+  audienceTokens?: string[];
 }): string[] {
-  // Always check the full weekday series so recurring weekly clashes
-  // show as multi-date (red), independent of edit apply-scope.
-  return semesterDatesForWeekday(config, weekday);
+  const range = resolveAudienceSemester(config, audienceTokens);
+  return range ? semesterDatesForWeekday(config, weekday, range) : [];
 }
 
 export function buildRoomPickerOptions({
   config,
   meetings,
-  date,
+  selection,
   dates,
+  weekly,
+  slots,
   start,
   end,
   audienceTokens,
@@ -394,10 +432,12 @@ export function buildRoomPickerOptions({
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
-  /** Focus date for the daily-load hint. */
-  date: string;
-  /** Dates to check for timeslot conflicts. */
+  /** Active draft targets; when supplied, overrides dates, slots and exclusions. */
+  selection?: Meeting[];
+  /** The same dates are used for load and availability. */
   dates: string[];
+  weekly: boolean;
+  slots?: MeetingPickerSlot[];
   start: string;
   end?: string;
   audienceTokens?: string[];
@@ -426,11 +466,19 @@ export function buildRoomPickerOptions({
   const attributeKeys = (config.term?.room_attributes ?? [])
     .map((item) => item.key.trim())
     .filter(Boolean);
-  const isExcluded = excludeRef
-    ? (meeting: Meeting) => isSameLogicalMeeting(meeting, excludeRef)
-    : undefined;
+  const selectedSchedule = selection
+    ? preparePickerSelection(meetings, selection)
+    : null;
+  const loadMeetings = selectedSchedule?.meetings ?? meetings;
+  const loadExcludeInstanceId = selectedSchedule
+    ? undefined
+    : excludeInstanceId;
+  const isExcluded =
+    !selectedSchedule && excludeRef
+      ? (meeting: Meeting) => isSameLogicalMeeting(meeting, excludeRef)
+      : undefined;
   const index = includeStatus
-    ? (indexArg ?? buildMeetingPickerIndex(meetings))
+    ? (selectedSchedule?.index ?? indexArg ?? buildMeetingPickerIndex(meetings))
     : null;
 
   return [...ids]
@@ -440,37 +488,79 @@ export function buildRoomPickerOptions({
         room?.features,
         attributeKeys,
       );
-      const availability = includeStatus
-        ? roomAvailabilityForSlot({
+      let availability: RoomAvailabilityInfo | null = null;
+      if (includeStatus && selectedSchedule) {
+        const candidateIndex = prospectivePickerIndex(
+          selectedSchedule.index,
+          selectedSchedule.targets,
+          { room: roomId },
+        );
+        const results = selectedSchedule.targets.map((target) =>
+          roomAvailabilityForSlot({
             config,
-            meetings,
+            meetings: selectedSchedule.meetings,
             roomId,
-            dates,
-            start,
-            end,
-            audienceSize,
+            dates: [target.date],
+            start: target.start,
+            end: resolveMeetingEnd(config, target),
+            audienceSize: audienceSizeForTokens(config, target.groups),
             capacity: room?.capacity,
-            excludeRef,
-            excludeInstanceId,
-            index,
-          })
-        : null;
-      const load = includeStatus
-        ? countRoomDailyLoad(
-            meetings,
-            roomId,
-            date,
-            excludeInstanceId,
-            isExcluded,
-            index,
-          )
-        : null;
+            excludeInstanceId: target.instance_id,
+            index: candidateIndex,
+          }),
+        );
+        availability = {
+          ...mergePickerAvailability(results),
+          capacityIssue: results.reduce<RoomAvailabilityInfo["capacityIssue"]>(
+            (worst, result) => {
+              if (!result.capacityIssue) return worst;
+              return !worst || result.capacityIssue.needed > worst.needed
+                ? result.capacityIssue
+                : worst;
+            },
+            null,
+          ),
+        };
+      } else if (includeStatus) {
+        availability = roomAvailabilityForSlot({
+          config,
+          meetings,
+          roomId,
+          dates,
+          slots,
+          start,
+          end,
+          audienceSize,
+          capacity: room?.capacity,
+          excludeRef,
+          excludeInstanceId,
+          index,
+        });
+      }
+      const loadHint =
+        includeStatus && !isVirtualRoom(roomId)
+          ? formatPickerLoadHint(
+              selectedSchedule?.dates ??
+                slots?.map((slot) => slot.date) ??
+                dates,
+              (date) =>
+                countRoomDailyLoad(
+                  loadMeetings,
+                  roomId,
+                  date,
+                  loadExcludeInstanceId,
+                  isExcluded,
+                  index,
+                ),
+              weekly,
+            )
+          : null;
       const hint = [
         room?.capacity != null ? `Вместимость ${room.capacity}` : null,
-        load != null ? `в этот день ${load} занятий` : null,
+        loadHint,
       ]
         .filter(Boolean)
-        .join(", ");
+        .join(" · ");
 
       return {
         value: roomId,
@@ -520,8 +610,8 @@ export function buildRoomPickerOptions({
 export function suggestBestRoomId({
   config,
   meetings,
-  date,
   dates,
+  slots,
   start,
   end,
   audienceTokens,
@@ -529,8 +619,8 @@ export function suggestBestRoomId({
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
-  date: string;
   dates: string[];
+  slots?: MeetingPickerSlot[];
   start: string;
   end?: string;
   audienceTokens?: string[];
@@ -539,7 +629,7 @@ export function suggestBestRoomId({
   const startHhmm = String(start || "")
     .trim()
     .slice(0, 5);
-  if (!date.trim() || !startHhmm || !dates.length) return null;
+  if (!startHhmm || !(slots ? slots.length : dates.length)) return null;
 
   const roomsById = new Map(
     (config.rooms || [])
@@ -557,6 +647,7 @@ export function suggestBestRoomId({
         meetings,
         roomId,
         dates,
+        slots,
         start: startHhmm,
         end: end?.slice(0, 5) || undefined,
         audienceSize,

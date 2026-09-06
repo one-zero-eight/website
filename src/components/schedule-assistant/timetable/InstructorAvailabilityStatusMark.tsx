@@ -7,12 +7,8 @@ import { cn } from "@/lib/ui/cn";
 import type {
   InstructorAvailabilityInfo,
   InstructorAvailabilityStatus,
-  InstructorConflictDetail,
 } from "./instructorPickerOptions.ts";
-import {
-  formatDisplayDate,
-  weeklyConflictWhenLabel,
-} from "./timetableViewerModel.ts";
+import { formatPickerConflictDates } from "./pickerLabels.ts";
 
 const STATUS_DOT_CLASS: Record<InstructorAvailabilityStatus, string> = {
   green: "bg-success",
@@ -20,10 +16,8 @@ const STATUS_DOT_CLASS: Record<InstructorAvailabilityStatus, string> = {
   red: "bg-error",
 };
 
-const MAX_TOOLTIP_CONFLICTS = 5;
-
 const OK_HEADER = "Нет проблем";
-const CONFLICTS_HEADER = "В это время есть занятия";
+const NO_DATES_HEADER = "Нет дат проведения";
 
 const PREFERENCE_HEADER: Record<InstructorSlotPreferenceLevel, string> = {
   [InstructorSlotPreferenceLevel.preferred]: "Предпочтительное время",
@@ -39,11 +33,6 @@ function formatConflictMeeting(item: {
 }) {
   if (!item.start) return item.label;
   return `${item.label} (${item.start}${item.end ? `–${item.end}` : ""})`;
-}
-
-function conflictWhenLabel(conflict: InstructorConflictDetail): string {
-  if (conflict.weekly) return weeklyConflictWhenLabel(conflict.dates);
-  return conflict.dates[0] ? formatDisplayDate(conflict.dates[0]) : "—";
 }
 
 function SectionLabel({ children }: { children: string }) {
@@ -83,41 +72,44 @@ export function InstructorAvailabilityStatusMark({
     );
   }
 
-  const visibleConflicts = info.conflicts.slice(0, MAX_TOOLTIP_CONFLICTS);
-  const remainingConflicts = info.conflicts.length - visibleConflicts.length;
-  const hasConflicts = visibleConflicts.length > 0;
+  const checkedDateCount = new Set(info.checkedDates).size;
+  const conflictDateCount = new Set(info.conflictDates).size;
+  const hasConflicts = conflictDateCount > 0;
   const hasPreference = !!info.preference;
-  const isOk = !hasConflicts && !hasPreference;
+  const isOk = checkedDateCount > 0 && !hasConflicts && !hasPreference;
 
   return (
     <Tooltip
       content={
-        <div className="flex max-w-xs flex-col gap-2 py-0.5">
+        <div className="flex max-w-xs flex-col gap-2 py-0.5 wrap-break-word whitespace-normal">
+          {!checkedDateCount ? (
+            <TooltipSection title={NO_DATES_HEADER} />
+          ) : null}
           {isOk ? <TooltipSection title={OK_HEADER} /> : null}
           {info.preference ? (
             <TooltipSection title={PREFERENCE_HEADER[info.preference.level]} />
           ) : null}
           {hasConflicts ? (
-            <TooltipSection title={CONFLICTS_HEADER}>
+            <TooltipSection
+              title={`В выбранное время занято в ${conflictDateCount} из ${checkedDateCount} дат`}
+            >
+              <div className="text-base-content/80 text-sm">
+                {formatPickerConflictDates(info.conflictDates)}
+              </div>
               <ul className="flex flex-col gap-1">
-                {visibleConflicts.map((conflict, index) => (
+                {info.conflicts.map((conflict, index) => (
                   <li
-                    key={`${conflictWhenLabel(conflict)}-${conflict.meeting.label}-${index}`}
+                    key={`${conflict.meeting.label}-${index}`}
                     className="text-sm"
                   >
                     {formatConflictMeeting(conflict.meeting)}
                     <span className="text-base-content/80">
                       {" "}
-                      · {conflictWhenLabel(conflict)}
+                      · {formatPickerConflictDates(conflict.dates)}
                     </span>
                   </li>
                 ))}
               </ul>
-              {remainingConflicts > 0 ? (
-                <div className="text-base-content/60 text-sm">
-                  и ещё {remainingConflicts} конфликтов
-                </div>
-              ) : null}
             </TooltipSection>
           ) : null}
         </div>
@@ -126,7 +118,9 @@ export function InstructorAvailabilityStatusMark({
       <span
         className={cn(
           "inline-block size-2.5 shrink-0 rounded-full",
-          STATUS_DOT_CLASS[info.status],
+          checkedDateCount
+            ? STATUS_DOT_CLASS[info.status]
+            : "bg-base-content/25",
         )}
         onClick={(e) => e.stopPropagation()}
       />

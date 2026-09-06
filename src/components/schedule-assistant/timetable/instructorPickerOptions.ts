@@ -28,7 +28,14 @@ import {
   type RoomConflictMeeting,
 } from "./roomPickerOptions.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
-import { add90m, semesterDatesForWeekday } from "./timetableViewerModel.ts";
+import { add90m, dayKey } from "./timetableViewerModel.ts";
+import {
+  mergePickerAvailability,
+  preparePickerSelection,
+  prospectivePickerIndex,
+  type MeetingPickerSlot,
+} from "./meetingPickerSchedule.ts";
+import { formatPickerLoadHint } from "./pickerLabels.ts";
 import {
   buildMeetingPickerIndex,
   meetingInstructorDateKey,
@@ -48,6 +55,8 @@ export type InstructorPreferenceIssue = {
 export type InstructorAvailabilityInfo = {
   status: InstructorAvailabilityStatus;
   conflicts: InstructorConflictDetail[];
+  checkedDates: string[];
+  conflictDates: string[];
   preference: InstructorPreferenceIssue | null;
 };
 
@@ -177,9 +186,9 @@ export function instructorAvailabilityForSlot({
   meetings,
   instructorId,
   dates,
+  slots,
   start,
   end,
-  weekday,
   preferences,
   excludeRef,
   excludeInstanceId,
@@ -189,6 +198,7 @@ export function instructorAvailabilityForSlot({
   meetings: Meeting[];
   instructorId: string;
   dates: string[];
+  slots?: MeetingPickerSlot[];
   start: string;
   end?: string;
   weekday: Weekday;
@@ -198,15 +208,25 @@ export function instructorAvailabilityForSlot({
   index?: MeetingPickerIndex | null;
 }): InstructorAvailabilityInfo {
   const id = instructorId.trim();
-  const proposedStart = normalizeHhmm(start);
-  const proposedEnd =
-    normalizeHhmm(end) ||
-    (proposedStart
-      ? normalizeHhmm(resolveEndTimeForStart(config, proposedStart)) ||
-        add90m(proposedStart)
-      : "");
-
-  const dateSet = new Set(dates.map((d) => d.trim()).filter(Boolean));
+  const actualSlots = (slots ?? dates.map((date) => ({ date, start, end })))
+    .map((slot) => {
+      const proposedStart = normalizeHhmm(slot.start);
+      return {
+        date: slot.date.trim(),
+        start: proposedStart,
+        end:
+          normalizeHhmm(slot.end) ||
+          (proposedStart
+            ? normalizeHhmm(resolveEndTimeForStart(config, proposedStart)) ||
+              add90m(proposedStart)
+            : ""),
+      };
+    })
+    .filter((slot) => slot.date && slot.start && slot.end);
+  const checkedDates = [
+    ...new Set(actualSlots.map((slot) => slot.date)),
+  ].sort();
+  const dateSet = new Set(checkedDates);
   type RawHit = {
     date: string;
     weeklyPattern: boolean;
@@ -214,53 +234,47 @@ export function instructorAvailabilityForSlot({
   };
   const groups = new Map<string, RawHit[]>();
 
-  if (id && proposedStart && proposedEnd && dateSet.size) {
-    const consider = (meeting: Meeting, day: string) => {
-      if (excludeInstanceId && meeting.instance_id === excludeInstanceId) {
-        return;
-      }
-      if (excludeRef && isSameLogicalMeeting(meeting, excludeRef)) return;
-      if (meeting.cancelled) return;
-      const otherStart = normalizeHhmm(meeting.start);
-      const otherEnd = resolveMeetingEnd(config, meeting);
-      if (!timesOverlap(proposedStart, proposedEnd, otherStart, otherEnd)) {
-        return;
-      }
-      const key = conflictGroupKey(meeting);
-      const list = groups.get(key) || [];
-      list.push({
-        date: day,
-        weeklyPattern: isWeeklyPatternMeeting(meeting),
-        meeting: {
-          label: conflictMeetingLabel(meeting),
-          start: otherStart,
-          end: otherEnd || undefined,
-        },
-      });
-      groups.set(key, list);
-    };
-
-    if (index) {
-      for (const day of dateSet) {
-        const list =
-          index.byInstructorDate.get(meetingInstructorDateKey(id, day)) || [];
-        for (const meeting of list) consider(meeting, day);
-      }
-    } else {
-      for (const meeting of meetings) {
-        if (!meetingHasInstructor(meeting, id)) continue;
-        const day = (meeting.date || "").trim();
-        if (!dateSet.has(day)) continue;
-        consider(meeting, day);
+  if (id) {
+    for (const slot of actualSlots) {
+      const candidates = index
+        ? (index.byInstructorDate.get(
+            meetingInstructorDateKey(id, slot.date),
+          ) ?? [])
+        : meetings;
+      for (const meeting of candidates) {
+        if (excludeInstanceId && meeting.instance_id === excludeInstanceId)
+          continue;
+        if (excludeRef && isSameLogicalMeeting(meeting, excludeRef)) continue;
+        if (meeting.cancelled) continue;
+        if (!index) {
+          if ((meeting.date || "").trim() !== slot.date) continue;
+          if (!meetingHasInstructor(meeting, id)) continue;
+        }
+        const otherStart = normalizeHhmm(meeting.start);
+        const otherEnd = resolveMeetingEnd(config, meeting);
+        if (!timesOverlap(slot.start, slot.end, otherStart, otherEnd)) continue;
+        const key = `${conflictGroupKey(meeting)}|${otherStart}|${otherEnd}`;
+        const list = groups.get(key) || [];
+        list.push({
+          date: slot.date,
+          weeklyPattern: isWeeklyPatternMeeting(meeting),
+          meeting: {
+            label: conflictMeetingLabel(meeting),
+            start: otherStart,
+            end: otherEnd || undefined,
+          },
+        });
+        groups.set(key, list);
       }
     }
   }
 
-  const conflicts: InstructorConflictDetail[] = [...groups.values()]
-    .map((hits) => {
+  const conflicts: InstructorConflictDetail[] = [...groups.entries()]
+    .map(([groupKey, hits]) => {
       const datesHit = [...new Set(hits.map((h) => h.date))].sort();
       const weekly = hits.some((h) => h.weeklyPattern) || datesHit.length >= 2;
       return {
+        groupKey,
         weekly,
         dates: datesHit,
         meeting: hits[0]!.meeting,
@@ -271,11 +285,16 @@ export function instructorAvailabilityForSlot({
       return (a.dates[0] || "").localeCompare(b.dates[0] || "");
     });
 
-  const preferenceLevel = preferenceLevelForSlot(
-    preferences ?? undefined,
-    weekday,
-    proposedStart,
-  );
+  const preferenceLevel =
+    actualSlots
+      .map((slot) =>
+        preferenceLevelForSlot(
+          preferences ?? undefined,
+          termWeekdayKeyToWeekday(dayKey(slot.date)),
+          slot.start,
+        ),
+      )
+      .sort((a, b) => preferenceSortRank(b) - preferenceSortRank(a))[0] ?? null;
   const preference: InstructorPreferenceIssue | null = preferenceLevel
     ? { level: preferenceLevel }
     : null;
@@ -284,7 +303,7 @@ export function instructorAvailabilityForSlot({
   const onceConflicts = conflicts.filter((conflict) => !conflict.weekly);
   const conflictDates = [
     ...new Set(conflicts.flatMap((conflict) => conflict.dates)),
-  ];
+  ].sort();
   const everyCheckedDateConflicts =
     dateSet.size > 0 && conflictDates.length >= dateSet.size;
   const isBanned = preferenceLevel === InstructorSlotPreferenceLevel.banned;
@@ -303,7 +322,7 @@ export function instructorAvailabilityForSlot({
     status = "orange";
   }
 
-  return { status, conflicts, preference };
+  return { status, conflicts, checkedDates, conflictDates, preference };
 }
 
 function statusSortRank(status: InstructorAvailabilityStatus): number {
@@ -326,8 +345,10 @@ function preferenceSortRank(
 export function buildInstructorPickerOptions({
   config,
   meetings,
-  date,
+  selection,
   dates,
+  weekly,
+  slots,
   start,
   end,
   weekday,
@@ -341,10 +362,12 @@ export function buildInstructorPickerOptions({
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
-  /** Focus date for the daily-load hint. */
-  date: string;
-  /** Dates to check for timeslot conflicts. */
+  /** Active draft targets; when supplied, overrides dates, slots and exclusions. */
+  selection?: Meeting[];
+  /** Dates to check for timeslot conflicts and daily load. */
   dates: string[];
+  weekly: boolean;
+  slots?: MeetingPickerSlot[];
   start: string;
   end?: string;
   weekday: TermWeekdayKey;
@@ -411,14 +434,29 @@ export function buildInstructorPickerOptions({
     if (!ids.includes(id)) ids.push(id);
   }
 
+  const selectedSchedule = selection
+    ? preparePickerSelection(meetings, selection)
+    : null;
+  const loadMeetings = selectedSchedule?.meetings ?? meetings;
+  const loadExcludeInstanceId = selectedSchedule
+    ? undefined
+    : excludeInstanceId;
   const apiWeekday = termWeekdayKeyToWeekday(weekday);
+  const actualDates = (
+    selectedSchedule?.dates ??
+    slots?.map((slot) => slot.date) ??
+    dates
+  )
+    .map((date) => date.trim())
+    .filter(Boolean);
 
   const restrictCatalog = true;
-  const isExcluded = excludeRef
-    ? (meeting: Meeting) => isSameLogicalMeeting(meeting, excludeRef)
-    : undefined;
+  const isExcluded =
+    !selectedSchedule && excludeRef
+      ? (meeting: Meeting) => isSameLogicalMeeting(meeting, excludeRef)
+      : undefined;
   const index = includeStatus
-    ? (indexArg ?? buildMeetingPickerIndex(meetings))
+    ? (selectedSchedule?.index ?? indexArg ?? buildMeetingPickerIndex(meetings))
     : null;
 
   return ids
@@ -428,37 +466,70 @@ export function buildInstructorPickerOptions({
       const role = roleById.get(id);
       const preferred = seenPreferred.has(id);
       const inPool = poolIdSet.has(id);
-      const availability = includeStatus
-        ? instructorAvailabilityForSlot({
+      let availability: InstructorAvailabilityInfo | null = null;
+      if (includeStatus && selectedSchedule) {
+        const candidateIndex = prospectivePickerIndex(
+          selectedSchedule.index,
+          selectedSchedule.targets,
+          { instructors: [id] },
+        );
+        const results = selectedSchedule.targets.map((target) =>
+          instructorAvailabilityForSlot({
             config,
-            meetings,
+            meetings: selectedSchedule.meetings,
             instructorId: id,
-            dates,
-            start,
-            end,
-            weekday: apiWeekday,
+            dates: [target.date],
+            start: target.start,
+            end: resolveMeetingEnd(config, target),
+            weekday: termWeekdayKeyToWeekday(dayKey(target.date)),
             preferences: instructor?.slot_preferences,
-            excludeRef,
-            excludeInstanceId,
-            index,
-          })
-        : null;
-      const load = includeStatus
-        ? countInstructorDailyLoad(
-            meetings,
-            id,
-            date,
-            excludeInstanceId,
-            isExcluded,
-            index,
-          )
-        : null;
-      const hint = [
-        role || null,
-        load != null ? `в этот день ${load} занятий` : null,
-      ]
-        .filter(Boolean)
-        .join(", ");
+            excludeInstanceId: target.instance_id,
+            index: candidateIndex,
+          }),
+        );
+        availability = {
+          ...mergePickerAvailability(results),
+          preference:
+            results
+              .map((result) => result.preference)
+              .sort(
+                (a, b) =>
+                  preferenceSortRank(b?.level) - preferenceSortRank(a?.level),
+              )[0] ?? null,
+        };
+      } else if (includeStatus) {
+        availability = instructorAvailabilityForSlot({
+          config,
+          meetings,
+          instructorId: id,
+          dates,
+          slots,
+          start,
+          end,
+          weekday: apiWeekday,
+          preferences: instructor?.slot_preferences,
+          excludeRef,
+          excludeInstanceId,
+          index,
+        });
+      }
+      const loadHint =
+        includeStatus || !actualDates.length
+          ? formatPickerLoadHint(
+              actualDates,
+              (date) =>
+                countInstructorDailyLoad(
+                  loadMeetings,
+                  id,
+                  date,
+                  loadExcludeInstanceId,
+                  isExcluded,
+                  index,
+                ),
+              weekly,
+            )
+          : null;
+      const hint = [role, loadHint].filter(Boolean).join(" · ");
       const searchText = [
         instructor?.name_en,
         instructor?.name_ru,
@@ -517,8 +588,8 @@ export function buildInstructorPickerOptions({
 export function suggestBestInstructorId({
   config,
   meetings,
-  date,
   dates,
+  slots,
   start,
   end,
   weekday,
@@ -528,8 +599,8 @@ export function suggestBestInstructorId({
 }: {
   config: SchemaScheduleConfig;
   meetings: Meeting[];
-  date: string;
   dates: string[];
+  slots?: MeetingPickerSlot[];
   start: string;
   end?: string;
   weekday: TermWeekdayKey;
@@ -540,7 +611,10 @@ export function suggestBestInstructorId({
   const startHhmm = String(start || "")
     .trim()
     .slice(0, 5);
-  if (!date.trim() || !startHhmm || !dates.length) return null;
+  const hasActualSlots = slots
+    ? slots.some((slot) => slot.date.trim() && normalizeHhmm(slot.start))
+    : Boolean(startHhmm && dates.some((date) => date.trim()));
+  if (!hasActualSlots) return null;
 
   const byId = new Map<string, SchemaInstructor>();
   for (const instructor of config.instructors || []) {
@@ -587,6 +661,7 @@ export function suggestBestInstructorId({
         meetings,
         instructorId: id,
         dates,
+        slots,
         start: startHhmm,
         end: end?.slice(0, 5) || undefined,
         weekday: apiWeekday,
@@ -614,11 +689,4 @@ export function suggestBestInstructorId({
     });
 
   return ranked[0]?.id ?? null;
-}
-
-export function instructorPickerDatesForWeekday(
-  config: SchemaScheduleConfig,
-  weekday: TermWeekdayKey,
-): string[] {
-  return semesterDatesForWeekday(config, weekday);
 }
