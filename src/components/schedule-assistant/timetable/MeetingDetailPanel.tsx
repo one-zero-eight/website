@@ -262,11 +262,13 @@ export function MeetingDetailPanel({
   config,
   allMeetings,
   onNavigateToMeeting,
+  onEdit,
 }: {
   meeting: Meeting;
   config: SchemaScheduleConfig;
   allMeetings: Meeting[];
   onNavigateToMeeting: (meeting: Meeting) => void;
+  onEdit?: () => void;
 }) {
   const instructorLabelById = buildInstructorLabelById(config);
   const { course } = resolveCourseAndComponent(config, meeting);
@@ -305,7 +307,21 @@ export function MeetingDetailPanel({
         </div>
       ) : null}
 
-      <DetailSection title="Занятие" />
+      <div className="mt-3 mb-1.5 flex items-center justify-between gap-2 first:mt-0">
+        <span className="text-base-content/55 text-xs font-semibold tracking-wide uppercase">
+          Занятие
+        </span>
+        {onEdit ? (
+          <button
+            type="button"
+            className="btn btn-ghost btn-xs shrink-0"
+            onClick={onEdit}
+          >
+            <span className="icon-[material-symbols--edit-outline-rounded] text-sm" />
+            Редактировать
+          </button>
+        ) : null}
+      </div>
       <DetailField label="Дата">
         {meeting.date
           ? `${formatDisplayDate(meeting.date)}, ${weekdayLabelRu(dayKey(meeting.date))}`

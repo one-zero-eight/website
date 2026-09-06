@@ -100,7 +100,7 @@ import {
   TimetableLayoutSelector,
   type TimetableLayoutMode,
 } from "./TimetableLayoutSelector.tsx";
-import { UnarrangedLessonsPanel } from "./UnarrangedLessonsPanel.tsx";
+import { TimetableSidebarMenu } from "./TimetableSidebarMenu.tsx";
 import {
   buildUnarrangedComponentGroups,
   flattenUnarrangedGroups,
@@ -337,7 +337,7 @@ function TimetableWorkspaceInner({
   const [placeTargetKey, setPlaceTargetKey] = useState<string | null>(null);
   const [hoverPlaceCell, setHoverPlaceCell] =
     useState<CreateMeetingCellContext | null>(null);
-  const [mobileUnarrangedOpen, setMobileUnarrangedOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [roomCapacityById, setRoomCapacityById] = useState<
     Record<string, number>
   >({});
@@ -1180,7 +1180,7 @@ function TimetableWorkspaceInner({
       selectionStore.setSelection(null);
       setPlaceTargetKey(item.key);
       setHoverPlaceCell(null);
-      if (!isLgUp) setMobileUnarrangedOpen(false);
+      if (!isLgUp) setMobileMenuOpen(false);
 
       const scrollGroupId = item.groupIds[0];
       if (!scrollGroupId || layoutMode !== "groups") return;
@@ -1434,16 +1434,14 @@ function TimetableWorkspaceInner({
                         Добавить занятие
                       </button>
                     ) : null}
-                    {!isLgUp &&
-                    !isUtilizationTab &&
-                    layoutMode !== "compact_groups" ? (
+                    {!isLgUp ? (
                       <button
                         type="button"
                         className="btn btn-xs btn-ghost gap-1"
-                        onClick={() => setMobileUnarrangedOpen(true)}
+                        onClick={() => setMobileMenuOpen(true)}
                       >
                         <span className="icon-[material-symbols--playlist-add-check-rounded] text-base" />
-                        Список
+                        Меню
                       </button>
                     ) : null}
                     <button
@@ -1575,6 +1573,7 @@ function TimetableWorkspaceInner({
                     clearSelection={clearSelection}
                     onNavigateToMeeting={navigateToMeeting}
                     chrome="aside"
+                    activeDate={weeks[weekIndex]?.start ?? todayIsoDate()}
                     editModalOpen={editModalOpen}
                     onEditModalOpenChange={setEditModalOpen}
                     unarrangedGroups={panelUnarrangedGroups}
@@ -1609,18 +1608,28 @@ function TimetableWorkspaceInner({
           showUnarranged={!isUtilizationTab && layoutMode !== "compact_groups"}
         />
       ) : null}
-      {!isLgUp && !isUtilizationTab && layoutMode !== "compact_groups" ? (
+      {!isLgUp ? (
         <DetailFullscreenModal
-          open={mobileUnarrangedOpen}
-          onOpenChange={setMobileUnarrangedOpen}
-          title="Неразмещённые"
+          open={mobileMenuOpen}
+          onOpenChange={setMobileMenuOpen}
+          title="Меню"
         >
-          <UnarrangedLessonsPanel
+          <TimetableSidebarMenu
+            activeDate={weeks[weekIndex]?.start ?? todayIsoDate()}
+            meetings={allMeetings}
+            config={config}
+            onNavigateToMeeting={(meeting) => {
+              setMobileMenuOpen(false);
+              navigateToMeeting(meeting);
+            }}
             groups={panelUnarrangedGroups}
             selectedKey={placeTargetKey}
-            onSelect={handleSelectUnarranged}
-            onCancel={clearPlaceMode}
+            onSelectUnarranged={handleSelectUnarranged}
+            onCancelPlace={clearPlaceMode}
             placing={placePending}
+            showUnarranged={
+              !isUtilizationTab && layoutMode !== "compact_groups"
+            }
           />
         </DetailFullscreenModal>
       ) : null}
@@ -2041,6 +2050,7 @@ type TimetableDetailPanelProps = {
   clearSelection: () => void;
   onNavigateToMeeting: (meeting: Meeting) => void;
   chrome?: "aside" | "modal";
+  activeDate?: string;
   editModalOpen: boolean;
   onEditModalOpenChange: (open: boolean) => void;
   unarrangedGroups?: UnarrangedComponentGroup[];
@@ -2062,6 +2072,7 @@ function timetableDetailPanelPropsEqual(
     prev.clearSelection === next.clearSelection &&
     prev.onNavigateToMeeting === next.onNavigateToMeeting &&
     prev.chrome === next.chrome &&
+    prev.activeDate === next.activeDate &&
     prev.editModalOpen === next.editModalOpen &&
     prev.onEditModalOpenChange === next.onEditModalOpenChange &&
     prev.unarrangedGroups === next.unarrangedGroups &&
@@ -2174,6 +2185,7 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
   clearSelection,
   onNavigateToMeeting,
   chrome = "aside",
+  activeDate,
   editModalOpen,
   onEditModalOpenChange,
   unarrangedGroups = [],
@@ -2200,55 +2212,24 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
 
   const title = timetableDetailTitle(selection, selectedMeeting);
   const showEditButton = canEditSelectedMeeting && !editModalOpen;
-  const showUnarrangedPanel =
-    showUnarranged &&
-    !selectedMeeting &&
-    !!onSelectUnarranged &&
-    !!onCancelPlace;
-
   return (
     <>
       {chrome === "aside" && selectedMeeting ? (
         <div className="border-base-300 mb-2 flex flex-col gap-2 border-b pb-2">
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm self-start"
+            onClick={clearSelection}
+          >
+            <span className="icon-[material-symbols--arrow-back-rounded] text-lg" />
+            Меню
+          </button>
           <div
             className="detail-title text-base-content min-w-0 text-lg leading-snug font-semibold [overflow-wrap:anywhere]"
             id="detailTitle"
           >
             {title}
           </div>
-          {!editModalOpen ? (
-            <div className="flex flex-wrap items-center gap-1.5">
-              {canEditSelectedMeeting ? (
-                <button
-                  className="btn btn-primary btn-sm"
-                  type="button"
-                  onClick={() => onEditModalOpenChange(true)}
-                >
-                  Редактировать
-                </button>
-              ) : null}
-              {selection ? (
-                <button
-                  className="btn btn-ghost btn-sm shrink-0"
-                  id="clearSelectionBtn"
-                  type="button"
-                  onClick={clearSelection}
-                >
-                  Сбросить
-                </button>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      ) : showEditButton ? (
-        <div className="mb-2 flex flex-wrap items-center gap-1.5">
-          <button
-            className="btn btn-primary btn-sm"
-            type="button"
-            onClick={() => onEditModalOpenChange(true)}
-          >
-            Редактировать
-          </button>
         </div>
       ) : null}
       {selectedMeeting ? (
@@ -2257,14 +2238,22 @@ const TimetableDetailPanel = memo(function TimetableDetailPanel({
           config={config}
           allMeetings={allMeetings}
           onNavigateToMeeting={onNavigateToMeeting}
+          onEdit={
+            showEditButton ? () => onEditModalOpenChange(true) : undefined
+          }
         />
-      ) : showUnarrangedPanel ? (
-        <UnarrangedLessonsPanel
+      ) : chrome === "aside" ? (
+        <TimetableSidebarMenu
+          activeDate={activeDate ?? todayIsoDate()}
+          meetings={allMeetings}
+          config={config}
+          onNavigateToMeeting={onNavigateToMeeting}
           groups={unarrangedGroups}
           selectedKey={placeTargetKey}
-          onSelect={onSelectUnarranged}
-          onCancel={onCancelPlace}
+          onSelectUnarranged={onSelectUnarranged}
+          onCancelPlace={onCancelPlace}
           placing={placePending}
+          showUnarranged={showUnarranged}
         />
       ) : selection ? (
         <p className="text-base-content/60 text-sm leading-relaxed">
