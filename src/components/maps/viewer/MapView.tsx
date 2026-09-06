@@ -51,10 +51,12 @@ export function MapView({
     stop: stopLocating,
   } = useUserLocation();
 
-  // Stop watching when leaving a scene that supports the location dot
+  // Stop watching if the new scene doesn't support the location dot; otherwise keep tracking across floor changes
   useEffect(() => {
-    return () => stopLocating();
-  }, [scene.scene_id, stopLocating]);
+    if (!geoTransform) {
+      stopLocating();
+    }
+  }, [geoTransform, stopLocating]);
 
   // Surface permission / availability problems
   useEffect(() => {
