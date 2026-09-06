@@ -73,6 +73,10 @@ export const MapViewer = memo(function MapViewer({
 
     transformRef.current.style.transformOrigin = "left top";
     transformRef.current.style.transform = `translate(${options.current.offsetX}px, ${options.current.offsetY}px) scale(${options.current.zoom})`;
+    transformRef.current.style.setProperty(
+      "--map-zoom",
+      String(options.current.zoom),
+    );
   };
 
   useEffect(() => {

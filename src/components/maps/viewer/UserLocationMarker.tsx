@@ -37,42 +37,51 @@ export function UserLocationMarker({
         />
       )}
 
-      {/* Expanding pulse */}
-      <circle cx={0} cy={0} r={26} className="fill-primary" fillOpacity={0.4}>
-        <animate
-          attributeName="r"
-          values="20;70"
-          dur="1.8s"
-          repeatCount="indefinite"
-        />
-        <animate
-          attributeName="fill-opacity"
-          values="0.4;0"
-          dur="1.8s"
-          repeatCount="indefinite"
-        />
-      </circle>
+      {/* Icon shapes counter-scaled against map zoom so they stay a sensible
+          screen size instead of growing huge as the user zooms in. */}
+      <g
+        style={{
+          transform: "scale(clamp(0.4, calc(1 / var(--map-zoom, 1)), 1.2))",
+          transition: "transform 0.15s ease-out",
+        }}
+      >
+        {/* Expanding pulse */}
+        <circle cx={0} cy={0} r={26} className="fill-primary" fillOpacity={0.4}>
+          <animate
+            attributeName="r"
+            values="20;70"
+            dur="1.8s"
+            repeatCount="indefinite"
+          />
+          <animate
+            attributeName="fill-opacity"
+            values="0.4;0"
+            dur="1.8s"
+            repeatCount="indefinite"
+          />
+        </circle>
 
-      {/* Solid dot with a light outline for contrast on any background */}
-      <circle
-        cx={0}
-        cy={0}
-        r={34}
-        className="fill-base-100"
-        stroke="white"
-        strokeWidth={3}
-        vectorEffect="non-scaling-stroke"
-      />
-      <circle cx={0} cy={0} r={22} className="fill-primary" />
-
-      {heading != null && (
-        <path
-          d="M 0 -62 L -16 -30 L 16 -30 Z"
-          className="fill-primary"
-          transform={`rotate(${heading})`}
-          style={{ transition: "transform 0.6s ease-out" }}
+        {/* Solid dot with a light outline for contrast on any background */}
+        <circle
+          cx={0}
+          cy={0}
+          r={34}
+          className="fill-base-100"
+          stroke="white"
+          strokeWidth={3}
+          vectorEffect="non-scaling-stroke"
         />
-      )}
+        <circle cx={0} cy={0} r={22} className="fill-primary" />
+
+        {heading != null && (
+          <path
+            d="M 0 -62 L -16 -30 L 16 -30 Z"
+            className="fill-primary"
+            transform={`rotate(${heading})`}
+            style={{ transition: "transform 0.6s ease-out" }}
+          />
+        )}
+      </g>
     </g>
   );
 }
