@@ -143,10 +143,14 @@ export function SessionSeriesEditor({
     const refs =
       placement === "weekly"
         ? weeklySlots
-            .map((_, index) => excludeRefForWeekly?.(index))
+            .map((_, index) =>
+              index < lockedRowCount ? null : excludeRefForWeekly?.(index),
+            )
             .filter((ref): ref is MeetingRef => ref != null)
         : occurrences
-            .map((_, index) => excludeRefForOccurrence?.(index))
+            .map((_, index) =>
+              index < lockedRowCount ? null : excludeRefForOccurrence?.(index),
+            )
             .filter((ref): ref is MeetingRef => ref != null);
     if (!refs.length) return meetings;
     return meetings.filter(
@@ -156,6 +160,7 @@ export function SessionSeriesEditor({
     excludeRefForOccurrence,
     excludeRefForWeekly,
     meetings,
+    lockedRowCount,
     occurrences,
     placement,
     weeklySlots,
@@ -229,6 +234,7 @@ export function SessionSeriesEditor({
                     occurrences,
                     index,
                     deletedOcc,
+                    lockedRowCount,
                   )}
                   occurrence={occurrence}
                   audienceTokens={audienceTokens}
@@ -304,6 +310,7 @@ export function SessionSeriesEditor({
                     audienceTokens,
                     index,
                     deletedWeekly,
+                    lockedRowCount,
                   )}
                   slot={slot}
                   audienceTokens={audienceTokens}

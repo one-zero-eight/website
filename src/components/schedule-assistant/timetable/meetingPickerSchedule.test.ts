@@ -7,6 +7,10 @@ import {
 
 import { weeklyPickerSlots } from "./meetingPickerSchedule.ts";
 import {
+  draftMeetingsFromOccurrences,
+  draftMeetingsFromWeeklySlots,
+} from "./sessionSeriesRows.tsx";
+import {
   createOccurrenceEvent,
   editableEventsToDraftMeetings,
   editableSessionEventInstanceId,
@@ -84,6 +88,78 @@ function meeting(date: string, overrides: Partial<Meeting> = {}): Meeting {
 }
 
 describe("picker schedule", () => {
+  it("preserves every co-instructor in sibling drafts, including weekly edits", () => {
+    const occurrences = draftMeetingsFromOccurrences(
+      [
+        {
+          date: "2026-09-11",
+          start_time: "16:00:00",
+          end_time: "17:30:00",
+          instructor: ["A", "B"],
+        },
+      ],
+      -1,
+      new Set(),
+    );
+    expect(occurrences[0].instructors).toEqual(["A", "B"]);
+    const weekly = draftMeetingsFromWeeklySlots(
+      config,
+      [
+        {
+          ...slot,
+          instructor: ["A", "B"],
+          edits: [
+            {
+              select_week: "2026-09-11",
+              date: "2026-09-11",
+              instructor: ["C", "D"],
+              cancel: false,
+            },
+          ],
+        },
+      ],
+      ["B25-CSE-04"],
+      -1,
+      new Set(),
+    );
+    expect(
+      weekly.find((meeting) => meeting.date === "2026-09-11")?.instructors,
+    ).toEqual(["C", "D"]);
+    expect(
+      weekly.find((meeting) => meeting.date === "2026-09-18")?.instructors,
+    ).toEqual(["A", "B"]);
+    expect(
+      instructorAvailabilityForSlot({
+        config,
+        meetings: weekly,
+        instructorId: "B",
+        dates: ["2026-09-18"],
+        start: "16:00",
+        end: "17:30",
+        weekday: Weekday.FRIDAY,
+      }).status,
+    ).toBe("red");
+  });
+  it("does not regenerate locked siblings using the edited audience's dates", () => {
+    expect(
+      draftMeetingsFromWeeklySlots(
+        config,
+        [slot],
+        ["B25-CSE-04"],
+        -1,
+        new Set(),
+        1,
+      ),
+    ).toEqual([]);
+    expect(
+      draftMeetingsFromOccurrences(
+        [{ date: "2026-09-11", start_time: "16:00:00", end_time: "17:30:00" }],
+        -1,
+        new Set(),
+        1,
+      ),
+    ).toEqual([]);
+  });
   it("keeps moved sibling weeks as conflicts when excluding one instance", () => {
     const date = "2026-09-11";
     const current = meeting(date);

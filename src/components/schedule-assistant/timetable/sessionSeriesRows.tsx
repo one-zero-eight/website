@@ -32,6 +32,7 @@ import {
 } from "@/components/schedule-assistant/timetable/roomPickerOptions.ts";
 import {
   dayKey,
+  resolveWeeklyMeetingFields,
   type Meeting,
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { instructorValue } from "@/components/schedule-assistant/timetable/sessionSeriesValidation.ts";
@@ -415,14 +416,16 @@ export function draftMeetingsFromOccurrences(
   occurrences: SchemaSessionOccurrence[],
   skipIndex: number,
   deleted: Set<number>,
+  lockedRowCount = 0,
 ): Meeting[] {
   const result: Meeting[] = [];
   occurrences.forEach((occurrence, index) => {
-    if (index === skipIndex || deleted.has(index)) return;
+    if (index < lockedRowCount || index === skipIndex || deleted.has(index))
+      return;
     const date = String(occurrence.date || "").trim();
     const start = toUiTime(occurrence.start_time);
     if (!date || !start) return;
-    const instructor = instructorValue(occurrence.instructor);
+    const instructors = occurrence.instructor ?? [];
     result.push({
       instance_id: `draft:occ:${index}`,
       course: "это же занятие",
@@ -432,7 +435,7 @@ export function draftMeetingsFromOccurrences(
       start,
       end: toUiTime(occurrence.end_time) || undefined,
       room: String(occurrence.room || "").trim(),
-      instructors: instructor ? [instructor] : [],
+      instructors: Array.isArray(instructors) ? instructors : [instructors],
       instructor_pool: [],
       section: "",
     });
@@ -446,6 +449,7 @@ export function draftMeetingsFromWeeklySlots(
   audienceTokens: string[],
   skipIndex: number,
   deleted: Set<number>,
+  lockedRowCount = 0,
 ): Meeting[] {
   return expandWeeklySlotsToEvents({
     config,
@@ -455,23 +459,38 @@ export function draftMeetingsFromWeeklySlots(
     .filter(
       (event) =>
         event.source.kind === "weekly" &&
+        event.source.slotIdx >= lockedRowCount &&
         event.source.slotIdx !== skipIndex &&
         !deleted.has(event.source.slotIdx) &&
         !event.cancelled,
     )
-    .map((event) => ({
-      instance_id: `draft:${event.key}`,
-      course: "это же занятие",
-      tag: "",
-      groups: audienceTokens,
-      date: event.date,
-      start: toUiTime(event.start_time),
-      end: toUiTime(event.end_time) || undefined,
-      room: event.room || "",
-      instructors: event.instructor ? [event.instructor] : [],
-      instructor_pool: [],
-      section: "",
-    }));
+    .flatMap((event) => {
+      if (event.source.kind !== "weekly") return [];
+      const { instructors } = resolveWeeklyMeetingFields(
+        slots[event.source.slotIdx],
+        event.source.patternDate,
+        config,
+      );
+      return [
+        {
+          instance_id: `draft:${event.key}`,
+          course: "это же занятие",
+          tag: "",
+          groups: audienceTokens,
+          date: event.date,
+          start: toUiTime(event.start_time),
+          end: toUiTime(event.end_time) || undefined,
+          room: event.room || "",
+          instructors: Array.isArray(instructors)
+            ? instructors
+            : instructors
+              ? [instructors]
+              : [],
+          instructor_pool: [],
+          section: "",
+        },
+      ];
+    });
 }
 
 export function RoomSelect({
