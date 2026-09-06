@@ -303,6 +303,7 @@ export type ComponentSeriesDisplayItem = {
   seriesIdx: number;
   label: string;
   secondary?: string;
+  secondaryParts?: { schedule: string; room: string; instructor: string };
   /** Rows shown on hover over secondary (e.g. each occurrence). */
   secondaryTooltipItems?: ComponentSeriesTooltipItem[];
   isCurrent?: boolean;
@@ -433,6 +434,7 @@ export function listComponentSeriesDisplayItems(
       seriesIdx,
       label,
       secondary: secondaryInfo.secondary,
+      secondaryParts: seriesSecondaryParts(series, resolveLabel),
       secondaryTooltipItems: secondaryInfo.secondaryTooltipItems,
     });
   }
@@ -555,6 +557,36 @@ function formatOccurrenceTooltipItem(
     ...parts,
     primary: parts.primary || time || "Дата",
     secondary: previewParts.length ? previewParts.join(" · ") : undefined,
+  };
+}
+
+function seriesSecondaryParts(
+  series: SchemaComponentSessionSeries,
+  resolveLabel: (id: string) => string,
+  meeting?: Meeting,
+): ComponentSeriesDisplayItem["secondaryParts"] {
+  const occurrences = (series.dates_pattern ?? []).filter((item) => item.date);
+  const weekly = series.weekly_pattern ?? [];
+  if (occurrences.length > 1 || weekly.length > 1) return undefined;
+  const source = occurrences[0] ?? weekly[0];
+  if (!source) return undefined;
+  const schedule = meeting
+    ? [
+        formatSeriesScheduleKind(series),
+        formatTimeRange(meeting.start, meeting.end),
+      ]
+        .filter(Boolean)
+        .join(" ")
+    : occurrences[0]
+      ? formatOccurrenceTooltipItem(occurrences[0], resolveLabel).primary
+      : formatWeeklySlotTooltipItem(weekly[0], resolveLabel).primary;
+  return {
+    schedule,
+    room: String(meeting ? meeting.room : source.room || "").trim(),
+    instructor: formatInstructorField(
+      meeting ? meeting.instructors : source.instructor,
+      resolveLabel,
+    ),
   };
 }
 
@@ -833,6 +865,11 @@ export function listComponentSeriesNavItemsForRef(
         representative,
         instructorLabelById,
         series,
+      ),
+      secondaryParts: seriesSecondaryParts(
+        series,
+        resolveLabel,
+        representative,
       ),
       secondaryTooltipItems: attachMeetingsToTooltipItems(
         markCurrentTooltipItems(

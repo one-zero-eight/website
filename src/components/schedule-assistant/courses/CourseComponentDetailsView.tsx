@@ -353,7 +353,34 @@ export function ComponentSeriesList({
       </div>
       <div className={cn("flex flex-col", compact ? "gap-0.5" : "gap-1")}>
         {items.map((item) => {
-          const secondary = item.secondary ? (
+          const secondary = item.secondaryParts ? (
+            <span className="text-base-content/60 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+              {[
+                {
+                  text: item.secondaryParts.schedule,
+                  icon: "icon-[material-symbols--schedule-outline-rounded]",
+                },
+                {
+                  text: item.secondaryParts.room,
+                  icon: "icon-[material-symbols--location-on-outline-rounded]",
+                },
+                {
+                  text: item.secondaryParts.instructor,
+                  icon: "icon-[material-symbols--person-outline-rounded]",
+                },
+              ]
+                .filter((part) => part.text)
+                .map((part) => (
+                  <span
+                    key={part.icon}
+                    className="inline-flex items-center gap-1"
+                  >
+                    <span className={cn(part.icon, "shrink-0 text-sm")} />
+                    <span>{part.text}</span>
+                  </span>
+                ))}
+            </span>
+          ) : item.secondary ? (
             <SeriesSecondaryLabel
               text={item.secondary}
               tooltipItems={item.secondaryTooltipItems}
