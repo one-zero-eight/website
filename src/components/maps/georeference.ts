@@ -5,7 +5,12 @@
  * The floor-plan SVGs carry no geographic metadata, so each scene that wants a
  * "you are here" dot must provide a few control points (a recognizable spot on
  * the plan + its real-world lat/lon). From those we fit a 2D affine transform.
+ *
+ * The control points themselves live server-side and arrive on `scene.geo_reference`
+ * from the maps `/scenes/` API; this module only turns them into a transform.
  */
+
+import { mapsTypes } from "@/api/maps";
 
 export type GeoControlPoint = {
   /** Human-readable note, e.g. "garage entrance, NE corner". */
@@ -30,9 +35,8 @@ export type SceneGeoReference = {
 /**
  * viewBox shared by every `university-floor-*.svg` (Floor -1 through Floor
  * 5): "-115.31 -100 2677.53 1893.18". Confirmed identical across all of them
- * (same building, same export coordinate frame), so control points
- * calibrated on one floor apply to all of them — see
- * UNIVERSITY_BUILDING_CONTROL_POINTS below.
+ * (same building, same export coordinate frame), so a single set of control
+ * points (served on `scene.geo_reference`) applies to all of them.
  */
 export const MAP_VIEWBOX = {
   minX: -115.31,
@@ -44,60 +48,23 @@ export const MAP_VIEWBOX = {
 export const MAP_VIEWBOX_STRING = `${MAP_VIEWBOX.minX} ${MAP_VIEWBOX.minY} ${MAP_VIEWBOX.width} ${MAP_VIEWBOX.height}`;
 
 /**
- * Per-scene calibration. A scene missing from this map (or with fewer than 2
- * control points) simply has no location dot — currently that's
- * `sport-complex` and `campus`, which need their own control points measured
- * the same way (pick something identifiable on the plan, read its lat/lon
- * from Google Maps / OpenStreetMap satellite view, and read its SVG x/y by
- * inspecting the inline SVG in dev tools).
+ * Adapt a scene's server-provided `geo_reference` (snake_case, from the
+ * `/scenes/` API) into the shape the transform solver expects. Returns
+ * `undefined` when the scene isn't georeferenced or has fewer than 2 control
+ * points — both mean "no location dot" (currently `sport-complex` and
+ * `campus`). New scenes are calibrated by adding `geo_reference` in the maps
+ * service's `scenes.yaml`, not here.
  */
-/**
- * Control points for the main university building. Every `university-floor-*`
- * scene shares the same coordinate frame (verified: identical viewBox across
- * all of them, and structural elements like stairwells land on byte-identical
- * SVG coordinates between floors), so a single calibration applies to all
- * floors of the building.
- */
-const UNIVERSITY_BUILDING_CONTROL_POINTS: GeoControlPoint[] = [
-  { label: "Upper-Left", lat: 55.752926, lon: 48.743707, x: 120, y: 1200 },
-  { label: "Upper-middle", lat: 55.753683, lon: 48.742779, x: 1050, y: 50 },
-  { label: "Upper-right", lat: 55.75455, lon: 48.743146, x: 2450, y: 80 },
-  { label: "Bottom-right", lat: 55.754476, lon: 48.743752, x: 2400, y: 600 },
-  {
-    label: "Bottom-middle",
-    lat: 55.753896,
-    lon: 48.743505,
-    x: 1470,
-    y: 620,
-  },
-  { label: "Bottom-Left", lat: 55.753181, lon: 48.744366, x: 650, y: 1550 },
-];
-
-// GPS accuracy indoors is commonly worse than outdoors (walls block
-// signal); 75m hid the dot for most real indoor fixes.
-const UNIVERSITY_BUILDING_ACCURACY_THRESHOLD_M = 150;
-
-const UNIVERSITY_BUILDING_GEOREFERENCE: SceneGeoReference = {
-  accuracyThresholdM: UNIVERSITY_BUILDING_ACCURACY_THRESHOLD_M,
-  controlPoints: UNIVERSITY_BUILDING_CONTROL_POINTS,
-};
-
-export const SCENE_GEOREFERENCE: Record<string, SceneGeoReference> = {
-  "university-floor-0": UNIVERSITY_BUILDING_GEOREFERENCE,
-  "university-floor-1": UNIVERSITY_BUILDING_GEOREFERENCE,
-  "university-floor-2": UNIVERSITY_BUILDING_GEOREFERENCE,
-  "university-floor-3": UNIVERSITY_BUILDING_GEOREFERENCE,
-  "university-floor-4": UNIVERSITY_BUILDING_GEOREFERENCE,
-  "university-floor-5": UNIVERSITY_BUILDING_GEOREFERENCE,
-};
-
 export function getSceneGeoReference(
-  sceneId: string | undefined,
+  geoReference: mapsTypes.SchemaGeoReference | null | undefined,
 ): SceneGeoReference | undefined {
-  if (!sceneId) return undefined;
-  const ref = SCENE_GEOREFERENCE[sceneId];
-  if (!ref || ref.controlPoints.length < 2) return undefined;
-  return ref;
+  if (!geoReference) return undefined;
+  const controlPoints = geoReference.control_points ?? [];
+  if (controlPoints.length < 2) return undefined;
+  return {
+    controlPoints,
+    accuracyThresholdM: geoReference.accuracy_threshold_m,
+  };
 }
 
 export function isWithinViewBox(

@@ -174,6 +174,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get All Users */
+    get: operations["users_get_all_users"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/me": {
     parameters: {
       query?: never;
@@ -293,6 +310,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/users/is_using_music_room": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Set Is Using Music Room */
+    post: operations["users_set_is_using_music_room"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -302,13 +336,13 @@ export interface components {
       /**
        * Time Start
        * Format: date-time
-       * @example 2026-06-28T16:39:00
+       * @example 2026-09-04T14:07:00
        */
       time_start: string;
       /**
        * Time End
        * Format: date-time
-       * @example 2026-06-28T17:39:00
+       * @example 2026-09-04T15:07:00
        */
       time_end: string;
     };
@@ -337,6 +371,10 @@ export interface components {
       msg: string;
       /** Error Type */
       type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
     };
     /** ViewBooking */
     ViewBooking: {
@@ -370,6 +408,8 @@ export interface components {
       /** Telegram Id */
       telegram_id: number;
       status: components["schemas"]["UserStatus"];
+      /** Is Using Music Room */
+      is_using_music_room: boolean;
     };
   };
   responses: never;
@@ -588,7 +628,7 @@ export interface operations {
   bookings_form_schedule: {
     parameters: {
       query?: {
-        /** @example 2026-06-22 */
+        /** @example 2026-08-31 */
         start_of_week?: string | null;
         from_user_id?: number | null;
       };
@@ -678,6 +718,26 @@ export interface operations {
       };
     };
   };
+  users_get_all_users: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ViewUser"][];
+        };
+      };
+    };
+  };
   users_get_me: {
     parameters: {
       query?: never;
@@ -736,7 +796,7 @@ export interface operations {
       query?: {
         /**
          * @description Date for which to get remaining hours (iso format). Default: server-side today
-         * @example 2026-06-28
+         * @example 2026-09-04
          */
         date?: string | null;
       };
@@ -771,7 +831,7 @@ export interface operations {
       query?: {
         /**
          * @description Date for which to get remaining hours (iso format). Default: server-side today
-         * @example 2026-06-28
+         * @example 2026-09-04
          */
         date?: string | null;
       };
@@ -875,6 +935,40 @@ export interface operations {
         email?: string | null;
         alias?: string | null;
         as_bot?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": unknown;
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  users_set_is_using_music_room: {
+    parameters: {
+      query: {
+        is_using_music_room: boolean;
+        telegram_id?: number | null;
+        email?: string | null;
+        alias?: string | null;
       };
       header?: never;
       path?: never;

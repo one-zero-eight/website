@@ -1,16 +1,15 @@
 /**
- * Calibration diagnostic for SCENE_GEOREFERENCE: reports how self-consistent
- * a scene's control points are, using the real solveGeoTransform/project
- * from georeference.ts (not a reimplementation), so the numbers always match
- * what the app actually does at runtime.
+ * Calibration diagnostic for the maps `/scenes/` georeference data: reports how
+ * self-consistent each scene's control points are, using the real
+ * solveGeoTransform/project from georeference.ts (not a reimplementation), so
+ * the numbers always match what the app actually does at runtime.
+ *
+ * Pulls the control points live from `${VITE_MAPS_API_URL}/scenes/` (the same
+ * source the app uses), so run it against whichever maps API `.env` points at.
  *
  * Run with: pnpm check:georeference
  */
-import {
-  SCENE_GEOREFERENCE,
-  solveGeoTransform,
-  type GeoControlPoint,
-} from "./georeference.ts";
+import { solveGeoTransform, type GeoControlPoint } from "./georeference.ts";
 
 const EARTH_RADIUS_M = 6378137;
 const DEG = Math.PI / 180;
@@ -87,6 +86,29 @@ function checkScene(sceneId: string, controlPoints: GeoControlPoint[]) {
   }
 }
 
-for (const [sceneId, ref] of Object.entries(SCENE_GEOREFERENCE)) {
-  checkScene(sceneId, ref.controlPoints);
+type ApiScene = {
+  scene_id: string;
+  geo_reference: { control_points?: GeoControlPoint[] } | null;
+};
+
+const base = import.meta.env.VITE_MAPS_API_URL;
+if (!base) {
+  throw new Error("VITE_MAPS_API_URL is not set (check .env / .env.local)");
+}
+
+const scenes: ApiScene[] = await fetch(`${base}/scenes/`).then((response) => {
+  if (!response.ok) {
+    throw new Error(`GET ${base}/scenes/ -> ${response.status}`);
+  }
+  return response.json();
+});
+
+const georeferenced = scenes.filter(
+  (scene) => (scene.geo_reference?.control_points?.length ?? 0) > 0,
+);
+if (georeferenced.length === 0) {
+  console.log("No scenes carry a geo_reference.");
+}
+for (const scene of georeferenced) {
+  checkScene(scene.scene_id, scene.geo_reference!.control_points!);
 }
