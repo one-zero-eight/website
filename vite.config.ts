@@ -49,11 +49,53 @@ export default defineConfig({
 
     // Offline mode via PWA
     VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       workbox: {
-        globPatterns: ["**/*.{js,css,html,json,svg,png,woff2}"],
-        navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/assets\//],
+        globPatterns: ["**/*.{js,css,json,svg,png,woff2}"],
+        navigateFallback: null,
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "html-pages",
+              cacheableResponse: { statuses: [200] },
+              matchOptions: { ignoreSearch: true },
+              expiration: {
+                maxEntries: 32,
+                maxAgeSeconds: 7 * 24 * 60 * 60,
+              },
+            },
+          },
+          {
+            urlPattern: ({ url }) =>
+              url.pathname.endsWith(".ics") ||
+              url.pathname.includes("check-calendar-url-to-link"),
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "ics-feeds",
+              cacheableResponse: { statuses: [200] },
+              expiration: {
+                maxEntries: 64,
+                maxAgeSeconds: 7 * 24 * 60 * 60,
+              },
+            },
+          },
+          {
+            urlPattern: ({ url }) =>
+              url.pathname.includes("/static/") && url.pathname.endsWith(".svg"),
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "map-svgs",
+              cacheableResponse: { statuses: [200] },
+              expiration: {
+                maxEntries: 64,
+                maxAgeSeconds: 7 * 24 * 60 * 60,
+              },
+            },
+          },
+        ],
       },
       manifest: false, // Manifest is already in public/manifest.json
       includeManifestIcons: true,
