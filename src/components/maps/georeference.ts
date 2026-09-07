@@ -86,75 +86,9 @@ export const SCENE_GEOREFERENCE: Record<string, SceneGeoReference> = {
   "university-floor-0": UNIVERSITY_BUILDING_GEOREFERENCE,
   "university-floor-1": UNIVERSITY_BUILDING_GEOREFERENCE,
   "university-floor-2": UNIVERSITY_BUILDING_GEOREFERENCE,
-  "university-floor-3": {
-    accuracyThresholdM: UNIVERSITY_BUILDING_ACCURACY_THRESHOLD_M,
-    controlPoints: [
-      { label: "Upper-Left", lat: 55.752926, lon: 48.743707, x: 65, y: 1280 },
-      { label: "Upper-middle", lat: 55.753683, lon: 48.742779, x: 1050, y: 50 },
-      { label: "Upper-right", lat: 55.75455, lon: 48.743146, x: 2450, y: 130 },
-      {
-        label: "Bottom-right",
-        lat: 55.754476,
-        lon: 48.743752,
-        x: 2400,
-        y: 600,
-      },
-      {
-        label: "Bottom-middle",
-        lat: 55.753896,
-        lon: 48.743505,
-        x: 1470,
-        y: 620,
-      },
-      { label: "Bottom-Left", lat: 55.753181, lon: 48.744366, x: 550, y: 1670 },
-    ],
-  },
-  "university-floor-4": {
-    accuracyThresholdM: UNIVERSITY_BUILDING_ACCURACY_THRESHOLD_M,
-    controlPoints: [
-      { label: "Upper-Left", lat: 55.752926, lon: 48.743707, x: 15, y: 1300 },
-      { label: "Upper-middle", lat: 55.753683, lon: 48.742779, x: 1050, y: 50 },
-      { label: "Upper-right", lat: 55.75455, lon: 48.743146, x: 2450, y: 80 },
-      {
-        label: "Bottom-right",
-        lat: 55.754476,
-        lon: 48.743752,
-        x: 2400,
-        y: 600,
-      },
-      {
-        label: "Bottom-middle",
-        lat: 55.753896,
-        lon: 48.743505,
-        x: 1470,
-        y: 620,
-      },
-      { label: "Bottom-Left", lat: 55.753181, lon: 48.744366, x: 520, y: 1700 },
-    ],
-  },
-  "university-floor-5": {
-    accuracyThresholdM: UNIVERSITY_BUILDING_ACCURACY_THRESHOLD_M,
-    controlPoints: [
-      { label: "Upper-Left", lat: 55.752926, lon: 48.743707, x: 15, y: 1300 },
-      { label: "Upper-middle", lat: 55.753683, lon: 48.742779, x: 1050, y: 50 },
-      { label: "Upper-right", lat: 55.75455, lon: 48.743146, x: 2420, y: 130 },
-      {
-        label: "Bottom-right",
-        lat: 55.754476,
-        lon: 48.743752,
-        x: 2400,
-        y: 600,
-      },
-      {
-        label: "Bottom-middle",
-        lat: 55.753896,
-        lon: 48.743505,
-        x: 1470,
-        y: 620,
-      },
-      { label: "Bottom-Left", lat: 55.753181, lon: 48.744366, x: 520, y: 1750 },
-    ],
-  },
+  "university-floor-3": UNIVERSITY_BUILDING_GEOREFERENCE,
+  "university-floor-4": UNIVERSITY_BUILDING_GEOREFERENCE,
+  "university-floor-5": UNIVERSITY_BUILDING_GEOREFERENCE,
 };
 
 export function getSceneGeoReference(
