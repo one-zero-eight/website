@@ -937,7 +937,7 @@ export interface components {
       enrolled?: boolean | null;
       /**
        * Enrolled Emails
-       * @description Visible to the author or a moderator only
+       * @description Visible to authenticated users only
        */
       enrolled_emails?: string[] | null;
       /**
@@ -1033,7 +1033,7 @@ export interface components {
     MeOut: {
       /**
        * Roles
-       * @description List of roles: "club-leader", "event-manager", "moderator"
+       * @description List of roles: "club-leader", "event-manager", "moderator", "club-moderator"
        */
       roles: string[];
       /** Clubs */
@@ -1474,7 +1474,7 @@ export interface operations {
           "application/json": unknown;
         };
       };
-      /** @description Cannot delete a draft while a submission is pending OR Cannot delete a draft while the event is published */
+      /** @description Cannot delete a draft while the event is published OR Cannot delete a draft while a submission is pending */
       400: {
         headers: {
           [name: string]: unknown;

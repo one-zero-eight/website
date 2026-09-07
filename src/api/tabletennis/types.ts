@@ -1249,7 +1249,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Tournament not found OR One or both players are not registered in the system (/reg) */
+      /** @description One or both players are not registered in the system (/reg) OR Tournament not found */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1292,7 +1292,7 @@ export interface operations {
           };
         };
       };
-      /** @description This game has already been finished. Recalculating rating is not allowed. OR Draws are not allowed in table tennis! */
+      /** @description Draws are not allowed in table tennis! OR This game has already been finished. Recalculating rating is not allowed. */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1306,7 +1306,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Tournament not found OR One or both players from this game are not registered (/reg) OR Game not found in this tournament */
+      /** @description Game not found in this tournament OR Tournament not found OR One or both players from this game are not registered (/reg) */
       404: {
         headers: {
           [name: string]: unknown;

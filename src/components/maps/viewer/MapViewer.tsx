@@ -34,7 +34,7 @@ export const MapViewer = memo(function MapViewer({
   highlightAreas: mapsTypes.SchemaArea[];
   disablePopup?: boolean;
   userLocation?: MapUserLocation | null;
-  /** TEMPORARY dev-only: raw SCENE_GEOREFERENCE control points to draw for calibration. */
+  /** TEMPORARY dev-only: raw `scene.geo_reference` control points to draw for calibration. */
   debugControlPoints?: GeoControlPoint[];
 }) {
   const navigate = useNavigate();

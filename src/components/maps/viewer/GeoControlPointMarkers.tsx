@@ -1,7 +1,7 @@
 import { type GeoControlPoint } from "@/components/maps/georeference.ts";
 
 /**
- * TEMPORARY / dev-only debug overlay: draws each SCENE_GEOREFERENCE control
+ * TEMPORARY / dev-only debug overlay: draws each `scene.geo_reference` control
  * point at its raw (x, y) SVG-viewBox coordinate, so calibration can be checked
  * by eye. Remove once calibration is confirmed.
  */

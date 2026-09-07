@@ -33,8 +33,8 @@ export function MapView({
   const switchFullscreen = useCallback(() => setFullscreen((v) => !v), []);
 
   const geoRef = useMemo(
-    () => getSceneGeoReference(scene.scene_id),
-    [scene.scene_id],
+    () => getSceneGeoReference(scene.geo_reference),
+    [scene.geo_reference],
   );
   const geoTransform = useMemo(
     () => (geoRef ? solveGeoTransform(geoRef) : null),

@@ -1075,6 +1075,13 @@ export interface operations {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
+      /** @description Stored club is missing its document ID */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   get_club_logo_clubs_by_id__id__logo_get: {
