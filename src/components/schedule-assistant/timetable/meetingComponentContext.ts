@@ -291,6 +291,9 @@ export type ComponentSeriesTooltipItem = {
   primaryDate?: string;
   primaryWeekday?: string;
   primaryTime?: string;
+  weekly?: boolean;
+  room?: string;
+  instructor?: string;
   secondary?: string;
   isCurrent?: boolean;
   /** Index in weekly_pattern / occurrences before sorting. */
@@ -534,6 +537,11 @@ function formatWeeklySlotTooltipItem(
   if (room) previewParts.push(room);
   return {
     primary,
+    primaryWeekday: day,
+    primaryTime: time,
+    weekly: true,
+    room,
+    instructor,
     secondary: previewParts.length ? previewParts.join(" · ") : undefined,
   };
 }
@@ -561,6 +569,9 @@ function formatOccurrenceTooltipItem(
   return {
     ...parts,
     primary: parts.primary || time || "Дата",
+    weekly: false,
+    room,
+    instructor,
     secondary: previewParts.length ? previewParts.join(" · ") : undefined,
   };
 }

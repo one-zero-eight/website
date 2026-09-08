@@ -116,9 +116,11 @@ export function MeetingAudienceInline({
       {items.map((item) => (
         <span
           key={item.key}
-          className="inline-flex shrink-0 items-center gap-0.5 leading-none whitespace-nowrap"
+          className="inline-flex max-w-full min-w-0 items-center gap-0.5 leading-none"
         >
-          <span className="leading-5">{item.label}</span>
+          <span className="min-w-0 leading-5 wrap-anywhere whitespace-normal">
+            {item.label}
+          </span>
           {item.selector ? (
             <AudienceTreeInfoIcon
               config={config}
@@ -544,7 +546,44 @@ function SeriesSecondaryLabel({
             <SeriesScheduleItemsList
               items={tooltipItems}
               onNavigateToMeeting={onNavigateToMeeting}
-              className="min-w-56"
+              className="w-80 max-w-[calc(100vw-2rem)]"
+              sharedColumns
+              showNavigationTitle={false}
+              renderItem={(item) => (
+                <>
+                  <MeetingMetadataRow
+                    left={
+                      <MeetingMetadataField
+                        kind="schedule"
+                        weekly={item.weekly}
+                      >
+                        {item.primaryWeekday
+                          ? `${item.primaryWeekday}, `
+                          : null}
+                        {[item.primaryDate, item.primaryTime]
+                          .filter(Boolean)
+                          .join(" ")}
+                      </MeetingMetadataField>
+                    }
+                    right={
+                      item.room ? (
+                        <MeetingMetadataField kind="room">
+                          {item.room}
+                        </MeetingMetadataField>
+                      ) : null
+                    }
+                  />
+                  {item.instructor ? (
+                    <MeetingMetadataRow
+                      right={
+                        <MeetingMetadataField kind="instructor">
+                          {item.instructor}
+                        </MeetingMetadataField>
+                      }
+                    />
+                  ) : null}
+                </>
+              )}
             />
           </div>
         </FloatingPortal>
