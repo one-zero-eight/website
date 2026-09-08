@@ -1,6 +1,11 @@
 import {
+  BookingOutcome,
+  BookingTaskItemStatus,
+  BookingTaskStatus,
   ConflictMode,
   ReviewKind,
+  type SchemaBookingTask,
+  type SchemaBookingTaskItem,
   type SchemaBookingReview,
   type SchemaReviewComponent,
   type SchemaReviewCourse,
@@ -41,12 +46,19 @@ export function disabledReasonLabel(reason: string | null | undefined) {
 }
 
 export function isReadySlot(slot: SchemaReviewSlot) {
-  return slot.bookable && slot.review_kind === ReviewKind.ready;
+  return (
+    slot.bookable &&
+    slot.review_kind === ReviewKind.ready &&
+    !slot.partially_booked
+  );
 }
 
 export function isSplitSelectableSlot(slot: SchemaReviewSlot) {
   return (
-    slot.bookable && slot.review_kind === ReviewKind.conflict && slot.can_split
+    slot.bookable &&
+    slot.review_kind === ReviewKind.conflict &&
+    slot.can_split &&
+    !slot.partially_booked
   );
 }
 
@@ -82,6 +94,10 @@ export type BookingSlotStatus =
   | "ready"
   | "booked"
   | "conflict"
+  | "pending_approval"
+  | "unknown"
+  | "declined"
+  | "cancelling"
   | "disabled"
   | "online";
 
@@ -89,12 +105,20 @@ export function slotStatus(slot: SchemaReviewSlot): BookingSlotStatus {
   if (!slot.bookable) {
     return slot.disabled_reason === "online" ? "online" : "disabled";
   }
-  if (slot.review_kind === ReviewKind.conflict) return "conflict";
-  if (slot.review_kind === ReviewKind.booked) return "booked";
-  return "ready";
+  if (
+    slot.partially_booked &&
+    (slot.review_kind === ReviewKind.booked ||
+      slot.review_kind === ReviewKind.ready)
+  )
+    return "unknown";
+  return slot.review_kind ?? "unknown";
 }
 
 export const BOOKING_STATUS_ORDER: BookingSlotStatus[] = [
+  "unknown",
+  "declined",
+  "pending_approval",
+  "cancelling",
   "conflict",
   "disabled",
   "ready",
@@ -123,7 +147,11 @@ export function reviewItemsInCourse(
 }
 
 export function countSlotStatuses(slots: SchemaReviewSlot[]) {
-  const counts = {
+  const counts: Record<BookingSlotStatus, number> = {
+    unknown: 0,
+    declined: 0,
+    pending_approval: 0,
+    cancelling: 0,
     ready: 0,
     booked: 0,
     conflict: 0,
@@ -135,7 +163,9 @@ export function countSlotStatuses(slots: SchemaReviewSlot[]) {
 }
 
 export function extraIds(review: SchemaBookingReview) {
-  return review.extra_auto_bookings.map((item) => item.extra_id);
+  return review.extra_auto_bookings
+    .filter((item) => item.can_cancel)
+    .map((item) => item.extra_id);
 }
 
 export function findReviewSlotContext(
@@ -204,7 +234,12 @@ export function formatReviewSlotLabel(slot: SchemaReviewSlot) {
   const room = slot.room ? ` (${slot.room})` : "";
   const weekdayKey = weeklyPatternDayKey(slot.date);
   if (slot.recurring || weekdayKey) {
-    return `${everyWeekdayPhraseRu(weekdayKey ?? "")} ${time}${room}`;
+    const weekday = weekdayKey ?? dayKey(slot.date);
+    const range =
+      slot.recurrence_start && slot.recurrence_end
+        ? ` · ${formatDisplayDate(slot.recurrence_start)}–${formatDisplayDate(slot.recurrence_end)}`
+        : " · Границы серии неизвестны";
+    return `${everyWeekdayPhraseRu(weekday)} ${time}${room}${range} · Занятий: ${slot.occurrence_dates.length}`;
   }
   if (/^\d{4}-\d{2}-\d{2}$/.test(slot.date)) {
     return `${weekdayLabelRu(dayKey(slot.date))} ${formatDisplayDate(slot.date)} ${time}${room}`;
@@ -334,6 +369,111 @@ export function formatConflictWhen(start: string, end: string) {
     timeZone: "Europe/Moscow",
   });
   return `${date} ${startTime}–${endTime}`;
+}
+
+export const BOOKING_OUTCOME_LABEL: Record<BookingOutcome, string> = {
+  submitted: "Отправлено, ответ ещё неизвестен",
+  pending_approval: "Ожидает утверждения",
+  accepted: "Подтверждено",
+  declined: "Отклонено",
+  unknown: "Требуется проверка",
+  cancel_requested: "Отменяется",
+  cancelled: "Отменено",
+};
+
+export function isActiveTask(task: SchemaBookingTask) {
+  return (
+    task.status === BookingTaskStatus.queued ||
+    task.status === BookingTaskStatus.running
+  );
+}
+
+export function taskItemLabel(item: SchemaBookingTaskItem) {
+  if (item.status === BookingTaskItemStatus.pending) return "Ожидает отправки";
+  return BOOKING_OUTCOME_LABEL[item.outcome];
+}
+
+export function taskNeedsReconciliation(task: SchemaBookingTask) {
+  return (
+    isActiveTask(task) ||
+    task.items.some(
+      (item) =>
+        item.outcome === BookingOutcome.submitted ||
+        item.outcome === BookingOutcome.pending_approval ||
+        item.outcome === BookingOutcome.unknown ||
+        item.outcome === BookingOutcome.cancel_requested,
+    )
+  );
+}
+
+export function blockedTaskSlotIds(tasks: SchemaBookingTask[]) {
+  const blocked = new Set<string>();
+  for (const task of tasks) {
+    for (const item of task.items) {
+      // Keep accepted requests blocked until review agrees too. Only a proven
+      // decline or cancellation releases an operation, never a transport error.
+      if (
+        !isActiveTask(task) &&
+        (item.outcome === BookingOutcome.declined ||
+          item.outcome === BookingOutcome.cancelled)
+      )
+        continue;
+      for (const id of item.slot_ids) blocked.add(id);
+    }
+  }
+  return blocked;
+}
+
+export function mergeBookingTasks(
+  current: SchemaBookingTask[],
+  incoming: SchemaBookingTask[],
+) {
+  const byId = new Map(current.map((task) => [task.task_id, task]));
+  for (const task of incoming) byId.set(task.task_id, task);
+  return [...byId.values()];
+}
+
+export function countTaskOutcomes(task: SchemaBookingTask) {
+  const counts: Record<BookingOutcome, number> = {
+    submitted: 0,
+    pending_approval: 0,
+    accepted: 0,
+    declined: 0,
+    unknown: 0,
+    cancel_requested: 0,
+    cancelled: 0,
+  };
+  for (const item of task.items) counts[item.outcome] += 1;
+  return counts;
+}
+
+export function formatTaskOutcomeSummary(task: SchemaBookingTask) {
+  const counts = countTaskOutcomes(task);
+  return Object.values(BookingOutcome)
+    .filter((outcome) => counts[outcome] > 0)
+    .map((outcome) => `${BOOKING_OUTCOME_LABEL[outcome]}: ${counts[outcome]}`)
+    .join(" · ");
+}
+
+export function roomResponseLabel(response: string | null | undefined) {
+  if (response === "Accept") return "Принято";
+  if (response === "Tentative") return "Ожидает утверждения";
+  if (response === "Decline") return "Отклонено";
+  if (response === "NoResponseReceived") return "Ответ ещё не получен";
+  return "Неизвестен";
+}
+
+export function calendarPresenceLabel(presence: string) {
+  if (presence === "present") return "Событие найдено";
+  if (presence === "absent") return "Событие не найдено";
+  return "Не проверено / чтение не завершено";
+}
+
+export function formatCheckedAt(checkedAt: string | null | undefined) {
+  if (!checkedAt) return "Ещё не проверено";
+  return new Date(checkedAt).toLocaleString("ru-RU", {
+    timeZone: "Europe/Moscow",
+  });
 }
 
 export function pruneSelectedIds(

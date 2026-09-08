@@ -1,4 +1,5 @@
 import { ReviewKind } from "@/api/schedule-assistant/types.ts";
+import { BookingSlotDetails } from "./BookingSlotDetails.tsx";
 import type {
   SchemaBookingReview,
   SchemaExtraAutoBooking,
@@ -36,6 +37,7 @@ export function BookingTree({
   selectedSlotIds,
   selectedExtraIds,
   expandedConflictIds,
+  blockedSlotIds,
   disabled,
   onToggleExpanded,
   onToggleSlots,
@@ -47,6 +49,7 @@ export function BookingTree({
   selectedSlotIds: ReadonlySet<string>;
   selectedExtraIds: ReadonlySet<string>;
   expandedConflictIds: ReadonlySet<string>;
+  blockedSlotIds: ReadonlySet<string>;
   disabled: boolean;
   onToggleExpanded: (id: string) => void;
   onToggleSlots: (ids: string[], selected: boolean) => void;
@@ -62,6 +65,7 @@ export function BookingTree({
           expandedIds={expandedIds}
           selectedSlotIds={selectedSlotIds}
           expandedConflictIds={expandedConflictIds}
+          blockedSlotIds={blockedSlotIds}
           disabled={disabled}
           onToggleExpanded={onToggleExpanded}
           onToggleSlots={onToggleSlots}
@@ -87,6 +91,7 @@ function ProgramBranch({
   expandedIds,
   selectedSlotIds,
   expandedConflictIds,
+  blockedSlotIds,
   disabled,
   onToggleExpanded,
   onToggleSlots,
@@ -96,6 +101,7 @@ function ProgramBranch({
   expandedIds: ReadonlySet<string>;
   selectedSlotIds: ReadonlySet<string>;
   expandedConflictIds: ReadonlySet<string>;
+  blockedSlotIds: ReadonlySet<string>;
   disabled: boolean;
   onToggleExpanded: (id: string) => void;
   onToggleSlots: (ids: string[], selected: boolean) => void;
@@ -103,7 +109,9 @@ function ProgramBranch({
 }) {
   const nodeId = programNodeId(program.program_id);
   const expanded = expandedIds.has(nodeId);
-  const ids = readySlotIdsInProgram(program);
+  const ids = readySlotIdsInProgram(program).filter(
+    (id) => !blockedSlotIds.has(id),
+  );
   const state = checkState(ids, selectedSlotIds);
 
   return (
@@ -127,6 +135,7 @@ function ProgramBranch({
               expandedIds={expandedIds}
               selectedSlotIds={selectedSlotIds}
               expandedConflictIds={expandedConflictIds}
+              blockedSlotIds={blockedSlotIds}
               disabled={disabled}
               onToggleExpanded={onToggleExpanded}
               onToggleSlots={onToggleSlots}
@@ -144,6 +153,7 @@ function CourseBranch({
   expandedIds,
   selectedSlotIds,
   expandedConflictIds,
+  blockedSlotIds,
   disabled,
   onToggleExpanded,
   onToggleSlots,
@@ -154,6 +164,7 @@ function CourseBranch({
   expandedIds: ReadonlySet<string>;
   selectedSlotIds: ReadonlySet<string>;
   expandedConflictIds: ReadonlySet<string>;
+  blockedSlotIds: ReadonlySet<string>;
   disabled: boolean;
   onToggleExpanded: (id: string) => void;
   onToggleSlots: (ids: string[], selected: boolean) => void;
@@ -161,7 +172,9 @@ function CourseBranch({
 }) {
   const nodeId = courseNodeId(programId, course.course_id);
   const expanded = expandedIds.has(nodeId);
-  const ids = readySlotIdsInCourse(course);
+  const ids = readySlotIdsInCourse(course).filter(
+    (id) => !blockedSlotIds.has(id),
+  );
   const state = checkState(ids, selectedSlotIds);
 
   return (
@@ -192,6 +205,7 @@ function CourseBranch({
               expandedIds={expandedIds}
               selectedSlotIds={selectedSlotIds}
               expandedConflictIds={expandedConflictIds}
+              blockedSlotIds={blockedSlotIds}
               disabled={disabled}
               onToggleExpanded={onToggleExpanded}
               onToggleSlots={onToggleSlots}
@@ -210,6 +224,7 @@ function ComponentBranch({
   expandedIds,
   selectedSlotIds,
   expandedConflictIds,
+  blockedSlotIds,
   disabled,
   onToggleExpanded,
   onToggleSlots,
@@ -221,6 +236,7 @@ function ComponentBranch({
   expandedIds: ReadonlySet<string>;
   selectedSlotIds: ReadonlySet<string>;
   expandedConflictIds: ReadonlySet<string>;
+  blockedSlotIds: ReadonlySet<string>;
   disabled: boolean;
   onToggleExpanded: (id: string) => void;
   onToggleSlots: (ids: string[], selected: boolean) => void;
@@ -228,7 +244,9 @@ function ComponentBranch({
 }) {
   const nodeId = componentNodeId(programId, courseId, component.component_id);
   const expanded = expandedIds.has(nodeId);
-  const ids = readySlotIdsInComponent(component);
+  const ids = readySlotIdsInComponent(component).filter(
+    (id) => !blockedSlotIds.has(id),
+  );
   const state = checkState(ids, selectedSlotIds);
 
   return (
@@ -253,7 +271,7 @@ function ComponentBranch({
               slot={slot}
               selected={selectedSlotIds.has(slot.slot_id)}
               detailsOpen={expandedConflictIds.has(slot.slot_id)}
-              disabled={disabled}
+              disabled={disabled || blockedSlotIds.has(slot.slot_id)}
               onToggle={() =>
                 onToggleSlots(
                   [slot.slot_id],
@@ -311,6 +329,13 @@ function SlotRow({
             </span>
             <BookingSlotStatusMark slot={slot} />
           </div>
+          <button
+            type="button"
+            className="btn btn-ghost btn-xs self-start"
+            onClick={onToggleDetails}
+          >
+            {detailsOpen ? "Скрыть детали" : "Детали и действия"}
+          </button>
           {slot.review_kind === ReviewKind.conflict ? (
             <div className="flex flex-wrap items-center gap-1.5">
               <button
@@ -338,21 +363,15 @@ function SlotRow({
                 </button>
               ) : null}
               {slot.conflicts.length > 0 ? (
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs gap-1"
-                  onClick={onToggleDetails}
-                >
-                  {detailsOpen ? "Скрыть пересечения" : "Пересечения"}
-                  <span className="badge badge-xs">
-                    {slot.conflicts.length}
-                  </span>
-                </button>
+                <span className="text-xs">
+                  Пересечения: {slot.conflicts.length}
+                </span>
               ) : null}
             </div>
           ) : null}
         </div>
       </div>
+      {detailsOpen ? <BookingSlotDetails slot={slot} /> : null}
       {detailsOpen &&
       slot.review_kind === ReviewKind.conflict &&
       slot.conflicts.length > 0 ? (
@@ -385,7 +404,9 @@ function ExtraBranch({
   onToggleExpanded: () => void;
   onToggleExtras: (ids: string[], selected: boolean) => void;
 }) {
-  const ids = extras.map((item) => item.extra_id);
+  const ids = extras
+    .filter((item) => item.can_cancel)
+    .map((item) => item.extra_id);
   const state = checkState(ids, selectedExtraIds);
 
   return (
@@ -406,7 +427,7 @@ function ExtraBranch({
               key={item.extra_id}
               item={item}
               selected={selectedExtraIds.has(item.extra_id)}
-              disabled={disabled}
+              disabled={disabled || !item.can_cancel}
               onToggle={() =>
                 onToggleExtras(
                   [item.extra_id],
@@ -444,6 +465,11 @@ function ExtraRow({
       />
       <span className="flex min-w-0 flex-col text-sm wrap-break-word">
         {item.label}
+        {!item.can_cancel ? (
+          <span className="text-warning text-xs">
+            Нет подтверждённого права отмены
+          </span>
+        ) : null}
         <span className="text-base-content/60 text-xs">
           {formatConflictWhen(item.start, item.end)}
           {item.room_id ? ` · ${item.room_id}` : ""}

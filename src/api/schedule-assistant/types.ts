@@ -1515,11 +1515,6 @@ export interface components {
        */
       short_name_ru?: string | null;
       /**
-       * Color
-       * @description Optional course color in #RRGGBB format
-       */
-      color?: string | null;
-      /**
        * Instructors
        * @description Subject-level staff with roles; preferred in event instructor pickers
        */
