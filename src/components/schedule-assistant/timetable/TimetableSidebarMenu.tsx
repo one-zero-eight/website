@@ -11,7 +11,13 @@ import {
   useFloating,
   useInteractions,
 } from "@floating-ui/react";
-import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useDeferredValue,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 
 import {
   MeetingMetadataField,
@@ -67,36 +73,51 @@ function TimetableEventSearch({
     () => buildTimetableSearchEntries(meetings, instructorLabels, config),
     [meetings, instructorLabels, config],
   );
+  const deferredQuery = useDeferredValue(query);
   const results = useMemo(
-    () => searchTimetableEntries(entries, query, activeDate),
-    [entries, query, activeDate],
+    () => searchTimetableEntries(entries, deferredQuery, activeDate),
+    [entries, deferredQuery, activeDate],
   );
-  const visibleSeries = results.slice(0, 50);
-  const visibleResults = visibleSeries.flatMap((result) => {
-    const baseEntry = result.isSeries
-      ? buildTimetableSeriesEntry(result.entry, config, instructorLabels)
-      : result.entry;
-    return [
-      {
-        ...baseEntry,
-        navigationMeeting: result.entry.meeting,
-        key: result.key,
-        series: result.isSeries ? result : null,
-        nested: false,
-        parentEntry: null,
-      },
-      ...(expandedSeries === result.key && result.isSeries
-        ? result.occurrences.map((entry) => ({
-            ...entry,
-            navigationMeeting: entry.meeting,
-            key: `${result.key}:${entry.meeting.instance_id}`,
-            series: null,
-            nested: true,
-            parentEntry: baseEntry,
-          }))
-        : []),
-    ];
-  });
+  const visibleSeries = useMemo(() => results.slice(0, 50), [results]);
+  const resolveSeriesEntry = useMemo(() => {
+    const cache = new Map<(typeof entries)[number], (typeof entries)[number]>();
+    return (entry: (typeof entries)[number]) => {
+      const cached = cache.get(entry);
+      if (cached) return cached;
+      const base = buildTimetableSeriesEntry(entry, config, instructorLabels);
+      cache.set(entry, base);
+      return base;
+    };
+  }, [entries, config, instructorLabels]);
+  const visibleResults = useMemo(
+    () =>
+      visibleSeries.flatMap((result) => {
+        const baseEntry = result.isSeries
+          ? resolveSeriesEntry(result.entry)
+          : result.entry;
+        return [
+          {
+            ...baseEntry,
+            navigationMeeting: result.entry.meeting,
+            key: result.key,
+            series: result.isSeries ? result : null,
+            nested: false,
+            parentEntry: null,
+          },
+          ...(expandedSeries === result.key && result.isSeries
+            ? result.occurrences.map((entry) => ({
+                ...entry,
+                navigationMeeting: entry.meeting,
+                key: `${result.key}:${entry.meeting.instance_id}`,
+                series: null,
+                nested: true,
+                parentEntry: baseEntry,
+              }))
+            : []),
+        ];
+      }),
+    [visibleSeries, expandedSeries, resolveSeriesEntry],
+  );
   const isOpen = open && Boolean(query.trim());
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,

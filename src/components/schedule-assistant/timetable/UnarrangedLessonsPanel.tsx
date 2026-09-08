@@ -107,7 +107,7 @@ export function UnarrangedLessonsPanel({
             <li key={group.key} className="flex flex-col gap-1.5">
               <div className="flex min-w-0 flex-col gap-0.5 px-0.5">
                 <div
-                  className="text-base-content truncate text-sm leading-snug font-medium"
+                  className="text-base-content text-sm leading-snug font-medium wrap-break-word"
                   title={group.label}
                 >
                   {group.label}
