@@ -303,7 +303,12 @@ export type ComponentSeriesDisplayItem = {
   seriesIdx: number;
   label: string;
   secondary?: string;
-  secondaryParts?: { schedule: string; room: string; instructor: string };
+  secondaryParts?: {
+    schedule: string;
+    room: string;
+    instructor: string;
+    weekly: boolean;
+  };
   /** Rows shown on hover over secondary (e.g. each occurrence). */
   secondaryTooltipItems?: ComponentSeriesTooltipItem[];
   isCurrent?: boolean;
@@ -582,6 +587,7 @@ function seriesSecondaryParts(
       : formatWeeklySlotTooltipItem(weekly[0], resolveLabel).primary;
   return {
     schedule,
+    weekly: !occurrences.length && weekly.length > 0,
     room: String(meeting ? meeting.room : source.room || "").trim(),
     instructor: formatInstructorField(
       meeting ? meeting.instructors : source.instructor,

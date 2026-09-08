@@ -19,6 +19,8 @@ import {
 } from "@/components/schedule-assistant/config/useConfig.tsx";
 import { ComponentEditModal } from "@/components/schedule-assistant/settings/courses/ComponentEditModal.tsx";
 import { useEffect, useState, type ReactNode } from "react";
+import { cn } from "@/lib/ui/cn";
+import Tooltip from "@/components/common/Tooltip.tsx";
 
 import {
   courseDisplayTitle,
@@ -29,15 +31,114 @@ import {
   resolveCourseAndComponent,
 } from "./meetingComponentContext.ts";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
+import { listAudienceInlineItems } from "./meetingAudienceSummary.ts";
+import {
+  MeetingMetadataField,
+  MeetingMetadataLabels,
+  MeetingMetadataRow,
+  meetingMetadataGridClass,
+  meetingMetadataSubgridClass,
+  meetingMetadataOverrideClass,
+} from "./MeetingMetadata.tsx";
 import {
   buildInstructorLabelById,
   dayKey,
   everyWeekdayPhraseRu,
-  formatDisplayDate,
   resolveInstructorLabel,
   weekdayLabelRu,
   type Meeting,
 } from "./timetableViewerModel.ts";
+
+function formatMeetingDate(date: string) {
+  const value = new Date(`${date}T12:00:00`);
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "numeric",
+    month: "short",
+    ...(value.getFullYear() !== new Date().getFullYear()
+      ? { year: "numeric" as const }
+      : {}),
+  }).format(value);
+}
+
+function shortMeetingWeekday(date: string) {
+  return new Intl.DateTimeFormat("ru-RU", { weekday: "short" })
+    .format(new Date(`${date}T12:00:00`))
+    .replace(/^./u, (letter) => letter.toUpperCase());
+}
+
+function MeetingDateListItem({
+  meeting,
+  config,
+  instructorLabels,
+}: {
+  meeting: Meeting;
+  config: SchemaScheduleConfig;
+  instructorLabels: Record<string, string>;
+}) {
+  const instructors = formatInstructors(meeting.instructors, instructorLabels);
+  const audienceItems = listAudienceInlineItems(config, meeting.groups);
+  const overrides = new Set(meeting.override_fields);
+  return (
+    <span className={cn(meetingMetadataSubgridClass, "gap-y-0.5")}>
+      <MeetingMetadataRow
+        left={
+          <MeetingMetadataField kind="schedule" showIcon={false}>
+            <span className="inline-flex items-center gap-1.5">
+              <span
+                className={cn(
+                  "text-sm font-medium",
+                  meeting.cancelled && "line-through opacity-60",
+                  overrides.has("weekday") && meetingMetadataOverrideClass,
+                )}
+              >
+                {shortMeetingWeekday(meeting.date)},{" "}
+                {formatMeetingDate(meeting.date)}
+              </span>
+              {meeting.cancelled ? (
+                <span className="badge badge-error badge-xs">Отменено</span>
+              ) : null}
+              <span
+                className={cn(
+                  "text-sm font-medium tabular-nums",
+                  overrides.has("time") && meetingMetadataOverrideClass,
+                )}
+              >
+                {meeting.start}
+                {meeting.end ? `–${meeting.end}` : ""}
+              </span>
+            </span>
+          </MeetingMetadataField>
+        }
+        right={
+          <MeetingMetadataField kind="room" overridden={overrides.has("room")}>
+            {meeting.room || "Без локации"}
+          </MeetingMetadataField>
+        }
+      />
+      <MeetingMetadataRow
+        left={
+          <MeetingMetadataField kind="audience">
+            {audienceItems.length ? (
+              <MeetingMetadataLabels
+                labels={audienceItems.map((item) => item.label)}
+              />
+            ) : (
+              "Без групп"
+            )}
+          </MeetingMetadataField>
+        }
+        right={
+          <MeetingMetadataField
+            kind="instructor"
+            overridden={overrides.has("instructor")}
+          >
+            {instructors === "—" ? "Без преподавателя" : instructors}
+          </MeetingMetadataField>
+        }
+      />
+    </span>
+  );
+}
 
 function formatInstructors(
   instructors: string | string[],
@@ -55,12 +156,12 @@ function formatInstructors(
     .join(", ");
 }
 
-function occurrenceMeetingsForSeries(
+function meetingsForSchedule(
   allMeetings: Meeting[],
   meeting: Meeting,
 ): Meeting[] {
   const ref = parseMeetingInstanceId(meeting.instance_id);
-  if (!ref || ref.kind !== "occ") {
+  if (!ref) {
     return meeting.date ? [meeting] : [];
   }
 
@@ -68,10 +169,12 @@ function occurrenceMeetingsForSeries(
     .filter((candidate) => {
       const candidateRef = parseMeetingInstanceId(candidate.instance_id);
       return (
-        candidateRef?.kind === "occ" &&
+        candidateRef?.kind === ref.kind &&
         candidateRef.courseIdx === ref.courseIdx &&
         candidateRef.componentIdx === ref.componentIdx &&
-        candidateRef.seriesIdx === ref.seriesIdx
+        candidateRef.seriesIdx === ref.seriesIdx &&
+        (ref.kind !== "wp" ||
+          (candidateRef.kind === "wp" && candidateRef.slotIdx === ref.slotIdx))
       );
     })
     .sort((a, b) => {
@@ -81,61 +184,16 @@ function occurrenceMeetingsForSeries(
     });
 }
 
-function resolveMeetingSchedule({
-  meeting,
-  allMeetings,
-  instructorLabelById,
-  onNavigateToMeeting,
-}: {
-  meeting: Meeting;
-  allMeetings: Meeting[];
-  instructorLabelById: Record<string, string>;
-  onNavigateToMeeting: (meeting: Meeting) => void;
-}): { phrase: ReactNode; datesList: ReactNode | null } {
+function resolveMeetingSchedule(meeting: Meeting): ReactNode {
   const ref = parseMeetingInstanceId(meeting.instance_id);
   const weekday = dayKey(meeting.date);
 
   if (meeting.cancelled) {
-    return {
-      phrase: <span className="badge badge-error badge-sm">Отменено</span>,
-      datesList: null,
-    };
+    return <span className="badge badge-error badge-sm">Отменено</span>;
   }
-
-  if (ref?.kind === "occ") {
-    const siblings = occurrenceMeetingsForSeries(allMeetings, meeting);
-    const items = siblings.map((item) =>
-      meetingToScheduleTooltipItem(
-        item,
-        instructorLabelById,
-        item.instance_id === meeting.instance_id,
-      ),
-    );
-
-    return {
-      phrase: "На определенные даты",
-      datesList: items.length ? (
-        <div className="border-base-300/70 w-full border-b pb-1.5">
-          <SeriesScheduleItemsList
-            items={items}
-            onNavigateToMeeting={onNavigateToMeeting}
-          />
-        </div>
-      ) : null,
-    };
-  }
-
-  if (ref?.kind === "wp") {
-    return {
-      phrase: <>{everyWeekdayPhraseRu(weekday)}</>,
-      datesList: null,
-    };
-  }
-
-  return {
-    phrase: weekdayLabelRu(weekday),
-    datesList: null,
-  };
+  if (ref?.kind === "occ") return "На определенные даты";
+  if (ref?.kind === "wp") return everyWeekdayPhraseRu(weekday);
+  return weekdayLabelRu(weekday);
 }
 
 function CourseComponentsAccordion({
@@ -279,6 +337,8 @@ export function MeetingDetailPanel({
   const timeRange = meeting.end
     ? `${meeting.start}–${meeting.end}`
     : meeting.start || "—";
+  const dateLabel = meeting.date ? formatMeetingDate(meeting.date) : "—";
+  const weekdayLabel = meeting.date ? shortMeetingWeekday(meeting.date) : "";
   const room = String(meeting.room || "").trim() || "—";
   const instructors = formatInstructors(
     meeting.instructors,
@@ -292,12 +352,19 @@ export function MeetingDetailPanel({
   const courseShortName =
     String(course?.short_name || course?.short_name_ru || "").trim() || "—";
 
-  const schedule = resolveMeetingSchedule({
-    meeting,
-    allMeetings,
-    instructorLabelById,
-    onNavigateToMeeting,
-  });
+  const schedule = resolveMeetingSchedule(meeting);
+  const [expandedMeetingId, setExpandedMeetingId] = useState<string | null>(
+    null,
+  );
+  const datesOpen = expandedMeetingId === meeting.instance_id;
+  const scheduleMeetings = meetingsForSchedule(allMeetings, meeting);
+  const scheduleItems = scheduleMeetings.map((item) =>
+    meetingToScheduleTooltipItem(
+      item,
+      instructorLabelById,
+      item.instance_id === meeting.instance_id,
+    ),
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-1 text-sm" id="detailList">
@@ -322,26 +389,83 @@ export function MeetingDetailPanel({
           </button>
         ) : null}
       </div>
-      <DetailField label="Дата">
-        {meeting.date
-          ? `${formatDisplayDate(meeting.date)}, ${weekdayLabelRu(dayKey(meeting.date))}`
-          : "—"}
-      </DetailField>
-      <DetailField label="Время">{timeRange}</DetailField>
-      <DetailField label="Повтор">
-        <span className="inline-flex min-w-0 flex-wrap items-center gap-1.5">
-          {schedule.phrase}
-        </span>
-      </DetailField>
-      {schedule.datesList}
-      <DetailField label="Локация">{room}</DetailField>
-      <DetailField label="Преподаватель">{instructors}</DetailField>
-      <DetailField label="Группы">
-        <MeetingAudienceInline
-          config={config}
-          groupIds={meeting.groups || []}
+      <div className={cn(meetingMetadataGridClass, "gap-y-0.5")}>
+        <MeetingMetadataRow
+          left={
+            <MeetingMetadataField
+              kind="schedule"
+              weekly={meetingRef?.kind === "wp"}
+              title="Дата и время"
+              iconTooltip={(icon) => (
+                <Tooltip content={schedule}>{icon}</Tooltip>
+              )}
+            >
+              {weekdayLabel ? `${weekdayLabel}, ` : ""}
+              {dateLabel} {timeRange}
+            </MeetingMetadataField>
+          }
+          right={
+            <MeetingMetadataField kind="room" title="Локация">
+              {room}
+            </MeetingMetadataField>
+          }
         />
-      </DetailField>
+        <MeetingMetadataRow
+          left={
+            <MeetingMetadataField kind="audience" title="Группы">
+              <MeetingAudienceInline
+                config={config}
+                groupIds={meeting.groups || []}
+              />
+            </MeetingMetadataField>
+          }
+          right={
+            <MeetingMetadataField kind="instructor" title="Преподаватели">
+              {instructors}
+            </MeetingMetadataField>
+          }
+        />
+        <button
+          type="button"
+          className="text-base-content/60 hover:text-primary col-span-2 flex items-center gap-1.5 justify-self-start rounded-md text-xs transition-colors"
+          onClick={() =>
+            setExpandedMeetingId(datesOpen ? null : meeting.instance_id)
+          }
+        >
+          <span className="icon-[material-symbols--calendar-month-outline-rounded] text-sm" />
+          {datesOpen ? "Скрыть даты" : "Показать даты"}
+          <span>{scheduleMeetings.length}</span>
+          <span
+            className={cn(
+              "text-sm",
+              datesOpen
+                ? "icon-[material-symbols--expand-less-rounded]"
+                : "icon-[material-symbols--expand-more-rounded]",
+            )}
+          />
+        </button>
+        {datesOpen ? (
+          <SeriesScheduleItemsList
+            items={scheduleItems}
+            className="col-span-2 min-w-0"
+            sharedColumns
+            showNavigationTitle={false}
+            onNavigateToMeeting={(nextMeeting) => {
+              setExpandedMeetingId(nextMeeting.instance_id);
+              onNavigateToMeeting(nextMeeting);
+            }}
+            renderItem={(item) =>
+              item.meeting ? (
+                <MeetingDateListItem
+                  meeting={item.meeting}
+                  config={config}
+                  instructorLabels={instructorLabelById}
+                />
+              ) : null
+            }
+          />
+        ) : null}
+      </div>
 
       <DetailSection title="Предмет" />
       <DetailField label="Название" truncate>

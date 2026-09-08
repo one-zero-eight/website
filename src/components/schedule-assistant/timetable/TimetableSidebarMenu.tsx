@@ -13,6 +13,16 @@ import {
 } from "@floating-ui/react";
 import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 
+import {
+  MeetingMetadataField,
+  MeetingMetadataLabels,
+  MeetingMetadataRow,
+  meetingMetadataCardClass,
+  meetingMetadataGridClass,
+  meetingMetadataOverrideClass,
+  meetingMetadataSubgridClass,
+  meetingMetadataTextClass,
+} from "./MeetingMetadata.tsx";
 import { UnarrangedLessonsPanel } from "./UnarrangedLessonsPanel.tsx";
 import { parseMeetingInstanceId } from "./meetingEditUtils.ts";
 import {
@@ -215,7 +225,10 @@ function TimetableEventSearch({
           <div
             ref={refs.setFloating}
             style={floatingStyles}
-            className="detail border-base-300 bg-base-100 rounded-box [scrollbar-width:thin] overflow-y-auto border p-1 shadow-sm"
+            className={cn(
+              meetingMetadataGridClass,
+              "detail border-base-300 bg-base-100 rounded-box [scrollbar-width:thin] overflow-y-auto border p-1 shadow-sm",
+            )}
             {...getFloatingProps({
               onBlur(event) {
                 if (
@@ -228,7 +241,7 @@ function TimetableEventSearch({
             })}
           >
             {!results.length ? (
-              <p className="text-base-content/60 px-3 py-4 text-sm">
+              <p className="text-base-content/60 col-span-2 px-3 py-4 text-sm">
                 Ничего не найдено
               </p>
             ) : (
@@ -249,8 +262,6 @@ function TimetableEventSearch({
                   index,
                 ) => {
                   const overrides = new Set(meeting.override_fields);
-                  const overrideClass =
-                    "underline decoration-sky-400 decoration-wavy decoration-1 underline-offset-2";
                   const differences = parentEntry
                     ? timetableOccurrenceDifferences(
                         visibleResults[index],
@@ -265,7 +276,8 @@ function TimetableEventSearch({
                     <div
                       key={key}
                       className={cn(
-                        "flex flex-col rounded-md",
+                        meetingMetadataSubgridClass,
+                        "rounded-md",
                         activeIndex === index &&
                           "bg-primary/12 ring-primary ring-2 ring-inset",
                         nested && "border-base-300 ml-3 border-l pl-1",
@@ -278,14 +290,22 @@ function TimetableEventSearch({
                           resultRefs.current[index] = node;
                         }}
                         type="button"
-                        className="flex w-full min-w-0 flex-col gap-0.5 rounded-md px-2 py-1.5 text-left text-sm outline-none"
+                        className={cn(
+                          meetingMetadataSubgridClass,
+                          meetingMetadataTextClass,
+                          meetingMetadataCardClass,
+                          "w-full gap-y-0.5 rounded-md text-left outline-none",
+                        )}
                         onClick={() => handleSelect(navigationMeeting)}
                         onKeyDown={handleSearchKeyDown}
                       >
                         <span
                           className={cn(
-                            "text-sm font-medium",
-                            nested && overrides.has("weekday") && overrideClass,
+                            meetingMetadataTextClass,
+                            "col-span-2 min-w-0 font-medium wrap-anywhere",
+                            nested &&
+                              overrides.has("weekday") &&
+                              meetingMetadataOverrideClass,
                           )}
                         >
                           {nested
@@ -297,98 +317,84 @@ function TimetableEventSearch({
                           (meeting.room ||
                             differences?.room ||
                             overrides.has("room"))) ? (
-                          <span className="text-base-content/80 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                            {showTime ? (
-                              <span className="inline-flex items-center gap-1.5">
-                                <span
-                                  className={cn(
-                                    "shrink-0 text-sm",
+                          <MeetingMetadataRow
+                            left={
+                              showTime ? (
+                                <MeetingMetadataField
+                                  kind="schedule"
+                                  weekly={
                                     parseMeetingInstanceId(meeting.instance_id)
                                       ?.kind === "wp"
-                                      ? "icon-[lucide--repeat-2] text-base-content/80"
-                                      : "icon-[material-symbols--calendar-month-outline-rounded] text-base-content/80",
-                                  )}
-                                />
-                                <span
-                                  className={cn(
-                                    "font-medium tabular-nums",
+                                  }
+                                  overridden={
                                     !series &&
-                                      (overrides.has("time") ||
-                                        overrides.has("weekday")) &&
-                                      overrideClass,
-                                  )}
+                                    (overrides.has("time") ||
+                                      overrides.has("weekday"))
+                                  }
                                 >
                                   {!series && !nested
                                     ? dateLabel
                                     : `${weekdayLabel},`}{" "}
                                   {meeting.start}
                                   {meeting.end ? `–${meeting.end}` : ""}
-                                </span>
-                              </span>
-                            ) : null}
-                            {showRoom &&
-                            (meeting.room ||
-                              differences?.room ||
-                              overrides.has("room")) ? (
-                              <span className="inline-flex items-center gap-1.5">
-                                <span className="icon-[material-symbols--location-on-outline-rounded] text-base-content/45 shrink-0 text-sm" />
-                                <span
-                                  className={cn(
-                                    !series &&
-                                      overrides.has("room") &&
-                                      overrideClass,
-                                  )}
+                                </MeetingMetadataField>
+                              ) : null
+                            }
+                            right={
+                              showRoom &&
+                              (meeting.room ||
+                                differences?.room ||
+                                overrides.has("room")) ? (
+                                <MeetingMetadataField
+                                  kind="room"
+                                  overridden={!series && overrides.has("room")}
                                 >
                                   {meeting.room || "Без локации"}
-                                </span>
-                              </span>
-                            ) : null}
-                          </span>
+                                </MeetingMetadataField>
+                              ) : null
+                            }
+                          />
                         ) : null}
                         {(showAudience && audienceLabel) ||
                         (showInstructor &&
                           (instructorLabel ||
                             differences?.instructor ||
                             overrides.has("instructor"))) ? (
-                          <span className="text-base-content/80 text-xs leading-snug">
-                            {showAudience && audienceLabel ? (
-                              <span>
-                                <span className="icon-[material-symbols--groups-outline-rounded] text-base-content/45 mr-1 inline-block align-[-0.125em] text-sm" />
-                                {audienceLabel}
-                              </span>
-                            ) : null}
-                            {showAudience &&
-                            audienceLabel &&
-                            showInstructor &&
-                            (instructorLabel ||
-                              differences?.instructor ||
-                              overrides.has("instructor")) ? (
-                              <span className="inline-block w-2" />
-                            ) : null}
-                            {showInstructor &&
-                            (instructorLabel ||
-                              differences?.instructor ||
-                              overrides.has("instructor")) ? (
-                              <span>
-                                <span className="icon-[material-symbols--person-outline-rounded] text-base-content/45 mr-1 inline-block align-[-0.125em] text-sm" />
-                                <span
-                                  className={cn(
-                                    !series &&
-                                      overrides.has("instructor") &&
-                                      overrideClass,
-                                  )}
+                          <MeetingMetadataRow
+                            left={
+                              showAudience && audienceLabel ? (
+                                <MeetingMetadataField kind="audience">
+                                  <MeetingMetadataLabels
+                                    labels={audienceLabel
+                                      .split(",")
+                                      .map((label) => label.trim())
+                                      .filter(Boolean)}
+                                  />
+                                </MeetingMetadataField>
+                              ) : null
+                            }
+                            right={
+                              showInstructor &&
+                              (instructorLabel ||
+                                differences?.instructor ||
+                                overrides.has("instructor")) ? (
+                                <MeetingMetadataField
+                                  kind="instructor"
+                                  overridden={
+                                    !series && overrides.has("instructor")
+                                  }
                                 >
                                   {instructorLabel || "Без преподавателя"}
-                                </span>
-                              </span>
-                            ) : null}
-                          </span>
+                                </MeetingMetadataField>
+                              ) : null
+                            }
+                          />
                         ) : null}
                       </button>
                       {series ? (
                         <button
                           type="button"
-                          className="text-base-content/60 hover:text-primary flex items-center gap-1.5 self-start rounded-md px-2 pb-1.5 text-xs transition-colors"
+                          className="text-base-content/60 hover:text-primary col-span-2 flex items-center gap-1.5 justify-self-start rounded-md px-2 pb-1.5 text-xs transition-colors"
                           title="Показать даты (→), свернуть (←)"
                           onClick={() => handleToggleDates(key)}
                         >
@@ -413,7 +419,7 @@ function TimetableEventSearch({
               )
             )}
             {results.length > visibleSeries.length ? (
-              <p className="text-base-content/60 px-3 py-2 text-xs">
+              <p className="text-base-content/60 col-span-2 px-3 py-2 text-xs">
                 Показаны первые 50 из {results.length}. Уточните запрос.
               </p>
             ) : null}

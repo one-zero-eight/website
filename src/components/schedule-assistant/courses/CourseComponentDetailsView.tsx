@@ -9,6 +9,15 @@ import {
 import { expandStudentGroupSelectors } from "@/components/schedule-assistant/config/studentGroupSelectors.ts";
 import { listAudienceInlineItems } from "@/components/schedule-assistant/timetable/meetingAudienceSummary.ts";
 import {
+  MeetingMetadataField,
+  MeetingMetadataLabels,
+  MeetingMetadataRow,
+  meetingMetadataCardClass,
+  meetingMetadataGridClass,
+  meetingMetadataSubgridClass,
+  meetingMetadataTextClass,
+} from "@/components/schedule-assistant/timetable/MeetingMetadata.tsx";
+import {
   countComponentPlacement,
   formatComponentPlaced,
   formatComponentTarget,
@@ -103,20 +112,13 @@ export function MeetingAudienceInline({
   }
 
   return (
-    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-0.5">
-      {items.map((item, index) => (
+    <span className="inline-flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+      {items.map((item) => (
         <span
           key={item.key}
-          className="inline-flex max-w-full items-center gap-0.5 leading-none"
+          className="inline-flex shrink-0 items-center gap-0.5 leading-none whitespace-nowrap"
         >
-          {index > 0 ? (
-            <span className="text-base-content/35 leading-none" aria-hidden>
-              ·
-            </span>
-          ) : null}
-          <span className="min-w-0 leading-snug [overflow-wrap:anywhere]">
-            {item.label}
-          </span>
+          <span className="leading-5">{item.label}</span>
           {item.selector ? (
             <AudienceTreeInfoIcon
               config={config}
@@ -161,10 +163,16 @@ export function SeriesScheduleItemsList({
   items,
   onNavigateToMeeting,
   className,
+  renderItem,
+  sharedColumns = false,
+  showNavigationTitle = true,
 }: {
   items: ComponentSeriesTooltipItem[];
   onNavigateToMeeting?: (meeting: Meeting) => void;
   className?: string;
+  renderItem?: (item: ComponentSeriesTooltipItem) => ReactNode;
+  sharedColumns?: boolean;
+  showNavigationTitle?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentRef = useRef<HTMLElement | null>(null);
@@ -227,12 +235,22 @@ export function SeriesScheduleItemsList({
     <div className={cn("relative w-full", className)}>
       <div
         ref={scrollRef}
-        className="flex max-h-72 w-full [scrollbar-width:thin] flex-col gap-0.5 overflow-y-auto"
+        className={cn(
+          "max-h-72 w-full [scrollbar-width:thin] gap-y-0.5 overflow-y-auto",
+          sharedColumns ? meetingMetadataGridClass : "flex flex-col",
+        )}
       >
         {items.map((item, index) => {
           const canNavigate = Boolean(item.meeting && onNavigateToMeeting);
           const rowClass = cn(
-            "w-full rounded px-1.5 py-1 text-left text-xs leading-snug font-normal transition-colors",
+            "w-full rounded text-left font-normal transition-colors",
+            sharedColumns
+              ? cn(
+                  meetingMetadataSubgridClass,
+                  meetingMetadataTextClass,
+                  meetingMetadataCardClass,
+                )
+              : "px-1.5 py-1 text-xs leading-snug",
             item.isCurrent
               ? "bg-primary/10 text-base-content"
               : "text-base-content/70",
@@ -241,7 +259,9 @@ export function SeriesScheduleItemsList({
               "hover:bg-base-200/60 hover:text-base-content",
             canNavigate && "cursor-pointer",
           );
-          const body = (
+          const body = renderItem ? (
+            renderItem(item)
+          ) : (
             <>
               <SeriesSchedulePrimaryLine item={item} />
               {item.secondary ? (
@@ -269,7 +289,11 @@ export function SeriesScheduleItemsList({
                 ref={setRowRef}
                 type="button"
                 className={rowClass}
-                title={`Перейти к ${item.meeting!.date ? formatDisplayDate(item.meeting!.date) : item.primary}`}
+                title={
+                  showNavigationTitle
+                    ? `Перейти к ${item.meeting!.date ? formatDisplayDate(item.meeting!.date) : item.primary}`
+                    : undefined
+                }
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
@@ -351,48 +375,59 @@ export function ComponentSeriesList({
       >
         Серии
       </div>
-      <div className={cn("flex flex-col", compact ? "gap-0.5" : "gap-1")}>
+      <div
+        className={cn(
+          meetingMetadataGridClass,
+          compact ? "gap-y-0.5" : "gap-y-1",
+        )}
+      >
         {items.map((item) => {
           const secondary = item.secondaryParts ? (
-            <span className="text-base-content/60 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
-              {[
-                {
-                  text: item.secondaryParts.schedule,
-                  icon: "icon-[material-symbols--schedule-outline-rounded]",
-                },
-                {
-                  text: item.secondaryParts.room,
-                  icon: "icon-[material-symbols--location-on-outline-rounded]",
-                },
-                {
-                  text: item.secondaryParts.instructor,
-                  icon: "icon-[material-symbols--person-outline-rounded]",
-                },
-              ]
-                .filter((part) => part.text)
-                .map((part) => (
-                  <span
-                    key={part.icon}
-                    className="inline-flex items-center gap-1"
+            <MeetingMetadataRow
+              left={
+                item.secondaryParts.schedule ? (
+                  <MeetingMetadataField
+                    kind="schedule"
+                    weekly={item.secondaryParts.weekly}
                   >
-                    <span className={cn(part.icon, "shrink-0 text-sm")} />
-                    <span>{part.text}</span>
-                  </span>
-                ))}
-            </span>
-          ) : item.secondary ? (
-            <SeriesSecondaryLabel
-              text={item.secondary}
-              tooltipItems={item.secondaryTooltipItems}
-              onNavigateToMeeting={onNavigateToMeeting}
+                    {item.secondaryParts.schedule}
+                  </MeetingMetadataField>
+                ) : null
+              }
+              right={
+                item.secondaryParts.room ? (
+                  <MeetingMetadataField kind="room">
+                    {item.secondaryParts.room}
+                  </MeetingMetadataField>
+                ) : null
+              }
             />
+          ) : item.secondary ? (
+            <span className="col-span-2 min-w-0">
+              <SeriesSecondaryLabel
+                text={item.secondary}
+                tooltipItems={item.secondaryTooltipItems}
+                onNavigateToMeeting={onNavigateToMeeting}
+              />
+            </span>
           ) : null;
 
           const body = (
             <>
-              <div className="text-sm font-medium wrap-anywhere">
-                {item.label}
-              </div>
+              <MeetingMetadataRow
+                left={
+                  <span className="font-medium">
+                    <MeetingMetadataLabels labels={item.label.split(", ")} />
+                  </span>
+                }
+                right={
+                  item.secondaryParts?.instructor ? (
+                    <MeetingMetadataField kind="instructor">
+                      {item.secondaryParts.instructor}
+                    </MeetingMetadataField>
+                  ) : null
+                }
+              />
               {secondary}
             </>
           );
@@ -404,13 +439,14 @@ export function ComponentSeriesList({
                 type="button"
                 onClick={() => onNavigateToMeeting(item.meeting!)}
                 className={cn(
-                  "rounded-box cursor-pointer border text-left transition-colors",
-                  compact ? "px-2 py-1" : "px-2.5 py-2",
+                  meetingMetadataSubgridClass,
+                  meetingMetadataTextClass,
+                  "cursor-pointer rounded text-left font-normal transition-colors",
+                  compact ? meetingMetadataCardClass : "px-2.5 py-2",
                   item.isCurrent
-                    ? "border-primary/40 bg-primary/10 hover:bg-primary/15"
-                    : "border-base-300/80 bg-base-200/25 hover:border-base-300 hover:bg-base-200/50",
+                    ? "bg-primary/10 text-base-content"
+                    : "text-base-content/70 hover:bg-base-200/60 hover:text-base-content",
                 )}
-                title={`Перейти к серии: ${item.label}`}
               >
                 {body}
               </button>
@@ -421,8 +457,13 @@ export function ComponentSeriesList({
             <div
               key={item.seriesIdx}
               className={cn(
-                "border-base-300/80 bg-base-200/25 rounded-box border",
-                compact ? "px-2 py-1" : "px-2.5 py-2",
+                meetingMetadataSubgridClass,
+                meetingMetadataTextClass,
+                "rounded text-left font-normal",
+                compact ? meetingMetadataCardClass : "px-2.5 py-2",
+                item.isCurrent
+                  ? "bg-primary/10 text-base-content"
+                  : "text-base-content/70",
               )}
             >
               {body}
@@ -461,7 +502,7 @@ function SeriesSecondaryLabel({
 
   if (!tooltipItems?.length) {
     return (
-      <div className="text-base-content/55 mt-0.5 text-xs wrap-anywhere">
+      <div className="text-base-content/80 mt-0.5 text-sm wrap-anywhere">
         {text}
       </div>
     );
@@ -471,7 +512,7 @@ function SeriesSecondaryLabel({
     <>
       <span
         ref={refs.setReference}
-        className="text-base-content/55 decoration-base-content/30 mt-0.5 inline-block cursor-default text-xs wrap-anywhere underline decoration-dotted underline-offset-2"
+        className="text-base-content/80 decoration-base-content/30 mt-0.5 inline-block cursor-default text-sm wrap-anywhere underline decoration-dotted underline-offset-2"
         {...getReferenceProps({
           onClick: (event) => {
             event.preventDefault();
