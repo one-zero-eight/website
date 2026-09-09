@@ -51,6 +51,22 @@ const courseComponentsRootSchema = {
         end_time: { type: "string" },
         room: { type: ["string", "null"] },
         instructor: { $ref: "#/$defs/instructorValue" },
+        alternation: {
+          anyOf: [
+            { type: "null" },
+            {
+              type: "object",
+              additionalProperties: false,
+              required: ["anchor_week"],
+              properties: {
+                anchor_week: {
+                  type: "string",
+                  pattern: "^\\d{4}-\\d{2}-\\d{2}$",
+                },
+              },
+            },
+          ],
+        },
         edits: {
           anyOf: [
             { type: "null" },

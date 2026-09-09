@@ -30,6 +30,7 @@ export function normalizeWeeklySlot(slot: SchemaWeeklyPatternSlot) {
     end_time: toUiTime(slot.end_time),
     room: String(slot.room || "").trim() || null,
     instructor: instructorValue(slot.instructor) || null,
+    alternation: slot.alternation ?? null,
     edits: slot.edits ?? null,
   };
 }
@@ -138,6 +139,22 @@ export function weeklyRowMarks({
   };
 
   return {
+    alternation:
+      JSON.stringify(cur.alternation) !== JSON.stringify(orig.alternation)
+        ? {
+            mark: "changed",
+            originalLabel: orig.alternation
+              ? `Через неделю · ${formatDisplayDate(orig.alternation.anchor_week)}`
+              : "Каждую неделю",
+            onRestore: () =>
+              onRestore({
+                ...current,
+                alternation: original.alternation
+                  ? { ...original.alternation }
+                  : null,
+              }),
+          }
+        : undefined,
     weekday: hint(
       cur.weekday !== orig.weekday,
       "weekday",

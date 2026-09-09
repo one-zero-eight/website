@@ -855,6 +855,14 @@ export function applyCreateMeetingToCourse(
     ),
     room: String(slot.room || "").trim() || null,
     instructor: slot.instructor ?? null,
+    alternation: slot.alternation
+      ? {
+          anchor_week: weekStartForDate(
+            slot.alternation.anchor_week,
+            config.term.starting_day ?? Weekday.MONDAY,
+          ),
+        }
+      : null,
     edits: slot.edits ?? null,
   }));
   return nextCourse;

@@ -38,6 +38,13 @@ import {
 import { instructorValue } from "@/components/schedule-assistant/timetable/sessionSeriesValidation.ts";
 import { SessionEventCard } from "@/components/schedule-assistant/timetable/SessionEventCard.tsx";
 import { cn } from "@/lib/ui/cn";
+import { Weekday } from "@/api/schedule-assistant/types.ts";
+import { resolveAudienceSemester } from "./programTimeSlots.ts";
+import {
+  formatDisplayDate,
+  inactiveWeeklySlotEdits,
+  weekStartForDate,
+} from "./timetableViewerModel.ts";
 import { weeklyPickerSlots } from "./meetingPickerSchedule.ts";
 import { expandWeeklySlotsToEvents } from "./editableSessionEvents.ts";
 import {
@@ -62,6 +69,7 @@ export type SessionRowFieldHint = {
 export type SessionRowFieldMarks = {
   date?: SessionRowFieldHint;
   weekday?: SessionRowFieldHint;
+  alternation?: SessionRowFieldHint;
   time?: SessionRowFieldHint;
   room?: SessionRowFieldHint;
   instructor?: SessionRowFieldHint;
@@ -373,6 +381,98 @@ export function SlotTimeFields({
             </div>
           ) : null}
         </div>
+      ) : null}
+    </div>
+  );
+}
+
+export function WeeklyAlternationFields({
+  config,
+  slot,
+  audienceTokens,
+  onChange,
+}: {
+  config: SchemaScheduleConfig;
+  slot: SchemaWeeklyPatternSlot;
+  audienceTokens: string[];
+  onChange: (slot: SchemaWeeklyPatternSlot) => void;
+}) {
+  const startingDay = config.term.starting_day ?? Weekday.MONDAY;
+  const window = resolveAudienceSemester(config, audienceTokens);
+  const ignoredEdits = inactiveWeeklySlotEdits(config, slot);
+  const preview = expandWeeklySlotsToEvents({
+    config,
+    weeklySlots: [slot],
+    audienceTokens,
+  })
+    .filter((event) => !event.cancelled)
+    .slice(0, 6);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <SelectDropdown
+        value={slot.alternation ? "alternate" : "weekly"}
+        options={[
+          { value: "weekly", label: "Каждую неделю" },
+          { value: "alternate", label: "Через неделю" },
+        ]}
+        onChange={(value) => {
+          if ((value === "alternate") === Boolean(slot.alternation)) return;
+          onChange({
+            ...slot,
+            alternation:
+              value === "alternate"
+                ? {
+                    anchor_week: weekStartForDate(
+                      window?.start_date || config.term.semester.start_date,
+                      startingDay,
+                    ),
+                  }
+                : null,
+          });
+        }}
+        className="w-full min-w-0"
+        triggerClassName="btn-sm w-full justify-between"
+      />
+      {slot.alternation ? (
+        <>
+          <label className="flex flex-col gap-1 text-xs">
+            Опорная активная неделя
+            <DateInput
+              value={slot.alternation.anchor_week}
+              onChange={(date) => {
+                if (!date) return;
+                onChange({
+                  ...slot,
+                  alternation: {
+                    anchor_week: weekStartForDate(date, startingDay),
+                  },
+                });
+              }}
+            />
+          </label>
+          <p className="text-base-content/60 text-xs">
+            Фаза на весь учебный период: каждые 14 дней до и после опорной
+            недели, а не начиная с этой даты.
+          </p>
+          <p className="text-base-content/70 text-xs">
+            Даты занятий:{" "}
+            {preview.length
+              ? preview.map((event) => formatDisplayDate(event.date)).join(", ")
+              : "нет в учебном периоде"}
+            .
+          </p>
+        </>
+      ) : null}
+      {ignoredEdits.length ? (
+        <p className="text-warning text-xs">
+          Разовые изменения неактивных недель ({ignoredEdits.length}) сохранены,
+          но не применяются:{" "}
+          {ignoredEdits
+            .map((edit) => formatDisplayDate(edit.select_week))
+            .join(", ")}
+          .
+        </p>
       ) : null}
     </div>
   );
@@ -751,6 +851,14 @@ export function WeeklySlotRow({
             deleted && "pointer-events-none opacity-60",
           )}
         >
+          <FieldMark hint={deleted ? undefined : fieldMarks?.alternation}>
+            <WeeklyAlternationFields
+              config={config}
+              slot={slot}
+              audienceTokens={audienceTokens}
+              onChange={onChange}
+            />
+          </FieldMark>
           <FieldMark hint={deleted ? undefined : fieldMarks?.room}>
             <RoomSelect
               config={config}

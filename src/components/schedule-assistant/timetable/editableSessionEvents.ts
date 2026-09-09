@@ -6,6 +6,8 @@ import type {
   SchemaWeeklyPatternSlotEdit,
 } from "@/api/schedule-assistant/types.ts";
 import { Weekday } from "@/api/schedule-assistant/types.ts";
+import { termWeekdayKeyToWeekday } from "@/components/schedule-assistant/settings/weekdays.ts";
+import { dayKey } from "./timetableViewerModel.ts";
 
 import {
   applySeriesScheduleToCourse,
@@ -15,12 +17,10 @@ import {
   type MeetingRef,
 } from "./meetingEditUtils.ts";
 import { instructorValue } from "./sessionSeriesValidation.ts";
-import { resolveAudienceSemester } from "./programTimeSlots.ts";
+import { activeWeeklySlotDates } from "./timetableViewerModel.ts";
 import {
   resolveWeeklyMeetingFields,
-  semesterDatesForWeekday,
   weekStartForDate,
-  weeklyPatternDayKey,
   type Meeting,
 } from "./timetableViewerModel.ts";
 
@@ -124,11 +124,7 @@ export function expandWeeklySlotsToEvents({
   const events: EditableSessionEvent[] = [];
 
   for (const [slotIdx, slot] of weeklySlots.entries()) {
-    const weekday = weeklyPatternDayKey(String(slot.weekday));
-    if (!weekday) continue;
-    const window = resolveAudienceSemester(config, audienceTokens);
-    if (window == null) continue;
-    const dates = semesterDatesForWeekday(config, weekday, window);
+    const dates = activeWeeklySlotDates(config, slot, audienceTokens);
     for (const patternDate of dates) {
       const resolved = resolveWeeklyMeetingFields(slot, patternDate, config);
       const base = resolveWeeklyMeetingFields(
@@ -189,6 +185,62 @@ export function expandOccurrencesToEvents(
     };
   });
 }
+
+/** Materialize actual active dates, including moves, without recreating skipped weeks. */
+export function eventsToOccurrences(
+  events: EditableSessionEvent[],
+): SchemaSessionOccurrence[] {
+  return events
+    .filter((event) => !event.cancelled)
+    .map((event) => ({
+      date: event.date,
+      start_time: event.start_time,
+      end_time: event.end_time,
+      room: event.room,
+      instructor: event.instructor,
+    }));
+}
+
+/** A proposed weekly conversion; callers must confirm if expansion changes the schedule. */
+export function eventsToWeeklySlots(
+  events: EditableSessionEvent[],
+): SchemaWeeklyPatternSlot[] {
+  const slots = new Map<string, SchemaWeeklyPatternSlot>();
+  for (const event of events) {
+    if (event.cancelled || !event.date) continue;
+    const slot: SchemaWeeklyPatternSlot = {
+      weekday: termWeekdayKeyToWeekday(dayKey(event.date)),
+      start_time: event.start_time,
+      end_time: event.end_time,
+      room: event.room,
+      instructor: event.instructor,
+      edits: null,
+    };
+    slots.set(JSON.stringify(slot), slot);
+  }
+  return [...slots.values()];
+}
+
+export function eventSchedulesEqual(
+  left: EditableSessionEvent[],
+  right: EditableSessionEvent[],
+): boolean {
+  function signatures(events: EditableSessionEvent[]) {
+    return eventsToOccurrences(events)
+      .map((event) =>
+        JSON.stringify({
+          ...event,
+          start_time: toUiTime(event.start_time),
+          end_time: toUiTime(event.end_time),
+        }),
+      )
+      .sort();
+  }
+  return JSON.stringify(signatures(left)) === JSON.stringify(signatures(right));
+}
+
+export const WEEKLY_CONVERSION_WARNING =
+  "Преобразование в еженедельный шаблон изменит набор дат занятий. Могут добавиться занятия на ранее неактивных неделях или исчезнуть разовые исключения. Применить преобразование?";
 
 export function createOccurrenceEvent(
   defaults?: Partial<EditableSessionEvent>,

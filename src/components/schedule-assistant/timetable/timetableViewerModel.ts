@@ -136,6 +136,7 @@ export type Meeting = {
   section: string;
   /** Canonical weekly-pattern date before edit.date override. */
   pattern_date?: string;
+  alternation?: SchemaWeeklyPatternSlot["alternation"];
   /** Fields that differ from the recurring weekly pattern base. */
   override_fields?: MeetingOverrideField[];
   /** Weekly-pattern occurrence cancelled via edit.cancel. */
@@ -438,17 +439,59 @@ export function semesterDatesForWeekday(
   return out;
 }
 
+/** A phase applies in both directions, independently of ISO week numbers or DST. */
+export function isWeeklySlotActiveOnDate(
+  slot: SchemaWeeklyPatternSlot,
+  date: string,
+  startingDay: Weekday = Weekday.MONDAY,
+): boolean {
+  if (!slot.alternation) return true;
+  const week = weekStartForDate(date, startingDay);
+  const anchor = weekStartForDate(slot.alternation.anchor_week, startingDay);
+  const days =
+    (Date.parse(`${week}T00:00:00Z`) - Date.parse(`${anchor}T00:00:00Z`)) /
+    86_400_000;
+  return Number.isFinite(days) && days % 14 === 0;
+}
+
+/** Source dates only: resolve edits after filtering, so inactive edits cannot create events. */
+export function activeWeeklySlotDates(
+  config: SchemaScheduleConfig,
+  slot: SchemaWeeklyPatternSlot,
+  audienceTokens: string[],
+): string[] {
+  const weekday = weeklyPatternDayKey(String(slot.weekday));
+  const range = resolveAudienceSemester(config, audienceTokens);
+  if (!weekday || !range) return [];
+  return semesterDatesForWeekday(config, weekday, range).filter((date) =>
+    isWeeklySlotActiveOnDate(
+      slot,
+      date,
+      config.term.starting_day ?? Weekday.MONDAY,
+    ),
+  );
+}
+
+export function inactiveWeeklySlotEdits(
+  config: SchemaScheduleConfig,
+  slot: SchemaWeeklyPatternSlot,
+): SchemaWeeklyPatternSlotEdit[] {
+  return (slot.edits ?? []).filter(
+    (edit) =>
+      !isWeeklySlotActiveOnDate(
+        slot,
+        edit.select_week,
+        config.term.starting_day ?? Weekday.MONDAY,
+      ),
+  );
+}
+
 export function countWeeklyPatternSlotOccurrences(
   config: SchemaScheduleConfig,
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[],
 ): number {
-  const weekday = weeklyPatternDayKey(String(slot.weekday));
-  if (!weekday) return 0;
-  const range = resolveAudienceSemester(config, audienceTokens);
-  if (!range) return 0;
-
-  return semesterDatesForWeekday(config, weekday, range).filter(
+  return activeWeeklySlotDates(config, slot, audienceTokens).filter(
     (date) => !resolveWeeklyMeetingFields(slot, date, config).cancelled,
   ).length;
 }
@@ -827,9 +870,7 @@ export function buildMeetingsForCourse(
       if (pattern.length === 0) continue;
       if (audienceWindow == null) continue;
       for (const [slotIdx, slot] of pattern.entries()) {
-        const weekday = weeklyPatternDayKey(String(slot.weekday ?? ""));
-        if (!weekday) continue;
-        const dates = semesterDatesForWeekday(config, weekday, audienceWindow);
+        const dates = activeWeeklySlotDates(config, slot, audienceTokens);
         for (const date of dates) {
           const resolved = resolveWeeklyMeetingFields(slot, date, config);
           if (resolved.cancelled) {
@@ -846,6 +887,7 @@ export function buildMeetingsForCourse(
               instructor_pool: component.instructor_pool,
               section,
               pattern_date: date,
+              alternation: slot.alternation,
               cancelled: true,
             });
             continue;
@@ -869,6 +911,7 @@ export function buildMeetingsForCourse(
             instructor_pool: component.instructor_pool,
             section,
             pattern_date: date,
+            alternation: slot.alternation,
             override_fields: overrideFields.length ? overrideFields : undefined,
           });
         }

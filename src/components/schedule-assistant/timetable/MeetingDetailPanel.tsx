@@ -192,7 +192,10 @@ function resolveMeetingSchedule(meeting: Meeting): ReactNode {
     return <span className="badge badge-error badge-sm">Отменено</span>;
   }
   if (ref?.kind === "occ") return "На определенные даты";
-  if (ref?.kind === "wp") return everyWeekdayPhraseRu(weekday);
+  if (ref?.kind === "wp")
+    return meeting.alternation
+      ? `Через неделю · ${weekdayLabelRu(weekday)}`
+      : everyWeekdayPhraseRu(weekday);
   return weekdayLabelRu(weekday);
 }
 

@@ -4,11 +4,8 @@ import type {
 } from "@/api/schedule-assistant/types.ts";
 import {
   resolveWeeklyMeetingFields,
-  semesterDatesForWeekday,
-  weeklyPatternDayKey,
+  activeWeeklySlotDates,
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
-import { resolveAudienceSemester } from "@/components/schedule-assistant/timetable/programTimeSlots.ts";
-
 const DEFAULT_TAG_ORDER = ["lec", "tut", "lab", "class"] as const;
 
 export type InstructorLessonBreakdown = Map<string, number>;
@@ -64,13 +61,12 @@ export function countCourseLessonsByInstructor(
       const audienceTokens =
         (session.audience?.length ? session.audience : component.audience) ||
         [];
-      const window = resolveAudienceSemester(config, audienceTokens);
-      if (window == null) continue;
-
       for (const slot of session.weekly_pattern ?? []) {
-        const weekday = weeklyPatternDayKey(String(slot.weekday ?? ""));
-        if (!weekday) continue;
-        for (const date of semesterDatesForWeekday(config, weekday, window)) {
+        for (const date of activeWeeklySlotDates(
+          config,
+          slot,
+          audienceTokens,
+        )) {
           const resolved = resolveWeeklyMeetingFields(slot, date, config);
           if (resolved.cancelled) continue;
           bumpTag(counts, resolved.instructors, tag);

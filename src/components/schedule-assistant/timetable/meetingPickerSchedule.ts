@@ -13,12 +13,10 @@ import type {
   RoomConflictDetail,
 } from "./roomPickerOptions.ts";
 import type { Meeting } from "./timetableViewerModel.ts";
-import { resolveAudienceSemester } from "./programTimeSlots.ts";
+import { activeWeeklySlotDates } from "./timetableViewerModel.ts";
 import {
   findEditForMeetingDate,
   resolveWeeklyMeetingFields,
-  semesterDatesForWeekday,
-  weeklyPatternDayKey,
 } from "./timetableViewerModel.ts";
 
 export type MeetingPickerSlot = {
@@ -124,11 +122,7 @@ export function weeklyPickerSlots(
   audienceTokens: string[],
   resource: "room" | "instructor",
 ): MeetingPickerSlot[] {
-  const weekday = weeklyPatternDayKey(String(slot.weekday));
-  const range = resolveAudienceSemester(config, audienceTokens);
-  if (!weekday || !range) return [];
-
-  return semesterDatesForWeekday(config, weekday, range).flatMap((date) => {
+  return activeWeeklySlotDates(config, slot, audienceTokens).flatMap((date) => {
     const edit = findEditForMeetingDate(
       date,
       slot.edits,

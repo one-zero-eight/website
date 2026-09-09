@@ -24,7 +24,7 @@ import {
   add90m,
   dayKey,
   normalizedTermDays,
-  semesterDatesForWeekday,
+  activeWeeklySlotDates,
   weekStartForDate,
   weeklyPatternDayKey,
   type Meeting,
@@ -33,7 +33,6 @@ import {
   buildGroupToProgramMap,
   findProgramByNameOrCode,
   programResolvedTimeSlots,
-  resolveAudienceSemester,
   termResolvedTimeSlots,
   unionResolvedTimeSlots,
 } from "./programTimeSlots.ts";
@@ -485,11 +484,7 @@ function weeklyMeetingDatesForSlot(
   slot: SchemaWeeklyPatternSlot,
   audienceTokens: string[] = [],
 ): string[] {
-  const weekday = weeklyPatternDayKey(String(slot.weekday));
-  if (!weekday) return [];
-  const window = resolveAudienceSemester(config, audienceTokens);
-  if (window == null) return [];
-  return semesterDatesForWeekday(config, weekday, window);
+  return activeWeeklySlotDates(config, slot, audienceTokens);
 }
 
 function getWeeklySlotContext(
@@ -528,6 +523,7 @@ function preservePastWeeksBeforeDate(
   config: SchemaScheduleConfig,
   slot: SchemaWeeklyPatternSlot,
   fromDate: string,
+  audienceTokens: string[],
   snapshot: {
     weekday: TermWeekdayKey;
     startTime: string;
@@ -537,9 +533,7 @@ function preservePastWeeksBeforeDate(
   },
 ) {
   const startingDay = config.term.starting_day ?? Weekday.MONDAY;
-  const oldWeekday = weeklyPatternDayKey(String(snapshot.weekday));
-  if (!oldWeekday) return;
-  for (const date of semesterDatesForWeekday(config, oldWeekday)) {
+  for (const date of activeWeeklySlotDates(config, slot, audienceTokens)) {
     if (date >= fromDate) continue;
     applyWeeklySingleEdit(slot, date, startingDay, {
       date,
@@ -557,6 +551,7 @@ function applyWeeklyFutureScope(
   slot: SchemaWeeklyPatternSlot,
   meetingDate: string,
   mutator: (slot: SchemaWeeklyPatternSlot) => void,
+  audienceTokens: string[],
 ) {
   const snapshot = {
     weekday: weeklyPatternDayKey(String(slot.weekday)) || dayKey(meetingDate),
@@ -565,7 +560,13 @@ function applyWeeklyFutureScope(
     room: slot.room ?? null,
     instructor: slot.instructor ?? null,
   };
-  preservePastWeeksBeforeDate(config, slot, meetingDate, snapshot);
+  preservePastWeeksBeforeDate(
+    config,
+    slot,
+    meetingDate,
+    audienceTokens,
+    snapshot,
+  );
   mutator(slot);
 }
 
@@ -710,6 +711,14 @@ export function applySeriesScheduleToCourse(
       ),
       room: String(slot.room || "").trim() || null,
       instructor: slot.instructor ?? null,
+      alternation: slot.alternation
+        ? {
+            anchor_week: weekStartForDate(
+              slot.alternation.anchor_week,
+              config.term.starting_day ?? Weekday.MONDAY,
+            ),
+          }
+        : null,
       edits: slot.edits ?? null,
     }));
   }
@@ -828,7 +837,15 @@ export function applyMeetingEditsToCourse(
     return nextCourse;
   }
 
-  applyWeeklyFutureScope(config, slot, meetingDate, patchSlotValue);
+  applyWeeklyFutureScope(
+    config,
+    slot,
+    meetingDate,
+    patchSlotValue,
+    (ctx.series.audience?.length
+      ? ctx.series.audience
+      : ctx.component.audience) || [],
+  );
   return nextCourse;
 }
 

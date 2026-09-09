@@ -36,7 +36,16 @@ import {
 } from "@/components/schedule-assistant/timetable/timetableViewerModel.ts";
 import { cn } from "@/lib/ui/cn";
 import {
+  expandWeeklySlotsToEvents,
+  expandOccurrencesToEvents,
+  eventsToOccurrences,
+  eventsToWeeklySlots,
+  eventSchedulesEqual,
+  WEEKLY_CONVERSION_WARNING,
+} from "@/components/schedule-assistant/timetable/editableSessionEvents.ts";
+import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   startTransition,
@@ -52,7 +61,8 @@ function emptySeries(): SchemaComponentSessionSeries {
 }
 
 function seriesMode(series: SchemaComponentSessionSeries): SessionPlacement {
-  if ((series.dates_pattern ?? []).length > 0) return "dates_pattern";
+  if (series.dates_pattern != null && !series.weekly_pattern?.length)
+    return "dates_pattern";
   return "weekly";
 }
 
@@ -269,7 +279,7 @@ export function ComponentSessionsEditor({
 }) {
   const sectionCode =
     courseIndex != null ? config.courses![courseIndex].section_code : "";
-  const list = sessions ?? [];
+  const list = useMemo(() => sessions ?? [], [sessions]);
   const modeStashRef = useRef(
     new Map<
       number,
@@ -291,6 +301,7 @@ export function ComponentSessionsEditor({
   );
 
   useEffect(() => {
+    modeStashRef.current.clear();
     setDeletedWeeklyBySeries(emptyIndexMap());
     setDeletedOccBySeries(emptyIndexMap());
     setDeletedSeriesIndexes(new Set());
@@ -427,8 +438,8 @@ export function ComponentSessionsEditor({
 
   function setMode(index: number, mode: SessionPlacement) {
     const series = list[index];
-    if (!series) return;
-    const stash = modeStashRef.current.get(index) ?? {};
+    if (!series || seriesMode(series) === mode) return;
+    const stash = { ...modeStashRef.current.get(index) };
     const audienceTokens = series.audience?.length
       ? series.audience
       : (componentGroups ?? []);
@@ -437,11 +448,27 @@ export function ComponentSessionsEditor({
       if ((series.dates_pattern ?? []).length > 0) {
         stash.dates_pattern = series.dates_pattern ?? null;
       }
-      const weekly = (series.weekly_pattern?.length
-        ? series.weekly_pattern
-        : stash.weekly_pattern?.length
-          ? stash.weekly_pattern
-          : null) ?? [emptyWeeklySlot(config, audienceTokens)];
+      const sourceEvents = expandOccurrencesToEvents(
+        (series.dates_pattern ?? []).filter(
+          (_, row) => !deletedOccBySeries.get(index)?.has(row),
+        ),
+      );
+      const weekly =
+        stash.weekly_pattern ??
+        (sourceEvents.length
+          ? eventsToWeeklySlots(sourceEvents)
+          : [emptyWeeklySlot(config, audienceTokens)]);
+      const expanded = expandWeeklySlotsToEvents({
+        config,
+        weeklySlots: weekly,
+        audienceTokens,
+      });
+      if (
+        series.dates_pattern != null &&
+        !eventSchedulesEqual(sourceEvents, expanded) &&
+        !window.confirm(WEEKLY_CONVERSION_WARNING)
+      )
+        return;
       modeStashRef.current.set(index, stash);
       setDeletedOccBySeries((prev) => {
         const next = cloneIndexMap(prev);
@@ -455,14 +482,19 @@ export function ComponentSessionsEditor({
       return;
     }
 
-    if ((series.weekly_pattern ?? []).length > 0) {
-      stash.weekly_pattern = series.weekly_pattern ?? null;
-    }
-    const occurrences = (series.dates_pattern?.length
-      ? series.dates_pattern
-      : stash.dates_pattern?.length
-        ? stash.dates_pattern
-        : null) ?? [emptyOccurrence(config, audienceTokens)];
+    const weekly = (series.weekly_pattern ?? []).filter(
+      (_, row) => !deletedWeeklyBySeries.get(index)?.has(row),
+    );
+    stash.weekly_pattern = structuredClone(weekly);
+    const occurrences = weekly.length
+      ? eventsToOccurrences(
+          expandWeeklySlotsToEvents({
+            config,
+            weeklySlots: weekly,
+            audienceTokens,
+          }),
+        )
+      : [emptyOccurrence(config, audienceTokens)];
     modeStashRef.current.set(index, stash);
     setDeletedWeeklyBySeries((prev) => {
       const next = cloneIndexMap(prev);
@@ -629,5 +661,5 @@ export function summarizeSessions(
 
 export function formatWeeklySlotChip(slot: SchemaWeeklyPatternSlot): string {
   const key = weekdayToKey(slot.weekday);
-  return `${TERM_WEEKDAY_LABEL_RU[key]} ${toUiTime(slot.start_time)}`;
+  return `${TERM_WEEKDAY_LABEL_RU[key]} ${toUiTime(slot.start_time)}${slot.alternation ? " · Через неделю" : ""}`;
 }
